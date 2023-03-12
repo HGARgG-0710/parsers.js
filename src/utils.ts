@@ -167,8 +167,9 @@ export function recursiveIndexation<InType = object, OutType = any>(
 	return res as OutType
 }
 
-export function whileNotEnd(endfunction: () => boolean, repeat: Function) {
-	while (!endfunction()) repeat()
+// * syntax sugar for while () {}
+export function whileDo(endfunction: () => boolean, repeat: Function) {
+	while (endfunction()) repeat()
 }
 
 // TODO: keep generalizing the previous functions...
