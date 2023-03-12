@@ -1,3 +1,5 @@
+import { Tuple } from "./general"
+
 /**
  * * Base parser class. Takes the "layer" things of the parser in question and then "combines" them using the given applied
  * (Conceptually, should be a part of the Generic, but it seems to be only for types in TS).
@@ -22,4 +24,16 @@ export class Parser<Types extends unknown[], StringType = string> {
 	}
 }
 
-// TODO: Create other base classes based on the Parser, namely those he the Mr. Body is going to use himself...
+// * Version of Parser that uses the functions as abstractions...
+export class FunctionParser<
+	n extends number,
+	StringType = string
+> extends Parser<Tuple<Function, n>, StringType> {
+	constructor(levels: Tuple<Function, n>) {
+		super(levels, (a?: any, b?: Function) =>
+			b !== undefined ? b(a) : null
+		)
+	}
+}
+
+// TODO: Create other fun base classes based on the Parser, not only those he the Mr. Body is going to use himself...
