@@ -5,10 +5,10 @@
             "es2020"
         ],
         "outDir": "src/out/",
-        "removeComments": true, 
+        "removeComments": true,
         "declaration": true
     },
     "include": [
-        "src/*.ts"
+        "src/*.ts",
     ]
 }

@@ -290,20 +290,36 @@ export function whileDo({
 
 // * Conceptually, this should be a templated object, but there aren't any such in TS.
 // TODO: after having created all the wanted general functions, make this a sort of all-in-one function: way of assembling the similar definitions together (that is applying the same arguments to different funcitons...)...
-export class UtilFunctions<StringType = string> {
+export class UtilFunctions<
+	StringType = string,
+	InType = object,
+	OutType = object
+> {
 	functions: { [a: string]: Function }
-	// TODO: Write the type for the default params; then, after making the type, pray do use it here for a "defaultParams" class variable; then, use the set ones as default in the newly defined functions... The defaultParams object should be passed to the constructor....
+	params: UtilParams
 	constructor(defaultParams: UtilParams) {
-		// TODO: list and write all the definitions....
-		this.functions["delimited"] = () => {}
-		this.functions["recursiveIndexation"] = () => {}
-		this.functions["recursiveSetting"] = () => {}
-		this.functions["read"] = () => {}
-		this.functions["readSequence"] = () => {}
-		this.functions["readWhilst"] = this.functions["readWhile"] = () => {}
-		this.functions["whileDo"] = () => {}
+		this.params = defaultParams
+
+		// TODO: give more accurate object types...
+		const functionTable: object = {
+			delimited: (args) => delimited<StringType>(args),
+			recursiveIndexation: (args) =>
+				recursiveIndexation<InType, OutType>(args),
+			recursiveSetting: (args) => recursiveSetting<InType, OutType>(args),
+			read: read,
+			readSequence: readSequence,
+			readWhilst: (args) => readWhilst<StringType>(args),
+			readWhile: (args) => readWhile<StringType>(args),
+			whileDo: whileDo,
+			skipMultiple: (args) => skipMultiple<StringType>(args),
+		}
+
+		// TODO: there is a thing: the UtilParams type should be written in such a manner as to allow for missing params (that is, instead of using default values, self would instead use the "?" mark);
+		for (const functionName of Object.keys(functionTable))
+			this.functions[functionName] = (pars?: UtilParams): any =>
+				functionTable[functionName]({ ...this.params, ...pars })
 	}
-	call(funcname: string, ...args: any[]) {
+	call(funcname: string, ...args: any[]): any {
 		return read({
 			typestable: this.functions,
 			type: funcname,
@@ -314,5 +330,48 @@ export class UtilFunctions<StringType = string> {
 
 type FunctionTable = { [a: Key]: Function }
 type Key = string | number | symbol
+
 // TODO: finish...
 type UtilParams = {}
+
+/**
+ * Takes a string and returns a convinient structure for iteration of it.
+ * @param {string} input String to be used as input.
+ */
+export function InputStream(
+	input: string,
+	errorfunc: (message: string, line: number, colon: number) => never
+) {
+	return {
+		sourcestring: input.split(""),
+		pos: 0,
+		curr: function () {
+			return this.sourcestring[this.pos]
+		},
+		next: function () {
+			return this.sourcestring[++this.pos]
+		},
+		prev: function () {
+			return this.sourcestring[--this.pos]
+		},
+		isEnd: function () {
+			return this.pos >= input.length
+		},
+		err: (message: string) => {
+			let alterpos = 0
+			let colon = 0
+			let line = 0
+
+			for (; alterpos < this.pos; alterpos++) {
+				if (input[alterpos] === "\n") {
+					line++
+					colon = 0
+					continue
+				}
+				colon++
+			}
+
+			errorfunc(message, line, colon)
+		},
+	}
+}
