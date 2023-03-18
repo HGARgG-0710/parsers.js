@@ -1,3 +1,4 @@
+// * A 'utils' file (object/submodule) of the library has various generalized functions and types that self have considered useful enoough for one's own projects.
 // TODO: whenever functions are concerned, pray do add capability to add as many arguments as he the self wants...
 
 // TODO: Create some of the wanted elementary functions that self would consider useful in building a parser (that is, to maximize the optimization of the routine repetition of various naturally ocurring parsing procedures)...
@@ -14,7 +15,25 @@
 
 // TODO: continue on with the generalizing of the things...
 
-// ? Rename arguments?
+// ? Rename arguments? Reorder them too (for clarity only...)
+// TODO: give them the same names, order this stuff properly... 15 fields in the least...
+// * Idea for names: 
+
+// * start (curr. starts); 
+// * end (curr. stops): 
+// * sep (curr. separators)
+// * parser (curr. parser)
+// * skipEnd (curr. shouldSkipStop)
+// * notice (curr. noticeFunc)
+// * noStartSymbol (curr. noStartSym)
+// * noEndSymbol (curr. noStopSym)
+// * skip (curr. skip)
+// * isEnd (curr. endFunc)
+// * output (curr. outputFunction)
+// * beginCall (curr. startCallback)
+// * endCall (curr. endCallback)
+// * skipmultiseps (curr. skipMultipleSeps)
+
 export function delimited<StringType = string>({
 	starts,
 	stops,
@@ -51,7 +70,7 @@ export function delimited<StringType = string>({
 	startCallback?: Function
 	endCallback?: Function
 	skipMultipleSeps?: boolean
-}) {
+}): any {
 	// ? generalize?
 	function skipSeparators(separator: StringType) {
 		skip(separator, noticeFunc)
@@ -171,6 +190,19 @@ function skipMultiple<StringType = string>({
 	while (spotFunction(char)) nextFunction()
 }
 
+
+// * new names (those that DIDN'T appear in the other function's names...): 
+// * 1. predicate (curr. predicate)
+// * 2. curr (curr. currentFunction)
+// * 3. next (curr. nextFunction)
+// * 4. append (curr. appendFunction)
+// * 5. beforeEvery (curr. beforeEvery)
+// * 6. afterEvery (curr. afterEvery)
+// * 7. emptyValue (curr. emptyValue)
+// ! (these two are written, because of mixing of different functions' arguments)
+// * 8. beginCallback (curr. beginning)
+// * 9. endCallback (curr. finale)
+
 export function readWhilst<StringType = string>({
 	predicate,
 	currentFunction,
@@ -208,6 +240,11 @@ export function readWhilst<StringType = string>({
 }
 
 export const readWhile = readWhilst
+
+// * Names (new): 
+// * 1. typetable (curr. typestable)
+// * 2. type (curr. type)
+// * 3. args (curr. args)
 
 // * useful with the pre-set tokentypes inside the UtilFunctions (simulating the proper templates)...
 export function read({
@@ -275,7 +312,10 @@ export function recursiveSetting<InType = object, OutType = any>({
 	return result as OutType
 }
 
-// * syntax sugar for while () {}
+// * new names: 
+// * 1. isEnd (current endfunction)
+
+// * syntax sugar for while (!a) b
 export function whileDo({
 	endfunction,
 	repeat,
@@ -283,7 +323,7 @@ export function whileDo({
 	endfunction: () => boolean
 	repeat: Function
 }): void {
-	while (endfunction()) repeat()
+	while (!endfunction()) repeat()
 }
 
 // TODO: keep generalizing the previous functions...
@@ -328,11 +368,11 @@ export class UtilFunctions<
 	}
 }
 
-type FunctionTable = { [a: Key]: Function }
-type Key = string | number | symbol
+export type FunctionTable = { [a: Key]: Function }
+export type Key = string | number | symbol
 
 // TODO: finish...
-type UtilParams = {}
+export type UtilParams = {}
 
 /**
  * Takes a string and returns a convinient structure for iteration of it.
