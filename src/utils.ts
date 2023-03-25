@@ -1,3 +1,7 @@
+// deno-lint-ignore-file no-explicit-any ban-types
+
+import { Key, Table } from "./general"
+
 // * A 'utils' file (object/submodule) of the library has various generalized functions and types that self have considered useful enoough for one's own projects.
 // TODO: whenever functions are concerned, pray do add capability to add as many arguments as he the self wants...
 
@@ -218,7 +222,7 @@ export function read({
 	type,
 	args = [],
 }: {
-	typetable: FunctionTable
+	typetable: Table<Function>
 	type: Key
 	args?: any[]
 }): any {
@@ -231,7 +235,7 @@ export function readSequence({
 	types,
 	args = Object.keys(typetables).map(() => []),
 }: {
-	typetables: FunctionTable[]
+	typetables: Table<Function>[]
 	types: Key[]
 	args?: any[][]
 }): any {
@@ -298,23 +302,28 @@ export class UtilFunctions<
 	InType = object,
 	OutType = object
 > {
-	functions: { [a: string]: Function }
+	functions!: Table<Function>
 	params: UtilParams<StringType, InType>
 	constructor(defaultParams: UtilParams<StringType, InType>) {
 		this.params = defaultParams
 
 		// TODO: give more accurate object types...
 		const functionTable: object = {
-			delimited: (args) => delimited<StringType>(args),
-			recursiveIndexation: (args) =>
+			delimited: (args: UtilParams<StringType, InType>) =>
+				delimited<StringType>(args),
+			recursiveIndexation: (args: UtilParams<StringType, InType>) =>
 				recursiveIndexation<InType, OutType>(args),
-			recursiveSetting: (args) => recursiveSetting<InType, OutType>(args),
+			recursiveSetting: (args: UtilParams<StringType, InType>) =>
+				recursiveSetting<InType, OutType>(args),
 			read: read,
 			readSequence: readSequence,
-			readWhilst: (args) => readWhilst<StringType>(args),
-			readWhile: (args) => readWhile<StringType>(args),
+			readWhilst: (args: UtilParams<StringType, InType>) =>
+				readWhilst<StringType>(args),
+			readWhile: (args: UtilParams<StringType, InType>) =>
+				readWhile<StringType>(args),
 			whileDo: whileDo,
-			skipMultiple: (args) => skipMultiple<StringType>(args),
+			skipMultiple: (args: UtilParams<StringType, InType>) =>
+				skipMultiple<StringType>(args),
 		}
 
 		// TODO: there is a thing: the UtilParams type should be written in such a manner as to allow for missing params (that is, instead of using default values, self would instead use the "?" mark);
@@ -331,9 +340,6 @@ export class UtilFunctions<
 		})
 	}
 }
-
-export type FunctionTable = { [a: Key]: Function }
-export type Key = string | number | symbol
 
 // TODO: add all the missing arguments (if any); inspect the entire code for potential errors/mischeifs/unwanted behaviour; add/manage the optional parametres (better still, make them all optional...)
 export type UtilParams<StringType, InType> = {
@@ -353,10 +359,10 @@ export type UtilParams<StringType, InType> = {
 	endCallback: Function
 	skipmultiseps: boolean
 	char: StringType
-	typetable: FunctionTable
+	typetable: Table<Function>
 	type: Key
 	args: any[]
-	typetables: FunctionTable[]
+	typetables: Table<Function>[]
 	types: Key[]
 	repeat: Function
 	object: InType

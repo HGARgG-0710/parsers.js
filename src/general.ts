@@ -15,3 +15,6 @@ export type _TupleOf<
 > = Recurring["length"] extends Num
 	? Recurring
 	: _TupleOf<Tuple, Num, [Tuple, ...Recurring]>
+
+export type Table<Type> = { [a: Key]: Type }
+export type Key = string | number | symbol

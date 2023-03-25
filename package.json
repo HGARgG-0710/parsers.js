@@ -1,10 +1,10 @@
 {
-    "name": "parser.ts", 
-    "version": "0.1", 
-    "description": "", 
-    "main": "src/out/main.js", 
-    "types": "src/out/main.d.ts", 
-    "license": "MIT", 
-    "author": "Igor Kuznetsov", 
+    "name": "parser.ts",
+    "version": "0.1",
+    "description": "",
+    "main": "src/out/main.js",
+    "types": "src/out/main.d.ts",
+    "license": "MIT",
+    "author": "Igor Kuznetsov",
     "publisher": "hgargg-0710"
 }

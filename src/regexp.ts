@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-inferrable-types no-explicit-any
 // * largely, just a tiny more intuitive syntax for regexp;
 
 export type RegExpArgs<FlagType = string> = {
