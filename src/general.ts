@@ -11,7 +11,7 @@ export type Tuple<Type, Num extends number> = Num extends Num
 export type _TupleOf<
 	Tuple,
 	Num extends number,
-	Recurring extends unknown[]
+	Recurring extends unknown[] = []
 > = Recurring["length"] extends Num
 	? Recurring
 	: _TupleOf<Tuple, Num, [Tuple, ...Recurring]>

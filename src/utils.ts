@@ -1,3 +1,4 @@
+// TODO: adopt the "expressions.ts" typesystem into the project: let it be as unlimited! Let it keep the support for JavaScript in-built types; 
 // deno-lint-ignore-file no-explicit-any ban-types
 
 import { Key, Table } from "./general"
@@ -271,15 +272,10 @@ export function recursiveSetting<InType = object, OutType = any>({
 	fields: Key[]
 	value: any
 }): OutType {
-	let result: any = object
-
-	result = recursiveIndexation({
-		object: result,
+	return (recursiveIndexation({
+		object: object,
 		fields: fields.slice(0, fields.length - 1),
-	})
-
-	result[fields[fields.length - 1]] = value
-	return result as OutType
+	})[fields[fields.length - 1]] = value) as OutType
 }
 
 // * syntax sugar for while (!a) b
