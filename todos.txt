@@ -13,4 +13,4 @@
 	All that type malarkey... And for a language one would (most probably) wouldn't want to use again? 
 	Current decision: nah, delete them later, along with the other typescript files... 
 
-5. Get rid of the TypeScript from the project; 
+5. Get rid of the TypeScript within the project; 

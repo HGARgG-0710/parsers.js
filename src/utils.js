@@ -1,3 +1,23 @@
+// TODO: adopt the "expressions.ts" typesystem into the project: let it be as unlimited! Let it keep the support for JavaScript in-built types;
+// * A 'utils' file (object/submodule) of the library has various generalized functions and types that self have considered useful enoough for one's own projects.
+// TODO: whenever functions are concerned, pray do add capability to add as many arguments as he the self wants...
+// TODO: Create some of the wanted elementary functions that self would consider useful in building a parser (that is, to maximize the optimization of the routine repetition of various naturally ocurring parsing procedures)...
+
+// * Currently, the `utils` can:
+// * 1. delimit arbitrary sequences...
+// * 2. read arbitrary functions provided the functions tables themselves...
+// * 3. read arbitrary sequences of tables provided sequences of functions tables...
+// * 4. recursively read a tree-object of arbitrary depth or shape;
+// * 5. recursively write a tree-object of arbitrary depth or shape;
+// * 6. configurably skip past multiple instances of a certain object;
+// * 7. configurably read a sequence of objects and then configurably "append" them together (depends on user's definition...)
+// IN WORK: 8. configure a united system of all these functions...
+// * 9. Have a defined type of a function table
+
+// TODO: continue on with the generalizing of the things...
+// ? Rename arguments? Reorder them too (for clarity only...)
+// TODO: give them the same names, order this stuff properly... 15 fields in the least...
+
 export function delimited({
 	begin,
 	end,
@@ -19,6 +39,7 @@ export function delimited({
 	},
 	skipmultiseps = true
 }) {
+	// ? generalize?
 	function skipSeparators(separator) {
 		skip(separator, notice)
 		if (skipmultiseps)
@@ -41,6 +62,8 @@ export function delimited({
 	const stopOnSeparator = end.includes(noStopSymbol)
 	let startVal = undefined
 	let endVal
+	// allowing for multiple starts (here, the starts are skipped "-or"-way, not "-and"-way; i.e. if more than one are found, then only the first one is read...)
+	// ? why, by the way? Should he the body not make it a flag?
 	if (!begin.includes(noStartSymbol))
 		if (begin instanceof Array) {
 			let i = 0
@@ -57,6 +80,8 @@ export function delimited({
 				i++
 			}
 		}
+	// ? this "skip the separators before the actual beginning" should be turnable on/off by a flag too...
+	// TODO: do along with the other questions...
 	for (const a of separator)
 		skipMultiple({
 			char: a,
@@ -96,15 +121,18 @@ export function delimited({
 		}
 		delimitedArr.push(parser())
 	}
+	// * the success index is always +1 from the true one. That is to avoid situations with Boolean(0) = false...
 	const tocallendres = tocall_end()
 	if (typeof skipEnd === "function") skipEnd = skipEnd()
 	if (!stopOnSeparator && tocallendres && skipEnd)
 		skip(end[tocallendres - 1], notice)
 	return output(startVal, endVal, delimitedArr)
 }
+
 function skipMultiple({ char, next, notice }) {
 	while (notice(char)) next()
 }
+
 export function readWhilst({
 	predicate,
 	curr,
@@ -128,10 +156,14 @@ export function readWhilst({
 	endCallback()
 	return res
 }
+
 export const readWhile = readWhilst
+// * useful with the pre-set tokentypes inside the UtilFunctions (simulating the proper templates)...
 export function read({ typetable, type, args = [] }) {
 	return typetable[type](...args)
 }
+
+// * generalization of read for multiple types;
 export function readSequence({
 	typetables,
 	types,
@@ -144,23 +176,35 @@ export function readSequence({
 	}
 	return currRes
 }
+
+// TODO: change this thing (recursiveIndexation and recusiveSetting): make 'fields' a far more complex and powerful argument -- let it be capable of taking the form [a:string,b:string,c:number, ...] with different (and different number of them too!) a,b and c, which would virtiually mean obj[a][b]...(c-2 more times here)[a][b], then proceeding as follows;
+// * This would allow for a more powerful use of the function generally and lesser memory-time consumption (also, add support for InfiniteCounters...; as everywhere else around this and other librarries)
+// * May be very useful in parsing of nested things. Used it once for an algorithm to traverse an arbitrary binary sequence...
 export function recursiveIndexation({ object, fields }) {
 	let res = object
 	for (const f of fields) res = res[f]
 	return res
 }
+
 export function recursiveSetting({ object, fields, value }) {
 	return (recursiveIndexation({
 		object: object,
 		fields: fields.slice(0, fields.length - 1)
 	})[fields[fields.length - 1]] = value)
 }
+
+// * syntax sugar for while (!a) b
 export function whileDo({ isEnd, repeat }) {
 	while (!isEnd()) repeat()
 }
+
+// TODO: keep generalizing the previous functions...
+// * Conceptually, this should be a templated object, but there aren't any such in TS.
+// TODO: after having created all the wanted general functions, make this a sort of all-in-one function: way of assembling the similar definitions together (that is applying the same arguments to different funcitons...)...
 export class UtilFunctions {
 	constructor(defaultParams) {
 		this.params = defaultParams
+		// TODO: give more accurate object types...
 		const functionTable = {
 			delimited: (args) => delimited(args),
 			recursiveIndexation: (args) => recursiveIndexation(args),
@@ -172,6 +216,7 @@ export class UtilFunctions {
 			whileDo: whileDo,
 			skipMultiple: (args) => skipMultiple(args)
 		}
+		// TODO: there is a thing: the UtilParams type should be written in such a manner as to allow for missing params (that is, instead of using default values, self would instead use the "?" mark);
 		for (const functionName of Object.keys(functionTable))
 			this.functions[functionName] = (pars) =>
 				functionTable[functionName]({ ...this.params, ...pars })
@@ -184,6 +229,11 @@ export class UtilFunctions {
 		})
 	}
 }
+// TODO: make this thing nested with the use of "template()" from "math-expressions.js@>=1.0"; the 'errorfunc' and 'input' should be separate layers (id est, one wants them to be)...
+/**
+ * Takes a string and returns a convinient structure for iteration over it.
+ * @param {string} input String to be used as input.
+ */
 export function InputStream(input, errorfunc) {
 	return {
 		sourcestring: input.split(""),
