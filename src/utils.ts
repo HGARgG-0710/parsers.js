@@ -250,6 +250,9 @@ export function readSequence({
 	return currRes
 }
 
+// TODO: change this thing (recursiveIndexation and recusiveSetting): make 'fields' a far more complex and powerful argument -- let it be capable of taking the form [a:string,b:string,c:number, ...] with different (and different number of them too!) a,b and c, which would virtiually mean obj[a][b]...(c-2 more times here)[a][b], then proceeding as follows; 
+// * This would allow for a more powerful use of the function generally and lesser memory-time consumption (also, add support for InfiniteCounters...; as everywhere else around this and other librarries)
+
 // * May be very useful in parsing of nested things. Used it once for an algorithm to traverse an arbitrary binary sequence...
 export function recursiveIndexation<InType = object, OutType = any>({
 	object,
@@ -366,6 +369,7 @@ export type UtilParams<StringType, InType> = {
 	value: any
 }
 
+// TODO: make this thing nested with the use of "template()" from "math-expressions.js@>=1.0";
 /**
  * Takes a string and returns a convinient structure for iteration over it.
  * @param {string} input String to be used as input.
