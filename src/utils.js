@@ -1,4 +1,4 @@
-// TODO: adopt the "expressions.ts" typesystem into the project: let it be as unlimited! Let it keep the support for JavaScript in-built types;
+// TODO: adopt the "math-expressions.js" typesystem into the project: let it be as unlimited! Let it keep the support for JavaScript in-built types;
 // * A 'utils' file (object/submodule) of the library has various generalized functions and types that self have considered useful enoough for one's own projects.
 // TODO: whenever functions are concerned, pray do add capability to add as many arguments as he the self wants...
 // TODO: Create some of the wanted elementary functions that self would consider useful in building a parser (that is, to maximize the optimization of the routine repetition of various naturally ocurring parsing procedures)...
@@ -15,9 +15,11 @@
 // * 9. Have a defined type of a function table
 
 // TODO: continue on with the generalizing of the things...
+
+// TODO: add one single 'export' instruction for the file...
+
 // ? Rename arguments? Reorder them too (for clarity only...)
 // TODO: give them the same names, order this stuff properly... 15 fields in the least...
-
 export function delimited({
 	begin,
 	end,
@@ -175,22 +177,6 @@ export function readSequence({
 		if (!currRes) break
 	}
 	return currRes
-}
-
-// TODO: change this thing (recursiveIndexation and recusiveSetting): make 'fields' a far more complex and powerful argument -- let it be capable of taking the form [a:string,b:string,c:number, ...] with different (and different number of them too!) a,b and c, which would virtiually mean obj[a][b]...(c-2 more times here)[a][b], then proceeding as follows;
-// * This would allow for a more powerful use of the function generally and lesser memory-time consumption (also, add support for InfiniteCounters...; as everywhere else around this and other librarries)
-// * May be very useful in parsing of nested things. Used it once for an algorithm to traverse an arbitrary binary sequence...
-export function recursiveIndexation({ object, fields }) {
-	let res = object
-	for (const f of fields) res = res[f]
-	return res
-}
-
-export function recursiveSetting({ object, fields, value }) {
-	return (recursiveIndexation({
-		object: object,
-		fields: fields.slice(0, fields.length - 1)
-	})[fields[fields.length - 1]] = value)
 }
 
 // * syntax sugar for while (!a) b

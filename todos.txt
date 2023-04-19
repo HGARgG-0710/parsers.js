@@ -1,16 +1,6 @@
 1. Finish the package.json...
 2. Write proper JavaDoc-like documentation for all this stuff...
 
-3. Fix the bugs within the project: find them out with Deno; then, pray use the `tsc` for the actual compilation of the thing...
+3. Fix the bugs within the project: find them out with Deno and/or manually;
 
-4. IDEA: about the in-editor types -- what about adding the JSDoc + using the .d.ts files for the libraries in question? 
-
-	If one would use them loosely, perhaps would be nice. 
-	Pray do think about it...
-	Also -- if one was to restore the original "tsconfig.json" files for them + written the JSDoc, that could be done in a single command; 
-
-	On the other hand... Does one really want this? 
-	All that type malarkey... And for a language one would (most probably) wouldn't want to use again? 
-	Current decision: nah, delete them later, along with the other typescript files... 
-
-5. Get rid of the TypeScript within the project; 
+4. List of things transported to the math-expressions.js, but that are still wanted there anyway: recursiveIndexation, recursiveSetting; 
