@@ -1,9 +1,8 @@
 {
-    "name": "parser.ts",
-    "version": "0.1",
-    "description": "",
-    "main": "src/out/main.js",
-    "license": "MIT",
-    "author": "Igor Kuznetsov",
-    "publisher": "hgargg-0710"
+	"name": "@hgargg-0710/parser.js",
+	"version": "0.1.0",
+	"description": "A simple JavaScript library for simplification the process of organization/creation of parsers of arbitrary complexity.",
+	"main": "src/out/main.js",
+	"license": "MIT",
+	"author": "hgargg-0710"
 }

@@ -1,6 +1,3 @@
-1. Finish the package.json...
-2. Write proper JavaDoc-like documentation for all this stuff...
-
-3. Fix the bugs within the project: find them out with Deno and/or manually;
-
-4. List of things transported to the math-expressions.js, but that are still wanted there anyway: recursiveIndexation, recursiveSetting; 
+1. Write proper JavaDoc-like documentation for all this stuff...
+2. Check if this works with Deno; 
+3. TESTING ARRANGEMENTS [think how to conduct testing...]; 

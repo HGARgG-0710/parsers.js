@@ -1,4 +1,4 @@
-import * as parsers from "./src/parsers";
-import * as utils from "./src/utils";
-import * as regexp from "./src/regexp";
-export { parsers, utils, regexp };
+export * from "./src/parsers.mjs"
+export * from "./src/regex.mjs"
+export * from "./src/types.mjs"
+export * from "./src/validate.mjs"
