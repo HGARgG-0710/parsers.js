@@ -3,12 +3,14 @@ import { mapKeyValue } from "./types.mjs"
 
 export function StreamValidator(validityTable) {
 	return function (input) {
-		while (!input.isEnd()) if (!validityTable[type(input.curr())](input)) return false
+		while (!input.isEnd()) {
+			const check = validityTable[type(input.curr())]
+			if (!check || !check(input)) return false
+			input.next()
+		}
 		return true
 	}
 }
-// ! Supposed to be:
-// * Checking that it's (pattern) breakable onto 'tokens' the same way as 'PatternTokenizer'
 export function PatternValidator(validityMap) {
 	return function (pattern) {
 		const patternClass = pattern.class
@@ -40,5 +42,16 @@ export function PatternValidator(validityMap) {
 		}
 
 		return validateRecursive(pattern)
+	}
+}
+
+export function TreeValidator(validationMap) {
+	return function (treeStream) {
+		while (!treeStream.isEnd()) {
+			const check = validationMap.index(treeStream)
+			if (!check || !check(treeStream.curr())) return false
+			treeStream.next()
+		}
+		return true
 	}
 }

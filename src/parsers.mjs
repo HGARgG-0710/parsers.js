@@ -93,18 +93,21 @@ export function PatternTokenizer(tokenMap) {
 }
 export function StreamTokenizer(tokenMap) {
 	return function (input) {
-		let _current = null
+		let current = null
 		return {
 			next: function () {
-				return (_current = ((x) => (x ? x.call(this, input) : x))(
+				const prev = current
+				current = ((x) => (x ? x.call(this, input) : x))(
 					tokenMap.index(input.curr())
-				))
+				)
+				return prev
 			},
 			curr: function () {
-				return _current || this.next()
+				if (!current) this.next()
+				return current
 			},
 			isEnd: function () {
-				return !!_current
+				return !!this.curr()
 			}
 		}
 	}

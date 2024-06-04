@@ -1,8 +1,8 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
 // ! this is [largely] very good, HOWEVER...
-// ? this 'bracket' thing seems slightly suspicious. On one hand - it provides the needed order to ensure the following of the operations being the same as the user defined them ('intuitiveness' of construction...). 
-// ! on the other - it (might) ruin some of the more intricate outputs of Regular Expressions (so it's not a perfect fit, though certainly does fit the basic purposes of the parsers currently available - first match, that is...); 
+// ? this 'bracket' thing seems slightly suspicious. On one hand - it provides the needed order to ensure the following of the operations being the same as the user defined them ('intuitiveness' of construction...).
+// ! on the other - it (might) ruin some of the more intricate outputs of Regular Expressions (so it's not a perfect fit, though certainly does fit the basic purposes of the parsers currently available - first match, that is...);
 // % See if one can do anything about this order issue...
 
 export const regexpRanges = (...ranges) =>
@@ -24,9 +24,19 @@ export const [and, or] = ["", "|"].map(
 		(...regexes) =>
 			new RegExp(regexes.map(bracket).join(sym))
 )
-export const flagAdd = (flag) => (regexp) => new RegExp(regexp, [flag])
+export const flagAdd = (flags) => (regexp) =>
+	new RegExp(regexp, regexp.flags.concat(flags))
 
-export const [global, unicode] = ["g", "u"].map(flagAdd)
+export const [
+	global,
+	unicode,
+	subInd,
+	caseInsensitive,
+	multline,
+	unicodeSets,
+	dotAll,
+	sticky
+] = ["g", "u", "d", "i", "m", "v", "s", "y"].map(flagAdd)
 
 export function occurences(...args) {
 	return (regexp) => new RegExp(`${bracket(regexp)}{${args.slice(0, 2).join(",")}}`)
@@ -55,8 +65,6 @@ export const [charClass, negCharClass] = ["", "^"].map(
 			new RegExp(`[${append}${regexpRanges(...ranges)}]`)
 )
 
-export const anything = () => /./
-
 export const [[digit, nonDigit], [word, nonWord], [space, nonSpace]] = [
 	"d",
 	"w",
@@ -65,6 +73,7 @@ export const [[digit, nonDigit], [word, nonWord], [space, nonSpace]] = [
 	[(x) => x, (x) => x.toUpperCase()].map((f) => () => new RegExp(`\\${f(pairLetter)}`))
 )
 
+export const anything = () => /./
 export const tab = () => /\t/
 export const cr = () => /\r/
 export const newline = () => /\n/
