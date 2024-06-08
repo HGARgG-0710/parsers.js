@@ -1,51 +1,37 @@
-import { mapKeyValue } from "./types.mjs"
-
-export const insertArr = (arr, ind, val) =>
-	arr.slice(0, ind).concat([val]).concat(arr.slice(ind))
+import { map, array } from "@hgargg-0710/one"
+import { Token } from "./types.mjs"
+const { kv: mkv } = map
+const { insert } = array
 
 export const isNumber = (x) => typeof x === "number" || x instanceof Number
 export const predicateChoice = (x) => (isNumber(x) ? (input, i) => i < x : x)
 
-export const predFromSet = (set) => (x) => set.has(x)
+export const setPredicate = (set) => (x) => set.has(x)
 
-export const token = (type, value) => ({ type, value })
 export const type = (x) => x.type
 export const value = (x) => x.value
-export const isToken = (x) => ["type", "value"].every((y) => y in x)
+export const isToken = (x) =>
+	typeof x === "object" && ["type", "value"].every((y) => y in x)
 
-export function delimited(
-	limits,
-	isdelim,
-	expectRepeats = false,
-	evenStep = false,
-	skipFirst = false
-) {
-	const pred =
-		limits instanceof Array
-			? predicateChoice(limits[1]) || predicateChoice(limits[0])
-			: predicateChoice(limits)
-	const prePred = !!limits[1] && predicateChoice(limits[0])
-	const delimPred = expectRepeats ? () => true : (input, i) => (i + evenStep) % 2
+export function delimited(limits, isdelim) {
+	if (!(limits instanceof Array)) limits = [limits]
+	const pred = predicateChoice(limits[1]) || predicateChoice(limits[0])
+	const prePred = 1 in limits && predicateChoice(limits[0])
 
 	return function (input, handler) {
-		if (prePred) {
-			skip(input)(prePred)
-			if (skipFirst) input.next()
-		}
+		const _skip = skip(input)
+		if (prePred) _skip(prePred)
 		const result = []
-		for (let i = 0; pred(input, i) && !input.isEnd(); ++i) {
-			while (delimPred(input, i) && isdelim(input.curr())) {
-				input.next()
-				continue
-			}
-			result.push(handler(input))
-			i++
+		for (let i = 0, j = 0; pred(input, i) && !input.isEnd(); ++i) {
+			j += _skip((input, _j) => isdelim(input, i + j + _j))
+			if (!input.isEnd()) result.push(handler(input, i + j))
 		}
 		return result
 	}
 }
 export function eliminate(symbols) {
-	return (pattern) => symbols.reduce((acc, curr) => acc.split(curr).join(""), pattern)
+	return (pattern, nil = pattern.class.empty) =>
+		symbols.reduce((acc, curr) => acc.split(curr).join(nil), pattern)
 }
 export function skip(input) {
 	return function (steps = 1) {
@@ -60,24 +46,22 @@ export function skip(input) {
 }
 
 export function PatternTokenizer(tokenMap) {
+	const tokenType = (_token) => (value) => Token(_token[1], value)
 	return function (pattern) {
 		const patternClass = pattern.class
-		const tokenType = (_token) => (value) => token(_token[1], value)
-
 		function tokenizeSingle(pattern, token) {
 			const type = tokenType(token)
-			const regexp = token[0]
+			const typeKey = token[0]
 			return pattern
-				.matchAll(regexp)
-				.map((x) => x[0])
+				.matchAll(typeKey)
 				.reduce(
-					(acc, curr, i) => insertArr(acc, 2 * i + 1, type(curr)),
-					pattern.split(regexp)
+					(acc, curr, i) => insert(acc, 2 * i + 1, type(curr)),
+					pattern.split(typeKey)
 				)
 				.filter((x) => isToken(x) || x.length)
 		}
 		function tokenizeRecursive(pattern) {
-			return mapKeyValue(tokenMap).reduce(
+			return mkv(tokenMap).reduce(
 				(acc, currToken) =>
 					acc
 						.map((x) =>
@@ -98,7 +82,7 @@ export function StreamTokenizer(tokenMap) {
 			next: function () {
 				const prev = current
 				current = ((x) => (x ? x.call(this, input) : x))(
-					tokenMap.index(input.curr())
+					tokenMap.index(input.next())
 				)
 				return prev
 			},
@@ -112,11 +96,13 @@ export function StreamTokenizer(tokenMap) {
 		}
 	}
 }
-export function StreamParser(parserTable) {
+export function StreamParser(parserMap) {
 	const parser = function (input) {
 		const final = []
-		while (!input.isEnd())
-			final.push(...parserTable[type(input.curr())](input, parser))
+		while (!input.isEnd()) {
+			final.push(...parserMap.index(input.curr())(input, parser))
+			input.next()
+		}
 		return final
 	}
 	return parser

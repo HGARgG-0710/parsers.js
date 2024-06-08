@@ -1,9 +1,9 @@
-export function SourceGenerator(generateTable, emptyVal = "") {
-	return function (treeStream) {
-		let result = emptyVal
-		while (!treeStream.isEnd()) {
-			result = result.concat(generateTable[type(treeStream.curr())](treeStream))
-			treeStream.next()
+export function SourceGenerator(generateMap) {
+	return function (stream, prevSource) {
+		let result = prevSource
+		while (!stream.isEnd()) {
+			result = result.concat(generateMap.index(stream.curr())(stream))
+			stream.next()
 		}
 		return result
 	}

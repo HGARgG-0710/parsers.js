@@ -1,5 +1,5 @@
 export * from "./src/parsers.mjs"
-export * from "./src/regex.mjs"
+export * as regex from "./src/regex.mjs"
 export * from "./src/types.mjs"
 export * from "./src/validate.mjs"
 export * from "./src/reverse.mjs"

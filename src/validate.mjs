@@ -1,10 +1,11 @@
-import { type, insertArr } from "./parsers.mjs"
-import { mapKeyValue } from "./types.mjs"
+import { map, array } from "@hgargg-0710/one"
+const { kv: mkv } = map
+const { insert } = array
 
-export function StreamValidator(validityTable) {
+export function StreamValidator(validityMap) {
 	return function (input) {
 		while (!input.isEnd()) {
-			const check = validityTable[type(input.curr())]
+			const check = validityMap.index(input.curr())
 			if (!check || !check(input)) return false
 			input.next()
 		}
@@ -13,27 +14,25 @@ export function StreamValidator(validityTable) {
 }
 export function PatternValidator(validityMap) {
 	return function (pattern) {
-		const patternClass = pattern.class
-
+		const isPattern = pattern.class.is
 		function validateSingle(pattern, token) {
-			const [regexp, check] = token
+			const [typeKey, check] = token
 			return pattern
-				.matchAll(regexp)
-				.map((x) => x[0])
+				.matchAll(typeKey)
 				.reduce(
-					(acc, curr, i) => insertArr(acc, 2 * i + 1, check(curr)),
-					pattern.split(regexp)
+					(acc, curr, i) => insert(acc, 2 * i + 1, check(curr)),
+					pattern.split(typeKey)
 				)
 				.filter((x) => typeof x === "boolean" || x.length)
 				.every((x) => x)
 		}
 		function validateRecursive(pattern) {
-			return !!mapKeyValue(validityMap).reduce(
+			return !!mkv(validityMap).reduce(
 				(acc, currToken) =>
 					acc
 						? ((x) => x.every((x) => x) && x)(
 								acc.map((x) =>
-									patternClass.is(x) ? validateSingle(x, currToken) : x
+									isPattern(x) ? validateSingle(x, currToken) : x
 								)
 						  )
 						: acc,
@@ -42,16 +41,5 @@ export function PatternValidator(validityMap) {
 		}
 
 		return validateRecursive(pattern)
-	}
-}
-
-export function TreeValidator(validationMap) {
-	return function (treeStream) {
-		while (!treeStream.isEnd()) {
-			const check = validationMap.index(treeStream)
-			if (!check || !check(treeStream.curr())) return false
-			treeStream.next()
-		}
-		return true
 	}
 }
