@@ -1,10 +1,7 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
-const regexRanges = (...ranges) =>
-	ranges
-		.map((r) => r.map(regexContents))
-		.map((r) => (r.length > 1 ? `${r[0]}-${r[1]}` : r[0]))
-		.join("")
+const charRanges = (...ranges) =>
+	ranges.map((r) => (r instanceof Array ? `${r[0]}-${r[1]}` : r[0])).join("")
 
 export const regexContents = (r) =>
 	((x) => x.slice(1, x.length - 1 - r.flags.length))(r.toString())
@@ -16,12 +13,13 @@ export const [capture, nonCapture] = [bracket, nonBracket].map(
 	(f) => (regex) => new RegExp(f(regex))
 )
 
-export const namedCapture = (name) => (regex) => new RegExp(`(?<${name}>${regex})`)
+export const namedCapture = (name) => (regex) =>
+	new RegExp(`(?<${name}>${nonBracket(regex)})`)
 
 export const [and, or] = ["", "|"].map(
 	(sym) =>
 		(...regexes) =>
-			new RegExp(nonBracket(regexes.map(nonBracket).join(sym)))
+			new RegExp(nonBracket(new RegExp(regexes.map(nonBracket).join(sym))))
 )
 export const flagsAdd = (flags) => (regex) => new RegExp(regex, regex.flags.concat(flags))
 
@@ -60,7 +58,7 @@ export const [boundry, Boundry] = ["b", "B"].map((b) => () => new RegExp(`\\${b}
 export const [charClass, negCharClass] = ["", "^"].map(
 	(append) =>
 		(...ranges) =>
-			new RegExp(`[${append}${regexRanges(...ranges)}]`)
+			new RegExp(`[${append}${charRanges(...ranges)}]`)
 )
 
 export const [[digit, nonDigit], [word, nonWord], [space, nonSpace]] = [
@@ -87,8 +85,9 @@ export const [plus, star, maybe] = ["+", "*", "?"].map(
 	(s) => (regex) => new RegExp(`${nonBracket(regex)}${s}`)
 )
 
+const uniProp = (x) => (x instanceof Array ? `${x[0]}=${x[1]}` : x)
 export const [uniAware, uniEsc, uniEscNon] = ["u", "p", "P"].map(
-	(l) => (code) => () => new RegExp(`\\${l}{${code}}`)
+	(l, i) => (code) => () => new RegExp(`\\${l}{${(i ? uniProp : (x) => x)(code)}}`)
 )
 
 export const backrefName = (name) => () => new RegExp(`\\k<${name}>`)

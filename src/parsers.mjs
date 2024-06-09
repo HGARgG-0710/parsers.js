@@ -48,7 +48,7 @@ export function skip(input) {
 export function PatternTokenizer(tokenMap) {
 	const tokenType = (_token) => (value) => Token(_token[1], value)
 	return function (pattern) {
-		const patternClass = pattern.class
+		const isPattern = pattern.class.is
 		function tokenizeSingle(pattern, token) {
 			const type = tokenType(token)
 			const typeKey = token[0]
@@ -64,9 +64,7 @@ export function PatternTokenizer(tokenMap) {
 			return mkv(tokenMap).reduce(
 				(acc, currToken) =>
 					acc
-						.map((x) =>
-							patternClass.is(x) ? tokenizeSingle(x, currToken) : x
-						)
+						.map((x) => (isPattern(x) ? tokenizeSingle(x, currToken) : x))
 						.flat(),
 				[pattern]
 			)

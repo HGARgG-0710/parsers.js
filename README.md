@@ -274,6 +274,9 @@ means, allowing for refactroing and greater reusability (functions).
 The API is simple and allows consequent chaining of output-RegExp
 to one another.
 
+NOTE (important): these transformations DO NOT preserve the flags of the initial regexps.
+To add flags use `flagsAdd`.
+
 ```ts
 function regexContents(r: RegExp): string
 ```
@@ -429,12 +432,11 @@ function Boundry(regex: RegExp): RegExp
 NOTE: the `/\B/`.
 
 ```ts
-function charClass(...ranges: [RegExp, RegExp?][]): RegExp
+function charClass(...ranges: (string | [string, string])[]): RegExp
 ```
 
-Creates a new character class regular expression
-from an array of the form `[r0]` or `[r0, r1]`, with
-corresponding ranges being `/[r0]/` and `/[r0-r1]/`.
+Creates a new character class regular expression from character strings `"r0"->/[r0]/`,
+and/or ranges `[r0, r1]->/[r0-r1]/`
 
 The ranges are then concatenated together into a single expression.
 

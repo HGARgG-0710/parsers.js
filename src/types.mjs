@@ -1,4 +1,5 @@
 import { array } from "@hgargg-0710/one"
+import { type } from "./parsers.mjs"
 const { last, lastOut, clear } = array
 
 export const MapClass = (change) => {
@@ -12,7 +13,8 @@ export const MapClass = (change) => {
 			index: (x) =>
 				((x) => (typeof x === "number" ? mapValues[x] : x))(
 					mapKeys.reduce(
-						(key, curr, i) => (key ? key : change(curr, x) ? i : key),
+						(key, curr, i) =>
+							key !== undefined ? key : change(curr, x) ? i : key,
 						undefined
 					)
 				)
@@ -39,7 +41,8 @@ export function StringPattern(string) {
 			StringPatternCollection([...string.matchAll(regexp)].map((x) => x[0])),
 		get length() {
 			return string.length
-		}
+		},
+		class: StringPattern
 	}
 }
 
@@ -53,19 +56,19 @@ export function StringPatternCollection(arr) {
 		join: function (x = "") {
 			return StringPattern(arr.join(x))
 		},
-		filter: function (predicate) {
+		filter: function (predicate = (x) => x) {
 			return StringPatternCollection(arr.filter(predicate))
 		},
 		reduce: function (predicate, init) {
 			return arr.reduce(predicate, init)
 		},
-		every: function (predicate) {
+		every: function (predicate = (x) => x) {
 			return arr.every(predicate)
 		},
-		slice: function (start, end) {
+		slice: function (start = 0, end = arr.length) {
 			return StringPatternCollection(arr.slice(start, end))
 		},
-		concat: function (collection) {
+		concat: function (collection = []) {
 			return StringPatternCollection([...arr, ...collection])
 		},
 		[Symbol.iterator]: function* () {
@@ -98,91 +101,66 @@ export function InputStream(input) {
 export function ArrayTree(arrtree) {
 	function ArrTreeLevel(level) {
 		level.children = function () {
-			return level
+			return this
 		}
 		level.index = function (multind) {
 			return multind.reduce((prev, curr) => prev.children()[curr], this)
 		}
 		return level
 	}
-
-	return ArrTreeLevel(arrtree)
-		.children()
-		.map((x) => (x instanceof Array ? ArrayTree : (x) => x)(x))
+	return arrtree instanceof Array ? ArrTreeLevel(arrtree.map(ArrayTree)) : arrtree
 }
 
 // TODO [for the future]: add a 'prev' [can be done easily without changing existing stuff too much...];
-export function TreeStream(treeType) {
-	let init = treeType
-	let currlevel = init
-	let current = init
-	const multind = []
+// ^ NOTE: the 'prev' implementation is farily straightforward - it's just a reversed 'next' (going from 'bottom-to-top' and 'from-end-to-beginning'), so instead of checking for `0 in c.children()` and `last(...) + 1 in l.children()`, one checks for `l === tree` and `last(...) - 1 in l.children()`
+// ! BUT one will also need to alter the 'next()', BECAUSE, both of them will now need to ALSO go down AND up the tree (one will additionally need to remember what was last not to 'skip' any "branches"...);
+export function TreeStream(tree) {
+	let currlevel = tree
+	let current = tree.children()[0]
+	const multind = [0]
 
-	const nextLevel = (c) => 0 in c.children()
+	const ENDVALUE = {}
+
+	const nextLevel = (c) => c.children && 0 in c.children()
 	const isMore = (l) => last(multind) + 1 in l.children()
-	// ! for 'prev'
-	// const isLimit = (l) => l === init
-	// const isLess = (l) => last(multind) - 1 in l.children()
 
 	return {
 		next: function () {
 			const prev = current
-
 			if (nextLevel(current)) {
 				multind.push(0)
 				currlevel = current
 				current = current.children()[0]
 				return prev
 			}
-
 			while (multind.length && !isMore(currlevel)) {
 				multind.pop()
 				current = currlevel
-				currlevel = init.index(lastOut(multind))
+				currlevel = tree.index(lastOut(multind))
 			}
-			if (multind.length) {
-				current = currlevel.children()[++multind[multind.length - 1]]
-				currlevel = prev
-			} else current = null
-
+			current = multind.length
+				? currlevel.children()[++multind[multind.length - 1]]
+				: ENDVALUE
 			return prev
 		},
-		// ! Later, fix the implementation of 'prev' [need to remember what was the previous one - 'prev' or 'next'];
-		// prev: function () {
-		// 	const next = current
-		// 	const nisless = !isLess(currlevel)
-
-		// 	if (nisless) {
-		// 		if (isLimit(currlevel)) return next
-		// 		multind.pop()
-		// 		current = currlevel
-		// 		currlevel = init.index(lastOut(multind))
-		// 		return next
-		// 	}
-
-		// 	// ! PROBLEM [here] - the 'prev' CANNOT continue successfully - it needs to KNOW that the last one WAS NOT a 'next' [otherwise, the order is ruined - it 'skips' all the subbranches];
-		// 	// ^ NOTE: same problem is with the 'next';
-		// 	current = currlevel.children()[--multind[multind.length - 1]]
-		// 	return next
-		// },
 		curr: function () {
 			return current
 		},
 		isEnd: function () {
-			return !!current
+			return current === ENDVALUE
 		},
 		rewind: function () {
 			clear(multind)
-			currlevel = init
-			current = init
+			currlevel = tree
+			current = tree
 			return this.curr()
 		}
 	}
 }
 
-export function StringSource(string) {
+export function StringSource(string = "") {
 	return {
-		value: string || "",
+		value: string,
 		concat: function (source) {
 			return StringSource(string + source.value)
 		}
