@@ -1,7 +1,11 @@
 import { array, object } from "@hgargg-0710/one"
-import { value, type } from "./parsers.mjs"
 const { kv: okv } = object
 const { last, lastOut, clear } = array
+
+export const Token = (type, value) => ({ type, value })
+Token.is = (x) => typeof x === "object" && ["type", "value"].every((y) => y in x)
+Token.type = (x) => x.type
+Token.value = (x) => x.value
 
 export const MapClass = (change) => {
 	const mapClass = function (map) {
@@ -32,7 +36,7 @@ export const [PredicateMap, RegExpMap, SetMap, BasicMap] = [
 	(curr, x) => curr === x
 ].map(MapClass)
 
-export const TokenMap = (mapClass) => mapClass.extend(type)
+export const TokenMap = (mapClass) => mapClass.extend(Token.type)
 
 export function StringPattern(string = "") {
 	return {
@@ -61,7 +65,7 @@ export function StringPatternCollection(arr = []) {
 	return {
 		value: arr,
 		join: function (x = StringPattern()) {
-			return StringPattern(arr.map(value).join(x.value))
+			return StringPattern(arr.map((x) => x.value).join(x.value))
 		},
 		filter: function (predicate = (x) => x) {
 			return StringPatternCollection(arr.filter(predicate))
@@ -105,7 +109,7 @@ const mapPropsPreserve = (array, fmap = (x) => x) => {
 }
 
 export const ArrayToken = (token) => {
-	const retval = [...token.value]
+	const retval = [...Token.value(token)]
 	const [keys, values] = okv(token)
 	keys.forEach((x, i) => {
 		if (isNaN(x)) retval[x] = values[i]
@@ -215,5 +219,3 @@ export function StringSource(string = "") {
 	}
 }
 StringSource.empty = StringSource()
-
-export const Token = (type, value) => ({ type, value })

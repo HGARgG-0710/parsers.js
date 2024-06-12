@@ -104,7 +104,7 @@ function streamValidationMap() {
 					if (isCollection === null) return false
 					input.next()
 					const r = input.curr() === "L"
-					if (r && isCollection) depth++
+					if (r && isCollection) ++depth
 					return r
 				}
 			],
@@ -119,7 +119,7 @@ function streamValidationMap() {
 				"E",
 				function () {
 					if (depth <= 0) return false
-					depth--
+					--depth
 					return true
 				}
 			]
@@ -206,7 +206,6 @@ console.log(skipTest.isEnd())
 
 console.log()
 
-// ! TEST THE 'delimited' (properly...);
 const delimString = "SKAR,Rag;LUFF;MURR\nTORK\n;DORK;SIEG"
 const delimTest = InputStream(delimString)
 console.log(

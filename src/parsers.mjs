@@ -1,31 +1,26 @@
 import { map, array } from "@hgargg-0710/one"
+import { Token } from "./types.mjs"
 const { kv: mkv } = map
 const { insert } = array
 
 export const isNumber = (x) => typeof x === "number" || x instanceof Number
-export const predicateChoice = (x) => (isNumber(x) ? (input, i) => i < x : x)
+export const predicateChoice = (x) => (isNumber(x) ? (input, i, j = 0) => i + j < x : x)
 
 export const setPredicate = (set) => (x) => set.has(x)
-
-export const type = (x) => x.type
-export const value = (x) => x.value
-export const isToken = (x) =>
-	typeof x === "object" && ["type", "value"].every((y) => y in x)
 
 export function delimited(limits, isdelim) {
 	if (!(limits instanceof Array)) limits = [limits]
 	const pred = predicateChoice(limits[1]) || predicateChoice(limits[0])
 	const prePred = 1 in limits && predicateChoice(limits[0])
-
 	return function (input, handler) {
 		const _skip = skip(input)
 		if (prePred) _skip(prePred)
 		const result = []
-		const endpred = (input, i) => !input.isEnd() && pred(input, i)
+		const endpred = (input, i, j) => !input.isEnd() && pred(input, i, j)
 		for (let i = 0, j = 0; endpred(input, i, j); ++i) {
-			j += _skip((input, _j) => isdelim(input, i + j + _j))
-			if (!endpred(input, i)) break
-			result.push(...handler(input, i + j))
+			j += _skip((input, _j) => isdelim(input, i, j + _j))
+			if (!endpred(input, i, j)) break
+			result.push(...handler(input, i, j))
 			input.next()
 		}
 		return result
@@ -41,7 +36,7 @@ export function skip(input) {
 		const pred = predicateChoice(steps)
 		while (!input.isEnd() && pred(input, i)) {
 			input.next()
-			i++
+			++i
 		}
 		return i
 	}
@@ -60,7 +55,7 @@ export function PatternTokenizer(tokenMap) {
 					(acc, curr, i) => insert(acc, 2 * i + 1, type(curr)),
 					pattern.split(typeKey)
 				)
-				.filter((x) => isToken(x) || x.length)
+				.filter((x) => Token.is(x) || x.length)
 
 		function keyTokenize(pattern) {
 			const flatten = (collection) =>
@@ -104,8 +99,14 @@ export function StreamTokenizer(tokenMap) {
 		}
 	}
 }
+
+export function TableParser(parserMap, next) {
+	const parser = (input) => parserMap.index(input.curr())(input, next || parser)
+	return parser
+}
+
 export function StreamParser(parserMap) {
-	const parser = (input) => parserMap.index(input.curr())(input, parser)
+	const parser = TableParser(parserMap)
 	return function (input) {
 		const final = []
 		while (!input.isEnd()) {

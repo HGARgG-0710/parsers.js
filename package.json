@@ -1,9 +1,9 @@
 {
 	"name": "@hgargg-0710/parsers.js",
 	"version": "0.1.0",
-	"description": "A simple JavaScript library for simplification the process of organization/creation of parsers of arbitrary complexity.",
+	"description": "A simple JavaScript library for simplification the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
 	"type": "module",
-	"main": "src/out/main.js",
+	"main": "main.mjs",
 	"license": "MIT",
 	"author": "hgargg-0710",
 	"keywords": [

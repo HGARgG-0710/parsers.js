@@ -37,9 +37,9 @@ function MapClass(change: (callee: any, target: any): boolean): {
 ```
 
 A general function (and an interface), returning a function for creation of immutable map-like data-structures
-on the base of maps, purposed for representing an arbitrary connection.
+on the base of maps, purposed for representing an arbitrary connection via `change`.
 
-The 'index(x)' is defined as a run-through all of the `keys()`, and checking for
+The 'index(x)' is defined as a run-through all of the `key`s in `keys()`, and checking for
 truthfulness of `change(key, x)`.
 The value corresponding to the first such key is returned.
 In case of failure to find a match, `undefined` is returned.
@@ -49,6 +49,8 @@ and uses the `IndexMap` interface (output of `MapClass` functions) throughout.
 
 The '.extend' method also allows one to create a new `MapClass` based on the current one, by means of composing it with another function.
 
+The function is very powerful and allows to, for example, easily and fluently express various sets of "responses" to different elements of a given grammar (and, by derivation, creation of descriptions of parsers, validators and source-generators).
+
 ```ts
 function PredicateMap(map: Map): {
 	keys: (): ((x): any)[]
@@ -57,6 +59,7 @@ function PredicateMap(map: Map): {
 }
 ```
 
+Instance of `MapClass`.
 Contains predicates (anything that is callable).
 Equivalent of `MapClass((curr, x): curr(x))`.
 
@@ -68,6 +71,7 @@ function RegExpMap(map: Map): {
 }
 ```
 
+Instance of `MapClass`.
 Contains Regular Expressions (or anything with '.test(x)' method defined on it).
 Equivalent of `MapClass((curr, x): curr.test(x))`.
 
@@ -79,6 +83,7 @@ function SetMap(map: Map): {
 }
 ```
 
+Instance of `MapClass`.
 Contains Sets (or anything with '.has(x)' method defined on it).
 Equivalent of `MapClass((curr, x): curr.has(x))`.
 
@@ -90,6 +95,7 @@ function BasicMap(map: Map): {
 }
 ```
 
+Instance of `MapClass`.
 Contains arbitrary objects.
 Equivalent of `MapClass((curr, x): curr === x)`.
 
@@ -97,7 +103,8 @@ Equivalent of `MapClass((curr, x): curr === x)`.
 function TokenMap(mapClass: MapClass): MapClass
 ```
 
-Equivalent to `mapClass.extend(type)` (that is, it adds the `type` function to the input of the initial `MapClass`'s `change` function)
+Accepts an instance of `MapClass`.
+Equivalent to `mapClass.extend(Token.type)` (that is, it adds the `type` function to the input of the initial `MapClass`'s `change` function)
 
 Intended for adapting already existing `MapClass`es to work with Tokens.
 
@@ -109,8 +116,9 @@ const StringPattern: {
 		matchAll: (x: RegExp): PatternCollection
 		length: number
 	}
-	empty: ""
-	is: (x: any): boolean
+	empty: StringPattern("")
+	is: (x: any): boolean,
+	collection: StringPatternCollection
 }
 ```
 
@@ -123,19 +131,24 @@ NOTE [1]: the `.split`, `.matchAll` can have an arbitrary argument type in the '
 NOTE [2]: here, the case of `PatternCollection` interface is a `StringPatternCollection` object.
 
 ```ts
-function StringPatternCollection(array: any[]): {
-	value: any[],
-	join: (x: string): Pattern
-	filter: (predicate: (x: any): boolean): PatternCollection
-	reduce: (accumulator: (acc: any, curr: any, i: number): any, init: any): any
-	every: (predicate: (x: any): boolean): boolean
-	slice: (start: number, end: number): PatternCollection
-	concat: (collection: PatterCollection): PatternCollection
-	[Symbol.iterator]: GeneratorFunction
+const StringPatternCollection: {
+	(array: any[]): {
+		value: any[],
+		join: (x: Pattern): Pattern
+		filter: (predicate: (x: any): boolean): PatternCollection
+		reduce: (accumulator: (acc: any, curr: any, i: number): any, init: any): any
+		every: (predicate: (x: any): boolean): boolean
+		slice: (start: number, end: number): PatternCollection
+		concat: (collection: PatterCollection): PatternCollection
+		[Symbol.iterator]: GeneratorFunction
+	},
+	is: (x: any): boolean
 }
 ```
 
 Implements the `PatternCollection`, which contains some of the methods of the builtin 'Array' interface.
+
+NOTE: here `Pattern` is always a `StringPattern`.
 
 ```ts
 function InputStream(input: any[] | string): {
@@ -181,6 +194,8 @@ The `isEnd` returns whether the `Stream` has "finished"
 The `rewind` method (when present) resets the `Stream`'s state
 entirely and returns the 0'th element (the new current).
 
+NOTE: the `any[] | string` is actually any type that is indexable using `number`s (so, for instance, an arbitrary object with right keys could work as well)
+
 ```ts
 function ArrayTree(arrTree: any[]): {
 	children: (): Tree[]
@@ -210,13 +225,15 @@ function TreeStream(tree: Tree): {
 Another implementation of the 'Stream' interface (this time for trees),
 which (effectively) linearizes a `Tree` tree-like interface.
 
+The order of following is with preference to recursion rather than "leveling" - that being, upon discovering that the `.curr()` is in possesion of any `.children()`, the first child becomes the new value of `.curr()` after calling `.next()`. When there are no children of the current value, the `TreeStream` turns to the siblings, and returns the next one, if it exists. Repeating this with the other siblings - when all the siblings and/or their children were exhausted (that being, the subtree defined by the initial child's parent has been fully iterated), the function goes up the level from the initial child, repeating the algorithm in regards to it. When it finally reaches the "rightmost" possible child of the root element (`tree`), it halts, thus rendering the iteration complete.
+
 ```ts
 const StringSource: {
 	(string: string): {
 		value: string
 		concat: (x: StringSource): StringSource,
 	}
-	empty: ""
+	empty: StringSource("")
 }
 ```
 
@@ -225,16 +242,34 @@ Is an output of the `SourceGenerator` function,
 intended for building text-generators.
 
 ```ts
-function Token(
-	type: any,
-	value: any
-): {
-	type: any
-	value: any
+const Token: {
+	(type: any, value: any): {
+		type: any
+		value: any
+	}
+	is: (x: any): boolean,
+	type(x: Token): any,
+	value(x: Token): any
 }
 ```
 
 The `Token` interface is simple, convinient for many practical applications and can be used by the library's parsing, tokenization and validation tools easily.
+
+The `type` and `value` static methods of the function can be used to get the `.type` and `.value` properties in a way that would make the usage of `Token`, or a related structure more slightly more obvious.
+
+The `.is` method checks that the given `any` is an `object` and has `type` and `value` properties.
+
+```ts
+function ArrayToken(x: Token): any[]
+```
+
+Converts the given `Token` with `value: any[]` into an array, while preserving its properties and having keys from `0` to `x.value.length - 1` same as that of `x.value`.
+
+```ts
+function RecursiveArrayToken(x: Token): any[]
+```
+
+Takes in a `Token` and recursively transforms all of its sub-`Token`s that are a descendant of `x.value` (whenever `x.value` is in possession of a `Symbol.iterator` and is an `object`, which is the requirement for the `ArrayToken` to work successfully).
 
 <br>
 
@@ -601,7 +636,7 @@ function nogreedy(regex: RegExp): RegExp
 ```
 
 Appends bare `?` to the given regular expression (NO NON-CAPTURE-GROUP).
-This is (primarily) for cases like:
+This is to be used (primarily) for cases like:
 
 `/(...)*?/`
 
@@ -616,14 +651,14 @@ function delimited
 (
 	limits:
 		[
-			number | (x: any): boolean,
-			(number | (x: any): boolean)?
+			number | (input: Stream, i: number, j: number): boolean,
+			(number | (input: Stream, i: number, j: number): boolean)?
 		]
 			| number
-			| (x: any): boolean,
-	isdelim: (input: Stream, i: number): boolean,
+			| (input: Stream, i: number, j: number): boolean,
+	isdelim: (input: Stream, i: number, j: number): boolean,
 ):
-	(input: Stream, handler: (x: any, i: any): any): any[]
+	(input: Stream, handler: (x: any, i: number, j: number): any): any[]
 ```
 
 Returns a function for parsing a "delimited" portion of a given
@@ -631,20 +666,20 @@ Stream (with appropriate predicates, the function is fit for parsing any part of
 
 Arguments [first layer]:
 
-1. `limits` - limits within which the function shall "seek" elements. If a `[number, number]` array, then the function will first skip `limits[0]`, then iterate through the next `limit[1]` elements of the `input`. If `limits[1]` is absent, `limits[0]` will be used for iterating and no items shall be skipped. If any of the two elements are not numbers but a predicate (`(x: any): boolean`), then the predicate shall be used instead. If `limits` is not an `Array`, then it shall be treated as if a single-element arary `[limits]` was passed instead.
-2. `isdelim` - a predicate taking in the `input` and a current index, checks element for being a "delimiter". Whenever true, the element in question is skipped, otherwise the `input.curr()` is passed to the `handler`, and the result added to the resulting array.
+1. `limits` - limits within which the function shall "seek" elements. If a `[number, number]` array, then the function will first skip `limits[0]`, then iterate through the next `limit[1]` elements of the `input`. If `limits[1]` is absent, `limits[0]` will be used for iterating and no items shall be skipped. If any of the two elements are not numbers but a predicate (`(input: Stream, i: number, j: number): boolean`), then the predicate shall be used instead. If `limits` is not an `Array`, then it shall be treated as if a single-element arary `[limits]` was passed instead.
+2. `isdelim` - a predicate taking in the `input`, a current element-index `i` (the number of non-delim elements in the resulting array so far) and a delim-index `j`, checks element for being a "delimiter". Whenever true, the element in question is skipped, otherwise the `input.curr()` is passed to the `handler`, and the result added to the resulting array.
 
 Arguments [second layer]:
 
 1. `input` - the `Stream` to be iterated through
-2. `handler` - function, accepting the `input` and the curent index. Its result gets added to the returned array.
+2. `handler` - function, accepting the `input` and the curent element-index `i` and delimiter-index `j` (sum being `i + j` - the current number of passed elements). Its result gets added to the returned array.
 
 NOTE: the `delimited` will only continue parsing until the moment that `input.isEnd()` is true, or the rest of conditions for stopping are met.
 
 ```ts
 function eliminate(
 	symbols: PatternCollection
-): (pattern: Pattern, nil: ?Pattern): Pattern
+): (pattern: Pattern, nil: Pattern?): Pattern
 ```
 
 Eliminates all the items from `symbols` (that are arguments of the given `Pattern.split` implementation),
@@ -661,12 +696,21 @@ Otherwise, continues to call `input.next()` until either `pred` is false,
 or the `input.isEnd()` has come to become true.
 
 ```ts
+function TableParser(parserMap: IndexMap, next: ((input: Stream): any)?): (input: Stream): any
+```
+
+Creates and returns a new parser based of an `IndexMap`. It takes in a `Stream` and returns the result of a corresponding function `(input: Stream, parser: (input: Stream): any): any[]`, to which (as a second argument) `next` is passed.
+In absence of `next`, the returned parser itself is used as an argument.
+
+```ts
 function StreamParser(parserMap: IndexMap): (input: Stream): any[]
 ```
 
-A function returning parser built based off `parserMap` `IndexMap`, containing as values functions `(input: Stream, parser: (input: Stream): any[]): any[]`, and `index` being run in terms of the current `input` element.
+A function returning parser built based off `parserMap` `IndexMap`, containing as values functions `(input: Stream, parser: (input: Stream): any): any[]`, and `index` being run in terms of the current `input` element. The `parser` (by default) is a function-indexator based on the `parserMap.index` of passed `input.curr()`.
 
-The `input` and result of `SteamParser` are passed to the called map-function as arguments. The results of those function calls are appended to the resulting array.
+The `input` and `parser` are passed to the called map-function as arguments. The results of those function calls are appended to the resulting array.
+
+User may use different `parser` values, thus allowing for `merging` and decomposing several sisterly syntaxes. The default `parser` is a result of `TableParser` defined through `parserMap` without a `next` given (so it references itself by default instead).
 
 <br>
 
@@ -701,11 +745,11 @@ function SourceGenerator(generateMap: IndexMap): (stream: Stream, prevSource: So
 
 Based on the `generateMap`, containing as values functions `(x: any): Source`, and the `.index` of which is applied to `stream.curr()`.
 
-The final `Source` is obtained via repeated `.concat`. The initial source is equal to `prevSource` (note: when there is none, one can use the `Source.empty`)
+The final `Source` is obtained via repeated `.concat`. The initial source is equal to `prevSource` (note: when there is none, one can use the `Source.empty` property of the constructor-function)
 
 ### Misc
 
-Various few little abstractions that may come in handy during parser-building process.
+Various few abstractions that may come in handy during parser-building process.
 
 ```ts
 function isNumber(x: any): boolean
@@ -714,10 +758,10 @@ function isNumber(x: any): boolean
 Returns whether `typeof x === 'number' || x instanceof Number`.
 
 ```ts
-function predicateChoice(x: any): any
+function predicateChoice(x: number | (...x: any[]): boolean): (input: Stream, i: number, j: number): boolean | (...x: any[]): boolean
 ```
 
-Returns `x` if `!isNumber(x)`, otherwise `(input, i) => i < x`.
+Returns `x` if `!isNumber(x)`, otherwise `(input, i) => i < x`. (Handy when "automatic" construction of predicates from numbers is needed).
 
 ```ts
 function setPredicate(set: Set): (x: any): boolean
@@ -725,24 +769,6 @@ function setPredicate(set: Set): (x: any): boolean
 
 Converts a set into a predicate via returning `(x) => set.has(x)`.
 
-```ts
-function type(x: Token): any
-```
-
-Gets the `type` of a `Token`.
-
-```ts
-function value(x: Token): any
-```
-
-Gets the value of a `Token`.
-
-```ts
-function isToken(x: any): boolean
-```
-
-Checks if given thing is a Token.
-
 ## Examples
 
-For examples, see the 'tests' directory.
+For usage examples, see the 'tests' directory.
