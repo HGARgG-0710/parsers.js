@@ -58,3 +58,12 @@
 	causes '.next' to become '.prev' and vice versa. 
 
 	Create an alias for this ('InvertTree := TreeReverseLR+TreeReverseTB').
+
+8. add 'defaults' for maps to 'parsers.js' (NOTE: one is SUPPOSED to be able to do it NOT ONLY with the 'RegExpMap'-s...);
+9. add a 'readWhile'/'readStream'/'read' function: 
+
+	Effectively, an alias for 'delmited' - a simplification, with 'isdelim = () => false';
+	It just reads everything until the end is reached
+
+	NOTE: perhaps, for optimization purposes, define it differently? [To avoid unneccessary recursion...]; 
+	ALSO - it would not have the 'limits' as an array - a simpler signature - just
