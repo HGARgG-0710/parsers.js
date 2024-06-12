@@ -1,5 +1,4 @@
 import { map, array } from "@hgargg-0710/one"
-import { Token } from "./types.mjs"
 const { kv: mkv } = map
 const { insert } = array
 
@@ -22,9 +21,12 @@ export function delimited(limits, isdelim) {
 		const _skip = skip(input)
 		if (prePred) _skip(prePred)
 		const result = []
-		for (let i = 0, j = 0; pred(input, i) && !input.isEnd(); ++i) {
+		const endpred = (input, i) => !input.isEnd() && pred(input, i)
+		for (let i = 0, j = 0; endpred(input, i, j); ++i) {
 			j += _skip((input, _j) => isdelim(input, i + j + _j))
-			if (!input.isEnd()) result.push(handler(input, i + j))
+			if (!endpred(input, i)) break
+			result.push(...handler(input, i + j))
+			input.next()
 		}
 		return result
 	}
@@ -37,7 +39,7 @@ export function skip(input) {
 	return function (steps = 1) {
 		let i = 0
 		const pred = predicateChoice(steps)
-		while (pred(input, i) && !input.isEnd()) {
+		while (!input.isEnd() && pred(input, i)) {
 			input.next()
 			i++
 		}
@@ -46,31 +48,38 @@ export function skip(input) {
 }
 
 export function PatternTokenizer(tokenMap) {
-	const tokenType = (_token) => (value) => Token(_token[1], value)
+	const [typeKeys, typeFunction] = mkv(tokenMap)
 	return function (pattern) {
 		const isPattern = pattern.class.is
-		function tokenizeSingle(pattern, token) {
-			const type = tokenType(token)
-			const typeKey = token[0]
-			return pattern
+		const collectionClass = pattern.class.collection
+		const isCollection = collectionClass.is
+		const tokenizeSingle = (pattern, typeKey, type) =>
+			pattern
 				.matchAll(typeKey)
 				.reduce(
 					(acc, curr, i) => insert(acc, 2 * i + 1, type(curr)),
 					pattern.split(typeKey)
 				)
 				.filter((x) => isToken(x) || x.length)
-		}
-		function tokenizeRecursive(pattern) {
-			return mkv(tokenMap).reduce(
-				(acc, currToken) =>
-					acc
-						.map((x) => (isPattern(x) ? tokenizeSingle(x, currToken) : x))
-						.flat(),
-				[pattern]
-			)
+
+		function keyTokenize(pattern) {
+			const flatten = (collection) =>
+				collection.reduce(
+					(last, curr) =>
+						last.concat(isCollection(curr) ? flatten(curr) : [curr]),
+					collectionClass()
+				)
+			const tokenizeRecursive = (current, currKey, i) =>
+				isPattern(current)
+					? tokenizeSingle(current, currKey, typeFunction[i])
+					: isCollection(current)
+					? current.map((x) => tokenizeRecursive(x, currKey, i))
+					: current
+
+			return flatten(typeKeys.reduce(tokenizeRecursive, pattern))
 		}
 
-		return tokenizeRecursive(pattern)
+		return keyTokenize(pattern)
 	}
 }
 export function StreamTokenizer(tokenMap) {
@@ -80,8 +89,9 @@ export function StreamTokenizer(tokenMap) {
 			next: function () {
 				const prev = current
 				current = ((x) => (x ? x.call(this, input) : x))(
-					tokenMap.index(input.next())
+					tokenMap.index(input.curr())
 				)
+				input.next()
 				return prev
 			},
 			curr: function () {
@@ -89,19 +99,19 @@ export function StreamTokenizer(tokenMap) {
 				return current
 			},
 			isEnd: function () {
-				return !!this.curr()
+				return !this.curr()
 			}
 		}
 	}
 }
 export function StreamParser(parserMap) {
-	const parser = function (input) {
+	const parser = (input) => parserMap.index(input.curr())(input, parser)
+	return function (input) {
 		const final = []
 		while (!input.isEnd()) {
-			final.push(...parserMap.index(input.curr())(input, parser))
+			final.push(...parser(input))
 			input.next()
 		}
 		return final
 	}
-	return parser
 }

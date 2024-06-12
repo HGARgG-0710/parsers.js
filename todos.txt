@@ -15,3 +15,31 @@
 	Use a structure somewhat similar to 'PEG's [parsing expression grammars]?
 
 	[Except, generalized...];
+
+6. IDEA: create a 'Locator' structure (StreamLocator): 
+
+	Effectively, finds the first bit of given 'Stream' 
+	that isn't correct. 
+
+	NOTE: MUST have a 'pos'.
+	
+	It takes: 
+
+		Level one: 
+			1. validationMap - same as in the StreamValidator, an IndexMap; 
+			2. errorMap - an IndexMap of [INDEX, ERROR], where ERROR is a string-like function of 'input'
+				NOTE: the 'checks' in 'validationMap' now have to return one of: 
+					1. true - for success; 
+					2. [errorCode]: 'errorCode' is mapped against 'errorMap', to obtain the desired function, then 'input.error = ...(input)', where ... is the result of mapping. 
+						After the mapping of error, the function exits. 
+		Level two: 
+			1. PositionalStream - the 'Stream' with an automatically changing '.pos' property.
+
+	NOTE: the whole 'thing'/purpose of API is much more in the 'PositionalStream', because it must have properties:
+
+		1. pos - last position
+		2. error - error message
+
+	Create the corresponding 'yell' function for "yelling" errors using these two properties based off a given stream. 
+		NOTE: the 'yelling' would be conditional - only if 'error' is not 'null', which is the default value. 
+	

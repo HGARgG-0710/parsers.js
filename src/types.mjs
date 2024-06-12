@@ -1,5 +1,6 @@
-import { array } from "@hgargg-0710/one"
-import { type } from "./parsers.mjs"
+import { array, object } from "@hgargg-0710/one"
+import { value, type } from "./parsers.mjs"
+const { kv: okv } = object
 const { last, lastOut, clear } = array
 
 export const MapClass = (change) => {
@@ -33,12 +34,15 @@ export const [PredicateMap, RegExpMap, SetMap, BasicMap] = [
 
 export const TokenMap = (mapClass) => mapClass.extend(type)
 
-export function StringPattern(string) {
+export function StringPattern(string = "") {
 	return {
 		value: string,
-		split: (regexp) => StringPatternCollection(string.split(regexp)),
+		split: (regexp) =>
+			StringPatternCollection(string.split(regexp).map(StringPattern)),
 		matchAll: (regexp) =>
-			StringPatternCollection([...string.matchAll(regexp)].map((x) => x[0])),
+			StringPatternCollection(
+				[...string.matchAll(regexp)].map((x) => x[0]).map(StringPattern)
+			),
 		get length() {
 			return string.length
 		},
@@ -47,14 +51,17 @@ export function StringPattern(string) {
 }
 
 StringPattern.is = (checked) =>
+	checked &&
 	typeof checked === "object" &&
 	["split", "matchAll", "length", "class"].every((x) => x in checked)
-StringPattern.empty = ""
+StringPattern.empty = StringPattern()
+StringPattern.collection = StringPatternCollection
 
-export function StringPatternCollection(arr) {
+export function StringPatternCollection(arr = []) {
 	return {
-		join: function (x = "") {
-			return StringPattern(arr.join(x))
+		value: arr,
+		join: function (x = StringPattern()) {
+			return StringPattern(arr.map(value).join(x.value))
 		},
 		filter: function (predicate = (x) => x) {
 			return StringPatternCollection(arr.filter(predicate))
@@ -71,10 +78,49 @@ export function StringPatternCollection(arr) {
 		concat: function (collection = []) {
 			return StringPatternCollection([...arr, ...collection])
 		},
+		map: function (f) {
+			return StringPatternCollection(arr.map(f))
+		},
 		[Symbol.iterator]: function* () {
 			for (let i = 0; i < arr.length; ++i) yield arr[i]
 		}
 	}
+}
+
+StringPatternCollection.is = (x) =>
+	x &&
+	typeof x === "object" &&
+	["join", "filter", "reduce", "every", "slice", "concat", Symbol.iterator].every(
+		(p) => p in x
+	)
+
+// TODO: ADD THIS TO 'one.js'! [in a different package's version - import from there...];
+const mapPropsPreserve = (array, fmap = (x) => x) => {
+	const retval = array.map(fmap)
+	const [keys, values] = okv(array)
+	keys.forEach((x, i) => {
+		if (isNaN(x)) retval[x] = values[i]
+	})
+	return retval
+}
+
+export const ArrayToken = (token) => {
+	const retval = [...token.value]
+	const [keys, values] = okv(token)
+	keys.forEach((x, i) => {
+		if (isNaN(x)) retval[x] = values[i]
+	})
+	return retval
+}
+
+export function RecursiveArrayToken(recursiveToken) {
+	const isCollection =
+		"value" in recursiveToken &&
+		recursiveToken.value &&
+		typeof recursiveToken.value === "object" &&
+		Symbol.iterator in recursiveToken.value
+	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)
+	return isCollection ? ArrayToken(recursiveToken) : recursiveToken
 }
 
 export function InputStream(input) {
@@ -108,7 +154,9 @@ export function ArrayTree(arrtree) {
 		}
 		return level
 	}
-	return arrtree instanceof Array ? ArrTreeLevel(arrtree.map(ArrayTree)) : arrtree
+	return arrtree instanceof Array
+		? ArrTreeLevel(mapPropsPreserve(arrtree, ArrayTree))
+		: arrtree
 }
 
 // TODO [for the future]: add a 'prev' [can be done easily without changing existing stuff too much...];
@@ -166,6 +214,6 @@ export function StringSource(string = "") {
 		}
 	}
 }
-StringSource.empty = ""
+StringSource.empty = StringSource()
 
 export const Token = (type, value) => ({ type, value })

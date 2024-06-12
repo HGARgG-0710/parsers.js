@@ -124,6 +124,7 @@ NOTE [2]: here, the case of `PatternCollection` interface is a `StringPatternCol
 
 ```ts
 function StringPatternCollection(array: any[]): {
+	value: any[],
 	join: (x: string): Pattern
 	filter: (predicate: (x: any): boolean): PatternCollection
 	reduce: (accumulator: (acc: any, curr: any, i: number): any, init: any): any
