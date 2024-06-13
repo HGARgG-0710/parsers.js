@@ -27,7 +27,8 @@ Types necessary for representation of the library entities.
 
 ```ts
 function MapClass(change: (callee: any, target: any): boolean): {
-	(map: Map): {
+	(map: Map, _default: any): {
+		default: (): any,
 		keys: (): any[],
 		values: (): any[],
 		index: (x: any): any
@@ -42,7 +43,7 @@ on the base of maps, purposed for representing an arbitrary connection via `chan
 The 'index(x)' is defined as a run-through all of the `key`s in `keys()`, and checking for
 truthfulness of `change(key, x)`.
 The value corresponding to the first such key is returned.
-In case of failure to find a match, `undefined` is returned.
+In case of failure to find a match, `default` is returned (by default, it's `undefined`).
 
 The library has some particular instances of this function's calls,
 and uses the `IndexMap` interface (output of `MapClass` functions) throughout.
@@ -701,6 +702,20 @@ function TableParser(parserMap: IndexMap, next: ((input: Stream): any)?): (input
 
 Creates and returns a new parser based of an `IndexMap`. It takes in a `Stream` and returns the result of a corresponding function `(input: Stream, parser: (input: Stream): any): any[]`, to which (as a second argument) `next` is passed.
 In absence of `next`, the returned parser itself is used as an argument.
+
+```ts
+function read(pred: number | (input: Stream, i: number): boolean, init: Source): (input: Stream): Source
+```
+
+Creates and returns a new function that iterates through its only argument `Stream` `input`,
+and returns a `Source` (which is the result of concatenation of `init` to all the `.curr()` elements
+of `input`, such that `pred(input, i)` for all `0<=i` starting from the initial `input.curr()`).
+
+Very useful generally for reading a portion of a `Stream` and getting it as a 'Source'.
+
+NOTE [important]: the actual type of the result is not necessarily a `Source`, 
+in that it does not have to possess the `.value` property, only the `.concat()` method. 
+Same goes for `init`. Fit for usage with builtin `String`s for instance...
 
 ```ts
 function StreamParser(parserMap: IndexMap): (input: Stream): any[]

@@ -24,7 +24,8 @@ import {
 	StreamParser,
 	delimited,
 	eliminate,
-	skip
+	skip,
+	read
 } from "../src/parsers.mjs"
 import { PatternValidator, StreamValidator } from "../src/validate.mjs"
 
@@ -227,3 +228,11 @@ console.log(
 	})
 )
 console.log(delimTest.curr())
+
+const readString = InputStream("KaaaaarTAAAAAAa")
+const testRead = read((input) => input.curr().charCodeAt(0) <= 97, "READ: ")
+console.log(testRead(readString))
+console.log(readString.next())
+console.log(readString.isEnd())
+console.log(testRead(readString))
+console.log(readString.isEnd())

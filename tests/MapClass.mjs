@@ -35,7 +35,8 @@ const bMap = BasicMap(
 		[88, "X!"],
 		["BOB!", "E!"],
 		[true, "K-E-X! Kex!"]
-	])
+	]),
+	"I'm not even supposed to exist, you know!"
 )
 
 const btMap = TokenMap(BasicMap)(
@@ -94,3 +95,9 @@ console.log()
 	["FARG", 9],
 	["FARGOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 9]
 ].forEach((pair) => console.log(treMap.index(Token(...pair))))
+
+console.log()
+
+// * 'default' test:
+console.log(bMap.default())
+console.log(treMap.default())

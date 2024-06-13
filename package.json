@@ -1,6 +1,6 @@
 {
 	"name": "@hgargg-0710/parsers.js",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A simple JavaScript library for simplification the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
 	"type": "module",
 	"main": "main.mjs",
@@ -14,7 +14,7 @@
 		"maps"
 	],
 	"dependencies": {
-		"@hgargg-0710/one": "0.1.0"
+		"@hgargg-0710/one": "0.1.1"
 	},
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"

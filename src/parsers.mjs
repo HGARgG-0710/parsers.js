@@ -11,10 +11,10 @@ export const setPredicate = (set) => (x) => set.has(x)
 export function delimited(limits, isdelim) {
 	if (!(limits instanceof Array)) limits = [limits]
 	const pred = predicateChoice(limits[1]) || predicateChoice(limits[0])
-	const prePred = 1 in limits && predicateChoice(limits[0])
+	const prePred = +(1 in limits) && limits[0]
 	return function (input, handler) {
 		const _skip = skip(input)
-		if (prePred) _skip(prePred)
+		_skip(prePred)
 		const result = []
 		const endpred = (input, i, j) => !input.isEnd() && pred(input, i, j)
 		for (let i = 0, j = 0; endpred(input, i, j); ++i) {
@@ -39,6 +39,18 @@ export function skip(input) {
 			++i
 		}
 		return i
+	}
+}
+
+export function read(pred, init) {
+	pred = predicateChoice(pred)
+	return function (input) {
+		let res = init
+		for (let i = 0; !input.isEnd() && pred(input, i); ++i) {
+			res = res.concat(input.curr())
+			input.next()
+		}
+		return res
 	}
 }
 

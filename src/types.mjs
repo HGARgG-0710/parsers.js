@@ -1,26 +1,27 @@
-import { array, object } from "@hgargg-0710/one"
-const { kv: okv } = object
-const { last, lastOut, clear } = array
+import { array, object, map } from "@hgargg-0710/one"
+
+const { kv: mkv } = map
+const { structCheck } = object
+const { first, last, lastOut, clear, iterator, propPreserve } = array
 
 export const Token = (type, value) => ({ type, value })
-Token.is = (x) => typeof x === "object" && ["type", "value"].every((y) => y in x)
+Token.is = structCheck(["type", "value"])
 Token.type = (x) => x.type
 Token.value = (x) => x.value
 
 export const MapClass = (change) => {
-	const mapClass = function (map) {
-		const [mapKeys, mapValues] = ["keys", "values"].map((x) =>
-			Array.from(map[x].bind(map)())
-		)
+	const mapClass = function (map, _default) {
+		const [mapKeys, mapValues] = mkv(map)
 		return {
+			default: () => _default,
 			keys: () => mapKeys,
 			values: () => mapValues,
 			index: (x) =>
 				((x) => (typeof x === "number" ? mapValues[x] : x))(
 					mapKeys.reduce(
 						(key, curr, i) =>
-							key !== undefined ? key : change(curr, x) ? i : key,
-						undefined
+							key !== _default ? key : change(curr, x) ? i : key,
+						_default
 					)
 				)
 		}
@@ -45,7 +46,7 @@ export function StringPattern(string = "") {
 			StringPatternCollection(string.split(regexp).map(StringPattern)),
 		matchAll: (regexp) =>
 			StringPatternCollection(
-				[...string.matchAll(regexp)].map((x) => x[0]).map(StringPattern)
+				[...string.matchAll(regexp)].map(first).map(StringPattern)
 			),
 		get length() {
 			return string.length
@@ -54,10 +55,7 @@ export function StringPattern(string = "") {
 	}
 }
 
-StringPattern.is = (checked) =>
-	checked &&
-	typeof checked === "object" &&
-	["split", "matchAll", "length", "class"].every((x) => x in checked)
+StringPattern.is = structCheck(["split", "matchAll", "length", "class"])
 StringPattern.empty = StringPattern()
 StringPattern.collection = StringPatternCollection
 
@@ -85,44 +83,26 @@ export function StringPatternCollection(arr = []) {
 		map: function (f) {
 			return StringPatternCollection(arr.map(f))
 		},
-		[Symbol.iterator]: function* () {
-			for (let i = 0; i < arr.length; ++i) yield arr[i]
-		}
+		[Symbol.iterator]: iterator(arr)
 	}
 }
 
-StringPatternCollection.is = (x) =>
-	x &&
-	typeof x === "object" &&
-	["join", "filter", "reduce", "every", "slice", "concat", Symbol.iterator].every(
-		(p) => p in x
-	)
+StringPatternCollection.is = structCheck([
+	"join",
+	"filter",
+	"reduce",
+	"every",
+	"slice",
+	"concat",
+	Symbol.iterator
+])
 
-// TODO: ADD THIS TO 'one.js'! [in a different package's version - import from there...];
-const mapPropsPreserve = (array, fmap = (x) => x) => {
-	const retval = array.map(fmap)
-	const [keys, values] = okv(array)
-	keys.forEach((x, i) => {
-		if (isNaN(x)) retval[x] = values[i]
-	})
-	return retval
-}
+const mapPropsPreserve = (f) => propPreserve((array) => array.map(f))
+export const ArrayToken = propPreserve((token) => [...Token.value(token)])
 
-export const ArrayToken = (token) => {
-	const retval = [...Token.value(token)]
-	const [keys, values] = okv(token)
-	keys.forEach((x, i) => {
-		if (isNaN(x)) retval[x] = values[i]
-	})
-	return retval
-}
-
+const iteratorCheck = structCheck([Symbol.iterator])
 export function RecursiveArrayToken(recursiveToken) {
-	const isCollection =
-		"value" in recursiveToken &&
-		recursiveToken.value &&
-		typeof recursiveToken.value === "object" &&
-		Symbol.iterator in recursiveToken.value
+	const isCollection = "value" in recursiveToken && iteratorCheck(recursiveToken.value)
 	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)
 	return isCollection ? ArrayToken(recursiveToken) : recursiveToken
 }
@@ -148,6 +128,8 @@ export function InputStream(input) {
 	}
 }
 
+// ? Move these things out of scope? [create a separate function-scope for them?]
+const arrayTreePreserve = mapPropsPreserve(ArrayTree)
 export function ArrayTree(arrtree) {
 	function ArrTreeLevel(level) {
 		level.children = function () {
@@ -158,9 +140,7 @@ export function ArrayTree(arrtree) {
 		}
 		return level
 	}
-	return arrtree instanceof Array
-		? ArrTreeLevel(mapPropsPreserve(arrtree, ArrayTree))
-		: arrtree
+	return arrtree instanceof Array ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree
 }
 
 // TODO [for the future]: add a 'prev' [can be done easily without changing existing stuff too much...];
