@@ -1,5 +1,6 @@
-import { array, object, map } from "@hgargg-0710/one"
+import { array, object, map, function as f } from "@hgargg-0710/one"
 
+const { and } = f
 const { kv: mkv } = map
 const { structCheck } = object
 const { first, last, lastOut, clear, iterator, propPreserve } = array
@@ -8,6 +9,20 @@ export const Token = (type, value) => ({ type, value })
 Token.is = structCheck(["type", "value"])
 Token.type = (x) => x.type
 Token.value = (x) => x.value
+
+export const isType = (type) => and(structCheck([]), (x) => Token.type(x) === type)
+
+export const TokenInstance = (type) => {
+	const ti = () => ({ type })
+	ti.is = isType(type)
+	return ti
+}
+
+export const TokenType = (type) => {
+	const tt = (value) => Token(type, value)
+	tt.is = isType(type)
+	return tt
+}
 
 export const MapClass = (change) => {
 	const mapClass = function (map, _default) {
@@ -124,6 +139,11 @@ export function InputStream(input) {
 		},
 		rewind: function () {
 			return input[(this.pos = 0)]
+		},
+		copy: function () {
+			const inputStream = InputStream(input)
+			inputStream.pos = this.pos
+			return inputStream
 		}
 	}
 }
@@ -199,3 +219,12 @@ export function StringSource(string = "") {
 	}
 }
 StringSource.empty = StringSource()
+
+export function TokenSource(token) {
+	return {
+		value: token,
+		concat: function (plus) {
+			return TokenSource({ ...token, value: token.value.concat(plus.value) })
+		}
+	}
+}

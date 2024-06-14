@@ -54,7 +54,35 @@ export function read(pred, init) {
 	}
 }
 
-export function PatternTokenizer(tokenMap) {
+export function limit(init, pred) {
+	init = predicateChoice(init)
+	if (!pred) {
+		pred = init
+		init = 0
+	}
+	return function (input) {
+		const _skip = skip(input)
+		_skip(init)
+		const result = []
+		for (let i = 0; !input.isEnd() && pred(input, i); ++i) result.push(input.next())
+		return result
+	}
+}
+
+export const preserve = (input) => [input.curr()]
+
+export function transform(handler = preserve) {
+	return function (input) {
+		const result = []
+		for (let i = 0; !input.isEnd(); ++i) {
+			result.push(...handler(input, i))
+			input.next()
+		}
+		return result
+	}
+}
+
+export function PatternTokenizer(tokenMap, tokenCheck = Token.is) {
 	const [typeKeys, typeFunction] = mkv(tokenMap)
 	return function (pattern) {
 		const isPattern = pattern.class.is
@@ -67,7 +95,7 @@ export function PatternTokenizer(tokenMap) {
 					(acc, curr, i) => insert(acc, 2 * i + 1, type(curr)),
 					pattern.split(typeKey)
 				)
-				.filter((x) => Token.is(x) || x.length)
+				.filter((x) => tokenCheck(x) || x.length)
 
 		function keyTokenize(pattern) {
 			const flatten = (collection) =>
