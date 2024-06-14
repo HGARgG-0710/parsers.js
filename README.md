@@ -158,7 +158,8 @@ function InputStream(input: any[] | string): {
 	prev: (): any
 	next: (): any
 	isEnd: (): boolean
-	rewind: (): any
+	rewind: (): any,
+	copy: (): Stream
 }
 ```
 
@@ -174,6 +175,9 @@ the stream (can be called several times to get the same result).
 
 The `prev` method (when present) goes back one position and returns
 the current element.
+
+The (optional) `copy` method copies the current stream up to the state and
+interface.
 
 NOTE: to get the previous element one does not do `input.prev()`, but:
 
@@ -242,6 +246,22 @@ Immutable data structure, implements a `Source` interface.
 Is an output of the `SourceGenerator` function,
 intended for building text-generators.
 
+Also can be used with `read` function.
+
+```ts
+function TokenSource(token: Token): {
+	value: Token,
+	concat: (x: Token): TokenSource
+}
+```
+
+A wrapper-function for creating `TokenSource`s - a semi-implementation of the 'Source' interface.
+Intended primarily for the `read` function.
+
+Upon calling `TokenSource(...).concat`, takes a `token: Token`,
+the `.value` of which is being `.concat`-ed (the method must be present on it)
+to the `.value` of `x`.
+
 ```ts
 const Token: {
 	(type: any, value: any): {
@@ -259,6 +279,36 @@ The `Token` interface is simple, convinient for many practical applications and 
 The `type` and `value` static methods of the function can be used to get the `.type` and `.value` properties in a way that would make the usage of `Token`, or a related structure more slightly more obvious.
 
 The `.is` method checks that the given `any` is an `object` and has `type` and `value` properties.
+
+```ts
+function TokenType(type: any): {
+	(value: any): {
+		type: any,
+		value: any
+	},
+	is: (x: any): boolean
+}
+```
+
+Returns a "type" of tokens defined by the `type`
+value, that contains a function for construction of `Token`s,
+as well as an identifying `.is` function for checking the validity of the `.type`.
+
+```ts
+function TokenInstance(type: any): {
+	(): {
+		type: any
+	},
+	is: (x: any): boolean
+}
+```
+
+Creates and returns a function for construction of an 'instance-type' of `Token`s,
+that, however, does not contain a 'value' property. Useful for
+cases, when one needs to bunch a sequence of tokens that always have to
+follow one another, but represent a single entity.
+
+Has an appropriate `.is` function (checks for `.type` only).
 
 ```ts
 function ArrayToken(x: Token): any[]
@@ -292,12 +342,14 @@ The `StreamTokenizer` is intended for further passing to a higher-level
 function working with streams (such as, for instance, `StreamParser`).
 
 ```ts
-function PatternTokenizer(tokenMap: IndexMap): (pattern: Pattern): Token[]
+function PatternTokenizer(tokenMap: IndexMap, tokenCheck?: (x: any): boolean): (pattern: Pattern): Token[]
 ```
 
 Splits a `Pattern` into `Token`s array using the `tokenMap`, containing
 as values types' values, and as keys - the values used for `.split`ting
-and `.matchAll`-ing the given Pattern recursively.
+and `.matchAll`-ing the given `Pattern` recursively.
+
+The `tokenCheck` (by default) is `Token.is`.
 
 <br>
 
@@ -697,6 +749,29 @@ Otherwise, continues to call `input.next()` until either `pred` is false,
 or the `input.isEnd()` has come to become true.
 
 ```ts
+function preserve(input: Stream): [any]
+```
+
+A `handler` function that returns the `[input.curr()]` (current element of the `Stream`).
+Good for "preserving" the `Stream`.
+
+```ts
+function limit(init: number | (input: Stream, i: number): boolean, pred?: number | (input: Stream, i: number): boolean): (input: Stream): any[]
+```
+
+Takes the chunk of `input` defined by `init` (the `number` of items to skip, or the condition used for `skip`ping),
+and `pred` (defining the end of the sequence extracted).
+
+Mutates `input`. If `pred` is missing, it will be replaced with `init`, and no items will be skipped.
+
+```ts
+function transform(handler?: (input: Stream, i: number): any): (input: Stream): any[]
+```
+
+Iterates a given `Stream`, turning it into an array filled with values of 
+Default handler is `preserve` (same as copying `input` and transforming the copy to an array).
+
+```ts
 function TableParser(parserMap: IndexMap, next: ((input: Stream): any)?): (input: Stream): any
 ```
 
@@ -713,8 +788,8 @@ of `input`, such that `pred(input, i)` for all `0<=i` starting from the initial 
 
 Very useful generally for reading a portion of a `Stream` and getting it as a 'Source'.
 
-NOTE [important]: the actual type of the result is not necessarily a `Source`, 
-in that it does not have to possess the `.value` property, only the `.concat()` method. 
+NOTE [important]: the actual type of the result is not necessarily a `Source`,
+in that it does not have to possess the `.value` property, only the `.concat()` method.
 Same goes for `init`. Fit for usage with builtin `String`s for instance...
 
 ```ts
@@ -783,6 +858,12 @@ function setPredicate(set: Set): (x: any): boolean
 ```
 
 Converts a set into a predicate via returning `(x) => set.has(x)`.
+
+```ts
+function isType(type: any): (x: any): boolean
+```
+
+Returns a function `(x) => Token.type(x) === type`.
 
 ## Examples
 

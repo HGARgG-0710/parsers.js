@@ -10,7 +10,8 @@ Token.is = structCheck(["type", "value"])
 Token.type = (x) => x.type
 Token.value = (x) => x.value
 
-export const isType = (type) => and(structCheck([]), (x) => Token.type(x) === type)
+const emptyStruct = structCheck([])
+export const isType = (type) => and(emptyStruct, (x) => Token.type(x) === type)
 
 export const TokenInstance = (type) => {
 	const ti = () => ({ type })

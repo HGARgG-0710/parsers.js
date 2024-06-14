@@ -80,13 +80,3 @@
 	Create an alias for this ('InvertTree := TreeReverseLR+TreeReverseTB').
 
 8. Implement the '.prev' inside of 'TreeStream'; 
-
-[v0.1.2] - document: 
-9. TokenSource [type] (another Source interface implementation); 
-10. TokenType [types] (two-level function, type first, then value, an '.is' property), TokenInstance (no value, only type, '.is' property); 
-11. preserve - parsing ((input) => [input.curr()]); 
-12. limit (parsing) - limits the given stream to a given 'condition/number' (predicateChoice arg), returns the result as an array; 
-13. transform (parsing) - applies a given 'handler' onto a stream, returning an array-result; 
-14. isType (misc)
-15. PatternTokenizer (SIGNATURE UPDATED)
-16. the optional '.copy' property of Stream-s (LATER, FORMALIZE AS A SEPARATE INTERFACE!); Clones a given Stream up to its state and interface; 
