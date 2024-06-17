@@ -1,7 +1,7 @@
-import { TableParser } from "./parsers.mjs"
+import { parserChoice } from "./parsers.mjs"
 
 export function SourceGenerator(generateMap) {
-	const generator = TableParser(generateMap)
+	const generator = parserChoice(generateMap)
 	return function (stream, prevSource) {
 		let result = prevSource
 		while (!stream.isEnd()) {

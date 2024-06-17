@@ -6,11 +6,11 @@ const { structCheck } = object
 const { first, last, lastOut, clear, iterator, propPreserve } = array
 
 export const Token = (type, value) => ({ type, value })
-Token.is = structCheck(["type", "value"])
+Token.is = structCheck("type", "value")
 Token.type = (x) => x.type
 Token.value = (x) => x.value
 
-const emptyStruct = structCheck([])
+const emptyStruct = structCheck()
 export const isType = (type) => and(emptyStruct, (x) => Token.type(x) === type)
 
 export const TokenInstance = (type) => {
@@ -43,6 +43,7 @@ export const MapClass = (change) => {
 		}
 	}
 	mapClass.extend = (f) => MapClass((curr, x) => change(curr, f(x)))
+	mapClass.extendKey = (f) => MapClass((curr, x) => change(f(curr), x))
 	return mapClass
 }
 
@@ -54,6 +55,8 @@ export const [PredicateMap, RegExpMap, SetMap, BasicMap] = [
 ].map(MapClass)
 
 export const TokenMap = (mapClass) => mapClass.extend(Token.type)
+export const ValueMap = (mapClass) => mapClass.extend(Token.value)
+export const TypeMap = (mapClass) => mapClass.extendKey((x) => x.is)
 
 export function StringPattern(string = "") {
 	return {
@@ -71,7 +74,7 @@ export function StringPattern(string = "") {
 	}
 }
 
-StringPattern.is = structCheck(["split", "matchAll", "length", "class"])
+StringPattern.is = structCheck("split", "matchAll", "length", "class")
 StringPattern.empty = StringPattern()
 StringPattern.collection = StringPatternCollection
 
@@ -103,7 +106,7 @@ export function StringPatternCollection(arr = []) {
 	}
 }
 
-StringPatternCollection.is = structCheck([
+StringPatternCollection.is = structCheck(
 	"join",
 	"filter",
 	"reduce",
@@ -111,12 +114,12 @@ StringPatternCollection.is = structCheck([
 	"slice",
 	"concat",
 	Symbol.iterator
-])
+)
 
 const mapPropsPreserve = (f) => propPreserve((array) => array.map(f))
 export const ArrayToken = propPreserve((token) => [...Token.value(token)])
 
-const iteratorCheck = structCheck([Symbol.iterator])
+const iteratorCheck = structCheck(Symbol.iterator)
 export function RecursiveArrayToken(recursiveToken) {
 	const isCollection = "value" in recursiveToken && iteratorCheck(recursiveToken.value)
 	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)
@@ -150,14 +153,15 @@ export function InputStream(input) {
 }
 
 const arrayTreePreserve = mapPropsPreserve(ArrayTree)
+export function childIndex(multind) {
+	return multind.reduce((prev, curr) => prev.children()[curr], this)
+}
 export function ArrayTree(arrtree) {
 	function ArrTreeLevel(level) {
 		level.children = function () {
 			return this
 		}
-		level.index = function (multind) {
-			return multind.reduce((prev, curr) => prev.children()[curr], this)
-		}
+		level.index = childIndex
 		return level
 	}
 	return arrtree instanceof Array ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree
@@ -167,13 +171,14 @@ export function ArrayTree(arrtree) {
 // ^ NOTE: the 'prev' implementation is farily straightforward - it's just a reversed 'next' (going from 'bottom-to-top' and 'from-end-to-beginning'), so instead of checking for `0 in c.children()` and `last(...) + 1 in l.children()`, one checks for `l === tree` and `last(...) - 1 in l.children()`
 // ! BUT one will also need to alter the 'next()', BECAUSE, both of them will now need to ALSO go down AND up the tree (one will additionally need to remember what was last not to 'skip' any "branches"...);
 export function TreeStream(tree) {
-	let currlevel = tree
-	let current = tree.children()[0]
 	const multind = [0]
+
+	let currlevel = tree
+	let current = currlevel.index(multind)
 
 	const ENDVALUE = {}
 
-	const nextLevel = (c) => c.children && 0 in c.children()
+	const nextLevel = (c) => typeof c.children === "function" && 0 in c.children()
 	const isMore = (l) => last(multind) + 1 in l.children()
 
 	return {
@@ -182,7 +187,7 @@ export function TreeStream(tree) {
 			if (nextLevel(current)) {
 				multind.push(0)
 				currlevel = current
-				current = current.children()[0]
+				current = current.index([0])
 				return prev
 			}
 			while (multind.length && !isMore(currlevel)) {
@@ -191,7 +196,7 @@ export function TreeStream(tree) {
 				currlevel = tree.index(lastOut(multind))
 			}
 			current = multind.length
-				? currlevel.children()[++multind[multind.length - 1]]
+				? currlevel.index([++multind[multind.length - 1]])
 				: ENDVALUE
 			return prev
 		},

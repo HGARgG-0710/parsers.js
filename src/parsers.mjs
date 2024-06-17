@@ -5,6 +5,7 @@ const { insert } = array
 
 export const isNumber = (x) => typeof x === "number" || x instanceof Number
 export const predicateChoice = (x) => (isNumber(x) ? (input, i, j = 0) => i + j < x : x)
+export const parserChoice = (x) => (typeof x === "function" ? x : TableParser(x))
 
 export const setPredicate = (set) => (x) => set.has(x)
 
@@ -70,6 +71,7 @@ export function limit(init, pred) {
 }
 
 export const preserve = (input) => [input.curr()]
+export const miss = () => []
 
 export function transform(handler = preserve) {
 	return function (input) {
@@ -123,7 +125,7 @@ export function StreamTokenizer(tokenMap) {
 		return {
 			next: function () {
 				const prev = current
-				current = ((x) => (x ? x.call(this, input) : x))(
+				current = ((x) => (typeof x === "function" ? x.call(this, input) : x))(
 					tokenMap.index(input.curr())
 				)
 				input.next()
@@ -146,7 +148,7 @@ export function TableParser(parserMap, next) {
 }
 
 export function StreamParser(parserMap) {
-	const parser = TableParser(parserMap)
+	const parser = parserChoice(parserMap)
 	return function (input) {
 		const final = []
 		while (!input.isEnd()) {
