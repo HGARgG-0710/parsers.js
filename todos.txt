@@ -80,3 +80,33 @@
 	Create an alias for this ('InvertTree := TreeReverseLR+TreeReverseTB').
 
 8. Implement the '.prev' inside of 'TreeStream'; 
+13. For v0.2 - the 'ConditionalParser': 
+
+	Works the same way as 'StreamParser', 
+
+		BUT: instead of 'any[]' output from map-values functions, 
+			it expects an [n, any[]], 
+			with the first being the number of steps/predicate to skip, 
+			and 'any[]' being the value to be added to the final array;
+		
+		Output is of the same type...;
+
+[v0.1.3]: 
+
+
+9. Add the 'extendKey' method to 'mapClass' (it would append a function TO THE KEY, instead of checked value); 
+10. Allow (optionally), for the argument of 'StreamParser' to be a TableParser (in which case, one DOESN'T convert it to 'TableParser', instead using as-is...); 
+	10.1. Based off it, create a 'TypeMap', which is: 
+
+		TypeMap(mapClass) = mapClass.extendKey((key) => key.is)
+	
+	Can be VERY successfully used with 'PredicateMap'; 
+11. const ValueMap = (mapClass) => mapClass.extend(Token.value)
+12. MAKE the 'ArrayTree.index' into a SEPARATE method: 
+
+	A general 'Indexation'; 
+	Then, the 'ArrayTree' would simply assing the thing to the object in question...; 
+
+	THEN, the user would ONLY require the creation of 'Children'. 
+	ALSO - create a sub-function that would be called by 'ArrayTree', 
+		that PARTICULARLY assigns the appropritate '.index'; 

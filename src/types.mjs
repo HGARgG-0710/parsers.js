@@ -149,7 +149,6 @@ export function InputStream(input) {
 	}
 }
 
-// ? Move these things out of scope? [create a separate function-scope for them?]
 const arrayTreePreserve = mapPropsPreserve(ArrayTree)
 export function ArrayTree(arrtree) {
 	function ArrTreeLevel(level) {
