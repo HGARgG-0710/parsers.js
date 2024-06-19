@@ -103,3 +103,42 @@
 
 		1. More room for optimization of 'rigid' structures (less allocation, simpler checks); 
 		2. More general interface;
+11. GET RID of '[]' in StreamParser (and other places): 
+
+	Replace with an arbitrary object passed by user as a second arg (default is '[]'). 
+	Allows to easily generalize to arbitrary interfaces.
+
+12. DynamicMapClass
+
+	A MUTABLE 'MapClass'. 
+	Interface is almost the same, HOWEVER, 
+		the 'values' and 'keys' are MUTABLE PROPERTIES, that are referenced, 
+		instead of being functions.
+
+12. DynamicParser: 
+
+	A very powerful thing, effectvely, a DYNAMIC version of the 'StreamParser'. 
+	Its signature: 
+
+		Level 1: 	
+			1. dynamicMap - the 'DynamicMapClass(...)' instance, defininig the parser;
+			2. initial (like with StreamParser) - the initial value, to which the values of the received 
+
+		Level 2: 
+			1. input: Stream - to be parsed
+			
+	'dynamicMap" is being 'parserChoice'-d ONCE, but on every step it additionally passed (for change), then the result is passed on 
+		(along with the original 'map', when it is needed);
+13. DynamicStreamTokenizer: 
+
+	Same to the 'StreamTokenizer' as `DynamicParser` is to the 'StreamParser'
+		(returns a 'Stream' used for parsing, AND every '.next()', 
+			one can change the 'map' in question).
+	
+14. IDEA: a 'LayeredParser': 
+
+	It is (in essence), a dynamic "composition" of different parsers.
+	A list which (upon change) gets "re-composed" into a new function.
+
+	So, EVERY TIME that is is changed the 'function' that it ultimately is, 
+	gets re-composed...; 
