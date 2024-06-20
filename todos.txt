@@ -77,23 +77,6 @@
 		
 		Output is of the same type...;
 		
-8. MILDLY BREAKING CHANGE [idea]: 
-
-	Re-do the 'TreeStream'. 
-	It would (from that moment on)
-		instead of 'children' have an 'isChild'
-		method (which would check whether a child at a given index is 'legal'). 
-
-	The difference is that there DOES NOT HAVE TO BE an underlying data structure.
-	This would permit: 
-
-		1. More room for optimization of 'rigid' structures (less allocation, simpler checks); 
-		2. More general interface;
-9. GET RID of '[]' in StreamParser (and other places): 
-
-	Replace with an arbitrary object passed by user as a second arg (default is '[]'). 
-	Allows to easily generalize to arbitrary interfaces.
-
 10. DynamicMapClass
 
 	A MUTABLE 'MapClass'. 
@@ -128,8 +111,3 @@
 
 	So, EVERY TIME that is is changed the 'function' that it ultimately is, 
 	gets re-composed...; 
-14. IMPORTANT: 'preserve' should IGNORE values after '.isEnd()'.
-	Allows for a freer usage of 'parser' function (in cases, when 'preserve' is used).
-	Change 'preserve' to '(input) => !input.isEnd() ? [input.curr()] : []'.
-15. The 'nested' function (from 'XML'): inflateDepth and deflateDepth predicates; 
-	A very beautiful and general solution to the 'parse a nested block' problem...; 

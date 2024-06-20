@@ -6,11 +6,13 @@ export type Iterable = {
 	[Symbol.iterator]: GeneratorFunction
 }
 
-export interface PatternCollectionClass {
-	is(x: any): x is PatternCollection
+export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any> {
+	(x?: any): PatternCollection<Type, SplitType, MatchType>
+	is(x: any): x is PatternCollection<Type, SplitType, MatchType>
 }
 
 export interface PatternClass<Type = any, SplitType = any, MatchType = any> {
+	(x?: Type): Pattern<Type, SplitType, MatchType>
 	is(x: any): x is Pattern
 	empty: Pattern<Type, SplitType, MatchType>
 	collection: PatternCollectionClass

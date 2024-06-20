@@ -1,3 +1,4 @@
+import { isFunction } from "../misc.js"
 import type { Summat } from "./Summat.js"
 import type { Tree } from "./Tree.js"
 
@@ -64,7 +65,7 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Type | Tree<Typ
 
 	const childStruct = structCheck("isChild")
 	const nextLevel = (c: any): boolean =>
-		childStruct(c) && typeof c.isChild === "function" && c.isChild(0)
+		childStruct(c) && isFunction(c.isChild) && c.isChild(0)
 	const isMore = (l: Tree<Type>): boolean => l.isChild(last(multind) + 1)
 
 	return {

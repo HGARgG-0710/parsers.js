@@ -5,8 +5,8 @@ export interface Source<Type = any> {
 	concat(source: Source<Type>): Source<Type>
 }
 
-export interface Concattable {
-	concat: (x: any) => Concattable
+export interface Concattable<Type = any> {
+	concat: (x: Type) => Concattable<Type>
 }
 
 export function StringSource(string: string = ""): Source<string> {
