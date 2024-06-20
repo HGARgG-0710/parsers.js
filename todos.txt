@@ -65,22 +65,8 @@
 	All the appropriate dependant-packages would also have a 0.2. version that would 
 		include appropriate 'Locator's. 
 
-6. Implement a left-to-right 'tree-inversion' algorithm. 
-	
-	Name: 'TreeReverseLR'
-	Effectively, it reverses each of the levels of the tree. 
-
-7. Implement top-to-bottom `tree-inversion` algorithm. 
-	Same as above, but top-to-bottom. Name: `TreeReverseTB`.
-	Switches parents and children.
-
-	The 'TreeStream(TreeReverseTB(TreeReverseLR(tree)))' 
-	causes '.next' to become '.prev' and vice versa. 
-
-	Create an alias for this ('InvertTree := TreeReverseLR+TreeReverseTB').
-
-8. Implement the '.prev' inside of 'TreeStream'; 
-9. For v0.2 - the 'ConditionalParser': 
+6. Implement the '.prev' inside of 'TreeStream'; 
+7. For v0.2 - the 'ConditionalParser': 
 
 	Works the same way as 'StreamParser', 
 
@@ -91,7 +77,7 @@
 		
 		Output is of the same type...;
 		
-10. MILDLY BREAKING CHANGE [idea]: 
+8. MILDLY BREAKING CHANGE [idea]: 
 
 	Re-do the 'TreeStream'. 
 	It would (from that moment on)
@@ -103,19 +89,19 @@
 
 		1. More room for optimization of 'rigid' structures (less allocation, simpler checks); 
 		2. More general interface;
-11. GET RID of '[]' in StreamParser (and other places): 
+9. GET RID of '[]' in StreamParser (and other places): 
 
 	Replace with an arbitrary object passed by user as a second arg (default is '[]'). 
 	Allows to easily generalize to arbitrary interfaces.
 
-12. DynamicMapClass
+10. DynamicMapClass
 
 	A MUTABLE 'MapClass'. 
 	Interface is almost the same, HOWEVER, 
 		the 'values' and 'keys' are MUTABLE PROPERTIES, that are referenced, 
 		instead of being functions.
 
-12. DynamicParser: 
+11. DynamicParser: 
 
 	A very powerful thing, effectvely, a DYNAMIC version of the 'StreamParser'. 
 	Its signature: 
@@ -129,16 +115,21 @@
 			
 	'dynamicMap" is being 'parserChoice'-d ONCE, but on every step it additionally passed (for change), then the result is passed on 
 		(along with the original 'map', when it is needed);
-13. DynamicStreamTokenizer: 
+12. DynamicStreamTokenizer: 
 
 	Same to the 'StreamTokenizer' as `DynamicParser` is to the 'StreamParser'
 		(returns a 'Stream' used for parsing, AND every '.next()', 
 			one can change the 'map' in question).
 	
-14. IDEA: a 'LayeredParser': 
+13. IDEA: a 'LayeredParser': 
 
 	It is (in essence), a dynamic "composition" of different parsers.
 	A list which (upon change) gets "re-composed" into a new function.
 
 	So, EVERY TIME that is is changed the 'function' that it ultimately is, 
 	gets re-composed...; 
+14. IMPORTANT: 'preserve' should IGNORE values after '.isEnd()'.
+	Allows for a freer usage of 'parser' function (in cases, when 'preserve' is used).
+	Change 'preserve' to '(input) => !input.isEnd() ? [input.curr()] : []'.
+15. The 'nested' function (from 'XML'): inflateDepth and deflateDepth predicates; 
+	A very beautiful and general solution to the 'parse a nested block' problem...; 

@@ -2,16 +2,6 @@ import { map, array } from "@hgargg-0710/one"
 const { kv: mkv } = map
 const { insert } = array
 
-export function StreamValidator(validityMap) {
-	return function (input) {
-		while (!input.isEnd()) {
-			const check = validityMap.index(input.curr())
-			if (!check || !check(input)) return false
-			input.next()
-		}
-		return true
-	}
-}
 export function PatternValidator(validityMap) {
 	const [typeKeys, checks] = mkv(validityMap)
 	return function (pattern) {
