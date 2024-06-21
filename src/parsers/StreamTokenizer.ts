@@ -1,12 +1,11 @@
 import { isFunction } from "../misc.js"
-import type { IndexMap } from "../types/IndexMap.js"
 import type { Stream } from "../types/Stream.js"
-import type { ParserFunction } from "./TableParser.js"
+import type { ParserMap } from "./TableParser.js"
 
 export type Falsy = null | undefined | false | "" | 0 | typeof NaN
 
 export function StreamTokenizer<KeyType = any, OutType = any>(
-	tokenMap: IndexMap<KeyType, ParserFunction<OutType>>
+	tokenMap: ParserMap<KeyType, OutType>
 ) {
 	return function (input: Stream): Stream<OutType, Falsy> {
 		const STARTVALUE = {}

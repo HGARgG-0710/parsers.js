@@ -1,10 +1,11 @@
-import { TableParser, type ParserFunction } from "../parsers.js"
-import type { IndexMap, PositionalStream } from "../types.js"
+import { parserChoice } from "../misc.js"
+import { TableParser, type ParserFunction, type ParserMap } from "../parsers.js"
+import type { PositionalStream } from "../types.js"
 
 export function StreamLocator<KeyType = any>(
-	locatorMap: IndexMap<KeyType, ParserFunction<boolean>>
+	locatorMap: ParserMap<KeyType, ParserFunction<boolean>> | TableParser<boolean>
 ) {
-	const locator = TableParser(locatorMap)
+	const locator: TableParser<boolean> = parserChoice(locatorMap)
 	return function (input: PositionalStream): [boolean, number] {
 		let found = false
 		while (!input.isEnd()) {

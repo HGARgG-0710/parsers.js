@@ -9,7 +9,7 @@ export type ParserMap<KeyType = any, OutType = any> =
 	| DynamicMap<KeyType, ParserFunction<OutType>>
 
 export interface ParserFunction<OutType = any> extends Summat {
-	(input?: Stream, parser?: TableParser): OutType
+	(input?: Stream, parser?: TableParser | ParserMap): OutType
 }
 
 export interface Handler<Type = any[]> extends Summat {
