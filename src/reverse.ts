@@ -1,1 +1,1 @@
-export * from "./generator/SourceGenerator"
+export * from "./generator/SourceGenerator.js"

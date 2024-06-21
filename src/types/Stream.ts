@@ -14,9 +14,9 @@ export interface Indexable<Type> {
 export interface Stream<Type = any, EndType = any> extends Summat {
 	curr(): Type | EndType
 	next(): Type | EndType
-	prev?(): Type
+	prev?(): Type | EndType
 	isEnd(): boolean
-	rewind?(): Type
+	rewind?(): Type | EndType
 	copy?(): Stream<Type>
 }
 
@@ -68,6 +68,9 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Type | Tree<Typ
 		childStruct(c) && isFunction(c.isChild) && c.isChild(0)
 	const isMore = (l: Tree<Type>): boolean => l.isChild(last(multind) + 1)
 
+	const isParent = (c: any): boolean => c !== tree
+	const isSibling = (l: any): boolean => l.isChild(last(multind) - 1)
+
 	return {
 		next: function () {
 			const prev = current
@@ -86,6 +89,29 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Type | Tree<Typ
 				? currlevel.index([++multind[multind.length - 1]])
 				: ENDVALUE
 			return prev
+		},
+		prev: function () {
+			const lastcurr = current
+
+			if (isSibling(currlevel)) {
+				const sibling = currlevel.index([--multind[multind.length - 1]])
+				if (nextLevel(sibling)) {
+					// ! FIX THE ALGORITHm (sketch of the fix):
+					//  one must travel to the bottom of the previous sub-tree, and change the 'current' to the obtained element [WHICH only ENDS in this in the event that the tree is EMPTY!];
+					// ! PROBLEM [implementation]: to do this FAST, one NEEDS to know the last available child (for that, one needs the children's COUNT instead of the 'isChild' predicate...);
+					return lastcurr
+				}
+				current = sibling
+				return lastcurr
+			}
+
+			if (isParent(current)) {
+				multind.pop()
+				current = currlevel
+				currlevel = tree.index(lastOut(multind)) as Tree
+				return lastcurr
+			}
+			return lastcurr
 		},
 		curr: function () {
 			return current

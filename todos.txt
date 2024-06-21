@@ -31,60 +31,17 @@
 [v0.2]
 2. Write proper JSDoc documentation for all this stuff...
 3. Check if this works with Deno; 
-4. Use TypeScript for this thing
 
-	Types would be VERY good. Permits greater clarity (PARTICULARLY in documentation...); 
-
-5. IDEA: create a 'Locator' structure (StreamLocator): 
-
-	Effectively, finds the first bit of given 'Stream' 
-	that isn't correct. 
-
-	NOTE: MUST have a 'pos'.
-	
-	It takes: 
-
-		Level one: 
-			1. validationMap - same as in the StreamValidator, an IndexMap; 
-			2. errorMap - an IndexMap of [INDEX, ERROR], where ERROR is a string-like function of 'input'
-				NOTE: the 'checks' in 'validationMap' now have to return one of: 
-					1. true - for success; 
-					2. [errorCode]: 'errorCode' is mapped against 'errorMap', to obtain the desired function, then 'input.error = ...(input)', where ... is the result of mapping. 
-						After the mapping of error, the function exits. 
-		Level two: 
-			1. PositionalStream - the 'Stream' with an automatically changing '.pos' property.
-
-	NOTE: the whole 'thing'/purpose of API is much more in the 'PositionalStream', because it must have properties:
-
-		1. pos - last position
-		2. error - error message
-
-	Create the corresponding 'yell' function for "yelling" errors using these two properties based off a given stream. 
-		NOTE: the 'yelling' would be conditional - only if 'error' is not 'null', which is the default value. 
-	
-	All the appropriate dependant-packages would also have a 0.2. version that would 
-		include appropriate 'Locator's. 
-
-6. Implement the '.prev' inside of 'TreeStream'; 
-7. For v0.2 - the 'ConditionalParser': 
-
-	Works the same way as 'StreamParser', 
-
-		BUT: instead of 'any[]' output from map-values functions, 
-			it expects an [n, any[]], 
-			with the first being the number of steps/predicate to skip, 
-			and 'any[]' being the value to be added to the final array;
+4. Implement the '.prev' inside of 'TreeStream' (in work); 
 		
-		Output is of the same type...;
-		
-10. DynamicMapClass
+5. DynamicMapClass
 
 	A MUTABLE 'MapClass'. 
 	Interface is almost the same, HOWEVER, 
 		the 'values' and 'keys' are MUTABLE PROPERTIES, that are referenced, 
 		instead of being functions.
 
-11. DynamicParser: 
+6. DynamicParser: 
 
 	A very powerful thing, effectvely, a DYNAMIC version of the 'StreamParser'. 
 	Its signature: 
@@ -98,13 +55,13 @@
 			
 	'dynamicMap" is being 'parserChoice'-d ONCE, but on every step it additionally passed (for change), then the result is passed on 
 		(along with the original 'map', when it is needed);
-12. DynamicStreamTokenizer: 
+7. DynamicStreamTokenizer: 
 
 	Same to the 'StreamTokenizer' as `DynamicParser` is to the 'StreamParser'
 		(returns a 'Stream' used for parsing, AND every '.next()', 
 			one can change the 'map' in question).
 	
-13. IDEA: a 'LayeredParser': 
+8. IDEA: a 'LayeredParser': 
 
 	It is (in essence), a dynamic "composition" of different parsers.
 	A list which (upon change) gets "re-composed" into a new function.
