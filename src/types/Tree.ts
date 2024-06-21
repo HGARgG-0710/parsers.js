@@ -1,5 +1,6 @@
 import { array } from "@hgargg-0710/one"
 import type { Summat } from "./Summat.js"
+import { isArray } from "../misc.js"
 const { propPreserve } = array
 
 // ? later, generalize the 'multiindex' to a separate type (not just 'number[]');
@@ -8,10 +9,11 @@ export interface Tree<Type = any> extends Summat {
 	index: (multindex: number[]) => Type
 }
 
-export type RecursiveTree<Type = any> = Tree<Type | RecursiveTree<Type>>
+export type RecursiveTree<Type = any> = Tree<Type | RecursiveTree<Type>> & Summat
 
-const mapPropsPreserve = (f: (x?: any, i?: number, arr?: any[]) => any) =>
-	propPreserve((array: any[]) => array.map(f))
+const mapPropsPreserve = (
+	f: (x?: any, i?: number, arr?: any[]) => any
+): ((x: any[] & Summat) => any[] & Summat) => propPreserve((array: any[]) => array.map(f))
 const arrayTreePreserve = mapPropsPreserve(ArrayTree)
 
 export function childIndex(multind: number[]) {
@@ -21,15 +23,14 @@ export function childrenCount(): number {
 	return this.children().length - 1
 }
 
-export type ExtendableArray<Type = any> = Type[] & RecursiveTree<Type>
 export function ArrayTree<Type = any>(arrtree: any): RecursiveTree<Type> {
-	function ArrTreeLevel(level: ExtendableArray<Type>): RecursiveTree<Type> {
+	function ArrTreeLevel(level: Summat): RecursiveTree<Type> {
 		level.lastChild = childrenCount
 		level.index = childIndex
 		level.children = function () {
 			return this
 		}
-		return level
+		return level as RecursiveTree<Type>
 	}
-	return arrtree instanceof Array ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree
+	return isArray(arrtree) ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree
 }

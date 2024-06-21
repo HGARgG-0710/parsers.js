@@ -1,14 +1,13 @@
-import type { ParserFunction } from "../parsers.js"
-import type { IndexMap } from "../types/IndexMap.js"
+import type { ParserMap } from "../parsers.js"
 import { parserChoice } from "../misc.js"
 import type { Stream } from "../types/Stream.js"
-import type { Source } from "../types/Source.js"
+import type { Concattable } from "../types/Source.js"
 
 export function SourceGenerator<KeyType = any, OutType = any>(
-	generateMap: Function | IndexMap<KeyType, ParserFunction<OutType>>
+	generateMap: Function | ParserMap<KeyType, OutType>
 ) {
-	const generator = parserChoice(generateMap)
-	return function <Type = any>(stream: Stream, prevSource: Source<Type>) {
+	const generator = parserChoice<OutType>(generateMap)
+	return function (stream: Stream, prevSource: Concattable<OutType>) {
 		let result = prevSource
 		while (!stream.isEnd()) {
 			result = result.concat(generator(stream))

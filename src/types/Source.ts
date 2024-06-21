@@ -1,9 +1,8 @@
 import type { Summat } from "./Summat.js"
 import type { Token } from "./Token.js"
 
-export interface Source<Type = any> extends Summat {
+export interface Source<Type = any> extends Concattable<Source<Type>>, Summat {
 	value: Type
-	concat(source: Source<Type>): Source<Type>
 }
 
 export interface Concattable<Type = any> extends Summat {

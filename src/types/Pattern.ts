@@ -3,9 +3,9 @@ import type { Summat } from "./Summat.js"
 const { first, iterator } = array
 const { structCheck } = object
 
-export type Iterable = {
+export interface Iterable extends Summat {
 	[Symbol.iterator]: GeneratorFunction
-} & Summat
+}
 
 export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any>
 	extends Summat {
@@ -23,8 +23,8 @@ export interface PatternClass<Type = any, SplitType = any, MatchType = any>
 
 export interface Pattern<Type = any, SplitType = any, MatchType = any> extends Summat {
 	value: Type
-	split: (x: SplitType) => PatternCollection<Type>
-	matchAll: (x: MatchType) => PatternCollection<Type>
+	split: (x: SplitType) => PatternCollection<Type, SplitType, MatchType>
+	matchAll: (x: MatchType) => PatternCollection<Type, SplitType, MatchType>
 	get length(): number
 	class: PatternClass<Type, SplitType, MatchType>
 }
@@ -34,7 +34,7 @@ export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
 	value: any
 	join: (x: Pattern<Type, SplitType, MatchType>) => Pattern<Type, SplitType, MatchType>
 	filter: (
-		predicate: (x?: any, i?: number, arr?: any) => boolean
+		predicate: (x?: any, i?: number, arr?: any) => any
 	) => PatternCollection<Type, SplitType, MatchType>
 	reduce: (predicate: (prev?: any, curr?: any, i?: number) => any, init: any) => any
 	every: (predicate: (x: any) => any) => boolean

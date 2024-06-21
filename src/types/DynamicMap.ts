@@ -1,15 +1,14 @@
-import type { IndexingFunction } from "./IndexMap.js"
+import type { IndexingFunction, Indexable } from "./IndexMap.js"
 import type { Summat } from "./Summat.js"
 
 import { map } from "@hgargg-0710/one"
 const { kv: mkv } = map
 
-// TODO: GENERALIZE THIS! [into an 'Indexable' (change curr. 'Indexable' to 'NumberIndexable')]
-// ! It's the new 'Indexable' that's supposed to be taken in by functions that (currently) accept the 'IndexMap' (also - one ought to generalize all of these to a SINGLE type...);
-export interface DynamicMap<KeyType = any, ValueType = any> extends Summat {
+export interface DynamicMap<KeyType = any, ValueType = any>
+	extends Indexable<ValueType>,
+		Summat {
 	keys: KeyType[]
 	values: ValueType[]
-	index(x: any): ValueType
 	default: any
 }
 

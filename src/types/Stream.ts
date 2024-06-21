@@ -6,7 +6,7 @@ import { array, object } from "@hgargg-0710/one"
 const { last, lastOut, clear } = array
 const { structCheck } = object
 
-export interface Indexable<Type> extends Summat {
+export interface Indexed<Type> extends Summat {
 	[x: number]: Type
 	length: number
 }
@@ -26,7 +26,7 @@ export interface PositionalStream<Type = any, EndType = any>
 }
 
 export function InputStream<Type = any>(
-	input: Indexable<Type>
+	input: Indexed<Type>
 ): PositionalStream<Type, undefined> {
 	return {
 		pos: 0,

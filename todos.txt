@@ -27,11 +27,15 @@
 
 		TODO: Think about state and how to implement it within the 
 		versions v0.2/v0.3 of the library, how to expand things accordingly...; 
+		
+2. Check if this works with Deno; 	
 	
 [v0.2]
-2. Write proper JSDoc documentation for all this stuff...
-3. Check if this works with Deno; 	
+3. Write proper JSDoc documentation for all this stuff...
 
+
+IDEA: get rid of these two (instead, incorporate their features into the handlers' signatures... The code for them would be exactly the same...); 
+	BETTER STILL, make all the present items (parsers, validators, locators, tokenizers, generators) in the library 'Dynamic'
 4. DynamicParser [NOTE: before that - one must fix the 'IndexMap' types...]: 
 
 	A very powerful thing, effectvely, a DYNAMIC version of the 'StreamParser'. 

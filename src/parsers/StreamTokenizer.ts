@@ -3,7 +3,6 @@ import type { IndexMap } from "../types/IndexMap.js"
 import type { Stream } from "../types/Stream.js"
 import type { ParserFunction } from "./TableParser.js"
 
-// TODO: MAKE SURE THIS IS CORRECT!
 export type Falsy = null | undefined | false | "" | 0 | typeof NaN
 
 export function StreamTokenizer<KeyType = any, OutType = any>(

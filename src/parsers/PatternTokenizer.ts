@@ -1,16 +1,15 @@
-import type { IndexMap } from "../types/IndexMap.js"
 import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { Token } from "../types/Token.js"
 
-import { map, array } from "@hgargg-0710/one"
-const { kv: mkv } = map
+import { array } from "@hgargg-0710/one"
+import { table, type ParserMap } from "./TableParser.js"
 const { insert } = array
 
-export function PatternTokenizer<KeyType = any>(
-	tokenMap: IndexMap<KeyType, Function>,
-	tokenCheck: Function = Token.is
+export function PatternTokenizer<KeyType = any, OutType = any>(
+	tokenMap: ParserMap<KeyType, OutType>,
+	tokenCheck: (x?: any) => boolean = Token.is
 ) {
-	const [typeKeys, typeFunction] = mkv(tokenMap)
+	const [typeKeys, typeFunction] = table(tokenMap)
 	return function (pattern: Pattern) {
 		const isPattern = pattern.class.is
 		const collectionClass = pattern.class.collection

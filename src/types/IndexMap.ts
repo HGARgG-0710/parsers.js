@@ -1,10 +1,17 @@
+import type { Summat } from "./Summat.js"
 import { Token } from "./Token.js"
 import { map } from "@hgargg-0710/one"
 const { kv: mkv } = map
 
-export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
+export interface IndexingFunction<KeyType = any> extends Summat {
+	(curr: KeyType, x: any): boolean
+}
 
-export type MapClass<KeyType = any, ValueType = any> = {
+export interface Indexable<OutType> extends Summat {
+	index(x: any): OutType
+}
+
+export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	(map: Map<KeyType, ValueType>, _default: any): IndexMap<KeyType, ValueType>
 
 	extend(f: (x: any) => any): MapClass<KeyType, ValueType>
@@ -14,18 +21,17 @@ export type MapClass<KeyType = any, ValueType = any> = {
 	): MapClass<NewKeyType, ValueType>
 }
 
-export type IndexMap<KeyType = any, ValueType = any> = {
+export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<ValueType> {
 	default(): any
 	keys(): KeyType[]
 	values(): ValueType[]
-	index(x: any): ValueType
 }
 
-export type HasType = {
+export interface HasType extends Summat {
 	has(x: any): boolean
 }
 
-export type TestType = {
+export interface TestType extends Summat {
 	test(x: any): boolean
 }
 
