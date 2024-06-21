@@ -2,17 +2,15 @@ import { Token } from "./Token.js"
 import { map } from "@hgargg-0710/one"
 const { kv: mkv } = map
 
-export type IndexingFunction = (curr: any, x: any) => any
+export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
 
 export type MapClass<KeyType = any, ValueType = any> = {
 	(map: Map<KeyType, ValueType>, _default: any): IndexMap<KeyType, ValueType>
 
-	extend<NewValueType = any>(
-		f: (x: ValueType) => NewValueType
-	): MapClass<KeyType, NewValueType>
+	extend(f: (x: any) => any): MapClass<KeyType, ValueType>
 
 	extendKey<NewKeyType = any>(
-		f: (x: KeyType) => NewKeyType
+		f: (x: NewKeyType) => KeyType
 	): MapClass<NewKeyType, ValueType>
 }
 
@@ -31,7 +29,7 @@ export type TestType = {
 	test(x: any): boolean
 }
 
-export function MapClass<KeyType, ValueType>(change: IndexingFunction) {
+export function MapClass<KeyType, ValueType>(change: IndexingFunction<KeyType>) {
 	const mapClass: MapClass<KeyType, ValueType> = function (
 		map: Map<KeyType, ValueType>,
 		_default: any
@@ -42,7 +40,7 @@ export function MapClass<KeyType, ValueType>(change: IndexingFunction) {
 			keys: () => mapKeys,
 			values: () => mapValues,
 			index: (x) =>
-				((x) => (typeof x === "number" ? mapValues[x] : x))(
+				((x) => (typeof x === "number" && x !== _default ? mapValues[x] : x))(
 					mapKeys.reduce(
 						(key: any, curr: KeyType, i: number) =>
 							key !== _default ? key : change(curr, x) ? i : key,

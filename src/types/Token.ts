@@ -1,24 +1,25 @@
 import { array, object, function as f } from "@hgargg-0710/one"
+import type { Summat } from "./Summat.js"
 
 const { and } = f
 const { structCheck } = object
 const { propPreserve } = array
 
-export interface Token<Type = any, Value = any> {
+export interface Token<Type = any, Value = any> extends Summat {
 	type: Type
 	value: Value
 }
 
-export interface TokenInstance<Type = any> {
+export interface TokenInstance<Type = any> extends Summat {
 	type: Type
 }
 
-export interface TokenInstanceClass<Type = any> {
+export interface TokenInstanceClass<Type = any> extends Summat {
 	(): TokenInstance<Type>
 	is: (x: any) => x is TokenInstance<Type>
 }
 
-export interface TokenType<Type = any, Value = any> {
+export interface TokenType<Type = any, Value = any> extends Summat {
 	(value: Value): TokenInstance<Type>
 	is: (x: any) => x is TokenInstance<Type>
 }

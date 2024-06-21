@@ -1,24 +1,27 @@
 import { array, object } from "@hgargg-0710/one"
+import type { Summat } from "./Summat.js"
 const { first, iterator } = array
 const { structCheck } = object
 
 export type Iterable = {
 	[Symbol.iterator]: GeneratorFunction
-}
+} & Summat
 
-export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any> {
+export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any>
+	extends Summat {
 	(x?: any): PatternCollection<Type, SplitType, MatchType>
 	is(x: any): x is PatternCollection<Type, SplitType, MatchType>
 }
 
-export interface PatternClass<Type = any, SplitType = any, MatchType = any> {
+export interface PatternClass<Type = any, SplitType = any, MatchType = any>
+	extends Summat {
 	(x?: Type): Pattern<Type, SplitType, MatchType>
 	is(x: any): x is Pattern
 	empty: Pattern<Type, SplitType, MatchType>
 	collection: PatternCollectionClass
 }
 
-export interface Pattern<Type = any, SplitType = any, MatchType = any> {
+export interface Pattern<Type = any, SplitType = any, MatchType = any> extends Summat {
 	value: Type
 	split: (x: SplitType) => PatternCollection<Type>
 	matchAll: (x: MatchType) => PatternCollection<Type>

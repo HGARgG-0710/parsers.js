@@ -1,12 +1,12 @@
 import { isFunction } from "../misc.js"
 import type { Summat } from "./Summat.js"
-import type { Tree } from "./Tree.js"
+import type { RecursiveTree, Tree } from "./Tree.js"
 
 import { array, object } from "@hgargg-0710/one"
 const { last, lastOut, clear } = array
 const { structCheck } = object
 
-export interface Indexable<Type> {
+export interface Indexable<Type> extends Summat {
 	[x: number]: Type
 	length: number
 }
@@ -53,23 +53,23 @@ export function InputStream<Type = any>(
 	}
 }
 
-// TODO [for the future]: add a 'prev' [can be done easily without changing existing stuff too much...];
-// ^ NOTE: the 'prev' implementation is farily straightforward - it's just a reversed 'next' (going from 'bottom-to-top' and 'from-end-to-beginning'), so instead of checking for `0 in c.children()` and `last(...) + 1 in l.children()`, one checks for `l === tree` and `last(...) - 1 in l.children()`
-// ! BUT one will also need to alter the 'next()', BECAUSE, both of them will now need to ALSO go down AND up the tree (one will additionally need to remember what was last not to 'skip' any "branches"...);
-export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Type | Tree<Type>, {}> {
+// todo: REFACTOR... [the indexation and other repetative operations...];
+export function TreeStream<Type = any>(
+	tree: RecursiveTree<Type>
+): Stream<RecursiveTree<Type>, {}> {
 	const multind = [0]
 	const ENDVALUE = {}
 
 	let currlevel = tree
-	let current: Tree<Type> | Type | typeof ENDVALUE = currlevel.index(multind)
+	let current: RecursiveTree<Type> | Type | typeof ENDVALUE = currlevel.index(multind)
 
-	const childStruct = structCheck("isChild")
-	const nextLevel = (c: any): boolean =>
-		childStruct(c) && isFunction(c.isChild) && c.isChild(0)
-	const isMore = (l: Tree<Type>): boolean => l.isChild(last(multind) + 1)
+	const childStruct = structCheck("lastChild")
+	const nextLevel = (c: any): c is RecursiveTree<Type> =>
+		childStruct(c) && isFunction(c.lastChild) && c.lastChild() >= 0
+	const isMore = (l: RecursiveTree<Type>): boolean => l.lastChild() >= last(multind) + 1
 
 	const isParent = (c: any): boolean => c !== tree
-	const isSibling = (l: any): boolean => l.isChild(last(multind) - 1)
+	const isSibling = (): boolean => !!last(multind)
 
 	return {
 		next: function () {
@@ -93,15 +93,29 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Type | Tree<Typ
 		prev: function () {
 			const lastcurr = current
 
-			if (isSibling(currlevel)) {
+			if (isSibling()) {
 				const sibling = currlevel.index([--multind[multind.length - 1]])
-				if (nextLevel(sibling)) {
-					// ! FIX THE ALGORITHm (sketch of the fix):
-					//  one must travel to the bottom of the previous sub-tree, and change the 'current' to the obtained element [WHICH only ENDS in this in the event that the tree is EMPTY!];
-					// ! PROBLEM [implementation]: to do this FAST, one NEEDS to know the last available child (for that, one needs the children's COUNT instead of the 'isChild' predicate...);
-					return lastcurr
-				}
 				current = sibling
+				let [isLevel, isFurther] = Array(2).fill(false)
+				if (nextLevel(current)) {
+					while (
+						(isLevel = nextLevel(current)) ||
+						(isFurther = isMore(currlevel))
+					) {
+						if (isLevel) {
+							multind.push(0)
+							currlevel = current as RecursiveTree<Type>
+							current = (current as RecursiveTree<Type>).index([
+								last(multind)
+							])
+							continue
+						}
+						if (isFurther)
+							current = currlevel.index([
+								(multind[multind.length - 1] = currlevel.lastChild())
+							])
+					}
+				}
 				return lastcurr
 			}
 

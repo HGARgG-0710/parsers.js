@@ -1,8 +1,13 @@
 import type { Stream } from "./types/Stream.js"
 import type { HasType } from "./types/IndexMap.js"
 import { TableParser } from "./parsers/TableParser.js"
+import type { Summat } from "./types.js"
 
-export type ParsingPredicate = (input?: Stream, i?: number, j?: number) => boolean
+export type ParsingPredicate = (
+	input?: Stream,
+	i?: number,
+	j?: number
+) => boolean & Summat
 
 export const isNumber = (x: any): x is number | Number =>
 	typeof x === "number" || x instanceof Number

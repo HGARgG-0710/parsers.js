@@ -1,3 +1,3 @@
 export interface Summat<Type = any> {
-	[x: string]: Type
+	[x: string | symbol | number]: Type
 }

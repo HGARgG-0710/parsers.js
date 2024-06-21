@@ -4,26 +4,27 @@ const { propPreserve } = array
 
 // ? later, generalize the 'multiindex' to a separate type (not just 'number[]');
 export interface Tree<Type = any> extends Summat {
-	isChild: (index: number) => boolean
+	lastChild: () => number
 	index: (multindex: number[]) => Type
 }
 
-export type RecursiveTree<Type = any> = Tree<Type | Tree<Type>>
+export type RecursiveTree<Type = any> = Tree<Type | RecursiveTree<Type>>
 
-const mapPropsPreserve = (f) => propPreserve((array) => array.map(f))
+const mapPropsPreserve = (f: (x?: any, i?: number, arr?: any[]) => any) =>
+	propPreserve((array: any[]) => array.map(f))
 const arrayTreePreserve = mapPropsPreserve(ArrayTree)
 
 export function childIndex(multind: number[]) {
 	return multind.reduce((prev, curr) => prev.children()[curr], this)
 }
-export function childrenCheck(index: number): boolean {
-	return index in this.children()
+export function childrenCount(): number {
+	return this.children().length - 1
 }
 
 export type ExtendableArray<Type = any> = Type[] & RecursiveTree<Type>
 export function ArrayTree<Type = any>(arrtree: any): RecursiveTree<Type> {
 	function ArrTreeLevel(level: ExtendableArray<Type>): RecursiveTree<Type> {
-		level.isChild = childrenCheck
+		level.lastChild = childrenCount
 		level.index = childIndex
 		level.children = function () {
 			return this

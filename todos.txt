@@ -30,18 +30,9 @@
 	
 [v0.2]
 2. Write proper JSDoc documentation for all this stuff...
-3. Check if this works with Deno; 
+3. Check if this works with Deno; 	
 
-4. Implement the '.prev' inside of 'TreeStream' (in work); 
-		
-5. DynamicMapClass
-
-	A MUTABLE 'MapClass'. 
-	Interface is almost the same, HOWEVER, 
-		the 'values' and 'keys' are MUTABLE PROPERTIES, that are referenced, 
-		instead of being functions.
-
-6. DynamicParser: 
+4. DynamicParser [NOTE: before that - one must fix the 'IndexMap' types...]: 
 
 	A very powerful thing, effectvely, a DYNAMIC version of the 'StreamParser'. 
 	Its signature: 
@@ -55,16 +46,8 @@
 			
 	'dynamicMap" is being 'parserChoice'-d ONCE, but on every step it additionally passed (for change), then the result is passed on 
 		(along with the original 'map', when it is needed);
-7. DynamicStreamTokenizer: 
+5. DynamicStreamTokenizer [NOTE: before that - one must fix the 'IndexMap' types...]: 
 
 	Same to the 'StreamTokenizer' as `DynamicParser` is to the 'StreamParser'
 		(returns a 'Stream' used for parsing, AND every '.next()', 
 			one can change the 'map' in question).
-	
-8. IDEA: a 'LayeredParser': 
-
-	It is (in essence), a dynamic "composition" of different parsers.
-	A list which (upon change) gets "re-composed" into a new function.
-
-	So, EVERY TIME that is is changed the 'function' that it ultimately is, 
-	gets re-composed...; 
