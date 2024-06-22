@@ -1,5 +1,6 @@
 import type { IndexingFunction, Indexable } from "./IndexMap.js"
 import type { Summat } from "./Summat.js"
+import type { TestType, HasType } from "./IndexMap.js"
 
 import { map, array } from "@hgargg-0710/one"
 const { kv: mkv } = map
@@ -65,3 +66,15 @@ export function DynamicMapClass<KeyType = any, ValueType = any>(
 	dynamicClass.extendKey = (f) => DynamicMapClass((curr, x) => change(f(curr), x))
 	return dynamicClass
 }
+
+export const [DynamicPredicateMap, DynamicRegExpMap, DynamicSetMap, BasicDynamicMap]: [
+	DynamicMapClass<Function>,
+	DynamicMapClass<TestType>,
+	DynamicMapClass<HasType>,
+	DynamicMapClass
+] = [
+	(curr: Function, x: any) => curr(x),
+	(curr: TestType, x: any) => curr.test(x),
+	(curr: HasType, x: any) => curr.has(x),
+	(curr: any, x: any) => curr === x
+].map(DynamicMapClass) as [any, any, any, any]

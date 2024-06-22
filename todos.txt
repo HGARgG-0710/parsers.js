@@ -71,6 +71,51 @@
 			4. prev := (x) => x.prev()
 			... [others...]
 
+3. Idea for new functions: 
+
+	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
+
+	3.1. a utility - 'find`: 2-layer of a `predcate` and a `Stream`; 
+
+		It copies the given stream, and (from its current point), 
+			finds all the elements of the stream that are in possession of the 
+			desired property.
+		It (then) proceeds to create an array of all the fitting stream elements.
+
+		Predicate is also passed the 'i'; 
+	3.2. a utility - 'revert' - reverts the stream, returns the copy
+
+		Alters the stream, returns an array of all of its elements, 
+			in reverse order.
+	
+	3.3. a utility - merge(mergeRule(...streams: Stream[]) => number, endRule: (...streams: Stream[]) => boolean, iterationRule: (...streams): Stream[])(...streams: Stream[]) - for merging separate streams 
+
+		Iterates the '...streams' using 'iterationRule', until the moment that 
+		`endRule` is false, and adds the 'streams[mergeRule(...streams)].curr()' to the final result (a general interface, of course...). 
+
+	3.4. a utility - `extract`: 
+
+		Reverse+generalization of 'limit' - splits a given Stream into 
+			pieces, [extracted: any[][], remains: any[][]], 
+			with: 
+			
+				Array(extracted.length).fill(0).map((_x, i) => [remains[i], extracted[i]]).flat().reduce((last, curr) => last.concat(curr), []) === transform((x) => x)(input)
+
+		Where 'input' is the passed `Stream`.
+
+		Useful for defining more complex predicate-based Pattern-s; 
+
+	3.5. a utility-alias - `array` (same as `transform((x) => x)`)
+	3.6. a utility `prolong` - concats the results of `transform((x) => x)`. 
+
+		The result is an array consisting of elements of several different streams.
+
+	3.7. StreamPattern: 
+
+		A `Pattern` implementation based off `extract` and a `Stream`. 
+
+	3.8. A general 'MultiIndex' interface, specific implementations. 
+
 [v0.2]
 3. Write proper JSDoc documentation for all this stuff...
 4. Documentation

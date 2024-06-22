@@ -1,7 +1,7 @@
 {
 	"name": "@hgargg-0710/parsers.js",
-	"version": "0.1.3",
-	"description": "A simple JavaScript library for simplification the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
+	"version": "0.2.0",
+	"description": "A JavaScript library for simplification the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
 	"type": "module",
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",

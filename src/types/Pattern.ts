@@ -43,7 +43,9 @@ export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
 	map: (f: (x?: Pattern<Type>, i?: number, arr?: any) => any) => any
 }
 
-export function StringPattern(string = ""): Pattern<string, RegExp, RegExp> {
+export const StringPattern: PatternClass<string, RegExp, RegExp> = (
+	string = ""
+): Pattern<string, RegExp, RegExp> => {
 	return {
 		value: string,
 		split: (regexp) =>
@@ -60,11 +62,10 @@ export function StringPattern(string = ""): Pattern<string, RegExp, RegExp> {
 }
 StringPattern.is = structCheck("split", "matchAll", "length", "class")
 StringPattern.empty = StringPattern()
-StringPattern.collection = StringPatternCollection
 
-export function StringPatternCollection(
-	arr = []
-): PatternCollection<string, RegExp, RegExp> {
+export const StringPatternCollection: PatternCollectionClass<string, RegExp, RegExp> = (
+	arr: any = []
+): PatternCollection<string, RegExp, RegExp> => {
 	return {
 		value: arr,
 		join: function (x = StringPattern()) {
@@ -91,6 +92,8 @@ export function StringPatternCollection(
 		[Symbol.iterator]: iterator(arr)
 	}
 }
+
+StringPattern.collection = StringPatternCollection
 
 StringPatternCollection.is = structCheck(
 	"join",
