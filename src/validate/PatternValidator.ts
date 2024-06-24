@@ -4,9 +4,8 @@ import type { Pattern, PatternCollection } from "../types.js"
 const { insert } = array
 
 export function PatternValidator<KeyType>(validityMap: ParserMap<KeyType, boolean>) {
+	const [typeKeys, checks] = table(validityMap)
 	return function (pattern: Pattern<any, KeyType, KeyType>) {
-		const [typeKeys, checks] = table(validityMap)
-		
 		const isPattern = pattern.class.is
 		const isCollection = pattern.class.collection.is
 		const validateSingle = (

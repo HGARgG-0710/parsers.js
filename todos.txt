@@ -116,10 +116,83 @@
 
 	3.8. A general 'MultiIndex' interface, specific implementations. 
 
+4. Better support for DynamicMaps: 
+
+	Certain tokenizers/validators (and so forth), 
+	do not have very good compatibility with DynamicMaps (namely - they are intended for usage with static ParserMap-s); 
+
+	__Think__ of a way to make them "dynamic" as well (or, at the very least, create a Dynamic alternative); 
+
+		[dilemma lies, primarily, in the choice between: 
+			1. Ability to have faster code; 
+			2. Haivng large chunks of (ultimately) repeating code, that could (otherwise) have been avoided had one had proper parsing/generation tools for JavaScript already; 
+		]
+
+		As the keys in question would have to be changed EVERY time, the implementation would (likely) have to change (as the target array would change correspondently...); 
+		So, regardless, for these pieces (at least), the change ought to be slightly more significant.
+
+5. PositionalValidator (validatorMap) - an idea for a `StreamLocator` alias. 
+	A way to easily create `StreamLocator`s through `validationMap`s used for `Validator`s via: 
+
+		streamLocator := (([found, pos]) => [!found, pos])(StreamLocator((input) => (!x || !x(input))(validityMap.index(input.curr()))))
+
+6. PositionalStream: 
+
+	Fix that. Currently, carries a (near) useless 'pos' property used by the 'StreamLocator'. 
+	The 'pos' must be A RESULT OF A FUNCTION-CONVERSION! There ought to be another (optional, this time) property 'converter' 
+		(defaulting to '(x) => x'), that is a part of 'Position' interface used by `PositionalInterface`. 
+
+	THEN, one can create some fairly wild things through user-defined position-writing, 
+		while ALLOWING to convert back from them 
+
+			so that: 
+				
+				skip(position.convert())(input)
+
+			skips to position 'position' in `inputs`.
+
+7. NEGATIVE NUMBERS!
+
+	Alter the 'predicateChoice' to allow for negative numbers (the '.prev'); 
+
+8. Unite 'read' and 'limit': 
+
+	Make a single interface or a union type and merge one function into the other. 
+
+		IDEA: rename into 'consume' (as it describes functions of both of them). 
+
+			Keep the default of `limit`; 
+			Keep the signature of `limit`; 
+			Keep both the 'Concattable' and 'Pushable' (or, unite them and use the library types instead of native ones [or do both...]); 
+
+			Decide whether to do `.concat(input.curr()); input.next()` or `.push(input.next())` 
+				[due to more complex interfaces possible that way, leaning towards the former]. 
+			
+			Think about '.concat' being non-modifying, while 'push' (intendedly) modifying.	
+	The library (generally) should decide between COPYING and MODIFYING data structures. 
+
+	From optimization standpoint, MODIFYING may be (and typically is, much) faster. 
+		(As there would also be according '.copy' methods, this would probably be the further vector of development for it).
+	
+	The 'Strings' (Concattable-s) and 'Arrays' (Pushable-s) all, therefore, should have a single uniting Interface. 
+
+	Call it 'Collector', with a 'prolong'/'collect' method. 
+
+	Similarly, get rid of `Source`s, replace them with the same interface. 
+
+	NOTE [again]: the v0.3 will be HIGHLY incompatible with the other versions due to major signature and interface changes (extensions, simplifications, generalizations). 	
+
+9. Get rid of `SourceGenerator`. 
+
+	Develop a new (or improve/extend the old) language of the library. 
+	Get rid of `SourceGenerator` (has become exceedingly useless - basically a simple composition of `parserChoice` and `read` without a predicate). 
+
+	Replace with the more general types (the 'parsing' methods shall be used for "generation" as well...); 
+
 [v0.2]
-3. Write proper JSDoc documentation for all this stuff...
-4. Documentation
-5. (Oh, the horror!) TESTING!
+6. Write proper JSDoc documentation for all this stuff...
+7. Documentation
+8. (Oh, the horror!) TESTING!
 
 	First, decidee: 
 

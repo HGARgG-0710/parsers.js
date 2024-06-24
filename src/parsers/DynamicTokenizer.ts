@@ -1,13 +1,12 @@
 import { isFunction } from "../misc.js"
-import type { IndexMap } from "../types/IndexMap.js"
 import type { Stream } from "../types/Stream.js"
-import type { ParserFunction } from "./TableParser.js"
+import type { ParserMap } from "./TableParser.js"
 
 import type { Falsy } from "./StreamTokenizer.js"
 
 export function DynamicTokenizer<KeyType = any, OutType = any>(
 	input: Stream,
-	tokenMap: IndexMap<KeyType, ParserFunction<OutType>>
+	tokenMap: ParserMap<KeyType, OutType>
 ): Stream<OutType, Falsy> {
 	const STARTVALUE = {}
 	let current: OutType | {} = STARTVALUE

@@ -2,7 +2,7 @@ import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { Token } from "../types/Token.js"
 
 import { array } from "@hgargg-0710/one"
-import { table, type ParserMap } from "./TableParser.js"
+import { table, type ParserFunction, type ParserMap } from "./TableParser.js"
 const { insert } = array
 
 export function PatternTokenizer<KeyType = any, OutType = any>(
@@ -10,29 +10,42 @@ export function PatternTokenizer<KeyType = any, OutType = any>(
 	tokenCheck: (x?: any) => boolean = Token.is
 ) {
 	const [typeKeys, typeFunction] = table(tokenMap)
-	return function (pattern: Pattern) {
+	return function (pattern: Pattern<any, KeyType, KeyType>) {
 		const isPattern = pattern.class.is
 		const collectionClass = pattern.class.collection
 		const isCollection = collectionClass.is
-		const tokenizeSingle = (pattern: Pattern, typeKey: KeyType, type: Function) =>
+		const tokenizeSingle = (
+			pattern: Pattern<any, KeyType, KeyType>,
+			typeKey: KeyType,
+			type: ParserFunction<OutType>
+		) =>
 			pattern
 				.matchAll(typeKey)
 				.reduce(
-					(acc: PatternCollection, curr: any, i: number) =>
-						insert(acc, 2 * i + 1, type(curr)),
+					(
+						acc: PatternCollection<any, KeyType, KeyType>,
+						curr: any,
+						i: number
+					) => insert(acc, 2 * i + 1, type(curr)),
 					pattern.split(typeKey)
 				)
 				.filter((x: any) => tokenCheck(x) || x.length)
 
-		function keyTokenize(pattern: Pattern) {
-			const flatten = (collection: PatternCollection) =>
+		function keyTokenize(pattern: Pattern<any, KeyType, KeyType>) {
+			const flatten = (collection: PatternCollection<any, KeyType, KeyType>) =>
 				collection.reduce(
-					(last: PatternCollection, curr: Pattern | PatternCollection) =>
-						last.concat(isCollection(curr) ? flatten(curr) : [curr]),
+					(
+						last: PatternCollection<any, KeyType, KeyType>,
+						curr:
+							| Pattern<any, KeyType, KeyType>
+							| PatternCollection<any, KeyType, KeyType>
+					) => last.concat(isCollection(curr) ? flatten(curr) : [curr]),
 					collectionClass()
 				)
 			const tokenizeRecursive = (
-				current: Pattern | PatternCollection,
+				current:
+					| Pattern<any, KeyType, KeyType>
+					| PatternCollection<any, KeyType, KeyType>,
 				currKey: KeyType,
 				i: number
 			) =>

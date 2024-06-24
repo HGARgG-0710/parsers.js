@@ -10,7 +10,7 @@ export interface Pushable extends Summat {
 export function StreamParser<KeyType = any, OutType = any>(
 	parserMap: TableParser<OutType[]> | ParserMap<KeyType, OutType[]>
 ) {
-	const parser: TableParser<OutType[]> = parserChoice<OutType[]>(parserMap)
+	const parser: TableParser<OutType[]> = parserChoice<KeyType, OutType[]>(parserMap)
 	return function (input: Stream, initial: Pushable = []) {
 		const final = initial
 		while (!input.isEnd()) {
