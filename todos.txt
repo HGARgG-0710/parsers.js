@@ -190,9 +190,11 @@
 	Replace with the more general types (the 'parsing' methods shall be used for "generation" as well...); 
 
 [v0.2]
-6. Write proper JSDoc documentation for all this stuff...
-7. Documentation
-8. (Oh, the horror!) TESTING!
+10. Write proper JSDoc documentation for all this stuff...
+
+	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
+
+11. (Oh, the horror!) TESTING!
 
 	First, decidee: 
 
