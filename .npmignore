@@ -1,5 +1,7 @@
 tests
 todos.txt
 ignore-notes.txt
-src
+/src
 wiki
+main.ts
+tsconfig.json
