@@ -1,4 +1,4 @@
-import { ArrayTree } from "../src/types.mjs"
+import { ArrayTree } from "../../../dist/src/types.js"
 
 const checkA = (x) => "index" in x && "children" in x
 const checkB = (x) => x.children()

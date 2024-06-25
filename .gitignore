@@ -2,3 +2,4 @@ node_modules
 ignore-notes.txt
 dist
 wiki
+tests/out

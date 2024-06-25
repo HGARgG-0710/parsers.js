@@ -188,17 +188,60 @@
 	Get rid of `SourceGenerator` (has become exceedingly useless - basically a simple composition of `parserChoice` and `read` without a predicate). 
 
 	Replace with the more general types (the 'parsing' methods shall be used for "generation" as well...); 
-
-[v0.2]
+	
 10. Write proper JSDoc documentation for all this stuff...
 
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
 
-11. (Oh, the horror!) TESTING!
+11. Fix the library's general interfaces: 
 
-	First, decidee: 
-
-		1. Whether to write tests in TypeScript (that is, whether the package is SUPPOSED to be used in TypeScript): 
-			Most likely - they're to be in TypeScript (as one would love for the thing to be usable in TypeScript...)
+	Ultimately, the reason the problem is here at all is that... 
 	
-	Second, write the tests and either (if it's in TypeScript) - compile, then TEST (run, fix bugs); 
+	TypeScript's being silly. 
+		Again. 
+	
+	It doesn't seem recognize a `string`, for instance, as an `Indexed`, because this would require for them to be OBJECTS. 
+
+		But the `string` is a primitive. 
+		So one has to target it SPECIFICALLY... 
+
+			Regardless, while the interfaces do serve their (ultimate) purpose, they do miss this. 
+			Problem arises due to "special" treatment of JS 'primitive' types (which are, nonetheless, equally viable as objects...)
+
+12. Certain general interfaces that are supposed to be 'friendly' togethter aren't too much so (example: buggy 'Source' and 'Concattable'). 
+
+	That, too, is to be fixed...
+
+13. TypeScript is realllyyyyyyyy dumb...
+
+	The (x: X) => any is NOT convertible to (x?: X) => any. 
+
+	Which is fucking ridiculous. 
+	Due to the fact that, in essence, it means that `x` CAN be undefined, 
+		instead of meaning that the element `x` can be ABSENT from the signature. 
+	
+	The absence is, thus, to be represented via unions of different function signatures: `|`. 
+
+	13.1. SIMILARLY: for interfaces like `Stream` with optional properties...
+
+		INSTEAD of marking a property optional, 
+
+		Create extensions that would ENFORCE those properties: 
+			for instance: 
+
+				1. RewindableStream (.rewind); 
+				2. CopiableStream (.copy); 
+				3. ReversibleStream (.prev); 
+			
+		Their intersections as types ('&') would grant desired interfaces. 
+
+		CONSEQUENTLY: 
+
+			Re-do the 'general' interfaces like this into UNIONS of 
+				these sub-types and more general types (so that, "?." can be done...); 
+			
+			1. Stream -> 'BasicStream', then (and 'Stream' becomes a union of `BasicStream`, `RewindableStream`, and others...);
+
+[v0.2]
+
+14. testing

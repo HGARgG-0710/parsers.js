@@ -12,7 +12,7 @@ export interface Indexable<OutType> extends Summat {
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
-	(map: Map<KeyType, ValueType>, _default: any): IndexMap<KeyType, ValueType>
+	(map: Map<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
 
 	extend(f: (x: any) => any): MapClass<KeyType, ValueType>
 
@@ -38,7 +38,7 @@ export interface TestType extends Summat {
 export function MapClass<KeyType, ValueType>(change: IndexingFunction<KeyType>) {
 	const mapClass: MapClass<KeyType, ValueType> = function (
 		map: Map<KeyType, ValueType>,
-		_default: any
+		_default?: any
 	): IndexMap<KeyType, ValueType> {
 		const [mapKeys, mapValues] = mkv(map)
 		return {

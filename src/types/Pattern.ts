@@ -43,7 +43,7 @@ export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
 	map: (f: (x?: Pattern<Type>, i?: number, arr?: any) => any) => any
 }
 
-export const StringPattern: PatternClass<string, RegExp, RegExp> = (
+export const StringPattern: PatternClass<string, RegExp | string, RegExp | string> = (
 	string = ""
 ): Pattern<string, RegExp, RegExp> => {
 	return {

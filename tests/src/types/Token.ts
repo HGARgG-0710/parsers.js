@@ -1,4 +1,4 @@
-import { TokenType, TokenInstance } from "../src/types.mjs"
+import { TokenType, TokenInstance } from "../../../dist/src/types.js"
 
 // * 'TokenType'
 

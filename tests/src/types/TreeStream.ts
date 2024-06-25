@@ -1,4 +1,4 @@
-import { ArrayTree, TreeStream } from "../src/types.mjs"
+import { ArrayTree, TreeStream } from "../../../dist/src/types.js"
 
 const ts = TreeStream(
 	ArrayTree([
@@ -31,5 +31,5 @@ while (!ts.isEnd()) {
 }
 
 console.log(ts.curr())
-ts.rewind()
+ts.rewind?.()
 console.log(ts.curr())

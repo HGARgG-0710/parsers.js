@@ -5,7 +5,7 @@ import {
 	BasicMap,
 	TokenMap,
 	Token
-} from "../src/types.mjs"
+} from "../../../dist/src/types.js"
 
 // * 'MapClass'
 const pMap = PredicateMap(
@@ -13,21 +13,21 @@ const pMap = PredicateMap(
 		[(x) => x === 78, false],
 		[(x) => typeof x === "number", 443],
 		[(x) => typeof x === "string", true]
-	])
+	] as [Function, any][])
 )
 const reMap = RegExpMap(
 	new Map([
 		[/889+/, 22],
 		[/8?89/, 7],
 		[/[A-T]/, " - Boo!\n - AAAAAAAAAAAAAH!"]
-	])
+	] as [RegExp, any][])
 )
 const sMap = SetMap(
 	new Map([
 		[new Set([true, false, null]), 3939392],
 		[new Set([77, 42]), 11],
 		[new Set(["dog", "voice", "words"]), "bark"]
-	])
+	] as [Set<any>, any][])
 )
 const bMap = BasicMap(
 	new Map([
@@ -35,7 +35,7 @@ const bMap = BasicMap(
 		[88, "X!"],
 		["BOB!", "E!"],
 		[true, "K-E-X! Kex!"]
-	]),
+	] as [any, any][]),
 	"I'm not even supposed to exist, you know!"
 )
 
@@ -61,7 +61,7 @@ const treMap = TokenMap(RegExpMap)(
 	new Map([
 		[/LaCarte?/, "_??"],
 		[/FARGO*/, 77]
-	])
+	] as [RegExp, any][])
 )
 
 ;[pMap, reMap, sMap, bMap, btMap, treMap].forEach((x) => {
@@ -86,7 +86,7 @@ console.log()
 ;[
 	["J.S.", 0],
 	["Art Vandalay", 9]
-].forEach((pair) => btMap.index(Token(...pair)))
+].forEach((pair) => btMap.index(Token(...(pair as [string, number]))))
 
 console.log()
 ;[
@@ -94,7 +94,7 @@ console.log()
 	["LaCarte", 1],
 	["FARG", 9],
 	["FARGOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 9]
-].forEach((pair) => console.log(treMap.index(Token(...pair))))
+].forEach((pair) => console.log(treMap.index(Token(...(pair as [string, number])))))
 
 console.log()
 

@@ -49,7 +49,7 @@ import {
 	utf16,
 	vtab,
 	word
-} from "../src/regex.mjs"
+} from "../../dist/src/regex.js"
 
 const r1 = /a|b/g
 ;[capture, nonCapture, namedCapture("CAPTURE")].forEach((x) => console.log(x(r1)))
@@ -71,7 +71,9 @@ const r2 = /77?0*/
 ].forEach((x) => console.log(x(r2)))
 console.log(sticky(dotAll(r2)))
 console.log()
-;[[1], [20, 39], [0, ""]].forEach((x) => console.log(occurences(...x)(r2)))
+;[[1], [20, 39], [0, ""]].forEach((x: [number, (number | string)?]) =>
+	console.log(occurences(...x)(r2))
+)
 console.log()
 ;[begin, end].forEach((x) => console.log(x(r2)))
 console.log()
@@ -79,7 +81,7 @@ console.log()
 console.log()
 ;[boundry, Boundry].forEach((x) => console.log(x()))
 console.log()
-const charClassTest = [["a", "x"], "9", "7", "-"]
+const charClassTest = [["a", "x"], ["9"], ["7"], ["-"]] as [string, string?][]
 ;[charClass, negCharClass].forEach((x) => console.log(x(...charClassTest)))
 console.log()
 ;[digit, nonDigit, word, nonWord, space, nonSpace].forEach((x) => console.log(x()))
@@ -96,7 +98,7 @@ console.log()
 console.log(uniAware("77")())
 console.log()
 
-const props = ["Letter", ["Script", "Greek"]]
+const props = ["Letter", ["Script", "Greek"]] as (string | [string, string])[]
 ;[uniEsc, uniEscNon].forEach((x) => {
 	props.forEach((y) => console.log(unicodeSets(x(y)())))
 	console.log()

@@ -20,5 +20,12 @@
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"
 	},
-	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme"
+	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
+	"scripts": {
+		"test": "cd tests && tsc --project tsconfig.json && cd ..",
+		"build": "tsc --project tsconfig.json"
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.8"
+	}
 }

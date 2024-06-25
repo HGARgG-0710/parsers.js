@@ -16,20 +16,21 @@ import {
 	RecursiveArrayToken,
 	StringSource,
 	TreeStream,
-	ArrayTree
-} from "../src/types.mjs"
+	ArrayTree,
+	type Indexed,
+	type Source,
+	type IndexMap
+} from "../../dist/src/types.js"
 import {
 	StreamTokenizer,
 	PatternTokenizer,
 	StreamParser,
 	delimited,
-	eliminate,
-	skip,
-	read
-} from "../src/parsers.mjs"
-import { PatternValidator, StreamValidator } from "../src/validate.mjs"
+	type ParserMap
+} from "../../dist/src/parsers.js"
+import { PatternValidator, StreamValidator } from "../../dist/src/validate.js"
 
-import { SourceGenerator } from "../src/reverse.mjs"
+import { SourceGenerator } from "../../dist/src/reverse.js"
 
 const [collection, element, operator, end] = [
 	"collection",
@@ -66,7 +67,7 @@ const regexTokens = RegExpMap(
 		[/OP/g, operator],
 		[/E/g, end]
 	])
-)
+) as IndexMap<RegExp | string>
 
 // % For Stream-Parsing...;
 const parserMap = TokenMap(BasicMap)(
@@ -136,7 +137,7 @@ const patternValidationMap = RegExpMap(
 		[/OP/g, () => true],
 		[/E/g, () => true]
 	])
-)
+) as ParserMap<string | RegExp, boolean>
 
 const generationMap = TokenMap(BasicMap)(
 	new Map([
@@ -146,7 +147,7 @@ const generationMap = TokenMap(BasicMap)(
 				const collection = input.next()
 				let result = StringSource("COL")
 				for (const _x of collection) {
-					result = result.concat(generator(input))
+					result = result.concat(generator(input)) as Source<string>
 					input.next()
 				}
 				return result.concat(StringSource("E"))
@@ -164,75 +165,32 @@ const tests = [
 ]
 
 const streamTokenizer = StreamTokenizer(streamTokens)
-const patternTokenizer = PatternTokenizer(regexTokens)
+const patternTokenizer = PatternTokenizer<string | RegExp>(regexTokens)
 const streamParser = StreamParser(parserMap)
 const streamValidator = StreamValidator(streamValidationMap())
-const patternValidator = PatternValidator(patternValidationMap)
+const patternValidator = PatternValidator<RegExp | string>(patternValidationMap)
 const sourceGenerator = SourceGenerator(generationMap)
 
-tests.forEach((x) => console.log(streamValidator(InputStream(x))))
+tests.forEach((x) =>
+	console.log(streamValidator(InputStream(x as unknown as Indexed<string>)))
+)
 console.log()
 
 tests.forEach((x) => console.log(patternValidator(StringPattern(x))))
 console.log()
 
-tests.forEach((x) => console.log(streamParser(streamTokenizer(InputStream(x)))))
+tests.forEach((x) =>
+	console.log(
+		streamParser(streamTokenizer(InputStream(x as unknown as Indexed<string>)))
+	)
+)
 console.log()
 
 tests.forEach((x) => console.log(patternTokenizer(StringPattern(x))))
 console.log()
 
-const outTest = streamParser(streamTokenizer(InputStream(tests[0]))).map(
-	RecursiveArrayToken
-)
+const outTest = streamParser(
+	streamTokenizer(InputStream(tests[0] as unknown as Indexed<string>))
+).map(RecursiveArrayToken)
 console.log(sourceGenerator(TreeStream(ArrayTree(outTest)), StringSource()).value)
 console.log()
-
-console.log(
-	eliminate(["K", /x|y/g, "SIEGBRAU!"])(
-		StringPattern("17171KKxyKyKxKKxKKLOGOGOGOSIEGBRAU!")
-	)
-)
-console.log()
-
-const skipString = "LAR012340124015016a97a27a54a99K"
-const skipTest = InputStream(skipString)
-console.log(skipString)
-console.log(skip(skipTest)(4))
-console.log(skipTest.curr())
-console.log(skip(skipTest)((input, i) => input.curr().charCodeAt(0) < 97))
-console.log(skipTest.curr())
-console.log(skip(skipTest)((input, i) => input.curr().charCodeAt(0) <= 97))
-console.log(skipTest.isEnd())
-
-console.log()
-
-const delimString = "SKAR,Rag;LUFF;MURR\nTORK\n;DORK;SIEG"
-const delimTest = InputStream(delimString)
-console.log(
-	delimited(
-		[(input, i) => input.curr() !== "M", (input, i) => input.curr() !== "D"],
-		(input, i) => {
-			console.log("Inside 'isdelim'!")
-			console.log(input.curr())
-			console.log(i)
-			console.log()
-			return [",", ";", "\n"].includes(input.curr())
-		}
-	)(delimTest, (input, i) => {
-		console.log("Inside 'handler'!")
-		console.log(input.curr())
-		console.log(i)
-		console.log()
-		return [input.curr()]
-	})
-)
-console.log(delimTest.curr())
-
-const readString = InputStream("KaaaaarTAAAAAAa")
-const testRead = read((input) => input.curr().charCodeAt(0) <= 97, "READ: ")
-console.log(testRead(readString))
-console.log(readString.next())
-console.log(readString.isEnd())
-console.log(testRead(readString))
-console.log(readString.isEnd())

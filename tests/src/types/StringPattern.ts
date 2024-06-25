@@ -1,4 +1,4 @@
-import { StringPattern } from "../src/types.mjs"
+import { StringPattern } from "../../../dist/src/types.js"
 
 console.log(StringPattern)
 const sp = StringPattern(

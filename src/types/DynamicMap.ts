@@ -16,7 +16,7 @@ export interface DynamicMap<KeyType = any, ValueType = any> extends Indexable<Va
 }
 
 export interface DynamicMapClass<KeyType = any, ValueType = any> extends Summat {
-	(map: Map<KeyType, ValueType>, _default: any): DynamicMap<KeyType, ValueType>
+	(map: Map<KeyType, ValueType>, _default?: any): DynamicMap<KeyType, ValueType>
 
 	extend<NewValueType = any>(
 		f: (x: ValueType) => NewValueType
@@ -32,7 +32,7 @@ export function DynamicMapClass<KeyType = any, ValueType = any>(
 ): DynamicMapClass<KeyType, ValueType> {
 	const dynamicClass: DynamicMapClass<KeyType, ValueType> = function (
 		map: Map<KeyType, ValueType>,
-		_default: any
+		_default?: any
 	): DynamicMap<KeyType, ValueType> {
 		const [keys, values] = mkv(map)
 		return {
