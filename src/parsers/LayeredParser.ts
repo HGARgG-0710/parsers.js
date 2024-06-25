@@ -4,12 +4,22 @@ const { trivialCompose } = _f
 
 export function LayeredParser(layers: Function[]) {
 	let localParser: Function
+	let localLayers: Function[] = []
+
 	const final = function (...x: any[]) {
 		return localParser(...x)
 	}
-	final.recompile = function (layers: Function[]) {
-		localParser = trivialCompose(...layers)
-	}
-	final.recompile(layers)
+	
+	Object.defineProperty(final, "layers", {
+		get: function () {
+			return localLayers
+		},
+		set: function (layers) {
+			localLayers = layers
+			localParser = trivialCompose(...layers)
+			return layers
+		}
+	})
+	final.layers = layers
 	return final
 }

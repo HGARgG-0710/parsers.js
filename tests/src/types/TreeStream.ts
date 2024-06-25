@@ -30,6 +30,47 @@ while (!ts.isEnd()) {
 	ts.next()
 }
 
+console.log(ts.next())
+console.log(ts.next())
 console.log(ts.curr())
+
+console.log("\n\n\n")
+
+console.log(ts.prev())
+console.log(ts.prev())
+
+// * 'prev' siblings
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.prev())
+
+// * 'prev'-'next' siblings
+console.log(ts.next())
+console.log(ts.prev())
+
+// * 'prev' levels
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.curr())
+
+// * 'prev'-'next' levels
+console.log(ts.next())
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.curr())
+
+// * 'until the first "complete surfacing"'
+console.log()
+while (ts.curr() != 0) console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.prev())
+console.log(ts.prev())
+
+console.log("\n\n\n")
+
+// * 'rewind'
+while (!ts.isEnd()) ts.next()
 ts.rewind?.()
 console.log(ts.curr())

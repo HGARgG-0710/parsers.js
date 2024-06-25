@@ -55,12 +55,15 @@ export function InputStream<Type = any>(
 
 // todo: REFACTOR... [the indexation and other repetative operations...];
 // TODO: add a 'copy()'
+// ? Not sure one likes these 'backup'-s, and `lastItem`-s (and this kind of 'multind' modification... + memory wasting on `backup` values). See if one could do without them...;
 export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Tree<Type>, {}> {
-	const multind = [0]
+	let multind = [0]
+	let backup: number[] = []
 	const ENDVALUE = {}
 
 	let currlevel = tree
 	let current: Tree<Type> | Type | typeof ENDVALUE = currlevel.index(multind)
+	let lastItem: Tree<Type> | Type
 
 	const childStruct = structCheck("lastChild")
 	const nextLevel = (c: any): c is Tree<Type> =>
@@ -73,12 +76,14 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Tree<Type>, {}>
 	return {
 		next: function () {
 			const prev = current
+			lastItem = prev === ENDVALUE ? lastItem : (prev as Tree<Type> | Type)
 			if (nextLevel(current)) {
 				multind.push(0)
 				currlevel = current
 				current = current.index([0])
 				return prev
 			}
+			if (multind.length) backup = [...multind]
 			while (multind.length && !isMore(currlevel)) {
 				multind.pop()
 				current = currlevel
@@ -91,7 +96,12 @@ export function TreeStream<Type = any>(tree: Tree<Type>): Stream<Tree<Type>, {}>
 		},
 		prev: function () {
 			const lastcurr = current
-
+			if (lastItem && current === ENDVALUE) {
+				multind = backup
+				current = lastItem
+				return lastcurr
+			}
+			lastItem = lastcurr as Tree<Type> | Type
 			if (isSibling()) {
 				const sibling = currlevel.index([--multind[multind.length - 1]])
 				current = sibling

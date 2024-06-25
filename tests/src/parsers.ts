@@ -19,14 +19,19 @@ import {
 	ArrayTree,
 	type Indexed,
 	type Source,
-	type IndexMap
+	type IndexMap,
+	type Stream
 } from "../../dist/src/types.js"
 import {
 	StreamTokenizer,
 	PatternTokenizer,
 	StreamParser,
 	delimited,
-	type ParserMap
+	type ParserMap,
+	TableParser,
+	preserve,
+	type ParserFunction,
+	transform
 } from "../../dist/src/parsers.js"
 import { PatternValidator, StreamValidator } from "../../dist/src/validate.js"
 
@@ -46,17 +51,19 @@ const streamTokens = BasicMap(
 			"C",
 			function (input) {
 				input.next()
-				if (input.curr() === "O") {
-					input.next()
-					return collection()
-				}
-				input.next()
-				return element()
+				const isCollection = input.next() === "O"
+				return (isCollection ? collection : element)()
 			}
 		],
-		["O", operator],
+		[
+			"O",
+			(input) => {
+				input.next()
+				return operator()
+			}
+		],
 		["E", end]
-	])
+	] as [string, ParserFunction][])
 )
 
 // % for Pattern-tokenization;
@@ -74,7 +81,7 @@ const parserMap = TokenMap(BasicMap)(
 	new Map([
 		[
 			"collection",
-			function (input, parser) {
+			function (input: Stream, parser: TableParser) {
 				return [
 					Token(
 						"collection",
@@ -86,10 +93,10 @@ const parserMap = TokenMap(BasicMap)(
 				]
 			}
 		],
-		["element", (input) => [input.curr()]],
-		["operator", (input) => [input.curr()]],
-		["end", (input) => [input.curr()]]
-	])
+		["element", preserve],
+		["operator", preserve],
+		["end", preserve]
+	] as [string, ParserFunction][])
 )
 
 // % For Stream-validation...;
@@ -179,6 +186,9 @@ console.log()
 tests.forEach((x) => console.log(patternValidator(StringPattern(x))))
 console.log()
 
+console.log(
+	transform()(streamTokenizer(InputStream(tests[0] as unknown as Indexed<string>)))
+)
 tests.forEach((x) =>
 	console.log(
 		streamParser(streamTokenizer(InputStream(x as unknown as Indexed<string>)))

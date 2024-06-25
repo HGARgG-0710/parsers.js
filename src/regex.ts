@@ -3,7 +3,7 @@
 import { isArray } from "./misc.js"
 
 const charRanges = (...ranges: [string, string?][]) =>
-	ranges.map((r) => (isArray(r) ? `${r[0]}-${r[1]}` : r[0])).join("")
+	ranges.map((r) => (r.length - 1 ? `${r[0]}-${r[1]}` : r[0])).join("")
 
 export const regexContents = (r: RegExp) =>
 	((x) => x.slice(1, x.length - 1 - r.flags.length))(r.toString())

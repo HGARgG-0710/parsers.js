@@ -75,14 +75,16 @@
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
 
-	3.1. a utility - 'find`: 2-layer of a `predcate` and a `Stream`; 
+	3.1. a utility - 'find`: 2-layer of a `predcate/number` and a `Stream`; 
 
-		It copies the given stream, and (from its current point), 
+		It iterates the given stream (modifying it), and (from its current point), 
 			finds all the elements of the stream that are in possession of the 
 			desired property.
 		It (then) proceeds to create an array of all the fitting stream elements.
 
 		Predicate is also passed the 'i'; 
+
+		If number is given, gets the 'n'th element of the `Stream`.
 	3.2. a utility - 'revert' - reverts the stream, returns the copy
 
 		Alters the stream, returns an array of all of its elements, 
@@ -242,6 +244,18 @@
 			
 			1. Stream -> 'BasicStream', then (and 'Stream' becomes a union of `BasicStream`, `RewindableStream`, and others...);
 
-[v0.2]
+14. Mandatory ".isStart" method for the 'ReversibleStream' (.prev). 
 
-14. testing
+	This method is the reverse of the '.isEnd'; 
+
+15. A `PositionalStream` function. 
+
+	It (ultimately) creates a basic `.pos` structure on a given stream for the price of one more `Stream` object and a callstack. 
+	Every time an `input.next()` is called, it changes its own `pos` in accordance with the user's desire. 
+
+16. 'charRanges' signature: 
+
+	Make it more varied (an array of):
+		
+		1. into a single 'string' array (where each pair of symbols is a range); 
+		2. a single string/sequence of strings - a character.
