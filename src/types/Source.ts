@@ -6,7 +6,7 @@ export interface Source<Type = any> extends Concattable<Source<Type>>, Summat {
 }
 
 export interface Concattable<Type = any> extends Summat {
-	concat: (x: Type) => Concattable<Type>
+	concat: (...x: Type[]) => Concattable<Type>
 }
 
 export function StringSource(string: string = ""): Source<string> {

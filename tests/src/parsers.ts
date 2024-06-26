@@ -26,14 +26,15 @@ import {
 	StreamTokenizer,
 	PatternTokenizer,
 	StreamParser,
-	delimited,
 	type ParserMap,
 	TableParser,
-	preserve,
 	type ParserFunction,
-	transform
+	transform,
+	limit
 } from "../../dist/src/parsers.js"
 import { PatternValidator, StreamValidator } from "../../dist/src/validate.js"
+
+import { preserve } from "../../dist/src/aliases.js"
 
 import { SourceGenerator } from "../../dist/src/reverse.js"
 
@@ -85,10 +86,14 @@ const parserMap = TokenMap(BasicMap)(
 				return [
 					Token(
 						"collection",
-						delimited(
-							[1, (input, i) => input.curr().type !== "end"],
-							() => false
-						)(input, parser)
+						transform(parser)(
+							InputStream(
+								limit(
+									1,
+									(input, i) => input.curr().type !== "end"
+								)(input) as any[]
+							)
+						)
 					)
 				]
 			}

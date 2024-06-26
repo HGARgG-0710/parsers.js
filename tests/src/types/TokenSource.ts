@@ -1,4 +1,4 @@
-import { type Handler, limit, preserve, read, transform } from "../../../dist/src/parsers.js"
+import { type Handler, limit, read, transform } from "../../../dist/src/parsers.js"
 import {
 	InputStream,
 	type Stream,
@@ -6,6 +6,8 @@ import {
 	TokenSource,
 	type Concattable
 } from "../../../dist/src/types.js"
+
+import { preserve } from "../../../dist/src/aliases.js"
 
 const ALP = [
 	["Raph", "CAP"],

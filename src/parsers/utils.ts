@@ -9,12 +9,13 @@ import type { Stream } from "../types/Stream.js"
 import type { Pattern } from "../types/Pattern.js"
 import type { Concattable } from "../types/Source.js"
 import type { Pushable } from "./StreamParser.js"
+import { preserve } from "../aliases.js"
 
 export function delimited(
 	limits:
 		| [number | DelimPredicate, (number | DelimPredicate)?]
 		| (number | DelimPredicate),
-	isdelim: DelimPredicate = () => true
+	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]
 	const pred = predicateChoice(limits[1]) || predicateChoice(limits[0])
@@ -79,9 +80,6 @@ export function limit(init: number | ParsingPredicate, pred?: number | ParsingPr
 		return result
 	}
 }
-
-export const preserve = (input: Stream) => (input.isEnd() ? [] : [input.curr()])
-export const miss = () => []
 
 export function transform(handler: Handler = preserve) {
 	return function (input: Stream, initial: Pushable = []) {

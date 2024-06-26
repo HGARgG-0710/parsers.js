@@ -1,5 +1,9 @@
 import { BasicDynamicMap, InputStream, type Indexed } from "../../dist/src/types.js"
-import { SkipParser, preserve, type ParserFunction } from "../../dist/src/parsers.js"
+import { SkipParser, type ParserFunction } from "../../dist/src/parsers.js"
+import { current, output, skipArg } from "../../dist/src/aliases.js"
+
+import { function as _f } from "@hgargg-0710/one"
+const { trivialCompose } = _f
 
 const parserMap = BasicDynamicMap(
 	new Map([
@@ -12,7 +16,7 @@ const parserMap = BasicDynamicMap(
 			}
 		]
 	] as [string, ParserFunction][]),
-	(input) => [1, [input.curr()]]
+	skipArg(1)(trivialCompose(output, current))
 )
 
 const skipParser = SkipParser(parserMap)
