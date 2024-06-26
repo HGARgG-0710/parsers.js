@@ -63,14 +63,6 @@
 
 		The "default" behaviour of the parser function will still be defined by things such as 'StreamParser' or `SkipParser`. 
 
-		NOTE: the version would also have a lot of new functions for the interfaces (which would enable easier functional programming techniques application): 
-
-			1. isEnd := (x) => x.isEnd()
-			2. next := (x) => x.next()
-			3. curr := (x) => x.curr()
-			4. prev := (x) => x.prev()
-			... [others...]
-
 3. Idea for new functions: 
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
@@ -184,6 +176,10 @@
 
 	NOTE [again]: the v0.3 will be HIGHLY incompatible with the other versions due to major signature and interface changes (extensions, simplifications, generalizations). 	
 
+
+	IDEA: use a general two-argument function `f(x, y)` for this 
+		(thus, the user gains a FAR more general way of doing the whole things [+ with 'push' and 'concat', one can (pretty much) keep the current interfaces])
+
 9. Get rid of `SourceGenerator`. 
 
 	Develop a new (or improve/extend the old) language of the library. 
@@ -253,9 +249,43 @@
 	It (ultimately) creates a basic `.pos` structure on a given stream for the price of one more `Stream` object and a callstack. 
 	Every time an `input.next()` is called, it changes its own `pos` in accordance with the user's desire. 
 
-16. 'charRanges' signature: 
+16. 'regex.charRanges' signature: 
 
 	Make it more varied (an array of):
 		
 		1. into a single 'string' array (where each pair of symbols is a range); 
 		2. a single string/sequence of strings - a character.
+
+17. IDEA: add a 'forward' function (which is (input) => [input.next()])
+
+18. Bug: 'BasicParser' hasn't got a default 'init'; 
+
+19. IDEA: add a 'wrapped' function: 
+
+		function wrapped(f) {
+			return function (input) {	
+				input.next()
+				const result = f(input)
+				inpu.next()
+				return result
+			}
+		}
+
+	Seems trivial, but it's surprisingly common...
+
+20. Add alias: 'output := (x) => [x]'. 
+21. Add alias: 'current := (input) => input.curr()'. 
+	
+	Using these, one could express entire PARSING METHODS as simple `trivialCompositions` of simple aliases.
+
+22. Add 'is := (x) => x.is' function to the library. 
+23. Add `concat := (x, y) => x.concat(y)`; 
+24. Add `push := (x, y) => x.push(y)`; 
+25. Add `destroy := (input) => {
+	input.next()
+	return []
+}`
+26. Add `skipArg := (pred) => (f) => (input) => [pred, f(input)]`
+27. Add `next := (input) => input.next()` function
+28. Add `previous := (input) => input.prev()`
+29. Add `isEnd := (x) => x.isEnd()`
