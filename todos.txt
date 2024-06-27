@@ -38,7 +38,7 @@
 			1. 'streams' array (current - 'input', a single 'Stream'); [ALLOWS MULTISTREAMING]
 			2. 'state' object (contains properties to be shared/mutated)
 			3. 'parser' object/function (in dynamic cases - the ParserMap itself, in static - only just the function)
-			4. 'result' - a 'Pushable': 
+			4. 'result' - a 'Pushable' (generalied): 
 
 				4.1. This will have to be transformed into something that is both: A. General (as in v0.2); B. Powerful (like the builtin Array); 
 					The final interface will have to both be an 'Array-equivalent' (in the sense that an 'Array' is viable), 
@@ -55,7 +55,9 @@
 
 					5.1. firstFinished = ({streams}) => streams[0].isEnd()
 					5.2. allFinished = ({streams}) => streams.every((x) => x.isEnd())
+			6. `changed` - the (ultimate) function used for construction of 'result' via `result = changed(result, out)`.
 
+				TODO: for '.push' and '.concat' to work with it, change them to `push(x, y) := { x.push(...y); return x}` and `concat(x, y) := x.concat(y)` [remains the same...];
 			
 		This signature will permit creation of parsers for syntaxes previously impossible. 
 		Of course, the behaviour of present parsers will, too, have to be changed/generalized, 
@@ -255,3 +257,31 @@
 		
 		1. into a single 'string' array (where each pair of symbols is a range); 
 		2. a single string/sequence of strings - a character.
+
+17. The 'GeneralParser(change) => (initState: State) => any': 
+
+	The most general parsing function. 
+	Returns a parser accepting signature of 2., with 'result = change(result, out, state)', where result is the returned thing, 
+		`result` is the final thing to be returned, 
+		`state` is the state signature from 2., 
+		`out` is the result of the parsing function [from 'state'].
+
+18. Tree-construction task: 
+
+	A comment from one of the projects, explaining it all: 
+
+		// ! Problem: 
+		// * Generally, trees consisting of different types of tokens [and, hence, structures], 
+		// 		fall under THE SAME class of classification problems used for writing parsers and generators in 'parsers.js'. 
+		// ^ SO, one OUGHT to create means for general out-of-the-box Tree-construction... using them; 
+		
+		// TODO: generalize the 'indexation' method of 'TableParser' (generally, create a method (table, next) => X := (x) => table.index(x)(x, next || X))
+
+19. An IMMENSELY breaking change: 
+
+	Rewrite the 'TableParser' as JUST `table`. 
+
+	INSTEAD, relocate the 'current' alias logic into a separate definition utilizing the `extendKey` (namely, .extendKey(current)). 
+
+	This would render v0.3 TOTALLY incompatible with the previous versions, as it would (then), use a COMPLETELY new set of abstractions, 
+		(though based on, ultimately, the same ideas). 
