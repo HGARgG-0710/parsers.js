@@ -102,7 +102,7 @@
 		Useful for defining more complex predicate-based Pattern-s; 
 
 	3.5. a utility-alias - `array` (same as `transform((x) => x)`)
-	3.6. a utility `prolong` - concats the results of `transform((x) => x)`. 
+	3.6. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
 
 		The result is an array consisting of elements of several different streams.
 
@@ -111,6 +111,11 @@
 		A `Pattern` implementation based off `extract` and a `Stream`. 
 
 	3.8. A general 'MultiIndex' interface, specific implementations. 
+
+	3.9. A 'has' utility: 
+
+		It, ultimately, 'skips' within the stream until the first point of encounter of a certain
+		'number/predicate'-defined element, then returns the `!.isEnd()` of the stream.
 
 4. Better support for DynamicMaps: 
 
@@ -285,3 +290,14 @@
 
 	This would render v0.3 TOTALLY incompatible with the previous versions, as it would (then), use a COMPLETELY new set of abstractions, 
 		(though based on, ultimately, the same ideas). 
+
+20. Make 'preserve' the default 'handler' of 'delimited'; 
+	
+21. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
+
+	It has to be also a NavigableStream (one using Positions to '.navigate' to a given point),
+		and a PositionalStream.
+
+	This thing would allow to save memory on things like temporary 'limit' results, for instance.
+	Instead of allocating an entirely new collection, one would just use the one already present 
+		via the according MultiPositionalStream interface...
