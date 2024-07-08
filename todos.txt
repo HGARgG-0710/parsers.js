@@ -301,3 +301,22 @@
 	This thing would allow to save memory on things like temporary 'limit' results, for instance.
 	Instead of allocating an entirely new collection, one would just use the one already present 
 		via the according MultiPositionalStream interface...
+
+22. Scour previous projects for various aliases, ideas for things to put into the library...
+
+23. Use the `root` element as a part of `TreeStream`. 
+
+	VERY inconvinient. 
+	Assumes that the top is a 'useless' element. 
+	Instead of letting the user mark it "useless". 
+
+	FIX. 
+
+24. Copying vs In-place algorithms. 
+
+	Reform algorithms and data-structures to work IN-PLACE!!! 
+	Supposed to save memory this way. 
+
+	[The library's a little wasteful currently - the only thing saving anything memory-wise is the 'StreamTokenizer'].
+
+	For instance, the present 'Source' would alter itself instead of returning a new thing. 
