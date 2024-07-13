@@ -2,8 +2,8 @@
 
 import { isArray } from "./misc.js"
 
-const charRanges = (...ranges: [string, string?][]) =>
-	ranges.map((r) => (r.length - 1 ? `${r[0]}-${r[1]}` : r[0])).join("")
+const charRanges = (...ranges: (string | [string, string])[]) =>
+	ranges.map((r) => (typeof r === "string" ? r : `${r[0]}-${r[1]}`)).join("")
 
 export const regexContents = (r: RegExp) =>
 	((x) => x.slice(1, x.length - 1 - r.flags.length))(r.toString())
@@ -61,7 +61,7 @@ export const [boundry, Boundry] = ["b", "B"].map((b) => () => new RegExp(`\\${b}
 
 export const [charClass, negCharClass] = ["", "^"].map(
 	(append) =>
-		(...ranges: [string, string?][]) =>
+		(...ranges: (string | [string, string])[]) =>
 			new RegExp(`[${append}${charRanges(...ranges)}]`)
 )
 

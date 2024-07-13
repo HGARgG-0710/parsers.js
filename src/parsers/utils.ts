@@ -4,7 +4,7 @@ import type {
 	DelimPredicate,
 	Handler,
 	ParsingPredicate
-} from "./TableParser.js"
+} from "./ParserMap.js"
 import {
 	isPosition,
 	type BasicStream,
@@ -147,4 +147,19 @@ export function revert(input: ReversibleStream, init: Collection = ArrayCollecti
 	const final = init
 	while (!input.isStart()) final.append(input.prev())
 	return final
+}
+
+export function merge(
+	mergeRule: (streams: BasicStream[]) => number,
+	endRule: (streams: BasicStream[]) => boolean,
+	iterationRule: (streams: BasicStream[]) => any
+) {
+	return function (streams: BasicStream[], init: Collection = ArrayCollection([])) {
+		const final = init
+		while (!endRule(streams)) {
+			final.append(streams[mergeRule(streams)].curr())
+			iterationRule(streams)
+		}
+		return final
+	}
 }

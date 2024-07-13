@@ -1,6 +1,6 @@
 import { isFunction } from "../misc.js"
 import type { BasicStream } from "../types/Stream.js"
-import type { ParserMap } from "./TableParser.js"
+import type { ParserMap } from "./ParserMap.js"
 
 export type Falsy = null | undefined | false | "" | 0 | typeof NaN
 

@@ -95,6 +95,7 @@ export const StringPatternCollection: PatternCollectionClass<string, RegExp, Reg
 
 StringPattern.collection = StringPatternCollection
 
+// TODO: make into a GENERAL EXPORT! [this is NOT exclusive to 'StringPatternCollection']; 
 StringPatternCollection.is = structCheck(
 	"join",
 	"filter",

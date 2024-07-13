@@ -1,6 +1,6 @@
 // * Aliases file (main purpose of its is to allow parsers to be written in a more functional style).
 
-import type { ParsingPredicate, TableParser } from "./parsers.js"
+import type { ParsingPredicate } from "./parsers.js"
 import type { BasicStream } from "./types.js"
 
 export const next = (input: BasicStream) => input.next()

@@ -71,12 +71,7 @@
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
 	
-	3.2. a utility - merge(mergeRule(...streams: Stream[]) => number, endRule: (...streams: Stream[]) => boolean, iterationRule: (...streams): Stream[])(...streams: Stream[]) - for merging separate streams 
-
-		Iterates the '...streams' using 'iterationRule', until the moment that 
-		`endRule` is false, and adds the 'streams[mergeRule(...streams)].curr()' to the final result (a general interface, of course...). 
-
-	3.3. a utility - `extract`: 
+	3.1. a utility - `extract`: 
 
 		Reverse+generalization of 'limit' - splits a given Stream into 
 			pieces, [extracted: any[][], remains: any[][]], 
@@ -88,45 +83,23 @@
 
 		Useful for defining more complex predicate-based Pattern-s; 
 
-	3.6. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
+	3.2. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
 
 		The result is an array consisting of elements of several different streams.
 
-	3.7. StreamPattern: 
+	3.3. StreamPattern:
 
 		A `Pattern` implementation based off `extract` and a `Stream`. 
 
-	3.8. A general 'MultiIndex' interface, specific implementations. 
-
-4. Better support for DynamicMaps: 
-
-	Certain tokenizers/validators (and so forth), 
-	do not have very good compatibility with DynamicMaps (namely - they are intended for usage with static ParserMap-s); 
-
-	__Think__ of a way to make them "dynamic" as well (or, at the very least, create a Dynamic alternative); 
-
-		[dilemma lies, primarily, in the choice between: 
-			1. Ability to have faster code; 
-			2. Haivng large chunks of (ultimately) repeating code, that could (otherwise) have been avoided had one had proper parsing/generation tools for JavaScript already; 
-		]
-
-		As the keys in question would have to be changed EVERY time, the implementation would (likely) have to change (as the target array would change correspondently...); 
-		So, regardless, for these pieces (at least), the change ought to be slightly more significant.
-
-5. PositionalValidator (validatorMap) - an idea for a `StreamLocator` alias. 
-	A way to easily create `StreamLocator`s through `validationMap`s used for `Validator`s via: 
-
-		streamLocator := (([found, pos]) => [!found, pos])(StreamLocator((input) => (!x || !x(input))(validityMap.index(input.curr()))))
-
-6. NEGATIVE NUMBERS!
+4. NEGATIVE NUMBERS!
 
 	Alter the 'predicateChoice' to allow for negative numbers (the '.prev'); 
 
-7. Write proper JSDoc documentation for all this stuff...
+5. Write proper JSDoc documentation for all this stuff...
 
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
 
-8. TypeScript is realllyyyyyyyy dumb...
+6. TypeScript is realllyyyyyyyy dumb...
 
 	The (x: X) => any is NOT convertible to (x?: X) => any. 
 
@@ -136,22 +109,7 @@
 	
 	The absence is, thus, to be represented via unions of different function signatures: `|`. 
 
-9. 'regex.charRanges' signature: 
-
-	Make it more varied (an array of):
-		
-		1. into a single 'string' array (where each pair of symbols is a range); 
-		2. a single string/sequence of strings - a character.
-
-10. The 'GeneralParser(change) => (initState: State) => any': 
-
-	The most general parsing function. 
-	Returns a parser accepting signature of 2., with 'result = change(result, out, state)', where result is the returned thing, 
-		`result` is the final thing to be returned, 
-		`state` is the state signature from 2., 
-		`out` is the result of the parsing function [from 'state'].
-
-11. Tree-construction task: 
+7. Tree-construction task: 
 
 	A comment from one of the projects, explaining it all: 
 
@@ -162,16 +120,7 @@
 		
 		// TODO: generalize the 'indexation' method of 'TableParser' (generally, create a method (table, next) => X := (x) => table.index(x)(x, next || X))
 
-12. An IMMENSELY breaking change: 
-
-	Rewrite the 'TableParser' as JUST `table`. 
-
-	INSTEAD, relocate the 'current' alias logic into a separate definition utilizing the `extendKey` (namely, .extendKey(current)). 
-
-	This would render v0.3 TOTALLY incompatible with the previous versions, as it would (then), use a COMPLETELY new set of abstractions, 
-		(though based on, ultimately, the same ideas). 
-	
-13. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
+8. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
 
 	It has to be also a NavigableStream (one using Positions to '.navigate' to a given point),
 		and a PositionalStream.
@@ -180,9 +129,9 @@
 	Instead of allocating an entirely new collection, one would just use the one already present 
 		via the according MultiPositionalStream interface...
 
-14. Scour previous projects for various aliases, ideas for things to put into the library...
+9. Scour previous projects for various aliases, ideas for things to put into the library...
 
-15. Copying vs In-place algorithms. 
+10. Copying vs In-place algorithms. 
 
 	Reform algorithms and data-structures to work IN-PLACE!!! 
 	Supposed to save memory this way. 
@@ -191,13 +140,16 @@
 
 	For instance, the present 'Source' would alter itself instead of returning a new thing. 
 
-16. GET RID OF "STATIC"/Immutable INTERFACES. 
+11. Delete the 'Dynamic' parsers; 
 
-	It was a mistake. 
-	The immutability ought to be handled by the user. 
-	It just unnecessarily complicates the library and its typesystem.
+	Unneeded. 
+	Rewrite the old parsers via 'GeneralParser';
+	The 'utilities' are LEFT ALONE... (they STILL operate on single BasicStream-s); 
 
-	Get rid of IndexMap (or, to be more exact, DynamicMap->IndexMap); 
+	The old parsers are categorized and refactored HEAVILY!
+
+	They are (primarily) used in pre-running stage of program's organization (id est for general parser definitions), 
+		so (in this case) stack doesn't matter all that much as of itself...;
 
 For v0.4: 
 

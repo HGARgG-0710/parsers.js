@@ -2,7 +2,7 @@ import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { Token } from "../types/Token.js"
 
 import { array } from "@hgargg-0710/one"
-import { table, type ParserFunction, type ParserMap } from "./TableParser.js"
+import { table, type ParserFunction, type ParserMap } from "./ParserMap.js"
 const { insert } = array
 
 export function PatternTokenizer<KeyType = any, OutType = any>(

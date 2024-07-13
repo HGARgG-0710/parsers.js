@@ -1,66 +1,99 @@
 import type { Summat } from "./Summat.js"
-import { Token } from "./Token.js"
-import { map } from "@hgargg-0710/one"
-const { kv: mkv } = map
+import { current, Token } from "main.js"
 
-export interface IndexingFunction<KeyType = any> extends Summat {
-	(curr: KeyType, x: any): boolean
-}
+import { map, array } from "@hgargg-0710/one"
+const { kv: mkv } = map
+const { insert } = array
 
 export interface Indexable<OutType> extends Summat {
 	index(x: any): OutType
+}
+export interface IndexingFunction<KeyType = any> extends Summat {
+	(curr: KeyType, x: any): boolean
+}
+export interface HasType extends Summat {
+	has(x: any): boolean
+}
+export interface TestType extends Summat {
+	test(x: any): boolean
+}
+
+// ? Add more methods for working with 'IndexMap's? [for "static" grammars, this ought to suffice, but for others - more algorithms will have to be implemented manually. Add to the library...];
+export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<ValueType> {
+	keys: KeyType[]
+	values: ValueType[]
+	default: any
+	add: (index: number, pair: [KeyType, ValueType]) => void
+	delete: (index: number) => void
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	(map: Map<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
 
-	extend(f: (x: any) => any): MapClass<KeyType, ValueType>
+	extend<NewValueType = any>(
+		f: (x: ValueType) => NewValueType
+	): MapClass<KeyType, NewValueType>
 
 	extendKey<NewKeyType = any>(
 		f: (x: NewKeyType) => KeyType
 	): MapClass<NewKeyType, ValueType>
 }
 
-export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<ValueType> {
-	default(): any
-	keys(): KeyType[]
-	values(): ValueType[]
+// ! ADD THIS TO 'one.js'! [or make an 'inplace.js' - mini-library for inplace algorithms?]
+function arrRemove(array: any[], index: number) {
+	for (let i = index; i < array.length - 1; ++i) array[i] = array[i + 1]
+	--array.length
+	return array
+}
+function arrInsert(array: any[], index: number, value: any) {
+	let currval: any = value
+	for (let i = index; i < array.length; ++i) {
+		const temp = array[i]
+		array[i] = currval
+		currval = temp
+	}
+	array[array.length] = currval
+	return array
 }
 
-export interface HasType extends Summat {
-	has(x: any): boolean
-}
-
-export interface TestType extends Summat {
-	test(x: any): boolean
-}
-
-export function MapClass<KeyType, ValueType>(change: IndexingFunction<KeyType>) {
-	const mapClass: MapClass<KeyType, ValueType> = function (
+export function MapClass<KeyType = any, ValueType = any>(
+	change: IndexingFunction<KeyType>
+): MapClass<KeyType, ValueType> {
+	const dynamicClass: MapClass<KeyType, ValueType> = function (
 		map: Map<KeyType, ValueType>,
 		_default?: any
 	): IndexMap<KeyType, ValueType> {
-		const [mapKeys, mapValues] = mkv(map)
+		const [keys, values] = mkv(map)
 		return {
-			default: () => _default,
-			keys: () => mapKeys,
-			values: () => mapValues,
-			index: (x) =>
-				((x) => (typeof x === "number" && x !== _default ? mapValues[x] : x))(
-					mapKeys.reduce(
-						(key: any, curr: KeyType, i: number) =>
-							key !== _default ? key : change(curr, x) ? i : key,
-						_default
+			keys,
+			values,
+			index: function (x) {
+				return ((x) => (x !== this.default ? this.values[x] : x))(
+					this.keys.reduce(
+						(prev: any, curr: KeyType, i: number) =>
+							prev !== this.default ? prev : change(curr, x) ? i : prev,
+						this.default
 					)
 				)
+			},
+			default: _default,
+			add: function (index: number, pair: [KeyType, ValueType]) {
+				const [key, value] = pair
+				arrInsert(this.keys, index, key)
+				arrInsert(this.values, index, value)
+			},
+			delete: function (index: number) {
+				arrRemove(this.keys, index)
+				arrRemove(this.values, index)
+			}
 		}
 	}
-	mapClass.extend = (f) => MapClass((curr, x) => change(curr, f(x)))
-	mapClass.extendKey = (f) => MapClass((curr, x) => change(f(curr), x))
-	return mapClass
+	dynamicClass.extend = (f) => MapClass((curr, x) => change(curr, f(x)))
+	dynamicClass.extendKey = (f) => MapClass((curr, x) => change(f(curr), x))
+	return dynamicClass
 }
 
-export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
+export const [DynamicPredicateMap, DynamicRegExpMap, DynamicSetMap, BasicDynamicMap]: [
 	MapClass<Function>,
 	MapClass<TestType>,
 	MapClass<HasType>,
@@ -72,6 +105,8 @@ export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
 	(curr: any, x: any) => curr === x
 ].map(MapClass) as [any, any, any, any]
 
-export const TokenMap = (mapClass: MapClass) => mapClass.extend(Token.type)
-export const ValueMap = (mapClass: MapClass) => mapClass.extend(Token.value)
+export const [TokenMap, ValueMap, CurrentMap] = [Token.type, Token.value, current].map(
+	(x) => (mapClass: MapClass) => mapClass.extend(x)
+)
+
 export const TypeMap = (mapClass: MapClass) => mapClass.extendKey((x) => x.is)
