@@ -3,8 +3,8 @@ import type { Summat } from "./Summat.js"
 const { first, iterator } = array
 const { structCheck } = object
 
-export interface Iterable extends Summat {
-	[Symbol.iterator]: GeneratorFunction
+export interface Iterable<Type = any, ReturnType = any> extends Summat {
+	[Symbol.iterator]: () => Generator<Type, ReturnType>
 }
 
 export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any>

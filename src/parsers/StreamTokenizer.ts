@@ -1,5 +1,5 @@
 import { isFunction } from "../misc.js"
-import type { Stream } from "../types/Stream.js"
+import type { BasicStream } from "../types/Stream.js"
 import type { ParserMap } from "./TableParser.js"
 
 export type Falsy = null | undefined | false | "" | 0 | typeof NaN
@@ -7,7 +7,7 @@ export type Falsy = null | undefined | false | "" | 0 | typeof NaN
 export function StreamTokenizer<KeyType = any, OutType = any>(
 	tokenMap: ParserMap<KeyType, OutType>
 ) {
-	return function (input: Stream): Stream<OutType, Falsy> {
+	return function (input: BasicStream): BasicStream<OutType, Falsy> {
 		const STARTVALUE = {}
 		let current: OutType | {} = STARTVALUE
 

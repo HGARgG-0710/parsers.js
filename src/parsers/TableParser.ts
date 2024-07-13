@@ -1,7 +1,7 @@
-import type { Summat } from "../types.js"
+import type { Iterable, Summat } from "../types.js"
 import type { DynamicMap } from "../types/DynamicMap.js"
 import type { IndexMap } from "../types/IndexMap.js"
-import type { Stream } from "../types/Stream.js"
+import type { BasicStream } from "../types/Stream.js"
 import { isFunction } from "../misc.js"
 
 export type ParserMap<KeyType = any, OutType = any> =
@@ -9,24 +9,24 @@ export type ParserMap<KeyType = any, OutType = any> =
 	| DynamicMap<KeyType, ParserFunction<OutType>>
 
 export interface ParserFunction<OutType = any> extends Summat {
-	(input?: Stream, parser?: TableParser | ParserMap): OutType
+	(input?: BasicStream, parser?: TableParser | ParserMap): OutType
 }
 
 export interface Handler<Type = any[]> extends Summat {
-	(input?: Stream, i?: number): Type
+	(input?: BasicStream, i?: number): Type
 }
 
 export interface DelimHandler<Type = any[]> extends Summat {
-	(input?: Stream, i?: number, j?: number): Type
+	(input?: BasicStream, i?: number, j?: number): Type
 }
 
-export type TableParser<OutType = any> = ((input?: Stream) => OutType) & Summat
+export type TableParser<OutType = any> = ((input?: BasicStream) => OutType) & Summat
 
 export function TableParser<KeyType = any, OutType = any>(
 	parserMap: ParserMap<KeyType, OutType>,
 	next?: TableParser<OutType>
 ): TableParser<OutType> {
-	const parser: TableParser<OutType> = (input: Stream) =>
+	const parser: TableParser<OutType> = (input: BasicStream) =>
 		parserMap.index(input.curr())(input, next || parser)
 	return parser
 }

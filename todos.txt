@@ -65,31 +65,18 @@
 
 		The "default" behaviour of the parser function will still be defined by things such as 'StreamParser' or `SkipParser`. 
 
+		NOTE: IN 'utilities', THE 'BasicStream' argument will be REPLACED by the 'ParsingState'-typed argument. 
+
 3. Idea for new functions: 
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
-
-	3.1. a utility - 'find`: 2-layer of a `predcate/number` and a `Stream`; 
-
-		It iterates the given stream (modifying it), and (from its current point), 
-			finds all the elements of the stream that are in possession of the 
-			desired property.
-		It (then) proceeds to create an array of all the fitting stream elements.
-
-		Predicate is also passed the 'i'; 
-
-		If number is given, gets the 'n'th element of the `Stream`.
-	3.2. a utility - 'revert' - reverts the stream, returns the copy
-
-		Alters the stream, returns an array of all of its elements, 
-			in reverse order.
 	
-	3.3. a utility - merge(mergeRule(...streams: Stream[]) => number, endRule: (...streams: Stream[]) => boolean, iterationRule: (...streams): Stream[])(...streams: Stream[]) - for merging separate streams 
+	3.2. a utility - merge(mergeRule(...streams: Stream[]) => number, endRule: (...streams: Stream[]) => boolean, iterationRule: (...streams): Stream[])(...streams: Stream[]) - for merging separate streams 
 
 		Iterates the '...streams' using 'iterationRule', until the moment that 
 		`endRule` is false, and adds the 'streams[mergeRule(...streams)].curr()' to the final result (a general interface, of course...). 
 
-	3.4. a utility - `extract`: 
+	3.3. a utility - `extract`: 
 
 		Reverse+generalization of 'limit' - splits a given Stream into 
 			pieces, [extracted: any[][], remains: any[][]], 
@@ -101,7 +88,6 @@
 
 		Useful for defining more complex predicate-based Pattern-s; 
 
-	3.5. a utility-alias - `array` (same as `transform((x) => x)`)
 	3.6. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
 
 		The result is an array consisting of elements of several different streams.
@@ -111,11 +97,6 @@
 		A `Pattern` implementation based off `extract` and a `Stream`. 
 
 	3.8. A general 'MultiIndex' interface, specific implementations. 
-
-	3.9. A 'has' utility: 
-
-		It, ultimately, 'skips' within the stream until the first point of encounter of a certain
-		'number/predicate'-defined element, then returns the `!.isEnd()` of the stream.
 
 4. Better support for DynamicMaps: 
 
@@ -137,87 +118,15 @@
 
 		streamLocator := (([found, pos]) => [!found, pos])(StreamLocator((input) => (!x || !x(input))(validityMap.index(input.curr()))))
 
-6. PositionalStream: 
-
-	Fix that. Currently, carries a (near) useless 'pos' property used by the 'StreamLocator'. 
-	The 'pos' must be A RESULT OF A FUNCTION-CONVERSION! There ought to be another (optional, this time) property 'converter' 
-		(defaulting to '(x) => x'), that is a part of 'Position' interface used by `PositionalInterface`. 
-
-	THEN, one can create some fairly wild things through user-defined position-writing, 
-		while ALLOWING to convert back from them 
-
-			so that: 
-				
-				skip(position.convert())(input)
-
-			skips to position 'position' in `inputs`.
-
-7. NEGATIVE NUMBERS!
+6. NEGATIVE NUMBERS!
 
 	Alter the 'predicateChoice' to allow for negative numbers (the '.prev'); 
 
-8. Unite 'read' and 'limit': 
-
-	Make a single interface or a union type and merge one function into the other. 
-
-		IDEA: rename into 'consume' (as it describes functions of both of them). 
-
-			Keep the default of `limit`; 
-			Keep the signature of `limit`; 
-			Keep both the 'Concattable' and 'Pushable' (or, unite them and use the library types instead of native ones [or do both...]); 
-
-			Decide whether to do `.concat(input.curr()); input.next()` or `.push(input.next())` 
-				[due to more complex interfaces possible that way, leaning towards the former]. 
-			
-			Think about '.concat' being non-modifying, while 'push' (intendedly) modifying.	
-	The library (generally) should decide between COPYING and MODIFYING data structures. 
-
-	From optimization standpoint, MODIFYING may be (and typically is, much) faster. 
-		(As there would also be according '.copy' methods, this would probably be the further vector of development for it).
-	
-	The 'Strings' (Concattable-s) and 'Arrays' (Pushable-s) all, therefore, should have a single uniting Interface. 
-
-	Call it 'Collector', with a 'prolong'/'collect' method. 
-
-	Similarly, get rid of `Source`s, replace them with the same interface. 
-
-	NOTE [again]: the v0.3 will be HIGHLY incompatible with the other versions due to major signature and interface changes (extensions, simplifications, generalizations). 	
-
-
-	IDEA: use a general two-argument function `f(x, y)` for this 
-		(thus, the user gains a FAR more general way of doing the whole things [+ with 'push' and 'concat', one can (pretty much) keep the current interfaces])
-
-9. Get rid of `SourceGenerator`. 
-
-	Develop a new (or improve/extend the old) language of the library. 
-	Get rid of `SourceGenerator` (has become exceedingly useless - basically a simple composition of `parserChoice` and `read` without a predicate). 
-
-	Replace with the more general types (the 'parsing' methods shall be used for "generation" as well...); 
-	
-10. Write proper JSDoc documentation for all this stuff...
+7. Write proper JSDoc documentation for all this stuff...
 
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
 
-11. Fix the library's general interfaces: 
-
-	Ultimately, the reason the problem is here at all is that... 
-	
-	TypeScript's being silly. 
-		Again. 
-	
-	It doesn't seem recognize a `string`, for instance, as an `Indexed`, because this would require for them to be OBJECTS. 
-
-		But the `string` is a primitive. 
-		So one has to target it SPECIFICALLY... 
-
-			Regardless, while the interfaces do serve their (ultimate) purpose, they do miss this. 
-			Problem arises due to "special" treatment of JS 'primitive' types (which are, nonetheless, equally viable as objects...)
-
-12. Certain general interfaces that are supposed to be 'friendly' togethter aren't too much so (example: buggy 'Source' and 'Concattable'). 
-
-	That, too, is to be fixed...
-
-13. TypeScript is realllyyyyyyyy dumb...
+8. TypeScript is realllyyyyyyyy dumb...
 
 	The (x: X) => any is NOT convertible to (x?: X) => any. 
 
@@ -227,43 +136,14 @@
 	
 	The absence is, thus, to be represented via unions of different function signatures: `|`. 
 
-	13.1. SIMILARLY: for interfaces like `Stream` with optional properties...
-
-		INSTEAD of marking a property optional, 
-
-		Create extensions that would ENFORCE those properties: 
-			for instance: 
-
-				1. RewindableStream (.rewind); 
-				2. CopiableStream (.copy); 
-				3. ReversibleStream (.prev); 
-			
-		Their intersections as types ('&') would grant desired interfaces. 
-
-		CONSEQUENTLY: 
-
-			Re-do the 'general' interfaces like this into UNIONS of 
-				these sub-types and more general types (so that, "?." can be done...); 
-			
-			1. Stream -> 'BasicStream', then (and 'Stream' becomes a union of `BasicStream`, `RewindableStream`, and others...);
-
-14. Mandatory ".isStart" method for the 'ReversibleStream' (.prev). 
-
-	This method is the reverse of the '.isEnd'; 
-
-15. A `PositionalStream` function. 
-
-	It (ultimately) creates a basic `.pos` structure on a given stream for the price of one more `Stream` object and a callstack. 
-	Every time an `input.next()` is called, it changes its own `pos` in accordance with the user's desire. 
-
-16. 'regex.charRanges' signature: 
+9. 'regex.charRanges' signature: 
 
 	Make it more varied (an array of):
 		
 		1. into a single 'string' array (where each pair of symbols is a range); 
 		2. a single string/sequence of strings - a character.
 
-17. The 'GeneralParser(change) => (initState: State) => any': 
+10. The 'GeneralParser(change) => (initState: State) => any': 
 
 	The most general parsing function. 
 	Returns a parser accepting signature of 2., with 'result = change(result, out, state)', where result is the returned thing, 
@@ -271,7 +151,7 @@
 		`state` is the state signature from 2., 
 		`out` is the result of the parsing function [from 'state'].
 
-18. Tree-construction task: 
+11. Tree-construction task: 
 
 	A comment from one of the projects, explaining it all: 
 
@@ -282,7 +162,7 @@
 		
 		// TODO: generalize the 'indexation' method of 'TableParser' (generally, create a method (table, next) => X := (x) => table.index(x)(x, next || X))
 
-19. An IMMENSELY breaking change: 
+12. An IMMENSELY breaking change: 
 
 	Rewrite the 'TableParser' as JUST `table`. 
 
@@ -290,10 +170,8 @@
 
 	This would render v0.3 TOTALLY incompatible with the previous versions, as it would (then), use a COMPLETELY new set of abstractions, 
 		(though based on, ultimately, the same ideas). 
-
-20. Make 'preserve' the default 'handler' of 'delimited'; 
 	
-21. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
+13. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
 
 	It has to be also a NavigableStream (one using Positions to '.navigate' to a given point),
 		and a PositionalStream.
@@ -302,17 +180,9 @@
 	Instead of allocating an entirely new collection, one would just use the one already present 
 		via the according MultiPositionalStream interface...
 
-22. Scour previous projects for various aliases, ideas for things to put into the library...
+14. Scour previous projects for various aliases, ideas for things to put into the library...
 
-23. Use the `root` element as a part of `TreeStream`. 
-
-	VERY inconvinient. 
-	Assumes that the top is a 'useless' element. 
-	Instead of letting the user mark it "useless". 
-
-	FIX. 
-
-24. Copying vs In-place algorithms. 
+15. Copying vs In-place algorithms. 
 
 	Reform algorithms and data-structures to work IN-PLACE!!! 
 	Supposed to save memory this way. 
@@ -320,3 +190,22 @@
 	[The library's a little wasteful currently - the only thing saving anything memory-wise is the 'StreamTokenizer'].
 
 	For instance, the present 'Source' would alter itself instead of returning a new thing. 
+
+16. GET RID OF "STATIC"/Immutable INTERFACES. 
+
+	It was a mistake. 
+	The immutability ought to be handled by the user. 
+	It just unnecessarily complicates the library and its typesystem.
+
+	Get rid of IndexMap (or, to be more exact, DynamicMap->IndexMap); 
+
+For v0.4: 
+
+	STACK! 
+	The library is VERY stack heavy, and this is (largely) impossible to fix on its own. 
+
+	SOLUTION: use the CPS style. 
+		Re-implement library (whilst keeping the non-CPS version) in CPS, 
+		with an infinite 'stack'; 
+
+	! THIS WILL REQUIRE FOR ONE TO FIRST IMPLEMENT THE INFINITE CPS-BASED STACK LIBRARY!

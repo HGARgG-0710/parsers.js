@@ -1,9 +1,9 @@
-import type { Stream } from "../types.js"
+import type { BasicStream } from "../types.js"
 import type { Pushable } from "./StreamParser.js"
 import type { ParserMap} from "./TableParser.js"
 
 export function DynamicParser<KeyType = any, OutType = any>(
-	input: Stream,
+	input: BasicStream,
 	init: Pushable,
 	parserMap: ParserMap<KeyType, OutType>
 ) {

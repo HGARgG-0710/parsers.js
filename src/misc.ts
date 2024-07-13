@@ -1,4 +1,4 @@
-import type { Stream } from "./types/Stream.js"
+import type { BasicStream } from "./types/Stream.js"
 import type { HasType } from "./types/IndexMap.js"
 import {
 	TableParser,
@@ -12,7 +12,7 @@ export const isFunction = (x: any): x is Function => typeof x === "function"
 export const isArray = (x: any): x is any[] => x instanceof Array
 
 export const predicateChoice = (x: number | DelimPredicate): DelimPredicate =>
-	isNumber(x) ? (_input: Stream, i: number, j: number = 0) => i + j < (x as number) : x
+	isNumber(x) ? (_input: BasicStream, i: number, j: number = 0) => i + j < (x as number) : x
 export function parserChoice<KeyType = any, OutType = any>(
 	x: ParserMap<KeyType, OutType> | TableParser<OutType>
 ): TableParser<OutType> {
