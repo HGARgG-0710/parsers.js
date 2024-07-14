@@ -15,19 +15,17 @@ const mapPropsPreserve = (
 const arrayTreePreserve = mapPropsPreserve(ArrayTree)
 
 export function childIndex(multind: number[]) {
-	return multind.reduce((prev, curr) => prev.children()[curr], this)
+	return multind.reduce((prev, curr) => prev.children[curr], this)
 }
 export function childrenCount(): number {
-	return this.children().length - 1
+	return this.children.length - 1
 }
 
 export function ArrayTree(arrtree: any): Tree {
 	function ArrTreeLevel(level: Summat): Tree {
 		level.lastChild = childrenCount
 		level.index = childIndex
-		level.children = function () {
-			return this
-		}
+		level.children = level
 		return level as Tree
 	}
 	return isArray(arrtree) ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree

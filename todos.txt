@@ -2,72 +2,7 @@
 1. Check if this works with Deno; 	
 
 [v0.3]
-2. Version Plan: Signatures. 
-
-	The entire release is totally breaking. 
-	Dedicated to fixing signatures. 
-
-		ULTIMATE ISSUE TO SOLVE: 
-
-			Currently (as of finished v0.2), the library supports: 
-
-				1. Table-parsers; 
-				2. Streams; 
-				3. Self-modifying parsers; 
-				4. Four (if not more) kinds of predicates; 
-				5. Two (if not more) kinds of handlers; 
-				6. Generators; 
-				7. Tokenizers; 
-				8. Trees
-				9. Various essential utils for functional parser-building and most common/typical parsing tasks
-				10. Validators; 
-				11. A Locator; 
-		
-		Now, the ONLY thing that it really does not have 
-			(but that which can be of essence, whenever building complex/exotic/unconventional syntaxes')
-			is STATE! 
-		Thus, the library must become STATEFUL (that is, 
-			FUNCTION SIGNATURES MUST CHANGE IN A WAY TO RECIEVE SINGLE OBJECTS, 
-				ONE OF PROPERTIES OF WHICH IS THE STATE!)
-
-		This, of course, means that whatever signatures were still "present" 
-		within the last release would erode in this one (and VERY fast). 
-
-		The 'state'	must allow to carry: 
-
-			1. 'streams' array (current - 'input', a single 'Stream'); [ALLOWS MULTISTREAMING]
-			2. 'state' object (contains properties to be shared/mutated)
-			3. 'parser' object/function (in dynamic cases - the ParserMap itself, in static - only just the function)
-			4. 'result' - a 'Pushable' (generalied): 
-
-				4.1. This will have to be transformed into something that is both: A. General (as in v0.2); B. Powerful (like the builtin Array); 
-					The final interface will have to both be an 'Array-equivalent' (in the sense that an 'Array' is viable), 
-						and also be an interface (in that it can be implemented differently and be, for instance, of unlimited length).
-
-				4.2. This is mutable; 
-				4.3. This is a "list-like" result of the insofar obtained pieces of parsing
-
-				In cases, when it's NOT an array (example: 'SourceGenerator'), one is to use an alternative with similar properties 
-					(a 'Type'-equivalent, where 'Type' is the builtin type that it's supposed to "imitate", that is both potentially more powerful
-						and equally capable of a given set of operations)
-			5. 'finished' - a (modifiable) predicate, determining the point, at which the parsing function should halt (note: used by ALL the parsers): 
-				There would be several predefined aliases for it, such as [SKETCHES (the actual things would be written in terms of the 5-object)]: 
-
-					5.1. firstFinished = ({streams}) => streams[0].isEnd()
-					5.2. allFinished = ({streams}) => streams.every((x) => x.isEnd())
-			6. `changed` - the (ultimate) function used for construction of 'result' via `result = changed(result, out)`.
-
-				TODO: for '.push' and '.concat' to work with it, change them to `push(x, y) := { x.push(...y); return x}` and `concat(x, y) := x.concat(y)` [remains the same...];
-			
-		This signature will permit creation of parsers for syntaxes previously impossible. 
-		Of course, the behaviour of present parsers will, too, have to be changed/generalized, 
-			and the v0.3 API is not naturally compatible with the previous ones (although, as it is only singature - it can still be fixed).
-
-		The "default" behaviour of the parser function will still be defined by things such as 'StreamParser' or `SkipParser`. 
-
-		NOTE: IN 'utilities', THE 'BasicStream' argument will be REPLACED by the 'ParsingState'-typed argument. 
-
-3. Idea for new functions: 
+2. Idea for new functions: 
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
 	
@@ -91,36 +26,20 @@
 
 		A `Pattern` implementation based off `extract` and a `Stream`. 
 
-4. NEGATIVE NUMBERS!
+3. NEGATIVE NUMBERS!
 
 	Alter the 'predicateChoice' to allow for negative numbers (the '.prev'); 
 
-5. Write proper JSDoc documentation for all this stuff...
+4. Write proper JSDoc documentation for all this stuff...
 
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
 
-6. TypeScript is realllyyyyyyyy dumb...
+5. Tree-construction task: 
 
-	The (x: X) => any is NOT convertible to (x?: X) => any. 
+	Scour the previous parser projects, distinguish different 'types/patterns' of trees
+		to be constructed (there are at least 4 that can be seen already...); 
 
-	Which is fucking ridiculous. 
-	Due to the fact that, in essence, it means that `x` CAN be undefined, 
-		instead of meaning that the element `x` can be ABSENT from the signature. 
-	
-	The absence is, thus, to be represented via unions of different function signatures: `|`. 
-
-7. Tree-construction task: 
-
-	A comment from one of the projects, explaining it all: 
-
-		// ! Problem: 
-		// * Generally, trees consisting of different types of tokens [and, hence, structures], 
-		// 		fall under THE SAME class of classification problems used for writing parsers and generators in 'parsers.js'. 
-		// ^ SO, one OUGHT to create means for general out-of-the-box Tree-construction... using them; 
-		
-		// TODO: generalize the 'indexation' method of 'TableParser' (generally, create a method (table, next) => X := (x) => table.index(x)(x, next || X))
-
-8. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
+6. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
 
 	It has to be also a NavigableStream (one using Positions to '.navigate' to a given point),
 		and a PositionalStream.
@@ -129,27 +48,13 @@
 	Instead of allocating an entirely new collection, one would just use the one already present 
 		via the according MultiPositionalStream interface...
 
-9. Scour previous projects for various aliases, ideas for things to put into the library...
+7. Scour previous projects for various aliases, ideas for things to put into the library...
 
-10. Copying vs In-place algorithms. 
+8. This list is for tracking source files with mangled types (WHICH DON'T SHOW ANY ERRORS... Revise carefully): 
+		1. PatternTokenizer 
+		2. PatternValidator
 
-	Reform algorithms and data-structures to work IN-PLACE!!! 
-	Supposed to save memory this way. 
-
-	[The library's a little wasteful currently - the only thing saving anything memory-wise is the 'StreamTokenizer'].
-
-	For instance, the present 'Source' would alter itself instead of returning a new thing. 
-
-11. Delete the 'Dynamic' parsers; 
-
-	Unneeded. 
-	Rewrite the old parsers via 'GeneralParser';
-	The 'utilities' are LEFT ALONE... (they STILL operate on single BasicStream-s); 
-
-	The old parsers are categorized and refactored HEAVILY!
-
-	They are (primarily) used in pre-running stage of program's organization (id est for general parser definitions), 
-		so (in this case) stack doesn't matter all that much as of itself...;
+	! WALK THROUGH THE FILES ADN FIND MORE MANGLED TYPES!
 
 For v0.4: 
 

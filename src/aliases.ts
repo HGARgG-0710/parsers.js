@@ -1,7 +1,8 @@
 // * Aliases file (main purpose of its is to allow parsers to be written in a more functional style).
 
-import type { ParsingPredicate } from "./parsers.js"
+import type { StreamHandler, StreamPredicate } from "./parsers.js"
 import type { BasicStream } from "./types.js"
+import type { Collection } from "./types/Collection.js"
 
 export const next = (input: BasicStream) => input.next()
 export const current = (input: BasicStream) => input.curr()
@@ -17,8 +18,7 @@ export function wrapped(handler: (input: BasicStream) => any) {
 
 export const is = (x: any) => x.is
 
-export const push = (x: Pushable, ...y: any[]) => x.push(...y)
-export const concat = (x: Concattable, ...y: any[]) => x.concat(...y)
+export const push = (x: Collection, ...y: any[]) => x.push(...y)
 
 export const isEnd = (input: BasicStream) => input.isEnd()
 export const previous = (input: BasicStream) => input.prev()
@@ -28,7 +28,7 @@ export const destroy = (input: BasicStream) => {
 }
 export const forward = (input: BasicStream) => (input.isEnd() ? [] : [input.next()])
 export const skipArg =
-	(pred: number | ParsingPredicate) => (f: TableParser) => (input: BasicStream) =>
+	(pred: number | StreamPredicate) => (f: StreamHandler) => (input: BasicStream) =>
 		[pred, f(input)]
 
 export const preserve = (input: BasicStream) => (input.isEnd() ? [] : [input.curr()])

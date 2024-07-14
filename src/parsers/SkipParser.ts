@@ -1,20 +1,25 @@
-import type { BasicStream } from "../types.js"
-import type { Pushable } from "./StreamParser.js"
-import type { ParserMap, ParsingPredicate } from "./ParserMap.js"
+import type { Position } from "../types.js"
+import type { ParserMap, StreamPredicate } from "./ParserMap.js"
 import { skip } from "./utils.js"
+import { GeneralParser } from "./GeneralParser.js"
+import { ArrayCollection, type Collection } from "src/types/Collection.js"
 
-export type SkipType<Type> = [number | ParsingPredicate, Type]
+export type SkipType<Type> = [number | StreamPredicate, Type]
 
 export function SkipParser<KeyType = any, OutType = any>(
 	parser: ParserMap<KeyType, SkipType<OutType[]>>
 ) {
-	return function (input: BasicStream, initial: Pushable = []) {
-		const finalResult = initial
-		while (!input.isEnd()) {
-			const [toSkip, currResult] = parser(input)
-			finalResult.push(...currResult)
-			skip(toSkip)(input)
-		}
-		return finalResult
-	}
+	return GeneralParser({
+		parser,
+		finished: ({ streams }) => streams[0].isEnd(),
+		result: ArrayCollection(),
+		change: function (
+			finalResult: Collection<OutType>,
+			toSkip: number | Position,
+			tempResult: OutType[]
+		) {
+			finalResult.push(...tempResult)
+			skip(toSkip)(this.streams[0])
+		} as (result: Collection<OutType>, ...y: any[]) => void
+	})
 }

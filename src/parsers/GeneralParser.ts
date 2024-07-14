@@ -1,23 +1,29 @@
 import type { BasicStream, ParserFunction, ParserMap, ParsingPredicate } from "main.js"
 import type { Collection } from "src/types/Collection.js"
 
-export interface ParsingState<StreamType = BasicStream, ResultType = Collection> {
-	streams: StreamType[]
-	state: object
-	parser: ParserMap | ParserFunction
-	result: ResultType
-	finished: ParsingPredicate
-	change: (x: ResultType, ...y: any) => ResultType
+export interface ParsingState<
+	StreamType = BasicStream,
+	ResultType = Collection,
+	TempType = ResultType
+> {
+	streams?: StreamType[]
+	state?: object
+	parser?:
+		| ParserMap<any, any, StreamType, ResultType, TempType>
+		| ParserFunction<any, StreamType, ResultType, TempType>
+	result?: ResultType
+	finished?: ParsingPredicate<StreamType, ResultType, TempType>
+	change?: (x: ResultType, y: TempType) => void
 }
 
-export function GeneralParser(initState?: ParsingState) {
-	return function (state: ParsingState) {
+export function GeneralParser<
+	StreamType = BasicStream,
+	ResultType = Collection,
+	TempType = ResultType
+>(initState?: ParsingState<StreamType, ResultType, TempType>) {
+	return function (state: ParsingState<StreamType, ResultType, TempType>) {
 		if (initState) state = { ...initState, ...state }
-		let i = 0
-		while (!state.finished(state, i)) {
-			state.change(state.result, ...state.parser(state))
-			++i
-		}
+		while (!state.finished(state)) state.change(state.result, state.parser(state))
 		return state
 	}
 }

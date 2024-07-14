@@ -2,8 +2,8 @@ import { isArray, predicateChoice } from "../misc.js"
 import type {
 	DelimHandler,
 	DelimPredicate,
-	Handler,
-	ParsingPredicate
+	StreamHandler,
+	StreamPredicate
 } from "./ParserMap.js"
 import {
 	isPosition,
@@ -30,7 +30,7 @@ export function delimited(
 	return function (
 		input: BasicStream,
 		handler: DelimHandler = preserve,
-		init: Collection = ArrayCollection([])
+		init: Collection = ArrayCollection()
 	) {
 		skip(prePred)(input)
 
@@ -46,7 +46,7 @@ export function delimited(
 		for (; endpred(input, i, j); ++i) {
 			j += skipDelims(input)
 			if (!endpred(input, i, j)) break
-			result.append(...handler(input, i, j))
+			result.push(...handler(input, i, j))
 			input.next()
 		}
 		return result
@@ -58,7 +58,7 @@ export function eliminate<Type = any, SplitType = any, MatchType = any>(
 	return (pattern: Pattern<Type, SplitType, MatchType>, nil = pattern.class.empty) =>
 		symbols.reduce((acc, curr) => acc.split(curr).join(nil), pattern)
 }
-export function skip(steps: ParsingPredicate | number | Position = 1) {
+export function skip(steps: StreamPredicate | number | Position = 1) {
 	const pred = predicateChoice(isPosition(steps) ? steps.convert() : steps)
 	return function (input: BasicStream) {
 		let i = 0
@@ -70,26 +70,23 @@ export function skip(steps: ParsingPredicate | number | Position = 1) {
 	}
 }
 
-export function consume(
-	init: number | ParsingPredicate,
-	pred?: number | ParsingPredicate
-) {
+export function consume(init: number | StreamPredicate, pred?: number | StreamPredicate) {
 	const isPred = !!pred
 	pred = predicateChoice(isPred ? pred : init)
 	const initSkip = skip(isPred ? predicateChoice(init) : 0)
-	return function (input: BasicStream, initial: Collection = ArrayCollection([])) {
+	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
 		initSkip(input)
 		const result = initial
-		for (let i = 0; !input.isEnd() && pred(input, i); ++i) result.append(input.next())
+		for (let i = 0; !input.isEnd() && pred(input, i); ++i) result.push(input.next())
 		return result
 	}
 }
 
-export function transform(handler: Handler = preserve) {
-	return function (input: BasicStream, initial: Collection = ArrayCollection([])) {
+export function transform(handler: StreamHandler = preserve) {
+	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
 		const result = initial
 		for (let i = 0; !input.isEnd(); ++i) {
-			result.append(...handler(input, i))
+			result.push(...handler(input, i))
 			input.next()
 		}
 		return result
@@ -97,8 +94,8 @@ export function transform(handler: Handler = preserve) {
 }
 
 export function nested(
-	inflation: Handler<boolean | number>,
-	deflation: Handler<boolean | number>
+	inflation: StreamHandler<boolean | number>,
+	deflation: StreamHandler<boolean | number>
 ) {
 	return function (input: BasicStream) {
 		let depth = 1
@@ -113,7 +110,7 @@ export function nested(
 
 export const array = transform()
 
-export function has(pred: ParsingPredicate) {
+export function has(pred: StreamPredicate) {
 	const checkSkip = skip(trivialCompose(not, pred))
 	return function (input: BasicStream) {
 		checkSkip(input)
@@ -121,7 +118,7 @@ export function has(pred: ParsingPredicate) {
 	}
 }
 
-export function find(pred: ParsingPredicate) {
+export function find(pred: StreamPredicate) {
 	return typeof pred === "number"
 		? function (input: BasicStream) {
 				let i = 0
@@ -131,11 +128,11 @@ export function find(pred: ParsingPredicate) {
 				}
 				return input.curr()
 		  }
-		: function (input: BasicStream, init: Collection = ArrayCollection([])) {
+		: function (input: BasicStream, init: Collection = ArrayCollection()) {
 				const final = init
 				let i = 0
 				while (!input.isEnd()) {
-					if (pred(input, i)) final.append(input.curr())
+					if (pred(input, i)) final.push(input.curr())
 					input.next()
 					++i
 				}
@@ -143,9 +140,9 @@ export function find(pred: ParsingPredicate) {
 		  }
 }
 
-export function revert(input: ReversibleStream, init: Collection = ArrayCollection([])) {
+export function revert(input: ReversibleStream, init: Collection = ArrayCollection()) {
 	const final = init
-	while (!input.isStart()) final.append(input.prev())
+	while (!input.isStart()) final.push(input.prev())
 	return final
 }
 
@@ -154,10 +151,10 @@ export function merge(
 	endRule: (streams: BasicStream[]) => boolean,
 	iterationRule: (streams: BasicStream[]) => any
 ) {
-	return function (streams: BasicStream[], init: Collection = ArrayCollection([])) {
+	return function (streams: BasicStream[], init: Collection = ArrayCollection()) {
 		const final = init
 		while (!endRule(streams)) {
-			final.append(streams[mergeRule(streams)].curr())
+			final.push(streams[mergeRule(streams)].curr())
 			iterationRule(streams)
 		}
 		return final

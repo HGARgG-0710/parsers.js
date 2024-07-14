@@ -1,9 +1,8 @@
 import type { Summat } from "./Summat.js"
-import { current, Token } from "main.js"
+import { current, is, Token } from "main.js"
 
-import { map, array } from "@hgargg-0710/one"
+import { map } from "@hgargg-0710/one"
 const { kv: mkv } = map
-const { insert } = array
 
 export interface Indexable<OutType> extends Summat {
 	index(x: any): OutType
@@ -39,23 +38,6 @@ export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	): MapClass<NewKeyType, ValueType>
 }
 
-// ! ADD THIS TO 'one.js'! [or make an 'inplace.js' - mini-library for inplace algorithms?]
-function arrRemove(array: any[], index: number) {
-	for (let i = index; i < array.length - 1; ++i) array[i] = array[i + 1]
-	--array.length
-	return array
-}
-function arrInsert(array: any[], index: number, value: any) {
-	let currval: any = value
-	for (let i = index; i < array.length; ++i) {
-		const temp = array[i]
-		array[i] = currval
-		currval = temp
-	}
-	array[array.length] = currval
-	return array
-}
-
 export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
@@ -79,12 +61,12 @@ export function MapClass<KeyType = any, ValueType = any>(
 			default: _default,
 			add: function (index: number, pair: [KeyType, ValueType]) {
 				const [key, value] = pair
-				arrInsert(this.keys, index, key)
-				arrInsert(this.values, index, value)
+				this.keys.splice(index, 0, key)
+				this.values.splice(index, 0, value)
 			},
 			delete: function (index: number) {
-				arrRemove(this.keys, index)
-				arrRemove(this.values, index)
+				this.keys.splice(index, 1)
+				this.values.splice(index, 1)
 			}
 		}
 	}
@@ -109,4 +91,4 @@ export const [TokenMap, ValueMap, CurrentMap] = [Token.type, Token.value, curren
 	(x) => (mapClass: MapClass) => mapClass.extend(x)
 )
 
-export const TypeMap = (mapClass: MapClass) => mapClass.extendKey((x) => x.is)
+export const TypeMap = (mapClass: MapClass) => mapClass.extendKey(is)
