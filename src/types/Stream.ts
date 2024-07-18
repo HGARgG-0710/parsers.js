@@ -1,6 +1,6 @@
-import type { Iterable } from "main.js"
-import { isFunction } from "../misc.js"
-import type { Summat } from "./Summat.js"
+import { type Iterable } from "main.js"
+import { isFunction, isNumber, predicateChoice } from "../misc.js"
+import type { Summat, SummatFunction } from "./Summat.js"
 import type { Tree } from "./Tree.js"
 
 import { array, object } from "@hgargg-0710/one"
@@ -20,14 +20,16 @@ export interface BasicStream<Type = any, EndType = any> extends Summat {
 	isEnd(): boolean
 }
 
-export interface Position<Type = any> {
+export type PositionObject<Type = any> = {
 	value: Type
 	convert(): number
 }
 
+export type Position<Type = any> = SummatFunction | PositionObject<Type> | number
+
 export interface PositionalStream<Type = any, EndType = any, PosType = any>
 	extends BasicStream<Type, EndType> {
-	pos: Position<PosType> | number
+	pos: Position<PosType>
 }
 
 export interface ReversibleStream<Type = any, EndType = any>
@@ -49,8 +51,33 @@ export interface CopiableStream<Type = any, EndType = any>
 export type IterableStream<Type, EndType> = BasicStream<Type, EndType> &
 	Iterable<Type, EndType>
 
-export function isPosition(x: any): x is Position {
+export type PositionLimit = [Position, Position]
+export interface NavigableStream<Type = any, EndType = any>
+	extends BasicStream<Type, EndType> {
+	navigate(position: Position): Type | EndType | void
+}
+
+export interface LimitableStream<Type = any, EndType = any>
+	extends BasicStream<Type, EndType> {
+	limit(from: Position, to?: Position): BasicStream<Type>
+}
+
+export function isPositionObject(x: any): x is PositionObject {
 	return typeof x.convert === "function"
+}
+
+export function positionConvert(pos: Position) {
+	return isPositionObject(pos) ? pos.convert() : pos
+}
+
+export function positionCheck(stream: PositionalStream, position: Position) {
+	position = positionConvert(position)
+	const converted = positionConvert(stream.pos)
+	return isNumber(position)
+		? isNumber(converted)
+			? position < converted
+			: converted(position)
+		: position(converted)
 }
 
 export function PositionalStream<Type = any, EndType = any>(
@@ -71,38 +98,65 @@ export function PositionalStream<Type = any, EndType = any>(
 	}
 }
 
+export function inputCurr() {
+	return this.input[this.pos]
+}
+
+export function inputNext() {
+	return this.input[this.pos++]
+}
+
+export function inputPrev() {
+	return this.input[this.pos--]
+}
+
+export function inputIsEnd() {
+	return this.pos >= this.input.length
+}
+
+export function inputRewind() {
+	return this.input[(this.pos = 0)]
+}
+export function inputCopy() {
+	const inputStream = InputStream(this.input)
+	inputStream.pos = this.pos
+	return inputStream
+}
+
+export function inputNavigate(i: number) {
+	return this.input[i]
+}
+
+export function inputIterator() {
+	return function* () {
+		while (this.pos < this.input.length) {
+			yield this.input[this.pos]
+			++this.pos
+		}
+		return undefined
+	}
+}
+
+// ? [general idea]: use the global this-based functions + data fields instead of this (for purposes of potential memory-saving? No need to create function every time, only just to reference);
 export function InputStream<Type = any>(
 	input: Indexed<Type>
-): PositionalStream<Type, undefined> & IterableStream<Type, undefined> {
+): PositionalStream<Type, undefined> &
+	IterableStream<Type, undefined> &
+	NavigableStream<Type, undefined> &
+	ReversibleStream<Type, undefined> &
+	RewindableStream<Type, undefined> &
+	CopiableStream<Type, undefined> {
 	return {
+		input,
 		pos: 0,
-		curr: function () {
-			return input[this.pos]
-		},
-		next: function () {
-			return input[this.pos++]
-		},
-		prev: function () {
-			return input[this.pos--]
-		},
-		isEnd: function () {
-			return this.pos >= input.length
-		},
-		rewind: function () {
-			return input[(this.pos = 0)]
-		},
-		copy: function () {
-			const inputStream = InputStream(input)
-			inputStream.pos = this.pos
-			return inputStream
-		},
-		[Symbol.iterator]: function* () {
-			while (this.pos < input.length) {
-				yield input[this.pos]
-				++this.pos
-			}
-			return undefined
-		}
+		curr: inputCurr,
+		next: inputNext,
+		prev: inputPrev,
+		isEnd: inputIsEnd,
+		rewind: inputRewind,
+		copy: inputCopy,
+		navigate: inputNavigate,
+		[Symbol.iterator]: inputIterator()
 	}
 }
 
@@ -209,4 +263,55 @@ export function TreeStream<Type = any>(
 			return copy
 		}
 	}
+}
+
+// ! THIS SHOULD ALSO BE A LIMITABLE STREAM!
+export function LimitedStream<Type, EndType>(
+	initialStream: NavigableStream<Type> & PositionalStream<Type>,
+	from: Position,
+	to?: Position
+): NavigableStream<Type, EndType> &
+	LimitableStream<Type, EndType> &
+	PositionalStream<Type> {
+	if (!to) {
+		to = from
+		from = null
+	}
+	if (from !== null) initialStream.navigate(from)
+	return {
+		pos: 0,
+		to,
+		input: initialStream,
+		navigate: function (position: Position) {
+			position = positionConvert(position)
+			return this.input.navigate(
+				isNumber(position)
+					? (positionConvert(this.input.pos) as number) + position
+					: position
+			)
+		},
+		next: function () {
+			return this.input.next()
+		},
+		curr: function () {
+			return this.input.curr()
+		},
+		isEnd: function () {
+			return !positionCheck(this.input, this.to) || this.input.isEnd()
+		},
+		limit: function (from: Position, to?: Position) {
+			return LimitedStream<Type, EndType>(this, from, to)
+		}
+	}
+}
+
+export function limitStream(from: Position, to?: Position) {
+	return LimitedStream(this, from, to)
+}
+
+export function LimitableStream<Type = any, EndType = any>(
+	navigable: NavigableStream<Type, EndType> & PositionalStream<Type>
+): LimitableStream<Type, EndType> {
+	navigable.limit = limitStream
+	return navigable as unknown as LimitableStream<Type, EndType>
 }

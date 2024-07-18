@@ -15,7 +15,7 @@ export function PositionalValidator<KeyType = any>(
 ) {
 	const locator = StreamLocator(trivialCompose(not, validatorMap))
 	return function (
-		input: ParsingState<PositionalStream, [boolean, Position | number], boolean>
+		input: ParsingState<PositionalStream, [boolean, Position], boolean>
 	) {
 		const [found, pos] = locator(input).result
 		return [!found, pos]

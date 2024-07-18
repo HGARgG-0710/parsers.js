@@ -6,7 +6,7 @@
 
 	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
 	
-	3.1. a utility - `extract`: 
+	2.1. a utility - `extract`: 
 
 		Reverse+generalization of 'limit' - splits a given Stream into 
 			pieces, [extracted: any[][], remains: any[][]], 
@@ -15,15 +15,12 @@
 				Array(extracted.length).fill(0).map((_x, i) => [remains[i], extracted[i]]).flat().reduce((last, curr) => last.concat(curr), []) === transform((x) => x)(input)
 
 		Where 'input' is the passed `Stream`.
-
 		Useful for defining more complex predicate-based Pattern-s; 
 
-	3.2. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
+	2.2. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
+		The result is a Collection consisting of elements of several different streams.
 
-		The result is an array consisting of elements of several different streams.
-
-	3.3. StreamPattern:
-
+	2.3. StreamPattern:
 		A `Pattern` implementation based off `extract` and a `Stream`. 
 
 3. NEGATIVE NUMBERS!
@@ -39,22 +36,20 @@
 	Scour the previous parser projects, distinguish different 'types/patterns' of trees
 		to be constructed (there are at least 4 that can be seen already...); 
 
-6. Create a 'MultiPositionalStream' interface, for "partitioning" a 'Stream': 
+6. Scour previous projects for various aliases, ideas for things to put into the library...
 
-	It has to be also a NavigableStream (one using Positions to '.navigate' to a given point),
-		and a PositionalStream.
-
-	This thing would allow to save memory on things like temporary 'limit' results, for instance.
-	Instead of allocating an entirely new collection, one would just use the one already present 
-		via the according MultiPositionalStream interface...
-
-7. Scour previous projects for various aliases, ideas for things to put into the library...
-
-8. This list is for tracking source files with mangled types (WHICH DON'T SHOW ANY ERRORS... Revise carefully): 
+7. This list is for tracking source files with mangled types (WHICH DON'T SHOW ANY ERRORS... Revise carefully): 
 		1. PatternTokenizer 
 		2. PatternValidator
 
 	! WALK THROUGH THE FILES ADN FIND MORE MANGLED TYPES!
+
+8. Cache ALL functions into separate exports. Example: the 'Stream' module. 
+	Use a more 'object-oriented' approach - use 'this' + fields instead of creating functions with variable information "beat-into" them
+
+
+A. testing (fix old tests, create new ones); 
+B. documentation (change/fix it...); 
 
 For v0.4: 
 

@@ -1,4 +1,4 @@
-import { isArray, predicateChoice } from "../misc.js"
+import { isArray, isNumber, predicateChoice } from "../misc.js"
 import type {
 	DelimHandler,
 	DelimPredicate,
@@ -6,7 +6,8 @@ import type {
 	StreamPredicate
 } from "./ParserMap.js"
 import {
-	isPosition,
+	isPositionObject,
+	positionConvert,
 	type BasicStream,
 	type Position,
 	type ReversibleStream
@@ -58,8 +59,8 @@ export function eliminate<Type = any, SplitType = any, MatchType = any>(
 	return (pattern: Pattern<Type, SplitType, MatchType>, nil = pattern.class.empty) =>
 		symbols.reduce((acc, curr) => acc.split(curr).join(nil), pattern)
 }
-export function skip(steps: StreamPredicate | number | Position = 1) {
-	const pred = predicateChoice(isPosition(steps) ? steps.convert() : steps)
+export function skip(steps: Position = 1) {
+	const pred = predicateChoice(positionConvert(steps))
 	return function (input: BasicStream) {
 		let i = 0
 		while (!input.isEnd() && pred(input, i)) {
@@ -70,9 +71,10 @@ export function skip(steps: StreamPredicate | number | Position = 1) {
 	}
 }
 
-export function consume(init: number | StreamPredicate, pred?: number | StreamPredicate) {
+export function consume(init: Position, pred?: Position) {
 	const isPred = !!pred
-	pred = predicateChoice(isPred ? pred : init)
+	init = positionConvert(init)
+	pred = predicateChoice(isPred ? positionConvert(pred) : init)
 	const initSkip = skip(isPred ? predicateChoice(init) : 0)
 	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
 		initSkip(input)
@@ -110,8 +112,9 @@ export function nested(
 
 export const array = transform()
 
-export function has(pred: StreamPredicate) {
-	const checkSkip = skip(trivialCompose(not, pred))
+export function has(pred: Position) {
+	pred = positionConvert(pred)
+	const checkSkip = skip(isNumber(pred) ? pred : trivialCompose(not, pred))
 	return function (input: BasicStream) {
 		checkSkip(input)
 		return !input.isEnd()
