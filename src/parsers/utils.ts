@@ -31,7 +31,7 @@ export function delimited(
 	return function (
 		input: BasicStream,
 		handler: DelimHandler = preserve,
-		init: Collection = ArrayCollection()
+		dest: Collection = ArrayCollection()
 	) {
 		skip(prePred)(input)
 
@@ -43,14 +43,13 @@ export function delimited(
 			isdelim(input, i, j + _j)
 		)
 
-		const result = init
 		for (; endpred(input, i, j); ++i) {
 			j += skipDelims(input)
 			if (!endpred(input, i, j)) break
-			result.push(...handler(input, i, j))
+			dest.push(...handler(input, i, j))
 			input.next()
 		}
-		return result
+		return dest
 	}
 }
 export function eliminate<Type = any, SplitType = any, MatchType = any>(
@@ -76,11 +75,10 @@ export function consume(init: Position, pred?: Position) {
 	init = positionConvert(init)
 	pred = predicateChoice(isPred ? positionConvert(pred) : init)
 	const initSkip = skip(isPred ? predicateChoice(init) : 0)
-	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
+	return function (input: BasicStream, dest: Collection = ArrayCollection()) {
 		initSkip(input)
-		const result = initial
-		for (let i = 0; !input.isEnd() && pred(input, i); ++i) result.push(input.next())
-		return result
+		for (let i = 0; !input.isEnd() && pred(input, i); ++i) dest.push(input.next())
+		return dest
 	}
 }
 
@@ -121,7 +119,8 @@ export function has(pred: Position) {
 	}
 }
 
-export function find(pred: StreamPredicate) {
+export function find(pred: Position) {
+	pred = positionConvert(pred)
 	return typeof pred === "number"
 		? function (input: BasicStream) {
 				let i = 0
@@ -131,22 +130,20 @@ export function find(pred: StreamPredicate) {
 				}
 				return input.curr()
 		  }
-		: function (input: BasicStream, init: Collection = ArrayCollection()) {
-				const final = init
+		: function (input: BasicStream, dest: Collection = ArrayCollection()) {
 				let i = 0
 				while (!input.isEnd()) {
-					if (pred(input, i)) final.push(input.curr())
+					if (pred(input, i)) dest.push(input.curr())
 					input.next()
 					++i
 				}
-				return final
+				return dest
 		  }
 }
 
-export function revert(input: ReversibleStream, init: Collection = ArrayCollection()) {
-	const final = init
-	while (!input.isStart()) final.push(input.prev())
-	return final
+export function revert(input: ReversibleStream, dest: Collection = ArrayCollection()) {
+	while (!input.isStart()) dest.push(input.prev())
+	return dest
 }
 
 export function merge(
@@ -162,4 +159,34 @@ export function merge(
 		}
 		return final
 	}
+}
+
+export function extract(pred: DelimPredicate, isRem: boolean = false) {
+	return function (
+		stream: BasicStream,
+		destextr: Collection = ArrayCollection(),
+		destrem: Collection = ArrayCollection()
+	): [Collection, Collection] | Collection {
+		let i = 0
+		let j = 0
+		while (!stream.isEnd()) {
+			while (!stream.isEnd() && pred(stream, i, j)) {
+				destextr.push(stream.next())
+				++i
+			}
+			while (!stream.isEnd() && !pred(stream, i, j)) {
+				if (isRem) destrem.push(stream.next())
+				++j
+			}
+		}
+		return isRem ? [destextr, destrem] : destextr
+	}
+}
+
+export function prolong(streams: BasicStream[], dest: Collection = ArrayCollection()) {
+	for (let i = 0; i < streams.length; ++i) {
+		const stream = streams[i]
+		while (!stream.isEnd()) dest.push(stream.next())
+	}
+	return dest
 }

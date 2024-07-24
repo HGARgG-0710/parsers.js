@@ -1,5 +1,6 @@
 import { array, object } from "@hgargg-0710/one"
-import type { Summat } from "./Summat.js"
+import type { Summat, SummatFunction } from "./Summat.js"
+import { extract, type DelimPredicate, type RewindableStream } from "main.js"
 const { first, iterator } = array
 const { structCheck } = object
 
@@ -43,6 +44,23 @@ export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
 	map: (f: (x?: Pattern<Type>, i?: number, arr?: any) => any) => any
 }
 
+export const isPattern: (x: any) => x is Pattern = structCheck(
+	"split",
+	"matchAll",
+	"length",
+	"class"
+)
+
+export const isPatternCollection: (x: any) => x is PatternCollection = structCheck(
+	"join",
+	"filter",
+	"reduce",
+	"every",
+	"slice",
+	"concat",
+	Symbol.iterator
+)
+
 export const StringPattern: PatternClass<string, RegExp | string, RegExp | string> = (
 	string = ""
 ): Pattern<string, RegExp, RegExp> => {
@@ -60,8 +78,17 @@ export const StringPattern: PatternClass<string, RegExp | string, RegExp | strin
 		class: StringPattern
 	}
 }
-StringPattern.is = structCheck("split", "matchAll", "length", "class")
+StringPattern.is = isPattern
 StringPattern.empty = StringPattern()
+
+export function stringPatternCollectionMap(f: Function) {
+	return StringPatternCollection(this.value.map(f))
+}
+export function stringPatternCollectionConcat(
+	collection: Iterable = [] as unknown as Iterable
+) {
+	return StringPatternCollection([...this.value, ...collection])
+}
 
 export const StringPatternCollection: PatternCollectionClass<string, RegExp, RegExp> = (
 	arr: any = []
@@ -69,7 +96,7 @@ export const StringPatternCollection: PatternCollectionClass<string, RegExp, Reg
 	return {
 		value: arr,
 		join: function (x = StringPattern()) {
-			return StringPattern(arr.map((x) => x.value).join(x.value))
+			return StringPattern(arr.map((x: Pattern) => x.value).join(x.value))
 		},
 		filter: function (predicate = (x) => x) {
 			return StringPatternCollection(arr.filter(predicate))
@@ -83,25 +110,11 @@ export const StringPatternCollection: PatternCollectionClass<string, RegExp, Reg
 		slice: function (start = 0, end = arr.length) {
 			return StringPatternCollection(arr.slice(start, end))
 		},
-		concat: function (collection: Iterable = [] as unknown as Iterable) {
-			return StringPatternCollection([...arr, ...collection])
-		},
-		map: function (f) {
-			return StringPatternCollection(arr.map(f))
-		},
+		concat: stringPatternCollectionConcat,
+		map: stringPatternCollectionMap,
 		[Symbol.iterator]: iterator(arr)
 	}
 }
 
 StringPattern.collection = StringPatternCollection
-
-// TODO: make into a GENERAL EXPORT! [this is NOT exclusive to 'StringPatternCollection']; 
-StringPatternCollection.is = structCheck(
-	"join",
-	"filter",
-	"reduce",
-	"every",
-	"slice",
-	"concat",
-	Symbol.iterator
-)
+StringPatternCollection.is = isPatternCollection

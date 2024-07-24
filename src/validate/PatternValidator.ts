@@ -1,9 +1,12 @@
 import { array } from "@hgargg-0710/one"
-import { table, type ParserFunction, type ParserMap } from "../parsers.js"
-import type { Pattern, PatternCollection } from "../types.js"
+import { table } from "../parsers.js"
+import type { IndexMap, Pattern, PatternCollection, SummatFunction } from "../types.js"
 const { insert } = array
 
-export function PatternValidator<KeyType>(validityMap: ParserMap<KeyType, boolean>) {
+// ? Generalize this to analyze a given pattern "globally" in terms of tokens? (id est, allow to LOCATE the 'non-true' bits and return them, along with locations/indexes?); 
+export function PatternValidator<KeyType>(
+	validityMap: IndexMap<KeyType, SummatFunction<any, boolean>>
+) {
 	const [typeKeys, checks] = table(validityMap)
 	return function (pattern: Pattern<any, KeyType, KeyType>) {
 		const isPattern = pattern.class.is
@@ -11,7 +14,7 @@ export function PatternValidator<KeyType>(validityMap: ParserMap<KeyType, boolea
 		const validateSingle = (
 			pattern: Pattern<any, KeyType, KeyType>,
 			typeKey: KeyType,
-			check: ParserFunction<boolean>
+			check: SummatFunction<KeyType, boolean>
 		) => {
 			return (
 				pattern

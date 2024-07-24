@@ -2,58 +2,22 @@
 1. Check if this works with Deno; 	
 
 [v0.3]
-2. Idea for new functions: 
 
-	NOTE: the 'utilities' and other parts of the library must ALL support the new 'stateful' signature...;
-	
-	2.1. a utility - `extract`: 
-
-		Reverse+generalization of 'limit' - splits a given Stream into 
-			pieces, [extracted: any[][], remains: any[][]], 
-			with: 
-			
-				Array(extracted.length).fill(0).map((_x, i) => [remains[i], extracted[i]]).flat().reduce((last, curr) => last.concat(curr), []) === transform((x) => x)(input)
-
-		Where 'input' is the passed `Stream`.
-		Useful for defining more complex predicate-based Pattern-s; 
-
-	2.2. a utility `prolong`/'extend' - concats the results of `transform((x) => x)`. 
-		The result is a Collection consisting of elements of several different streams.
-
-	2.3. StreamPattern:
-		A `Pattern` implementation based off `extract` and a `Stream`. 
-
-3. NEGATIVE NUMBERS!
-
-	Alter the 'predicateChoice' to allow for negative numbers (the '.prev'); 
-
-4. Write proper JSDoc documentation for all this stuff...
-
-	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
-
-5. Tree-construction task: 
-
+1. Tree-construction task: 
 	Scour the previous parser projects, distinguish different 'types/patterns' of trees
 		to be constructed (there are at least 4 that can be seen already...); 
 
-6. Scour previous projects for various aliases, ideas for things to put into the library...
+2. Scour previous projects for various aliases, ideas for things to put into the library...
 
-7. This list is for tracking source files with mangled types (WHICH DON'T SHOW ANY ERRORS... Revise carefully): 
-		1. PatternTokenizer 
-		2. PatternValidator
-
-	! WALK THROUGH THE FILES ADN FIND MORE MANGLED TYPES!
-
-8. Cache ALL functions into separate exports. Example: the 'Stream' module. 
+3. Cache all the remaining functions into separate exports. Example: the 'Stream' module. 
 	Use a more 'object-oriented' approach - use 'this' + fields instead of creating functions with variable information "beat-into" them
-
 
 A. testing (fix old tests, create new ones); 
 B. documentation (change/fix it...); 
 
 For v0.4: 
 
-	STACK! 
+1. STACK! 
 	The library is VERY stack heavy, and this is (largely) impossible to fix on its own. 
 
 	SOLUTION: use the CPS style. 
@@ -61,3 +25,19 @@ For v0.4:
 		with an infinite 'stack'; 
 
 	! THIS WILL REQUIRE FOR ONE TO FIRST IMPLEMENT THE INFINITE CPS-BASED STACK LIBRARY!
+	That one should: 
+		0. Be written in TypeScript; 
+		Include Types: 
+		1. InfiniteStack; 
+		2. CPSArray (this is, ultimately, a CPS version of JS array);
+
+2. Negative numbers? 
+	Alter the 'predicateChoice' to allow for negative numbers (the '.prev')? 
+	This'd mean (ultimately) just adding a more convinient syntax for stuff like 'RevertedStream'; 
+	Except, it would also require that all Streams used be REVERSIBLE...; 
+
+	Think about this. 
+	
+3. Write proper JSDoc documentation for all this stuff...
+
+	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...

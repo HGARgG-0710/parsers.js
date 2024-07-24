@@ -25,13 +25,20 @@ export type ParserFunction<
 ) &
 	Summat
 
-export interface StreamHandler<Type = any[]> extends Summat {
-	(input?: BasicStream, i?: number): Type
-}
+export type StreamHandler<Type = any[]> = Summat &
+	(
+		| ((input?: BasicStream, i?: number) => Type)
+		| ((input?: BasicStream) => Type)
+		| (() => Type)
+	)
 
-export interface DelimHandler<Type = any[]> extends Summat {
-	(input?: BasicStream, i?: number, j?: number): Type
-}
+export type DelimHandler<Type = any[]> = Summat &
+	(
+		| ((input?: BasicStream, i?: number, j?: number) => Type)
+		| ((input?: BasicStream, i?: number) => Type)
+		| ((input?: BasicStream) => Type)
+		| (() => Type)
+	)
 
 export function ParserMap<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, ParserFunction<OutType>>
@@ -53,7 +60,7 @@ export type StreamPredicate = StreamHandler<boolean>
 export type DelimPredicate = DelimHandler<boolean>
 
 export function table<KeyType = any, OutType = any>(
-	parserMap: ParserMap<KeyType, OutType>
-): [KeyType[], ParserFunction<OutType>[]] {
+	parserMap: IndexMap<KeyType, OutType>
+): [KeyType[], OutType[]] {
 	return [parserMap.keys, parserMap.values]
 }

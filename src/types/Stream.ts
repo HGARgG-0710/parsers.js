@@ -137,6 +137,10 @@ export function inputIterator() {
 	}
 }
 
+export function inputIsStart() {
+	return !this.pos
+}
+
 // ? [general idea]: use the global this-based functions + data fields instead of this (for purposes of potential memory-saving? No need to create function every time, only just to reference);
 export function InputStream<Type = any>(
 	input: Indexed<Type>
@@ -152,6 +156,7 @@ export function InputStream<Type = any>(
 		curr: inputCurr,
 		next: inputNext,
 		prev: inputPrev,
+		isStart: inputIsStart,
 		isEnd: inputIsEnd,
 		rewind: inputRewind,
 		copy: inputCopy,
@@ -163,6 +168,7 @@ export function InputStream<Type = any>(
 // todo: REFACTOR... [the indexation and other repetative operations...];
 // ? Not sure one likes these 'backup'-s, and `lastItem`-s (and this kind of 'multind' modification... + memory wasting on `backup` values). See if one could do without them...;
 // ^ IDEA: create a 'pos' (as in PositionalStream), for this thing - THEN, it'd be possible to, say, get an index of a given item in terms of number of iterations through the thing...;
+// ! Add 'isStart';
 export function TreeStream<Type = any>(
 	tree: Tree<Type>
 ): RewindableStream<Tree<Type>, {}> &
@@ -265,7 +271,6 @@ export function TreeStream<Type = any>(
 	}
 }
 
-// ! THIS SHOULD ALSO BE A LIMITABLE STREAM!
 export function LimitedStream<Type, EndType>(
 	initialStream: NavigableStream<Type> & PositionalStream<Type>,
 	from: Position,
@@ -310,8 +315,24 @@ export function limitStream(from: Position, to?: Position) {
 }
 
 export function LimitableStream<Type = any, EndType = any>(
-	navigable: NavigableStream<Type, EndType> & PositionalStream<Type>
-): LimitableStream<Type, EndType> {
+	navigable: NavigableStream<Type, EndType> & PositionalStream<Type, EndType>
+): LimitableStream<Type, EndType> &
+	NavigableStream<Type, EndType> &
+	PositionalStream<Type, EndType> {
 	navigable.limit = limitStream
-	return navigable as unknown as LimitableStream<Type, EndType>
+	return navigable as LimitableStream<Type, EndType> &
+		NavigableStream<Type, EndType> &
+		PositionalStream<Type, EndType>
+}
+
+export function ReversedStream<Type = any, EndType = any>(
+	input: ReversibleStream<Type, EndType>
+): ReversibleStream<Type, EndType> {
+	return {
+		next: input.prev,
+		prev: input.next,
+		curr: input.curr,
+		isEnd: input.isStart,
+		isStart: input.isEnd
+	}
 }
