@@ -1,11 +1,12 @@
 import type { ParserMap } from "./ParserMap.js"
 import { GeneralParser } from "./GeneralParser.js"
 import { ArrayCollection, type Collection } from "src/types/Collection.js"
+import { firstFinished } from "main.js"
 
 export function FiniteStepParser(n: number) {
 	return <KeyType = any, OutType = any>(parser: ParserMap<KeyType, OutType[]>) =>
 		GeneralParser({
-			finished: ({ streams }) => streams[0].isEnd(),
+			finished: firstFinished,
 			change: function (result, y: Collection<OutType>) {
 				result.push(...y)
 				let i = 0

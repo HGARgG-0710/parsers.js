@@ -9,7 +9,7 @@ export function StreamTokenizer<KeyType = any, OutType = any>(
 ) {
 	return function (input: BasicStream): BasicStream<OutType, Falsy> {
 		const STARTVALUE = {}
-		let current: OutType | {} = STARTVALUE
+		let current: OutType | typeof STARTVALUE = STARTVALUE
 
 		const RESULT = {
 			next: function () {

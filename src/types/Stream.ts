@@ -1,5 +1,5 @@
-import { type Iterable } from "main.js"
-import { isFunction, isNumber, predicateChoice } from "../misc.js"
+import { type SummatIterable } from "main.js"
+import { isFunction, isNumber } from "../misc.js"
 import type { Summat, SummatFunction } from "./Summat.js"
 import type { Tree } from "./Tree.js"
 
@@ -49,7 +49,7 @@ export interface CopiableStream<Type = any, EndType = any>
 }
 
 export type IterableStream<Type, EndType> = BasicStream<Type, EndType> &
-	Iterable<Type, EndType>
+	SummatIterable<Type>
 
 export type PositionLimit = [Position, Position]
 export interface NavigableStream<Type = any, EndType = any>
@@ -77,7 +77,16 @@ export function positionCheck(stream: PositionalStream, position: Position) {
 		? isNumber(converted)
 			? position < converted
 			: converted(position)
-		: position(converted)
+		: position(stream)
+}
+
+export function positionCopy(x: Position): Position {
+	return isPositionObject(x) ? { ...x } : x
+}
+
+export function positionalStreamNext() {
+	++this.pos
+	return this.input.next()
 }
 
 export function PositionalStream<Type = any, EndType = any>(
@@ -85,59 +94,53 @@ export function PositionalStream<Type = any, EndType = any>(
 ): PositionalStream<Type, EndType> {
 	return {
 		pos: 0,
-		next: function () {
-			++this.pos
-			return substream.next()
-		},
-		curr: function () {
-			return substream.curr()
-		},
-		isEnd: function () {
-			return substream.isEnd()
-		}
+		input: substream,
+		next: positionalStreamNext,
+		curr: underStreamCurr,
+		isEnd: underStreamIsEnd
 	}
 }
 
-export function inputCurr() {
+export function inputStreamCurr() {
 	return this.input[this.pos]
 }
 
-export function inputNext() {
+export function inputStreamtNext() {
 	return this.input[this.pos++]
 }
 
-export function inputPrev() {
+export function inputStreamtPrev() {
 	return this.input[this.pos--]
 }
 
-export function inputIsEnd() {
+export function inputStreamIsEnd() {
 	return this.pos >= this.input.length
 }
 
-export function inputRewind() {
+export function inputStreamRewind() {
 	return this.input[(this.pos = 0)]
 }
-export function inputCopy() {
+export function inputStreamCopy() {
 	const inputStream = InputStream(this.input)
 	inputStream.pos = this.pos
 	return inputStream
 }
 
-export function inputNavigate(i: number) {
-	return this.input[i]
+export function inputStreamNavigate(i: number | SummatFunction) {
+	if (isNumber(i)) return this.input[i]
+	while (!i(this.input)) this.next()
+	return this.input[this.pos]
 }
 
-export function inputIterator() {
-	return function* () {
-		while (this.pos < this.input.length) {
-			yield this.input[this.pos]
-			++this.pos
-		}
-		return undefined
+export function* inputStreamIterator() {
+	while (this.pos < this.input.length) {
+		yield this.input[this.pos]
+		++this.pos
 	}
+	return undefined
 }
 
-export function inputIsStart() {
+export function inputStreamIsStart() {
 	return !this.pos
 }
 
@@ -153,29 +156,30 @@ export function InputStream<Type = any>(
 	return {
 		input,
 		pos: 0,
-		curr: inputCurr,
-		next: inputNext,
-		prev: inputPrev,
-		isStart: inputIsStart,
-		isEnd: inputIsEnd,
-		rewind: inputRewind,
-		copy: inputCopy,
-		navigate: inputNavigate,
-		[Symbol.iterator]: inputIterator()
+		curr: inputStreamCurr,
+		next: inputStreamtNext,
+		prev: inputStreamtPrev,
+		isStart: inputStreamIsStart,
+		isEnd: inputStreamIsEnd,
+		rewind: inputStreamRewind,
+		copy: inputStreamCopy,
+		navigate: inputStreamNavigate,
+		[Symbol.iterator]: inputStreamIterator
 	}
 }
 
 // todo: REFACTOR... [the indexation and other repetative operations...];
-// ? Not sure one likes these 'backup'-s, and `lastItem`-s (and this kind of 'multind' modification... + memory wasting on `backup` values). See if one could do without them...;
 // ^ IDEA: create a 'pos' (as in PositionalStream), for this thing - THEN, it'd be possible to, say, get an index of a given item in terms of number of iterations through the thing...;
-// ! Add 'isStart';
 export function TreeStream<Type = any>(
 	tree: Tree<Type>
 ): RewindableStream<Tree<Type>, {}> &
 	ReversibleStream<Tree<Type>, {}> &
 	CopiableStream<Tree<Type>, {}> {
-	let multind = []
-	let backup: number[] = []
+	// ! NOTE: this sort of 'internal state' PREVENTS one from properly refactoring the thing into 'this.'-based methods; If one keeps these as an 'available state', the user will be able to modify it... [which is largely undesired...];
+	// THE VARIABLES THAT STAND IN THE WAY:
+	// 1. ENDVALUE [hidden constant]
+	// 2. lastMultind [hidden constant, not supposed to be changeable];
+	let multind: number[] = []
 	const ENDVALUE = {}
 
 	let currlevel = tree
@@ -185,63 +189,64 @@ export function TreeStream<Type = any>(
 	const childStruct = structCheck("lastChild")
 	const nextLevel = (c: any): c is Tree<Type> =>
 		childStruct(c) && isFunction(c.lastChild) && c.lastChild() >= 0
-	const isMore = (l: Tree<Type>): boolean => l.lastChild() >= last(multind) + 1
 
 	const isParent = (c: any): boolean => c !== tree
 	const isSibling = (): boolean => !!last(multind)
+
+	const lastMultind = []
+	let lastIterated: Tree<Type> | Type = tree
+	while (nextLevel(lastIterated)) {
+		const lastChild = lastIterated.lastChild()
+		lastMultind.push(lastChild)
+		lastIterated = lastIterated.index([lastChild])
+	}
 
 	return {
 		pos: multind,
 		next: function () {
 			const prev = current
-			lastItem = prev === ENDVALUE ? lastItem : (prev as Tree<Type> | Type)
+			if (prev === ENDVALUE) return prev
+
+			lastItem = prev as Tree<Type> | Type
 			if (nextLevel(current)) {
 				multind.push(0)
 				currlevel = current
 				current = current.index([0])
 				return prev
 			}
-			if (multind.length) backup = [...multind]
-			while (multind.length && !isMore(currlevel)) {
-				multind.pop()
-				current = currlevel
-				currlevel = tree.index(lastOut(multind)) as Tree<Type>
+
+			let result = Math.min(lastMultind.length, multind.length) - 1
+			while (result >= 0 && lastMultind[result] <= multind[result]) --result
+			if (result < 0) {
+				current = ENDVALUE
+				return prev
 			}
-			current = multind.length
-				? currlevel.index([++multind[multind.length - 1]])
-				: ENDVALUE
+
+			++multind[result]
+			multind.length = result + 1
+			currlevel = tree.index(lastOut(multind)) as Tree
+			current = currlevel.index([last(multind)])
 			return prev
 		},
 		prev: function () {
-			const lastcurr = current
-			if (lastItem && current === ENDVALUE) {
-				multind = backup
+			const next = current
+			if (current === ENDVALUE) {
 				current = lastItem
-				return lastcurr
+				return next
 			}
-			lastItem = lastcurr as Tree<Type> | Type
+			lastItem = next as Tree<Type> | Type
 
 			if (isSibling()) {
 				const sibling = currlevel.index([--multind[multind.length - 1]])
 				current = sibling
-				let [isLevel, isFurther] = Array(2).fill(false)
-				if (nextLevel(current))
-					while (
-						(isLevel = nextLevel(current)) ||
-						(isFurther = isMore(currlevel))
-					) {
-						if (isLevel) {
-							multind.push(0)
-							currlevel = current as Tree<Type>
-							current = (current as Tree<Type>).index([last(multind)])
-							continue
-						}
-						if (isFurther)
-							current = currlevel.index([
-								(multind[multind.length - 1] = currlevel.lastChild())
-							])
-					}
-				return lastcurr
+				const subind = []
+				while (nextLevel(current)) {
+					const lastChild = current.lastChild()
+					subind.push(lastChild)
+					current = current.index([lastChild])
+				}
+				multind.push(...subind)
+				return next
 			}
 
 			if (isParent(current)) {
@@ -250,7 +255,7 @@ export function TreeStream<Type = any>(
 				currlevel = tree.index(lastOut(multind)) as Tree<Type>
 			}
 
-			return lastcurr
+			return next
 		},
 		curr: function () {
 			return current
@@ -267,11 +272,35 @@ export function TreeStream<Type = any>(
 			const copy = TreeStream(tree)
 			copy.pos = [...multind]
 			return copy
+		},
+		isStart: function () {
+			return current === tree
 		}
 	}
 }
 
-export function LimitedStream<Type, EndType>(
+export function limitedStreamNavigate(position: Position) {
+	position = positionConvert(position)
+	return this.input.navigate(
+		isNumber(position)
+			? (positionConvert(this.input.pos) as number) + position
+			: position
+	)
+}
+export function underStreamNext() {
+	return this.input.next()
+}
+export function underStreamCurr() {
+	return this.input.curr()
+}
+export function underStreamIsEnd() {
+	return this.input.isEnd()
+}
+export function limitedStreamIsEnd() {
+	return !positionCheck(this.input, this.to) || this.input.isEnd()
+}
+
+export function LimitedStream<Type = any, EndType = any>(
 	initialStream: NavigableStream<Type> & PositionalStream<Type>,
 	from: Position,
 	to?: Position
@@ -287,31 +316,16 @@ export function LimitedStream<Type, EndType>(
 		pos: 0,
 		to,
 		input: initialStream,
-		navigate: function (position: Position) {
-			position = positionConvert(position)
-			return this.input.navigate(
-				isNumber(position)
-					? (positionConvert(this.input.pos) as number) + position
-					: position
-			)
-		},
-		next: function () {
-			return this.input.next()
-		},
-		curr: function () {
-			return this.input.curr()
-		},
-		isEnd: function () {
-			return !positionCheck(this.input, this.to) || this.input.isEnd()
-		},
-		limit: function (from: Position, to?: Position) {
-			return LimitedStream<Type, EndType>(this, from, to)
-		}
+		navigate: limitedStreamNavigate,
+		next: underStreamNext,
+		curr: underStreamCurr,
+		isEnd: limitedStreamIsEnd,
+		limit: limitStream
 	}
 }
 
-export function limitStream(from: Position, to?: Position) {
-	return LimitedStream(this, from, to)
+export function limitStream<Type = any, EndType = any>(from: Position, to?: Position) {
+	return LimitedStream<Type, EndType>(this, from, to)
 }
 
 export function LimitableStream<Type = any, EndType = any>(
@@ -328,6 +342,7 @@ export function LimitableStream<Type = any, EndType = any>(
 export function ReversedStream<Type = any, EndType = any>(
 	input: ReversibleStream<Type, EndType>
 ): ReversibleStream<Type, EndType> {
+	while (!input.isEnd()) input.next()
 	return {
 		next: input.prev,
 		prev: input.next,

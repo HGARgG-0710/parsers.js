@@ -2,6 +2,7 @@ import type { BasicStream } from "./types/Stream.js"
 import type { HasType } from "./types/IndexMap.js"
 import type { DelimPredicate } from "./parsers/ParserMap.js"
 
+export const isHex = (x: string) => /[0-9A-Fa-f]/.test(x)
 export const isNumber = (x: any): x is number | Number =>
 	typeof x === "number" || x instanceof Number
 export const isFunction = (x: any): x is Function => typeof x === "function"

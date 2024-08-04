@@ -34,3 +34,5 @@ export const skipArg =
 export const preserve = (input: BasicStream) => (input.isEnd() ? [] : [input.curr()])
 export const miss = () => []
 export const not = (x: any) => !x
+
+export const firstFinished = ({ streams }) => streams[0].isEnd()

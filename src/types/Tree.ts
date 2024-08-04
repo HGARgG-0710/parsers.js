@@ -12,7 +12,7 @@ export interface Tree<Type = any> extends Summat {
 const mapPropsPreserve = (
 	f: (x?: any, i?: number, arr?: any[]) => any
 ): ((x: any[] & Summat) => any[] & Summat) => propPreserve((array: any[]) => array.map(f))
-const arrayTreePreserve = mapPropsPreserve(ArrayTree)
+const arrayTreePreserve = mapPropsPreserve(RecursiveArrayTree)
 
 export function childIndex(multind: number[]) {
 	return multind.reduce((prev, curr) => prev.children[curr], this)
@@ -21,12 +21,40 @@ export function childrenCount(): number {
 	return this.children.length - 1
 }
 
-export function ArrayTree(arrtree: any): Tree {
-	function ArrTreeLevel(level: Summat): Tree {
-		level.lastChild = childrenCount
-		level.index = childIndex
-		level.children = level
-		return level as Tree
-	}
-	return isArray(arrtree) ? ArrTreeLevel(arrayTreePreserve(arrtree)) : arrtree
+export function ChildrenTree(tree: Summat): Tree {
+	tree.lastChild = childrenCount
+	tree.index = childIndex
+	return tree as Tree
+}
+
+export function ChildlessTree(tree: Tree): Tree {
+	tree.children = []
+	return tree
+}
+
+export function SingleValueTree(tree: Tree, converter: (x: any) => any): Tree {
+	tree.value = converter(tree.value)
+	tree.children = [tree.value]
+	return tree
+}
+
+export function MultValueTree(tree: Tree, converter: (x: any) => any): Tree {
+	tree.value = tree.value.map(converter)
+	tree.children = tree.value
+	return tree
+}
+
+export function ThisTree(level: Summat): Summat {
+	level.children = level
+	return level
+}
+
+export function ArrayTree(level: Summat): Tree {
+	ChildrenTree(level)
+	ThisTree(level)
+	return level as Tree
+}
+
+export function RecursiveArrayTree(arrtree: any): Tree {
+	return isArray(arrtree) ? ArrayTree(arrayTreePreserve(arrtree)) : arrtree
 }

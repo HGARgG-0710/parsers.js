@@ -1,12 +1,10 @@
 import { array, object } from "@hgargg-0710/one"
-import type { Summat, SummatFunction } from "./Summat.js"
-import { extract, type DelimPredicate, type RewindableStream } from "main.js"
+import type { Summat } from "./Summat.js"
 const { first, iterator } = array
 const { structCheck } = object
 
-export interface Iterable<Type = any, ReturnType = any> extends Summat {
-	[Symbol.iterator]: () => Generator<Type, ReturnType>
-}
+// ? separate the 'summat' into a separate TypeScript library?
+export type SummatIterable<Type = any> = Iterable<Type> & Summat
 
 export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any>
 	extends Summat {
@@ -31,7 +29,7 @@ export interface Pattern<Type = any, SplitType = any, MatchType = any> extends S
 }
 
 export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
-	extends Iterable {
+	extends SummatIterable {
 	value: any
 	join: (x: Pattern<Type, SplitType, MatchType>) => Pattern<Type, SplitType, MatchType>
 	filter: (
@@ -40,7 +38,7 @@ export interface PatternCollection<Type = any, SplitType = any, MatchType = any>
 	reduce: (predicate: (prev?: any, curr?: any, i?: number) => any, init: any) => any
 	every: (predicate: (x: any) => any) => boolean
 	slice: (start: number, end: number) => PatternCollection<Type, SplitType, MatchType>
-	concat: (collection: Iterable) => PatternCollection<Type, SplitType, MatchType>
+	concat: (collection: SummatIterable) => PatternCollection<Type, SplitType, MatchType>
 	map: (f: (x?: Pattern<Type>, i?: number, arr?: any) => any) => any
 }
 
@@ -61,19 +59,24 @@ export const isPatternCollection: (x: any) => x is PatternCollection = structChe
 	Symbol.iterator
 )
 
+export const stringPatternSplit = function (regexp: RegExp) {
+	return StringPatternCollection(this.value.split(regexp).map(StringPattern))
+}
+export const stringPatternMatchAll = function (regexp: RegExp) {
+	return StringPatternCollection(
+		[...this.value.matchAll(regexp)].map(first).map(StringPattern)
+	)
+}
+
 export const StringPattern: PatternClass<string, RegExp | string, RegExp | string> = (
 	string = ""
 ): Pattern<string, RegExp, RegExp> => {
 	return {
 		value: string,
-		split: (regexp) =>
-			StringPatternCollection(string.split(regexp).map(StringPattern)),
-		matchAll: (regexp) =>
-			StringPatternCollection(
-				[...string.matchAll(regexp)].map(first).map(StringPattern)
-			),
+		split: stringPatternSplit,
+		matchAll: stringPatternMatchAll,
 		get length() {
-			return string.length
+			return this.value.length
 		},
 		class: StringPattern
 	}
@@ -84,10 +87,26 @@ StringPattern.empty = StringPattern()
 export function stringPatternCollectionMap(f: Function) {
 	return StringPatternCollection(this.value.map(f))
 }
-export function stringPatternCollectionConcat(
-	collection: Iterable = [] as unknown as Iterable
-) {
+export function stringPatternCollectionConcat(collection: SummatIterable = []) {
 	return StringPatternCollection([...this.value, ...collection])
+}
+export function stringPatternCollectionSlice(start = 0, end = this.value.length) {
+	return StringPatternCollection(this.value.slice(start, end))
+}
+export function stringPatternCollectionEvery(predicate = (x: any): any => x) {
+	return this.value.every(predicate)
+}
+export function stringPatternCollectionReduce(predicate: (x: any) => any, init: any) {
+	return this.value.reduce(predicate, init)
+}
+export function stringPatternCollectionFilter(predicate = (x: any): any => x) {
+	return StringPatternCollection(this.value.filter(predicate))
+}
+export function stringPatternCollectionJoin(x = StringPattern()) {
+	return StringPattern(this.value.map((x: Pattern) => x.value).join(x.value))
+}
+export function* stringPatteernCollectionIterator() {
+	for (let i = 0; i < this.value.length; ++i) yield this.value[i]
 }
 
 export const StringPatternCollection: PatternCollectionClass<string, RegExp, RegExp> = (
@@ -95,24 +114,14 @@ export const StringPatternCollection: PatternCollectionClass<string, RegExp, Reg
 ): PatternCollection<string, RegExp, RegExp> => {
 	return {
 		value: arr,
-		join: function (x = StringPattern()) {
-			return StringPattern(arr.map((x: Pattern) => x.value).join(x.value))
-		},
-		filter: function (predicate = (x) => x) {
-			return StringPatternCollection(arr.filter(predicate))
-		},
-		reduce: function (predicate, init) {
-			return arr.reduce(predicate, init)
-		},
-		every: function (predicate = (x) => x) {
-			return arr.every(predicate)
-		},
-		slice: function (start = 0, end = arr.length) {
-			return StringPatternCollection(arr.slice(start, end))
-		},
+		join: stringPatternCollectionJoin,
+		filter: stringPatternCollectionFilter,
+		reduce: stringPatternCollectionReduce,
+		every: stringPatternCollectionEvery,
+		slice: stringPatternCollectionSlice,
 		concat: stringPatternCollectionConcat,
 		map: stringPatternCollectionMap,
-		[Symbol.iterator]: iterator(arr)
+		[Symbol.iterator]: stringPatteernCollectionIterator
 	}
 }
 

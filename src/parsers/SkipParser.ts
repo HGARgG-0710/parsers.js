@@ -3,6 +3,7 @@ import type { ParserMap, StreamPredicate } from "./ParserMap.js"
 import { skip } from "./utils.js"
 import { GeneralParser } from "./GeneralParser.js"
 import { ArrayCollection, type Collection } from "src/types/Collection.js"
+import { firstFinished } from "main.js"
 
 export type SkipType<Type> = [number | StreamPredicate, Type]
 
@@ -11,7 +12,7 @@ export function SkipParser<KeyType = any, OutType = any>(
 ) {
 	return GeneralParser({
 		parser,
-		finished: ({ streams }) => streams[0].isEnd(),
+		finished: firstFinished,
 		result: ArrayCollection(),
 		change: function (
 			finalResult: Collection<OutType>,

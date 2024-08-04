@@ -24,6 +24,7 @@ export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<Valu
 	default: any
 	add: (index: number, pair: [KeyType, ValueType]) => void
 	delete: (index: number) => void
+	replace: (index: number, pair: [KeyType, ValueType]) => void
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
@@ -59,6 +60,11 @@ export function MapClass<KeyType = any, ValueType = any>(
 				)
 			},
 			default: _default,
+			replace: function (index: number, pair: [KeyType, ValueType]) {
+				const [key, value] = pair
+				this.keys[index] = key
+				this.values[index] = value
+			},
 			add: function (index: number, pair: [KeyType, ValueType]) {
 				const [key, value] = pair
 				this.keys.splice(index, 0, key)

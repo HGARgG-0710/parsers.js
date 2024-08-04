@@ -3,15 +3,6 @@
 
 [v0.3]
 
-1. Tree-construction task: 
-	Scour the previous parser projects, distinguish different 'types/patterns' of trees
-		to be constructed (there are at least 4 that can be seen already...); 
-
-2. Scour previous projects for various aliases, ideas for things to put into the library...
-
-3. Cache all the remaining functions into separate exports. Example: the 'Stream' module. 
-	Use a more 'object-oriented' approach - use 'this' + fields instead of creating functions with variable information "beat-into" them
-
 A. testing (fix old tests, create new ones); 
 B. documentation (change/fix it...); 
 
@@ -34,10 +25,111 @@ For v0.4:
 2. Negative numbers? 
 	Alter the 'predicateChoice' to allow for negative numbers (the '.prev')? 
 	This'd mean (ultimately) just adding a more convinient syntax for stuff like 'RevertedStream'; 
-	Except, it would also require that all Streams used be REVERSIBLE...; 
+	Except, it would also require that all Streams used by the utils to be REVERSIBLE... 
+		(unless one branches it into two separate functions...); 
 
 	Think about this. 
 	
 3. Write proper JSDoc documentation for all this stuff...
-
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
+
+4. Add various optimization data structures + utils + parser properties: 
+
+	4.1. bufferize(process, size)(tree) - util
+
+		Given a 'Tree', returns an array of values: 
+
+			{
+				index: number, 
+				childNumber: number,
+				value: any
+			}
+
+		This (ultimately) does THE SAME thing
+			as the 'TreeStream', BUT without losing the children's Tree-information. 
+		Unlike the 'TreeStream', this is intended as
+			a more persistent data structure with faster, 
+			and NON-LINEAR (important) access than TreeStream.
+		
+		Would return a 'NodeBuffer' (which is just a kind of an array); 
+		Indexing an array could be (potentially) noticeably faster than walking through a Tree 
+			(particularly so with the 'TreeStream'); 
+
+		The 'index' is the index FROM THE BEGINNING of the buffer to the current Node. 
+		The 'childNumber' is the number of children that come AFTER the current node. 
+			Children are read between positions from 'index' to 'index + childNumber', 
+				with each 'child' being checked for its own children
+					(which, if nonzero, are excluded from the current children, and are instead counted as grandchildren). 
+		
+		The 'value' is the actual value at the index (note: being 'process'ed - this is intended for removing/keeping children, primarily); 
+
+		If size is used, it will ONLY use this many items from the tree (up to the maximum amount - the rest of positions will be assigned to 'undefined'); 
+
+	4.2. Add a 'state.size' property to the parsers. 
+		This (ultimately) counts the number of items inside the tree.
+		Can be used with 'bufferize': 
+
+			bufferize((x) => x, pstate.size)(pstate.result)
+
+	4.3. pointer(x): 
+
+		This is a function of '(x) => { pointer: x }'. 
+		As objects are passed by reference, this bypasses default copying + allows to preserve state.
+		[Note: this is without need of using the '.state' - id est, outside of it]
+
+	4.4. NestableStream: 
+
+		A 'Stream', on which 'nested' has been implemented (id est WITHOUT copying) EFFICIENTLY! 
+		This, ultimately, means prioritizing the elements of the 'Stream' over the actual NESTING. 
+
+		NOTE: THE 'stream' here is a 'NavigableStream'; 
+
+		The thing would: 
+
+			1. Given a 'stream' (Stream) and a pair of functions 'inflate, deflate', create a 'NestableStream' [based on the current one, NOT COPYING] with: 
+				1.1. .next(), which: 
+					1.1.1. [if the 'stream.curr()' is not 'inflate(stream.curr()) == 1'], return 'stream.next()'; 
+					1.1.2. [if the 'stream.curr()' IS 'inflate(stream.curr()) == 1'], return a new 'NavigableStream' with the same 'deflate' AND A NEW POSITION [NOTE: IT MUST be copied]; 
+				1.2. '.curr()', which works the same way as the '.next()', EXCEPT, it caches the 'current' value; 
+				1.3. 'isEnd()' which would END THE STREAM [keep the locally-scoped boolean for this]!
+					1.3.1. The boolean is actually altered on '.next()'; 
+
+	4.5. isStream(x) function: 
+		For dealing with 'Stream's consisting of 'Stream's; 
+		Allows one to identify a Stream, and handle it accordingly...; 
+
+	4.6. ProlongedStream; 
+		The Stream-equivalent of 'prolong' utility; 
+		'Concatenates' different streams into one; 
+	
+	4.7. TransformedStream: 
+		The Stream-equivalent of 'transform' utility;
+		Applies the given 'transform' on the 'Stream' on the 'per-element' basis.
+
+	4.8. SubStream: 
+		The Stream-equivalent of the 'find' utility (finds ALL occurences of the given 'position') - this [effectively], 
+			gives a new Stream that has only the items with given 'position' (either property-function or a single element at that position, if any); 
+	
+	4.9. DelimitedStream: 
+		The Stream-equivalent of 'delimited'; 
+		Does THE SAME stuff as the 'delimited' function, but on Streams: 
+			Skips the elements deemed 'delimiters', 
+				'handle's the elements deemed 'non-delimiters'; 
+
+	Note: the new object-oriented approach will enable better speed and lesser structure-copying (better memory use); 
+		PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
+			(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
+
+	4.10. TreeStream: extend; 
+
+		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
+		There should be ANOTHER - the 'LR' post-order tree traversal; 
+
+		Rename the 'TreeStream' to 'TreeStreamLL', and create an implemnetation for the 'TreeStreamLR'; 
+		This is (particularly) useful for some types of interpreters; 
+
+		The LL visits the node, then its children one-by-one starting from the beginning. 
+		The LR visits first the children, only THEN the parent.
+
+		4.10.1. Also - MAKE THE 'TreeStream' into a 'proper' function for Stream-creation; 
+			In the sense that it has 
