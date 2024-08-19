@@ -1,4 +1,4 @@
-import { ArrayTree, TreeStream } from "../../../dist/src/types.js"
+import { ArrayTree, TreeStream } from "../../../../dist/src/types.js"
 
 const ts = TreeStream(
 	ArrayTree([

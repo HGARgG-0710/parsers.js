@@ -1,9 +1,9 @@
 import { array } from "@hgargg-0710/one"
-import { table } from "../parsers.js"
+import { table } from "../types/IndexMap.js"
 import type { IndexMap, Pattern, PatternCollection, SummatFunction } from "../types.js"
 const { insert } = array
 
-// ? Generalize this to analyze a given pattern "globally" in terms of tokens? (id est, allow to LOCATE the 'non-true' bits and return them, along with locations/indexes?); 
+// ? Generalize this to analyze a given pattern "globally" in terms of tokens? (id est, allow to LOCATE the 'non-true' bits and return them, along with locations/indexes?);
 export function PatternValidator<KeyType>(
 	validityMap: IndexMap<KeyType, SummatFunction<any, boolean>>
 ) {

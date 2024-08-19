@@ -1,12 +1,6 @@
 import { isArray, isNumber, predicateChoice } from "../misc.js"
-import type {
-	DelimHandler,
-	DelimPredicate,
-	StreamHandler,
-	StreamPredicate
-} from "./ParserMap.js"
+import type { DelimHandler, DelimPredicate, StreamHandler } from "./ParserMap.js"
 import {
-	isPositionObject,
 	positionConvert,
 	type BasicStream,
 	type Position,
@@ -14,19 +8,26 @@ import {
 } from "../types/Stream.js"
 import type { Pattern } from "../types/Pattern.js"
 import { not, preserve } from "../aliases.js"
-import { ArrayCollection, type Collection } from "src/types/Collection.js"
+import { ArrayCollection, type Collection } from "../types/Collection.js"
 
 import { function as _f } from "@hgargg-0710/one"
+import type { SummatFunction } from "../types/Summat.js"
 const { trivialCompose } = _f
 
 export function delimited(
 	limits:
-		| [number | DelimPredicate, (number | DelimPredicate)?]
-		| (number | DelimPredicate),
+		| [Position | DelimPredicate, (Position | DelimPredicate)?]
+		| (Position | DelimPredicate),
 	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]
-	const pred = predicateChoice(limits[1]) || predicateChoice(limits[0])
+	limits = limits.map(positionConvert) as [
+		number | SummatFunction,
+		(number | SummatFunction)?
+	]
+	const pred =
+		predicateChoice(limits[1] as number | SummatFunction) ||
+		predicateChoice(limits[0] as number | SummatFunction)
 	const prePred = +(1 in limits) && limits[0]
 	return function (
 		input: BasicStream,

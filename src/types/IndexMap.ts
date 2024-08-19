@@ -1,5 +1,6 @@
 import type { Summat } from "./Summat.js"
-import { current, is, Token } from "main.js"
+import { Token } from "./Token.js"
+import { current, firstStream, is } from "../aliases.js"
 
 import { map } from "@hgargg-0710/one"
 const { kv: mkv } = map
@@ -42,7 +43,7 @@ export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
-	const dynamicClass: MapClass<KeyType, ValueType> = function (
+	const mapClass: MapClass<KeyType, ValueType> = function (
 		map: Map<KeyType, ValueType>,
 		_default?: any
 	): IndexMap<KeyType, ValueType> {
@@ -51,13 +52,13 @@ export function MapClass<KeyType = any, ValueType = any>(
 			keys,
 			values,
 			index: function (x) {
-				return ((x) => (x !== this.default ? this.values[x] : x))(
-					this.keys.reduce(
-						(prev: any, curr: KeyType, i: number) =>
-							prev !== this.default ? prev : change(curr, x) ? i : prev,
-						this.default
-					)
-				)
+				let current = this.default
+				for (let i = 0; i < this.keys.length; ++i)
+					if (change(this.keys[i], x)) {
+						current = this.values[i]
+						break
+					}
+				return current
 			},
 			default: _default,
 			replace: function (index: number, pair: [KeyType, ValueType]) {
@@ -76,12 +77,12 @@ export function MapClass<KeyType = any, ValueType = any>(
 			}
 		}
 	}
-	dynamicClass.extend = (f) => MapClass((curr, x) => change(curr, f(x)))
-	dynamicClass.extendKey = (f) => MapClass((curr, x) => change(f(curr), x))
-	return dynamicClass
+	mapClass.extend = (f) => MapClass((curr, x) => change(curr, f(x)))
+	mapClass.extendKey = (f) => MapClass((curr, x) => change(f(curr), x))
+	return mapClass
 }
 
-export const [DynamicPredicateMap, DynamicRegExpMap, DynamicSetMap, BasicDynamicMap]: [
+export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
 	MapClass<Function>,
 	MapClass<TestType>,
 	MapClass<HasType>,
@@ -93,8 +94,17 @@ export const [DynamicPredicateMap, DynamicRegExpMap, DynamicSetMap, BasicDynamic
 	(curr: any, x: any) => curr === x
 ].map(MapClass) as [any, any, any, any]
 
-export const [TokenMap, ValueMap, CurrentMap] = [Token.type, Token.value, current].map(
-	(x) => (mapClass: MapClass) => mapClass.extend(x)
-)
+export const [TokenMap, ValueMap, CurrentMap, FirstStreamMap] = [
+	Token.type,
+	Token.value,
+	current,
+	firstStream
+].map((x) => (mapClass: MapClass) => mapClass.extend(x))
 
 export const TypeMap = (mapClass: MapClass) => mapClass.extendKey(is)
+
+export function table<KeyType = any, OutType = any>(
+	indexMap: IndexMap<KeyType, OutType>
+): [KeyType[], OutType[]] {
+	return [indexMap.keys, indexMap.values]
+}

@@ -1,5 +1,5 @@
-import { GeneralParser } from "src/parsers/GeneralParser.js"
-import type { ParserMap } from "../parsers.js"
+import { GeneralParser } from "../parsers/GeneralParser.js"
+import type { ParserMap } from "../parsers/ParserMap.js"
 import type { Position, PositionalStream } from "../types.js"
 
 export function StreamLocator<KeyType = any>(locator: ParserMap<KeyType, boolean>) {

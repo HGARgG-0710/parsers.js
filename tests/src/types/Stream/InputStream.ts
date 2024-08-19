@@ -1,4 +1,4 @@
-import { InputStream, type Indexed } from "../../../dist/src/types.js"
+import { InputStream, type Indexed } from "../../../../dist/src/types.js"
 
 const is = InputStream(
 	"Come sun and come rain, we share shall the strain..." as unknown as Indexed<string>

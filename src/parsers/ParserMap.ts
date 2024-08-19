@@ -1,5 +1,5 @@
-import type { Collection } from "src/types/Collection.js"
-import type { Summat } from "../types.js"
+import type { Collection } from "../types/Collection.js"
+import type { Summat } from "../types/Summat.js"
 import type { IndexMap } from "../types/IndexMap.js"
 import type { BasicStream } from "../types/Stream.js"
 import type { ParsingState } from "./GeneralParser.js"
@@ -56,11 +56,4 @@ export type ParsingPredicate<
 	TempType = ResultType
 > = ParserFunction<boolean, StreamType, ResultType, TempType>
 
-export type StreamPredicate = StreamHandler<boolean>
 export type DelimPredicate = DelimHandler<boolean>
-
-export function table<KeyType = any, OutType = any>(
-	parserMap: IndexMap<KeyType, OutType>
-): [KeyType[], OutType[]] {
-	return [parserMap.keys, parserMap.values]
-}

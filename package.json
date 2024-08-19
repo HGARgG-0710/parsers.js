@@ -1,7 +1,7 @@
 {
 	"name": "@hgargg-0710/parsers.js",
 	"version": "0.3.0",
-	"description": "A JavaScript library for simplification the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
+	"description": "A JavaScript library for simplification of the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
 	"type": "module",
 	"main": "./dist/main.js",
 	"types": "./dist/main.d.ts",
@@ -23,7 +23,8 @@
 	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
 	"scripts": {
 		"test": "cd tests && tsc --project tsconfig.json && cd ..",
-		"build": "tsc --project tsconfig.json"
+		"build": "tsc --project tsconfig.json",
+		"all": "npm run build && npm run test"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.8"

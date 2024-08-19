@@ -1,6 +1,6 @@
 import { array, object, function as f } from "@hgargg-0710/one"
 import type { Summat } from "./Summat.js"
-import type { SummatIterable } from "./Pattern.js"
+import type { SummatIterable } from "./Summat.js"
 
 const { and } = f
 const { structCheck } = object

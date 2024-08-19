@@ -81,7 +81,7 @@ console.log()
 console.log()
 ;[boundry, Boundry].forEach((x) => console.log(x()))
 console.log()
-const charClassTest = [["a", "x"], ["9"], ["7"], ["-"]] as [string, string?][]
+const charClassTest = [["a", "x"], "9", "7", "-"] as (string | [string, string])[]
 ;[charClass, negCharClass].forEach((x) => console.log(x(...charClassTest)))
 console.log()
 ;[digit, nonDigit, word, nonWord, space, nonSpace].forEach((x) => console.log(x()))

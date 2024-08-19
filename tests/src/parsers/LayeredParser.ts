@@ -1,4 +1,4 @@
-import { LayeredParser } from "../../dist/src/parsers.js"
+import { LayeredParser } from "../../../dist/src/parsers.js"
 
 const lp = LayeredParser([(x) => x ** 3, (x) => x + 3342, (x) => x || 3])
 console.log(lp(880))

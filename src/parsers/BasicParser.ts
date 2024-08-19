@@ -1,13 +1,14 @@
 import type { ParserMap } from "./ParserMap.js"
-import { GeneralParser, type ParsingState } from "./GeneralParser.js"
-import { ArrayCollection } from "src/types/Collection.js"
-import { firstFinished, push } from "main.js"
+import { GeneralParser } from "./GeneralParser.js"
+import { ArrayCollection, type Collection } from "../types/Collection.js"
+import { type BasicStream } from "../types/Stream.js"
+import { firstFinished, push } from "../aliases.js"
 
 // * note: doesn't do iteration - leaves it to the user...
 export function BasicParser<KeyType = any, OutType = any>(
 	parser: ParserMap<KeyType, OutType[]>
 ) {
-	return GeneralParser({
+	return GeneralParser<BasicStream, Collection, Iterable<any>>({
 		parser,
 		finished: firstFinished,
 		change: push,

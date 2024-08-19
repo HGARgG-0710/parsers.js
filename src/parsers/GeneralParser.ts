@@ -1,5 +1,6 @@
-import type { BasicStream, ParserFunction, ParserMap, ParsingPredicate } from "main.js"
-import type { Collection } from "src/types/Collection.js"
+import type { ParserMap, ParsingPredicate, ParserFunction } from "./ParserMap.js"
+import type { BasicStream } from "../types/Stream.js"
+import type { Collection } from "../types/Collection.js"
 
 export interface ParsingState<
 	StreamType = BasicStream,

@@ -1,12 +1,9 @@
-import {
-	not,
-	PositionalStream,
-	StreamLocator,
-	type ParserMap,
-	type Position
-} from "main.js"
+import { not } from "../aliases.js"
+import { PositionalStream, type Position } from "../types/Stream.js"
+import { StreamLocator } from "./StreamLocator.js"
 import { function as _f } from "@hgargg-0710/one"
-import type { ParsingState } from "src/parsers/GeneralParser.js"
+import type { ParserMap } from "../parsers/ParserMap.js"
+import type { ParsingState } from "../parsers/GeneralParser.js"
 
 const { trivialCompose } = _f
 

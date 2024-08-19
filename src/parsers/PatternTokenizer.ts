@@ -2,8 +2,8 @@ import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { Token } from "../types/Token.js"
 
 import { array } from "@hgargg-0710/one"
-import { table } from "./ParserMap.js"
-import type { IndexMap, SummatFunction } from "main.js"
+import { table, type IndexMap } from "../types/IndexMap.js"
+import type { SummatFunction } from "../types/Summat.js"
 const { insert } = array
 
 export function PatternTokenizer<KeyType = any, OutType = any>(

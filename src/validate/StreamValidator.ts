@@ -1,6 +1,6 @@
-import type { ParserMap } from "../parsers.js"
+import type { ParserMap } from "../parsers/ParserMap.js"
 import type { BasicStream } from "../types.js"
-import { GeneralParser } from "src/parsers/GeneralParser.js"
+import { GeneralParser } from "../parsers/GeneralParser.js"
 
 export function StreamValidator<KeyType = any>(validator: ParserMap<KeyType, boolean>) {
 	return GeneralParser<BasicStream<KeyType>, boolean, any>({

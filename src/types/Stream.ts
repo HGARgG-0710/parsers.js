@@ -1,4 +1,4 @@
-import { type SummatIterable } from "main.js"
+import { type SummatIterable } from "./Summat.js"
 import { isFunction, isNumber } from "../misc.js"
 import type { Summat, SummatFunction } from "./Summat.js"
 import type { Tree } from "./Tree.js"
@@ -126,7 +126,8 @@ export function inputStreamCopy() {
 	return inputStream
 }
 
-export function inputStreamNavigate(i: number | SummatFunction) {
+export function inputStreamNavigate(i: Position) {
+	i = positionConvert(i)
 	if (isNumber(i)) return this.input[i]
 	while (!i(this.input)) this.next()
 	return this.input[this.pos]
@@ -137,7 +138,6 @@ export function* inputStreamIterator() {
 		yield this.input[this.pos]
 		++this.pos
 	}
-	return undefined
 }
 
 export function inputStreamIsStart() {
@@ -176,9 +176,7 @@ export function TreeStream<Type = any>(
 	ReversibleStream<Tree<Type>, {}> &
 	CopiableStream<Tree<Type>, {}> {
 	// ! NOTE: this sort of 'internal state' PREVENTS one from properly refactoring the thing into 'this.'-based methods; If one keeps these as an 'available state', the user will be able to modify it... [which is largely undesired...];
-	// THE VARIABLES THAT STAND IN THE WAY:
-	// 1. ENDVALUE [hidden constant]
-	// 2. lastMultind [hidden constant, not supposed to be changeable];
+	// ^ solution: make into a separate interface in the next version;
 	let multind: number[] = []
 	const ENDVALUE = {}
 

@@ -1,10 +1,7 @@
 import { array, object } from "@hgargg-0710/one"
-import type { Summat } from "./Summat.js"
-const { first, iterator } = array
+import type { Summat, SummatIterable } from "./Summat.js"
+const { first } = array
 const { structCheck } = object
-
-// ? separate the 'summat' into a separate TypeScript library?
-export type SummatIterable<Type = any> = Iterable<Type> & Summat
 
 export interface PatternCollectionClass<Type = any, SplitType = any, MatchType = any>
 	extends Summat {
@@ -59,10 +56,10 @@ export const isPatternCollection: (x: any) => x is PatternCollection = structChe
 	Symbol.iterator
 )
 
-export const stringPatternSplit = function (regexp: RegExp) {
+export const stringPatternSplit = function (regexp: RegExp | string) {
 	return StringPatternCollection(this.value.split(regexp).map(StringPattern))
 }
-export const stringPatternMatchAll = function (regexp: RegExp) {
+export const stringPatternMatchAll = function (regexp: RegExp | string) {
 	return StringPatternCollection(
 		[...this.value.matchAll(regexp)].map(first).map(StringPattern)
 	)
@@ -70,7 +67,7 @@ export const stringPatternMatchAll = function (regexp: RegExp) {
 
 export const StringPattern: PatternClass<string, RegExp | string, RegExp | string> = (
 	string = ""
-): Pattern<string, RegExp, RegExp> => {
+): Pattern<string, RegExp | string, RegExp | string> => {
 	return {
 		value: string,
 		split: stringPatternSplit,
@@ -105,13 +102,15 @@ export function stringPatternCollectionFilter(predicate = (x: any): any => x) {
 export function stringPatternCollectionJoin(x = StringPattern()) {
 	return StringPattern(this.value.map((x: Pattern) => x.value).join(x.value))
 }
-export function* stringPatteernCollectionIterator() {
+export function* stringPatternCollectionIterator() {
 	for (let i = 0; i < this.value.length; ++i) yield this.value[i]
 }
 
-export const StringPatternCollection: PatternCollectionClass<string, RegExp, RegExp> = (
-	arr: any = []
-): PatternCollection<string, RegExp, RegExp> => {
+export const StringPatternCollection: PatternCollectionClass<
+	string,
+	RegExp | string,
+	RegExp | string
+> = (arr: any = []): PatternCollection<string, RegExp, RegExp> => {
 	return {
 		value: arr,
 		join: stringPatternCollectionJoin,
@@ -121,7 +120,7 @@ export const StringPatternCollection: PatternCollectionClass<string, RegExp, Reg
 		slice: stringPatternCollectionSlice,
 		concat: stringPatternCollectionConcat,
 		map: stringPatternCollectionMap,
-		[Symbol.iterator]: stringPatteernCollectionIterator
+		[Symbol.iterator]: stringPatternCollectionIterator
 	}
 }
 

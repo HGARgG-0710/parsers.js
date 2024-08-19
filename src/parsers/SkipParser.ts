@@ -1,26 +1,25 @@
-import type { Position } from "../types.js"
-import type { ParserMap, StreamPredicate } from "./ParserMap.js"
+import type { Position, BasicStream } from "../types/Stream.js"
+import type { ParserMap } from "./ParserMap.js"
 import { skip } from "./utils.js"
 import { GeneralParser } from "./GeneralParser.js"
-import { ArrayCollection, type Collection } from "src/types/Collection.js"
-import { firstFinished } from "main.js"
+import { ArrayCollection, type Collection } from "../types/Collection.js"
+import { firstFinished } from "../aliases.js"
 
-export type SkipType<Type> = [number | StreamPredicate, Type]
+export type SkipType<Type> = [number | Position, Type]
 
 export function SkipParser<KeyType = any, OutType = any>(
 	parser: ParserMap<KeyType, SkipType<OutType[]>>
 ) {
-	return GeneralParser({
+	return GeneralParser<BasicStream, Collection, SkipType<OutType[]>>({
 		parser,
 		finished: firstFinished,
 		result: ArrayCollection(),
 		change: function (
 			finalResult: Collection<OutType>,
-			toSkip: number | Position,
-			tempResult: OutType[]
+			[toSkip, tempResult]: SkipType<OutType[]>
 		) {
 			finalResult.push(...tempResult)
 			skip(toSkip)(this.streams[0])
-		} as (result: Collection<OutType>, ...y: any[]) => void
+		}
 	})
 }

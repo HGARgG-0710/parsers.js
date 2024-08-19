@@ -1,9 +1,7 @@
 // * This is the generalization of 'Source's and 'Pushable's from the v0.2 and earlier.
 
-import { array } from "@hgargg-0710/one"
-import type { SummatIterable, Token } from "main.js"
-
-const { iterator } = array
+import type { Token } from "./Token.js"
+import type { SummatIterable } from "./Summat.js"
 
 export interface Collection<Type = any> extends SummatIterable<Type> {
 	value: any
@@ -19,7 +17,13 @@ export function StringCollection(string: string): Collection<string> {
 	return {
 		value: string,
 		push: stringCollectionPush,
-		[Symbol.iterator]: iterator(string)
+		[Symbol.iterator]: function* () {
+			let i = 0
+			while (this.value.length > i) {
+				yield this.value[i]
+				++i
+			}
+		}
 	}
 }
 
@@ -38,7 +42,7 @@ export function AccumulatingTokenCollection(token: Token): Collection<Token> {
 		value: token,
 		push: accumulatingTokenCollectionPush,
 		[Symbol.iterator]: function* () {
-			return this.value
+			yield this.value
 		}
 	}
 }
