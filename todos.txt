@@ -3,6 +3,25 @@
 
 [v0.3]
 
+NOTE: nope, the version is NOT finished. 
+
+	Things to do before re-starting the testing all over again: 
+
+		1. Refactor ALL the functions used by the 'Stream'-s into separate this.-based functions; 
+		2. Fix all [some] of the 'as' problems (namely: CREATE THE NEEDED SUB-INTERFACES!);
+
+		3. 'utils', NavigableStream and LimitedStream - NEGATIVE INTEGERS, backwards directions!
+		4. Add the 'finish' method [choose WHICH interfaces to make it compulsory for...]; 
+
+		5. Go through the other files, checking for minor/old/derivative errors/problems and fixing them (small); 
+		6. Finish implementing the 'MultiIndex.convert'; 
+
+		7. Finish the 'Stream' exports;
+		8. Generally, check the exports' list (test that additionally - lots of new stuff was added); 
+
+		AFTER EVERYTHING ELSE: 
+		9. Take 'Pointer' out of the library IF it becomes far too tiresome...; 
+
 A. testing (fix old tests, create new ones); 
 	Plan for organizing the testing: 
 		1. make tests for them; 
@@ -42,26 +61,10 @@ A. testing (fix old tests, create new ones);
 				9.3. CurrentMap; 
 				9.4. FirstStreamMap; 
 			11. Stream.ts: 
-				11.1. isPositionObject; 
-				11.2. positionConvert; 
-				11.3. positionCheck; 
-				11.4. positionCopy; 
-				11.5. PositionalStream; 
-				11.6. InputStream; 
 				11.7. TreeStream;
 				11.8. LimitedStream; 
 				11.9. LimitableStream; 
 				11.10. ReversedStream; 
-			13. Tree.ts: 
-				13.1. childIndex; 
-				13.2. childrenCount; 
-				13.3. ChildrenTree; 
-				13.4. ChildlessTree; 
-				13.5. SingleValueTree; 
-				13.6. MultValueTree; 
-				13.7. ThisTree; 
-				13.8. ArrayTree; 
-				13.9. RecursiveArrayTree; 
 			14. PatternValidator.ts: 
 				14.1. PatternValidator; 
 			15. PositionalValidator.ts: 
@@ -74,7 +77,6 @@ A. testing (fix old tests, create new ones);
 
 		Order of implementation: 
 
-			13.
 			11.
 			[2. - will be auto-tested during the other 'parser'-testing]
 			[9.3-4, 'auto-tested']
@@ -160,13 +162,7 @@ For v0.4:
 
 			bufferize((x) => x, pstate.size)(pstate.result)
 
-	4.3. pointer(x): 
-
-		This is a function of '(x) => { pointer: x }'. 
-		As objects are passed by reference, this bypasses default copying + allows to preserve state.
-		[Note: this is without need of using the '.state' - id est, outside of it]
-
-	4.4. NestableStream: 
+	4.3. NestableStream: 
 
 		A 'Stream', on which 'nested' has been implemented (id est WITHOUT copying) EFFICIENTLY! 
 		This, ultimately, means prioritizing the elements of the 'Stream' over the actual NESTING. 
@@ -183,23 +179,23 @@ For v0.4:
 				1.3. 'isEnd()' which would END THE STREAM [keep the locally-scoped boolean for this]!
 					1.3.1. The boolean is actually altered on '.next()'; 
 
-	4.5. isStream(x) function: 
+	4.4. isStream(x) function: 
 		For dealing with 'Stream's consisting of 'Stream's; 
 		Allows one to identify a Stream, and handle it accordingly...; 
 
-	4.6. ProlongedStream; 
+	4.5. ProlongedStream; 
 		The Stream-equivalent of 'prolong' utility; 
 		'Concatenates' different streams into one; 
 	
-	4.7. TransformedStream: 
+	4.6. TransformedStream: 
 		The Stream-equivalent of 'transform' utility;
 		Applies the given 'transform' on the 'Stream' on the 'per-element' basis.
 
-	4.8. SubStream: 
+	4.7. SubStream: 
 		The Stream-equivalent of the 'find' utility (finds ALL occurences of the given 'position') - this [effectively], 
 			gives a new Stream that has only the items with given 'position' (either property-function or a single element at that position, if any); 
 	
-	4.9. DelimitedStream: 
+	4.8. DelimitedStream: 
 		The Stream-equivalent of 'delimited'; 
 		Does THE SAME stuff as the 'delimited' function, but on Streams: 
 			Skips the elements deemed 'delimiters', 
@@ -209,7 +205,7 @@ For v0.4:
 		PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
 			(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
 
-	4.10. TreeStream: extend; 
+	4.9. TreeStream: extend; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -220,114 +216,28 @@ For v0.4:
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-		4.10.1. Also - MAKE THE 'TreeStream' into a 'proper' function for Stream-creation; 
+		4.9.1. Also - MAKE THE 'TreeStream' into a 'proper' function for Stream-creation; 
 			In the sense that it has refactored this-based functions;
 
-	4.11. recursiveTransform - a utility; 
+	4.10. recursiveTransform - a utility; 
 		This recursively transforms all the sub-Stream-s within the given Stream; 
 		It, effectively, frees the user from the necessity of writing the recursive functionality into their transformation themselves; 
 
-	4.12. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
+	4.11. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
 
-	4.13. Re-think the 'Position' interface; 
-
-		It's very nice, BUT, somewhat misguided. 
-		Need to be able to use the 'multi-indexes' with it properly (AND QUICKLY - without having to do all that current 'utility' nonsense...); 
-
-		SOLUTION:
-			1. Make 'convert(): number' into 'convert(stream?: BasicStream): number'; 
-			2. Add a new property '.compare' to the 'PositionObject':
-				Here, a 'compare' is: 
-					compare: (x: PositionObject) => boolean
-				
-				Ultimately, checks whether a certain thing is 'smaller'
-					than some other thing... (generalization of 'x < y' for 'number's);
-				The 'isNumber' check should be replaced with 'isComparable'; 
-
-				The only "real" problem with the current definition of 'Position' is the need to 
-					'.convert()' to 'number' to compare two positions and the inability 
-						to rely on a certain 'Stream' to do what is desired; 
-
-			3. Add a new interface 'ComparablePosition extends Position, Comparable'; 
-			
-		Based on this new definition, define the 'MultiIndex' - special case of 'PositionObject<number[]>': 
-
-			1. This one is used SPECIFICALLY by the 'TreeStream'-Streams ('TreeStream'); 
-				1.1. MAKE THOSE 'Navigable' - by adding a 'navigate(multindex: MultiIndex): void', which would do 'this.multind = multind.value; tree.index(multind)'; 
-			2. Definition: 
-				2.1. The type used for the '.value' of the 'PositionObject' is 'number[]'; 
-				2.2. The 'compare' is defined as: 
-					({ value }: PositionObject<number[]>) => {
-						const length = Math.min(this.value.length, value.length)
-						let i = 0
-						while (i < length) {	
-							if (this.value[i] !== value[i]) 
-								return this.value[i] < value[i]
-							++i
-						}
-						return this.value.length < x.length
-					}
-				2.3. The '.convert(stream: BasicStream)' [note: THE ARGUMENT IS EXPECTED!] is defined as (note: COSTLY OPERATION, REQUIRES TREE-TRAVERSAL!): 
-
-					(stream: BasicStream): function () {
-						const countStream = stream.copy()
-						countStream.rewind()
-						const multindEquality  = (x, y) => {
-							// ... - DEFINE THE EQUALITY OF TWO Multi-indexes (efficiently...); 
-						}
-						while (!multindEquality(this.value, countStream.pos)) countStream.next()	
-						return 
-					}
-				2.4. it should also have an EQUALITY function; This checks for whether two are equal or not... (can be slightly faster than the '<' comparison); 
-
-				IDEA: re-define the 'TreeStream' streams VIA the 'MultInd'-like structure that would KEEP TRACK of the 'this.pos' for them; 
-					Then, one can just REPLACE the '.next' with appropriate alterations to the 'this.pos' (multi-index) + calling '.index' (kind of what it does already...);
-					
-					Call it the 'TreeWalker', which would have methods: 
-						1. pushFirstChild (.push([0])); 
-						2. pushLastChild (.push(current.lastChild)); 
-						3. popChild (.pop()); 
-						4. isSiblingAfter (.lastChild < last(multind)); 
-						5. isSiblingBefore (!!last(multind)); 
-						6. goSiblingAfter(++multind[multind.length - 1]); 
-						7. goSiblingBefore(--multind[multind.length - 1]); 
-						8. indexCut (multind.length = ...); 
-						9. lastIndex (same as 'lastMultind'-variable; THIS DOES NOT CHANGE!); 
-						10. isChild (same as 'nextLevel'-variable);
-						11. isParent (same as 'isParent'-variable);
-
-						12. current (same as 'current'-variable); 
-						13. level (same as 'currlevel'-variable);
-							These two have getters-setters; 
-							Behave like variables-properties; 
-								When set, they take in a MULTI-INDEX!
-								Underneath, an '.index' call is performed; 
-							These don't change (id est, the '.index' doesn't happen) UNTIL THEY'RE READ!
-							This saves time (potentially); 
-
-						14. finish [same as 'current = ENDVALUE', the 'ENDVALUE' is kept UNDERNEATH the 'walker', as a separate variable, BY WHICH IT IS DEFINED!]; 
-							The 'walker' is a PUBLIC PROPERTY!
-						15. isFinished - returns whether 'current === ENDVALUE'; 
-							The 'ENDVALUE' becomes a public property ALSO! 
-							This is to: 
-								1. give user greater flexibility over how the thing is managed [example: stop the reading of the Stream manually abruptly]; 
-								2. permit the caching [and global naming + exporting] of functions used inside of 'TreeWalker'; 
-						16. renew - same as the multind-'recovery' from 'finish'; [used in '.prev']
-						17. lastLevelWithSiblings() - this does the 'thing' in the '.next' with the 'while' loop and 'looking' for the children based off the last index; 
-							Returns the index inside the 'multind' array; 
-	4.14. Implement a 'PartialValidator': 
+	4.12. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
 		[Which it does by 'numbering' particular portions of a given Pattern]; 
 		This would allow for a greater ability to analyze/point-out the errors in the original input;
 
-	4.15. Implement a 'level-by-level TreeStream': 
+	4.13. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	4.16. Add a 'HashClass'-implementation of 'MapClass'; 
+	4.14. Add a 'HashClass'-implementation of 'MapClass'; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -373,12 +283,15 @@ For v0.4:
 
 				This can be used with strings/
 
-	4.17. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
+	4.15. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
 		This makes code MUCH more general. 
 		In particular, one does so with the 'Tree'-s; 
 		It'd allow to (for instance) store identifiers, and getting them via 'loops'; 
 
-	4.18. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed'); 
+		Excluding some few special cases (like 'childIndex'), walk through the project, 
+			AND REPLACE un-place-ly '.reduce'-s with proper loops...
+
+	4.16. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -392,7 +305,7 @@ For v0.4:
 
 							{ ann, ant, ben }
 
-						Woule yield an IdentifierTree: 
+						Would yield an IdentifierTree: 
 
 							0   1 2
 							a,b-n-n,t
@@ -412,7 +325,7 @@ For v0.4:
 				Same as 'UniqueSequenceTree', BUT it implements a Binary Search Tree.
 				It works based on a provided comparison (a very rough indexation sketch): 
 
-					function IdentifierBinarySearchTree(tree, comparison) {
+					function BinarySearchTree(tree, comparison) {
 						return function (x) {
 							let current = tree
 							let greater
@@ -423,7 +336,43 @@ For v0.4:
 				
 				NOTE: with (x, y) => x > y, can be used with identifiers; 
 
-	4.19. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
+			3. shorten(names); 
+				Given a sequence of "names" (strings/sequences),
+					and a 'comparison' predicate for each of its elements,
+						it would implement a name-shortening algorithm, 
+							that would preserve the name uniqueness;
+				
+				The return value is an IndexMap; 
+
+			4. renameable(names);
+				Given an IndexMap of names (which could come from, for instance, 'shorten'), 
+					the method: 
+
+					1. Re-orders;
+					2. Creates new name-map entries;
+
+				In a fashion that would allow straightforward implementation of a sequential "exact replacement algorithm" based on the output: 
+
+					1. Loop through a list of name-maps; 
+						2. [In the loop] Rename current encounters of a name with its mapped value;	
+					
+				There are 2 operations that may be necessary: 
+
+					1. creation of temp-names (when collisions in present names are far too high to re-order);
+					2. re-order; 
+				
+				The algorithm for the 'renameable' function: 
+
+					0. Keep the cached (met) names in a 'Set'; 
+					1. Loop through the 'names' given: 
+						1.0. If the name is in the cached Set, continue; 
+						1.1. If the current 'value' of the 'name' is already present amongst 'keys' (another loop): 
+							1.1.1. put the keys in question BEFORE the current value;
+							1.1.2. '.swap' the two indexes;
+							1.1.3. go one position back (because now one needs to check the "others" now); 
+							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
+
+	4.17. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
 		Again, too_much_copying!
 		The 'copying methods' should be a WHOLE SEPARATE thing with THEIR OWN module; 
 
@@ -442,7 +391,7 @@ For v0.4:
 
 				This would be a 'FlatCopiableTree'; 
 	
-	4.20. Create a ModifiableStream;
+	4.18. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -490,6 +439,9 @@ For v0.4:
 
 						And the TreeWalker, TreeModifier, would be 'bound' to the current one (that is, they'd be taking an argument of 'multindex');
 
+			The 'TreeModifier' implementations would HAVE to have a sort of "Modifiable" Tree (which is a special case of a 'Tree'); 
+			A 'ChildrenTree' (Tree with '.children') is a GREAT fit for it...; 
+
 		2. A 'ModifiablePositionalStream' would be a wrapper around another 'PositionalStream', 
 			which would have a map of 'Positions', into which things were 'inserted', and would return new stuff accordingly...
 			It is ALSO a 'PositionalStream'; 
@@ -523,3 +475,63 @@ For v0.4:
 						this.input.splice(this.pos, 0, X)
 					}
 				}
+	
+	4.19. MORE WORK on the 'IndexMap'; 
+		
+		Things to do: 
+
+			1. add a [Symbol.iterator] for this stuff (would give back the '[key, value]' pairs...); 
+			2. add a '.swap' method (for swapping two positions); 
+
+	4.20. MORE work on the 'NavigableStream-s'!
+
+		Currently, these DON'T HAVE AN OPTION TO navigate "backwards" via a predicate; 
+		Which is disappointing; 
+
+		There should be a SEPARATE SIGNATURE for this: a predicate on its own NO LONGER suffices; 
+		Call it 'PredicatePosition': 
+
+			{
+				predicate: SummatFunction, 
+				direction?: boolean
+			}
+
+		With 'true' (the default, if missing) designating 'forward'
+			and 'prev' designating 'Backwards'; 
+		
+		One will ALSO need to: 
+
+			1. Create a `BacktrackableStream` interface. 
+				It is one that is `Navigable & Reversible`;
+				A BacktrackableStream, then would be used for the proper re-definition of the 'inputStreamNavigate'; 
+			2. Create an alias 'backtrack(predicate)', which would (basically) return an object `{ predicate, direction: false }`; 
+				This could be used as an argument to 'navigate';
+
+	4.21. A new required 'BasicStream' method [optimization]: 
+		Call it 'finish'; 
+		It would do the opposite of 'rewind'; 
+
+		The method would "go" to the very end of the 'Stream';
+		This can be made to be VERY fast/trivial for various methods;
+
+		Example: 
+			1. InputStream: just do 'this.pos = this.input.length'; 
+			2. TreeStream: just do 'this.pos = this.walker.lastIndex'; 
+			3. PositionalStream: just call underlying 'this.input.finish()'; 
+			4. ReversedStream: just call underlying 'this.input.rewind()';
+	
+	4.22. 'ReversedStream' - same problem as with TreeStream: NEEDS ITS OWN INTERFACES [no hidden values, and all that stuff...];
+
+	4.23. Resolve the 'as' TypeScript issues; 
+		This is (fundamentally) an interface-shortage problem. 
+		The library has insufficient definitions to express the intent of the code well enough to the static type analyzer; 
+
+	4.24. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
+		These are MIGHTY! [allow to save memory, and so forth...]; 
+		IDEA: maybe, even create a library for these...; 
+
+5. Dependency management: 
+
+	5.1. Take the 'Summat.ts' out into a separate npm package;
+	5.2. Take the 'Pointer.ts' out into a separate npm package (IF ever come down to not-needing it in this one...)
+		5.2.1. Take it out ANYWAY, just not in 0.3. IF it's needed at that stage...; 

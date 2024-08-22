@@ -1,5 +1,5 @@
 import type { ParserMap, ParsingPredicate, ParserFunction } from "./ParserMap.js"
-import type { BasicStream } from "../types/Stream.js"
+import type { BasicStream } from "src/types/Stream/BasicStream.js"
 import type { Collection } from "../types/Collection.js"
 
 export interface ParsingState<

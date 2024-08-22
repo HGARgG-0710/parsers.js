@@ -1,7 +1,7 @@
 import type { Collection } from "../types/Collection.js"
 import type { Summat } from "../types/Summat.js"
 import type { IndexMap } from "../types/IndexMap.js"
-import type { BasicStream } from "../types/Stream.js"
+import type { BasicStream } from "src/types/Stream/BasicStream.js"
 import type { ParsingState } from "./GeneralParser.js"
 
 export type ParserMap<
@@ -20,6 +20,10 @@ export type ParserFunction<
 	ResultType = Collection,
 	TempType = ResultType
 > = (
+	| ((
+			state?: ParsingState<StreamType, ResultType, TempType>,
+			parser?: Function
+	  ) => OutType)
 	| ((state?: ParsingState<StreamType, ResultType, TempType>) => OutType)
 	| (() => OutType)
 ) &
@@ -43,9 +47,7 @@ export type DelimHandler<Type = any[]> = Summat &
 export function ParserMap<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, ParserFunction<OutType>>
 ): ParserMap<KeyType, OutType> {
-	const T = function (x: ParsingState) {
-		return T.table.index(x)(x)
-	}
+	const T = (x: ParsingState) => T.table.index(x)(x, T)
 	T.table = indexMap
 	return T
 }

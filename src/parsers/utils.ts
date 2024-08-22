@@ -1,11 +1,9 @@
 import { isArray, isNumber, predicateChoice } from "../misc.js"
 import type { DelimHandler, DelimPredicate, StreamHandler } from "./ParserMap.js"
-import {
-	positionConvert,
-	type BasicStream,
-	type Position,
-	type ReversibleStream
-} from "../types/Stream.js"
+import { positionConvert } from "src/types/Stream/Position.js"
+import { type ReversibleStream } from "src/types/Stream/ReversibleStream.js"
+import { type BasicStream } from "src/types/Stream/BasicStream.js"
+import { type Position } from "src/types/Stream/Position.js"
 import type { Pattern } from "../types/Pattern.js"
 import { not, preserve } from "../aliases.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
@@ -37,7 +35,7 @@ export function delimited(
 		skip(prePred)(input)
 
 		const endpred = (input: BasicStream, i: number, j: number) =>
-			!input.isEnd() && pred(input, i, j)
+			!input.isEnd && pred(input, i, j)
 		let i = 0,
 			j = 0
 		const skipDelims = skip((input: BasicStream, _j: number) =>
@@ -63,7 +61,7 @@ export function skip(steps: Position = 1) {
 	const pred = predicateChoice(positionConvert(steps))
 	return function (input: BasicStream) {
 		let i = 0
-		while (!input.isEnd() && pred(input, i)) {
+		while (!input.isEnd && pred(input, i)) {
 			input.next()
 			++i
 		}
@@ -78,7 +76,7 @@ export function consume(init: Position, pred?: Position) {
 	const initSkip = skip(isPred ? predicateChoice(init) : 0)
 	return function (input: BasicStream, dest: Collection = ArrayCollection()) {
 		initSkip(input)
-		for (let i = 0; !input.isEnd() && pred(input, i); ++i) dest.push(input.next())
+		for (let i = 0; !input.isEnd && pred(input, i); ++i) dest.push(input.next())
 		return dest
 	}
 }
@@ -86,7 +84,7 @@ export function consume(init: Position, pred?: Position) {
 export function transform(handler: StreamHandler = preserve) {
 	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
 		const result = initial
-		for (let i = 0; !input.isEnd(); ++i) {
+		for (let i = 0; !input.isEnd; ++i) {
 			result.push(...handler(input, i))
 			input.next()
 		}
@@ -116,16 +114,16 @@ export function has(pred: Position) {
 	const checkSkip = skip(isNumber(pred) ? pred : trivialCompose(not, pred))
 	return function (input: BasicStream) {
 		checkSkip(input)
-		return !input.isEnd()
+		return !input.isEnd
 	}
 }
 
 export function find(pred: Position) {
 	pred = positionConvert(pred)
-	return typeof pred === "number"
+	return isNumber(pred)
 		? function (input: BasicStream) {
 				let i = 0
-				while (!input.isEnd() && i < pred) {
+				while (!input.isEnd && i < pred) {
 					input.next()
 					++i
 				}
@@ -133,7 +131,7 @@ export function find(pred: Position) {
 		  }
 		: function (input: BasicStream, dest: Collection = ArrayCollection()) {
 				let i = 0
-				while (!input.isEnd()) {
+				while (!input.isEnd) {
 					if (pred(input, i)) dest.push(input.curr())
 					input.next()
 					++i
@@ -143,7 +141,7 @@ export function find(pred: Position) {
 }
 
 export function revert(input: ReversibleStream, dest: Collection = ArrayCollection()) {
-	while (!input.isStart()) dest.push(input.prev())
+	while (!input.isStart) dest.push(input.prev())
 	return dest
 }
 
@@ -170,12 +168,12 @@ export function extract(pred: DelimPredicate, isRem: boolean = false) {
 	): [Collection, Collection] | Collection {
 		let i = 0
 		let j = 0
-		while (!stream.isEnd()) {
-			while (!stream.isEnd() && pred(stream, i, j)) {
+		while (!stream.isEnd) {
+			while (!stream.isEnd && pred(stream, i, j)) {
 				destextr.push(stream.next())
 				++i
 			}
-			while (!stream.isEnd() && !pred(stream, i, j)) {
+			while (!stream.isEnd && !pred(stream, i, j)) {
 				if (isRem) destrem.push(stream.next())
 				++j
 			}
@@ -187,7 +185,7 @@ export function extract(pred: DelimPredicate, isRem: boolean = false) {
 export function prolong(streams: BasicStream[], dest: Collection = ArrayCollection()) {
 	for (let i = 0; i < streams.length; ++i) {
 		const stream = streams[i]
-		while (!stream.isEnd()) dest.push(stream.next())
+		while (!stream.isEnd) dest.push(stream.next())
 	}
 	return dest
 }

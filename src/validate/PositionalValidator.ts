@@ -1,5 +1,6 @@
 import { not } from "../aliases.js"
-import { PositionalStream, type Position } from "../types/Stream.js"
+import { PositionalStream } from "src/types/Stream/PositionalStream.js"
+import { type Position } from "src/types/Stream/Position.js"
 import { StreamLocator } from "./StreamLocator.js"
 import { function as _f } from "@hgargg-0710/one"
 import type { ParserMap } from "../parsers/ParserMap.js"

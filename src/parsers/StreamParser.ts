@@ -1,7 +1,8 @@
 import type { ParserMap } from "./ParserMap.js"
 import { GeneralParser } from "./GeneralParser.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
-import type { Position, BasicStream } from "../types/Stream.js"
+import type { BasicStream } from "src/types/Stream/BasicStream.js"
+import type { Position } from "src/types/Stream/Position.js"
 import { skip } from "./utils.js"
 import { firstFinished } from "../aliases.js"
 

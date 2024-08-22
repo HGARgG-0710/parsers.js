@@ -1,4 +1,4 @@
-import type { BasicStream } from "./types/Stream.js"
+import type { BasicStream } from "./types/Stream/BasicStream.js"
 import type { DelimPredicate } from "./parsers/ParserMap.js"
 
 export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
@@ -8,6 +8,7 @@ export const isFunction = (x: any): x is Function => typeof x === "function"
 export const isArray = (x: any): x is any[] => x instanceof Array
 export const isString = (x: any): x is string => typeof x === "string"
 export const isBoolean = (x: any): x is boolean => typeof x === "boolean"
+export const isSymbol = (x: any): x is symbol => typeof x === "symbol"
 
 export const predicateChoice = (x: number | DelimPredicate): DelimPredicate =>
 	isNumber(x)

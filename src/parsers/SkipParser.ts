@@ -1,4 +1,5 @@
-import type { Position, BasicStream } from "../types/Stream.js"
+import type { BasicStream } from "src/types/Stream/BasicStream.js"
+import type { Position } from "src/types/Stream/Position.js"
 import type { ParserMap } from "./ParserMap.js"
 import { skip } from "./utils.js"
 import { GeneralParser } from "./GeneralParser.js"
