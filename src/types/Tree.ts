@@ -6,7 +6,6 @@ import { isArray } from "../misc.js"
 const { trivialCompose } = f
 const { propPreserve } = array
 
-// ? later, generalize the 'multiindex' to a separate type (not just 'number[]');
 export interface Tree<Type = any> extends Summat {
 	lastChild: number
 	index: (multindex: number[]) => Tree<Type> | Type

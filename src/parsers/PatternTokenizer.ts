@@ -1,13 +1,14 @@
 import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { Token } from "../types/Token.js"
 
-import { array } from "@hgargg-0710/one"
 import { table, type IndexMap } from "../types/IndexMap.js"
 import type { SummatFunction } from "../types/Summat.js"
+
+import { array } from "@hgargg-0710/one"
 const { insert } = array
 
 export function PatternTokenizer<KeyType = any, OutType = any>(
-	tokenMap: IndexMap<KeyType, SummatFunction<KeyType, OutType>>,
+	tokenMap: IndexMap<KeyType, SummatFunction<any, KeyType, OutType>>,
 	tokenCheck: (x?: any) => boolean = Token.is
 ) {
 	const [typeKeys, typeFunction] = table(tokenMap)
@@ -18,7 +19,7 @@ export function PatternTokenizer<KeyType = any, OutType = any>(
 		const tokenizeSingle = (
 			pattern: Pattern<any, KeyType, KeyType>,
 			typeKey: KeyType,
-			type: SummatFunction<KeyType, OutType>
+			type: SummatFunction<any, KeyType, OutType>
 		) =>
 			pattern
 				.matchAll(typeKey)

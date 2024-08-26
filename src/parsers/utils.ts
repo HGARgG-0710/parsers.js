@@ -1,6 +1,15 @@
-import { isArray, isNumber, predicateChoice } from "../misc.js"
-import type { DelimHandler, DelimPredicate, StreamHandler } from "./ParserMap.js"
-import { positionConvert } from "src/types/Stream/Position.js"
+import {
+	iterationChoice,
+	isArray,
+	isBackward,
+	isNumber,
+	predicateChoice,
+	preserveDirection,
+	pickDirection,
+	positionStopPoint
+} from "../misc.js"
+import type { DelimPredicate, StreamHandler } from "./ParserMap.js"
+import { positionConvert, type PredicatePosition } from "src/types/Stream/Position.js"
 import { type ReversibleStream } from "src/types/Stream/ReversibleStream.js"
 import { type BasicStream } from "src/types/Stream/BasicStream.js"
 import { type Position } from "src/types/Stream/Position.js"
@@ -9,7 +18,6 @@ import { not, preserve } from "../aliases.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
 
 import { function as _f } from "@hgargg-0710/one"
-import type { SummatFunction } from "../types/Summat.js"
 const { trivialCompose } = _f
 
 export function delimited(
@@ -19,50 +27,45 @@ export function delimited(
 	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]
-	limits = limits.map(positionConvert) as [
-		number | SummatFunction,
-		(number | SummatFunction)?
-	]
-	const pred =
-		predicateChoice(limits[1] as number | SummatFunction) ||
-		predicateChoice(limits[0] as number | SummatFunction)
-	const prePred = +(1 in limits) && limits[0]
-	return function (
-		input: BasicStream,
-		handler: DelimHandler = preserve,
-		dest: Collection = ArrayCollection()
-	) {
-		skip(prePred)(input)
+	const limitsDirectional = limits.map(positionConvert)
+	const pred = 1 in limitsDirectional ? limitsDirectional[1] : limitsDirectional[0]
+	const prePred = skip(+(1 in limits) && limits[0])
 
-		const endpred = (input: BasicStream, i: number, j: number) =>
-			!input.isEnd && pred(input, i, j)
+	const prev = isBackward(pred)
+	const [change, endPred] = iterationChoice(pred)
+
+	return function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
 		let i = 0,
 			j = 0
-		const skipDelims = skip((input: BasicStream, _j: number) =>
-			isdelim(input, i, j + _j)
-		)
 
-		for (; endpred(input, i, j); ++i) {
+		const skipDirection: PredicatePosition = (input: BasicStream, _j: number) =>
+			isdelim(input, i, j + _j)
+		skipDirection.direction = prev
+
+		const skipDelims = skip(skipDirection)
+
+		prePred(input)
+		for (; endPred(input, i, j); ++i) {
 			j += skipDelims(input)
-			if (!endpred(input, i, j)) break
-			dest.push(...handler(input, i, j))
-			input.next()
+			if (!endPred(input, i, j)) break
+			dest.push(change(input))
 		}
+
 		return dest
 	}
 }
-export function eliminate<Type = any, SplitType = any, MatchType = any>(
-	symbols: SplitType[]
-) {
-	return (pattern: Pattern<Type, SplitType, MatchType>, nil = pattern.class.empty) =>
+
+export function eliminate<Type = any, SplitType = any>(symbols: SplitType[]) {
+	return (pattern: Pattern<Type, SplitType>, nil = pattern.class.empty) =>
 		symbols.reduce((acc, curr) => acc.split(curr).join(nil), pattern)
 }
+
 export function skip(steps: Position = 1) {
-	const pred = predicateChoice(positionConvert(steps))
-	return function (input: BasicStream) {
+	const [change, endPred] = iterationChoice(positionConvert(steps))
+	return function (input: ReversibleStream) {
 		let i = 0
-		while (!input.isEnd && pred(input, i)) {
-			input.next()
+		while (endPred(input, i)) {
+			change(input)
 			++i
 		}
 		return i
@@ -72,11 +75,14 @@ export function skip(steps: Position = 1) {
 export function consume(init: Position, pred?: Position) {
 	const isPred = !!pred
 	init = positionConvert(init)
-	pred = predicateChoice(isPred ? positionConvert(pred) : init)
-	const initSkip = skip(isPred ? predicateChoice(init) : 0)
-	return function (input: BasicStream, dest: Collection = ArrayCollection()) {
+	const directional = isPred ? positionConvert(pred) : init
+
+	const initSkip = skip(+isPred && predicateChoice(init))
+	const [change, endPred] = iterationChoice(directional)
+
+	return function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
 		initSkip(input)
-		for (let i = 0; !input.isEnd && pred(input, i); ++i) dest.push(input.next())
+		for (let i = 0; endPred(input, i); ++i) dest.push(change(input))
 		return dest
 	}
 }
@@ -96,7 +102,7 @@ export function nested(
 	inflation: StreamHandler<boolean | number>,
 	deflation: StreamHandler<boolean | number>
 ) {
-	return function (input: BasicStream) {
+	return function (input: ReversibleStream) {
 		let depth = 1
 		const depthInflate = (x: boolean | number) => x && (depth += x as number)
 		const depthDeflate = (x: boolean | number) => !x || (depth -= x as number)
@@ -110,30 +116,34 @@ export function nested(
 export const array = transform()
 
 export function has(pred: Position) {
-	pred = positionConvert(pred)
-	const checkSkip = skip(isNumber(pred) ? pred : trivialCompose(not, pred))
-	return function (input: BasicStream) {
+	pred = predicateChoice(positionConvert(pred))
+	const stopPoint = positionStopPoint(pred)
+	const checkSkip = skip(preserveDirection(pred, (x) => trivialCompose(not, x)))
+	return function (input: ReversibleStream) {
 		checkSkip(input)
-		return !input.isEnd
+		return !input[stopPoint]
 	}
 }
 
 export function find(pred: Position) {
 	pred = positionConvert(pred)
+	const change = pickDirection(pred)
+	const stopPoint = positionStopPoint(pred)
+	pred = isNumber(pred) ? Math.abs(pred) : pred
 	return isNumber(pred)
-		? function (input: BasicStream) {
-				let i = 0
-				while (!input.isEnd && i < pred) {
-					input.next()
-					++i
-				}
+		? function (input: ReversibleStream) {
+				while (!input[stopPoint] && (pred as number)--) change(input)
 				return input.curr()
 		  }
-		: function (input: BasicStream, dest: Collection = ArrayCollection()) {
-				let i = 0
-				while (!input.isEnd) {
-					if (pred(input, i)) dest.push(input.curr())
-					input.next()
+		: function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
+				let i = 0,
+					j = 0
+				for (; !input[stopPoint]; change(input)) {
+					if (pred(input, i, j)) {
+						dest.push(input.curr())
+						++j
+						continue
+					}
 					++i
 				}
 				return dest
@@ -166,9 +176,9 @@ export function extract(pred: DelimPredicate, isRem: boolean = false) {
 		destextr: Collection = ArrayCollection(),
 		destrem: Collection = ArrayCollection()
 	): [Collection, Collection] | Collection {
-		let i = 0
-		let j = 0
-		while (!stream.isEnd) {
+		let i = 0,
+			j = 0
+		do {
 			while (!stream.isEnd && pred(stream, i, j)) {
 				destextr.push(stream.next())
 				++i
@@ -177,14 +187,16 @@ export function extract(pred: DelimPredicate, isRem: boolean = false) {
 				if (isRem) destrem.push(stream.next())
 				++j
 			}
-		}
+		} while (!stream.isEnd)
 		return isRem ? [destextr, destrem] : destextr
 	}
 }
 
 export function prolong(streams: BasicStream[], dest: Collection = ArrayCollection()) {
-	for (let i = 0; i < streams.length; ++i) {
-		const stream = streams[i]
+	const streamLen = streams.length - 1
+	let i = streams.length
+	while (i--) {
+		const stream = streams[streamLen - i]
 		while (!stream.isEnd) dest.push(stream.next())
 	}
 	return dest

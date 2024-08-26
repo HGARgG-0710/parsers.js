@@ -103,7 +103,7 @@ export function stringPatternCollectionJoin(x = StringPattern()) {
 	return StringPattern(this.value.map((x: Pattern) => x.value).join(x.value))
 }
 export function* stringPatternCollectionIterator() {
-	for (let i = 0; i < this.value.length; ++i) yield this.value[i]
+	for (let i = this.value.length; i--; ) yield this.value[this.value.length - i]
 }
 
 export const StringPatternCollection: PatternCollectionClass<

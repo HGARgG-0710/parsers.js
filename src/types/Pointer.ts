@@ -1,5 +1,5 @@
 import { object } from "@hgargg-0710/one"
-import type { Summat } from "main.js"
+import type { Summat } from "./Summat.js"
 import { isFunction } from "src/misc.js"
 const { structCheck } = object
 

@@ -1,7 +1,9 @@
-import { array } from "@hgargg-0710/one"
-import { table } from "../types/IndexMap.js"
-import type { IndexMap, Pattern, PatternCollection, SummatFunction } from "../types.js"
+import { table, type IndexMap } from "../types/IndexMap.js"
+import type { SummatFunction } from "../types/Summat.js"
+import type { Pattern, PatternCollection } from "../types/Pattern.js"
 import { isBoolean } from "src/misc.js"
+
+import { array } from "@hgargg-0710/one"
 const { insert } = array
 
 // ? Generalize this to analyze a given pattern "globally" in terms of tokens? (id est, allow to LOCATE the 'non-true' bits and return them, along with locations/indexes?);

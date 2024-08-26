@@ -1,4 +1,4 @@
-import type { Summat } from "main.js"
+import type { Summat } from "./Summat.js"
 export type Indexed<Type = any> =
 	| string
 	| (Summat & {

@@ -1,5 +1,5 @@
 import type { Collection } from "../types/Collection.js"
-import type { Summat } from "../types/Summat.js"
+import type { Summat, SummatFunction } from "../types/Summat.js"
 import type { IndexMap } from "../types/IndexMap.js"
 import type { BasicStream } from "src/types/Stream/BasicStream.js"
 import type { ParsingState } from "./GeneralParser.js"
@@ -29,6 +29,11 @@ export type ParserFunction<
 ) &
 	Summat
 
+export type StreamMap<
+	OutType = any,
+	StreamType extends BasicStream = BasicStream
+> = StreamHandler<SummatFunction<any, StreamType, OutType>>
+
 export type StreamHandler<Type = any[]> = Summat &
 	(
 		| ((input?: BasicStream, i?: number) => Type)
@@ -37,12 +42,7 @@ export type StreamHandler<Type = any[]> = Summat &
 	)
 
 export type DelimHandler<Type = any[]> = Summat &
-	(
-		| ((input?: BasicStream, i?: number, j?: number) => Type)
-		| ((input?: BasicStream, i?: number) => Type)
-		| ((input?: BasicStream) => Type)
-		| (() => Type)
-	)
+	(((input?: BasicStream, i?: number, j?: number) => Type) | StreamHandler<Type>)
 
 export function ParserMap<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, ParserFunction<OutType>>

@@ -1,4 +1,4 @@
-import type { Summat, SummatFunction } from "main.js"
+import type { Summat, SummatFunction } from "../Summat.js"
 import { isFunction, isNumber } from "src/misc.js"
 import type { PositionalStream } from "./PositionalStream.js"
 import type { BasicStream } from "./BasicStream.js"
@@ -13,8 +13,7 @@ export type PositionObject<Type = any> = Summat & {
 	copy?(): PositionObject<Type>
 }
 
-export interface PredicatePosition {
-	predicate: SummatFunction
+export interface PredicatePosition extends SummatFunction {
 	direction?: boolean
 }
 
@@ -27,13 +26,8 @@ export function isPositionObject(x: any): x is PositionObject {
 	return convertCheck(x) && isFunction(x.convert)
 }
 
-export const predicateCheck = structCheck("predicate")
-export function isPredicatePosition(x: any): x is PredicatePosition {
-	return predicateCheck(x) && isFunction(x.predicate)
-}
-
 export function positionExtract(pos: DirectionalPosition): BasicPosition {
-	return isPredicatePosition(pos) ? pos.predicate : Math.abs(pos)
+	return isFunction(pos) ? pos : Math.abs(pos)
 }
 
 // ? Should calls of this be made OUTSIDE the closures in the 'utils', or INSIDE them? [With an additional 'stream' argument?];
