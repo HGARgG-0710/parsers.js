@@ -6,6 +6,8 @@ const { trivialCompose } = f
 const { propPreserve } = array
 const { isArray } = type
 
+export type InTreeType<Type = any> = Type | Tree<Type>
+
 export interface Tree<Type = any> extends Summat {
 	lastChild: number
 	index: (multindex: number[]) => Tree<Type> | Type

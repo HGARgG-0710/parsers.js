@@ -29,7 +29,6 @@ export function treeWalkerRenewLevel<Type = any>(
 	this: TreeWalker<Type>,
 	init: Tree<Type> = this.stream.input
 ) {
-	this.stream.input
 	this.level = init.index(this.stream.pos.slice(0, -1)) as Tree<Type>
 }
 

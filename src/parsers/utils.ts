@@ -19,9 +19,7 @@ const { trivialCompose } = _f
 const { isArray, isNumber } = type
 
 export function delimited(
-	limits:
-		| [Position | DelimPredicate, (Position | DelimPredicate)?]
-		| (Position | DelimPredicate),
+	limits: [Position, Position?] | Position,
 	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]

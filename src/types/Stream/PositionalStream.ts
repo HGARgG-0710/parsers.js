@@ -4,7 +4,7 @@ import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { Position } from "./Position.js"
 import { StreamCurrGetter, StreamEndingHandler } from "./StreamEndingHandler.js"
 import { positionalStreamNext } from "./StreamIterable.js"
-import { isFinishableStream } from "main.js"
+import { isFinishableStream, streamIterator, type IterableStream } from "main.js"
 
 export interface PositionalStream<Type = any, PosType extends Position = Position>
 	extends BasicStream<Type> {
@@ -13,7 +13,8 @@ export interface PositionalStream<Type = any, PosType extends Position = Positio
 
 export interface PositionalInputtedStream<Type = any, PosType extends Position = Position>
 	extends PositionalStream<Type, PosType>,
-		Inputted<BasicStream<Type>> {}
+		Inputted<BasicStream<Type>>,
+		IterableStream<Type> {}
 
 export function PositionalStream<Type = any>(
 	input: BasicStream<Type>
@@ -24,7 +25,8 @@ export function PositionalStream<Type = any>(
 				pos: 0,
 				input,
 				next: positionalStreamNext<Type>,
-				finish: isFinishableStream(input) ? underStreamFinish<Type> : null
+				finish: isFinishableStream(input) ? underStreamFinish<Type> : null,
+				[Symbol.iterator]: streamIterator<Type>
 			},
 			underStreamCurr<Type>
 		),

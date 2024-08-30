@@ -41,9 +41,9 @@ export function InputStream<Type = any>(input: Indexed<Type>): InputStream<Type>
 					prev: inputStreamtPrev<Type>,
 					rewind: inputStreamRewind<Type>,
 					copy: inputStreamCopy<Type>,
-					navigate: inputStreamNavigate,
-					finish: inputStreamFinish,
-					[Symbol.iterator]: inputStreamIterator
+					navigate: inputStreamNavigate<Type>,
+					finish: inputStreamFinish<Type>,
+					[Symbol.iterator]: inputStreamIterator<Type>
 				},
 				inputStreamCurr<Type>
 			),

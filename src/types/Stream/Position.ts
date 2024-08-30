@@ -40,6 +40,7 @@ export function positionConvert(
 export function positionCheck(stream: PositionalStream, position: Position) {
 	if (isPositionObject(position) && position.compare && isPositionObject(stream.pos))
 		return position.compare(stream.pos)
+
 	const checked = positionExtract(positionConvert(position, stream))
 	const streampos = positionExtract(positionConvert(stream.pos, stream))
 	return isNumber(checked)

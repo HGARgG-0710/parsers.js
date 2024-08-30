@@ -2,9 +2,10 @@ import { underStreamCurr } from "./UnderStream.js"
 import { underStreamNext } from "./UnderStream.js"
 import { PositionalStream } from "./PositionalStream.js"
 import { limitedStreamIsEnd, type BasicStream, type Inputted } from "./BasicStream.js"
-import { type Position } from "./Position.js"
+import type { Position } from "./Position.js"
 import { limitedStreamNavigate, type NavigableStream } from "./NavigableStream.js"
 import { StreamCurrGetter, StreamEndingHandler } from "./StreamEndingHandler.js"
+import { streamIterator, type IterableStream } from "main.js"
 
 export interface LimitableStream<Type = any> extends BasicStream<Type> {
 	limit(from: Position, to?: Position): BasicStream<Type>
@@ -12,12 +13,14 @@ export interface LimitableStream<Type = any> extends BasicStream<Type> {
 
 export interface LimitedStream<Type = any>
 	extends BoundableStream<Type>,
-		Inputted<NavigableStream<Type> & PositionalStream<Type>> {}
+		Inputted<NavigableStream<Type> & PositionalStream<Type>>,
+		IterableStream<Type> {}
 
 export interface BoundableStream<Type = any>
 	extends LimitableStream<Type>,
 		NavigableStream<Type>,
-		PositionalStream<Type> {}
+		PositionalStream<Type>,
+		IterableStream<Type> {}
 
 export function LimitedStream<Type = any>(
 	initialStream: NavigableStream<Type> & PositionalStream<Type>,
@@ -36,12 +39,13 @@ export function LimitedStream<Type = any>(
 				to,
 				input: initialStream,
 				navigate: limitedStreamNavigate<Type>,
-				next: underStreamNext,
-				limit: limitStream
+				next: underStreamNext<Type>,
+				limit: limitStream<Type>,
+				[Symbol.iterator]: streamIterator<Type>
 			},
-			underStreamCurr
+			underStreamCurr<Type>
 		),
-		limitedStreamIsEnd
+		limitedStreamIsEnd<Type>
 	) as LimitedStream<Type>
 }
 
@@ -56,6 +60,7 @@ export function limitStream<Type = any>(
 export function LimitableStream<Type = any>(
 	navigable: NavigableStream<Type> & PositionalStream<Type>
 ): BoundableStream<Type> {
-	navigable.limit = limitStream
+	navigable.limit = limitStream<Type>
+	navigable[Symbol.iterator] = streamIterator<Type>
 	return navigable as BoundableStream<Type>
 }

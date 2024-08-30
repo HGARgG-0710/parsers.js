@@ -1,7 +1,6 @@
 // * Aliases file (main purpose of its is to allow parsers to be written in a more functional style).
 
-import type { StreamHandler } from "./parsers.js"
-import type { Collection } from "./types/Collection.js"
+import type { ParsingState, StreamHandler } from "./parsers.js"
 
 import type { BasicStream } from "./types/Stream/BasicStream.js"
 import type { Position, PredicatePosition } from "./types/Stream/Position.js"
@@ -23,7 +22,6 @@ export function wrapped(handler: (input: BasicStream) => any) {
 }
 
 export const is = (x: any) => x.is
-export const push = (x: Collection, ...y: any[]) => x.push(...y)
 
 export const isEnd = (input: BasicStream) => input.isEnd
 export const isStart = (input: ReversibleStream) => input.isStart
@@ -39,8 +37,7 @@ export const skipArg = (pred: Position) => (f: StreamHandler) => (input: BasicSt
 export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.curr])
 export const miss = () => []
 
-export const firstFinished = ({ streams }) => streams[0].isEnd
-export const firstStream = ({ streams }) => streams[0]
+export const firstStream = ({ streams }: ParsingState) => streams[0]
 
 export const eq = (x: any) => (y: any) => x === y
 export const not = (x: any) => !x

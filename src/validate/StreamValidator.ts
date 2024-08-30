@@ -1,15 +1,44 @@
-import type { ParserMap } from "../parsers/ParserMap.js"
+import type { ParserMap, StreamHandler } from "../parsers/ParserMap.js"
 import type { BasicStream } from "../types.js"
-import { GeneralParser } from "../parsers/GeneralParser.js"
+import {
+	DefineFinished,
+	GeneralParser,
+	type ParsingState
+} from "../parsers/GeneralParser.js"
 
-export function StreamValidator<KeyType = any>(validator: ParserMap<KeyType, boolean>) {
-	return GeneralParser<BasicStream<KeyType>, boolean, any>({
-		finished: ({ streams, result }) => streams[0].isEnd || !result,
-		change: function (_current, next) {
-			this.result = next && next(this.streams[0])
-			if (this.result) this.streams[0].next()
-		},
-		parser: validator,
-		result: true
-	})
+// ? Take out this type used for determining the '.next' call? [could be a simple 'StreamHandler...'];
+export type StreamValidatorState<KeyType = any> = ParsingState<
+	BasicStream<KeyType>,
+	boolean,
+	StreamHandler<boolean>,
+	KeyType
+>
+
+export function streamValidatorFinished<KeyType = any>(
+	this: StreamValidatorState<KeyType>
+) {
+	return this.streams[0].isEnd || !this.result
+}
+
+export function streamValidatorChange<KeyType = any>(
+	this: StreamValidatorState<KeyType>,
+	next: StreamHandler<boolean>
+) {
+	this.result = next && next(this.streams[0])
+	if (this.result) this.streams[0].next()
+}
+
+export function StreamValidator<KeyType = any>(
+	validator: ParserMap<KeyType, StreamHandler<boolean>, StreamValidatorState<KeyType>>
+) {
+	return GeneralParser<StreamValidatorState<KeyType>>(
+		DefineFinished(
+			{
+				change: streamValidatorChange<KeyType>,
+				parser: validator,
+				result: true
+			},
+			streamValidatorFinished<KeyType>
+		)
+	)
 }
