@@ -1,10 +1,10 @@
-import { array, function as f } from "@hgargg-0710/one"
 import type { Summat } from "./Summat.js"
 import type { Token } from "./Token.js"
-import { isArray } from "../misc.js"
 
+import { array, function as f, typeof as type } from "@hgargg-0710/one"
 const { trivialCompose } = f
 const { propPreserve } = array
+const { isArray } = type
 
 export interface Tree<Type = any> extends Summat {
 	lastChild: number

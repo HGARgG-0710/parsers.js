@@ -1,8 +1,8 @@
-import { isFunction } from "src/misc.js"
 import type { BasicStream } from "./BasicStream.js"
 
-import { object } from "@hgargg-0710/one"
+import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
+const { isFunction } = type
 
 export interface FinishableStream<Type = any> extends BasicStream<Type> {
 	finish(): Type

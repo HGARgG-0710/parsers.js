@@ -1,25 +1,32 @@
 import { function as _f } from "@hgargg-0710/one"
+import type { SummatFunction } from "src/types/Summat.js"
 
 const { trivialCompose } = _f
 
-export function LayeredParser(layers: Function[]) {
-	let localParser: Function
-	let localLayers: Function[] = []
+export interface LayeredParser extends SummatFunction {
+	layers: Function[]
+	parser: Function
+}
 
-	const final = function (...x: any[]) {
-		return localParser(...x)
-	}
-	
+export function layersGet(this: LayeredParser) {
+	return this.realLayers
+}
+export function layersSet(this: LayeredParser, layers: Function[]) {
+	this.realLayers = layers
+	this.parser = trivialCompose(...layers)
+	return layers
+}
+
+export function LayeredParser(layers: Function[]): LayeredParser {
+	const final: LayeredParser = function (...x: any[]) {
+		return final.parser(...x)
+	} as unknown as LayeredParser
+
 	Object.defineProperty(final, "layers", {
-		get: function () {
-			return localLayers
-		},
-		set: function (layers) {
-			localLayers = layers
-			localParser = trivialCompose(...layers)
-			return layers
-		}
+		get: layersGet,
+		set: layersSet
 	})
+
 	final.layers = layers
 	return final
 }

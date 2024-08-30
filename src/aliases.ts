@@ -11,7 +11,7 @@ import type { PreBasicStream } from "./types/Stream/PreBasicStream.js"
 import type { ReversibleStream } from "./types/Stream/ReversibleStream.js"
 
 export const next = (input: PreBasicStream) => input.next()
-export const current = (input: PreBasicStream) => input.curr()
+export const current = (input: PreBasicStream) => input.curr
 export const output = (x: any) => [x]
 export function wrapped(handler: (input: BasicStream) => any) {
 	return function (input: BasicStream) {
@@ -26,6 +26,7 @@ export const is = (x: any) => x.is
 export const push = (x: Collection, ...y: any[]) => x.push(...y)
 
 export const isEnd = (input: BasicStream) => input.isEnd
+export const isStart = (input: ReversibleStream) => input.isStart
 export const previous = (input: ReversibleStream) => input.prev()
 export const destroy = (input: BasicStream) => {
 	input.next()
@@ -35,7 +36,7 @@ export const forward = (input: BasicStream) => (input.isEnd ? [] : [input.next()
 export const skipArg = (pred: Position) => (f: StreamHandler) => (input: BasicStream) =>
 	[pred, f(input)]
 
-export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.curr()])
+export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.curr])
 export const miss = () => []
 
 export const firstFinished = ({ streams }) => streams[0].isEnd

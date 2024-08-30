@@ -7,30 +7,30 @@ export interface UnderStream<StreamType extends BasicStream = BasicStream, Type 
 	extends Inputted<StreamType>,
 		BasicStream<Type> {}
 
-export function underStreamPrev(this: UnderStream<ReversibleStream>) {
+export function underStreamPrev<Type = any>(this: UnderStream<ReversibleStream, Type>) {
 	return this.input.prev()
 }
 
-export function underStreamNext(this: UnderStream) {
+export function underStreamNext<Type = any>(this: UnderStream<BasicStream, Type>) {
 	return this.input.next()
 }
 
-export function underStreamCurr(this: UnderStream) {
-	return this.input.curr()
+export function underStreamCurr<Type = any>(this: UnderStream<BasicStream, Type>) {
+	return this.input.curr
 }
 
-export function underStreamIsEnd(this: UnderStream) {
+export function underStreamIsEnd<Type = any>(this: UnderStream<BasicStream, Type>) {
 	return this.input.isEnd
 }
 
-export function underStreamIsStart(this: StartedStream) {
+export function underStreamIsStart<Type = any>(this: StartedStream<Type>) {
 	return this.input.isStart
 }
 
-export function underStreamRewind(this: UnderStream<RewindableStream>) {
+export function underStreamRewind<Type = any>(this: UnderStream<RewindableStream, Type>) {
 	return this.input.rewind()
 }
 
-export function underStreamFinish(this: UnderStream<FinishableStream>) {
+export function underStreamFinish<Type = any>(this: UnderStream<FinishableStream, Type>) {
 	return this.input.finish()
 }

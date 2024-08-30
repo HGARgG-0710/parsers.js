@@ -1,15 +1,15 @@
 import { array, object, function as f } from "@hgargg-0710/one"
 import type { Summat } from "./Summat.js"
 import type { SummatIterable } from "./Summat.js"
+import type { Pattern } from "main.js"
 
 const { and } = f
 const { structCheck } = object
 const { propPreserve } = array
 
-export interface Token<Type = any, Value = any> extends Summat {
-	type: Type
-	value: Value
-}
+export interface Token<Type = any, Value = any>
+	extends TokenInstance<Type>,
+		Pattern<Value> {}
 
 export interface TokenInstance<Type = any> extends Summat {
 	type: Type
@@ -37,7 +37,9 @@ Token.value = (x: any) => x.value
 
 const emptyStruct = structCheck()
 export function isType<Type = any>(type: Type): (x: any) => x is TokenInstance<Type> {
-	return and(emptyStruct, (x: any): boolean => Token.type(x) === type)
+	return and(emptyStruct, (x: any): boolean => Token.type(x) === type) as (
+		x: any
+	) => x is TokenInstance<Type>
 }
 
 export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {

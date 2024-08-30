@@ -1,59 +1,19 @@
-import { table, type IndexMap } from "../types/IndexMap.js"
+import { type IndexMap } from "../types/IndexMap.js"
 import type { SummatFunction } from "../types/Summat.js"
-import type { Pattern, PatternCollection } from "../types/Pattern.js"
-import { isBoolean } from "src/misc.js"
+import type { ValidatablePattern } from "src/types/Pattern.js"
 
-import { array } from "@hgargg-0710/one"
-const { insert } = array
+export type PatternValidatorOutput = true | null | [false, number]
 
-// ? Generalize this to analyze a given pattern "globally" in terms of tokens? (id est, allow to LOCATE the 'non-true' bits and return them, along with locations/indexes?);
-export function PatternValidator<KeyType>(
+// ^ 'null' indicates non-coverage, 'true' indicates correctness and coverage, 'false' indicates incorrectness (comes additionally with a position);
+export function PatternValidator<KeyType = any>(
 	validityMap: IndexMap<KeyType, SummatFunction<any, any, boolean>>
 ) {
-	const [typeKeys, checks] = table(validityMap)
-	return function (pattern: Pattern<any, KeyType, KeyType>) {
-		const isPattern = pattern.class.is
-		const isCollection = pattern.class.collection.is
-		const validateSingle = (
-			pattern: Pattern<any, KeyType, KeyType>,
-			typeKey: KeyType,
-			check: SummatFunction<any, KeyType, boolean>
-		) => {
-			return (
-				pattern
-					.matchAll(typeKey)
-					.reduce(
-						(acc, curr, i) => insert(acc, 2 * i + 1, check(curr)),
-						pattern.split(typeKey)
-					) as PatternCollection<any, KeyType, KeyType>
-			).filter((x) => isBoolean(x) || (isPattern(x) && x.length))
+	return function <Type = any>(pattern: ValidatablePattern<Type, KeyType>) {
+		for (let i = 0; i < validityMap.keys.length; ++i) {
+			const [key, handler] = validityMap.byIndex(i)
+			const result = pattern.validate(key, handler)
+			if (!result[0]) return [false, i]
 		}
-
-		function keyValidate(pattern: Pattern<any, KeyType, KeyType>) {
-			function validateRecursive(
-				current:
-					| Pattern<any, KeyType, KeyType>
-					| PatternCollection<any, KeyType, KeyType>,
-				currKey: KeyType,
-				i: number
-			) {
-				return isPattern(current)
-					? validateSingle(current, currKey, checks[i])
-					: isCollection(current)
-					? current.map((x) => validateRecursive(x, currKey, i))
-					: current
-			}
-
-			function booltreeCheck(booltree: PatternCollection<any, KeyType, KeyType>) {
-				return booltree.every(
-					(x: boolean | PatternCollection<any, KeyType, KeyType>) =>
-						isCollection(x) ? booltreeCheck(x) : x === true
-				)
-			}
-
-			return booltreeCheck(typeKeys.reduce(validateRecursive, pattern))
-		}
-
-		return keyValidate(pattern)
+		return !pattern.result[1].length ? true : null
 	}
 }

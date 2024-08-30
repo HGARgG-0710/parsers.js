@@ -1,8 +1,6 @@
 import {
 	iterationChoice,
-	isArray,
 	isBackward,
-	isNumber,
 	predicateChoice,
 	preserveDirection,
 	pickDirection,
@@ -13,12 +11,12 @@ import { positionConvert, type PredicatePosition } from "src/types/Stream/Positi
 import { type ReversibleStream } from "src/types/Stream/ReversibleStream.js"
 import { type BasicStream } from "src/types/Stream/BasicStream.js"
 import { type Position } from "src/types/Stream/Position.js"
-import type { Pattern } from "../types/Pattern.js"
 import { not, preserve } from "../aliases.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
 
-import { function as _f } from "@hgargg-0710/one"
+import { function as _f, typeof as type } from "@hgargg-0710/one"
 const { trivialCompose } = _f
+const { isArray, isNumber } = type
 
 export function delimited(
 	limits:
@@ -53,11 +51,6 @@ export function delimited(
 
 		return dest
 	}
-}
-
-export function eliminate<Type = any, SplitType = any>(symbols: SplitType[]) {
-	return (pattern: Pattern<Type, SplitType>, nil = pattern.class.empty) =>
-		symbols.reduce((acc, curr) => acc.split(curr).join(nil), pattern)
 }
 
 export function skip(steps: Position = 1) {
@@ -133,14 +126,14 @@ export function find(pred: Position) {
 	return isNumber(pred)
 		? function (input: ReversibleStream) {
 				while (!input[stopPoint] && (pred as number)--) change(input)
-				return input.curr()
+				return input.curr
 		  }
 		: function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
 				let i = 0,
 					j = 0
 				for (; !input[stopPoint]; change(input)) {
 					if (pred(input, i, j)) {
-						dest.push(input.curr())
+						dest.push(input.curr)
 						++j
 						continue
 					}
@@ -163,7 +156,7 @@ export function merge(
 	return function (streams: BasicStream[], init: Collection = ArrayCollection()) {
 		const final = init
 		while (!endRule(streams)) {
-			final.push(streams[mergeRule(streams)].curr())
+			final.push(streams[mergeRule(streams)].curr)
 			iterationRule(streams)
 		}
 		return final

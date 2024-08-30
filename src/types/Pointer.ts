@@ -1,7 +1,8 @@
-import { object } from "@hgargg-0710/one"
 import type { Summat } from "./Summat.js"
-import { isFunction } from "src/misc.js"
+
+import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
+const { isFunction } = type
 
 export interface Pointer<Type = any> extends Summat {
 	value: Type | Pointer<Type>
@@ -9,7 +10,7 @@ export interface Pointer<Type = any> extends Summat {
 	set(newvalue: Type): Type
 }
 
-const valueCheck = structCheck("value")
+const valueCheck = structCheck("value", "get", "set")
 export const isPointer = (x: any): x is Pointer =>
 	valueCheck(x) && isFunction(x.get) && isFunction(x.set)
 

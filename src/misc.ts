@@ -5,15 +5,21 @@ import type { ReversibleStream } from "./types/Stream/ReversibleStream.js"
 import { next, previous } from "./aliases.js"
 import type { BoundType } from "./types/Stream/StreamEndingHandler.js"
 
+import { typeof as type } from "@hgargg-0710/one"
+import type { Summat } from "./types/Summat.js"
+const { isNumber } = type
+
+export interface Resulting<ResultType = any> extends Summat {
+	result: ResultType
+}
+
+export interface Flushable {
+	flush(): void
+}
+
 export type ChangeType = (input: ReversibleStream) => any
 
 export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
-export const isNumber = (x: any): x is number => typeof x === "number"
-export const isFunction = (x: any): x is Function => typeof x === "function"
-export const isArray = (x: any): x is any[] => x instanceof Array
-export const isString = (x: any): x is string => typeof x === "string"
-export const isBoolean = (x: any): x is boolean => typeof x === "boolean"
-export const isSymbol = (x: any): x is symbol => typeof x === "symbol"
 
 export function predicateChoice(x: DirectionalPosition): PredicatePosition {
 	if (isNumber(x)) {

@@ -2,8 +2,8 @@ import { underStreamFinish, underStreamIsEnd } from "./UnderStream.js"
 import { underStreamCurr } from "./UnderStream.js"
 import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { Position } from "./Position.js"
-import { StreamEndingHandler } from "./StreamEndingHandler.js"
-import { positionalStreamNext } from "./PreBasicStream.js"
+import { StreamCurrGetter, StreamEndingHandler } from "./StreamEndingHandler.js"
+import { positionalStreamNext } from "./StreamIterable.js"
 import { isFinishableStream } from "main.js"
 
 export interface PositionalStream<Type = any, PosType extends Position = Position>
@@ -19,13 +19,15 @@ export function PositionalStream<Type = any>(
 	input: BasicStream<Type>
 ): PositionalInputtedStream<Type> {
 	return StreamEndingHandler(
-		{
-			pos: 0,
-			input,
-			next: positionalStreamNext,
-			curr: underStreamCurr,
-			finish: isFinishableStream(input) ? underStreamFinish : null
-		},
-		underStreamIsEnd
+		StreamCurrGetter(
+			{
+				pos: 0,
+				input,
+				next: positionalStreamNext<Type>,
+				finish: isFinishableStream(input) ? underStreamFinish<Type> : null
+			},
+			underStreamCurr<Type>
+		),
+		underStreamIsEnd<Type>
 	) as PositionalInputtedStream<Type>
 }

@@ -8,20 +8,23 @@ NOTE: nope, the version is NOT finished.
 	Things to do before re-starting the testing all over again: 
 
 		0. DO the dependency-management bit (about 'pointer' + 'summat.ts'); 
+			0.1. The 'structCheck' IS BAAD!
 
-		[CURRENT! 5]
-		1. Fix all [some] of the 'as' problems (namely: CREATE THE NEEDED SUB-INTERFACES!);
-			1.1. Primarily, in the 'InputStream', and such ...
-
-		[CURRENT! 4]
-		2. NavigableStream and LimitedStream - NEGATIVE INTEGERS, backwards directions!
+		1. 3.27 
 
 		AFTER EVERYTHING ELSE: 
-		[CURRENT! 3]
-		3. Make all the 'Stream'-s implementations out there __ITERABLE__! 
-			3.1. With the 'default' Iterator being given in an 'IterableStream' constructor; 
 
-		4. Re-define the '.curr()' as a PROPERTY (thus, the user would be able to change the '.curr', BUT the 'StreamTokenizer' wouldn't need that ugly 'current' property...); 
+		2. DURING TESTING [possible RE-DO AGAIN!]: 
+
+			Make a micro-benchmark, for comparing execution time of functional and OO API;
+			IF OO is faster, IMPLEMENT it in the '3.0' version (NOT v0.4) + REPLACE the functional API with it...;
+
+			IF it proves faster, do: 
+
+				1. 3.24, 2.25
+				2. 3.4-3.8
+				3. 3.10, 3.11
+
 
 A. testing [1. Create list of modules to be tested]; 
 B. documentation (change/fix it...); 
@@ -47,21 +50,13 @@ For v0.4:
 	As, CPS is (quite) time-costly to actually run (due to the stack unwinding [primary] + amount of stack usage + additional checks...),
 		this sort of thing would be useful for applications where speed of little importance
 			(that is: NOT things like apps/websites/interpreters, and so forth; Stuff like AOT-compilers, perhaps);
-
-2. Negative numbers? 
-	Alter the 'predicateChoice' to allow for negative numbers (the '.prev')? 
-	This'd mean (ultimately) just adding a more convinient syntax for stuff like 'RevertedStream'; 
-	Except, it would also require that all Streams used by the utils to be REVERSIBLE... 
-		(unless one branches it into two separate functions...); 
-
-	Think about this. 
 	
-3. Write proper JSDoc documentation for all this stuff...
+2. Write proper JSDoc documentation for all this stuff...
 	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
 
-4. Add various optimization data structures + utils + parser properties: 
+3. Add various optimization data structures + utils + parser properties: 
 
-	4.1. bufferize(process, size)(tree) - util
+	3.1. bufferize(process, size)(tree) - util
 
 		Given a 'Tree', returns an array of values: 
 
@@ -91,13 +86,13 @@ For v0.4:
 
 		If size is used, it will ONLY use this many items from the tree (up to the maximum amount - the rest of positions will be assigned to 'undefined'); 
 
-	4.2. Add a 'state.size' property to the parsers. 
+	3.2. Add a 'state.size' property to the parsers. 
 		This (ultimately) counts the number of items inside the tree.
 		Can be used with 'bufferize': 
 
 			bufferize((x) => x, pstate.size)(pstate.result)
 
-	4.3. NestableStream: 
+	3.3. NestableStream: 
 
 		A 'Stream', on which 'nested' has been implemented (id est WITHOUT copying) EFFICIENTLY! 
 		This, ultimately, means prioritizing the elements of the 'Stream' over the actual NESTING. 
@@ -110,11 +105,11 @@ For v0.4:
 				1.1. .next(), which: 
 					1.1.1. [if the 'stream.curr()' is not 'inflate(stream.curr()) == 1'], return 'stream.next()'; 
 					1.1.2. [if the 'stream.curr()' IS 'inflate(stream.curr()) == 1'], return a new 'NavigableStream' with the same 'inflate', 'deflate' AND A NEW POSITION [NOTE: IT MUST be copied]; 
-				1.2. '.curr()', which works the same way as the '.next()', EXCEPT, it caches the 'current' value; 
-				1.3. 'isEnd()' which would END THE STREAM [keep the locally-scoped boolean for this]!
+				1.2. '.curr', which is just a property for keeping track of the results of '.next()'; 
+				1.3. 'isEnd' which would END THE STREAM [keep the locally-scoped boolean for this]!
 					1.3.1. The boolean is actually altered on '.next()'; 
 
-	4.4. isStream(x) functions: 
+	3.4. isStream(x) functions: 
 		For dealing with 'Stream's consisting of 'Stream's; 
 		Allows one to identify a Stream, and handle it accordingly...; 
 		Let there be different 'isStream' function (for different types of streams...);
@@ -123,21 +118,21 @@ For v0.4:
 
 		The library has some already (needed for optimization purposes...);
 
-	4.5. ProlongedStream; 
+	3.5. ProlongedStream; 
 		The Stream-equivalent of 'prolong' utility; 
 		'Concatenates' different streams into one; 
 	
-	4.6. TransformedStream: 
+	3.6. TransformedStream: 
 		The Stream-equivalent of 'transform' utility;
 		Applies the given 'transform' on the 'Stream' on the 'per-element' basis.
 
-	4.7. SubStream: 
+	3.7. SubStream: 
 		The Stream-equivalent of the 'find' utility (finds ALL occurences of the given 'position') - this [effectively], 
 			gives a new Stream that has only the items with given 'position' (either property-function or a single element at that position, if any); 
 
 		The property function has an 'i: Position' argument for THE POSITION!
 	
-	4.8. DelimitedStream: 
+	3.8. DelimitedStream: 
 		The Stream-equivalent of 'delimited'; 
 		Does THE SAME stuff as the 'delimited' function, but on Streams: 
 			Skips the elements deemed 'delimiters', 
@@ -147,7 +142,7 @@ For v0.4:
 		PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
 			(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
 
-	4.9. TreeStream: create two versions; 
+	3.9. TreeStream: create two versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -158,25 +153,27 @@ For v0.4:
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-	4.10. recursiveTransform - a utility; 
+	3.10. recursiveTransform - a utility; 
 		This recursively transforms all the sub-Stream-s within the given Stream; 
 		It, effectively, frees the user from the necessity of writing the recursive functionality into their transformation themselves; 
 
-	4.11. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
+	3.11. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
 
-	4.12. Implement a 'PartialValidator': 
+	3.12. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
 		[Which it does by 'numbering' particular portions of a given Pattern]; 
 		This would allow for a greater ability to analyze/point-out the errors in the original input;
 
-	4.13. Implement a 'level-by-level TreeStream': 
+		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
+
+	3.13. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	4.14. Add a 'HashClass'-implementation of 'MapClass'; 
+	3.14. Add a 'HashClass'-implementation of 'MapClass'; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -222,7 +219,7 @@ For v0.4:
 
 				This can be used with strings/
 
-	4.15. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
+	3.15. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
 		This makes code MUCH more general. 
 		In particular, one does so with the 'Tree'-s; 
 		It'd allow to (for instance) store identifiers, and getting them via 'loops'; 
@@ -230,7 +227,7 @@ For v0.4:
 		Excluding some few special cases (like 'childIndex'), walk through the project, 
 			AND REPLACE un-place-ly '.reduce'-s with proper loops...
 
-	4.16. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	3.16. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -311,7 +308,7 @@ For v0.4:
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 
-	4.17. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
+	3.17. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
 		The 'copying' for Tree-s should be a WHOLE SEPARATE thing with ITS OWN module; 
 		NOTE: the 'copying' in question occurs in methods 'MultValueTree' and 'RecursiveArrayTree'; 
 
@@ -330,7 +327,7 @@ For v0.4:
 
 				This would be a 'FlatCopiableTree'; 
 	
-	4.18. Create a 'ModifiableStream' interface;
+	3.18. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -415,14 +412,12 @@ For v0.4:
 					}
 				}
 	
-	4.19. MORE WORK on the 'IndexMap'; 
+	3.19. MORE WORK on the 'IndexMap'; 
 		
 		Things to do: 
+			1. add a '.swap' method (for swapping two positions); 
 
-			1. add a [Symbol.iterator] for this stuff (would give back the '[key, value]' pairs...); 
-			2. add a '.swap' method (for swapping two positions); 
-
-	4.20. MORE work on the 'NavigableStream-s'!
+	3.20. MORE work on the 'NavigableStream-s'!
 
 		Currently, these DON'T HAVE AN OPTION TO navigate "backwards" via a predicate; 
 		Which is disappointing; 
@@ -443,20 +438,16 @@ For v0.4:
 			1. Create a `BacktrackableStream` interface. 
 				It is one that is `Navigable & Reversible`;
 				A BacktrackableStream, then would be used for the proper re-definition of the 'inputStreamNavigate'; 
-	
-	4.21. Resolve the 'as' TypeScript issues (need for using 'as', excepting cases when it's a "type evolution" thing...); 
-		This is (fundamentally) an interface-shortage problem. 
-		The library has insufficient definitions to express the intent of the code well enough to the static type analyzer; 
 
-	4.22. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
+	3.21. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
 		These are MIGHTY! [allow to save memory, and so forth...]; 
 		IDEA: maybe, even create a library for these...; 
 
-	4.23. IDEA: benchmark, and, if it seems worth it (that is, the Object-oriented version is REALLY faster/less-memory-needy/not-too-"heavy"): 
+	3.22. IDEA: benchmark, and, if it seems worth it (that is, the Object-oriented version is REALLY faster/less-memory-needy/not-too-"heavy"): 
 
 		1. LIGHTEN the library by removing the functional API completely, replacing it with: 	
 			1.1. Object-oriented alternatives (more or less outlined already);
-			1.2. The 'array' function for transforming given 'Stream'-s into 'Collection'-s (to make things simpler...);
+			1.2. The 'consume' function for transforming given 'Stream'-s into 'Collection'-s (to make things simpler...);
 		2. DO EVERYTHING ELSE ONLY after this is finished (either functional STAYS, or it gets replaced....);
 
 		The fundamental issue with the 'utils' is that they provide (quite literally) NO value [besides semantic], 
@@ -467,11 +458,13 @@ For v0.4:
 		
 		Certain utilities, however, would stay. 
 		This (primarily) refers to the ones that actually might have (some) efficiency implications. 
-		Examples: 
+		To keep: 
 			
-			0. eliminate - this one DOESN'T EVEN work with Streams (so, no sense removing); 
+			1. skip - this doesn't work with ANY kinds of data structures (so, it doesn't have an 'output' per-se); 
+			2. consume - basic thing (needed FOR SAVING the given Stream desirably [without the overhead of having to reverse it prior]); 
+			3. has - doesn't have a data-structure output; 
 		
-	4.24. Expand on the 'Position' type further;
+	3.23. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -496,21 +489,33 @@ For v0.4:
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	4.25. MergeStream - equivalent of the 'merge' util; 
-		As per 4.24 - replace functional API with OOP; 
+	3.24. MergeStream - equivalent of the 'merge' util; 
+		As per 3.24 - replace functional API with OOP; 
 
-	4.26. SplitStream - generalization of 'extract' util (as per 4.24.), reverse of 'MergeStream';
+	3.25. SplitStream - generalization of 'extract' util (as per 3.24.), reverse of 'MergeStream';
 
 		Based off a given set of predicates (by default, if set size is 1: {P}, uses 2: {P, !P}),
 			it defines a set of non-interlocking streams; 
 		The predicates are interpreted to be 'greedy', in the sense that each will work to increase its Stream's size
 			FOR AS LONG AS IT CAN.
 	
-5. Dependency management: 
+	3.26. RELAX overly demanding interface and types definitions/requirements;
+		Example: inputStreamCopy, inputStreamNavigate; 
 
-	5.1. Take the 'Summat.ts' out into a separate npm package;
-	5.2. Take the 'Pointer.ts' out into a separate npm package (IF ever come down to not-needing it in this one...)
-		5.2.1. Take it out ANYWAY, just not in 0.3. IF it's needed at that stage...; 
-	5.3. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
-		5.3.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
-	5.4. Finish working on the more 'in-place' one.js v0.2 before doing this thing...; 
+			These do not NEED to have all the parts of the 'InputStream' definition (even though, they are originally implemented to work with it);
+			RE-DEFINE them...;
+		
+
+	3.27. Make all the 'Stream'-s implementations out there __ITERABLE__! 
+			With the 'default' Iterator being given as a 'streamIterator' constructor;
+
+	
+4. Dependency management: 
+
+	4.1. Take the 'Summat.ts' out into a separate npm package;
+	4.2. Take the 'Pointer.ts' out into a separate npm package (IF ever come down to not-needing it in this one...)
+		4.3.1. Take it out ANYWAY, just not in 0.3. IF it's needed at that stage...; 
+		4.3.2. This would depend on 'one.js' [AFTER adding TypeScript to it...]; 
+	4.3. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
+		4.4.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
+	4.4. Add generics + proper 'lower-level' (more "fractured") types to the ''; 

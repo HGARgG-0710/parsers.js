@@ -1,13 +1,14 @@
-import { isSymbol } from "src/misc.js"
 import type { Indexed } from "./Indexed.js"
+
+import { typeof as type } from "@hgargg-0710/one"
+const { isSymbol } = type
 
 // ! Place [refactor] into the 'proxy-op' library LATER!
 export const slicerMethods = new Map<string | symbol, Function>([
 	[Symbol.iterator, slicerIterator],
 	["reduce", slicerReduce],
 	["reSlice", reSlice]
-]
-)
+])
 export const slicerProperties = new Map<string | symbol, Function>([
 	["length", slicerLength]
 ])

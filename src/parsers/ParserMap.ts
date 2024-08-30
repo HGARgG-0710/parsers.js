@@ -11,7 +11,7 @@ export type ParserMap<
 	ResultType = Collection,
 	TempType = ResultType
 > = ParserFunction<OutType, StreamType, ResultType, TempType> & {
-	table: IndexMap<KeyType, ParserFunction<OutType>>
+	table?: IndexMap<KeyType, ParserFunction<OutType>>
 }
 
 export type ParserFunction<

@@ -1,6 +1,7 @@
 import type { SummatFunction } from "./../Summat.js"
 import type { BasicStream } from "./BasicStream.js"
 import type { PreBasicStream } from "./PreBasicStream.js"
+import type { StreamIterable } from "./StreamIterable.js"
 
 export function setMet(name: MetType) {
 	return function (value: boolean) {
@@ -46,3 +47,26 @@ export function StreamBoundHandler(name: BoundType, subName: MetType) {
 
 export const StreamEndingHandler = StreamBoundHandler("isEnd", "metEnd")
 export const StreamStartHandler = StreamBoundHandler("isStart", "metStart")
+
+export function StreamCurrGetter<Type = any>(
+	stream: StreamIterable<Type>,
+	getter: () => Type,
+	returnSetCurrentCondition: () => boolean = () => false
+): PreBasicStream<Type> {
+	return Object.defineProperties(stream, {
+		realCurr: {
+			writable: true,
+			value: null
+		},
+		curr: {
+			set: function (value) {
+				return (this.realCurr = value)
+			},
+			get: function () {
+				return returnSetCurrentCondition.call(this)
+					? this.realCurr
+					: getter.call(this)
+			}
+		}
+	}) as PreBasicStream<Type>
+}

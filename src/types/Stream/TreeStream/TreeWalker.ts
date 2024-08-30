@@ -8,7 +8,6 @@ const { structCheck } = object
 
 export interface TreeWalker<Type = any> extends Summat {
 	stream: TreeStream<Type>
-	current: Type | Tree<Type>
 	level: Tree<Type>
 	pushFirstChild(): void
 	popChild(): number[]
@@ -36,19 +35,19 @@ export function treeWalkerRenewLevel<Type = any>(
 
 export function treeWalkerPushFirstChild<Type = any>(this: TreeWalker<Type>) {
 	const index = this.stream.pos.modifier.nextLevel()
-	this.level = this.current as Tree<Type>
-	this.current = (this.current as Tree<Type>).index(index)
+	this.level = this.stream.curr as Tree<Type>
+	this.stream.curr = (this.stream.curr as Tree<Type>).index(index)
 }
 
 export function treeWalkerPopChild<Type = any>(this: TreeWalker<Type>) {
 	const lastIndexed = this.stream.pos.modifier.prevLevel()
-	this.current = this.level
+	this.stream.curr = this.level
 	this.renewLevel()
 	return lastIndexed
 }
 
 export function treeWalkerIsSiblingAfter<Type = any>(this: TreeWalker<Type>) {
-	return (this.current as Tree<Type>).lastChild > last(this.stream.pos.lastLevel())
+	return (this.stream.curr as Tree<Type>).lastChild > last(this.stream.pos.lastLevel())
 }
 
 export function treeWalkerIsSiblingBefore<Type = any>(this: TreeWalker<Type>) {
@@ -66,13 +65,13 @@ export function treeWalkerGoSiblingBefore<Type = any>(this: TreeWalker<Type>) {
 export function treeWalkerIndexCut<Type = any>(this: TreeWalker<Type>, length: number) {
 	this.stream.pos.modifier.resize(length)
 	this.renewLevel()
-	this.current = this.level.index(this.stream.pos.lastLevel())
+	this.stream.curr = this.level.index(this.stream.pos.lastLevel())
 }
 
 const childStruct = structCheck("lastChild")
 export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
 	const lastIndex: number[] = []
-	let current = this.current as Tree<Type>
+	let current = this.stream.curr as Tree<Type>
 	while (childStruct(current.lastChild) && current.lastChild >= 0) {
 		const { lastChild } = current
 		lastIndex.push(lastChild)
@@ -82,11 +81,11 @@ export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerIsChild<Type = any>(this: TreeWalker<Type>) {
-	return childStruct(this.current) && (this.current as Tree).lastChild >= 0
+	return childStruct(this.stream.curr) && (this.stream.curr as Tree).lastChild >= 0
 }
 
 export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
-	return this.current !== this.stream.input
+	return this.stream.curr !== this.stream.input
 }
 
 export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Type>) {
@@ -99,18 +98,18 @@ export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Typ
 }
 
 export function treeWalkerGoPrevLast<Type = any>(this: TreeWalker<Type>) {
-	this.current = this.level.index([this.goSiblingBefore()])
+	this.stream.curr = this.level.index([this.goSiblingBefore()])
 	this.stream.pos.modifier.extend(this.currentLastIndex())
-	this.renewLevel(this.current as Tree<Type>)
+	this.renewLevel(this.stream.curr as Tree<Type>)
 }
 
 export function treeWalkerRestart<Type = any>(this: TreeWalker<Type>) {
-	this.current = this.level = this.stream.input
+	this.stream.curr = this.level = this.stream.input
 	this.stream.pos.modifier.clear()
 }
 
 export function treeWalkerGoIndex<Type = any>(this: TreeWalker<Type>) {
-	this.current = this.stream.input.index(this.stream.pos.value)
+	this.stream.curr = this.stream.input.index(this.stream.pos.value)
 	this.renewLevel()
 }
 
@@ -121,7 +120,6 @@ export function TreeWalker<Type = any>(treeStream: TreeStream<Type>): TreeWalker
 	return {
 		stream: treeStream,
 		level: root,
-		current: root,
 		pushFirstChild: treeWalkerPushFirstChild<Type>,
 		popChild: treeWalkerPopChild<Type>,
 		isSiblingAfter: treeWalkerIsSiblingAfter<Type>,

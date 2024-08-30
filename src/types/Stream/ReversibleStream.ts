@@ -9,28 +9,31 @@ import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { TreeStream } from "./TreeStream.js"
 import { isRewindableStream } from "./RewindableStream.js"
 import { unifinish } from "./FinishableStream.js"
+import { InputStream, StreamCurrGetter, type PreBasicStream } from "main.js"
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>
 ): ReversedStream<Type> {
 	unifinish(input)
-	return Object.defineProperties(
-		{
-			input,
-			next: underStreamPrev,
-			prev: underStreamNext,
-			curr: underStreamCurr,
-			finish: isRewindableStream(input) ? underStreamRewind : null
-		},
-		{
-			isEnd: {
-				get: underStreamIsStart
+	return StreamCurrGetter(
+		Object.defineProperties(
+			{
+				input,
+				next: underStreamPrev,
+				prev: underStreamNext,
+				finish: isRewindableStream(input) ? underStreamRewind : null
 			},
-			isStart: {
-				get: underStreamIsEnd
+			{
+				isEnd: {
+					get: underStreamIsStart
+				},
+				isStart: {
+					get: underStreamIsEnd
+				}
 			}
-		}
-	) as unknown as ReversedStream<Type>
+		) as unknown as PreBasicStream<Type>,
+		underStreamCurr
+	) as ReversedStream<Type>
 }
 
 export interface ReversedStream<Type = any>
@@ -47,23 +50,23 @@ export interface StartedStream<Type = any> extends BasicStream<Type> {
 	isStart: boolean
 }
 
-export function inputStreamtPrev() {
+export function inputStreamtPrev<Type = any>(this: InputStream<Type>) {
 	const prev = this.pos
-	// ! AGAIN: THIS IS __supposed__ to be used with something that is a PositionalStream with NUMBER '.pos' (this has to be given its own name...); REMOVE the explicit number-conversion...;
 	this.pos -= +!this.isStart
 	return this.input[prev]
 }
 
-export function inputStreamIsStart() {
+export function inputStreamIsStart<Type = any>(this: InputStream<Type>) {
 	return !this.pos
 }
 
 export function treeStreamPrev<Type = any>(this: TreeStream<Type>) {
-	const { walker } = this
-	const next = walker.current
+	const { walker, curr } = this
+	const next = curr
 
 	if (this.isEnd) this.isEnd = false
-	else if (walker.isSiblingBefore()) walker.goPrevLast()
+
+	if (walker.isSiblingBefore()) walker.goPrevLast()
 	else if (walker.isParent()) walker.popChild()
 
 	return next

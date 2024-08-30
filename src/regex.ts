@@ -1,6 +1,7 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
-import { isArray } from "./misc.js"
+import { typeof as type } from "@hgargg-0710/one"
+const { isArray } = type
 
 const charRanges = (...ranges: (string | [string, string])[]) =>
 	ranges.map((r) => (typeof r === "string" ? r : `${r[0]}-${r[1]}`)).join("")

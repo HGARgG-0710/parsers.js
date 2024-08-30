@@ -2,6 +2,9 @@ import type { Summat } from "./Summat.js"
 import { Token } from "./Token.js"
 import { current, firstStream, is } from "../aliases.js"
 
+import { inplace } from "@hgargg-0710/one"
+const { insert } = inplace
+
 export interface Indexable<OutType> extends Summat {
 	index(x: any): OutType
 }
@@ -24,7 +27,9 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = <NewKeyType =
 ) => MapClass<NewKeyType, ValueType>
 
 // ? Add more methods for working with 'IndexMap's? [for "static" grammars, this ought to suffice, but for others - more algorithms will have to be implemented manually. Add to the library...];
-export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<ValueType> {
+export interface IndexMap<KeyType = any, ValueType = any>
+	extends Indexable<ValueType>,
+		Iterable<[KeyType, ValueType]> {
 	keys: KeyType[]
 	values: ValueType[]
 	default: any
@@ -33,6 +38,7 @@ export interface IndexMap<KeyType = any, ValueType = any> extends Indexable<Valu
 	delete: (index: number) => any
 	replace: (index: number, pair: [KeyType, ValueType]) => any
 	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
+	byIndex: (index: number) => [KeyType, ValueType]
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
@@ -46,13 +52,16 @@ export function indexMapIndex<KeyType = any, ValueType = any>(
 	x: any
 ) {
 	let current = this.default
-	for (let i = 0; i < this.keys.length; ++i)
-		if (this.change(this.keys[i], x)) {
-			current = this.values[i]
+	for (let i = this.keys.length; i--; ) {
+		const index = this.keys.length - 1 - i
+		if (this.change(this.keys[index], x)) {
+			current = this.values[index]
 			break
 		}
+	}
 	return current
 }
+
 export function indexMapReplace<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number,
@@ -67,13 +76,14 @@ export function indexMapReplace<KeyType = any, ValueType = any>(
 export function indexMapAdd<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number,
-	pair: [KeyType, ValueType]
+	...pairs: [KeyType, ValueType][]
 ): IndexMap<KeyType, ValueType> {
-	const [key, value] = pair
-	this.keys.splice(index, 0, key)
-	this.values.splice(index, 0, value)
+	const [keys, values] = fromPairsList(pairs)
+	insert(this.keys, index, ...keys)
+	insert(this.values, index, ...values)
 	return this
 }
+
 export function indexMapDelete<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number
@@ -82,6 +92,7 @@ export function indexMapDelete<KeyType = any, ValueType = any>(
 	this.values.splice(index, 1)
 	return this
 }
+
 export function indexMapUnique<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	start: boolean = true
@@ -100,6 +111,22 @@ export function indexMapUnique<KeyType = any, ValueType = any>(
 	return this
 }
 
+export function* indexMapIterator<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>
+): Generator<[KeyType, ValueType]> {
+	for (let k = this.keys.length; k--; ) {
+		const index = this.keys.length - 1 - k
+		yield [this.keys[index], this.values[index]]
+	}
+}
+
+export function indexMapByIndex<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>,
+	index: number
+): [KeyType, ValueType] {
+	return [this.keys[index], this.values[index]]
+}
+
 export function mapClassExtend<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClassValueExtension<KeyType, ValueType> {
@@ -116,15 +143,10 @@ export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
 	const mapClass: MapClass<KeyType, ValueType> = function (
-		mapPairs: [KeyType, ValueType][],
+		pairsList: [KeyType, ValueType][],
 		_default?: any
 	): IndexMap<KeyType, ValueType> {
-		const keys = []
-		const values = []
-		for (const [key, value] of mapPairs) {
-			keys.push(key)
-			values.push(value)
-		}
+		const [keys, values] = fromPairsList(pairsList)
 		return {
 			keys,
 			values,
@@ -134,7 +156,9 @@ export function MapClass<KeyType = any, ValueType = any>(
 			add: indexMapAdd<KeyType, ValueType>,
 			delete: indexMapDelete<KeyType, ValueType>,
 			unique: indexMapUnique<KeyType, ValueType>,
-			default: _default
+			byIndex: indexMapByIndex<KeyType, ValueType>,
+			default: _default,
+			[Symbol.iterator]: indexMapIterator<KeyType, ValueType>
 		}
 	}
 	mapClass.extend = mapClassExtend(change)
@@ -167,4 +191,16 @@ export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType>
 ): [KeyType[], OutType[]] {
 	return [indexMap.keys, indexMap.values]
+}
+
+export function fromPairsList<KeyType = any, ValueType = any>(
+	mapPairs: [KeyType, ValueType][]
+): [KeyType[], ValueType[]] {
+	const keys = []
+	const values = []
+	for (const [key, value] of mapPairs) {
+		keys.push(key)
+		values.push(value)
+	}
+	return [keys, values]
 }

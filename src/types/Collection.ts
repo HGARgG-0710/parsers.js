@@ -1,10 +1,9 @@
 // * This is the generalization of 'Source's and 'Pushable's from the v0.2 and earlier.
 
 import type { Token } from "./Token.js"
-import type { SummatIterable } from "./Summat.js"
+import type { Pattern } from "main.js"
 
-export interface Collection<Type = any> extends SummatIterable<Type> {
-	value: any
+export interface Collection<Type = any> extends Pattern, Iterable<Type> {
 	push(...x: Type[]): Collection<Type>
 }
 

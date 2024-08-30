@@ -1,37 +1,51 @@
-import { isNumber } from "src/misc.js"
+import { iterationChoice, preserveDirection } from "src/misc.js"
 import type { BasicStream } from "./BasicStream.js"
 import { positionConvert, type Position } from "./Position.js"
-import type { PositionalStream } from "./PositionalStream.js"
 import type { TreeStream, MultiIndex } from "./TreeStream.js"
+
+import { InputStream, LimitedStream, not } from "main.js"
+
+import { function as _f, typeof as type } from "@hgargg-0710/one"
+const { trivialCompose } = _f
+const { isNumber } = type
 
 export interface NavigableStream<Type = any> extends BasicStream<Type> {
 	navigate(position: Position): Type | void
 }
 
-export function inputStreamNavigate(
-	this: PositionalStream & NavigableStream,
+export function inputStreamNavigate<Type = any>(
+	this: InputStream<Type>,
 	index: Position
 ) {
 	index = positionConvert(index)
-	if (isNumber(index)) return this.input[(this.pos = index)]
-	while (!this.isEnd && !index(this)) this.next()
-	// TODO: REWRITE the interface in a fashion that this "as" information be supplied AS A PART OF THEM. Example: here, the 'inputStreamNavigate' is SUPPOSED to be used with a 'number' OR 'PositionObject' as '.pos';
+	if (isNumber(index)) {
+		if (index < 0) index += this.input.length
+		return this.input[(this.pos = index)]
+	}
+	const [change, predicate] = iterationChoice(
+		preserveDirection(index, (x) => trivialCompose(not, x))
+	)
+	while (predicate(this)) change(this)
 	return this.input[positionConvert(this.pos) as number]
 }
 
-export function limitedStreamNavigate(position: Position) {
+export function limitedStreamNavigate<Type = any>(
+	this: LimitedStream<Type>,
+	position: Position
+) {
 	position = positionConvert(position)
 	return this.input.navigate(
 		isNumber(position)
-			? (positionConvert(this.input.pos) as number) + position
+			? Math.max((positionConvert(this.input.pos) as number) + position, 0)
 			: position
 	)
-}export function treeStreamNavigate<Type = any>(
+}
+
+export function treeStreamNavigate<Type = any>(
 	this: TreeStream<Type>,
 	index: MultiIndex
 ) {
 	this.pos = index
 	this.walker.goIndex()
-	return this.walker.current
+	return this.curr
 }
-

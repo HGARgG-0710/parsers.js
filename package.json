@@ -15,7 +15,7 @@
 		"maps"
 	],
 	"dependencies": {
-		"@hgargg-0710/one": "0.1.2"
+		"@hgargg-0710/one": "0.2.0"
 	},
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"
