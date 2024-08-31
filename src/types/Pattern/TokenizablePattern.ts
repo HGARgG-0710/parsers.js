@@ -1,11 +1,11 @@
-import type { SummatFunction } from "../Summat.js"
-import { tokenizeString, type Pattern } from "../Pattern.js"
-import { type Flushable } from "src/misc.js"
-
-import { inplace } from "@hgargg-0710/one"
-import { isString } from "@hgargg-0710/one/dist/src/typeof/typeof.js"
-import type { Resulting } from "src/misc.js"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import { inplace, typeof as type } from "@hgargg-0710/one"
 const { replace } = inplace
+const { isString } = type
+
+import { tokenizeString, type Pattern } from "../Pattern.js"
+import { type Flushable } from "../../misc.js"
+import type { Resulting } from "../../misc.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 

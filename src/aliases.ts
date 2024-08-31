@@ -40,7 +40,6 @@ export const miss = () => []
 export const firstStream = ({ streams }: ParsingState) => streams[0]
 
 export const eq = (x: any) => (y: any) => x === y
-export const not = (x: any) => !x
 export const inSet = (set: HasType) => (x: any) => set.has(x)
 
 export const backtrack = (predicate: PredicatePosition) => {

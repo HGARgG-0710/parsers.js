@@ -15,7 +15,8 @@ import { TreeWalker } from "./TreeStream/TreeWalker.js"
 
 import type { MultiIndex } from "./TreeStream/MultiIndex.js"
 import { MultiIndex as MultiIndexConstructor } from "./TreeStream/MultiIndex/MultiIndex.js"
-import { streamIterator, StreamStartHandler, type IterableStream } from "main.js"
+import { streamIterator, type IterableStream } from "./IterableStream.js"
+import { StreamStartHandler } from "./StreamEndingHandler.js"
 
 export interface TreeStream<Type = any>
 	extends RewindableStream<InTreeType<Type>>,

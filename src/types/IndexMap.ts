@@ -1,4 +1,4 @@
-import type { Summat } from "./Summat.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { Token } from "./Token.js"
 import { current, firstStream, is } from "../aliases.js"
 

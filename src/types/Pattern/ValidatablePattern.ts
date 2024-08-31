@@ -1,10 +1,10 @@
-import { matchString, type Pattern } from "main.js"
-import type { SummatFunction } from "../Summat.js"
-import type { Resulting, Flushable } from "src/misc.js"
-import { isBoolean } from "@hgargg-0710/one/dist/src/typeof/typeof.js"
-
-import { inplace } from "@hgargg-0710/one"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import { inplace, typeof as type } from "@hgargg-0710/one"
 const { replace } = inplace
+const { isBoolean } = type
+
+import { matchString, type Pattern } from "../Pattern.js"
+import type { Resulting, Flushable } from "../../misc.js"
 
 export type ValidationOutput<Type = any> = [boolean, Type[]]
 

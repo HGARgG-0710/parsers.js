@@ -7,23 +7,24 @@ import {
 	positionStopPoint
 } from "../misc.js"
 import type { DelimPredicate, StreamHandler } from "./ParserMap.js"
-import { positionConvert, type PredicatePosition } from "src/types/Stream/Position.js"
-import { type ReversibleStream } from "src/types/Stream/ReversibleStream.js"
-import { type BasicStream } from "src/types/Stream/BasicStream.js"
-import { type Position } from "src/types/Stream/Position.js"
-import { not, preserve } from "../aliases.js"
+import { positionConvert, type PredicatePosition } from "../types/Stream/Position.js"
+import type { ReversibleStream } from "../types/Stream/ReversibleStream.js"
+import type { BasicStream } from "../types/Stream/BasicStream.js"
+import type { Position } from "../types/Stream/Position.js"
+import { preserve } from "../aliases.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
 
-import { function as _f, typeof as type } from "@hgargg-0710/one"
+import { function as _f, typeof as type, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f
 const { isArray, isNumber } = type
+const { not } = boolean
 
 export function delimited(
 	limits: [Position, Position?] | Position,
 	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]
-	const limitsDirectional = limits.map(positionConvert)
+	const limitsDirectional = limits.map((x) => positionConvert(x))
 	const pred = 1 in limitsDirectional ? limitsDirectional[1] : limitsDirectional[0]
 	const prePred = skip(+(1 in limits) && limits[0])
 

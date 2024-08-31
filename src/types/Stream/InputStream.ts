@@ -1,6 +1,6 @@
 import { inputStreamNavigate, type NavigableStream } from "./NavigableStream.js"
 import type { PositionalStream } from "./PositionalStream.js"
-import type { Indexed } from "../Indexed.js"
+import type { Indexed } from "../../misc.js"
 import { inputStreamIterator, type IterableStream } from "./IterableStream.js"
 import {
 	inputStreamIsStart,

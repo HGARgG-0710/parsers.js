@@ -1,10 +1,10 @@
-import type { BasicStream, Inputted } from "src/types/Stream/BasicStream.js"
+import type { BasicStream, Inputted } from "../types/Stream/BasicStream.js"
 import type { StreamMap } from "./ParserMap.js"
 import {
 	StreamCurrGetter,
 	StreamEndingHandler
 } from "../types/Stream/StreamEndingHandler.js"
-import type { StartedStream } from "main.js"
+import type { StartedStream } from "../../src/types/Stream/ReversibleStream.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isFunction } = type

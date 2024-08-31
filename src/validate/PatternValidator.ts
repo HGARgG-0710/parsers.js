@@ -1,6 +1,7 @@
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+
 import { type IndexMap } from "../types/IndexMap.js"
-import type { SummatFunction } from "../types/Summat.js"
-import type { ValidatablePattern } from "src/types/Pattern.js"
+import type { ValidatablePattern } from "../types/Pattern.js"
 
 export type PatternValidatorOutput = true | null | [false, number]
 

@@ -1,4 +1,4 @@
-import type { SummatFunction } from "./../Summat.js"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "./BasicStream.js"
 import type { PreBasicStream } from "./PreBasicStream.js"
 import type { StreamIterable } from "./StreamIterable.js"

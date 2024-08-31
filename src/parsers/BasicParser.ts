@@ -1,7 +1,7 @@
 import type { ParserMap } from "./ParserMap.js"
 import { DefineFinished, GeneralParser, type ParsingState } from "./GeneralParser.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
-import { type BasicStream } from "src/types/Stream/BasicStream.js"
+import { type BasicStream } from "../types/Stream/BasicStream.js"
 import { firstFinished } from "./GeneralParser.js"
 
 export type BasicState<KeyType = any, OutType = any> = ParsingState<

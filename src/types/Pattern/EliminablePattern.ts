@@ -1,5 +1,5 @@
-import type { Pattern } from "main.js"
-import type { Flushable, Resulting } from "src/misc.js"
+import type { Pattern } from "../Pattern.js"
+import type { Flushable, Resulting } from "../../misc.js"
 
 export interface EliminablePattern<Type = any, EliminatedType = any>
 	extends Pattern<Type>,

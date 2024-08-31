@@ -1,10 +1,11 @@
-import type { Summat } from "./Summat.js"
-import type { Token } from "./Token.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 import { array, function as f, typeof as type } from "@hgargg-0710/one"
 const { trivialCompose } = f
 const { propPreserve } = array
 const { isArray } = type
+
+import type { Token } from "./Token.js"
 
 export type InTreeType<Type = any> = Type | Tree<Type>
 

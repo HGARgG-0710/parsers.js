@@ -1,10 +1,10 @@
-import type { Summat } from "src/types/Summat.js"
-import { sequentialIndex, type Tree } from "../../Tree.js"
-import type { TreeStream } from "../TreeStream.js"
-
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { array, object } from "@hgargg-0710/one"
 const { last } = array
 const { structCheck } = object
+
+import { sequentialIndex, type Tree } from "../../Tree.js"
+import type { TreeStream } from "../TreeStream.js"
 
 export interface TreeWalker<Type = any> extends Summat {
 	stream: TreeStream<Type>

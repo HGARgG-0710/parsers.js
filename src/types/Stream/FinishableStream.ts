@@ -1,4 +1,4 @@
-import type { InputStream } from "main.js"
+import type { InputStream } from "./InputStream.js"
 import type { BasicStream } from "./BasicStream.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
@@ -18,7 +18,7 @@ export function finish(stream: BasicStream) {
 	while (!stream.isEnd) stream.next()
 }
 
-const finishCheck = structCheck("finish")
+const finishCheck = structCheck<FinishableStream>("finish")
 export function isFinishableStream(stream: BasicStream): stream is FinishableStream {
 	return finishCheck(stream) && isFunction(stream.finish)
 }

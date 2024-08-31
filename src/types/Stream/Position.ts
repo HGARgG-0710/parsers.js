@@ -1,11 +1,11 @@
-import type { SummatFunction } from "../Summat.js"
-import type { PositionalStream } from "./PositionalStream.js"
-import type { BasicStream } from "./BasicStream.js"
-
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import { object, typeof as type } from "@hgargg-0710/one"
-import type { Pattern } from "main.js"
 const { structCheck } = object
 const { isFunction, isNumber } = type
+
+import type { PositionalStream } from "./PositionalStream.js"
+import type { BasicStream } from "./BasicStream.js"
+import type { Pattern } from "../Pattern.js"
 
 export interface PositionObject<Type = any> extends Pattern<Type> {
 	convert(stream?: BasicStream): number | PredicatePosition
@@ -21,7 +21,7 @@ export type Position<Type = any> = PredicatePosition | PositionObject<Type> | nu
 export type DirectionalPosition = PredicatePosition | number
 export type BasicPosition = SummatFunction | number
 
-const convertCheck = structCheck("convert")
+const convertCheck = structCheck<PositionObject>("convert")
 export function isPositionObject(x: any): x is PositionObject {
 	return convertCheck(x) && isFunction(x.convert)
 }

@@ -1,11 +1,10 @@
-import { underStreamCurr } from "./UnderStream.js"
-import { underStreamNext } from "./UnderStream.js"
+import { underStreamCurr, underStreamNext } from "./UnderStream.js"
 import { PositionalStream } from "./PositionalStream.js"
 import { limitedStreamIsEnd, type BasicStream, type Inputted } from "./BasicStream.js"
 import type { Position } from "./Position.js"
 import { limitedStreamNavigate, type NavigableStream } from "./NavigableStream.js"
 import { StreamCurrGetter, StreamEndingHandler } from "./StreamEndingHandler.js"
-import { streamIterator, type IterableStream } from "main.js"
+import { type IterableStream, streamIterator } from "./IterableStream.js"
 
 export interface LimitableStream<Type = any> extends BasicStream<Type> {
 	limit(from: Position, to?: Position): BasicStream<Type>

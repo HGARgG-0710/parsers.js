@@ -1,7 +1,8 @@
-import type { Summat } from "./../Summat.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { PreBasicStream } from "./PreBasicStream.js"
 import { positionCheck } from "./Position.js"
-import type { InputStream, LimitedStream } from "main.js"
+import type { InputStream } from "./InputStream.js"
+import type { LimitedStream } from "./LimitedStream.js"
 
 export interface BasicStream<Type = any> extends PreBasicStream<Type> {
 	isEnd: boolean

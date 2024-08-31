@@ -1,5 +1,8 @@
-import type { InputStream, PositionalStream, TreeStream } from "main.js"
-import type { Summat } from "../Summat.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
+
+import type { TreeStream } from "./TreeStream.js"
+import type { PositionalStream } from "./PositionalStream.js"
+import type { InputStream } from "./InputStream.js"
 import type { PreBasicStream } from "./PreBasicStream.js"
 
 export interface StreamIterable<Type = any> extends Summat {

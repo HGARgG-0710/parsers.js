@@ -1,8 +1,8 @@
-import type { Summat } from "src/types/Summat.js"
-import type { MultiIndex } from "../MultiIndex.js"
-
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { array } from "@hgargg-0710/one"
 const { clear } = array
+
+import type { MultiIndex } from "../MultiIndex.js"
 
 export interface MultiIndexModifier extends Summat {
 	multind: MultiIndex

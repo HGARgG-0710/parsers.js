@@ -1,5 +1,4 @@
 export * from "./types/Collection.js"
-export * from "./types/Indexed.js"
 export * from "./types/IndexMap.js"
 export * from "./types/Pattern.js"
 export * from "./types/Slicer.js"

@@ -1,4 +1,4 @@
-import type { Indexed } from "./Indexed.js"
+import type { Indexed } from "../misc.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isSymbol } = type

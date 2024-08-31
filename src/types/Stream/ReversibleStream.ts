@@ -9,13 +9,10 @@ import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { TreeStream } from "./TreeStream.js"
 import { isRewindableStream } from "./RewindableStream.js"
 import { unifinish } from "./FinishableStream.js"
-import {
-	InputStream,
-	StreamCurrGetter,
-	streamIterator,
-	type IterableStream,
-	type PreBasicStream
-} from "main.js"
+import type { InputStream } from "./InputStream.js"
+import { type IterableStream, streamIterator } from "./IterableStream.js"
+import type { PreBasicStream } from "./PreBasicStream.js"
+import { StreamCurrGetter } from "./StreamEndingHandler.js"
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>

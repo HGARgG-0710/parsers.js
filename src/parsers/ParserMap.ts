@@ -1,7 +1,7 @@
 import type { Collection } from "../types/Collection.js"
-import type { Summat, SummatFunction } from "../types/Summat.js"
+import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 import type { IndexMap } from "../types/IndexMap.js"
-import type { BasicStream } from "src/types/Stream/BasicStream.js"
+import type { BasicStream } from "../types/Stream/BasicStream.js"
 import type {
 	DefaultMapParsingState,
 	BaseParsingState,

@@ -1,4 +1,4 @@
-import { Slicer } from "src/types/Slicer.js"
+import { Slicer } from "../../../Slicer.js"
 import type { TreeStream } from "../../TreeStream.js"
 import type { MultiIndex } from "../MultiIndex.js"
 

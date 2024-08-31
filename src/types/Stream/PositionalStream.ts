@@ -1,10 +1,10 @@
-import { underStreamFinish, underStreamIsEnd } from "./UnderStream.js"
-import { underStreamCurr } from "./UnderStream.js"
+import { underStreamFinish, underStreamIsEnd, underStreamCurr } from "./UnderStream.js"
 import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { Position } from "./Position.js"
 import { StreamCurrGetter, StreamEndingHandler } from "./StreamEndingHandler.js"
 import { positionalStreamNext } from "./StreamIterable.js"
-import { isFinishableStream, streamIterator, type IterableStream } from "main.js"
+import { isFinishableStream } from "./FinishableStream.js"
+import { streamIterator, type IterableStream } from "./IterableStream.js"
 
 export interface PositionalStream<Type = any, PosType extends Position = Position>
 	extends BasicStream<Type> {

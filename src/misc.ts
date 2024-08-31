@@ -5,8 +5,8 @@ import type { ReversibleStream } from "./types/Stream/ReversibleStream.js"
 import { next, previous } from "./aliases.js"
 import type { BoundType } from "./types/Stream/StreamEndingHandler.js"
 
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { typeof as type } from "@hgargg-0710/one"
-import type { Summat } from "./types/Summat.js"
 const { isNumber } = type
 
 export interface Resulting<ResultType = any> extends Summat {
@@ -67,3 +67,9 @@ export function preserveDirection(
 export function positionStopPoint(pos: DirectionalPosition): BoundType {
 	return isBackward(pos) ? "isStart" : "isEnd"
 }
+export type Indexed<Type = any> =
+	| string
+	| (Summat & {
+			[x: number]: Type
+			length: number
+	  })

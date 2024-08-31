@@ -1,7 +1,7 @@
 import type { RewindableStream } from "./RewindableStream.js"
 import type { BasicStream, Inputted } from "./BasicStream.js"
 import type { ReversibleStream, StartedStream } from "./ReversibleStream.js"
-import type { FinishableStream } from "main.js"
+import type { FinishableStream } from "./FinishableStream.js"
 
 export interface UnderStream<StreamType extends BasicStream = BasicStream, Type = any>
 	extends Inputted<StreamType>,

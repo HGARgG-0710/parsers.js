@@ -2,7 +2,7 @@ import type { BasicStream } from "./BasicStream.js"
 import type { TreeStream } from "./TreeStream.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
-import type { InputStream } from "main.js"
+import type { InputStream } from "./InputStream.js"
 const { structCheck } = object
 const { isFunction } = type
 
@@ -21,7 +21,7 @@ export function treeStreamRewind<Type = any>(this: TreeStream<Type>) {
 	return this.curr
 }
 
-const checkRewind = structCheck("rewind")
+const checkRewind = structCheck<RewindableStream>("rewind")
 export function isRewindableStream(stream: BasicStream): stream is RewindableStream {
 	return checkRewind(stream) && isFunction(stream.rewind)
 }

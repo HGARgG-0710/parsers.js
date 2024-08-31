@@ -1,7 +1,7 @@
 // * This is the generalization of 'Source's and 'Pushable's from the v0.2 and earlier.
 
 import type { Token } from "./Token.js"
-import type { Pattern } from "main.js"
+import type { Pattern } from "./Pattern.js"
 
 export interface Collection<Type = any> extends Pattern, Iterable<Type> {
 	push(...x: Type[]): Collection<Type>
@@ -12,17 +12,19 @@ export function stringCollectionPush(...x: string[]) {
 	return this
 }
 
+export function* stringCollectionIterator(this: Collection<string>) {
+	let i = 0
+	while (this.value.length > i) {
+		yield this.value[i]
+		++i
+	}
+}
+
 export function StringCollection(string: string): Collection<string> {
 	return {
 		value: string,
 		push: stringCollectionPush,
-		[Symbol.iterator]: function* () {
-			let i = 0
-			while (this.value.length > i) {
-				yield this.value[i]
-				++i
-			}
-		}
+		[Symbol.iterator]: stringCollectionIterator
 	}
 }
 

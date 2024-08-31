@@ -1,5 +1,6 @@
-import type { InputStream } from "main.js"
-import type { SummatIterable } from "../Summat.js"
+import type { SummatIterable } from "@hgargg-0710/summat.ts"
+
+import type { InputStream } from "./InputStream.js"
 import type { BasicStream } from "./BasicStream.js"
 export type IterableStream<Type = any> = BasicStream<Type> & SummatIterable<Type>
 

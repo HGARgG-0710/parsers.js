@@ -1,6 +1,6 @@
-import { function as _f } from "@hgargg-0710/one"
-import type { SummatFunction } from "src/types/Summat.js"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 
+import { function as _f } from "@hgargg-0710/one"
 const { trivialCompose } = _f
 
 export interface LayeredParser extends SummatFunction {

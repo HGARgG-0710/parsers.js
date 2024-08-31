@@ -1,11 +1,10 @@
+import type { Summat, SummatIterable } from "@hgargg-0710/summat.ts"
 import { array, object, function as f } from "@hgargg-0710/one"
-import type { Summat } from "./Summat.js"
-import type { SummatIterable } from "./Summat.js"
-import type { Pattern } from "main.js"
-
 const { and } = f
 const { structCheck } = object
 const { propPreserve } = array
+
+import type { Pattern } from "./Pattern.js"
 
 export interface Token<Type = any, Value = any>
 	extends TokenInstance<Type>,
@@ -31,7 +30,7 @@ export function Token<Type = any, Value = any>(
 ): Token<Type, Value> {
 	return { type, value }
 }
-Token.is = structCheck("type", "value")
+Token.is = structCheck<Token>("type", "value")
 Token.type = (x: any) => x.type
 Token.value = (x: any) => x.value
 
@@ -58,7 +57,7 @@ export function TokenType<Type = any, ValueType = any>(
 
 export const ArrayToken = propPreserve((token: Token) => [...Token.value(token)])
 
-export const iteratorCheck: (x: any) => x is SummatIterable = structCheck(Symbol.iterator)
+export const iteratorCheck = structCheck<SummatIterable>(Symbol.iterator)
 export function RecursiveArrayToken(recursiveToken: Token) {
 	const isCollection = "value" in recursiveToken && iteratorCheck(recursiveToken.value)
 	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)

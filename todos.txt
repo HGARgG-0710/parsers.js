@@ -5,23 +5,15 @@
 
 NOTE: nope, the version is NOT finished. 
 
-	Things to do before re-starting the testing all over again: 
+	THE BENCHMARK HATH SPOKEN! 
+	Based off a (very) approximate heuristic of 'consume' (which was) 'the fastest/simplest' of them all...; 
+	The simple 'iteration' approach IS (quite a bit) faster; 
+	
+	IF it proves faster, do: 
 
-		0. DO the dependency-management bit (about 'pointer' + 'summat.ts'); 
-			0.1. The 'structCheck' IS BAAD!
-		
-		AFTER EVERYTHING ELSE: 
-
-		1. DURING TESTING [possible RE-DO AGAIN!]: 
-
-			Make a micro-benchmark, for comparing execution time of functional and OO API;
-			IF OO is faster, IMPLEMENT it in the '3.0' version (NOT v0.4) + REPLACE the functional API with it...;
-
-			IF it proves faster, do: 
-
-				1. 3.24, 2.25
-				2. 3.4-3.8
-				3. 3.10, 3.11
+		1. 3.24, 2.25
+		2. 3.4-3.8
+		3. 3.10, 3.11
 
 
 A. testing [1. Create list of modules to be tested]; 
@@ -502,18 +494,42 @@ For v0.4:
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though, they are originally implemented to work with it);
 			RE-DEFINE them...;
+
+	3.27. [Idea?] Create an error-handling API for the 'v0.4';
+		Create means of: 
+
+			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
+			2. Assigning relevant debug information to them;
+
+		This is (primarily) for the development process of the parsers; 
 		
+		Define a Catcher [rough sketch]: 
 
-	3.27. Make all the 'Stream'-s implementations out there __ITERABLE__! 
-			With the 'default' Iterator being given as a 'streamIterator' constructor;
+			function Catcher (info: DebugInfo, logger: Function) {
+				return function (thing: Function, thisArg: any, args: any) {
+					try {
+						thing.call(thisArg, ...args)
+					} catch (e) {
+						logger(info)
+						throw e // NOTE: THIS here is to represent DEPTH [as parsers can be VERY recursive indeed, it may be needed to eliminate the recursive errors on a case-by-case basis]; 
+					}
+				}
+			}
 
+	3.28. Split the interfaces; 
+
+		Example: 'FinishableStream'; 
+			THIS can be abstracted to a SEPARATE name property; 
+			Example: 
+
+				// NOTE: NO 'BasicStream'!
+				export interface Finishable<Type = any> {
+					finish(): Type
+				}
+
+			There shouldn't be any 'excessive' interlacing between the types/interfaces;
 	
 4. Dependency management: 
 
-	4.1. Take the 'Summat.ts' out into a separate npm package;
-	4.2. Take the 'Pointer.ts' out into a separate npm package (IF ever come down to not-needing it in this one...)
-		4.2.1. Take it out ANYWAY, just not in 0.3. IF it's needed at that stage...; 
-		4.2.2. This would depend on 'one.js' [AFTER adding TypeScript to it...]; 
-	4.3. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
-		4.3.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
-	4.4. Add generics + proper 'lower-level' (more "fractured") types to the ''; 
+	4.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
+		4.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 

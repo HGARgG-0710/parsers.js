@@ -1,7 +1,7 @@
-import type { SummatFunction } from "../types/Summat.js"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 
 import { type IndexMap } from "../types/IndexMap.js"
-import type { TokenizablePattern } from "src/types/Pattern/TokenizablePattern.js"
+import type { TokenizablePattern } from "../types/Pattern/TokenizablePattern.js"
 
 export function PatternTokenizer<KeyType = any, OutType = any>(
 	tokenMap: IndexMap<KeyType, SummatFunction<any, KeyType, OutType>>

@@ -15,7 +15,7 @@
 		"maps"
 	],
 	"dependencies": {
-		"@hgargg-0710/one": "0.2.0"
+		"@hgargg-0710/one": "0.2.1"
 	},
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"
@@ -27,6 +27,7 @@
 		"all": "npm run build && npm run test"
 	},
 	"devDependencies": {
+		"@hgargg-0710/summat.ts": "^0.0.1",
 		"@types/node": "^20.14.8"
 	}
 }

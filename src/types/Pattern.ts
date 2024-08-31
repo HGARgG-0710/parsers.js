@@ -1,4 +1,4 @@
-import type { Summat, SummatFunction } from "./Summat.js"
+import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 import { inplace, array } from "@hgargg-0710/one"
 
 const { first } = array

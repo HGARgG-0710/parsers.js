@@ -1,5 +1,5 @@
 import type { StreamIterable } from "./StreamIterable.js"
-import type { InputStream } from "main.js"
+import type { InputStream } from "./InputStream.js"
 
 export interface PreBasicStream<Type = any> extends StreamIterable<Type> {
 	curr: Type

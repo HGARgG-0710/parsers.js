@@ -1,10 +1,10 @@
 import type { ParserMap } from "./ParserMap.js"
 import { DefineFinished, GeneralParser, type ParsingState } from "./GeneralParser.js"
 import { ArrayCollection, type Collection } from "../types/Collection.js"
-import type { Position } from "src/types/Stream/Position.js"
+import type { Position } from "../types/Stream/Position.js"
 import { skip } from "./utils.js"
 import { firstFinished } from "./GeneralParser.js"
-import type { ReversibleStream } from "main.js"
+import type { ReversibleStream } from "../../src/types/Stream/ReversibleStream.js"
 
 export type FixedSkipState<KeyType = any, OutType = any> = ParsingState<
 	ReversibleStream,
