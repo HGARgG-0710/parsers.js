@@ -1,35 +1,23 @@
-import type { BasicStream, Inputted } from "../types/Stream/BasicStream.js"
+import { type BasicStream, streamTokenizerIsEnd } from "../types/Stream/BasicStream.js"
+import type { Inputted } from "src/interfaces/Inputted.js"
 import type { StreamMap } from "./ParserMap.js"
 import {
-	StreamCurrGetter,
-	StreamEndingHandler
-} from "../types/Stream/StreamEndingHandler.js"
-import type { StartedStream } from "../../src/types/Stream/ReversibleStream.js"
+	ForwardStreamIterationHandler,
+	StreamCurrGetter
+} from "../types/Stream/StreamIterationHandler.js"
+import type { StartedStream } from "main.js"
 
-import { typeof as type } from "@hgargg-0710/one"
-const { isFunction } = type
+import { streamTokenizerCurrGetter } from "src/types/Stream/PreBasicStream.js"
+import { streamTokenizerNext } from "src/types/Stream/BasicStream.js"
+import type { BaseNextable } from "src/interfaces/BaseIterable.js"
+import type { IsEndCurrable } from "src/interfaces/BoundCheckable.js"
 
 export interface StreamTokenizer<OutType = any>
 	extends Inputted<BasicStream>,
-		StartedStream<OutType> {
+		StartedStream<OutType>,
+		BaseNextable<OutType>,
+		IsEndCurrable {
 	tokenMap: StreamMap<OutType>
-}
-
-export function streamTokenizerIsEnd<Type = any>(this: StreamTokenizer<Type>) {
-	return !this.curr
-}
-
-export function streamTokenizerNext<Type = any>(this: StreamTokenizer<Type>) {
-	const prev = this.curr
-	const mapped = this.tokenMap(this.input)
-	this.curr = isFunction(mapped) ? mapped.call(this, this.input) : mapped
-	this.input.next()
-	return prev as Type
-}
-
-export function streamTokenizerCurrGetter<Type = any>(this: StreamTokenizer<Type>) {
-	this.isStart = false
-	return this.next()
 }
 
 export function streamTokenizerCurrentCondition<Type = any>(this: StreamTokenizer<Type>) {
@@ -38,7 +26,7 @@ export function streamTokenizerCurrentCondition<Type = any>(this: StreamTokenize
 
 export function StreamTokenizer<OutType = any>(tokenMap: StreamMap<OutType>) {
 	return function (input: BasicStream): StreamTokenizer<OutType> {
-		return StreamEndingHandler(
+		return ForwardStreamIterationHandler(
 			StreamCurrGetter(
 				{
 					tokenMap,
@@ -46,8 +34,10 @@ export function StreamTokenizer<OutType = any>(tokenMap: StreamMap<OutType>) {
 					next: streamTokenizerNext<OutType>,
 					isStart: true
 				},
-				streamTokenizerCurrGetter<OutType>
+				streamTokenizerCurrGetter<OutType>,
+				streamTokenizerCurrentCondition<OutType>
 			),
+			streamTokenizerNext<OutType>,
 			streamTokenizerIsEnd<OutType>
 		) as StreamTokenizer<OutType>
 	}

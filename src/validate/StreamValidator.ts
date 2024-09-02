@@ -6,7 +6,6 @@ import {
 	type ParsingState
 } from "../parsers/GeneralParser.js"
 
-// ? Take out this type used for determining the '.next' call? [could be a simple 'StreamHandler...'];
 export type StreamValidatorState<KeyType = any> = ParsingState<
 	BasicStream<KeyType>,
 	boolean,

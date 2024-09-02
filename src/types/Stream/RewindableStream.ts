@@ -1,14 +1,13 @@
 import type { BasicStream } from "./BasicStream.js"
 import type { TreeStream } from "./TreeStream.js"
 
-import { object, typeof as type } from "@hgargg-0710/one"
 import type { InputStream } from "./InputStream.js"
-const { structCheck } = object
-const { isFunction } = type
+import type { Rewindable } from "src/interfaces/Rewindable.js"
+import type { ReversibleStream } from "main.js"
 
-export interface RewindableStream<Type = any> extends BasicStream<Type> {
-	rewind(this: RewindableStream<Type>): Type
-}
+export interface RewindableStream<Type = any>
+	extends BasicStream<Type>,
+		Rewindable<Type> {}
 
 export function inputStreamRewind<Type = any>(this: InputStream<Type>) {
 	this.isStart = true
@@ -21,7 +20,6 @@ export function treeStreamRewind<Type = any>(this: TreeStream<Type>) {
 	return this.curr
 }
 
-const checkRewind = structCheck<RewindableStream>("rewind")
-export function isRewindableStream(stream: BasicStream): stream is RewindableStream {
-	return checkRewind(stream) && isFunction(stream.rewind)
+export function rewind(stream: ReversibleStream) {
+	while (!stream.isStart) stream.prev()
 }

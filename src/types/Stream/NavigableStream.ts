@@ -7,13 +7,14 @@ import type { InputStream } from "./InputStream.js"
 import type { LimitedStream } from "./LimitedStream.js"
 
 import { function as _f, typeof as type, boolean } from "@hgargg-0710/one"
+import type { Navigable } from "src/interfaces/Navigable.js"
 const { trivialCompose } = _f
 const { isNumber } = type
 const { not } = boolean
 
-export interface NavigableStream<Type = any> extends BasicStream<Type> {
-	navigate(position: Position): Type | void
-}
+export interface NavigableStream<Type = any>
+	extends BasicStream<Type>,
+		Navigable<Type | void, Position> {}
 
 export function inputStreamNavigate<Type = any>(
 	this: InputStream<Type>,

@@ -1,5 +1,6 @@
 import type { Pattern } from "../Pattern.js"
-import type { Flushable, Resulting } from "../../misc.js"
+import type { Flushable } from "src/interfaces/Flushable.js"
+import type { Resulting } from "src/interfaces/Resulting.js"
 
 export interface EliminablePattern<Type = any, EliminatedType = any>
 	extends Pattern<Type>,

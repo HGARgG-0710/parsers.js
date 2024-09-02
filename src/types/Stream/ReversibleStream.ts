@@ -2,17 +2,29 @@ import {
 	underStreamCurr,
 	underStreamIsEnd,
 	underStreamIsStart,
-	underStreamRewind
+	underStreamRewind,
+	underStreamNext,
+	underStreamPrev
 } from "./UnderStream.js"
-import { underStreamNext, underStreamPrev } from "./UnderStream.js"
-import type { BasicStream, Inputted } from "./BasicStream.js"
+import type { Inputted } from "src/interfaces/Inputted.js"
 import type { TreeStream } from "./TreeStream.js"
-import { isRewindableStream } from "./RewindableStream.js"
+import { isRewindable } from "src/interfaces/Rewindable.js"
 import { unifinish } from "./FinishableStream.js"
 import type { InputStream } from "./InputStream.js"
 import { type IterableStream, streamIterator } from "./IterableStream.js"
 import type { PreBasicStream } from "./PreBasicStream.js"
-import { StreamCurrGetter } from "./StreamEndingHandler.js"
+import { StreamCurrGetter } from "./StreamIterationHandler.js"
+import type { StartedStream } from "./StartedStream.js"
+import type { Prevable } from "src/interfaces/BaseIterable.js"
+
+export interface ReversibleStream<Type = any>
+	extends StartedStream<Type>,
+		Prevable<Type> {}
+
+export interface ReversedStream<Type = any>
+	extends ReversibleStream<Type>,
+		Inputted<ReversibleStream<Type>>,
+		IterableStream<Type> {}
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>
@@ -24,7 +36,7 @@ export function ReversedStream<Type = any>(
 				input,
 				next: underStreamPrev<Type>,
 				prev: underStreamNext<Type>,
-				finish: isRewindableStream(input) ? underStreamRewind<Type> : null,
+				finish: isRewindable(input) ? underStreamRewind<Type> : null,
 				[Symbol.iterator]: streamIterator<Type>
 			},
 			{
@@ -36,47 +48,18 @@ export function ReversedStream<Type = any>(
 				}
 			}
 		) as unknown as PreBasicStream<Type>,
-		underStreamCurr
+		underStreamCurr<Type>
 	) as ReversedStream<Type>
 }
 
-export interface ReversedStream<Type = any>
-	extends ReversibleStream<Type>,
-		Inputted<ReversibleStream<Type>>,
-		IterableStream<Type> {}
-
-export interface ReversibleStream<Type = any>
-	extends BasicStream<Type>,
-		StartedStream<Type> {
-	prev(): Type
-}
-
-export interface StartedStream<Type = any> extends BasicStream<Type> {
-	isStart: boolean
-}
-
-export function inputStreamtPrev<Type = any>(this: InputStream<Type>) {
-	const prev = this.pos
-	this.pos -= +!this.isStart
-	return this.input[prev]
-}
-
-export function inputStreamIsStart<Type = any>(this: InputStream<Type>) {
-	return !this.pos
+export function inputStreamPrev<Type = any>(this: InputStream<Type>) {
+	return this.input[--this.pos]
 }
 
 export function treeStreamPrev<Type = any>(this: TreeStream<Type>) {
-	const { walker, curr } = this
-	const next = curr
-
-	if (this.isEnd) this.isEnd = false
-
+	const { walker } = this
+	this.isEnd = false
 	if (walker.isSiblingBefore()) walker.goPrevLast()
 	else if (walker.isParent()) walker.popChild()
-
-	return next
-}
-
-export function treeStreamIsStartGetter<Type = any>(this: TreeStream<Type>) {
-	return !this.walker.isParent()
+	return this.curr
 }

@@ -1,7 +1,7 @@
 import type { ParserMap, ParserFunction } from "./ParserMap.js"
 import type { BasicStream } from "../types/Stream/BasicStream.js"
 import type { Collection } from "../types/Collection.js"
-import type { Resulting } from "../misc.js"
+import type { Resulting } from "src/interfaces/Resulting.js"
 
 export interface ParsingState<
 	StreamType extends BasicStream = BasicStream,

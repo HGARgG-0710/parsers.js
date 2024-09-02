@@ -4,7 +4,8 @@ const { replace } = inplace
 const { isBoolean } = type
 
 import { matchString, type Pattern } from "../Pattern.js"
-import type { Resulting, Flushable } from "../../misc.js"
+import type { Flushable } from "src/interfaces/Flushable.js"
+import type { Resulting } from "src/interfaces/Resulting.js"
 
 export type ValidationOutput<Type = any> = [boolean, Type[]]
 

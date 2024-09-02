@@ -1,7 +1,7 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
-const { isFunction, isNumber } = type
+const { isFunction, isNumber, isArray } = type
 
 import type { PositionalStream } from "./PositionalStream.js"
 import type { BasicStream } from "./BasicStream.js"
@@ -21,9 +21,15 @@ export type Position<Type = any> = PredicatePosition | PositionObject<Type> | nu
 export type DirectionalPosition = PredicatePosition | number
 export type BasicPosition = SummatFunction | number
 
-const convertCheck = structCheck<PositionObject>("convert")
-export function isPositionObject(x: any): x is PositionObject {
-	return convertCheck(x) && isFunction(x.convert)
+export type DualPosition<Type = any> = [Position<Type>, Position<Type>?]
+export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
+
+export function isPosition<Type = any>(x: any): x is Position<Type> {
+	return isNumber(x) || isFunction(x) || isPositionObject(x)
+}
+
+export function isDualPosition<Type = any>(x: any): x is DualPosition<Type> {
+	return isArray(x) && isPosition<Type>(x[0]) && (!(1 in x) || isPosition<Type>(x[1]))
 }
 
 export function positionExtract(pos: DirectionalPosition): BasicPosition {

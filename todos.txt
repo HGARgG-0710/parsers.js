@@ -5,16 +5,20 @@
 
 NOTE: nope, the version is NOT finished. 
 
-	THE BENCHMARK HATH SPOKEN! 
-	Based off a (very) approximate heuristic of 'consume' (which was) 'the fastest/simplest' of them all...; 
-	The simple 'iteration' approach IS (quite a bit) faster; 
+	0. Add [optional] '.prev()' to the 'LimitedStream'? [would be defined as an 'underStreamPrev']; 
+		SAME for the others...; [PositionalStream, and so forth...]; 
+
+		0.1. Change the 'forced' types (such as 'NavigableStream') for 'LimitedStream' (AND OTHERS) to the 
+			methods that are used BEING OPTIONAL [input-dependent...]; 
+
+	1. THE BENCHMARK HATH SPOKEN! 
+
+		Based off a (very) approximate heuristic of 'consume' (which was) 'the fastest/simplest' of them all...; 
+		The simple 'iteration' approach IS (quite a bit) faster; 
 	
-	IF it proves faster, do: 
-
-		1. 3.24, 2.25
-		2. 3.4-3.8
-		3. 3.10, 3.11
-
+		1. 3.3-3.7
+		2. 3.23, 3.24
+		3. 3.9, 3.10
 
 A. testing [1. Create list of modules to be tested]; 
 B. documentation (change/fix it...); 
@@ -99,30 +103,21 @@ For v0.4:
 				1.3. 'isEnd' which would END THE STREAM [keep the locally-scoped boolean for this]!
 					1.3.1. The boolean is actually altered on '.next()'; 
 
-	3.4. isStream(x) functions: 
-		For dealing with 'Stream's consisting of 'Stream's; 
-		Allows one to identify a Stream, and handle it accordingly...; 
-		Let there be different 'isStream' function (for different types of streams...);
-
-		isLimitedStream, isNestableStream, isPositionalStream, et cetera
-
-		The library has some already (needed for optimization purposes...);
-
-	3.5. ProlongedStream; 
+	3.4. ProlongedStream; 
 		The Stream-equivalent of 'prolong' utility; 
 		'Concatenates' different streams into one; 
 	
-	3.6. TransformedStream: 
+	3.5. TransformedStream: 
 		The Stream-equivalent of 'transform' utility;
 		Applies the given 'transform' on the 'Stream' on the 'per-element' basis.
 
-	3.7. SubStream: 
+	3.6. SubStream: 
 		The Stream-equivalent of the 'find' utility (finds ALL occurences of the given 'position') - this [effectively], 
 			gives a new Stream that has only the items with given 'position' (either property-function or a single element at that position, if any); 
 
 		The property function has an 'i: Position' argument for THE POSITION!
 	
-	3.8. DelimitedStream: 
+	3.7. DelimitedStream: 
 		The Stream-equivalent of 'delimited'; 
 		Does THE SAME stuff as the 'delimited' function, but on Streams: 
 			Skips the elements deemed 'delimiters', 
@@ -132,7 +127,7 @@ For v0.4:
 		PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
 			(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
 
-	3.9. TreeStream: create two versions; 
+	3.8. TreeStream: create two versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -143,13 +138,13 @@ For v0.4:
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-	3.10. recursiveTransform - a utility; 
+	3.9. recursiveTransform - a utility; 
 		This recursively transforms all the sub-Stream-s within the given Stream; 
 		It, effectively, frees the user from the necessity of writing the recursive functionality into their transformation themselves; 
 
-	3.11. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
+	3.10. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
 
-	3.12. Implement a 'PartialValidator': 
+	3.11. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
@@ -158,12 +153,12 @@ For v0.4:
 
 		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
 
-	3.13. Implement a 'level-by-level TreeStream': 
+	3.12. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	3.14. Add a 'HashClass'-implementation of 'MapClass'; 
+	3.13. Add a 'HashClass'-implementation of 'MapClass'; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -209,7 +204,7 @@ For v0.4:
 
 				This can be used with strings/
 
-	3.15. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
+	3.14. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
 		This makes code MUCH more general. 
 		In particular, one does so with the 'Tree'-s; 
 		It'd allow to (for instance) store identifiers, and getting them via 'loops'; 
@@ -217,7 +212,7 @@ For v0.4:
 		Excluding some few special cases (like 'childIndex'), walk through the project, 
 			AND REPLACE un-place-ly '.reduce'-s with proper loops...
 
-	3.16. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	3.15. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -298,7 +293,7 @@ For v0.4:
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 
-	3.17. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
+	3.16. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
 		The 'copying' for Tree-s should be a WHOLE SEPARATE thing with ITS OWN module; 
 		NOTE: the 'copying' in question occurs in methods 'MultValueTree' and 'RecursiveArrayTree'; 
 
@@ -317,7 +312,7 @@ For v0.4:
 
 				This would be a 'FlatCopiableTree'; 
 	
-	3.18. Create a 'ModifiableStream' interface;
+	3.17. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -402,12 +397,12 @@ For v0.4:
 					}
 				}
 	
-	3.19. MORE WORK on the 'IndexMap'; 
+	3.18. MORE WORK on the 'IndexMap'; 
 		
 		Things to do: 
 			1. add a '.swap' method (for swapping two positions); 
 
-	3.20. MORE work on the 'NavigableStream-s'!
+	3.19. MORE work on the 'NavigableStream-s'!
 
 		Currently, these DON'T HAVE AN OPTION TO navigate "backwards" via a predicate; 
 		Which is disappointing; 
@@ -429,11 +424,11 @@ For v0.4:
 				It is one that is `Navigable & Reversible`;
 				A BacktrackableStream, then would be used for the proper re-definition of the 'inputStreamNavigate'; 
 
-	3.21. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
+	3.20. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
 		These are MIGHTY! [allow to save memory, and so forth...]; 
 		IDEA: maybe, even create a library for these...; 
 
-	3.22. IDEA: benchmark, and, if it seems worth it (that is, the Object-oriented version is REALLY faster/less-memory-needy/not-too-"heavy"): 
+	3.21. IDEA: benchmark, and, if it seems worth it (that is, the Object-oriented version is REALLY faster/less-memory-needy/not-too-"heavy"): 
 
 		1. LIGHTEN the library by removing the functional API completely, replacing it with: 	
 			1.1. Object-oriented alternatives (more or less outlined already);
@@ -454,7 +449,7 @@ For v0.4:
 			2. consume - basic thing (needed FOR SAVING the given Stream desirably [without the overhead of having to reverse it prior]); 
 			3. has - doesn't have a data-structure output; 
 		
-	3.23. Expand on the 'Position' type further;
+	3.22. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -479,23 +474,23 @@ For v0.4:
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	3.24. MergeStream - equivalent of the 'merge' util; 
+	3.23. MergeStream - equivalent of the 'merge' util; 
 		As per 3.24 - replace functional API with OOP; 
 
-	3.25. SplitStream - generalization of 'extract' util (as per 3.24.), reverse of 'MergeStream';
+	3.24. SplitStream - generalization of 'extract' util (as per 3.24.), reverse of 'MergeStream';
 
 		Based off a given set of predicates (by default, if set size is 1: {P}, uses 2: {P, !P}),
 			it defines a set of non-interlocking streams; 
 		The predicates are interpreted to be 'greedy', in the sense that each will work to increase its Stream's size
 			FOR AS LONG AS IT CAN.
 	
-	3.26. RELAX overly demanding interface and types definitions/requirements;
+	3.25. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
-			These do not NEED to have all the parts of the 'InputStream' definition (even though, they are originally implemented to work with it);
+			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	3.27. [Idea?] Create an error-handling API for the 'v0.4';
+	3.26. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -516,18 +511,8 @@ For v0.4:
 				}
 			}
 
-	3.28. Split the interfaces; 
+		Although... This is rather general. Perhaps, better implement as a separate package; 
 
-		Example: 'FinishableStream'; 
-			THIS can be abstracted to a SEPARATE name property; 
-			Example: 
-
-				// NOTE: NO 'BasicStream'!
-				export interface Finishable<Type = any> {
-					finish(): Type
-				}
-
-			There shouldn't be any 'excessive' interlacing between the types/interfaces;
 	
 4. Dependency management: 
 

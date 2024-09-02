@@ -5,18 +5,8 @@ import { current, firstStream, is } from "../aliases.js"
 import { inplace } from "@hgargg-0710/one"
 const { insert } = inplace
 
-export interface Indexable<OutType> extends Summat {
-	index(x: any): OutType
-}
-export interface IndexingFunction<KeyType = any> extends Summat {
-	(curr: KeyType, x: any): boolean
-}
-export interface HasType extends Summat {
-	has(x: any): boolean
-}
-export interface TestType extends Summat {
-	test(x: any): boolean
-}
+import type { Indexable } from "src/interfaces/Indexable.js"
+import type { HasType, IndexingFunction, TestType } from "src/interfaces/misc.js"
 
 export type MapClassValueExtension<KeyType = any, ValueType = any> = <NewValueType = any>(
 	f: (x: ValueType) => NewValueType
@@ -26,7 +16,6 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = <NewKeyType =
 	f: (x: NewKeyType) => KeyType
 ) => MapClass<NewKeyType, ValueType>
 
-// ? Add more methods for working with 'IndexMap's? [for "static" grammars, this ought to suffice, but for others - more algorithms will have to be implemented manually. Add to the library...];
 export interface IndexMap<KeyType = any, ValueType = any>
 	extends Indexable<ValueType>,
 		Iterable<[KeyType, ValueType]> {

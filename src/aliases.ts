@@ -5,7 +5,7 @@ import type { ParsingState, StreamHandler } from "./parsers.js"
 import type { BasicStream } from "./types/Stream/BasicStream.js"
 import type { Position, PredicatePosition } from "./types/Stream/Position.js"
 
-import type { HasType } from "./types/IndexMap.js"
+import type { HasType } from "./interfaces/misc.js"
 import type { PreBasicStream } from "./types/Stream/PreBasicStream.js"
 import type { ReversibleStream } from "./types/Stream/ReversibleStream.js"
 

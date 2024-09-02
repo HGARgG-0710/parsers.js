@@ -1,10 +1,11 @@
+import type { Copiable } from "src/interfaces/Copiable.js"
 import type { BasicStream } from "./BasicStream.js"
 import { InputStream } from "./InputStream.js"
 import { TreeStream } from "./TreeStream.js"
 
-export interface CopiableStream<Type = any> extends BasicStream<Type> {
-	copy(this: CopiableStream<Type>): BasicStream<Type>
-}
+export interface CopiableStream<Type = any>
+	extends BasicStream<Type>,
+		Copiable<BasicStream<Type>> {}
 
 export function inputStreamCopy<Type = any>(this: InputStream<Type>) {
 	const inputStream = InputStream(this.input)

@@ -3,19 +3,11 @@ import type { DelimPredicate } from "./parsers/ParserMap.js"
 import type { DirectionalPosition, PredicatePosition } from "./types/Stream/Position.js"
 import type { ReversibleStream } from "./types/Stream/ReversibleStream.js"
 import { next, previous } from "./aliases.js"
-import type { BoundType } from "./types/Stream/StreamEndingHandler.js"
+import type { BoundNameType } from "./types/Stream/StreamIterationHandler.js"
 
 import type { Summat } from "@hgargg-0710/summat.ts"
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber } = type
-
-export interface Resulting<ResultType = any> extends Summat {
-	result: ResultType
-}
-
-export interface Flushable {
-	flush(): void
-}
 
 export type ChangeType = (input: ReversibleStream) => any
 
@@ -64,7 +56,7 @@ export function preserveDirection(
 	return transformed
 }
 
-export function positionStopPoint(pos: DirectionalPosition): BoundType {
+export function positionStopPoint(pos: DirectionalPosition): BoundNameType {
 	return isBackward(pos) ? "isStart" : "isEnd"
 }
 export type Indexed<Type = any> =

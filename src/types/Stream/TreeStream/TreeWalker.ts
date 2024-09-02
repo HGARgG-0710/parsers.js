@@ -67,7 +67,7 @@ export function treeWalkerIndexCut<Type = any>(this: TreeWalker<Type>, length: n
 	this.stream.curr = this.level.index(this.stream.pos.lastLevel())
 }
 
-const childStruct = structCheck("lastChild")
+const childStruct = structCheck(["lastChild"])
 export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
 	const lastIndex: number[] = []
 	let current = this.stream.curr as Tree<Type>

@@ -4,8 +4,8 @@ const { replace } = inplace
 const { isString } = type
 
 import { tokenizeString, type Pattern } from "../Pattern.js"
-import { type Flushable } from "../../misc.js"
-import type { Resulting } from "../../misc.js"
+import { type Flushable } from "src/interfaces/Flushable.js"
+import type { Resulting } from "src/interfaces/Resulting.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 

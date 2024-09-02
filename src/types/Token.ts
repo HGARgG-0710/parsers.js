@@ -30,11 +30,11 @@ export function Token<Type = any, Value = any>(
 ): Token<Type, Value> {
 	return { type, value }
 }
-Token.is = structCheck<Token>("type", "value")
+Token.is = structCheck<Token>(["type", "value"])
 Token.type = (x: any) => x.type
 Token.value = (x: any) => x.value
 
-const emptyStruct = structCheck()
+const emptyStruct = structCheck([])
 export function isType<Type = any>(type: Type): (x: any) => x is TokenInstance<Type> {
 	return and(emptyStruct, (x: any): boolean => Token.type(x) === type) as (
 		x: any
@@ -57,7 +57,7 @@ export function TokenType<Type = any, ValueType = any>(
 
 export const ArrayToken = propPreserve((token: Token) => [...Token.value(token)])
 
-export const iteratorCheck = structCheck<SummatIterable>(Symbol.iterator)
+export const iteratorCheck = structCheck<SummatIterable>([Symbol.iterator])
 export function RecursiveArrayToken(recursiveToken: Token) {
 	const isCollection = "value" in recursiveToken && iteratorCheck(recursiveToken.value)
 	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)
