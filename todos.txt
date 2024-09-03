@@ -5,6 +5,66 @@
 
 NOTE: nope, the version is NOT finished. 
 
+	-4. RE-STRUCTURE: 
+
+			Actual new structure [dirs, ES6 modules]: 
+
+				[main.ts-used files, EXPORTED AS SUBMODULES]; 
+				1. classes; 
+				2. interfaces; 
+				3. methods; 
+				4. util [contains Stream/utils and aliases]; 
+				5. regex; [submodule] 
+
+		The 'namespaces' thing; Code isn't maintainable anymore. 
+		It's bullshit; 
+
+		NOTE: the 'namespaces' only means that the things that are USED by the 
+		
+		1. Destroy the per-directory separation; 
+
+			No more 'parsers/', 'patterns/', 'interfaces/', and 'validate/'!
+			From now on, everything is kept in namespaces, and as 'types/'; 
+
+			Sub-namespace separation [for a given type]: 
+			
+				1. interfaces (interfaces used by the 'classes' and the 'methods'); 
+				2. methods (the functions that compose the classes)
+				3. classes (constructor-functions); 
+				4. util (rare, the things that are used for refactoring purposes)
+
+		2. List of types (and their sub-types); 
+
+			1. Stream (namespace); 
+				This includes ALL the previous Streams (NOTE: those are in SEPARATE FILES, STILL!); 
+
+				NOTE: each of the sub-types of 'Stream' has a distinction: 
+
+					1. The namespace itself; 
+					2. The 'default export' of the namespace/file; 
+						This will be available DIRECTLY through 'Stream'; 
+
+				NOTE: The 'Slicer' will be a part of the 'TreeStream'-related stuff...; 
+				NOTE: The 'parsers/utils.ts' becomes the 'Stream.utils' namespace
+
+			2. Parser (namespace); 
+				This includes ParsingState, GeneralParser, Validator-s [NOTE: the 'Validator' is a separate sub-namespace] and so forth; 
+			3. Pattern (namespace); 
+				Includes all things that are Patterns and/or extend the 'Pattern' (includes Collection, Token); 
+			4. IndexMap (type); 
+			5. Tree (type)
+
+		3. The remainder of the stuff will be...
+
+	-3. 'consume': 
+
+		Delete it, ONCE the 'LimitedStream' gains its '.prev()'; 
+		The 'array' + the OO-API for Stream-s can do all that the 'consume' can (and will be present anyhow...);
+		THIS should be based off EXPLICIT pre-reversing of the direction of the given DirectionalPosition;
+
+		Ultimately, the 'pre-reversing' part is defined in the 'limitedStreamNext' (which is currently absent, as 'underStreamNext' is used in its place...); 
+			ALSO, there should be a conditional '.prev' FOR CASES, when it's possible to naturally reverse the Stream; 
+
 	-2. [IMPORTANT]: a small thing, but key... 
 		The 'initial behaviour' of different Streams isn't very 'synchronized'; 
 			Presently, the ONLY thing that 'StreamCurrGetter' does is: 
@@ -33,11 +93,14 @@ NOTE: nope, the version is NOT finished.
 		1. 3.3-3.5
 		2. 3.19, 3.20
 		3. 3.7, 3.8
+		4. 3.23.
+			4.1. Add a special module/namespace named 'universal' (it'd contain various kinds of 'uni'-functions [example: uniFinish, uniNavigate, et cetera]); 
+				These would allow to perform THE SAME operations on different types of Stream-s; 
 		
 		Utilities to keep: 
 			
 			1. skip - this doesn't work with ANY kinds of data structures (so, it doesn't have an 'output' per-se); 
-			2. consume - basic thing (needed FOR SAVING the given Stream desirably [without the overhead of having to reverse it prior]); 
+			2. array - basic thing (needed FOR SAVING the given Stream desirably [without the overhead of having to reverse it prior]); 
 			3. has - doesn't have a data-structure output; 
 			4. nested - it's far too specific (because SOMETIMES, one may desire NOT the 'partitioned' NestedStream [though, that is very frequently the case], BUT the 'whole' thing as a Collection); 
 
@@ -45,7 +108,7 @@ A. testing [1. Create list of modules to be tested];
 B. documentation (change/fix it...); 
 C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
 
-For v0.4: 
+[v0.4]
 
 1. STACK! 
 	The library is not too stack heavy, BUT it does have an (ultimate) stack-limitation
@@ -471,10 +534,6 @@ For v0.4:
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 
-	3.23. For future: use namespaces? 
-
-		The project's module system is not too "true" to the interfaces, or their organization; 
-		The resulting thing has... NO structure whatsoever...; 
 	
 4. Dependency management: 
 
