@@ -12,10 +12,14 @@ import { isRewindable } from "src/interfaces/Rewindable.js"
 import { unifinish } from "./FinishableStream.js"
 import type { InputStream } from "./InputStream.js"
 import { type IterableStream, streamIterator } from "./IterableStream.js"
-import type { PreBasicStream } from "./PreBasicStream.js"
-import { StreamCurrGetter } from "./StreamIterationHandler.js"
+import {
+	BackwardStreamIterationHandler,
+	ForwardStreamIterationHandler,
+	StreamCurrGetter
+} from "./StreamIterationHandler.js"
 import type { StartedStream } from "./StartedStream.js"
-import type { Prevable } from "src/interfaces/BaseIterable.js"
+import type { BaseNextable, BasePrevable, Prevable } from "src/interfaces/BaseIterable.js"
+import type { IsEndCurrable, IsStartCurrable } from "src/interfaces.js"
 
 export interface ReversibleStream<Type = any>
 	extends StartedStream<Type>,
@@ -24,31 +28,31 @@ export interface ReversibleStream<Type = any>
 export interface ReversedStream<Type = any>
 	extends ReversibleStream<Type>,
 		Inputted<ReversibleStream<Type>>,
-		IterableStream<Type> {}
+		IterableStream<Type>,
+		BaseNextable<Type>,
+		IsEndCurrable,
+		BasePrevable<Type>,
+		IsStartCurrable {}
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>
 ): ReversedStream<Type> {
 	unifinish(input)
-	return StreamCurrGetter(
-		Object.defineProperties(
-			{
-				input,
-				next: underStreamPrev<Type>,
-				prev: underStreamNext<Type>,
-				finish: isRewindable(input) ? underStreamRewind<Type> : null,
-				[Symbol.iterator]: streamIterator<Type>
-			},
-			{
-				isEnd: {
-					get: underStreamIsStart<Type>
+	return BackwardStreamIterationHandler<Type>(
+		ForwardStreamIterationHandler<Type>(
+			StreamCurrGetter(
+				{
+					input,
+					finish: isRewindable(input) ? underStreamRewind<Type> : null,
+					[Symbol.iterator]: streamIterator<Type>
 				},
-				isStart: {
-					get: underStreamIsEnd<Type>
-				}
-			}
-		) as unknown as PreBasicStream<Type>,
-		underStreamCurr<Type>
+				underStreamCurr<Type>
+			),
+			underStreamPrev<Type>,
+			underStreamIsStart<Type>
+		),
+		underStreamNext<Type>,
+		underStreamIsEnd<Type>
 	) as ReversedStream<Type>
 }
 

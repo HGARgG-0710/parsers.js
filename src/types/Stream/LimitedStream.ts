@@ -3,7 +3,7 @@ import { PositionalStream } from "./PositionalStream.js"
 import { type BasicStream, limitedStreamIsEnd } from "./BasicStream.js"
 import type { Inputted } from "src/interfaces/Inputted.js"
 import type { DualPosition, Position } from "./Position.js"
-import { limitedStreamNavigate, type NavigableStream } from "./NavigableStream.js"
+import { limitedStreamNavigate } from "./NavigableStream.js"
 import {
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
@@ -12,9 +12,9 @@ import { type IterableStream, streamIterator } from "./IterableStream.js"
 import type { Limitable } from "src/interfaces/Limitable.js"
 import type { BaseNextable } from "src/interfaces/BaseIterable.js"
 import type { IsEndCurrable } from "src/interfaces/BoundCheckable.js"
+import { isNavigable } from "src/interfaces/Navigable.js"
 
-export type LimitedUnderStream<Type = any> = NavigableStream<Type> &
-	PositionalStream<Type> &
+export type LimitedUnderStream<Type = any> = PositionalStream<Type> &
 	BaseNextable<Type> &
 	IsEndCurrable
 
@@ -50,7 +50,7 @@ export function LimitedStream<Type = any>(
 				pos: startPos,
 				to,
 				input: initialStream,
-				navigate: limitedStreamNavigate<Type>,
+				navigate: isNavigable(initialStream) ? limitedStreamNavigate<Type> : null,
 				limit: limitStream<Type>,
 				[Symbol.iterator]: streamIterator<Type>
 			},

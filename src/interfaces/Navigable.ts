@@ -7,4 +7,4 @@ export interface Navigable<Type = any, PosType = any> extends Summat {
 	navigate(position: PosType): Type
 }
 
-export const isNaviable = structCheck<Navigable>({ navigate: isFunction })
+export const isNavigable = structCheck<Navigable>({ navigate: isFunction })

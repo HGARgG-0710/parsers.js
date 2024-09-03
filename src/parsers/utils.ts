@@ -17,7 +17,7 @@ import { ArrayCollection, type Collection } from "../types/Collection.js"
 import { function as _f, typeof as type, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f
 const { isArray, isNumber } = type
-const { not } = boolean
+const { not, T } = boolean
 
 export function delimited(
 	limits: [Position, Position?] | Position,
@@ -79,17 +79,6 @@ export function consume(init: Position, pred?: Position) {
 	}
 }
 
-export function transform(handler: StreamHandler = preserve) {
-	return function (input: BasicStream, initial: Collection = ArrayCollection()) {
-		const result = initial
-		for (let i = 0; !input.isEnd; ++i) {
-			result.push(...handler(input, i))
-			input.next()
-		}
-		return result
-	}
-}
-
 export function nested(
 	inflation: StreamHandler<boolean | number>,
 	deflation: StreamHandler<boolean | number>
@@ -105,7 +94,7 @@ export function nested(
 	}
 }
 
-export const array = transform()
+export const array = consume(T)
 
 export function has(pred: Position) {
 	pred = predicateChoice(positionConvert(pred))
@@ -140,11 +129,6 @@ export function find(pred: Position) {
 				}
 				return dest
 		  }
-}
-
-export function revert(input: ReversibleStream, dest: Collection = ArrayCollection()) {
-	while (!input.isStart) dest.push(input.prev())
-	return dest
 }
 
 export function merge(

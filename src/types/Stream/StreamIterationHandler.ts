@@ -4,6 +4,9 @@ import type { PreBasicStream } from "./PreBasicStream.js"
 import type { BoundCheckable } from "src/interfaces/BoundCheckable.js"
 import type { BaseIterable } from "src/interfaces/BaseIterable.js"
 
+import { boolean } from "@hgargg-0710/one"
+const { F } = boolean
+
 export type CommonStream<Type = any> = BasicStream<Type> &
 	BoundCheckable &
 	BaseIterable<Type>
@@ -59,10 +62,14 @@ export const BackwardStreamIterationHandler = StreamIterationHandler(
 	"isCurrStart"
 )
 
+export function currSetter(value: any) {
+	return (this.realCurr = value)
+}
+
 export function StreamCurrGetter<Type = any>(
 	stream: Summat,
 	getter: () => Type,
-	returnSetCurrentCondition: () => boolean = () => false
+	returnSetCurrentCondition: () => boolean = F
 ): PreBasicStream<Type> {
 	return Object.defineProperties(stream, {
 		realCurr: {
@@ -70,9 +77,7 @@ export function StreamCurrGetter<Type = any>(
 			value: null
 		},
 		curr: {
-			set: function (value) {
-				return (this.realCurr = value)
-			},
+			set: currSetter,
 			get: function () {
 				return returnSetCurrentCondition.call(this)
 					? this.realCurr

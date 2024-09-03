@@ -20,14 +20,14 @@ export interface StreamTokenizer<OutType = any>
 	tokenMap: StreamMap<OutType>
 }
 
-export function streamTokenizerCurrentCondition<Type = any>(this: StreamTokenizer<Type>) {
+export function streamTokenizerCurrentCondition<Type = any>(this: StartedStream<Type>) {
 	return !this.isStart
 }
 
 export function StreamTokenizer<OutType = any>(tokenMap: StreamMap<OutType>) {
 	return function (input: BasicStream): StreamTokenizer<OutType> {
 		return ForwardStreamIterationHandler(
-			StreamCurrGetter(
+			StreamCurrGetter<OutType>(
 				{
 					tokenMap,
 					input,

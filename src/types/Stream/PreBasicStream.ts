@@ -11,5 +11,5 @@ export function inputStreamCurr<Type = any>(this: InputStream<Type>) {
 
 export function streamTokenizerCurrGetter<Type = any>(this: StreamTokenizer<Type>) {
 	this.isStart = false
-	return this.next()
+	return (this.curr = this.next())
 }

@@ -1,13 +1,22 @@
 import type { RewindableStream } from "./RewindableStream.js"
-import type { BasicStream } from "./BasicStream.js"
+import type { BaseStream, BasicStream, ReverseBaseStream } from "./BasicStream.js"
 import type { Inputted } from "src/interfaces/Inputted.js"
 import type { ReversibleStream } from "./ReversibleStream.js"
-import type { StartedStream } from "./StartedStream.js"
 import type { FinishableStream } from "./FinishableStream.js"
 
 export interface UnderStream<StreamType extends BasicStream = BasicStream, Type = any>
 	extends Inputted<StreamType>,
 		BasicStream<Type> {}
+
+export interface BaseUnderStream<StreamType extends BaseStream = BaseStream, Type = any>
+	extends UnderStream<StreamType, Type>,
+		BaseStream<Type> {}
+
+export interface ReverseBaseUnderStream<
+	StreamType extends ReverseBaseStream = ReverseBaseStream,
+	Type = any
+> extends UnderStream<StreamType, Type>,
+		ReverseBaseStream<Type> {}
 
 export function underStreamPrev<Type = any>(this: UnderStream<ReversibleStream, Type>) {
 	return this.input.prev()
@@ -21,12 +30,14 @@ export function underStreamCurr<Type = any>(this: UnderStream<BasicStream, Type>
 	return this.input.curr
 }
 
-export function underStreamIsEnd<Type = any>(this: UnderStream<BasicStream, Type>) {
-	return this.input.isEnd
+export function underStreamIsEnd<Type = any>(this: BaseUnderStream<BaseStream, Type>) {
+	return this.input.isCurrEnd()
 }
 
-export function underStreamIsStart<Type = any>(this: StartedStream<Type>) {
-	return this.input.isStart
+export function underStreamIsStart<Type = any>(
+	this: ReverseBaseUnderStream<ReverseBaseStream, Type>
+) {
+	return this.input.isCurrStart()
 }
 
 export function underStreamRewind<Type = any>(this: UnderStream<RewindableStream, Type>) {
