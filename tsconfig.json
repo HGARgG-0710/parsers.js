@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"outDir": "dist",
+		"strictNullChecks": true,
 		"lib": [
 			"ES2020"
 		],

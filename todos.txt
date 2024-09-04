@@ -5,57 +5,6 @@
 
 NOTE: nope, the version is NOT finished. 
 
-	-4. RE-STRUCTURE: 
-
-			Actual new structure [dirs, ES6 modules]: 
-
-				[main.ts-used files, EXPORTED AS SUBMODULES]; 
-				1. classes; 
-				2. interfaces; 
-				3. methods; 
-				4. util [contains Stream/utils and aliases]; 
-				5. regex; [submodule] 
-
-		The 'namespaces' thing; Code isn't maintainable anymore. 
-		It's bullshit; 
-
-		NOTE: the 'namespaces' only means that the things that are USED by the 
-		
-		1. Destroy the per-directory separation; 
-
-			No more 'parsers/', 'patterns/', 'interfaces/', and 'validate/'!
-			From now on, everything is kept in namespaces, and as 'types/'; 
-
-			Sub-namespace separation [for a given type]: 
-			
-				1. interfaces (interfaces used by the 'classes' and the 'methods'); 
-				2. methods (the functions that compose the classes)
-				3. classes (constructor-functions); 
-				4. util (rare, the things that are used for refactoring purposes)
-
-		2. List of types (and their sub-types); 
-
-			1. Stream (namespace); 
-				This includes ALL the previous Streams (NOTE: those are in SEPARATE FILES, STILL!); 
-
-				NOTE: each of the sub-types of 'Stream' has a distinction: 
-
-					1. The namespace itself; 
-					2. The 'default export' of the namespace/file; 
-						This will be available DIRECTLY through 'Stream'; 
-
-				NOTE: The 'Slicer' will be a part of the 'TreeStream'-related stuff...; 
-				NOTE: The 'parsers/utils.ts' becomes the 'Stream.utils' namespace
-
-			2. Parser (namespace); 
-				This includes ParsingState, GeneralParser, Validator-s [NOTE: the 'Validator' is a separate sub-namespace] and so forth; 
-			3. Pattern (namespace); 
-				Includes all things that are Patterns and/or extend the 'Pattern' (includes Collection, Token); 
-			4. IndexMap (type); 
-			5. Tree (type)
-
-		3. The remainder of the stuff will be...
-
 	-3. 'consume': 
 
 		Delete it, ONCE the 'LimitedStream' gains its '.prev()'; 
