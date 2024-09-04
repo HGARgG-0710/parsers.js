@@ -1,18 +1,20 @@
-import {
-	uniNavigate,
-	ForwardStreamIterationHandler,
-	StreamCurrGetter,
-	limitedStreamNavigate
-} from "_src/types.js"
-import { limitStream } from "./methods.js"
 import type { Started } from "../ReversibleStream/interfaces.js"
 import type { Prevable } from "../interfaces.js"
-import { isNavigable } from "../NavigableStream/utils.js"
+import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
+import type { LimitedUnderStream, LimitedStream, BoundableStream } from "./interfaces.js"
+
+import {
+	ForwardStreamIterationHandler,
+	StreamCurrGetter
+} from "../IterationHandler/classes.js"
+
+import { limitStream } from "./methods.js"
+import { limitedStreamNavigate } from "../NavigableStream/methods.js"
 import { limitedStreamIsEnd } from "../PreBasicStream/methods.js"
 import { streamIterator } from "../IterableStream/methods.js"
-import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
 import { underStreamCurr, underStreamNext } from "../UnderStream/methods.js"
-import type { LimitedUnderStream, LimitedStream, BoundableStream } from "./interfaces.js"
+
+import { isNavigable, uniNavigate } from "../NavigableStream/utils.js"
 
 export function LimitedStream<Type = any>(
 	initialStream: LimitedUnderStream<Type>,
@@ -21,7 +23,7 @@ export function LimitedStream<Type = any>(
 ): LimitedStream<Type> {
 	if (!to) {
 		to = from
-		from = null
+		from = null as unknown as Position
 	}
 	if (from !== null)
 		uniNavigate(initialStream as LimitedUnderStream<Type> & Prevable & Started, from)

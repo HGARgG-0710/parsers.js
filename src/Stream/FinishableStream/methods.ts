@@ -1,5 +1,4 @@
-import type { InputStream } from "_src/types.js";
-
+import type { InputStream } from "../InputStream/interfaces.js"
 
 export function inputStreamFinish<Type = any>(this: InputStream<Type>) {
 	this.isEnd = true

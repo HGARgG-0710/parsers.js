@@ -11,6 +11,8 @@ import type {
 	PredicatePosition
 } from "./interfaces.js"
 
+import type { PositionalStream } from "../interfaces.js"
+
 import { previous, next } from "src/aliases.js"
 import type { ChangeType } from "src/Stream/ReversibleStream/interfaces.js"
 import type { DelimPredicate } from "src/Parser/ParserMap/interfaces.js"
@@ -54,6 +56,7 @@ export function positionCheck(stream: PositionalStream, position: Position) {
 export function positionCopy(x: Position): Position {
 	return isPositionObject(x) ? (x.copy ? x.copy() : { ...x }) : x
 }
+
 export function predicateChoice(x: DirectionalPosition): PredicatePosition {
 	if (isNumber(x)) {
 		const abs = Math.abs(x)
@@ -67,22 +70,27 @@ export function predicateChoice(x: DirectionalPosition): PredicatePosition {
 	}
 	return x
 }
+
 export function isBackward(pos: DirectionalPosition): boolean {
-	return isNumber(pos) ? pos < 0 : !("direction" in pos) || pos.direction
+	return isNumber(pos) ? pos < 0 : !("direction" in pos) || (pos.direction as boolean)
 }
+
 export function pickDirection(pos: DirectionalPosition): ChangeType {
 	return isBackward(pos) ? previous : next
 }
+
 export function endPredicate(predicate: PredicatePosition): DelimPredicate {
 	const stopPoint = positionStopPoint(predicate)
 	return (input: BasicStream, i: number = 0, j: number = 0) =>
 		!input[stopPoint] && predicate(input, i, j)
 }
+
 export function iterationChoice(
 	directional: DirectionalPosition
 ): [ChangeType, DelimPredicate] {
 	return [pickDirection(directional), endPredicate(predicateChoice(directional))]
 }
+
 export function preserveDirection(
 	init: PredicatePosition,
 	transform: (x: PredicatePosition) => PredicatePosition
@@ -91,6 +99,7 @@ export function preserveDirection(
 	transformed.direction = init.direction
 	return transformed
 }
+
 export function positionStopPoint(pos: DirectionalPosition): BoundNameType {
 	return isBackward(pos) ? "isStart" : "isEnd"
 }

@@ -1,5 +1,4 @@
-import type { BaseIterable } from "src/interfaces/BaseIterable.js"
-import type { BoundCheckable } from "src/interfaces/BoundCheckable.js"
+import type { BaseIterable, BoundCheckable } from "../interfaces.js"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 
 export type CommonStream<Type = any> = BasicStream<Type> &

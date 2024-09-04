@@ -1,4 +1,5 @@
-import type { BasicStream, InputStream } from "_src/types.js"
+import type { BasicStream } from "../BasicStream/interfaces.js"
+import type { InputStream } from "../InputStream/interfaces.js"
 
 export function* inputStreamIterator<Type = any>(this: InputStream<Type>) {
 	while (this.pos < this.input.length) {

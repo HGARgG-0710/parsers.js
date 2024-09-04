@@ -1,12 +1,13 @@
 // * Aliases file (main purpose of its is to allow parsers to be written in a more functional style).
 
-import type { ParsingState, StreamHandler } from "./parsers.js"
+import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
+import type { StreamHandler } from "./Parser/ParserMap/interfaces.js"
 
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { PredicatePosition } from "src/Stream/PositionalStream/Position/interfaces.js"
 import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
 
-import type { HasType } from "./interfaces/misc.js"
+import type { HasType } from "./IndexMap/interfaces.js"
 import type { PreBasicStream } from "src/Stream/PreBasicStream/interfaces.js"
 import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
 
@@ -38,7 +39,7 @@ export const skipArg = (pred: Position) => (f: StreamHandler) => (input: BasicSt
 export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.curr])
 export const miss = () => []
 
-export const firstStream = ({ streams }: ParsingState) => streams[0]
+export const firstStream = ({ streams }: ParsingState) => (streams as BasicStream[])[0]
 
 export const eq = (x: any) => (y: any) => x === y
 export const inSet = (set: HasType) => (x: any) => set.has(x)

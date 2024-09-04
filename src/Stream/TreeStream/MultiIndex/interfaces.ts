@@ -1,4 +1,4 @@
-import type { Slicer } from "_src/types.js"
+import type { Slicer } from "./Slicer/interfaces.js"
 import type { MultiIndexModifier } from "./MultiIndexModifier/interfaces.js"
 import type { PositionObject } from "src/Stream/PositionalStream/Position/interfaces.js"
 

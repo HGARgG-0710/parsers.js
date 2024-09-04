@@ -1,7 +1,5 @@
-import type { LayeredParser } from "_src/parsers/LayeredParser.js";
-import type { LayeredParser } from "./interfaces.js";
-import { layersGet, layersSet } from "./methods.js";
-
+import type { LayeredParser } from "./interfaces.js"
+import { layersGet, layersSet } from "./methods.js"
 
 export function LayeredParser(layers: Function[]): LayeredParser {
 	const final: LayeredParser = function (...x: any[]) {

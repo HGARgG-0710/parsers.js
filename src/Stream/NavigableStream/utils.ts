@@ -1,5 +1,5 @@
 import { iterationChoice } from "../PositionalStream/Position/utils.js"
-import type { ReversibleStream } from "main.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import { positionConvert } from "../PositionalStream/Position/utils.js"
 import type { Navigable } from "./interfaces.js"

@@ -1,5 +1,6 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
-import type { BasicStream } from "_src/types.js"
+
+import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { IndexMap } from "src/IndexMap/interfaces.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
 import type { ParsingState } from "../GeneralParser/interfaces.js"

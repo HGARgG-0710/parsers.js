@@ -1,4 +1,9 @@
-import type { BaseStream, BasicStream, ReverseBaseStream } from "_src/types.js"
+import type {
+	BaseStream,
+	BasicStream,
+	ReverseBaseStream
+} from "../BasicStream/interfaces.js"
+
 import type { Inputted } from "../interfaces.js"
 
 export interface UnderStream<StreamType extends BasicStream = BasicStream, Type = any>

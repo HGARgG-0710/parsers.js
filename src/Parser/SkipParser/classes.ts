@@ -4,7 +4,7 @@ import type { ParserMap } from "../ParserMap/interfaces.js"
 import { firstFinished } from "../utils.js"
 import type { SkipType, SkipState, FixedSkipState } from "./interfaces.js"
 import { fixedParserChange, skipParserChange } from "./methods.js"
-import type { Position } from "_src/types.js"
+import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
 
 export function SkipParser<KeyType = any, OutType = any>(
 	parser: ParserMap<KeyType, SkipType<Iterable<OutType>>, SkipState<KeyType, OutType>>

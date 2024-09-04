@@ -1,4 +1,4 @@
-import type { ParserMap } from "_src/parsers.js"
+import type { ParserMap } from "../ParserMap/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
 import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
 import { firstFinished } from "../utils.js"

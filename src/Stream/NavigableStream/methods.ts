@@ -9,7 +9,8 @@ import type { InputStream } from "../InputStream/interfaces.js"
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import { positionConvert } from "../PositionalStream/Position/utils.js"
 import type { LimitedStream } from "../LimitedStream/interfaces.js"
-import type { TreeStream, MultiIndex } from "_src/types.js"
+import type { TreeStream } from "../TreeStream/interfaces.js"
+import type { MultiIndex } from "../TreeStream/MultiIndex/interfaces.js"
 
 export function inputStreamNavigate<Type = any>(
 	this: InputStream<Type>,
@@ -37,7 +38,9 @@ export function limitedStreamNavigate<Type = any>(
 			? Math.max((positionConvert(this.input.pos) as number) + position, 0)
 			: position
 	)
-}export function treeStreamNavigate<Type = any>(
+}
+
+export function treeStreamNavigate<Type = any>(
 	this: TreeStream<Type>,
 	index: MultiIndex
 ) {
@@ -45,4 +48,3 @@ export function limitedStreamNavigate<Type = any>(
 	this.walker.goIndex()
 	return this.curr
 }
-

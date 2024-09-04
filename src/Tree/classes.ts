@@ -1,8 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import { childrenCount, childIndex } from "./methods.js"
 import type { Tree, ChildrentTree } from "./interfaces.js"
-import type { Token } from "_src/types.js"
-import { arrayTreePreserve } from "./utils.js"
+import type { Token } from "src/Pattern/Token/interfaces.js"
 
 import { function as f, typeof as type } from "@hgargg-0710/one"
 const { trivialCompose } = f
@@ -43,5 +42,5 @@ export function ThisTree(level: Summat): Summat {
 export const ArrayTree: (x: any) => Tree = trivialCompose(ThisTree, ChildrenTree)
 
 export function RecursiveArrayTree(arrtree: any): Tree {
-	return isArray(arrtree) ? ArrayTree(arrayTreePreserve(arrtree)) : arrtree
+	return isArray(arrtree) ? ArrayTree(arrtree.map(RecursiveArrayTree)) : arrtree
 }

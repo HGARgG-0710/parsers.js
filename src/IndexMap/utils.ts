@@ -17,11 +17,13 @@ export function mapClassExtend<KeyType = any, ValueType = any>(
 ): MapClassValueExtension<KeyType, ValueType> {
 	return (f) => MapClass<KeyType>((curr: KeyType, x: any) => change(curr, f(x)))
 }
+
 export function mapClassExtendKey<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClassKeyExtension<KeyType, ValueType> {
 	return (f) => MapClass((curr: any, x: any) => change(f(curr), x))
 }
+
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType>
 ): [KeyType[], OutType[]] {
@@ -31,8 +33,8 @@ export function table<KeyType = any, OutType = any>(
 export function fromPairsList<KeyType = any, ValueType = any>(
 	mapPairs: [KeyType, ValueType][]
 ): [KeyType[], ValueType[]] {
-	const keys = []
-	const values = []
+	const keys: KeyType[] = []
+	const values: ValueType[] = []
 	for (const [key, value] of mapPairs) {
 		keys.push(key)
 		values.push(value)

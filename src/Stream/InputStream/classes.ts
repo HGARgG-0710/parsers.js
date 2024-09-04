@@ -2,11 +2,11 @@ import type { Indexed } from "../interfaces.js"
 import {
 	ForwardStreamIterationHandler,
 	BackwardStreamIterationHandler,
-	StreamCurrGetter,
-	inputStreamRewind,
-	inputStreamNavigate,
-	inputStreamPrev
-} from "_src/types.js"
+	StreamCurrGetter
+} from "../IterationHandler/classes.js"
+import { inputStreamRewind } from "../RewindableStream/methods.js"
+import { inputStreamNavigate } from "../NavigableStream/methods.js"
+import { inputStreamPrev } from "../ReversibleStream/methods.js"
 import { inputStreamNext } from "../BasicStream/methods.js"
 import { inputStreamIsEnd } from "../PreBasicStream/methods.js"
 import { inputStreamCopy } from "../CopiableStream/methods.js"

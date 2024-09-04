@@ -2,7 +2,7 @@ import { function as _f, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f
 const { not } = boolean
 
-import { StreamLocator } from "_src/validate.js"
+import { StreamLocator } from "../StreamLocator/classes.js"
 import type { ParserMap } from "../ParserMap/interfaces.js"
 import type { PositionalValidatorState } from "./interfaces.js"
 

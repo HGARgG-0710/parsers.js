@@ -1,17 +1,18 @@
 import type {
-	BaseStream,
-	BasicStream,
-	FinishableStream,
-	ReverseBaseStream,
-	ReversibleStream,
-	RewindableStream
-} from "_src/types.js"
-
-import type {
 	BaseUnderStream,
 	ReverseBaseUnderStream,
 	UnderStream
 } from "./interfaces.js"
+
+import type {
+	BaseStream,
+	BasicStream,
+	ReverseBaseStream
+} from "../BasicStream/interfaces.js"
+
+import type { FinishableStream } from "../FinishableStream/interfaces.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { RewindableStream } from "../RewindableStream/interfaces.js"
 
 export function underStreamPrev<Type = any>(this: UnderStream<ReversibleStream, Type>) {
 	return this.input.prev()

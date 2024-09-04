@@ -1,10 +1,8 @@
 import type { Indexed } from "../interfaces.js"
-import type {
-	PositionalStream,
-	NavigableStream,
-	ReversibleStream,
-	RewindableStream
-} from "_src/types.js"
+import type { PositionalStream } from "../PositionalStream/interfaces.js"
+import type { NavigableStream } from "../NavigableStream/interfaces.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { RewindableStream } from "../RewindableStream/interfaces.js"
 import type {
 	BaseNextable,
 	BasePrevable,

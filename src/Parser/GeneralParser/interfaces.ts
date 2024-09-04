@@ -1,4 +1,4 @@
-import type { BasicStream } from "_src/types.js"
+import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { Resulting } from "../../Pattern/interfaces.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
 import type { ParserMap, ParserFunction } from "../ParserMap/interfaces.js"

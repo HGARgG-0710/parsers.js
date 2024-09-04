@@ -14,6 +14,7 @@ NOTE: nope, the version is NOT finished.
 		Ultimately, the 'pre-reversing' part is defined in the 'limitedStreamNext' (which is currently absent, as 'underStreamNext' is used in its place...); 
 			ALSO, there should be a conditional '.prev' FOR CASES, when it's possible to naturally reverse the Stream; 
 
+	[Current!]
 	-2. [IMPORTANT]: a small thing, but key... 
 		The 'initial behaviour' of different Streams isn't very 'synchronized'; 
 			Presently, the ONLY thing that 'StreamCurrGetter' does is: 
@@ -42,9 +43,6 @@ NOTE: nope, the version is NOT finished.
 		1. 3.3-3.5
 		2. 3.19, 3.20
 		3. 3.7, 3.8
-		4. 3.23.
-			4.1. Add a special module/namespace named 'universal' (it'd contain various kinds of 'uni'-functions [example: uniFinish, uniNavigate, et cetera]); 
-				These would allow to perform THE SAME operations on different types of Stream-s; 
 		
 		Utilities to keep: 
 			

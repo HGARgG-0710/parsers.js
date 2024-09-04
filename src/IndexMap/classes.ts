@@ -17,7 +17,7 @@ import {
 } from "./methods.js"
 import { mapClassExtend, mapClassExtendKey } from "./utils.js"
 import { current, firstStream, is } from "src/aliases.js"
-import { Token } from "_src/types.js"
+import { Token } from "src/Pattern/Token/classes.js"
 
 export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>

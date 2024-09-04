@@ -26,7 +26,7 @@ const { not } = boolean
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(
 	this: T
 ) {
-	return this.streams[0].isEnd
+	return (this.streams as BasicStream[])[0].isEnd
 }
 
 export function delimited(
@@ -34,7 +34,7 @@ export function delimited(
 	isdelim: DelimPredicate = () => false
 ) {
 	if (!isArray(limits)) limits = [limits]
-	const limitsDirectional = limits.map((x) => positionConvert(x))
+	const limitsDirectional = limits.map((x: Position) => positionConvert(x))
 	const pred = 1 in limitsDirectional ? limitsDirectional[1] : limitsDirectional[0]
 	const prePred = skip(+(1 in limits) && limits[0])
 

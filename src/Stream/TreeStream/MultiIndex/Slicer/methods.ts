@@ -17,8 +17,9 @@ export const slicerProperties = new Map<string | symbol, Function>([
 export function slicedGet(indexed: Indexed & object, p: string | symbol) {
 	if (isSymbol(p) || Number.isNaN(Number(p))) {
 		if (slicerMethods.has(p))
-			return (...args: any[]) => slicerMethods.get(p).apply(indexed, args)
-		if (slicerProperties.has(p)) return slicerProperties.get(p)(indexed)
+			return (...args: any[]) =>
+				(slicerMethods.get(p) as Function).apply(indexed, args)
+		if (slicerProperties.has(p)) return (slicerProperties.get(p) as Function)(indexed)
 		return Reflect.get(indexed, p)
 	}
 	const index = Number(p) + indexed.from
