@@ -2,21 +2,31 @@ import type { BasicStream } from "../BasicStream/interfaces.js"
 import { uniFinish } from "../FinishableStream/utils.js"
 import { NestedSteam } from "./classes.js"
 import type {
-	BaseNestableStream,
-	BaseNestedStream,
 	EffectiveNestedStream,
-	InflationPredicate
+	InflationPredicate,
+	NestableEndableStream,
+	NestedEndableStream
 } from "./interfaces.js"
 
 import { boolean } from "@hgargg-0710/one"
 const { F } = boolean
 
-export function baseNestableStreamNest<Type = any>(
-	this: BaseNestableStream<Type>,
+export function nestableStreamNest<Type = any>(
+	this: NestableEndableStream<Type>,
 	inflate: InflationPredicate = F,
 	deflate: InflationPredicate = F
 ) {
 	return NestedSteam<Type>(this, inflate, deflate)
+}
+
+export function effectiveNestedStreamInitCurr<Type = any>(
+	this: EffectiveNestedStream<Type>
+) {
+	if (this.inflate(this.input)) {
+		this.currNested = true
+		return this.input.nest(this.inflate, this.deflate)
+	}
+	return this.input.curr
 }
 
 export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStream<Type>) {
@@ -24,13 +34,10 @@ export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStrea
 		uniFinish(this.curr as BasicStream<Type>)
 		this.currNested = false
 	}
-	if (this.inflate(this.input)) {
-		this.currNested = true
-		return this.input.nest(this.inflate, this.deflate)
-	}
-	return this.input.next()
+	this.input.next()
+	return effectiveNestedStreamInitCurr.call(this)
 }
 
-export function baseNestedStreamIsEnd<Type = any>(this: BaseNestedStream<Type>) {
+export function nestedEndableStreamIsEnd<Type = any>(this: NestedEndableStream<Type>) {
 	return this.input.isCurrEnd() || !!this.deflate()
 }

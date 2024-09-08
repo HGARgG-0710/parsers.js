@@ -10,31 +10,23 @@ import {
 	underStreamIsEnd
 } from "../UnderStream/methods.js"
 import type { ReversibleStream, ReversedStream } from "./interfaces.js"
+import { StreamClass } from "../StreamClass/classes.js"
+import { Inputted } from "../UnderStream/classes.js"
 
-import {
-	BackwardStreamIterationHandler,
-	ForwardStreamIterationHandler,
-	StreamCurrGetter
-} from "../StreamClass/classes.js"
+export const ReversedStreamClass = StreamClass({
+	currGetter: underStreamCurr,
+	baseNextIter: underStreamPrev,
+	basePrevIter: underStreamNext,
+	isCurrEnd: underStreamIsStart,
+	isCurrStart: underStreamIsEnd
+})
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>
 ): ReversedStream<Type> {
 	uniFinish(input)
-	return BackwardStreamIterationHandler<Type>(
-		ForwardStreamIterationHandler<Type>(
-			StreamCurrGetter<Type>(
-				{
-					input,
-					finish: isRewindable(input) ? underStreamRewind<Type> : null,
-					[Symbol.iterator]: streamIterator<Type>
-				},
-				underStreamCurr<Type>
-			),
-			underStreamPrev<Type>,
-			underStreamIsStart<Type>
-		),
-		underStreamNext<Type>,
-		underStreamIsEnd<Type>
-	) as ReversedStream<Type>
+	const result = Inputted(ReversedStreamClass(), input)
+	result.finish = isRewindable(input) ? underStreamRewind<Type> : null
+	result[Symbol.iterator] = streamIterator<Type>
+	return result as ReversedStream<Type>
 }

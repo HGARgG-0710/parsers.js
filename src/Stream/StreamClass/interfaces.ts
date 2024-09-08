@@ -1,5 +1,6 @@
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
 
 export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"
 export type BaseIterPropNameType = "baseNextIter" | "basePrevIter"
@@ -7,13 +8,14 @@ export type IterPropNameType = "next" | "prev"
 export type BoundNameType = "isEnd" | "isStart"
 
 export type StartedType = 1 | boolean
-
-export interface StatefulStarted extends Summat {
-	isStart: StartedType
-}
+export type StatefulStarted = Started<StartedType>
 
 export interface IsEndCurrable extends Summat {
 	isCurrEnd(): boolean
+}
+
+export interface IsStartCurrable extends Summat {
+	isCurrStart(): boolean
 }
 
 export interface ConditionalIsStartCurrable extends Summat {
@@ -48,10 +50,15 @@ export interface ConditionallyPrevable<Type = any> extends Summat {
 	prev?(): Type
 }
 
-export interface StreamClassTransferable<Type = any>
+export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
+
+export interface PrimalStreamClassSignature<Type = any>
 	extends IsEndCurrable,
-		BaseNextIterable,
-		ConditionalCurrGettable<Type>,
+		BaseNextIterable<Type>,
+		ConditionalCurrGettable<Type> {}
+
+export interface StreamClassTransferable<Type = any>
+	extends PrimalStreamClassSignature<Type>,
 		ConditionalBasePrevIterable<Type>,
 		ConditionalIsStartCurrable {}
 
@@ -59,11 +66,20 @@ export interface StreamClassSignature<Type = any>
 	extends StreamClassTransferable<Type>,
 		ConditionalInitGettable<Type> {}
 
-export interface StreamClassInstance<Type = any>
-	extends Summat,
-		InitGettable<Type>,
-		StreamClassTransferable<Type>,
+export interface BasicStreamClassInstance<Type = any>
+	extends InitGettable<Type>,
+		PrimalStreamClassSignature<Type>,
 		StatefulStarted,
 		RealCurrHaving,
-		ConditionallyPrevable<Type>,
 		BasicStream<Type> {}
+
+export interface StreamClassInstance<Type = any>
+	extends BasicStreamClassInstance<Type>,
+		StreamClassTransferable<Type>,
+		ConditionallyPrevable<Type>,
+		ConditionalIsStartCurrable {}
+
+export interface ReversedStreamClassInstance<Type = any>
+	extends BasicStreamClassInstance<Type>,
+		Prevable<Type>,
+		IsStartCurrable {}

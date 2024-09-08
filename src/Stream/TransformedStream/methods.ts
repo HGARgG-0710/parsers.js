@@ -9,11 +9,16 @@ export function transformStream<UnderType = any, UpperType = any>(
 	return TransformedStreamConstructor<UnderType, UpperType>(this, transform)
 }
 
+export function transformedStreamInitCurr<UnderType = any, UpperType = any>(
+	this: TransformedStream<UnderType, UpperType>
+) {
+	return this.transform(this.input, this.pos)
+}
+
 export function transformedStreamNext<UnderType = any, UpperType = any>(
 	this: TransformedStream<UnderType, UpperType>
 ) {
-	const result = this.transform(this.input, this.pos)
 	this.input.next()
 	++this.pos
-	return result
+	return transformedStreamInitCurr.call(this)
 }

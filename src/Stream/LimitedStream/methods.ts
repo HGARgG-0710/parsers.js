@@ -34,12 +34,14 @@ export function limitedStreamNavigate<Type = any>(
 	return this.input.navigate(
 		isNumber(position) ? Math.max(fromConverted + position, fromConverted) : position
 	)
-}export function limitedStreamIsStartGetter<Type = any>(this: LimitedStream<Type>) {
+}
+
+export function limitedStreamIsStart<Type = any>(this: LimitedStream<Type>) {
 	return this.input.isCurrStart() || positionEqual(this.input, this.from)
 }
+
 export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
 	return positionCompare(this.from, this.to, this.input)
 		? this.input.prev()
 		: this.input.next()
 }
-

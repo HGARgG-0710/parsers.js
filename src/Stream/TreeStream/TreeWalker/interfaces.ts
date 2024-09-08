@@ -1,7 +1,6 @@
-import type { Summat } from "@hgargg-0710/summat.ts";
-import type { Tree } from "src/Tree/interfaces.js";
-import type { TreeStream } from "../interfaces.js";
-
+import type { Summat } from "@hgargg-0710/summat.ts"
+import type { Tree } from "src/Tree/interfaces.js"
+import type { TreeStream } from "../interfaces.js"
 
 export interface TreeWalker<Type = any> extends Summat {
 	stream: TreeStream<Type>

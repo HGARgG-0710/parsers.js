@@ -27,7 +27,7 @@ export function inputStreamNavigate<Type = any>(
 	index = positionConvert(index, this)
 	if (isNumber(index)) {
 		if (index < 0) index += this.input.length
-		return this.input[(this.pos = index)]
+		return this.input[Math.max((this.pos = index), 0)]
 	}
 	navigate(this, index)
 	return this.input[positionConvert(this.pos) as number]
@@ -55,7 +55,7 @@ export function inputStreamCopy<Type = any>(this: InputStream<Type>) {
 	return inputStream
 }
 
-export function inputStreamIsStartGetter<Type = any>(this: InputStream<Type>) {
+export function inputStreamIsStart<Type = any>(this: InputStream<Type>) {
 	return !this.pos
 }
 

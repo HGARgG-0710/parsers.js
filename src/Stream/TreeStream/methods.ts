@@ -3,22 +3,15 @@ import type { TreeStream } from "./interfaces.js"
 import type { MultiIndex } from "./MultiIndex/interfaces.js"
 
 export function treeStreamNext<Type = any>(this: TreeStream<Type>) {
-	const { walker, curr } = this
-	const prev = curr
+	const { walker, response } = this
 
-	if (!this.isEnd)
-		if (walker.isChild()) walker.pushFirstChild()
-		else if (walker.isSiblingAfter()) walker.goSiblingAfter()
-		else {
-			const searchResult = walker.lastLevelWithSiblings()
-			if (searchResult < 0) this.isEnd = true
-			else {
-				walker.indexCut(searchResult + 1)
-				walker.goSiblingAfter()
-			}
-		}
+	if (response) walker[response]()
+	else {
+		walker.indexCut(this.lastLevelWithSiblings + 1)
+		walker.goSiblingAfter()
+	}
 
-	return prev
+	return this.curr
 }
 
 export function treeStreamRewind<Type = any>(this: TreeStream<Type>) {
@@ -42,16 +35,36 @@ export function treeStreamCopy<Type = any>(this: TreeStream<Type>) {
 	return copied
 }
 
-export function treeStreamIsStartGetter<Type = any>(this: TreeStream<Type>) {
-	return !this.walker.isParent()
+export function treeStreamPrev<Type = any>(this: TreeStream<Type>) {
+	const { walker, response } = this
+	walker[response]()
+	return this.curr
 }
 
-export function treeStreamPrev<Type = any>(this: TreeStream<Type>) {
+export function treeStreamInitCurr<Type = any>(this: TreeStream<Type>) {
+	return this.input
+}
+
+export function treeStreamIsEnd<Type = any>(this: TreeStream<Type>) {
 	const { walker } = this
-	this.isEnd = false
-	if (walker.isSiblingBefore()) walker.goPrevLast()
-	else if (walker.isParent()) walker.popChild()
-	return this.curr
+	this.response = walker.isChild()
+		? "pushFirstChild"
+		: walker.isSiblingAfter()
+		? "goSiblingAfter"
+		: ""
+	return (
+		!this.response &&
+		(this.lastLevelWithSiblings = walker.lastLevelWithSiblings()) < 0
+	)
+}
+
+export function treeStreamIsStart<Type = any>(this: TreeStream<Type>) {
+	const { walker } = this
+	return !(this.response = walker.isSiblingBefore()
+		? "goPrevLast"
+		: walker.isParent()
+		? "popChild"
+		: "")
 }
 
 export * as TreeWalker from "./TreeWalker/methods.js"

@@ -8,11 +8,10 @@ import type { PredicatePosition } from "src/Stream/PositionalStream/Position/int
 import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
 
 import type { HasType } from "./IndexMap/interfaces.js"
-import type { PreBasicStream } from "src/Stream/PreBasicStream/interfaces.js"
 import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
 
-export const next = (input: PreBasicStream) => input.next()
-export const current = (input: PreBasicStream) => input.curr
+export const next = (input: BasicStream) => input.next()
+export const current = (input: BasicStream) => input.curr
 export const output = (x: any) => [x]
 export function wrapped(handler: (input: BasicStream) => any) {
 	return function (input: BasicStream) {
