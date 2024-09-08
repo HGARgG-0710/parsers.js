@@ -74,33 +74,24 @@ export function skip(steps: Position = 1) {
 	}
 }
 
-export function consume(init: Position, pred?: Position) {
-	const isPred = !!pred
-	init = positionConvert(init)
-	const directional = isPred ? positionConvert(pred) : init
-
-	const initSkip = skip(+isPred && predicateChoice(init))
-	const [change, endPred] = iterationChoice(directional)
-
-	return function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
-		initSkip(input)
-		for (let i = 0; endPred(input, i); ++i) dest.push(change(input))
-		return dest
-	}
-}
-
 export function nested(
 	inflation: StreamHandler<boolean | number>,
 	deflation: StreamHandler<boolean | number>
 ) {
-	return function (input: ReversibleStream) {
+	return function (input: ReversibleStream, dest: Collection = ArrayCollection([])) {
 		let depth = 1
 		const depthInflate = (x: boolean | number) => x && (depth += x as number)
 		const depthDeflate = (x: boolean | number) => !x || (depth -= x as number)
-		return consume(
-			(input: BasicStream, i: number) =>
-				!!(depthInflate(inflation(input, i)) || depthDeflate(deflation(input, i)))
-		)(input)
+
+		for (
+			let i = 0;
+			!input.isEnd &&
+			!!(depthInflate(inflation(input, i)) || depthDeflate(deflation(input, i)));
+			++i
+		)
+			dest.push(input.next())
+
+		return dest
 	}
 }
 

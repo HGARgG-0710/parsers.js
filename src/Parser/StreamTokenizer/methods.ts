@@ -1,5 +1,9 @@
-import type { StartedStream } from "src/Stream/ReversibleStream/interfaces.js"
+import { typeof as type } from "@hgargg-0710/one"
+const { isFunction } = type
 
-export function streamTokenizerCurrentCondition<Type = any>(this: StartedStream<Type>) {
-	return !this.isStart
+import type { StreamTokenizer } from "./interfaces.js"
+
+export function streamTokenizerNext<Type = any>(this: StreamTokenizer<Type>) {
+	const mapped = this.tokenMap(this.input)
+	return isFunction(mapped) ? mapped.call(this, this.input) : mapped
 }

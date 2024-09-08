@@ -1,32 +1,26 @@
 import {
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../../Stream/IterationHandler/classes.js"
+} from "../../Stream/StreamClass/classes.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import { streamTokenizerNext } from "../../Stream/BasicStream/methods.js"
-import {
-	streamTokenizerIsEnd,
-	streamTokenizerCurrGetter
-} from "src/Stream/PreBasicStream/methods.js"
+import { streamTokenizerNext } from "./methods.js"
 import type { StreamMap } from "../ParserMap/interfaces.js"
 import type { StreamTokenizer } from "./interfaces.js"
-import { streamTokenizerCurrentCondition } from "./methods.js"
+import { underStreamIsEnd } from "src/Stream/UnderStream/methods.js"
 
 export function StreamTokenizer<OutType = any>(tokenMap: StreamMap<OutType>) {
 	return function (input: BasicStream): StreamTokenizer<OutType> {
-		return ForwardStreamIterationHandler(
+		return ForwardStreamIterationHandler<OutType>(
 			StreamCurrGetter<OutType>(
 				{
 					tokenMap,
-					input,
-					next: streamTokenizerNext<OutType>,
-					isStart: true
+					input
 				},
-				streamTokenizerCurrGetter<OutType>,
-				streamTokenizerCurrentCondition<OutType>
+				undefined,
+				streamTokenizerNext<OutType>
 			),
 			streamTokenizerNext<OutType>,
-			streamTokenizerIsEnd<OutType>
+			underStreamIsEnd<OutType>
 		) as StreamTokenizer<OutType>
 	}
 }

@@ -3,14 +3,14 @@ const { structCheck } = object
 const { isBoolean } = type
 const { and } = f
 
-import { isNextable } from "../utils.js"
-import { isCurrable } from "../PreBasicStream/utils.js"
-import type { Endable } from "../PreBasicStream/interfaces.js"
-import type { BasicStream } from "./interfaces.js"
+import type { Currable, Endable, BasicStream, Nextable } from "./interfaces.js"
+
+export const isCurrable = structCheck<Currable>(["curr"])
 
 export const isEndable = structCheck<Endable>({ isEnd: isBoolean })
 export const isStream: (x: any) => x is BasicStream = and(
 	isEndable,
 	isCurrable,
 	isNextable
-) as (x: any) => x is BasicStream
+) as (x: any) => x is BasicStreamexport const isNextable = structCheck<Nextable>({ next: isFunction })
+

@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { StreamHandler } from "src/Parser/ParserMap/interfaces.js"
 import type { EssentialStream } from "../BasicStream/interfaces.js"
-import type { Inputted } from "../interfaces.js"
+import type { Inputted } from "../UnderStream/interfaces.js"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Started } from "../ReversibleStream/interfaces.js"
 

@@ -7,7 +7,7 @@ import type {
 } from "../BasicStream/interfaces.js"
 import type { Started } from "../ReversibleStream/interfaces.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
-import type { Inputted } from "../interfaces.js"
+import type { Inputted } from "../UnderStream/interfaces.js"
 import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
 
 export interface Transformable<InType = any, OutType = any> extends Summat {

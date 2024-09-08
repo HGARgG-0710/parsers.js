@@ -37,18 +37,6 @@ export type StreamTransform<UnderType = any, UpperType = any> = Summat &
 export type DelimHandler<Type = any[]> = Summat &
 	((input?: BasicStream, i?: number, j?: number) => Type)
 
-export function ParserMap<
-	KeyType = any,
-	OutType = any,
-	ParsingType extends BaseMapParsingState<KeyType> = DefaultMapParsingState<KeyType>
->(
-	indexMap: IndexMap<KeyType, ParserFunction<ParsingType, OutType>>
-): ParserMap<KeyType, OutType, ParsingType> {
-	const T = (x: ParsingType) => T.table.index(x)(x, T)
-	T.table = indexMap
-	return T
-}
-
 export type ParsingPredicate<
 	StreamType extends BasicStream = BasicStream,
 	ResultType = Collection,

@@ -1,10 +1,11 @@
-import { object, typeof as type } from "@hgargg-0710/one"
+import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber, isArray } = type
+const { trivialCompose } = f
+const { not } = boolean
 
 import type {
 	DirectionalPosition,
-	BasicPosition,
 	DualPosition,
 	Position,
 	PositionObject,
@@ -17,11 +18,8 @@ import { previous, next } from "src/aliases.js"
 import type { ChangeType } from "src/Stream/ReversibleStream/interfaces.js"
 import type { DelimPredicate } from "src/Parser/ParserMap/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import type { BoundNameType } from "src/Stream/IterationHandler/interfaces.js"
-
-export function positionExtract(pos: DirectionalPosition): BasicPosition {
-	return isFunction(pos) ? pos : Math.abs(pos)
-}
+import type { BoundNameType } from "src/Stream/StreamClass/interfaces.js"
+import { isPositional } from "../utils.js"
 
 export function isDualPosition<Type = any>(x: any): x is DualPosition<Type> {
 	return isArray(x) && isPosition<Type>(x[0]) && (!(1 in x) || isPosition<Type>(x[1]))
@@ -34,23 +32,70 @@ export function positionConvert(
 	return isPositionObject(pos) ? pos.convert(stream) : pos
 }
 
+export function positionNegate(position: DirectionalPosition): DirectionalPosition {
+	return isFunction(position)
+		? preserveDirection(position, (position) => trivialCompose(not, position))
+		: position
+}
+
 export function isPosition<Type = any>(x: any): x is Position<Type> {
 	return isNumber(x) || isFunction(x) || isPositionObject(x)
 }
 
 export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
 
-export function positionCheck(stream: PositionalStream, position: Position) {
-	if (isPositionObject(position) && position.compare && isPositionObject(stream.pos))
-		return position.compare(stream.pos)
+export function positionSame(pos1: Position, pos2: Position, stream?: BasicStream) {
+	return positionConvert(pos1, stream) === positionConvert(pos2, stream)
+}
 
-	const checked = positionExtract(positionConvert(position, stream))
-	const streampos = positionExtract(positionConvert(stream.pos, stream))
-	return isNumber(checked)
-		? isNumber(streampos)
-			? checked < streampos
-			: streampos(checked)
-		: checked(streampos)
+export function positionEqual(stream: PositionalStream, position: Position) {
+	return isFunction(position)
+		? position(stream)
+		: positionSame(stream.pos, position, stream)
+}
+
+export function simplifiedPositionCompare(
+	pos1: Position,
+	pos2: Position,
+	stream?: BasicStream
+): boolean {
+	return positionCompare(
+		positionConvert(pos1, stream),
+		positionConvert(pos2, stream),
+		stream
+	)
+}
+
+export function positionCompare(pos1: Position, pos2: Position, stream?: BasicStream) {
+	if (isNumber(pos1) && isNumber(pos2)) return pos1 < pos2
+	if (isPositionObject(pos1) && pos1.compare && isPositionObject(pos2))
+		return pos1.compare(pos2)
+
+	if (isPositional(stream) && isFunction(stream.pos)) {
+		if (pos1 === stream.pos && !isFunction(pos2)) return stream.pos(pos2)
+		if (pos2 === stream.pos && !isFunction(pos1)) return stream.pos(pos1)
+	}
+
+	if (isFunction(pos1)) {
+		const isPos = pos1(stream)
+		if (isFunction(pos2)) return isPos && !pos2(stream)
+		if (pos2 && isPositional(stream))
+			return isPos && positionCompare(stream.pos, pos2, stream)
+		return isPos
+	}
+
+	if (isFunction(pos2)) {
+		const isPos = !pos2(stream)
+		if (isPositional(stream))
+			return isPos && positionCompare(pos1, stream.pos, stream)
+		return isPos
+	}
+
+	return simplifiedPositionCompare(pos1, pos2, stream)
+}
+
+export function positionCheck(stream: PositionalStream, position: Position) {
+	return positionCompare(position, stream.pos, stream)
 }
 
 export function positionCopy(x: Position): Position {

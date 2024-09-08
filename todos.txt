@@ -5,35 +5,187 @@
 
 NOTE: nope, the version is NOT finished. 
 
-	-3. 'consume': 
+	-5. More conditional functions, 'is'-functions based off interfaces; 
 
-		Delete it, ONCE the 'LimitedStream' gains its '.prev()'; 
-		The 'array' + the OO-API for Stream-s can do all that the 'consume' can (and will be present anyhow...);
-		THIS should be based off EXPLICIT pre-reversing of the direction of the given DirectionalPosition;
+		Many are missing appropriate functions for checking presence of properties...; 
 
-		Ultimately, the 'pre-reversing' part is defined in the 'limitedStreamNext' (which is currently absent, as 'underStreamNext' is used in its place...); 
-			ALSO, there should be a conditional '.prev' FOR CASES, when it's possible to naturally reverse the Stream; 
+	-4. CHECK EXPORTS FOR CORRECTNESS! 
+		Primarily concerns missing exports in the 'Parser/' immidiate files; 
 
-	[Current!]
-	-2. [IMPORTANT]: a small thing, but key... 
-		The 'initial behaviour' of different Streams isn't very 'synchronized'; 
-			Presently, the ONLY thing that 'StreamCurrGetter' does is: 
 
-				1. Define the getter for the '.curr' property; 
-				2. Work around the issue of the "initial" '.curr' being 'null'; 
+	-3.1. PROBLEM : with replacement of 'basicStreamInitGetter'; 
 
-				Therefore, IDEA: 
+		The new 'StreamCurrGetter' has a BAD setter! 
+		ID EST, the 'initGetter' and the 'currGetter' CONFLICT with one another...; 
 
-					-2.1. RESTRUCTURE the 'StreamCurrGetter' in a way that would enable one to
-						give the 'getter' to the START value [meaning: the FIRST time that the thing is called...]; 
+		It has to have a mechanism of determining WHEN to use which ...; 
 
-	-1. SEPARATE the 'Base'- and 'Basic'-based 'Stream's (as the 'Base' requirements, are, quite honestly, OPTIONAL); 
+		PROBLEM WITH IT, HOWEVER, IS, that IN ORDER TO DECIDE, it has to KEEP IN SYNC with the calls of '.next', 
+			or have '.next' modify its state!
+
+		Which is extremely bad and breaks the modularity...; 
+
+		Need to consider re-structuring majorly AGAIN; 
+
+		Idea [for a solution]: 
+		
+			1. Create a single GeneralIterationHandler, creating an object with: 
+
+				1.1. baseCurr; 
+				1.2. baseIter [{ baseIter(); return baseCurr() } = baseNext()]; 
+				1.3. next; [which works off 'baseCurr+baseIter']; 
+				1.4. curr: 
+					which works off a: 
+
+						1. explicit setter/getter (ex.: TreeStream); 
+						2. init getter (for the first value, DEFAULTS to the general getter); 
+						3. general getter (ONLY after having called '.next' ONCE, and 'first' value was exhausted); 
+
+						ALSO, it's possible to cache the values from the '.next'/'.prev'; 
+
+				NOTE: that the first time that the '.next' is called and 'isStart' ARE THE SAME!
+					Thus, it'll actually be a GENERAL TEMPLATE for the library Stream-s;
+
+					They would all contain information regarding: 
+
+						1. next, baseIter; 
+						2. isEnd, isStart; 
+						3. curr, baseCurr;
+						4. isEndCurr; 
+
+				A BIT OF A HACK: for simplicity, and universality, the library would have 2 reserved truthy values for '.isStart': 
+
+					VALUE-A. 1; 
+					VALUE-B. true; 
+
+				VALUE-A is used ONLY when the '.curr' is STILL UNINITIALIZED, 
+					whereas 'VALUE-B' is used for cases of SECONDARY initialization [ex: '.rewind' or '.prev']; 
+				
+				THESE TWO CONSTANTS would be defined in a separate file [and exported]; 
+
+				Thus, the workflow: 
+
+					1. curr: 
+						1.1. properties: 
+							1.1.1. .realCur
+							1.1.2. .isStart = 1; 
+							1.1.3. .initCurr()
+							1.1.4. .currGetter()
+						1.2. workflow [get]: 
+							1.2.1. IF isStart === 1, 
+								1.2.1.1. this.realCurr = this.initCurr() // 'initCurr' is 'currGetter', unless alternative is provided; 
+								1.2.1.2. this.isStart = true
+								1.2.1.3. return this.realCurr
+							1.2.2. ELSE 
+								1.2.2.1. IF this.currGetter != null and !.isStart: 
+									1.2.2.1.1. return this.currGetter()
+								1.2.2.2. ELSE: 
+									1.2.2.2.1. reutrn this.realCurr
+						1.3. workflow [set; 'value']: 
+							1.3.1. this.realCurr = value
+					2. next/prev: 
+						2.1. properties: 
+							2.1.1. isEnd/isStart (bound, boolean); 
+							2.1.2. baseIter (baseIterNext, baseIterPrev); 
+						2.2. workflow [usage]: 
+							2.2.1. [WRAPPED in the 'isEnd/isStart' check - PREVIOUSLY DONE]; 
+								2.2.1.1. const curr = this.curr
+								2.2.1.2. this.baseIter(); 
+								2.2.1.3. this.curr = this.baseCurr(); 
+								2.2.1.4. return curr
+
+				Props to add: 
+
+					1. baseIter; 
+					2. initCurr; 
+					3. baseCurr; 
+				
+				Props to delete:
+				
+					1. metFirst
+
+	-3. PROBLEM: basicStreamInitGetter: 
+
+		This DOESN'T work as intended; 
+		THE WHOLE PURPOSE of the new 'StreamCurrGetter' definition is so that user can 
+			RE-DIRECT (id est, implicitly propagate by referencing) the first call to '.curr' AND USE IT 
+				in computations; 
+
+		The '.baseNext' system (.isEnd-check + .baseNext-method for iteration) is (yet again) FAR too simple for 
+			cases that work as 'wrapper-Streams' over other Streams; 
+			These are: 
+
+			1. TransformedStream; 
+			2. StreamTokenizer; 
+			3. NestedStream; 
+
+		The 'basicStreamInitGetter' is SUPPOSED to work like the following: 
+
+			1. Get the underlying stream's .curr (this.input.curr); 
+			2. Run the '.baseCurr' (???) function on 'this.input.curr'; 
+			3. Return the result of '.baseCurr'; 
+		
+		The key issue here is that the 'baseCurr' function (currently undefined), which is 
+			SUPPOSED to be doing all the things that the corresponding '.baseNext' is currently doing, BUT, 
+				without necessarily doing the 'this.input.next()'; 
+
+		However, as this is SUCH a simple relation, there's really no need to introduce any structural alternative
+			(in the sense, that, this is NOT a general construction); 
+		
+		THEREFORE [refactoring algorithm]: 
+
+			1. Create 'baseCurr' based off prev. 'baseNext'; 
+			2. Use 'baseCurr' for the re-definition [compactification] of 'baseNext'; 
+			3. Use 'baseCurr' function to define the 'initCurrGetter'-s; 
+
+		But then, comes the question of cleanness - this is all... pretty ugly currently; 
+
+			The "re-modularization" pretty much falls apart once one starts to pack files with LOTS of different "related" methods; 
+		
+		CONCLUSION: one should re-distribute the 'next', 'prev' and ALL the other stuff BACK to their origin-sourcefiles...;
+
+			AND do the same for the "abstract" classes (that are really just interfaces with utils - Rewindable, Finishable, and so forth...); 
+
+	-1. [Think how to] SEPARATE the 'Base'- and 'Basic'-based 'Stream's (as the 'Base' requirements, are, quite honestly, OPTIONAL); 
 		-1.1. At the same time, the 'Base' references the IMPLEMENTATION DETAILS, BUT, 
 			it is ALSO used throughout the library to solve the 'isEnd'-definition issue; 
 
-	0. Add [optional] '.prev()' to the 'LimitedStream'? [would be defined as an 'underStreamPrev']; 
-		SAME for the others...; [PositionalStream, and so forth...; ALSO: add '.navigate', where possible...]; 
-		0.1. define OPTIONAL methods for other Stream-s...; [relax existing type restrictions pertaining to the optional methods]; 
+			ULTIMATELY, separate the 'used' (Base) and 'non-used' (Basic) interfaces (difference being all in implementation); 
+
+		-1.2. Perhaps...; 
+
+			Move the 'BaseStream' interfaces INTO THE "main" 'Stream/interfaces.ts'? 
+			[It is USED practically everywhere and it's not specific to the BasicStream]; 
+
+				In accordance with the new changes: 
+
+					-1.2.1. All the implementation-related stuff is handled by the 'StreamIterationHandler' and 'StreamClass' thingies; 
+						Thus, the 'Base' things VANISH COMPLETELY, and the remainder (that ends up being useful) gets ABSORBED into the 'StreamClass'; 
+
+							Sketch: 
+
+								1. Create 'Conditional' and 'Forced' property-types (with 'Conditional' being used for the "typical"/relaxed StreamClassInstance interface); 
+									1.1. Example: 'ForcedPrevable - prev(): Type' and 'ConditionalPrevable - prev?(): Type'; 
+								2. Put them all into 'StreamIterationHandler/interfaces.ts'; 
+								3. The implementations that already use the 'StreamClass' must ALL use the interfaces from the 'StreamIterationHandler', and their own interfaces SHOULD BE THE SPECIAL CASES!
+								4. The parts of the implementations' interfaces that are NOT coverable by the 'StreamClass' interfaces, must also use the 'basic ones'; 
+									4.1. The 'basic' interfaces are those that can be directly employed by the user for creation of their own low-level implementations of Streams: 
+										4.1.1. Nextable; 
+										4.1.2. Prevable (ONLY Forced, NOT Conditional - this is inside the 'StreamIterationHandler'); 
+										4.1.3. Currable; 
+										4.1.4. Endable; 
+										4.1.5. Started (There is 'StatefulStarted' - with 1 | boolean, and regular 'Started' - with JUST boolean); 
+										4.1.6. .navigate, .rewind., .finish, .limit, all the others; 
+
+								NOTE: parts that ARE covered by implementation-interfaces: 
+									1. 'Conditional' stuff; 
+									2. 'BaseIterableNext'/'BaseIterablePrev'; 
+									3. 'IsCurrEndable'/'IsCurrStartable'; 
+									4. 'BaseCurrable' (.baseCurr, mandatory); 
+									5. 'CurrGetterHaving' (.currGetter, conditional); 
+									6. 'RealCurred' (.realCurr, mandatory); 
+									7. 'InitCurred' (.initCurr, conditional); 
+									8. 'StatefulStarted' (1 | boolean version of 'Started'); 
 
 	1. THE BENCHMARK HATH SPOKEN! 
 
@@ -43,6 +195,7 @@ NOTE: nope, the version is NOT finished.
 		1. 3.3-3.5
 		2. 3.19, 3.20
 		3. 3.7, 3.8
+		4. 3.23. 
 		
 		Utilities to keep: 
 			
@@ -481,6 +634,49 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 
+	3.23. Re-define the 'Parser' (StatefulStream): 
+
+		Currently, a 'Parser' is a result of 'GeneralParser'; 
+		This is NOT what one wants; 
+
+		In particular, one needs a thing called STATEFUL STREAMS (StatefulStream); 
+
+		Basically, this is a 'BasicStream' with the '.state' property; 
+		This is very useful for complex parsing operations that DO NOT REQUIRE full-input parsing (one can delay execution); 
+
+		ADD a 'Stateful' function, which does [basically]: 
+
+			function Stateful (state: object) {
+				return function (x: any) {
+					x.state = state
+				}
+			}
+
+		[Note: this can ALREADY be used in the form of 'Stateful' with 'StreamTokenizer' and 'TransformedStream']; 
+
+		
+	3.24. limitedStreamNavigate: FLAWED!
+	
+		Should handle the case where the '.pos' is A FUNCTION [but the 'position' ISN'T]; 
+		THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
+
+			Once these are implemented, there'll be no problem whatsoever... 
+
+			The (primary) issue with '.navigate'-ing using predicates is that it's NOT possible to navigate (generally) ABSOLUTELY using them; 
+			Only the relative navigation is possible; 
+
+			SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
+				will largely solve the issue. 
+			
+	3.25. MemoizableStreamClass: 
+
+		This is a generalization of StreamClass; 
+		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
+
+		This would (additionally) have two more methods: 
+
+			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
+			2. unmemoize() - returns back to the flow of the Stream; 
 	
 4. Dependency management: 
 

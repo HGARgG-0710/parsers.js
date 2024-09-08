@@ -2,12 +2,11 @@ import { underStreamIsEnd } from "../UnderStream/methods.js"
 import {
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
+} from "../StreamClass/classes.js"
 
-import { streamTokenizerCurrGetter } from "../PreBasicStream/methods.js"
-import { streamTokenizerCurrentCondition } from "src/Parser/StreamTokenizer/methods.js"
+import { basicStreamInitGetter } from "../BasicStream/methods.js"
 import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
-import { transformedStreamNext } from "../BasicStream/methods.js"
+import { transformedStreamNext } from "./methods.js"
 import type { TransformableStream, TransformedStream } from "./interfaces.js"
 import { transformStream } from "./methods.js"
 
@@ -18,15 +17,15 @@ export function TransformedStream<UnderType = any, UpperType = any>(
 	transform: StreamTransform<UnderType, UpperType>
 ): TransformedStream<UnderType, UpperType> {
 	return ForwardStreamIterationHandler(
-		StreamCurrGetter(
+		StreamCurrGetter<UpperType>(
 			{
 				pos: 0,
 				transform,
 				input,
 				isStart: true
 			},
-			streamTokenizerCurrGetter<UpperType>,
-			streamTokenizerCurrentCondition
+			undefined,
+			basicStreamInitGetter<UpperType>
 		),
 		transformedStreamNext<UnderType, UpperType>,
 		underStreamIsEnd<UpperType>

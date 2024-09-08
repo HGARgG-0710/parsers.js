@@ -1,48 +1,59 @@
-import type { Started } from "../ReversibleStream/interfaces.js"
-import type { Prevable } from "../interfaces.js"
+import { boolean } from "@hgargg-0710/one"
+const { T } = boolean
+
 import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
 import type { LimitedUnderStream, LimitedStream, BoundableStream } from "./interfaces.js"
 
 import {
+	BackwardStreamIterationHandler,
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
+} from "../StreamClass/classes.js"
 
 import { limitStream } from "./methods.js"
-import { limitedStreamNavigate } from "../NavigableStream/methods.js"
-import { limitedStreamIsEnd } from "../PreBasicStream/methods.js"
+import { limitedStreamNavigate } from "./methods.js"
+import { limitedStreamIsEnd } from "./methods.js"
 import { streamIterator } from "../IterableStream/methods.js"
-import { underStreamCurr, underStreamNext } from "../UnderStream/methods.js"
+import { underStreamCurr } from "../UnderStream/methods.js"
 
 import { isNavigable, uniNavigate } from "../NavigableStream/utils.js"
+import { limitedStreamNext } from "./methods.js"
+import { limitedStreamPrev } from "./methods.js"
+import { limitedStreamIsStartGetter } from "./methods.js"
 
 export function LimitedStream<Type = any>(
 	initialStream: LimitedUnderStream<Type>,
-	[from, to]: DualPosition,
-	startPos: Position = 0
+	[from, to]: DualPosition
 ): LimitedStream<Type> {
 	if (!to) {
 		to = from
-		from = null as unknown as Position
+		from = T
 	}
-	if (from !== null)
-		uniNavigate(initialStream as LimitedUnderStream<Type> & Prevable & Started, from)
-	return ForwardStreamIterationHandler<Type>(
-		StreamCurrGetter(
-			{
-				pos: startPos,
-				to,
-				input: initialStream,
-				navigate: isNavigable(initialStream) ? limitedStreamNavigate<Type> : null,
-				limit: limitStream<Type>,
-				[Symbol.iterator]: streamIterator<Type>
-			},
-			underStreamCurr<Type>
+	if (from !== null) uniNavigate(initialStream, from)
+	return BackwardStreamIterationHandler<Type>(
+		ForwardStreamIterationHandler<Type>(
+			StreamCurrGetter<Type>(
+				{
+					pos: 0,
+					from,
+					to,
+					input: initialStream,
+					navigate: isNavigable(initialStream)
+						? limitedStreamNavigate<Type>
+						: null,
+					limit: limitStream<Type>,
+					[Symbol.iterator]: streamIterator<Type>
+				},
+				underStreamCurr<Type>
+			),
+			limitedStreamNext<Type>,
+			limitedStreamIsEnd<Type>
 		),
-		underStreamNext<Type>,
-		limitedStreamIsEnd<Type>
+		limitedStreamPrev<Type>,
+		limitedStreamIsStartGetter
 	) as LimitedStream<Type>
 }
+
 export function LimitableStream<Type = any>(
 	navigable: LimitedUnderStream<Type>
 ): BoundableStream<Type> {

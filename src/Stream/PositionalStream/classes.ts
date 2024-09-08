@@ -1,11 +1,11 @@
 import { isFinishable } from "../FinishableStream/utils.js"
 import type { BasicStream } from "../BasicStream/interfaces.js"
-import { positionalStreamNext } from "../BasicStream/methods.js"
+import { positionalStreamNext } from "./methods.js"
 import { streamIterator } from "../IterableStream/methods.js"
 import {
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
+} from "../StreamClass/classes.js"
 import {
 	underStreamFinish,
 	underStreamCurr,
@@ -17,7 +17,7 @@ export function PositionalStream<Type = any>(
 	input: BasicStream<Type>
 ): PositionalInputtedStream<Type> {
 	return ForwardStreamIterationHandler(
-		StreamCurrGetter(
+		StreamCurrGetter<Type>(
 			{
 				pos: 0,
 				input,

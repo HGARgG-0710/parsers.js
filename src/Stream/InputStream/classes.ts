@@ -3,23 +3,23 @@ import {
 	ForwardStreamIterationHandler,
 	BackwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
-import { inputStreamRewind } from "../RewindableStream/methods.js"
-import { inputStreamNavigate } from "../NavigableStream/methods.js"
-import { inputStreamPrev } from "../ReversibleStream/methods.js"
-import { inputStreamNext } from "../BasicStream/methods.js"
-import { inputStreamIsEnd } from "../PreBasicStream/methods.js"
-import { inputStreamCopy } from "../CopiableStream/methods.js"
-import { inputStreamFinish } from "../FinishableStream/methods.js"
-import { inputStreamIterator } from "../IterableStream/methods.js"
-import { inputStreamCurr } from "../PreBasicStream/methods.js"
-import { inputStreamIsStartGetter } from "../ReversibleStream/methods.js"
+} from "../StreamClass/classes.js"
+import { inputStreamRewind } from "./methods.js"
+import { inputStreamNavigate } from "./methods.js"
+import { inputStreamPrev } from "./methods.js"
+import { inputStreamNext } from "./methods.js"
+import { inputStreamIsEnd } from "./methods.js"
+import { inputStreamCopy } from "./methods.js"
+import { inputStreamFinish } from "./methods.js"
+import { inputStreamIterator } from "./methods.js"
+import { inputStreamCurr } from "./methods.js"
+import { inputStreamIsStartGetter } from "./methods.js"
 import type { InputStream } from "./interfaces.js"
 
 export function InputStream<Type = any>(input: Indexed<Type>): InputStream<Type> {
 	return ForwardStreamIterationHandler<Type>(
 		BackwardStreamIterationHandler<Type>(
-			StreamCurrGetter(
+			StreamCurrGetter<Type>(
 				{
 					input,
 					pos: 0,

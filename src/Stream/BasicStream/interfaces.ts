@@ -1,17 +1,13 @@
-import type {
-	Nextable,
-	IsEndCurrable,
-	IsStartCurrable,
-	BaseNextable
-} from "../interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { PreBasicStream } from "../PreBasicStream/interfaces.js"
 
 export interface BasicStream<Type = any> extends PreBasicStream<Type>, Nextable<Type> {}
-export interface BaseStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
-export interface ReverseBaseStream<Type = any>
-	extends BasicStream<Type>,
-		IsStartCurrable {}
+export interface Nextable<Type = any> extends Summat {
+	next(): Type
+}export interface Currable<Type = any> extends Summat {
+	curr: Type
+}
+export interface Endable extends Summat {
+	isEnd: boolean
+}
 
-export interface EssentialStream<Type = any>
-	extends BaseStream<Type>,
-		BaseNextable<Type> {}

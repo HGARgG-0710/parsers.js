@@ -1,5 +1,5 @@
-import { effectiveNestedStreamNext } from "../BasicStream/methods.js"
-import { baseNestedStreamIsEnd } from "../PreBasicStream/methods.js"
+import { effectiveNestedStreamNext } from "./methods.js"
+import { baseNestedStreamIsEnd } from "./methods.js"
 import type {
 	BaseNestableStream,
 	InflationPredicate,
@@ -9,9 +9,8 @@ import { baseNestableStreamNest } from "./methods.js"
 import {
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
-import { streamTokenizerCurrGetter } from "../PreBasicStream/methods.js"
-import { streamTokenizerCurrentCondition } from "src/Parser/StreamTokenizer/methods.js"
+} from "../StreamClass/classes.js"
+import { basicStreamInitGetter } from "../BasicStream/methods.js"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 
 export function NestedSteam<Type = any>(
@@ -20,7 +19,7 @@ export function NestedSteam<Type = any>(
 	deflate: InflationPredicate
 ): EffectiveNestedStream<Type> {
 	return ForwardStreamIterationHandler(
-		StreamCurrGetter(
+		StreamCurrGetter<Type>(
 			{
 				input,
 				inflate,
@@ -30,13 +29,14 @@ export function NestedSteam<Type = any>(
 				curr: null,
 				currNested: false
 			},
-			streamTokenizerCurrGetter<Type>,
-			streamTokenizerCurrentCondition<Type>
+			undefined,
+			basicStreamInitGetter<Type>
 		),
 		effectiveNestedStreamNext<Type>,
 		baseNestedStreamIsEnd<Type>
 	) as EffectiveNestedStream<Type>
 }
+
 export function NestableStream<Type = any>(
 	stream: BasicStream<Type>
 ): BaseNestableStream<Type> {

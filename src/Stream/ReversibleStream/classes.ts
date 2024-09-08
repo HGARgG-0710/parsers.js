@@ -15,7 +15,7 @@ import {
 	BackwardStreamIterationHandler,
 	ForwardStreamIterationHandler,
 	StreamCurrGetter
-} from "../IterationHandler/classes.js"
+} from "../StreamClass/classes.js"
 
 export function ReversedStream<Type = any>(
 	input: ReversibleStream<Type>
@@ -23,7 +23,7 @@ export function ReversedStream<Type = any>(
 	uniFinish(input)
 	return BackwardStreamIterationHandler<Type>(
 		ForwardStreamIterationHandler<Type>(
-			StreamCurrGetter(
+			StreamCurrGetter<Type>(
 				{
 					input,
 					finish: isRewindable(input) ? underStreamRewind<Type> : null,
