@@ -28,10 +28,10 @@ export function currSetter<Type = any>(this: StreamClassInstance<Type>, value: T
 export function baseCurr<Type = any>(this: StreamClassInstance<Type>) {
 	if (this.isStart === PRE_CURR_INIT) {
 		this.isStart = POST_CURR_INIT
-		return (this.realCurr = this.initGetter.call(this))
+		return (this.realCurr = this.initGetter())
 	}
 	return this.currGetter && !this.isStart
-		? (this.realCurr = this.currGetter.call(this))
+		? (this.realCurr = this.currGetter())
 		: this.realCurr
 }
 

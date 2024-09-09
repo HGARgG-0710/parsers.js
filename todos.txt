@@ -43,29 +43,15 @@ NOTE: nope, the version is NOT finished.
 		Many are missing appropriate functions for checking presence of properties...; 
 
 	-1. CHECK EXPORTS FOR CORRECTNESS! 
-		Primarily concerns missing exports in the 'Parser/' immidiate files; 
-
-	[Current!]
-	1. THE BENCHMARK HATH SPOKEN! 
-
-		Based off a (very) approximate heuristic of 'consume' (which was) 'the fastest/simplest' of them all...; 
-		The simple 'iteration' approach IS (quite a bit) faster; 
-	
-		1. 3.3
-		2. 3.16, 3.17
-		3. 3.5, 3.6
-		
-		Utilities to keep: 
-			
-			1. skip - this doesn't output ANY kinds of data structures; 
-			2. array - basic thing (Stream-to-array conversion); 
-			3. has - no data-structure output; 
-			4. nested - far too specific (a task that is not always accomplishable equally efficiently via 'Stream'-s: This keeps a counter, whilst the NestedStream doesn't); 
-			5. find - ONLY the 'number' case (basically, just a 'travel n forward/backward'-kind of function...); 
+		Primarily concerns missing exports; 
 
 A. testing [1. Create list of modules to be tested]; 
 B. documentation (change/fix it...); 
 C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
+
+Note: the new object-oriented approach will enable better speed and lesser structure-copying (better memory use); 
+	PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
+		(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
 
 [v0.4]
 
@@ -99,7 +85,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 		Given a 'Tree', returns an array of values: 
 
 			{
-				index: number, 
 				childNumber: number,
 				value: any
 			}
@@ -116,7 +101,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 		The 'index' is the index FROM THE BEGINNING of the buffer to the current Node. 
 		The 'childNumber' is the number of children that come AFTER the current node. 
-			Children are read between positions from 'index' to 'index + childNumber', 
+			Children are read between positions from 'index' to 'index + childNumber', [where 'index' is the NODE'S POSITION! Keep it or keep it not...]; 
 				with each 'child' being checked for its own children
 					(which, if nonzero, are excluded from the current children, and are instead counted as grandchildren). 
 		
@@ -128,19 +113,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 		This (ultimately) counts the number of items inside the tree.
 		Can be used with 'bufferize': 
 
-			bufferize((x) => x, pstate.size)(pstate.result)
-	
-	3.3. DelimitedStream: 
-		The Stream-equivalent of 'delimited'; 
-		Does THE SAME stuff as the 'delimited' function, but on Streams: 
-			Skips the elements deemed 'delimiters', 
-				'handle's the elements deemed 'non-delimiters'; 
+			bufferize((x) => x, pstate.size)(pstate.result)	
 
-	Note: the new object-oriented approach will enable better speed and lesser structure-copying (better memory use); 
-		PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
-			(as the recursive Stream-s more or less serve the same function - only problem is populating them with the appropriate kinds of objects); 
-
-	3.4. TreeStream: create two versions; 
+	3.3. TreeStream: create two versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -151,13 +126,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-	3.5. recursiveTransform - a utility; 
-		This recursively transforms all the sub-Stream-s within the given Stream; 
-		It, effectively, frees the user from the necessity of writing the recursive functionality into their transformation themselves; 
-
-	3.6. NestedlyTransformed - an object-oriented version of the 'recursiveTransform'; 
-
-	3.7. Implement a 'PartialValidator': 
+	3.4. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
@@ -166,12 +135,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
 
-	3.8. Implement a 'level-by-level TreeStream': 
+	3.5. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	3.9. Add a 'HashClass'-implementation of 'MapClass'; 
+	3.6. Add a 'HashClass'-implementation of 'MapClass'; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -217,7 +186,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 				This can be used with strings/
 
-	3.10. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
+	3.7. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
 		This makes code MUCH more general. 
 		In particular, one does so with the 'Tree'-s; 
 		It'd allow to (for instance) store identifiers, and getting them via 'loops'; 
@@ -225,7 +194,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 		Excluding some few special cases (like 'childIndex'), walk through the project, 
 			AND REPLACE un-place-ly '.reduce'-s with proper loops...
 
-	3.11. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	3.8. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -306,7 +275,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 
-	3.12. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
+	3.9. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
 		The 'copying' for Tree-s should be a WHOLE SEPARATE thing with ITS OWN module; 
 		NOTE: the 'copying' in question occurs in methods 'MultValueTree' and 'RecursiveArrayTree'; 
 
@@ -325,7 +294,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 				This would be a 'FlatCopiableTree'; 
 	
-	3.13. Create a 'ModifiableStream' interface;
+	3.10. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -410,11 +379,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 					}
 				}
 
-	3.14. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
+	3.11. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
 		These are MIGHTY! [allow to save memory, and so forth...]; 
 		IDEA: maybe, even create a library for these...; 
 		
-	3.15. Expand on the 'Position' type further;
+	3.12. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -429,9 +398,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 		The 'RelativePositionEvaluatorStream' would (ultimately) create a 'Stream' of values, defined by this "sequence"
 			of Position-s (call it 'PositionSequence = Position[]'), and which would be entirely relative to one another; 
+			Example: given [3, 6] it would get the 3'rd, then the (3 + 6) = 9'th positions of the Stream; 
 
 		The 'AbsolutePositionEvaluatorStream' would (similarly) interpret a sequence of 'Position's,
 			but relative to the initial Stream (not one another).
+			Example: given [3, 6] it would get positions 3 and 6 relative to the initial Stream; 
 		
 		Then, GENERALIZE THIS to a 'PortionPosition' [which is the pair '[Position, Position]' used in 'LimitedStream'],
 			to also use this with 'LimitedStream';
@@ -439,23 +410,13 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	3.16. MergeStream - equivalent of the 'merge' util; 
-		replace functional API with OOP; 
-
-	3.17. SplitStream - generalization of 'extract' util (as per 3.24.), reverse of 'MergeStream';
-
-		Based off a given set of predicates (by default, if set size is 1: {P}, uses 2: {P, !P}),
-			it defines a set of non-interlocking streams; 
-		The predicates are interpreted to be 'greedy', in the sense that each will work to increase its Stream's size
-			FOR AS LONG AS IT CAN.
-	
-	3.18. RELAX overly demanding interface and types definitions/requirements;
+	3.13. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	3.19. [Idea?] Create an error-handling API for the 'v0.4';
+	3.14. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -478,7 +439,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	3.20. limitedStreamNavigate: FLAWED!
+	3.15. limitedStreamNavigate: FLAWED!
 	
 		Should handle the case where the '.pos' is A FUNCTION [but the 'position' ISN'T]; 
 		THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
@@ -491,7 +452,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 			SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
 				will largely solve the issue. 
 			
-	3.21. MemoizableStreamClass: 
+	3.16. MemoizableStreamClass: 
 
 		This is a generalization of StreamClass; 
 		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
@@ -501,7 +462,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
 			2. unmemoize() - returns back to the flow of the Stream; 
 
-	3.22. Minor refactoring: 
+	3.17. Minor refactoring: 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -515,13 +476,81 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 						return curr()
 					}
 
-	3.23. Try re-doing the project's type-system? [again...]
+	3.18. Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
 
 		See, if not (mayhaps), it is feasible to re-write everything via 'extends BasicStream'-sort of thing
 			(meaning, the needed StreamType-s would be "inserted" where desired...); 
+
+	3.19. BreakableStream - a stream-class that produces instances, which : 
+
+		1. Are capable of being "broken" via different positions; 
+			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
+			1.2. Gets a chunk of the given 'Stream' if it's: 
+				1.2.1. DualPosition [a LimitedStream: NOTE: this literally builds a sub-LimitedStream]; 
+				1.2.2. PositionPredicate [a property to be followed by the next chunk]; 
+		2. Have a sub-stream of '.input', on which they operate; 
+		3. Take in a sequence of (Position | DualPosition)[]
+		
+		NOTE: this is, basically, same stuff as the 'AbsolutePositionEvaluatorStream', BUT, 
+			it's "not-picky" in the sense that the FIRST of the allowed occurences will be used, 
+			AND, it will be used without preference; 
+
+			Also - this works UNTIL THE END OF THE GIVEN Stream, NOT until the end of THE EVALUATED ARRAY; 
+
+		SO, what is given is an Array, each of possibilities in which are "checked" for getting picked for 
+			the Stream, then the first one getting its "go" as the '.curr'; 
+
+		BUT, the given 'Array' will actually be several, which are ORDERED BY ATTEMPT in the following fashion: 
+
+			1. limits[] - the array of 'DualPosition's; These define 'LimitedStream'-s [NOTE: these can contain pairs of predicates also!]; 
+				1.1. In particular, this defines the predicate-limiting on the given Stream (in the sense, that, the piece matched by the first)
+			2. nest[] - the array of dual 'StreamPredicate'-s used to define the nesting; 
+			3. preserve[] - a set of 'Position'-s for IMMIDIATE matches; 
+				3.1. These are added to the Stream ONE-BY-ONE and ONLY if none of the above [.predicates, .limits] match; 
+			4. skip[] - a Position-s array; Will be used FOR SKIPPING items sequentially; 
+				5.0. THIS is only matched if NOTHING from 'preserve' is matched; 
+				5.1. StaticPosition: This will take the next one that is 'x: StaticPosition' '.next'/'.prev' (depending on direction) calls away
+				5.2. PredicatePosition: This will skip the items FOR AS LONG as the given predicate holds...;
+			5. halt[] - this is a set of Positions, that, if met/reached will TERMINATE the given Stream's consumption; 
+			6. default - this is a 'special' action, if NOTHING amongst these matches, it'll do one of 'preserve', 'halt' or 'skip' [or other...]; 
+
+		Whether the 'predicates', 'limits', 'preserve', or 'skip' are checked for first, the user can choose; 
+
+		IDEA: 
+			No, don't do that; 
+			INSTEAD: categorize; That is, a list of things is given (BreakPattern): 
+
+				1. BreakPattern = ((Position | DualPosition) | BreakPattern)[] // tree-like structure
+				2. Each of the elements of 'BreakPattern' is one of 'type: "..."' (one of the above)
+				3. WHEN ARRAY IS PASSED, the given thing is being 'sub-broken'; Thus, one can work through trees; 
+
+				ABOUT ITERATION: 
+
+					Once having achieved the '.break'-ing of a BreakableStream, one does the following: 
+						
+						1. keep the 'currType' property on the 'BreakableStream', which IS 
+							one of the allowed types for a given thing; 
+						2. Based off them, RESPOND; 
+							2.1. The response can (for instance) be based off a 'TransformedStream', or 'NestedlyTransformed' stream; 
+		
+		ALL the 'BreakableStream'-s are RELATIVE [in the sense that the current position is used to grab the future '.curr'-s]; 
+		
+		These can serve as a wonderful alternative to PatternTokeniz-ing via Regular Expressions; 
+		Moreover, 'BreakableStream'-s are (very much) capable of replacing sequences of operations inside of 'IndexMap'-s for StreamTokenizer-s; 
+			In that, it's entirely feasible to define any operation currently present within the parser.js library using them; 
+
+			Example: parse string: "..."
+
+				(string) => BreakableStream(string, {})
+
+	3.20. [later?] AlphanumericEnum; [Note: this is GENERAL - uses a linearly ordered set of symbols]
+
+	3.21. CREATE a new file 'constants': this will keep track of in-library constants; 
+		Put the 'PRE_CURR_INIT', and other such things THERE; 
+
 	
 4. Dependency management: 
 

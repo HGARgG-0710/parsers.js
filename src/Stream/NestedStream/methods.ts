@@ -3,18 +3,19 @@ import { uniFinish } from "../FinishableStream/utils.js"
 import { NestedSteam } from "./classes.js"
 import type {
 	EffectiveNestedStream,
-	InflationPredicate,
 	NestableEndableStream,
 	NestedEndableStream
 } from "./interfaces.js"
+
+import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 
 import { boolean } from "@hgargg-0710/one"
 const { F } = boolean
 
 export function nestableStreamNest<Type = any>(
 	this: NestableEndableStream<Type>,
-	inflate: InflationPredicate = F,
-	deflate: InflationPredicate = F
+	inflate: StreamPredicate = F,
+	deflate: StreamPredicate = F
 ) {
 	return NestedSteam<Type>(this, inflate, deflate)
 }

@@ -10,6 +10,7 @@ import {
 	predicateStreamNext
 } from "./methods.js"
 import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
+import { preserveDirection } from "../PositionalStream/Position/utils.js"
 
 export const PredicateStreamClass = StreamClass({
 	currGetter: predicateStreamCurr,
@@ -24,6 +25,6 @@ export function PredicateStream<Type = any>(
 	const result = Inputted(PredicateStreamClass(), input)
 	result.prod = effectivePredicateStreamProd<Type>
 	result.pos = 0
-	result.predicate = predicate
+	result.predicate = preserveDirection(predicate, (predicate) => predicate.bind(result))
 	return result as EffectivePredicateStream<Type>
 }

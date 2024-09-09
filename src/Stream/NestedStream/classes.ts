@@ -1,7 +1,6 @@
 import { effectiveNestedStreamInitCurr, effectiveNestedStreamNext } from "./methods.js"
 import { nestedEndableStreamIsEnd } from "./methods.js"
 import type {
-	InflationPredicate,
 	EffectiveNestedStream,
 	NestableStream,
 	NestableEndableStream
@@ -11,6 +10,8 @@ import type { EndableStream } from "../StreamClass/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 import { Inputted } from "../UnderStream/classes.js"
 
+import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
+
 export const NestableStreamClass = StreamClass({
 	isCurrEnd: nestedEndableStreamIsEnd,
 	baseNextIter: effectiveNestedStreamNext,
@@ -19,8 +20,8 @@ export const NestableStreamClass = StreamClass({
 
 export function NestedSteam<Type = any>(
 	input: NestableEndableStream<Type>,
-	inflate: InflationPredicate,
-	deflate: InflationPredicate
+	inflate: StreamPredicate,
+	deflate: StreamPredicate
 ): EffectiveNestedStream<Type> {
 	const result = Inputted(NestableStreamClass(), input)
 	result.inflate = inflate
