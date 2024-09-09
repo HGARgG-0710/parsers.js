@@ -1,5 +1,5 @@
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import type { StreamHandler } from "../ParserMap/interfaces.js"
+import type { StreamPredicate } from "../ParserMap/interfaces.js"
 import type { StreamValidatorState } from "./interfaces.js"
 
 export function streamValidatorFinished<KeyType = any>(
@@ -10,8 +10,8 @@ export function streamValidatorFinished<KeyType = any>(
 
 export function streamValidatorChange<KeyType = any>(
 	this: StreamValidatorState<KeyType>,
-	next: StreamHandler<boolean>
+	next: StreamPredicate
 ) {
-	this.result = next && next((this.streams as BasicStream<KeyType>[])[0])
-	if (this.result) (this.streams as BasicStream<KeyType>[])[0].next()
+	if ((this.result = next && next((this.streams as BasicStream<KeyType>[])[0])))
+		(this.streams as BasicStream<KeyType>[])[0].next()
 }

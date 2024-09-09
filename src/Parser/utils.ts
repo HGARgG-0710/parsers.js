@@ -14,13 +14,16 @@ import { positionConvert } from "src/Stream/PositionalStream/Position/utils.js"
 import { type PredicatePosition } from "src/Stream/PositionalStream/Position/interfaces.js"
 import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
+import type {
+	Position,
+	PositionObject
+} from "src/Stream/PositionalStream/Position/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
 import { type Collection } from "src/Pattern/Collection/interfaces.js"
 
 import { function as _f, typeof as type, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f
-const { isArray, isNumber } = type
+const { isArray } = type
 const { not } = boolean
 
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(
@@ -113,29 +116,15 @@ export function has(pred: Position) {
 	}
 }
 
-export function find(pred: Position) {
-	pred = positionConvert(pred)
-	const change = pickDirection(pred)
-	const stopPoint = positionStopPoint(pred)
-	pred = isNumber(pred) ? Math.abs(pred) : pred
-	return isNumber(pred)
-		? function (input: ReversibleStream) {
-				while (!input[stopPoint] && (pred as number)--) change(input)
-				return input.curr
-		  }
-		: function (input: ReversibleStream, dest: Collection = ArrayCollection()) {
-				let i = 0,
-					j = 0
-				for (; !input[stopPoint]; change(input)) {
-					if (pred(input, i, j)) {
-						dest.push(input.curr)
-						++j
-						continue
-					}
-					++i
-				}
-				return dest
-		  }
+export function find(position: number | PositionObject) {
+	position = positionConvert(position) as number
+	const change = pickDirection(position)
+	const stopPoint = positionStopPoint(position)
+	position = Math.abs(position)
+	return function (input: ReversibleStream) {
+		while (!input[stopPoint] && (position as number)--) change(input)
+		return input.curr
+	}
 }
 
 export function merge(
@@ -173,14 +162,4 @@ export function extract(pred: DelimPredicate, isRem: boolean = false) {
 		} while (!stream.isEnd)
 		return isRem ? [destextr, destrem] : destextr
 	}
-}
-
-export function prolong(streams: BasicStream[], dest: Collection = ArrayCollection()) {
-	const streamLen = streams.length - 1
-	let i = streams.length
-	while (i--) {
-		const stream = streams[streamLen - i]
-		while (!stream.isEnd) dest.push(stream.next())
-	}
-	return dest
 }

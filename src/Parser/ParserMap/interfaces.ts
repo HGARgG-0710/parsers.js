@@ -48,4 +48,5 @@ export type ParsingPredicate<
 ) => boolean) &
 	Summat
 
+export type StreamPredicate = StreamHandler<boolean>
 export type DelimPredicate = DelimHandler<boolean>

@@ -36,6 +36,7 @@ export interface IndexMap<KeyType = any, ValueType = any>
 	replace: (index: number, pair: [KeyType, ValueType]) => any
 	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
 	byIndex: (index: number) => [KeyType, ValueType]
+	swap: (i: number, j: number) => any
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {

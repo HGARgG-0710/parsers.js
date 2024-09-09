@@ -2,7 +2,7 @@ import { fromPairsList } from "./utils.js"
 import type { IndexMap } from "./interfaces.js"
 
 import { inplace } from "@hgargg-0710/one"
-const { insert } = inplace
+const { insert, swap } = inplace
 
 // * 'IndexMap' methods
 export function indexMapIndex<KeyType = any, ValueType = any>(
@@ -83,4 +83,14 @@ export function indexMapByIndex<KeyType = any, ValueType = any>(
 	index: number
 ): [KeyType, ValueType] {
 	return [this.keys[index], this.values[index]]
+}
+
+export function indexMapSwap<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>,
+	i: number,
+	j: number
+): IndexMap<KeyType, ValueType> {
+	swap(this.keys, i, j)
+	swap(this.values, i, j)
+	return this
 }

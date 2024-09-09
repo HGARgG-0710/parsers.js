@@ -13,7 +13,8 @@ import {
 	indexMapDelete,
 	indexMapUnique,
 	indexMapByIndex,
-	indexMapIterator
+	indexMapIterator,
+	indexMapSwap
 } from "./methods.js"
 import { mapClassExtend, mapClassExtendKey } from "./utils.js"
 import { current, firstStream, is } from "src/aliases.js"
@@ -37,6 +38,7 @@ export function MapClass<KeyType = any, ValueType = any>(
 			delete: indexMapDelete<KeyType, ValueType>,
 			unique: indexMapUnique<KeyType, ValueType>,
 			byIndex: indexMapByIndex<KeyType, ValueType>,
+			swap: indexMapSwap<KeyType, ValueType>,
 			default: _default,
 			[Symbol.iterator]: indexMapIterator<KeyType, ValueType>
 		}
