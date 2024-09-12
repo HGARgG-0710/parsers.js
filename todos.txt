@@ -3,14 +3,6 @@
 
 [v0.3]
 
-NOTE: nope, the version is NOT finished. 
-
-	-2. JSDOC: 
-
-		THIS Should be present ONLY for: 
-
-			1. "Position/" utilities; 
-
 A. testing: 
 	A.1. Create list of modules to be tested; 
 	A.2. Write out dependencies to be tested for each one of them; 
@@ -526,24 +518,8 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 	2.21. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
-
-	2.22. [Unhandled Edge case] The 'default .curr' in events that the '.isCurrEnd' is AUTOMATICALLY false ON-DEFINITION for the given Stream IS NOT defined; 
-
-		There should be a '.defaultCurr' property, for defining the value of the '.curr' whenever the Stream is initialized empty; 
-		This is particularly useful for ModifiableStream-s, as for even non-empty ones, this can, indeed, be an actual case; 
-
-		Although, for the 'static' (inplace/read-only) Streams, this sort of thing is ONLY possible, if the "reading rule" of: 
-
-			while (!stream.isEnd()) {
-				// ... do stuff with 'stream'
-			}
-		
-		Is disobeyed; 
-
-		Similarly, one SHOULD allow the user to define the value for '.curr' REGARDLESS, of whether the Stream is empty or not
-			(that being, '.defaultCurr' would work for Stream-s that ended EVEN IF they aren't empty); 
 	
-	2.23. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
+	2.22. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
 		In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
 			an item with given predicate; 
 
@@ -564,11 +540,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
 
-	2.24. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.23. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 		
-	2.25. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
+	2.24. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
 
 		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
 			This is because otherwise, the whole "optimization thing" isn't existent
@@ -581,7 +557,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			3. copy - let EVERY stream available be copiable; 
 			4. navigate - where appropriate; 
 
-	2.26. utility - findNestedEnd: 
+	2.25. utility - findNestedEnd: 
 
 		Given a 'ReversibleStream'/'NavigableStream', it does: 
 
@@ -591,13 +567,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
 
-	2.27. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.26. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!
 	
-	2.28. Use prototypal inheritance to save memory; 
+	2.27. Use prototypal inheritance to save memory; 
 
 		Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
 			really just 'Object.create(INITIAL)' + setting of additional properties that are passed)

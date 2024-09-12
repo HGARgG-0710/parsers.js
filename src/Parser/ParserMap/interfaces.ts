@@ -34,9 +34,6 @@ export type StreamHandler<Type = any[]> = StreamTransform<any, Type>
 export type StreamTransform<UnderType = any, UpperType = any> = Summat &
 	((input?: BasicStream<UnderType>, i?: number) => UpperType)
 
-export type DelimHandler<Type = any[]> = Summat &
-	((input?: BasicStream, i?: number, j?: number) => Type)
-
 export type ParsingPredicate<
 	StreamType extends BasicStream = BasicStream,
 	ResultType = Collection,
@@ -49,4 +46,3 @@ export type ParsingPredicate<
 	Summat
 
 export type StreamPredicate = StreamHandler<boolean>
-export type DelimPredicate = DelimHandler<boolean>

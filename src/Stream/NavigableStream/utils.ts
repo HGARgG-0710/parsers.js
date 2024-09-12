@@ -1,8 +1,5 @@
 import { positionNegate } from "../PositionalStream/Position/utils.js"
-import type {
-	GeneralReversibleStream,
-	ReversibleStream
-} from "../ReversibleStream/interfaces.js"
+import type { GeneralReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import { positionConvert } from "../PositionalStream/Position/utils.js"
 import type { Navigable } from "./interfaces.js"
@@ -14,6 +11,12 @@ const { isFunction } = type
 
 export const isNavigable = structCheck<Navigable>({ navigate: isFunction })
 
+/**
+ * Skips inside the given `ReversibleStream` up to the nearest point
+ * defined by the given `Position`.
+ * Can be inefficient for certain types of `Stream`s. 
+ * Consider using `uniNavigate` instead
+ */
 export function navigate<Type = any>(
 	stream: GeneralReversibleStream<Type>,
 	position: Position
@@ -22,10 +25,14 @@ export function navigate<Type = any>(
 	return stream.curr
 }
 
+/**
+ * Performs a universal `navigate` operation on a given `ReversibleStream`.
+ * If it is `Navigable`, returns `stream.navigate(position)`, otherwise returns
+ * `navigate(stream, position)`.
+ */
 export function uniNavigate<Type = any>(
-	stream: ReversibleStream<Type>,
+	stream: GeneralReversibleStream<Type>,
 	position: Position
 ): Type {
-	if (isNavigable(stream)) return stream.navigate(position)
-	return navigate(stream, position)
+	return isNavigable(stream) ? stream.navigate(position) : navigate(stream, position)
 }
