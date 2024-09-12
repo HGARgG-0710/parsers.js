@@ -1,9 +1,8 @@
-import { skip } from "src/Parser/utils.js"
 import type { EffectivePredicateStream, PredicateStream } from "./interfaces.js"
-import { positionNegate } from "../PositionalStream/Position/utils.js"
+import { navigate } from "../NavigableStream/utils.js"
 
 export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
-	skip(positionNegate(this.predicate))(this.input)
+	navigate(this.input, this.predicate)
 	return this.input.curr
 }
 

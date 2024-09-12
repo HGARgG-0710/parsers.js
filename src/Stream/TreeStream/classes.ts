@@ -12,12 +12,16 @@ import { treeStreamIsStart } from "./methods.js"
 import type { TreeStream } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 
+import { boolean } from "@hgargg-0710/one"
+const { F } = boolean
+
 export const TreeStreamClass = StreamClass({
 	initGetter: treeStreamInitCurr,
 	baseNextIter: treeStreamNext,
 	basePrevIter: treeStreamPrev,
 	isCurrEnd: treeStreamIsEnd,
-	isCurrStart: treeStreamIsStart
+	isCurrStart: treeStreamIsStart,
+	defaultIsEnd: F
 })
 
 export function TreeStream<Type = any>(tree: Tree<Type>): TreeStream<Type> {

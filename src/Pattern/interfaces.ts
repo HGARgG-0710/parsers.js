@@ -12,8 +12,9 @@ export interface Flushable extends Summat {
 	flush(): void
 }
 
-export * as ValidatablePattern from "./ValidatablePattern/interfaces.js"
-export * as TokenizablePattern from "./TokenizablePattern/interfaces.js"
-export * as Token from "./Token/interfaces.js"
-export * as EliminablePattern from "./EliminablePattern/interfaces.js"
 export * as Collection from "./Collection/interfaces.js"
+export * as EliminablePattern from "./EliminablePattern/interfaces.js"
+export * as EnumSpace from "./EnumSpace/interfaces.js"
+export * as Token from "./Token/interfaces.js"
+export * as TokenizablePattern from "./TokenizablePattern/interfaces.js"
+export * as ValidatablePattern from "./ValidatablePattern/interfaces.js"

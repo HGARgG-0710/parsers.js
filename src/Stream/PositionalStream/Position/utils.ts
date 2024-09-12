@@ -68,34 +68,37 @@ export function simplifiedPositionCompare(
 
 export function positionCompare(pos1: Position, pos2: Position, stream?: BasicStream) {
 	if (isNumber(pos1) && isNumber(pos2)) return pos1 < pos2
-	if (isPositionObject(pos1) && pos1.compare && isPositionObject(pos2))
-		return pos1.compare(pos2)
+	if (isPositionObject(pos1) && pos1.compare) return pos1.compare(pos2, stream)
 
-	if (isPositional(stream) && isFunction(stream.pos)) {
-		if (pos1 === stream.pos && !isFunction(pos2)) return stream.pos(pos2)
-		if (pos2 === stream.pos && !isFunction(pos1)) return stream.pos(pos1)
+	const isPos1Function = isFunction(pos1)
+	const isPos2Function = isFunction(pos2)
+	const isStreamPositional = isPositional(stream)
+
+	if (isStreamPositional && isFunction(stream.pos)) {
+		if (pos1 === stream.pos && !isPos2Function) return stream.pos(pos2)
+		if (pos2 === stream.pos && !isPos1Function) return stream.pos(pos1)
 	}
 
-	if (isFunction(pos1)) {
-		const isPos = pos1(stream)
-		if (isFunction(pos2)) return isPos && !pos2(stream)
-		if (pos2 && isPositional(stream))
-			return isPos && positionCompare(stream.pos, pos2, stream)
-		return isPos
-	}
+	if (isPos1Function)
+		return (
+			pos1(stream) &&
+			(isPos2Function
+				? !pos2(stream)
+				: !(pos2 && isStreamPositional) ||
+				  positionCompare(stream.pos, pos2, stream))
+		)
 
-	if (isFunction(pos2)) {
-		const isPos = !pos2(stream)
-		if (isPositional(stream))
-			return isPos && positionCompare(pos1, stream.pos, stream)
-		return isPos
-	}
+	if (isPos2Function)
+		return (
+			!pos2(stream) &&
+			(!isStreamPositional || positionCompare(pos1, stream.pos, stream))
+		)
 
 	return simplifiedPositionCompare(pos1, pos2, stream)
 }
 
 export function positionCheck(stream: PositionalStream, position: Position) {
-	return positionCompare(position, stream.pos, stream)
+	return positionCompare(stream.pos, position, stream)
 }
 
 export function positionCopy(x: Position): Position {

@@ -1,4 +1,4 @@
-import { iterationChoice, positionNegate } from "../PositionalStream/Position/utils.js"
+import { positionNegate } from "../PositionalStream/Position/utils.js"
 import type {
 	GeneralReversibleStream,
 	ReversibleStream
@@ -8,6 +8,7 @@ import { positionConvert } from "../PositionalStream/Position/utils.js"
 import type { Navigable } from "./interfaces.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
+import { skip } from "src/Parser/utils.js"
 const { structCheck } = object
 const { isFunction } = type
 
@@ -17,11 +18,7 @@ export function navigate<Type = any>(
 	stream: GeneralReversibleStream<Type>,
 	position: Position
 ) {
-	const [change, endPredicate] = iterationChoice(
-		positionNegate(positionConvert(position, stream))
-	)
-	let i = 0
-	while (endPredicate(stream, i)) change(stream)
+	skip(stream, positionNegate(positionConvert(position, stream)))
 	return stream.curr
 }
 

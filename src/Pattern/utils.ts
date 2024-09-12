@@ -14,3 +14,4 @@ export const isResulting = structCheck<Resulting>(["result"])
 export const isFlushable = structCheck<Flushable>({ flush: isFunction })
 
 export * as TokenizablePattern from "./TokenizablePattern/utils.js"
+export * as Token from "./Token/utils.js"

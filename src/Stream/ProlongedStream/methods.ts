@@ -22,3 +22,7 @@ export function effectiveProlongedStreamNext<Type = any>(
 	++this.pos
 	return currStream.curr
 }
+
+export function prolongedStreamDefaultIsEnd<Type = any>(this: ProlongedStream<Type>) {
+	return this.input.every((x) => x.isEnd)
+}

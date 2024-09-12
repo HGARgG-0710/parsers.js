@@ -3,7 +3,7 @@ import type { BaseUnderStream, IsCurrableUnderStream, UnderStream } from "./inte
 import type { BasicStream } from "../BasicStream/interfaces.js"
 
 import type { FinishableStream } from "../FinishableStream/interfaces.js"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { ReversibleStream, StartedStream } from "../ReversibleStream/interfaces.js"
 import type { RewindableStream } from "../RewindableStream/interfaces.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
 
@@ -35,4 +35,16 @@ export function underStreamRewind<Type = any>(this: UnderStream<RewindableStream
 
 export function underStreamFinish<Type = any>(this: UnderStream<FinishableStream, Type>) {
 	return this.input.finish()
+}
+
+export function underStreamDefaultIsEnd<Type = any>(
+	this: UnderStream<BasicStream, Type>
+) {
+	return this.input.isEnd
+}
+
+export function underStreamDefaultIsStart<Type = any>(
+	this: UnderStream<StartedStream, Type>
+) {
+	return this.input.isStart
 }

@@ -28,3 +28,4 @@ export function MultiIndex(multindex: number[]): MultiIndex {
 }
 
 export * as MultiIndexModifier from "./MultiIndexModifier/classes.js"
+export * as Slicer from "./Slicer/classes.js"

@@ -1,5 +1,5 @@
 import type { Indexed } from "../interfaces.js"
-import { inputStreamRewind } from "./methods.js"
+import { inputStreamDefaultIsEnd, inputStreamRewind } from "./methods.js"
 import { inputStreamNavigate } from "./methods.js"
 import { inputStreamPrev } from "./methods.js"
 import { inputStreamNext } from "./methods.js"
@@ -18,7 +18,8 @@ export const InputStreamClass = StreamClass({
 	baseNextIter: inputStreamNext,
 	basePrevIter: inputStreamPrev,
 	isCurrEnd: inputStreamIsEnd,
-	isCurrStart: inputStreamIsStart
+	isCurrStart: inputStreamIsStart,
+	defaultIsEnd: inputStreamDefaultIsEnd
 })
 
 export function InputStream<Type = any>(input: Indexed<Type>): InputStream<Type> {

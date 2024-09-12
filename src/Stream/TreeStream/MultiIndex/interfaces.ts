@@ -12,3 +12,4 @@ export interface MultiIndex extends PositionObject<number[]> {
 }
 
 export * as MultiIndexModifier from "./MultiIndexModifier/interfaces.js"
+export * as Slicer from "./Slicer/methods.js"

@@ -7,6 +7,7 @@ import type { StreamMap } from "../ParserMap/interfaces.js"
 
 export interface StreamTokenizer<OutType = any>
 	extends Inputted<EndableStream>,
-		StreamClassInstance<OutType> {
+		StreamClassInstance<OutType>,
+		Iterable<OutType> {
 	tokenMap: StreamMap<OutType>
 }

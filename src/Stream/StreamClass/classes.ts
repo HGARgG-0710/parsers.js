@@ -10,13 +10,19 @@ import {
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
 ): () => StreamClassInstance<Type> {
-	const { baseNextIter, isCurrEnd, isCurrStart, basePrevIter, initGetter, currGetter } =
-		signature
-	return () =>
-		Object.defineProperties(
+	const {
+		baseNextIter,
+		isCurrEnd,
+		isCurrStart,
+		basePrevIter,
+		initGetter,
+		currGetter,
+		defaultIsEnd
+	} = signature
+	return () => {
+		const initial = Object.defineProperty(
 			{
 				realCurr: null,
-				isEnd: false,
 				isStart: PRE_CURR_INIT,
 				baseNextIter,
 				isCurrEnd,
@@ -27,11 +33,13 @@ export function StreamClass<Type = any>(
 				next: nextHandler,
 				prev: prevHandler
 			} as StreamClassInstance<Type>,
+			"curr",
 			{
-				curr: {
-					set: currSetter<Type>,
-					get: baseCurr<Type>
-				}
+				set: currSetter<Type>,
+				get: baseCurr<Type>
 			}
 		)
+		initial.isEnd = defaultIsEnd.call(initial)
+		return initial
+	}
 }

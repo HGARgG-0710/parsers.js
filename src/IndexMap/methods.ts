@@ -4,7 +4,6 @@ import type { IndexMap } from "./interfaces.js"
 import { inplace } from "@hgargg-0710/one"
 const { insert, swap } = inplace
 
-// * 'IndexMap' methods
 export function indexMapIndex<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	x: any

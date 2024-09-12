@@ -62,3 +62,7 @@ export function inputStreamIsStart<Type = any>(this: InputStream<Type>) {
 export function inputStreamPrev<Type = any>(this: InputStream<Type>) {
 	return this.input[--this.pos]
 }
+
+export function inputStreamDefaultIsEnd<Type = any>(this: InputStream<Type>) {
+	return !this.input.length
+}

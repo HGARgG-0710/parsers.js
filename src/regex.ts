@@ -12,6 +12,7 @@ export const regexContents = (r: RegExp) =>
 const [bracket, nonBracket] = ["", "?:"].map(
 	(s) => (regex: RegExp) => `(${s}${regexContents(regex)})`
 )
+
 export const [capture, nonCapture] = [bracket, nonBracket].map(
 	(f) => (regex: RegExp) => new RegExp(f(regex))
 )
@@ -24,6 +25,7 @@ export const [and, or] = ["", "|"].map(
 		(...regexes: RegExp[]) =>
 			new RegExp(nonBracket(new RegExp(regexes.map(nonBracket).join(sym))))
 )
+
 export const flagsAdd = (flags: string) => (regex: RegExp) =>
 	new RegExp(regex, regex.flags.concat(flags))
 

@@ -6,7 +6,8 @@ import { StreamClass } from "../StreamClass/classes.js"
 import {
 	underStreamFinish,
 	underStreamCurr,
-	underStreamIsEnd
+	underStreamIsEnd,
+	underStreamDefaultIsEnd
 } from "../UnderStream/methods.js"
 import type { PositionalInputtedStream } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
@@ -14,7 +15,8 @@ import { Inputted } from "../UnderStream/classes.js"
 export const PositionalStreamClass = StreamClass({
 	isCurrEnd: underStreamIsEnd,
 	baseNextIter: positionalStreamNext,
-	currGetter: underStreamCurr
+	currGetter: underStreamCurr,
+	defaultIsEnd: underStreamDefaultIsEnd
 })
 
 export function PositionalStream<Type = any>(

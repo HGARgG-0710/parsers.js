@@ -1,10 +1,10 @@
-import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { Posed } from "../PositionalStream/interfaces.js"
 import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
+import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface StreamPredicated extends Summat {
 	predicate: PredicatePosition
@@ -25,7 +25,7 @@ export interface BasicPredicated<Type = any>
 		Posed<number> {}
 
 export interface PredicateStream<Type = any>
-	extends BasicStream<Type>,
+	extends IterableStream<Type>,
 		BasicPredicated<Type>,
 		Inputted<ReversibleStream<Type>> {}
 

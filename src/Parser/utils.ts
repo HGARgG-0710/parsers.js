@@ -4,9 +4,9 @@ import type { BaseParsingState } from "./interfaces.js"
 import {
 	iterationChoice,
 	predicateChoice,
-	preserveDirection,
 	pickDirection,
-	positionStopPoint
+	positionStopPoint,
+	positionNegate
 } from "../Stream/PositionalStream/Position/utils.js"
 import type { StreamHandler } from "src/Parser/ParserMap/interfaces.js"
 import { positionConvert } from "src/Stream/PositionalStream/Position/utils.js"
@@ -17,11 +17,7 @@ import type {
 	StaticPosition
 } from "src/Stream/PositionalStream/Position/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
-import { type Collection } from "src/Pattern/Collection/interfaces.js"
-
-import { function as _f, boolean } from "@hgargg-0710/one"
-const { trivialCompose } = _f
-const { not } = boolean
+import type { Collection } from "src/Pattern/Collection/interfaces.js"
 
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(
 	this: T
@@ -29,16 +25,14 @@ export const firstFinished = function <T extends BaseParsingState = ParsingState
 	return (this.streams as BasicStream[])[0].isEnd
 }
 
-export function skip(steps: Position = 1) {
-	const [change, endPred] = iterationChoice(positionConvert(steps))
-	return function (input: ReversibleStream) {
-		let i = 0
-		while (endPred(input, i)) {
-			change(input)
-			++i
-		}
-		return i
+export function skip(input: ReversibleStream, steps: Position = 1) {
+	const [change, endPred] = iterationChoice(positionConvert(steps, input))
+	let i = 0
+	while (endPred(input, i)) {
+		change(input)
+		++i
 	}
+	return i
 }
 
 export function nested(
@@ -70,9 +64,9 @@ export function array(stream: BasicStream, init: Collection = ArrayCollection([]
 export function has(pred: Position) {
 	pred = predicateChoice(positionConvert(pred))
 	const stopPoint = positionStopPoint(pred)
-	const checkSkip = skip(preserveDirection(pred, (x) => trivialCompose(not, x)))
+	const skipPred = positionNegate(pred)
 	return function (input: ReversibleStream) {
-		checkSkip(input)
+		skip(input, skipPred)
 		return !input[stopPoint]
 	}
 }

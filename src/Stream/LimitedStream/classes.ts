@@ -8,7 +8,7 @@ import { limitStream } from "./methods.js"
 import { limitedStreamNavigate } from "./methods.js"
 import { limitedStreamIsEnd } from "./methods.js"
 import { streamIterator } from "../IterableStream/methods.js"
-import { underStreamCurr } from "../UnderStream/methods.js"
+import { underStreamCurr, underStreamDefaultIsEnd } from "../UnderStream/methods.js"
 
 import { isNavigable, uniNavigate } from "../NavigableStream/utils.js"
 import { limitedStreamNext } from "./methods.js"
@@ -22,7 +22,8 @@ export const LimitedStreamClass = StreamClass({
 	baseNextIter: limitedStreamNext,
 	basePrevIter: limitedStreamPrev,
 	isCurrEnd: limitedStreamIsEnd,
-	isCurrStart: limitedStreamIsStart
+	isCurrStart: limitedStreamIsStart,
+	defaultIsEnd: underStreamDefaultIsEnd
 })
 
 export function LimitedStream<Type = any>(

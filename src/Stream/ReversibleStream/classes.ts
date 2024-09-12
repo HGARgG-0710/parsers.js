@@ -7,7 +7,8 @@ import {
 	underStreamPrev,
 	underStreamIsStart,
 	underStreamNext,
-	underStreamIsEnd
+	underStreamIsEnd,
+	underStreamDefaultIsStart
 } from "../UnderStream/methods.js"
 import type { ReversibleStream, ReversedStream } from "./interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
@@ -18,7 +19,8 @@ export const ReversedStreamClass = StreamClass({
 	baseNextIter: underStreamPrev,
 	basePrevIter: underStreamNext,
 	isCurrEnd: underStreamIsStart,
-	isCurrStart: underStreamIsEnd
+	isCurrStart: underStreamIsEnd,
+	defaultIsEnd: underStreamDefaultIsStart
 })
 
 export function ReversedStream<Type = any>(

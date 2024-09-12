@@ -5,49 +5,28 @@
 
 NOTE: nope, the version is NOT finished. 
 
-	-7. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
+	-2. JSDOC: 
 
-		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
-			This is because otherwise, the whole "optimization thing" isn't existent
-				(example ProlongedStream's '.finish' MUST have all its underlying Stream-s being checked); 
+		THIS Should be present ONLY for: 
 
-	-6. REFACTOR the INTERFACES; 
+			1. "Position/" utilities; 
 
-		Look for repetition; Examples: 
-
-			1. IsEndCurrable & IsEndStartable; 
-
-	-5. [reminder, until v0.3 is done] ADD 'Symbol.iterator' EVERYWHERE; 
-		Some Stream-s implementations STILL lack it! 
-		The ability to do: 
-
-			for (const x of stream) {
-				// ...
-			}
-
-		Over something relatively 'complex' (like a NestedStream), is absolutely AMAZING!
-
-	-4. CHECK whether the current 'isCurrEnd' thing WORKS with empty streams; 
-		[The 'isEnd' is initialized to 'false' BY DEFAULT! It'll have to walk AT LEAST one position];
-			FIX THAT: the user should be able to give the 'initial' '.isEnd' checking-function; 
-
-	-3. Write the JSDocs already (1.): 	
-
-		Been laying it off for far-far-far too long now. 
-		The library is literally impossible to apply for the new user. 
-
-		JSDoc will help A LOT with accesibility. 
-
-	-2. More typechecking-functions, 'is'-functions based off interfaces; 
-
-		Many are missing appropriate functions for checking presence of properties...; 
-
-	-1. CHECK EXPORTS FOR CORRECTNESS! 
-		Primarily concerns missing exports; 
-
-A. testing [1. Create list of modules to be tested]; 
-B. documentation (change/fix it...); 
+A. testing: 
+	A.1. Create list of modules to be tested; 
+	A.2. Write out dependencies to be tested for each one of them; 
+	A.3. Write the documentation (JSDoc), in order to be able to check the expected output/input of the given thing; 
+	A.4. Write the tests (module-by-module); 
+B. documentation (change/fix it...);
+	B.1. Create new pages:
+		B.1.1. Home: 
+			B1.1.1. Motivation (write that the library was created/conceived primarily as a mean of refactoring of frequent parsing tasks/data-structures); 
+			B1.1.2. "One good approach" principle (write that the library was made to have a single "intended" best approach for all the things that are possible to do using it); 
+			B1.1.3. Examples [projects done using it]; 
+			B1.1.4. Structure - explain how the library structure works (interfaces., methods., classes., utils.); 
+			B1.1.5. Known issues (this lists known problems that the library currently has);
 C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
+	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
+	C.2. Walk through the v0.3 changes, and write them down [constructive];
 
 Note: the new object-oriented approach will enable better speed and lesser structure-copying (better memory use); 
 	PLUS: one can have the 'Streams' in question working AS TREES without the necessity for creation of the actual TreeStream-s
@@ -75,12 +54,9 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		this sort of thing would be useful for applications where speed of little importance
 			(that is: NOT things like apps/websites/interpreters, and so forth; Stuff like AOT-compilers, perhaps);
 	
-2. Write proper JSDoc documentation for all this stuff...
-	DO NOT add the 'docs' copies into JSDoc, INSTEAD, just reference them...
+2. Add various optimization data structures + utils + parser properties: 
 
-3. Add various optimization data structures + utils + parser properties: 
-
-	3.1. bufferize(process, size)(tree) - util
+	2.1. bufferize(process, size)(tree) - util
 
 		Given a 'Tree', returns an array of values: 
 
@@ -109,13 +85,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		If size is used, it will ONLY use this many items from the tree (up to the maximum amount - the rest of positions will be assigned to 'undefined'); 
 
-	3.2. Add a 'state.size' property to the parsers. 
+	2.2. Add a 'state.size' property to the parsers. 
 		This (ultimately) counts the number of items inside the tree.
 		Can be used with 'bufferize': 
 
 			bufferize((x) => x, pstate.size)(pstate.result)	
 
-	3.3. TreeStream: create two versions; 
+	2.3. TreeStream: create two versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -126,7 +102,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-	3.4. Implement a 'PartialValidator': 
+	2.4. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
@@ -135,12 +111,12 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
 
-	3.5. Implement a 'level-by-level TreeStream': 
+	2.5. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	3.6. Add a 'HashClass'-implementation of 'MapClass'; 
+	2.6. Add a 'HashClass'-implementation of 'MapClass'; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -186,7 +162,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				This can be used with strings/
 
-	3.7. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
+	2.7. __ALWAYS__ USE 'for'-loops INSTEAD OF '.reduce'!
 		This makes code MUCH more general. 
 		In particular, one does so with the 'Tree'-s; 
 		It'd allow to (for instance) store identifiers, and getting them via 'loops'; 
@@ -194,7 +170,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Excluding some few special cases (like 'childIndex'), walk through the project, 
 			AND REPLACE un-place-ly '.reduce'-s with proper loops...
 
-	3.8. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	2.8. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -275,7 +251,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 
-	3.9. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
+	2.9. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
 		The 'copying' for Tree-s should be a WHOLE SEPARATE thing with ITS OWN module; 
 		NOTE: the 'copying' in question occurs in methods 'MultValueTree' and 'RecursiveArrayTree'; 
 
@@ -294,7 +270,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				This would be a 'FlatCopiableTree'; 
 	
-	3.10. Create a 'ModifiableStream' interface;
+	2.10. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -379,11 +355,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					}
 				}
 
-	3.11. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
+	2.11. CREATE A LOT OF Proxy-based OPTIMIZATION STRUCTURES!
 		These are MIGHTY! [allow to save memory, and so forth...]; 
 		IDEA: maybe, even create a library for these...; 
 		
-	3.12. Expand on the 'Position' type further;
+	2.12. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -410,13 +386,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	3.13. RELAX overly demanding interface and types definitions/requirements;
+	2.13. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	3.14. [Idea?] Create an error-handling API for the 'v0.4';
+	2.14. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -439,7 +415,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	3.15. limitedStreamNavigate: FLAWED!
+	2.15. limitedStreamNavigate: FLAWED!
 	
 		Should handle the case where the '.pos' is A FUNCTION [but the 'position' ISN'T]; 
 		THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
@@ -452,7 +428,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
 				will largely solve the issue. 
 			
-	3.16. MemoizableStreamClass: 
+	2.16. MemoizableStreamClass: 
 
 		This is a generalization of StreamClass; 
 		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
@@ -462,7 +438,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
 			2. unmemoize() - returns back to the flow of the Stream; 
 
-	3.17. Minor refactoring: 
+	2.17. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -476,7 +452,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	3.18. Try re-doing the project's type-system? [again...]
+	2.18. Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -484,7 +460,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		See, if not (mayhaps), it is feasible to re-write everything via 'extends BasicStream'-sort of thing
 			(meaning, the needed StreamType-s would be "inserted" where desired...); 
 
-	3.19. BreakableStream - a stream-class that produces instances, which : 
+	2.19. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -546,13 +522,94 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 
-	3.20. [later?] AlphanumericEnum; [Note: this is GENERAL - uses a linearly ordered set of symbols]
+	2.20. [later?] AlphanumericEnum; [Note: this is GENERAL - uses a linearly ordered set of symbols]
 
-	3.21. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.21. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 
-	
-4. Dependency management: 
+	2.22. [Unhandled Edge case] The 'default .curr' in events that the '.isCurrEnd' is AUTOMATICALLY false ON-DEFINITION for the given Stream IS NOT defined; 
 
-	4.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
-		4.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
+		There should be a '.defaultCurr' property, for defining the value of the '.curr' whenever the Stream is initialized empty; 
+		This is particularly useful for ModifiableStream-s, as for even non-empty ones, this can, indeed, be an actual case; 
+
+		Although, for the 'static' (inplace/read-only) Streams, this sort of thing is ONLY possible, if the "reading rule" of: 
+
+			while (!stream.isEnd()) {
+				// ... do stuff with 'stream'
+			}
+		
+		Is disobeyed; 
+
+		Similarly, one SHOULD allow the user to define the value for '.curr' REGARDLESS, of whether the Stream is empty or not
+			(that being, '.defaultCurr' would work for Stream-s that ended EVEN IF they aren't empty); 
+	
+	2.23. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
+		In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
+			an item with given predicate; 
+
+		Which is something of a problem, as it requires iterating over the Stream (and is, thus, useless); 
+		
+		Practical solution for this: 
+
+			{
+				// ...
+				const hasValue = has(pred)(stream) // changes the 'Stream' position
+				if (hasValue) {	
+					const S = PredicateStream(stream, pred) // the '.curr' guaranteedly becomes the '.curr' in the 'S'
+					// ...
+				} else {
+					// ... handle the alterior case...
+				}
+			}
+
+		Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
+
+	2.24. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
+		Try to make the library code that avoids this stuff fundamentally; 
+		
+	2.25. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
+
+		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
+			This is because otherwise, the whole "optimization thing" isn't existent
+				(example ProlongedStream's '.finish' MUST have all its underlying Stream-s being checked); 
+			
+		Properties: 
+
+			1. finish (complete);
+			2. rewind (likewise, complete); 
+			3. copy - let EVERY stream available be copiable; 
+			4. navigate - where appropriate; 
+
+	2.26. utility - findNestedEnd: 
+
+		Given a 'ReversibleStream'/'NavigableStream', it does: 
+
+			1. Walk through the Stream (similarly to 'nest' - counting 'depth');
+			2. Finds the location, at which the end of the nested block lies (note: A NUMBER); 
+			3. Returns that location, whilst also altering the location of the 'Stream' given; 
+
+		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
+
+	2.27. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+		for its operations; 
+
+		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
+			HOLDS!
+	
+	2.28. Use prototypal inheritance to save memory; 
+
+		Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
+			really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
+		
+		The user can do this sort of thing themselves, but for operations that are heavy on 'Object.create' usage, it may be useful
+			to provide an alias; 
+
+		Thus, there'd be BOTH exports for things that are StreamClass-es (functions for producing base prototypes), and the prototype 
+			objects themselves; 
+
+		Same goes for objects that are used within the definitons of different 'Parsers"; 
+	
+3. Dependency management: 
+	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
+		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 

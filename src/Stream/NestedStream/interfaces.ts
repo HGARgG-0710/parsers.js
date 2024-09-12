@@ -44,4 +44,5 @@ export interface NestableEndableStream<Type = any>
 export interface EffectiveNestedStream<Type = any>
 	extends StreamClassInstance<Type | NestedEndableStream<Type>>,
 		NestedEndableStream<Type>,
-		CurrNestedCheckable {}
+		CurrNestedCheckable,
+		Iterable<Type> {}

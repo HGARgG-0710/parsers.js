@@ -1,4 +1,4 @@
-import { underStreamIsEnd } from "../UnderStream/methods.js"
+import { underStreamDefaultIsEnd, underStreamIsEnd } from "../UnderStream/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
@@ -12,11 +12,13 @@ import {
 } from "./methods.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
+import { streamIterator } from "../IterableStream/methods.js"
 
 export const TransformedStreamClass = StreamClass({
 	isCurrEnd: underStreamIsEnd,
 	initGetter: transformedStreamInitCurr,
-	baseNextIter: transformedStreamNext
+	baseNextIter: transformedStreamNext,
+	defaultIsEnd: underStreamDefaultIsEnd
 })
 
 export function TransformedStream<UnderType = any, UpperType = any>(
@@ -26,6 +28,7 @@ export function TransformedStream<UnderType = any, UpperType = any>(
 	const result = Inputted(TransformedStreamClass(), input)
 	result.pos = 0
 	result.transform = transform
+	result[Symbol.iterator] = streamIterator<UpperType>
 	return result as TransformedStream<UnderType, UpperType>
 }
 

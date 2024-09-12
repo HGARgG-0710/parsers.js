@@ -6,6 +6,13 @@ const { structCheck } = object
 const { isFunction } = type
 
 export const isRewindable = structCheck<Rewindable>({ rewind: isFunction })
-export function rewind(stream: ReversibleStream) {
+export function rewind<Type = any>(stream: ReversibleStream<Type>) {
 	while (!stream.isStart) stream.prev()
+	return stream.curr
+}
+
+export function uniRewind<Type = any>(stream: ReversibleStream<Type>) {
+	return isRewindable(stream)
+		? (stream as Rewindable<Type>).rewind()
+		: rewind<Type>(stream)
 }

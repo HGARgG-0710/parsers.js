@@ -49,3 +49,4 @@ export function multiIndexConvert(this: MultiIndex, stream: TreeStream) {
 }
 
 export * as MultiIndexModifier from "./MultiIndexModifier/methods.js"
+export * as Slicer from "./Slicer/methods.js"
