@@ -1,9 +1,8 @@
-import { array, object } from "@hgargg-0710/one"
+import { object } from "@hgargg-0710/one"
 const { structCheck } = object
-const { propPreserve } = array
 
 import type { Token, TokenInstanceClass, TokenType } from "./interfaces.js"
-import { isType, iteratorCheck } from "./utils.js"
+import { isType } from "./utils.js"
 
 export function Token<Type = any, Value = any>(
 	type: Type,
@@ -24,16 +23,14 @@ export function TokenType<Type = any, ValueType = any>(
 	return tt
 }
 
-export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {
-	const ti: TokenInstanceClass<Type> = () => ({ type })
+export function TokenInstance<Type = any>(
+	type: any,
+	cached: boolean = true
+): TokenInstanceClass<Type> {
+	const cachedInstance = { type }
+	const ti = (
+		cached ? () => cachedInstance : () => ({ type })
+	) as TokenInstanceClass<Type>
 	ti.is = isType<Type>(type)
 	return ti
-}
-
-export const ArrayToken = propPreserve((token: Token) => [...Token.value(token)])
-
-export function RecursiveArrayToken(recursiveToken: Token) {
-	const isCollection = "value" in recursiveToken && iteratorCheck(recursiveToken.value)
-	if (isCollection) recursiveToken.value = recursiveToken.value.map(RecursiveArrayToken)
-	return isCollection ? ArrayToken(recursiveToken) : recursiveToken
 }

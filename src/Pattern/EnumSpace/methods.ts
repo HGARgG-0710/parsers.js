@@ -3,11 +3,13 @@ import type { ConstEnumSpace, EnumSpace, IncrementEnum, Mappable } from "./inter
 
 export function constEnumAdd(this: ConstEnumSpace, size: number) {
 	this.value.push(...Array.from({ length: size }, () => ({})))
+	this.size += size
 	return this
 }
 
 export function constEnumJoin(this: ConstEnumSpace, enums: EnumSpace) {
 	this.value.push(...enums.value)
+	this.size += enums.size
 	return this
 }
 

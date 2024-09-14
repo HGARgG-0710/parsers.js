@@ -9,11 +9,8 @@ export function PatternValidator<KeyType = any>(
 	return function <Type = any>(
 		pattern: ValidatablePattern<Type, KeyType>
 	): PatternValidatorOutput {
-		for (let i = 0; i < validityMap.keys.length; ++i) {
-			const [key, handler] = validityMap.byIndex(i)
-			const result = pattern.validate(key, handler)
-			if (!result[0]) return [false, i]
-		}
-		return !pattern.result[1].length ? true : null
+		for (let i = 0; i < validityMap.keys.length; ++i)
+			if (!pattern.validate(...validityMap.byIndex(i))[0]) return [false, i]
+		return !pattern.result[1].length || null
 	}
 }

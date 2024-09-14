@@ -1,4 +1,7 @@
-// % 1. 'null' indicates non-coverage [that is, the given grammar is not SUFFICIENT],
-// % 2. 'true' indicates correctness [in the user-defined sense] and coverage
-// % 3. 'false' indicates incorrectness (in the user-defined sense; comes additionally with a number-position);
+/**
+ * Type, indicating the output of the `PatternValidator`. 
+ * * `true`, whenever the input provided is both correct and covered
+ * * `null`, whenever the input given is not incorrect, but is not covered by the grammar given either
+ * * `[false, number]`, whenever the input is explicitly incorrect (with a number-defined position of table entry that caused this)
+*/
 export type PatternValidatorOutput = true | null | [false, number]

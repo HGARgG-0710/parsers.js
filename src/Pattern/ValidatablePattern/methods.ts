@@ -20,17 +20,20 @@ export function validatableStringPatternValidate(
 	key: string | RegExp,
 	handler: SummatFunction<any, string, boolean>
 ): ValidationOutput<string> {
-	if (!this.result[1].length) {
+	const validated = this.result[1]
+	const size = validated.length
+
+	if (!size) {
 		const matched: string[] = matchString(this.value, key)
 		for (let i = matched.length; i--; )
 			if (!handler(matched[i])) return (this.result = [false, []])
 		return (this.result = [true, matched.filter((x) => !isBoolean(x))])
 	}
 
-	for (let i = this.result.length; i--; ) {
-		const tempres = ValidatableStringPattern(this.result[1][i]).validate(key, handler)
+	for (let i = size; i--; ) {
+		const tempres = ValidatableStringPattern(validated[i]).validate(key, handler)
 		this.result[0] = tempres[0]
-		replace(this.result[1], i, ...tempres[1])
+		replace(validated, i, ...tempres[1])
 	}
 
 	return this.result

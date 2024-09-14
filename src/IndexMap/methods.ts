@@ -1,22 +1,18 @@
-import { fromPairsList } from "./utils.js"
-import type { IndexMap } from "./interfaces.js"
+import { fromPairsList, toPairsList } from "./utils.js"
+import type { IndexMap, MapClass as MapClassType, Pairs } from "./interfaces.js"
 
 import { inplace } from "@hgargg-0710/one"
+import { MapClass } from "./classes.js"
+import { table } from "./utils.js"
 const { insert, swap } = inplace
 
 export function indexMapIndex<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	x: any
 ) {
-	let current = this.default
-	for (let i = this.keys.length; i--; ) {
-		const index = this.keys.length - 1 - i
-		if (this.change(this.keys[index], x)) {
-			current = this.values[index]
-			break
-		}
-	}
-	return current
+	for (let i = 0; i < this.keys.length; ++i)
+		if (this.change(this.keys[i], x)) return this.values[i]
+	return this.default
 }
 
 export function indexMapReplace<KeyType = any, ValueType = any>(
@@ -33,7 +29,7 @@ export function indexMapReplace<KeyType = any, ValueType = any>(
 export function indexMapAdd<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number,
-	...pairs: [KeyType, ValueType][]
+	...pairs: Pairs<KeyType, ValueType>
 ): IndexMap<KeyType, ValueType> {
 	const [keys, values] = fromPairsList(pairs)
 	insert(this.keys, index, ...keys)
@@ -71,10 +67,7 @@ export function indexMapUnique<KeyType = any, ValueType = any>(
 export function* indexMapIterator<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ): Generator<[KeyType, ValueType]> {
-	for (let k = this.keys.length; k--; ) {
-		const index = this.keys.length - 1 - k
-		yield [this.keys[index], this.values[index]]
-	}
+	for (let i = 0; i < this.keys.length; ++i) yield [this.keys[i], this.values[i]]
 }
 
 export function indexMapByIndex<KeyType = any, ValueType = any>(
@@ -92,4 +85,23 @@ export function indexMapSwap<KeyType = any, ValueType = any>(
 	swap(this.keys, i, j)
 	swap(this.values, i, j)
 	return this
+}
+
+export function indexMapCopy<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>
+) {
+	return MapClass<KeyType, ValueType>(this.change)(toPairsList(table(this)))
+}
+export function mapClassExtend<KeyType = any, ValueType = any>(
+	this: MapClassType<KeyType, ValueType>,
+	f: (x: ValueType) => any
+): MapClassType<KeyType, any> {
+	return MapClass<KeyType>((curr: KeyType, x: any) => this.change(curr, f(x)))
+}
+
+export function mapClassExtendKey<KeyType = any, ValueType = any>(
+	this: MapClassType<KeyType, ValueType>,
+	f: (x: KeyType) => any
+): MapClassType<any, ValueType> {
+	return MapClass((curr: any, x: any) => this.change(f(curr), x))
 }

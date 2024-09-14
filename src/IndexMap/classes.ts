@@ -4,7 +4,8 @@ import type {
 	IndexMap,
 	IndexingFunction,
 	TestType,
-	HasType
+	HasType,
+	Pairs
 } from "./interfaces.js"
 import {
 	indexMapIndex,
@@ -14,9 +15,10 @@ import {
 	indexMapUnique,
 	indexMapByIndex,
 	indexMapIterator,
-	indexMapSwap
+	indexMapSwap,
+	indexMapCopy
 } from "./methods.js"
-import { mapClassExtend, mapClassExtendKey } from "./utils.js"
+import { mapClassExtend, mapClassExtendKey } from "./methods.js"
 import { current, firstStream, is } from "src/utils.js"
 import { Token } from "src/Pattern/Token/classes.js"
 
@@ -24,7 +26,7 @@ export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
 	const mapClass: MapClass<KeyType, ValueType> = function (
-		pairsList: [KeyType, ValueType][],
+		pairsList: Pairs<KeyType, ValueType>,
 		_default?: any
 	): IndexMap<KeyType, ValueType> {
 		const [keys, values] = fromPairsList(pairsList)
@@ -39,12 +41,14 @@ export function MapClass<KeyType = any, ValueType = any>(
 			unique: indexMapUnique<KeyType, ValueType>,
 			byIndex: indexMapByIndex<KeyType, ValueType>,
 			swap: indexMapSwap<KeyType, ValueType>,
+			copy: indexMapCopy<KeyType, ValueType>,
 			default: _default,
 			[Symbol.iterator]: indexMapIterator<KeyType, ValueType>
 		}
 	}
-	mapClass.extend = mapClassExtend(change)
-	mapClass.extendKey = mapClassExtendKey(change)
+	mapClass.change = change
+	mapClass.extend = mapClassExtend
+	mapClass.extendKey = mapClassExtendKey
 	return mapClass
 }
 

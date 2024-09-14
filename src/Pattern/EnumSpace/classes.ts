@@ -1,7 +1,5 @@
-import type {
-	ConstEnumSpace,
-	IncrementEnum
-} from "./interfaces.js"
+import { TokenInstance } from "../Token/classes.js"
+import type { ConstEnumSpace, EnumSpace, IncrementEnum } from "./interfaces.js"
 
 import {
 	constEnumAdd,
@@ -27,12 +25,15 @@ export function IncrementEnum(size: number): IncrementEnum {
 export function ConstEnum(size: number): ConstEnumSpace {
 	const result: ConstEnumSpace = {
 		value: [],
+		size,
 		add: constEnumAdd,
 		join: constEnumJoin,
 		copy: constEnumCopy,
-		map: constEnumMap,
-		size
+		map: constEnumMap
 	}
 	result.add(size)
 	return result
 }
+
+export const CachedTokenEnum = (enums: EnumSpace) =>
+	enums.map((x) => TokenInstance(x, true))
