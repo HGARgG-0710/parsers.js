@@ -1,12 +1,28 @@
-import type { ChildrentTree } from "./interfaces.js"
+import type { ChildrenTree, MultChildrenTree } from "./interfaces.js"
 
-export function childIndex<Type = any>(this: ChildrentTree<Type>, multind: number[]) {
-	return multind.reduce(
-		(prev, curr) => (prev.children as ChildrentTree<Type>[])[curr],
-		this
-	)
+export function baseChildIndex<Type = any>(this: ChildrenTree<Type>, multind: number[]) {
+	return multind.reduce((prev, curr) => prev[curr], this)
 }
 
-export function childrenCount(this: ChildrentTree): number {
-	return this.children.length - 1
+export function baseChildrenCount(this: ChildrenTree) {
+	return this.length - 1
+}
+
+export function childIndex(propName: string = "children") {
+	return propName
+		? function <Type = any>(this: MultChildrenTree<Type>, multind: number[]) {
+				return multind.reduce(
+					(prev, curr) => (prev[propName] as MultChildrenTree<Type>[])[curr],
+					this
+				)
+		  }
+		: baseChildIndex
+}
+
+export function childrenCount(propName: string = "children") {
+	return propName
+		? function (this: MultChildrenTree): number {
+				return this[propName].length - 1
+		  }
+		: baseChildrenCount
 }

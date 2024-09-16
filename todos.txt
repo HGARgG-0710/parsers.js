@@ -3,81 +3,60 @@
 
 [v0.3]
 
-1. TEST REFACTORING: 
-
-	1.1. The 'EliminablePattern', 'TokenizablePattern', 'ValidatablePattern'; 
-		The 'CommonPatter' - Patterns that have: 
-
-			1. A single property; 
-			2. That is a function; 
-			3. That takes multiple arguments; 
-			4. And whose output has an "ambigous" nature, due to which there is a need for specifying a two-value 'compare' predicate; 
-			5. Have '.result' (that is being CHECKED ALSO for being the same as the return value); 
-
 A. testing: 
 	A.1. Create list of modules to be tested; 
 
 		Testing choice [per-method/per-class] and implementation are defined by: 
 
-			0. Use a testing framework (try using the 'node:test'); 
-				0.1. use 'describe' on all levels except for the last one, where 'test' is employed; 
-			1. Only 'classes.ts', 'utils.ts' have corresponding test files (in that, classes are tested with their methods, whereas 'utils.ts' aren't); 'methods.ts' ARE ALSO present, but methods are tested as part of Class tests;
-				1.1. THEY ARE BROKEN CORRESPONDENTLY ('methods.ts')
-			2. Stream Classes are tested in the following fashion [they branch]:
-				2.1. They branch: 
-					2.1.0. Empty Stream instance
-					2.1.1. Single-element Stream instance
-					2.1.2. Two-element Stream instance
-					2.1.3. Long Stream instance (>= 20 elements)
-				2.2. There are benchmarks; 	
+			1. Stream Classes are tested in the following fashion [they branch]:
+				1.1. They branch: 
+					1.1.0. Empty Stream instance
+					1.1.1. Single-element Stream instance
+					1.1.2. Two-element Stream instance
+					1.1.3. Long Stream instance (>= 20 elements)
+				1.2. There are benchmarks; 	
 					2.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
-			3. Pattern Classes are tested in the following fashion [they branch]: 
-				3.1. Input
-					3.1.1. Empty; 
-					3.1.2. One-element; 
-					3.1.3. Two-element; 
-					3.1.4. Long; 
-				3.2. Tables: 	
-					3.2.1. Empty; 
-					3.2.2. One-element; 
-					3.2.3. Two-element; 
-					3.2.4. Long; 
-			4. Parsers are tested as follows (with according Stream-s): 
-				4.1. There is a set of Stream-s, for which they're tested; 
-				4.2. With appropriate Collection-s; 
-				4.3. They branch [by 4.1. and 4.2.]: 
-					4.3.1. The Empty Stream; 
-					4.3.2. The One-element Stream; 
-					4.3.3. The Two-element Stream; 
-					4.3.4. The many-element Stream; 
-			5. Generally, provided an instance of a given class, its methods are tested: 
-				5.1. All methods are tested; 
-				5.2. If a method is mutating, there is a new instance created (a temp copy), then the operation performed on it; 
-				5.3. If a method is non-mutating, it is performed without copying; 
-			6. There are benchmarks: 
-				6.1. Stack benchmarks: 
-					6.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
+			2. Pattern Classes are tested in the following fashion [they branch]: 
+				2.1. Empty; 
+				2.2. One-element; 
+				2.3. Two-element; 
+				2.4. Long; 
+			3. Parsers are tested as follows (with according Stream-s): 
+				3.1. There is a set of Stream-s, for which they're tested; 
+				3.2. With appropriate Collection-s; 
+				3.3. They branch [by 4.1. and 4.2.]: 
+					3.3.1. The Empty Stream; 
+					3.3.2. The One-element Stream; 
+					3.3.3. The Two-element Stream; 
+					3.3.4. The many-element Stream; 
+			4. Generally, provided an instance of a given class, its methods are tested: 
+				4.1. All methods are tested; 
+				4.2. If a method is mutating, there is a new instance created (a temp copy), then the operation performed on it; 
+				4.3. If a method is non-mutating, it is performed without copying; 
+			5. There are benchmarks: 
+				5.1. Stack benchmarks: 
+					5.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
 						Use as metric later
-				6.2. Parse really long strings: 
-					6.2.1. Try to parse some incredibly long strings;
+				5.2. Parse really long strings: 
+					5.2.1. Try to parse some incredibly long strings;
 						See the speed limits for different string sizes
-				6.3. "Cached" TokenInstance vs "Non-Cached" TokenInstance: 
-					6.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
-					6.3.2. Iterate through them [TreeStream]; Measure time; 
+				5.3. "Cached" TokenInstance vs "Non-Cached" TokenInstance: 
+					5.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
+					5.3.2. Iterate through them [TreeStream]; Measure time; 
 						NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
-			7. Rewrite/restructure the 'regex' tests; 
+			6. Rewrite/restructure the 'regex' tests; 
 			
 		Left to make tests for: 
 
 			1. IndexMap/ [specifics]
-			2. Pattern/ ! ALSO - the 'RecursiveArrayPattern'; 
+			2. Pattern/  [specifics - underlying]
 				2.1. Token/ [specifics]
 				2.2. EnumSpace/ [specifics]
 				2.3. TokenizablePattern/ [specifics]
 				2.4. ValidatablePattern/ [specifics]
 				2.5. EliminablePattern/ [specifics]
 				2.6. Collection/ [specifics]
-			3. Tree/
+			3. Tree/ [specifics]
 			4. Stream/
 			5. Parser/
 			6. Stateful/
@@ -349,27 +328,8 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.2. '.swap' the two indexes;
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
-
-	2.8. Replace the 'Tree' methods with in-place algorithms (not what this currently is...); 
-		The 'copying' for Tree-s should be a WHOLE SEPARATE thing with ITS OWN module; 
-		NOTE: the 'copying' in question occurs in methods 'MultValueTree' and 'RecursiveArrayTree'; 
-
-		Namely: 
-
-			1. RecursiveCopy:
-
-				This is a method that deals with the 'ConstructibleTree's interface (basically, trees that can also be [generally] modified...);
-				It creates a new such tree based off the current one; 
-
-				Uses a general interface to copy arbitrary trees; 
-				There has to be a 'flatCopy(): Tree' function for a given tree
-					(which, repeated recursively, would yield a new tree, 
-						and allow to preserve the reference to the underlying children WITHOUT
-							preserving the reference to the tree itself...);
-
-				This would be a 'FlatCopiableTree'; 
 	
-	2.9. Create a 'ModifiableStream' interface;
+	2.8. Create a 'ModifiableStream' interface;
 
 		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
 		Id est: 
@@ -454,7 +414,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					}
 				}
 		
-	2.10. Expand on the 'Position' type further;
+	2.9. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -481,13 +441,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	2.11. RELAX overly demanding interface and types definitions/requirements;
+	2.10. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.12. [Idea?] Create an error-handling API for the 'v0.4';
+	2.11. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -510,7 +470,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	2.13. limitedStreamNavigate: FLAWED!
+	2.12. limitedStreamNavigate: FLAWED!
 	
 		Should handle the case where the '.pos' is A FUNCTION [but the 'position' ISN'T]; 
 		THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
@@ -523,7 +483,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
 				will largely solve the issue. 
 			
-	2.14. MemoizableStreamClass: 
+	2.13. MemoizableStreamClass: 
 
 		This is a generalization of StreamClass; 
 		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
@@ -533,7 +493,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
 			2. unmemoize() - returns back to the flow of the Stream; 
 
-	2.15. Minor refactoring (StreamClass): 
+	2.14. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -547,7 +507,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.16. Try re-doing the project's type-system? [again...]
+	2.15. Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -555,7 +515,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		See, if not (mayhaps), it is feasible to re-write everything via 'extends BasicStream'-sort of thing
 			(meaning, the needed StreamType-s would be "inserted" where desired...); 
 
-	2.17. BreakableStream - a stream-class that produces instances, which : 
+	2.16. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -617,10 +577,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 
-	2.18. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.17. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 	
-	2.19. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
+	2.18. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
 		In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
 			an item with given predicate; 
 
@@ -641,7 +601,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
 
-	2.20. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.19. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -650,7 +610,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 		
-	2.21. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
+	2.20. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
 
 		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
 			This is because otherwise, the whole "optimization thing" isn't existent
@@ -663,7 +623,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			3. copy - let EVERY stream available be copiable; 
 			4. navigate - where appropriate; 
 
-	2.22. utility - findNestedEnd: 
+	2.21. utility - findNestedEnd: 
 
 		Given a 'ReversibleStream'/'NavigableStream', it does: 
 
@@ -673,13 +633,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
 
-	2.23. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.22. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!
 	
-	2.24. Use prototypal inheritance to save memory; 
+	2.23. Use prototypal inheritance to save memory; 
 
 		Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
 			really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
@@ -693,7 +653,50 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Same goes for objects that are used within the definitons of different 'Parsers"; 
 
 		NOTE: some types (such as 'IndexMap') would benefit from such introductions INCREDIBLY!
-	
+
+		ESPECIALLY use the prototypal inheritance for the 'Tree'-s (can make the Big ones A LOT more compact memory-wise, need only store the '.value'); 
+
+	2.24. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
+
+		The idea is: separate the processes of object-creation and initialization; 
+		This permits the re-usage of the same interfaces on DIFFERENT targets 
+			(making it: 
+				
+				1. equivalent to a function call [memory-wise] - no need for wasting time on additional allocations/de-allocations;
+				2. preserve the "lazy evaluation" (saving memory relative to the constant usage of buffers); 
+			); 
+
+		Example ("LimitedStream" vs. "StreamLimitor"): 
+
+			How it is currently: 
+				1. LimitedStream: 
+
+					function parseSomething (input) {
+						const limited = input.limit(from, to) // creates a new Stream [memory spent on temp-operational object]
+						// ... operations on `limited`, OBJECT CONTINUES TO LIVE [used as '.curr' value for upper-level stream]
+						return limited
+					}
+				
+					Here, the allocation is NECESSARY, AS THE 'stream' is USED. 
+					However, this is not always the case and (sometimes), the operational 
+
+				2. StreamLimitor: 
+
+					const limitor = StreamLimitor() // OBJECT CREATION ___WITHOUT___ initialization; 
+					
+					function parseSomething (input) {
+						const limited = limitor.init(input, from, to) // creates a new Stream [memory spent on temp-operational object]
+						// ... operations on 'limited'
+						return SOMETHING_ELSE // The resulting object is NOT the 'limited', the 'limitor' is RE-USED for the next stream/input; 
+					}
+
+			Basically, this is just "formalized" re-usage of LimitedStream objects with appropriate interfaces; 
+			Also, one could allow for 'default'-initialization (during object-creation),
+				and only partitially initialize it afterwards;
+
+			Likewise, there'd be 'StreamTransformer' (TransformedStream), 'StreamNester' (NestedStream), and others; 
+			Call these `StreamProxy/`; 
+
 3. Dependency management: 
 	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
 		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 

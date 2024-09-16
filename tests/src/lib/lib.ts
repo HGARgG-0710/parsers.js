@@ -2,9 +2,13 @@ import assert from "assert"
 import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
 import { it } from "node:test"
 
-export function arraysSame(arr1: any[], arr2: any[]) {
+export function arraysSame(
+	arr1: any[],
+	arr2: any[],
+	lowCompare: (x: any, y: any) => boolean = (x, y) => x === y
+) {
 	let size = arr1.length
-	while (size--) if (arr1[size] !== arr2[size]) return false
+	while (size--) if (!lowCompare(arr1[size], arr2[size])) return false
 	return true
 }
 

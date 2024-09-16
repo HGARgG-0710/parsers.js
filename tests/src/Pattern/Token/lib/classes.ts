@@ -27,7 +27,8 @@ export function TokenInstanceTest(tests: [any, number, boolean][]) {
 			while (i--)
 				it(`${times - i}. TokenInstance(${base.toString()})`, () => {
 					const nextInstance = ti()
-					assert.notStrictEqual(initial, nextInstance)
+					if (!cached) assert.notStrictEqual(initial, nextInstance)
+					else assert.strictEqual(initial, nextInstance)
 					assert(ti.is(nextInstance))
 				})
 		})

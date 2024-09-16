@@ -3,6 +3,7 @@ const { structCheck } = object
 
 import type { Token, TokenInstanceClass, TokenType } from "./interfaces.js"
 import { isType } from "./utils.js"
+import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "src/Tree/classes.js"
 
 export function Token<Type = any, Value = any>(
 	type: Type,
@@ -33,4 +34,14 @@ export function TokenInstance<Type = any>(
 	) as TokenInstanceClass<Type>
 	ti.is = isType<Type>(type)
 	return ti
+}
+
+/**
+ * An object for constructing 'Token' (or, 'Pattern') -based `Tree`-s
+*/
+export const TokenTree = {
+	children: ChildrenTree("value"),
+	multiple: MultTree("value"),
+	single: SingleTree("value"),
+	childless: ChildlessTree("value")
 }
