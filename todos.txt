@@ -58,6 +58,110 @@ A. testing:
 				2.6. Collection/ [specifics]
 			3. Tree/ [specifics]
 			4. Stream/
+
+				To test:
+
+					1. Position [specifics]; 
+					2. InputStream; 
+					3. PositionalStream; 
+					4. TreeStream; 
+						4.1. TreeWalker; 
+						4.2. MultiIndex; 
+							4.2.1. MultiIndexModifier; 
+							4.2.2. Slicer; 
+					5. TransformedStream; 
+					6. PredicateStream; 
+					7. LimitedStream; 
+					8. ReversedStream; 
+
+				4.0. One tests on a class-basis; 
+					4.0.1. Classes are tested per-method; 
+					4.0.2. A single class is a collection of methods, ergo, there MUST BE A WELL-DEFINED SET OF 
+						general wrapper-tests: 
+						4.0.2.1. These would be based OFF passed "checks"; These would (fundamentally) 
+							compare the result of the given Stream having a given method called with given arguments, 
+								with the GIVEN EXPECTED RESULTS. 
+							
+							The 'compare' would be class-based; 
+
+							THERE WOULD BE SPECIAL-CASE PER-CLASS DEFINITIONS FOR IT! 
+							They would be used with the actual Interfaces; 
+
+				4.1. The testing is CYCLOTOMIC-NODES-based: 
+					4.1.1. Meaning - one has to include AT LEAST ONE test for each one of the "directions" that a given 
+
+				4.2. The tests have TO BE ORDERED [because various interfaces are intertwined]; 
+
+					In particular: 
+
+						1. All PositionalStream-s must come AFTER Position; 
+						2. All the sub-interfaces of TreeStream must be checked BEFORE the 'TreeStream'; 
+						3. "WrapperStream"-s (such as 'NestedStream', 'TransformedStream', 'LimitedStream' and others)
+							must ALL be tested on different combinations/variations of Stream-classes; 
+
+							Thus, for instance, one has to test ALL of: 
+
+								LimitedStream-NestedStream-InputStream;
+								TransformedStream-LimitedStream-TreeStream;
+								NestedStream-TransformedStream-InputStream;
+
+							And more...
+
+				4.3. There are SEVERAL TYPES of tests for the same method:
+					4.3.1. Basic functionality (comparisons, and so forth...); 
+						This (typically), just calls the method once, + does some comparison work on the result; 
+						These are separated by predicates used for comparison.
+
+					4.3.2. Combined functionality; 
+						This is relative to how 'Stream'-s are supposed to "behave" in certain conditions; 
+							Generally: 
+
+								1. For '.isEnd', the 'generalIsEndTest': 
+									1.1. start from current, point; 
+									1.2. COMPARE the '.curr' on each iteration, then '.next()'
+										1.2.1. do appropriate 'assert' + USE A GENERAL 'COMPARISON' OPERATION!
+										1.2.2. Update the 'i' (index); 
+										1.2.3. Save the 'stream.curr' into a separate variable BEFORE doing the 'stream.next()'; 
+									1.3. Compare the 'i' counter of walked-through items [.length, or whatever]; 
+									1.4. Compare the LAST ITEM WITH ITSELF (to check for correctness of the definition of the 'StreamClass'-specific items, the '.isEnd'); 
+								2. SAME for '.isStart' and '.prev'; 
+								3. For '.rewind()', '.finish()' - 'generalRewind', 'generalFinish': 
+									3.0. Walk up to the end/start ('while (!stream.isEnd) stream.next()')
+										3.0.1. Save the items into A BUFFER ('bufferCopy')
+									3.1. Do '.rewind()'/'.finish()'; 
+									3.2. Walk again; 
+										3.2.1. Add into 'bufferRepeat'
+									3.3. Compare the 'bufferCopy' and 'bufferRepeat' via 'arraysSame'; 
+
+					4.3.3. Utils; 
+						These are tested regularly via the 'utilTest'; 
+						4.3.3.1. ORGANIZE THESE! 
+							Let each 'util' go to its appropriate interface directory...;
+
+					4.3.4. Constructors: 
+						Make them "typical" (in the sense they uses the 'is'-functions); 
+
+						ADD THE 'is'-utils: 
+
+							1. For the 'StreamClass' ('StreamClassInstance')
+							2. For each of the 'implementations' of the 'StreamClass'; 
+								These would be 'and'-s with SPECIFIC properties; 
+								LIST: 
+
+									1. StreamTokenizer [technically, a Parser]; 
+									2. InputStream
+									3. LimitedStream; 
+									4. NestableStream; 
+									5. PositionalStream; 
+									6. PredicateStream; 
+									7. ProlongedStream; 
+									8. ReversedStream; 
+									9. TransformedStream; 
+									10. TreeStream; 
+
+					4.3.4. Refactoring: 
+						4.3.4.1. In tests, rely HEAVILY on 'navigate' (once tested); 
+						4.3.4.2. Don't test optimizations (like 'uniNavigate') INSIDE the test-code; 
 			5. Parser/
 			6. Stateful/
 			7. benchmarks/
@@ -207,7 +311,9 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
 			function HashTable (hash) {
+				// The HashClass
 				return function (values, keys = new Set(), default = null) {
+					// The '.index' function; 
 					return function (x) {
 						return !keys.size || keys.has(x) ? values[hash(x)] : default
 					}
@@ -247,6 +353,108 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					BUT: for this, it'd require a more 'generalized' version (in particular, USE LOOPS INSTEAD OF '.reduce')
 
 				This can be used with strings/
+
+		NOTE [on optimizations]: this is especially useful when
+			static-lengthed and long-term parsing tables are concerned; 
+				The HashMaps are IDEAL for this because
+					(on large inputs, with DISTINCT, and/or integer-keys), 
+					there is A LOT of choosing between different values; 
+				
+			IDEA: generalize the 'TokenType'-s, by EXPOSING their 'type'-s (whenever they're 'number'-s, or 'string'-s); 
+				WHENEVER they are guaranteedly disjoint, it allows for an immidiate
+					one-to-one match; 
+
+				Example of hash-table implementation based off objects [rough sketch]: 
+
+					function ObjectHash (hash, default) {
+						return {
+							hash, 
+							default, 
+							index: function (key) {
+								return this.hash[key] || default
+							}
+						}
+					}
+				
+				Thus, one'd want some sort of data structure to (assuming disjoint-ness) 
+					convert the given '.type'-s into HashMap-s (equivalent of 'TypeMap', but for the newly exposed '.type' not '.is'); 
+
+					ALSO:
+						one may want to implement: 
+
+							1. hashFromKeys: 
+
+								Basically, creates a 'hash' function from a given 'Map' (inverses it); 
+									Basically does: 
+
+										function hashFromKeys(keys) {
+											const map = new Map()
+											for (let i = 0 ; i < keys.length ; ++i) map.add([x, i])
+											return (x) => map.get(x)
+										}
+
+								The resulting function can be used in conjunction with the 'keys' (provided they're static); 
+
+							2. hashFromObject: 
+
+								A way to implement the 'ObjectHash' ORGANICALLY [without the need to change the '.hash' type]: [crude sketch]
+
+									function hashFromObject(object) {
+										return (key) => object[key]
+									}
+
+									THEN, 
+
+										ObjectHash := (object) => HashClass(hashFromObject(object))
+
+								This is (particularly) for cases, when the given map has integers/strings for keys; 
+								Useful in conjuction with the 'SimpleTokenType'; 
+
+									ONE HAS TO BE ABLE to (somehow) get use the 'SimpleTokenType' with this; 
+									Possibly?: 	
+
+										// Parsing table; 
+										const basPairs = mutate([
+											[TokenTypeA, ...], 
+											...
+											[TokenTypeN, ...]
+										], ([Type, Handler]) => [Token.type(Type), Handler])
+
+										const baseObj = toObject(new Map(basePairs)) // known that THE KEYS are all strings/numbers + disjoint; 
+										const hashMap = ObjectHash(baseObj)	
+
+										
+										TODO: implement the: 
+
+											3. disjointKeysParseTable(tokenPairs)
+
+												This (basically) accepts pairs of '[SimpleTokenType, Function]';
+												And spits out a 'HashMap', like: 
+
+													disjointKeysParseTable := (pairs, default) =>
+														ObjectHash(
+															hashFromObject(	
+																dekv(fromPairsList(pairs.map(
+																				([Type, Handler]) => [Token.type(Type), Handler])))), 
+															default)
+												
+												? perhaps, make a new version for one.js that would have a new method for optimizing transformation from pairs-list to an Object? 
+
+												That would be desired for two reasons: 
+
+													1. Performance (when the table consists of SimpleTokenType-s and is used A LOT); 
+													2. Common-ness of the pattern: 
+														This thing can be VERY frequently used in actual parsers;	
+
+				Also, there'd need to be a way to get the '.type' of the 'TokenType'-s directly; 
+
+				IDEA: create a structure 'SimpleTokenType', 
+					which would have the '.type' property on it; 
+
+					THEN, re-purpose '.is' to allow for more complex constructors
+						(in particular, MAKE THE CURRENT 'TokenType' into 'SimpleTokenType', 
+							whilst creating the NEW 'TokenType',
+								permitting to set the '.is' AS-DESIRED!)
 
 	2.7. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
@@ -328,93 +536,8 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.2. '.swap' the two indexes;
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
-	
-	2.8. Create a 'ModifiableStream' interface;
-
-		It is (basically) a Stream, into which things can be INSERTED, whilst it is iterated. 
-		Id est: 
-
-			// ...
-			input.next()
-			input.insert(X) // calls another 'input.next()'; input.curr() now is 'X'; The thing RETURNS the result of the 'input.next()';
-
-		Implement various different kinds of ModifiableStream-s; 
-
-		1. A 'ModifiableTreeStream' "interface" (set of TreeStream-related implementations) would be a 'ConstructibleTree';
-
-			There'd be different ModifiableTreeStream-s; 
-			Their '.insert' would be based off how the tree was visited: 
-
-				1. pre-order: it adds a NEW FIRST child to the current tree's node;
-				2. post-order:
-					1. IF current node has a parent already, adds a new parent to it
-						(the current node; ID EST, adds a new CHILD to the current parent, and makes it the parent of the current node...)
-					2. Otherwise, adds a node that is a FIRST CHILD of the current one; 
-			
-			There would also be some 'special' methods on 'TreeModifier', INDEPENDENT of the 'ModifiableTreeStream'-s [which would work with the TreeContext-s themselves]: 
-			
-				1. "insertSibling", which would insert a next sibling of the current element; 
-				2. "insertLast", which would insert a child TO THE END of the tree's '.children';
-				3. "insertChild", which would insert a child at a given index; 
-				4. 'prependSibling', which would add a sibling BEFORE the current child; 
-
-				PROBLEM: this sort of thing would OCCASIONALLY INVALIDATE the 'last' index; 
-					It would have to be re-computed in such cases; 
-
-			NOTE: there'd be a special new "class" of objects called 'TreeModifier' (analogous to 'TreeWalker'); 
-				NOTE: Due to how the 'multi-index' of a 'Tree' would be "contained" within the 'TreeWalker',
-					yet it would STILL need to be accessed by the 'TreeModifier' [in Stream Contexts...], 
-						one might NEED to unite the two...; 
-
-					IDEA: TreeIndexContext;
-						This, basically, contains a triple: 
-
-							{
-								index: MultiIndex
-								walker: TreeWalker
-								modifier: TreeModifier
-							}
-
-						And the TreeWalker, TreeModifier, would be 'bound' to the current one (that is, they'd be taking an argument of 'multindex');
-
-			The 'TreeModifier' implementations would HAVE to have a sort of "Modifiable" Tree (which is a special case of a 'Tree'); 
-			A 'ChildrenTree' (Tree with '.children') is a GREAT fit for it...; 
-
-		2. A 'ModifiablePositionalStream' would be a wrapper around another 'PositionalStream', 
-			which would have a map of 'Positions', into which things were 'inserted', and would return new stuff accordingly...
-			It is ALSO a 'PositionalStream'; 
-
-			NOTE: for this stuff to WORK generally, one needs to define an 'AdditivePosition',
-				one for which the 'skip(stream: PositionalStream, plus: Position)', or 'add(stream: PositionalStream, plus: Position)', 
-					would exist. 
-
-					'Number' special case of 'add(...)': 
-						(a, b) => a + b
-					
-					Basically, just "goes forward"; 
-					Similarly, there'd be a 'backout(stream: PositionalStream, plus: Position)' [or call it 'return'] method for these; 
-
-					For numbers, definition is: 
-						(a, b) => a - b
-
-			The ModifiablePositionalStream would be a PositionalStream ALSO, which would permit one to 
-				"stack them up" on top of one another (which is good for semantics separation...). 
-
-		3. A 'ModifiableSplicableStream' would be a 'ModifiableStream' for 'Splicable'-s: 
-
-			A 'Splicable' is an interface (extension of 'Indexed') with an Array-like .splice(index: number, toDelete: number, ...items: any) interface;
-			Arrays are splice-ables; 
-
-			The implementation would (basically) do: 
-
-				{
-					...InputStream(splicable),
-					insert: function (X) {
-						this.input.splice(this.pos, 0, X)
-					}
-				}
 		
-	2.9. Expand on the 'Position' type further;
+	2.8. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -441,13 +564,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	2.10. RELAX overly demanding interface and types definitions/requirements;
+	2.9. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.11. [Idea?] Create an error-handling API for the 'v0.4';
+	2.10. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -470,7 +593,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	2.12. limitedStreamNavigate: FLAWED!
+	2.11. limitedStreamNavigate: FLAWED!
 	
 		Should handle the case where the '.pos' is A FUNCTION [but the 'position' ISN'T]; 
 		THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
@@ -483,7 +606,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
 				will largely solve the issue. 
 			
-	2.13. MemoizableStreamClass: 
+	2.12. MemoizableStreamClass: 
 
 		This is a generalization of StreamClass; 
 		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
@@ -493,7 +616,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
 			2. unmemoize() - returns back to the flow of the Stream; 
 
-	2.14. Minor refactoring (StreamClass): 
+	2.13. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -507,7 +630,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.15. Try re-doing the project's type-system? [again...]
+	2.14. Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -515,7 +638,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		See, if not (mayhaps), it is feasible to re-write everything via 'extends BasicStream'-sort of thing
 			(meaning, the needed StreamType-s would be "inserted" where desired...); 
 
-	2.16. BreakableStream - a stream-class that produces instances, which : 
+	2.15. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -577,10 +700,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 
-	2.17. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.16. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 	
-	2.18. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
+	2.17. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
 		In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
 			an item with given predicate; 
 
@@ -601,7 +724,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
 
-	2.19. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.18. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -610,7 +733,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 		
-	2.20. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
+	2.19. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
 
 		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
 			This is because otherwise, the whole "optimization thing" isn't existent
@@ -623,7 +746,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			3. copy - let EVERY stream available be copiable; 
 			4. navigate - where appropriate; 
 
-	2.21. utility - findNestedEnd: 
+	2.20. utility - findNestedEnd: 
 
 		Given a 'ReversibleStream'/'NavigableStream', it does: 
 
@@ -633,13 +756,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
 
-	2.22. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.21. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!
 	
-	2.23. Use prototypal inheritance to save memory; 
+	2.22. Use prototypal inheritance to save memory; 
 
 		Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
 			really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
@@ -656,7 +779,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		ESPECIALLY use the prototypal inheritance for the 'Tree'-s (can make the Big ones A LOT more compact memory-wise, need only store the '.value'); 
 
-	2.24. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
+	2.23. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
 
 		The idea is: separate the processes of object-creation and initialization; 
 		This permits the re-usage of the same interfaces on DIFFERENT targets 
@@ -696,6 +819,33 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 			Likewise, there'd be 'StreamTransformer' (TransformedStream), 'StreamNester' (NestedStream), and others; 
 			Call these `StreamProxy/`; 
+	
+	2.24. TypeScript - use 'enum's; 
+
+		Learned about 'enum's being present in TypeScript; 
+		Use them to designate "special constants" (ALSO - take those out into separate files); 
+
+		Examples of applications (already present): 
+
+			1. StreamClass - PRE_CURR_INIT, POST_CURR_INIT, POST_START...; 
+			2. ValidationOutput: 
+				1. null - NoCoverage; 
+				2. true - Coverage; 
+				3. [false, n] - ValidationError(n); // GENERALIZE THE 'TokenType' to an 'Isable', with '.is(x: any): boolean'; 
+															Make 'NoCoverage', 'Coverage' and 'ValidationError' into individual 'Isable'-s, 
+															identifying outputs from a 'PatternValidator'; 
+
+															GENERALLY, make this sort of distinction BETWEEN DIFFERENT KINDS OF 'Validator'-s!
+
+		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
+		[Current preference is to the latter...]
+
+	2.25. Idea for a method: ProlongedStream.prolong; 	
+
+		This (utilmately) modifies the 'this.streams'; 
+		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
+			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
+				 
 
 3. Dependency management: 
 	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

@@ -21,6 +21,12 @@ import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { BoundNameType } from "src/Stream/StreamClass/interfaces.js"
 import { isPositional } from "../utils.js"
 
+export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
+
+export function isPosition<Type = any>(x: any): x is Position<Type> {
+	return isNumber(x) || isFunction(x) || isPositionObject(x)
+}
+
 export function isDualPosition<Type = any>(x: any): x is DualPosition<Type> {
 	return isArray(x) && isPosition<Type>(x[0]) && (!(1 in x) || isPosition<Type>(x[1]))
 }
@@ -49,12 +55,6 @@ export function positionNegate(position: DirectionalPosition): DirectionalPositi
 		? preserveDirection(position, (position) => trivialCompose(not, position))
 		: position
 }
-
-export function isPosition<Type = any>(x: any): x is Position<Type> {
-	return isNumber(x) || isFunction(x) || isPositionObject(x)
-}
-
-export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
 
 /**
  * Returns a `boolean`, indicating whether the results of `(x) => positionConvert(x, stream)` for `pos1` and `pos2` are equal

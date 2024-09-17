@@ -5,7 +5,7 @@ import { it } from "node:test"
 export function arraysSame(
 	arr1: any[],
 	arr2: any[],
-	lowCompare: (x: any, y: any) => boolean = (x, y) => x === y
+	lowCompare: (x: any, y: any) => boolean = equals
 ) {
 	let size = arr1.length
 	while (size--) if (!lowCompare(arr1[size], arr2[size])) return false
@@ -53,6 +53,26 @@ export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
 	}
 }
 
+export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName: string) {
+	return function (compare: (x: any, y: any) => boolean) {
+		return function (instance: InstanceType, input: any[], expectedValue: any) {
+			it(`method: .${methodName}(${input
+				.map((x) => x.toString())
+				.join(", ")})`, () =>
+				assert(compare(instance[methodName](...input), expectedValue)))
+		}
+	}
+}
+
+export function classSpecificAmbigiousPropertyTest<InstanceType = any>(propName: string) {
+	return function (compare: (x: any, y: any) => boolean) {
+		return function (instance: InstanceType, expectedValue: any) {
+			it(`property: .${propName}`, () =>
+				assert(compare(instance[propName], expectedValue)))
+		}
+	}
+}
+
 export function FlushableResultableAmbigiousMethodTest<
 	InstanceType extends Resulting = any
 >(methodName: string) {
@@ -69,3 +89,14 @@ export function FlushableResultableAmbigiousMethodTest<
 		})
 	}
 }
+
+export function utilTest(util: Function, utilName: string) {
+	return function (compare: (x: any, y: any) => boolean) {
+		return function (input: any[], expected: any) {
+			it(`util: ${utilName} (${input.map((x) => x.toString()).join(",")})`, () =>
+				assert(compare(util(...input), expected)))
+		}
+	}
+}
+
+export const equals = (x: any, y: any) => x === y

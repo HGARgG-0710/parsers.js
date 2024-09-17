@@ -31,9 +31,12 @@ export function validatableStringPatternValidate(
 	}
 
 	for (let i = size; i--; ) {
-		const tempres = ValidatableStringPattern(validated[i]).validate(key, handler)
-		this.result[0] = tempres[0]
-		replace(validated, i, ...tempres[1])
+		const [tempValid, tempRemains] = ValidatableStringPattern(validated[i]).validate(
+			key,
+			handler
+		)
+		this.result[0] = tempValid
+		replace(validated, i, ...tempRemains)
 	}
 
 	return this.result
