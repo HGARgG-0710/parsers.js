@@ -22,27 +22,23 @@ export interface CurrNestedCheckable extends Summat {
 }
 
 export interface Blowfish extends Inflatable, Deflatable {}
-
-export interface NestedStream<Type = any>
-	extends BasicStream<Type | NestedStream<Type>>,
-		Blowfish,
-		Inputted<NestableStream<Type>> {}
+export interface VisibleBlowfish extends Blowfish, CurrNestedCheckable {}
 
 export interface NestableStream<Type = any>
 	extends BasicStream<Type>,
 		Nestable<NestedStream<Type>> {}
 
-export interface NestedEndableStream<Type = any>
-	extends BasicStream<Type | NestedEndableStream<Type>>,
-		Blowfish,
-		Inputted<NestableEndableStream<Type>> {}
-
 export interface NestableEndableStream<Type = any>
 	extends NestableStream<Type>,
 		EndableStream<Type> {}
 
+export interface NestedStream<Type = any>
+	extends BasicStream<Type | NestedStream<Type>>,
+		VisibleBlowfish,
+		Inputted<NestableStream<Type>> {}
+
 export interface EffectiveNestedStream<Type = any>
-	extends StreamClassInstance<Type | NestedEndableStream<Type>>,
-		NestedEndableStream<Type>,
-		CurrNestedCheckable,
+	extends StreamClassInstance<Type | EffectiveNestedStream<Type>>,
+		VisibleBlowfish,
+		Inputted<NestableEndableStream<Type>>,
 		Iterable<Type> {}

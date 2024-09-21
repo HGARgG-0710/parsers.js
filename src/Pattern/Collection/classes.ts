@@ -1,4 +1,4 @@
-import type { Token } from "../Token/interfaces.js"
+import type { Pattern } from "../interfaces.js"
 import type { Collection } from "./interfaces.js"
 import {
 	stringCollectionPush,
@@ -20,7 +20,7 @@ export function ArrayCollection<Type = any>(x: Type[] = []): Collection<Type> {
 	return x as unknown as Collection<Type>
 }
 
-export function AccumulatingTokenCollection(token: Token): Collection<Token> {
+export function AccumulatingPatternCollection(token: Pattern): Collection<Pattern> {
 	return {
 		value: token,
 		push: accumulatingTokenCollectionPush,

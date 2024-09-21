@@ -9,14 +9,16 @@ export interface StreamIndexed extends Summat {
 	streamIndex: number
 }
 
-export interface ProlongedStream<Type = any>
+export interface BasicProlonged<Type = any>
 	extends PositionalStream<Type, number>,
-		Inputted<BasicStream<Type>[]>,
-		StreamIndexed {}
-
-export interface EffectiveProlongedStream<Type = any>
-	extends PositionalStream<Type, number>,
-		Inputted<StreamClassInstance<Type>[]>,
-		StreamClassInstance<Type>,
 		StreamIndexed,
 		IterableStream<Type> {}
+
+export interface ProlongedStream<Type = any>
+	extends BasicProlonged<Type>,
+		Inputted<BasicStream<Type>[]> {}
+
+export interface EffectiveProlongedStream<Type = any>
+	extends BasicProlonged<Type>,
+		Inputted<StreamClassInstance<Type>[]>,
+		StreamClassInstance<Type> {}

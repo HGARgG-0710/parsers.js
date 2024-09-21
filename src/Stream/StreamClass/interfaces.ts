@@ -54,6 +54,10 @@ export interface DefaultEndable extends Summat {
 	defaultIsEnd(): boolean
 }
 
+export interface PreInitable extends Summat {
+	preInit?: boolean
+}
+
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
 
 export interface PrimalStreamClassSignature<Type = any>
@@ -69,7 +73,8 @@ export interface StreamClassTransferable<Type = any>
 export interface StreamClassSignature<Type = any>
 	extends StreamClassTransferable<Type>,
 		ConditionalInitGettable<Type>,
-		DefaultEndable {}
+		DefaultEndable,
+		PreInitable {}
 
 export interface BasicStreamClassInstance<Type = any>
 	extends InitGettable<Type>,

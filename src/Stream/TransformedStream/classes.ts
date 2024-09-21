@@ -3,7 +3,7 @@ import { underStreamDefaultIsEnd, underStreamIsEnd } from "../UnderStream/method
 import { StreamClass } from "../StreamClass/classes.js"
 
 import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
-import type { TransformableStream, TransformedStream } from "./interfaces.js"
+import type { EndableTransformableStream, EffectiveTransformedStream } from "./interfaces.js"
 
 import {
 	transformedStreamInitCurr,
@@ -22,21 +22,21 @@ export const TransformedStreamClass = StreamClass({
 })
 
 export function TransformedStream<UnderType = any, UpperType = any>(
-	input: TransformableStream<UnderType, UpperType>,
+	input: EndableTransformableStream<UnderType, UpperType>,
 	transform: StreamTransform<UnderType, UpperType>
-): TransformedStream<UnderType, UpperType> {
+): EffectiveTransformedStream<UnderType, UpperType> {
 	const result = Inputted(TransformedStreamClass(), input)
 	result.pos = 0
 	result.transform = transform
 	result[Symbol.iterator] = streamIterator<UpperType>
-	return result as TransformedStream<UnderType, UpperType>
+	return result as EffectiveTransformedStream<UnderType, UpperType>
 }
 
 export function TransformableStream<UnderType = any, UpperType = any>() {
 	return function (
 		stream: EndableStream<UnderType>
-	): TransformableStream<UnderType, UpperType> {
+	): EndableTransformableStream<UnderType, UpperType> {
 		stream.transform = transformStream<UnderType, UpperType>
-		return stream as TransformableStream<UnderType, UpperType>
+		return stream as EndableTransformableStream<UnderType, UpperType>
 	}
 }

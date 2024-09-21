@@ -4,7 +4,7 @@ const { isFunction } = type
 const { T } = boolean
 
 import type { Collection } from "./interfaces.js"
-import { iteratorCheck } from "../Token/utils.js"
+import { isIterable } from "src/Stream/IterableStream/utils.js"
 
 export const isPlainCollection = structCheck<Collection>({
 	push: isFunction,
@@ -12,5 +12,5 @@ export const isPlainCollection = structCheck<Collection>({
 })
 
 export function isCollection<Type = any>(x: any): x is Collection<Type> {
-	return isPlainCollection(x) && iteratorCheck(x)
+	return isPlainCollection(x) && isIterable(x)
 }

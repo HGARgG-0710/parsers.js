@@ -14,11 +14,11 @@ import {
 export function MultiIndex(multindex: number[]): MultiIndex {
 	const T = {
 		value: multindex,
+		slicer: Slicer(multindex),
 		convert: multiIndexConvert,
 		compare: multiIndexCompare,
 		equals: multiIndexEqual,
 		copy: multiIndexCopy,
-		slicer: Slicer(multindex),
 		slice: multiIndexSlice,
 		firstLevel: multiIndexFirstLevel,
 		lastLevel: multiIndexLastLevel

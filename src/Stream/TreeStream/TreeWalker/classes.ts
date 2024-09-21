@@ -1,4 +1,4 @@
-import type { TreeStream } from "../interfaces.js"
+import type { EffectiveTreeStream } from "../interfaces.js"
 import type { TreeWalker } from "./interfaces.js"
 import {
 	treeWalkerPushFirstChild,
@@ -19,7 +19,9 @@ import {
 } from "./methods.js"
 
 // ! LATER, when implementing the 'TreeModifier', one'll NEED A WAY TO NOTIFY THE TreeWalker of CHANGES IN THE 'Tree'!
-export function TreeWalker<Type = any>(treeStream: TreeStream<Type>): TreeWalker<Type> {
+export function TreeWalker<Type = any>(
+	treeStream: EffectiveTreeStream<Type>
+): TreeWalker<Type> {
 	const root = treeStream.input
 	return {
 		stream: treeStream,

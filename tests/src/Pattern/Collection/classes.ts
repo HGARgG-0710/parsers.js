@@ -2,9 +2,9 @@ import { CollectionClassTest } from "./lib/classes.js"
 import {
 	StringCollection,
 	ArrayCollection,
-	AccumulatingTokenCollection
+	AccumulatingPatternCollection
 } from "../../../../dist/src/Pattern/Collection/classes.js"
 
 CollectionClassTest("StringCollection", StringCollection, {})
 CollectionClassTest("ArrayCollection", ArrayCollection, {})
-CollectionClassTest("AccumulatingTokenCollection", AccumulatingTokenCollection, {})
+CollectionClassTest("AccumulatingPatternCollection", AccumulatingPatternCollection, {})

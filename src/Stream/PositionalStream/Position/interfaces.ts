@@ -15,6 +15,7 @@ export interface PredicatePosition extends SummatFunction {
 
 export interface PositionObject<Type = any> extends Pattern<Type> {
 	convert(stream?: BasicStream): number | PredicatePosition
+	equals?(position: Position): boolean
 	compare?(position: Position, stream?: BasicStream): boolean
 	copy?(): PositionObject<Type>
 }

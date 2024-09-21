@@ -9,11 +9,14 @@ import type { FinishableStream } from "../FinishableStream/interfaces.js"
 import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface InputStream<Type = any>
-	extends PositionalStream<Type, number>,
-		IterableStream<Type>,
+	extends Inputted<Indexed>,
+		PositionalStream<Type, number>,
+		IterableStream<Type> {}
+
+export interface EffectiveInputStream<Type = any>
+	extends InputStream<Type>,
 		NavigableStream<Type>,
 		RewindableStream<Type>,
 		CopiableStream<Type>,
 		FinishableStream<Type>,
-		Inputted<Indexed>,
 		ReversedStreamClassInstance<Type> {}

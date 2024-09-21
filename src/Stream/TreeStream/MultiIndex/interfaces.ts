@@ -5,7 +5,7 @@ import type { PositionObject } from "src/Stream/PositionalStream/Position/interf
 export interface MultiIndex extends PositionObject<number[]> {
 	slicer: Slicer<number[]>
 	modifier: MultiIndexModifier
-	equals(position: MultiIndex): boolean
+	equals(position: MultiIndex, i?: number): boolean
 	slice(from?: number, to?: number): Slicer<number[]>
 	firstLevel(): number[]
 	lastLevel(): number[]

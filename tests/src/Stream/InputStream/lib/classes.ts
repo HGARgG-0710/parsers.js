@@ -1,8 +1,1 @@
-import {
-	streamCopyTest,
-	streamFinishTest,
-	streamNavigateTest,
-	streamNextTest,
-	streamPosTest,
-	streamPrevTest
-} from "Stream/lib/classes.js"
+import { streamCopyTest, streamNavigateTest } from "Stream/lib/classes.js"

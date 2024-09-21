@@ -6,24 +6,26 @@ export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
 	return this.input.curr
 }
 
-export function predicateStreamNext<Type = any>(this: PredicateStream<Type>) {
+export function effectivePredicateStreamNext<Type = any>(
+	this: EffectivePredicateStream<Type>
+) {
 	++this.pos
+	this.hasLookAhead = false
 	return this.lookAhead
 }
 
 export function effectivePredicateStreamProd<Type = any>(
 	this: EffectivePredicateStream<Type>
 ) {
-	if (this.isStart || this.lookAhead === this.curr) {
-		this.input.next()
-		return this.curr
-	}
+	if (this.hasLookAhead) return this.lookAhead
+	this.hasLookAhead = true
+	this.input.next()
+	return this.curr
 }
 
 export function effectivePredicateStreamIsEnd<Type = any>(
 	this: EffectivePredicateStream<Type>
 ) {
-	if (this.input.isCurrEnd()) return true
 	this.lookAhead = this.prod()
-	return !this.predicate(this.input)
+	return this.input.isCurrEnd() || !this.predicate(this.input)
 }

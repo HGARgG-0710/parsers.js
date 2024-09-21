@@ -3,26 +3,47 @@ const { isNumber } = type
 
 import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
 import {
-	positionCheck,
-	positionCompare,
+	directionCompare,
 	positionConvert,
-	positionEqual
+	positionEqual,
+	positionNegate
 } from "../PositionalStream/Position/utils.js"
 import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
-import type { BoundableStream, LimitedStream } from "./interfaces.js"
+import type {
+	BoundableStream,
+	EffectiveLimitedStream,
+	LimitedStream
+} from "./interfaces.js"
 
 export function limitStream<Type = any>(this: BoundableStream<Type>, dual: DualPosition) {
 	return LimitedStreamConstructor<Type>(this, dual)
 }
 
-export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {
-	return positionCompare(this.from, this.to, this.input)
-		? this.input.next()
-		: this.input.prev()
+export function effectiveLimitedStreamNext<Type = any>(
+	this: EffectiveLimitedStream<Type>
+) {
+	++this.pos
+	this.hasLookAhead = false
+	return this.lookAhead
 }
 
-export function limitedStreamIsEnd<Type = any>(this: LimitedStream<Type>) {
-	return this.input.isCurrEnd() || !positionCheck(this.input, this.to)
+export function effectiveLimitedStreamProd<Type = any>(
+	this: EffectiveLimitedStream<Type>
+) {
+	if (!this.hasLookAhead) {
+		this.hasLookAhead = true
+		this.input[directionCompare(this.from, this.to, this.input) ? "next" : "prev"]()
+		return this.input.curr
+	}
+	return this.lookAhead
+}
+
+export function effectiveLimitedStreamIsEnd<Type = any>(
+	this: EffectiveLimitedStream<Type>
+) {
+	if (this.input.isCurrEnd()) return true
+	this.lookAhead = this.prod()
+	return positionEqual(this.input, positionNegate(positionConvert(this.to, this.input)))
 }
 
 export function limitedStreamNavigate<Type = any>(
@@ -36,12 +57,18 @@ export function limitedStreamNavigate<Type = any>(
 	)
 }
 
-export function limitedStreamIsStart<Type = any>(this: LimitedStream<Type>) {
+export function effectiveLimitedStreamIsStart<Type = any>(
+	this: EffectiveLimitedStream<Type>
+) {
 	return this.input.isCurrStart() || positionEqual(this.input, this.from)
 }
 
-export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
-	return positionCompare(this.from, this.to, this.input)
-		? this.input.prev()
-		: this.input.next()
+export function effectiveLimitedStreamPrev<Type = any>(
+	this: EffectiveLimitedStream<Type>
+) {
+	--this.pos
+	this.lookAhead = this.curr
+	this.hasLookAhead = true
+	this.input[directionCompare(this.from, this.to, this.input) ? "prev" : "next"]()
+	return this.input.curr
 }

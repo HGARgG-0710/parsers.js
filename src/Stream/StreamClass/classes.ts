@@ -17,7 +17,8 @@ export function StreamClass<Type = any>(
 		basePrevIter,
 		initGetter,
 		currGetter,
-		defaultIsEnd
+		defaultIsEnd,
+		preInit
 	} = signature
 	return () => {
 		const initial = Object.defineProperty(
@@ -40,6 +41,8 @@ export function StreamClass<Type = any>(
 			}
 		)
 		initial.isEnd = defaultIsEnd.call(initial)
+		// note: call to the constructor (IN CASE IT'S PRESENT); Otherwise, a no-op
+		if (preInit && !initial.isEnd) initial.curr
 		return initial
 	}
 }

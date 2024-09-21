@@ -55,20 +55,16 @@ export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
 
 export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
-		return function (instance: InstanceType, input: any[], expectedValue: any) {
+		return function (
+			instance: InstanceType,
+			input: any[],
+			expectedValue: any,
+			lowCompare = compare
+		) {
 			it(`method: .${methodName}(${input
 				.map((x) => x.toString())
 				.join(", ")})`, () =>
-				assert(compare(instance[methodName](...input), expectedValue)))
-		}
-	}
-}
-
-export function classSpecificAmbigiousPropertyTest<InstanceType = any>(propName: string) {
-	return function (compare: (x: any, y: any) => boolean) {
-		return function (instance: InstanceType, expectedValue: any) {
-			it(`property: .${propName}`, () =>
-				assert(compare(instance[propName], expectedValue)))
+				assert(lowCompare(instance[methodName](...input), expectedValue)))
 		}
 	}
 }

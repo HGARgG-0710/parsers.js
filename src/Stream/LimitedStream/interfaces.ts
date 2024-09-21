@@ -4,11 +4,18 @@ import type { DualPosition, Position } from "../PositionalStream/Position/interf
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+
 import type {
 	IsEndCurrable,
 	IsStartCurrable,
 	ReversedStreamClassInstance
 } from "../StreamClass/interfaces.js"
+
+import type {
+	LookaheadHaving,
+	SinglePositionLookahead
+} from "../PredicateStream/interfaces.js"
+import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface Limitable<Type = any, LimitType = any> extends Summat {
 	limit(limitPositions: LimitType): Type
@@ -19,12 +26,10 @@ export interface BasicLimited extends Summat {
 	to: Position
 }
 
-export type LimitedSubUnderStream<Type = any> = PositionalStream<Type> &
+export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
+	PositionalStream<Type> &
 	IsEndCurrable &
 	IsStartCurrable
-
-export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
-	LimitedSubUnderStream<Type>
 
 export interface LimitableStream<Type = any>
 	extends BasicStream<Type>,
@@ -35,8 +40,13 @@ export interface BoundableStream<Type = any>
 		LimitedUnderStream<Type> {}
 
 export interface LimitedStream<Type = any>
-	extends LimitedSubUnderStream<Type>,
+	extends BasicLimited,
+		PositionalStream<Type, number>,
+		SinglePositionLookahead<Type>,
 		Inputted<LimitedUnderStream<Type>>,
-		Iterable<Type>,
-		BasicLimited,
+		IterableStream<Type> {}
+
+export interface EffectiveLimitedStream<Type = any>
+	extends LimitedStream<Type>,
+		LookaheadHaving,
 		ReversedStreamClassInstance<Type> {}

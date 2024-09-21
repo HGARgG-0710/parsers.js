@@ -1,7 +1,7 @@
 import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber, isArray } = type
-const { trivialCompose } = f
+const { trivialCompose, or } = f
 const { not } = boolean
 
 import type {
@@ -19,13 +19,12 @@ import type { ChangeType } from "src/Stream/ReversibleStream/interfaces.js"
 import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { BoundNameType } from "src/Stream/StreamClass/interfaces.js"
-import { isPositional } from "../utils.js"
 
 export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
 
-export function isPosition<Type = any>(x: any): x is Position<Type> {
-	return isNumber(x) || isFunction(x) || isPositionObject(x)
-}
+export const isPosition = or(isNumber, isFunction, isPositionObject) as <Type = any>(
+	x: any
+) => x is Position<Type>
 
 export function isDualPosition<Type = any>(x: any): x is DualPosition<Type> {
 	return isArray(x) && isPosition<Type>(x[0]) && (!(1 in x) || isPosition<Type>(x[1]))
@@ -60,6 +59,7 @@ export function positionNegate(position: DirectionalPosition): DirectionalPositi
  * Returns a `boolean`, indicating whether the results of `(x) => positionConvert(x, stream)` for `pos1` and `pos2` are equal
  */
 export function positionSame(pos1: Position, pos2: Position, stream?: BasicStream) {
+	if (isPositionObject(pos1) && isFunction(pos1.equals)) return pos1.equals(pos2)
 	return positionConvert(pos1, stream) === positionConvert(pos2, stream)
 }
 
@@ -76,77 +76,19 @@ export function positionEqual(stream: PositionalStream, position: Position): boo
 }
 
 /**
- * Given two `Position`s and (optionally) a `BasicStream`, returns the result of calling `positionCompare` on `(x) => positionConvert(x, stream)` for `pos1` and `pos2`
- */
-export function simplifiedPositionCompare(
-	pos1: Position,
-	pos2: Position,
-	stream?: BasicStream
-) {
-	return positionCompare(
-		positionConvert(pos1, stream),
-		positionConvert(pos2, stream),
-		stream
-	)
-}
-
-/**
- * Used for comparison of positions (possibly, within a given `Stream`).
- * Given two `Position`s and (optionally) a `Stream`, it does so in the following fashion:
+ * Compares two granted positions directionally relative to an (optional) `Stream` in the following fashion:
  *
- * * 1. If both `pos1` and `pos2` are numbers: `pos1 < pos2`
- * * 2. If `pos1` is a `PositionalObject` with '.compare' defined on it: `pos1.compare(pos2, stream)`
- * * 3. If `stream` is given, is a `PositionalStream`, `pos1 === stream.pos` and `pos2` is not a `PredicatePosition`: `!stream.pos(pos2)`
- * * 4. If `stream` is given, is a `PositionalStream`, `pos2 === stream.pos` and `pos1` is not a `PredicatePosition`: `stream.pos(pos1)`
- * * 5. If `pos1` is a `PredicatePosition` and `pos2` is a `PredicatePosition`: `pos1(stream) && !pos2(stream)`
- * * 6. If `pos1` is a `PredicatePosition` and `pos2` is falsy/absent, or `stream` is not a `PositionalStream`: `pos1(stream)`
- * * 7. If `pos1` is a `PredicatePosition` and `pos2` is neither falsy nor a `PredicatePosition`, and `stream` is given and is a `PositionalStream`:
- * 		`pos1(stream) && positionCompare(stream.pos, pos2, stream)`
- * * 8. If none of 1.-7. held, `pos2` is a `PredicatePosition` and `stream` is not a `PositionalStream`: `!pos2(stream)`
- * * 9. If none of 1.-7. held, `pos2` is a `PredicatePosition`, and `stream` is a `PositionalStream`: `!pos2(stream) && positionCompare(pos1, stream.pos, stream)`
- * * 10. If none of 1.-9. held: `simplifiedPositionCompare(pos1, pos2, stream)`
+ * * 0. Convert the given positions to `DirectionalPosition`
+ * * 1. If `isBackward(pos1) !== isBackward(pos2)`: return `isBackward(pos2) < isBackward(pos1)`;
+ * * 2. If `isBackward(pos1) === isBackward(pos2)` and not both of them are a `number`: return `true`
+ * * 3. If `isBackward(pos1) === isBackward(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
  */
-export function positionCompare(
-	pos1: Position,
-	pos2: Position,
-	stream?: BasicStream
-): boolean {
-	if (isNumber(pos1) && isNumber(pos2)) return pos1 < pos2
-	if (isPositionObject(pos1) && isFunction(pos1.compare))
-		return pos1.compare(pos2, stream)
-
-	const isPos1Function = isFunction(pos1)
-	const isPos2Function = isFunction(pos2)
-	const isStreamPositional = isPositional(stream)
-
-	if (isStreamPositional && isFunction(stream.pos)) {
-		if (pos1 === stream.pos && !isPos2Function) return !stream.pos(pos2)
-		if (pos2 === stream.pos && !isPos1Function) return stream.pos(pos1)
-	}
-
-	if (isPos1Function)
-		return (
-			pos1(stream) &&
-			(isPos2Function
-				? !pos2(stream)
-				: !(pos2 && isStreamPositional) ||
-				  positionCompare(stream.pos, pos2, stream))
-		)
-
-	if (isPos2Function)
-		return (
-			!pos2(stream) &&
-			(!isStreamPositional || positionCompare(pos1, stream.pos, stream))
-		)
-
-	return simplifiedPositionCompare(pos1, pos2, stream)
-}
-
-/**
- * Given a `PositionalStream` and a `Position`, returns `positionCompare(stream.pos, position, stream)`
- */
-export function positionCheck(stream: PositionalStream, position: Position) {
-	return positionCompare(stream.pos, position, stream)
+export function directionCompare(pos1: Position, pos2: Position, stream?: BasicStream) {
+	const converted = [pos1, pos2].map((pos) => positionConvert(pos, stream))
+	const [cPos1, cPos2] = converted
+	const [bPos1, bPos2] = [pos1, pos2].map((_, i) => isBackward(converted[i]))
+	if (bPos2 !== bPos1) return bPos2 < bPos1
+	return !(isNumber(cPos1) && isNumber(cPos2)) || cPos1 < cPos2
 }
 
 /**
@@ -210,12 +152,14 @@ export function endPredicate(predicate: PredicatePosition): StreamPredicate {
 }
 
 /**
- * Given a `DirectionalPosition`, returns a pair of `[pickDirection(directional), endPredicate(predicateChoice(directional))]`
+ * Given a `Position`, returns a pair of `[pickDirection(positionConvert(directional, stream)), endPredicate(predicateChoice(positionConverte(directional, stream)))]`
  */
 export function iterationChoice(
-	directional: DirectionalPosition
+	position: Position,
+	stream?: BasicStream
 ): [ChangeType, StreamPredicate] {
-	return [pickDirection(directional), endPredicate(predicateChoice(directional))]
+	const converted = positionConvert(position, stream)
+	return [pickDirection(converted), endPredicate(predicateChoice(converted))]
 }
 
 /**

@@ -6,16 +6,17 @@ import {
 	predicateChoice,
 	pickDirection,
 	positionStopPoint,
-	positionNegate
+	positionNegate,
+	isPosition
 } from "../Stream/PositionalStream/Position/utils.js"
-import type { StreamHandler } from "src/Parser/ParserMap/interfaces.js"
+import type { StreamHandler, StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import { positionConvert } from "src/Stream/PositionalStream/Position/utils.js"
-import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type {
-	Position,
-	StaticPosition
-} from "src/Stream/PositionalStream/Position/interfaces.js"
+	ChangeType,
+	ReversibleStream
+} from "src/Stream/ReversibleStream/interfaces.js"
+import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
+import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
 
@@ -25,8 +26,11 @@ export const firstFinished = function <T extends BaseParsingState = ParsingState
 	return (this.streams as BasicStream[])[0].isEnd
 }
 
-export function skip(input: ReversibleStream, steps: Position = 1) {
-	const [change, endPred] = iterationChoice(positionConvert(steps, input))
+export function skip(
+	input: ReversibleStream,
+	steps: Position | [ChangeType, StreamPredicate] = 1
+) {
+	const [change, endPred] = isPosition(steps) ? iterationChoice(steps) : steps
 	let i = 0
 	while (endPred(input, i)) {
 		change(input)
@@ -56,28 +60,21 @@ export function nested(
 	}
 }
 
-export function array(stream: BasicStream, init: Collection = ArrayCollection([])) {
+export function array(stream: BasicStream, init: Collection = ArrayCollection<any>([])) {
 	while (!stream.isEnd) init.push(stream.next())
 	return init
 }
 
-export function has(pred: Position) {
-	pred = predicateChoice(positionConvert(pred))
-	const stopPoint = positionStopPoint(pred)
-	const skipPred = positionNegate(pred)
+/**
+ * @returns `skip`-s until the point of `positionNegate(positionConvert(pos))`
+ */
+export function has(pos: Position) {
+	pos = predicateChoice(positionConvert(pos))
+	const stopPoint = positionStopPoint(pos)
+	const negPred = positionNegate(pos)
+	const [change, endPred] = iterationChoice(negPred)
 	return function (input: ReversibleStream) {
-		skip(input, skipPred)
+		skip(input, [change, endPred])
 		return !input[stopPoint]
-	}
-}
-
-export function find(position: StaticPosition) {
-	position = positionConvert(position) as number
-	const change = pickDirection(position)
-	const stopPoint = positionStopPoint(position)
-	position = Math.abs(position)
-	return function (input: ReversibleStream) {
-		while (!input[stopPoint] && (position as number)--) change(input)
-		return input.curr
 	}
 }

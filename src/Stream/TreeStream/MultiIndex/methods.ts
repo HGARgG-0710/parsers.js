@@ -1,4 +1,4 @@
-import type { TreeStream } from "../interfaces.js"
+import type { EffectiveTreeStream } from "../interfaces.js"
 import type { MultiIndex } from "./interfaces.js"
 import { MultiIndex as MultiIndexConstructor } from "./classes.js"
 
@@ -12,9 +12,11 @@ export function multiIndexCompare(this: MultiIndex, position: MultiIndex) {
 	return this.value.length < position.value.length
 }
 
-export function multiIndexEqual(this: MultiIndex, position: MultiIndex) {
+export function multiIndexEqual(this: MultiIndex, position: MultiIndex, i: number = 0) {
 	if (this.value.length !== position.value.length) return false
-	return this.value.every((x: number, i: number) => x === position.value[i])
+	for (; i < position.value.length; ++i)
+		if (this.value[i] !== position.value[i]) return false
+	return true
 }
 
 export function multiIndexCopy(this: MultiIndex) {
@@ -38,10 +40,10 @@ export function multiIndexLastLevel(this: MultiIndex): number[] {
 	return [last(this.value)]
 }
 
-export function multiIndexConvert(this: MultiIndex, stream: TreeStream) {
+export function multiIndexConvert(this: MultiIndex, stream: EffectiveTreeStream) {
 	let final = 0
 	stream.rewind()
-	while (!stream.isEnd && !this.equals(stream.pos)) {
+	while (!(stream.isEnd || this.equals(stream.pos))) {
 		stream.next()
 		++final
 	}

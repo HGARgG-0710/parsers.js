@@ -6,8 +6,6 @@ import type {
 
 import type { RewindableStream } from "../../../../../dist/src/Stream/RewindableStream/interfaces.js"
 
-import { next, previous } from "../../../../../dist/src/aliases.js"
-
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber, isFunction } = type
 
@@ -19,8 +17,6 @@ import {
 	isPositionObject,
 	iterationChoice,
 	pickDirection,
-	positionCheck,
-	positionCompare,
 	positionConvert,
 	positionCopy,
 	positionEqual,
@@ -28,8 +24,7 @@ import {
 	positionSame,
 	positionStopPoint,
 	predicateChoice,
-	preserveDirection,
-	simplifiedPositionCompare
+	preserveDirection
 } from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
 import { equals, utilTest } from "lib/lib.js"
 import type {
@@ -38,7 +33,6 @@ import type {
 } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 import type { StreamPredicate } from "../../../../../dist/src/Parser/ParserMap/interfaces.js"
 import type { BoundNameType } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
-import assert from "assert"
 
 const positionTrivialEquality = (x: DirectionalPosition, y: DirectionalPosition) =>
 	(isNumber(x) && isNumber(y)) ||
@@ -52,9 +46,6 @@ const [
 	basePositionNegateTest,
 	basePositionSameTest,
 	basePositionEqualTest,
-	baseSimplifiedPositionCompareTest,
-	basePositionCompareTest,
-	basePositionCheckTest,
 	basePositionCopyTest,
 	basePredicateChoiceTest,
 	baseIsBackwardTest,
@@ -71,9 +62,6 @@ const [
 	[positionNegate, "positionNegate"],
 	[positionSame, "positionSame"],
 	[positionEqual, "positionEqual"],
-	[simplifiedPositionCompare, "simplifiedPositionCompare"],
-	[positionCompare, "positionCompare"],
-	[positionCheck, "positionCheck"],
 	[positionCopy, "positionCopy"],
 	[predicateChoice, "predicateChoice"],
 	[isBackward, "isBackward"],
@@ -96,9 +84,6 @@ export const positionNegateTest = basePositionNegateTest(preserveDirectionTestCo
 
 export const positionsSameTest = basePositionSameTest(equals)
 export const positionsEqualTest = basePositionEqualTest(equals)
-export const simplifiedPositionCompareTest = baseSimplifiedPositionCompareTest(equals)
-export const positionCompareTest = basePositionCompareTest(equals)
-export const positionCheckTest = basePositionCheckTest(equals)
 
 export const positionCopyTest = basePositionCopyTest((x: Position, input: Position) =>
 	isPositionObject(x) ? isPositionObject(input) && !equals(x, input) : equals(x, input)

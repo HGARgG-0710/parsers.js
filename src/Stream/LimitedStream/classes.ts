@@ -1,36 +1,39 @@
-import { boolean } from "@hgargg-0710/one"
-const { T } = boolean
-
 import type { DualPosition } from "../PositionalStream/Position/interfaces.js"
-import type { LimitedUnderStream, LimitedStream, BoundableStream } from "./interfaces.js"
+import type {
+	LimitedUnderStream,
+	EffectiveLimitedStream,
+	BoundableStream
+} from "./interfaces.js"
 
-import { limitStream } from "./methods.js"
-import { limitedStreamNavigate } from "./methods.js"
-import { limitedStreamIsEnd } from "./methods.js"
+import { effectiveLimitedStreamProd, limitStream } from "./methods.js"
+import { effectiveLimitedStreamIsEnd, limitedStreamNavigate } from "./methods.js"
 import { streamIterator } from "../IterableStream/methods.js"
 import { underStreamCurr, underStreamDefaultIsEnd } from "../UnderStream/methods.js"
 
 import { isNavigable, uniNavigate } from "../NavigableStream/utils.js"
-import { limitedStreamNext } from "./methods.js"
-import { limitedStreamPrev } from "./methods.js"
-import { limitedStreamIsStart } from "./methods.js"
+import { effectiveLimitedStreamNext } from "./methods.js"
+import { effectiveLimitedStreamPrev } from "./methods.js"
+import { effectiveLimitedStreamIsStart } from "./methods.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
+import { boolean } from "@hgargg-0710/one"
+const { T } = boolean
+
 export const LimitedStreamClass = StreamClass({
 	currGetter: underStreamCurr,
-	baseNextIter: limitedStreamNext,
-	basePrevIter: limitedStreamPrev,
-	isCurrEnd: limitedStreamIsEnd,
-	isCurrStart: limitedStreamIsStart,
+	baseNextIter: effectiveLimitedStreamNext,
+	basePrevIter: effectiveLimitedStreamPrev,
+	isCurrEnd: effectiveLimitedStreamIsEnd,
+	isCurrStart: effectiveLimitedStreamIsStart,
 	defaultIsEnd: underStreamDefaultIsEnd
 })
 
 export function LimitedStream<Type = any>(
 	input: LimitedUnderStream<Type>,
 	[from, to]: DualPosition
-): LimitedStream<Type> {
-	if (!to) {
+): EffectiveLimitedStream<Type> {
+	if (to === undefined) {
 		to = from
 		from = T // explanation: the 'from = T' will cause expression 'while (!from(stream)) stream.next()' become 'while (false) stream.next()', essentially being a no-op;
 	}
@@ -43,7 +46,10 @@ export function LimitedStream<Type = any>(
 	result.navigate = isNavigable(input) ? limitedStreamNavigate<Type> : null
 	result[Symbol.iterator] = streamIterator<Type>
 	result.limit = limitStream<Type>
-	return result as LimitedStream<Type>
+	result.hasLookAhead = false
+	result.prod = effectiveLimitedStreamProd<Type>
+
+	return result as EffectiveLimitedStream<Type>
 }
 
 export function LimitableStream<Type = any>(

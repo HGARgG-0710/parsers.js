@@ -4,7 +4,6 @@ const { structCheck } = object
 
 import { Token } from "./classes.js"
 import type { TokenInstance } from "./interfaces.js"
-import type { SummatIterable } from "@hgargg-0710/summat.ts"
 
 const emptyStruct = structCheck([])
 export function isType<Type = any>(type: Type): (x: any) => x is TokenInstance<Type> {
@@ -12,5 +11,3 @@ export function isType<Type = any>(type: Type): (x: any) => x is TokenInstance<T
 		x: any
 	) => x is TokenInstance<Type>
 }
-
-export const iteratorCheck = structCheck<SummatIterable>([Symbol.iterator])

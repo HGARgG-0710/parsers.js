@@ -4,7 +4,7 @@ import { NestedSteam } from "./classes.js"
 import type {
 	EffectiveNestedStream,
 	NestableEndableStream,
-	NestedEndableStream
+	NestedStream
 } from "./interfaces.js"
 
 import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
@@ -20,9 +20,7 @@ export function nestableStreamNest<Type = any>(
 	return NestedSteam<Type>(this, inflate, deflate)
 }
 
-export function effectiveNestedStreamInitCurr<Type = any>(
-	this: EffectiveNestedStream<Type>
-) {
+export function nestedStreamInitCurr<Type = any>(this: NestedStream<Type>) {
 	if (this.inflate(this.input)) {
 		this.currNested = true
 		return this.input.nest(this.inflate, this.deflate)
@@ -36,9 +34,11 @@ export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStrea
 		this.currNested = false
 	}
 	this.input.next()
-	return effectiveNestedStreamInitCurr.call(this)
+	return this.initGetter()
 }
 
-export function nestedEndableStreamIsEnd<Type = any>(this: NestedEndableStream<Type>) {
+export function effectiveNestedStreamIsEnd<Type = any>(
+	this: EffectiveNestedStream<Type>
+) {
 	return this.input.isCurrEnd() || !!this.deflate()
 }

@@ -1,8 +1,8 @@
 import { TreeStream as TreeStreamConstructor } from "./classes.js"
-import type { TreeStream } from "./interfaces.js"
+import type { EffectiveTreeStream, TreeStream } from "./interfaces.js"
 import type { MultiIndex } from "./MultiIndex/interfaces.js"
 
-export function treeStreamNext<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
 
 	if (response) walker[response]()
@@ -14,14 +14,14 @@ export function treeStreamNext<Type = any>(this: TreeStream<Type>) {
 	return this.curr
 }
 
-export function treeStreamRewind<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamRewind<Type = any>(this: EffectiveTreeStream<Type>) {
 	this.walker.restart()
 	this.isStart = true
 	return this.curr
 }
 
-export function treeStreamNavigate<Type = any>(
-	this: TreeStream<Type>,
+export function effectiveTreeStreamNavigate<Type = any>(
+	this: EffectiveTreeStream<Type>,
 	index: MultiIndex
 ) {
 	this.pos = index
@@ -29,13 +29,13 @@ export function treeStreamNavigate<Type = any>(
 	return this.curr
 }
 
-export function treeStreamCopy<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamCopy<Type = any>(this: EffectiveTreeStream<Type>) {
 	const copied = TreeStreamConstructor(this.input)
 	copied.navigate(this.pos)
 	return copied
 }
 
-export function treeStreamPrev<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamPrev<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
 	walker[response]()
 	return this.curr
@@ -45,7 +45,7 @@ export function treeStreamInitCurr<Type = any>(this: TreeStream<Type>) {
 	return this.input
 }
 
-export function treeStreamIsEnd<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamIsEnd<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker } = this
 	this.response = walker.isChild()
 		? "pushFirstChild"
@@ -58,7 +58,7 @@ export function treeStreamIsEnd<Type = any>(this: TreeStream<Type>) {
 	)
 }
 
-export function treeStreamIsStart<Type = any>(this: TreeStream<Type>) {
+export function effectiveTreeStreamIsStart<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker } = this
 	return !(this.response = walker.isSiblingBefore()
 		? "goPrevLast"

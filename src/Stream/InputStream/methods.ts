@@ -3,7 +3,7 @@ const { isNumber } = type
 
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import { positionConvert } from "../PositionalStream/Position/utils.js"
-import type { InputStream } from "./interfaces.js"
+import type { EffectiveInputStream, InputStream } from "./interfaces.js"
 import { InputStream as InputStreamConstructor } from "./classes.js"
 import { navigate } from "../NavigableStream/utils.js"
 
@@ -15,24 +15,25 @@ export function inputStreamNext<Type = any>(this: InputStream<Type>) {
 	return this.input[++this.pos]
 }
 
-export function inputStreamRewind<Type = any>(this: InputStream<Type>) {
+export function effectiveInputStreamRewind<Type = any>(this: EffectiveInputStream<Type>) {
 	this.isStart = true
 	return this.input[(this.pos = 0)]
 }
 
-export function inputStreamNavigate<Type = any>(
-	this: InputStream<Type>,
+export function effectiveInputStreamNavigate<Type = any>(
+	this: EffectiveInputStream<Type>,
 	index: Position
 ) {
 	index = positionConvert(index, this)
 	if (isNumber(index)) {
 		if (index < 0) index += this.input.length
-		return this.input[Math.max((this.pos = index), 0)]
+		return this.input[(this.pos = Math.max(index, 0))]
 	}
 	navigate(this, index)
 	return this.input[positionConvert(this.pos) as number]
 }
 
+// * note: this is just 'streamIterator' inlined;
 export function* inputStreamIterator<Type = any>(this: InputStream<Type>) {
 	while (this.pos < this.input.length) {
 		yield this.input[this.pos]
@@ -49,7 +50,7 @@ export function inputStreamCurr<Type = any>(this: InputStream<Type>) {
 	return this.input[this.pos]
 }
 
-export function inputStreamCopy<Type = any>(this: InputStream<Type>) {
+export function effectiveInputStreamCopy<Type = any>(this: EffectiveInputStream<Type>) {
 	const inputStream = InputStreamConstructor<Type>(this.input)
 	inputStream.pos = this.pos
 	return inputStream
