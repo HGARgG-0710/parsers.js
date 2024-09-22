@@ -18,7 +18,6 @@ import {
 	treeWalkerGoIndex
 } from "./methods.js"
 
-// ! LATER, when implementing the 'TreeModifier', one'll NEED A WAY TO NOTIFY THE TreeWalker of CHANGES IN THE 'Tree'!
 export function TreeWalker<Type = any>(
 	treeStream: EffectiveTreeStream<Type>
 ): TreeWalker<Type> {

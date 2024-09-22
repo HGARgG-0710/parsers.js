@@ -4,9 +4,10 @@ import type { Inputted } from "../UnderStream/interfaces.js"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
+import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface Nestable<Type = any> extends Summat {
-	nest(inflate?: StreamPredicate, deflate?: StreamPredicate): Type
+	nest(inflate?: StreamPredicate, deflate?: StreamPredicate, toplevel?: boolean): Type
 }
 
 export interface Inflatable extends Summat {
@@ -21,8 +22,15 @@ export interface CurrNestedCheckable extends Summat {
 	currNested: boolean
 }
 
-export interface Blowfish extends Inflatable, Deflatable {}
-export interface VisibleBlowfish extends Blowfish, CurrNestedCheckable {}
+export interface Toplevel extends Summat {
+	toplevel: boolean
+}
+
+export interface BasicNested
+	extends CurrNestedCheckable,
+		Toplevel,
+		Inflatable,
+		Deflatable {}
 
 export interface NestableStream<Type = any>
 	extends BasicStream<Type>,
@@ -33,12 +41,12 @@ export interface NestableEndableStream<Type = any>
 		EndableStream<Type> {}
 
 export interface NestedStream<Type = any>
-	extends BasicStream<Type | NestedStream<Type>>,
-		VisibleBlowfish,
+	extends IterableStream<Type | NestedStream<Type>>,
+		BasicNested,
 		Inputted<NestableStream<Type>> {}
 
 export interface EffectiveNestedStream<Type = any>
 	extends StreamClassInstance<Type | EffectiveNestedStream<Type>>,
-		VisibleBlowfish,
+		BasicNested,
 		Inputted<NestableEndableStream<Type>>,
-		Iterable<Type> {}
+		IterableStream<Type | EffectiveNestedStream<Type>> {}

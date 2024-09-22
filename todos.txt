@@ -3,6 +3,68 @@
 
 [v0.3]
 
+NOTE: motivated to implement these after having encoutnered the 'TreeWalker'. The size of it is INSANE
+2.22. Use prototypal inheritance to save memory; 
+
+	Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
+		really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
+	
+	The user can do this sort of thing themselves, but for operations that are heavy on 'Object.create' usage, it may be useful
+		to provide an alias; 
+
+	Thus, there'd be BOTH exports for things that are StreamClass-es (functions for producing base prototypes), and the prototype 
+		objects themselves; 
+
+	Same goes for objects that are used within the definitons of different 'Parsers"; 
+
+	NOTE: some types (such as 'IndexMap') would benefit from such introductions INCREDIBLY!
+
+	ESPECIALLY use the prototypal inheritance for the 'Tree'-s (can make the Big ones A LOT more compact memory-wise, need only store the '.value'); 
+
+
+2.28. [Maaaayyybe???] Consider turning the 'StreamClass' into a 'new'-constructor+prototype also; 	
+	This is due to that the cost of actually calling it is prohibitively expensive; 
+	Instead, one can return CONSTRUCTORS from the 'StreamClass' [they would have prototypes defined by the user signature]; 
+
+		The results of constructors would have their '.isStart', '.realCurr' and other dynamic per-Stream properties
+			defined inside the actual returned constructor; 
+		
+		Then, the function returning this "basic" StreamClass-constructor, would have it copied as a '.prototype' for the other one: 
+
+			ClassFunction.prototype = Object.create(StreamClass.prototype)
+
+		The remainder properties/functions would be specified WITHIN ITS OWN CONSTRUCTOR; 
+
+		This feature (in particular) would permit intantiation of different StreamClass-es, 
+			without the need for copying; 
+
+2.26. IDEA: for compact and general implementation of '.copy' on the 'StreamClassInstance'-based StreamClasses: 
+
+		1. Add '.constructor' (as in '.prototype.constructor') to the PROTOTYPE OBJECT of the given StreamClass; 
+			1.1. Let the 'constructor' correspond to the function that is to be used for copying; 
+		2. Keep the '.copy' ONLY on the 'InputStream', and 'TreeStream';
+			Do not implement it on the 'Wrapper'-streams (those that have other Stream-s as '.input'); 
+
+		The 'StreamClassInstance'-s ARE far too diverse to be implementing '.copy' on each one of them; 
+
+		ALSO, regarding usage of 'new': 
+
+			Due to the fact that one is going to be introducing the prototypal inheritance in v0.4, 
+				let there also be (optional) 'new'. Done like: 
+
+					funcition Constructor(...args) {
+						if (!(this instanceof Constructor))
+							return new Constructor (...args)
+						// ... 
+					}
+					Object.assign(Constructor.prototype, ...) // desired prototype
+
+				The difference from the current constructor-functions of 'parsers.js' is that those do not use 'this', 
+					and they also have the 'return' statement; 
+
+				The object that is being '.assign'-ed to the '.prototype' is the output of the according 'StreamClass({...})' call; 
+					[???On account of that, perhaps rename the 'StreamClass' into 'StreamClassPrototype'?]; 
+
 A. testing: 
 	A.1. Create list of modules to be tested; 
 
@@ -110,60 +172,30 @@ A. testing:
 						This (typically), just calls the method once, + does some comparison work on the result; 
 						These are separated by predicates used for comparison.
 
-					4.2.2. Combined functionality; 
-						This is relative to how 'Stream'-s are supposed to "behave" in certain conditions; 
-							Generally: 
-
-								1. For '.isEnd', the 'generalIsEndTest': 
-									1.1. start from current, point; 
-									1.2. COMPARE the '.curr' on each iteration, then '.next()'
-										1.2.1. do appropriate 'assert' + USE A GENERAL 'COMPARISON' OPERATION!
-										1.2.2. Update the 'i' (index); 
-										1.2.3. Save the 'stream.curr' into a separate variable BEFORE doing the 'stream.next()'; 
-									1.3. Compare the 'i' counter of walked-through items [.length, or whatever]; 
-									1.4. Compare the LAST ITEM WITH ITSELF (to check for correctness of the definition of the 'StreamClass'-specific items, the '.isEnd'); 
-								2. SAME for '.isStart' and '.prev'; 
-								3. For '.rewind()', '.finish()' - 'generalRewind', 'generalFinish': 
-									3.0. Walk up to the end/start ('while (!stream.isEnd) stream.next()')
-										3.0.1. Save the items into A BUFFER ('bufferCopy')
-									3.1. Do '.rewind()'/'.finish()'; 
-									3.2. Walk again; 
-										3.2.1. Add into 'bufferRepeat'
-									3.3. Compare the 'bufferCopy' and 'bufferRepeat' via 'arraysSame'; 
-
-					4.2.3. Utils; 
+					4.2.2. Utils; 
 						These are tested regularly via the 'utilTest'; 
-						4.2.3.1. ORGANIZE THESE! 
+						4.2.2.1. ORGANIZE THESE! 
 							Let each 'util' go to its appropriate interface directory...;
 
-					4.2.4. Constructors: 
+							NOTE: the 'is'- utils ARE NOT to be tested ; 
+								Only things like 'toInputStream', 'uniNavigate', and so forth...
+
+							To test [only]: 
+
+								1. InputStream/toInputStream
+								2. IterableStream/isIterable
+								3. BasicStream/isStream
+								4. RewindableStream/rewind
+
+					4.2.3. Constructors: 
 						Make them "typical" (in the sense they uses the 'is'-functions); 
 
-						ADD THE 'is'-utils: 
+						1. For each of the 'implementations' of the 'StreamClass'; 
+							These would be 'and'-s with SPECIFIC properties; 
+							LIST: 
 
-							1. For the 'StreamClass' ('StreamClassInstance')
-							2. For each of the 'implementations' of the 'StreamClass'; 
-								These would be 'and'-s with SPECIFIC properties; 
-								LIST: 
+								1. StreamTokenizer (Parser/) [need both 'is' and the constructor]; 
 
-									1. StreamTokenizer (Parser/) ;
-
-									['is' done - constructor left];
-									2. InputStream 					
-									3. LimitedStream 		
-									4. NestedStream 		
-									5. PositionalStream 	
-									6. PredicateStream 		
-									7. ProlongedStream 		 
-									8. ReversedStream		 
-									9. TransformedStream	
-									10. TreeStream; 		 
-
-									NOTE: when writing the 'is'-functions for the interfaces of Streams that USE THE 'StreamClass', 
-										DO NOT use the 'isStreamClass' utility as a part of their "identification util"'s definition; 
-
-										CONCLUSION: the tests WILL have to have THEIR OWN 'is'-functions, based on the ones that 
-											are intended for the primary "facade" interfaces; 
 
 					4.2.5. Methods:
 						4.3.5.1. StreamClassInstance-specific (general): 
@@ -177,16 +209,15 @@ A. testing:
 							4.3.5.1.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
 							4.3.5.1.6. copyTest (based off 'streamCopyTest'; for InputStream and TreeStream); 
 
-							4.3.5.1.7. 'isStream(.input)', the "missing" '.from' and other such particular values would be tested
-								AS PART OF THE APPROPRIATE (__specific__) METHODS' definitions/comparisons; 
-
 					4.2.6. Refactoring: 
 						4.3.6.1. In tests, rely HEAVILY on 'navigate' (once tested); 
 						4.3.6.2. Don't test optimizations (like 'uniNavigate') INSIDE the test-code; 
 
 					NEXT ITEM-s: 
 
-						1. The 'is'-functions, CONSTRUCTORS for every single type of Stream: 
+						1. Rewew the 'ClassConstructor' function to include: 
+							1.1. Ability to ensure that a given 'Stream' is (after all) BOTH creatable using 'new' AND regular function call; 
+							1.2. That the properties on it are NOT OWN [that being, that the memory saving is real]; 
 						2. per-case defined (.copy, .navigate); 
 							2.1. .copy is for InputStream and TreeStream only (can be generalized?); 
 							2.2. .navigate is for: 
@@ -194,10 +225,10 @@ A. testing:
 								2.2.2. TreeStream; 
 								2.2.3. LimitedStream; 
 						3. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
-							3.1. Re-design the 'Position' [re-check what could have been missing - been adding some new definitions...]; 
-						4. [Finally] combining the testing code together FOR EACH one of the classes, via signatures; 
+						4. [mini, side] Re-design the 'Position' [re-check what could have been missing - been adding some new definitions...]; 
+						5. [Finally] combining the testing code together FOR EACH one of the classes, via signatures; 
 
-						5. ALSO : add a 'streamIterator' TEST [look for other such "minor" utils, if any remains...]; 
+						6. ALSO : add a 'streamIterator' TEST [look for other such "minor" utils, if any remains...]; 
 
 			5. Parser/
 			6. Stateful/
@@ -821,24 +852,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!
 	
-	2.22. Use prototypal inheritance to save memory; 
-
-		Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
-			really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
-		
-		The user can do this sort of thing themselves, but for operations that are heavy on 'Object.create' usage, it may be useful
-			to provide an alias; 
-
-		Thus, there'd be BOTH exports for things that are StreamClass-es (functions for producing base prototypes), and the prototype 
-			objects themselves; 
-
-		Same goes for objects that are used within the definitons of different 'Parsers"; 
-
-		NOTE: some types (such as 'IndexMap') would benefit from such introductions INCREDIBLY!
-
-		ESPECIALLY use the prototypal inheritance for the 'Tree'-s (can make the Big ones A LOT more compact memory-wise, need only store the '.value'); 
-
-	2.23. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
+	2.22. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
 
 		The idea is: separate the processes of object-creation and initialization; 
 		This permits the re-usage of the same interfaces on DIFFERENT targets 
@@ -879,7 +893,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Likewise, there'd be 'StreamTransformer' (TransformedStream), 'StreamNester' (NestedStream), and others; 
 			Call these `StreamProxy/`; 
 	
-	2.24. TypeScript - use 'enum's; 
+	2.23. TypeScript - use 'enum's; 
 
 		Learned about 'enum's being present in TypeScript; 
 		Use them to designate "special constants" (ALSO - take those out into separate files); 
@@ -899,40 +913,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
 		[Current preference is to the latter...]
 
-	2.25. Idea for a method: ProlongedStream.prolong; 	
+	2.24. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams'; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
-
-	2.26. IDEA: for compact and general implementation of '.copy' on the 'StreamClassInstance'-based StreamClasses: 
-
-		1. Add '.constructor' (as in '.prototype.constructor') to the PROTOTYPE OBJECT of the given StreamClass; 
-			1.1. Let the 'constructor' correspond to the function that is to be used for copying; 
-		2. Keep the '.copy' ONLY on the 'InputStream', and 'TreeStream';
-			Do not implement it on the 'Wrapper'-streams (those that have other Stream-s as '.input'); 
-
-		The 'StreamClassInstance'-s ARE far too diverse to be implementing '.copy' on each one of them; 
-
-		ALSO, regarding usage of 'new': 
-
-			Due to the fact that one is going to be introducing the prototypal inheritance in v0.4, 
-				let there also be (optional) 'new'. Done like: 
-
-					funcition Constructor(...args) {
-						if (!(this instanceof Constructor))
-							return new Constructor (...args)
-						// ... 
-					}
-					Object.assign(Constructor.prototype, ...) // desired prototype
-
-				The difference from the current constructor-functions of 'parsers.js' is that those do not use 'this', 
-					and they also have the 'return' statement; 
-
-				The object that is being '.assign'-ed to the '.prototype' is the output of the according 'StreamClass({...})' call; 
-					[???On account of that, perhaps rename the 'StreamClass' into 'StreamClassPrototype'?]; 
 	
-	2.27. LimitedStream - '.findDirection(from?, to?, input?)' method: 
+	2.25. LimitedStream - '.findDirection(from?, to?, input?)' method: 
 
 		This (basically) re-initializes the values for '.from' and '.to' on the given 'LimitedStream', re-setting the '.direction' property; 
 		During the course of computing the '.next/.prev' on the underlying '.input'-Stream inside the 'LimitedStream', it may come to be that 
@@ -952,23 +939,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 					Will reduce pointless out-of-place re-computation; 
 	
-	2.28. [Maaaayyybe???] Consider turning the 'StreamClass' into a 'new'-constructor+prototype also; 	
-		This is due to that the cost of actually calling it is prohibitively expensive; 
-		Instead, one can return CONSTRUCTORS from the 'StreamClass' [they would have prototypes defined by the user signature]; 
-
-			The results of constructors would have their '.isStart', '.realCurr' and other dynamic per-Stream properties
-				defined inside the actual returned constructor; 
-			
-			Then, the function returning this "basic" StreamClass-constructor, would have it copied as a '.prototype' for the other one: 
-
-				ClassFunction.prototype = Object.create(StreamClass.prototype)
-
-			The remainder properties/functions would be specified WITHIN ITS OWN CONSTRUCTOR; 
-
-			This feature (in particular) would permit intantiation of different StreamClass-es, 
-				without the need for copying; 
-
-	2.29. MAKE the 'utils' TYPE-SAFE! 
+	2.26. MAKE the 'utils' TYPE-SAFE! 
 
 		Currently, what lacks is the ability to dynamically generate the appropriate type-checking functions that may require 
 			additional predicates, BUT still preserve the form; 
@@ -986,7 +957,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Currently, the checks can make SOME mistakes still; 
 			[Noticed this while doing 'isNumericPositional' - should be refactored...]; 
 
-	2.30. [Maaayybe?] Create a 'samples' directory; 
+	2.27. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -995,12 +966,20 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Think about it [this particular refactoring is VERY fine]; 
 
-	2.31. Generics for the 'isType'-functions; 	
+	2.28. Generics for the 'isType'-functions; 	
 		Learned about TypeScript generics for nameless functions (namely, how they can be used with 'as'): 
 
 			const isType = ... as <Type = any>(x: any) => x is Type
 		
 		Variation on this - add throughout the library [particularly, when 'Type' is itself a generics parameter]; 
+
+	2.29. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+		It appears at least in 2 places inside the library: 
+
+			1. Tree (InTreeType)
+			2. NestedStream;
+		
+		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 
 3. Dependency management: 
 	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

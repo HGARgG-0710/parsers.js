@@ -25,11 +25,13 @@ export const NestedStreamClass = StreamClass({
 export function NestedSteam<Type = any>(
 	input: NestableEndableStream<Type>,
 	inflate: StreamPredicate,
-	deflate: StreamPredicate
+	deflate: StreamPredicate,
+	toplevel: boolean = true
 ): EffectiveNestedStream<Type> {
 	const result = Inputted(NestedStreamClass(), input)
 	result.inflate = inflate
 	result.deflate = deflate
+	result.toplevel = toplevel
 	result.currNested = false
 	result[Symbol.iterator] = streamIterator<Type>
 	return result as EffectiveNestedStream<Type>

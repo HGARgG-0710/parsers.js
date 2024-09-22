@@ -28,15 +28,15 @@ export interface SinglePositionLookahead<Type = any>
 
 export interface BasicPredicated<Type = any>
 	extends Predicated,
-		SinglePositionLookahead<Type> {}
+		SinglePositionLookahead<Type>,
+		IterableStream<Type>,
+		PositionalStream<Type, number> {}
 
 export interface PredicateStream<Type = any>
-	extends PositionalStream<Type, number>,
-		BasicPredicated<Type>,
-		Inputted<ReversibleStream<Type>>,
-		IterableStream<Type> {}
+	extends BasicPredicated<Type>,
+		Inputted<ReversibleStream<Type>> {}
 
-export interface EffectivePredicateStream<Type>
+export interface EffectivePredicateStream<Type = any>
 	extends StreamClassInstance<Type>,
 		BasicPredicated<Type>,
 		Inputted<ReversibleStream<Type> & IsEndCurrable>,

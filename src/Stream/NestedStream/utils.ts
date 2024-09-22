@@ -2,14 +2,15 @@ import type {
 	Inflatable,
 	Deflatable,
 	Nestable,
-	Blowfish,
 	NestedStream,
-	CurrNestedCheckable
+	CurrNestedCheckable,
+	Toplevel,
+	BasicNested
 } from "./interfaces.js"
 import { isInputted } from "../UnderStream/utils.js"
-import { isStream } from "../BasicStream/utils.js"
 
 import { object, typeof as type, function as f } from "@hgargg-0710/one"
+import { isIterableStream } from "../IterableStream/utils.js"
 const { structCheck } = object
 const { isFunction, isBoolean } = type
 const { and } = f
@@ -20,11 +21,14 @@ export const isDeflatable = structCheck<Deflatable>({ deflate: isFunction })
 export const isCurrNestedCheckable = structCheck<CurrNestedCheckable>({
 	currNested: isBoolean
 })
+export const isToplevel = structCheck<Toplevel>({ toplevel: isBoolean })
 
-export const isBlowfish = and(isInflatable, isDeflatable) as (x: any) => x is Blowfish
-export const isNestedStream = and(
-	isInputted,
-	isCurrNestedCheckable,
-	isBlowfish,
-	isStream
-) as <Type = any>(x: any) => x is NestedStream<Type>
+export const isBasicNested = and(isInflatable, isDeflatable, isCurrNestedCheckable) as (
+	x: any
+) => x is BasicNested
+
+export const isNestedStream = and(isInputted, isBasicNested, isIterableStream) as <
+	Type = any
+>(
+	x: any
+) => x is NestedStream<Type>

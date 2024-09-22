@@ -15,15 +15,16 @@ const { F } = boolean
 export function nestableStreamNest<Type = any>(
 	this: NestableEndableStream<Type>,
 	inflate: StreamPredicate = F,
-	deflate: StreamPredicate = F
+	deflate: StreamPredicate = F,
+	toplevel: boolean = true
 ) {
-	return NestedSteam<Type>(this, inflate, deflate)
+	return NestedSteam<Type>(this, inflate, deflate, toplevel)
 }
 
 export function nestedStreamInitCurr<Type = any>(this: NestedStream<Type>) {
 	if (this.inflate(this.input)) {
 		this.currNested = true
-		return this.input.nest(this.inflate, this.deflate)
+		return this.input.nest(this.inflate, this.deflate, false)
 	}
 	return this.input.curr
 }
@@ -40,5 +41,5 @@ export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStrea
 export function effectiveNestedStreamIsEnd<Type = any>(
 	this: EffectiveNestedStream<Type>
 ) {
-	return this.input.isCurrEnd() || !!this.deflate()
+	return this.input.isCurrEnd() || (!this.toplevel && this.deflate())
 }

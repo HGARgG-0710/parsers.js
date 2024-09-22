@@ -28,8 +28,8 @@ export const isBasicPredicated = and(isPredicated, isSinglePositionLookahead) as
 ) => x is BasicPredicated
 
 export const isPredicateStream = and(
-	isPositionalStream,
 	isBasicPredicated,
 	isInputted,
-	isIterable
+	isIterable, 
+	isPositionalStream,
 ) as (x: any) => x is PredicateStream

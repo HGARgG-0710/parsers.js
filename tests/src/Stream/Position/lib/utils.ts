@@ -73,7 +73,7 @@ const [
 ].map(([method, name]) => utilTest(method as Function, name as string))
 
 export const isPositionObjectTest = baseIsPositionObjectTest(equals)
-export const IsPositionTest = baseIsPositionTest(equals)
+export const isPositionTest = baseIsPositionTest(equals)
 export const isDualPositionTest = baseIsDualPositionTest(equals)
 
 export const positionConvertTest = basePositionConvertTest(positionTrivialEquality)

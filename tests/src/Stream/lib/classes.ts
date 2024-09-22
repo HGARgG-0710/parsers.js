@@ -1,5 +1,4 @@
 import assert from "assert"
-import { it } from "node:test"
 
 import { arraysSame, classSpecificAmbigiousMethodTest, equals } from "lib/lib.js"
 import type { BasicStream } from "../../../../dist/src/Stream/BasicStream/interfaces.js"
@@ -8,7 +7,7 @@ import type {
 	ReversibleStream
 } from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 import type { BoundNameType } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
-import { next, previous } from "../../../../dist/src/aliases.js"
+import { next, previous } from "../../../../dist/src/utils.js"
 
 import { finish } from "../../../../dist/src/Stream/FinishableStream/utils.js"
 
@@ -94,3 +93,5 @@ export function generalJumpTest(direction: boolean) {
 
 export const [generalIsEndTest, generalIsStartTest] = [true, false].map(generalBoundTest)
 export const [generalRewindTest, generalFinishTest] = [true, false].map(generalJumpTest)
+
+export const isLookaheadHaving = (x: object) => "hasLookAhead" in x
