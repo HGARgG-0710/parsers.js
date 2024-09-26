@@ -1,11 +1,13 @@
 import { fromPairsList } from "./utils.js"
 import type {
-	MapClass,
 	IndexMap,
 	IndexingFunction,
 	TestType,
 	HasType,
-	Pairs
+	Pairs,
+	MapClass,
+	MapClassValueExtension,
+	MapClassKeyExtension
 } from "./interfaces.js"
 import {
 	indexMapIndex,
@@ -22,33 +24,58 @@ import { mapClassExtend, mapClassExtendKey } from "./methods.js"
 import { current, firstStream, is } from "src/utils.js"
 import { Token } from "src/Pattern/Token/classes.js"
 
+export const MapClassPrototype = {
+	index: { value: indexMapIndex },
+	replace: { value: indexMapReplace },
+	add: { value: indexMapAdd },
+	delete: { value: indexMapDelete },
+	unique: { value: indexMapUnique },
+	byIndex: { value: indexMapByIndex },
+	swap: { value: indexMapSwap },
+	copy: { value: indexMapCopy },
+	[Symbol.iterator]: { value: indexMapIterator }
+}
+
 export function MapClass<KeyType = any, ValueType = any>(
 	change: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
-	const mapClass: MapClass<KeyType, ValueType> = function (
-		pairsList: Pairs<KeyType, ValueType>,
-		_default?: any
-	): IndexMap<KeyType, ValueType> {
-		const [keys, values] = fromPairsList(pairsList)
-		return {
-			keys,
-			values,
-			change,
-			index: indexMapIndex<KeyType, ValueType>,
-			replace: indexMapReplace<KeyType, ValueType>,
-			add: indexMapAdd<KeyType, ValueType>,
-			delete: indexMapDelete<KeyType, ValueType>,
-			unique: indexMapUnique<KeyType, ValueType>,
-			byIndex: indexMapByIndex<KeyType, ValueType>,
-			swap: indexMapSwap<KeyType, ValueType>,
-			copy: indexMapCopy<KeyType, ValueType>,
-			default: _default,
-			[Symbol.iterator]: indexMapIterator<KeyType, ValueType>
+	class mapClass implements IndexMap<KeyType, ValueType> {
+		keys: KeyType[]
+		values: ValueType[]
+		default: any
+
+		index: (x: any) => ValueType
+
+		add: (index: number, pair: [KeyType, ValueType]) => any
+		delete: (index: number) => any
+		replace: (index: number, pair: [KeyType, ValueType]) => any
+		unique: (start?: boolean) => IndexMap<KeyType, ValueType>
+		byIndex: (index: number) => [KeyType, ValueType]
+		swap: (i: number, j: number) => any
+		copy: () => IndexMap<KeyType, ValueType>;
+		[Symbol.iterator]: () => Generator<[KeyType, ValueType]>
+
+		change: IndexingFunction<KeyType>
+
+		static change: IndexingFunction<KeyType>
+		static extend: MapClassValueExtension<KeyType, ValueType>
+		static extendKey: MapClassKeyExtension<KeyType, ValueType>
+
+		constructor(pairsList: Pairs<KeyType, ValueType>, _default?: any) {
+			const [keys, values] = fromPairsList(pairsList)
+			this.keys = keys
+			this.values = values
+			this.default = _default
 		}
 	}
+
+	Object.defineProperties(mapClass.prototype, MapClassPrototype)
+	mapClass.prototype.change = change
+
 	mapClass.change = change
 	mapClass.extend = mapClassExtend
 	mapClass.extendKey = mapClassExtendKey
+
 	return mapClass
 }
 

@@ -1,7 +1,6 @@
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 import type { IsEndCurrable } from "../StreamClass/interfaces.js"
-import { Inputted } from "../UnderStream/classes.js"
 import type { EffectivePredicateStream } from "./interfaces.js"
 import {
 	effectivePredicateStreamIsEnd,
@@ -9,27 +8,49 @@ import {
 	predicateStreamCurr,
 	effectivePredicateStreamNext
 } from "./methods.js"
-import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
-import { preserveDirection } from "../PositionalStream/Position/utils.js"
+import type {
+	Position,
+	PredicatePosition
+} from "../PositionalStream/Position/interfaces.js"
 import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
-import { streamIterator } from "../IterableStream/methods.js"
+import { effectiveLimitedStreamInitialize } from "../LimitedStream/methods.js"
+import type { PositionalStream } from "../PositionalStream/interfaces.js"
 
-export const PredicateStreamClass = StreamClass({
+export const PredicateStreamBase = StreamClass({
 	currGetter: predicateStreamCurr,
 	baseNextIter: effectivePredicateStreamNext,
 	isCurrEnd: effectivePredicateStreamIsEnd,
 	defaultIsEnd: underStreamDefaultIsEnd
 })
 
-export function PredicateStream<Type = any>(
-	input: ReversibleStream<Type> & IsEndCurrable,
+export class PredicateStream<Type = any>
+	extends PredicateStreamBase
+	implements EffectivePredicateStream<Type>
+{
+	input: ReversibleStream<Type> & IsEndCurrable
+	pos: number
+	lookAhead: Type
+	hasLookAhead: boolean
 	predicate: PredicatePosition
-): EffectivePredicateStream<Type> {
-	const result = Inputted(PredicateStreamClass(), input)
-	result.hasLookAhead = false
-	result.prod = effectivePredicateStreamProd<Type>
-	result.pos = 0
-	result.predicate = preserveDirection(predicate, (predicate) => predicate.bind(result))
-	result[Symbol.iterator] = streamIterator<Type>
-	return result as EffectivePredicateStream<Type>
+
+	init: (
+		input?: ReversibleStream<Type> & IsEndCurrable,
+		predicate?: PredicatePosition
+	) => PositionalStream<Type, Position>
+
+	prod: () => Type
+
+	constructor(
+		input?: ReversibleStream<Type> & IsEndCurrable,
+		predicate?: PredicatePosition
+	) {
+		super()
+		this.init(input, predicate)
+		super.init()
+	}
 }
+
+Object.defineProperties(PredicateStream.prototype, {
+	prod: { value: effectivePredicateStreamProd },
+	init: { value: effectiveLimitedStreamInitialize }
+})

@@ -19,6 +19,7 @@ export function ChildrenTree(propName: string = "children") {
 	const indexator = childIndex(propName)
 	return function (tree: Summat): Tree {
 		Object.defineProperty(tree, "lastChild", {
+			enumerable: true,
 			get: countGetter
 		})
 		tree.index = indexator

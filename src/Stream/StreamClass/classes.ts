@@ -1,4 +1,12 @@
-import type { StreamClassSignature, StreamClassInstance } from "./interfaces.js"
+import { finish } from "../FinishableStream/methods.js"
+import { streamIterator } from "../IterableStream/methods.js"
+import { navigate } from "../NavigableStream/methods.js"
+import { rewind } from "../RewindableStream/methods.js"
+import type {
+	StreamClassSignature,
+	StreamClassInstance,
+	StartedType
+} from "./interfaces.js"
 import {
 	currSetter,
 	baseCurr,
@@ -9,7 +17,7 @@ import {
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
-): () => StreamClassInstance<Type> {
+): { new (): StreamClassInstance<Type> } {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -20,29 +28,53 @@ export function StreamClass<Type = any>(
 		defaultIsEnd,
 		preInit
 	} = signature
-	return () => {
-		const initial = Object.defineProperty(
-			{
-				realCurr: null,
-				isStart: PRE_CURR_INIT,
-				baseNextIter,
-				isCurrEnd,
-				isCurrStart,
-				basePrevIter,
-				currGetter,
-				initGetter: (initGetter || currGetter) as () => Type,
-				next: nextHandler,
-				prev: prevHandler
-			} as StreamClassInstance<Type>,
-			"curr",
-			{
-				set: currSetter<Type>,
-				get: baseCurr<Type>
-			}
-		)
-		initial.isEnd = defaultIsEnd.call(initial)
-		// note: call to the constructor (IN CASE IT'S PRESENT); Otherwise, a no-op
-		if (preInit && !initial.isEnd) initial.curr
-		return initial
+
+	class streamClass implements StreamClassInstance<Type> {
+		realCurr: any
+		isStart: StartedType
+		isEnd: boolean
+		curr: Type
+
+		baseNextIter: () => Type
+		next: () => Type
+		currGetter: () => Type
+		initGetter: () => Type
+		isCurrEnd: () => boolean
+
+		navigate: () => Type
+		finish: () => Type;
+		[Symbol.iterator]: () => Generator<Type>
+
+		constructor() {
+			this.realCurr = null
+			this.isStart = PRE_CURR_INIT
+			this.isEnd = defaultIsEnd.call(this)
+		}
+
+		init(): void {
+			// note: call to the 'initGetter' (IN CASE IT'S PRESENT); Otherwise, a no-op
+			if (preInit && !this.isEnd) this.curr
+		}
 	}
+
+	Object.defineProperties(streamClass, {
+		baseNextIter: { value: baseNextIter },
+		isCurrEnd: { value: isCurrEnd },
+		isCurrStart: { value: isCurrStart },
+		basePrevIter: { value: basePrevIter },
+		currGetter: { value: currGetter },
+		initGetter: { value: (initGetter || currGetter) as () => Type },
+		next: { value: nextHandler },
+		prev: { value: prevHandler },
+		curr: {
+			set: currSetter<Type>,
+			get: baseCurr<Type>
+		},
+		navigate: { value: navigate },
+		rewind: { value: rewind },
+		finish: { value: finish },
+		[Symbol.iterator]: { value: streamIterator<Type> }
+	})
+
+	return streamClass
 }

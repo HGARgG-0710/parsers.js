@@ -1,14 +1,22 @@
-import type { EliminableStringPattern } from "./interfaces.js"
+import type { EliminableStringPattern as EliminableStringPatternType } from "./interfaces.js"
 import {
 	eliminableStringPatternFlush,
 	eliminableStringPatternEliminate
 } from "./methods.js"
 
-export function EliminableStringPattern(value: string): EliminableStringPattern {
-	return {
-		value,
-		result: value,
-		flush: eliminableStringPatternFlush,
-		eliminate: eliminableStringPatternEliminate
+export class EliminableStringPattern implements EliminableStringPatternType {
+	value: string
+	result: string
+
+	flush: () => void
+	eliminate: (eliminated: string | RegExp) => string
+
+	constructor(value: string) {
+		this.value = this.result = value
 	}
 }
+
+Object.defineProperties(EliminableStringPattern.prototype, {
+	flush: { value: eliminableStringPatternFlush },
+	eliminate: { value: eliminableStringPatternEliminate }
+})

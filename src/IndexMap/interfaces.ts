@@ -44,7 +44,7 @@ export interface IndexMap<KeyType = any, ValueType = any>
 }
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
-	(map: Pairs<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
+	new (map: Pairs<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
 	change: IndexingFunction<KeyType>
 	extend: MapClassValueExtension<KeyType, ValueType>
 	extendKey: MapClassKeyExtension<KeyType, ValueType>

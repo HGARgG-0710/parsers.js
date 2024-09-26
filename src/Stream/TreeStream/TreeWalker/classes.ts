@@ -1,5 +1,6 @@
-import type { EffectiveTreeStream } from "../interfaces.js"
-import type { TreeWalker } from "./interfaces.js"
+import type { Tree } from "src/Tree/interfaces.js"
+import type { BasicTreeStream } from "../interfaces.js"
+import type { TreeWalker as TreeWalkerType } from "./interfaces.js"
 import {
 	treeWalkerPushFirstChild,
 	treeWalkerPopChild,
@@ -15,30 +16,52 @@ import {
 	treeWalkerGoPrevLast,
 	treeWalkerRenewLevel,
 	treeWalkerRestart,
-	treeWalkerGoIndex
+	treeWalkerGoIndex,
+	treeWalkerInitialize
 } from "./methods.js"
 
-export function TreeWalker<Type = any>(
-	treeStream: EffectiveTreeStream<Type>
-): TreeWalker<Type> {
-	const root = treeStream.input
-	return {
-		stream: treeStream,
-		level: root,
-		pushFirstChild: treeWalkerPushFirstChild<Type>,
-		popChild: treeWalkerPopChild<Type>,
-		isSiblingAfter: treeWalkerIsSiblingAfter<Type>,
-		isSiblingBefore: treeWalkerIsSiblingBefore<Type>,
-		goSiblingAfter: treeWalkerGoSiblingAfter<Type>,
-		goSiblingBefore: treeWalkerGoSiblingBefore<Type>,
-		indexCut: treeWalkerIndexCut<Type>,
-		isChild: treeWalkerIsChild<Type>,
-		isParent: treeWalkerIsParent<Type>,
-		lastLevelWithSiblings: treeWalkerLastLevelWithSiblings<Type>,
-		currentLastIndex: treeWalkerCurrentLastIndex<Type>,
-		goPrevLast: treeWalkerGoPrevLast<Type>,
-		renewLevel: treeWalkerRenewLevel<Type>,
-		restart: treeWalkerRestart<Type>,
-		goIndex: treeWalkerGoIndex<Type>
+export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
+	stream: BasicTreeStream<Type>
+	level: Tree<Type>
+
+	pushFirstChild: () => void
+	popChild: () => number[]
+	isSiblingAfter: () => boolean
+	isSiblingBefore: () => boolean
+	goSiblingAfter: () => number
+	goSiblingBefore: () => number
+	indexCut: (length: number) => void
+	isChild: () => boolean
+	isParent: () => boolean
+	lastLevelWithSiblings: () => number
+	currentLastIndex: () => number[]
+	goPrevLast: () => void
+	renewLevel: () => void
+	restart: () => void
+	goIndex: () => void
+	init: (treeStream?: Tree<Type>) => TreeWalker<Type>
+
+	constructor(treeStream: BasicTreeStream<Type>) {
+		this.stream = treeStream
+		this.init(treeStream.input)
 	}
 }
+
+Object.defineProperties(TreeWalker.prototype, {
+	pushFirstChild: { value: treeWalkerPushFirstChild },
+	popChild: { value: treeWalkerPopChild },
+	isSiblingAfter: { value: treeWalkerIsSiblingAfter },
+	isSiblingBefore: { value: treeWalkerIsSiblingBefore },
+	goSiblingAfter: { value: treeWalkerGoSiblingAfter },
+	goSiblingBefore: { value: treeWalkerGoSiblingBefore },
+	indexCut: { value: treeWalkerIndexCut },
+	isChild: { value: treeWalkerIsChild },
+	isParent: { value: treeWalkerIsParent },
+	lastLevelWithSiblings: { value: treeWalkerLastLevelWithSiblings },
+	currentLastIndex: { value: treeWalkerCurrentLastIndex },
+	goPrevLast: { value: treeWalkerGoPrevLast },
+	renewLevel: { value: treeWalkerRenewLevel },
+	restart: { value: treeWalkerRestart },
+	goIndex: { value: treeWalkerGoIndex },
+	init: { value: treeWalkerInitialize }
+})

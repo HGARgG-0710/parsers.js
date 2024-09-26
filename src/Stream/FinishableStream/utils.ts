@@ -9,19 +9,13 @@ export const isFinishable = structCheck<Finishable>({ finish: isFunction })
 
 /**
  * Iterates the given `BasicStream` until hitting the end.
- * Can be very ineffcient for certain kinds of `Stream`s. 
- * Consider using `uniFinish` instead. 
+ * When an alternative `.finish()` method is present, it is likely faster.
  */
-export function finish<Type = any>(stream: BasicStream<Type>) {
+export function uniFinish<Type = any>(stream: BasicStream<Type>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
 
-/**
- * Performs a universal `finish` operation on the given `BasicStream`.
- * If the stream is `Finishable`, returns `stream.finish()`,
- * otherwise returns `finish(stream)`
- */
-export function uniFinish<Type = any>(stream: BasicStream<Type>) {
-	return isFinishable(stream) ? stream.finish() : finish(stream)
+export function fastFinish<Type = any>(stream: BasicStream<Type>) {
+	return isFinishable(stream) ? stream.finish() : uniFinish<Type>(stream)
 }

@@ -1,14 +1,26 @@
-import type { ValidatableStringPattern } from "./interfaces.js"
+import type {
+	ValidatableStringPattern as ValidatableStringPatternType,
+	ValidationOutput
+} from "./interfaces.js"
 import {
 	validatableStringPatternValidate,
 	validatableStringPatternFlush
 } from "./methods.js"
 
-export function ValidatableStringPattern(value: string): ValidatableStringPattern {
-	return {
-		value,
-		result: [false, []],
-		validate: validatableStringPatternValidate,
-		flush: validatableStringPatternFlush
+export class ValidatableStringPattern implements ValidatableStringPatternType {
+	value: string
+	result: ValidationOutput<any>
+
+	flush: () => void
+	validate: () => ValidationOutput<string>
+
+	constructor(value: string) {
+		this.value = value
+		this.result = [false, []]
 	}
 }
+
+Object.defineProperties(ValidatableStringPattern.prototype, {
+	validate: { value: validatableStringPatternValidate },
+	flush: { value: validatableStringPatternFlush }
+})

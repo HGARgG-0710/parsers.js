@@ -91,3 +91,11 @@ export function treeWalkerGoIndex<Type = any>(this: TreeWalker<Type>) {
 	this.stream.curr = this.stream.input.index(this.stream.pos.value)
 	this.renewLevel()
 }
+
+export function treeWalkerInitialize<Type = any>(
+	this: TreeWalker<Type>,
+	input?: Tree<Type>
+) {
+	if (input) this.level = input
+	return this
+}

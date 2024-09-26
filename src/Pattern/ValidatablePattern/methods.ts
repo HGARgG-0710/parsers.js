@@ -9,7 +9,7 @@ import type {
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import { matchString } from "../utils.js"
 
-import { ValidatableStringPattern } from "./classes.js"
+import { ValidatableStringPatternType } from "./classes.js"
 
 export function validatableStringPatternFlush(this: ValidatableStringPatternType) {
 	this.result = [false, []]
@@ -31,7 +31,7 @@ export function validatableStringPatternValidate(
 	}
 
 	for (let i = size; i--; ) {
-		const [tempValid, tempRemains] = ValidatableStringPattern(validated[i]).validate(
+		const [tempValid, tempRemains] = ValidatableStringPatternType(validated[i]).validate(
 			key,
 			handler
 		)

@@ -3,67 +3,187 @@
 
 [v0.3]
 
-NOTE: motivated to implement these after having encoutnered the 'TreeWalker'. The size of it is INSANE
-2.22. Use prototypal inheritance to save memory; 
+CURR TODO LIST: 
 
-	Restructure code a little - provide A SINGLE prototype, that is to be used by the 'constructor' (which are, in practice,
-		really just 'Object.create(INITIAL)' + setting of additional properties that are passed)
-	
-	The user can do this sort of thing themselves, but for operations that are heavy on 'Object.create' usage, it may be useful
-		to provide an alias; 
-
-	Thus, there'd be BOTH exports for things that are StreamClass-es (functions for producing base prototypes), and the prototype 
-		objects themselves; 
-
-	Same goes for objects that are used within the definitons of different 'Parsers"; 
-
-	NOTE: some types (such as 'IndexMap') would benefit from such introductions INCREDIBLY!
-
-	ESPECIALLY use the prototypal inheritance for the 'Tree'-s (can make the Big ones A LOT more compact memory-wise, need only store the '.value'); 
-
-
-2.28. [Maaaayyybe???] Consider turning the 'StreamClass' into a 'new'-constructor+prototype also; 	
-	This is due to that the cost of actually calling it is prohibitively expensive; 
-	Instead, one can return CONSTRUCTORS from the 'StreamClass' [they would have prototypes defined by the user signature]; 
-
-		The results of constructors would have their '.isStart', '.realCurr' and other dynamic per-Stream properties
-			defined inside the actual returned constructor; 
+		[RENAME these two into 'Linear-', because they depend on linear search of keys]; 
+		[todo - fix the utils to match the interfaces]; 
+		1. MapClass
+		2. IndexMap; 
 		
-		Then, the function returning this "basic" StreamClass-constructor, would have it copied as a '.prototype' for the other one: 
+		[todo - fix the utils to match the interfaces]; 
+		3. Collection [various implementations]; 
+		4. EliminablePattern; 
+		5. EnumSpace [various implementations]; 
+		6. TokenizablePattern; 
+		7. ValidatablePattern; 
+		8. SimpleTokenType [after changing the 'TokenType' into it]; 
+		9. TokenInstance (GET RID of the 'cached' bit, unneeded now); 
+		10. StreamClass;	
+		11. InputStream; 
+		12. LimitedStream; 
+		13. NestedStream; 
+		14. PositionalStream; 
+		15. PredicateStream; 
+		16. ProlongedStream; 	
+		17. ReversibleStream; 
+		18. TransformedStream; 
+		19. TreeStream; 
+		20. MultiIndex; 
+		21. TreeWalker; 
+		22. MultiIndexModifier; 
+		
 
-			ClassFunction.prototype = Object.create(StreamClass.prototype)
+	2.22.1. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
+		Namely: 
+			1. Initializable-related; 
 
-		The remainder properties/functions would be specified WITHIN ITS OWN CONSTRUCTOR; 
+	2.22.2. PROBLEM: with the NestedStream: 	
 
-		This feature (in particular) would permit intantiation of different StreamClass-es, 
-			without the need for copying; 
+		1 IT CANNOT HANDLE MULTIPLE DIFFERENT "KINDS" OF NESTED-NESS; 
+			Here's an example: 
 
-2.26. IDEA: for compact and general implementation of '.copy' on the 'StreamClassInstance'-based StreamClasses: 
+				0. A grammar consisting of 2 nested constructs - () and [], together with a primitive symbol X; 
+				1. String: [([X])]
 
-		1. Add '.constructor' (as in '.prototype.constructor') to the PROTOTYPE OBJECT of the given StreamClass; 
-			1.1. Let the 'constructor' correspond to the function that is to be used for copying; 
-		2. Keep the '.copy' ONLY on the 'InputStream', and 'TreeStream';
-			Do not implement it on the 'Wrapper'-streams (those that have other Stream-s as '.input'); 
+				Current NestedStream CANNOT match several different brackets; 
+				CONCLUSION: need to reform to permit this
+					ALSO: need the ability to extend the list of the brackets [dynamic parsing]; 
+						CONCLUSION: 
 
-		The 'StreamClassInstance'-s ARE far too diverse to be implementing '.copy' on each one of them; 
+							1. Pass the 'IndexMap' [interface, can actually also be a HashMap]; 
+								1.1. NOTE: it's actually the 'StreamMap'; 
+							2. Save it; 
+							3. For each such 'type' of the given 'NestedStream', have an 'end-predicate' to end THIS PARTICULAR 
+								nested structure; Then, each nested structure carries a KEY (index) using which it can 
+									get the value of the reverse-predicate (for which it checks ON EVERY turn to see if 'NestedStream' is indeed over); 
+									
+							Problem [memory]: what about the passed table? 
+								IT IS the same one; So, it would make sense to
+									CACHE IT for every single part of the NestedStream; 
+							
+							ERGO, use a single Table for AN ENTIRE CLASS [keep inside the prototype]; 
 
-		ALSO, regarding usage of 'new': 
+							Form: 
+								[???]: [index, inflate, deflate] // note: the 'index' is NEEDED in order to work as a key for '.byIndex' (quick access); 
 
-			Due to the fact that one is going to be introducing the prototypal inheritance in v0.4, 
-				let there also be (optional) 'new'. Done like: 
+							IDEA: implement this as an 'PersistentIndexMap'; 
+								Basically, every time something new is added/deleted,
+									the 'index' either increases, decreases or remains the same; 
 
-					funcition Constructor(...args) {
-						if (!(this instanceof Constructor))
-							return new Constructor (...args)
-						// ... 
-					}
-					Object.assign(Constructor.prototype, ...) // desired prototype
+		2. Once different kinds of Nested-ness ARE USED, 
+			they cannot be recursively transformed; 
 
-				The difference from the current constructor-functions of 'parsers.js' is that those do not use 'this', 
-					and they also have the 'return' statement; 
+			The problem with TransformedStream is that it ONLY just permits 
+				working with the CURRENT STREAM; 
+			The user can transform the thing recursively themselves [by means of checking the 'key' + having a HashMap/IndexMap], 
+				but it's somewhat convoluted [due to the fact that it's NOT POSSIBLE to express BOTH the 'NestedStream', 
+					and its 'Transformed' counterpart in terms of THE SAME table (duplication reduction)];
+			
+			Ergo, one desires to (somehow) fix this as well... [how?]
+			There must be a single agreed-upon [between two interfaces] shape for the 'IndexMap': 
 
-				The object that is being '.assign'-ed to the '.prototype' is the output of the according 'StreamClass({...})' call; 
-					[???On account of that, perhaps rename the 'StreamClass' into 'StreamClassPrototype'?]; 
+				HOW to handle dynamic keys? 
+				Suppose that the user changes them mid-stream...; This would (very much) ruin the synchronization between prior and current data...; 
+
+				IDEA: Pointer [that's where it comes in]: 
+
+					1. Have a 'PersistentIndexMap' data structure for adding/deleting items from a given 'IndexMap'; 
+						1.1. Serves as a wrapper for: 
+							1.1.1. calling the '.add'/'.delete' of the underlying object; 
+							1.1.2. increasing/decreasing appropriate indexes; 
+							1.1.3. Having its own 'byIndex', and other methods [delegates]; 
+					2. Then, accept a `PersistentIndexMap`, with shape: 
+
+						[???(indexes the curr-arg)]: [Pointer(index), inflate, deflate]
+
+						The pointer is needed to ENSURE that the thing WORKS ALWAYS DESPITE CHANGES IN THE TABLE STRUCTURE!
+
+						Works like: 
+							2.1. When first encountering an item: 
+								2.1.1. runs through the 'PersistentIndexMap', to see if it has a match (if it's nested); Otherwise - do nothing; 
+								2.1.2. When it does have a match, it (automatically) categorizes it by its index, WHICH IS STORED ON THE STREAM CREATED [note: the Pointer is stored, and then used]; 
+									2.1.2.1. And then, it proceeds to evaluate the Stream in question likewise (again); 
+							2.2. When processing an item ('NestedlyTransformedStream'): 
+								// ! This is the difficulty - HOW to ensure that the item in question is GUARANTEEDLY a Stream,
+									and NOT a something that the user has implemented themselves???
+								
+								IDEA: Create those two IN PAIR: 
+									Meaning, that the construction of the NestedlyTransformedStream is ALSO 
+										dependent on THE SAME table; 
+
+									Thus, the NestedlyTransformedStream class created would have a SPECIAL CHECK for the 
+										'NestedStream.prototype' that is used;
+
+									CONCLUSION: do 
+
+										1. Create a dynamic semi-hidden constant on the .prototype of 'NestedStream' in question;
+										2. Check for this constant in the 'NestedlyTransformedStream'; 
+									
+									This should give a very good speedup (as it only requires a single '===' instead of a whole 'instanceof'); 
+									
+									The only way that the user could 'break' it is by extending the particular NestedStream
+										[or, manually adding the property's value to wherever...]; 
+								
+								2.2.1. Check if the given item HAS a [valid] key; 
+								2.2.2. Check if it is a 'NestedStream' via hidden-constant-comparison; 
+									2.2.2.1. If it is, APPLY RECURSIVELY [return a new NestedlyTransformed, based off it]; 
+									2.2.2.2. Otherwise, apply the '.transform' that is passed; 
+
+2.30. Implement the HashMap in this version; 
+	Without it, the library is nigh unusable from the optimization standpoint; 
+	Should implement IndexMap, be applicable in every case when it is (interface-wise); 
+
+	Need: 
+
+		1. Ability to set: 
+			1.1. the 'hash' function
+			1.2. the 'keys' (and 'extendKey'); 
+			1.3. the 'extendValue': 
+				SOLUTION: just compose with the 'hash' like 'hash(newF(x))'
+			1.4. '.add': 
+				1.4.1. P.1 of SOLUTION: 
+					do it via pairs-list of [key, value] like with IndexMap-s; 
+				1.4.2. P.2 of SOLUTION: 
+					The 'hash' has to change accordingly also; 
+					Question: how?
+
+					SOLUTION: 
+						The 'hash' should take NOT ONE, but several arguments: 
+							1. the indexed value 'x'; 
+							2. the table itself; 
+		
+		2. Separate constant getter-property for the '.size'; 
+
+			In some places, the thing (and IndexMap implementation also) has 'this.keys.length'; 
+			Replace this with 'this.size := this.keys.length' [on a prototype]; 
+
+2.16. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
+	In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
+		an item with given predicate; 
+
+	Which is something of a problem, as it requires iterating over the Stream (and is, thus, useless); 
+	
+	Practical solution for this: 
+
+		{
+			// ...
+			const hasValue = has(pred)(stream) // changes the 'Stream' position
+			if (hasValue) {	
+				const S = PredicateStream(stream, pred) // the '.curr' guaranteedly becomes the '.curr' in the 'S'
+				// ...
+			} else {
+				// ... handle the alterior case...
+			}
+		}
+
+	Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
+
+	The issue with this is: IT RETURNS THE '.curr' NEVERTHELESS; 
+		So, this means that there's always at least one element - trouble is, in this case it becomes the '.isEnd'-element [last one]; 
+
+	Nope, no good solution for this... Just do the '.defaultIsEnd, then...'; 
+
+2.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME!
 
 A. testing: 
 	A.1. Create list of modules to be tested; 
@@ -210,12 +330,12 @@ A. testing:
 							4.3.5.1.6. copyTest (based off 'streamCopyTest'; for InputStream and TreeStream); 
 
 					4.2.6. Refactoring: 
-						4.3.6.1. In tests, rely HEAVILY on 'navigate' (once tested); 
-						4.3.6.2. Don't test optimizations (like 'uniNavigate') INSIDE the test-code; 
+						4.2.6.1. In tests, rely HEAVILY on 'navigate' (once tested); 
+						4.2.6.2. Don't test optimizations (like 'uniNavigate') INSIDE the test-code; 
 
 					NEXT ITEM-s: 
 
-						1. Rewew the 'ClassConstructor' function to include: 
+						1. Renew the 'ClassConstructor' function to include: 
 							1.1. Ability to ensure that a given 'Stream' is (after all) BOTH creatable using 'new' AND regular function call; 
 							1.2. That the properties on it are NOT OWN [that being, that the memory saving is real]; 
 						2. per-case defined (.copy, .navigate); 
@@ -375,6 +495,21 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
 	2.6. Add a 'HashClass'-implementation of 'MapClass'; 
+		
+		NOTE [important]: one needs to implement A DETAILED and GENERAL collision-resolution algorithm for this thing; 
+			In particular, must be available: 
+
+				1. Open addressing: 
+					1.1. Via a special interface, permitting usage of different step functions `hash_addr(key, probe_index)`,
+						ALSO, add implementations of frequent cases - linear, quadratic, and so forth...; 
+				2. Separate chaining: 
+					2.1. Via a special interface, permitting usage of different according data structures: 
+						2.1.1. Self-balancing search trees (height-balanced/weight-balanced); 
+						2.1.2. Arrays; 
+				3. Proper resizing; 
+			
+			These three features are CRUCIAL for implementing '.add', '.delete' and other dynamic-parsing related operations; 
+				Due to this, a simple wrapper around a primitive-based lookup table will simply not do...; 
 
 		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
 
@@ -514,15 +649,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 													2. Common-ness of the pattern: 
 														This thing can be VERY frequently used in actual parsers;	
 
+												THIS SHOULD WORK IN REVERSE: instead of mapping to match the underlying hash, 
+													one USES THE 'extended' function of the Hash to THEN get the value 
+													from the underlying Hash [note: this would permit a greater variability]; 
+
 				Also, there'd need to be a way to get the '.type' of the 'TokenType'-s directly; 
-
-				IDEA: create a structure 'SimpleTokenType', 
-					which would have the '.type' property on it; 
-
-					THEN, re-purpose '.is' to allow for more complex constructors
-						(in particular, MAKE THE CURRENT 'TokenType' into 'SimpleTokenType', 
-							whilst creating the NEW 'TokenType',
-								permitting to set the '.is' AS-DESIRED!)
 
 	2.7. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
@@ -661,33 +792,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	2.11. limitedStreamNavigate: FLAWED!
-	
-		1. Should handle the case where the '.from' is A FUNCTION [but the 'position' ISN'T]; 
-			THIS [fundamentally] needs the separation between the 'relative' and 'absolute' '.navigate'; 
-
-				Once these are implemented, there'll be no problem whatsoever... 
-
-				The (primary) issue with '.navigate'-ing using predicates is that it's NOT possible to navigate (generally) ABSOLUTELY using them; 
-				Only the relative navigation is possible; 
-
-				SEPARATING the navigation into 'absoluteNavigate' and 'relativeNavigate' (and defining the actual '.navigate' as the CONJUNCTION of the two), 
-				will largely solve the issue. 
-
-					ALSO: when '.pos' is a function, one FIRST calls '.navigate(.pos)' [relative], then does so with the '+n' (absolute); 
-
-		2. Should be able to tell when the result of '.navigate' is 'outside the bounds' [NOT "finished" in a regular sense - that checks for equality of '.lookAhead']; 
-			Namely [define a new util for that...]: 
-
-				[forward-crossing]
-				1. for a numeric 'this.input.pos' and 'this.to': newInputPos > this.to; 
-				2. for a predicate 'this.to': Via looking for whether `!positionEqual(this.to, this.input)`; 
-				3. for a predicate 'this.input.pos' and numeric '.from, .to': always return 'true' [never out of bounds]
-
-				4. When looking at backward-crossing..?
-					Perhaps, implement a 'lookBehind'?
-			
-	2.12. MemoizableStreamClass: 
+	2.11. MemoizableStreamClass: 
 
 		This is a generalization of StreamClass; 
 		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
@@ -697,7 +802,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
 			2. unmemoize() - returns back to the flow of the Stream; 
 
-	2.13. Minor refactoring (StreamClass): 
+	2.12. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -711,7 +816,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.14. [mayyyybee??] Try re-doing the project's type-system? [again...]
+	2.13. [mayyyybee??] Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -724,7 +829,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. TransformedStream; 
 			2. NestedStream; 
 
-	2.15. BreakableStream - a stream-class that produces instances, which : 
+	2.14. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -785,58 +890,23 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Example: parse string: "..."
 
 				(string) => BreakableStream(string, {})
-
-	2.16. CREATE a new file 'constants': this will keep track of in-library constants; 
-		Put the 'PRE_CURR_INIT', and other such things THERE; 
 	
-	2.17. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
-		In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
-			an item with given predicate; 
+	2.15. CREATE a new file 'constants': this will keep track of in-library constants; 
+		Put the 'PRE_CURR_INIT', and other such things THERE; 
 
-		Which is something of a problem, as it requires iterating over the Stream (and is, thus, useless); 
-		
-		Practical solution for this: 
-
-			{
-				// ...
-				const hasValue = has(pred)(stream) // changes the 'Stream' position
-				if (hasValue) {	
-					const S = PredicateStream(stream, pred) // the '.curr' guaranteedly becomes the '.curr' in the 'S'
-					// ...
-				} else {
-					// ... handle the alterior case...
-				}
-			}
-
-		Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
-
-	2.18. Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.16. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
-		2.20.1. DO ACTIVE MICRO-BENCHMARKING!
+		2.17.1. DO ACTIVE MICRO-BENCHMARKING!
 
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
+	
+	2.17. utility - nestedDepth; 
+		Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 		
-	2.19. More "conditional" properties (like the conditional '.finish', '.rewind', and so forth...); 
-
-		note: these MUST depend on assumptions regarding '.finish'-ness (and so forth) of underlying stream/-s, WHEN they are present. 
-			This is because otherwise, the whole "optimization thing" isn't existent
-				(example ProlongedStream's '.finish' MUST have all its underlying Stream-s being checked); 
-			
-		Properties: 
-
-			1. finish (complete covergae);
-			2. rewind (likewise, complete coverage); 
-			3. navigate - where appropriate; 
-			4. prev - where possible/makes sense; 
-
-			5. copy - ALMOST NEVER (turned out to be a bad idea); 
-				Trying to implement it on Streams that operate on other Streams, whilst ensuring preservation of index 
-					is too difficult (mainly due to the 'Position'-s, and the flaw of having JUST ONE '.navigate' definition); 
-
-	2.20. utility - findNestedEnd: 
+	2.18. utility - findNestedEnd: 
 
 		Given a 'ReversibleStream'/'NavigableStream', it does: 
 
@@ -846,54 +916,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
 
-	2.21. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.19. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
-			HOLDS!
+			HOLDS!	 
 	
-	2.22. Introduce a new [additional] object model (significantly improves memory concerns for temp-Stream-managment objects...); 
-
-		The idea is: separate the processes of object-creation and initialization; 
-		This permits the re-usage of the same interfaces on DIFFERENT targets 
-			(making it: 
-				
-				1. equivalent to a function call [memory-wise] - no need for wasting time on additional allocations/de-allocations;
-				2. preserve the "lazy evaluation" (saving memory relative to the constant usage of buffers); 
-			); 
-
-		Example ("LimitedStream" vs. "StreamLimitor"): 
-
-			How it is currently: 
-				1. LimitedStream: 
-
-					function parseSomething (input) {
-						const limited = input.limit(from, to) // creates a new Stream [memory spent on temp-operational object]
-						// ... operations on `limited`, OBJECT CONTINUES TO LIVE [used as '.curr' value for upper-level stream]
-						return limited
-					}
-				
-					Here, the allocation is NECESSARY, AS THE 'stream' is USED. 
-					However, this is not always the case and (sometimes), the operational 
-
-				2. StreamLimitor: 
-
-					const limitor = StreamLimitor() // OBJECT CREATION ___WITHOUT___ initialization; 
-					
-					function parseSomething (input) {
-						const limited = limitor.init(input, from, to) // creates a new Stream [memory spent on temp-operational object]
-						// ... operations on 'limited'
-						return SOMETHING_ELSE // The resulting object is NOT the 'limited', the 'limitor' is RE-USED for the next stream/input; 
-					}
-
-			Basically, this is just "formalized" re-usage of LimitedStream objects with appropriate interfaces; 
-			Also, one could allow for 'default'-initialization (during object-creation),
-				and only partitially initialize it afterwards;
-
-			Likewise, there'd be 'StreamTransformer' (TransformedStream), 'StreamNester' (NestedStream), and others; 
-			Call these `StreamProxy/`; 
-	
-	2.23. TypeScript - use 'enum's; 
+	2.20. TypeScript - use 'enum's; 
 
 		Learned about 'enum's being present in TypeScript; 
 		Use them to designate "special constants" (ALSO - take those out into separate files); 
@@ -913,33 +942,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
 		[Current preference is to the latter...]
 
-	2.24. Idea for a method: ProlongedStream.prolong; 	
+	2.21. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams'; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.25. LimitedStream - '.findDirection(from?, to?, input?)' method: 
-
-		This (basically) re-initializes the values for '.from' and '.to' on the given 'LimitedStream', re-setting the '.direction' property; 
-		During the course of computing the '.next/.prev' on the underlying '.input'-Stream inside the 'LimitedStream', it may come to be that 
-			the values are CHANGING!
-
-		Now, there is no presently a mechanism for this within the library (and the thing gets re-computed EVERY TIME), 
-			so it may as well be more beneficial/simpler/readable to just store it as a property; 
-
-		This would permit the user to 're-initialize' the 'LimitedStream'; 
-		[Possibly] ???Replace the 'StreamLimitor' with something similar? 
-			[id est, a SINGLE initialization method that does all the appropriate work?]
-			Separate the initialization from allocation...;
-
-			1. ALSO: additionally, do the similar thing for the 'positionNegate' inside the 'isEnd'; 
-					THUS, the '.to' will actually contain the "negated" version,
-						whereas the user will need to re-initialize the Stream MANUALLY; 
-
-					Will reduce pointless out-of-place re-computation; 
-	
-	2.26. MAKE the 'utils' TYPE-SAFE! 
+	2.22. MAKE the 'utils' TYPE-SAFE! 
 
 		Currently, what lacks is the ability to dynamically generate the appropriate type-checking functions that may require 
 			additional predicates, BUT still preserve the form; 
@@ -957,7 +966,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Currently, the checks can make SOME mistakes still; 
 			[Noticed this while doing 'isNumericPositional' - should be refactored...]; 
 
-	2.27. [Maaayybe?] Create a 'samples' directory; 
+	2.23. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -966,20 +975,41 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Think about it [this particular refactoring is VERY fine]; 
 
-	2.28. Generics for the 'isType'-functions; 	
+	2.24. Generics for the 'isType'-functions; 	
 		Learned about TypeScript generics for nameless functions (namely, how they can be used with 'as'): 
 
 			const isType = ... as <Type = any>(x: any) => x is Type
 		
 		Variation on this - add throughout the library [particularly, when 'Type' is itself a generics parameter]; 
 
-	2.29. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.25. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
 			2. NestedStream;
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
+
+	2.26. Generalize the streams even further for general copying implementation: 
+
+		Have to have: 
+			
+			1. 'props' field (StatefulStream); 
+				1.1. This one '.preventsExtension'! [that is, it's a FIXED object, with a fixed number of properties];
+			2. the '.copy' is then defined: 
+
+				function uniCopy (stream: ...) {	
+					const copy = new (Object.getPrototypeOf(stream).constructor)()
+					copy.init(stream.props)
+					return copy
+				}
+
+		The method would go on the 'StreamClass'; 
+
+	2.27. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
+		The latter can easily be replaced with 'array(...)', 
+			whereas the former - with an appropriate table...; 
+		Consider removing them...
 
 3. Dependency management: 
 	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

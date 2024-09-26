@@ -1,5 +1,10 @@
-import { TokenInstance } from "../Token/classes.js"
-import type { ConstEnumSpace, EnumSpace, IncrementEnum } from "./interfaces.js"
+import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
+import type {
+	ConstEnumSpace,
+	EnumSpace,
+	IncrementEnum as IncrementEnumType,
+	Mappable
+} from "./interfaces.js"
 
 import {
 	constEnumAdd,
@@ -12,28 +17,57 @@ import {
 	incrementEnumMap
 } from "./methods.js"
 
-export function IncrementEnum(size: number): IncrementEnum {
-	return {
-		size,
-		add: incrementEnumAdd,
-		join: incrementEnumJoin,
-		copy: incrementEnumCopy,
-		map: incrementEnumMap
+export class IncrementEnum implements IncrementEnumType {
+	size: number
+
+	add: (n: number) => IncrementEnumType
+	join: (enums: EnumSpace) => EnumSpace<number>
+	copy: () => IncrementEnumType
+	map: () => number[]
+
+	constructor(size: number) {
+		this.size = size
 	}
 }
 
-export function ConstEnum(size: number): ConstEnumSpace {
-	const result: ConstEnumSpace = {
-		value: [],
-		size,
-		add: constEnumAdd,
-		join: constEnumJoin,
-		copy: constEnumCopy,
-		map: constEnumMap
+Object.defineProperties(IncrementEnum.prototype, {
+	add: { value: incrementEnumAdd },
+	join: { value: incrementEnumJoin },
+	copy: { value: incrementEnumCopy },
+	map: { value: incrementEnumMap }
+})
+
+export class ConstEnum implements ConstEnumSpace {
+	size: number
+	value: {}[]
+
+	add: (n: number) => ConstEnumSpace
+	join: (enums: EnumSpace) => EnumSpace<{}>
+	copy: () => EnumSpace<{}>
+	map: (f: Mappable<{}>) => {}[]
+
+	constructor(size: number) {
+		this.value = []
+		this.size = size
+		this.add(size)
 	}
-	result.add(size)
-	return result
 }
 
-export const CachedTokenEnum = (enums: EnumSpace) =>
-	enums.map((x) => TokenInstance(x, true))
+Object.defineProperties(ConstEnum.prototype, {
+	add: { value: constEnumAdd },
+	join: { value: constEnumJoin },
+	copy: { value: constEnumCopy },
+	map: { value: constEnumMap }
+})
+
+export const TokenInstanceEnum = (enums: EnumSpace) =>
+	enums.map((x) => {
+		const cachedClass = TokenInstance(x)
+		return () => new cachedClass()
+	})
+
+export const SimpleTokenTypeEnum = (enums: EnumSpace) =>
+	enums.map((x) => {
+		const cachedClass = SimpleTokenType(x)
+		return (y: any) => new cachedClass(y)
+	})

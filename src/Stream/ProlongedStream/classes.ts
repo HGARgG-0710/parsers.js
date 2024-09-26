@@ -1,28 +1,39 @@
 import type { BasicStream } from "../BasicStream/interfaces.js"
-import { streamIterator } from "../IterableStream/methods.js"
 import { effectiveNestedStreamNext } from "../NestedStream/methods.js"
 import { StreamClass } from "../StreamClass/classes.js"
-import { Inputted } from "../UnderStream/classes.js"
+import type { StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { EffectiveProlongedStream } from "./interfaces.js"
 import {
 	effectiveProlongedStreamIsEnd,
 	prolongedStreamCurr,
-	prolongedStreamDefaultIsEnd
+	prolongedStreamDefaultIsEnd,
+	prolongedStreamInitialize
 } from "./methods.js"
 
-export const ProlongedStreamClass = StreamClass({
+export const ProlongedStreamBase = StreamClass({
 	currGetter: prolongedStreamCurr,
 	isCurrEnd: effectiveProlongedStreamIsEnd,
 	baseNextIter: effectiveNestedStreamNext,
 	defaultIsEnd: prolongedStreamDefaultIsEnd
 })
 
-export function ProlongedStream<Type = any>(
-	streams: BasicStream<Type>[]
-): EffectiveProlongedStream<Type> {
-	const result = Inputted(ProlongedStreamClass(), streams)
-	result.pos = 0
-	result.streamIndex = 0
-	result[Symbol.iterator] = streamIterator<Type>
-	return result as EffectiveProlongedStream<Type>
+export class ProlongedStream<Type = any>
+	extends ProlongedStreamBase
+	implements EffectiveProlongedStream<Type>
+{
+	input: StreamClassInstance<Type>[]
+	pos: number
+	streamIndex: number
+
+	init: (streams?: BasicStream<Type>[]) => ProlongedStream<Type>
+
+	constructor(streams?: BasicStream<Type>[]) {
+		super()
+		this.init(streams)
+		super.init()
+	}
 }
+
+Object.defineProperties(ProlongedStream.prototype, {
+	init: { value: prolongedStreamInitialize }
+})

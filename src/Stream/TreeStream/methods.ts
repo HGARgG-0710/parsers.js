@@ -1,6 +1,10 @@
+import type { Tree } from "src/Tree/interfaces.js"
+import { Inputted } from "../UnderStream/classes.js"
 import { TreeStream as TreeStreamConstructor } from "./classes.js"
-import type { EffectiveTreeStream, TreeStream } from "./interfaces.js"
-import type { MultiIndex } from "./MultiIndex/interfaces.js"
+import { type EffectiveTreeStream, type TreeStream } from "./interfaces.js"
+
+import type { MultiIndex as MultiIndexType } from "./MultiIndex/interfaces.js"
+import { MultiIndex } from "./MultiIndex/classes.js"
 
 export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
@@ -22,7 +26,7 @@ export function effectiveTreeStreamRewind<Type = any>(this: EffectiveTreeStream<
 
 export function effectiveTreeStreamNavigate<Type = any>(
 	this: EffectiveTreeStream<Type>,
-	index: MultiIndex
+	index: MultiIndexType
 ) {
 	this.pos = index
 	this.walker.goIndex()
@@ -65,6 +69,18 @@ export function effectiveTreeStreamIsStart<Type = any>(this: EffectiveTreeStream
 		: walker.isParent()
 		? "popChild"
 		: "")
+}
+
+export function effectiveTreeStreamInitialize<Type = any>(
+	this: EffectiveTreeStream<Type>,
+	tree?: Tree<Type>
+) {
+	if (tree) {
+		Inputted(this, tree)
+		this.walker.init(tree)
+		this.pos = new MultiIndex([])
+	}
+	return this
 }
 
 export * as TreeWalker from "./TreeWalker/methods.js"

@@ -22,7 +22,7 @@ export interface BasicReversibleStream<Type = any, StartedType = any>
 export type ReversibleStream<Type = any> = BasicReversibleStream<Type, boolean>
 
 export interface ReversedStream<Type = any>
-	extends Inputted<ReversibleStream<Type>>,
+	extends Inputted<BasicReversibleStream<Type>>,
 		ReversedStreamClassInstance<Type> {}
 
 export type ChangeType = (input: ReversibleStream) => any

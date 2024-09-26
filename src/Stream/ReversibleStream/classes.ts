@@ -1,6 +1,3 @@
-import { isRewindable } from "../RewindableStream/utils.js"
-import { uniFinish } from "../FinishableStream/utils.js"
-import { streamIterator } from "../IterableStream/methods.js"
 import {
 	underStreamRewind,
 	underStreamCurr,
@@ -8,13 +5,18 @@ import {
 	underStreamIsStart,
 	underStreamNext,
 	underStreamIsEnd,
-	underStreamDefaultIsStart
+	underStreamDefaultIsStart,
+	underStreamFinish
 } from "../UnderStream/methods.js"
-import type { ReversibleStream, ReversedStream } from "./interfaces.js"
+import type {
+	ReversibleStream,
+	ReversedStream as ReversedStreamType,
+	BasicReversibleStream
+} from "./interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
-import { Inputted } from "../UnderStream/classes.js"
+import { reversedStreamInitialize } from "./methods.js"
 
-export const ReversedStreamClass = StreamClass({
+export const ReversedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
 	baseNextIter: underStreamPrev,
 	basePrevIter: underStreamNext,
@@ -23,12 +25,24 @@ export const ReversedStreamClass = StreamClass({
 	defaultIsEnd: underStreamDefaultIsStart
 })
 
-export function ReversedStream<Type = any>(
-	input: ReversibleStream<Type>
-): ReversedStream<Type> {
-	uniFinish(input)
-	const result = Inputted(ReversedStreamClass(), input)
-	result.finish = isRewindable(input) ? underStreamRewind<Type> : null
-	result[Symbol.iterator] = streamIterator<Type>
-	return result as ReversedStream<Type>
+export class ReversedStream<Type = any>
+	extends ReversedStreamBase
+	implements ReversedStreamType<Type>
+{
+	input: BasicReversibleStream<Type>
+	prev: () => Type
+	isCurrStart: () => boolean
+	rewind: () => Type
+
+	constructor(input?: ReversibleStream<Type>) {
+		super()
+		this.init(input)
+		super.init()
+	}
 }
+
+Object.defineProperties(ReversedStream.prototype, {
+	rewind: { value: underStreamFinish },
+	finish: { value: underStreamRewind },
+	init: { value: reversedStreamInitialize }
+})

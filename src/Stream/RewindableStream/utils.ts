@@ -1,4 +1,4 @@
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { Rewindable } from "./interfaces.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
@@ -8,22 +8,11 @@ const { isFunction } = type
 export const isRewindable = structCheck<Rewindable>({ rewind: isFunction })
 
 /**
- * Function for returning back to the beginning of the given `ReversibleStream`.
- * Can be very inefficient for certain types of Stream.
- * Consider using `uniRewind` instead.
+ * Performs a universal `rewind`ing operaion on the given `ReversibleStream`.
+ * Continues to call '.prev()' on the given `Stream`, until `stream.isStart` is true;
+ * @returns `stream.curr`
  */
-export function rewind<Type = any>(stream: ReversibleStream<Type>) {
+export function uniRewind<Type = any>(stream: BasicReversibleStream<Type>) {
 	while (!stream.isStart) stream.prev()
 	return stream.curr
-}
-
-/**
- * Performs a universal `rewind`ing operaion on the given `ReversibleStream`.
- * If it is `Rewindable`, calls the `stream.rewind()` method and returns the result,
- * otherwise, calls the `rewind(stream)`
- */
-export function uniRewind<Type = any>(stream: ReversibleStream<Type>) {
-	return isRewindable(stream)
-		? (stream as Rewindable<Type>).rewind()
-		: rewind<Type>(stream)
 }

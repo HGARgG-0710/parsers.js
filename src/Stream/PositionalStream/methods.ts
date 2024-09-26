@@ -1,5 +1,4 @@
-import type { PositionalInputtedStream } from "./interfaces.js";
-
+import type { PositionalInputtedStream } from "./interfaces.js"
 
 export function positionalStreamNext<Type = any>(
 	this: PositionalInputtedStream<Type, number>

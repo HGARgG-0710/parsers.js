@@ -1,22 +1,30 @@
-import { typeof as type } from "@hgargg-0710/one"
-const { isNumber } = type
+import { boolean } from "@hgargg-0710/one"
+const { T } = boolean
 
-import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
+import type { Position } from "../PositionalStream/Position/interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
 	positionEqual,
 	positionNegate
 } from "../PositionalStream/Position/utils.js"
+
+import { fastNavigate } from "../NavigableStream/utils.js"
+
 import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
 import type {
 	BoundableStream,
 	EffectiveLimitedStream,
-	LimitedStream
+	LimitedUnderStream
 } from "./interfaces.js"
+import { Inputted } from "../UnderStream/classes.js"
 
-export function limitStream<Type = any>(this: BoundableStream<Type>, dual: DualPosition) {
-	return LimitedStreamConstructor<Type>(this, dual)
+export function limitStream<Type = any>(
+	this: BoundableStream<Type>,
+	from?: Position,
+	to?: Position
+) {
+	return new LimitedStreamConstructor<Type>(this, from, to)
 }
 
 export function effectiveLimitedStreamNext<Type = any>(
@@ -32,7 +40,7 @@ export function effectiveLimitedStreamProd<Type = any>(
 ) {
 	if (!this.hasLookAhead) {
 		this.hasLookAhead = true
-		this.input[directionCompare(this.from, this.to, this.input) ? "next" : "prev"]()
+		this.input[this.direction ? "next" : "prev"]()
 		return this.input.curr
 	}
 	return this.lookAhead
@@ -43,18 +51,7 @@ export function effectiveLimitedStreamIsEnd<Type = any>(
 ) {
 	if (this.input.isCurrEnd()) return true
 	this.lookAhead = this.prod()
-	return positionEqual(this.input, positionNegate(positionConvert(this.to, this.input)))
-}
-
-export function limitedStreamNavigate<Type = any>(
-	this: LimitedStream<Type>,
-	position: Position
-) {
-	const fromConverted = positionConvert(this.from) as number
-	position = positionConvert(position)
-	return this.input.navigate(
-		isNumber(position) ? Math.max(fromConverted + position, fromConverted) : position
-	)
+	return positionEqual(this.input, this.to)
 }
 
 export function effectiveLimitedStreamIsStart<Type = any>(
@@ -69,6 +66,35 @@ export function effectiveLimitedStreamPrev<Type = any>(
 	--this.pos
 	this.lookAhead = this.curr
 	this.hasLookAhead = true
-	this.input[directionCompare(this.from, this.to, this.input) ? "prev" : "next"]()
+	this.input[this.direction ? "prev" : "next"]()
 	return this.input.curr
+}
+
+export function effectiveLimitedStreamInitialize<Type = any>(
+	this: EffectiveLimitedStream<Type>,
+	input?: LimitedUnderStream<Type>,
+	from?: Position,
+	to?: Position
+) {
+	this.pos = 0
+
+	if (input) {
+		Inputted(this, input)
+		this.hasLookAhead = false
+
+		if (from !== undefined) {
+			if (to === undefined) {
+				to = from
+				from = T // explanation: the 'from = T' will cause expression 'while (!from(stream)) stream.next()' become 'while (false) stream.next()', essentially being a no-op;
+			}
+
+			fastNavigate(input, from)
+
+			this.direction = directionCompare(from, to, this.input)
+			this.from = from
+			this.to = positionNegate(positionConvert(this.to, this.input))
+		}
+	}
+
+	return this
 }

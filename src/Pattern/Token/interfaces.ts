@@ -10,11 +10,15 @@ export interface TokenInstance<Type = any> extends Summat {
 }
 
 export interface TokenInstanceClass<Type = any> extends Summat {
-	(): TokenInstance<Type>
+	new (): TokenInstance<Type>
 	is: (x: any) => x is TokenInstance<Type>
 }
 
 export interface TokenType<Type = any, Value = any> extends Summat {
-	(value: Value): Token<Type, Value>
+	new (value: Value): Token<Type, Value>
 	is: (x: any) => x is TokenInstance<Type>
 }
+
+export interface SimpleTokenType<Type = any, Value = any>
+	extends TokenType<Type, Value>,
+		TokenInstance<Type> {}

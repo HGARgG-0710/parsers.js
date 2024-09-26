@@ -92,6 +92,7 @@ export function indexMapCopy<KeyType = any, ValueType = any>(
 ) {
 	return MapClass<KeyType, ValueType>(this.change)(toPairsList(table(this)))
 }
+
 export function mapClassExtend<KeyType = any, ValueType = any>(
 	this: MapClassType<KeyType, ValueType>,
 	f: (x: ValueType) => any

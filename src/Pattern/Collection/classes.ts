@@ -7,23 +7,37 @@ import {
 	accumulatingTokenCollectionIterator
 } from "./methods.js"
 
-export function StringCollection(string: string): Collection<string> {
-	return {
-		value: string,
-		push: stringCollectionPush,
-		[Symbol.iterator]: stringCollectionIterator
+export class StringCollection implements Collection<string> {
+	value: string
+	push: (...x: string[]) => Collection<string>;
+	[Symbol.iterator]: () => Generator<string>
+
+	constructor(string: string) {
+		this.value = string
 	}
 }
+
+Object.defineProperties(StringCollection.prototype, {
+	push: { value: stringCollectionPush },
+	[Symbol.iterator]: { value: stringCollectionIterator }
+})
 
 export function ArrayCollection<Type = any>(x: Type[] = []): Collection<Type> {
 	;(x as unknown as Collection<Type>).value = x
 	return x as unknown as Collection<Type>
 }
 
-export function AccumulatingPatternCollection(token: Pattern): Collection<Pattern> {
-	return {
-		value: token,
-		push: accumulatingTokenCollectionPush,
-		[Symbol.iterator]: accumulatingTokenCollectionIterator
+export class AccumulatingPatternCollection implements Collection<Pattern> {
+	value: Pattern
+	push: (...x: Pattern<any>[]) => Collection<Pattern>;
+	[Symbol.iterator]: () => Generator<Pattern>
+
+	constructor(pattern: Pattern) {
+		this.value = pattern
 	}
 }
+
+Object.defineProperties(AccumulatingPatternCollection.prototype, {
+	push: { value: accumulatingTokenCollectionPush },
+	[Symbol.iterator]: { value: accumulatingTokenCollectionIterator }
+})

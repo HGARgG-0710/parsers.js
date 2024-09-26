@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../BasicStream/interfaces.js"
-import type { DualPosition, Position } from "../PositionalStream/Position/interfaces.js"
+import type { Position } from "../PositionalStream/Position/interfaces.js"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
@@ -17,13 +17,17 @@ import type {
 } from "../PredicateStream/interfaces.js"
 import type { IterableStream } from "../IterableStream/interfaces.js"
 
-export interface Limitable<Type = any, LimitType = any> extends Summat {
-	limit(limitPositions: LimitType): Type
+export interface Limitable<Type = any> extends Summat {
+	limit(from?: Position, to?: Position): Type
 }
 
 export interface BasicLimited extends Summat {
 	from: Position
 	to: Position
+}
+
+export interface Directioned extends Summat {
+	direction: boolean
 }
 
 export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
@@ -33,7 +37,7 @@ export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
 
 export interface LimitableStream<Type = any>
 	extends BasicStream<Type>,
-		Limitable<BasicStream<Type>, DualPosition> {}
+		Limitable<BasicStream<Type>> {}
 
 export interface BoundableStream<Type = any>
 	extends LimitableStream<Type>,
@@ -49,4 +53,5 @@ export interface LimitedStream<Type = any>
 export interface EffectiveLimitedStream<Type = any>
 	extends LimitedStream<Type>,
 		LookaheadHaving,
+		Directioned,
 		ReversedStreamClassInstance<Type> {}

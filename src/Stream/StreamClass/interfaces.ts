@@ -1,6 +1,11 @@
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
+import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { Initializable } from "../InitializableStream/interfaces.js"
+import type { Rewindable } from "../RewindableStream/interfaces.js"
+import type { Finishable } from "../FinishableStream/interfaces.js"
+import type { Navigable } from "../NavigableStream/interfaces.js"
 
 export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"
 export type BaseIterPropNameType = "baseNextIter" | "basePrevIter"
@@ -58,6 +63,10 @@ export interface PreInitable extends Summat {
 	preInit?: boolean
 }
 
+export interface ConditionallyRewindable<Type = any> extends Summat {
+	rewind?(): Type
+}
+
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
 
 export interface PrimalStreamClassSignature<Type = any>
@@ -78,18 +87,23 @@ export interface StreamClassSignature<Type = any>
 
 export interface BasicStreamClassInstance<Type = any>
 	extends InitGettable<Type>,
+		Initializable<void>,
 		PrimalStreamClassSignature<Type>,
 		StatefulStarted,
 		RealCurrHaving,
-		BasicStream<Type> {}
+		Navigable<Type>,
+		Finishable<Type>,
+		IterableStream<Type> {}
 
 export interface StreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
 		StreamClassTransferable<Type>,
 		ConditionallyPrevable<Type>,
-		ConditionalIsStartCurrable {}
+		ConditionalIsStartCurrable,
+		ConditionallyRewindable<Type> {}
 
 export interface ReversedStreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
 		Prevable<Type>,
-		IsStartCurrable {}
+		IsStartCurrable,
+		Rewindable<Type> {}

@@ -12,15 +12,17 @@ export function multiIndexCompare(this: MultiIndex, position: MultiIndex) {
 	return this.value.length < position.value.length
 }
 
-export function multiIndexEqual(this: MultiIndex, position: MultiIndex, i: number = 0) {
+export function multiIndexEqual(this: MultiIndex, position: MultiIndex) {
 	if (this.value.length !== position.value.length) return false
-	for (; i < position.value.length; ++i)
-		if (this.value[i] !== position.value[i]) return false
+	const thisVal = this.value
+	const posVal = position.value
+	let length = position.value.length
+	while (length--) if (thisVal[length] !== posVal[length]) return false
 	return true
 }
 
 export function multiIndexCopy(this: MultiIndex) {
-	return MultiIndexConstructor([...this.value])
+	return new MultiIndexConstructor(([] as number[]).concat(this.value))
 }
 
 export function multiIndexSlice(
@@ -43,7 +45,7 @@ export function multiIndexLastLevel(this: MultiIndex): number[] {
 export function multiIndexConvert(this: MultiIndex, stream: BasicTreeStream) {
 	let final = 0
 	stream.rewind()
-	while (!(stream.isEnd || this.equals(stream.pos))) {
+	while (!stream.isEnd && !this.equals(stream.pos)) {
 		stream.next()
 		++final
 	}

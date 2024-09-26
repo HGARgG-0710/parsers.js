@@ -7,7 +7,10 @@ import type {
 	Position,
 	PredicatePosition
 } from "./Stream/PositionalStream/Position/interfaces.js"
-import type { ReversibleStream } from "./Stream/ReversibleStream/interfaces.js"
+import type {
+	BasicReversibleStream,
+	ReversibleStream
+} from "./Stream/ReversibleStream/interfaces.js"
 
 /**
  * Given a string, returns whether it's a Hex number
@@ -22,7 +25,7 @@ export const next = <Type = any>(input: BasicStream<Type>) => input.next()
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any>(input: ReversibleStream<Type>) => input.prev()
+export const previous = <Type = any>(input: BasicReversibleStream<Type>) => input.prev()
 
 /**
  * Given a `BasicStream` returns its `.curr` property value

@@ -1,10 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Tree } from "src/Tree/interfaces.js"
-import type { EffectiveTreeStream } from "../interfaces.js"
+import type { BasicTreeStream } from "../interfaces.js"
 
 export interface TreeWalker<Type = any> extends Summat {
-	stream: EffectiveTreeStream<Type>
+	stream: BasicTreeStream<Type>
 	level: Tree<Type>
+	init(treeStream: Tree<Type>): TreeWalker<Type>
+
 	pushFirstChild(): void
 	popChild(): number[]
 	isSiblingAfter(): boolean

@@ -2,23 +2,19 @@ import type { ParsingState } from "./GeneralParser/interfaces.js"
 import type { BaseParsingState } from "./interfaces.js"
 
 import {
-	iterationChoice,
-	predicateChoice,
-	pickDirection,
 	positionStopPoint,
-	positionNegate,
-	isPosition
+	positionNegate
 } from "../Stream/PositionalStream/Position/utils.js"
-import type { StreamHandler, StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
-import { positionConvert } from "src/Stream/PositionalStream/Position/utils.js"
-import type {
-	ChangeType,
-	ReversibleStream
-} from "src/Stream/ReversibleStream/interfaces.js"
+import type { StreamHandler } from "src/Parser/ParserMap/interfaces.js"
+import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import type { Position } from "src/Stream/PositionalStream/Position/interfaces.js"
+import type {
+	DirectionalPosition,
+	Position
+} from "src/Stream/PositionalStream/Position/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
+import { uniNavigate } from "src/Stream/NavigableStream/utils.js"
 
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(
 	this: T
@@ -26,17 +22,8 @@ export const firstFinished = function <T extends BaseParsingState = ParsingState
 	return (this.streams as BasicStream[])[0].isEnd
 }
 
-export function skip(
-	input: ReversibleStream,
-	steps: Position | [ChangeType, StreamPredicate] = 1
-) {
-	const [change, endPred] = isPosition(steps) ? iterationChoice(steps) : steps
-	let i = 0
-	while (endPred(input, i)) {
-		change(input)
-		++i
-	}
-	return i
+export function skip(input: ReversibleStream, steps: Position = 1) {
+	return uniNavigate(input, positionNegate(steps))
 }
 
 export function nested(
@@ -66,15 +53,12 @@ export function array(stream: BasicStream, init: Collection = ArrayCollection<an
 }
 
 /**
- * @returns `skip`-s until the point of `positionNegate(positionConvert(pos))`
+ * @returns navigates up to the desired position on the given `Stream`, returns whether the bound has been reached
  */
-export function has(pos: Position) {
-	pos = predicateChoice(positionConvert(pos))
+export function has(pos: DirectionalPosition) {
 	const stopPoint = positionStopPoint(pos)
-	const negPred = positionNegate(pos)
-	const [change, endPred] = iterationChoice(negPred)
 	return function (input: ReversibleStream) {
-		skip(input, [change, endPred])
+		uniNavigate(input, pos)
 		return !input[stopPoint]
 	}
 }

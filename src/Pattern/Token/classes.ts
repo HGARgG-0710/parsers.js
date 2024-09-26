@@ -1,7 +1,7 @@
 import { object } from "@hgargg-0710/one"
 const { structCheck } = object
 
-import type { Token, TokenInstanceClass, TokenType } from "./interfaces.js"
+import type { Token, TokenInstance, TokenInstanceClass, TokenType } from "./interfaces.js"
 import { isType } from "./utils.js"
 import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "src/Tree/classes.js"
 
@@ -16,29 +16,38 @@ Token.is = structCheck<Token>(["type", "value"])
 Token.type = (x: any) => x.type
 Token.value = (x: any) => x.value
 
-export function TokenType<Type = any, ValueType = any>(
+export function SimpleTokenType<Type = any, ValueType = any>(
 	type: Type
 ): TokenType<Type, ValueType> {
-	const tt = (value: ValueType) => Token<Type, ValueType>(type, value)
-	tt.is = isType<Type>(type)
-	return tt
+	class stt implements Token<Type, ValueType> {
+		type: Type
+		value: ValueType
+
+		static type: Type
+		static is: (x: any) => x is Token<Type, ValueType>
+
+		constructor(value: ValueType) {
+			this.value = value
+		}
+	}
+	stt.type = stt.prototype.type = type
+	stt.is = isType<Type>(type) as (x: any) => x is Token<Type, ValueType>
+	return stt
 }
 
-export function TokenInstance<Type = any>(
-	type: any,
-	cached: boolean = true
-): TokenInstanceClass<Type> {
-	const cachedInstance = { type }
-	const ti = (
-		cached ? () => cachedInstance : () => ({ type })
-	) as TokenInstanceClass<Type>
+export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {
+	class ti implements TokenInstance<Type> {
+		type: Type
+		static is: (x: any) => x is TokenInstance<Type>
+	}
+	ti.prototype.type = type
 	ti.is = isType<Type>(type)
 	return ti
 }
 
 /**
  * An object for constructing 'Token' (or, 'Pattern') -based `Tree`-s
-*/
+ */
 export const TokenTree = {
 	children: ChildrenTree("value"),
 	multiple: MultTree("value"),

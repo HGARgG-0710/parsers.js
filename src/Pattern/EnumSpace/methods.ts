@@ -14,7 +14,7 @@ export function constEnumJoin(this: ConstEnumSpace, enums: EnumSpace) {
 }
 
 export function constEnumCopy(this: ConstEnumSpace) {
-	return ConstEnum(this.value.length)
+	return new ConstEnum(this.value.length)
 }
 
 export function constEnumMap(this: ConstEnumSpace, mapped: Mappable<{}>) {
@@ -32,7 +32,7 @@ export function incrementEnumJoin(this: IncrementEnum, enums: EnumSpace) {
 }
 
 export function incrementEnumCopy(this: IncrementEnum) {
-	return IncrementEnumConstructor(this.size)
+	return new IncrementEnumConstructor(this.size)
 }
 
 export function incrementEnumMap(this: IncrementEnum, mapped: Mappable<number>) {

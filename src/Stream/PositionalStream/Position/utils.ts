@@ -6,7 +6,6 @@ const { not } = boolean
 
 import type {
 	DirectionalPosition,
-	DualPosition,
 	Position,
 	PositionObject,
 	PredicatePosition
@@ -16,7 +15,6 @@ import type { PositionalStream } from "../interfaces.js"
 
 import { previous, next } from "src/utils.js"
 import type { ChangeType } from "src/Stream/ReversibleStream/interfaces.js"
-import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { BoundNameType } from "src/Stream/StreamClass/interfaces.js"
 
@@ -25,10 +23,6 @@ export const isPositionObject = structCheck<PositionObject>({ convert: isFunctio
 export const isPosition = or(isNumber, isFunction, isPositionObject) as <Type = any>(
 	x: any
 ) => x is Position<Type>
-
-export function isDualPosition<Type = any>(x: any): x is DualPosition<Type> {
-	return isArray(x) && isPosition<Type>(x[0]) && (!(1 in x) || isPosition<Type>(x[1]))
-}
 
 /**
  * Given a `Position` and (optionally) a `BasicStream`, it returns one of:
@@ -49,7 +43,7 @@ export function positionConvert(
  * * The original position, If it is a `number`
  * * The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
-export function positionNegate(position: DirectionalPosition): DirectionalPosition {
+export function positionNegate(position: Position): Position {
 	return isFunction(position)
 		? preserveDirection(position, (position) => trivialCompose(not, position))
 		: position
@@ -92,39 +86,6 @@ export function directionCompare(pos1: Position, pos2: Position, stream?: BasicS
 }
 
 /**
- * Given a `Position`, copies it via one of:
- *
- * * 1. If `x` is a `PositionObject`, and has `.copy` on itself: `x.copy()`
- * * 2. If `x` is a `PositionObject` without `.copy`: `{...x}`
- * * 3. If `x` is not a `PositionObject`: `x`
- *
- * NOTE: does not copy `PredicatePosition`s [those have to be manually bound/re-created];
- */
-export function positionCopy(x: Position): Position {
-	return isPositionObject(x) ? (isFunction(x.copy) ? x.copy() : { ...x }) : x
-}
-
-/**
- * Creates a `PredicatePosition` based off given `DirectionalPosition`.
- * Does so in the following fashion:
- *
- * * 1. If `x` is a `PredicatePosition`: `x`
- * * 2. If `x` is a number: `((_, i = 0, j = 0) => i + j < Math.abs(x))`, with `.direction` being `x >= 0`
- */
-export function predicateChoice(x: DirectionalPosition): PredicatePosition {
-	if (!isNumber(x)) return x
-
-	const abs = Math.abs(x)
-	const result: PredicatePosition = (
-		_input: BasicStream,
-		i: number = 0,
-		j: number = 0
-	) => i + j < abs
-	result.direction = x >= 0
-	return result
-}
-
-/**
  * Returns whether given `DirectionalPosition` is a "reverse-position" (that is, used to designate backward iteration).
  * Does so in the next manner:
  *
@@ -140,26 +101,6 @@ export function isBackward(pos: DirectionalPosition): boolean {
  */
 export function pickDirection(pos: DirectionalPosition): ChangeType {
 	return isBackward(pos) ? previous : next
-}
-
-/**
- * Given a `PredicatePosition`, returns a `positionStopPoint`-safe `StreamPredicate`
- * 		[never overflows a given `Stream`]
- */
-export function endPredicate(predicate: PredicatePosition): StreamPredicate {
-	const stopPoint = positionStopPoint(predicate)
-	return (input: BasicStream, i: number = 0) => !input[stopPoint] && predicate(input, i)
-}
-
-/**
- * Given a `Position`, returns a pair of `[pickDirection(positionConvert(directional, stream)), endPredicate(predicateChoice(positionConverte(directional, stream)))]`
- */
-export function iterationChoice(
-	position: Position,
-	stream?: BasicStream
-): [ChangeType, StreamPredicate] {
-	const converted = positionConvert(position, stream)
-	return [pickDirection(converted), endPredicate(predicateChoice(converted))]
 }
 
 /**
