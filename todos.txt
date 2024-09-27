@@ -5,32 +5,30 @@
 
 CURR TODO LIST: 
 
-		[RENAME these two into 'Linear-', because they depend on linear search of keys]; 
 		[todo - fix the utils to match the interfaces]; 
-		1. MapClass
-		2. IndexMap; 
+		1. IndexMap [various classes, FINISH FIRST]; 
 		
 		[todo - fix the utils to match the interfaces]; 
-		3. Collection [various implementations]; 
-		4. EliminablePattern; 
-		5. EnumSpace [various implementations]; 
-		6. TokenizablePattern; 
-		7. ValidatablePattern; 
-		8. SimpleTokenType [after changing the 'TokenType' into it]; 
-		9. TokenInstance (GET RID of the 'cached' bit, unneeded now); 
-		10. StreamClass;	
-		11. InputStream; 
-		12. LimitedStream; 
-		13. NestedStream; 
-		14. PositionalStream; 
-		15. PredicateStream; 
-		16. ProlongedStream; 	
-		17. ReversibleStream; 
-		18. TransformedStream; 
-		19. TreeStream; 
-		20. MultiIndex; 
-		21. TreeWalker; 
-		22. MultiIndexModifier; 
+		2. Collection [various implementations]; 
+		3. EliminablePattern; 
+		4. EnumSpace [various implementations]; 
+		5. TokenizablePattern; 
+		6. ValidatablePattern; 
+		7. SimpleTokenType [after changing the 'TokenType' into it]; 
+		8. TokenInstance (GET RID of the 'cached' bit, unneeded now); 
+		9. StreamClass;	
+		10. InputStream; 
+		11. LimitedStream; 
+		12. NestedStream; 
+		13. PositionalStream; 
+		14. PredicateStream; 
+		15. ProlongedStream; 	
+		16. ReversibleStream; 
+		17. TransformedStream; 
+		18. TreeStream; 
+		19. MultiIndex; 
+		20. TreeWalker; 
+		21. MultiIndexModifier; 
 		
 
 	2.22.1. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
@@ -135,24 +133,41 @@ CURR TODO LIST:
 
 	Need: 
 
-		1. Ability to set: 
-			1.1. the 'hash' function
-			1.2. the 'keys' (and 'extendKey'); 
-			1.3. the 'extendValue': 
-				SOLUTION: just compose with the 'hash' like 'hash(newF(x))'
-			1.4. '.add': 
-				1.4.1. P.1 of SOLUTION: 
-					do it via pairs-list of [key, value] like with IndexMap-s; 
-				1.4.2. P.2 of SOLUTION: 
-					The 'hash' has to change accordingly also; 
-					Question: how?
+		1. To be able to implement: 
+			1.1. builtin Map-based (with '.extendKey'); 
+				1.1.1. Ergo, need ability to set ONE'S OWN special "structure" for the underlying thing; 
+					1.1.1.1. The interface used needs to be UNIFORM (to allow for the wrapper's universality); 
+						1.1.1.1.1. Therefore, need an INTERFACE ADAPTOR! [for each special case...]; 
+			1.2. builtin object-based one (with '.extendKey');
+				1.2.1. Same as 1.1.
+			1.3. one relying upon a '.length'-based hash function; 
+				1.3.1. Need the ability to set the 'hash' function on one's own...; 
+			
+			Ergo
+			
+				1. all this really does is provide the interface: 
 
-					SOLUTION: 
-						The 'hash' should take NOT ONE, but several arguments: 
-							1. the indexed value 'x'; 
-							2. the table itself; 
-		
-		2. Separate constant getter-property for the '.size'; 
+					{
+						hash, 
+						new: function () {	
+							return {
+									hash, 
+									structure, 
+									index: function (x) {
+										return this.structure.get(this.hash(x))
+									}
+							}
+						}
+						extend: function (f) {
+							return HashMap((x) => this.hash(f(x)))
+						}
+					}
+				
+				2. PROBLEM: this is far too hidden - DOES NOT permit one to organize the '.extendKey' (needed for the using the SimpleTokenType); 
+					2.1. Solution 1: enable 'extendKey' on the structure (as a part of hte intermediate interface); 
+						2.1.1. Based off a given 'structure', returns a NEW ONE with a DIFFERENT '.get' [one that accounts for the extension provided with]; 
+			
+		2. [generally, for IndexMap-s] Separate constant getter-property for the '.size'; 
 
 			In some places, the thing (and IndexMap implementation also) has 'this.keys.length'; 
 			Replace this with 'this.size := this.keys.length' [on a prototype]; 
@@ -352,8 +367,9 @@ A. testing:
 
 			5. Parser/
 			6. Stateful/
-			7. benchmarks/
-			8. imports/ 
+			7. regex/
+			8. benchmarks/
+			9. imports/ 
 				NOTE: there has to be a WHOLE SEPARATE testing procedure for the 'imports'; 
 		
 	A.2. Write out dependencies to be tested for each one of them; 
@@ -539,23 +555,6 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					of other strings of equal length, then map in this collection (which has a different interface...);
 
 				NOTE: ANYTHING with a '.length' property is usable with this;
-				
-			2. TreeHash (a kind of 'Hash', based off 'Tree'-s): 
-				Basically, given an 'Indexed<Type>' (WITH A '.length'), and given an 'array-tree', one does (rough sketch, indexation): 
-
-					function ArrayTreeHash (tree) {
-						return function (x) {
-							let current = tree
-							for (let i = 0; i < x.length; ++i) current = current[x[i]]
-							return current
-						}
-					}
-
-				NOTE: the actual 'TreeHash' would be more general and use 'x' as a MULTIINDEX!
-					(tree) => tree.index(x)
-					BUT: for this, it'd require a more 'generalized' version (in particular, USE LOOPS INSTEAD OF '.reduce')
-
-				This can be used with strings/
 
 		NOTE [on optimizations]: this is especially useful when
 			static-lengthed and long-term parsing tables are concerned; 
@@ -1010,6 +1009,8 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		The latter can easily be replaced with 'array(...)', 
 			whereas the former - with an appropriate table...; 
 		Consider removing them...
+	
+	2.28. Tiny detail: in interfaces replace all 'methodName(...): Type' with 'methodName: () => Type'; 
 
 3. Dependency management: 
 	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

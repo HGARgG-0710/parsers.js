@@ -13,7 +13,7 @@ function assertIndexMapEquality<KeyType = any, ValueType = any>(
 	indexMap: IndexMap<KeyType, ValueType>,
 	preMap: Pairs<KeyType, ValueType>
 ) {
-	for (let i = 0; i < indexMap.keys.length; ++i) {
+	for (let i = 0; i < indexMap.size; ++i) {
 		const [origKey, origValue] = indexMap.byIndex(i)
 		const [copiedKey, copiedValue] = preMap[i]
 		assert.strictEqual(origKey, copiedKey)

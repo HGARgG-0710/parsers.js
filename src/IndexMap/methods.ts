@@ -1,61 +1,26 @@
-import { fromPairsList, toPairsList } from "./utils.js"
-import type { IndexMap, MapClass as MapClassType, Pairs } from "./interfaces.js"
+import { toPairsList } from "./utils.js"
+import type { IndexMap, MapClass as MapClassType } from "./interfaces.js"
 
 import { inplace } from "@hgargg-0710/one"
-import { MapClass } from "./classes.js"
+import { LinearMapClass } from "./LinearIndexMap/classes.js"
 import { table } from "./utils.js"
-const { insert, swap } = inplace
-
-export function indexMapIndex<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	x: any
-) {
-	for (let i = 0; i < this.keys.length; ++i)
-		if (this.change(this.keys[i], x)) return this.values[i]
-	return this.default
-}
-
-export function indexMapReplace<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	index: number,
-	pair: [KeyType, ValueType]
-): IndexMap<KeyType, ValueType> {
-	const [key, value] = pair
-	this.keys[index] = key
-	this.values[index] = value
-	return this
-}
-
-export function indexMapAdd<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	index: number,
-	...pairs: Pairs<KeyType, ValueType>
-): IndexMap<KeyType, ValueType> {
-	const [keys, values] = fromPairsList(pairs)
-	insert(this.keys, index, ...keys)
-	insert(this.values, index, ...values)
-	return this
-}
-
-export function indexMapDelete<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	index: number
-): IndexMap<KeyType, ValueType> {
-	this.keys.splice(index, 1)
-	this.values.splice(index, 1)
-	return this
-}
+const { swap } = inplace
 
 export function indexMapUnique<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	start: boolean = true
 ): IndexMap<KeyType, ValueType> {
+	const eliminationSet = new Set()
 	const indexSet = new Set()
-	const predicate = start ? (i: number) => i < this.keys.length : (i: number) => i >= 0
+
+	const predicate = start ? (i: number) => i < this.size : (i: number) => i >= 0
 	const change = (-1) ** +!start
 
-	for (let i = +!start * this.keys.length; predicate(i); i += change)
-		if (!indexSet.has(this.keys[i])) indexSet.add(i)
+	for (let i = +!start * (this.size - 1); predicate(i); i += change)
+		if (!eliminationSet.has(this.keys[i])) {
+			eliminationSet.add(this.keys[i])
+			indexSet.add(i)
+		}
 
 	const filterPredicate = (_x: any, i: number) => indexSet.has(i)
 	this.keys = this.keys.filter(filterPredicate)
@@ -67,7 +32,7 @@ export function indexMapUnique<KeyType = any, ValueType = any>(
 export function* indexMapIterator<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ): Generator<[KeyType, ValueType]> {
-	for (let i = 0; i < this.keys.length; ++i) yield [this.keys[i], this.values[i]]
+	for (let i = 0; i < this.size; ++i) yield [this.keys[i], this.values[i]]
 }
 
 export function indexMapByIndex<KeyType = any, ValueType = any>(
@@ -90,19 +55,28 @@ export function indexMapSwap<KeyType = any, ValueType = any>(
 export function indexMapCopy<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ) {
-	return MapClass<KeyType, ValueType>(this.change)(toPairsList(table(this)))
+	return new (Object.getPrototypeOf(this).constructor)(toPairsList(table(this)))
+}
+
+export function indexMapSizeGetter<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>
+) {
+	return this.keys.length
 }
 
 export function mapClassExtend<KeyType = any, ValueType = any>(
 	this: MapClassType<KeyType, ValueType>,
 	f: (x: ValueType) => any
 ): MapClassType<KeyType, any> {
-	return MapClass<KeyType>((curr: KeyType, x: any) => this.change(curr, f(x)))
+	return LinearMapClass<KeyType>((curr: KeyType, x: any) => this.change(curr, f(x)))
 }
 
 export function mapClassExtendKey<KeyType = any, ValueType = any>(
 	this: MapClassType<KeyType, ValueType>,
 	f: (x: KeyType) => any
 ): MapClassType<any, ValueType> {
-	return MapClass((curr: any, x: any) => this.change(f(curr), x))
+	return LinearMapClass((curr: any, x: any) => this.change(f(curr), x))
 }
+
+export * as LinearIndexMap from "./LinearIndexMap/methods.js"
+export * as PersistentIndexMap from "./PersistentIndexMap/methods.js"

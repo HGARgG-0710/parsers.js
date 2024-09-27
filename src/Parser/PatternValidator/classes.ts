@@ -9,7 +9,7 @@ export function PatternValidator<KeyType = any>(
 	return function <Type = any>(
 		pattern: ValidatablePattern<Type, KeyType>
 	): PatternValidatorOutput {
-		for (let i = 0; i < validityMap.keys.length; ++i)
+		for (let i = 0; i < validityMap.size; ++i)
 			if (!pattern.validate(...validityMap.byIndex(i))[0]) return [false, i]
 		return !pattern.result[1].length || null
 	}
