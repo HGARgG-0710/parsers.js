@@ -10,6 +10,7 @@ import {
 	persistentIndexMapIndex,
 	persistentIndexMapKeysGetter,
 	persistentIndexMapReplace,
+	persistentIndexMapSet,
 	persistentIndexMapUnique,
 	persistentIndexMapValuesGetter
 } from "./methods.js"
@@ -32,6 +33,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	indexMap: UnderPersistentMap<KeyType, ValueType>
 	index: (x: any) => PersistentIndexValue<ValueType>
 	copy: () => IndexMap<KeyType, PersistentIndexValue<ValueType>>
+	set: (key: KeyType, value: ValueType, index: number) => any
 
 	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
@@ -55,6 +57,7 @@ Object.defineProperties(PersistentIndexMap, {
 	delete: { value: persistentIndexMapDelete },
 	unique: { value: persistentIndexMapUnique },
 	index: { value: persistentIndexMapIndex },
+	set: { value: persistentIndexMapSet },
 	keys: { get: persistentIndexMapKeysGetter },
 	values: { get: persistentIndexMapValuesGetter },
 	default: { get: persistentIndexMapDefault },

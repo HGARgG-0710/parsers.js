@@ -9,7 +9,7 @@ export interface Resulting<ResultType = any> extends Summat {
 }
 
 export interface Flushable extends Summat {
-	flush(): void
+	flush: () => void
 }
 
 export * as Collection from "./Collection/interfaces.js"

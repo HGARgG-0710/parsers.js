@@ -7,17 +7,17 @@ import { basicParserChange } from "./methods.js"
 
 // * note: doesn't do iteration - leaves it to the user...
 
-export function BasicParser<KeyType = any, OutType = any>(
-	parser: ParserMap<KeyType, Iterable<OutType>, BasicState<KeyType, OutType>>
+export function BasicParser<OutType = any>(
+	parser: ParserMap<Iterable<OutType>, BasicState<OutType>>
 ) {
-	return GeneralParser<BasicState<KeyType, OutType>>(
+	return GeneralParser<BasicState<OutType>>(
 		DefineFinished(
 			{
 				parser,
 				change: basicParserChange,
 				result: ArrayCollection()
 			},
-			firstFinished<BasicState<KeyType>>
+			firstFinished<BasicState<OutType>>
 		)
 	)
 }

@@ -29,13 +29,64 @@ CURR TODO LIST:
 		19. MultiIndex; 
 		20. TreeWalker; 
 		21. MultiIndexModifier; 
-		
 
-	2.22.1. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
+	0. Find all the redundant generics + function definitions - remove them [scour the source]; 
+	1. StreamTokenizer - ADD THE PROTOTYPE!	[unfixed...]; 
+
+	2. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
 		Namely: 
 			1. Initializable-related; 
 
-	2.22.2. PROBLEM: with the NestedStream: 	
+	3. PROBLEM: with the NestedStream: 	
+
+		FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
+
+			Create a special 'FastLookupTable' wrapper-interface that 
+				could be used to redirect to HashMap and/or PersistentIndexMap (generally - '.index'-having + some other methods): 
+
+					The idea is - being capable of having O(1) operations after creating the NestedStream
+						[that is - indexes are remembered for Stream-s, and their elements are checked/transformed using those; 
+							This (for linear case) comes in a cost of average O(log n) [n - elements total] number of additional checks overall in a NestedStream structure to determine 
+								the types of Stream-s [in linear case - O(s), where s - size of table, so it comes to O(s * log n) ONCE instead of O(ns) EVERY single layer]; 
+						]; 
+					
+					Fundamentally, it works via methods: 
+
+						1. '.index' - initial indexation ['inflation: [Pointer(number)?, deflation, transform | null]'] - null when no bound NestedTransformed was uninitialized, Pointer(number) only in 'PersistentIndexMap'; 
+							This is potentially slow; 
+						2. '.own' - "owns" the given object; 
+							To be applied on 'Stream'-s; 
+							In case of 'PersistentIndexMap' - stores the GIVEN Pointer(number) on them as a property for later reference by '.byOwned'; 
+							In case of 'HashMap' - does nothing, it's already O(1) [assuming SimpleTokenType-s]; 
+						3. '.byOwned' - secondary indexation (used by 'NestedlyTransformedStream'); Guaranteedly fast, O(1); 
+							In case of 'PersistentIndexMap', this one calls the '.byIndex' based of the stored '.tableIndex' property on the NestedStream that was '.own'-ed; 
+							Those are pointers, to permit changes in the table [WHICH IS SHARED BY THE __CLASSES__ CREATED - NestedStream and NestedStreamTransform VIA PROTOTYPES]; 
+
+							Comparison "whether something is a 'NestedStream" (one of sought types)" is done via a 'hidden' prototype-level constant on NestedStream; 
+
+						4. 'set' - this one is for changing the values of the table [adding new/replacing old]; 
+						5. 'delete' - this one is for deleting items from the table by key; 
+						6. 'replaceKeys' - this one is for deleting the old key, while transfering its value to the new one; 
+
+					THE TABLE FOR the pair of classes is initialized FROM a FastLookupTable of 'inflation: [deflation, null]', where "null" is the future slot for 'transformations'; 
+						Those are initialized upon calling the '.init' method OF THE NestedlyTransformedStream CLASS!: 
+							VIA ANOTHER METHOD of FastLookupTable: 
+
+								7. mutate(mutation): 
+
+									In 'HashMap' case does: 
+										this.keys.forEach((key, i) => this.set(key, mutation(this.get(key), i, this)))
+
+									In 'PersistentIndexMap' case does the same via the GOOD OLD FOR-LOOP (reverse-order); 
+										
+							
+							WITH 'mutation = function (x, i) {
+								x[1] = transformations[i]
+								return x
+							}'; 
+
+							EVERY TIME that a new 'ResettingNestedlyTransformedStream' is created (extends NestedlyTransformedStream), 
+								the 'transformations' used for it are ADDED DIRECTLY INTO THE NestedlyTransformedStream CLASS'S PROTOTYPE!
 
 		1 IT CANNOT HANDLE MULTIPLE DIFFERENT "KINDS" OF NESTED-NESS; 
 			Here's an example: 
@@ -127,51 +178,6 @@ CURR TODO LIST:
 									2.2.2.1. If it is, APPLY RECURSIVELY [return a new NestedlyTransformed, based off it]; 
 									2.2.2.2. Otherwise, apply the '.transform' that is passed; 
 
-2.30. Implement the HashMap in this version; 
-	Without it, the library is nigh unusable from the optimization standpoint; 
-	Should implement IndexMap, be applicable in every case when it is (interface-wise); 
-
-	Need: 
-
-		1. To be able to implement: 
-			1.1. builtin Map-based (with '.extendKey'); 
-				1.1.1. Ergo, need ability to set ONE'S OWN special "structure" for the underlying thing; 
-					1.1.1.1. The interface used needs to be UNIFORM (to allow for the wrapper's universality); 
-						1.1.1.1.1. Therefore, need an INTERFACE ADAPTOR! [for each special case...]; 
-			1.2. builtin object-based one (with '.extendKey');
-				1.2.1. Same as 1.1.
-			1.3. one relying upon a '.length'-based hash function; 
-				1.3.1. Need the ability to set the 'hash' function on one's own...; 
-			
-			Ergo
-			
-				1. all this really does is provide the interface: 
-
-					{
-						hash, 
-						new: function () {	
-							return {
-									hash, 
-									structure, 
-									index: function (x) {
-										return this.structure.get(this.hash(x))
-									}
-							}
-						}
-						extend: function (f) {
-							return HashMap((x) => this.hash(f(x)))
-						}
-					}
-				
-				2. PROBLEM: this is far too hidden - DOES NOT permit one to organize the '.extendKey' (needed for the using the SimpleTokenType); 
-					2.1. Solution 1: enable 'extendKey' on the structure (as a part of hte intermediate interface); 
-						2.1.1. Based off a given 'structure', returns a NEW ONE with a DIFFERENT '.get' [one that accounts for the extension provided with]; 
-			
-		2. [generally, for IndexMap-s] Separate constant getter-property for the '.size'; 
-
-			In some places, the thing (and IndexMap implementation also) has 'this.keys.length'; 
-			Replace this with 'this.size := this.keys.length' [on a prototype]; 
-
 2.16. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
 	In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
 		an item with given predicate; 
@@ -198,7 +204,11 @@ CURR TODO LIST:
 
 	Nope, no good solution for this... Just do the '.defaultIsEnd, then...'; 
 
-2.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME!
+2.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME AND HEAP OCCUPATION!
+	Likewise, profile the previous projects - see if one's guesses (albeit, simple) 
+		regarding the natures of performance issues were, indeed, correct; 
+
+	ALSO - replace the '.filter((x) => x.length)' with new 'filter' from 'one.js'
 
 A. testing: 
 	A.1. Create list of modules to be tested; 
@@ -245,7 +255,7 @@ A. testing:
 			
 		Left to make tests for: 
 
-			1. IndexMap/ [specifics]
+			1. IndexMap/ [specifics, RE-DO]
 			2. Pattern/  [specifics - underlying]
 				2.1. Token/ [specifics]
 				2.2. EnumSpace/ [specifics]
@@ -271,6 +281,9 @@ A. testing:
 					7. ProlongedStream; 
 					8. LimitedStream; 
 					9. ReversedStream; 
+					10. NestedStream [RE-DEFINE]; 
+						10.1. NestedlyTransformedStream;
+						11.1. NestedStream; 
 
 				4.0. One tests on a class-basis; 
 					4.0.1. Classes are tested per-method; 
@@ -457,7 +470,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					final.push(stream.next())
 				return final
 				
-			It does: 
+			It does [except, with no stream - it just walks the tree recursively]: 
 
 				const final = Array(size).fill(null)
 				const staticSize = size - 1
@@ -471,21 +484,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Except here, the 'stream' [TreeStream] is replaced by the tree:
 				so it recursively traverses it, preserving the SAME buffer and index across different recursive calls;
 
-	2.2. Add a 'state.size' property to the parsers. 
-		This (ultimately) counts the number of items inside the tree.
-		Can be used with 'bufferize': 
-
-			bufferize((x) => x, pstate.size)(pstate.result)	
-
-		IDEA: generalize this; 
-
-			Let the 'array' permit an OPTIMIZATION of replacement with 'bufferize' [not for a 'Tree', but a 'Stream']; 
-				Thus, whenever there's a DISTINCT LENGTH, it'll simply do 'Array(size)' [or, more exactly, for some general interface 'GeneralBuffer(size)'...], 
-					then convert it to a 'Collection'; 
-
-			This will permit minorly optimizing the collections that have known length;
-
-	2.3. TreeStream: create two versions; 
+	2.2. TreeStream: create two versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -496,7 +495,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		The Pre  visits the node, then its children one-by-one starting from the beginning. 
 		The Post visits first the children, only THEN the parent.
 
-	2.4. Implement a 'PartialValidator': 
+	2.3. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
@@ -505,12 +504,12 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
 
-	2.5. Implement a 'level-by-level TreeStream': 
+	2.4. Implement a 'level-by-level TreeStream': 
 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	2.6. Add a 'HashClass'-implementation of 'MapClass'; 
+	2.5. Add a 'HashClass'-implementation of 'MapClass'; 
 		
 		NOTE [important]: one needs to implement A DETAILED and GENERAL collision-resolution algorithm for this thing; 
 			In particular, must be available: 
@@ -654,52 +653,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				Also, there'd need to be a way to get the '.type' of the 'TokenType'-s directly; 
 
-	2.7. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	2.6. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
-			1. UniqueSequenceTree;
-
-				This is an 'IndexMap'+'Tree'-implementation working like: 
-
-					1. '.index' of a given 'string' (or another '.length'-having structure) BASICALLY, finds the first "unique" level it's on; 
-
-						So, for instance, having a set: 
-
-							{ ann, ant, ben }
-
-						Would yield an IdentifierTree: 
-
-							0   1 2
-							a,b-n-n,t
-
-						This (basically) uses recursive objects + indexation
-						(
-							ant is found in 3 iterations; 
-							an is found in 2 iterations; 
-							'ben' is found in 1 iteration (only 'b' is stored);
-						)
-
-				Note: this implements a HashMap's 'hash'; 
-				This is VERY good for frequent accesses to THE SAME value; 
-
-			2. BinarySearchTree; 
-
-				Same as 'UniqueSequenceTree', BUT it implements a Binary Search Tree.
-				It works based on a provided comparison (a very rough indexation sketch): 
-
-					function BinarySearchTree(tree, comparison) {
-						return function (x) {
-							let current = tree
-							let greater
-							while (current.length) current = current[+comparison(current, x)]
-							return current.value
-						}
-					}
-				
-				NOTE: with (x, y) => x > y, can be used with identifiers; 
-
-			3. shorten(names); 
+			1. shorten(names); 
 				Given a sequence of "names" (strings/sequences),
 					and a 'comparison' predicate for each of its elements,
 						it would implement a name-shortening algorithm, 
@@ -707,7 +665,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 				
 				The return value is an IndexMap; 
 
-			4. renameable(names);
+			2. renameable(names);
 				Given an IndexMap of names (which could come from, for instance, 'shorten'), 
 					the method: 
 
@@ -735,7 +693,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 		
-	2.8. Expand on the 'Position' type further;
+	2.7. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -762,13 +720,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	2.9. RELAX overly demanding interface and types definitions/requirements;
+	2.8. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.10. [Idea?] Create an error-handling API for the 'v0.4';
+	2.9. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -791,17 +749,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		
-	2.11. MemoizableStreamClass: 
-
-		This is a generalization of StreamClass; 
-		The StreamClassInstance-s are ONLY capable of memoizing the very first value obtained via 'initCurr'; 
-
-		This would (additionally) have two more methods: 
-
-			1. memoize() - memoizes the value (any further .next() changes the value of the Stream, but '.curr' remains THE SAME); 
-			2. unmemoize() - returns back to the flow of the Stream; 
-
-	2.12. Minor refactoring (StreamClass): 
+	2.10. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -815,7 +763,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.13. [mayyyybee??] Try re-doing the project's type-system? [again...]
+	2.11. [mayyyybee??] Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -828,7 +776,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. TransformedStream; 
 			2. NestedStream; 
 
-	2.14. BreakableStream - a stream-class that produces instances, which : 
+	2.12. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -890,10 +838,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 	
-	2.15. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.13. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 
-	2.16. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.14. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -902,10 +850,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 	
-	2.17. utility - nestedDepth; 
+	2.15. utility - nestedDepth; 
 		Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 		
-	2.18. utility - findNestedEnd: 
+	2.16. utility - findNestedEnd: 
 
 		Given a 'ReversibleStream'/'NavigableStream', it does: 
 
@@ -915,13 +863,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
 
-	2.19. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.17. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
 	
-	2.20. TypeScript - use 'enum's; 
+	2.18. TypeScript - use 'enum's; 
 
 		Learned about 'enum's being present in TypeScript; 
 		Use them to designate "special constants" (ALSO - take those out into separate files); 
@@ -941,13 +889,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
 		[Current preference is to the latter...]
 
-	2.21. Idea for a method: ProlongedStream.prolong; 	
+	2.19. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams'; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.22. MAKE the 'utils' TYPE-SAFE! 
+	2.20. MAKE the 'utils' TYPE-SAFE! 
 
 		Currently, what lacks is the ability to dynamically generate the appropriate type-checking functions that may require 
 			additional predicates, BUT still preserve the form; 
@@ -965,23 +913,28 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Currently, the checks can make SOME mistakes still; 
 			[Noticed this while doing 'isNumericPositional' - should be refactored...]; 
 
-	2.23. [Maaayybe?] Create a 'samples' directory; 
+	2.21. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
 		Or, better, make this into a separate mini-project called 'parsing-samples'; 
 		[EXAMPLE: handling the 'escaped' strings/sequences all the time];
 
-		Think about it [this particular refactoring is VERY fine]; 
+		Think about it [this particular refactoring is VERY fine and case-specific, though, it can come in useful...]; 
 
-	2.24. Generics for the 'isType'-functions; 	
+		No, if one is to do it, the thing should: 
+
+			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
+			2. Provide low-level Token-s with specialized given names; 
+
+	2.22. Generics for the 'isType'-functions; 	
 		Learned about TypeScript generics for nameless functions (namely, how they can be used with 'as'): 
 
 			const isType = ... as <Type = any>(x: any) => x is Type
 		
 		Variation on this - add throughout the library [particularly, when 'Type' is itself a generics parameter]; 
 
-	2.25. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.23. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
@@ -989,7 +942,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 
-	2.26. Generalize the streams even further for general copying implementation: 
+	2.24. Generalize the streams even further for general copying implementation: 
 
 		Have to have: 
 			
@@ -1005,13 +958,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		The method would go on the 'StreamClass'; 
 
-	2.27. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
-		The latter can easily be replaced with 'array(...)', 
-			whereas the former - with an appropriate table...; 
-		Consider removing them...
-	
-	2.28. Tiny detail: in interfaces replace all 'methodName(...): Type' with 'methodName: () => Type'; 
+	2.25. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
+		The former can easily be replaced with an appropriate table on BasicStream, 
+			while 'BasicParser' is equivalent to a 'TransformedStream' (or NestedlyTransformedStream); 
+		Consider removal...
 
 3. Dependency management: 
-	3.1. Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
+	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
 		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 

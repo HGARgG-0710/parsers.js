@@ -26,10 +26,12 @@ import {
 	linearIndexMapIndex,
 	linearIndexMapReplace,
 	linearIndexMapAdd,
-	linearIndexMapDelete
+	linearIndexMapDelete,
+	linearIndexMapSet
 } from "./methods.js"
 
 const LinearMapClassPrototype = {
+	set: { value: linearIndexMapSet },
 	index: { value: linearIndexMapIndex },
 	replace: { value: linearIndexMapReplace },
 	add: { value: linearIndexMapAdd },
@@ -56,6 +58,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 		delete: (index?: number, count?: number) => any
 		replace: (index: number, pair: [KeyType, ValueType]) => any
+		set: (key: KeyType, value: ValueType, index: number) => any
 		unique: (start?: boolean) => LinearIndexMap<KeyType, ValueType>
 		byIndex: (index: number) => [KeyType, ValueType]
 		swap: (i: number, j: number) => any

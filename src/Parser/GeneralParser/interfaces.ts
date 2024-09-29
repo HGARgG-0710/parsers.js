@@ -6,21 +6,13 @@ import type { ParserMap, ParserFunction } from "../ParserMap/interfaces.js"
 export interface ParsingState<
 	StreamType extends BasicStream = BasicStream,
 	ResultType = Collection,
-	TempType = ResultType,
-	KeyType = any
+	TempType = ResultType
 > extends Resulting<ResultType> {
 	streams?: StreamType[]
 	state?: object
 	parser?:
-		| ParserMap<
-				KeyType,
-				TempType,
-				ParsingState<StreamType, ResultType, TempType, KeyType>
-		  >
-		| ParserFunction<
-				ParsingState<StreamType, ResultType, TempType, KeyType>,
-				TempType
-		  >
+		| ParserMap<TempType, ParsingState<StreamType, ResultType, TempType>>
+		| ParserFunction<ParsingState<StreamType, ResultType, TempType>, TempType>
 	finished?: boolean
 	change?: (x: TempType) => void
 }

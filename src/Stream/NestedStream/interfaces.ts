@@ -7,7 +7,11 @@ import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface Nestable<Type = any> extends Summat {
-	nest(inflate?: StreamPredicate, deflate?: StreamPredicate, toplevel?: boolean): Type
+	nest: (
+		inflate?: StreamPredicate,
+		deflate?: StreamPredicate,
+		toplevel?: boolean
+	) => Type
 }
 
 export interface Inflatable extends Summat {

@@ -9,7 +9,7 @@ export interface Started<Type = boolean> extends Summat {
 }
 
 export interface Prevable<Type = any> extends Summat {
-	prev(): Type
+	prev: () => Type
 }
 
 export interface StartedStream<Type = any> extends BasicStream<Type>, Started {}

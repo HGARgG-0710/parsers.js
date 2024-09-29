@@ -1,7 +1,7 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
-import type { IndexMap } from "src/IndexMap/interfaces.js"
+import type { Indexable } from "src/IndexMap/interfaces.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
 import type { ParsingState } from "../GeneralParser/interfaces.js"
 import type {
@@ -11,11 +11,10 @@ import type {
 } from "../interfaces.js"
 
 export type ParserMap<
-	KeyType = any,
 	OutType = any,
-	T extends BaseMapParsingState<KeyType> = DefaultMapParsingState<KeyType>
+	T extends BaseMapParsingState = DefaultMapParsingState
 > = ParserFunction<T, OutType> & {
-	table?: IndexMap<KeyType, ParserFunction<T, OutType>>
+	table?: Indexable<ParserFunction<T, OutType>>
 }
 
 export type ParserFunction<T extends BaseParsingState = ParsingState, OutType = any> = ((
@@ -37,10 +36,9 @@ export type StreamTransform<UnderType = any, UpperType = any> = Summat &
 export type ParsingPredicate<
 	StreamType extends BasicStream = BasicStream,
 	ResultType = Collection,
-	TempType = ResultType,
-	KeyType = any
+	TempType = ResultType
 > = ((
-	state?: ParsingState<StreamType, ResultType, TempType, KeyType>,
+	state?: ParsingState<StreamType, ResultType, TempType>,
 	parser?: Function
 ) => boolean) &
 	Summat

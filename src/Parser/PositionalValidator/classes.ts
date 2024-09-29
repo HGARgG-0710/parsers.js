@@ -6,11 +6,11 @@ import { StreamLocator } from "../StreamLocator/classes.js"
 import type { ParserMap } from "../ParserMap/interfaces.js"
 import type { PositionalValidatorState } from "./interfaces.js"
 
-export function PositionalValidator<KeyType = any>(
-	validatorMap: ParserMap<KeyType, boolean, PositionalValidatorState<KeyType>>
+export function PositionalValidator(
+	validatorMap: ParserMap<boolean, PositionalValidatorState>
 ) {
 	const locator = StreamLocator(trivialCompose(not, validatorMap))
-	return function (input: PositionalValidatorState<KeyType>) {
+	return function (input: PositionalValidatorState) {
 		const [found, pos] = locator(input).result
 		return [!found, pos]
 	}

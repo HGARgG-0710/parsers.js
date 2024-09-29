@@ -34,7 +34,7 @@ export function effectiveTreeStreamNavigate<Type = any>(
 }
 
 export function effectiveTreeStreamCopy<Type = any>(this: EffectiveTreeStream<Type>) {
-	const copied = TreeStreamConstructor(this.input)
+	const copied = new TreeStreamConstructor(this.input)
 	copied.navigate(this.pos)
 	return copied
 }

@@ -6,7 +6,7 @@ export interface BasicStream<Type = any>
 		Nextable<Type> {}
 
 export interface Nextable<Type = any> extends Summat {
-	next(): Type
+	next: () => Type
 }
 
 export interface Currable<Type = any> extends Summat {

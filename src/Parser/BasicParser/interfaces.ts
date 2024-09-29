@@ -2,9 +2,8 @@ import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
 import type { ParsingState } from "../GeneralParser/interfaces.js"
 
-export type BasicState<KeyType = any, OutType = any> = ParsingState<
+export type BasicState<OutType = any> = ParsingState<
 	BasicStream,
 	Collection<OutType>,
-	Iterable<OutType>,
-	KeyType
+	Iterable<OutType>
 >

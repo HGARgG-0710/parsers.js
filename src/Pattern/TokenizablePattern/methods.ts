@@ -24,12 +24,13 @@ export function tokenizableStringPatternTokenize<OutType = any>(
 			replace(
 				this.result,
 				r,
-				...TokenizableStringPattern<OutType>(current).tokenize(key, handler)
+				...new TokenizableStringPattern<OutType>(current).tokenize(key, handler)
 			)
 	}
 
 	return this.result
 }
+
 export function tokenizableStringPatternFlush(this: TokenizableStringPatternType): void {
 	this.result = []
 }

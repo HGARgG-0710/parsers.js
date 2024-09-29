@@ -44,3 +44,17 @@ export function linearIndexMapDelete<KeyType = any, ValueType = any>(
 	out(this.values, index, count)
 	return this
 }
+
+export function linearIndexMapSet<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>,
+	key: KeyType,
+	value: ValueType,
+	index: number = this.size
+) {
+	for (let i = 0; i < this.size; ++i)
+		if (this.keys[i] === key) {
+			this.values[i] = value
+			return this
+		}
+	return this.add(index, [key, value])
+}

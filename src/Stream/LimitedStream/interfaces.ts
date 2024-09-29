@@ -18,7 +18,7 @@ import type {
 import type { IterableStream } from "../IterableStream/interfaces.js"
 
 export interface Limitable<Type = any> extends Summat {
-	limit(from?: Position, to?: Position): Type
+	limit: (from?: Position, to?: Position) => Type
 }
 
 export interface BasicLimited extends Summat {

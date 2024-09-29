@@ -6,7 +6,7 @@ export function PatternTokenizer<KeyType = any, OutType = any>(
 	tokenMap: IndexMap<KeyType, SummatFunction<any, KeyType, OutType>>
 ) {
 	return function <Type = any>(pattern: TokenizablePattern<Type, KeyType, OutType>) {
-		for (const pair of tokenMap) pattern.tokenize(...pair)
+		for (const [key, handler] of tokenMap) pattern.tokenize(key, handler)
 		return pattern.result
 	}
 }

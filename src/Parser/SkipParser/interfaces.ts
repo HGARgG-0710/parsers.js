@@ -5,16 +5,14 @@ import type { ParsingState } from "../GeneralParser/interfaces.js"
 
 export type SkipType<Type> = [Position, Type]
 
-export type SkipState<KeyType = any, OutType = any> = ParsingState<
+export type SkipState<OutType = any> = ParsingState<
 	ReversibleStream,
 	Collection<OutType>,
-	SkipType<Iterable<OutType>>,
-	KeyType
+	SkipType<Iterable<OutType>>
 >
 
-export type FixedSkipState<KeyType = any, OutType = any> = ParsingState<
+export type FixedSkipState<OutType = any> = ParsingState<
 	ReversibleStream,
 	Collection,
-	Iterable<OutType>,
-	KeyType
+	Iterable<OutType>
 >

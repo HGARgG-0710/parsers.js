@@ -11,5 +11,6 @@ export const [TokenMap, ValueMap, CurrentMap, FirstStreamMap] = [
 
 export const TypeMap = (mapClass: MapClass) => mapClass.extendKey(is)
 
+export * as HashMap from "./HashMap/classes.js"
 export * as LinearIndexMap from "./LinearIndexMap/classes.js"
 export * as PersistentIndexMap from "./PersistentIndexMap/classes.js"

@@ -78,5 +78,6 @@ export function mapClassExtendKey<KeyType = any, ValueType = any>(
 	return LinearMapClass((curr: any, x: any) => this.change(f(curr), x))
 }
 
+export * as HashMap from "./HashMap/methods.js"
 export * as LinearIndexMap from "./LinearIndexMap/methods.js"
 export * as PersistentIndexMap from "./PersistentIndexMap/methods.js"

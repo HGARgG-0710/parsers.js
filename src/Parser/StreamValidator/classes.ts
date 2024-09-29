@@ -4,7 +4,7 @@ import type { StreamValidatorState } from "./interfaces.js"
 import { streamValidatorChange, streamValidatorFinished } from "./methods.js"
 
 export function StreamValidator<KeyType = any>(
-	validator: ParserMap<KeyType, StreamPredicate, StreamValidatorState<KeyType>>
+	validator: ParserMap<StreamPredicate, StreamValidatorState<KeyType>>
 ) {
 	return GeneralParser<StreamValidatorState<KeyType>>(
 		DefineFinished(

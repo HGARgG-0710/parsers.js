@@ -1,3 +1,4 @@
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type {
 	ValidatableStringPattern as ValidatableStringPatternType,
 	ValidationOutput
@@ -12,7 +13,10 @@ export class ValidatableStringPattern implements ValidatableStringPatternType {
 	result: ValidationOutput<any>
 
 	flush: () => void
-	validate: () => ValidationOutput<string>
+	validate: (
+		key: string | RegExp,
+		handler: SummatFunction<any, string, boolean>
+	) => ValidationOutput<string>
 
 	constructor(value: string) {
 		this.value = value

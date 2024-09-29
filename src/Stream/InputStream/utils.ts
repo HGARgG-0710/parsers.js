@@ -17,7 +17,7 @@ import { isIterable } from "../IterableStream/utils.js"
 export function toInputStream<Type = any>(
 	stream: BasicStream<Type>
 ): EffectiveInputStream<Type> {
-	return InputStreamConstructor(array(stream).value)
+	return new InputStreamConstructor(array(stream).value)
 }
 
 export const isInputStream = and(isInputted, isIterable, isPositionalStream) as (

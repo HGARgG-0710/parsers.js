@@ -105,3 +105,17 @@ export function persistentIndexMapSwap<KeyType = any, ValueType = any>(
 	this.indexMap.swap(i, j)
 	return this
 }
+
+export function persistentIndexMapSet<KeyType = any, ValueType = any>(
+	this: PersistentIndexMap<KeyType, ValueType>,
+	key: KeyType,
+	value: ValueType,
+	index: number = this.size
+) {
+	for (let i = 0; i < this.size; ++i)
+		if (this.keys[i] === key) {
+			this.values[i][1] = value
+			return this
+		}
+	return this.add(index, [key, value])
+}

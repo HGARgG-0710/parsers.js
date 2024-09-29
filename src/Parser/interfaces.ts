@@ -2,21 +2,9 @@ import type { Collection } from "src/Pattern/Collection/interfaces.js"
 import type { ParsingState } from "./GeneralParser/interfaces.js"
 import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
 
-export type BaseParsingState = ParsingState<BasicStream, any, any, any>
-
-export type BaseMapParsingState<KeyType = any> = ParsingState<
-	BasicStream,
-	any,
-	any,
-	KeyType
->
-
-export type DefaultMapParsingState<KeyType = any> = ParsingState<
-	BasicStream,
-	Collection,
-	Collection,
-	KeyType
->
+export type BaseParsingState = ParsingState<BasicStream, any, any>
+export type BaseMapParsingState = ParsingState<BasicStream, any, any>
+export type DefaultMapParsingState = ParsingState<BasicStream, Collection, Collection>
 
 export * as BasicParser from "./BasicParser/interfaces.js"
 export * as GeneralParser from "./GeneralParser/interfaces.js"

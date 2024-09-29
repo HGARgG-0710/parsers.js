@@ -4,10 +4,10 @@ import type { Pattern, Flushable, Resulting } from "../interfaces.js"
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 
 export interface Tokenizable<Type = any, InType = any, OutType = any> extends Summat {
-	tokenize(
+	tokenize: (
 		key: InType,
 		handler: SummatFunction<any, InType, OutType>
-	): TokenizationResult<Type, OutType>
+	) => TokenizationResult<Type, OutType>
 }
 
 export interface TokenizablePattern<Type = any, InType = any, OutType = any>

@@ -4,10 +4,10 @@ import type { Pattern, Flushable, Resulting } from "../interfaces.js"
 export type ValidationOutput<Type = any> = [boolean, Type[]]
 
 export interface Validatable<Type = any, KeyType = any> extends Summat {
-	validate(
+	validate: (
 		key: KeyType,
 		handler: SummatFunction<any, Type, boolean>
-	): ValidationOutput<Type>
+	) => ValidationOutput<Type>
 }
 
 export interface ValidatablePattern<Type = any, KeyType = any>

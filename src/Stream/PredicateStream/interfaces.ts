@@ -19,7 +19,7 @@ export interface Lookahead<Type = any> extends Summat {
 }
 
 export interface Proddable<Type = any> extends Summat {
-	prod(): Type
+	prod: () => Type
 }
 
 export interface SinglePositionLookahead<Type = any>

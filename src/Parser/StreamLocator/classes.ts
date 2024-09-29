@@ -3,13 +3,11 @@ import type { ParserMap } from "../ParserMap/interfaces.js"
 import type { LocatorState } from "./interfaces.js"
 import { streamLocatorChange, streamLocatorFinished } from "./methods.js"
 
-export function StreamLocator<KeyType = any>(
-	locator: ParserMap<KeyType, boolean, LocatorState<KeyType>>
-) {
-	return GeneralParser<LocatorState<KeyType>>(
-		DefineFinished<LocatorState<KeyType>>(
+export function StreamLocator(locator: ParserMap<boolean, LocatorState>) {
+	return GeneralParser<LocatorState>(
+		DefineFinished<LocatorState>(
 			{
-				change: streamLocatorChange<KeyType>,
+				change: streamLocatorChange,
 				parser: locator,
 				result: [false, 0]
 			},

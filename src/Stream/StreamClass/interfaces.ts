@@ -16,31 +16,31 @@ export type StartedType = 1 | boolean
 export type StatefulStarted = Started<StartedType>
 
 export interface IsEndCurrable extends Summat {
-	isCurrEnd(): boolean
+	isCurrEnd: () => boolean
 }
 
 export interface IsStartCurrable extends Summat {
-	isCurrStart(): boolean
+	isCurrStart: () => boolean
 }
 
 export interface ConditionalIsStartCurrable extends Summat {
-	isCurrStart?(): boolean
+	isCurrStart?: () => boolean
 }
 
 export interface BaseNextIterable<Type = any> extends Summat {
-	baseNextIter(): Type
+	baseNextIter: () => Type
 }
 
 export interface ConditionalBasePrevIterable<Type = any> extends Summat {
-	basePrevIter?(): Type
+	basePrevIter?: () => Type
 }
 
 export interface InitGettable<Type = any> extends Summat {
-	initGetter(): Type
+	initGetter: () => Type
 }
 
 export interface ConditionalInitGettable<Type = any> extends Summat {
-	initGetter?(): Type
+	initGetter?: () => Type
 }
 
 export interface RealCurrHaving<Type = any> extends Summat {
@@ -48,15 +48,15 @@ export interface RealCurrHaving<Type = any> extends Summat {
 }
 
 export interface ConditionalCurrGettable<Type = any> extends Summat {
-	currGetter?(): Type
+	currGetter?: () => Type
 }
 
 export interface ConditionallyPrevable<Type = any> extends Summat {
-	prev?(): Type
+	prev?: () => Type
 }
 
 export interface DefaultEndable extends Summat {
-	defaultIsEnd(): boolean
+	defaultIsEnd: () => boolean
 }
 
 export interface PreInitable extends Summat {
@@ -64,7 +64,7 @@ export interface PreInitable extends Summat {
 }
 
 export interface ConditionallyRewindable<Type = any> extends Summat {
-	rewind?(): Type
+	rewind?: () => Type
 }
 
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
