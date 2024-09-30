@@ -1,3 +1,4 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import { effectiveNestedStreamNext } from "../NestedStream/methods.js"
 import { StreamClass } from "../StreamClass/classes.js"
@@ -26,14 +27,15 @@ export class ProlongedStream<Type = any>
 	streamIndex: number
 
 	init: (streams?: BasicStream<Type>[]) => ProlongedStream<Type>
+	super: Summat
 
 	constructor(streams?: BasicStream<Type>[]) {
 		super()
 		this.init(streams)
-		super.init()
 	}
 }
 
 Object.defineProperties(ProlongedStream.prototype, {
+	super: { value: ProlongedStreamBase.prototype },
 	init: { value: prolongedStreamInitialize }
 })

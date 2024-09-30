@@ -2,7 +2,8 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { IterableStream } from "../StreamClass/Iterable/interfaces.js"
+import type { Superable } from "../StreamClass/Superable/interfaces.js"
 
 export interface Started<Type = boolean> extends Summat {
 	isStart: Type
@@ -22,7 +23,8 @@ export interface BasicReversibleStream<Type = any, StartedType = any>
 export type ReversibleStream<Type = any> = BasicReversibleStream<Type, boolean>
 
 export interface ReversedStream<Type = any>
-	extends Inputted<BasicReversibleStream<Type>>,
+	extends Superable,
+		Inputted<BasicReversibleStream<Type>>,
 		ReversedStreamClassInstance<Type> {}
 
 export type ChangeType = (input: ReversibleStream) => any

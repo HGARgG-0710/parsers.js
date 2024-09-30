@@ -10,6 +10,7 @@ import {
 	persistentIndexMapIndex,
 	persistentIndexMapKeysGetter,
 	persistentIndexMapReplace,
+	persistentIndexMapReplaceKey,
 	persistentIndexMapSet,
 	persistentIndexMapUnique,
 	persistentIndexMapValuesGetter
@@ -38,6 +39,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
 	replace: (index: number, pair: [KeyType, ValueType]) => any
+	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 	unique: (start?: boolean) => IndexMap<KeyType, PersistentIndexValue<ValueType>>
 	byIndex: (index: number) => [KeyType, PersistentIndexValue<ValueType>]
 	swap: (i: number, j: number) => any;
@@ -50,13 +52,14 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 }
 
 Object.defineProperties(PersistentIndexMap, {
-	copy: { value: indexMapCopy },
+	index: { value: persistentIndexMapIndex },
 	byIndex: { value: persistentIndexMapByIndex },
+	copy: { value: indexMapCopy },
 	replace: { value: persistentIndexMapReplace },
 	add: { value: persistentIndexMapAdd },
 	delete: { value: persistentIndexMapDelete },
+	replaceKey: { value: persistentIndexMapReplaceKey },
 	unique: { value: persistentIndexMapUnique },
-	index: { value: persistentIndexMapIndex },
 	set: { value: persistentIndexMapSet },
 	keys: { get: persistentIndexMapKeysGetter },
 	values: { get: persistentIndexMapValuesGetter },

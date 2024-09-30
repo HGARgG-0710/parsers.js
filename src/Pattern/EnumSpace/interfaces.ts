@@ -12,4 +12,3 @@ export interface EnumSpace<Type = any> extends Summat, Sizeable {
 }
 
 export interface ConstEnumSpace extends EnumSpace<{}>, Pattern<{}[]> {}
-export interface IncrementEnum extends EnumSpace<number> {}

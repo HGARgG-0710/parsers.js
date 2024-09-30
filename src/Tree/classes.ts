@@ -44,22 +44,12 @@ export function SingleTree(propName: string = "children") {
 	}
 }
 
-export function BaseMultTree<Type = any>(
-	tree: Tree & Pattern<Type[]>,
-	converter: (x: Type) => Type = (x) => x
-): MultChildrenTree & Pattern<Type[]> {
-	mutate(tree.value, converter)
-	return tree
-}
-
 export function MultTree(propName: string = "children") {
-	return propName === "value"
-		? BaseMultTree
-		: function <Type = any>(
-				tree: Tree & Pattern<Type[]>,
-				converter: (x: Type) => Type = (x) => x
-		  ): MultChildrenTree & Pattern<Type[]> {
-				tree[propName] = tree.value.map(converter)
-				return tree
-		  }
+	return function <Type = any>(
+		tree: Tree & Pattern<Type[]>,
+		converter: (x: Type) => Type = (x) => x
+	): MultChildrenTree & Pattern<Type[]> {
+		tree[propName] = tree.value.map(converter)
+		return tree
+	}
 }

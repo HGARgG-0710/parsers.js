@@ -6,16 +6,14 @@
 CURR TODO LIST: 
 
 		[todo - fix the utils to match the interfaces]; 
-		1. IndexMap [various classes, FINISH FIRST]; 
-		
-		[todo - fix the utils to match the interfaces]; 
+		1. IndexMap [various implementations]
 		2. Collection [various implementations]; 
 		3. EliminablePattern; 
 		4. EnumSpace [various implementations]; 
 		5. TokenizablePattern; 
 		6. ValidatablePattern; 
-		7. SimpleTokenType [after changing the 'TokenType' into it]; 
-		8. TokenInstance (GET RID of the 'cached' bit, unneeded now); 
+		7. SimpleTokenType; 
+		8. TokenInstance; 
 		9. StreamClass;	
 		10. InputStream; 
 		11. LimitedStream; 
@@ -30,8 +28,27 @@ CURR TODO LIST:
 		20. TreeWalker; 
 		21. MultiIndexModifier; 
 
-	0. Find all the redundant generics + function definitions - remove them [scour the source]; 
-	1. StreamTokenizer - ADD THE PROTOTYPE!	[unfixed...]; 
+	-1. DELETE the 'utils.ts', that ONLY have the 'is'-functions; 
+
+		INSTEAD, make those into a part of the LIBRARY'S TESTING FRAMEWORK! 
+		They (really) aren't necessary, and they DO bloat the 'dist/' quite a bit...; 
+		Keep only the ones needed for testing...; 
+
+	0. Find all the redundant generics + imports + function definitions - remove them [scour the source]; 
+	1. PROBLEM: the 'StreamClass' [again]; 
+		The values of '.isStart', '.isEnd', '.realCurr' SHOULD BE UPDATED UPON CHANGING THE '.input'!
+		NEED TO SOMEHOW call the 'super.init()' FROM INSIDE the classes' methods; 
+
+		OKAY: one found a (technically legitimate and not too ugly) "hack" to do this: 
+
+			1. Define a new '.super' property on the inheriting class's '.prototype' to be equal to the PARENT'S CLASS'S '.prototype'; 
+			2. INSIDE THE NECESSARY METHODS, do 'this.super.call(...)'; 
+
+			Et voila! You can basically use non-standard classes like you would standard ones!
+
+			List of affected classes: 
+				
+				1. NestedStream [POST-REDOING]; 
 
 	2. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
 		Namely: 
@@ -39,7 +56,7 @@ CURR TODO LIST:
 
 	3. PROBLEM: with the NestedStream: 	
 
-		FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
+		0. FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
 
 			Create a special 'FastLookupTable' wrapper-interface that 
 				could be used to redirect to HashMap and/or PersistentIndexMap (generally - '.index'-having + some other methods): 
@@ -178,37 +195,37 @@ CURR TODO LIST:
 									2.2.2.1. If it is, APPLY RECURSIVELY [return a new NestedlyTransformed, based off it]; 
 									2.2.2.2. Otherwise, apply the '.transform' that is passed; 
 
-2.16. MINOR ISSUE: the 'PredicateStream' - that one DOESN'T have a very well defined 'defaultIsEnd' predicate; 
-	In other words, IT REQUIRES for the given thing to be able to tell WHETHER OR NOT in the given Stream, there is
-		an item with given predicate; 
-
-	Which is something of a problem, as it requires iterating over the Stream (and is, thus, useless); 
-	
-	Practical solution for this: 
-
-		{
-			// ...
-			const hasValue = has(pred)(stream) // changes the 'Stream' position
-			if (hasValue) {	
-				const S = PredicateStream(stream, pred) // the '.curr' guaranteedly becomes the '.curr' in the 'S'
-				// ...
-			} else {
-				// ... handle the alterior case...
-			}
-		}
-
-	Think whether an elegant solution may be found (or whether this is to be simply left to the docs...); 
-
-	The issue with this is: IT RETURNS THE '.curr' NEVERTHELESS; 
-		So, this means that there's always at least one element - trouble is, in this case it becomes the '.isEnd'-element [last one]; 
-
-	Nope, no good solution for this... Just do the '.defaultIsEnd, then...'; 
-
 2.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME AND HEAP OCCUPATION!
 	Likewise, profile the previous projects - see if one's guesses (albeit, simple) 
 		regarding the natures of performance issues were, indeed, correct; 
 
-	ALSO - replace the '.filter((x) => x.length)' with new 'filter' from 'one.js'
+2.25. OPTIMIZE the 'IndexMap': 
+	Under a 'static-.change' assumption [id est, '.change' is composed of functions that ONLY ever return THE SAME values], 
+		optimize it as follows: 
+
+		1. Get rid of '.change', replacing it with: 
+			1.1. extension - a function; 
+				1.1.1. extensionList - a list of transformations; 
+			1.2. keyExtensions - array of transformations; 
+
+			Which works as follows: 
+
+				1. Keep the ORIGINAL [BasicMap-based] list of properties [keys-values] of the IndexMap; 
+				2. Upon change of 'keyExtensions' [via '.extendKey'], a COPY of the original values used for indexing is made, VIA: 
+					2.1. 'trivialCompose' of transformations in 'keyExtensions'; 
+					2.2. '.map' with keys now put through the 'trivialCompose(...keyExtensions)'; 
+					2.3. THE COPY is used for the actual indexation; 
+				3. The 'extension' is 're-composed' via 'trivialCompose' every time upon change of 'extensionList'; 
+					3.1. When '.index'-ing an 'item', one does 'this.values[this.keys.indexOf(this.extension(item))]'; 
+						The '.indexOf' is ~always ~2.5-12 times faster (depending on the use-case); 
+
+	NO! Doing this optimization would be HIGHLY detrimental to the IndexMaps' functionality; 
+		Would be IMPOSSIBLE to generally do it via a something like 'change = (x, y) => x < y'; 
+
+	CONCLUSION: for fast search like this, one needs A NEW structure; 
+	Call it: FastLinearIndexMap; 
+	Would be identical to LinearIndexMap, save for this one method, thus permitting one to retain the nice linear properties,
+		whilst also gaining a great deal of speediness; 
 
 A. testing: 
 	A.1. Create list of modules to be tested; 
@@ -430,7 +447,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		this sort of thing would be useful for applications where speed of little importance
 			(that is: NOT things like apps/websites/interpreters, and so forth; Stuff like AOT-compilers, perhaps);
 	
-2. Add various optimization data structures + utils + parser properties: 
+2. New Streams/Parsers + some minor stuff/code-quality/minimalism: 
 
 	2.1. bufferize(process, size)(tree) - util
 
@@ -472,7 +489,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 				
 			It does [except, with no stream - it just walks the tree recursively]: 
 
-				const final = Array(size).fill(null)
+				const final = Array(size)
 				const staticSize = size - 1
 				while (size--) 
 					final[staticSize - size] = stream.next()
@@ -509,151 +526,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 
-	2.5. Add a 'HashClass'-implementation of 'MapClass'; 
-		
-		NOTE [important]: one needs to implement A DETAILED and GENERAL collision-resolution algorithm for this thing; 
-			In particular, must be available: 
-
-				1. Open addressing: 
-					1.1. Via a special interface, permitting usage of different step functions `hash_addr(key, probe_index)`,
-						ALSO, add implementations of frequent cases - linear, quadratic, and so forth...; 
-				2. Separate chaining: 
-					2.1. Via a special interface, permitting usage of different according data structures: 
-						2.1.1. Self-balancing search trees (height-balanced/weight-balanced); 
-						2.1.2. Arrays; 
-				3. Proper resizing; 
-			
-			These three features are CRUCIAL for implementing '.add', '.delete' and other dynamic-parsing related operations; 
-				Due to this, a simple wrapper around a primitive-based lookup table will simply not do...; 
-
-		Basically, takes the 'hash' function (rough sketch) and returns a hash-table based off it...: 
-
-			function HashTable (hash) {
-				// The HashClass
-				return function (values, keys = new Set(), default = null) {
-					// The '.index' function; 
-					return function (x) {
-						return !keys.size || keys.has(x) ? values[hash(x)] : default
-					}
-				}
-			}
-
-		Great for generalizing optimizations of tables/hashes/maps...
-
-		Implement special  cases of this ALSO (PARTICULAR hash-functions...): 
-
-			1. LengthHash: 
-
-				This is excellent for string-identifiers; 
-				Given a set of strings (THAT CAN BE UPDATED!),
-					one has a hash function: 
-
-						(string) => string.length
-
-				The thing in question is (supposed) to map a given string to an array/collection 
-					of other strings of equal length, then map in this collection (which has a different interface...);
-
-				NOTE: ANYTHING with a '.length' property is usable with this;
-
-		NOTE [on optimizations]: this is especially useful when
-			static-lengthed and long-term parsing tables are concerned; 
-				The HashMaps are IDEAL for this because
-					(on large inputs, with DISTINCT, and/or integer-keys), 
-					there is A LOT of choosing between different values; 
-				
-			IDEA: generalize the 'TokenType'-s, by EXPOSING their 'type'-s (whenever they're 'number'-s, or 'string'-s); 
-				WHENEVER they are guaranteedly disjoint, it allows for an immidiate
-					one-to-one match; 
-
-				Example of hash-table implementation based off objects [rough sketch]: 
-
-					function ObjectHash (hash, default) {
-						return {
-							hash, 
-							default, 
-							index: function (key) {
-								return this.hash[key] || default
-							}
-						}
-					}
-				
-				Thus, one'd want some sort of data structure to (assuming disjoint-ness) 
-					convert the given '.type'-s into HashMap-s (equivalent of 'TypeMap', but for the newly exposed '.type' not '.is'); 
-
-					ALSO:
-						one may want to implement: 
-
-							1. hashFromKeys: 
-
-								Basically, creates a 'hash' function from a given 'Map' (inverses it); 
-									Basically does: 
-
-										function hashFromKeys(keys) {
-											const map = new Map()
-											for (let i = 0 ; i < keys.length ; ++i) map.add([x, i])
-											return (x) => map.get(x)
-										}
-
-								The resulting function can be used in conjunction with the 'keys' (provided they're static); 
-
-							2. hashFromObject: 
-
-								A way to implement the 'ObjectHash' ORGANICALLY [without the need to change the '.hash' type]: [crude sketch]
-
-									function hashFromObject(object) {
-										return (key) => object[key]
-									}
-
-									THEN, 
-
-										ObjectHash := (object) => HashClass(hashFromObject(object))
-
-								This is (particularly) for cases, when the given map has integers/strings for keys; 
-								Useful in conjuction with the 'SimpleTokenType'; 
-
-									ONE HAS TO BE ABLE to (somehow) get use the 'SimpleTokenType' with this; 
-									Possibly?: 	
-
-										// Parsing table; 
-										const basPairs = mutate([
-											[TokenTypeA, ...], 
-											...
-											[TokenTypeN, ...]
-										], ([Type, Handler]) => [Token.type(Type), Handler])
-
-										const baseObj = toObject(new Map(basePairs)) // known that THE KEYS are all strings/numbers + disjoint; 
-										const hashMap = ObjectHash(baseObj)	
-
-										
-										TODO: implement the: 
-
-											3. disjointKeysParseTable(tokenPairs)
-
-												This (basically) accepts pairs of '[SimpleTokenType, Function]';
-												And spits out a 'HashMap', like: 
-
-													disjointKeysParseTable := (pairs, default) =>
-														ObjectHash(
-															hashFromObject(	
-																dekv(fromPairsList(pairs.map(
-																				([Type, Handler]) => [Token.type(Type), Handler])))), 
-															default)
-												
-												? perhaps, make a new version for one.js that would have a new method for optimizing transformation from pairs-list to an Object? 
-
-												That would be desired for two reasons: 
-
-													1. Performance (when the table consists of SimpleTokenType-s and is used A LOT); 
-													2. Common-ness of the pattern: 
-														This thing can be VERY frequently used in actual parsers;	
-
-												THIS SHOULD WORK IN REVERSE: instead of mapping to match the underlying hash, 
-													one USES THE 'extended' function of the Hash to THEN get the value 
-													from the underlying Hash [note: this would permit a greater variability]; 
-
-				Also, there'd need to be a way to get the '.type' of the 'TokenType'-s directly; 
-
-	2.6. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	2.5. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
 		In particular, functions/abstractions: 
 
@@ -693,7 +566,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
 		
-	2.7. Expand on the 'Position' type further;
+	2.6. Expand on the 'Position' type further;
 
 		Allow for creation of more "exotic" types;
 		Example: 
@@ -720,13 +593,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
 			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
 
-	2.8. RELAX overly demanding interface and types definitions/requirements;
+	2.7. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.9. [Idea?] Create an error-handling API for the 'v0.4';
+	2.8. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -748,8 +621,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			}
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
+
+		Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 
 		
-	2.10. Minor refactoring (StreamClass): 
+	2.9. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -763,7 +638,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.11. [mayyyybee??] Try re-doing the project's type-system? [again...]
+	2.10. [mayyyybee??] Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -776,7 +651,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. TransformedStream; 
 			2. NestedStream; 
 
-	2.12. BreakableStream - a stream-class that produces instances, which : 
+	2.11. BreakableStream - a stream-class that produces instances, which : 
 
 		1. Are capable of being "broken" via different positions; 
 			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
@@ -838,10 +713,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 	
-	2.13. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 
-	2.14. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.13. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -850,26 +725,21 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 	
-	2.15. utility - nestedDepth; 
-		Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
-		
-	2.16. utility - findNestedEnd: 
+	2.14. utility - 'nestedInfo'; 
 
-		Given a 'ReversibleStream'/'NavigableStream', it does: 
+		1. Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
+			NOTE: the MAX depth achievable; 
+		2. Finds its length - how many positions (in 'number') must one walk before the current nestedness ends, from the initiated position; 
 
-			1. Walk through the Stream (similarly to 'nest' - counting 'depth');
-			2. Finds the location, at which the end of the nested block lies (note: A NUMBER); 
-			3. Returns that location, whilst also altering the location of the 'Stream' given; 
+		Returns it as a pair; 
 
-		This, basically, allows one to "know" where to end the parsing of a given thing (WHEN it's needed to be parsed LATER)!
-
-	2.17. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.15. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
 	
-	2.18. TypeScript - use 'enum's; 
+	2.16. TypeScript - use 'enum's; 
 
 		Learned about 'enum's being present in TypeScript; 
 		Use them to designate "special constants" (ALSO - take those out into separate files); 
@@ -889,13 +759,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
 		[Current preference is to the latter...]
 
-	2.19. Idea for a method: ProlongedStream.prolong; 	
+	2.17. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams'; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.20. MAKE the 'utils' TYPE-SAFE! 
+	2.18. MAKE the 'utils' TYPE-SAFE! 
 
 		Currently, what lacks is the ability to dynamically generate the appropriate type-checking functions that may require 
 			additional predicates, BUT still preserve the form; 
@@ -913,7 +783,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Currently, the checks can make SOME mistakes still; 
 			[Noticed this while doing 'isNumericPositional' - should be refactored...]; 
 
-	2.21. [Maaayybe?] Create a 'samples' directory; 
+	2.19. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -927,14 +797,14 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
 
-	2.22. Generics for the 'isType'-functions; 	
+	2.20. Generics for the 'isType'-functions; 	
 		Learned about TypeScript generics for nameless functions (namely, how they can be used with 'as'): 
 
 			const isType = ... as <Type = any>(x: any) => x is Type
 		
 		Variation on this - add throughout the library [particularly, when 'Type' is itself a generics parameter]; 
 
-	2.23. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.21. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
@@ -942,7 +812,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 
-	2.24. Generalize the streams even further for general copying implementation: 
+	2.22. Generalize the streams even further for general copying implementation: 
 
 		Have to have: 
 			
@@ -958,10 +828,32 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		The method would go on the 'StreamClass'; 
 
-	2.25. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
+	2.23. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
 		The former can easily be replaced with an appropriate table on BasicStream, 
 			while 'BasicParser' is equivalent to a 'TransformedStream' (or NestedlyTransformedStream); 
 		Consider removal...
+	
+	2.24. v8-specific optimizations: 
+		Having done some benchmarking on some typical Array methods, one arrived at a...
+	
+		CONCLUSION: 
+			1. Handwritten methods are *often* __MUCH__ faster than the builtins ON LARGE PIECES OF DATA; 
+				On the more common-place cases, however, they are inferior in time performance; 
+			2. THEREFORE, one should do: 
+				Re-organize the library (how?) to permit usage of the current methods on LARGE pieces of data; 
+				Prior - do more benchmarking; 
+
+				About re-organization: 
+					1. Think - whether to introduce explicit low-level 'size-controls' [possibly costly, when run a lot]; 
+						Although, it's likely to be optimized/negligible; 
+					2. Or, whether to split the thing onto 2 chunks [where the 'size' is precomputed...]; 
+						This is less flexible (and thus, error-prone), plus will be more difficult to re-structure; 
+					
+				Current vote is for 1.; 
+
+				ALSO, about bounds - those should be CAREFULLY BENCHMARKED; 
+		
+		MORE GENERALLY - try to adapt the library for work on LARGE datasets; 
 
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

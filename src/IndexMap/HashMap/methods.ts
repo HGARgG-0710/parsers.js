@@ -32,6 +32,18 @@ export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = 
 	this.structure.delete(this.hash(key, this.structure))
 }
 
+export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyType = any>(
+	this: HashMap<KeyType, ValueType, InternalKeyType>,
+	keyFrom: KeyType,
+	keyTo: KeyType
+) {
+	this.structure.replaceKey(
+		this.hash(keyFrom, this.structure),
+		this.hash(keyTo, this.structure)
+	)
+	return this
+}
+
 export function hashClassExtend<KeyType = any, ValueType = any, InternalKeyType = any>(
 	this: HashClassType<KeyType, ValueType, InternalKeyType>,
 	f: (x: any) => KeyType

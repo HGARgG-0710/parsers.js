@@ -18,10 +18,7 @@ export function fromPairsList<KeyType = any, ValueType = any>(
 	mapPairs: Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
-	const [keys, values]: [KeyType[], ValueType[]] = [
-		Array(size).fill(null),
-		Array(size).fill(null)
-	]
+	const [keys, values]: [KeyType[], ValueType[]] = [Array(size), Array(size)]
 	while (size--) {
 		keys[size] = mapPairs[size][0]
 		values[size] = mapPairs[size][1]

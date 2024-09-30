@@ -1,3 +1,5 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+
 import type { Indexed } from "../interfaces.js"
 import type { EffectiveInputStream } from "./interfaces.js"
 
@@ -33,6 +35,7 @@ export class InputStream<Type = any>
 {
 	pos: number
 	input: Indexed<Type>
+	super: Summat
 
 	finish: () => Type
 	rewind: () => Type
@@ -47,7 +50,6 @@ export class InputStream<Type = any>
 	constructor(input?: Indexed<Type>) {
 		super()
 		this.init(input)
-		super.init()
 	}
 }
 
@@ -57,5 +59,6 @@ Object.defineProperties(InputStream.prototype, {
 	navigate: { value: effectiveInputStreamNavigate },
 	copy: { value: effectiveInputStreamCopy },
 	init: { value: inputStreamInitialize },
+	super: { value: InputStreamBase },
 	[Symbol.iterator]: { value: inputStreamIterator }
 })

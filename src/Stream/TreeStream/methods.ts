@@ -79,6 +79,7 @@ export function effectiveTreeStreamInitialize<Type = any>(
 		Inputted(this, tree)
 		this.walker.init(tree)
 		this.pos = new MultiIndex([])
+		this.super.init.call(this)
 	}
 	return this
 }

@@ -15,6 +15,7 @@ import {
 	transformedStreamNext,
 	transformStream
 } from "./methods.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 export const TransformedStreamBase = StreamClass({
 	isCurrEnd: underStreamIsEnd,
@@ -30,17 +31,20 @@ export class TransformedStream<UnderType = any, UpperType = any>
 	pos: number
 	input: EndableTransformableStream<UnderType, UpperType>
 	transform: () => UpperType
+
+	super: Summat
+
 	constructor(
 		input?: EndableTransformableStream<UnderType, UpperType>,
 		transform?: StreamTransform<UnderType, UpperType>
 	) {
 		super()
 		this.init(input, transform)
-		super.init()
 	}
 }
 
 Object.defineProperties(TransformedStream.prototype, {
+	super: { value: TransformedStreamBase.prototype },
 	init: { value: transformedStreamInitialize }
 })
 

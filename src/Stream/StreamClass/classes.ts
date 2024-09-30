@@ -45,13 +45,10 @@ export function StreamClass<Type = any>(
 		finish: () => Type;
 		[Symbol.iterator]: () => Generator<Type>
 
-		constructor() {
+		init(): void {
 			this.realCurr = null
 			this.isStart = PRE_CURR_INIT
 			this.isEnd = defaultIsEnd.call(this)
-		}
-
-		init(): void {
 			// note: call to the 'initGetter' (IN CASE IT'S PRESENT); Otherwise, a no-op
 			if (preInit && !this.isEnd) this.curr
 		}

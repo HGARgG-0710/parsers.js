@@ -21,16 +21,15 @@ export function validatableStringPatternValidate(
 	handler: SummatFunction<any, string, boolean>
 ): ValidationOutput<string> {
 	const validated = this.result[1]
-	const size = validated.length
 
-	if (!size) {
+	if (!validated.length) {
 		const matched: string[] = matchString(this.value, key)
 		for (let i = matched.length; i--; )
 			if (!handler(matched[i])) return (this.result = [false, []])
 		return (this.result = [true, matched.filter((x) => !isBoolean(x))])
 	}
 
-	for (let i = size; i--; ) {
+	for (let i = validated.length; i--; ) {
 		const [tempValid, tempRemains] = new ValidatableStringPattern(
 			validated[i]
 		).validate(key, handler)

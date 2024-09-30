@@ -37,6 +37,7 @@ export function prolongedStreamInitialize<Type = any>(
 		Inputted(this, streams)
 		this.pos = 0
 		this.streamIndex = 0
+		this.super.init.call(this)
 	}
 	return this
 }

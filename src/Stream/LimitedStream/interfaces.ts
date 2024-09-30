@@ -16,6 +16,7 @@ import type {
 	SinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { Superable } from "src/Stream/StreamClass/Superable/interfaces.js"
 
 export interface Limitable<Type = any> extends Summat {
 	limit: (from?: Position, to?: Position) => Type
@@ -48,6 +49,7 @@ export interface LimitedStream<Type = any>
 		PositionalStream<Type, number>,
 		SinglePositionLookahead<Type>,
 		Inputted<LimitedUnderStream<Type>>,
+		Superable,
 		IterableStream<Type> {}
 
 export interface EffectiveLimitedStream<Type = any>

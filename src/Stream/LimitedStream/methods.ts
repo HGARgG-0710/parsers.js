@@ -94,6 +94,8 @@ export function effectiveLimitedStreamInitialize<Type = any>(
 			this.from = from
 			this.to = positionNegate(positionConvert(this.to, this.input))
 		}
+
+		this.super.init.call(this)
 	}
 
 	return this

@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Sizeable, StrictIndexable } from "../interfaces.js"
+import type { Indexable, Sizeable } from "../interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
 
 export interface Deletable<KeyType = any> extends Summat {
@@ -12,6 +12,10 @@ export interface Settable<KeyType = any, ValueType = any> extends Summat {
 
 export interface KeyHaving<KeyType = any> extends Summat {
 	keys: Set<KeyType>
+}
+
+export interface KeyReplaceable<KeyType = any> {
+	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
 export type HashType<KeyType = any, ValueType = any, InternalKeyType = any> = (
@@ -31,9 +35,10 @@ export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any
 }
 
 export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends StrictIndexable<KeyType, ValueType>,
+	extends Indexable<ValueType>,
 		Settable<KeyType, ValueType>,
 		Deletable<KeyType>,
+		KeyReplaceable<KeyType>,
 		Sizeable,
 		KeyHaving<KeyType> {
 	hash: HashType<KeyType, ValueType, InternalKeyType>

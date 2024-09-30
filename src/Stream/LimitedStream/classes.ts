@@ -17,6 +17,7 @@ import {
 import { underStreamCurr, underStreamDefaultIsEnd } from "../UnderStream/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 export const LimitedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
@@ -34,11 +35,14 @@ export class LimitedStream<Type = any>
 	input: LimitedUnderStream<Type>
 	pos: number = 0
 	lookAhead: Type
+
 	from: Position
 	to: Position
 
 	direction: boolean
 	hasLookAhead: boolean
+
+	super: Summat
 
 	init: (
 		input?: LimitedUnderStream<Type>,
@@ -55,11 +59,11 @@ export class LimitedStream<Type = any>
 	constructor(input?: LimitedUnderStream<Type>, from?: Position, to?: Position) {
 		super()
 		this.init(input, from, to)
-		super.init()
 	}
 }
 
 Object.defineProperties(LimitedStream.prototype, {
+	super: { value: LimitedStreamBase.prototype },
 	limit: { value: limitStream },
 	prod: { value: effectiveLimitedStreamProd },
 	init: { value: effectiveLimitedStreamInitialize }

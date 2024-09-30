@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Copiable } from "../Stream/CopiableStream/interfaces.js"
+import type { Copiable } from "../Stream/StreamClass/Copiable/interfaces.js"
 
 export interface IndexingFunction<KeyType = any> extends Summat {
 	(curr: KeyType, x: any): boolean
@@ -13,11 +13,9 @@ export interface TestType extends Summat {
 	test: (x: any) => boolean
 }
 
-export interface StrictIndexable<KeyType = any, ValueType = any> extends Summat {
-	index: (x: KeyType) => ValueType
+export interface Indexable<OutType = any> extends Summat {
+	index: (x: any) => OutType
 }
-
-export type Indexable<OutType = any> = StrictIndexable<any, OutType>
 
 export type MapClassValueExtension<KeyType = any, ValueType = any> = (
 	f: (x: ValueType) => any
@@ -33,7 +31,8 @@ export interface VolatileIndexMap<KeyType = any, ValueType = any> extends Summat
 	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
 	replace: (index: number, pair: [KeyType, ValueType]) => any
-	set: (key: KeyType, value: ValueType, index: number) => any
+	set: (key: KeyType, value: ValueType, index?: number) => any
+	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
 export interface Sizeable {

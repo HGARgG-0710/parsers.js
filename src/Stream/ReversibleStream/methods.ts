@@ -8,5 +8,6 @@ export function reversedStreamInitialize<Type>(
 ): ReversedStream<Type> {
 	fastFinish(input)
 	Inputted(this, input)
+	this.super.init.call(this)
 	return this
 }

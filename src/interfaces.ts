@@ -1,6 +1,6 @@
 export * as IndexMap from "./IndexMap/interfaces.js"
 export * as Parser from "./Parser/interfaces.js"
 export * as Pattern from "./Pattern/interfaces.js"
-export * as Stateful from "./Stateful/interfaces.js"
+export * as Stateful from "./Stream/StreamClass/Stateful/interfaces.js"
 export * as Stream from "./Stream/interfaces.js"
 export * as Tree from "./Tree/interfaces.js"

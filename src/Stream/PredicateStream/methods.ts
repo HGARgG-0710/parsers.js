@@ -43,10 +43,17 @@ export function effectivePredicateStreamInitialize<Type = any>(
 	if (input) {
 		Inputted(this, input)
 		this.pos = 0
+		this.super.init.call(this)
 	}
 	if (predicate) {
 		this.predicate = preserveDirection(predicate, (predicate) => predicate.bind(this))
 		this.hasLookAhead = false
 	}
 	return this
+}
+
+export function effectivePredicateStreamDefaultIsEnd<Type = any>(
+	this: EffectivePredicateStream<Type>
+) {
+	return this.input.isEnd || !this.predicate(this.curr)
 }

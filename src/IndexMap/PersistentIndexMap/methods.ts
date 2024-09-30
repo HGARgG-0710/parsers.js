@@ -8,7 +8,8 @@ export function persistentIndexMapAdd<KeyType = any, ValueType = any>(
 	...pairs: Pairs<KeyType, ValueType>
 ) {
 	const increase = pairs.length
-	for (let i = index; i < this.size; ++i) this.values[i][0].value += increase
+	const size = this.size
+	for (let i = index; i < size; ++i) this.values[i][0].value += increase
 	const withPointers = pairs.map(([key, value], i) => [
 		key,
 		[Pointer(index + i), value]
@@ -63,7 +64,8 @@ export function persistentIndexMapDelete<KeyType = any, ValueType = any>(
 	index: number,
 	count: number = 1
 ) {
-	for (let i = index + count; i < this.size; ++i) this.values[i][0].value -= count
+	const size = this.size
+	for (let i = index + count; i < size; ++i) this.values[i][0].value -= count
 	this.indexMap.delete(index, count)
 	return this
 }
@@ -112,10 +114,20 @@ export function persistentIndexMapSet<KeyType = any, ValueType = any>(
 	value: ValueType,
 	index: number = this.size
 ) {
-	for (let i = 0; i < this.size; ++i)
-		if (this.keys[i] === key) {
-			this.values[i][1] = value
-			return this
-		}
+	const keyIndex = this.keys.indexOf(key)
+	if (keyIndex > -1) {
+		this.values[keyIndex][1] = value
+		return this
+	}
 	return this.add(index, [key, value])
+}
+
+export function persistentIndexMapReplaceKey<KeyType = any, ValueType = any>(
+	this: PersistentIndexMap<KeyType, ValueType>,
+	keyFrom: KeyType,
+	keyTo: KeyType
+) {
+	const toReplace = this.index(keyFrom)
+	this.replace(toReplace[0].value, [keyTo, toReplace[1]])
+	return this
 }

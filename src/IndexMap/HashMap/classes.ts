@@ -5,6 +5,7 @@ import {
 	hashClassExtend,
 	hashMapDelete,
 	hashMapIndex,
+	hashMapReplaceKey,
 	hashMapSet,
 	hashMapSize
 } from "./methods.js"
@@ -14,6 +15,7 @@ import type { Token as TypeToken } from "src/Pattern/Token/interfaces.js"
 const HashClassPrototype = {
 	index: { value: hashMapIndex },
 	set: { value: hashMapSet },
+	replaceKey: { value: hashMapReplaceKey },
 	delete: { value: hashMapDelete },
 	size: { get: hashMapSize }
 }
@@ -30,6 +32,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		index: (x: KeyType) => ValueType
 		set: (key: KeyType, value: ValueType) => any
 		delete: (key: KeyType) => any
+		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
 		static hash: HashType<KeyType, ValueType, InternalKeyType>
 		static extend: (

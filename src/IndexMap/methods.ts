@@ -32,7 +32,8 @@ export function indexMapUnique<KeyType = any, ValueType = any>(
 export function* indexMapIterator<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ): Generator<[KeyType, ValueType]> {
-	for (let i = 0; i < this.size; ++i) yield [this.keys[i], this.values[i]]
+	const size = this.size
+	for (let i = 0; i < size; ++i) yield [this.keys[i], this.values[i]]
 }
 
 export function indexMapByIndex<KeyType = any, ValueType = any>(

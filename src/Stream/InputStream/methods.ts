@@ -71,7 +71,10 @@ export function inputStreamInitialize<Type = any>(
 	this: InputStream<Type>,
 	input?: Indexed<Type>
 ) {
-	if (input) Inputted(this, input)
+	if (input) {
+		Inputted(this, input)
+		this.super.init.call(this)
+	}
 	this.pos = 0
 	return this
 }

@@ -15,6 +15,7 @@ import type {
 import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
 import { effectiveLimitedStreamInitialize } from "../LimitedStream/methods.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 export const PredicateStreamBase = StreamClass({
 	currGetter: predicateStreamCurr,
@@ -37,6 +38,7 @@ export class PredicateStream<Type = any>
 		input?: ReversibleStream<Type> & IsEndCurrable,
 		predicate?: PredicatePosition
 	) => PositionalStream<Type, Position>
+	super: Summat
 
 	prod: () => Type
 
@@ -46,11 +48,11 @@ export class PredicateStream<Type = any>
 	) {
 		super()
 		this.init(input, predicate)
-		super.init()
 	}
 }
 
 Object.defineProperties(PredicateStream.prototype, {
+	super: { value: PredicateStreamBase.prototype },
 	prod: { value: effectivePredicateStreamProd },
 	init: { value: effectiveLimitedStreamInitialize }
 })

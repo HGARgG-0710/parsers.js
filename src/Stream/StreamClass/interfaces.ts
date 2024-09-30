@@ -1,10 +1,10 @@
 import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { IterableStream } from "./Iterable/interfaces.js"
 import type { Initializable } from "../InitializableStream/interfaces.js"
-import type { Rewindable } from "../RewindableStream/interfaces.js"
-import type { Finishable } from "../FinishableStream/interfaces.js"
+import type { Rewindable } from "./Rewindable/interfaces.js"
+import type { Finishable } from "./Finishable/interfaces.js"
 import type { Navigable } from "../NavigableStream/interfaces.js"
 
 export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"

@@ -8,6 +8,7 @@ import {
 } from "../UnderStream/methods.js"
 import type { PositionalInputtedStream } from "./interfaces.js"
 import { inputStreamInitialize } from "../InputStream/methods.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 export const PositionalStreamBase = StreamClass({
 	isCurrEnd: underStreamIsEnd,
@@ -24,13 +25,15 @@ export class PositionalStream<Type = any>
 	input: BasicStream<Type>
 	init: (input?: BasicStream<Type>) => PositionalStream<Type>
 
+	super: Summat
+
 	constructor(input?: BasicStream<Type>) {
 		super()
 		this.init(input)
-		super.init()
 	}
 }
 
 Object.defineProperties(PositionalStream.prototype, {
+	super: { value: PositionalStreamBase.prototype },
 	init: { value: inputStreamInitialize }
 })

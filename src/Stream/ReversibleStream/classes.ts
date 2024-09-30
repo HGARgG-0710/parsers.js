@@ -15,6 +15,7 @@ import type {
 } from "./interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 import { reversedStreamInitialize } from "./methods.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 export const ReversedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
@@ -34,14 +35,16 @@ export class ReversedStream<Type = any>
 	isCurrStart: () => boolean
 	rewind: () => Type
 
+	super: Summat
+
 	constructor(input?: ReversibleStream<Type>) {
 		super()
 		this.init(input)
-		super.init()
 	}
 }
 
 Object.defineProperties(ReversedStream.prototype, {
+	super: { value: ReversedStreamBase.prototype },
 	rewind: { value: underStreamFinish },
 	finish: { value: underStreamRewind },
 	init: { value: reversedStreamInitialize }

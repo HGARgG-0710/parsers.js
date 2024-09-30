@@ -18,6 +18,7 @@ import { TreeWalker } from "./TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
 import { boolean } from "@hgargg-0710/one"
+import type { Summat } from "@hgargg-0710/summat.ts"
 const { F } = boolean
 
 export const TreeStreamBase = StreamClass({
@@ -44,16 +45,17 @@ export class TreeStream<Type = any>
 
 	copy: () => EffectiveTreeStream<Type>
 	rewind: () => Type
+	super: Summat
 
 	constructor(tree?: Tree<Type>) {
 		super()
 		this.walker = new TreeWalker(this)
 		this.init(tree)
-		super.init()
 	}
 }
 
 Object.defineProperties(TreeStream.prototype, {
+	super: { value: TreeStreamBase.prototype },
 	rewind: { value: effectiveTreeStreamRewind },
 	copy: { value: effectiveTreeStreamCopy },
 	navigate: { value: effectiveTreeStreamNavigate }

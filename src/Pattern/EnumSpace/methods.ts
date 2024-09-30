@@ -1,5 +1,5 @@
-import { ConstEnum, IncrementEnum as IncrementEnumConstructor } from "./classes.js"
-import type { ConstEnumSpace, EnumSpace, IncrementEnum, Mappable } from "./interfaces.js"
+import { ConstEnum } from "./classes.js"
+import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
 
 export function constEnumAdd(this: ConstEnumSpace, size: number) {
 	this.value.push(...Array.from({ length: size }, () => ({})))
@@ -19,24 +19,4 @@ export function constEnumCopy(this: ConstEnumSpace) {
 
 export function constEnumMap(this: ConstEnumSpace, mapped: Mappable<{}>) {
 	return this.value.map(mapped)
-}
-
-export function incrementEnumAdd(this: IncrementEnum, size: number) {
-	this.size += size
-	return this
-}
-
-export function incrementEnumJoin(this: IncrementEnum, enums: EnumSpace) {
-	this.size += enums.size
-	return this
-}
-
-export function incrementEnumCopy(this: IncrementEnum) {
-	return new IncrementEnumConstructor(this.size)
-}
-
-export function incrementEnumMap(this: IncrementEnum, mapped: Mappable<number>) {
-	const final: unknown[] = []
-	for (let i = 0; i < this.size; ++i) final.push(mapped(i, i))
-	return final
 }

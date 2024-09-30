@@ -36,6 +36,7 @@ export function transformedStreamInitialize<UnderType = any, UpperType = any>(
 	if (input) {
 		Inputted(this, input)
 		this.pos = 0
+		this.super.init.call(this)
 	}
 	if (transform) this.transform = transform
 	return this
