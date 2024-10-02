@@ -1,6 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Indexable, Sizeable } from "../interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
+import type { SubHaving } from "../SubHaving/interfaces.js"
 
 export interface Deletable<KeyType = any> extends Summat {
 	delete: (key: KeyType) => any
@@ -35,14 +36,14 @@ export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any
 }
 
 export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends Indexable<ValueType>,
+	extends Indexable<KeyType, ValueType>,
 		Settable<KeyType, ValueType>,
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,
 		Sizeable,
-		KeyHaving<KeyType> {
+		KeyHaving<KeyType>,
+		SubHaving<InternalHash<InternalKeyType, ValueType>> {
 	hash: HashType<KeyType, ValueType, InternalKeyType>
-	structure: InternalHash<InternalKeyType, ValueType>
 }
 
 export * as InternalHash from "./InternalHash/interfaces.js"

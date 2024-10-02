@@ -34,27 +34,12 @@ CURR TODO LIST:
 		They (really) aren't necessary, and they DO bloat the 'dist/' quite a bit...; 
 		Keep only the ones needed for testing...; 
 
-	0. Find all the redundant generics + imports + function definitions - remove them [scour the source]; 
-	1. PROBLEM: the 'StreamClass' [again]; 
-		The values of '.isStart', '.isEnd', '.realCurr' SHOULD BE UPDATED UPON CHANGING THE '.input'!
-		NEED TO SOMEHOW call the 'super.init()' FROM INSIDE the classes' methods; 
-
-		OKAY: one found a (technically legitimate and not too ugly) "hack" to do this: 
-
-			1. Define a new '.super' property on the inheriting class's '.prototype' to be equal to the PARENT'S CLASS'S '.prototype'; 
-			2. INSIDE THE NECESSARY METHODS, do 'this.super.call(...)'; 
-
-			Et voila! You can basically use non-standard classes like you would standard ones!
-
-			List of affected classes: 
-				
-				1. NestedStream [POST-REDOING]; 
-
-	2. DUE TO CHANGES OF INTERFACES [once again], fix the utils...; 
-		Namely: 
-			1. Initializable-related; 
+	0. Find all the redundant interfaces + generics + imports + function definitions - remove them [scour the source]; 
 
 	3. PROBLEM: with the NestedStream: 	
+
+		-1. CREATE implementations of 'FastLookupTable' that would be SPECIFIC to the use-cases; 
+			In particular - CREATE ALIASES for the combined workflow that they are intended to be used in [with NestedStream]; 
 
 		0. FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
 
@@ -102,8 +87,10 @@ CURR TODO LIST:
 								return x
 							}'; 
 
-							EVERY TIME that a new 'ResettingNestedlyTransformedStream' is created (extends NestedlyTransformedStream), 
-								the 'transformations' used for it are ADDED DIRECTLY INTO THE NestedlyTransformedStream CLASS'S PROTOTYPE!
+							ONE NEEDS: 
+
+								1. For 'transformations' to be a part of the table, that was initially given by the user; 
+									1.1. BUT, ASSIGNED, not given by the user [or, rather, given separately...]; 
 
 		1 IT CANNOT HANDLE MULTIPLE DIFFERENT "KINDS" OF NESTED-NESS; 
 			Here's an example: 
@@ -195,11 +182,11 @@ CURR TODO LIST:
 									2.2.2.1. If it is, APPLY RECURSIVELY [return a new NestedlyTransformed, based off it]; 
 									2.2.2.2. Otherwise, apply the '.transform' that is passed; 
 
-2.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME AND HEAP OCCUPATION!
+3.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME AND HEAP OCCUPATION!
 	Likewise, profile the previous projects - see if one's guesses (albeit, simple) 
 		regarding the natures of performance issues were, indeed, correct; 
 
-2.25. OPTIMIZE the 'IndexMap': 
+3.25. OPTIMIZE the 'LinearIndexMap': 
 	Under a 'static-.change' assumption [id est, '.change' is composed of functions that ONLY ever return THE SAME values], 
 		optimize it as follows: 
 
@@ -227,8 +214,41 @@ CURR TODO LIST:
 	Would be identical to LinearIndexMap, save for this one method, thus permitting one to retain the nice linear properties,
 		whilst also gaining a great deal of speediness; 
 
+3.27. ANOTHER refactoring with 'one.js': 
+	Update it [again]; 
+	1. SPECIFICALLY, search for 'id': these (most frequently) are expressed via 
+		') => ' sequence [sometimes: ') => x']; 
+
+3.28. Create an ID-based HashFastLookupTable instance [one that uses 'id = (x) => x']; 
+	3.28.1. CREATE a Stream-specific one, that uses '(stream) => stream.curr' [note: the 'this.input' is passed...]; 
+
+3.29. The condition '._index != null' (and similar ones), THE LIBRARY SHOULD HAVE A NULL-CONSTANT OF ITS OWN; 
+	This constant should be unique, and single: 
+		ERGO, DO THE 'constants' file already: 
+		
+			2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
+				Put the 'PRE_CURR_INIT', and other such things THERE; 
+
+		SIMILAR CONDITIONS should also be handled [otherwise, the library would have a great inconsistency in acceptance of possible values...]; 
+
+Order of todo-elimination [v0.3]: 
+	3.29. 
+	3.25.
+	3.27. 
+	3.28.
+	TODOS: 
+		3.1. [NestedlyTransformedStream]
+		0. [redundant defs]
+		-1. [relocate utils out of 'dist/']
+
 A. testing: 
 	A.1. Create list of modules to be tested; 
+
+		CHANGE OF PLANS: 
+
+			0. Refactor the utils into the mini-testing framework; 
+			1. FIX the uils;
+			2. Re-do all the tests, create missing ones [note: all __relevant__ ones]
 
 		Testing choice [per-method/per-class] and implementation are defined by: 
 
@@ -713,9 +733,6 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 	
-	2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
-		Put the 'PRE_CURR_INIT', and other such things THERE; 
-
 	2.13. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
@@ -855,6 +872,14 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		
 		MORE GENERALLY - try to adapt the library for work on LARGE datasets; 
 
+	3.25. [minimalism] - remove the 'static' properties on the classes? [instead, place them inside the prototypes?]; 
+	
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
 		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
+	3.2. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
+		In particular, it would have: 	
+
+			1. delegates [from here]; 
+		
+		Expand the list; 

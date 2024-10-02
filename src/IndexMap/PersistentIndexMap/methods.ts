@@ -1,6 +1,10 @@
+import type { Pattern } from "src/Pattern/interfaces.js"
 import type { Pairs } from "../interfaces.js"
 import { Pointer } from "./classes.js"
-import type { PersistentIndexValue, PersistentIndexMap } from "./interfaces.js"
+import type { PersistentIndexMap } from "./interfaces.js"
+
+import { inplace } from "@hgargg-0710/one"
+const { insert } = inplace
 
 export function persistentIndexMapAdd<KeyType = any, ValueType = any>(
 	this: PersistentIndexMap<KeyType, ValueType>,
@@ -9,53 +13,9 @@ export function persistentIndexMapAdd<KeyType = any, ValueType = any>(
 ) {
 	const increase = pairs.length
 	const size = this.size
-	for (let i = index; i < size; ++i) this.values[i][0].value += increase
-	const withPointers = pairs.map(([key, value], i) => [
-		key,
-		[Pointer(index + i), value]
-	]) as Pairs<KeyType, PersistentIndexValue<ValueType>>
-	this.indexMap.add(index, ...withPointers)
-	return this
-}
-
-export function persistentIndexMapKeysGetter<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>
-) {
-	return this.indexMap.keys
-}
-
-export function persistentIndexMapValuesGetter<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>
-) {
-	return this.indexMap.values
-}
-
-export function persistentIndexMapDefault<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>
-) {
-	return this.indexMap.default
-}
-
-export function persistentIndexMapIndex<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>,
-	x: any
-) {
-	return this.indexMap.index(x)
-}
-
-export function persistentIndexMapByIndex<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>,
-	i: number
-) {
-	return this.indexMap.byIndex(i)
-}
-
-export function persistentIndexMapReplace<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>,
-	index: number,
-	pair: [KeyType, ValueType]
-) {
-	this.indexMap.replace(index, [pair[0], [this.byIndex(index)[1][0], pair[1]]])
+	for (let i = index; i < size; ++i) this.indexes[i].value += increase
+	insert(this.indexes, index, ...pairs.map((_x, i) => Pointer(i + index)))
+	this.sub.add(index, ...pairs)
 	return this
 }
 
@@ -65,8 +25,8 @@ export function persistentIndexMapDelete<KeyType = any, ValueType = any>(
 	count: number = 1
 ) {
 	const size = this.size
-	for (let i = index + count; i < size; ++i) this.values[i][0].value -= count
-	this.indexMap.delete(index, count)
+	for (let i = index + count; i < size; ++i) this.indexes[i].value -= count
+	this.sub.delete(index, count)
 	return this
 }
 
@@ -86,13 +46,15 @@ export function persistentIndexMapUnique<KeyType = any, ValueType = any>(
 			indexSet.add(i)
 		}
 
-	const filterPredicate = (_x: any, i: number) => indexSet.has(i)
-	this.keys = this.keys.filter(filterPredicate)
-	this.values = this.values.filter(filterPredicate)
+	this.indexes = this.indexes.filter((x: Pattern<number>, i: any) => {
+		if (indexSet.has(i)) return true
+		x.value = -1 // invalidating the deleted Pointer-s
+	})
 
 	let i = this.size
 	while (i--) this.values[i][0].value = i
 
+	this.sub.unique(start)
 	return this
 }
 
@@ -101,33 +63,23 @@ export function persistentIndexMapSwap<KeyType = any, ValueType = any>(
 	i: number,
 	j: number
 ) {
-	const tempInt = this.values[i][0].value
-	this.values[i][0].value = this.value[j][0].value
-	this.values[j][0].value = tempInt
-	this.indexMap.swap(i, j)
+	// * Swap values
+	const tempInt = this.indexes[i].value
+	this.indexes[i].value = this.indexes[j].value
+	this.indexes[j].value = tempInt
+
+	// * Swap '.indexes'-locations
+	const tempObj = this.indexes[i]
+	this.indexes[i] = this.indexes[j]
+	this.indexes[j] = tempObj
+
+	this.sub.swap(i, j)
 	return this
 }
 
-export function persistentIndexMapSet<KeyType = any, ValueType = any>(
+export function persistentIndexMapGetIndex<KeyType = any, ValueType = any>(
 	this: PersistentIndexMap<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType,
-	index: number = this.size
+	key: KeyType
 ) {
-	const keyIndex = this.keys.indexOf(key)
-	if (keyIndex > -1) {
-		this.values[keyIndex][1] = value
-		return this
-	}
-	return this.add(index, [key, value])
-}
-
-export function persistentIndexMapReplaceKey<KeyType = any, ValueType = any>(
-	this: PersistentIndexMap<KeyType, ValueType>,
-	keyFrom: KeyType,
-	keyTo: KeyType
-) {
-	const toReplace = this.index(keyFrom)
-	this.replace(toReplace[0].value, [keyTo, toReplace[1]])
-	return this
+	return this.indexes[this.keys.indexOf(key)]
 }

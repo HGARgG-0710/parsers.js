@@ -1,69 +1,83 @@
 import {
-	nestedStreamInitCurr,
+	effectiveNestedStreamInitCurr,
 	effectiveNestedStreamNext,
 	effectiveNestedStreamInitialize,
-	effectiveNestedStreamIsEnd,
-	nestableStreamNest
+	effectiveNestedStreamIsEnd
 } from "./methods.js"
-import type {
-	EffectiveNestedStream,
-	NestableStream,
-	NestableEndableStream
-} from "./interfaces.js"
+import type { EffectiveNestedStream } from "./interfaces.js"
 
-import type { EndableStream } from "../StreamClass/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
-import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
+import type { StreamHandler, StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
+import type { FastLookupTable } from "src/IndexMap/FastLookupTable/interfaces.js"
+import type { EndableStream } from "../StreamClass/interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
+import { current } from "src/utils.js"
 
 // * explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`;
 export const NestedStreamBase = StreamClass({
 	isCurrEnd: effectiveNestedStreamIsEnd,
 	baseNextIter: effectiveNestedStreamNext,
-	initGetter: nestedStreamInitCurr,
+	initGetter: effectiveNestedStreamInitCurr,
 	defaultIsEnd: underStreamDefaultIsEnd,
 	preInit: true
 })
 
-export class NestedStream<Type = any>
-	extends NestedStreamBase
-	implements EffectiveNestedStream<Type>
-{
-	toplevel: boolean
-	currNested: boolean
+// TODO list for implementation:
+// ! 0. PRIOR: fix the:
+// 		0.1. PersistentIndexMap - lack of proper implementation for '._index'-keeping on the key-value pairs on it [likewise, CHANGE THE 'Indexable' return value to [KeyType, ValueType] from JUST ValueType];
+// 		0.2. OptimizedLinearIndexMap - implement it... [single method, basically...];
+// * 1. Implement the new NestedlyTransformedStream
+// * 	1.1. Which will reference THE SAME table, and use it like [accepts a 'NestedStream' as '.input']:
+// 			const method = this.typesTable.byOwned(this.input.curr)
+// 			return (isArray(method) ? last(method) : method)(this.input.curr)
 
-	input: NestableEndableStream<Type>
-	inflate: StreamPredicate
-	deflate: StreamPredicate
+export function NestedStream<Type = any>(
+	nestedTypes: FastLookupTable<any, [StreamPredicate, (null | StreamHandler)?]>
+) {
+	class NestedStream extends NestedStreamBase implements EffectiveNestedStream<Type> {
+		input: EndableStream<Type>
+		currNested: boolean
+		_index: any
 
-	init: (
-		input?: NestableEndableStream<Type>,
-		inflate?: StreamPredicate,
-		deflate?: StreamPredicate,
-		toplevel?: boolean
-	) => EffectiveNestedStream<Type>
+		super: Summat
+		typesTable: FastLookupTable<any, [StreamPredicate, (StreamHandler | null)?]>
 
-	constructor(
-		input?: NestableEndableStream<Type>,
-		inflate?: StreamPredicate,
-		deflate?: StreamPredicate,
-		toplevel: boolean = true
-	) {
-		super()
-		this.init(input, inflate, deflate, toplevel)
-		this.currNested = false
-		super.init()
+		init: (input?: EndableStream<Type>, _index?: any) => EffectiveNestedStream<Type>;
+		["constructor"]: new (
+			input?: EndableStream<Type> | undefined,
+			_index?: any
+		) => EffectiveNestedStream<Type>
+
+		constructor(input?: EndableStream<Type>, _index?: any) {
+			super()
+			this.init(input, _index)
+		}
 	}
-}
 
-Object.defineProperties(NestedStream.prototype, {
-	init: { value: effectiveNestedStreamInitialize }
-})
+	Object.defineProperties(NestedStream.prototype, {
+		typesTable: { value: nestedTypes },
+		init: { value: effectiveNestedStreamInitialize },
+		super: { value: NestedStreamBase.prototype }
+	})
 
-export function NestableStream<Type = any>(
-	stream: EndableStream<Type>
-): NestableEndableStream<Type> {
-	stream.nest = nestableStreamNest<Type>
-	return stream as NestableEndableStream<Type>
+	function NestedlyTransformedStream<ToType = any>(
+		transformations: StreamHandler<ToType>[]
+	) {
+		class NestedlyTransfromedStream {}
+
+		// * updating the 'transformations'
+		if (transformations.length)
+			NestedStream.prototype.typesTable.mutate(
+				(curr: [StreamPredicate, (null | StreamHandler<ToType>)?], i: number) => {
+					curr[1] = transformations[i] || current
+					return curr
+				}
+			)
+
+		return NestedlyTransfromedStream
+	}
+
+	return [NestedStream, NestedlyTransformedStream]
 }

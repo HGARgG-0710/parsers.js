@@ -7,17 +7,17 @@ export function ParserMap<
 	OutType = any,
 	ParsingType extends BaseMapParsingState = DefaultMapParsingState
 >(
-	indexMap: Indexable<ParserFunction<ParsingType, OutType>>
+	indexMap: Indexable<any, ParserFunction<ParsingType, OutType>>
 ): ParserMap<OutType, ParsingType> {
-	const T = (x: ParsingType) => T.table.index(x)(x, T)
+	const T = (x: ParsingType) => T.table.index(x)[1](x, T)
 	T.table = indexMap
 	return T
 }
 
 export function StreamMap<OutType = any>(
-	indexMap: Indexable<StreamHandler<OutType>>
+	indexMap: Indexable<any, StreamHandler<OutType>>
 ): StreamMap<OutType> {
-	const T: StreamMap<OutType> = (x: BasicStream) => T.table.index(x)
+	const T: StreamMap<OutType> = (x: BasicStream) => T.table.index(x)[1]
 	T.table = indexMap
 	return T
 }

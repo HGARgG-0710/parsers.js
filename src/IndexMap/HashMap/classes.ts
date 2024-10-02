@@ -6,9 +6,8 @@ import {
 	hashMapDelete,
 	hashMapIndex,
 	hashMapReplaceKey,
-	hashMapSet,
-	hashMapSize
-} from "./methods.js"
+	hashMapSet} from "./methods.js"
+import { subSize } from "../SubHaving/methods.js"
 import { Token } from "src/Pattern/Token/classes.js"
 import type { Token as TypeToken } from "src/Pattern/Token/interfaces.js"
 
@@ -17,7 +16,7 @@ const HashClassPrototype = {
 	set: { value: hashMapSet },
 	replaceKey: { value: hashMapReplaceKey },
 	delete: { value: hashMapDelete },
-	size: { get: hashMapSize }
+	size: { get: subSize }
 }
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
@@ -25,11 +24,11 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass implements HashMap<KeyType, ValueType, InternalKeyType> {
 		hash: HashType<KeyType, ValueType, InternalKeyType>
-		structure: InternalHash<InternalKeyType, ValueType>
+		sub: InternalHash<InternalKeyType, ValueType>
 		size: number
 		keys: Set<KeyType>
 
-		index: (x: KeyType) => ValueType
+		index: (x: KeyType) => [KeyType, ValueType]
 		set: (key: KeyType, value: ValueType) => any
 		delete: (key: KeyType) => any
 		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
@@ -40,7 +39,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		) => HashClass<KeyType, ValueType, InternalKeyType>
 
 		constructor(structure: InternalHash<InternalKeyType, ValueType>) {
-			this.structure = structure
+			this.sub = structure
 			this.keys = new Set()
 		}
 	}

@@ -5,7 +5,8 @@ import type {
 	MapClassKeyExtension,
 	Pairs,
 	TestType,
-	HasType
+	HasType,
+	IndexMap
 } from "../interfaces.js"
 
 import {
@@ -27,12 +28,12 @@ import {
 	linearIndexMapReplace,
 	linearIndexMapAdd,
 	linearIndexMapDelete,
-	linearIndexMapSet,
 	linearIndexMapReplaceKey
 } from "./methods.js"
+import { indexMapSet } from "../methods.js"
 
 const LinearMapClassPrototype = {
-	set: { value: linearIndexMapSet },
+	set: { value: indexMapSet },
 	index: { value: linearIndexMapIndex },
 	replace: { value: linearIndexMapReplace },
 	add: { value: linearIndexMapAdd },
@@ -53,9 +54,14 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		keys: KeyType[]
 		values: ValueType[]
 		default: any
-		size: number
+		size: number;
 
-		index: (x: any) => ValueType
+		["constructor"]: new (pairs: Pairs<KeyType, ValueType>, _default?: any) => IndexMap<
+			KeyType,
+			ValueType
+		>
+
+		index: (x: any) => [KeyType, ValueType]
 
 		add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 		delete: (index?: number, count?: number) => any
@@ -83,9 +89,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 	}
 
 	Object.defineProperties(linearMapClass.prototype, LinearMapClassPrototype)
-	linearMapClass.prototype.change = change
-
-	linearMapClass.change = change
+	linearMapClass.prototype.change = linearMapClass.change = change
 	linearMapClass.extend = mapClassExtend
 	linearMapClass.extendKey = mapClassExtendKey
 

@@ -1,8 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Pattern } from "src/Pattern/interfaces.js"
-import type { HashMapFastLookupTable, PersistentIndexFastLookupTable } from "./classes.js"
-import type { FastLookupTableMutation, PersistentIndexMapMutation } from "./interfaces.js"
-import type { Currable } from "src/Stream/BasicStream/interfaces.js"
+import type { PersistentIndexFastLookupTable } from "./classes.js"
+import type { FastLookupTableMutation, HashTableClass } from "./interfaces.js"
 
 // * PersistentIndexLooupTable
 
@@ -18,110 +17,76 @@ export function persistentIndexFastLookupTableOwn<KeyType = any, ValueType = any
 export function persistentIndexFastLookupTableByOwned<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	priorOwned: Summat
-) {
-	return this.table.byIndex(priorOwned._index.value)
+): [KeyType, ValueType] {
+	return this.sub.byIndex(priorOwned._index.value)
 }
 
 export function persistentIndexFastLookupTableIndex<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	key: KeyType
 ) {
-	return this.table.index(key)
-}
-
-export function persistentIndexFastLookupTableSet<KeyType = any, ValueType = any>(
-	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType
-) {
-	this.table.set(key, value)
-	return this
+	const [lowKey, value] = this.sub.index(key)
+	return [this.sub.getIndex(lowKey), lowKey, value]
 }
 
 export function persistentIndexFastLookupTableDelete<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	key: KeyType
 ) {
-	this.table.delete(this.table.index(key)[0].value)
-	return this
-}
-
-export function persistentIndexFastLookupTableReplaceKey<KeyType = any, ValueType = any>(
-	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
-	keyFrom: KeyType,
-	keyTo: KeyType
-) {
-	this.table.replaceKey(keyFrom, keyTo)
+	this.sub.delete(this.sub.getIndex(key).value)
 	return this
 }
 
 export function persistentIndexFastLookupTableMutate<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
-	f: PersistentIndexMapMutation<KeyType, ValueType>
+	f: FastLookupTableMutation<KeyType, ValueType>
 ) {
-	const table = this.table
+	const table = this.sub
 	let i = table.size
-	while (i--) table.set(table.keys[i], f(table.byIndex(i)[1][1], i, this))
+	while (i--) table.set(table.keys[i], f(table.values[i], i, this))
 	return this
 }
 
 // * HashMapFastLookupTable
 
-export function hashMapFastLookupTableOwn<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	toBeOwned: Currable & Summat
+export function hashMapFastLookupTableOwn<
+	KeyType = any,
+	ValueType = any,
+	OwningType = any
+>(
+	this: HashTableClass<KeyType, ValueType, OwningType>,
+	toBeOwned: Summat,
+	ownType: OwningType
 ) {
-	toBeOwned._index = toBeOwned.curr
+	toBeOwned._index = ownType
 	return this
 }
 
 export function hashMapFastLookupTableByOwned<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
+	this: HashTableClass<KeyType, ValueType>,
 	priorOwned: Summat
 ) {
-	return this.hash.index(priorOwned._index)
+	return this.sub.index(priorOwned._index)
 }
 
-export function hashMapFastLookupTableIndex<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	key: KeyType
-) {
-	return this.hash.index(key)
+export function hashMapFastLookupTableIndex<
+	KeyType = any,
+	ValueType = any,
+	OwningType = any
+>(this: HashTableClass<KeyType, ValueType, OwningType>, key: KeyType) {
+	const [lowKey, value] = this.sub.index(key)
+	return [this.ownership(key), lowKey, value] as [OwningType, KeyType, ValueType]
 }
 
-export function hashMapFastLookupTableSet<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType
-) {
-	this.hash.set(key, value)
-	return this
-}
-
-export function hashMapFastLookupTableDelete<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	key: KeyType
-) {
-	this.hash.delete(key)
-	return this
-}
-
-export function hashMapFastLookupTableReplaceKey<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	keyFrom: KeyType,
-	keyTo: KeyType
-) {
-	this.hash.replaceKey(keyFrom, keyTo)
-	return this
-}
-
-export function hashMapFastLookupTableMutate<KeyType = any, ValueType = any>(
-	this: HashMapFastLookupTable<KeyType, ValueType>,
-	mutation: FastLookupTableMutation<KeyType, ValueType>
+export function hashMapFastLookupTableMutate<
+	KeyType = any,
+	ValueType = any,
+	OwningType = any
+>(
+	this: HashTableClass<KeyType, ValueType>,
+	mutation: FastLookupTableMutation<KeyType, ValueType, OwningType>
 ) {
 	let i = 0
-	this.hash.keys.forEach((key) =>
-		this.set(key, mutation(this.hash.get(key), i++, this))
-	)
+	this.sub.keys.forEach((key) => this.set(key, mutation(this.sub.get(key), i++, this)))
 	return this
 }

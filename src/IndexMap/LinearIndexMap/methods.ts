@@ -9,8 +9,13 @@ export function linearIndexMapIndex<KeyType = any, ValueType = any>(
 	x: any
 ) {
 	const size = this.size
-	for (let i = 0; i < size; ++i) if (this.change(this.keys[i], x)) return this.values[i]
-	return this.default
+	let final = this.default
+	for (let i = 0; i < size; ++i)
+		if (this.change(this.keys[i], x)) {
+			final = this.values[i]
+			break
+		}
+	return [x, final]
 }
 
 export function linearIndexMapReplace<KeyType = any, ValueType = any>(
@@ -43,20 +48,6 @@ export function linearIndexMapDelete<KeyType = any, ValueType = any>(
 	out(this.keys, index, count)
 	out(this.values, index, count)
 	return this
-}
-
-export function linearIndexMapSet<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType,
-	index: number = this.size
-) {
-	const keyIndex = this.keys.indexOf(key)
-	if (keyIndex > -1) {
-		this.values[keyIndex] = value
-		return this
-	}
-	return this.add(index, [key, value])
 }
 
 export function linearIndexMapReplaceKey<KeyType = any, ValueType = any>(

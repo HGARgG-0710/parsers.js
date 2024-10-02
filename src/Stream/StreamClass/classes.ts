@@ -1,7 +1,7 @@
-import { finish } from "../FinishableStream/methods.js"
-import { streamIterator } from "../IterableStream/methods.js"
-import { navigate } from "../NavigableStream/methods.js"
-import { rewind } from "../RewindableStream/methods.js"
+import { finish } from "./Finishable/methods.js"
+import { streamIterator } from "./Iterable/methods.js"
+import { navigate } from "./Navigable/methods.js"
+import { rewind } from "./Rewindable/methods.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,

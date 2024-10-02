@@ -1,34 +1,13 @@
 import type { MapInternalHash, ObjectInternalHash } from "./classes.js"
 
+// * MapInternalHash
+
 export function mapInternalHashGet<KeyType = any, ValueType = any>(
 	this: MapInternalHash<KeyType, ValueType>,
 	x: KeyType
 ) {
-	const gotten = this.map.get(x)
+	const gotten = this.sub.get(x)
 	return gotten === undefined ? this.default : gotten
-}
-
-export function mapInternalHashSet<KeyType = any, ValueType = any>(
-	this: MapInternalHash<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType
-) {
-	this.map.set(key, value)
-	return this
-}
-
-export function mapInternalHashDelete<KeyType = any, ValueType = any>(
-	this: MapInternalHash<KeyType, ValueType>,
-	key: KeyType
-) {
-	this.map.delete(key)
-	return this
-}
-
-export function mapInternalHashSize<KeyType = any, ValueType = any>(
-	this: MapInternalHash<KeyType, ValueType>
-) {
-	return this.map.size
 }
 
 export function mapInternalHashReplaceKey<KeyType = any, ValueType = any>(
@@ -42,11 +21,13 @@ export function mapInternalHashReplaceKey<KeyType = any, ValueType = any>(
 	return this
 }
 
+// * ObjectInternalHash
+
 export function objectInternalHashGet<Type = any>(
 	this: ObjectInternalHash<Type>,
 	key: string
 ) {
-	const read = this.object[key]
+	const read = this.sub[key]
 	return read === undefined ? this.default : read
 }
 
@@ -55,8 +36,8 @@ export function objectInternalHashSet<Type = any>(
 	key: string,
 	value: Type
 ) {
-	if (this.object[key] === undefined) ++this.size
-	this.object[key] = value
+	if (this.sub[key] === undefined) ++this.size
+	this.sub[key] = value
 	return this
 }
 
@@ -64,9 +45,9 @@ export function objectInternalHashDelete<Type = any>(
 	this: ObjectInternalHash<Type>,
 	key: string
 ) {
-	if (this.object[key] !== undefined) {
+	if (this.sub[key] !== undefined) {
 		--this.size
-		this.object[key] = undefined
+		this.sub[key] = undefined
 	}
 	return this
 }
@@ -76,7 +57,7 @@ export function objectInternalHashReplaceKey<Type = any>(
 	keyFrom: string,
 	keyTo: string
 ) {
-	this.object[keyTo] = this.object[keyFrom]
-	this.object[keyFrom] = undefined
+	this.sub[keyTo] = this.sub[keyFrom]
+	this.sub[keyFrom] = undefined
 	return this
 }

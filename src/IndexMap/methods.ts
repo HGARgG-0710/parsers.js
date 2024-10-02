@@ -56,13 +56,27 @@ export function indexMapSwap<KeyType = any, ValueType = any>(
 export function indexMapCopy<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ) {
-	return new (Object.getPrototypeOf(this).constructor)(toPairsList(table(this)))
+	return new this.constructor(toPairsList(table(this)))
 }
 
 export function indexMapSizeGetter<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ) {
 	return this.keys.length
+}
+
+export function indexMapSet<KeyType = any, ValueType = any>(
+	this: IndexMap<KeyType, ValueType>,
+	key: KeyType,
+	value: ValueType,
+	index: number = this.size
+) {
+	const keyIndex = this.keys.indexOf(key)
+	if (keyIndex > -1) {
+		this.values[keyIndex] = value
+		return this
+	}
+	return this.add(index, [key, value])
 }
 
 export function mapClassExtend<KeyType = any, ValueType = any>(

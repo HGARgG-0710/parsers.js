@@ -1,38 +1,23 @@
-import { uniFinish } from "../FinishableStream/utils.js"
-import { NestedStream as NestedStreamConstructor } from "./classes.js"
-import type {
-	EffectiveNestedStream,
-	NestableEndableStream,
-	NestedStream
-} from "./interfaces.js"
+import { uniFinish } from "../StreamClass/Finishable/utils.js"
+import type { EffectiveNestedStream } from "./interfaces.js"
 
-import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
-
-import { boolean } from "@hgargg-0710/one"
 import { Inputted } from "../UnderStream/classes.js"
-import { PRE_CURR_INIT } from "../StreamClass/methods.js"
-const { F } = boolean
+import type { EndableStream } from "../StreamClass/interfaces.js"
 
-export function nestableStreamNest<Type = any>(
-	this: NestableEndableStream<Type>,
-	inflate: StreamPredicate = F,
-	deflate: StreamPredicate = F,
-	toplevel: boolean = true
+export function effectiveNestedStreamInitCurr<Type = any>(
+	this: EffectiveNestedStream<Type>
 ) {
-	return new NestedStreamConstructor<Type>(this, inflate, deflate, toplevel)
-}
-
-export function nestedStreamInitCurr<Type = any>(this: NestedStream<Type>) {
-	if (this.inflate(this.input)) {
+	const result = this.typesTable.index(this.input)
+	if (result) {
 		this.currNested = true
-		return this.input.nest(this.inflate, this.deflate, false)
+		return new this.constructor(this.input, result[0])
 	}
 	return this.input.curr
 }
 
 export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStream<Type>) {
 	if (this.currNested) {
-		uniFinish(this.curr as NestableEndableStream<Type>)
+		uniFinish(this.curr as EndableStream<Type>)
 		this.currNested = false
 	}
 	this.input.next()
@@ -42,22 +27,21 @@ export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStrea
 export function effectiveNestedStreamIsEnd<Type = any>(
 	this: EffectiveNestedStream<Type>
 ) {
-	return this.input.isCurrEnd() || (!this.toplevel && this.deflate())
+	return (
+		this.input.isCurrEnd() ||
+		(this._index != null && !this.typesTable.byOwned(this)[1][0](this))
+	)
 }
 
 export function effectiveNestedStreamInitialize<Type = any>(
 	this: EffectiveNestedStream<Type>,
-	input?: NestableEndableStream<Type>,
-	inflate?: StreamPredicate,
-	deflate?: StreamPredicate,
-	toplevel?: boolean
+	input?: EndableStream<Type>,
+	_index?: any
 ) {
+	if (_index) this.typesTable.own(this, _index)
 	if (input) {
 		Inputted(this, input)
-		this.isStart = PRE_CURR_INIT
+		this.super.init()
 	}
-	if (inflate) this.inflate = inflate
-	if (deflate) this.deflate = deflate
-	if (toplevel !== undefined) this.toplevel = toplevel
 	return this
 }

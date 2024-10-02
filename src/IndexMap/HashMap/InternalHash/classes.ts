@@ -1,20 +1,19 @@
+import type { SubHaving } from "src/IndexMap/SubHaving/interfaces.js"
 import type { InternalHash } from "./interfaces.js"
 import {
-	mapInternalHashDelete,
 	mapInternalHashGet,
 	mapInternalHashReplaceKey,
-	mapInternalHashSet,
-	mapInternalHashSize,
 	objectInternalHashDelete,
 	objectInternalHashGet,
 	objectInternalHashReplaceKey,
 	objectInternalHashSet
 } from "./methods.js"
+import { subDelete, subSet, subSize } from "src/IndexMap/SubHaving/methods.js"
 
 export class MapInternalHash<KeyType = any, ValueType = any>
-	implements InternalHash<KeyType, ValueType>
+	implements InternalHash<KeyType, ValueType>, SubHaving<Map<KeyType, ValueType>>
 {
-	map: Map<KeyType, ValueType>
+	sub: Map<KeyType, ValueType>
 	size: number
 	default: any
 
@@ -24,21 +23,23 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
 	constructor(baseMap: Map<KeyType, ValueType>, _default: any) {
-		this.map = baseMap
+		this.sub = baseMap
 		this.default = _default
 	}
 }
 
 Object.defineProperties(MapInternalHash.prototype, {
-	set: { value: mapInternalHashSet },
+	set: { value: subSet },
 	get: { value: mapInternalHashGet },
-	delete: { value: mapInternalHashDelete },
-	size: { get: mapInternalHashSize },
+	delete: { value: subDelete },
+	size: { get: subSize },
 	replaceKey: { value: mapInternalHashReplaceKey }
 })
 
-export class ObjectInternalHash<Type = any> implements InternalHash<string, Type> {
-	object: object
+export class ObjectInternalHash<Type = any>
+	implements InternalHash<string, Type>, SubHaving<object>
+{
+	sub: object
 	default: any
 	size: number
 
@@ -49,7 +50,7 @@ export class ObjectInternalHash<Type = any> implements InternalHash<string, Type
 
 	constructor(baseObj: object, _default: any) {
 		this.size = Object.keys(baseObj).length
-		this.object = baseObj
+		this.sub = baseObj
 		this.default = _default
 	}
 }

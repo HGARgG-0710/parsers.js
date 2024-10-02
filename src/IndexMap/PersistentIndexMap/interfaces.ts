@@ -1,14 +1,10 @@
 import type { Pattern } from "src/Pattern/interfaces.js"
-import type { IndexMap, StableIndexMap, VolatileIndexMap } from "../interfaces.js"
-
-export type PersistentIndexValue<Value = any> = [Pattern<number>, Value]
-export type UnderPersistentMap<KeyType = any, ValueType = any> = IndexMap<
-	KeyType,
-	PersistentIndexValue<ValueType>
->
+import type { IndexMap } from "../interfaces.js"
+import type { SubHaving } from "../SubHaving/interfaces.js"
 
 export interface PersistentIndexMap<KeyType = any, ValueType = any>
-	extends StableIndexMap<KeyType, PersistentIndexValue<ValueType>>,
-		VolatileIndexMap<KeyType, ValueType> {
-	indexMap: UnderPersistentMap<KeyType, ValueType>
+	extends IndexMap<KeyType, ValueType>,
+		SubHaving<IndexMap<KeyType, ValueType>> {
+	getIndex: (key: KeyType) => Pattern<number>
+	indexes: Pattern<number>[]
 }
