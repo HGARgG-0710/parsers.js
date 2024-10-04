@@ -1,5 +1,5 @@
-import type { Position } from "../PositionalStream/Position/interfaces.js"
-import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { Position } from "../../PositionalStream/Position/interfaces.js"
+import type { BasicReversibleStream } from "../../ReversibleStream/interfaces.js"
 
 import { uniNavigate } from "./utils.js"
 

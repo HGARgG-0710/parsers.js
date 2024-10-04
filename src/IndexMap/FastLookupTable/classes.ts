@@ -6,15 +6,13 @@ import type { SubHaving } from "../SubHaving/interfaces.js"
 import {
 	persistentIndexFastLookupTableByOwned,
 	persistentIndexFastLookupTableDelete,
-	persistentIndexFastLookupTableIndex,
 	persistentIndexFastLookupTableMutate,
 	hashMapFastLookupTableByOwned,
 	persistentIndexFastLookupTableOwn,
 	hashMapFastLookupTableOwn,
-	hashMapFastLookupTableMutate,
-	hashMapFastLookupTableIndex
+	hashMapFastLookupTableMutate
 } from "./methods.js"
-import { subDelete, subSet, subReplaceKey } from "../SubHaving/methods.js"
+import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
 
 import type { HashTableClass as HashTableClassType } from "./interfaces.js"
 
@@ -25,9 +23,9 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 {
 	sub: PersistentIndexMap<KeyType, ValueType>
 
-	index: (x: any) => [Pattern<number>, KeyType, ValueType]
+	getIndex: (x: any) => Pattern<number>
 	own: (x: any, ownIndex: Pattern<number>) => void
-	byOwned: (x: any) => [KeyType, ValueType]
+	byOwned: (x: any) => ValueType
 
 	set: (key: KeyType, value: ValueType) => any
 	delete: (key: KeyType) => any
@@ -41,7 +39,7 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 }
 
 Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
-	index: { value: persistentIndexFastLookupTableIndex },
+	getIndex: { value: subGetIndex },
 	own: { value: persistentIndexFastLookupTableOwn },
 	byOwned: { value: persistentIndexFastLookupTableByOwned },
 	set: { value: subSet },
@@ -51,7 +49,6 @@ Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 })
 
 const HashTablePrototype = {
-	index: { value: hashMapFastLookupTableIndex },
 	own: { value: hashMapFastLookupTableOwn },
 	byOwned: { value: hashMapFastLookupTableByOwned },
 	set: { value: subSet },
@@ -66,15 +63,14 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	class HashTableClass implements HashTableClassType<KeyType, ValueType, OwningType> {
 		sub: HashMap<KeyType, ValueType>
 
-		index: (x: any) => [OwningType, KeyType, ValueType]
+		getIndex: (x: any) => OwningType
 		own: (x: any, ownFunc: OwningType) => void
-		byOwned: (x: any) => [KeyType, ValueType]
+		byOwned: (x: any) => ValueType
 		set: (key: KeyType, value: ValueType) => any
 		delete: (key: KeyType) => any
 		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
 		mutate: (mutation: FastLookupTableMutation<KeyType, ValueType>) => any
-		ownership: (x: KeyType) => OwningType
 
 		constructor(baseHash: HashMap<KeyType, ValueType>) {
 			this.sub = baseHash
@@ -82,7 +78,10 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	}
 
 	Object.defineProperties(HashTableClass.prototype, HashTablePrototype)
-	HashTableClass.prototype.ownership = ownership
+	HashTableClass.prototype.getIndex = ownership
 
 	return HashTableClass
 }
+
+export const [BasicHashTable, StreamHashTable]: [HashTableClassType, HashTableClassType] =
+	[(x: any) => x, (stream: any) => stream.curr].map(HashTable) as [any, any]

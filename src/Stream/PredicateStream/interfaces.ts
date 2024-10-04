@@ -4,7 +4,7 @@ import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfac
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
 import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
-import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { IterableStream } from "../StreamClass/Iterable/interfaces.js"
 
 export interface Predicated extends Summat {
 	predicate: PredicatePosition

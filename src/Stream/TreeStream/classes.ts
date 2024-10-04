@@ -12,13 +12,14 @@ import {
 
 import type { MultiIndex } from "./MultiIndex/interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "./TreeWalker/interfaces.js"
-import type { Tree } from "../../Tree/interfaces.js"
+import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 
 import { TreeWalker } from "./TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
 import { boolean } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { Position } from "../PositionalStream/Position/interfaces.js"
 const { F } = boolean
 
 export const TreeStreamBase = StreamClass({
@@ -45,6 +46,7 @@ export class TreeStream<Type = any>
 
 	copy: () => EffectiveTreeStream<Type>
 	rewind: () => Type
+	navigate: (position: Position) => InTreeType<Type>
 	super: Summat
 
 	constructor(tree?: Tree<Type>) {

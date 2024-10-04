@@ -1,4 +1,4 @@
-import { isIterable } from "../IterableStream/utils.js"
+import { isIterable } from "../StreamClass/Iterable/utils.js"
 import { isPositionalStream } from "../PositionalStream/utils.js"
 import { isInputted } from "../UnderStream/utils.js"
 import type {
@@ -30,6 +30,6 @@ export const isBasicPredicated = and(isPredicated, isSinglePositionLookahead) as
 export const isPredicateStream = and(
 	isBasicPredicated,
 	isInputted,
-	isIterable, 
-	isPositionalStream,
+	isIterable,
+	isPositionalStream
 ) as (x: any) => x is PredicateStream

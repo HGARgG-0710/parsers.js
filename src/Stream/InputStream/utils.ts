@@ -9,7 +9,7 @@ import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { EffectiveInputStream } from "./interfaces.js"
 import { isPositionalStream } from "../PositionalStream/utils.js"
 import { isInputted } from "../UnderStream/utils.js"
-import { isIterable } from "../IterableStream/utils.js"
+import { isIterable } from "../StreamClass/Iterable/utils.js"
 
 /**
  * Given a `BasicStream`, converts it to an `InputStream` for the price of a single iteration.

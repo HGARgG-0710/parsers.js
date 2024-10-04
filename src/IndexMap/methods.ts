@@ -1,8 +1,7 @@
 import { toPairsList } from "./utils.js"
-import type { IndexMap, MapClass as MapClassType } from "./interfaces.js"
+import type { IndexMap } from "./interfaces.js"
 
 import { inplace } from "@hgargg-0710/one"
-import { LinearMapClass } from "./LinearIndexMap/classes.js"
 import { table } from "./utils.js"
 const { swap } = inplace
 
@@ -77,20 +76,6 @@ export function indexMapSet<KeyType = any, ValueType = any>(
 		return this
 	}
 	return this.add(index, [key, value])
-}
-
-export function mapClassExtend<KeyType = any, ValueType = any>(
-	this: MapClassType<KeyType, ValueType>,
-	f: (x: ValueType) => any
-): MapClassType<KeyType, any> {
-	return LinearMapClass<KeyType>((curr: KeyType, x: any) => this.change(curr, f(x)))
-}
-
-export function mapClassExtendKey<KeyType = any, ValueType = any>(
-	this: MapClassType<KeyType, ValueType>,
-	f: (x: KeyType) => any
-): MapClassType<any, ValueType> {
-	return LinearMapClass((curr: any, x: any) => this.change(f(curr), x))
 }
 
 export * as HashMap from "./HashMap/methods.js"

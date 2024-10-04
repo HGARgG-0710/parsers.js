@@ -4,7 +4,7 @@ import type { BasicStream } from "../BasicStream/interfaces.js"
 import type { PositionalStream } from "../PositionalStream/interfaces.js"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IterableStream } from "../IterableStream/interfaces.js"
+import type { IterableStream } from "../StreamClass/Iterable/interfaces.js"
 import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
 
 export interface Transformable<InType = any, OutType = any> extends Summat {

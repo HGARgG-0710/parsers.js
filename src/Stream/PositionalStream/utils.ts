@@ -3,7 +3,7 @@ import type { Position } from "./Position/interfaces.js"
 
 import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 import { isPosition } from "./Position/utils.js"
-import { isIterableStream } from "../IterableStream/utils.js"
+import { isIterableStream } from "../StreamClass/Iterable/utils.js"
 const { structCheck } = object
 const { and } = _f
 const { isNumber } = type

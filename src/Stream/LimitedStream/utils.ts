@@ -1,4 +1,4 @@
-import { isIterable } from "../IterableStream/utils.js"
+import { isIterable } from "../StreamClass/Iterable/utils.js"
 import { isPosition } from "../PositionalStream/Position/utils.js"
 import { isPositionalStream } from "../PositionalStream/utils.js"
 import { isSinglePositionLookahead } from "../PredicateStream/utils.js"

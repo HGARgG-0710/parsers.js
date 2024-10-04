@@ -1,5 +1,5 @@
 import { isStream } from "../BasicStream/utils.js"
-import { isIterableStream } from "../IterableStream/utils.js"
+import { isIterableStream } from "../StreamClass/Iterable/utils.js"
 import { isPositional } from "../PositionalStream/utils.js"
 import { isInputted } from "../UnderStream/utils.js"
 import type {

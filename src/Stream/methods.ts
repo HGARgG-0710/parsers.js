@@ -1,5 +1,4 @@
 export * as InputStream from "./InputStream/methods.js"
-export * as IterableStream from "./IterableStream/methods.js"
 export * as LimitedStream from "./LimitedStream/methods.js"
 export * as NestedStream from "./NestedStream/methods.js"
 export * as PositionalStream from "./PositionalStream/methods.js"

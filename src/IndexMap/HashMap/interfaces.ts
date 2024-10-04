@@ -36,7 +36,7 @@ export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any
 }
 
 export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends Indexable<KeyType, ValueType>,
+	extends Indexable<ValueType>,
 		Settable<KeyType, ValueType>,
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,

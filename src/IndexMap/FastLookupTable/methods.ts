@@ -17,23 +17,16 @@ export function persistentIndexFastLookupTableOwn<KeyType = any, ValueType = any
 export function persistentIndexFastLookupTableByOwned<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	priorOwned: Summat
-): [KeyType, ValueType] {
-	return this.sub.byIndex(priorOwned._index.value)
-}
-
-export function persistentIndexFastLookupTableIndex<KeyType = any, ValueType = any>(
-	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
-	key: KeyType
 ) {
-	const [lowKey, value] = this.sub.index(key)
-	return [this.sub.getIndex(lowKey), lowKey, value]
+	return this.sub.byIndex(priorOwned._index.value)[1]
 }
 
 export function persistentIndexFastLookupTableDelete<KeyType = any, ValueType = any>(
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	key: KeyType
 ) {
-	this.sub.delete(this.sub.getIndex(key).value)
+	const sub = this.sub
+	sub.delete(sub.getIndex(key).value)
 	return this
 }
 
@@ -67,15 +60,6 @@ export function hashMapFastLookupTableByOwned<KeyType = any, ValueType = any>(
 	priorOwned: Summat
 ) {
 	return this.sub.index(priorOwned._index)
-}
-
-export function hashMapFastLookupTableIndex<
-	KeyType = any,
-	ValueType = any,
-	OwningType = any
->(this: HashTableClass<KeyType, ValueType, OwningType>, key: KeyType) {
-	const [lowKey, value] = this.sub.index(key)
-	return [this.ownership(key), lowKey, value] as [OwningType, KeyType, ValueType]
 }
 
 export function hashMapFastLookupTableMutate<

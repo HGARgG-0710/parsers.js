@@ -1,8 +1,8 @@
-import { pickDirection, positionConvert } from "../PositionalStream/Position/utils.js"
+import { pickDirection, positionConvert } from "../../PositionalStream/Position/utils.js"
 import type { Navigable } from "./interfaces.js"
 
-import type { Position } from "../PositionalStream/Position/interfaces.js"
-import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { Position } from "../../PositionalStream/Position/interfaces.js"
+import type { BasicReversibleStream } from "../../ReversibleStream/interfaces.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object

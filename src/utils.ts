@@ -119,6 +119,28 @@ export const backtrack = (predicate: PredicatePosition) => {
 	return predicate
 }
 
+export const delegate = (delegatePropName: string) => (delegateMethodName: string) =>
+	function (...delegateArgs: any[]) {
+		return this[delegatePropName][delegateMethodName](...delegateArgs)
+	}
+
+export const thisReturningDelegate =
+	(delegatePropName: string) => (delegateMethodName: string) =>
+		function (...delegateArgs: any[]) {
+			this[delegatePropName][delegateMethodName](...delegateArgs)
+			return this
+		}
+
+export const delegateProperty = (delegatePropName: string) => (propName: string) =>
+	function () {
+		return this[delegatePropName][propName]
+	}
+
+export const classWrapper =
+	(X: new (...args: any[]) => any) =>
+	(...args: any[]) =>
+		new X(...args)
+
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"

@@ -12,16 +12,14 @@ export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = an
 		KeyReplaceable<KeyType>,
 		Settable<KeyType, ValueType>,
 		Deletable<KeyType> {
-	index: (x: any) => [OwningType, KeyType, ValueType]
+	getIndex: (x: any) => OwningType
 	own: (x: any, ownType: OwningType) => void
-	byOwned: (x: any) => [KeyType, ValueType]
+	byOwned: (x: any) => ValueType
 }
 
 export interface HashTableClass<KeyType = any, ValueType = any, OwningType = any>
 	extends FastLookupTable<KeyType, ValueType, OwningType>,
-		SubHaving<HashMap<KeyType, ValueType>> {
-	ownership: (x: KeyType) => OwningType
-}
+		SubHaving<HashMap<KeyType, ValueType>> {}
 
 export type FastLookupTableMutation<KeyType = any, ValueType = any, OwningType = any> = (
 	value: ValueType,

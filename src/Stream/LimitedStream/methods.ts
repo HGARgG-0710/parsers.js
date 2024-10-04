@@ -9,7 +9,7 @@ import {
 	positionNegate
 } from "../PositionalStream/Position/utils.js"
 
-import { fastNavigate } from "../NavigableStream/utils.js"
+import { fastNavigate } from "../StreamClass/Navigable/utils.js"
 
 import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
 import type {

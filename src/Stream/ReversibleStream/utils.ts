@@ -1,7 +1,7 @@
 import type { Started, ReversibleStream, BasicReversibleStream } from "./interfaces.js"
 
 import type { Prevable } from "./interfaces.js"
-import { isIterableStream } from "../IterableStream/utils.js"
+import { isIterableStream } from "../StreamClass/Iterable/utils.js"
 
 import { object, typeof as type, function as _f } from "@hgargg-0710/one"
 const { structCheck } = object

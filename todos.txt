@@ -38,9 +38,6 @@ CURR TODO LIST:
 
 	3. PROBLEM: with the NestedStream: 	
 
-		-1. CREATE implementations of 'FastLookupTable' that would be SPECIFIC to the use-cases; 
-			In particular - CREATE ALIASES for the combined workflow that they are intended to be used in [with NestedStream]; 
-
 		0. FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
 
 			Create a special 'FastLookupTable' wrapper-interface that 
@@ -186,60 +183,27 @@ CURR TODO LIST:
 	Likewise, profile the previous projects - see if one's guesses (albeit, simple) 
 		regarding the natures of performance issues were, indeed, correct; 
 
-3.25. OPTIMIZE the 'LinearIndexMap': 
-	Under a 'static-.change' assumption [id est, '.change' is composed of functions that ONLY ever return THE SAME values], 
-		optimize it as follows: 
-
-		1. Get rid of '.change', replacing it with: 
-			1.1. extension - a function; 
-				1.1.1. extensionList - a list of transformations; 
-			1.2. keyExtensions - array of transformations; 
-
-			Which works as follows: 
-
-				1. Keep the ORIGINAL [BasicMap-based] list of properties [keys-values] of the IndexMap; 
-				2. Upon change of 'keyExtensions' [via '.extendKey'], a COPY of the original values used for indexing is made, VIA: 
-					2.1. 'trivialCompose' of transformations in 'keyExtensions'; 
-					2.2. '.map' with keys now put through the 'trivialCompose(...keyExtensions)'; 
-					2.3. THE COPY is used for the actual indexation; 
-				3. The 'extension' is 're-composed' via 'trivialCompose' every time upon change of 'extensionList'; 
-					3.1. When '.index'-ing an 'item', one does 'this.values[this.keys.indexOf(this.extension(item))]'; 
-						The '.indexOf' is ~always ~2.5-12 times faster (depending on the use-case); 
-
-	NO! Doing this optimization would be HIGHLY detrimental to the IndexMaps' functionality; 
-		Would be IMPOSSIBLE to generally do it via a something like 'change = (x, y) => x < y'; 
-
-	CONCLUSION: for fast search like this, one needs A NEW structure; 
-	Call it: FastLinearIndexMap; 
-	Would be identical to LinearIndexMap, save for this one method, thus permitting one to retain the nice linear properties,
-		whilst also gaining a great deal of speediness; 
-
-3.27. ANOTHER refactoring with 'one.js': 
+-2. CREATE implementations of 'FastLookupTable' that would be SPECIFIC to the use-cases; 
+	In particular - CREATE ALIASES for the combined workflow that they are intended to be used in [with NestedStream]; 
+				
+3.25. ANOTHER refactoring with 'one.js': 
 	Update it [again]; 
 	1. SPECIFICALLY, search for 'id': these (most frequently) are expressed via 
 		') => ' sequence [sometimes: ') => x']; 
 
-3.28. Create an ID-based HashFastLookupTable instance [one that uses 'id = (x) => x']; 
-	3.28.1. CREATE a Stream-specific one, that uses '(stream) => stream.curr' [note: the 'this.input' is passed...]; 
+-4. WORK CAREFULLY on the precise list of exports; 
+	Seek stuff that is NOT to be exported and vice-versa; 
 
-3.29. The condition '._index != null' (and similar ones), THE LIBRARY SHOULD HAVE A NULL-CONSTANT OF ITS OWN; 
-	This constant should be unique, and single: 
-		ERGO, DO THE 'constants' file already: 
-		
-			2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
-				Put the 'PRE_CURR_INIT', and other such things THERE; 
-
-		SIMILAR CONDITIONS should also be handled [otherwise, the library would have a great inconsistency in acceptance of possible values...]; 
+-6. QUESTION: should one remove the '.mutate' from the 'FastLookupTable'? 
 
 Order of todo-elimination [v0.3]: 
-	3.29. 
-	3.25.
-	3.27. 
-	3.28.
 	TODOS: 
-		3.1. [NestedlyTransformedStream]
 		0. [redundant defs]
-		-1. [relocate utils out of 'dist/']
+		-1. [relocate utils out of 'dist/']	
+	-2 [aliases for workflows, compositions]; 
+	3.25. 
+	3.31.
+	-4. 
 
 A. testing: 
 	A.1. Create list of modules to be tested; 
@@ -437,6 +401,17 @@ B. documentation (change/fix it...);
 			B1.1.3. Examples [projects done using it]; 
 			B1.1.4. Structure - explain how the library structure works (interfaces., methods., classes., utils.); 
 			B1.1.5. Known issues (this lists known problems that the library currently has);
+
+	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
+	[This is especially important in the case of NestedlyTransformedStream, where such a thing CAN OCURR, whenever dealing with a non-Stream item:
+		1. 'x._index === undefined' [because not a Stream, and was not '.own()'-ed]
+		2. 'this.sub.index(x._index) === this.sub.index(undefined)' [in hash - example]
+		3. 'this.sub.get(this.hash(x, this))'
+		4. IF 'this.hash(undefined, this) === undefined', 'this.sub.get(this.hash(x, this)) === this.sub.get(undefined)'; 
+		5. 'this.sub.get(undefined) === this.sub.default'; 
+
+		In case of 'NestedlyTransformedStream', the 'this.sub.default' is actually a base-transformation; 
+	]; 
 C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
 	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
 	C.2. Walk through the v0.3 changes, and write them down [constructive];
@@ -733,6 +708,10 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 				(string) => BreakableStream(string, {})
 	
+	
+	2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
+		Put the 'PRE_CURR_INIT', and other such things THERE; 
+
 	2.13. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
@@ -871,9 +850,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 				ALSO, about bounds - those should be CAREFULLY BENCHMARKED; 
 		
 		MORE GENERALLY - try to adapt the library for work on LARGE datasets; 
-
-	3.25. [minimalism] - remove the 'static' properties on the classes? [instead, place them inside the prototypes?]; 
-	
+		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
 		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 

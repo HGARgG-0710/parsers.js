@@ -13,16 +13,16 @@ export interface TestType extends Summat {
 	test: (x: any) => boolean
 }
 
-export interface Indexable<KeyType = any, ValueType = any> extends Summat {
-	index: (x: any) => [KeyType, ValueType]
+export interface Indexable<ValueType = any> extends Summat {
+	index: (x: any) => ValueType
 }
 
 export type MapClassValueExtension<KeyType = any, ValueType = any> = (
-	f: (x: ValueType) => any
+	...f: ((x: ValueType) => any)[]
 ) => MapClass<KeyType, any>
 
 export type MapClassKeyExtension<KeyType = any, ValueType = any> = <NewKeyType = any>(
-	f: (x: NewKeyType) => KeyType
+	...f: ((x: any) => KeyType)[]
 ) => MapClass<NewKeyType, ValueType>
 
 export type Pairs<KeyType = any, ValueType = any> = [KeyType, ValueType][]
@@ -35,12 +35,8 @@ export interface DefaultHaving {
 	default: any
 }
 
-export interface Changing<Type = any> extends Summat {
-	change: IndexingFunction<Type>
-}
-
-export interface IndexMap<KeyType = any, ValueType = any>
-	extends Indexable<KeyType, ValueType>,
+export interface IndexMap<KeyType = any, ValueType = any, IndexGetType = number>
+	extends Indexable<ValueType>,
 		Iterable<[KeyType, ValueType]>,
 		Copiable<IndexMap<KeyType, ValueType>>,
 		Sizeable,
@@ -56,6 +52,8 @@ export interface IndexMap<KeyType = any, ValueType = any>
 	byIndex: (index: number) => [KeyType, ValueType]
 	swap: (i: number, j: number) => any
 
+	getIndex: (key: any) => IndexGetType
+
 	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
 	replace: (index: number, pair: [KeyType, ValueType]) => any
@@ -65,9 +63,12 @@ export interface IndexMap<KeyType = any, ValueType = any>
 
 export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	new (map: Pairs<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
-	change: IndexingFunction<KeyType>
+	change?: IndexingFunction<KeyType>
 	extend: MapClassValueExtension<KeyType, ValueType>
 	extendKey: MapClassKeyExtension<KeyType, ValueType>
+
+	keyExtensions: Function[]
+	extensions: Function[]
 }
 
 export * as HashMap from "./HashMap/interfaces.js"

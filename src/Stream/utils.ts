@@ -1,7 +1,6 @@
 export * as BasicStream from "./BasicStream/utils.js"
 export * as InputStream from "./InputStream/utils.js"
 export * as LimitedStream from "./LimitedStream/utils.js"
-export * as NestedStream from "./NestedStream/utils.js"
 export * as PositionalStream from "./PositionalStream/utils.js"
 export * as PredicateStream from "./PredicateStream/utils.js"
 export * as ReversibleStream from "./ReversibleStream/utils.js"

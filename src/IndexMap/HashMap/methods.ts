@@ -5,7 +5,7 @@ export function hashMapIndex<KeyType = any, ValueType = any, InternalKeyType = a
 	this: HashMap<KeyType, ValueType, InternalKeyType>,
 	x: KeyType
 ) {
-	return [x, this.sub.get(this.hash(x, this.sub))]
+	return this.sub.get(this.hash(x, this.sub))
 }
 
 export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any>(
@@ -31,10 +31,7 @@ export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyTyp
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {
-	this.sub.replaceKey(
-		this.hash(keyFrom, this.sub),
-		this.hash(keyTo, this.sub)
-	)
+	this.sub.replaceKey(this.hash(keyFrom, this.sub), this.hash(keyTo, this.sub))
 	return this
 }
 

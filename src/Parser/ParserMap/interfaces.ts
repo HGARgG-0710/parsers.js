@@ -14,7 +14,7 @@ export type ParserMap<
 	OutType = any,
 	T extends BaseMapParsingState = DefaultMapParsingState
 > = ParserFunction<T, OutType> & {
-	table?: Indexable<any, ParserFunction<T, OutType>>
+	table?: Indexable<ParserFunction<T, OutType>>
 }
 
 export type ParserFunction<T extends BaseParsingState = ParsingState, OutType = any> = ((

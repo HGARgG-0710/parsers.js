@@ -1,5 +1,5 @@
 import type { EffectivePredicateStream, PredicateStream } from "./interfaces.js"
-import { uniNavigate } from "../NavigableStream/utils.js"
+import { uniNavigate } from "../StreamClass/Navigable/utils.js"
 import type { IsEndCurrable } from "../StreamClass/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"

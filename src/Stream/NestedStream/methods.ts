@@ -1,5 +1,7 @@
 import { uniFinish } from "../StreamClass/Finishable/utils.js"
-import type { EffectiveNestedStream } from "./interfaces.js"
+import type {
+	EffectiveNestedStream
+} from "./interfaces.js"
 
 import { Inputted } from "../UnderStream/classes.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
@@ -7,19 +9,14 @@ import type { EndableStream } from "../StreamClass/interfaces.js"
 export function effectiveNestedStreamInitCurr<Type = any>(
 	this: EffectiveNestedStream<Type>
 ) {
-	const result = this.typesTable.index(this.input)
-	if (result) {
-		this.currNested = true
-		return new this.constructor(this.input, result[0])
-	}
-	return this.input.curr
+	const ownershipType = this.typesTable.getIndex(this.input)
+	return (this.currNested = ownershipType != undefined)
+		? new this.constructor(this.input, ownershipType)
+		: this.input.curr
 }
 
 export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStream<Type>) {
-	if (this.currNested) {
-		uniFinish(this.curr as EndableStream<Type>)
-		this.currNested = false
-	}
+	if (this.currNested) uniFinish(this.curr as EndableStream<Type>)
 	this.input.next()
 	return this.initGetter()
 }
@@ -29,7 +26,7 @@ export function effectiveNestedStreamIsEnd<Type = any>(
 ) {
 	return (
 		this.input.isCurrEnd() ||
-		(this._index != null && !this.typesTable.byOwned(this)[1][0](this))
+		(this._index != null && !this.typesTable.byOwned(this)(this.input))
 	)
 }
 

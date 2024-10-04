@@ -5,8 +5,7 @@ import type {
 	MapClassKeyExtension,
 	Pairs,
 	TestType,
-	HasType,
-	IndexMap
+	HasType
 } from "../interfaces.js"
 
 import {
@@ -15,22 +14,26 @@ import {
 	indexMapSwap,
 	indexMapCopy,
 	indexMapIterator,
+	indexMapSizeGetter,
+	indexMapSet
+} from "../methods.js"
+import {
 	mapClassExtend,
 	mapClassExtendKey,
-	indexMapSizeGetter
-} from "../methods.js"
-
-import { fromPairsList } from "../utils.js"
-import type { LinearIndexMap } from "./interfaces.js"
-
-import {
 	linearIndexMapIndex,
 	linearIndexMapReplace,
 	linearIndexMapAdd,
 	linearIndexMapDelete,
-	linearIndexMapReplaceKey
+	linearIndexMapReplaceKey,
+	linearIndexMapGetIndex,
+	optimizedLinearIndexMapGetIndex
 } from "./methods.js"
-import { indexMapSet } from "../methods.js"
+
+import { fromPairsList } from "../utils.js"
+import type { LinearIndexMap } from "./interfaces.js"
+
+import { function as _f } from "@hgargg-0710/one"
+const { trivialCompose } = _f
 
 const LinearMapClassPrototype = {
 	set: { value: indexMapSet },
@@ -48,20 +51,24 @@ const LinearMapClassPrototype = {
 }
 
 export function LinearMapClass<KeyType = any, ValueType = any>(
-	change: IndexingFunction<KeyType>
+	extensions: Function[],
+	keyExtensions: Function[],
+	change?: IndexingFunction<KeyType>
 ): MapClass<KeyType, ValueType> {
 	class linearMapClass implements LinearIndexMap<KeyType, ValueType> {
 		keys: KeyType[]
+		alteredKeys: any[]
+
 		values: ValueType[]
 		default: any
 		size: number;
 
-		["constructor"]: new (pairs: Pairs<KeyType, ValueType>, _default?: any) => IndexMap<
-			KeyType,
-			ValueType
-		>
+		["constructor"]: new (
+			pairs: Pairs<KeyType, ValueType>,
+			_default?: any
+		) => LinearIndexMap<KeyType, ValueType>
 
-		index: (x: any) => [KeyType, ValueType]
+		index: (x: any) => ValueType
 
 		add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 		delete: (index?: number, count?: number) => any
@@ -70,31 +77,52 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		set: (key: KeyType, value: ValueType, index: number) => any
 		unique: (start?: boolean) => LinearIndexMap<KeyType, ValueType>
 		byIndex: (index: number) => [KeyType, ValueType]
+		getIndex: (key: any) => number
 		swap: (i: number, j: number) => any
 		copy: () => LinearIndexMap<KeyType, ValueType>;
 		[Symbol.iterator]: () => Generator<[KeyType, ValueType]>
 
-		change: IndexingFunction<KeyType>
+		change?: IndexingFunction<KeyType>
 
-		static change: IndexingFunction<KeyType>
+		static change?: IndexingFunction<KeyType>
 		static extend: MapClassValueExtension<KeyType, ValueType>
 		static extendKey: MapClassKeyExtension<KeyType, ValueType>
+
+		static keyExtensions: Function[]
+		static extensions: Function[]
+
+		extension: Function
+		keyExtension: Function
 
 		constructor(pairsList: Pairs<KeyType, ValueType>, _default?: any) {
 			const [keys, values] = fromPairsList(pairsList)
 			this.keys = keys
 			this.values = values
 			this.default = _default
+			this.alteredKeys = this.keys.map((x) => this.keyExtension(x))
 		}
 	}
 
 	Object.defineProperties(linearMapClass.prototype, LinearMapClassPrototype)
-	linearMapClass.prototype.change = linearMapClass.change = change
-	linearMapClass.extend = mapClassExtend
-	linearMapClass.extendKey = mapClassExtendKey
+
+	linearMapClass.prototype.extension = trivialCompose(...extensions)
+	linearMapClass.prototype.keyExtension = trivialCompose(...keyExtensions)
+	linearMapClass.prototype.change = change
+
+	linearMapClass.extensions = extensions
+	linearMapClass.keyExtensions = keyExtensions
+	linearMapClass.change = change
+	linearMapClass.extend = mapClassExtend<KeyType>
+	linearMapClass.extendKey = mapClassExtendKey<KeyType, ValueType>
+
+	linearMapClass.prototype.getIndex = change
+		? linearIndexMapGetIndex<KeyType, ValueType>
+		: optimizedLinearIndexMapGetIndex<KeyType, ValueType>
 
 	return linearMapClass
 }
+
+export const OptimizedLinearMap = LinearMapClass([], [])
 
 export const [LinearPredicateMap, LinearRegExpMap, LinearSetMap, LinearBasicMap]: [
 	MapClass<Function>,
@@ -106,4 +134,4 @@ export const [LinearPredicateMap, LinearRegExpMap, LinearSetMap, LinearBasicMap]
 	(curr: TestType, x: any) => curr.test(x),
 	(curr: HasType, x: any) => curr.has(x),
 	(curr: any, x: any) => curr === x
-].map(LinearMapClass) as [any, any, any, any]
+].map((change) => LinearMapClass<any, any>([], [], change)) as [any, any, any, any]

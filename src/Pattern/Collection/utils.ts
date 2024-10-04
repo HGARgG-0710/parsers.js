@@ -4,7 +4,7 @@ const { isFunction } = type
 const { T } = boolean
 
 import type { Collection } from "./interfaces.js"
-import { isIterable } from "src/Stream/IterableStream/utils.js"
+import { isIterable } from "src/Stream/StreamClass/Iterable/utils.js"
 
 export const isPlainCollection = structCheck<Collection>({
 	push: isFunction,

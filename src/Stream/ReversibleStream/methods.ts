@@ -1,4 +1,4 @@
-import { fastFinish } from "../FinishableStream/utils.js"
+import { fastFinish } from "../StreamClass/Finishable/utils.js"
 import { Inputted } from "../UnderStream/classes.js"
 import type { ReversedStream } from "./interfaces.js"
 

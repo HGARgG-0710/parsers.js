@@ -5,7 +5,7 @@ import type { IterableStream } from "./Iterable/interfaces.js"
 import type { Initializable } from "../InitializableStream/interfaces.js"
 import type { Rewindable } from "./Rewindable/interfaces.js"
 import type { Finishable } from "./Finishable/interfaces.js"
-import type { Navigable } from "../NavigableStream/interfaces.js"
+import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
 
 export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"
 export type BaseIterPropNameType = "baseNextIter" | "basePrevIter"

@@ -81,5 +81,5 @@ export function persistentIndexMapGetIndex<KeyType = any, ValueType = any>(
 	this: PersistentIndexMap<KeyType, ValueType>,
 	key: KeyType
 ) {
-	return this.indexes[this.keys.indexOf(key)]
+	return this.indexes[this.sub.getIndex(key)]
 }

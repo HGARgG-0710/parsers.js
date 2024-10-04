@@ -37,7 +37,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	default: any
 
 	sub: IndexMap<KeyType, ValueType>
-	index: (x: any) => [KeyType, ValueType]
+	index: (x: any) => ValueType
 	copy: () => IndexMap<KeyType, ValueType>
 	set: (key: KeyType, value: ValueType, index: number) => any
 	getIndex: (key: KeyType) => Pattern<number>

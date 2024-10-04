@@ -6,7 +6,8 @@ import {
 	hashMapDelete,
 	hashMapIndex,
 	hashMapReplaceKey,
-	hashMapSet} from "./methods.js"
+	hashMapSet
+} from "./methods.js"
 import { subSize } from "../SubHaving/methods.js"
 import { Token } from "src/Pattern/Token/classes.js"
 import type { Token as TypeToken } from "src/Pattern/Token/interfaces.js"
@@ -28,7 +29,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		size: number
 		keys: Set<KeyType>
 
-		index: (x: KeyType) => [KeyType, ValueType]
+		index: (x: KeyType) => ValueType
 		set: (key: KeyType, value: ValueType) => any
 		delete: (key: KeyType) => any
 		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any

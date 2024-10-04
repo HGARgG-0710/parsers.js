@@ -1,6 +1,6 @@
 import type { SummatIterable } from "@hgargg-0710/summat.ts"
 import type { IterableStream } from "./interfaces.js"
-import { isStream } from "../BasicStream/utils.js"
+import { isStream } from "../../BasicStream/utils.js"
 
 import { object, function as f } from "@hgargg-0710/one"
 const { and } = f

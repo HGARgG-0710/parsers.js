@@ -14,7 +14,7 @@ import type {
 } from "src/Stream/PositionalStream/Position/interfaces.js"
 import { ArrayCollection } from "src/Pattern/Collection/classes.js"
 import type { Collection } from "src/Pattern/Collection/interfaces.js"
-import { uniNavigate } from "src/Stream/NavigableStream/utils.js"
+import { uniNavigate } from "src/Stream/StreamClass/Navigable/utils.js"
 
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(
 	this: T

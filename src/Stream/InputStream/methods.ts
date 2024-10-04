@@ -7,7 +7,7 @@ import type { EffectiveInputStream, InputStream } from "./interfaces.js"
 import { InputStream as InputStreamConstructor } from "./classes.js"
 import type { Indexed } from "../interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
-import { uniNavigate } from "../NavigableStream/utils.js"
+import { uniNavigate } from "../StreamClass/Navigable/utils.js"
 
 export function inputStreamIsEnd<Type = any>(this: InputStream<Type>) {
 	return this.pos >= this.input.length - 1
