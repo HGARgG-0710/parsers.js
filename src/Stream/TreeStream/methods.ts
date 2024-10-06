@@ -4,7 +4,7 @@ import { TreeStream as TreeStreamConstructor } from "./classes.js"
 import { type EffectiveTreeStream, type TreeStream } from "./interfaces.js"
 
 import type { MultiIndex as MultiIndexType } from "./MultiIndex/interfaces.js"
-import { MultiIndex } from "./MultiIndex/classes.js"
+import { superInit } from "../StreamClass/Superable/utils.js"
 
 export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
@@ -77,9 +77,9 @@ export function effectiveTreeStreamInitialize<Type = any>(
 ) {
 	if (tree) {
 		Inputted(this, tree)
+		this.pos.modifier.clear()
 		this.walker.init(tree)
-		this.pos = new MultiIndex([])
-		this.super.init.call(this)
+		superInit(this)
 	}
 	return this
 }

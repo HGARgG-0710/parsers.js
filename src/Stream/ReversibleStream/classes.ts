@@ -1,3 +1,10 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+import type {
+	ReversibleStream,
+	ReversedStream as ReversedStreamType,
+	BasicReversibleStream
+} from "./interfaces.js"
+
 import {
 	underStreamRewind,
 	underStreamCurr,
@@ -8,16 +15,11 @@ import {
 	underStreamDefaultIsStart,
 	underStreamFinish
 } from "../UnderStream/methods.js"
-import type {
-	ReversibleStream,
-	ReversedStream as ReversedStreamType,
-	BasicReversibleStream
-} from "./interfaces.js"
-import { StreamClass } from "../StreamClass/classes.js"
 import { reversedStreamInitialize } from "./methods.js"
-import type { Summat } from "@hgargg-0710/summat.ts"
 
-export const ReversedStreamBase = StreamClass({
+import { StreamClass } from "../StreamClass/classes.js"
+
+const ReversedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
 	baseNextIter: underStreamPrev,
 	basePrevIter: underStreamNext,

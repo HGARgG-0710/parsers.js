@@ -20,7 +20,7 @@ import {
 	effectiveInputStreamNavigate
 } from "./methods.js"
 
-export const InputStreamBase = StreamClass({
+const InputStreamBase = StreamClass({
 	currGetter: inputStreamCurr,
 	baseNextIter: inputStreamNext,
 	basePrevIter: inputStreamPrev,

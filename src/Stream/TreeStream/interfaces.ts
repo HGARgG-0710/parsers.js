@@ -1,19 +1,20 @@
 import type { TreeWalker } from "./TreeWalker/interfaces.js"
 import type { MultiIndex } from "./MultiIndex/interfaces.js"
-import type { PositionalStream } from "../PositionalStream/interfaces.js"
+import type { Posed } from "../PositionalStream/interfaces.js"
 import type { Rewindable } from "../StreamClass/Rewindable/interfaces.js"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "src/Tree/interfaces.js"
-import type { CopiableStream } from "../StreamClass/Copiable/interfaces.js"
-import type { IterableStream } from "../StreamClass/Iterable/interfaces.js"
+import type { Copiable } from "../StreamClass/Copiable/interfaces.js"
 import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { BasicStream } from "../interfaces.js"
 
 export interface BasicTreeStream<Type = any>
-	extends PositionalStream<InTreeType<Type>, MultiIndex>,
+	extends BasicStream<InTreeType<Type>>,
+		Posed<MultiIndex>,
 		Inputted<Tree<Type>>,
-		IterableStream<InTreeType<Type>> {}
+		Iterable<InTreeType<Type>> {}
 
 export interface TreeStream<Type = any>
 	extends BasicTreeStream<Type>,
@@ -22,7 +23,7 @@ export interface TreeStream<Type = any>
 export interface EffectiveTreeStream<Type = any>
 	extends BasicTreeStream<Type>,
 		Rewindable<InTreeType<Type>>,
-		CopiableStream<InTreeType<Type>>,
+		Copiable<EffectiveTreeStream<Type>>,
 		Navigable<InTreeType<Type>>,
 		ReversedStreamClassInstance<InTreeType<Type>> {
 	walker: TreeWalker<Type>

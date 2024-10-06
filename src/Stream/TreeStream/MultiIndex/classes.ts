@@ -1,9 +1,8 @@
 import type { BasicTreeStream } from "../interfaces.js"
-import { MultiIndexModifier } from "./MultiIndexModifier/classes.js"
 import type { MultiIndexModifier as MultiIndexModifierType } from "./MultiIndexModifier/interfaces.js"
-import { Slicer } from "./Slicer/classes.js"
 import type { Slicer as SlicerType } from "./Slicer/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "./interfaces.js"
+
 import {
 	multiIndexConvert,
 	multiIndexCompare,
@@ -13,6 +12,9 @@ import {
 	multiIndexFirstLevel,
 	multiIndexLastLevel
 } from "./methods.js"
+
+import { MultiIndexModifier } from "./MultiIndexModifier/classes.js"
+import { Slicer } from "./Slicer/classes.js"
 
 export class MultiIndex implements MultiIndexType {
 	value: number[]

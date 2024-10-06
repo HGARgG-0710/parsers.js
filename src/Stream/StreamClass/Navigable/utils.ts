@@ -31,7 +31,7 @@ export function uniNavigate<Type = any>(
 		else while (position--) stream.next()
 	} else {
 		const change = pickDirection(position)
-		while (!stream.isEnd && !position(this)) change(this)
+		while (!stream.isEnd && !position(stream)) change(stream)
 	}
 
 	return stream.curr

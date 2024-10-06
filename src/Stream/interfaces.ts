@@ -7,7 +7,23 @@ export type Indexed<Type = any> =
 			length: number
 	  })
 
-export * as BasicStream from "./BasicStream/interfaces.js"
+export interface BasicStream<Type = any>
+	extends Endable,
+		Currable<Type>,
+		Nextable<Type> {}
+
+export interface Endable extends Summat {
+	isEnd: boolean
+}
+
+export interface Nextable<Type = any> extends Summat {
+	next: () => Type
+}
+
+export interface Currable<Type = any> extends Summat {
+	curr: Type
+}
+
 export * as InputStream from "./InputStream/interfaces.js"
 export * as LimitedStream from "./LimitedStream/interfaces.js"
 export * as NestedStream from "./NestedStream/interfaces.js"

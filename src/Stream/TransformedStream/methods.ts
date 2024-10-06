@@ -6,6 +6,7 @@ import type {
 	TransformedStream
 } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
+import { superInit } from "../StreamClass/Superable/utils.js"
 
 export function transformStream<UnderType = any, UpperType = any>(
 	this: EndableTransformableStream<UnderType, UpperType>,
@@ -33,11 +34,11 @@ export function transformedStreamInitialize<UnderType = any, UpperType = any>(
 	input?: EndableTransformableStream<UnderType, UpperType>,
 	transform?: StreamTransform<UnderType, UpperType>
 ) {
+	this.pos = 0
+	if (transform) this.transform = transform
 	if (input) {
 		Inputted(this, input)
-		this.pos = 0
-		this.super.init.call(this)
+		superInit(this)
 	}
-	if (transform) this.transform = transform
 	return this
 }

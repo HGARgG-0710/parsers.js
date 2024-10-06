@@ -11,9 +11,6 @@ export interface Settable<KeyType = any, ValueType = any> extends Summat {
 	set: (key: KeyType, value: ValueType) => any
 }
 
-export interface KeyHaving<KeyType = any> extends Summat {
-	keys: Set<KeyType>
-}
 
 export interface KeyReplaceable<KeyType = any> {
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
@@ -41,7 +38,6 @@ export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,
 		Sizeable,
-		KeyHaving<KeyType>,
 		SubHaving<InternalHash<InternalKeyType, ValueType>> {
 	hash: HashType<KeyType, ValueType, InternalKeyType>
 }

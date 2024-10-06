@@ -13,7 +13,6 @@ export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any
 	key: KeyType,
 	value: ValueType
 ) {
-	this.keys.add(key)
 	this.sub.set(this.hash(key, this.sub), value)
 	return this
 }
@@ -22,8 +21,8 @@ export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = 
 	this: HashMap<KeyType, ValueType, InternalKeyType>,
 	key: KeyType
 ) {
-	this.keys.delete(key)
 	this.sub.delete(this.hash(key, this.sub))
+	return this
 }
 
 export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyType = any>(

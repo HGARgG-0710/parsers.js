@@ -1,12 +1,4 @@
 import type { IndexMap, Pairs } from "./interfaces.js"
-import type { Indexable } from "./interfaces.js"
-
-import { object, typeof as type, boolean } from "@hgargg-0710/one"
-const { structCheck } = object
-const { isFunction, isArray } = type
-const { T } = boolean
-
-export const isIndexable = structCheck<Indexable>({ index: isFunction })
 
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType>
@@ -40,18 +32,3 @@ export function toPairsList<KeyType = any, ValueType = any>(
 	}
 	return result
 }
-
-export const isIndexMap = structCheck<IndexMap>({
-	keys: isArray,
-	values: isArray,
-	change: isFunction,
-	index: isFunction,
-	add: isFunction,
-	delete: isFunction,
-	replace: isFunction,
-	unique: isFunction,
-	byIndex: isFunction,
-	swap: isFunction,
-	copy: isFunction,
-	default: T
-})

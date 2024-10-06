@@ -1,9 +1,3 @@
-import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
-const { structCheck } = object
-const { isFunction, isNumber, isArray } = type
-const { trivialCompose, or } = f
-const { not } = boolean
-
 import type {
 	DirectionalPosition,
 	Position,
@@ -11,14 +5,22 @@ import type {
 	PredicatePosition
 } from "./interfaces.js"
 
-import type { PositionalStream } from "../interfaces.js"
-
 import { previous, next } from "src/utils.js"
 import type { ChangeType } from "src/Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
+import type { BasicStream } from "src/Stream/interfaces.js"
 import type { BoundNameType } from "src/Stream/StreamClass/interfaces.js"
 
-export const isPositionObject = structCheck<PositionObject>({ convert: isFunction })
+import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
+import type { Posed } from "../interfaces.js"
+const { structCheck } = object
+const { isFunction, isNumber } = type
+const { trivialCompose, or } = f
+const { not, T } = boolean
+
+export const isPositionObject = structCheck<PositionObject>({
+	convert: isFunction,
+	value: T
+})
 
 export const isPosition = or(isNumber, isFunction, isPositionObject) as <Type = any>(
 	x: any
@@ -63,7 +65,10 @@ export function positionSame(pos1: Position, pos2: Position, stream?: BasicStrea
  * * The `position(stream)`, if `position` is a `PredicatePosition`
  * * The `positionSame(stream.pos, position, stream)` otherwise
  */
-export function positionEqual(stream: PositionalStream, position: Position): boolean {
+export function positionEqual(
+	stream: BasicStream & Posed<Position>,
+	position: Position
+): boolean {
 	return isFunction(position)
 		? position(stream)
 		: positionSame(stream.pos, position, stream)

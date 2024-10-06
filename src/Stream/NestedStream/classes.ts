@@ -23,6 +23,11 @@ const NestedStreamBase = StreamClass({
 	preInit: true
 })
 
+const NestedStreamPrototype = {
+	init: { value: effectiveNestedStreamInitialize },
+	super: { value: NestedStreamBase.prototype }
+}
+
 export function NestedStream<Type = any>(
 	nestedTypes: FastLookupTable<any, StreamPredicate>
 ) {
@@ -46,11 +51,8 @@ export function NestedStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(NestedStream.prototype, {
-		typesTable: { value: nestedTypes },
-		init: { value: effectiveNestedStreamInitialize },
-		super: { value: NestedStreamBase.prototype }
-	})
+	Object.defineProperties(NestedStream.prototype, NestedStreamPrototype)
+	NestedStream.prototype.typesTable = nestedTypes
 
-	return [NestedStream]
+	return NestedStream
 }

@@ -7,7 +7,7 @@ import {
 } from "../Stream/PositionalStream/Position/utils.js"
 import type { StreamHandler } from "src/Parser/ParserMap/interfaces.js"
 import type { ReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "src/Stream/BasicStream/interfaces.js"
+import type { BasicStream } from "src/Stream/interfaces.js"
 import type {
 	DirectionalPosition,
 	Position

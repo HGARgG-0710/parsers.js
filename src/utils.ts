@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType } from "./IndexMap/interfaces.js"
 import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
 import type { StreamHandler } from "./Parser/ParserMap/interfaces.js"
-import type { BasicStream } from "./Stream/BasicStream/interfaces.js"
+import type { BasicStream } from "./Stream/interfaces.js"
 import type {
 	Position,
 	PredicatePosition
@@ -118,6 +118,12 @@ export const backtrack = (predicate: PredicatePosition) => {
 	predicate.direction = false
 	return predicate
 }
+
+export const calledDelegate =
+	(delegatePropName: string) =>
+	(delegateMethodName: string) =>
+	(called: any, ...delegateArgs: any[]) =>
+		called[delegatePropName][delegateMethodName].call(called, ...delegateArgs)
 
 export const delegate = (delegatePropName: string) => (delegateMethodName: string) =>
 	function (...delegateArgs: any[]) {

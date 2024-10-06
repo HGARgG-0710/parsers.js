@@ -21,9 +21,9 @@ export type MapClassValueExtension<KeyType = any, ValueType = any> = (
 	...f: ((x: ValueType) => any)[]
 ) => MapClass<KeyType, any>
 
-export type MapClassKeyExtension<KeyType = any, ValueType = any> = <NewKeyType = any>(
+export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
 	...f: ((x: any) => KeyType)[]
-) => MapClass<NewKeyType, ValueType>
+) => MapClass<any, ValueType>
 
 export type Pairs<KeyType = any, ValueType = any> = [KeyType, ValueType][]
 

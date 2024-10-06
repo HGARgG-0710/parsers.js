@@ -9,7 +9,7 @@ import {
 import type { EndableStream } from "src/Stream/StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-export const StreamTokenizerBase = StreamClass({
+const StreamTokenizerBase = StreamClass({
 	initGetter: streamTokenizerNext,
 	isCurrEnd: underStreamIsEnd,
 	baseNextIter: streamTokenizerNext,

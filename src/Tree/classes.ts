@@ -1,11 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { childrenCount, childIndex } from "./methods.js"
 import type { Tree, ChildrenTree, MultChildrenTree } from "./interfaces.js"
-
-import { inplace } from "@hgargg-0710/one"
 import type { Pattern } from "../Pattern/interfaces.js"
 
-const { mutate } = inplace
+import { childrenCount, childIndex } from "./methods.js"
 
 /**
  * Initializes a new `ChildrenTree` without the `[propName]` (default: `"children"`) value (expected to be set by the user).

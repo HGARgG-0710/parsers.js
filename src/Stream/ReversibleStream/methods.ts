@@ -1,13 +1,14 @@
+import type { ReversedStream } from "./interfaces.js"
 import { fastFinish } from "../StreamClass/Finishable/utils.js"
 import { Inputted } from "../UnderStream/classes.js"
-import type { ReversedStream } from "./interfaces.js"
+import { superInit } from "../StreamClass/Superable/utils.js"
 
-export function reversedStreamInitialize<Type>(
+export function reversedStreamInitialize<Type = any>(
 	this: ReversedStream<Type>,
 	input: ReversedStream<Type>
 ): ReversedStream<Type> {
 	fastFinish(input)
 	Inputted(this, input)
-	this.super.init.call(this)
+	superInit(this)
 	return this
 }

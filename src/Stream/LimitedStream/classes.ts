@@ -19,7 +19,7 @@ import { underStreamCurr, underStreamDefaultIsEnd } from "../UnderStream/methods
 import { StreamClass } from "../StreamClass/classes.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-export const LimitedStreamBase = StreamClass({
+const LimitedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
 	baseNextIter: effectiveLimitedStreamNext,
 	basePrevIter: effectiveLimitedStreamPrev,

@@ -27,7 +27,6 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		hash: HashType<KeyType, ValueType, InternalKeyType>
 		sub: InternalHash<InternalKeyType, ValueType>
 		size: number
-		keys: Set<KeyType>
 
 		index: (x: KeyType) => ValueType
 		set: (key: KeyType, value: ValueType) => any
@@ -41,7 +40,6 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 
 		constructor(structure: InternalHash<InternalKeyType, ValueType>) {
 			this.sub = structure
-			this.keys = new Set()
 		}
 	}
 
@@ -54,14 +52,16 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 	return hashClass
 }
 
-export const [BasicHash, LengthHash, TokenHash] = [
+export const [BasicHash, LengthHash, TokenHash, TypeofHash] = [
 	(x: any) => x,
 	(x: Indexed) => x.length,
-	Token.type
+	Token.type,
+	(x: any) => typeof x
 ].map(HashClass) as [
 	HashClass<any, any, any>,
 	HashClass<Indexed, any, any>,
-	HashClass<TypeToken, any, any>
+	HashClass<TypeToken, any, any>,
+	HashMap<any, any, any>
 ]
 
 export * as InternalHash from "./InternalHash/classes.js"

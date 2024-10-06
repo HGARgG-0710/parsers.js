@@ -16,3 +16,7 @@ export function uniRewind<Type = any>(stream: BasicReversibleStream<Type>) {
 	while (!stream.isStart) stream.prev()
 	return stream.curr
 }
+
+export function fastRewind<Type = any>(stream: BasicReversibleStream<Type>): Type {
+	return isRewindable(stream) ? stream.rewind() : uniRewind(stream)
+}

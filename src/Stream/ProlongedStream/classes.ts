@@ -1,20 +1,21 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { BasicStream } from "../BasicStream/interfaces.js"
-import { effectiveNestedStreamNext } from "../NestedStream/methods.js"
-import { StreamClass } from "../StreamClass/classes.js"
+import type { BasicStream } from "../interfaces.js"
 import type { StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { EffectiveProlongedStream } from "./interfaces.js"
 import {
 	effectiveProlongedStreamIsEnd,
+	effectiveProlongedStreamNext,
 	prolongedStreamCurr,
 	prolongedStreamDefaultIsEnd,
 	prolongedStreamInitialize
 } from "./methods.js"
 
-export const ProlongedStreamBase = StreamClass({
+import { StreamClass } from "../StreamClass/classes.js"
+
+const ProlongedStreamBase = StreamClass({
 	currGetter: prolongedStreamCurr,
 	isCurrEnd: effectiveProlongedStreamIsEnd,
-	baseNextIter: effectiveNestedStreamNext,
+	baseNextIter: effectiveProlongedStreamNext,
 	defaultIsEnd: prolongedStreamDefaultIsEnd
 })
 

@@ -5,205 +5,33 @@
 
 CURR TODO LIST: 
 
-		[todo - fix the utils to match the interfaces]; 
-		1. IndexMap [various implementations]
-		2. Collection [various implementations]; 
-		3. EliminablePattern; 
-		4. EnumSpace [various implementations]; 
-		5. TokenizablePattern; 
-		6. ValidatablePattern; 
-		7. SimpleTokenType; 
-		8. TokenInstance; 
-		9. StreamClass;	
-		10. InputStream; 
-		11. LimitedStream; 
-		12. NestedStream; 
-		13. PositionalStream; 
-		14. PredicateStream; 
-		15. ProlongedStream; 	
-		16. ReversibleStream; 
-		17. TransformedStream; 
-		18. TreeStream; 
-		19. MultiIndex; 
-		20. TreeWalker; 
-		21. MultiIndexModifier; 
-
-	-1. DELETE the 'utils.ts', that ONLY have the 'is'-functions; 
-
-		INSTEAD, make those into a part of the LIBRARY'S TESTING FRAMEWORK! 
-		They (really) aren't necessary, and they DO bloat the 'dist/' quite a bit...; 
-		Keep only the ones needed for testing...; 
-
-	0. Find all the redundant interfaces + generics + imports + function definitions - remove them [scour the source]; 
-
-	3. PROBLEM: with the NestedStream: 	
-
-		0. FOR THE COUPLED-NestedStream and NestedlyTransformedStream: 
-
-			Create a special 'FastLookupTable' wrapper-interface that 
-				could be used to redirect to HashMap and/or PersistentIndexMap (generally - '.index'-having + some other methods): 
-
-					The idea is - being capable of having O(1) operations after creating the NestedStream
-						[that is - indexes are remembered for Stream-s, and their elements are checked/transformed using those; 
-							This (for linear case) comes in a cost of average O(log n) [n - elements total] number of additional checks overall in a NestedStream structure to determine 
-								the types of Stream-s [in linear case - O(s), where s - size of table, so it comes to O(s * log n) ONCE instead of O(ns) EVERY single layer]; 
-						]; 
-					
-					Fundamentally, it works via methods: 
-
-						1. '.index' - initial indexation ['inflation: [Pointer(number)?, deflation, transform | null]'] - null when no bound NestedTransformed was uninitialized, Pointer(number) only in 'PersistentIndexMap'; 
-							This is potentially slow; 
-						2. '.own' - "owns" the given object; 
-							To be applied on 'Stream'-s; 
-							In case of 'PersistentIndexMap' - stores the GIVEN Pointer(number) on them as a property for later reference by '.byOwned'; 
-							In case of 'HashMap' - does nothing, it's already O(1) [assuming SimpleTokenType-s]; 
-						3. '.byOwned' - secondary indexation (used by 'NestedlyTransformedStream'); Guaranteedly fast, O(1); 
-							In case of 'PersistentIndexMap', this one calls the '.byIndex' based of the stored '.tableIndex' property on the NestedStream that was '.own'-ed; 
-							Those are pointers, to permit changes in the table [WHICH IS SHARED BY THE __CLASSES__ CREATED - NestedStream and NestedStreamTransform VIA PROTOTYPES]; 
-
-							Comparison "whether something is a 'NestedStream" (one of sought types)" is done via a 'hidden' prototype-level constant on NestedStream; 
-
-						4. 'set' - this one is for changing the values of the table [adding new/replacing old]; 
-						5. 'delete' - this one is for deleting items from the table by key; 
-						6. 'replaceKeys' - this one is for deleting the old key, while transfering its value to the new one; 
-
-					THE TABLE FOR the pair of classes is initialized FROM a FastLookupTable of 'inflation: [deflation, null]', where "null" is the future slot for 'transformations'; 
-						Those are initialized upon calling the '.init' method OF THE NestedlyTransformedStream CLASS!: 
-							VIA ANOTHER METHOD of FastLookupTable: 
-
-								7. mutate(mutation): 
-
-									In 'HashMap' case does: 
-										this.keys.forEach((key, i) => this.set(key, mutation(this.get(key), i, this)))
-
-									In 'PersistentIndexMap' case does the same via the GOOD OLD FOR-LOOP (reverse-order); 
-										
-							
-							WITH 'mutation = function (x, i) {
-								x[1] = transformations[i]
-								return x
-							}'; 
-
-							ONE NEEDS: 
-
-								1. For 'transformations' to be a part of the table, that was initially given by the user; 
-									1.1. BUT, ASSIGNED, not given by the user [or, rather, given separately...]; 
-
-		1 IT CANNOT HANDLE MULTIPLE DIFFERENT "KINDS" OF NESTED-NESS; 
-			Here's an example: 
-
-				0. A grammar consisting of 2 nested constructs - () and [], together with a primitive symbol X; 
-				1. String: [([X])]
-
-				Current NestedStream CANNOT match several different brackets; 
-				CONCLUSION: need to reform to permit this
-					ALSO: need the ability to extend the list of the brackets [dynamic parsing]; 
-						CONCLUSION: 
-
-							1. Pass the 'IndexMap' [interface, can actually also be a HashMap]; 
-								1.1. NOTE: it's actually the 'StreamMap'; 
-							2. Save it; 
-							3. For each such 'type' of the given 'NestedStream', have an 'end-predicate' to end THIS PARTICULAR 
-								nested structure; Then, each nested structure carries a KEY (index) using which it can 
-									get the value of the reverse-predicate (for which it checks ON EVERY turn to see if 'NestedStream' is indeed over); 
-									
-							Problem [memory]: what about the passed table? 
-								IT IS the same one; So, it would make sense to
-									CACHE IT for every single part of the NestedStream; 
-							
-							ERGO, use a single Table for AN ENTIRE CLASS [keep inside the prototype]; 
-
-							Form: 
-								[???]: [index, inflate, deflate] // note: the 'index' is NEEDED in order to work as a key for '.byIndex' (quick access); 
-
-							IDEA: implement this as an 'PersistentIndexMap'; 
-								Basically, every time something new is added/deleted,
-									the 'index' either increases, decreases or remains the same; 
-
-		2. Once different kinds of Nested-ness ARE USED, 
-			they cannot be recursively transformed; 
-
-			The problem with TransformedStream is that it ONLY just permits 
-				working with the CURRENT STREAM; 
-			The user can transform the thing recursively themselves [by means of checking the 'key' + having a HashMap/IndexMap], 
-				but it's somewhat convoluted [due to the fact that it's NOT POSSIBLE to express BOTH the 'NestedStream', 
-					and its 'Transformed' counterpart in terms of THE SAME table (duplication reduction)];
-			
-			Ergo, one desires to (somehow) fix this as well... [how?]
-			There must be a single agreed-upon [between two interfaces] shape for the 'IndexMap': 
-
-				HOW to handle dynamic keys? 
-				Suppose that the user changes them mid-stream...; This would (very much) ruin the synchronization between prior and current data...; 
-
-				IDEA: Pointer [that's where it comes in]: 
-
-					1. Have a 'PersistentIndexMap' data structure for adding/deleting items from a given 'IndexMap'; 
-						1.1. Serves as a wrapper for: 
-							1.1.1. calling the '.add'/'.delete' of the underlying object; 
-							1.1.2. increasing/decreasing appropriate indexes; 
-							1.1.3. Having its own 'byIndex', and other methods [delegates]; 
-					2. Then, accept a `PersistentIndexMap`, with shape: 
-
-						[???(indexes the curr-arg)]: [Pointer(index), inflate, deflate]
-
-						The pointer is needed to ENSURE that the thing WORKS ALWAYS DESPITE CHANGES IN THE TABLE STRUCTURE!
-
-						Works like: 
-							2.1. When first encountering an item: 
-								2.1.1. runs through the 'PersistentIndexMap', to see if it has a match (if it's nested); Otherwise - do nothing; 
-								2.1.2. When it does have a match, it (automatically) categorizes it by its index, WHICH IS STORED ON THE STREAM CREATED [note: the Pointer is stored, and then used]; 
-									2.1.2.1. And then, it proceeds to evaluate the Stream in question likewise (again); 
-							2.2. When processing an item ('NestedlyTransformedStream'): 
-								// ! This is the difficulty - HOW to ensure that the item in question is GUARANTEEDLY a Stream,
-									and NOT a something that the user has implemented themselves???
-								
-								IDEA: Create those two IN PAIR: 
-									Meaning, that the construction of the NestedlyTransformedStream is ALSO 
-										dependent on THE SAME table; 
-
-									Thus, the NestedlyTransformedStream class created would have a SPECIAL CHECK for the 
-										'NestedStream.prototype' that is used;
-
-									CONCLUSION: do 
-
-										1. Create a dynamic semi-hidden constant on the .prototype of 'NestedStream' in question;
-										2. Check for this constant in the 'NestedlyTransformedStream'; 
-									
-									This should give a very good speedup (as it only requires a single '===' instead of a whole 'instanceof'); 
-									
-									The only way that the user could 'break' it is by extending the particular NestedStream
-										[or, manually adding the property's value to wherever...]; 
-								
-								2.2.1. Check if the given item HAS a [valid] key; 
-								2.2.2. Check if it is a 'NestedStream' via hidden-constant-comparison; 
-									2.2.2.1. If it is, APPLY RECURSIVELY [return a new NestedlyTransformed, based off it]; 
-									2.2.2.2. Otherwise, apply the '.transform' that is passed; 
-
-3.31. Do profiling - do not stop at simple benchmarks, ANALYZE THEIR TIME AND HEAP OCCUPATION!
-	Likewise, profile the previous projects - see if one's guesses (albeit, simple) 
-		regarding the natures of performance issues were, indeed, correct; 
-
 -2. CREATE implementations of 'FastLookupTable' that would be SPECIFIC to the use-cases; 
 	In particular - CREATE ALIASES for the combined workflow that they are intended to be used in [with NestedStream]; 
+	Think about the library workflow - DOCUMENT IT...; 
 				
 3.25. ANOTHER refactoring with 'one.js': 
 	Update it [again]; 
 	1. SPECIFICALLY, search for 'id': these (most frequently) are expressed via 
 		') => ' sequence [sometimes: ') => x']; 
+	2. The (x) => typeof x: 
+	3. The '(x) => x === undefined' and '(x) => x === null'; 
+	4. copy = (x) => [].concat(x) - in multiIndexCopy (and other places, likely also...); 
+	
+3.24. [maayybe?? De-refactoring] Think about what to do with interfaces like 'IterableStream<Type>'; 
+	They are made [primarily] for the purpose of refactoring; However, they also trash the library's namespace (thus, contradicting minimality); 
+	QUESTION: should they remain? 
+	[Current decision]: get rid of them; Unneeded, make the types less useful, pain to work with; Their only benefit is refactoring, and [rather limited] potential re-usability; 
 
--4. WORK CAREFULLY on the precise list of exports; 
-	Seek stuff that is NOT to be exported and vice-versa; 
-
--6. QUESTION: should one remove the '.mutate' from the 'FastLookupTable'? 
+	1. Superable, Initializable - ENSURE that all the Stream-s, whose classes implement those have interfaces, THAT HAVE THEM AS WELL!
+		1.1. Also - first check if 'StreamClass' has them - then, REMOVE from places that already have both them and StreamClass [redundancy]; 
 
 Order of todo-elimination [v0.3]: 
-	TODOS: 
-		0. [redundant defs]
-		-1. [relocate utils out of 'dist/']	
+	3.24. 
 	-2 [aliases for workflows, compositions]; 
 	3.25. 
-	3.31.
-	-4. 
+	
+	-1. re-add the 'is'-functions for the testing; 
+		The constructor tests still need them; 
 
 A. testing: 
 	A.1. Create list of modules to be tested; 
@@ -403,15 +231,6 @@ B. documentation (change/fix it...);
 			B1.1.5. Known issues (this lists known problems that the library currently has);
 
 	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
-	[This is especially important in the case of NestedlyTransformedStream, where such a thing CAN OCURR, whenever dealing with a non-Stream item:
-		1. 'x._index === undefined' [because not a Stream, and was not '.own()'-ed]
-		2. 'this.sub.index(x._index) === this.sub.index(undefined)' [in hash - example]
-		3. 'this.sub.get(this.hash(x, this))'
-		4. IF 'this.hash(undefined, this) === undefined', 'this.sub.get(this.hash(x, this)) === this.sub.get(undefined)'; 
-		5. 'this.sub.get(undefined) === this.sub.default'; 
-
-		In case of 'NestedlyTransformedStream', the 'this.sub.default' is actually a base-transformation; 
-	]; 
 C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
 	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
 	C.2. Walk through the v0.3 changes, and write them down [constructive];
@@ -504,11 +323,14 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Rename the 'TreeStream' to 'TreeStreamPre', and create an implemnetation for the 'TreeStreamPost'; 
 		This is (particularly) useful for some types of interpreters; 
 
-		The Pre  visits the node, then its children one-by-one starting from the beginning. 
-		The Post visits first the children, only THEN the parent.
+		The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
+		The Post visits first the children, then the siblings, only THEN the parent [in reverse order]; 
+
+		Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
+			whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
 
 	2.3. Implement a 'PartialValidator': 
-		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer' (GENERALIZE THEM TO A SINGLE FUNCTION ALREADY!)
+		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer'
 		Gets the recursive structure with all the 'split' and 'inserted' bits; 
 		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
 		[Which it does by 'numbering' particular portions of a given Pattern]; 
@@ -517,9 +339,11 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
 
 	2.4. Implement a 'level-by-level TreeStream': 
-
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
+		Would do it via calling '.getJointLayer' function (then - caching for later '.prev'); 
+		This (basically) takes the nodes from the previous 'joint layer', gets their respective children,
+			CONCATENATES THEM into a new layer, then iterates it; 
 
 	2.5. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 
@@ -530,7 +354,6 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					and a 'comparison' predicate for each of its elements,
 						it would implement a name-shortening algorithm, 
 							that would preserve the name uniqueness;
-				
 				The return value is an IndexMap; 
 
 			2. renameable(names);
@@ -541,17 +364,14 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 					2. Creates new name-map entries;
 
 				In a fashion that would allow straightforward implementation of a sequential "exact replacement algorithm" based on the output: 
-
 					1. Loop through a list of name-maps; 
 						2. [In the loop] Rename current encounters of a name with its mapped value;	
 					
 				There are 2 operations that may be necessary: 
-
 					1. creation of temp-names (when collisions in present names are far too high to re-order);
 					2. re-order; 
 				
 				The algorithm for the 'renameable' function: 
-
 					0. Keep the cached (met) names in a 'Set'; 
 					1. Loop through the 'names' given: 
 						1.0. If the name is in the cached Set, continue; 
@@ -560,41 +380,16 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 							1.1.2. '.swap' the two indexes;
 							1.1.3. go one position back (because now one needs to check the "others" now); 
 							1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
-		
-	2.6. Expand on the 'Position' type further;
 
-		Allow for creation of more "exotic" types;
-		Example: 
+				This is useful when implementing things like mass renamings/name shortenings in code mangling software; 
 
-			"go up to nearest point in the past defined by predicate 'P', then another 5 positions", 
-
-		should be something like: 
-
-			[P, 5] // with 'P.direction = false'; 
-		
-		Allow "nesting" positions like so, create a proper PositionEvaluator (current thing is VERY limited); 
-
-		The 'RelativePositionEvaluatorStream' would (ultimately) create a 'Stream' of values, defined by this "sequence"
-			of Position-s (call it 'PositionSequence = Position[]'), and which would be entirely relative to one another; 
-			Example: given [3, 6] it would get the 3'rd, then the (3 + 6) = 9'th positions of the Stream; 
-
-		The 'AbsolutePositionEvaluatorStream' would (similarly) interpret a sequence of 'Position's,
-			but relative to the initial Stream (not one another).
-			Example: given [3, 6] it would get positions 3 and 6 relative to the initial Stream; 
-		
-		Then, GENERALIZE THIS to a 'PortionPosition' [which is the pair '[Position, Position]' used in 'LimitedStream'],
-			to also use this with 'LimitedStream';
-
-		So, 'PositionSequence = (Position | [Position, Position])[]' will define a new Stream based of a given one
-			via the 'AbsolutePositionEvaluatorStream' and 'RelativePositionEvaluatorStream'; 
-
-	2.7. RELAX overly demanding interface and types definitions/requirements;
+	2.6. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.8. [Idea?] Create an error-handling API for the 'v0.4';
+	2.7. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -619,7 +414,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 
 		
-	2.9. Minor refactoring (StreamClass): 
+	2.8. Minor refactoring (StreamClass): 
 
 		Create a special case for the 'StreamClass' - the 'WrapperStreamClass'; 
 			Basically, this works in a fashion similar to the 'InputStream', 'TransformedStream', and 'NestedStream', and others such (generally, UnderStream-s and Inputted): 
@@ -633,7 +428,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 						return curr()
 					}
 
-	2.10. [mayyyybee??] Try re-doing the project's type-system? [again...]
+	2.9. [mayyyybee??] Try re-doing the project's type-system? [again...]
 
 		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
 			(in particular, the need to duplicate to make everything work). 
@@ -646,82 +441,43 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. TransformedStream; 
 			2. NestedStream; 
 
-	2.11. BreakableStream - a stream-class that produces instances, which : 
+	2.10. [maybe?] BreakableStream - a major generalization of the library's patterns: 
+		Returns a class for producing Stream-s: 
 
-		1. Are capable of being "broken" via different positions; 
-			1.1. can eliminate parts of the given stream, IF it's a 'number' or a StaticPosition,
-			1.2. Gets a chunk of the given 'Stream' if it's: 
-				1.2.1. DualPosition [a LimitedStream: NOTE: this literally builds a sub-LimitedStream]; 
-				1.2.2. PositionPredicate [a property to be followed by the next chunk]; 
-		2. Have a sub-stream of '.input', on which they operate; 
-		3. Take in a sequence of (Position | DualPosition)[]
+		1. Have an '.input' (another Stream); 
+		2. Has an 'Indexable' of 'BreakPattern's (they are objects) pre-given, which define how the Stream instances behave: 
+			2.1. type: string - one of: 
+				2.1.1. limit - works like LimitedStream; 
+				2.1.2. nest - works like NestedStream; 
+				2.1.3. halt - stops the stream [no more items after that]; 
+				2.1.4. navigate - finds: 
+					2.1.4.1. Either the next item [or the first item AFTER THE BEGINNING] that obeys a given property (PredicatePosition)
+					2.1.4.2. Goes to a static position [relative or absolute]; 
+					
+					ALSO, has a boolean arg 'isRelative' (default: true, basically - whether the values for 'navigate' are to be handled absolutely or not...); 
+				2.1.5. transform - applies a given transformation on the '.input' (calls a function); Returns the result;
+			2.2. args: object - the way that the 'type' is resolved (equivalent of constructor-arguments/.init-arguments); 
+			2.3. buffer: boolean | () => boolean - this one corresponds to whether the current value should be bufferized; 
+				When a function is passed, it is called on the 'BufferizedStream' in question to get the value; 
 		
-		NOTE: this is, basically, same stuff as the 'AbsolutePositionEvaluatorStream', BUT, 
-			it's "not-picky" in the sense that the FIRST of the allowed occurences will be used, 
-			AND, it will be used without preference; 
+		The result of matching 2. to the '.input.curr' is (effectively) evaluated to be the Stream's '.curr'; 
 
-			Also - this works UNTIL THE END OF THE GIVEN Stream, NOT until the end of THE EVALUATED ARRAY; 
-
-		SO, what is given is an Array, each of possibilities in which are "checked" for getting picked for 
-			the Stream, then the first one getting its "go" as the '.curr'; 
-
-		BUT, the given 'Array' will actually be several, which are ORDERED BY ATTEMPT in the following fashion: 
-
-			1. limits[] - the array of 'DualPosition's; These define 'LimitedStream'-s [NOTE: these can contain pairs of predicates also!]; 
-				1.1. In particular, this defines the predicate-limiting on the given Stream (in the sense, that, the piece matched by the first)
-			2. nest[] - the array of dual 'StreamPredicate'-s used to define the nesting; 
-			3. preserve[] - a set of 'Position'-s for IMMIDIATE matches; 
-				3.1. These are added to the Stream ONE-BY-ONE and ONLY if none of the above [.predicates, .limits] match; 
-			4. skip[] - a Position-s array; Will be used FOR SKIPPING items sequentially; 
-				5.0. THIS is only matched if NOTHING from 'preserve' is matched; 
-				5.1. StaticPosition: This will take the next one that is 'x: StaticPosition' '.next'/'.prev' (depending on direction) calls away
-				5.2. PredicatePosition: This will skip the items FOR AS LONG as the given predicate holds...;
-			5. halt[] - this is a set of Positions, that, if met/reached will TERMINATE the given Stream's consumption; 
-			6. default - this is a 'special' action, if NOTHING amongst these matches, it'll do one of 'preserve', 'halt' or 'skip' [or other...]; 
-
-		Whether the 'predicates', 'limits', 'preserve', or 'skip' are checked for first, the user can choose; 
-
-		IDEA: 
-			No, don't do that; 
-			INSTEAD: categorize; That is, a list of things is given (BreakPattern): 
-
-				1. BreakPattern = ((Position | DualPosition) | BreakPattern)[] // tree-like structure
-				2. Each of the elements of 'BreakPattern' is one of 'type: "..."' (one of the above)
-				3. WHEN ARRAY IS PASSED, the given thing is being 'sub-broken'; Thus, one can work through trees; 
-
-				ABOUT ITERATION: 
-
-					Once having achieved the '.break'-ing of a BreakableStream, one does the following: 
-						
-						1. keep the 'currType' property on the 'BreakableStream', which IS 
-							one of the allowed types for a given thing; 
-						2. Based off them, RESPOND; 
-							2.1. The response can (for instance) be based off a 'TransformedStream', or 'NestedlyTransformed' stream; 
-		
-		ALL the 'BreakableStream'-s are RELATIVE [in the sense that the current position is used to grab the future '.curr'-s]; 
-		
-		These can serve as a wonderful alternative to PatternTokeniz-ing via Regular Expressions; 
-		Moreover, 'BreakableStream'-s are (very much) capable of replacing sequences of operations inside of 'IndexMap'-s for StreamTokenizer-s; 
-			In that, it's entirely feasible to define any operation currently present within the parser.js library using them; 
-
-			Example: parse string: "..."
-
-				(string) => BreakableStream(string, {})
+		This todo is a 'maybe?' because all the said things can (pretty much) already be done by the user using StreamTokenizer and the rest
+			- this really only just provides a minor abstraction over the whole thing (frees the user from needing to use the exports of the library); 
+		This kind of thing is (somewhat) against the library's "all-minimialism" approach; 
 	
-	
-	2.12. CREATE a new file 'constants': this will keep track of in-library constants; 
+	2.11. CREATE a new file 'constants': this will keep track of in-library constants; 
 		Put the 'PRE_CURR_INIT', and other such things THERE; 
 
-	2.13. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.12. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
 		2.17.1. DO ACTIVE MICRO-BENCHMARKING!
-
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 	
-	2.14. utility - 'nestedInfo'; 
+	2.13. utility - 'nestedInfo'; 
 
 		1. Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 			NOTE: the MAX depth achievable; 
@@ -729,13 +485,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		Returns it as a pair; 
 
-	2.15. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.14. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
 	
-	2.16. TypeScript - use 'enum's; 
+	2.15. TypeScript - use 'enum's; 
 
 		Learned about 'enum's being present in TypeScript; 
 		Use them to designate "special constants" (ALSO - take those out into separate files); 
@@ -755,31 +511,13 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
 		[Current preference is to the latter...]
 
-	2.17. Idea for a method: ProlongedStream.prolong; 	
+	2.16. Idea for a method: ProlongedStream.prolong; 	
 
-		This (utilmately) modifies the 'this.streams'; 
+		This (utilmately) modifies the 'this.streams' [modifying the '.isEnd' accordingly]; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.18. MAKE the 'utils' TYPE-SAFE! 
-
-		Currently, what lacks is the ability to dynamically generate the appropriate type-checking functions that may require 
-			additional predicates, BUT still preserve the form; 
-
-		Just needs more boilerplate code like: 
-
-			interface C<Type = any> {
-				X: Type
-			}
-
-			const isC = structCheck<C>(["X"])
-			// this 
-			const isCType = (isType: (x: any) => x is Type) => structCheck<C<Type>>({ X: isType })
-
-		Currently, the checks can make SOME mistakes still; 
-			[Noticed this while doing 'isNumericPositional' - should be refactored...]; 
-
-	2.19. [Maaayybe?] Create a 'samples' directory; 
+	2.17. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -793,14 +531,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
 
-	2.20. Generics for the 'isType'-functions; 	
-		Learned about TypeScript generics for nameless functions (namely, how they can be used with 'as'): 
-
-			const isType = ... as <Type = any>(x: any) => x is Type
-		
-		Variation on this - add throughout the library [particularly, when 'Type' is itself a generics parameter]; 
-
-	2.21. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.18. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
@@ -808,7 +539,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 
-	2.22. Generalize the streams even further for general copying implementation: 
+	2.19. Generalize the streams even further for general copying implementation: 
 
 		Have to have: 
 			
@@ -824,12 +555,12 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 
 		The method would go on the 'StreamClass'; 
 
-	2.23. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
+	2.20. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
 		The former can easily be replaced with an appropriate table on BasicStream, 
 			while 'BasicParser' is equivalent to a 'TransformedStream' (or NestedlyTransformedStream); 
 		Consider removal...
 	
-	2.24. v8-specific optimizations: 
+	2.21. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
 	
 		CONCLUSION: 
@@ -850,6 +581,53 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 				ALSO, about bounds - those should be CAREFULLY BENCHMARKED; 
 		
 		MORE GENERALLY - try to adapt the library for work on LARGE datasets; 
+		It'll make it useful for working with big projects/pieces-of-text; 
+	
+	2.22. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
+		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
+	
+		Do only if there are code aspects suffering from this significantly: 
+
+			1. readability/accesibility; 
+			2. performance; 
+		
+		Primary cause for this todo is that, despite being "slow" (memory allocation), 
+			they did still have the benefit of semantic simplicity; 
+
+		The only cause for performance issues with OOP Stream-s API is overhead from re-structuring the original loop so much
+			[need for calling the '.isCurrEnd()' two times more]; 
+		Again, do this ONLY if the performance difference is SIGNIFICANT!
+	
+	2.23. util - enumerateTree; 
+		Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
+			to single-array-siblings form (the current ChildrenTree); 	
+		This would permit a more "variable" set of trees (those that have properties with fixed names), 
+			to be enumerated accordingly...; 
+
+		Example: 
+
+			{
+				a: any
+				b: any
+				c: any
+			}
+
+		Becomes: 
+
+			{
+				value: [
+					// ... a, b, c
+					// ... or b, a, c
+					// ... or any other order
+				]
+			}
+		
+	2.24. About generics - relax them; 
+		Use ONLY WHEN NEEDED; 
+		For example: a method makes use of X generics, out of which Y < X is needed [id est, used somewhere beyond the 'this: ...' in the parameters list]; 
+			REMOVE the unneeded ones; 
+			RE-ORDER THEM, if need be; 
+			Try to make them more minimal...; 
 		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
@@ -857,6 +635,7 @@ Note: the new object-oriented approach will enable better speed and lesser struc
 	3.2. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 
-			1. delegates [from here]; 
+			1. 'delegate' functions [from here]; 
+			2. the 'classWrapper' function; 
 		
 		Expand the list; 

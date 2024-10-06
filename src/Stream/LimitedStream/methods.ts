@@ -18,6 +18,7 @@ import type {
 	LimitedUnderStream
 } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
+import { superInit } from "../StreamClass/Superable/utils.js"
 
 export function limitStream<Type = any>(
 	this: BoundableStream<Type>,
@@ -95,7 +96,7 @@ export function effectiveLimitedStreamInitialize<Type = any>(
 			this.to = positionNegate(positionConvert(this.to, this.input))
 		}
 
-		this.super.init.call(this)
+		superInit(this)
 	}
 
 	return this

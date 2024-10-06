@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Tree, InTreeType } from "./interfaces.js"
 
 import { array, typeof as type, object } from "@hgargg-0710/one"
-const { isArray, isFunction, isNumber } = type
+const { isArray } = type
 const { propPreserve } = array
 const { structCheck } = object
 
@@ -52,8 +52,3 @@ export function recursiveTreeCopy(propName: string = "children") {
 export function baseRecursiveTreeCopy(tree: any) {
 	return isArray(tree) ? arrayTreeMapPreserve(tree) : tree
 }
-
-export const isTree = structCheck<Tree>({
-	index: isFunction,
-	lastChild: isNumber
-})

@@ -1,16 +1,14 @@
 import type { Pattern } from "src/Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable, FastLookupTableMutation } from "./interfaces.js"
+import type { FastLookupTable } from "./interfaces.js"
 import type { SubHaving } from "../SubHaving/interfaces.js"
 import {
 	persistentIndexFastLookupTableByOwned,
 	persistentIndexFastLookupTableDelete,
-	persistentIndexFastLookupTableMutate,
 	hashMapFastLookupTableByOwned,
 	persistentIndexFastLookupTableOwn,
-	hashMapFastLookupTableOwn,
-	hashMapFastLookupTableMutate
+	hashMapFastLookupTableOwn
 } from "./methods.js"
 import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
 
@@ -31,8 +29,6 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 	delete: (key: KeyType) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-	mutate: (mutation: FastLookupTableMutation<KeyType, ValueType>) => any
-
 	constructor(subTable: PersistentIndexMap<KeyType, ValueType>) {
 		this.sub = subTable
 	}
@@ -45,7 +41,6 @@ Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 	set: { value: subSet },
 	delete: { value: persistentIndexFastLookupTableDelete },
 	replaceKey: { value: subReplaceKey },
-	mutate: { value: persistentIndexFastLookupTableMutate }
 })
 
 const HashTablePrototype = {
@@ -54,7 +49,6 @@ const HashTablePrototype = {
 	set: { value: subSet },
 	delete: { value: subDelete },
 	replaceKey: { value: subReplaceKey },
-	mutate: { value: hashMapFastLookupTableMutate }
 }
 
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
@@ -69,8 +63,6 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 		set: (key: KeyType, value: ValueType) => any
 		delete: (key: KeyType) => any
 		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
-
-		mutate: (mutation: FastLookupTableMutation<KeyType, ValueType>) => any
 
 		constructor(baseHash: HashMap<KeyType, ValueType>) {
 			this.sub = baseHash

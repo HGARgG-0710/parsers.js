@@ -1,8 +1,7 @@
-import type { BasicStream } from "../BasicStream/interfaces.js"
+import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { IterableStream } from "./Iterable/interfaces.js"
-import type { Initializable } from "../InitializableStream/interfaces.js"
+import type { Initializable } from "./Initializable/interfaces.js"
 import type { Rewindable } from "./Rewindable/interfaces.js"
 import type { Finishable } from "./Finishable/interfaces.js"
 import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
@@ -86,14 +85,15 @@ export interface StreamClassSignature<Type = any>
 		PreInitable {}
 
 export interface BasicStreamClassInstance<Type = any>
-	extends InitGettable<Type>,
+	extends BasicStream<Type>,
+		InitGettable<Type>,
 		Initializable<void>,
 		PrimalStreamClassSignature<Type>,
 		StatefulStarted,
 		RealCurrHaving,
 		Navigable<Type>,
 		Finishable<Type>,
-		IterableStream<Type> {}
+		Iterable<Type> {}
 
 export interface StreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,

@@ -1,6 +1,3 @@
-import { typeof as type } from "@hgargg-0710/one"
-const { isNumber } = type
-
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import { positionConvert } from "../PositionalStream/Position/utils.js"
 import type { EffectiveInputStream, InputStream } from "./interfaces.js"
@@ -8,6 +5,10 @@ import { InputStream as InputStreamConstructor } from "./classes.js"
 import type { Indexed } from "../interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { uniNavigate } from "../StreamClass/Navigable/utils.js"
+
+import { typeof as type } from "@hgargg-0710/one"
+import { superInit } from "../StreamClass/Superable/utils.js"
+const { isNumber } = type
 
 export function inputStreamIsEnd<Type = any>(this: InputStream<Type>) {
 	return this.pos >= this.input.length - 1
@@ -71,10 +72,10 @@ export function inputStreamInitialize<Type = any>(
 	this: InputStream<Type>,
 	input?: Indexed<Type>
 ) {
+	this.pos = 0
 	if (input) {
 		Inputted(this, input)
-		this.super.init.call(this)
+		superInit(this)
 	}
-	this.pos = 0
 	return this
 }

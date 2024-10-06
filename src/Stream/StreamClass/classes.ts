@@ -1,12 +1,13 @@
-import { finish } from "./Finishable/methods.js"
-import { streamIterator } from "./Iterable/methods.js"
-import { navigate } from "./Navigable/methods.js"
-import { rewind } from "./Rewindable/methods.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
 	StartedType
 } from "./interfaces.js"
+
+import { finish } from "./Finishable/methods.js"
+import { streamIterator } from "./Iterable/methods.js"
+import { navigate } from "./Navigable/methods.js"
+import { rewind } from "./Rewindable/methods.js"
 import {
 	currSetter,
 	baseCurr,
