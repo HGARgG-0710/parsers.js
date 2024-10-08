@@ -1,4 +1,6 @@
 import type { MapInternalHash, ObjectInternalHash } from "./classes.js"
+import { typeof as type } from "@hgargg-0710/one"
+const { isUndefined } = type
 
 // * MapInternalHash
 
@@ -7,7 +9,7 @@ export function mapInternalHashGet<KeyType = any, ValueType = any>(
 	x: KeyType
 ) {
 	const gotten = this.sub.get(x)
-	return gotten === undefined ? this.default : gotten
+	return isUndefined(gotten) ? this.default : gotten
 }
 
 export function mapInternalHashReplaceKey<KeyType = any, ValueType = any>(
@@ -28,7 +30,7 @@ export function objectInternalHashGet<Type = any>(
 	key: string
 ) {
 	const read = this.sub[key]
-	return read === undefined ? this.default : read
+	return isUndefined(read) ? this.default : read
 }
 
 export function objectInternalHashSet<Type = any>(
@@ -36,7 +38,7 @@ export function objectInternalHashSet<Type = any>(
 	key: string,
 	value: Type
 ) {
-	if (this.sub[key] === undefined) ++this.size
+	if (isUndefined(this.sub[key])) ++this.size
 	this.sub[key] = value
 	return this
 }
@@ -45,7 +47,7 @@ export function objectInternalHashDelete<Type = any>(
 	this: ObjectInternalHash<Type>,
 	key: string
 ) {
-	if (this.sub[key] !== undefined) {
+	if (!isUndefined(this.sub[key])) {
 		--this.size
 		this.sub[key] = undefined
 	}

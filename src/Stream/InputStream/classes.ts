@@ -8,7 +8,7 @@ import { StreamClass } from "../StreamClass/classes.js"
 import {
 	inputStreamDefaultIsEnd,
 	effectiveInputStreamRewind,
-	inputStreamInitialize,
+	effectiveInputStreamInitialize,
 	inputStreamCurr,
 	inputStreamIsStart,
 	inputStreamIterator,
@@ -58,7 +58,7 @@ Object.defineProperties(InputStream.prototype, {
 	finish: { value: inputStreamFinish },
 	navigate: { value: effectiveInputStreamNavigate },
 	copy: { value: effectiveInputStreamCopy },
-	init: { value: inputStreamInitialize },
+	init: { value: effectiveInputStreamInitialize },
 	super: { value: InputStreamBase },
 	[Symbol.iterator]: { value: inputStreamIterator }
 })

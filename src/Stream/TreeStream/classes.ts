@@ -50,6 +50,8 @@ export class TreeStream<Type = any>
 	navigate: (position: Position) => InTreeType<Type>
 	super: Summat
 
+	init: (tree?: Tree<Type>) => EffectiveTreeStream<Type>
+
 	constructor(tree?: Tree<Type>) {
 		super()
 		this.pos = new MultiIndex([])

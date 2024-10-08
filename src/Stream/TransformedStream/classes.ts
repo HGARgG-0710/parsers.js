@@ -33,6 +33,10 @@ export class TransformedStream<UnderType = any, UpperType = any>
 	transform: () => UpperType
 
 	super: Summat
+	init: (
+		input?: EndableTransformableStream<UnderType, UpperType>,
+		transform?: StreamTransform<UnderType, UpperType>
+	) => TransformedStream<UnderType, UpperType>
 
 	constructor(
 		input?: EndableTransformableStream<UnderType, UpperType>,

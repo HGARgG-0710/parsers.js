@@ -5,8 +5,9 @@ import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
 import type { Superable } from "../StreamClass/Superable/interfaces.js"
 import type { FastLookupTable } from "src/IndexMap/FastLookupTable/interfaces.js"
 import type { BasicState } from "src/Parser/BasicParser/interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
-export interface BasicNested extends Superable {
+export interface BasicNested extends Summat {
 	typesTable: FastLookupTable<any, StreamPredicate>
 	currNested: boolean
 }
@@ -20,6 +21,7 @@ export interface NestedStream<Type = any>
 export interface EffectiveNestedStream<Type = any>
 	extends StreamClassInstance<Type | EffectiveNestedStream<Type>>,
 		BasicNested,
+		Superable,
 		Inputted<EndableStream<Type>>,
 		Iterable<Type | EffectiveNestedStream<Type>> {
 	constructor: new (

@@ -22,7 +22,7 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	delete: (key: KeyType) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-	constructor(baseMap: Map<KeyType, ValueType>, _default: any) {
+	constructor(baseMap: Map<KeyType, ValueType> = new Map(), _default?: any) {
 		this.sub = baseMap
 		this.default = _default
 	}
@@ -48,7 +48,7 @@ export class ObjectInternalHash<Type = any>
 	delete: (key: string) => any
 	replaceKey: (keyFrom: string, keyTo: string) => any
 
-	constructor(baseObj: object, _default: any) {
+	constructor(baseObj: object = {}, _default?: any) {
 		this.size = Object.keys(baseObj).length
 		this.sub = baseObj
 		this.default = _default

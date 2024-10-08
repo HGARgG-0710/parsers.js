@@ -7,7 +7,7 @@ import {
 	underStreamIsEnd,
 	underStreamDefaultIsEnd
 } from "../UnderStream/methods.js"
-import { inputStreamInitialize } from "../InputStream/methods.js"
+import { effectiveInputStreamInitialize } from "../InputStream/methods.js"
 import { positionalStreamNext } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
@@ -37,5 +37,5 @@ export class PositionalStream<Type = any>
 
 Object.defineProperties(PositionalStream.prototype, {
 	super: { value: PositionalStreamBase.prototype },
-	init: { value: inputStreamInitialize }
+	init: { value: effectiveInputStreamInitialize }
 })

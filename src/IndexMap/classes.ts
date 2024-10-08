@@ -1,13 +1,15 @@
 import type { MapClass } from "./interfaces.js"
 import { current, firstStream, is } from "src/utils.js"
 import { Token } from "src/Pattern/Token/classes.js"
+import { typeof as type } from "@hgargg-0710/one"
+const { typeOf } = type
 
 export const [TokenMap, ValueMap, CurrentMap, FirstStreamMap, TypeofMap] = [
 	Token.type,
 	Token.value,
 	current,
 	firstStream,
-	(x: any) => typeof x
+	typeOf
 ].map((x) => (mapClass: MapClass) => mapClass.extend(x))
 
 export const TypeMap = (mapClass: MapClass) => mapClass.extendKey(is)

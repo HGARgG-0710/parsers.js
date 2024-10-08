@@ -5,6 +5,7 @@ import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { Posed } from "../PositionalStream/interfaces.js"
 import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
+import type { Superable } from "../StreamClass/Superable/interfaces.js"
 
 export interface Predicated extends Summat {
 	predicate: PredicatePosition
@@ -38,6 +39,7 @@ export interface PredicateStream<Type = any>
 
 export interface EffectivePredicateStream<Type = any>
 	extends StreamClassInstance<Type>,
+		Superable,
 		BasicPredicated<Type>,
 		Inputted<ReversibleStream<Type> & IsEndCurrable>,
 		LookaheadHaving {}

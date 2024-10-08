@@ -37,6 +37,7 @@ export class ReversedStream<Type = any>
 	isCurrStart: () => boolean
 	rewind: () => Type
 
+	init: (input?: BasicReversibleStream) => ReversedStream<Type>
 	super: Summat
 
 	constructor(input?: ReversibleStream<Type>) {

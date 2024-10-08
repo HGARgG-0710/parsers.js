@@ -1,7 +1,8 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
-import { typeof as type } from "@hgargg-0710/one"
+import { typeof as type, function as _f } from "@hgargg-0710/one"
 const { isArray } = type
+const { id } = _f
 
 const charRanges = (...ranges: (string | [string, string])[]) =>
 	ranges.map((r) => (typeof r === "string" ? r : `${r[0]}-${r[1]}`)).join("")
@@ -73,7 +74,7 @@ export const [[digit, nonDigit], [word, nonWord], [space, nonSpace]] = [
 	"w",
 	"s"
 ].map((pairLetter) =>
-	[(x: any) => x, (x: string) => x.toUpperCase()].map(
+	[id, (x: string) => x.toUpperCase()].map(
 		(f) => () => new RegExp(`\\${f(pairLetter)}`)
 	)
 )

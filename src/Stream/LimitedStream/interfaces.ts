@@ -45,11 +45,11 @@ export interface LimitedStream<Type = any>
 		Posed<number>,
 		SinglePositionLookahead<Type>,
 		Inputted<LimitedUnderStream<Type>>,
-		Superable,
 		Iterable<Type> {}
 
 export interface EffectiveLimitedStream<Type = any>
 	extends LimitedStream<Type>,
 		LookaheadHaving,
+		Superable,
 		Directioned,
 		ReversedStreamClassInstance<Type> {}

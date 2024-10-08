@@ -1,6 +1,3 @@
-import { boolean } from "@hgargg-0710/one"
-const { T } = boolean
-
 import type { Position } from "../PositionalStream/Position/interfaces.js"
 import {
 	directionCompare,
@@ -19,6 +16,10 @@ import type {
 } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { superInit } from "../StreamClass/Superable/utils.js"
+
+import { boolean, typeof as type } from "@hgargg-0710/one"
+const { T } = boolean
+const { isUndefined } = type
 
 export function limitStream<Type = any>(
 	this: BoundableStream<Type>,
@@ -83,8 +84,8 @@ export function effectiveLimitedStreamInitialize<Type = any>(
 		Inputted(this, input)
 		this.hasLookAhead = false
 
-		if (from !== undefined) {
-			if (to === undefined) {
+		if (!isUndefined(from)) {
+			if (isUndefined(to)) {
 				to = from
 				from = T // explanation: the 'from = T' will cause expression 'while (!from(stream)) stream.next()' become 'while (false) stream.next()', essentially being a no-op;
 			}

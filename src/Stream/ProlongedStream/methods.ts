@@ -2,6 +2,7 @@ import type { BasicStream } from "../interfaces.js"
 import type { EffectiveProlongedStream, ProlongedStream } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { superInit } from "../StreamClass/Superable/utils.js"
+import { isEnd } from "src/utils.js"
 
 export function effectiveProlongedStreamIsEnd<Type = any>(
 	this: EffectiveProlongedStream<Type>
@@ -27,7 +28,7 @@ export function effectiveProlongedStreamNext<Type = any>(
 }
 
 export function prolongedStreamDefaultIsEnd<Type = any>(this: ProlongedStream<Type>) {
-	return this.input.every((x) => x.isEnd)
+	return this.input.every(isEnd)
 }
 
 export function prolongedStreamInitialize<Type = any>(

@@ -26,7 +26,8 @@ export function sequentialIndex<Type = any>(
  */
 export const mapPropsPreserve = (
 	f: (x?: any, i?: number, arr?: any[]) => any
-): ((x: any[] & Summat) => any[] & Summat) => propPreserve((array: any[]) => array.map(f))
+): ((x: any[] & Summat) => any[] & Summat) =>
+	propPreserve((array: any[]) => array.map(f), new Set(["length"]))
 
 /**
  * Applies `recursiveArrayCopy` on all the elements of the given array, while copying it (returns the result)

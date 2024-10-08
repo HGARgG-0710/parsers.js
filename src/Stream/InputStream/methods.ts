@@ -68,8 +68,8 @@ export function inputStreamDefaultIsEnd<Type = any>(this: InputStream<Type>) {
 	return !this.input.length
 }
 
-export function inputStreamInitialize<Type = any>(
-	this: InputStream<Type>,
+export function effectiveInputStreamInitialize<Type = any>(
+	this: EffectiveInputStream<Type>,
 	input?: Indexed<Type>
 ) {
 	this.pos = 0

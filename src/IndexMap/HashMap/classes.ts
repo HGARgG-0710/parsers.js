@@ -12,6 +12,10 @@ import { subSize } from "../SubHaving/methods.js"
 import { Token } from "src/Pattern/Token/classes.js"
 import type { Token as TypeToken } from "src/Pattern/Token/interfaces.js"
 
+import { function as _f, typeof as type } from "@hgargg-0710/one"
+const { id } = _f
+const { typeOf } = type
+
 const HashClassPrototype = {
 	index: { value: hashMapIndex },
 	set: { value: hashMapSet },
@@ -53,10 +57,10 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 }
 
 export const [BasicHash, LengthHash, TokenHash, TypeofHash] = [
-	(x: any) => x,
+	id,
 	(x: Indexed) => x.length,
 	Token.type,
-	(x: any) => typeof x
+	typeOf
 ].map(HashClass) as [
 	HashClass<any, any, any>,
 	HashClass<Indexed, any, any>,

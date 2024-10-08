@@ -9,10 +9,10 @@ export interface InputStream<Type = any>
 	extends BasicStream<Type>,
 		Inputted<Indexed>,
 		Posed<number>,
-		Superable,
 		Iterable<Type> {}
 
 export interface EffectiveInputStream<Type = any>
 	extends InputStream<Type>,
+		Superable,
 		Copiable<EffectiveInputStream<Type>>,
 		ReversedStreamClassInstance<Type> {}

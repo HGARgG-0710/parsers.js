@@ -3,26 +3,28 @@ import type { MultiIndex } from "./interfaces.js"
 import { MultiIndex as MultiIndexConstructor } from "./classes.js"
 
 import { array } from "@hgargg-0710/one"
-const { last, first } = array
+const { last, first, copy } = array
 
 export function multiIndexCompare(this: MultiIndex, position: MultiIndex) {
-	const minlen = Math.min(this.value.length, position.value.length)
+	const thisVal = this.value
+	const posVal = position.value
+	const minlen = Math.min(thisVal.length, posVal.length)
 	for (let i = 0; i < minlen; ++i)
-		if (this.value[i] !== position.value[i]) return this.value[i] < position.value[i]
-	return this.value.length < position.value.length
+		if (thisVal[i] !== posVal[i]) return thisVal[i] < posVal[i]
+	return thisVal.length < posVal.length
 }
 
 export function multiIndexEqual(this: MultiIndex, position: MultiIndex) {
-	if (this.value.length !== position.value.length) return false
 	const thisVal = this.value
 	const posVal = position.value
-	let length = position.value.length
-	while (length--) if (thisVal[length] !== posVal[length]) return false
+	if (thisVal.length !== posVal.length) return false
+	let i = posVal.length
+	while (i--) if (thisVal[i] !== posVal[i]) return false
 	return true
 }
 
 export function multiIndexCopy(this: MultiIndex) {
-	return new MultiIndexConstructor(([] as number[]).concat(this.value))
+	return new MultiIndexConstructor(copy(this.value))
 }
 
 export function multiIndexSlice(

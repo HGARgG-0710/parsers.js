@@ -9,6 +9,7 @@ import type { Copiable } from "../StreamClass/Copiable/interfaces.js"
 import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
+import type { Superable } from "../StreamClass/Superable/interfaces.js"
 
 export interface BasicTreeStream<Type = any>
 	extends BasicStream<InTreeType<Type>>,
@@ -22,6 +23,7 @@ export interface TreeStream<Type = any>
 
 export interface EffectiveTreeStream<Type = any>
 	extends BasicTreeStream<Type>,
+		Superable,
 		Rewindable<InTreeType<Type>>,
 		Copiable<EffectiveTreeStream<Type>>,
 		Navigable<InTreeType<Type>>,
