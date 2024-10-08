@@ -1,5 +1,6 @@
-import type { SubHaving } from "src/IndexMap/SubHaving/interfaces.js"
+import type { SubHaving } from "../../SubHaving/interfaces.js"
 import type { InternalHash } from "./interfaces.js"
+import { subDelete, subSet, subSize } from "../../SubHaving/methods.js"
 import {
 	mapInternalHashGet,
 	mapInternalHashReplaceKey,
@@ -8,7 +9,6 @@ import {
 	objectInternalHashReplaceKey,
 	objectInternalHashSet
 } from "./methods.js"
-import { subDelete, subSet, subSize } from "src/IndexMap/SubHaving/methods.js"
 
 export class MapInternalHash<KeyType = any, ValueType = any>
 	implements InternalHash<KeyType, ValueType>, SubHaving<Map<KeyType, ValueType>>

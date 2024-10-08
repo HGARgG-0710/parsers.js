@@ -1,4 +1,4 @@
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable } from "./interfaces.js"
@@ -40,7 +40,7 @@ Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 	byOwned: { value: persistentIndexFastLookupTableByOwned },
 	set: { value: subSet },
 	delete: { value: persistentIndexFastLookupTableDelete },
-	replaceKey: { value: subReplaceKey },
+	replaceKey: { value: subReplaceKey }
 })
 
 const HashTablePrototype = {
@@ -48,7 +48,7 @@ const HashTablePrototype = {
 	byOwned: { value: hashMapFastLookupTableByOwned },
 	set: { value: subSet },
 	delete: { value: subDelete },
-	replaceKey: { value: subReplaceKey },
+	replaceKey: { value: subReplaceKey }
 }
 
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(

@@ -3,7 +3,7 @@ import type { Posed } from "../PositionalStream/interfaces.js"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Copiable } from "../StreamClass/Copiable/interfaces.js"
-import type { Superable } from "src/Stream/StreamClass/Superable/interfaces.js"
+import type { Superable } from "../../Stream/StreamClass/Superable/interfaces.js"
 
 export interface InputStream<Type = any>
 	extends BasicStream<Type>,

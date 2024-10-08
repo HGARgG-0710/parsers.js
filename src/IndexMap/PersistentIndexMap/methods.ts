@@ -1,4 +1,4 @@
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Pairs } from "../interfaces.js"
 import { Pointer } from "./classes.js"
 import type { PersistentIndexMap } from "./interfaces.js"

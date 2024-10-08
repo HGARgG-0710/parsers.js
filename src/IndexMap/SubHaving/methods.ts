@@ -1,4 +1,4 @@
-import { delegate, thisReturningDelegate, delegateProperty } from "src/utils.js"
+import { delegate, thisReturningDelegate, delegateProperty } from "../../utils.js"
 
 export const [subDelegate, subThisDelegate, subPropDelegate] = [
 	delegate,

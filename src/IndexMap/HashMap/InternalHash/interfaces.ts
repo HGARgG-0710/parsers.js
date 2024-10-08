@@ -1,4 +1,4 @@
-import type { DefaultHaving, Sizeable } from "src/IndexMap/interfaces.js"
+import type { DefaultHaving, Sizeable } from "../../interfaces.js"
 import type { Settable, Deletable, KeyReplaceable } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 

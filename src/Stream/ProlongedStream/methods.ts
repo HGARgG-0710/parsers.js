@@ -2,7 +2,7 @@ import type { BasicStream } from "../interfaces.js"
 import type { EffectiveProlongedStream, ProlongedStream } from "./interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { superInit } from "../StreamClass/Superable/utils.js"
-import { isEnd } from "src/utils.js"
+import { isEnd } from "../../utils.js"
 
 export function effectiveProlongedStreamIsEnd<Type = any>(
 	this: EffectiveProlongedStream<Type>

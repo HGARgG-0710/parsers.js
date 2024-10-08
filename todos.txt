@@ -11,193 +11,115 @@ Order of todo-elimination [v0.3]:
 		The constructor tests still need them; 
 
 A. testing: 
-	A.1. Create list of modules to be tested; 
 
-		CHANGE OF PLANS: 
+	1. Order, in which to fix things [that are broken currently]: 
+		1. Pattern; 
+		2. Tree; 
+		3. Stream; 
+		
+		Order, in which to add things: 
+		1. IndexMap; 
+	2. Changes to tests [for modules]: 
 
-			0. Refactor the utils into the mini-testing framework; 
-			1. FIX the uils;
-			2. Re-do all the tests, create missing ones [note: all __relevant__ ones]
+		0. GENERALLY: 	
+			0.1. For constructors - create individual 'is' functions (using 'structCheck' for simplicity); 
+			0.2. Renew the 'ClassConstructor' function to include: 
+				0.2.1. That the properties on it are NOT OWN [that being, that the memory saving is real]; 
+					For this, one'll need a special set of properties to be set as 'prototype'-belonging; 
+					Check for such 'p' that: 'p in x && !ownKeys(x).includes(p)'; 
+		1. Stream-s: add '.init', and '.super' checks [to the '.is']; 
+		2. IndexMap: 
+			2.1. Add FastLookupTable tests [design is the same for different classes]; 
+			2.2. Add HashMap tests [design is the same for different classes]; 
+			2.3. Add InternalHash tests [design is the same for differnt classes]; 
+	3. Utils: 
+		These are tested regularly via the 'utilTest'; 
+		Re-do them; 
+		List the utils to be tested for each particular class, add tests for them; 
+	4. Design the undone-yet tests: 
+		4.1. Stream-s: 
+			4.1.0. Methods:
+				To implement [generally]:
+					generalIteratorTest (based off 'iterationTest'); 
 
-		Testing choice [per-method/per-class] and implementation are defined by: 
+				To add per class: 
+					[predefined - all]
+					4.1.0.1. generalIsEndTest; 
+					4.1.0.2. generalIsStartTest; 
+					4.1.0.3. generalRewindTest; 
+					4.1.0.4. generaFinishTest; 
+					4.1.0.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
 
-			1. Stream Classes are tested in the following fashion [they branch]:
-				1.1. They branch: 
-					1.1.0. Empty Stream instance
-					1.1.1. Single-element Stream instance
-					1.1.2. Two-element Stream instance
-					1.1.3. Long Stream instance (>= 20 elements)
-				1.2. There are benchmarks; 	
-					2.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
-			2. Pattern Classes are tested in the following fashion [they branch]: 
-				2.1. Empty; 
-				2.2. One-element; 
-				2.3. Two-element; 
-				2.4. Long; 
-			3. Parsers are tested as follows (with according Stream-s): 
-				3.1. There is a set of Stream-s, for which they're tested; 
-				3.2. With appropriate Collection-s; 
-				3.3. They branch [by 4.1. and 4.2.]: 
-					3.3.1. The Empty Stream; 
-					3.3.2. The One-element Stream; 
-					3.3.3. The Two-element Stream; 
-					3.3.4. The many-element Stream; 
-			4. Generally, provided an instance of a given class, its methods are tested: 
-				4.1. All methods are tested; 
-				4.2. If a method is mutating, there is a new instance created (a temp copy), then the operation performed on it; 
-				4.3. If a method is non-mutating, it is performed without copying; 
-			5. There are benchmarks: 
-				5.1. Stack benchmarks: 
-					5.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
-						Use as metric later
-				5.2. Parse really long strings: 
-					5.2.1. Try to parse some incredibly long strings;
-						See the speed limits for different string sizes
-				5.3. "Cached" TokenInstance vs "Non-Cached" TokenInstance: 
-					5.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
-					5.3.2. Iterate through them [TreeStream]; Measure time; 
-						NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
-			6. Rewrite/restructure the 'regex' tests; 
+					[per-case-defined]
+					4.1.0.6. copyTest (based off 'streamCopyTest'; for InputStream and TreeStream); 
+
+				General plan [to be iterated for each Stream-class test suite]: 
+					1. per-case defined (.copy, .navigate); 
+						1.1. .copy is for InputStream and TreeStream only (can be generalized?); 
+						// ! RE-DO the 'streamNavigateTest' as 'generalNavigateTest'; 
+						1.2. .navigate is for all Streams; 
+					2. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
+					3. Compine into a Stream class test-suite; 
 			
-		Left to make tests for: 
+			4.1.1. "WrapperStream"-combinations; 
+				Thus, for instance, one has to test ALL of: 
 
-			1. IndexMap/ [specifics, RE-DO]
-			2. Pattern/  [specifics - underlying]
-				2.1. Token/ [specifics]
-				2.2. EnumSpace/ [specifics]
-				2.3. TokenizablePattern/ [specifics]
-				2.4. ValidatablePattern/ [specifics]
-				2.5. EliminablePattern/ [specifics]
-				2.6. Collection/ [specifics]
-			3. Tree/ [specifics]
-			4. Stream/
+					LimitedStream-NestedStream-InputStream;
+					TransformedStream-LimitedStream-TreeStream;
+					NestedStream-TransformedStream-InputStream;
+						And more...
 
-				To test:
+			4.1.2. Constructors:
+					1. StreamTokenizer (Parser/) [need both 'is' and the constructor]; 
 
-					1. Position [re-design]; 
-					2. InputStream; 
-					3. PositionalStream; 
-					4. TreeStream; 
-						4.1. TreeWalker; 
-						4.2. MultiIndex; 
-							4.2.1. MultiIndexModifier; 
-							4.2.2. Slicer; 
-					5. TransformedStream; 
-					6. PredicateStream; 
-					7. ProlongedStream; 
-					8. LimitedStream; 
-					9. ReversedStream; 
-					10. NestedStream [RE-DEFINE]; 
-						10.1. NestedlyTransformedStream;
-						11.1. NestedStream; 
+			4.1.3. TreeStream [sub-classes to be also tested]: 
+				4.1.3.1. TreeWalker; 
+				4.1.3.2. MultiIndex; 
+					4.1.3.2.1. MultiIndexModifier; 
+					4.1.3.2.2. Slicer; 
 
-				4.0. One tests on a class-basis; 
-					4.0.1. Classes are tested per-method; 
-					4.0.2. A single class is a collection of methods, ergo, there MUST BE A WELL-DEFINED SET OF 
-						general wrapper-tests: 
-						4.0.2.1. These would be based OFF passed "checks"; These would (fundamentally) 
-							compare the result of the given Stream having a given method called with given arguments, 
-								with the GIVEN EXPECTED RESULTS. 
-							
-							The 'compare' would be class-based; 
-
-							THERE WOULD BE SPECIAL-CASE PER-CLASS DEFINITIONS FOR IT! 
-							They would be used with the actual Interfaces; 
-
-				4.1. The tests have TO BE ORDERED [because various interfaces are intertwined]; 
-
-					In particular: 
-
-						1. All PositionalStream-s must come AFTER Position; 
-						2. All the sub-interfaces of TreeStream must be checked BEFORE the 'TreeStream'; 
-						3. "WrapperStream"-s (such as 'NestedStream', 'TransformedStream', 'LimitedStream' and others)
-							must ALL be tested on different combinations/variations of Stream-classes; 
-
-							Thus, for instance, one has to test ALL of: 
-
-								LimitedStream-NestedStream-InputStream;
-								TransformedStream-LimitedStream-TreeStream;
-								NestedStream-TransformedStream-InputStream;
-
-							And more...
-
-				4.2. There are SEVERAL TYPES of tests for the same method:
-					4.2.1. Basic functionality (comparisons, and so forth...); 
-						This (typically), just calls the method once, + does some comparison work on the result; 
-						These are separated by predicates used for comparison.
-
-					4.2.2. Utils; 
-						These are tested regularly via the 'utilTest'; 
-						4.2.2.1. ORGANIZE THESE! 
-							Let each 'util' go to its appropriate interface directory...;
-
-							NOTE: the 'is'- utils ARE NOT to be tested ; 
-								Only things like 'toInputStream', 'uniNavigate', and so forth...
-
-							To test [only]: 
-
-								1. InputStream/toInputStream
-								2. IterableStream/isIterable
-								3. BasicStream/isStream
-								4. RewindableStream/rewind
-
-					4.2.3. Constructors: 
-						Make them "typical" (in the sense they uses the 'is'-functions); 
-
-						1. For each of the 'implementations' of the 'StreamClass'; 
-							These would be 'and'-s with SPECIFIC properties; 
-							LIST: 
-
-								1. StreamTokenizer (Parser/) [need both 'is' and the constructor]; 
-
-
-					4.2.5. Methods:
-						4.3.5.1. StreamClassInstance-specific (general): 
-							[predefined]
-							4.3.5.1.1. generalIsEndTest; 
-							4.3.5.1.2. generalIsStartTest; 
-							4.3.5.1.3. generalRewindTest; 
-							4.3.5.1.4. generaFinishTest; 
-
-							[per-case-defined]
-							4.3.5.1.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
-							4.3.5.1.6. copyTest (based off 'streamCopyTest'; for InputStream and TreeStream); 
-
-					4.2.6. Refactoring: 
-						4.2.6.1. In tests, rely HEAVILY on 'navigate' (once tested); 
-						4.2.6.2. Don't test optimizations (like 'uniNavigate') INSIDE the test-code; 
-
-					NEXT ITEM-s: 
-
-						1. Renew the 'ClassConstructor' function to include: 
-							1.1. Ability to ensure that a given 'Stream' is (after all) BOTH creatable using 'new' AND regular function call; 
-							1.2. That the properties on it are NOT OWN [that being, that the memory saving is real]; 
-						2. per-case defined (.copy, .navigate); 
-							2.1. .copy is for InputStream and TreeStream only (can be generalized?); 
-							2.2. .navigate is for: 
-								2.2.1. InputStream; 
-								2.2.2. TreeStream; 
-								2.2.3. LimitedStream; 
-						3. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
-						4. [mini, side] Re-design the 'Position' [re-check what could have been missing - been adding some new definitions...]; 
-						5. [Finally] combining the testing code together FOR EACH one of the classes, via signatures; 
-
-						6. ALSO : add a 'streamIterator' TEST [look for other such "minor" utils, if any remains...]; 
-
-			5. Parser/
-			6. Stateful/
-			7. regex/
-			8. benchmarks/
-			9. imports/ 
-				NOTE: there has to be a WHOLE SEPARATE testing procedure for the 'imports'; 
+			4.1.4. Test Instances: 	
+				4.1.4.1. They branch: 
+					4.1.4.1.0. Empty Stream instance
+					4.1.4.1.1. Single-element Stream instance
+					4.1.4.1.2. Two-element Stream instance
+					4.1.4.1.3. Long Stream instance (>= 20 elements)
+				4.1.4.2. There are optimization-specific benchmarks; 	
+					1.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
 		
-	A.2. Write out dependencies to be tested for each one of them; 
+		4.2. Parser/
+			Test Instances:
+				4.2.1. There is a set of Stream-s, for which they're tested; 
+				4.2.2. With appropriate Collection-s; 
+				4.2.3. They branch [by 4.1. and 4.2.]: 
+					4.2.3.1. The Empty Stream; 
+					4.2.3.2. The One-element Stream; 
+					4.2.3.3. The Two-element Stream; 
+					4.2.3.4. The many-element Stream; 
+		4.3. regex/
+			Re-structure to fit the current mini-testing framework (expand the framework appropriately); 
+		4.4. benchmarks/	
+			4.4.1. Stack benchmarks: 
+				4.4.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
+					Use as metric later
+			4.4.2. Parse really long strings: 
+				4.4.2.1. Try to parse some incredibly long strings;
+					See the speed limits for different string sizes
+			4.4.3. "Cached" TokenInstance vs "Non-Cached" TokenInstance: 
+				4.4.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
+				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
+					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
+				
+		4.5. imports/ 
+			The imports are flawed - test them properly [import each and every layer inside the library...]; 
 
-		1. Classes (classes.ts) - ALWAYS
-		2. Utilities (utils.ts) - OCCASIONALLY
+		4.6. Pattern/
+			4.6.1. Test instances: 
+				4.6.1. Empty; 
+				4.6.2. One-element; 
+				4.6.3. Two-element; 
+				4.6.4. Long; 
 		
-	A.3. Write the tests (module-by-module); 
-
 B. documentation (change/fix it...);
 	B.1. Create new pages:
 		B.1.1. Home: 
@@ -208,7 +130,7 @@ B. documentation (change/fix it...);
 			B1.1.5. Known issues (this lists known problems that the library currently has);
 
 	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
-C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3]; 
+C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3]; 
 	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
 	C.2. Walk through the v0.3 changes, and write them down [constructive];
 
@@ -286,7 +208,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 			CONCATENATES THEM into a new layer, then iterates it; 
 
 	2.5. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
-
 		In particular, functions/abstractions: 
 
 			1. shorten(names); 
@@ -351,7 +272,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "initial" v0.3];
 			}
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
-
 		Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 
 		
 	2.8. Minor refactoring (StreamClass): 

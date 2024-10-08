@@ -1,7 +1,7 @@
 import { typeof as type } from "@hgargg-0710/one"
 const { isSymbol } = type
 
-import type { Indexed } from "src/Stream/interfaces.js"
+import type { Indexed } from "../../../interfaces.js"
 
 // ! Place [refactor] into the 'proxy-op' library LATER!
 

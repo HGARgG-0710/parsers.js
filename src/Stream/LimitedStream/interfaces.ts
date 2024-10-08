@@ -15,7 +15,7 @@ import type {
 	LookaheadHaving,
 	SinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
-import type { Superable } from "src/Stream/StreamClass/Superable/interfaces.js"
+import type { Superable } from "../../Stream/StreamClass/Superable/interfaces.js"
 
 export interface Limitable<Type = any> extends Summat {
 	limit: (from?: Position, to?: Position) => Type

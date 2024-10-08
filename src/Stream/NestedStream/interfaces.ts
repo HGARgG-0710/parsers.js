@@ -1,11 +1,11 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Inputted } from "../UnderStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
 import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
+import type { StreamPredicate } from "../../Parser/ParserMap/interfaces.js"
 import type { Superable } from "../StreamClass/Superable/interfaces.js"
-import type { FastLookupTable } from "src/IndexMap/FastLookupTable/interfaces.js"
-import type { BasicState } from "src/Parser/BasicParser/interfaces.js"
-import type { Summat } from "@hgargg-0710/summat.ts"
+import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
+import type { BasicState } from "../../Parser/BasicParser/interfaces.js"
 
 export interface BasicNested extends Summat {
 	typesTable: FastLookupTable<any, StreamPredicate>

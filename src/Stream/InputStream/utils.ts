@@ -1,6 +1,6 @@
 import { InputStream as InputStreamConstructor } from "./classes.js"
 
-import { array } from "src/Parser/utils.js"
+import { array } from "../../Parser/utils.js"
 import type { BasicStream } from "../interfaces.js"
 import type { EffectiveInputStream } from "./interfaces.js"
 

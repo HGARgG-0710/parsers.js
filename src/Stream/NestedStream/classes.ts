@@ -1,18 +1,18 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+import type { EffectiveNestedStream } from "./interfaces.js"
+import type { StreamPredicate } from "../../Parser/ParserMap/interfaces.js"
+import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
+import type { EndableStream } from "../StreamClass/interfaces.js"
+
+import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
 import {
 	effectiveNestedStreamInitCurr,
 	effectiveNestedStreamNext,
 	effectiveNestedStreamInitialize,
 	effectiveNestedStreamIsEnd
 } from "./methods.js"
-import type { EffectiveNestedStream } from "./interfaces.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
-
-import type { StreamPredicate } from "src/Parser/ParserMap/interfaces.js"
-import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
-import type { FastLookupTable } from "src/IndexMap/FastLookupTable/interfaces.js"
-import type { EndableStream } from "../StreamClass/interfaces.js"
-import type { Summat } from "@hgargg-0710/summat.ts"
 
 // * Explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`;
 const NestedStreamBase = StreamClass({

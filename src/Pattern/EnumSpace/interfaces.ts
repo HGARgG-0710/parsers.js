@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Sizeable } from "src/IndexMap/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Sizeable } from "../../IndexMap/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export type Mappable<Type = any> = (value: Type, index?: number) => unknown
 

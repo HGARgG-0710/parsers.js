@@ -1,4 +1,4 @@
-import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
+import type { StreamTransform } from "../../Parser/ParserMap/interfaces.js"
 import { TransformedStream as TransformedStreamConstructor } from "./classes.js"
 import type {
 	EndableTransformableStream,

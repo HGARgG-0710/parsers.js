@@ -1,4 +1,4 @@
-import type { BasicStream } from "src/Stream/interfaces.js"
+import type { BasicStream } from "../../Stream/interfaces.js"
 import type { LocatorState } from "./interfaces.js"
 
 export function streamLocatorFinished(this: LocatorState) {

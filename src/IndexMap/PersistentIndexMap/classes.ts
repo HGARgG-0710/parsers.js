@@ -1,20 +1,7 @@
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { IndexMap, MapClass, Pairs } from "../interfaces.js"
-import {
-	indexMapCopy,
-	indexMapIterator,
-	indexMapSet,
-	indexMapSizeGetter
-} from "../methods.js"
-import {
-	persistentIndexMapAdd,
-	persistentIndexMapDelete,
-	persistentIndexMapGetIndex,
-	persistentIndexMapSwap,
-	persistentIndexMapUnique
-} from "./methods.js"
-
 import type { PersistentIndexMap as PersistentIndexMapType } from "./interfaces.js"
+
 import {
 	subByIndex,
 	subDefault,
@@ -24,6 +11,21 @@ import {
 	subReplaceKey,
 	subValues
 } from "../SubHaving/methods.js"
+
+import {
+	indexMapCopy,
+	indexMapIterator,
+	indexMapSet,
+	indexMapSizeGetter
+} from "../methods.js"
+
+import {
+	persistentIndexMapAdd,
+	persistentIndexMapDelete,
+	persistentIndexMapGetIndex,
+	persistentIndexMapSwap,
+	persistentIndexMapUnique
+} from "./methods.js"
 
 export const Pointer = <Type = any>(value: Type): Pattern<Type> => ({ value })
 

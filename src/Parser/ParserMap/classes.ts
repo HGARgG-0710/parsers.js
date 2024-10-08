@@ -1,7 +1,7 @@
 import type { BaseMapParsingState, DefaultMapParsingState } from "../interfaces.js"
-import type { Indexable } from "src/IndexMap/interfaces.js"
+import type { Indexable } from "../../IndexMap/interfaces.js"
 import type { ParserMap, ParserFunction, StreamHandler, StreamMap } from "./interfaces.js"
-import type { BasicStream } from "src/Stream/interfaces.js"
+import type { BasicStream } from "../../Stream/interfaces.js"
 
 export function ParserMap<
 	OutType = any,

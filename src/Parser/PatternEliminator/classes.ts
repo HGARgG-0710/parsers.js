@@ -1,4 +1,4 @@
-import type { EliminablePattern } from "src/Pattern/EliminablePattern/interfaces.js"
+import type { EliminablePattern } from "../../Pattern/EliminablePattern/interfaces.js"
 
 export function PatternEliminator<EliminatedType = any>(eliminated: EliminatedType[]) {
 	return function <Type = any>(pattern: EliminablePattern<Type, EliminatedType>) {

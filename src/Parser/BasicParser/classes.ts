@@ -1,5 +1,5 @@
 import type { ParserMap } from "../ParserMap/interfaces.js"
-import { ArrayCollection } from "src/Pattern/Collection/classes.js"
+import { ArrayCollection } from "../../Pattern/Collection/classes.js"
 import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
 import { firstFinished } from "../utils.js"
 import type { BasicState } from "./interfaces.js"

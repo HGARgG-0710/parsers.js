@@ -1,6 +1,6 @@
-import type { Collection } from "src/Pattern/Collection/interfaces.js"
+import type { Collection } from "../Pattern/Collection/interfaces.js"
 import type { ParsingState } from "./GeneralParser/interfaces.js"
-import type { BasicStream } from "src/Stream/interfaces.js"
+import type { BasicStream } from "../Stream/interfaces.js"
 
 export type BaseParsingState = ParsingState<BasicStream, any, any>
 export type BaseMapParsingState = ParsingState<BasicStream, any, any>

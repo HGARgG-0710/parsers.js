@@ -1,4 +1,4 @@
-import type { Tree } from "src/Tree/interfaces.js"
+import type { Tree } from "../../Tree/interfaces.js"
 import { Inputted } from "../UnderStream/classes.js"
 import { TreeStream as TreeStreamConstructor } from "./classes.js"
 import { type EffectiveTreeStream, type TreeStream } from "./interfaces.js"

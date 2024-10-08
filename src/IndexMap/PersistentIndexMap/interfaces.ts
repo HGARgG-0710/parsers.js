@@ -1,4 +1,4 @@
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { IndexMap } from "../interfaces.js"
 import type { SubHaving } from "../SubHaving/interfaces.js"
 

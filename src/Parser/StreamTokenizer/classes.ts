@@ -1,13 +1,15 @@
-import { StreamClass } from "../../Stream/StreamClass/classes.js"
-import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { StreamMap } from "../ParserMap/interfaces.js"
 import type { StreamTokenizer } from "./interfaces.js"
+import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
+
+import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
 import {
 	underStreamDefaultIsEnd,
 	underStreamIsEnd
-} from "src/Stream/UnderStream/methods.js"
-import type { EndableStream } from "src/Stream/StreamClass/interfaces.js"
-import type { Summat } from "@hgargg-0710/summat.ts"
+} from "../../Stream/UnderStream/methods.js"
+
+import { StreamClass } from "../../Stream/StreamClass/classes.js"
 
 const StreamTokenizerBase = StreamClass({
 	initGetter: streamTokenizerNext,

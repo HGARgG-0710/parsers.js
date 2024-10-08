@@ -1,29 +1,23 @@
 import type {
 	DirectionalPosition,
-	Position,
 	PredicatePosition
 } from "../../../../../dist/src/Stream/PositionalStream/Position/interfaces.js"
 
-import type { RewindableStream } from "../../../../../dist/src/Stream/RewindableStream/interfaces.js"
+import type { Rewindable } from "../../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber, isFunction } = type
 
 import {
-	endPredicate,
 	isBackward,
-	isDualPosition,
 	isPosition,
 	isPositionObject,
-	iterationChoice,
 	pickDirection,
 	positionConvert,
-	positionCopy,
 	positionEqual,
 	positionNegate,
 	positionSame,
 	positionStopPoint,
-	predicateChoice,
 	preserveDirection
 } from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
 import { equals, utilTest } from "lib/lib.js"
@@ -41,40 +35,29 @@ const positionTrivialEquality = (x: DirectionalPosition, y: DirectionalPosition)
 const [
 	baseIsPositionObjectTest,
 	baseIsPositionTest,
-	baseIsDualPositionTest,
 	basePositionConvertTest,
 	basePositionNegateTest,
 	basePositionSameTest,
 	basePositionEqualTest,
-	basePositionCopyTest,
-	basePredicateChoiceTest,
 	baseIsBackwardTest,
 	basePickDirectionTest,
-	baseEndPredicateTest,
-	baseIterationChoiceTest,
 	basePreserveDirectionTest,
 	basePositionStopPointTest
 ] = [
 	[isPositionObject, "isPositionObject"],
 	[isPosition, "isPosition"],
-	[isDualPosition, "isDualPosition"],
 	[positionConvert, "positionConvert"],
 	[positionNegate, "positionNegate"],
 	[positionSame, "positionSame"],
 	[positionEqual, "positionEqual"],
-	[positionCopy, "positionCopy"],
-	[predicateChoice, "predicateChoice"],
 	[isBackward, "isBackward"],
 	[pickDirection, "pickDirection"],
-	[endPredicate, "endPredicate"],
-	[iterationChoice, "iterationChoice"],
 	[preserveDirection, "preserveDirection"],
 	[positionStopPoint, "positionStopPoint"]
 ].map(([method, name]) => utilTest(method as Function, name as string))
 
 export const isPositionObjectTest = baseIsPositionObjectTest(equals)
 export const isPositionTest = baseIsPositionTest(equals)
-export const isDualPositionTest = baseIsDualPositionTest(equals)
 
 export const positionConvertTest = basePositionConvertTest(positionTrivialEquality)
 
@@ -85,22 +68,13 @@ export const positionNegateTest = basePositionNegateTest(preserveDirectionTestCo
 export const positionsSameTest = basePositionSameTest(equals)
 export const positionsEqualTest = basePositionEqualTest(equals)
 
-export const positionCopyTest = basePositionCopyTest((x: Position, input: Position) =>
-	isPositionObject(x) ? isPositionObject(input) && !equals(x, input) : equals(x, input)
-)
-
-export const predicateChoiceTest = basePredicateChoiceTest(
-	(x: Position, input: Position) =>
-		isFunction(x) && (!isNumber(input) || x.direction === input >= 0)
-)
-
 export const isBackwardTest = baseIsBackwardTest(equals)
 export const pickDirectionTest = basePickDirectionTest(equals)
 
 const endPredicateTestCompare = (
 	output: StreamPredicate,
 	streamDirectionPredicate: [
-		ReversibleStream & RewindableStream,
+		ReversibleStream & Rewindable,
 		ChangeType,
 		PredicatePosition,
 		BoundNameType
@@ -124,24 +98,6 @@ const endPredicateTestCompare = (
 
 	return equals(expectedCurr, stream.curr)
 }
-
-export const endPredicateTest = baseEndPredicateTest(endPredicateTestCompare)
-
-export const iterationChoiceTest = baseIterationChoiceTest(
-	(
-		output: [ChangeType, StreamPredicate],
-		input: [ReversibleStream & RewindableStream, DirectionalPosition, BoundNameType]
-	) => {
-		const [endPredicate, change] = output
-		const [stream, directional, stopPoint] = input
-		return endPredicateTestCompare(endPredicate, [
-			stream,
-			change,
-			predicateChoice(directional),
-			stopPoint
-		])
-	}
-)
 
 export const preserveDirectionTest = basePreserveDirectionTest(
 	preserveDirectionTestCompare

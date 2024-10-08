@@ -1,4 +1,4 @@
-import { delegate, delegateProperty } from "src/utils.js"
+import { delegate, delegateProperty } from "../../utils.js"
 
 export const [inputDelegate, inputPropDelegate] = [delegate, delegateProperty].map((x) =>
 	x("input")

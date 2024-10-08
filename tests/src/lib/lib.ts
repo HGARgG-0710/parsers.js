@@ -1,6 +1,10 @@
 import assert from "assert"
-import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
 import { it } from "node:test"
+
+import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
+
+import { object } from "@hgargg-0710/one"
+const { ownKeys } = object
 
 export function arraysSame(
 	arr1: any[],
@@ -12,12 +16,22 @@ export function arraysSame(
 	return true
 }
 
-export function ClassConstructorTest<ClassType = any>(
-	checker: (x: any) => x is ClassType
+export function ClassConstructorTest<ClassType extends object = object>(
+	checker: (x: any) => x is ClassType,
+	prototypeProps: (string | symbol)[] = [],
+	ownProps: (string | symbol)[] = []
 ) {
-	return function (constructor: (...x: any[]) => ClassType, ...input: any[]) {
-		const instance: ClassType = constructor(...input)
-		it("constructor", () => assert(checker(instance)))
+	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
+		const instance: ClassType = new constructor(...input)
+		it("constructor", () => {
+			assert(checker(instance))
+			for (const prop of prototypeProps)
+				it(`Is a Prototype Property? (${prop.toString()})`, () =>
+					assert(prop in instance && !ownKeys(instance).includes(prop)))
+			for (const prop of ownProps)
+				it(`Is Own Property? (${prop.toString()})`, () =>
+					assert(ownKeys(instance).includes(prop)))
+		})
 		return instance
 	}
 }

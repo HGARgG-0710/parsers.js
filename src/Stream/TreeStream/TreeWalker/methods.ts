@@ -1,5 +1,5 @@
-import type { Tree } from "src/Tree/interfaces.js"
-import { sequentialIndex } from "src/Tree/utils.js"
+import type { Tree } from "../../../Tree/interfaces.js"
+import { sequentialIndex } from "../../../Tree/utils.js"
 import type { TreeWalker } from "./interfaces.js"
 
 import { array, object } from "@hgargg-0710/one"

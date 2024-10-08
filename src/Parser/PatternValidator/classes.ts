@@ -1,5 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { IndexMap } from "src/IndexMap/interfaces.js"
+import type { IndexMap } from "../../IndexMap/interfaces.js"
 import type { ValidatablePattern } from "../../Pattern/ValidatablePattern/interfaces.js"
 import type { PatternValidatorOutput } from "./interfaces.js"
 

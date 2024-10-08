@@ -1,4 +1,4 @@
-import type { Tree } from "src/Tree/interfaces.js"
+import type { Tree } from "../../../Tree/interfaces.js"
 import type { BasicTreeStream } from "../interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "./interfaces.js"
 import {

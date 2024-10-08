@@ -1,4 +1,4 @@
-import type { Pairs } from "src/IndexMap/interfaces.js"
+import type { Pairs } from "../../interfaces.js"
 import type { HashClass } from "../interfaces.js"
 import type { InternalHashClass } from "./interfaces.js"
 

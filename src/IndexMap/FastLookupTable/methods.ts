@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { PersistentIndexFastLookupTable } from "./classes.js"
 import type { HashTableClass } from "./interfaces.js"
 

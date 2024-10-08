@@ -1,6 +1,6 @@
 import type { MapClass } from "./interfaces.js"
-import { current, firstStream, is } from "src/utils.js"
-import { Token } from "src/Pattern/Token/classes.js"
+import { current, firstStream, is } from "../utils.js"
+import { Token } from "../Pattern/Token/classes.js"
 import { typeof as type } from "@hgargg-0710/one"
 const { typeOf } = type
 

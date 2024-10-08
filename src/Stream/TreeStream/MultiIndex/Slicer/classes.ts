@@ -1,4 +1,4 @@
-import type { Indexed } from "src/Stream/interfaces.js"
+import type { Indexed } from "../../../interfaces.js"
 import type { Slicer } from "./interfaces.js"
 import { slicedGet } from "./methods.js"
 

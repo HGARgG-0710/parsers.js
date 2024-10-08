@@ -1,6 +1,6 @@
 import type { Token, TokenInstance, TokenInstanceClass, TokenType } from "./interfaces.js"
 import { isType } from "./utils.js"
-import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "src/Tree/classes.js"
+import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "../../Tree/classes.js"
 
 import { object } from "@hgargg-0710/one"
 const { structCheck } = object

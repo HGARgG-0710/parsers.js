@@ -3,7 +3,7 @@ import { underStreamDefaultIsEnd, underStreamIsEnd } from "../UnderStream/method
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
-import type { StreamTransform } from "src/Parser/ParserMap/interfaces.js"
+import type { StreamTransform } from "../../Parser/ParserMap/interfaces.js"
 import type {
 	EndableTransformableStream,
 	EffectiveTransformedStream
