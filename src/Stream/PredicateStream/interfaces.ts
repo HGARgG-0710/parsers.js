@@ -7,10 +7,6 @@ import type { PredicatePosition } from "../PositionalStream/Position/interfaces.
 import type { BasicStream } from "../interfaces.js"
 import type { Superable } from "../StreamClass/Superable/interfaces.js"
 
-export interface Predicated extends Summat {
-	predicate: PredicatePosition
-}
-
 export interface LookaheadHaving extends Summat {
 	hasLookAhead: boolean
 }
@@ -28,13 +24,14 @@ export interface SinglePositionLookahead<Type = any>
 		Lookahead<Type> {}
 
 export interface BasicPredicated<Type = any>
-	extends BasicStream<Type>,
-		Predicated,
-		SinglePositionLookahead<Type>,
-		Posed<number> {}
+	extends SinglePositionLookahead<Type>,
+		Posed<number> {
+	predicate: PredicatePosition
+}
 
 export interface PredicateStream<Type = any>
-	extends BasicPredicated<Type>,
+	extends BasicStream<Type>,
+		BasicPredicated<Type>,
 		Inputted<ReversibleStream<Type>> {}
 
 export interface EffectivePredicateStream<Type = any>

@@ -4,6 +4,37 @@
 [v0.3]
 
 CURR TODO LIST: 
+3.26. [maybe?] Delete the 'PositionalStream'? 
+	Originating as an attempt to generalize the '.pos', it truly does appear to be useless; 
+	Because: 
+
+		1. It DOESN'T sync with doing '.init' on the '.input' (a SEPARATE '.init' is needed to update the index); 
+		2. The user doesn't usually need a position [in practice]; 
+		3. Another layer adds overhead (small, but still - overhead); 
+
+	Now, one may want to just add the '.pos' to appropriate classes... 
+	BUT, it could be quite costly from memory perspective (especially for something like NestedStream); 
+		QUESTION - what to do? 
+		SOLUTION: 
+			1. Introduce the 'positional' methods, and an ADDITIONAL CONDITION of 'hasPosition: boolean = false', which determines whether the stream is a 'Posed' stream; 
+			2. Create factories with 'hasPosition: boolean', which would RETURN AN APPROPRIATE STREAM; 
+			3. The factory streams will differ in prototypes - those with 'hasPosition: boolean' would HAVE THE '.pos'-altering methods INSTEAD; 
+			4. Create TWO different Base classes for this case (one - for Pos-having methods and one - for Non-pos-having methods); 
+	
+	Then, one will have another separation [testing]: 
+
+		1. hasPosition - checks whether the given class's instances should have a 'position'; 
+
+		Thus, the tests should ALSO be contained in factories (contents of which would depend upon presence of 'hasPosition = true'); 
+
+	To delete [and re-do] '.pos' from (at): 
+		1. LimitedStream; 
+		2. ProlongedStream; 
+		3. PredicateStream; 
+		4. TransformedStream; 
+
+	To add the possibility of having '.pos' on: 
+		1. StreamTokenizer;  
 
 Order of todo-elimination [v0.3]: 
 	Begin the testing anew [re-plan it]; 
@@ -20,10 +51,12 @@ A. testing:
 
 			1.1. InputStream [check]; 
 			1.2. LimitedStream [check]; 
-			1.3. NestedStream; 
-			1.4. PositionalStream; 
-			1.5. PredicateStream; 
-			1.6. ProlongedStream; 
+			1.3. NestedStream [check]; 
+				1.3.1. TODO: currently, the 'isNestedStream' checks for 'typesTable' as an 'isObject'. Make the test stricter, by making it 'isFastLookupTable'; 
+					1.3.1.1. First, however, one needs to implement the tests for the FastLookupTable; 
+			1.4. PositionalStream [check]; 
+			1.5. PredicateStream [check]; 
+			1.6. ProlongedStream [check]; 
 			1.7. ReversibleStream; 
 			1.8. TransformedStream; 
 			1.9. TreeStream; 
@@ -154,6 +187,19 @@ B. documentation (change/fix it...);
 			B1.1.3. Examples [projects done using it]; 
 			B1.1.4. Structure - explain how the library structure works (interfaces., methods., classes., utils.); 
 			B1.1.5. Known issues (this lists known problems that the library currently has);
+			B1.1.6. Terminology
+				This mentions that the library has a distinct terminology [albeit, not very large], that is useful for understanding its concepts; 
+		B1.2. Properties: 
+			This describes individual properties (and methods!) that can ocurr on different classes; 
+			ONLY describes the properties, methods that ocurr more than once in the library [and have the same meaning]; 
+		B1.3. Classes: 
+			Describes individual classes; 
+			THEY ARE LISTED AS EXTENSION-HIERARCHIES; 
+		B1.4. Factories: 
+			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
+		B1.5. Interfaces; 
+			Lists the library's interfaces. 
+			They are described via an, extends-implements hierarchy [where classes that implement the interfaces are the lowest level elements of the tree (the "leaves")]; 
 
 	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
 C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3]; 
@@ -534,7 +580,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
 
-	2.25. Rename the 'array' into 'collection'; 
+	2.25. Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
 		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

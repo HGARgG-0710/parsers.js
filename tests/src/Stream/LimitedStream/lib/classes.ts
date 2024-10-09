@@ -17,26 +17,26 @@ import {
 import {
 	InitReversedStreamClassConstructorTest,
 	isInputted,
+	isLookahead,
 	isPosed,
 	isProddable,
 	isSuperable,
 	ReversedStreamClassConstructorTest
 } from "Stream/StreamClass/lib/classes.js"
 
-import { object, function as _f, boolean, typeof as type } from "@hgargg-0710/one"
+import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { and } = _f
 const { isBoolean } = type
-const { T } = boolean
 
 const isLimitedStream = and(
 	structCheck({
 		from: isPosition,
 		to: isPosition,
 		hasLookAhead: isBoolean,
-		direction: isBoolean,
-		lookAhead: T
+		direction: isBoolean
 	}),
+	isLookahead,
 	isSuperable,
 	isPosed,
 	isProddable,

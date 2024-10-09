@@ -10,8 +10,7 @@ export interface Posed<Type = any> extends Summat {
 }
 
 export interface PositionalInputtedStream<Type = any, PosType extends Position = Position>
-	extends BasicStream<Type>,
-		Superable,
+	extends Superable,
 		Posed<PosType>,
 		Iterable<Type>,
 		Inputted<BasicStream<Type>>,

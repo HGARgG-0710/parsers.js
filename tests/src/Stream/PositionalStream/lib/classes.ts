@@ -1,9 +1,6 @@
 import { it } from "node:test"
 import assert from "assert"
 
-import { function as _f } from "@hgargg-0710/one"
-const { and } = _f
-
 import type {
 	Posed,
 	PositionalInputtedStream
@@ -12,12 +9,22 @@ import type { BasicReversibleStream } from "../../../../../dist/src/Stream/Rever
 import type { Position } from "../../../../../dist/src/Stream/PositionalStream/Position/interfaces.js"
 
 import { uniNavigate } from "../../../../../dist/src/Stream/StreamClass/Navigable/utils.js"
-import { ClassConstructorTest } from "lib/lib.js"
-import { isStreamClassInstance } from "../../../../../dist/src/Stream/StreamClass/utils.js"
-import { isPositionalStream } from "../../../../../dist/src/Stream/PositionalStream/utils.js"
+import {
+	blockExtension,
+	ClassConstructorTest,
+	InitClassConstructorTest
+} from "lib/lib.js"
 
-import { boolean } from "@hgargg-0710/one"
+import { boolean, function as _f } from "@hgargg-0710/one"
+import {
+	InitReversedStreamClassConstructorTest,
+	isInputted,
+	isPosed,
+	isSuperable,
+	ReversedStreamClassConstructorTest
+} from "Stream/StreamClass/lib/classes.js"
 const { equals } = boolean
+const { and } = _f
 
 function PositionalStreamPosTest(
 	stream: Posed<Position> & BasicReversibleStream,
@@ -31,10 +38,27 @@ function PositionalStreamPosTest(
 	})
 }
 
-const isPositionalStreamInternal = and(isPositionalStream, isStreamClassInstance) as (
+const positionalStreamPrototypeProps = ["super"]
+const positionalStreamOwnProps = ["pos", "input"]
+
+const isPositionalStream = and(isSuperable, isPosed, isInputted) as (
 	x: any
 ) => x is PositionalInputtedStream
 
-const PositionalStreamConstructorTest = ClassConstructorTest<PositionalInputtedStream>(
-	isPositionalStreamInternal
+const PositionalStreamConstructorTest = blockExtension(
+	ReversedStreamClassConstructorTest,
+	ClassConstructorTest<PositionalInputtedStream>(
+		isPositionalStream,
+		positionalStreamPrototypeProps,
+		positionalStreamOwnProps
+	)
+)
+
+const InitPositionalStreamConstructorTest = blockExtension(
+	InitReversedStreamClassConstructorTest,
+	InitClassConstructorTest<PositionalInputtedStream>(
+		isPositionalStream,
+		positionalStreamPrototypeProps,
+		positionalStreamOwnProps
+	)
 )

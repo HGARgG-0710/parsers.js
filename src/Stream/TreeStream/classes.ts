@@ -20,7 +20,7 @@ import { MultiIndex } from "./MultiIndex/classes.js"
 
 import { boolean } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Position } from "../PositionalStream/Position/interfaces.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 const { F } = boolean
 
 const TreeStreamBase = StreamClass({
@@ -30,7 +30,7 @@ const TreeStreamBase = StreamClass({
 	isCurrEnd: effectiveTreeStreamIsEnd,
 	isCurrStart: effectiveTreeStreamIsStart,
 	defaultIsEnd: F
-})
+}) as new () => ReversedStreamClassInstance
 
 export class TreeStream<Type = any>
 	extends TreeStreamBase
@@ -42,12 +42,8 @@ export class TreeStream<Type = any>
 	response: string
 	lastLevelWithSiblings: number
 
-	prev: () => Type
-	isCurrStart: () => boolean
-
 	copy: () => EffectiveTreeStream<Type>
-	rewind: () => Type
-	navigate: (position: Position) => InTreeType<Type>
+	navigate: (position: MultiIndex) => InTreeType<Type>
 	super: Summat
 
 	init: (tree?: Tree<Type>) => EffectiveTreeStream<Type>

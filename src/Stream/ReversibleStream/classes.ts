@@ -18,6 +18,7 @@ import {
 import { reversedStreamInitialize } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 const ReversedStreamBase = StreamClass({
 	currGetter: underStreamCurr,
@@ -26,17 +27,13 @@ const ReversedStreamBase = StreamClass({
 	isCurrEnd: underStreamIsStart,
 	isCurrStart: underStreamIsEnd,
 	defaultIsEnd: underStreamDefaultIsStart
-})
+}) as new () => ReversedStreamClassInstance
 
 export class ReversedStream<Type = any>
 	extends ReversedStreamBase
 	implements ReversedStreamType<Type>
 {
 	input: BasicReversibleStream<Type>
-	prev: () => Type
-	isCurrStart: () => boolean
-	rewind: () => Type
-
 	init: (input?: BasicReversibleStream) => ReversedStream<Type>
 	super: Summat
 

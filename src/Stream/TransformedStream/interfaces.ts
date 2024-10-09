@@ -15,14 +15,14 @@ export interface TransformableStream<UnderType = any, UpperType = any>
 	extends BasicStream<UnderType>,
 		Transformable<UnderType, BasicStream<UpperType>> {}
 
-export interface BasicTransformedStream<UnderType = any, UpperType = any>
-	extends BasicStream<UpperType>,
-		Transformable<UnderType, UpperType>,
+export interface BasicTransformed<UnderType = any, UpperType = any>
+	extends Transformable<UnderType, UpperType>,
 		Posed<number>,
 		Iterable<UpperType> {}
 
 export interface TransformedStream<UnderType = any, UpperType = any>
-	extends BasicTransformedStream<UnderType, UpperType>,
+	extends BasicTransformed<UnderType, UpperType>,
+		BasicStream<UpperType>,
 		Inputted<BasicStream<UnderType>> {}
 
 export interface EndableTransformableStream<UnderType = any, UpperType = any>
@@ -30,7 +30,7 @@ export interface EndableTransformableStream<UnderType = any, UpperType = any>
 		TransformableStream<UnderType, UpperType> {}
 
 export interface EffectiveTransformedStream<UnderType = any, UpperType = any>
-	extends BasicTransformedStream<UnderType, UpperType>,
+	extends BasicTransformed<UnderType, UpperType>,
 		Superable,
 		Inputted<EndableTransformableStream<UnderType, UpperType>>,
 		StreamClassInstance<UpperType> {}

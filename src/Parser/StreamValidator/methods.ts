@@ -5,7 +5,7 @@ import type { StreamValidatorState } from "./interfaces.js"
 export function streamValidatorFinished<KeyType = any>(
 	this: StreamValidatorState<KeyType>
 ) {
-	return (this.streams as BasicStream<KeyType>[])[0].isEnd || !this.result
+	return !this.result || (this.streams as BasicStream<KeyType>[])[0].isEnd
 }
 
 export function streamValidatorChange<KeyType = any>(

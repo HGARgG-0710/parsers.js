@@ -1,18 +1,52 @@
-import { isPredicateStream } from "../../../../../dist/src/Stream/PredicateStream/utils.js"
-
-import { function as _f } from "@hgargg-0710/one"
-import { isStreamClassInstance } from "../../../../../dist/src/Stream/StreamClass/utils.js"
-import { isLookaheadHaving } from "Stream/lib/classes.js"
 import type { EffectivePredicateStream } from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
-import { ClassConstructorTest } from "lib/lib.js"
-const { and } = _f
+import {
+	blockExtension,
+	ClassConstructorTest,
+	InitClassConstructorTest
+} from "lib/lib.js"
+import {
+	InitStreamClassConstructorTest,
+	isInputted,
+	isLookahead,
+	isPosed,
+	isProddable,
+	isSuperable,
+	StreamClassConstructorTest
+} from "Stream/StreamClass/lib/classes.js"
 
-const isPredicateStreamInternal = and(
-	isPredicateStream,
-	isStreamClassInstance,
-	isLookaheadHaving
+import { object, function as _f, typeof as type } from "@hgargg-0710/one"
+const { and } = _f
+const { structCheck } = object
+const { isFunction } = type
+
+const predicateStreamPrototypeProps = ["super", "prod"]
+const predicateStreamOwnProps = ["predicate", "lookAhead", "input", "pos"]
+
+const isPredicateStream = and(
+	structCheck({
+		predicate: isFunction
+	}),
+	isLookahead,
+	isSuperable,
+	isInputted,
+	isProddable,
+	isPosed
 ) as (x: any) => x is EffectivePredicateStream
 
-const PredicateStreamConstructorTest = ClassConstructorTest<EffectivePredicateStream>(
-	isPredicateStreamInternal
+const PredicateStreamConstructorTest = blockExtension(
+	StreamClassConstructorTest,
+	ClassConstructorTest<EffectivePredicateStream>(
+		isPredicateStream,
+		predicateStreamPrototypeProps,
+		predicateStreamOwnProps
+	)
+)
+
+const InitPredicateStreamConstructorTest = blockExtension(
+	InitStreamClassConstructorTest,
+	InitClassConstructorTest<EffectivePredicateStream>(
+		isPredicateStream,
+		predicateStreamPrototypeProps,
+		predicateStreamOwnProps
+	)
 )

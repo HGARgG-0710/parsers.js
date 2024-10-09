@@ -19,6 +19,7 @@ import {
 	inputStreamPrev,
 	effectiveInputStreamNavigate
 } from "./methods.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 const InputStreamBase = StreamClass({
 	currGetter: inputStreamCurr,
@@ -27,7 +28,7 @@ const InputStreamBase = StreamClass({
 	isCurrEnd: inputStreamIsEnd,
 	isCurrStart: inputStreamIsStart,
 	defaultIsEnd: inputStreamDefaultIsEnd
-})
+}) as new () => ReversedStreamClassInstance
 
 export class InputStream<Type = any>
 	extends InputStreamBase
@@ -37,14 +38,7 @@ export class InputStream<Type = any>
 	input: Indexed<Type>
 	super: Summat
 
-	finish: () => Type
-	rewind: () => Type
-	navigate: () => Type
 	copy: () => EffectiveInputStream<Type>
-
-	prev: () => Type
-	isCurrStart: () => boolean
-
 	init: (input?: Indexed<Type>) => EffectiveInputStream<Type>
 
 	constructor(input?: Indexed<Type>) {

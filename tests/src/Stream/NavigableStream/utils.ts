@@ -1,6 +1,6 @@
 import { utilTest } from "lib/lib.js"
-import { navigate } from "../../../../dist/src/Stream/NavigableStream/utils.js"
+import { uniNavigate } from "../../../../dist/src/Stream/StreamClass/Navigable/utils.js"
 
-export const [navigateTest] = [[navigate, "navigate"]].map(([util, name]) =>
+export const [navigateTest] = [[uniNavigate, "uniNavigate"]].map(([util, name]) =>
 	utilTest(util as Function, name as string)
 )

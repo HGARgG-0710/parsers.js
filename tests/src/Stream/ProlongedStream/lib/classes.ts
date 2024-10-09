@@ -1,15 +1,49 @@
-import { ClassConstructorTest } from "lib/lib.js"
-import { isProlongedStream } from "../../../../../dist/src/Stream/ProlongedStream/utils.js"
-
-import { function as _f } from "@hgargg-0710/one"
-import { isStreamClassInstance } from "../../../../../dist/src/Stream/StreamClass/utils.js"
+import {
+	blockExtension,
+	ClassConstructorTest,
+	InitClassConstructorTest
+} from "lib/lib.js"
 import type { EffectiveProlongedStream } from "../../../../../dist/src/Stream/ProlongedStream/interfaces.js"
+
+import {
+	InitStreamClassConstructorTest,
+	isInputted,
+	isPosed,
+	isSuperable,
+	StreamClassConstructorTest
+} from "Stream/StreamClass/lib/classes.js"
+
+import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
+const { structCheck } = object
+const { isNumber } = type
 
-const isProlongedStreamInternal = and(isProlongedStream, isStreamClassInstance) as (
-	x: any
-) => x is EffectiveProlongedStream
+const prolongedStreamPrototypeProps = ["super"]
+const prolongedStreamOwnProps = ["streamIndex", "pos", "input"]
 
-const ProlongedStreamConstructorTest = ClassConstructorTest<EffectiveProlongedStream>(
-	isProlongedStreamInternal
+const isProlongedStream = and(
+	structCheck({
+		streamIndex: isNumber
+	}),
+	isSuperable,
+	isInputted,
+	isPosed
+) as (x: any) => x is EffectiveProlongedStream
+
+const ProlongedStreamConstructorTest = blockExtension(
+	StreamClassConstructorTest,
+	ClassConstructorTest<EffectiveProlongedStream>(
+		isProlongedStream,
+		prolongedStreamPrototypeProps,
+		prolongedStreamOwnProps
+	)
+)
+
+const InitProlongedStreamConstructorTest = blockExtension(
+	InitStreamClassConstructorTest,
+	InitClassConstructorTest<EffectiveProlongedStream>(
+		isProlongedStream,
+		prolongedStreamPrototypeProps,
+		prolongedStreamOwnProps
+	)
 )

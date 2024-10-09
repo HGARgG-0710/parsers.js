@@ -14,7 +14,10 @@ import type { Superable } from "../../../../../dist/src/Stream/StreamClass/Super
 import type { Copiable } from "../../../../../dist/src/Stream/StreamClass/Copiable/interfaces.js"
 import type { Inputted } from "../../../../../dist/src/Stream/UnderStream/interfaces.js"
 import type { Posed } from "../../../../../dist/src/Stream/PositionalStream/interfaces.js"
-import type { Proddable } from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
+import type {
+	Lookahead,
+	Proddable
+} from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
 
 import { isPosition } from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
 import { PRE_CURR_INIT } from "../../../../../dist/src/Stream/StreamClass/methods.js"
@@ -114,3 +117,4 @@ export const isPosed = structCheck<Posed>({ pos: isPosition })
 export const isProddable = structCheck<Proddable>({
 	prod: isFunction
 })
+export const isLookahead = structCheck<Lookahead>(["lookAhead"])
