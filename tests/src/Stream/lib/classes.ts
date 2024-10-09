@@ -1,7 +1,7 @@
 import assert from "assert"
+import { arraysSame, classSpecificAmbigiousMethodTest } from "lib/lib.js"
 
-import { arraysSame, classSpecificAmbigiousMethodTest, equals } from "lib/lib.js"
-import type { BasicStream } from "../../../../dist/src/Stream/BasicStream/interfaces.js"
+import type { BasicStream } from "../../../../dist/src/Stream/interfaces.js"
 import type {
 	ChangeType,
 	ReversibleStream
@@ -9,16 +9,14 @@ import type {
 import type { BoundNameType } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
 import { next, previous } from "../../../../dist/src/utils.js"
 
-import { finish } from "../../../../dist/src/Stream/FinishableStream/utils.js"
+import type { Rewindable } from "../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
+import type { Finishable } from "../../../../dist/src/Stream/StreamClass/Finishable/interfaces.js"
 
-import type { Rewindable } from "../../../../dist/src/Stream/RewindableStream/interfaces.js"
-import type { Finishable } from "../../../../dist/src/Stream/FinishableStream/interfaces.js"
+import { uniFinish } from "../../../../dist/src/Stream/StreamClass/Finishable/utils.js"
 
 export const [streamNavigateTest, streamCopyTest] = ["navigate", "copy"].map(
 	classSpecificAmbigiousMethodTest<BasicStream>
 )
-
-export const [basicStreamNavigateTest] = [streamNavigateTest].map((x) => x(equals))
 
 const pickTestDirection = (direction: boolean): [BoundNameType, ChangeType] =>
 	direction ? ["isEnd", next] : ["isStart", previous]
@@ -32,7 +30,7 @@ export function generalBoundTest(direction: boolean) {
 			expected: any[],
 			lowCompare = compare
 		) {
-			if (!direction) finish(stream)
+			if (!direction) uniFinish(stream)
 
 			assert(stream[beginningBoundName])
 			if (expected.length) assert(!stream[boundName])
@@ -64,7 +62,7 @@ export function generalJumpTest(direction: boolean) {
 			expectedBuffer: any[],
 			lowCompare = compare
 		) {
-			if (!direction) finish(stream)
+			if (!direction) uniFinish(stream)
 
 			const bufferCopy = []
 			while (!stream[boundName]) {
@@ -93,5 +91,3 @@ export function generalJumpTest(direction: boolean) {
 
 export const [generalIsEndTest, generalIsStartTest] = [true, false].map(generalBoundTest)
 export const [generalRewindTest, generalFinishTest] = [true, false].map(generalJumpTest)
-
-export const isLookaheadHaving = (x: object) => "hasLookAhead" in x

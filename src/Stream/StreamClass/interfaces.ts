@@ -30,6 +30,10 @@ export interface BaseNextIterable<Type = any> extends Summat {
 	baseNextIter: () => Type
 }
 
+export interface BasePrevIterable<Type = any> extends Summat {
+	basePrevIter: () => Type
+}
+
 export interface ConditionalBasePrevIterable<Type = any> extends Summat {
 	basePrevIter?: () => Type
 }
@@ -104,6 +108,7 @@ export interface StreamClassInstance<Type = any>
 
 export interface ReversedStreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
+		BasePrevIterable<Type>,
 		Prevable<Type>,
 		IsStartCurrable,
 		Rewindable<Type> {}

@@ -3,8 +3,12 @@ import { it } from "node:test"
 
 import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
 
-import { object } from "@hgargg-0710/one"
+import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
+import type { Initializable } from "../../../dist/src/Stream/StreamClass/Initializable/interfaces.js"
 const { ownKeys } = object
+const { equals, not } = boolean
+const { or } = _f
+const { isFunction } = type
 
 export function arraysSame(
 	arr1: any[],
@@ -16,14 +20,14 @@ export function arraysSame(
 	return true
 }
 
-export function ClassConstructorTest<ClassType extends object = object>(
+export function ChainClassConstructorTest<ClassType extends object = object>(
 	checker: (x: any) => x is ClassType,
 	prototypeProps: (string | symbol)[] = [],
-	ownProps: (string | symbol)[] = []
+	ownProps: (string | symbol)[] = [],
+	isInit: boolean = false
 ) {
-	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
-		const instance: ClassType = new constructor(...input)
-		it("constructor", () => {
+	return function (instance: ClassType) {
+		it(`${isInit ? "(delayed) " : ""}constructor`, () => {
 			assert(checker(instance))
 			for (const prop of prototypeProps)
 				it(`Is a Prototype Property? (${prop.toString()})`, () =>
@@ -36,7 +40,40 @@ export function ClassConstructorTest<ClassType extends object = object>(
 	}
 }
 
-export function FlushableResultableTestFlush(
+export function FunctionalClassConctructorTest<ClassType extends object = object>(
+	checker: (x: any) => x is ClassType,
+	prototypeProps: (string | symbol)[] = [],
+	ownProps: (string | symbol)[] = []
+) {
+	const UnderChainTest = ChainClassConstructorTest<ClassType>(
+		checker,
+		prototypeProps,
+		ownProps
+	)
+	return function (constructor: (...x: any[]) => ClassType, ...input: any[]) {
+		return UnderChainTest(constructor(...input))
+	}
+}
+
+export function ClassConstructorTest<ClassType extends object = object>(
+	checker: (x: any) => x is ClassType,
+	prototypeProps: (string | symbol)[] = [],
+	ownProps: (string | symbol)[] = []
+) {
+	const UnderFunctionalTest = FunctionalClassConctructorTest<ClassType>(
+		checker,
+		prototypeProps,
+		ownProps
+	)
+	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
+		return UnderFunctionalTest(
+			(...input: any[]) => new constructor(...input),
+			...input
+		)
+	}
+}
+
+export function FlushableResultingTestFlush(
 	x: Flushable & Resulting,
 	result: any,
 	compare: (x: any, y: any) => boolean
@@ -83,7 +120,7 @@ export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName:
 	}
 }
 
-export function FlushableResultableAmbigiousMethodTest<
+export function ResultingAmbigiousMethodTest<
 	InstanceType extends Resulting = any
 >(methodName: string) {
 	return function (
@@ -109,4 +146,29 @@ export function utilTest(util: Function, utilName: string) {
 	}
 }
 
-export const equals = (x: any, y: any) => x === y
+export function blockExtension(...blocks: Function[]) {
+	return function (...input: any[]) {
+		for (const block of blocks) block(...input)
+	}
+}
+
+export const optional = (type: Function) => or(not, type)
+export const optionalMethod = optional(isFunction)
+
+export function InitClassConstructorTest<ClassType extends Initializable = Initializable>(
+	checker: (x: any) => x is ClassType,
+	prototypeProps: (string | symbol)[] = [],
+	ownProps: (string | symbol)[] = []
+) {
+	const UnderChainTest = ChainClassConstructorTest<ClassType>(
+		checker,
+		prototypeProps,
+		ownProps,
+		true
+	)
+	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
+		const instance = new constructor()
+		instance.init(...input)
+		return UnderChainTest(instance)
+	}
+}

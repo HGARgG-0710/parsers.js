@@ -1,16 +1,31 @@
 import { describe } from "node:test"
 
+import type { ValidatablePattern } from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
 import {
 	ClassConstructorTest,
-	FlushableResultableAmbigiousMethodTest,
-	FlushableResultableTestFlush
+	ResultingAmbigiousMethodTest,
+	FlushableResultingTestFlush
 } from "lib/lib.js"
-import { isValidatablePattern } from "../../../../../dist/src/Pattern/ValidatablePattern/utils.js"
-import type { ValidatablePattern } from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
 
-const ValidatablePatternConstructorTest =
-	ClassConstructorTest<ValidatablePattern>(isValidatablePattern)
-const ValidatablePatternValidateTest = FlushableResultableAmbigiousMethodTest("validate")
+import { object, boolean, typeof as type } from "@hgargg-0710/one"
+const { structCheck } = object
+const { isFunction } = type
+const { T } = boolean
+
+const isValidatablePattern = structCheck<ValidatablePattern>({
+	value: T,
+	result: T,
+	flush: isFunction,
+	validate: isFunction
+})
+
+const ValidatablePatternConstructorTest = ClassConstructorTest<ValidatablePattern>(
+	isValidatablePattern,
+	["validate", "flush"],
+	["value", "result"]
+)
+
+const ValidatablePatternValidateTest = ResultingAmbigiousMethodTest("validate")
 
 type ValidatablePatternTestSignature = {
 	input: any
@@ -21,7 +36,7 @@ type ValidatablePatternTestSignature = {
 
 export function ValidatablePatternClassTest(
 	className: string,
-	validatablePatternConstructor: (input: any) => ValidatablePattern,
+	validatablePatternConstructor: new (input: any) => ValidatablePattern,
 	instances: ValidatablePatternTestSignature[]
 ) {
 	describe(`class: (ValidatablePattern) ${className}`, () => {
@@ -42,7 +57,7 @@ export function ValidatablePatternClassTest(
 				)
 
 			// .flush
-			FlushableResultableTestFlush(
+			FlushableResultingTestFlush(
 				validatablePatternInstance,
 				flushResult,
 				resultCompare

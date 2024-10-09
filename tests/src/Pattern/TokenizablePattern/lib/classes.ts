@@ -1,20 +1,36 @@
 import { describe } from "node:test"
 
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type {
 	TokenizablePattern,
 	TokenizationResult
 } from "../../../../../dist/src/Pattern/TokenizablePattern/interfaces.js"
-import { isTokenizablePattern } from "../../../../../dist/src/Pattern/TokenizablePattern/utils.js"
+
 import {
 	ClassConstructorTest,
-	FlushableResultableAmbigiousMethodTest,
-	FlushableResultableTestFlush
+	ResultingAmbigiousMethodTest,
+	FlushableResultingTestFlush
 } from "lib/lib.js"
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
 
-const TokenizablePatternConstructorTest = ClassConstructorTest(isTokenizablePattern)
+import { object, boolean, typeof as type } from "@hgargg-0710/one"
+const { structCheck } = object
+const { T } = boolean
+const { isFunction } = type
+
+const isTokenizablePattern = structCheck<TokenizablePattern>({
+	value: T,
+	result: T,
+	flush: isFunction,
+	tokenize: isFunction
+})
+
+const TokenizablePatternConstructorTest = ClassConstructorTest(
+	isTokenizablePattern,
+	["tokenize", "flush"],
+	["value", "result"]
+)
 const TokenizablePatternTokenizeTest =
-	FlushableResultableAmbigiousMethodTest<TokenizablePattern>("tokenize")
+	ResultingAmbigiousMethodTest<TokenizablePattern>("tokenize")
 
 type TokenizablePatternClassTestSignature<Type = any, InType = any, OutType = any> = {
 	input: any
@@ -28,7 +44,11 @@ type TokenizablePatternClassTestSignature<Type = any, InType = any, OutType = an
 
 export function TokenizablePatternClassTest<Type = any, InType = any, OutType = any>(
 	className: string,
-	tokenizablePatternConstructor: (x: any) => TokenizablePattern<Type, InType, OutType>,
+	tokenizablePatternConstructor: new (x: any) => TokenizablePattern<
+		Type,
+		InType,
+		OutType
+	>,
 	instances: TokenizablePatternClassTestSignature<Type, InType, OutType>[]
 ) {
 	describe(`class: (TokenizablePattern) ${className}`, () => {
@@ -47,7 +67,7 @@ export function TokenizablePatternClassTest<Type = any, InType = any, OutType = 
 				)
 
 			// .flush
-			FlushableResultableTestFlush(
+			FlushableResultingTestFlush(
 				tokenizablePatternInstance,
 				flushResult,
 				resultCompare

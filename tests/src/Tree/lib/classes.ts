@@ -1,10 +1,18 @@
 import assert from "node:assert"
 import { describe, it } from "node:test"
 
-import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
 import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
-import { isTree } from "../../../../dist/src/Tree/utils.js"
-import { ClassConstructorTest } from "lib/lib.js"
+import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
+import { FunctionalClassConctructorTest } from "lib/lib.js"
+
+import { object, typeof as type } from "@hgargg-0710/one"
+const { isFunction, isNumber } = type
+
+const { structCheck } = object
+const isTree = structCheck<Tree>({
+	lastChild: isNumber,
+	index: isFunction
+})
 
 function ChildlessTreeTest(childlessTree: any, propName: string) {
 	describe(`class: ChildlessTree (${propName})`, () =>
@@ -72,7 +80,7 @@ export function TreeTestSuite(
 	}
 }
 
-const TreeConstructorTest = ClassConstructorTest<Tree>(isTree)
+const TreeConstructorTest = FunctionalClassConctructorTest<Tree>(isTree)
 
 function TreeIndexTest(
 	tree: Tree,

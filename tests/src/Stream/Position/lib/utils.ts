@@ -1,12 +1,16 @@
+import type { StreamPredicate } from "../../../../../dist/src/Parser/ParserMap/interfaces.js"
+import type { BoundNameType } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
+import type { Rewindable } from "../../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
+
 import type {
 	DirectionalPosition,
 	PredicatePosition
 } from "../../../../../dist/src/Stream/PositionalStream/Position/interfaces.js"
 
-import type { Rewindable } from "../../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
-
-import { typeof as type } from "@hgargg-0710/one"
-const { isNumber, isFunction } = type
+import type {
+	ChangeType,
+	ReversibleStream
+} from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 
 import {
 	isBackward,
@@ -20,13 +24,12 @@ import {
 	positionStopPoint,
 	preserveDirection
 } from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
-import { equals, utilTest } from "lib/lib.js"
-import type {
-	ChangeType,
-	ReversibleStream
-} from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
-import type { StreamPredicate } from "../../../../../dist/src/Parser/ParserMap/interfaces.js"
-import type { BoundNameType } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
+
+import { utilTest } from "lib/lib.js"
+
+import { typeof as type, boolean } from "@hgargg-0710/one"
+const { isNumber, isFunction } = type
+const { equals } = boolean
 
 const positionTrivialEquality = (x: DirectionalPosition, y: DirectionalPosition) =>
 	(isNumber(x) && isNumber(y)) ||

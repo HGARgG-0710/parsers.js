@@ -5,19 +5,22 @@ import { function as _f } from "@hgargg-0710/one"
 const { and } = _f
 
 import type {
-	PositionalInputtedStream,
-	PositionalStream
+	Posed,
+	PositionalInputtedStream
 } from "../../../../../dist/src/Stream/PositionalStream/interfaces.js"
 import type { BasicReversibleStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 import type { Position } from "../../../../../dist/src/Stream/PositionalStream/Position/interfaces.js"
 
-import { uniNavigate } from "../../../../../dist/src/Stream/NavigableStream/utils.js"
-import { ClassConstructorTest, equals } from "lib/lib.js"
+import { uniNavigate } from "../../../../../dist/src/Stream/StreamClass/Navigable/utils.js"
+import { ClassConstructorTest } from "lib/lib.js"
 import { isStreamClassInstance } from "../../../../../dist/src/Stream/StreamClass/utils.js"
 import { isPositionalStream } from "../../../../../dist/src/Stream/PositionalStream/utils.js"
 
+import { boolean } from "@hgargg-0710/one"
+const { equals } = boolean
+
 function PositionalStreamPosTest(
-	stream: PositionalStream & BasicReversibleStream,
+	stream: Posed<Position> & BasicReversibleStream,
 	goPos: Position,
 	expectedPos: Position,
 	posCompare: (x: any, y: any) => boolean = equals

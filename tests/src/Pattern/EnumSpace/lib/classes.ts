@@ -5,8 +5,20 @@ import type {
 	EnumSpace,
 	Mappable
 } from "../../../../../dist/src/Pattern/EnumSpace/interfaces.js"
-import { isEnumSpace } from "../../../../../dist/src/Pattern/EnumSpace/utils.js"
 import { arraysSame, ClassConstructorTest } from "lib/lib.js"
+
+import { object, boolean, typeof as type } from "@hgargg-0710/one"
+const { structCheck } = object
+const { isFunction } = type
+const { T } = boolean
+
+const isEnumSpace = structCheck<EnumSpace>({
+	value: T,
+	add: isFunction,
+	map: isFunction,
+	join: isFunction,
+	copy: isFunction
+})
 
 function enumEquality(enumSpaceOrig: EnumSpace, enumSpaceCompared: EnumSpace) {
 	return arraysSame(
@@ -15,7 +27,11 @@ function enumEquality(enumSpaceOrig: EnumSpace, enumSpaceCompared: EnumSpace) {
 	)
 }
 
-const EnumSpaceConstructorTest = ClassConstructorTest(isEnumSpace)
+const EnumSpaceConstructorTest = ClassConstructorTest(
+	isEnumSpace,
+	["add", "map", "join", "copy"],
+	["value"]
+)
 
 function EnumSpaceCopyTest(enumInstance: EnumSpace) {
 	it("method: .copy", () => {
@@ -69,7 +85,7 @@ type EnumSpaceClassTestSignature = {
 
 export function EnumSpaceTest(
 	className: string,
-	enumConstructor: (size: number) => EnumSpace,
+	enumConstructor: new (size: number) => EnumSpace,
 	instances: EnumSpaceClassTestSignature[]
 ) {
 	describe(`class: (EnumSpace) ${className}`, () => {

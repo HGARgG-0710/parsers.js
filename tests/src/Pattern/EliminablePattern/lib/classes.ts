@@ -1,17 +1,31 @@
 import { describe } from "node:test"
 
-import { isEliminablePattern } from "../../../../../dist/src/Pattern/EliminablePattern/utils.js"
 import {
 	ClassConstructorTest,
-	FlushableResultableAmbigiousMethodTest,
-	FlushableResultableTestFlush
+	ResultingAmbigiousMethodTest,
+	FlushableResultingTestFlush
 } from "lib/lib.js"
 import type { EliminablePattern } from "../../../../../dist/src/Pattern/EliminablePattern/interfaces.js"
 
-const EliminablePatternConstructorTest =
-	ClassConstructorTest<EliminablePattern>(isEliminablePattern)
+import { object, boolean, typeof as type } from "@hgargg-0710/one"
+const { structCheck } = object
+const { isFunction } = type
+const { T } = boolean
 
-const EliminablePatternEliminateTest = FlushableResultableAmbigiousMethodTest("eliminate")
+const isEliminablePattern = structCheck<EliminablePattern>({
+	value: T,
+	result: T,
+	flush: isFunction,
+	eliminate: isFunction
+})
+
+const EliminablePatternConstructorTest = ClassConstructorTest<EliminablePattern>(
+	isEliminablePattern,
+	["eliminate", "flush"],
+	["value", "result"]
+)
+
+const EliminablePatternEliminateTest = ResultingAmbigiousMethodTest("eliminate")
 
 type EliminablePatternTestSignature = {
 	input: any
@@ -22,7 +36,7 @@ type EliminablePatternTestSignature = {
 
 export function EliminablePatternClassTest(
 	className: string,
-	eliminablePatternConstructor: (x: any) => EliminablePattern,
+	eliminablePatternConstructor: new (x: any) => EliminablePattern,
 	instances: EliminablePatternTestSignature[]
 ) {
 	describe(`class: (EliminablePattern) ${className}`, () => {
@@ -44,7 +58,7 @@ export function EliminablePatternClassTest(
 				)
 
 			// .flush
-			FlushableResultableTestFlush(
+			FlushableResultingTestFlush(
 				eliminablePatternInstance,
 				flushResult,
 				resultCompare

@@ -13,21 +13,47 @@ Order of todo-elimination [v0.3]:
 A. testing: 
 
 	1. Order, in which to fix things [that are broken currently]: 
-		1. Pattern; 
-		2. Tree; 
-		3. Stream; 
+		1. Stream; 
+			0. StreamClass [isStreamClassInstance, isReverisbleStreamClassInstance]; 
+				0.1. Use blockExtensions with appropriate is-functions on StreamClass-es, 
+					in conjuction with the basic ClassConstructorTest-s defined via 'isStreamClassInstance' and 'isReverisbleStreamClassInstance'; 
+
+			1.1. InputStream [check]; 
+			1.2. LimitedStream [check]; 
+			1.3. NestedStream; 
+			1.4. PositionalStream; 
+			1.5. PredicateStream; 
+			1.6. ProlongedStream; 
+			1.7. ReversibleStream; 
+			1.8. TransformedStream; 
+			1.9. TreeStream; 
 		
-		Order, in which to add things: 
-		1. IndexMap; 
+		Order, in which to add the new things: 
+			1. IndexMap; 
+				1.1. HashMap; 
+				1.2. InternalHash; 
+				1.3. FastLookupTable; 
+			2. TreeStream/MultiIndex; 
+				2.1. MultiIndexModifier; 
+				2.2. Slicer; 
+			3. TreeStream/TreeWalker; 
+			4. Parser; 
 	2. Changes to tests [for modules]: 
 
 		0. GENERALLY: 	
 			0.1. For constructors - create individual 'is' functions (using 'structCheck' for simplicity); 
-			0.2. Renew the 'ClassConstructor' function to include: 
-				0.2.1. That the properties on it are NOT OWN [that being, that the memory saving is real]; 
-					For this, one'll need a special set of properties to be set as 'prototype'-belonging; 
-					Check for such 'p' that: 'p in x && !ownKeys(x).includes(p)'; 
-		1. Stream-s: add '.init', and '.super' checks [to the '.is']; 
+		1. Stream-s: add '.init', and '.super' checks [to the '.is', while also adding it...]; 
+			1.1. For '.init': 
+				1.1.1. Create one constructor test that is 'init'-less (basic tests); 
+				1.1.2. Create another, which does: 
+					const instance = new constructor()
+					instance.init(...input)
+
+					And then - the rest of the stuff, like the 1.1.1. (this is to verify the functional equivalence of two semantics); 
+
+				[undone]
+				1.1.3. Create a third, which is plain '.init', and checks for changes in the appropriate parts of the definition; 
+					This one is CREATED PER-StreamClass ONLY!
 		2. IndexMap: 
 			2.1. Add FastLookupTable tests [design is the same for different classes]; 
 			2.2. Add HashMap tests [design is the same for different classes]; 
@@ -155,6 +181,15 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	As, CPS is (quite) time-costly to actually run (due to amount of stack usage [primary] + the stack unwinding + additional checks...),
 		this sort of thing would be useful for applications where speed of little importance
 			(that is: NOT things like apps/websites/interpreters, and so forth; Stuff like AOT-compilers, perhaps);
+
+	HOWEVER: 
+
+		1. As said previously, it IS quite costly to do CPS, so: 
+			1.1. See, whether it's feasible from time-perspective (how much slower it is, whether it's possible, or whether it's way too slow); 
+			1.2. If not feasible - abandon the whole CPS idea completely; 
+
+			To find out - benchmark; Write a sketch for parsing a very nested expression [sufficiently nested to crash the current API] 
+				using the Infinite-Stack-CPS approach, then - measure and decide...; 
 	
 2. New Streams/Parsers + some minor stuff/code-quality/minimalism: 
 
@@ -174,8 +209,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Would permit user to store a '.state.size: Pattern<number>' property (Pointer(number)) on the ParserState-s, 
 			for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
 				and use the tree for evaluation; 
-		Also - it wouldn't check for the '.isEnd', so "last element" could be added several times
-			[otherwise, the purpose of the optimization is largely defeated]; 
 
 	2.2. TreeStream: create two versions; 
 
@@ -500,6 +533,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			REMOVE the unneeded ones; 
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
+
+	2.25. Rename the 'array' into 'collection'; 
 		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
