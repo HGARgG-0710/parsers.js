@@ -1,15 +1,17 @@
-import type { TreeWalker } from "./TreeWalker/interfaces.js"
-import type { MultiIndex } from "./MultiIndex/interfaces.js"
-import type { Posed } from "../PositionalStream/interfaces.js"
-import type { Rewindable } from "../StreamClass/Rewindable/interfaces.js"
-import type { Inputted } from "../UnderStream/interfaces.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { TreeWalker } from "../../Tree/TreeWalker/interfaces.js"
+import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
+import type {
+	Rewindable,
+	Inputted,
+	Copiable,
+	Navigable,
+	ReversedStreamClassInstance
+} from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
-import type { Copiable } from "../StreamClass/Copiable/interfaces.js"
-import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
-import type { Superable } from "../StreamClass/Superable/interfaces.js"
+import type { Superable } from "../StreamClass/interfaces.js"
 
 export interface BasicTreeStream<Type = any>
 	extends BasicStream<InTreeType<Type>>,
@@ -32,6 +34,3 @@ export interface EffectiveTreeStream<Type = any>
 	response: string
 	lastLevelWithSiblings: number
 }
-
-export * as TreeWalker from "./TreeWalker/interfaces.js"
-export * as MultiIndex from "./MultiIndex/interfaces.js"

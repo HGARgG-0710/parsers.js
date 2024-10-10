@@ -1,24 +1,24 @@
-import type { Position } from "../PositionalStream/Position/interfaces.js"
-import {
-	directionCompare,
-	positionConvert,
-	positionEqual,
-	positionNegate
-} from "../PositionalStream/Position/utils.js"
-
-import { fastNavigate } from "../StreamClass/Navigable/utils.js"
-
-import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
+import type { Position } from "../../Position/interfaces.js"
 import type {
 	BoundableStream,
 	EffectiveLimitedStream,
 	LimitedUnderStream
 } from "./interfaces.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+import {
+	directionCompare,
+	positionConvert,
+	positionEqual,
+	positionNegate
+} from "../../Position/utils.js"
 
-import { boolean, typeof as type } from "@hgargg-0710/one"
-const { T } = boolean
+import { fastNavigate } from "../StreamClass/utils.js"
+
+import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
+import { Inputted } from "../StreamClass/classes.js"
+import { superInit } from "../StreamClass/utils.js"
+
+import { typeof as type } from "@hgargg-0710/one"
+import { LimitedStream } from "src/constants.js"
 const { isUndefined } = type
 
 export function limitStream<Type = any>(
@@ -87,7 +87,7 @@ export function effectiveLimitedStreamInitialize<Type = any>(
 		if (!isUndefined(from)) {
 			if (isUndefined(to)) {
 				to = from
-				from = T // explanation: the 'from = T' will cause expression 'while (!from(stream)) stream.next()' become 'while (false) stream.next()', essentially being a no-op;
+				from = LimitedStream.NoMovementPredicate
 			}
 
 			fastNavigate(input, from)

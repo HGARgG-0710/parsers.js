@@ -1,5 +1,5 @@
-import type { Tree } from "../../../Tree/interfaces.js"
-import type { BasicTreeStream } from "../interfaces.js"
+import type { Tree } from "../interfaces.js"
+import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "./interfaces.js"
 import {
 	treeWalkerPushFirstChild,

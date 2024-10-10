@@ -1,11 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IsEndCurrable } from "../StreamClass/interfaces.js"
+import type { PredicatePosition } from "../../Position/interfaces.js"
 import type { EffectivePredicateStream } from "./interfaces.js"
-import type {
-	Position,
-	PredicatePosition
-} from "../PositionalStream/Position/interfaces.js"
 
 import {
 	effectivePredicateStreamIsEnd,
@@ -14,7 +11,7 @@ import {
 	effectivePredicateStreamNext,
 	effectivePredicateStreamInitialize
 } from "./methods.js"
-import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
+import { inputDefaultIsEnd } from "../StreamClass/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
@@ -22,7 +19,7 @@ const PredicateStreamBase = StreamClass({
 	currGetter: predicateStreamCurr,
 	baseNextIter: effectivePredicateStreamNext,
 	isCurrEnd: effectivePredicateStreamIsEnd,
-	defaultIsEnd: underStreamDefaultIsEnd
+	defaultIsEnd: inputDefaultIsEnd
 })
 
 export class PredicateStream<Type = any>

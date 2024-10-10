@@ -4,22 +4,11 @@
 [v0.3]
 
 CURR TODO LIST: 
-3.26. [maybe?] Delete the 'PositionalStream'? 
-	Originating as an attempt to generalize the '.pos', it truly does appear to be useless; 
-	Because: 
-
-		1. It DOESN'T sync with doing '.init' on the '.input' (a SEPARATE '.init' is needed to update the index); 
-		2. The user doesn't usually need a position [in practice]; 
-		3. Another layer adds overhead (small, but still - overhead); 
-
-	Now, one may want to just add the '.pos' to appropriate classes... 
-	BUT, it could be quite costly from memory perspective (especially for something like NestedStream); 
-		QUESTION - what to do? 
-		SOLUTION: 
-			1. Introduce the 'positional' methods, and an ADDITIONAL CONDITION of 'hasPosition: boolean = false', which determines whether the stream is a 'Posed' stream; 
-			2. Create factories with 'hasPosition: boolean', which would RETURN AN APPROPRIATE STREAM; 
-			3. The factory streams will differ in prototypes - those with 'hasPosition: boolean' would HAVE THE '.pos'-altering methods INSTEAD; 
-			4. Create TWO different Base classes for this case (one - for Pos-having methods and one - for Non-pos-having methods); 
+3.26. Finish replacing the PositionalStream: 
+		1. Introduce the 'positional' methods, and an ADDITIONAL CONDITION of 'hasPosition: boolean = false', which determines whether the stream is a 'Posed' stream; 
+		2. Create factories with 'hasPosition: boolean', which would RETURN AN APPROPRIATE STREAM; 
+		3. The factory streams will differ in prototypes - those with 'hasPosition: boolean' would HAVE THE '.pos'-altering methods INSTEAD; 
+		4. Create TWO different Base classes for this case (one - for Pos-having methods and one - for Non-pos-having methods); 
 	
 	Then, one will have another separation [testing]: 
 
@@ -35,11 +24,13 @@ CURR TODO LIST:
 
 	To add the possibility of having '.pos' on: 
 		1. StreamTokenizer;  
+		2. NestedStream
+		3. ReversedStream [note: this WILL require quite some changing...]; 
 
 Order of todo-elimination [v0.3]: 
-	Begin the testing anew [re-plan it]; 
-	-1. re-add the 'is'-functions for the testing; 
-		The constructor tests still need them; 
+	3.27.
+	3.26.
+	A.
 
 A. testing: 
 
@@ -195,7 +186,7 @@ B. documentation (change/fix it...);
 		B1.3. Classes: 
 			Describes individual classes; 
 			THEY ARE LISTED AS EXTENSION-HIERARCHIES; 
-		B1.4. Factories: 
+		B1.4. Class-Factories: 
 			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
 		B1.5. Interfaces; 
 			Lists the library's interfaces. 
@@ -256,19 +247,27 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
 				and use the tree for evaluation; 
 
-	2.2. TreeStream: create two versions; 
+	2.2. TreeStream: create two new versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
 
-		Rename the 'TreeStream' to 'TreeStreamPre', and create an implemnetation for the 'TreeStreamPost'; 
-		This is (particularly) useful for some types of interpreters; 
+		1. Rename the 'TreeStream' to 'TreeStreamPre', and create an implemnetation for the 'TreeStreamPost'; 
+			This is (particularly) useful for some types of interpreters; 
 
-		The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
-		The Post visits first the children, then the siblings, only THEN the parent [in reverse order]; 
+			The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
+			The Post visits first the children, then the siblings, only THEN the parent [when there are NO MORE children - then the parent is visited]; 
 
-		Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
-			whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
+			Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
+				whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
+
+			[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
+
+		2. Create a 'TreeStreamSwitch', which would be capable of "choosing" [based off underlying IndexMap] 
+			whether to give items in the 'Post' order (parent first - children after), 
+				or the 'Pre' order (children first - parent after);
+			
+			This would be a class-factory; 
 
 	2.3. Implement a 'PartialValidator': 
 		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer'
@@ -405,18 +404,15 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			- this really only just provides a minor abstraction over the whole thing (frees the user from needing to use the exports of the library); 
 		This kind of thing is (somewhat) against the library's "all-minimialism" approach; 
 	
-	2.11. CREATE a new file 'constants': this will keep track of in-library constants; 
-		Put the 'PRE_CURR_INIT', and other such things THERE; 
-
-	2.12. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.11. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
-		2.17.1. DO ACTIVE MICRO-BENCHMARKING!
+		2.11.1. DO ACTIVE MICRO-BENCHMARKING!
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 	
-	2.13. utility - 'nestedInfo'; 
+	2.12. utility - 'nestedInfo'; 
 
 		1. Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 			NOTE: the MAX depth achievable; 
@@ -424,39 +420,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		Returns it as a pair; 
 
-	2.14. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.13. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
-	
-	2.15. TypeScript - use 'enum's; 
 
-		Learned about 'enum's being present in TypeScript; 
-		Use them to designate "special constants" (ALSO - take those out into separate files); 
-
-		Examples of applications (already present): 
-
-			1. StreamClass - PRE_CURR_INIT, POST_CURR_INIT, POST_START...; 
-			2. ValidationOutput: 
-				1. null - NoCoverage; 
-				2. true - Coverage; 
-				3. [false, n] - ValidationError(n); // GENERALIZE THE 'TokenType' to an 'Isable', with '.is(x: any): boolean'; 
-															Make 'NoCoverage', 'Coverage' and 'ValidationError' into individual 'Isable'-s, 
-															identifying outputs from a 'PatternValidator'; 
-
-															GENERALLY, make this sort of distinction BETWEEN DIFFERENT KINDS OF 'Validator'-s!
-
-		ALSO - adapt either the SCREAMING_TRAIN_CASE or PascalCase for the constants; 
-		[Current preference is to the latter...]
-
-	2.16. Idea for a method: ProlongedStream.prolong; 	
+	2.14. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams' [modifying the '.isEnd' accordingly]; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.17. [Maaayybe?] Create a 'samples' directory; 
+	2.15. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -470,7 +446,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
 
-	2.18. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.16. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
@@ -478,7 +454,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 
-	2.19. Generalize the streams even further for general copying implementation: 
+	2.17. Generalize the streams even further for general copying implementation: 
 
 		Have to have: 
 			
@@ -494,12 +470,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		The method would go on the 'StreamClass'; 
 
-	2.20. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
+	2.18. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
 		The former can easily be replaced with an appropriate table on BasicStream, 
 			while 'BasicParser' is equivalent to a 'TransformedStream' (or NestedlyTransformedStream); 
 		Consider removal...
 	
-	2.21. v8-specific optimizations: 
+	2.19. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
 	
 		CONCLUSION: 
@@ -534,7 +510,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						2. profile, break the execution down on several tiny pieces; Then - benchmark and optimize them accordingly; 
 							For this, use results from samples from one's benchmarks library;  
 	
-	2.22. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
+	2.20. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
 	
 		Do only if there are code aspects suffering from this significantly: 
@@ -549,7 +525,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			[need for calling the '.isCurrEnd()' two times more]; 
 		Again, do this ONLY if the performance difference is SIGNIFICANT!
 	
-	2.23. util - enumerateTree; 
+	2.21. util - enumerateTree; 
 		Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
 			to single-array-siblings form (the current ChildrenTree); 	
 		This would permit a more "variable" set of trees (those that have properties with fixed names), 
@@ -573,14 +549,14 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				]
 			}
 		
-	2.24. About generics - relax them; 
+	2.22. About generics - relax them; 
 		Use ONLY WHEN NEEDED; 
 		For example: a method makes use of X generics, out of which Y < X is needed [id est, used somewhere beyond the 'this: ...' in the parameters list]; 
 			REMOVE the unneeded ones; 
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
 
-	2.25. Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
+	2.23. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
 		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
@@ -590,5 +566,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 			1. 'delegate' functions [from here]; 
 			2. the 'classWrapper' function; 
+			3. the 'AssignmentClass' function; 
 		
 		Expand the list; 

@@ -1,7 +1,6 @@
 import type { ReversedStream } from "./interfaces.js"
-import { fastFinish } from "../StreamClass/Finishable/utils.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+import { fastFinish, superInit } from "../StreamClass/utils.js"
+import { Inputted } from "../StreamClass/classes.js"
 
 export function reversedStreamInitialize<Type = any>(
 	this: ReversedStream<Type>,

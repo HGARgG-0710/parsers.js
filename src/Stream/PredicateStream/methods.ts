@@ -1,11 +1,10 @@
 import type { EffectivePredicateStream, PredicateStream } from "./interfaces.js"
 import type { IsEndCurrable } from "../StreamClass/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { PredicatePosition } from "../PositionalStream/Position/interfaces.js"
-import { uniNavigate } from "../StreamClass/Navigable/utils.js"
-import { preserveDirection } from "../PositionalStream/Position/utils.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+import type { PredicatePosition } from "../../Position/interfaces.js"
+import { preserveDirection } from "../../Position/utils.js"
+import { uniNavigate, superInit } from "../StreamClass/utils.js"
+import { Inputted } from "../StreamClass/classes.js"
 
 export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
 	uniNavigate(this.input, this.predicate)

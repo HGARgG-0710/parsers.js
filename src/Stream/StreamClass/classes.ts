@@ -1,17 +1,23 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+
+import { StreamClass as StreamClassNamespace } from "src/constants.js"
+import { AssignmentClass } from "src/utils.js"
+
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
-	StartedType
+	StartedType,
+	Stateful as StatefulType,
+	Inputted as InputtedType
 } from "./interfaces.js"
 
-import { finish } from "./Finishable/methods.js"
-import { streamIterator } from "./Iterable/methods.js"
-import { navigate } from "./Navigable/methods.js"
-import { rewind } from "./Rewindable/methods.js"
 import {
+	rewind,
+	navigate,
+	streamIterator,
+	finish,
 	currSetter,
 	baseCurr,
-	PRE_CURR_INIT,
 	nextHandler,
 	prevHandler
 } from "./methods.js"
@@ -47,8 +53,8 @@ export function StreamClass<Type = any>(
 		[Symbol.iterator]: () => Generator<Type>
 
 		init(): void {
-			this.realCurr = null
-			this.isStart = PRE_CURR_INIT
+			this.realCurr = StreamClassNamespace.DefaultRealCurr
+			this.isStart = StreamClassNamespace.PreCurrInit
 			this.isEnd = defaultIsEnd.call(this)
 			// note: call to the 'initGetter' (IN CASE IT'S PRESENT); Otherwise, a no-op
 			if (preInit && !this.isEnd) this.curr
@@ -76,3 +82,6 @@ export function StreamClass<Type = any>(
 
 	return streamClass
 }
+
+export const Stateful = AssignmentClass<object, StatefulType>("state")
+export const Inputted = AssignmentClass<any, InputtedType>("input")

@@ -1,10 +1,7 @@
 import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { Initializable } from "./Initializable/interfaces.js"
-import type { Rewindable } from "./Rewindable/interfaces.js"
-import type { Finishable } from "./Finishable/interfaces.js"
-import type { Navigable } from "../StreamClass/Navigable/interfaces.js"
+import type { Position } from "../../Position/interfaces.js"
 
 export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"
 export type BaseIterPropNameType = "baseNextIter" | "basePrevIter"
@@ -13,6 +10,42 @@ export type BoundNameType = "isEnd" | "isStart"
 
 export type StartedType = 1 | boolean
 export type StatefulStarted = Started<StartedType>
+
+// * Optional Property-interfaces
+
+export interface Superable extends Summat {
+	super: Summat
+}
+
+export interface Stateful extends Summat {
+	state: object
+}
+
+export interface Copiable<Type = any> extends Summat {
+	copy: () => Type
+}
+
+export interface Inputted<Type = any> extends Summat {
+	input: Type
+}
+
+// * Mandatory Property-interfaces
+
+export interface Initializable<Type = any> extends Summat {
+	init: (...x: any[]) => Type
+}
+
+export interface Navigable<Type = any> extends Summat {
+	navigate: (position: Position) => Type
+}
+
+export interface Finishable<Type = any> extends Summat {
+	finish: () => Type
+}
+
+export interface Rewindable<Type = any> extends Summat {
+	rewind: () => Type
+}
 
 export interface IsEndCurrable extends Summat {
 	isCurrEnd: () => boolean

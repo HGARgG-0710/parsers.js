@@ -5,17 +5,17 @@ import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
 
 import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
 import {
-	underStreamDefaultIsEnd,
-	underStreamIsEnd
-} from "../../Stream/UnderStream/methods.js"
+	inputDefaultIsEnd,
+	inputIsEnd
+} from "src/Stream/StreamClass/methods.js"
 
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 
 const StreamTokenizerBase = StreamClass({
 	initGetter: streamTokenizerNext,
-	isCurrEnd: underStreamIsEnd,
+	isCurrEnd: inputIsEnd,
 	baseNextIter: streamTokenizerNext,
-	defaultIsEnd: underStreamDefaultIsEnd
+	defaultIsEnd: inputDefaultIsEnd
 })
 
 const StreamTokenizerPrototype = {

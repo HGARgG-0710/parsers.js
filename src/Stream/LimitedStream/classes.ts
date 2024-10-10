@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Position } from "../PositionalStream/Position/interfaces.js"
+import type { Position } from "../../Position/interfaces.js"
 import type {
 	LimitedUnderStream,
 	EffectiveLimitedStream,
@@ -16,17 +16,17 @@ import {
 	effectiveLimitedStreamPrev,
 	effectiveLimitedStreamIsStart
 } from "./methods.js"
-import { underStreamCurr, underStreamDefaultIsEnd } from "../UnderStream/methods.js"
+import { inputCurr, inputDefaultIsEnd } from "../StreamClass/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
 const LimitedStreamBase = StreamClass({
-	currGetter: underStreamCurr,
+	currGetter: inputCurr,
 	baseNextIter: effectiveLimitedStreamNext,
 	basePrevIter: effectiveLimitedStreamPrev,
 	isCurrEnd: effectiveLimitedStreamIsEnd,
 	isCurrStart: effectiveLimitedStreamIsStart,
-	defaultIsEnd: underStreamDefaultIsEnd
+	defaultIsEnd: inputDefaultIsEnd
 }) as new () => ReversedStreamClassInstance
 
 export class LimitedStream<Type = any>

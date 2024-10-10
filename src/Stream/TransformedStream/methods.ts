@@ -1,12 +1,13 @@
 import type { StreamTransform } from "../../Parser/ParserMap/interfaces.js"
-import { TransformedStream as TransformedStreamConstructor } from "./classes.js"
 import type {
 	EndableTransformableStream,
 	EffectiveTransformedStream,
 	TransformedStream
 } from "./interfaces.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+
+import { Inputted } from "../StreamClass/classes.js"
+import { superInit } from "../StreamClass/utils.js"
+import { TransformedStream as TransformedStreamConstructor } from "./classes.js"
 
 export function transformStream<UnderType = any, UpperType = any>(
 	this: EndableTransformableStream<UnderType, UpperType>,

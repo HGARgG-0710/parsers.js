@@ -4,18 +4,12 @@ import type { BaseParsingState } from "./interfaces.js"
 import type { StreamHandler } from "../Parser/ParserMap/interfaces.js"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
-import type {
-	DirectionalPosition,
-	Position
-} from "../Stream/PositionalStream/Position/interfaces.js"
+import type { DirectionalPosition, Position } from "../Position/interfaces.js"
 import type { Collection } from "../Pattern/Collection/interfaces.js"
 
-import {
-	positionStopPoint,
-	positionNegate
-} from "../Stream/PositionalStream/Position/utils.js"
+import { positionStopPoint, positionNegate } from "../Position/utils.js"
 
-import { uniNavigate } from "../Stream/StreamClass/Navigable/utils.js"
+import { uniNavigate } from "../Stream/StreamClass/utils.js"
 import { ArrayCollection } from "../Pattern/Collection/classes.js"
 
 export const firstFinished = function <T extends BaseParsingState = ParsingState>(

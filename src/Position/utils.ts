@@ -1,7 +1,7 @@
-import type { BasicStream } from "../../interfaces.js"
-import type { ChangeType } from "../../ReversibleStream/interfaces.js"
-import type { BoundNameType } from "../../StreamClass/interfaces.js"
-import type { Posed } from "../interfaces.js"
+import type { BasicStream } from "../Stream/interfaces.js"
+import type { ChangeType } from "../Stream/ReversibleStream/interfaces.js"
+import type { BoundNameType } from "../Stream/StreamClass/interfaces.js"
+import type { Posed } from "./interfaces.js"
 
 import type {
 	DirectionalPosition,
@@ -10,7 +10,7 @@ import type {
 	PredicatePosition
 } from "./interfaces.js"
 
-import { previous, next } from "../../../utils.js"
+import { previous, next } from "../utils.js"
 
 import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
 const { structCheck } = object

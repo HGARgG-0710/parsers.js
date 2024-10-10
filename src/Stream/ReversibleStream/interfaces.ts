@@ -1,8 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
-import type { Inputted } from "../UnderStream/interfaces.js"
+import type { Inputted } from "../StreamClass/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Superable } from "../StreamClass/Superable/interfaces.js"
+import type { Superable } from "../StreamClass/interfaces.js"
 
 export interface Started<Type = boolean> extends Summat {
 	isStart: Type

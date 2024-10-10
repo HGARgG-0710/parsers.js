@@ -1,10 +1,12 @@
 import type { Tree } from "../../Tree/interfaces.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { TreeStream as TreeStreamConstructor } from "./classes.js"
-import { type EffectiveTreeStream, type TreeStream } from "./interfaces.js"
+import type { EffectiveTreeStream, TreeStream } from "./interfaces.js"
 
-import type { MultiIndex as MultiIndexType } from "./MultiIndex/interfaces.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+import { Inputted } from "../StreamClass/classes.js"
+import { TreeStream as TreeStreamConstructor } from "./classes.js"
+
+import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
+import { superInit } from "../StreamClass/utils.js"
+import { StreamClass } from "../../constants.js"
 
 export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
@@ -20,7 +22,7 @@ export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Ty
 
 export function effectiveTreeStreamRewind<Type = any>(this: EffectiveTreeStream<Type>) {
 	this.walker.restart()
-	this.isStart = true
+	this.isStart = StreamClass.PostCurrInit
 	return this.curr
 }
 
@@ -83,6 +85,3 @@ export function effectiveTreeStreamInitialize<Type = any>(
 	}
 	return this
 }
-
-export * as TreeWalker from "./TreeWalker/methods.js"
-export * as MultiIndex from "./MultiIndex/methods.js"

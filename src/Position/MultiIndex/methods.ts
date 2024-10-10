@@ -1,4 +1,4 @@
-import type { BasicTreeStream } from "../interfaces.js"
+import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { MultiIndex } from "./interfaces.js"
 import { MultiIndex as MultiIndexConstructor } from "./classes.js"
 

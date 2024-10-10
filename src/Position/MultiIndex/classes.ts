@@ -1,4 +1,4 @@
-import type { BasicTreeStream } from "../interfaces.js"
+import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { MultiIndexModifier as MultiIndexModifierType } from "./MultiIndexModifier/interfaces.js"
 import type { Slicer as SlicerType } from "./Slicer/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "./interfaces.js"

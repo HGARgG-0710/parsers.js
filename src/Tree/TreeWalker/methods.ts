@@ -1,6 +1,6 @@
-import type { Tree } from "../../../Tree/interfaces.js"
-import { sequentialIndex } from "../../../Tree/utils.js"
+import type { Tree } from "../interfaces.js"
 import type { TreeWalker } from "./interfaces.js"
+import { sequentialIndex } from "../utils.js"
 
 import { array, object } from "@hgargg-0710/one"
 const { last } = array

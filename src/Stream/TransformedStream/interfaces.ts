@@ -1,11 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { BasicStream } from "../interfaces.js"
-import type { Posed } from "../PositionalStream/interfaces.js"
-import type { Inputted } from "../UnderStream/interfaces.js"
-import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
 import type { StreamTransform } from "../../Parser/ParserMap/interfaces.js"
-import type { Superable } from "../StreamClass/Superable/interfaces.js"
+import type { BasicStream } from "../interfaces.js"
+import type {
+	Inputted,
+	Superable,
+	EndableStream,
+	StreamClassInstance
+} from "../StreamClass/interfaces.js"
 
 export interface Transformable<InType = any, OutType = any> extends Summat {
 	transform: StreamTransform<InType, OutType>

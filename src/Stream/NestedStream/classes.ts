@@ -4,7 +4,7 @@ import type { StreamPredicate } from "../../Parser/ParserMap/interfaces.js"
 import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
 
-import { underStreamDefaultIsEnd } from "../UnderStream/methods.js"
+import { inputDefaultIsEnd } from "../StreamClass/methods.js"
 import {
 	effectiveNestedStreamInitCurr,
 	effectiveNestedStreamNext,
@@ -19,7 +19,7 @@ const NestedStreamBase = StreamClass({
 	isCurrEnd: effectiveNestedStreamIsEnd,
 	baseNextIter: effectiveNestedStreamNext,
 	initGetter: effectiveNestedStreamInitCurr,
-	defaultIsEnd: underStreamDefaultIsEnd,
+	defaultIsEnd: inputDefaultIsEnd,
 	preInit: true
 })
 

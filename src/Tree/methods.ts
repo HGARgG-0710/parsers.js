@@ -26,3 +26,5 @@ export function childrenCount(propName: string = "children") {
 		  }
 		: baseChildrenCount
 }
+
+export * as TreeWalker from "./TreeWalker/methods.js"

@@ -3,10 +3,7 @@ import type { HasType } from "./IndexMap/interfaces.js"
 import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
 import type { StreamHandler } from "./Parser/ParserMap/interfaces.js"
 import type { BasicStream } from "./Stream/interfaces.js"
-import type {
-	Position,
-	PredicatePosition
-} from "./Stream/PositionalStream/Position/interfaces.js"
+import type { Position, PredicatePosition } from "./Position/interfaces.js"
 import type {
 	BasicReversibleStream,
 	ReversibleStream
@@ -147,8 +144,16 @@ export const classWrapper =
 	(...args: any[]) =>
 		new X(...args)
 
+export const AssignmentClass =
+	<Type = any, OutType extends Summat = Summat>(propName: string) =>
+	(x: Summat, propVal: Type): OutType => {
+		x[propName] = propVal
+		return x as OutType
+	}
+
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"
+export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
 export * as Tree from "./Tree/utils.js"

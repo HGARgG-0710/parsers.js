@@ -10,13 +10,13 @@ import {
 	effectiveTreeStreamIsStart
 } from "./methods.js"
 
-import type { MultiIndex as MultiIndexType } from "./MultiIndex/interfaces.js"
-import type { TreeWalker as TreeWalkerType } from "./TreeWalker/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
+import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
+import type { TreeWalker as TreeWalkerType } from "../../Tree/TreeWalker/interfaces.js"
 
-import { TreeWalker } from "./TreeWalker/classes.js"
+import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
+import { MultiIndex } from "../../Position/MultiIndex/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
-import { MultiIndex } from "./MultiIndex/classes.js"
 
 import { boolean } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
@@ -43,7 +43,7 @@ export class TreeStream<Type = any>
 	lastLevelWithSiblings: number
 
 	copy: () => EffectiveTreeStream<Type>
-	navigate: (position: MultiIndex) => InTreeType<Type>
+	navigate: (position: MultiIndexType) => InTreeType<Type>
 	super: Summat
 
 	init: (tree?: Tree<Type>) => EffectiveTreeStream<Type>
@@ -62,6 +62,3 @@ Object.defineProperties(TreeStream.prototype, {
 	copy: { value: effectiveTreeStreamCopy },
 	navigate: { value: effectiveTreeStreamNavigate }
 })
-
-export * as TreeWalker from "./TreeWalker/classes.js"
-export * as MultiIndex from "./MultiIndex/classes.js"

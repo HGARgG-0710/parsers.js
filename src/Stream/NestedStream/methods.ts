@@ -1,8 +1,7 @@
 import type { EffectiveNestedStream } from "./interfaces.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
-import { uniFinish } from "../StreamClass/Finishable/utils.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { superInit } from "../StreamClass/Superable/utils.js"
+import { uniFinish, superInit } from "../StreamClass/utils.js"
+import { Inputted } from "../StreamClass/classes.js"
 
 export function effectiveNestedStreamInitCurr<Type = any>(
 	this: EffectiveNestedStream<Type>

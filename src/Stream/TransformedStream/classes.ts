@@ -1,4 +1,4 @@
-import { underStreamDefaultIsEnd, underStreamIsEnd } from "../UnderStream/methods.js"
+import { inputDefaultIsEnd, inputIsEnd } from "../StreamClass/methods.js"
 
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
@@ -18,10 +18,10 @@ import {
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 const TransformedStreamBase = StreamClass({
-	isCurrEnd: underStreamIsEnd,
+	isCurrEnd: inputIsEnd,
 	initGetter: transformedStreamInitCurr,
 	baseNextIter: transformedStreamNext,
-	defaultIsEnd: underStreamDefaultIsEnd
+	defaultIsEnd: inputDefaultIsEnd
 })
 
 export class TransformedStream<UnderType = any, UpperType = any>

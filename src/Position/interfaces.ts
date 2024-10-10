@@ -1,6 +1,6 @@
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Pattern } from "../../../Pattern/interfaces.js"
-import type { BasicStream } from "../../interfaces.js"
+import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
+import type { Pattern } from "../Pattern/interfaces.js"
+import type { BasicStream } from "../Stream/interfaces.js"
 
 export type Position<Type = any> = PredicatePosition | PositionObject<Type> | number
 export type DirectionalPosition = PredicatePosition | number
@@ -15,4 +15,8 @@ export interface PositionObject<Type = any> extends Pattern<Type> {
 	equals?: (position: Position) => boolean
 	compare?: (position: Position, stream?: BasicStream) => boolean
 	copy?: () => PositionObject<Type>
+}
+
+export interface Posed<Type = any> extends Summat {
+	pos: Type
 }

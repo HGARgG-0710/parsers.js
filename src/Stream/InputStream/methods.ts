@@ -1,13 +1,15 @@
-import type { Position } from "../PositionalStream/Position/interfaces.js"
-import { positionConvert } from "../PositionalStream/Position/utils.js"
+import type { Position } from "../../Position/interfaces.js"
 import type { EffectiveInputStream, InputStream } from "./interfaces.js"
-import { InputStream as InputStreamConstructor } from "./classes.js"
 import type { Indexed } from "../interfaces.js"
-import { Inputted } from "../UnderStream/classes.js"
-import { uniNavigate } from "../StreamClass/Navigable/utils.js"
+
+import { InputStream as InputStreamConstructor } from "./classes.js"
+import { positionConvert } from "../../Position/utils.js"
+import { Inputted } from "../StreamClass/classes.js"
+import { uniNavigate, superInit } from "../StreamClass/utils.js"
+
+import { StreamClass } from "../../constants.js"
 
 import { typeof as type } from "@hgargg-0710/one"
-import { superInit } from "../StreamClass/Superable/utils.js"
 const { isNumber } = type
 
 export function inputStreamIsEnd<Type = any>(this: InputStream<Type>) {
@@ -19,7 +21,7 @@ export function inputStreamNext<Type = any>(this: InputStream<Type>) {
 }
 
 export function effectiveInputStreamRewind<Type = any>(this: EffectiveInputStream<Type>) {
-	this.isStart = true
+	this.isStart = StreamClass.PostCurrInit
 	return this.input[(this.pos = 0)]
 }
 

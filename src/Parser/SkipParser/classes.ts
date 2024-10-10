@@ -1,10 +1,11 @@
+import type { ParserMap } from "../ParserMap/interfaces.js"
+import type { SkipType, SkipState, FixedSkipState } from "./interfaces.js"
+import type { Position } from "../../Position/interfaces.js"
+
 import { ArrayCollection } from "../../Pattern/Collection/classes.js"
 import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
-import type { ParserMap } from "../ParserMap/interfaces.js"
 import { firstFinished } from "../utils.js"
-import type { SkipType, SkipState, FixedSkipState } from "./interfaces.js"
 import { fixedParserChange, skipParserChange } from "./methods.js"
-import type { Position } from "../../Stream/PositionalStream/Position/interfaces.js"
 
 export function SkipParser<OutType = any>(
 	parser: ParserMap<SkipType<Iterable<OutType>>, SkipState<OutType>>

@@ -1,10 +1,10 @@
+import type { StreamTokenizer } from "./interfaces.js"
+import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
+import { Inputted } from "src/Stream/StreamClass/classes.js"
+import { superInit } from "src/Stream/StreamClass/utils.js"
+
 import { typeof as type } from "@hgargg-0710/one"
 const { isFunction } = type
-
-import type { StreamTokenizer } from "./interfaces.js"
-import { Inputted } from "../../Stream/UnderStream/classes.js"
-import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
-import { superInit } from "../../Stream/StreamClass/Superable/utils.js"
 
 export function streamTokenizerNext<Type = any>(this: StreamTokenizer<Type>) {
 	const mapped = this.tokenMap(this.input)

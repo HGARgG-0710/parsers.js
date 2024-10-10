@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Copiable } from "../Stream/StreamClass/Copiable/interfaces.js"
+import type { Copiable } from "src/Stream/StreamClass/interfaces.js"
 
 export interface IndexingFunction<KeyType = any> extends Summat {
 	(curr: KeyType, x: any): boolean

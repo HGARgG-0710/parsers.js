@@ -1,9 +1,18 @@
+import type { BasicStream } from "../interfaces.js"
+import type { Position } from "../../Position/interfaces.js"
+import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
+
 import type {
 	BoundNameType,
 	BaseIterPropNameType,
 	IterCheckPropNameType,
 	StreamClassInstance
 } from "./interfaces.js"
+
+import { uniFinish, uniNavigate, uniRewind } from "./utils.js"
+
+import { StreamClass } from "../../constants.js"
+import { delegate, delegateProperty } from "src/utils.js"
 
 export function iterationHandler(
 	boundName: BoundNameType,
@@ -26,18 +35,14 @@ export function currSetter<Type = any>(this: StreamClassInstance<Type>, value: T
 }
 
 export function baseCurr<Type = any>(this: StreamClassInstance<Type>) {
-	if (this.isStart === PRE_CURR_INIT) {
-		this.isStart = POST_CURR_INIT
+	if (this.isStart === StreamClass.PreCurrInit) {
+		this.isStart = StreamClass.PostCurrInit
 		return (this.realCurr = this.initGetter())
 	}
 	return this.currGetter && !this.isStart
 		? (this.realCurr = this.currGetter())
 		: this.realCurr
 }
-
-export const PRE_CURR_INIT = 1
-export const POST_CURR_INIT = true
-export const POST_START = false
 
 export const nextHandler = iterationHandler(
 	"isEnd",
@@ -52,3 +57,43 @@ export const prevHandler = iterationHandler(
 	"basePrevIter",
 	"isCurrStart"
 )
+
+export function finish<Type = any>(this: BasicStream<Type>) {
+	return uniFinish(this)
+}
+
+export function* streamIterator<Type = any>(this: BasicStream<Type>) {
+	while (!this.isEnd) yield this.next()
+}
+
+/**
+ * A definition of `.navigate` method that works for any `Stream`
+ * 		(used as default, overriden in some classes for performance reasons)
+ */
+export function navigate<Type = any>(
+	this: BasicReversibleStream<Type>,
+	position: Position
+) {
+	return uniNavigate(this, position)
+}
+
+/**
+ * A definition of `.rewind` that works for any `BasicReversibleStream`
+ * 		(used as default, overriden in some classes for performance reasons)
+ */
+export function rewind<Type = any>(this: BasicReversibleStream<Type>) {
+	return uniRewind(this)
+}
+
+export const [inputDelegate, inputPropDelegate] = [delegate, delegateProperty].map((x) =>
+	x("input")
+)
+
+export const [inputPrev, inputNext, inputIsEnd, inputIsStart, inputRewind, inputFinish] =
+	["prev", "next", "isCurrEnd", "isCurrStart", "rewind", "finish"].map(inputDelegate)
+
+export const [inputCurr, inputDefaultIsEnd, inputDefaultIsStart] = [
+	"curr",
+	"isEnd",
+	"isStart"
+].map(inputPropDelegate)

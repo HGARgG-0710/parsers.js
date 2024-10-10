@@ -1,2 +1,2 @@
 export * as InputStream from "./InputStream/utils.js"
-export * as PositionalStream from "./PositionalStream/utils.js"
+export * as StreamClass from "./StreamClass/utils.js"

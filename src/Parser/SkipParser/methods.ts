@@ -1,6 +1,6 @@
 import { skip } from "../utils.js"
 import type { FixedSkipState, SkipState, SkipType } from "./interfaces.js"
-import type { Position } from "../../Stream/PositionalStream/Position/interfaces.js"
+import type { Position } from "../../Position/interfaces.js"
 import type { ReversibleStream } from "../../Stream/ReversibleStream/interfaces.js"
 
 export function skipParserChange<OutType = any>(

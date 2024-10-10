@@ -6,27 +6,27 @@ import type {
 } from "./interfaces.js"
 
 import {
-	underStreamRewind,
-	underStreamCurr,
-	underStreamPrev,
-	underStreamIsStart,
-	underStreamNext,
-	underStreamIsEnd,
-	underStreamDefaultIsStart,
-	underStreamFinish
-} from "../UnderStream/methods.js"
+	inputRewind,
+	inputCurr,
+	inputPrev,
+	inputIsStart,
+	inputNext,
+	inputIsEnd,
+	inputDefaultIsStart,
+	inputFinish
+} from "../StreamClass/methods.js"
 import { reversedStreamInitialize } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 const ReversedStreamBase = StreamClass({
-	currGetter: underStreamCurr,
-	baseNextIter: underStreamPrev,
-	basePrevIter: underStreamNext,
-	isCurrEnd: underStreamIsStart,
-	isCurrStart: underStreamIsEnd,
-	defaultIsEnd: underStreamDefaultIsStart
+	currGetter: inputCurr,
+	baseNextIter: inputPrev,
+	basePrevIter: inputNext,
+	isCurrEnd: inputIsStart,
+	isCurrStart: inputIsEnd,
+	defaultIsEnd: inputDefaultIsStart
 }) as new () => ReversedStreamClassInstance
 
 export class ReversedStream<Type = any>
@@ -45,7 +45,7 @@ export class ReversedStream<Type = any>
 
 Object.defineProperties(ReversedStream.prototype, {
 	super: { value: ReversedStreamBase.prototype },
-	rewind: { value: underStreamFinish },
-	finish: { value: underStreamRewind },
+	rewind: { value: inputFinish },
+	finish: { value: inputRewind },
 	init: { value: reversedStreamInitialize }
 })

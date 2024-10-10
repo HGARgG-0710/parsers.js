@@ -1,9 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
-import type { Posed } from "../PositionalStream/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
 import type { StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Inputted } from "../UnderStream/interfaces.js"
-import type { Superable } from "../StreamClass/Superable/interfaces.js"
+import type { Inputted } from "../StreamClass/interfaces.js"
+import type { Superable } from "../StreamClass/interfaces.js"
 
 export interface StreamIndexed extends Summat {
 	streamIndex: number
