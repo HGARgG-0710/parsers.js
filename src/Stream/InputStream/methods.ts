@@ -2,7 +2,7 @@ import type { Position } from "../../Position/interfaces.js"
 import type { EffectiveInputStream, InputStream } from "./interfaces.js"
 import type { Indexed } from "../interfaces.js"
 
-import { InputStream as InputStreamConstructor } from "./classes.js"
+import { InputStream as InputStreamClass } from "./classes.js"
 import { positionConvert } from "../../Position/utils.js"
 import { Inputted } from "../StreamClass/classes.js"
 import { uniNavigate, superInit } from "../StreamClass/utils.js"
@@ -26,7 +26,7 @@ export function effectiveInputStreamRewind<Type = any>(this: EffectiveInputStrea
 }
 
 export function effectiveInputStreamNavigate<Type = any>(
-	this: EffectiveInputStream<Type>,
+	this: InputStreamClass<Type>,
 	index: Position
 ) {
 	index = positionConvert(index, this)
@@ -52,17 +52,17 @@ export function inputStreamCurr<Type = any>(this: InputStream<Type>) {
 	return this.input[this.pos]
 }
 
-export function effectiveInputStreamCopy<Type = any>(this: EffectiveInputStream<Type>) {
-	const inputStream = new InputStreamConstructor<Type>(this.input)
+export function effectiveInputStreamCopy<Type = any>(this: InputStreamClass<Type>) {
+	const inputStream = new InputStreamClass<Type>(this.input)
 	inputStream.pos = this.pos
 	return inputStream
 }
 
-export function inputStreamIsStart<Type = any>(this: InputStream<Type>) {
+export function inputStreamIsStart<Type = any>(this: InputStreamClass<Type>) {
 	return !this.pos
 }
 
-export function inputStreamPrev<Type = any>(this: InputStream<Type>) {
+export function inputStreamPrev<Type = any>(this: InputStreamClass<Type>) {
 	return this.input[--this.pos]
 }
 
@@ -71,7 +71,7 @@ export function inputStreamDefaultIsEnd<Type = any>(this: InputStream<Type>) {
 }
 
 export function effectiveInputStreamInitialize<Type = any>(
-	this: EffectiveInputStream<Type>,
+	this: InputStreamClass<Type>,
 	input?: Indexed<Type>
 ) {
 	this.pos = 0

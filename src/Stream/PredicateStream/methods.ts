@@ -14,7 +14,6 @@ export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
 export function effectivePredicateStreamNext<Type = any>(
 	this: EffectivePredicateStream<Type>
 ) {
-	++this.pos
 	this.hasLookAhead = false
 	return this.lookAhead
 }
@@ -45,7 +44,6 @@ export function effectivePredicateStreamInitialize<Type = any>(
 		this.hasLookAhead = false
 	}
 	if (input) {
-		this.pos = 0
 		Inputted(this, input)
 		superInit(this)
 	}

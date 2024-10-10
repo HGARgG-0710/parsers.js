@@ -1,5 +1,4 @@
 import type { BasicStream, Indexed } from "../interfaces.js"
-import type { Posed } from "../../Position/interfaces.js"
 import type {
 	Inputted,
 	ReversedStreamClassInstance,
@@ -7,11 +6,7 @@ import type {
 	Superable
 } from "../StreamClass/interfaces.js"
 
-export interface InputStream<Type = any>
-	extends BasicStream<Type>,
-		Inputted<Indexed>,
-		Posed<number>,
-		Iterable<Type> {}
+export interface InputStream<Type = any> extends BasicStream<Type>, Inputted<Indexed> {}
 
 export interface EffectiveInputStream<Type = any>
 	extends InputStream<Type>,

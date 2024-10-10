@@ -23,7 +23,6 @@ export function effectiveProlongedStreamNext<Type = any>(
 	const currStream = this.input[this.streamIndex]
 	if (currStream.isCurrEnd()) ++this.streamIndex
 	else currStream.next()
-	++this.pos
 	return currStream.curr
 }
 
@@ -35,7 +34,6 @@ export function prolongedStreamInitialize<Type = any>(
 	this: ProlongedStream<Type>,
 	streams?: BasicStream<Type>[]
 ) {
-	this.pos = 0
 	if (streams) {
 		Inputted(this, streams)
 		this.streamIndex = 0

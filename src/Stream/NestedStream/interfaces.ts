@@ -13,7 +13,6 @@ export interface BasicNested extends Summat {
 
 export interface NestedStream<Type = any>
 	extends BasicStream<Type | NestedStream<Type>>,
-		Iterable<Type | NestedStream<Type>>,
 		BasicNested,
 		Inputted<BasicStream<Type>> {}
 
@@ -21,8 +20,7 @@ export interface EffectiveNestedStream<Type = any>
 	extends StreamClassInstance<Type | EffectiveNestedStream<Type>>,
 		BasicNested,
 		Superable,
-		Inputted<EndableStream<Type>>,
-		Iterable<Type | EffectiveNestedStream<Type>> {
+		Inputted<EndableStream<Type>> {
 	constructor: new (
 		input?: EndableStream<Type>,
 		...x: any[]

@@ -16,8 +16,7 @@ import type { Superable } from "../StreamClass/interfaces.js"
 export interface BasicTreeStream<Type = any>
 	extends BasicStream<InTreeType<Type>>,
 		Posed<MultiIndex>,
-		Inputted<Tree<Type>>,
-		Iterable<InTreeType<Type>> {}
+		Inputted<Tree<Type>> {}
 
 export interface TreeStream<Type = any>
 	extends BasicTreeStream<Type>,

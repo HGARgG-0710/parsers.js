@@ -3,10 +3,10 @@ import type { Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type {
-	BoundNameType,
-	BaseIterPropNameType,
-	IterCheckPropNameType,
-	StreamClassInstance
+	StreamClassInstance,
+	ReversedStreamClassInstance,
+	PositionalStreamClassInstance,
+	PositionalReversedStreamClassInstance
 } from "./interfaces.js"
 
 import { uniFinish, uniNavigate, uniRewind } from "./utils.js"
@@ -14,20 +14,44 @@ import { uniFinish, uniNavigate, uniRewind } from "./utils.js"
 import { StreamClass } from "../../constants.js"
 import { delegate, delegateProperty } from "src/utils.js"
 
-export function iterationHandler(
-	boundName: BoundNameType,
-	otherEnd: BoundNameType,
-	baseIterPropName: BaseIterPropNameType,
-	iterCheckPropName: IterCheckPropNameType
-) {
-	return function <Type = any>(this: StreamClassInstance<Type>) {
-		const last = this.curr
-		this[otherEnd] = false
-		const lastEnd = (this[iterCheckPropName] as () => boolean)()
-		if (!lastEnd) this.curr = (this[baseIterPropName] as () => Type)()
-		this[boundName] = lastEnd && (this[iterCheckPropName] as () => boolean)()
-		return last
+export function posNextHandler<Type = any>(this: PositionalStreamClassInstance<Type>) {
+	const last = this.curr
+	this.isStart = false
+	if (this.isCurrEnd()) this.isEnd = true
+	else {
+		++this.pos
+		this.curr = this.baseNextIter()
 	}
+	return last
+}
+
+export function posPrevHandler<Type = any>(
+	this: PositionalReversedStreamClassInstance<Type>
+) {
+	const last = this.curr
+	this.isEnd = false
+	if (this.isCurrStart()) this.isStart = true
+	else {
+		--this.pos
+		this.curr = this.basePrevIter()
+	}
+	return last
+}
+
+export function nextHandler<Type = any>(this: StreamClassInstance<Type>) {
+	const last = this.curr
+	this.isStart = false
+	if (this.isCurrEnd()) this.isEnd = true
+	else this.curr = this.baseNextIter()
+	return last
+}
+
+export function prevHandler<Type = any>(this: ReversedStreamClassInstance<Type>) {
+	const last = this.curr
+	this.isEnd = false
+	if (this.isCurrStart()) this.isStart = true
+	else this.curr = this.basePrevIter()
+	return last
 }
 
 export function currSetter<Type = any>(this: StreamClassInstance<Type>, value: Type) {
@@ -44,19 +68,39 @@ export function baseCurr<Type = any>(this: StreamClassInstance<Type>) {
 		: this.realCurr
 }
 
-export const nextHandler = iterationHandler(
-	"isEnd",
-	"isStart",
-	"baseNextIter",
-	"isCurrEnd"
-)
+export function trivialInitialize<Type = any>(this: StreamClassInstance<Type>) {
+	this.realCurr = StreamClass.DefaultRealCurr
+	this.isStart = StreamClass.PreCurrInit
+	this.isEnd = this.defaultIsEnd()
+}
 
-export const prevHandler = iterationHandler(
-	"isStart",
-	"isEnd",
-	"basePrevIter",
-	"isCurrStart"
-)
+export function posInitialize<Type = any>(this: PositionalStreamClassInstance<Type>) {
+	this.pos = 0
+	trivialInitialize.call(this)
+}
+
+export function preInitPosInitialize<Type = any>(
+	this: PositionalStreamClassInstance<Type>
+) {
+	posInitialize.call(this)
+	// note: call to the 'initGetter' (IN CASE IT'S PRESENT); Otherwise, a no-op
+	if (!this.isEnd) this.curr
+}
+
+export function preInitInitialize<Type = any>(this: StreamClassInstance<Type>) {
+	trivialInitialize.call(this)
+	if (!this.isEnd) this.curr
+}
+
+export function baseStreamInitialize(preInit?: boolean, hasPosition?: boolean) {
+	return hasPosition
+		? preInit
+			? preInitPosInitialize
+			: posInitialize
+		: preInit
+		? preInitInitialize
+		: trivialInitialize
+}
 
 export function finish<Type = any>(this: BasicStream<Type>) {
 	return uniFinish(this)

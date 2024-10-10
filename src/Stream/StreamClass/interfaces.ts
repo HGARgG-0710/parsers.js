@@ -1,13 +1,9 @@
 import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { Position } from "../../Position/interfaces.js"
+import type { Posed, Position } from "../../Position/interfaces.js"
 
-export type IterCheckPropNameType = "isCurrEnd" | "isCurrStart"
-export type BaseIterPropNameType = "baseNextIter" | "basePrevIter"
-export type IterPropNameType = "next" | "prev"
 export type BoundNameType = "isEnd" | "isStart"
-
 export type StartedType = 1 | boolean
 export type StatefulStarted = Started<StartedType>
 
@@ -18,7 +14,7 @@ export interface Superable extends Summat {
 }
 
 export interface Stateful extends Summat {
-	state: object
+	state: Summat
 }
 
 export interface Copiable<Type = any> extends Summat {
@@ -103,12 +99,17 @@ export interface ConditionallyRewindable<Type = any> extends Summat {
 	rewind?: () => Type
 }
 
+export interface HasPositionCheckable extends Summat {
+	hasPosition?: boolean
+}
+
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
 
 export interface PrimalStreamClassSignature<Type = any>
 	extends IsEndCurrable,
 		BaseNextIterable<Type>,
-		ConditionalCurrGettable<Type> {}
+		ConditionalCurrGettable<Type>,
+		DefaultEndable {}
 
 export interface StreamClassTransferable<Type = any>
 	extends PrimalStreamClassSignature<Type>,
@@ -118,7 +119,7 @@ export interface StreamClassTransferable<Type = any>
 export interface StreamClassSignature<Type = any>
 	extends StreamClassTransferable<Type>,
 		ConditionalInitGettable<Type>,
-		DefaultEndable,
+		HasPositionCheckable,
 		PreInitable {}
 
 export interface BasicStreamClassInstance<Type = any>
@@ -145,3 +146,15 @@ export interface ReversedStreamClassInstance<Type = any>
 		Prevable<Type>,
 		IsStartCurrable,
 		Rewindable<Type> {}
+
+export interface PositionalStreamClassInstance<
+	Type = any,
+	PosType extends Position = number
+> extends StreamClassInstance<Type>,
+		Posed<PosType> {}
+
+export interface PositionalReversedStreamClassInstance<
+	Type = any,
+	PosType extends Position = number
+> extends ReversedStreamClassInstance<Type>,
+		Posed<PosType> {}

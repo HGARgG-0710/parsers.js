@@ -16,10 +16,6 @@ import type {
 } from "../PredicateStream/interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
 
-export interface Limitable<Type = any> extends Summat {
-	limit: (from?: Position, to?: Position) => Type
-}
-
 export interface BasicLimited extends Summat {
 	from: Position
 	to: Position
@@ -34,17 +30,11 @@ export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
 	IsEndCurrable &
 	IsStartCurrable
 
-export interface BoundableStream<Type = any>
-	extends Limitable<BasicStream<Type>>,
-		LimitedUnderStream<Type> {}
-
 export interface LimitedStream<Type = any>
 	extends BasicStream<Type>,
 		BasicLimited,
-		Posed<number>,
 		SinglePositionLookahead<Type>,
-		Inputted<LimitedUnderStream<Type>>,
-		Iterable<Type> {}
+		Inputted<LimitedUnderStream<Type>> {}
 
 export interface EffectiveLimitedStream<Type = any>
 	extends LimitedStream<Type>,

@@ -18,7 +18,6 @@ export interface StartedStream<Type = any> extends BasicStream<Type>, Started {}
 
 export interface BasicReversibleStream<Type = any, StartedType = any>
 	extends BasicStream<Type>,
-		Iterable<Type>,
 		Started<StartedType>,
 		Prevable<Type> {}
 

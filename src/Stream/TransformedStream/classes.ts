@@ -1,62 +1,61 @@
-import { inputDefaultIsEnd, inputIsEnd } from "../StreamClass/methods.js"
-
-import type { EndableStream } from "../StreamClass/interfaces.js"
-import { StreamClass } from "../StreamClass/classes.js"
-
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { StreamTransform } from "../../Parser/ParserMap/interfaces.js"
-import type {
-	EndableTransformableStream,
-	EffectiveTransformedStream
-} from "./interfaces.js"
+import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { EffectiveTransformedStream } from "./interfaces.js"
+
+import { inputDefaultIsEnd, inputIsEnd } from "../StreamClass/methods.js"
 
 import {
 	transformedStreamInitCurr,
 	transformedStreamInitialize,
-	transformedStreamNext,
-	transformStream
+	transformedStreamNext
 } from "./methods.js"
-import type { Summat } from "@hgargg-0710/summat.ts"
 
-const TransformedStreamBase = StreamClass({
-	isCurrEnd: inputIsEnd,
-	initGetter: transformedStreamInitCurr,
-	baseNextIter: transformedStreamNext,
-	defaultIsEnd: inputDefaultIsEnd
-})
+import { StreamClass } from "../StreamClass/classes.js"
 
-export class TransformedStream<UnderType = any, UpperType = any>
-	extends TransformedStreamBase
-	implements EffectiveTransformedStream<UnderType, UpperType>
-{
-	pos: number
-	input: EndableTransformableStream<UnderType, UpperType>
-	transform: () => UpperType
+import { function as _f } from "@hgargg-0710/one"
+const { cached } = _f
 
-	super: Summat
-	init: (
-		input?: EndableTransformableStream<UnderType, UpperType>,
-		transform?: StreamTransform<UnderType, UpperType>
-	) => TransformedStream<UnderType, UpperType>
+const TransformedStreamBase = cached((hasPosition: boolean = false) =>
+	StreamClass({
+		isCurrEnd: inputIsEnd,
+		initGetter: transformedStreamInitCurr,
+		baseNextIter: transformedStreamNext,
+		defaultIsEnd: inputDefaultIsEnd,
+		hasPosition
+	})
+) as (hasPosition?: boolean) => new () => StreamClassInstance
 
-	constructor(
-		input?: EndableTransformableStream<UnderType, UpperType>,
-		transform?: StreamTransform<UnderType, UpperType>
-	) {
-		super()
-		this.init(input, transform)
+export function TransformedStream<UnderType = any, UpperType = any>(
+	hasPosition: boolean = false
+) {
+	const baseClass = TransformedStreamBase(hasPosition)
+	class transformedStream
+		extends baseClass
+		implements EffectiveTransformedStream<UnderType, UpperType>
+	{
+		input: EndableStream<UnderType>
+		transform: StreamTransform<UnderType, UpperType>
+
+		super: Summat
+		init: (
+			input?: EndableStream<UnderType>,
+			transform?: StreamTransform<UnderType, UpperType>
+		) => EffectiveTransformedStream<UnderType, UpperType>
+
+		constructor(
+			input?: EndableStream<UnderType>,
+			transform?: StreamTransform<UnderType, UpperType>
+		) {
+			super()
+			this.init(input, transform)
+		}
 	}
-}
 
-Object.defineProperties(TransformedStream.prototype, {
-	super: { value: TransformedStreamBase.prototype },
-	init: { value: transformedStreamInitialize }
-})
+	Object.defineProperties(transformedStream.prototype, {
+		super: { value: baseClass.prototype },
+		init: { value: transformedStreamInitialize }
+	})
 
-export function TransformableStream<UnderType = any, UpperType = any>() {
-	return function (
-		stream: EndableStream<UnderType>
-	): EndableTransformableStream<UnderType, UpperType> {
-		stream.transform = transformStream<UnderType, UpperType>
-		return stream as EndableTransformableStream<UnderType, UpperType>
-	}
+	return transformedStream
 }

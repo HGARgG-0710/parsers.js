@@ -1,16 +1,11 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Position } from "../../Position/interfaces.js"
-import type {
-	LimitedUnderStream,
-	EffectiveLimitedStream,
-	BoundableStream
-} from "./interfaces.js"
+import type { LimitedUnderStream, EffectiveLimitedStream } from "./interfaces.js"
 
 import {
 	effectiveLimitedStreamInitialize,
 	effectiveLimitedStreamProd,
-	limitStream,
 	effectiveLimitedStreamIsEnd,
 	effectiveLimitedStreamNext,
 	effectiveLimitedStreamPrev,
@@ -20,53 +15,58 @@ import { inputCurr, inputDefaultIsEnd } from "../StreamClass/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
-const LimitedStreamBase = StreamClass({
-	currGetter: inputCurr,
-	baseNextIter: effectiveLimitedStreamNext,
-	basePrevIter: effectiveLimitedStreamPrev,
-	isCurrEnd: effectiveLimitedStreamIsEnd,
-	isCurrStart: effectiveLimitedStreamIsStart,
-	defaultIsEnd: inputDefaultIsEnd
-}) as new () => ReversedStreamClassInstance
+import { function as _f } from "@hgargg-0710/one"
+const { cached } = _f
 
-export class LimitedStream<Type = any>
-	extends LimitedStreamBase
-	implements EffectiveLimitedStream<Type>
-{
-	input: LimitedUnderStream<Type>
-	lookAhead: Type
-	hasLookAhead: boolean
-	pos: number = 0
+const LimitedStreamBase = cached((hasPosition: boolean = false) =>
+	StreamClass({
+		currGetter: inputCurr,
+		baseNextIter: effectiveLimitedStreamNext,
+		basePrevIter: effectiveLimitedStreamPrev,
+		isCurrEnd: effectiveLimitedStreamIsEnd,
+		isCurrStart: effectiveLimitedStreamIsStart,
+		defaultIsEnd: inputDefaultIsEnd,
+		hasPosition
+	})
+) as (hasPosition?: boolean) => new () => ReversedStreamClassInstance
 
-	direction: boolean
-	from: Position
-	to: Position
+export function LimitedStream<Type = any>(
+	hasPosition: boolean = false
+): new (
+	input?: LimitedUnderStream<Type>,
+	from?: Position,
+	to?: Position
+) => EffectiveLimitedStream<Type> {
+	const baseClass = LimitedStreamBase(hasPosition)
+	class limitedStream extends baseClass implements EffectiveLimitedStream<Type> {
+		input: LimitedUnderStream<Type>
+		lookAhead: Type
+		hasLookAhead: boolean
 
-	super: Summat
+		direction: boolean
+		from: Position
+		to: Position
 
-	prod: () => Type
-	init: (
-		input?: LimitedUnderStream<Type>,
-		from?: Position,
-		to?: Position
-	) => EffectiveLimitedStream<Type>
+		super: Summat
 
-	constructor(input?: LimitedUnderStream<Type>, from?: Position, to?: Position) {
-		super()
-		this.init(input, from, to)
+		prod: () => Type
+		init: (
+			input?: LimitedUnderStream<Type>,
+			from?: Position,
+			to?: Position
+		) => EffectiveLimitedStream<Type>
+
+		constructor(input?: LimitedUnderStream<Type>, from?: Position, to?: Position) {
+			super()
+			this.init(input, from, to)
+		}
 	}
-}
 
-Object.defineProperties(LimitedStream.prototype, {
-	super: { value: LimitedStreamBase.prototype },
-	limit: { value: limitStream },
-	prod: { value: effectiveLimitedStreamProd },
-	init: { value: effectiveLimitedStreamInitialize }
-})
+	Object.defineProperties(limitedStream.prototype, {
+		super: { value: baseClass.prototype },
+		prod: { value: effectiveLimitedStreamProd },
+		init: { value: effectiveLimitedStreamInitialize }
+	})
 
-export function LimitableStream<Type = any>(
-	navigable: LimitedUnderStream<Type>
-): BoundableStream<Type> {
-	navigable.limit = limitStream<Type>
-	return navigable as BoundableStream<Type>
+	return limitedStream
 }

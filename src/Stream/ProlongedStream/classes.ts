@@ -12,31 +12,40 @@ import {
 
 import { StreamClass } from "../StreamClass/classes.js"
 
-const ProlongedStreamBase = StreamClass({
-	currGetter: prolongedStreamCurr,
-	isCurrEnd: effectiveProlongedStreamIsEnd,
-	baseNextIter: effectiveProlongedStreamNext,
-	defaultIsEnd: prolongedStreamDefaultIsEnd
-})
+import { function as _f } from "@hgargg-0710/one"
+const { cached } = _f
 
-export class ProlongedStream<Type = any>
-	extends ProlongedStreamBase
-	implements EffectiveProlongedStream<Type>
-{
-	input: StreamClassInstance<Type>[]
-	pos: number
-	streamIndex: number
+const ProlongedStreamBase = cached((hasPosition: boolean = false) =>
+	StreamClass({
+		currGetter: prolongedStreamCurr,
+		isCurrEnd: effectiveProlongedStreamIsEnd,
+		baseNextIter: effectiveProlongedStreamNext,
+		defaultIsEnd: prolongedStreamDefaultIsEnd,
+		hasPosition
+	})
+) as (hasPosition?: boolean) => new () => StreamClassInstance
 
-	init: (streams?: BasicStream<Type>[]) => ProlongedStream<Type>
-	super: Summat
+export function ProlongedStream<Type = any>(
+	hasPosition: boolean = false
+): new (streams?: BasicStream<Type>[]) => EffectiveProlongedStream<Type> {
+	const baseClass = ProlongedStreamBase(hasPosition)
+	class prolongedStream extends baseClass implements EffectiveProlongedStream<Type> {
+		input: StreamClassInstance<Type>[]
+		streamIndex: number
 
-	constructor(streams?: BasicStream<Type>[]) {
-		super()
-		this.init(streams)
+		init: (streams?: BasicStream<Type>[]) => EffectiveProlongedStream<Type>
+		super: Summat
+
+		constructor(streams?: BasicStream<Type>[]) {
+			super()
+			this.init(streams)
+		}
 	}
-}
 
-Object.defineProperties(ProlongedStream.prototype, {
-	super: { value: ProlongedStreamBase.prototype },
-	init: { value: prolongedStreamInitialize }
-})
+	Object.defineProperties(prolongedStream.prototype, {
+		super: { value: baseClass.prototype },
+		init: { value: prolongedStreamInitialize<Type> }
+	})
+
+	return prolongedStream
+}

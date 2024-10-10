@@ -1,6 +1,5 @@
 import type { Position } from "../../Position/interfaces.js"
 import type {
-	BoundableStream,
 	EffectiveLimitedStream,
 	LimitedUnderStream
 } from "./interfaces.js"
@@ -13,7 +12,6 @@ import {
 
 import { fastNavigate } from "../StreamClass/utils.js"
 
-import { LimitedStream as LimitedStreamConstructor } from "./classes.js"
 import { Inputted } from "../StreamClass/classes.js"
 import { superInit } from "../StreamClass/utils.js"
 
@@ -21,18 +19,9 @@ import { typeof as type } from "@hgargg-0710/one"
 import { LimitedStream } from "src/constants.js"
 const { isUndefined } = type
 
-export function limitStream<Type = any>(
-	this: BoundableStream<Type>,
-	from?: Position,
-	to?: Position
-) {
-	return new LimitedStreamConstructor<Type>(this, from, to)
-}
-
 export function effectiveLimitedStreamNext<Type = any>(
 	this: EffectiveLimitedStream<Type>
 ) {
-	++this.pos
 	this.hasLookAhead = false
 	return this.lookAhead
 }
@@ -65,7 +54,6 @@ export function effectiveLimitedStreamIsStart<Type = any>(
 export function effectiveLimitedStreamPrev<Type = any>(
 	this: EffectiveLimitedStream<Type>
 ) {
-	--this.pos
 	this.lookAhead = this.curr
 	this.hasLookAhead = true
 	this.input[this.direction ? "prev" : "next"]()
@@ -78,8 +66,6 @@ export function effectiveLimitedStreamInitialize<Type = any>(
 	from?: Position,
 	to?: Position
 ) {
-	this.pos = 0
-
 	if (input) {
 		Inputted(this, input)
 		this.hasLookAhead = false

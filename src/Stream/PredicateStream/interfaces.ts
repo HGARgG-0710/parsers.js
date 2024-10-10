@@ -22,9 +22,7 @@ export interface SinglePositionLookahead<Type = any>
 	extends Proddable<Type>,
 		Lookahead<Type> {}
 
-export interface BasicPredicated<Type = any>
-	extends SinglePositionLookahead<Type>,
-		Posed<number> {
+export interface BasicPredicated<Type = any> extends SinglePositionLookahead<Type> {
 	predicate: PredicatePosition
 }
 
