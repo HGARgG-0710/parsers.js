@@ -1,13 +1,53 @@
-import { ClassConstructorTest } from "lib/lib.js"
-import { isStreamClassInstance } from "../../../../../dist/src/Stream/StreamClass/utils.js"
+import {
+	blockExtension,
+	ClassConstructorTest,
+	InitClassConstructorTest
+} from "lib/lib.js"
 import type { EffectiveTransformedStream } from "../../../../../dist/src/Stream/TransformedStream/interfaces.js"
-import { isTransformedStream } from "../../../../../dist/src/Stream/TransformedStream/utils.js"
 
-import { function as _f } from "@hgargg-0710/one"
+import {
+	InitStreamClassConstructorTest,
+	isInputted,
+	isPosed,
+	isSuperable,
+	StreamClassConstructorTest
+} from "Stream/StreamClass/lib/classes.js"
+
+import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
+const { structCheck } = object
+const { isFunction } = type
 
-const isTransformedStreamInternal = and(isTransformedStream, isStreamClassInstance) as (
-	x: any
-) => x is EffectiveTransformedStream
+export function GeneratedTransformedStreamTest(hasPosition: boolean = false) {
+	const transformedStreamPrototypeProps = ["super"]
+	const transformedStreamOwnProps = ["transform", "input"].concat(
+		hasPosition ? ["pos"] : []
+	)
 
-const TransformedStreamConstructorTest = ClassConstructorTest(isTransformedStreamInternal)
+	const isTransformedStream = and(
+		structCheck({
+			transform: isFunction
+		}),
+		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
+			hasPosition ? [isPosed] : []
+		)
+	) as (x: any) => x is EffectiveTransformedStream
+
+	const TransformedStreamConstructorTest = blockExtension(
+		StreamClassConstructorTest,
+		ClassConstructorTest<EffectiveTransformedStream>(
+			isTransformedStream,
+			transformedStreamPrototypeProps,
+			transformedStreamOwnProps
+		)
+	)
+
+	const InitTransformedStreamConstructorTest = blockExtension(
+		InitStreamClassConstructorTest,
+		InitClassConstructorTest<EffectiveTransformedStream>(
+			isTransformedStream,
+			transformedStreamPrototypeProps,
+			transformedStreamOwnProps
+		)
+	)
+}

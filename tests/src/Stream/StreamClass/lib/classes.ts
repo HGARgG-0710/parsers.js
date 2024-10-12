@@ -10,17 +10,18 @@ import type {
 	StreamClassInstance
 } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
 
-import type { Superable } from "../../../../../dist/src/Stream/StreamClass/Superable/interfaces.js"
-import type { Copiable } from "../../../../../dist/src/Stream/StreamClass/Copiable/interfaces.js"
-import type { Inputted } from "../../../../../dist/src/Stream/UnderStream/interfaces.js"
-import type { Posed } from "../../../../../dist/src/Stream/PositionalStream/interfaces.js"
+import type { Superable } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
+import type { Copiable } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
+import type { Inputted } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
+import type { Posed } from "../../../../../dist/src/Position/interfaces.js"
 import type {
 	Lookahead,
 	Proddable
 } from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
 
-import { isPosition } from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
-import { PRE_CURR_INIT } from "../../../../../dist/src/Stream/StreamClass/methods.js"
+import { isPosition } from "../../../../../dist/src/Position/utils.js"
+
+import { StreamClass } from "../../../../../dist/src/constants.js"
 
 import { object, function as _f, typeof as type, boolean } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -37,7 +38,7 @@ const isBasicStreamClassInstance = structCheck<BasicStreamClassInstance>({
 	initGetter: optionalMethod,
 	currGetter: optionalMethod,
 	init: isFunction,
-	isStart: or(isBoolean, (x: any) => x === PRE_CURR_INIT),
+	isStart: or(isBoolean, (x: any) => x === StreamClass.PreCurrInit),
 	isCurrEnd: isFunction,
 	baseNextIter: isFunction,
 	realCurr: T,

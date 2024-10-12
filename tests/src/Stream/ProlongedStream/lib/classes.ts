@@ -18,32 +18,36 @@ const { and } = _f
 const { structCheck } = object
 const { isNumber } = type
 
-const prolongedStreamPrototypeProps = ["super"]
-const prolongedStreamOwnProps = ["streamIndex", "pos", "input"]
-
-const isProlongedStream = and(
-	structCheck({
-		streamIndex: isNumber
-	}),
-	isSuperable,
-	isInputted,
-	isPosed
-) as (x: any) => x is EffectiveProlongedStream
-
-const ProlongedStreamConstructorTest = blockExtension(
-	StreamClassConstructorTest,
-	ClassConstructorTest<EffectiveProlongedStream>(
-		isProlongedStream,
-		prolongedStreamPrototypeProps,
-		prolongedStreamOwnProps
+export function GeneratedProlongedStreamTest(hasPosition: boolean = false) {
+	const prolongedStreamPrototypeProps = ["super"]
+	const prolongedStreamOwnProps = ["streamIndex", "input"].concat(
+		hasPosition ? ["pos"] : []
 	)
-)
 
-const InitProlongedStreamConstructorTest = blockExtension(
-	InitStreamClassConstructorTest,
-	InitClassConstructorTest<EffectiveProlongedStream>(
-		isProlongedStream,
-		prolongedStreamPrototypeProps,
-		prolongedStreamOwnProps
+	const isProlongedStream = and(
+		structCheck({
+			streamIndex: isNumber
+		}),
+		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
+			hasPosition ? [isPosed] : []
+		)
+	) as (x: any) => x is EffectiveProlongedStream
+
+	const ProlongedStreamConstructorTest = blockExtension(
+		StreamClassConstructorTest,
+		ClassConstructorTest<EffectiveProlongedStream>(
+			isProlongedStream,
+			prolongedStreamPrototypeProps,
+			prolongedStreamOwnProps
+		)
 	)
-)
+
+	const InitProlongedStreamConstructorTest = blockExtension(
+		InitStreamClassConstructorTest,
+		InitClassConstructorTest<EffectiveProlongedStream>(
+			isProlongedStream,
+			prolongedStreamPrototypeProps,
+			prolongedStreamOwnProps
+		)
+	)
+}

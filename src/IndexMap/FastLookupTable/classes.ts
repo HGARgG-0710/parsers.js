@@ -3,14 +3,14 @@ import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable } from "./interfaces.js"
 import type { SubHaving } from "../SubHaving/interfaces.js"
+
+import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
 import {
 	persistentIndexFastLookupTableByOwned,
 	persistentIndexFastLookupTableDelete,
 	hashMapFastLookupTableByOwned,
-	persistentIndexFastLookupTableOwn,
-	hashMapFastLookupTableOwn
+	affirmOwnership
 } from "./methods.js"
-import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
 
 import type { HashTableClass as HashTableClassType } from "./interfaces.js"
 
@@ -36,7 +36,7 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 
 Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 	getIndex: { value: subGetIndex },
-	own: { value: persistentIndexFastLookupTableOwn },
+	own: { value: affirmOwnership },
 	byOwned: { value: persistentIndexFastLookupTableByOwned },
 	set: { value: subSet },
 	delete: { value: persistentIndexFastLookupTableDelete },
@@ -44,7 +44,7 @@ Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 })
 
 const HashTablePrototype = {
-	own: { value: hashMapFastLookupTableOwn },
+	own: { value: affirmOwnership},
 	byOwned: { value: hashMapFastLookupTableByOwned },
 	set: { value: subSet },
 	delete: { value: subDelete },

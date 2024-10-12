@@ -1,7 +1,7 @@
 import type { StreamTokenizer } from "./interfaces.js"
 import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
-import { Inputted } from "src/Stream/StreamClass/classes.js"
-import { superInit } from "src/Stream/StreamClass/utils.js"
+import { Inputted } from "../../Stream/StreamClass/classes.js"
+import { superInit } from "../../Stream/StreamClass/utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isFunction } = type

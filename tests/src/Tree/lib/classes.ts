@@ -3,13 +3,14 @@ import { describe, it } from "node:test"
 
 import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
 import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
-import { FunctionalClassConctructorTest } from "lib/lib.js"
+import { ambigiousMethodTest, FunctionalClassConctructorTest } from "lib/lib.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
 const { isFunction, isNumber } = type
 
 const { structCheck } = object
-const isTree = structCheck<Tree>({
+
+export const isTree = structCheck<Tree>({
 	lastChild: isNumber,
 	index: isFunction
 })
@@ -82,15 +83,7 @@ export function TreeTestSuite(
 
 const TreeConstructorTest = FunctionalClassConctructorTest<Tree>(isTree)
 
-function TreeIndexTest(
-	tree: Tree,
-	index: number[],
-	expectedValue: any,
-	compare: (x: any, y: any) => boolean
-) {
-	it(`method: .index(${index.toString()})`, () =>
-		assert(compare(tree.index(index), expectedValue)))
-}
+const TreeIndexTest = ambigiousMethodTest<Tree>("index")
 
 function TreeLastChildTest(tree: Tree, index: number[], expectedLastChild: number) {
 	it(`property: .lastChild`, () =>
@@ -112,9 +105,11 @@ export function TreeClassTest(
 		for (const instance of instances) {
 			const { input, indexTests, lastChildTests } = instance
 			const treeInstance: Tree = TreeConstructorTest(treeConstructor, input)
+
 			// .index
 			for (const [index, expected, compare] of indexTests)
-				TreeIndexTest(treeInstance, index, expected, compare)
+				TreeIndexTest(treeInstance, [index], expected, compare)
+
 			// .lastChild
 			for (const [index, lastChild] of lastChildTests)
 				TreeLastChildTest(treeInstance, index, lastChild)

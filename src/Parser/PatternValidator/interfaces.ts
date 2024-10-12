@@ -1,4 +1,4 @@
-import type { PatternValidator } from "src/constants.js"
+import type { PatternValidator } from "../../constants.js"
 
 export type FullCoverage = typeof PatternValidator.FullCoverage
 export type NoFullCoverage = typeof PatternValidator.NoFullCoverage

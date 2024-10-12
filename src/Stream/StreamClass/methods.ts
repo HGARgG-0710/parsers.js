@@ -9,10 +9,10 @@ import type {
 	PositionalReversedStreamClassInstance
 } from "./interfaces.js"
 
-import { uniFinish, uniNavigate, uniRewind } from "./utils.js"
-
 import { StreamClass } from "../../constants.js"
-import { delegate, delegateProperty } from "src/utils.js"
+import { delegate, delegateProperty } from "../../utils.js"
+
+import { uniFinish, uniNavigate, uniRewind } from "./utils.js"
 
 export function posNextHandler<Type = any>(this: PositionalStreamClassInstance<Type>) {
 	const last = this.curr

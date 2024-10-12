@@ -1,22 +1,23 @@
 import assert from "assert"
-import { arraysSame, classSpecificAmbigiousMethodTest } from "lib/lib.js"
+import { arraysSame, classSpecificAmbigiousMethodTest, methodTest } from "lib/lib.js"
 
+import type { BoundNameType } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
 import type { BasicStream } from "../../../../dist/src/Stream/interfaces.js"
 import type {
 	ChangeType,
 	ReversibleStream
 } from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
-import type { BoundNameType } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
+
+import type {
+	Rewindable,
+	Finishable
+} from "../../../../dist/src/Stream/StreamClass/interfaces.js"
+
+import { uniFinish } from "../../../../dist/src/Stream/StreamClass/utils.js"
 import { next, previous } from "../../../../dist/src/utils.js"
 
-import type { Rewindable } from "../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
-import type { Finishable } from "../../../../dist/src/Stream/StreamClass/Finishable/interfaces.js"
-
-import { uniFinish } from "../../../../dist/src/Stream/StreamClass/Finishable/utils.js"
-
-export const [streamNavigateTest, streamCopyTest] = ["navigate", "copy"].map(
-	classSpecificAmbigiousMethodTest<BasicStream>
-)
+export const streamNavigateTest = methodTest("navigate")
+export const streamCopyTest = classSpecificAmbigiousMethodTest<BasicStream>("copy")
 
 const pickTestDirection = (direction: boolean): [BoundNameType, ChangeType] =>
 	direction ? ["isEnd", next] : ["isStart", previous]

@@ -21,7 +21,7 @@ import {
 	posPrevHandler
 } from "./methods.js"
 
-import { AssignmentClass } from "src/utils.js"
+import { AssignmentClass } from "../../utils.js"
 
 const IterationStreamClassPrototypeProps = {
 	next: { value: nextHandler },

@@ -2,13 +2,17 @@ import assert from "assert"
 import { it } from "node:test"
 
 import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
+import type { Initializable } from "../../../dist/src/Stream/StreamClass/interfaces.js"
 
 import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
-import type { Initializable } from "../../../dist/src/Stream/StreamClass/Initializable/interfaces.js"
 const { ownKeys } = object
 const { equals, not } = boolean
 const { or } = _f
 const { isFunction } = type
+
+export function inputDescribe(...input: any[]) {
+	return input.map((x) => x.toString()).join(", ")
+}
 
 export function arraysSame(
 	arr1: any[],
@@ -92,6 +96,13 @@ export function iterationTest<Type extends Iterable<any> = any>(
 		assert(arraysSame([...collectionInstance], iteratedOver)))
 }
 
+export function methodTest<InstanceType = any>(methodName: string) {
+	return function (instance: InstanceType, input: any[], expectedValue: any) {
+		it(`method: .${methodName}(${inputDescribe(input)})`, () =>
+			assert.strictEqual(instance[methodName](...input), expectedValue))
+	}
+}
+
 export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
 	return function (
 		instance: InstanceType,
@@ -104,6 +115,26 @@ export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
 	}
 }
 
+export function unambigiousMethodTest<InstanceType = any>(
+	methodName: string,
+	compare: (x: any, y: any) => boolean
+) {
+	return function (instance: InstanceType, input: any[], expectedValue: any) {
+		it(`method: .${methodName}`, () =>
+			assert(compare(instance[methodName](...input), expectedValue)))
+	}
+}
+
+export function unambigiousThisMethodTest<InstanceType = any>(
+	methodName: string,
+	compare: (x: any, y: any) => boolean
+) {
+	return function (instance: InstanceType, expectedValue: any) {
+		it(`method: .${methodName}`, () =>
+			assert(compare(instance[methodName](), expectedValue)))
+	}
+}
+
 export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
 		return function (
@@ -112,24 +143,34 @@ export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName:
 			expectedValue: any,
 			lowCompare = compare
 		) {
-			it(`method: .${methodName}(${input
-				.map((x) => x.toString())
-				.join(", ")})`, () =>
+			it(`method: .${methodName}(${inputDescribe(input)})`, () =>
 				assert(lowCompare(instance[methodName](...input), expectedValue)))
 		}
 	}
 }
 
-export function ResultingAmbigiousMethodTest<
-	InstanceType extends Resulting = any
->(methodName: string) {
+export function setMethodTest<InstanceType = any>(
+	setMethodName: string,
+	getMethodName: string
+) {
+	return function (instance: InstanceType, input: any[], expectedValue: any) {
+		it(`method: ${setMethodName}(${inputDescribe(input)})`, () => {
+			instance[setMethodName](...input)
+			assert.strictEqual(input[getMethodName](input[0]), expectedValue)
+		})
+	}
+}
+
+export function ResultingAmbigiousMethodTest<InstanceType extends Resulting = any>(
+	methodName: string
+) {
 	return function (
 		instance: InstanceType,
 		items: any[],
 		expectedResult: any,
 		compare: any
 	) {
-		it(`method: .${methodName}`, () => {
+		it(`method: .${methodName}(${inputDescribe(items)})`, () => {
 			const result = instance[methodName](...items)
 			assert(compare(result, expectedResult))
 			assert(compare(result, instance.result))
@@ -140,9 +181,24 @@ export function ResultingAmbigiousMethodTest<
 export function utilTest(util: Function, utilName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
 		return function (input: any[], expected: any) {
-			it(`util: ${utilName} (${input.map((x) => x.toString()).join(",")})`, () =>
+			it(`util: ${utilName} (${inputDescribe(input)})`, () =>
 				assert(compare(util(...input), expected)))
 		}
+	}
+}
+
+export function tripleUtilTest(
+	util: Function,
+	utilName: string,
+	highCompare: (x: any, y: any, z: (x: any, y: any) => boolean) => boolean
+) {
+	return function (
+		input: any[],
+		expected: any,
+		lowCompare: (x: any, y: any) => boolean
+	) {
+		it(`util: ${utilName} (${inputDescribe(input)})`, () =>
+			assert(highCompare(util(...input), expected, lowCompare)))
 	}
 }
 

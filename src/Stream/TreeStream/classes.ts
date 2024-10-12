@@ -7,7 +7,8 @@ import {
 	effectiveTreeStreamNext,
 	effectiveTreeStreamCopy,
 	effectiveTreeStreamNavigate,
-	effectiveTreeStreamIsStart
+	effectiveTreeStreamIsStart,
+	effectiveTreeStreamInitialize
 } from "./methods.js"
 
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
@@ -52,6 +53,8 @@ export class TreeStream<Type = any>
 		super()
 		this.pos = new MultiIndex([])
 		this.walker = new TreeWalker(this)
+		this.response = ""
+		this.lastLevelWithSiblings = 0
 		this.init(tree)
 	}
 }
@@ -60,5 +63,6 @@ Object.defineProperties(TreeStream.prototype, {
 	super: { value: TreeStreamBase.prototype },
 	rewind: { value: effectiveTreeStreamRewind },
 	copy: { value: effectiveTreeStreamCopy },
-	navigate: { value: effectiveTreeStreamNavigate }
+	navigate: { value: effectiveTreeStreamNavigate },
+	init: { value: effectiveTreeStreamInitialize }
 })

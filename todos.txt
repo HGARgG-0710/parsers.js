@@ -5,64 +5,52 @@
 
 CURR TODO LIST: 
 
-Order of todo-elimination [v0.3]: 
-	A.: another fix - [rewrite the Stream tests to fit the 'hasPosition: boolean']
-	A.
-
 A. testing: 
 
-	1. Order, in which to fix things [that are broken currently]: 
-		1. Stream; 
-			0. StreamClass [isStreamClassInstance, isReverisbleStreamClassInstance]; 
-				0.1. Use blockExtensions with appropriate is-functions on StreamClass-es, 
-					in conjuction with the basic ClassConstructorTest-s defined via 'isStreamClassInstance' and 'isReverisbleStreamClassInstance'; 
+	0. FUNDAMENTAL: 
+		0.1. INDEX the 'signatures' for test-suites with INDEXES [thus, one will be able to know which one precisely failed...]; 
+		0.2. Decide how much of generics must be used inside the test-signature types [some use a lot, while others are satied with 'any']; 
+			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
+		0.3. Add '.toString()' to all the 'it' and 'describe' calls, when arguments for tests are used [to be able to distinguish failures and successes]; 
 
-			1.1. InputStream [check]; 
-			1.2. LimitedStream [check]; 
-			1.3. NestedStream [check]; 
-				1.3.1. TODO: currently, the 'isNestedStream' checks for 'typesTable' as an 'isObject'. Make the test stricter, by making it 'isFastLookupTable'; 
-					1.3.1.1. First, however, one needs to implement the tests for the FastLookupTable; 
-			1.4. PositionalStream [check]; 
-			1.5. PredicateStream [check]; 
-			1.6. ProlongedStream [check]; 
-			1.7. ReversibleStream; 
-			1.8. TransformedStream; 
-			1.9. TreeStream; 
+	1. Order, in which to fix things [that are broken currently]: 
+		1. Stream [first, need to add 'FastLookupTable', 'MultiIndex' and 'TreeWalker']; 
+			1.1. TreeStream [check]; 
+				1.1.1. TODO: make the 'isObject' check STRICTER for the 'walker:' property (make it 'isTreeWalker', based on exported is-function); 
+				1.1.2. TODO: make the 'isPosed' check STRICTER for the 'pos: ' property (make it 'isMultiIndex', based on exported is-function); 
+					1.1.2.1. DO THE SAME with the other 'isPosed' - as the types (usually) are intended to be CONCRETE, choose the different predicates in place of 'isPosition' (which should appear ONLY in certain few places...); 
 		
 		Order, in which to add the new things: 
-			1. IndexMap; 
-				1.1. HashMap; 
-				1.2. InternalHash; 
-				1.3. FastLookupTable; 
-			2. TreeStream/MultiIndex; 
-				2.1. MultiIndexModifier; 
+			1. Position/MultiIndex; 
+				1.1. MultiIndexModifier; 
 				2.2. Slicer; 
-			3. TreeStream/TreeWalker; 
-			4. Parser; 
+			2. Tree/TreeWalker; 
+			3. Parser; 
 	2. Changes to tests [for modules]: 
 
-		0. GENERALLY: 	
-			0.1. For constructors - create individual 'is' functions (using 'structCheck' for simplicity); 
-		1. Stream-s: add '.init', and '.super' checks [to the '.is', while also adding it...]; 
-			1.1. For '.init': 
-				1.1.1. Create one constructor test that is 'init'-less (basic tests); 
-				1.1.2. Create another, which does: 
-					const instance = new constructor()
-					instance.init(...input)
+		1. Stream-s: 
+				1.1.1. Create a plain '.init' test; 
+					All StreamClass-es have it; 
+					Namely, this is a 'ReInitializationTest', which (fundamentally) looks to verify correctness of behaviour upon RE-INITIALIZATION of the given Stream; 
+						It is done like: 
 
-					And then - the rest of the stuff, like the 1.1.1. (this is to verify the functional equivalence of two semantics); 
+							1. '.init' is called with given test arguments [this sequence 1.-... is done several times]; 
+							2. The entire test-suite is RE-DONE, but WITHOUT needing to create an instance...; 
+								2.1. A different signature is given; 
 
-				[undone]
-				1.1.3. Create a third, which is plain '.init', and checks for changes in the appropriate parts of the definition; 
-					This one is CREATED PER-StreamClass ONLY!
+							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
+							REFACTOR THIS [once again...]; 
+				1.1.2. TEST the '.pos', where it is relevant; 
+					There must be SPECIFIC checks for it (namely - a SEPARATE method, that goes through the entire Stream, comparing the differences between the '.pos' - that they ALWAYS be 1); 
+					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
 		2. IndexMap: 
 			2.1. Add FastLookupTable tests [design is the same for different classes]; 
-			2.2. Add HashMap tests [design is the same for different classes]; 
-			2.3. Add InternalHash tests [design is the same for differnt classes]; 
+			2.2. Add InternalHash tests [design is the same for differnt classes]; 
 	3. Utils: 
 		These are tested regularly via the 'utilTest'; 
 		Re-do them; 
 		List the utils to be tested for each particular class, add tests for them; 
+		DO THEM ACCORDINGLY [refactor using 'lib/lib.ts' on-the-spot]
 	4. Design the undone-yet tests: 
 		4.1. Stream-s: 
 			4.1.0. Methods:
@@ -86,7 +74,7 @@ A. testing:
 						// ! RE-DO the 'streamNavigateTest' as 'generalNavigateTest'; 
 						1.2. .navigate is for all Streams; 
 					2. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
-					3. Compine into a Stream class test-suite; 
+					3. Comine into a Stream class test-suite; 
 			
 			4.1.1. "WrapperStream"-combinations; 
 				Thus, for instance, one has to test ALL of: 
@@ -125,6 +113,7 @@ A. testing:
 					4.2.3.4. The many-element Stream; 
 		4.3. regex/
 			Re-structure to fit the current mini-testing framework (expand the framework appropriately); 
+
 		4.4. benchmarks/	
 			4.4.1. Stack benchmarks: 
 				4.4.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
@@ -146,6 +135,12 @@ A. testing:
 				4.6.2. One-element; 
 				4.6.3. Two-element; 
 				4.6.4. Long; 
+		
+		4.7. constants/
+			Check that those correspond to the constant values expected 'assert.strictEqual';
+		
+		4.8. IndexMap/
+			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
 		
 B. documentation (change/fix it...);
 	B.1. Create new pages:
@@ -528,8 +523,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	2.22. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
 	2.23. [maybe?] Create a module for randomized Stream-generation (`random`);
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
-			it will choose one of them); 
-		Similarly - one could give an Array of characters for a LimitedStream to be defined by...; 
+			it will choose a pair of them for different [distinct] boundries); 
+		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 		
 3. Dependency management: 
 	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	

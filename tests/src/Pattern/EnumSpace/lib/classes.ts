@@ -5,7 +5,7 @@ import type {
 	EnumSpace,
 	Mappable
 } from "../../../../../dist/src/Pattern/EnumSpace/interfaces.js"
-import { arraysSame, ClassConstructorTest } from "lib/lib.js"
+import { arraysSame, ClassConstructorTest, unambigiousMethodTest } from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -48,33 +48,24 @@ function EnumSpaceCopyTest(enumInstance: EnumSpace) {
 	})
 }
 
-function EnumSpaceAddTest(enumInstance: EnumSpace, increases: number[]) {
-	for (const n of increases) {
-		it(`method: .add(${n})`, () => {
-			const initial = enumInstance.copy()
-			enumInstance.add(n)
-			assert(enumInstance.size - initial.size === n)
-			assert(!enumEquality(enumInstance, initial))
-		})
-	}
+function EnumSpaceAddTest(enumInstance: EnumSpace, n: number) {
+	it(`method: .add(${n})`, () => {
+		const initial = enumInstance.copy()
+		enumInstance.add(n)
+		assert(enumInstance.size - initial.size === n)
+		assert(!enumEquality(enumInstance, initial))
+	})
 }
 
-function EnumSpaceJoinTest(enumInstance: EnumSpace, joined: EnumSpace[]) {
-	for (const space of joined) {
-		it(`method: .join(${enumInstance.size}, ${space.size})`, () => {
-			const currJoined = enumInstance.copy().join(space)
-			assert.notStrictEqual(currJoined, enumInstance)
-			if (space.size) assert(!enumEquality(enumInstance, currJoined))
-		})
-	}
+function EnumSpaceJoinTest(enumInstance: EnumSpace, space: EnumSpace) {
+	it(`method: .join(${enumInstance.size}, ${space.size})`, () => {
+		const currJoined = enumInstance.copy().join(space)
+		assert.notStrictEqual(currJoined, enumInstance)
+		if (space.size) assert(!enumEquality(enumInstance, currJoined))
+	})
 }
 
-function EnumSpaceMapTest(enumInstance: EnumSpace, mapTests: [Mappable, any[]][]) {
-	for (const [f, out] of mapTests)
-		it(`method: .map(${out.toString()})`, () => {
-			assert(arraysSame(enumInstance.map(f), out))
-		})
-}
+const EnumSpaceMapTest = unambigiousMethodTest("map", arraysSame)
 
 type EnumSpaceClassTestSignature = {
 	size: number
@@ -93,10 +84,17 @@ export function EnumSpaceTest(
 			const { size, increases, joined, mapTests } = instance
 			const enumInstance = EnumSpaceConstructorTest(enumConstructor, size)
 
-			EnumSpaceCopyTest(enumInstance) // 				.copy
-			EnumSpaceAddTest(enumInstance, increases) // 	.add
-			EnumSpaceJoinTest(enumInstance, joined) //		.join
-			EnumSpaceMapTest(enumInstance, mapTests) //		.map
+			// .copy
+			EnumSpaceCopyTest(enumInstance)
+
+			// .add
+			for (const n of increases) EnumSpaceAddTest(enumInstance, n)
+
+			// .join
+			for (const space of joined) EnumSpaceJoinTest(enumInstance, space)
+
+			// .map
+			for (const [f, out] of mapTests) EnumSpaceMapTest(enumInstance, [f], out)
 		}
 	})
 }

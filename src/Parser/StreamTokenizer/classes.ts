@@ -7,7 +7,7 @@ import type {
 } from "../../Stream/StreamClass/interfaces.js"
 
 import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
-import { inputDefaultIsEnd, inputIsEnd } from "src/Stream/StreamClass/methods.js"
+import { inputDefaultIsEnd, inputIsEnd } from "../../Stream/StreamClass/methods.js"
 
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 

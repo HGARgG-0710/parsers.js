@@ -3,7 +3,7 @@ import type { IndexMap } from "../../IndexMap/interfaces.js"
 import type { ValidatablePattern } from "../../Pattern/ValidatablePattern/interfaces.js"
 import type { PatternValidatorOutput } from "./interfaces.js"
 
-import { PatternValidator as PatternValidatorNamespace } from "src/constants.js"
+import { PatternValidator as PatternValidatorNamespace } from "../../constants.js"
 const { FullCoverage, NoFullCoverage, ValidationError } = PatternValidatorNamespace
 
 export function PatternValidator<KeyType = any>(

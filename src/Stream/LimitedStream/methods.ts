@@ -1,8 +1,5 @@
 import type { Position } from "../../Position/interfaces.js"
-import type {
-	EffectiveLimitedStream,
-	LimitedUnderStream
-} from "./interfaces.js"
+import type { EffectiveLimitedStream, LimitedUnderStream } from "./interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
@@ -10,13 +7,13 @@ import {
 	positionNegate
 } from "../../Position/utils.js"
 
-import { fastNavigate } from "../StreamClass/utils.js"
+import { LimitedStream } from "../../constants.js"
 
+import { fastNavigate } from "../StreamClass/utils.js"
 import { Inputted } from "../StreamClass/classes.js"
 import { superInit } from "../StreamClass/utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
-import { LimitedStream } from "src/constants.js"
 const { isUndefined } = type
 
 export function effectiveLimitedStreamNext<Type = any>(

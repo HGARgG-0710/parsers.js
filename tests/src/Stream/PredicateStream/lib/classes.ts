@@ -19,34 +19,36 @@ const { and } = _f
 const { structCheck } = object
 const { isFunction } = type
 
-const predicateStreamPrototypeProps = ["super", "prod"]
-const predicateStreamOwnProps = ["predicate", "lookAhead", "input", "pos"]
-
-const isPredicateStream = and(
-	structCheck({
-		predicate: isFunction
-	}),
-	isLookahead,
-	isSuperable,
-	isInputted,
-	isProddable,
-	isPosed
-) as (x: any) => x is EffectivePredicateStream
-
-const PredicateStreamConstructorTest = blockExtension(
-	StreamClassConstructorTest,
-	ClassConstructorTest<EffectivePredicateStream>(
-		isPredicateStream,
-		predicateStreamPrototypeProps,
-		predicateStreamOwnProps
+export function GeneratedPredicateStreamTest(hasPosition: boolean = false) {
+	const predicateStreamPrototypeProps = ["super", "prod"]
+	const predicateStreamOwnProps = ["predicate", "lookAhead", "input"].concat(
+		hasPosition ? ["pos"] : []
 	)
-)
 
-const InitPredicateStreamConstructorTest = blockExtension(
-	InitStreamClassConstructorTest,
-	InitClassConstructorTest<EffectivePredicateStream>(
-		isPredicateStream,
-		predicateStreamPrototypeProps,
-		predicateStreamOwnProps
+	const isPredicateStream = and(
+		structCheck({
+			predicate: isFunction
+		}),
+		...(
+			[isLookahead, isSuperable, isInputted, isProddable] as ((x: any) => boolean)[]
+		).concat(hasPosition ? [isPosed] : [])
+	) as (x: any) => x is EffectivePredicateStream
+
+	const PredicateStreamConstructorTest = blockExtension(
+		StreamClassConstructorTest,
+		ClassConstructorTest<EffectivePredicateStream>(
+			isPredicateStream,
+			predicateStreamPrototypeProps,
+			predicateStreamOwnProps
+		)
 	)
-)
+
+	const InitPredicateStreamConstructorTest = blockExtension(
+		InitStreamClassConstructorTest,
+		InitClassConstructorTest<EffectivePredicateStream>(
+			isPredicateStream,
+			predicateStreamPrototypeProps,
+			predicateStreamOwnProps
+		)
+	)
+}
