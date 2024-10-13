@@ -97,7 +97,7 @@ export function iterationTest<Type extends Iterable<any> = any>(
 }
 
 export function methodTest<InstanceType = any>(methodName: string) {
-	return function (instance: InstanceType, input: any[], expectedValue: any) {
+	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
 		it(`method: .${methodName}(${inputDescribe(input)})`, () =>
 			assert.strictEqual(instance[methodName](...input), expectedValue))
 	}
@@ -106,9 +106,9 @@ export function methodTest<InstanceType = any>(methodName: string) {
 export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
 	return function (
 		instance: InstanceType,
-		input: any[],
 		expectedValue: any,
-		compare: (x: any, y: any) => boolean
+		compare: (x: any, y: any) => boolean,
+		...input: any[]
 	) {
 		it(`method: .${methodName}`, () =>
 			assert(compare(instance[methodName](...input), expectedValue)))
@@ -119,19 +119,9 @@ export function unambigiousMethodTest<InstanceType = any>(
 	methodName: string,
 	compare: (x: any, y: any) => boolean
 ) {
-	return function (instance: InstanceType, input: any[], expectedValue: any) {
+	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
 		it(`method: .${methodName}`, () =>
 			assert(compare(instance[methodName](...input), expectedValue)))
-	}
-}
-
-export function unambigiousThisMethodTest<InstanceType = any>(
-	methodName: string,
-	compare: (x: any, y: any) => boolean
-) {
-	return function (instance: InstanceType, expectedValue: any) {
-		it(`method: .${methodName}`, () =>
-			assert(compare(instance[methodName](), expectedValue)))
 	}
 }
 
@@ -139,9 +129,9 @@ export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName:
 	return function (compare: (x: any, y: any) => boolean) {
 		return function (
 			instance: InstanceType,
-			input: any[],
 			expectedValue: any,
-			lowCompare = compare
+			lowCompare = compare,
+			...input: any[]
 		) {
 			it(`method: .${methodName}(${inputDescribe(input)})`, () =>
 				assert(lowCompare(instance[methodName](...input), expectedValue)))
@@ -153,7 +143,7 @@ export function setMethodTest<InstanceType = any>(
 	setMethodName: string,
 	getMethodName: string
 ) {
-	return function (instance: InstanceType, input: any[], expectedValue: any) {
+	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
 		it(`method: ${setMethodName}(${inputDescribe(input)})`, () => {
 			instance[setMethodName](...input)
 			assert.strictEqual(input[getMethodName](input[0]), expectedValue)
@@ -180,7 +170,7 @@ export function ResultingAmbigiousMethodTest<InstanceType extends Resulting = an
 
 export function utilTest(util: Function, utilName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
-		return function (input: any[], expected: any) {
+		return function (expected: any, ...input: any[]) {
 			it(`util: ${utilName} (${inputDescribe(input)})`, () =>
 				assert(compare(util(...input), expected)))
 		}

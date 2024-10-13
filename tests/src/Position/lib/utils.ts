@@ -1,16 +1,19 @@
-import type { StreamPredicate } from "../../../../../dist/src/Parser/ParserMap/interfaces.js"
-import type { BoundNameType } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
-import type { Rewindable } from "../../../../../dist/src/Stream/StreamClass/Rewindable/interfaces.js"
+import type { StreamPredicate } from "../../../../dist/src/Parser/ParserMap/interfaces.js"
+
+import type {
+	BoundNameType,
+	Rewindable
+} from "../../../../dist/src/Stream/StreamClass/interfaces.js"
 
 import type {
 	DirectionalPosition,
 	PredicatePosition
-} from "../../../../../dist/src/Stream/PositionalStream/Position/interfaces.js"
+} from "../../../../dist/src/Position/interfaces.js"
 
 import type {
 	ChangeType,
 	ReversibleStream
-} from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
+} from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 
 import {
 	isBackward,
@@ -23,7 +26,7 @@ import {
 	positionSame,
 	positionStopPoint,
 	preserveDirection
-} from "../../../../../dist/src/Stream/PositionalStream/Position/utils.js"
+} from "../../../../dist/src/Position/utils.js"
 
 import { utilTest } from "lib/lib.js"
 

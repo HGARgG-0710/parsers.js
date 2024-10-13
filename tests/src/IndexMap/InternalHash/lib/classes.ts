@@ -64,12 +64,11 @@ export function InternalHashTest(
 			const instance = InternalHashConstructorTest(hashConstructor, sub)
 
 			// .get
-			for (const [key, value] of getTests)
-				InternalHashGetTest(instance, [key], value)
+			for (const [key, value] of getTests) InternalHashGetTest(instance, value, key)
 
 			// .set
 			for (const [key, value] of setTests)
-				InternalHashSetTest(instance, [key, value], value)
+				InternalHashSetTest(instance, value, key, value)
 
 			// .delete
 			for (const key of deleteTests) InternalHashDeleteTest(instance, key)

@@ -14,7 +14,7 @@ import type {
 	Pairs,
 	DefaultHaving
 } from "../../../../dist/src/IndexMap/interfaces.js"
-import { ClassConstructorTest, methodTest, unambigiousThisMethodTest } from "lib/lib.js"
+import { ClassConstructorTest, methodTest, unambigiousMethodTest } from "lib/lib.js"
 
 import { toPairsList } from "../../../../dist/src/IndexMap/utils.js"
 
@@ -141,7 +141,7 @@ function indexMapByIndexTest<KeyType = any, ValueType = any>(
 	})
 }
 
-const indexMapIndexTest = methodTest("index")
+const indexMapIndexTest = methodTest<IndexMap>("index")
 
 function indexMapSwapTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>,
@@ -180,7 +180,7 @@ function indexMapCopyTest<KeyType = any, ValueType = any>(
 	})
 }
 
-const indexMapUniqueTest = unambigiousThisMethodTest("unique", indexMapEquality)
+const indexMapUniqueTest = unambigiousMethodTest("unique", indexMapEquality)
 
 function indexMapReplaceTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>,
@@ -280,7 +280,7 @@ export function MapClassTest<KeyType = any, ValueType = any>(
 
 			// .index
 			for (const [key, value] of indexTest)
-				indexMapIndexTest(mapInstance, [key], value)
+				indexMapIndexTest(mapInstance, value, key)
 
 			// .copy
 			indexMapCopyTest(mapInstance)

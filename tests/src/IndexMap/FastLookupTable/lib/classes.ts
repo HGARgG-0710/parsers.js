@@ -78,28 +78,34 @@ export function FastLookupTableTest(
 ) {
 	describe(`class: (FastLookupTable) ${className}`, () => {
 		for (const signature of signatures) {
-			const { sub, getIndexTests, setTests, ownTests, replaceKeyTests, deleteTests } = signature
+			const {
+				sub,
+				getIndexTests,
+				setTests,
+				ownTests,
+				replaceKeyTests,
+				deleteTests
+			} = signature
 			const instance = FastLookupTableConstructorTest(tableConstructor, sub)
 
 			// .getIndex
 			for (const [index, value] of getIndexTests)
-				FastLookupTableGetIndexTest(instance, index, value)
+				FastLookupTableGetIndexTest(instance, value, index)
 
 			// .set
 			for (const [key, value] of setTests)
-				FastLookupTableSetTest(instance, key, value)
+				FastLookupTableSetTest(instance, value, key, value)
 
 			// .own/.byOwned
 			for (const [owned, ownershipToken, value] of ownTests)
-				FastLookupTableOwnByOwnedTest(instance, [owned, ownershipToken], value)
+				FastLookupTableOwnByOwnedTest(instance, value, owned, ownershipToken)
 
 			// .replaceKey
 			for (const [keyFrom, keyTo, failKey] of replaceKeyTests)
 				FastLookupTableReplaceKeyTest(instance, keyFrom, keyTo, failKey)
 
 			// .delete
-			for (const key of deleteTests)
-				FastLookupTableDeleteTest(instance, key)
+			for (const key of deleteTests) FastLookupTableDeleteTest(instance, key)
 		}
 	})
 }

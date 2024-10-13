@@ -65,7 +65,7 @@ function EnumSpaceJoinTest(enumInstance: EnumSpace, space: EnumSpace) {
 	})
 }
 
-const EnumSpaceMapTest = unambigiousMethodTest("map", arraysSame)
+const EnumSpaceMapTest = unambigiousMethodTest<EnumSpace>("map", arraysSame)
 
 type EnumSpaceClassTestSignature = {
 	size: number
@@ -94,7 +94,7 @@ export function EnumSpaceTest(
 			for (const space of joined) EnumSpaceJoinTest(enumInstance, space)
 
 			// .map
-			for (const [f, out] of mapTests) EnumSpaceMapTest(enumInstance, [f], out)
+			for (const [f, out] of mapTests) EnumSpaceMapTest(enumInstance, out, f)
 		}
 	})
 }

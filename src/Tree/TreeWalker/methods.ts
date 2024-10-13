@@ -70,10 +70,11 @@ export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
 
 export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Type>) {
 	const { input, pos } = this.stream
-	const parents = sequentialIndex(input, pos.slice(0, -1)) as Tree<Type>[]
+	const sliced = pos.slice(0, -1)
+	const parents = sequentialIndex(input, sliced) as Tree<Type>[]
 
 	let result = parents.length - 1
-	while (result >= 0 && parents[result].lastChild <= pos.slicer[result]) --result
+	while (result >= 0 && parents[result].lastChild <= sliced[result]) --result
 	return result
 }
 

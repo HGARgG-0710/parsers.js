@@ -19,6 +19,8 @@ import {
 	isRewindable
 } from "../../../../../dist/src/Stream/StreamClass/utils.js"
 
+import { isMultiIndex } from "Position/MultiIndex/lib/classes.js"
+
 import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
@@ -38,7 +40,7 @@ const isTreeStream = and(
 	isCopiable,
 	isNavigable,
 	isInputted,
-	isPosed
+	isPosed(isMultiIndex)
 ) as (x: any) => x is EffectiveTreeStream
 
 const TreeStreamConstructorTest = blockExtension(

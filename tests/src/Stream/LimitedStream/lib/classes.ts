@@ -25,7 +25,7 @@ import {
 import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { and } = _f
-const { isBoolean } = type
+const { isBoolean, isNumber } = type
 
 export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 	const isLimitedStream = and(
@@ -37,7 +37,7 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		}),
 		...(
 			[isLookahead, isSuperable, isProddable, isInputted] as ((x: any) => boolean)[]
-		).concat(hasPosition ? [isPosed] : [])
+		).concat(hasPosition ? [isPosed(isNumber)] : [])
 	) as (x: any) => x is EffectiveLimitedStream
 
 	const limitedStreamPrototypeProps = ["super", "prod"]

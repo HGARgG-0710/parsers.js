@@ -8,7 +8,6 @@ import {
 	InitClassConstructorTest
 } from "lib/lib.js"
 
-import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 import {
 	InitStreamClassConstructorTest,
 	isInputted,
@@ -17,9 +16,11 @@ import {
 	StreamClassConstructorTest
 } from "Stream/StreamClass/lib/classes.js"
 import { isFastLookupTable } from "IndexMap/FastLookupTable/lib/classes.js"
+
+import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
-const { isBoolean } = type
+const { isBoolean, isNumber } = type
 
 type NestedStreamCurrNestedTreeList = (false | NestedStreamCurrNestedTreeList)[]
 
@@ -59,7 +60,7 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 			currNested: isBoolean
 		}),
 		...([isInputted, isSuperable] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed] : []
+			hasPosition ? [isPosed(isNumber)] : []
 		)
 	) as (x: any) => x is EffectiveNestedStream
 

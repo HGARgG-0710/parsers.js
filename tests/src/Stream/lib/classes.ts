@@ -1,7 +1,10 @@
 import assert from "assert"
 import { arraysSame, classSpecificAmbigiousMethodTest, methodTest } from "lib/lib.js"
 
-import type { BoundNameType } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
+import type {
+	BoundNameType,
+	Navigable
+} from "../../../../dist/src/Stream/StreamClass/interfaces.js"
 import type { BasicStream } from "../../../../dist/src/Stream/interfaces.js"
 import type {
 	ChangeType,
@@ -16,7 +19,7 @@ import type {
 import { uniFinish } from "../../../../dist/src/Stream/StreamClass/utils.js"
 import { next, previous } from "../../../../dist/src/utils.js"
 
-export const streamNavigateTest = methodTest("navigate")
+export const streamNavigateTest = methodTest<Navigable>("navigate")
 export const streamCopyTest = classSpecificAmbigiousMethodTest<BasicStream>("copy")
 
 const pickTestDirection = (direction: boolean): [BoundNameType, ChangeType] =>

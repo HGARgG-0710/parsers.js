@@ -108,7 +108,7 @@ export function TreeClassTest(
 
 			// .index
 			for (const [index, expected, compare] of indexTests)
-				TreeIndexTest(treeInstance, [index], expected, compare)
+				TreeIndexTest(treeInstance, expected, compare, index)
 
 			// .lastChild
 			for (const [index, lastChild] of lastChildTests)

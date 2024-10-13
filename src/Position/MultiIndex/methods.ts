@@ -32,8 +32,7 @@ export function multiIndexSlice(
 	from: number = 0,
 	to: number = this.value.length
 ) {
-	this.slicer.reSlice(from, to < 0 ? this.value.length + to : to)
-	return this.slicer
+	return this.value.slice(from, to < 0 ? this.value.length + to : to)
 }
 
 export function multiIndexFirstLevel(this: MultiIndex): number[] {
@@ -55,4 +54,3 @@ export function multiIndexConvert(this: MultiIndex, stream: BasicTreeStream) {
 }
 
 export * as MultiIndexModifier from "./MultiIndexModifier/methods.js"
-export * as Slicer from "./Slicer/methods.js"

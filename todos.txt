@@ -13,19 +13,17 @@ A. testing:
 			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
 		0.3. Add '.toString()' to all the 'it' and 'describe' calls, when arguments for tests are used [to be able to distinguish failures and successes]; 
 
+		0.4. Create the 'run.ts' script for running ALL the test specific suites AT ONCE [in sequence, that is...]; 
+			0.4.1. This will ensure one's ability to see the global code correctness despite making small changes to a particular (possibly sensitive) area of the project...; 
+
 	1. Order, in which to fix things [that are broken currently]: 
 		1. Stream [first, need to add 'FastLookupTable', 'MultiIndex' and 'TreeWalker']; 
 			1.1. TreeStream [check]; 
 				1.1.1. TODO: make the 'isObject' check STRICTER for the 'walker:' property (make it 'isTreeWalker', based on exported is-function); 
-				1.1.2. TODO: make the 'isPosed' check STRICTER for the 'pos: ' property (make it 'isMultiIndex', based on exported is-function); 
-					1.1.2.1. DO THE SAME with the other 'isPosed' - as the types (usually) are intended to be CONCRETE, choose the different predicates in place of 'isPosition' (which should appear ONLY in certain few places...); 
 		
 		Order, in which to add the new things: 
-			1. Position/MultiIndex; 
-				1.1. MultiIndexModifier; 
-				2.2. Slicer; 
-			2. Tree/TreeWalker; 
-			3. Parser; 
+			1. Tree/TreeWalker; 
+			2. Parser; 
 	2. Changes to tests [for modules]: 
 
 		1. Stream-s: 
@@ -43,11 +41,9 @@ A. testing:
 				1.1.2. TEST the '.pos', where it is relevant; 
 					There must be SPECIFIC checks for it (namely - a SEPARATE method, that goes through the entire Stream, comparing the differences between the '.pos' - that they ALWAYS be 1); 
 					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
-		2. IndexMap: 
-			2.1. Add FastLookupTable tests [design is the same for different classes]; 
-			2.2. Add InternalHash tests [design is the same for differnt classes]; 
+				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 
 	3. Utils: 
-		These are tested regularly via the 'utilTest'; 
+		These are tested in a regular manner via the 'utilTest'; 
 		Re-do them; 
 		List the utils to be tested for each particular class, add tests for them; 
 		DO THEM ACCORDINGLY [refactor using 'lib/lib.ts' on-the-spot]
@@ -83,6 +79,12 @@ A. testing:
 					TransformedStream-LimitedStream-TreeStream;
 					NestedStream-TransformedStream-InputStream;
 						And more...
+				
+				FOR THIS, one needs to be able to do CompositionClassTests; 
+				Introduce a new function 'classCompose', which does '(...classes) => trivialCompose(...classes.map(classWrapper))'
+					[produces a function for creation of an instance that is the result of a chain (new X)<-(new Y)<-... of classes]
+
+					The tests for them work THE SAME WAY as the top-level cases, BUT they have a different constructor; 
 
 			4.1.2. Constructors:
 					1. StreamTokenizer (Parser/) [need both 'is' and the constructor]; 
@@ -91,7 +93,6 @@ A. testing:
 				4.1.3.1. TreeWalker; 
 				4.1.3.2. MultiIndex; 
 					4.1.3.2.1. MultiIndexModifier; 
-					4.1.3.2.2. Slicer; 
 
 			4.1.4. Test Instances: 	
 				4.1.4.1. They branch: 
@@ -433,13 +434,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				}
 
 		The method would go on the 'StreamClass'; 
-
-	2.17. QUESTION [minimalism]: are 'SkipParser' and 'BasicParser' really useful? 
-		The former can easily be replaced with an appropriate table on BasicStream, 
-			while 'BasicParser' is equivalent to a 'TransformedStream' (or NestedlyTransformedStream); 
-		Consider removal...
 	
-	2.18. v8-specific optimizations: 
+	2.17. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
 	
 		CONCLUSION: 
@@ -474,7 +470,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						2. profile, break the execution down on several tiny pieces; Then - benchmark and optimize them accordingly; 
 							For this, use results from samples from one's benchmarks library;  
 	
-	2.19. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
+	2.18. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
 	
 		Do only if there are code aspects suffering from this significantly: 
@@ -489,7 +485,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			[need for calling the '.isCurrEnd()' two times more]; 
 		Again, do this ONLY if the performance difference is SIGNIFICANT!
 	
-	2.20. util - enumerateTree; 
+	2.19. util - enumerateTree; 
 		Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
 			to single-array-siblings form (the current ChildrenTree); 	
 		This would permit a more "variable" set of trees (those that have properties with fixed names), 
@@ -513,22 +509,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				]
 			}
 		
-	2.21. About generics - relax them; 
+	2.20. About generics - relax them; 
 		Use ONLY WHEN NEEDED; 
 		For example: a method makes use of X generics, out of which Y < X is needed [id est, used somewhere beyond the 'this: ...' in the parameters list]; 
 			REMOVE the unneeded ones; 
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
 
-	2.22. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
-	2.23. [maybe?] Create a module for randomized Stream-generation (`random`);
+	2.21. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
+	2.22. [maybe?] Create a module for randomized Stream-generation (`random`);
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
 			it will choose a pair of them for different [distinct] boundries); 
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 		
 3. Dependency management: 
-	3.1. [maybe?] Create a 'proxy-op' library SPECIFICALLY for various optimizations based on Proxy-functions on different types/kinds of objects;	
-		3.1.1. These (sometimes) can help GREATELY reduce memory-consumption; Example: the Slicer; Include those there...; 
 	3.2. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 

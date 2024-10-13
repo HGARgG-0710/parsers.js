@@ -16,7 +16,7 @@ import {
 import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
-const { isFunction } = type
+const { isFunction, isNumber } = type
 
 export function GeneratedTransformedStreamTest(hasPosition: boolean = false) {
 	const transformedStreamPrototypeProps = ["super"]
@@ -29,7 +29,7 @@ export function GeneratedTransformedStreamTest(hasPosition: boolean = false) {
 			transform: isFunction
 		}),
 		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed] : []
+			hasPosition ? [isPosed(isNumber)] : []
 		)
 	) as (x: any) => x is EffectiveTransformedStream
 

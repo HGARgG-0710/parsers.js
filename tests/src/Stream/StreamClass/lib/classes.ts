@@ -114,7 +114,8 @@ export const InitReversedStreamClassConstructorTest = InitClassConstructorTest(
 export const isSuperable = structCheck<Superable>({ super: isObject })
 export const isCopiable = structCheck<Copiable>({ copy: isFunction })
 export const isInputted = structCheck<Inputted>({ input: isObject })
-export const isPosed = structCheck<Posed>({ pos: isPosition })
+export const isPosed = (pred: (x: any) => boolean = isPosition) =>
+	structCheck<Posed>({ pos: pred })
 export const isProddable = structCheck<Proddable>({
 	prod: isFunction
 })

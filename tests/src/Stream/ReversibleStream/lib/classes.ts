@@ -6,7 +6,6 @@ import {
 	InitClassConstructorTest
 } from "lib/lib.js"
 
-import { function as _f } from "@hgargg-0710/one"
 import {
 	InitReversedStreamClassConstructorTest,
 	isInputted,
@@ -14,7 +13,10 @@ import {
 	isSuperable,
 	ReversedStreamClassConstructorTest
 } from "Stream/StreamClass/lib/classes.js"
+
+import { function as _f, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
+const { isNumber } = type
 
 export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
 	const reversedStreamPrototypeProps = ["super"]
@@ -22,7 +24,7 @@ export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
 
 	const isReversedStream = and(
 		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed] : []
+			hasPosition ? [isPosed(isNumber)] : []
 		)
 	) as (x: any) => x is ReversedStream
 

@@ -17,7 +17,7 @@ import {
 import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
-const { isFunction } = type
+const { isFunction, isNumber } = type
 
 export function GeneratedPredicateStreamTest(hasPosition: boolean = false) {
 	const predicateStreamPrototypeProps = ["super", "prod"]
@@ -31,7 +31,7 @@ export function GeneratedPredicateStreamTest(hasPosition: boolean = false) {
 		}),
 		...(
 			[isLookahead, isSuperable, isInputted, isProddable] as ((x: any) => boolean)[]
-		).concat(hasPosition ? [isPosed] : [])
+		).concat(hasPosition ? [isPosed(isNumber)] : [])
 	) as (x: any) => x is EffectivePredicateStream
 
 	const PredicateStreamConstructorTest = blockExtension(

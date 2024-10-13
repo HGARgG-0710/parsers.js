@@ -51,7 +51,7 @@ export function CollectionClassTest(
 			)
 
 			CollectionIterationTest(collectionInstance, iteratedOver) // 				[Symbol.iterator]
-			CollectionPushTest(collectionInstance, pushed, expectedValue, pushCompare) //	.push
+			CollectionPushTest(collectionInstance, expectedValue, pushCompare, pushed) //	.push
 		}
 	})
 }

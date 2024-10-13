@@ -29,7 +29,7 @@ export function GeneratedProlongedStreamTest(hasPosition: boolean = false) {
 			streamIndex: isNumber
 		}),
 		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed] : []
+			hasPosition ? [isPosed(isNumber)] : []
 		)
 	) as (x: any) => x is EffectiveProlongedStream
 

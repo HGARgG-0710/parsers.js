@@ -76,12 +76,11 @@ export function HashMapTest(
 			const instance = HashMapConstructorTest(HashMapClass, sub)
 
 			// .index
-			for (const [key, value] of indexTests)
-				HashMapIndexTest(instance, [key], value)
+			for (const [key, value] of indexTests) HashMapIndexTest(instance, value, key)
 
 			// .set
 			for (const [key, value] of setTests)
-				HashMapSetTest(instance, [key, value], value)
+				HashMapSetTest(instance, value, key, value)
 
 			// .delete
 			for (const key of deleteTests) HashMapDeleteTest(instance, key)
