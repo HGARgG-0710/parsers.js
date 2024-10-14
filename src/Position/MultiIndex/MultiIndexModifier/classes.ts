@@ -7,11 +7,13 @@ import {
 	multiIndexModifierClear,
 	multiIndexModifierIncLast,
 	multiIndexModifierDecLast,
-	multiIndexModifierExtend
+	multiIndexModifierExtend,
+	multiIndexModifierInitialize
 } from "./methods.js"
 
 export class MultiIndexModifier implements MultiIndexModifierType {
 	multind: MultiIndex
+	init: (multind: MultiIndex) => MultiIndexModifierType
 
 	nextLevel: () => number[]
 	prevLevel: () => number[]
@@ -27,6 +29,7 @@ export class MultiIndexModifier implements MultiIndexModifierType {
 }
 
 Object.defineProperties(MultiIndexModifier.prototype, {
+	init: { value: multiIndexModifierInitialize },
 	nextLevel: { value: multiIndexModifierNextLevel },
 	prevLevel: { value: multiIndexModifierPrevLevel },
 	resize: { value: multiIndexModifierResize },

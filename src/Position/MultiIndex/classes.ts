@@ -1,5 +1,4 @@
 import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { MultiIndexModifier as MultiIndexModifierType } from "./MultiIndexModifier/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "./interfaces.js"
 
 import {
@@ -9,14 +8,14 @@ import {
 	multiIndexCopy,
 	multiIndexSlice,
 	multiIndexFirstLevel,
-	multiIndexLastLevel
+	multiIndexLastLevel,
+	multiIndexLevelsGetter,
+	multiIndexLevelsSetter
 } from "./methods.js"
-
-import { MultiIndexModifier } from "./MultiIndexModifier/classes.js"
 
 export class MultiIndex implements MultiIndexType {
 	value: number[]
-	modifier: MultiIndexModifierType
+	levels: number
 
 	equals: (x: MultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]
@@ -25,13 +24,13 @@ export class MultiIndex implements MultiIndexType {
 	lastLevel: () => number[]
 	copy: () => MultiIndex
 
-	constructor(multindex: number[]) {
+	constructor(multindex: number[] = []) {
 		this.value = multindex
-		this.modifier = new MultiIndexModifier(this)
 	}
 }
 
 Object.defineProperties(MultiIndex.prototype, {
+	levels: { get: multiIndexLevelsGetter, set: multiIndexLevelsSetter },
 	convert: { value: multiIndexConvert },
 	compare: { value: multiIndexCompare },
 	equals: { value: multiIndexEqual },

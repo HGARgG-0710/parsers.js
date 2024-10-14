@@ -1,5 +1,6 @@
-import type { Tree } from "../interfaces.js"
-import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
+import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
+import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
+import type { InTreeType, Tree } from "../interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "./interfaces.js"
 import {
 	treeWalkerPushFirstChild,
@@ -20,9 +21,16 @@ import {
 	treeWalkerInitialize
 } from "./methods.js"
 
+import { MultiIndex as MultiIndexClass } from "../../Position/MultiIndex/classes.js"
+import { MultiIndexModifier as MultiIndexModifierClass } from "../../Position/MultiIndex/MultiIndexModifier/classes.js"
+
 export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
-	stream: BasicTreeStream<Type>
 	level: Tree<Type>
+
+	input: Tree<Type>
+	curr: InTreeType<Type>
+	pos: MultiIndex
+	modifier: MultiIndexModifier
 
 	pushFirstChild: () => void
 	popChild: () => number[]
@@ -36,14 +44,14 @@ export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	lastLevelWithSiblings: () => number
 	currentLastIndex: () => number[]
 	goPrevLast: () => void
-	renewLevel: () => void
+	renewLevel: (init?: Tree<Type>, from?: number, until?: number) => void
 	restart: () => void
-	goIndex: () => void
-	init: (treeStream?: Tree<Type>) => TreeWalker<Type>
+	goIndex: (pos: MultiIndex) => void
+	init: (input?: Tree<Type>, pos?: MultiIndex) => TreeWalker<Type>
 
-	constructor(treeStream: BasicTreeStream<Type>) {
-		this.stream = treeStream
-		this.init(treeStream.input)
+	constructor(input?: Tree<Type>, pos: MultiIndex = new MultiIndexClass()) {
+		this.modifier = new MultiIndexModifierClass(pos)
+		this.init(input, pos)
 	}
 }
 

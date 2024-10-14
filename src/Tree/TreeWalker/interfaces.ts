@@ -1,11 +1,17 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Tree } from "../interfaces.js"
-import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
+import type { InTreeType, Tree } from "../interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
+import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
+import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
+import type { Currable } from "../../Stream/interfaces.js"
+import type { Inputted } from "../../Stream/StreamClass/interfaces.js"
 
-export interface TreeWalker<Type = any> extends Summat {
-	stream: BasicTreeStream<Type>
+export interface TreeWalker<Type = any>
+	extends Posed<MultiIndex>,
+		Currable<InTreeType<Type>>,
+		Inputted<Tree<Type>> {
 	level: Tree<Type>
-	init: (treeStream: Tree<Type>) => TreeWalker<Type>
+	modifier: MultiIndexModifier
+	init: (input?: Tree<Type>, pos?: MultiIndex) => TreeWalker<Type>
 
 	pushFirstChild: () => void
 	popChild: () => number[]
@@ -19,7 +25,7 @@ export interface TreeWalker<Type = any> extends Summat {
 	lastLevelWithSiblings: () => number
 	currentLastIndex: () => number[]
 	goPrevLast: () => void
-	renewLevel: (init?: Tree<Type>) => void
+	renewLevel: (init?: Tree<Type>, from?: number, until?: number) => void
 	restart: () => void
-	goIndex: () => void
+	goIndex: (pos: MultiIndex) => void
 }

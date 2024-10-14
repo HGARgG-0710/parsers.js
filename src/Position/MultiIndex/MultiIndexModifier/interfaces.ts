@@ -3,6 +3,7 @@ import type { MultiIndex } from "../interfaces.js"
 
 export interface MultiIndexModifier extends Summat {
 	multind: MultiIndex
+	init: (multind: MultiIndex) => MultiIndexModifier
 	nextLevel: () => number[]
 	prevLevel: () => number[]
 	resize: (length: number) => MultiIndex

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test"
 import assert from "node:assert"
 
+import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
 import type { MultiIndex } from "../../../../../dist/src/Position/MultiIndex/interfaces.js"
 
 import {
@@ -12,19 +13,15 @@ import {
 
 import {
 	ChainMultiIndexModifierTest,
-	isMultiIndexModifier,
 	type MultiIndexModifierTestSignature
 } from "../MultiIndexModifier/lib/classes.js"
 
-import { object, typeof as type, function as _f } from "@hgargg-0710/one"
-import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
+import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
-const { isFunction, isArray, isObject } = type
-const { and } = _f
+const { isFunction, isArray } = type
 
-export const plainIsMultiIndex = structCheck({
+export const isMultiIndex = structCheck({
 	value: isArray,
-	modifier: isObject,
 	convert: isFunction,
 	compare: isFunction,
 	equals: isFunction,
@@ -32,19 +29,12 @@ export const plainIsMultiIndex = structCheck({
 	slice: isFunction,
 	firstLevel: isFunction,
 	lastLevel: isFunction
-})
-
-export const isMultiIndex = and(
-	plainIsMultiIndex,
-	structCheck({
-		modifier: isMultiIndexModifier
-	})
-) as (x: any) => x is MultiIndex
+}) as (x: any) => x is MultiIndex
 
 const MultiIndexConstructorTest = ClassConstructorTest<MultiIndex>(
 	isMultiIndex,
 	["convert", "compare", "equals", "copy", "slice", "firstLevel", "lastLevel"],
-	["value", "modifier"]
+	["value"]
 )
 
 const MultiIndexEqualsTest = methodTest<MultiIndex>("equals")
@@ -87,10 +77,6 @@ type MultiIndexTestSignature = {
 	equalsTests: [MultiIndex, boolean][]
 	firstLevelTest: number
 	lastLevelTest: number
-	modifierTest: {
-		modifierClassName: string
-		modifierSignature: MultiIndexModifierTestSignature
-	}
 }
 
 export function MultiIndexTest(
@@ -102,7 +88,6 @@ export function MultiIndexTest(
 		for (const signature of signatures) {
 			const {
 				value,
-				modifierTest,
 				conversionTests,
 				comparisonTests,
 				sliceTests,
@@ -110,7 +95,6 @@ export function MultiIndexTest(
 				firstLevelTest,
 				lastLevelTest
 			} = signature
-			const { modifierClassName, modifierSignature } = modifierTest
 			const instance = MultiIndexConstructorTest(multindConstructor, value)
 
 			// .convert
@@ -136,14 +120,6 @@ export function MultiIndexTest(
 
 			// .lastLevel
 			MultiIndexLastLevelTest(instance, [lastLevelTest])
-
-			// running the sub-suite
-			ChainMultiIndexModifierTest(
-				instance.modifier,
-				modifierSignature,
-				true,
-				modifierClassName
-			)
 		}
 	})
 }

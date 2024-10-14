@@ -1,19 +1,20 @@
 import { describe, it } from "node:test"
 import assert from "node:assert"
 
+import type { MultiIndex } from "../../../../../../dist/src/Position/MultiIndex/interfaces.js"
 import type { MultiIndexModifier } from "../../../../../../dist/src/Position/MultiIndex/MultiIndexModifier/interfaces.js"
-import { plainIsMultiIndex } from "Position/MultiIndex/lib/classes.js"
+import { isMultiIndex } from "Position/MultiIndex/lib/classes.js"
 
 import { arraysSame, ClassConstructorTest } from "lib/lib.js"
 
 import { object, typeof as type, array } from "@hgargg-0710/one"
-import type { MultiIndex } from "../../../../../../dist/src/Position/MultiIndex/interfaces.js"
 const { structCheck } = object
 const { isFunction } = type
 const { last } = array
 
 export const isMultiIndexModifier = structCheck<MultiIndexModifier>({
-	multind: plainIsMultiIndex,
+	multind: isMultiIndex,
+	init: isFunction,
 	nextLevel: isFunction,
 	prevLevel: isFunction,
 	resize: isFunction,
@@ -103,57 +104,44 @@ export function MultiIndexModifierTest(
 ) {
 	describe(`class: (MultiIndexModifier) ${className}`, () => {
 		for (const signature of signatures) {
-			const { multindex } = signature
+			const {
+				multindex,
+				nextLevelTimes,
+				prevLevelTimes,
+				resizes,
+				incTimes,
+				decTimes,
+				extensions
+			} = signature
 
 			const instance = MultiIndexModifierConstructorTest(
 				modifierConstructor,
 				multindex
 			)
 
-			ChainMultiIndexModifierTest(instance, signature)
+			// .nextLevel
+			for (let i = 0; i < nextLevelTimes; ++i)
+				MultiIndexModifierNextLevelTest(instance)
+
+			// .incLast
+			for (let i = 0; i < incTimes; ++i) MultiIndexModifierIncLastTest(instance)
+
+			// .prevLevel
+			for (let i = 0; i < prevLevelTimes; ++i)
+				MultiIndexModifierPrevLevelTest(instance)
+
+			// .resize
+			for (const resize of resizes) MultiIndexModifierResizeTest(instance, resize)
+
+			// .extend
+			for (const [extension, expected] of extensions)
+				MultiIndexModifierExtendTest(instance, expected, extension)
+
+			// .decLast
+			for (let i = 0; i < decTimes; ++i) MultiIndexModifierDecLastTest(instance)
+
+			// .clear
+			MultiIndexModifierClearTest(instance)
 		}
 	})
-}
-
-export function ChainMultiIndexModifierTest(
-	instance: MultiIndexModifier,
-	signature: MultiIndexModifierTestSignature,
-	announce: boolean = false,
-	className: string = ""
-) {
-	const testMeat = () => {
-		const {
-			nextLevelTimes,
-			prevLevelTimes,
-			resizes,
-			incTimes,
-			decTimes,
-			extensions
-		} = signature
-
-		// .nextLevel
-		for (let i = 0; i < nextLevelTimes; ++i) MultiIndexModifierNextLevelTest(instance)
-
-		// .incLast
-		for (let i = 0; i < incTimes; ++i) MultiIndexModifierIncLastTest(instance)
-
-		// .prevLevel
-		for (let i = 0; i < prevLevelTimes; ++i) MultiIndexModifierPrevLevelTest(instance)
-
-		// .resize
-		for (const resize of resizes) MultiIndexModifierResizeTest(instance, resize)
-
-		// .extend
-		for (const [extension, expected] of extensions)
-			MultiIndexModifierExtendTest(instance, expected, extension)
-
-		// .decLast
-		for (let i = 0; i < decTimes; ++i) MultiIndexModifierDecLastTest(instance)
-
-		// .clear
-		MultiIndexModifierClearTest(instance)
-	}
-
-	if (announce) describe(`sub-suite: (MultiIndexModifier) ${className}`, testMeat)
-	else testMeat()
 }

@@ -5,25 +5,32 @@
 
 CURR TODO LIST: 
 
+0.4. FIX THE TESTS [again, for the final time, hopefully...]: 
+	0.4.2. MultiIndexModifier;
+		0.4.2.1. Add the '.init' method test; 
+
 A. testing: 
 
 	0. FUNDAMENTAL: 
-		0.1. INDEX the 'signatures' for test-suites with INDEXES [thus, one will be able to know which one precisely failed...]; 
+		0.1. INDEX [with 'number's] the 'signatures' for test-suites with INDEXES [thus, one will be able to know which one precisely failed...]; 
 		0.2. Decide how much of generics must be used inside the test-signature types [some use a lot, while others are satied with 'any']; 
 			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
+				LIST them first; 
 		0.3. Add '.toString()' to all the 'it' and 'describe' calls, when arguments for tests are used [to be able to distinguish failures and successes]; 
 
 		0.4. Create the 'run.ts' script for running ALL the test specific suites AT ONCE [in sequence, that is...]; 
 			0.4.1. This will ensure one's ability to see the global code correctness despite making small changes to a particular (possibly sensitive) area of the project...; 
+		
+		0.5. Decide what to do with things like 'ambigiousMethodTest' - that require a SPECIAL 'compare' function; 
+			Whether one should not just compare by references instead [where possible/makes sense]; 
+			This'd simplify both the tests, and the suites (albeit, make the suites mildly uglier due to need for pre-caching and partial creation of recursive/table-structures); 
+
+			DECISION: YES, do that; 
 
 	1. Order, in which to fix things [that are broken currently]: 
-		1. Stream [first, need to add 'FastLookupTable', 'MultiIndex' and 'TreeWalker']; 
-			1.1. TreeStream [check]; 
-				1.1.1. TODO: make the 'isObject' check STRICTER for the 'walker:' property (make it 'isTreeWalker', based on exported is-function); 
-		
 		Order, in which to add the new things: 
-			1. Tree/TreeWalker; 
-			2. Parser; 
+			1. Parser; 
+				1.1. These ones are basically just 'utilTest'-s [for each of the library's defined 'Parser'-s]; 
 	2. Changes to tests [for modules]: 
 
 		1. Stream-s: 
@@ -144,7 +151,7 @@ A. testing:
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
 		
 B. documentation (change/fix it...);
-	B.1. Create new pages:
+	B.1. Create new docs pages:
 		B.1.1. Home: 
 			B1.1.1. Motivation (write that the library was created/conceived primarily as a mean of refactoring of frequent parsing tasks/data-structures); 
 			B1.1.2. "One good approach" principle (write that the library was made to have a single "intended" best approach for all the things that are possible to do using it); 
@@ -170,6 +177,11 @@ B. documentation (change/fix it...);
 				NOTE [1]: identifying NestedStream-s that are elements as a part of a recursively-defined StreamTokenizer; 
 					To define this is (typically) trivial, via having '.type' of a given 'Stream' to be 'undefined', or 
 						not a part of a given NestedStream's '.typesTable';
+
+	B.2 [while working on the concrete documentation]: 
+		1. Patch up the type definitions: 	
+			Pay PARTICULAR attention to the methods return values; 
+			Those are especially likely to be mangled up, due to the way that the methods are defined...; 
 
 	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
 C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3]; 
@@ -521,9 +533,41 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
 			it will choose a pair of them for different [distinct] boundries); 
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
+	
+	2.23. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
+		In the 'TreeWalker.renewLevel', it does the 'this.stream.pos.slice', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
+		A 'BacktrackableTree' [interface] is one that has a method: 
+
+			1. backtrack(pos: number)
+
+		Which returns the 'pos'-parent [that being, goes "up" the level in the tree]; 
+		Make the old 'Tree' into the 'BacktrackableTree', create a 'ParentTree' [implementation], where 'backtrack' is defined as: 
+
+			backtrack = (pos: number) => {
+				let result = this
+				while (pos--) result = result.parent
+				return retult
+			}
+		
+		Which is O(1) to get the immidiate parent, and O(p) relative to the number of levels to go back (`p`); 
+		For this to work (the '.parent' property), the Tree must be CONSTRUCTED in a certain fashion; 
+		Add more items to the interface: 
+
+			1. pushChildren(children: any[])
+			2. clearChildren() 
+		
+		The 'ParentTree' implementation would (therefore) assign '.parent = this' on all the pushed children in '.pushChildren', and do 'this[propName] = []' in 'clearChlidren'; 
+		[IMPORTANT!: Make a 'ParentTree' implementation work with the 'ChildrenTree'-s, that is it'd have its own 'propName']; 
+
+		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.stream.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
+			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
+
+	2.24. Add a fast implementation of '.finish' to the 'TreeStream'; 
+	2.25. Re-structure the tests to be made on a per-method basis? 
+		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
 		
 3. Dependency management: 
-	3.2. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
+	3.`. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 
 			1. 'delegate' functions [from here]; 

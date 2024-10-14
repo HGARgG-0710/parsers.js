@@ -1,3 +1,4 @@
+import type { MultiIndex } from "../interfaces.js"
 import type { MultiIndexModifier } from "./interfaces.js"
 
 import { array } from "@hgargg-0710/one"
@@ -9,7 +10,7 @@ export function multiIndexModifierNextLevel(this: MultiIndexModifier) {
 }
 
 export function multiIndexModifierResize(this: MultiIndexModifier, length: number = 0) {
-	this.multind.value.length = length
+	this.multind.levels = length
 	return this.multind
 }
 
@@ -19,11 +20,11 @@ export function multiIndexModifierClear(this: MultiIndexModifier) {
 }
 
 export function multiIndexModifierIncLast(this: MultiIndexModifier) {
-	return ++this.multind.value[this.multind.value.length - 1]
+	return ++this.multind.value[this.multind.levels - 1]
 }
 
 export function multiIndexModifierDecLast(this: MultiIndexModifier) {
-	return --this.multind.value[this.multind.value.length - 1]
+	return --this.multind.value[this.multind.levels - 1]
 }
 
 export function multiIndexModifierExtend(this: MultiIndexModifier, subIndex: number[]) {
@@ -32,4 +33,12 @@ export function multiIndexModifierExtend(this: MultiIndexModifier, subIndex: num
 
 export function multiIndexModifierPrevLevel(this: MultiIndexModifier): number[] {
 	return [this.multind.value.pop() as number]
+}
+
+export function multiIndexModifierInitialize(
+	this: MultiIndexModifier,
+	multind: MultiIndex
+) {
+	this.multind = multind
+	return this
 }

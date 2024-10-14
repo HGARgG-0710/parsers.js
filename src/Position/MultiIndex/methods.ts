@@ -30,9 +30,9 @@ export function multiIndexCopy(this: MultiIndex) {
 export function multiIndexSlice(
 	this: MultiIndex,
 	from: number = 0,
-	to: number = this.value.length
+	to: number = this.levels
 ) {
-	return this.value.slice(from, to < 0 ? this.value.length + to : to)
+	return this.value.slice(from, to < 0 ? this.levels + to : to)
 }
 
 export function multiIndexFirstLevel(this: MultiIndex): number[] {
@@ -51,6 +51,14 @@ export function multiIndexConvert(this: MultiIndex, stream: BasicTreeStream) {
 		++final
 	}
 	return final
+}
+
+export function multiIndexLevelsGetter(this: MultiIndex) {
+	return this.value.length
+}
+
+export function multiIndexLevelsSetter(this: MultiIndex, length: number) {
+	return (this.value.length = length)
 }
 
 export * as MultiIndexModifier from "./MultiIndexModifier/methods.js"
