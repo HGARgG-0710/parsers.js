@@ -6,7 +6,7 @@ import { Inputted } from "../StreamClass/classes.js"
 export function effectiveNestedStreamInitCurr<Type = any>(
 	this: EffectiveNestedStream<Type>
 ) {
-	const ownershipType = this.typesTable.getIndex(this.input)
+	const ownershipType = this.typesTable.getIndex(this)
 	return (this.currNested = ownershipType != undefined)
 		? new this.constructor(this.input, ownershipType)
 		: this.input.curr
@@ -23,7 +23,7 @@ export function effectiveNestedStreamIsEnd<Type = any>(
 ) {
 	return (
 		this.input.isCurrEnd() ||
-		(this._index != null && !this.typesTable.byOwned(this)(this.input))
+		(this._index != null && !this.typesTable.byOwned(this)(this))
 	)
 }
 

@@ -3,7 +3,7 @@ import type {
 	EndableStream,
 	StreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
-import type { StreamMap } from "../ParserMap/interfaces.js"
+import type { StreamHandler } from "../TableMap/interfaces.js"
 import type { Superable } from "../../Stream/StreamClass/interfaces.js"
 
 export interface StreamTokenizer<InType = any, OutType = any>
@@ -11,5 +11,5 @@ export interface StreamTokenizer<InType = any, OutType = any>
 		StreamClassInstance<OutType>,
 		Superable,
 		Iterable<OutType> {
-	tokenMap: StreamMap<OutType>
+	tokenHandler: StreamHandler<OutType>
 }

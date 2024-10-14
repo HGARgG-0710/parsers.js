@@ -1,10 +1,10 @@
-import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
-import type { ParserMap, StreamPredicate } from "../ParserMap/interfaces.js"
+import type { ParserFunction, StreamPredicate } from "../TableMap/interfaces.js"
 import type { StreamValidatorState } from "./interfaces.js"
+import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
 import { streamValidatorChange, streamValidatorFinished } from "./methods.js"
 
 export function StreamValidator<KeyType = any>(
-	validator: ParserMap<StreamPredicate, StreamValidatorState<KeyType>>
+	validator: ParserFunction<StreamValidatorState<KeyType>, StreamPredicate>
 ) {
 	return GeneralParser<StreamValidatorState<KeyType>>(
 		DefineFinished(

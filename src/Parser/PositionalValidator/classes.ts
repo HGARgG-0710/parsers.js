@@ -3,11 +3,11 @@ const { trivialCompose } = _f
 const { not } = boolean
 
 import { StreamLocator } from "../StreamLocator/classes.js"
-import type { ParserMap } from "../ParserMap/interfaces.js"
+import type { ParserFunction } from "../TableMap/interfaces.js"
 import type { PositionalValidatorState } from "./interfaces.js"
 
 export function PositionalValidator(
-	validatorMap: ParserMap<boolean, PositionalValidatorState>
+	validatorMap: ParserFunction<PositionalValidatorState, boolean>
 ) {
 	const locator = StreamLocator(trivialCompose(not, validatorMap))
 	return function (input: PositionalValidatorState) {

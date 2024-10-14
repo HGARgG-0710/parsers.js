@@ -1,5 +1,5 @@
 import type { BasicStream } from "../../Stream/interfaces.js"
-import type { StreamPredicate } from "../ParserMap/interfaces.js"
+import type { StreamPredicate } from "../TableMap/interfaces.js"
 import type { StreamValidatorState } from "./interfaces.js"
 
 export function streamValidatorFinished<KeyType = any>(

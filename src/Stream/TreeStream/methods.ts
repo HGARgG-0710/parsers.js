@@ -29,12 +29,6 @@ export function effectiveTreeStreamNavigate<Type = any>(
 	return this.curr
 }
 
-export function effectiveTreeStreamCopy<Type = any>(this: EffectiveTreeStream<Type>) {
-	const copied = new TreeStreamConstructor(this.input)
-	copied.navigate(this.walker.pos)
-	return copied
-}
-
 export function effectiveTreeStreamPrev<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this
 	walker[response]()

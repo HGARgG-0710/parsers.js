@@ -31,7 +31,7 @@ export function effectivePredicateStreamIsEnd<Type = any>(
 	this: EffectivePredicateStream<Type>
 ) {
 	this.lookAhead = this.prod()
-	return this.input.isCurrEnd() || !this.predicate(this.input)
+	return this.input.isCurrEnd() || !this.predicate(this)
 }
 
 export function effectivePredicateStreamInitialize<Type = any>(

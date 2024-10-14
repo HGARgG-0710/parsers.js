@@ -10,7 +10,6 @@ import {
 	effectiveTreeStreamPrev,
 	effectiveTreeStreamRewind,
 	effectiveTreeStreamNext,
-	effectiveTreeStreamCopy,
 	effectiveTreeStreamNavigate,
 	effectiveTreeStreamIsStart,
 	effectiveTreeStreamInitialize,
@@ -43,7 +42,6 @@ export class TreeStream<Type = any>
 	response: string
 	lastLevelWithSiblings: number
 
-	copy: () => EffectiveTreeStream<Type>
 	navigate: (position: MultiIndexType) => InTreeType<Type>
 	super: Summat
 
@@ -62,7 +60,6 @@ Object.defineProperties(TreeStream.prototype, {
 	input: { get: effectiveTreeStreamInputGetter, set: effectiveTreeStreamInputSetter },
 	super: { value: TreeStreamBase.prototype },
 	rewind: { value: effectiveTreeStreamRewind },
-	copy: { value: effectiveTreeStreamCopy },
 	navigate: { value: effectiveTreeStreamNavigate },
 	init: { value: effectiveTreeStreamInitialize }
 })

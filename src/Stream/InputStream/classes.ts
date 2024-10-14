@@ -13,7 +13,6 @@ import {
 	inputStreamIsStart,
 	inputStreamIterator,
 	inputStreamFinish,
-	effectiveInputStreamCopy,
 	inputStreamIsEnd,
 	inputStreamNext,
 	inputStreamPrev,
@@ -38,7 +37,6 @@ export class InputStream<Type = any>
 	input: Indexed<Type>
 	super: Summat
 
-	copy: () => EffectiveInputStream<Type>
 	init: (input?: Indexed<Type>) => EffectiveInputStream<Type>
 
 	constructor(input?: Indexed<Type>) {
@@ -51,7 +49,6 @@ Object.defineProperties(InputStream.prototype, {
 	rewind: { value: effectiveInputStreamRewind },
 	finish: { value: inputStreamFinish },
 	navigate: { value: effectiveInputStreamNavigate },
-	copy: { value: effectiveInputStreamCopy },
 	init: { value: effectiveInputStreamInitialize },
 	super: { value: InputStreamBase },
 	[Symbol.iterator]: { value: inputStreamIterator }

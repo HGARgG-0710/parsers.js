@@ -9,7 +9,7 @@ export type DefaultMapParsingState = ParsingState<BasicStream, Collection, Colle
 export * as BasicParser from "./BasicParser/interfaces.js"
 export * as GeneralParser from "./GeneralParser/interfaces.js"
 export * as LayeredParser from "./LayeredParser/interfaces.js"
-export * as ParserMap from "./ParserMap/interfaces.js"
+export * as TableMap from "./TableMap/interfaces.js"
 export * as PatternValidator from "./PatternValidator/interfaces.js"
 export * as PositionalValidator from "./PositionalValidator/interfaces.js"
 export * as SkipParser from "./SkipParser/interfaces.js"

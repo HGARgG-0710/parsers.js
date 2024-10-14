@@ -1,7 +1,7 @@
 import type { ParsingState } from "./GeneralParser/interfaces.js"
 import type { BaseParsingState } from "./interfaces.js"
 
-import type { StreamHandler } from "../Parser/ParserMap/interfaces.js"
+import type { StreamHandler } from "./TableMap/interfaces.js"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
 import type { DirectionalPosition, Position } from "../Position/interfaces.js"

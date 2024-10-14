@@ -11,7 +11,6 @@ import type {
 } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
 
 import type { Superable } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
-import type { Copiable } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
 import type { Inputted } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
 import type { Posed } from "../../../../../dist/src/Position/interfaces.js"
 import type {
@@ -112,7 +111,6 @@ export const InitReversedStreamClassConstructorTest = InitClassConstructorTest(
 )
 
 export const isSuperable = structCheck<Superable>({ super: isObject })
-export const isCopiable = structCheck<Copiable>({ copy: isFunction })
 export const isInputted = structCheck<Inputted>({ input: isObject })
 export const isPosed = (pred: (x: any) => boolean = isPosition) =>
 	structCheck<Posed>({ pos: pred })

@@ -7,7 +7,6 @@ import {
 
 import {
 	InitReversedStreamClassConstructorTest,
-	isCopiable,
 	isInputted,
 	isPosed,
 	isSuperable,
@@ -18,7 +17,7 @@ import { function as _f, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { isNumber } = type
 
-const isInputStream = and(isSuperable, isCopiable, isInputted, isPosed(isNumber)) as (
+const isInputStream = and(isSuperable, isInputted, isPosed(isNumber)) as (
 	x: any
 ) => x is EffectiveInputStream
 

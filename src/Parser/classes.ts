@@ -1,7 +1,7 @@
 export * as BasicParser from "./BasicParser/classes.js"
 export * as GeneralParser from "./GeneralParser/classes.js"
 export * as LayeredParser from "./LayeredParser/classes.js"
-export * as ParserMap from "./ParserMap/classes.js"
+export * as TableMap from "./TableMap/classes.js"
 export * as PatternEliminator from "./PatternEliminator/classes.js"
 export * as PatternTokenizer from "./PatternTokenizer/classes.js"
 export * as PatternValidator from "./PatternValidator/classes.js"

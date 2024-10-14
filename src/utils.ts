@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType } from "./IndexMap/interfaces.js"
 import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
-import type { StreamHandler } from "./Parser/ParserMap/interfaces.js"
+import type { StreamHandler } from "./Parser/TableMap/interfaces.js"
 import type { BasicStream } from "./Stream/interfaces.js"
 import type { Position, PredicatePosition } from "./Position/interfaces.js"
 import type {
@@ -33,6 +33,11 @@ export const current = <Type = any>(input: BasicStream<Type>) => input.curr
  * Returns `[x]`
  */
 export const output = (x: any) => [x]
+
+/**
+ * Returns 'x.input'
+ */
+export const input = (x: any) => x.input
 
 /**
  * Given a `handler` function returns a function of `input: BasicStream` that skips a single stream-element before and after calling the handler.

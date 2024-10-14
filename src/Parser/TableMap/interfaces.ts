@@ -1,32 +1,14 @@
-import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { BasicStream } from "../../Stream/interfaces.js"
-import type { Indexable } from "../../IndexMap/interfaces.js"
 import type { Collection } from "../../Pattern/Collection/interfaces.js"
 import type { ParsingState } from "../GeneralParser/interfaces.js"
-import type {
-	BaseMapParsingState,
-	DefaultMapParsingState,
-	BaseParsingState
-} from "../interfaces.js"
 
-export type ParserMap<
-	OutType = any,
-	T extends BaseMapParsingState = DefaultMapParsingState
-> = ParserFunction<T, OutType> & {
-	table?: Indexable<ParserFunction<T, OutType>>
-}
-
-export type ParserFunction<T extends BaseParsingState = ParsingState, OutType = any> = ((
-	state?: T,
+export type ParserFunction<InputType = any, OutType = any> = ((
+	state?: InputType,
 	parser?: Function
 ) => OutType) &
 	Summat
-
-export type StreamMap<
-	OutType = any,
-	StreamType extends BasicStream = BasicStream
-> = StreamHandler<SummatFunction<any, StreamType, OutType>>
 
 export type StreamHandler<Type = any[]> = StreamTransform<any, Type>
 

@@ -52,12 +52,6 @@ export function inputStreamCurr<Type = any>(this: InputStream<Type>) {
 	return this.input[this.pos]
 }
 
-export function effectiveInputStreamCopy<Type = any>(this: InputStreamClass<Type>) {
-	const inputStream = new InputStreamClass<Type>(this.input)
-	inputStream.pos = this.pos
-	return inputStream
-}
-
 export function inputStreamIsStart<Type = any>(this: InputStreamClass<Type>) {
 	return !this.pos
 }

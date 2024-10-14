@@ -1,4 +1,4 @@
-import type { ParserMap } from "../ParserMap/interfaces.js"
+import type { ParserFunction } from "../TableMap/interfaces.js"
 import type { SkipType, SkipState, FixedSkipState } from "./interfaces.js"
 import type { Position } from "../../Position/interfaces.js"
 
@@ -8,7 +8,7 @@ import { firstFinished } from "../utils.js"
 import { fixedParserChange, skipParserChange } from "./methods.js"
 
 export function SkipParser<OutType = any>(
-	parser: ParserMap<SkipType<Iterable<OutType>>, SkipState<OutType>>
+	parser: ParserFunction<SkipState<OutType>, SkipType<Iterable<OutType>>>
 ) {
 	return GeneralParser<SkipState<OutType>>(
 		DefineFinished(
@@ -25,7 +25,7 @@ export function SkipParser<OutType = any>(
 export function FixedSkipParser(n: Position) {
 	const fixedChange = fixedParserChange(n)
 	return <OutType = any>(
-		parser: ParserMap<Iterable<OutType>, FixedSkipState<OutType>>
+		parser: ParserFunction<FixedSkipState<OutType>, Iterable<OutType>>
 	) =>
 		GeneralParser<FixedSkipState<OutType>>(
 			DefineFinished(

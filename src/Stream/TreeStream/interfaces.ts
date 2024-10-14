@@ -1,9 +1,5 @@
 import type { TreeWalker } from "../../Tree/TreeWalker/interfaces.js"
-import type {
-	Copiable,
-	ReversedStreamClassInstance,
-	Inputted
-} from "../StreamClass/interfaces.js"
+import type { ReversedStreamClassInstance, Inputted } from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
@@ -20,7 +16,6 @@ export interface TreeStream<Type = any>
 export interface EffectiveTreeStream<Type = any>
 	extends BasicTreeStream<Type>,
 		Superable,
-		Copiable<EffectiveTreeStream<Type>>,
 		ReversedStreamClassInstance<InTreeType<Type>> {
 	walker: TreeWalker<Type>
 	response: string

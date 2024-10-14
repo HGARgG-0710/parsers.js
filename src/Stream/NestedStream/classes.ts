@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { EffectiveNestedStream } from "./interfaces.js"
-import type { StreamPredicate } from "../../Parser/ParserMap/interfaces.js"
+import type { StreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
 import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
 

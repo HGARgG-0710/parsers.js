@@ -3,9 +3,16 @@
 
 [v0.3]
 
-CURR TODO LIST: 
-
+Order of TODO-elimination: 
+	A.1. [fixing/adding]
+	0.4.
+	A.0 [fundamental]
+	A.2 
+	A.3
+	A.4
+	
 0.4. FIX THE TESTS [again, for the final time, hopefully...]: 
+	0.4.1. Re-order the directory structure [the 'NavigableStream' - make it 'StreamClass/utils.ts']; 
 	0.4.2. MultiIndexModifier;
 		0.4.2.1. Add the '.init' method test; 
 
@@ -30,7 +37,32 @@ A. testing:
 	1. Order, in which to fix things [that are broken currently]: 
 		Order, in which to add the new things: 
 			1. Parser; 
-				1.1. These ones are basically just 'utilTest'-s [for each of the library's defined 'Parser'-s]; 
+				1.1. LayeredParser
+					1.1.1. Just use the appropriate 'layers', then TEST the resulting function [2-level testing]; 
+					1.1.2. Test that the layers are as-expected; 
+
+				1.2. GeneralParserTest: 
+					For: 
+						1. PatternEliminator
+						2. PatternTokenizer
+						3. PatternValidator	
+						4. BasicParser; 
+						5. SkipParser; 
+							5.1. FixedSkipParser; 
+								5.1.1. StreamParser; 
+						6. StreamLocator; 
+						7. StreamValidator; 
+						8. PositionalValidator; 
+
+					This checks the '.result' of the object given is the same as the expected result
+
+					SPECIAL: 
+						StreamTokenizer - this one must be tested like a StreamClass [follow the scheme that the others have already used...]; 
+					
+				1.3. TableMapTest: 
+					1.3.1. Test the resulting TableMap's outputs based on given inputs; 
+					1.3.2. Test that the '.table' is the same as expected; 
+
 	2. Changes to tests [for modules]: 
 
 		1. Stream-s: 
@@ -49,12 +81,12 @@ A. testing:
 					There must be SPECIFIC checks for it (namely - a SEPARATE method, that goes through the entire Stream, comparing the differences between the '.pos' - that they ALWAYS be 1); 
 					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
 				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 
-	3. Utils: 
+	3. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
 		Re-do them; 
 		List the utils to be tested for each particular class, add tests for them; 
 		DO THEM ACCORDINGLY [refactor using 'lib/lib.ts' on-the-spot]
-	4. Design the undone-yet tests: 
+	4. Implement test suites: 
 		4.1. Stream-s: 
 			4.1.0. Methods:
 				To implement [generally]:
@@ -67,9 +99,6 @@ A. testing:
 					4.1.0.3. generalRewindTest; 
 					4.1.0.4. generaFinishTest; 
 					4.1.0.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
-
-					[per-case-defined]
-					4.1.0.6. copyTest (based off 'streamCopyTest'; for InputStream and TreeStream); 
 
 				General plan [to be iterated for each Stream-class test suite]: 
 					1. per-case defined (.copy, .navigate); 
@@ -342,21 +371,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 
-		
-	2.8. [mayyyybee??] Try re-doing the project's type-system? [again...]
 
-		The direct use TypeScript's 'interface's cause huge issues surrounding the 'conditional' properties
-			(in particular, the need to duplicate to make everything work). 
-
-		See, if not (mayhaps), it is feasible to re-write everything via 'extends BasicStream'-sort of thing
-			(meaning, the needed StreamType-s would be "inserted" where desired...); 
-
-		Examples [interfaces]: 
-
-			1. TransformedStream; 
-			2. NestedStream; 
-
-	2.9. [maybe?] BreakableStream - a major generalization of the library's patterns: 
+	2.8. [maybe?] BreakableStream - a major generalization of the library's patterns: 
 		Returns a class for producing Stream-s: 
 
 		1. Have an '.input' (another Stream); 
@@ -380,8 +396,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		This todo is a 'maybe?' because all the said things can (pretty much) already be done by the user using StreamTokenizer and the rest
 			- this really only just provides a minor abstraction over the whole thing (frees the user from needing to use the exports of the library); 
 		This kind of thing is (somewhat) against the library's "all-minimialism" approach; 
+
+		On the other hand, it would permit one to use a very domain-specific language to describe operations on streams conventionally, 
+			thus - simplifying semantics + unifying a very large number of different abstractions that are creatable via the library using just this one; 	
+		Conclusion: think about it, more of a YES, tha a NO currently;
 	
-	2.10. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.9. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -389,7 +409,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Having general/particular implementations in mind, MICRO-BENCHMARK, 
 				and on the basis of those, optimize particular functions/approaches; 
 	
-	2.11. utility - 'nestedInfo'; 
+	2.10. utility - 'nestedInfo'; 
 
 		1. Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 			NOTE: the MAX depth achievable; 
@@ -397,19 +417,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		Returns it as a pair; 
 
-	2.12. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.11. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
 
-	2.13. Idea for a method: ProlongedStream.prolong; 	
+	2.12. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams' [modifying the '.isEnd' accordingly]; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.14. [Maaayybe?] Create a 'samples' directory; 
+	2.13. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -423,31 +443,15 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
 
-	2.15. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.14. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
 			2. NestedStream;
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
-
-	2.16. Generalize the streams even further for general copying implementation: 
-
-		Have to have: 
-			
-			1. 'props' field (StatefulStream); 
-				1.1. This one '.preventsExtension'! [that is, it's a FIXED object, with a fixed number of properties];
-			2. the '.copy' is then defined: 
-
-				function uniCopy (stream: ...) {	
-					const copy = new (Object.getPrototypeOf(stream).constructor)()
-					copy.init(stream.props)
-					return copy
-				}
-
-		The method would go on the 'StreamClass'; 
 	
-	2.17. v8-specific optimizations: 
+	2.15. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
 	
 		CONCLUSION: 
@@ -482,7 +486,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						2. profile, break the execution down on several tiny pieces; Then - benchmark and optimize them accordingly; 
 							For this, use results from samples from one's benchmarks library;  
 	
-	2.18. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
+	2.16. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
 	
 		Do only if there are code aspects suffering from this significantly: 
@@ -497,7 +501,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			[need for calling the '.isCurrEnd()' two times more]; 
 		Again, do this ONLY if the performance difference is SIGNIFICANT!
 	
-	2.19. util - enumerateTree; 
+	2.17. util - enumerateTree; 
 		Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
 			to single-array-siblings form (the current ChildrenTree); 	
 		This would permit a more "variable" set of trees (those that have properties with fixed names), 
@@ -521,20 +525,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				]
 			}
 		
-	2.20. About generics - relax them; 
+	2.18. About generics - relax them; 
 		Use ONLY WHEN NEEDED; 
 		For example: a method makes use of X generics, out of which Y < X is needed [id est, used somewhere beyond the 'this: ...' in the parameters list]; 
 			REMOVE the unneeded ones; 
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
 
-	2.21. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
-	2.22. [maybe?] Create a module for randomized Stream-generation (`random`);
+	2.19. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
+	2.20. [maybe?] Create a module for randomized Stream-generation (`random`);
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
 			it will choose a pair of them for different [distinct] boundries); 
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 	
-	2.23. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
+	2.21. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
 		In the 'TreeWalker.renewLevel', it does the 'this.stream.pos.slice', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
 		A 'BacktrackableTree' [interface] is one that has a method: 
 
@@ -562,12 +566,38 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.stream.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
 			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
 
-	2.24. Add a fast implementation of '.finish' to the 'TreeStream'; 
-	2.25. Re-structure the tests to be made on a per-method basis? 
+	2.22. Add a fast implementation of '.finish' to the 'TreeStream'; 
+	2.23. Re-structure the tests to be made on a per-method basis? 
 		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
+	
+	2.24. INTRODUCE the '.state' property for state-keeping; RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
+		Comes inside the 'StreamClass' (optionally) via the 'hasState' property;
+		Will additionally be supported by: 
+
+			1. 'StreamClass(...).prototype.copy()' method; 
+				Solution for '.copy': 
+					1.1. Keep the instance variables inside the single '.vars' property ('.preventsExtension' cast upon it); 
+					1.2. Keep the user-defined variables under '.state'; 
+				
+				Definition [loose, has to have overloads, depending on presence/absence of '.pos']: 
+
+					function uniCopy (stream: ...) {	
+						const copy = new (Object.getPrototypeOf(stream).constructor)()
+						copy.init(stream.vars, stream.state)
+						return copy
+					}
+
+			2. 'StreamClass(...).prototype.init(vars, state)': 
+				Will (by default) assign the '.vars' to be 'vars' and '.state' to be 'state'; 
+
+		Then, the various 'Indexable'-s can use the '.state' inside the '.index' call; 
+
+		ALSO, ADD: 
+				1. New 'HashMap' (and IndexMap) aliases to work with ParsingState; 
+				2. New 'HashMap' (and IndexMap) aliases to work with '.state' property; 
 		
 3. Dependency management: 
-	3.`. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
+	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 
 			1. 'delegate' functions [from here]; 

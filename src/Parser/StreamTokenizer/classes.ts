@@ -1,5 +1,4 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { StreamMap } from "../ParserMap/interfaces.js"
 import type { StreamTokenizer } from "./interfaces.js"
 import type {
 	EndableStream,
@@ -12,6 +11,7 @@ import { inputDefaultIsEnd, inputIsEnd } from "../../Stream/StreamClass/methods.
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 
 import { function as _f } from "@hgargg-0710/one"
+import type { StreamHandler } from "../TableMap/interfaces.js"
 const { cached } = _f
 
 const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
@@ -25,7 +25,7 @@ const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
 ) as (hasPosition: boolean) => new () => StreamClassInstance
 
 export function StreamTokenizer<OutType = any>(
-	tokenMap: StreamMap<OutType>,
+	tokenHandler: StreamHandler<OutType>,
 	hasPosition: boolean = false
 ) {
 	const baseClass = StreamTokenizerBase(hasPosition)
@@ -35,7 +35,7 @@ export function StreamTokenizer<OutType = any>(
 	{
 		input: EndableStream<InType>
 		super: Summat
-		tokenMap: StreamMap<OutType>
+		tokenHandler: StreamHandler<OutType>
 
 		init: (input?: EndableStream<InType>) => StreamTokenizer<InType, OutType>
 
@@ -48,7 +48,7 @@ export function StreamTokenizer<OutType = any>(
 	Object.defineProperties(streamTokenizerClass.prototype, {
 		super: { value: baseClass.prototype },
 		init: { value: streamTokenizerInitialize },
-		tokenMap: { value: tokenMap }
+		tokenHandler: { value: tokenHandler }
 	})
 
 	return streamTokenizerClass

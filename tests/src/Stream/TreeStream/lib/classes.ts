@@ -8,7 +8,6 @@ import {
 
 import {
 	InitReversedStreamClassConstructorTest,
-	isCopiable,
 	isInputted,
 	isSuperable,
 	ReversedStreamClassConstructorTest
@@ -30,7 +29,6 @@ const isTreeStream = and(
 		response: isString
 	}),
 	isSuperable,
-	isCopiable,
 	isInputted
 ) as (x: any) => x is EffectiveTreeStream
 
