@@ -4,12 +4,11 @@
 [v0.3]
 
 Order of TODO-elimination: 
-	A.1. [fixing/adding]
 	0.4.
 	A.0 [fundamental]
-	A.2 
+	A.1 
+	A.2
 	A.3
-	A.4
 	
 0.4. FIX THE TESTS [again, for the final time, hopefully...]: 
 	0.4.1. Re-order the directory structure [the 'NavigableStream' - make it 'StreamClass/utils.ts']; 
@@ -34,36 +33,7 @@ A. testing:
 
 			DECISION: YES, do that; 
 
-	1. Order, in which to fix things [that are broken currently]: 
-		Order, in which to add the new things: 
-			1. Parser; 
-				1.1. LayeredParser
-					1.1.1. Just use the appropriate 'layers', then TEST the resulting function [2-level testing]; 
-					1.1.2. Test that the layers are as-expected; 
-
-				1.2. GeneralParserTest: 
-					For: 
-						1. PatternEliminator
-						2. PatternTokenizer
-						3. PatternValidator	
-						4. BasicParser; 
-						5. SkipParser; 
-							5.1. FixedSkipParser; 
-								5.1.1. StreamParser; 
-						6. StreamLocator; 
-						7. StreamValidator; 
-						8. PositionalValidator; 
-
-					This checks the '.result' of the object given is the same as the expected result
-
-					SPECIAL: 
-						StreamTokenizer - this one must be tested like a StreamClass [follow the scheme that the others have already used...]; 
-					
-				1.3. TableMapTest: 
-					1.3.1. Test the resulting TableMap's outputs based on given inputs; 
-					1.3.2. Test that the '.table' is the same as expected; 
-
-	2. Changes to tests [for modules]: 
+	1. Changes to tests [for modules]: 
 
 		1. Stream-s: 
 				1.1.1. Create a plain '.init' test; 
@@ -80,35 +50,34 @@ A. testing:
 				1.1.2. TEST the '.pos', where it is relevant; 
 					There must be SPECIFIC checks for it (namely - a SEPARATE method, that goes through the entire Stream, comparing the differences between the '.pos' - that they ALWAYS be 1); 
 					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
-				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 
-	3. Design Utils' tests (and write suites for them...): 
+				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 	
+				1.1.4. [Parser/] Do the tests for 'StreamTokenizer' - this one must be tested like a StreamClass [follow the scheme that the others have already used...]
+	2. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
 		Re-do them; 
 		List the utils to be tested for each particular class, add tests for them; 
 		DO THEM ACCORDINGLY [refactor using 'lib/lib.ts' on-the-spot]
-	4. Implement test suites: 
-		4.1. Stream-s: 
-			4.1.0. Methods:
+	3. Implement test suites: 
+		3.1. Stream-s: 
+			3.1.0. Methods:
 				To implement [generally]:
 					generalIteratorTest (based off 'iterationTest'); 
 
 				To add per class: 
 					[predefined - all]
-					4.1.0.1. generalIsEndTest; 
-					4.1.0.2. generalIsStartTest; 
-					4.1.0.3. generalRewindTest; 
-					4.1.0.4. generaFinishTest; 
-					4.1.0.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
+					3.1.0.1. generalIsEndTest; 
+					3.1.0.2. generalIsStartTest; 
+					3.1.0.3. generalRewindTest; 
+					3.1.0.4. generaFinishTest; 
+					3.1.0.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
 
 				General plan [to be iterated for each Stream-class test suite]: 
 					1. per-case defined (.copy, .navigate); 
-						1.1. .copy is for InputStream and TreeStream only (can be generalized?); 
-						// ! RE-DO the 'streamNavigateTest' as 'generalNavigateTest'; 
-						1.2. .navigate is for all Streams; 
+						1.1. .navigate is for all Streams; 
 					2. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
 					3. Comine into a Stream class test-suite; 
 			
-			4.1.1. "WrapperStream"-combinations; 
+			3.1.1. "WrapperStream"-combinations; 
 				Thus, for instance, one has to test ALL of: 
 
 					LimitedStream-NestedStream-InputStream;
@@ -122,36 +91,44 @@ A. testing:
 
 					The tests for them work THE SAME WAY as the top-level cases, BUT they have a different constructor; 
 
-			4.1.2. Constructors:
-					1. StreamTokenizer (Parser/) [need both 'is' and the constructor]; 
-
-			4.1.3. TreeStream [sub-classes to be also tested]: 
-				4.1.3.1. TreeWalker; 
-				4.1.3.2. MultiIndex; 
-					4.1.3.2.1. MultiIndexModifier; 
-
-			4.1.4. Test Instances: 	
-				4.1.4.1. They branch: 
-					4.1.4.1.0. Empty Stream instance
-					4.1.4.1.1. Single-element Stream instance
-					4.1.4.1.2. Two-element Stream instance
-					4.1.4.1.3. Long Stream instance (>= 20 elements)
-				4.1.4.2. There are optimization-specific benchmarks; 	
-					1.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
+			3.1.2. Test Instances: 	
+				3.1.4.1. They branch: 
+					3.1.4.1.0. Empty Stream instance
+					3.1.4.1.1. Single-element Stream instance
+					3.1.4.1.2. Two-element Stream instance
+					3.1.4.1.3. Long Stream instance (>= 20 elements)
+				3.1.4.2. There are optimization-specific benchmarks; 	
+					3.1.4.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
 		
-		4.2. Parser/
+		3.2. Parser/
 			Test Instances:
-				4.2.1. There is a set of Stream-s, for which they're tested; 
-				4.2.2. With appropriate Collection-s; 
-				4.2.3. They branch [by 4.1. and 4.2.]: 
-					4.2.3.1. The Empty Stream; 
-					4.2.3.2. The One-element Stream; 
-					4.2.3.3. The Two-element Stream; 
-					4.2.3.4. The many-element Stream; 
-		4.3. regex/
+				3.2.1. There is a set of Stream-s, for which they're tested; 
+				3.2.2. With appropriate Collection-s; 
+				3.2.3. They branch [by 4.1. and 4.2.]: 
+					3.2.3.1. The Empty Stream; 
+					3.2.3.2. The One-element Stream; 
+					3.2.3.3. The Two-element Stream; 
+					3.2.3.4. The many-element Stream; 
+
+				[Grouping by test suite type, for each type of parser:]	
+				1. LayeredParserTest - itself
+				2. TableMapTest - itself
+				3. GeneralParserTest: 
+					1. PatternEliminator
+					2. PatternTokenizer
+					3. PatternValidator	
+					4. BasicParser; 
+					5. SkipParser; 
+						5.1. FixedSkipParser; 
+							5.1.1. StreamParser; 
+					6. StreamLocator; 
+					7. StreamValidator; 
+					8. PositionalValidator; 
+
+		3.3. regex/
 			Re-structure to fit the current mini-testing framework (expand the framework appropriately); 
 
-		4.4. benchmarks/	
+		3.4. benchmarks/	
 			4.4.1. Stack benchmarks: 
 				4.4.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
 					Use as metric later
@@ -163,20 +140,20 @@ A. testing:
 				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
 					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
 				
-		4.5. imports/ 
+		3.5. imports/ 
 			The imports are flawed - test them properly [import each and every layer inside the library...]; 
 
-		4.6. Pattern/
+		3.6. Pattern/
 			4.6.1. Test instances: 
 				4.6.1. Empty; 
 				4.6.2. One-element; 
 				4.6.3. Two-element; 
 				4.6.4. Long; 
 		
-		4.7. constants/
+		3.7. constants/
 			Check that those correspond to the constant values expected 'assert.strictEqual';
 		
-		4.8. IndexMap/
+		3.8. IndexMap/
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
 		
 B. documentation (change/fix it...);
