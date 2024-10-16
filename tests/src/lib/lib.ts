@@ -5,13 +5,29 @@ import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.
 import type { Initializable } from "../../../dist/src/Stream/StreamClass/interfaces.js"
 
 import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
-const { ownKeys } = object
+const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = _f
-const { isFunction } = type
+const { isFunction, isObject, isNull, isArray } = type
+
+export function recursiveToString(x: any) {
+	if (isNull(x)) return "null"
+	if (isArray(x)) return `[ ${x.map(recursiveToString).join(", ")} ]`
+	if (isObject(x)) {
+		const [allKeys, values] = kv(x)
+		const mappedKeys = allKeys.map((x) => x.toString())
+		const mappedValues = values.map(recursiveToString)
+
+		const converted = []
+		for (let i = 0; i < mappedKeys.length; ++i)
+			converted.push(`${mappedKeys[i]}: ${mappedValues[i]}`)
+		return `${x.constructor.name} { ${converted.join(", ")} }`
+	}
+	return x.toString()
+}
 
 export function inputDescribe(...input: any[]) {
-	return input.map((x) => x.toString()).join(", ")
+	return input.map(recursiveToString).join(", ")
 }
 
 export function arraysSame(
@@ -82,7 +98,7 @@ export function FlushableResultingTestFlush(
 	result: any,
 	compare: (x: any, y: any) => boolean
 ) {
-	it("method: .flush", () => {
+	method("flush", () => {
 		x.flush()
 		assert(compare(x.result, result))
 	})
@@ -92,50 +108,31 @@ export function iterationTest<Type extends Iterable<any> = any>(
 	collectionInstance: Type,
 	iteratedOver: any[]
 ) {
-	it("method: [Symbol.iterator]", () =>
-		assert(arraysSame([...collectionInstance], iteratedOver)))
+	method("[Symbol.iterator]", () =>
+		assert(arraysSame([...collectionInstance], iteratedOver))
+	)
 }
 
 export function methodTest<InstanceType = any>(methodName: string) {
 	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
-		it(`method: .${methodName}(${inputDescribe(input)})`, () =>
-			assert.strictEqual(instance[methodName](...input), expectedValue))
+		method(
+			methodName,
+			() => assert.strictEqual(instance[methodName](...input), expectedValue),
+			...input
+		)
 	}
 }
 
-export function ambigiousMethodTest<InstanceType = any>(methodName: string) {
-	return function (
-		instance: InstanceType,
-		expectedValue: any,
-		compare: (x: any, y: any) => boolean,
-		...input: any[]
-	) {
-		it(`method: .${methodName}`, () =>
-			assert(compare(instance[methodName](...input), expectedValue)))
-	}
-}
-
-export function unambigiousMethodTest<InstanceType = any>(
+export function comparisonMethodTest<InstanceType = any>(
 	methodName: string,
 	compare: (x: any, y: any) => boolean
 ) {
 	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
-		it(`method: .${methodName}`, () =>
-			assert(compare(instance[methodName](...input), expectedValue)))
-	}
-}
-
-export function classSpecificAmbigiousMethodTest<InstanceType = any>(methodName: string) {
-	return function (compare: (x: any, y: any) => boolean) {
-		return function (
-			instance: InstanceType,
-			expectedValue: any,
-			lowCompare = compare,
-			...input: any[]
-		) {
-			it(`method: .${methodName}(${inputDescribe(input)})`, () =>
-				assert(lowCompare(instance[methodName](...input), expectedValue)))
-		}
+		method(
+			methodName,
+			() => assert(compare(instance[methodName](...input), expectedValue)),
+			...input
+		)
 	}
 }
 
@@ -144,10 +141,14 @@ export function setMethodTest<InstanceType = any>(
 	getMethodName: string
 ) {
 	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
-		it(`method: ${setMethodName}(${inputDescribe(input)})`, () => {
-			instance[setMethodName](...input)
-			assert.strictEqual(input[getMethodName](input[0]), expectedValue)
-		})
+		method(
+			setMethodName,
+			() => {
+				instance[setMethodName](...input)
+				assert.strictEqual(input[getMethodName](input[0]), expectedValue)
+			},
+			...input
+		)
 	}
 }
 
@@ -160,19 +161,26 @@ export function ResultingAmbigiousMethodTest<InstanceType extends Resulting = an
 		expectedResult: any,
 		compare: any
 	) {
-		it(`method: .${methodName}(${inputDescribe(items)})`, () => {
-			const result = instance[methodName](...items)
-			assert(compare(result, expectedResult))
-			assert(compare(result, instance.result))
-		})
+		method(
+			methodName,
+			() => {
+				const result = instance[methodName](...items)
+				assert(compare(result, expectedResult))
+				assert(compare(result, instance.result))
+			},
+			...items
+		)
 	}
 }
 
-export function utilTest(util: Function, utilName: string) {
+export function utilTest(testedUtil: Function, utilName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
 		return function (expected: any, ...input: any[]) {
-			it(`util: ${utilName} (${inputDescribe(input)})`, () =>
-				assert(compare(util(...input), expected)))
+			util(
+				utilName,
+				() => assert(compare(testedUtil(...input), expected)),
+				...input
+			)
 		}
 	}
 }
@@ -187,8 +195,11 @@ export function tripleUtilTest(
 		expected: any,
 		lowCompare: (x: any, y: any) => boolean
 	) {
-		it(`util: ${utilName} (${inputDescribe(input)})`, () =>
-			assert(highCompare(util(...input), expected, lowCompare)))
+		util(
+			utilName,
+			() => assert(highCompare(util(...input), expected, lowCompare)),
+			...input
+		)
 	}
 }
 
@@ -218,3 +229,20 @@ export function InitClassConstructorTest<ClassType extends Initializable = Initi
 		return UnderChainTest(instance)
 	}
 }
+
+export function signatures<SignatureType extends object = any>(
+	signatures: SignatureType[],
+	post: (signature: SignatureType) => () => void
+) {
+	for (let i = 0; i < signatures.length; ++i) it(`signature: ${i}`, post(signatures[i]))
+}
+
+export const [method, util] = ["method", "util"].map(
+	(typeString) =>
+		(name: string, post: () => void, ...args: any[]) =>
+			it(`${typeString}: ${name}(${inputDescribe(args)})`, post)
+)
+
+export const [classTest, property] = ["class", "property"].map(
+	(typeString) => (name: string, post: () => void) => it(`${typeString}: ${name}`, post)
+)

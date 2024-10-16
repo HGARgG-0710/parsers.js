@@ -5,7 +5,8 @@ import type { EffectiveNestedStream } from "../../../../../dist/src/Stream/Neste
 import {
 	blockExtension,
 	ClassConstructorTest,
-	InitClassConstructorTest
+	InitClassConstructorTest,
+	property
 } from "lib/lib.js"
 
 import {
@@ -45,8 +46,9 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 		stream: EffectiveNestedStream,
 		currNestedList: NestedStreamCurrNestedTreeList
 	) {
-		it("property: .currNested", () =>
-			NestedStreamCurrNestedPreTest(stream, currNestedList))
+		property("currNested", () =>
+			NestedStreamCurrNestedPreTest(stream, currNestedList)
+		)
 	}
 
 	const nestedStreamPrototypeProps = ["super", "typesTable"]

@@ -3,38 +3,99 @@
 
 [v0.3]
 
+4. [Part of the docuementation effort] Add the JSDoc; 
+	Let it be brief (very), and work like: 
+
+		1. Contains a short (SHORT) description of the given class/method; 
+		2. Contains a reference to the proper documentation; 
+	
+	The only benefit of actually having the thing is the ability to reference the "big docs"
+
 Order of TODO-elimination: 
-	0.4.
-	A.0 [fundamental]
+	A.2.1.
+	A.0.4.1
+	A.0.4
+
+	A.0.9.
+	A.0.8. 
+	A.0.2. 
+
+	A.0.7.
+
 	A.1 
+	
 	A.2
 	A.3
-	
-0.4. FIX THE TESTS [again, for the final time, hopefully...]: 
-	0.4.1. Re-order the directory structure [the 'NavigableStream' - make it 'StreamClass/utils.ts']; 
-	0.4.2. MultiIndexModifier;
-		0.4.2.1. Add the '.init' method test; 
 
+	B. 
+	4. 
+	C.
+	
 A. testing: 
 
 	0. FUNDAMENTAL: 
-		0.1. INDEX [with 'number's] the 'signatures' for test-suites with INDEXES [thus, one will be able to know which one precisely failed...]; 
 		0.2. Decide how much of generics must be used inside the test-signature types [some use a lot, while others are satied with 'any']; 
 			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
 				LIST them first; 
-		0.3. Add '.toString()' to all the 'it' and 'describe' calls, when arguments for tests are used [to be able to distinguish failures and successes]; 
-
+				
 		0.4. Create the 'run.ts' script for running ALL the test specific suites AT ONCE [in sequence, that is...]; 
 			0.4.1. This will ensure one's ability to see the global code correctness despite making small changes to a particular (possibly sensitive) area of the project...; 
+			0.4.2. This will require first creating all the 'classes.ts' and 'utils.ts' files to be run, then iterating them inside the 'run.ts'
+			
+			[structure incomplete]
+			1. IndexMap/
+				0. lib/classes.ts
+				1. FastLookupTable
+				2. HashMap
+				3. InternalHash
+				4. LinearIndexMap
+				5. PersistentIndexMap
+			2. Parser/
+				1. GeneralParserTest
+				2. LayeredParserTest 
+				3. TableMapTest 
+			3. Pattern/
+				1. Collection 
+				2. EliminablePattern 
+				3. EnumSpace 
+				4. TokenInstanceTest
+				5. TokenTypeTest 
+				6. TokenTest 
+				7. TokenizablePattern 
+				8. ValidatablePattern 
+			4. Position/ 
+				1. MultiIndex/ 
+					1.1. MultiIndexModifier 
+			5. Stream/ 
+				5.1. InputStream/
+				5.2. LimitedStream/
+				5.3. NestedStream/
+				5.4. PredicateStream/ 
+				5.5. ProlongedStream/ 
+				5.6. ReversibleStream/ 
+				5.7. TreeStream/ 
+			6. Tree/
+				6.1. TreeClassTest
+				6.2. TreeTestSuite
+				6.3. TreeWalker
 		
-		0.5. Decide what to do with things like 'ambigiousMethodTest' - that require a SPECIAL 'compare' function; 
-			Whether one should not just compare by references instead [where possible/makes sense]; 
-			This'd simplify both the tests, and the suites (albeit, make the suites mildly uglier due to need for pre-caching and partial creation of recursive/table-structures); 
+		0.7. Tidy up the test suite signatures - make uniform names for similar properties, introduce naming conventions; 
+		0.8. Refactor the 'let times = X; while (times--) it('${X - times}. ${STRING}', FUNCTION(X - times))' into 'timesTest'; 
+			When one needs to run a certain test several times, basically...; 
 
-			DECISION: YES, do that; 
+			0.8.1. Use the 'i. ...' thing with the in-signature arrays; 
+			[Example: incTimes inside of 'MultiIndexModifier']; 
+
+		0.9. Introduce the 'instance' it-function [to contrast with 'times', and to also specify the INSTANCE that is used...]; 
+			Use on the top-level of suites; 
+			PASS the 'i' along with the 'signature' inside 'signatures' to acommodate for this...; 
 
 	1. Changes to tests [for modules]: 
 
+		0. GENERALLY: 
+			0.1. A big problem with the '.copy' tests: ONE ALSO needs to check whether or not THEY STILL HAVE THE METHODS WORKING AS EXPECTED!
+				Create 'CopyConstructorTest'-s; 
+				They do EXACTLY THE SAME things as the non-CopyConstructorTest-s, EXCEPT, for the '.copy' operation; 
 		1. Stream-s: 
 				1.1.1. Create a plain '.init' test; 
 					All StreamClass-es have it; 
@@ -52,11 +113,10 @@ A. testing:
 					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
 				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 	
 				1.1.4. [Parser/] Do the tests for 'StreamTokenizer' - this one must be tested like a StreamClass [follow the scheme that the others have already used...]
+				1.1.5. [maybe?] Refactor the '.pos' and 'hasPosition'-related testing into the tests of 'StreamClass/'? 
 	2. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
-		Re-do them; 
-		List the utils to be tested for each particular class, add tests for them; 
-		DO THEM ACCORDINGLY [refactor using 'lib/lib.ts' on-the-spot]
+		2.1. List all the 'src/**/utils.ts" files, create according 'lib/utils.ts' and '/utils.ts' files; 
 	3. Implement test suites: 
 		3.1. Stream-s: 
 			3.1.0. Methods:

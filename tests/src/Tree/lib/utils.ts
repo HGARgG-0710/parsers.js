@@ -1,9 +1,8 @@
-import { it } from "node:test"
 import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
 
 import { recursiveTreeCopy, sequentialIndex } from "../../../../dist/src/Tree/utils.js"
 import { isTree } from "./classes.js"
-import { arraysSame, tripleUtilTest } from "lib/lib.js"
+import { arraysSame, tripleUtilTest, util } from "lib/lib.js"
 import assert from "node:assert"
 
 export const sequentialIndexTest = tripleUtilTest(
@@ -25,6 +24,9 @@ function recursiveTreeCompare(x: any, y: any) {
 }
 
 export function recursiveTreeCopyTest(x: Tree, propName: string) {
-	it(`util: recursiveTreeCopy (${propName})`, () =>
-		assert(recursiveTreeCompare(x, recursiveTreeCopy(propName)(x))))
+	util(
+		`recursiveTreeCopy`,
+		() => assert(recursiveTreeCompare(x, recursiveTreeCopy(propName)(x))),
+		propName
+	)
 }

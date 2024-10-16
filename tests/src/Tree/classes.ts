@@ -1,3 +1,3 @@
-import { TreeClassTest, TreeTestSuite } from "./lib/classes.js"
-TreeTestSuite()
+import { TreeClassTest, TreeTestSeveral } from "./lib/classes.js"
+TreeTestSeveral()
 TreeClassTest()

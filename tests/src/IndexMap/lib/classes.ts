@@ -1,4 +1,3 @@
-import { describe, it } from "node:test"
 import assert from "node:assert"
 
 import type {
@@ -14,14 +13,20 @@ import type {
 	Pairs,
 	DefaultHaving
 } from "../../../../dist/src/IndexMap/interfaces.js"
-import { ClassConstructorTest, methodTest, unambigiousMethodTest } from "lib/lib.js"
+import {
+	ClassConstructorTest,
+	classTest,
+	method,
+	methodTest,
+	signatures,
+	comparisonMethodTest
+} from "lib/lib.js"
 
 import { toPairsList } from "../../../../dist/src/IndexMap/utils.js"
 
-import { object, typeof as type, boolean, function as _f } from "@hgargg-0710/one"
+import { object, typeof as type, function as _f } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
-const { T } = boolean
 const { and } = _f
 
 export const isIndexable = structCheck<Indexable>({ index: isFunction })
@@ -80,11 +85,14 @@ export function baseIndexMapGetIndexTest<IndexGetType = any>(
 ) {
 	return function <KeyType = any, ValueType = any>(
 		instance: IndexMap<KeyType, ValueType, IndexGetType>,
-		testPairs: Pairs<KeyType, IndexGetType>
+		key: KeyType,
+		index: IndexGetType
 	) {
-		for (const [key, trueIndex] of testPairs)
-			it(`method: .getIndex(${key.toString()})`, () =>
-				assert.strictEqual(converter(instance.getIndex(key)), trueIndex))
+		method(
+			"getIndex",
+			() => assert.strictEqual(converter(instance.getIndex(key)), index),
+			key
+		)
 	}
 }
 
@@ -93,12 +101,17 @@ function indexMapReplaceKeyTest<KeyType = any, ValueType = any>(
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {
-	it(`method: .replaceKey(${keyFrom.toString()}, ${keyTo.toString()})`, () => {
-		const initVal = instance.index(keyFrom)
-		instance.replaceKey(keyFrom, keyTo)
-		assert.strictEqual(initVal, instance.values[instance.keys.indexOf(keyTo)])
-		assert.strictEqual(-1, instance.keys.indexOf(keyFrom))
-	})
+	method(
+		"replaceKey",
+		() => {
+			const initVal = instance.index(keyFrom)
+			instance.replaceKey(keyFrom, keyTo)
+			assert.strictEqual(initVal, instance.values[instance.keys.indexOf(keyTo)])
+			assert.strictEqual(-1, instance.keys.indexOf(keyFrom))
+		},
+		keyFrom,
+		keyTo
+	)
 }
 
 function indexMapSetTest<KeyType = any, ValueType = any>(
@@ -106,16 +119,21 @@ function indexMapSetTest<KeyType = any, ValueType = any>(
 	setKey: KeyType,
 	setValue: ValueType
 ) {
-	it(`method: .set(${setKey.toString()}, ${setValue.toString()})`, () => {
-		instance.set(setKey, setValue)
-		assert.strictEqual(instance.values[instance.keys.indexOf(setKey)], setValue)
-	})
+	method(
+		"set",
+		() => {
+			instance.set(setKey, setValue)
+			assert.strictEqual(instance.values[instance.keys.indexOf(setKey)], setValue)
+		},
+		setKey,
+		setValue
+	)
 }
 
 function indexMapIteratorTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>
 ) {
-	it(`method: [Symbol.iterator]`, () => {
+	method("[Symbol.iterator]", () => {
 		const pairsList = [...instance]
 		const truePairsList = toPairsList([instance.keys, instance.values])
 		assert.strictEqual(pairsList.length, truePairsList.length)
@@ -133,12 +151,16 @@ function indexMapByIndexTest<KeyType = any, ValueType = any>(
 	i: number,
 	expected: [KeyType, ValueType]
 ) {
-	it(`method: .byIndex(${i})`, () => {
-		const [allegedKey, allegedValue] = instance.byIndex(i)
-		const [trueKey, trueValue] = expected
-		assert.strictEqual(allegedKey, trueKey)
-		assert.strictEqual(allegedValue, trueValue)
-	})
+	method(
+		"byIndex",
+		() => {
+			const [allegedKey, allegedValue] = instance.byIndex(i)
+			const [trueKey, trueValue] = expected
+			assert.strictEqual(allegedKey, trueKey)
+			assert.strictEqual(allegedValue, trueValue)
+		},
+		i
+	)
 }
 
 const indexMapIndexTest = methodTest<IndexMap>("index")
@@ -148,27 +170,32 @@ function indexMapSwapTest<KeyType = any, ValueType = any>(
 	i: number,
 	j: number
 ) {
-	it(`method: .swap(${i}, ${j})`, () => {
-		const [oldKey, oldValue] = instance.byIndex(i)
-		const [newKey, newValue] = instance.byIndex(j)
+	method(
+		"swap",
+		() => {
+			const [oldKey, oldValue] = instance.byIndex(i)
+			const [newKey, newValue] = instance.byIndex(j)
 
-		instance.swap(i, j)
+			instance.swap(i, j)
 
-		const [postOldKey, postOldValue] = instance.byIndex(i)
-		const [postNewKey, postNewValue] = instance.byIndex(j)
+			const [postOldKey, postOldValue] = instance.byIndex(i)
+			const [postNewKey, postNewValue] = instance.byIndex(j)
 
-		assert.strictEqual(oldKey, postNewKey)
-		assert.strictEqual(newKey, postOldKey)
+			assert.strictEqual(oldKey, postNewKey)
+			assert.strictEqual(newKey, postOldKey)
 
-		assert.strictEqual(oldValue, postNewValue)
-		assert.strictEqual(newValue, postOldValue)
-	})
+			assert.strictEqual(oldValue, postNewValue)
+			assert.strictEqual(newValue, postOldValue)
+		},
+		i,
+		j
+	)
 }
 
 function indexMapCopyTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>
 ) {
-	it("method: .copy()", () => {
+	method("copy", () => {
 		const copied = instance.copy()
 		for (let i = 0; i < instance.keys.length; ++i) {
 			const [origKey, origValue] = instance.byIndex(i)
@@ -180,26 +207,31 @@ function indexMapCopyTest<KeyType = any, ValueType = any>(
 	})
 }
 
-const indexMapUniqueTest = unambigiousMethodTest("unique", indexMapEquality)
+const indexMapUniqueTest = comparisonMethodTest("unique", indexMapEquality)
 
 function indexMapReplaceTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>,
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
-	it(`method: .replace(${i})`, () => {
-		const replaced: IndexMap<KeyType, ValueType> = instance.copy().replace(i, pair)
+	method(
+		"replace",
+		() => {
+			const [origKey, origValue] = instance.byIndex(i)
+			instance.replace(i, pair)
 
-		const [intendedKey, intendedValue] = pair
-		const [replacedKey, replacedValue] = replaced.byIndex(i)
-		const [origKey, origValue] = instance.byIndex(i)
+			const [intendedKey, intendedValue] = pair
+			const [replacedKey, replacedValue] = instance.byIndex(i)
 
-		assert.strictEqual(intendedKey, replacedKey)
-		assert.strictEqual(intendedValue, replacedValue)
+			assert.strictEqual(intendedKey, replacedKey)
+			assert.strictEqual(intendedValue, replacedValue)
 
-		assert.notStrictEqual(replacedValue, origValue)
-		assert.notStrictEqual(replacedKey, origKey)
-	})
+			assert.notStrictEqual(replacedValue, origValue)
+			assert.notStrictEqual(replacedKey, origKey)
+		},
+		i,
+		pair
+	)
 }
 
 function indexMapAddTest<KeyType = any, ValueType = any>(
@@ -207,36 +239,45 @@ function indexMapAddTest<KeyType = any, ValueType = any>(
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
-	it(`method: .add(${i})`, () => {
-		const copy: IndexMap<KeyType, ValueType> = instance.copy().add(i, pair)
-		const [addedKey, addedValue] = copy.byIndex(i)
-		const [origKey, origValue] = instance.byIndex(i)
+	method(
+		"add",
+		() => {
+			const [origKey, origValue] = instance.byIndex(i)
+			instance.add(i, pair)
+			const [addedKey, addedValue] = instance.byIndex(i)
 
-		assert.notStrictEqual(addedKey, origKey)
-		assert.notStrictEqual(addedValue, origValue)
+			assert.notStrictEqual(addedKey, origKey)
+			assert.notStrictEqual(addedValue, origValue)
 
-		const newLength = instance.keys.length + 1
-		assert.strictEqual(newLength, copy.keys.length)
-		assert.strictEqual(newLength, copy.values.length)
-	})
+			const newLength = instance.keys.length + 1
+			assert.strictEqual(newLength, instance.keys.length)
+			assert.strictEqual(newLength, instance.values.length)
+		},
+		i,
+		pair
+	)
 }
 
 function indexMapDeleteTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>,
 	i: number
 ) {
-	it(`method: .add(${i})`, () => {
-		const copy: IndexMap<KeyType, ValueType> = instance.copy().delete(i)
-		const [deletedKey, deletedValue] = copy.byIndex(i)
-		const [origKey, origValue] = instance.byIndex(i)
+	method(
+		"delete",
+		() => {
+			const [origKey, origValue] = instance.byIndex(i)
+			instance.delete(i)
+			const [deletedKey, deletedValue] = instance.byIndex(i)
 
-		assert.notStrictEqual(deletedKey, origKey)
-		assert.notStrictEqual(deletedValue, origValue)
+			assert.notStrictEqual(deletedKey, origKey)
+			assert.notStrictEqual(deletedValue, origValue)
 
-		const newLength = Math.max(instance.keys.length - 1, 0)
-		assert.strictEqual(newLength, copy.keys.length)
-		assert.strictEqual(newLength, copy.values.length)
-	})
+			const newLength = Math.max(instance.keys.length - 1, 0)
+			assert.strictEqual(newLength, instance.keys.length)
+			assert.strictEqual(newLength, instance.values.length)
+		},
+		i
+	)
 }
 
 export type MapClassTestSignature<KeyType = any, ValueType = any> = {
@@ -255,65 +296,66 @@ export type MapClassTestSignature<KeyType = any, ValueType = any> = {
 export function MapClassTest<KeyType = any, ValueType = any>(
 	className: string,
 	mapConstructor: MapClass<KeyType, ValueType>,
-	signatures: MapClassTestSignature<KeyType, ValueType>[]
+	testSignatures: MapClassTestSignature<KeyType, ValueType>[]
 ) {
-	const size = signatures.length
-	describe(`class: (IndexMap) ${className}`, () => {
-		for (let i = 0; i < size; ++i) {
-			const {
-				instance,
-				byIndexTest,
-				indexTest,
-				swapIndicies,
-				uniqueTest,
-				replaceTests,
-				addTests,
-				deleteInds,
-				setArgs,
-				replaceKeys
-			} = signatures[i]
+	classTest(`(IndexMap) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({
+					instance,
+					byIndexTest,
+					indexTest,
+					swapIndicies,
+					uniqueTest,
+					replaceTests,
+					addTests,
+					deleteInds,
+					setArgs,
+					replaceKeys
+				}) =>
+				() => {
+					const mapInstance: IndexMap<KeyType, ValueType> =
+						indexMapConstructorTest(mapConstructor, instance)
 
-			const mapInstance: IndexMap<KeyType, ValueType> = indexMapConstructorTest(
-				mapConstructor,
-				instance
-			)
+					// .index
+					for (const [key, value] of indexTest)
+						indexMapIndexTest(mapInstance, value, key)
 
-			// .index
-			for (const [key, value] of indexTest)
-				indexMapIndexTest(mapInstance, value, key)
+					// .copy
+					indexMapCopyTest(mapInstance)
 
-			// .copy
-			indexMapCopyTest(mapInstance)
+					// .add
+					for (const [i, pair] of addTests)
+						indexMapAddTest(mapInstance, i, pair)
 
-			// .add
-			for (const [i, pair] of addTests) indexMapAddTest(mapInstance, i, pair)
+					// .delete
+					for (const i of deleteInds) indexMapDeleteTest(mapInstance, i)
 
-			// .delete
-			for (const i of deleteInds) indexMapDeleteTest(mapInstance, i)
+					// .set
+					for (const [setKey, setValue] of setArgs)
+						indexMapSetTest(mapInstance, setKey, setValue)
 
-			// .set
-			for (const [setKey, setValue] of setArgs)
-				indexMapSetTest(mapInstance, setKey, setValue)
+					// .unique
+					indexMapUniqueTest(mapInstance, uniqueTest)
 
-			// .unique
-			indexMapUniqueTest(mapInstance, uniqueTest)
+					// .byIndex
+					for (const [i, pair] of byIndexTest)
+						indexMapByIndexTest(mapInstance, i, pair)
 
-			// .byIndex
-			for (const [i, pair] of byIndexTest) indexMapByIndexTest(mapInstance, i, pair)
+					// .swap
+					for (const [i, j] of swapIndicies) indexMapSwapTest(mapInstance, i, j)
 
-			// .swap
-			for (const [i, j] of swapIndicies) indexMapSwapTest(mapInstance, i, j)
+					// .replace
+					for (const [i, pair] of replaceTests)
+						indexMapReplaceTest(mapInstance, i, pair)
 
-			// .replace
-			for (const [i, pair] of replaceTests)
-				indexMapReplaceTest(mapInstance, i, pair)
+					// [Symbol.iterator]
+					indexMapIteratorTest(mapInstance)
 
-			// [Symbol.iterator]
-			indexMapIteratorTest(mapInstance)
-
-			// .replaceKey
-			for (const [keyFrom, keyTo] of replaceKeys)
-				indexMapReplaceKeyTest(mapInstance, keyFrom, keyTo)
-		}
-	})
+					// .replaceKey
+					for (const [keyFrom, keyTo] of replaceKeys)
+						indexMapReplaceKeyTest(mapInstance, keyFrom, keyTo)
+				}
+		)
+	)
 }

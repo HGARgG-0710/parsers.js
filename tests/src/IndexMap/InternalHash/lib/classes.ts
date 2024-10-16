@@ -1,8 +1,14 @@
-import { describe, it } from "node:test"
 import assert from "assert"
 
 import type { InternalHash } from "../../../../../dist/src/IndexMap/HashMap/InternalHash/interfaces.js"
-import { ClassConstructorTest, methodTest, setMethodTest } from "lib/lib.js"
+import {
+	ClassConstructorTest,
+	classTest,
+	method,
+	methodTest,
+	setMethodTest,
+	signatures
+} from "lib/lib.js"
 import { isDeletable, isKeyReplaceable, isSettable } from "IndexMap/lib/classes.js"
 
 import { object, function as _f, typeof as type } from "@hgargg-0710/one"
@@ -30,19 +36,28 @@ const InternalHashSetTest = setMethodTest<InternalHash>("set", "get")
 const InternalHashGetTest = methodTest<InternalHash>("get")
 
 function InternalHashDeleteTest(instance: InternalHash, key: any) {
-	it(`method: .delete(${key.toString()})`, () => {
-		instance.delete(key)
-		assert.strictEqual(instance.get(key), instance.default)
-	})
+	method(
+		"delete",
+		() => {
+			instance.delete(key)
+			assert.strictEqual(instance.get(key), instance.default)
+		},
+		key
+	)
 }
 
 function InternalHashReplaceKeyTest(instance: InternalHash, keyFrom: any, keyTo: any) {
-	it(`method: .replaceKey(${(keyFrom.toString(), keyTo.toString())})`, () => {
-		const value = instance.get(keyFrom)
-		instance.replaceKey(keyFrom, keyTo)
-		assert.strictEqual(value, instance.get(keyTo))
-		assert.strictEqual(instance.default, instance.get(keyFrom))
-	})
+	method(
+		"replaceKey",
+		() => {
+			const value = instance.get(keyFrom)
+			instance.replaceKey(keyFrom, keyTo)
+			assert.strictEqual(value, instance.get(keyTo))
+			assert.strictEqual(instance.default, instance.get(keyFrom))
+		},
+		keyFrom,
+		keyTo
+	)
 }
 
 type InternalHashTestSignature = {
@@ -56,26 +71,30 @@ type InternalHashTestSignature = {
 export function InternalHashTest(
 	className: string,
 	hashConstructor: new (...x: any[]) => InternalHash,
-	signatures: InternalHashTestSignature[]
+	testSignatures: InternalHashTestSignature[]
 ) {
-	describe(`class: (InternalHash) ${className}`, () => {
-		for (const signature of signatures) {
-			const { sub, getTests, setTests, deleteTests, replaceKeyTests } = signature
-			const instance = InternalHashConstructorTest(hashConstructor, sub)
+	classTest(`(InternalHash) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({ sub, getTests, setTests, deleteTests, replaceKeyTests }) =>
+				() => {
+					const instance = InternalHashConstructorTest(hashConstructor, sub)
 
-			// .get
-			for (const [key, value] of getTests) InternalHashGetTest(instance, value, key)
+					// .get
+					for (const [key, value] of getTests)
+						InternalHashGetTest(instance, value, key)
 
-			// .set
-			for (const [key, value] of setTests)
-				InternalHashSetTest(instance, value, key, value)
+					// .set
+					for (const [key, value] of setTests)
+						InternalHashSetTest(instance, value, key, value)
 
-			// .delete
-			for (const key of deleteTests) InternalHashDeleteTest(instance, key)
+					// .delete
+					for (const key of deleteTests) InternalHashDeleteTest(instance, key)
 
-			// .replaceKey
-			for (const [keyFrom, keyTo] of replaceKeyTests)
-				InternalHashReplaceKeyTest(instance, keyFrom, keyTo)
-		}
-	})
+					// .replaceKey
+					for (const [keyFrom, keyTo] of replaceKeyTests)
+						InternalHashReplaceKeyTest(instance, keyFrom, keyTo)
+				}
+		)
+	)
 }

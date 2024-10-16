@@ -1,4 +1,3 @@
-import { describe, it } from "node:test"
 import assert from "node:assert"
 
 import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
@@ -7,14 +6,12 @@ import type { MultiIndex } from "../../../../../dist/src/Position/MultiIndex/int
 import {
 	arraysSame,
 	ClassConstructorTest,
+	classTest,
+	method,
 	methodTest,
-	unambigiousMethodTest
+	signatures,
+	comparisonMethodTest
 } from "lib/lib.js"
-
-import {
-	ChainMultiIndexModifierTest,
-	type MultiIndexModifierTestSignature
-} from "../MultiIndexModifier/lib/classes.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -40,17 +37,17 @@ const MultiIndexConstructorTest = ClassConstructorTest<MultiIndex>(
 const MultiIndexEqualsTest = methodTest<MultiIndex>("equals")
 
 const levelComparison = (x: [number], y: [number]) => x[0] === y[0]
-const MultiIndexFirstLevelTest = unambigiousMethodTest<MultiIndex>(
+const MultiIndexFirstLevelTest = comparisonMethodTest<MultiIndex>(
 	"firstLevel",
 	levelComparison
 )
-const MultiIndexLastLevelTest = unambigiousMethodTest<MultiIndex>(
+const MultiIndexLastLevelTest = comparisonMethodTest<MultiIndex>(
 	"lastLevel",
 	levelComparison
 )
 
 function MultiIndexCopyTest(instance: MultiIndex) {
-	it(`method: .copy()`, () => {
+	method("copy", () => {
 		const copy = instance.copy()
 		assert(arraysSame(instance.value, copy.value))
 		assert(isMultiIndex(copy))
@@ -58,11 +55,11 @@ function MultiIndexCopyTest(instance: MultiIndex) {
 }
 
 function MultiIndexSliceTest(instance: MultiIndex, from: number, to: number) {
-	it(`method: .slice()`, () => {
+	method("slice", () => {
 		const copy = instance.copy()
 		const arr = instance.value.slice(from, to)
 		assert(arraysSame(arr, instance.slice(from, to)))
-		assert(instance.equals(copy))
+		assert(instance.equals(copy)) // ensuring non-mutating nature of the method
 	})
 }
 
@@ -82,44 +79,48 @@ type MultiIndexTestSignature = {
 export function MultiIndexTest(
 	className: string,
 	multindConstructor: new (...input: any[]) => MultiIndex,
-	signatures: MultiIndexTestSignature[]
+	testSignatures: MultiIndexTestSignature[]
 ) {
-	describe(`class: (MultiIndex) ${className}`, () => {
-		for (const signature of signatures) {
-			const {
-				value,
-				conversionTests,
-				comparisonTests,
-				sliceTests,
-				equalsTests,
-				firstLevelTest,
-				lastLevelTest
-			} = signature
-			const instance = MultiIndexConstructorTest(multindConstructor, value)
+	classTest(`(MultiIndex) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({
+					value,
+					conversionTests,
+					comparisonTests,
+					sliceTests,
+					equalsTests,
+					firstLevelTest,
+					lastLevelTest
+				}) =>
+				() => {
+					const instance = MultiIndexConstructorTest(multindConstructor, value)
 
-			// .convert
-			for (const [treeStream, expected] of conversionTests)
-				MultiIndexConvertTest(instance, expected, treeStream)
+					// .convert
+					for (const [treeStream, expected] of conversionTests)
+						MultiIndexConvertTest(instance, expected, treeStream)
 
-			// .compare
-			for (const [comparedWith, expected] of comparisonTests)
-				MultiIndexCompareTest(instance, expected, comparedWith)
+					// .compare
+					for (const [comparedWith, expected] of comparisonTests)
+						MultiIndexCompareTest(instance, expected, comparedWith)
 
-			// .slice
-			for (const [from, to] of sliceTests) MultiIndexSliceTest(instance, from, to)
+					// .slice
+					for (const [from, to] of sliceTests)
+						MultiIndexSliceTest(instance, from, to)
 
-			// .equals
-			for (const [differedWith, expected] of equalsTests)
-				MultiIndexEqualsTest(instance, expected, differedWith)
+					// .equals
+					for (const [differedWith, expected] of equalsTests)
+						MultiIndexEqualsTest(instance, expected, differedWith)
 
-			// .copy
-			MultiIndexCopyTest(instance)
+					// .copy
+					MultiIndexCopyTest(instance)
 
-			// .firstLevel
-			MultiIndexFirstLevelTest(instance, [firstLevelTest])
+					// .firstLevel
+					MultiIndexFirstLevelTest(instance, [firstLevelTest])
 
-			// .lastLevel
-			MultiIndexLastLevelTest(instance, [lastLevelTest])
-		}
-	})
+					// .lastLevel
+					MultiIndexLastLevelTest(instance, [lastLevelTest])
+				}
+		)
+	)
 }

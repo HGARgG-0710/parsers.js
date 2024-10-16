@@ -1,10 +1,10 @@
-import { describe } from "node:test"
-
 import type { ValidatablePattern } from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
 import {
 	ClassConstructorTest,
 	ResultingAmbigiousMethodTest,
-	FlushableResultingTestFlush
+	FlushableResultingTestFlush,
+	classTest,
+	signatures
 } from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
@@ -37,31 +37,34 @@ type ValidatablePatternTestSignature = {
 export function ValidatablePatternClassTest(
 	className: string,
 	validatablePatternConstructor: new (input: any) => ValidatablePattern,
-	instances: ValidatablePatternTestSignature[]
+	testSignatures: ValidatablePatternTestSignature[]
 ) {
-	describe(`class: (ValidatablePattern) ${className}`, () => {
-		for (const instance of instances) {
-			const { input, flushResult, resultCompare, validationInput } = instance
-			const validatablePatternInstance = ValidatablePatternConstructorTest(
-				validatablePatternConstructor,
-				input
-			)
+	classTest(`(ValidatablePattern) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({ input, flushResult, resultCompare, validationInput }) =>
+				() => {
+					const validatablePatternInstance = ValidatablePatternConstructorTest(
+						validatablePatternConstructor,
+						input
+					)
 
-			// .validate
-			for (const [key, handler, result] of validationInput)
-				ValidatablePatternValidateTest(
-					validatablePatternInstance,
-					[key, handler],
-					result,
-					resultCompare
-				)
+					// .validate
+					for (const [key, handler, result] of validationInput)
+						ValidatablePatternValidateTest(
+							validatablePatternInstance,
+							[key, handler],
+							result,
+							resultCompare
+						)
 
-			// .flush
-			FlushableResultingTestFlush(
-				validatablePatternInstance,
-				flushResult,
-				resultCompare
-			)
-		}
-	})
+					// .flush
+					FlushableResultingTestFlush(
+						validatablePatternInstance,
+						flushResult,
+						resultCompare
+					)
+				}
+		)
+	)
 }

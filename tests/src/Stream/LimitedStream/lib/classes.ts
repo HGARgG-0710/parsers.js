@@ -10,6 +10,7 @@ import { isPosition, positionEqual } from "../../../../../dist/src/Position/util
 import {
 	blockExtension,
 	ClassConstructorTest,
+	classTest,
 	InitClassConstructorTest
 } from "lib/lib.js"
 import {
@@ -73,7 +74,7 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		expected: any[],
 		compare: (x: any, y: any) => boolean
 	) {
-		it("class: [base] LimitedStream", () => {
+		classTest("[base] LimitedStream", () => {
 			positionEqual(stream.input, stream.from)
 			let i = 0
 			while (!stream.isEnd) assert(compare(stream.next(), expected[i++]))

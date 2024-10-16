@@ -1,11 +1,17 @@
-import { describe, it } from "node:test"
 import assert from "node:assert"
 
 import type {
 	EnumSpace,
 	Mappable
 } from "../../../../../dist/src/Pattern/EnumSpace/interfaces.js"
-import { arraysSame, ClassConstructorTest, unambigiousMethodTest } from "lib/lib.js"
+import {
+	arraysSame,
+	ClassConstructorTest,
+	classTest,
+	method,
+	signatures,
+	comparisonMethodTest
+} from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -33,39 +39,46 @@ const EnumSpaceConstructorTest = ClassConstructorTest(
 	["value"]
 )
 
-function EnumSpaceCopyTest(enumInstance: EnumSpace) {
-	it("method: .copy", () => {
-		const copy = enumInstance.copy()
-		assert.notStrictEqual(copy, enumInstance)
+function EnumSpaceCopyTest(instance: EnumSpace) {
+	method("copy", () => {
+		const copy = instance.copy()
+		assert.notStrictEqual(copy, instance)
 
-		assert.strictEqual(enumInstance.size, copy.size)
-		assert.strictEqual(enumInstance.add, copy.add)
-		assert.strictEqual(enumInstance.join, copy.join)
-		assert.strictEqual(enumInstance.copy, copy.copy)
-		assert.strictEqual(enumInstance.map, copy.map)
+		assert.strictEqual(instance.size, copy.size)
+		assert.strictEqual(instance.add, copy.add)
+		assert.strictEqual(instance.join, copy.join)
+		assert.strictEqual(instance.copy, copy.copy)
+		assert.strictEqual(instance.map, copy.map)
 
-		assert(enumEquality(enumInstance, copy))
+		assert(enumEquality(instance, copy))
 	})
 }
 
-function EnumSpaceAddTest(enumInstance: EnumSpace, n: number) {
-	it(`method: .add(${n})`, () => {
-		const initial = enumInstance.copy()
-		enumInstance.add(n)
-		assert(enumInstance.size - initial.size === n)
-		assert(!enumEquality(enumInstance, initial))
-	})
+function EnumSpaceAddTest(instance: EnumSpace, n: number) {
+	method(
+		"add",
+		() => {
+			const initSize = instance.size
+			instance.add(n)
+			assert(instance.size - initSize === n)
+		},
+		n
+	)
 }
 
-function EnumSpaceJoinTest(enumInstance: EnumSpace, space: EnumSpace) {
-	it(`method: .join(${enumInstance.size}, ${space.size})`, () => {
-		const currJoined = enumInstance.copy().join(space)
-		assert.notStrictEqual(currJoined, enumInstance)
-		if (space.size) assert(!enumEquality(enumInstance, currJoined))
-	})
+function EnumSpaceJoinTest(instance: EnumSpace, space: EnumSpace) {
+	method(
+		"join",
+		() => {
+			const initSize = instance.size
+			instance.join(space)
+			assert(instance.size - initSize === space.size)
+		},
+		space
+	)
 }
 
-const EnumSpaceMapTest = unambigiousMethodTest<EnumSpace>("map", arraysSame)
+const EnumSpaceMapTest = comparisonMethodTest<EnumSpace>("map", arraysSame)
 
 type EnumSpaceClassTestSignature = {
 	size: number
@@ -77,24 +90,23 @@ type EnumSpaceClassTestSignature = {
 export function EnumSpaceTest(
 	className: string,
 	enumConstructor: new (size: number) => EnumSpace,
-	instances: EnumSpaceClassTestSignature[]
+	testSignatures: EnumSpaceClassTestSignature[]
 ) {
-	describe(`class: (EnumSpace) ${className}`, () => {
-		for (const instance of instances) {
-			const { size, increases, joined, mapTests } = instance
-			const enumInstance = EnumSpaceConstructorTest(enumConstructor, size)
+	classTest(`(EnumSpace) ${className}`, () =>
+		signatures(testSignatures, ({ size, increases, joined, mapTests }) => () => {
+			const instance = EnumSpaceConstructorTest(enumConstructor, size)
 
 			// .copy
-			EnumSpaceCopyTest(enumInstance)
+			EnumSpaceCopyTest(instance)
 
 			// .add
-			for (const n of increases) EnumSpaceAddTest(enumInstance, n)
+			for (const n of increases) EnumSpaceAddTest(instance, n)
 
 			// .join
-			for (const space of joined) EnumSpaceJoinTest(enumInstance, space)
+			for (const space of joined) EnumSpaceJoinTest(instance, space)
 
 			// .map
-			for (const [f, out] of mapTests) EnumSpaceMapTest(enumInstance, out, f)
-		}
-	})
+			for (const [f, out] of mapTests) EnumSpaceMapTest(instance, out, f)
+		})
+	)
 }

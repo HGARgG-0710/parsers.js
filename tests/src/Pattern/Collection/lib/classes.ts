@@ -1,7 +1,11 @@
-import { describe } from "node:test"
-
 import type { Collection } from "../../../../../dist/src/Pattern/Collection/interfaces.js"
-import { ambigiousMethodTest, ClassConstructorTest, iterationTest } from "lib/lib.js"
+import {
+	ClassConstructorTest,
+	classTest,
+	iterationTest,
+	methodTest,
+	signatures
+} from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -19,7 +23,7 @@ const CollectionConstructorTest = ClassConstructorTest<Collection>(
 	["push", Symbol.iterator],
 	["value"]
 )
-const CollectionPushTest = ambigiousMethodTest<Collection>("push")
+const CollectionPushTest = methodTest<Collection>("push")
 const CollectionIterationTest = iterationTest<Collection>
 
 type CollectionClassTestSignature = {
@@ -33,25 +37,35 @@ type CollectionClassTestSignature = {
 export function CollectionClassTest(
 	className: string,
 	collectionConstructor: new (x: any) => Collection,
-	instances: CollectionClassTestSignature[]
+	testSignatures: CollectionClassTestSignature[]
 ) {
-	describe(`class: (Collection) ${className}`, () => {
-		for (const instance of instances) {
-			const {
-				input,
-				pushed,
-				expectedPushValue: expectedValue,
-				pushCompare,
-				iteratedOver
-			} = instance
+	classTest(`(Collection) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({
+					input,
+					pushed,
+					expectedPushValue: expectedValue,
+					pushCompare,
+					iteratedOver
+				}) =>
+				() => {
+					const collectionInstance = CollectionConstructorTest(
+						collectionConstructor,
+						input
+					)
 
-			const collectionInstance = CollectionConstructorTest(
-				collectionConstructor,
-				input
-			)
+					// [Symbol.iterator]
+					CollectionIterationTest(collectionInstance, iteratedOver)
 
-			CollectionIterationTest(collectionInstance, iteratedOver) // 				[Symbol.iterator]
-			CollectionPushTest(collectionInstance, expectedValue, pushCompare, pushed) //	.push
-		}
-	})
+					// .push
+					CollectionPushTest(
+						collectionInstance,
+						expectedValue,
+						pushCompare,
+						pushed
+					)
+				}
+		)
+	)
 }

@@ -3,3 +3,4 @@ ignore-notes.txt
 dist
 wiki
 tests/out
+git/

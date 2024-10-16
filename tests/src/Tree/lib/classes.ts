@@ -1,9 +1,15 @@
 import assert from "node:assert"
-import { describe, it } from "node:test"
+import { it } from "node:test"
 
 import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
 import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
-import { ambigiousMethodTest, FunctionalClassConctructorTest } from "lib/lib.js"
+import {
+	classTest,
+	FunctionalClassConctructorTest,
+	methodTest,
+	property,
+	signatures
+} from "lib/lib.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
 const { isFunction, isNumber } = type
@@ -16,8 +22,9 @@ export const isTree = structCheck<Tree>({
 })
 
 function ChildlessTreeTest(childlessTree: any, propName: string) {
-	describe(`class: ChildlessTree (${propName})`, () =>
-		assert.strictEqual(ChildlessTree(propName)(childlessTree).length, 0))
+	classTest(`ChildlessTree(${propName})`, () =>
+		assert.strictEqual(ChildlessTree(propName)(childlessTree).length, 0)
+	)
 }
 
 function SingleTreeTest(
@@ -25,7 +32,7 @@ function SingleTreeTest(
 	propName: string,
 	converter?: (x: any) => any
 ) {
-	describe(`class: SingleTree (${propName})`, () => {
+	classTest(`SingleTree(${propName})`, () => {
 		const oldValue = childrenTree.value
 		const singled = SingleTree(propName)(childrenTree, converter)
 		assert.strictEqual(singled[propName].length, 1)
@@ -35,7 +42,7 @@ function SingleTreeTest(
 }
 
 function MultTreeTest(childrenTree: any, propName: string, converter?: (x: any) => any) {
-	describe(`class: MultTree (${propName})`, () => {
+	classTest(`MultTree(${propName})`, () => {
 		const oldValue = childrenTree.value
 		const multed = MultTree(propName)(childrenTree, converter)
 		assert.strictEqual(multed.value.length, multed[propName].length)
@@ -57,37 +64,41 @@ type ChildlessTreeTestSignature = TreeSignature
 type SingleTreeTestSignature = TreeSignature & ConvertedTreeSignature
 type MultTreeTestSignature = TreeSignature & ConvertedTreeSignature
 
-export function TreeTestSuite(
+export function TreeTestSeveral(
 	childless: ChildlessTreeTestSignature[],
 	single: SingleTreeTestSignature[],
 	multiple: MultTreeTestSignature[]
 ) {
-	for (const s_childless of childless) {
-		const { propName, childrenTrees } = s_childless
-		for (const childrenTree of childrenTrees)
-			ChildlessTreeTest(propName, childrenTree)
-	}
+	classTest(`ChildlessTree`, () =>
+		signatures(childless, ({ propName, childrenTrees }) => () => {
+			for (const childrenTree of childrenTrees)
+				ChildlessTreeTest(propName, childrenTree)
+		})
+	)
 
-	for (const s_single of single) {
-		const { propName, childrenTrees, converter } = s_single
-		for (const childrenTree of childrenTrees)
-			SingleTreeTest(propName, childrenTree, converter)
-	}
+	classTest(`SingleTree`, () =>
+		signatures(single, ({ propName, childrenTrees, converter }) => () => {
+			for (const childrenTree of childrenTrees)
+				SingleTreeTest(propName, childrenTree, converter)
+		})
+	)
 
-	for (const s_multiple of multiple) {
-		const { propName, childrenTrees, converter } = s_multiple
-		for (const childrenTree of childrenTrees)
-			MultTreeTest(propName, childrenTree, converter)
-	}
+	classTest(`MultTree`, () =>
+		signatures(multiple, ({ propName, childrenTrees, converter }) => () => {
+			for (const childrenTree of childrenTrees)
+				MultTreeTest(propName, childrenTree, converter)
+		})
+	)
 }
 
 const TreeConstructorTest = FunctionalClassConctructorTest<Tree>(isTree)
 
-const TreeIndexTest = ambigiousMethodTest<Tree>("index")
+const TreeIndexTest = methodTest<Tree>("index")
 
 function TreeLastChildTest(tree: Tree, index: number[], expectedLastChild: number) {
-	it(`property: .lastChild`, () =>
-		assert.strictEqual(tree.index(index).lastChild, expectedLastChild))
+	property("lastChild", () =>
+		assert.strictEqual(tree.index(index).lastChild, expectedLastChild)
+	)
 }
 
 type TreeClassTestSignature = {
@@ -99,11 +110,10 @@ type TreeClassTestSignature = {
 export function TreeClassTest(
 	className: string,
 	treeConstructor: (x: any) => Tree,
-	instances: TreeClassTestSignature[]
+	testSignatures: TreeClassTestSignature[]
 ) {
-	describe(`class: (Tree) ${className}`, () => {
-		for (const instance of instances) {
-			const { input, indexTests, lastChildTests } = instance
+	classTest(`(Tree) ${className}`, () =>
+		signatures(testSignatures, ({ input, indexTests, lastChildTests }) => () => {
 			const treeInstance: Tree = TreeConstructorTest(treeConstructor, input)
 
 			// .index
@@ -113,6 +123,6 @@ export function TreeClassTest(
 			// .lastChild
 			for (const [index, lastChild] of lastChildTests)
 				TreeLastChildTest(treeInstance, index, lastChild)
-		}
-	})
+		})
+	)
 }

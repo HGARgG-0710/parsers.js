@@ -1,12 +1,12 @@
+import type { MapClass, Pairs } from "../../../../../dist/src/IndexMap/interfaces.js"
 import {
 	baseIndexMapGetIndexTest,
 	MapClassTest,
 	type MapClassTestSignature
 } from "IndexMap/lib/classes.js"
-import type { MapClass, Pairs } from "../../../../../dist/src/IndexMap/interfaces.js"
 
 import { function as _f } from "@hgargg-0710/one"
-import { describe } from "node:test"
+import { classTest, signatures } from "lib/lib.js"
 const { id } = _f
 
 const linearMapClassGetIndexTest = baseIndexMapGetIndexTest<number>(id)
@@ -18,14 +18,14 @@ type LinearMapClassTestSignature<KeyType = any, ValueType = any> = {
 export function LinearMapClassTest<KeyType = any, ValueType = any>(
 	className: string,
 	mapConstructor: MapClass<KeyType, ValueType>,
-	signatures: LinearMapClassTestSignature<KeyType, ValueType>[]
+	testSignatures: LinearMapClassTestSignature<KeyType, ValueType>[]
 ) {
-	MapClassTest<KeyType, ValueType>(className, mapConstructor, signatures)
-	describe(`class: (LinearIndexMap) ${className}`, () => {
-		for (const signature of signatures) {
-			const { instance, getIndexTest } = signature
-			const linearMapInstance = new mapConstructor(instance)
-			linearMapClassGetIndexTest(linearMapInstance, getIndexTest) // .getIndex
-		}
-	})
+	MapClassTest<KeyType, ValueType>(className, mapConstructor, testSignatures)
+	classTest(`(LinearIndexMap) ${className}`, () =>
+		signatures(testSignatures, ({ instance, getIndexTest }) => () => {
+			// .getIndex
+			for (const [key, index] of getIndexTest)
+				linearMapClassGetIndexTest(new mapConstructor(instance), key, index)
+		})
+	)
 }

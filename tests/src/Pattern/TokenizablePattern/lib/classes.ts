@@ -1,5 +1,3 @@
-import { describe } from "node:test"
-
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type {
 	TokenizablePattern,
@@ -9,7 +7,9 @@ import type {
 import {
 	ClassConstructorTest,
 	ResultingAmbigiousMethodTest,
-	FlushableResultingTestFlush
+	FlushableResultingTestFlush,
+	classTest,
+	signatures
 } from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
@@ -49,29 +49,38 @@ export function TokenizablePatternClassTest<Type = any, InType = any, OutType = 
 		InType,
 		OutType
 	>,
-	instances: TokenizablePatternClassTestSignature<Type, InType, OutType>[]
+	testSignatures: TokenizablePatternClassTestSignature<Type, InType, OutType>[]
 ) {
-	describe(`class: (TokenizablePattern) ${className}`, () => {
-		for (const instance of instances) {
-			const { input, flushResult, resultCompare, tableEntries } = instance
-			const tokenizablePatternInstance: TokenizablePattern<Type, InType, OutType> =
-				TokenizablePatternConstructorTest(tokenizablePatternConstructor, input)
+	classTest(`(TokenizablePattern) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({ input, flushResult, resultCompare, tableEntries }) =>
+				() => {
+					const tokenizablePatternInstance: TokenizablePattern<
+						Type,
+						InType,
+						OutType
+					> = TokenizablePatternConstructorTest(
+						tokenizablePatternConstructor,
+						input
+					)
 
-			// .tokenize
-			for (const [key, handler, result] of tableEntries)
-				TokenizablePatternTokenizeTest(
-					tokenizablePatternInstance,
-					[key, handler],
-					result,
-					resultCompare
-				)
+					// .tokenize
+					for (const [key, handler, result] of tableEntries)
+						TokenizablePatternTokenizeTest(
+							tokenizablePatternInstance,
+							[key, handler],
+							result,
+							resultCompare
+						)
 
-			// .flush
-			FlushableResultingTestFlush(
-				tokenizablePatternInstance,
-				flushResult,
-				resultCompare
-			)
-		}
-	})
+					// .flush
+					FlushableResultingTestFlush(
+						tokenizablePatternInstance,
+						flushResult,
+						resultCompare
+					)
+				}
+		)
+	)
 }

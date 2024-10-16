@@ -1,8 +1,9 @@
-import { describe } from "node:test"
-import type { Resulting } from "../../../../dist/src/Pattern/interfaces.js"
 import assert from "node:assert"
+
+import type { Resulting } from "../../../../dist/src/Pattern/interfaces.js"
 import type { LayeredParser } from "../../../../dist/src/Parser/LayeredParser/interfaces.js"
 import type { Indexable } from "../../../../dist/src/IndexMap/interfaces.js"
+import { classTest, signatures } from "lib/lib.js"
 
 type GeneralParserTestSignature = {
 	input: Resulting
@@ -13,16 +14,16 @@ type GeneralParserTestSignature = {
 export function GeneralParserTest(
 	className: string,
 	tested: (x: Resulting) => any,
-	signatures: GeneralParserTestSignature[]
+	testSignatures: GeneralParserTestSignature[]
 ) {
-	describe(`class: (GeneralParser) ${className}`, () => {
-		for (const signature of signatures) {
+	classTest(`(GeneralParser) ${className}`, () =>
+		signatures(testSignatures, (signature: GeneralParserTestSignature) => () => {
 			const { input, expectedOutput, expectedResult } = signature
 			const output = tested(input)
 			assert.strictEqual(output, expectedOutput)
 			assert.strictEqual(expectedResult, input.result)
-		}
-	})
+		})
+	)
 }
 
 type LayeredParserTestSignature = {
@@ -33,17 +34,16 @@ type LayeredParserTestSignature = {
 export function LayeredParserTest(
 	className: string,
 	tested: (...input: any[]) => LayeredParser,
-	signatures: LayeredParserTestSignature[]
+	testSignatures: LayeredParserTestSignature[]
 ) {
-	describe(`class: (LayeredParser) ${className}`, () => {
-		for (const signature of signatures) {
-			const { layers, inOuts } = signature
+	classTest(`(LayeredParser) ${className}`, () =>
+		signatures(testSignatures, ({ layers, inOuts }) => () => {
 			const instance = tested(layers)
 			assert.strictEqual(instance.layers, layers)
 			for (const [input, output] of inOuts)
 				assert.strictEqual(instance(input), output)
-		}
-	})
+		})
+	)
 }
 
 type TableMapTestSignature = {
@@ -54,14 +54,13 @@ type TableMapTestSignature = {
 export function TableMapTest(
 	className: string,
 	tableMaker: (x: Indexable) => (x: any) => any,
-	signatures: TableMapTestSignature[]
+	testSignatures: TableMapTestSignature[]
 ) {
-	describe(`class: (TableMap) ${className}`, () => {
-		for (const signature of signatures) {
-			const { input, inOuts } = signature
+	classTest(`(TableMap) ${className}`, () =>
+		signatures(testSignatures, ({ input, inOuts }) => () => {
 			const instance = tableMaker(input)
 			for (const [input, output] of inOuts)
 				assert.strictEqual(instance(input), output)
-		}
-	})
+		})
+	)
 }

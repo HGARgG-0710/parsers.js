@@ -1,9 +1,9 @@
-import { describe } from "node:test"
-
 import {
 	ClassConstructorTest,
 	ResultingAmbigiousMethodTest,
-	FlushableResultingTestFlush
+	FlushableResultingTestFlush,
+	classTest,
+	signatures
 } from "lib/lib.js"
 import type { EliminablePattern } from "../../../../../dist/src/Pattern/EliminablePattern/interfaces.js"
 
@@ -37,32 +37,30 @@ type EliminablePatternTestSignature = {
 export function EliminablePatternClassTest(
 	className: string,
 	eliminablePatternConstructor: new (x: any) => EliminablePattern,
-	instances: EliminablePatternTestSignature[]
+	testSignatures: EliminablePatternTestSignature[]
 ) {
-	describe(`class: (EliminablePattern) ${className}`, () => {
-		for (const instance of instances) {
-			const { input, toEliminate, resultCompare, flushResult } = instance
+	classTest(`(EliminablePattern) ${className}`, () =>
+		signatures(
+			testSignatures,
+			({ input, toEliminate, resultCompare, flushResult }) =>
+				() => {
+					const instance = EliminablePatternConstructorTest(
+						eliminablePatternConstructor,
+						input
+					)
 
-			const eliminablePatternInstance = EliminablePatternConstructorTest(
-				eliminablePatternConstructor,
-				input
-			)
+					// .eliminate
+					for (const [eliminated, result] of toEliminate)
+						EliminablePatternEliminateTest(
+							instance,
+							[eliminated],
+							result,
+							resultCompare
+						)
 
-			// .eliminate
-			for (const [eliminated, result] of toEliminate)
-				EliminablePatternEliminateTest(
-					eliminablePatternInstance,
-					[eliminated],
-					result,
-					resultCompare
-				)
-
-			// .flush
-			FlushableResultingTestFlush(
-				eliminablePatternInstance,
-				flushResult,
-				resultCompare
-			)
-		}
-	})
+					// .flush
+					FlushableResultingTestFlush(instance, flushResult, resultCompare)
+				}
+		)
+	)
 }
