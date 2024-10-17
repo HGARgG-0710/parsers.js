@@ -11,21 +11,28 @@
 	
 	The only benefit of actually having the thing is the ability to reference the "big docs"
 
+5. [maybe?] Structure the 'imports.ts' and 'regex.ts' into their own directories? 
+	Would increase modularity, clarity and test readability/modifiability...; 
+
 Order of TODO-elimination: 
-	A.2.1.
-	A.0.4.1
-	A.0.4
+	A.3.1.0.
+	A.1.1.4. 
+	A.1.1.1.
 
-	A.0.9.
-	A.0.8. 
-	A.0.2. 
-
-	A.0.7.
-
-	A.1 
+	A.1.3.
+	A.1.2. 
 	
 	A.2
-	A.3
+	5. 
+
+	A.0.10. 
+	A.3.1.1.
+	A.3.
+	A.0.2. 
+	A.0.7.
+	
+	A.0.9.
+	A.0.8. 
 
 	B. 
 	4. 
@@ -37,47 +44,6 @@ A. testing:
 		0.2. Decide how much of generics must be used inside the test-signature types [some use a lot, while others are satied with 'any']; 
 			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
 				LIST them first; 
-				
-		0.4. Create the 'run.ts' script for running ALL the test specific suites AT ONCE [in sequence, that is...]; 
-			0.4.1. This will ensure one's ability to see the global code correctness despite making small changes to a particular (possibly sensitive) area of the project...; 
-			0.4.2. This will require first creating all the 'classes.ts' and 'utils.ts' files to be run, then iterating them inside the 'run.ts'
-			
-			[structure incomplete]
-			1. IndexMap/
-				0. lib/classes.ts
-				1. FastLookupTable
-				2. HashMap
-				3. InternalHash
-				4. LinearIndexMap
-				5. PersistentIndexMap
-			2. Parser/
-				1. GeneralParserTest
-				2. LayeredParserTest 
-				3. TableMapTest 
-			3. Pattern/
-				1. Collection 
-				2. EliminablePattern 
-				3. EnumSpace 
-				4. TokenInstanceTest
-				5. TokenTypeTest 
-				6. TokenTest 
-				7. TokenizablePattern 
-				8. ValidatablePattern 
-			4. Position/ 
-				1. MultiIndex/ 
-					1.1. MultiIndexModifier 
-			5. Stream/ 
-				5.1. InputStream/
-				5.2. LimitedStream/
-				5.3. NestedStream/
-				5.4. PredicateStream/ 
-				5.5. ProlongedStream/ 
-				5.6. ReversibleStream/ 
-				5.7. TreeStream/ 
-			6. Tree/
-				6.1. TreeClassTest
-				6.2. TreeTestSuite
-				6.3. TreeWalker
 		
 		0.7. Tidy up the test suite signatures - make uniform names for similar properties, introduce naming conventions; 
 		0.8. Refactor the 'let times = X; while (times--) it('${X - times}. ${STRING}', FUNCTION(X - times))' into 'timesTest'; 
@@ -90,52 +56,70 @@ A. testing:
 			Use on the top-level of suites; 
 			PASS the 'i' along with the 'signature' inside 'signatures' to acommodate for this...; 
 
+		0.10. Add proper testing mini-framework support for the checking predicates; 
+			For "composite" Streams' tests one will HAVE to be doing the 'comparing'
+				(because it'll be much easier to specify a "structure" to be checked, instead of trying to fish out the references, then use them for constructing tests); 
+			THEREFORE - when it comes to this, do; 
+
+			0.10.1. AFTERWARDS - modify the Stream-s test suites to include OBJECTS [not just the things comparable by reference directly]; 
+
 	1. Changes to tests [for modules]: 
 
-		0. GENERALLY: 
-			0.1. A big problem with the '.copy' tests: ONE ALSO needs to check whether or not THEY STILL HAVE THE METHODS WORKING AS EXPECTED!
-				Create 'CopyConstructorTest'-s; 
-				They do EXACTLY THE SAME things as the non-CopyConstructorTest-s, EXCEPT, for the '.copy' operation; 
 		1. Stream-s: 
 				1.1.1. Create a plain '.init' test; 
 					All StreamClass-es have it; 
 					Namely, this is a 'ReInitializationTest', which (fundamentally) looks to verify correctness of behaviour upon RE-INITIALIZATION of the given Stream; 
 						It is done like: 
 
-							1. '.init' is called with given test arguments [this sequence 1.-... is done several times]; 
+							1. '.init' is called with given test arguments [this sequence 1.-... is done several times, depending on the '.init' arguments]; 
 							2. The entire test-suite is RE-DONE, but WITHOUT needing to create an instance...; 
 								2.1. A different signature is given; 
 
 							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
 							REFACTOR THIS [once again...]; 
-				1.1.2. TEST the '.pos', where it is relevant; 
-					There must be SPECIFIC checks for it (namely - a SEPARATE method, that goes through the entire Stream, comparing the differences between the '.pos' - that they ALWAYS be 1); 
-					This should be a single method, that is used in ALL the StreamClass-based .pos-generated test suites; 
-				1.1.3. FIX the 'streamNavigateTest' - IT MUST also check for the correct value of '.curr' [NOT JUST the return value...]; 	
 				1.1.4. [Parser/] Do the tests for 'StreamTokenizer' - this one must be tested like a StreamClass [follow the scheme that the others have already used...]
-				1.1.5. [maybe?] Refactor the '.pos' and 'hasPosition'-related testing into the tests of 'StreamClass/'? 
+
+		2. regex/ [re-design the old tests]
+			2.1. Turn into a directory
+			2.2. Split into two parts: 
+				2.2.1. elementary (contain a one-symbol-creation functions); 
+				2.2.2. composite (contain those that actually need to be tested)
+			Design the tests to check the veracity of the resulting regular expressions based off combination of initial inputs; 
+			Call this test-template 'regexTest'; 
+		3. imports/ [design new tests]
+			1. Structure these in a fashion similar to the project's tree. 
+			2. Each would do the 'import * as X from ...', then - verify the 'X'
+			Design a single 'importTest' template to be used for all of these. 
 	2. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
-		2.1. List all the 'src/**/utils.ts" files, create according 'lib/utils.ts' and '/utils.ts' files; 
+		2.1. Add the 'constructor' tests for the copying utils (list those...); 
 	3. Implement test suites: 
 		3.1. Stream-s: 
+			-1. PRE: 
+				2. Unite the SAME methods into the 'StreamClassTest'; 
+					2.0. Works like ['streamonstructor', 'signatures' - higher level Stream-suite constructor and signatures]: 
+						`StreamClassTest(streamConstrucotr, signatures); 
+						... [local test]`
+					2.1. This would be the one, on which the '.pos' goes...; 
+						2.1.1. Works like [local variable INSIDE the generated suite]: 
+							`PosDependentStreamClassTest = StreamClassTest(hasPosition)`
+					2.2. GET RID of the 'blockExtension' stuff (it was unnecessary after all - just do the several 'Generated' suites); 
+
 			3.1.0. Methods:
-				To implement [generally]:
-					generalIteratorTest (based off 'iterationTest'); 
-
-				To add per class: 
-					[predefined - all]
-					3.1.0.1. generalIsEndTest; 
-					3.1.0.2. generalIsStartTest; 
-					3.1.0.3. generalRewindTest; 
-					3.1.0.4. generaFinishTest; 
-					3.1.0.5. navigateTest (based off 'streamNavigateTest' + comparisons); 
-
 				General plan [to be iterated for each Stream-class test suite]: 
-					1. per-case defined (.copy, .navigate); 
-						1.1. .navigate is for all Streams; 
-					2. Boilerplate-implementations (generalIsEndTest, generalIsStartTest, generalRewindTest, generalFinishTest); 
-					3. Comine into a Stream class test-suite; 
+					1. Derivative suites [from the 'StreamClass' suite]; 	
+						LIST THEM! 
+						1. InputStream
+						2. LimitedStream
+						3. NestedStream
+						4. Predicatetream
+						5. ProlongedStream
+						6. ReversibleStream
+						7. TreeStream 
+
+						[unfinished yet]
+						8. StreamTokenizer
+
 			
 			3.1.1. "WrapperStream"-combinations; 
 				Thus, for instance, one has to test ALL of: 
@@ -189,6 +173,7 @@ A. testing:
 			Re-structure to fit the current mini-testing framework (expand the framework appropriately); 
 
 		3.4. benchmarks/	
+			NOTE: have ITS OWN 'run.ts' inside of the 'benchmarks/' directory...; 
 			4.4.1. Stack benchmarks: 
 				4.4.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
 					Use as metric later
@@ -522,6 +507,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						1. take overall time measurements (performance.now()); 
 						2. profile, break the execution down on several tiny pieces; Then - benchmark and optimize them accordingly; 
 							For this, use results from samples from one's benchmarks library;  
+			3. Optimize for smaller sizes ONLY when it doesn't impair the memory severely; 
+				When it impairs it at all, choose whether or not to do it based off the chosen memory/speed difference measurements...; 
 	
 	2.16. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
@@ -632,6 +619,10 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		ALSO, ADD: 
 				1. New 'HashMap' (and IndexMap) aliases to work with ParsingState; 
 				2. New 'HashMap' (and IndexMap) aliases to work with '.state' property; 
+
+	2.25. For future: improve the 'constructor' tests. 
+		Refactor them, permit the ability to properly test the '.copy()'-ed instances using the constructor
+			tests (namely - the "prototypeProps" and "ownProps" thing - missing currently); 
 		
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 

@@ -39,7 +39,10 @@ const EnumSpaceConstructorTest = ClassConstructorTest(
 	["value"]
 )
 
-function EnumSpaceCopyTest(instance: EnumSpace) {
+function EnumSpaceCopyTest(
+	instance: EnumSpace,
+	signature: ReducedEnumSpaceTestSignature
+) {
 	method("copy", () => {
 		const copy = instance.copy()
 		assert.notStrictEqual(copy, instance)
@@ -51,6 +54,7 @@ function EnumSpaceCopyTest(instance: EnumSpace) {
 		assert.strictEqual(instance.map, copy.map)
 
 		assert(enumEquality(instance, copy))
+		ChainEnumSpaceTest(instance, signature)
 	})
 }
 
@@ -82,9 +86,14 @@ const EnumSpaceMapTest = comparisonMethodTest<EnumSpace>("map", arraysSame)
 
 type EnumSpaceClassTestSignature = {
 	size: number
+} & ReducedEnumSpaceTestSignature
+
+type ReducedEnumSpaceTestSignature = {
 	increases: number[]
 	joined: EnumSpace[]
 	mapTests: [Mappable, any[]][]
+	isCopyTest?: boolean
+	furtherSignature?: ReducedEnumSpaceTestSignature
 }
 
 export function EnumSpaceTest(
@@ -93,20 +102,39 @@ export function EnumSpaceTest(
 	testSignatures: EnumSpaceClassTestSignature[]
 ) {
 	classTest(`(EnumSpace) ${className}`, () =>
-		signatures(testSignatures, ({ size, increases, joined, mapTests }) => () => {
-			const instance = EnumSpaceConstructorTest(enumConstructor, size)
-
-			// .copy
-			EnumSpaceCopyTest(instance)
-
-			// .add
-			for (const n of increases) EnumSpaceAddTest(instance, n)
-
-			// .join
-			for (const space of joined) EnumSpaceJoinTest(instance, space)
-
-			// .map
-			for (const [f, out] of mapTests) EnumSpaceMapTest(instance, out, f)
-		})
+		signatures(
+			testSignatures,
+			({ size, increases, joined, mapTests, isCopyTest, furtherSignature }) =>
+				() =>
+					ChainEnumSpaceTest(EnumSpaceConstructorTest(enumConstructor, size), {
+						increases,
+						joined,
+						mapTests,
+						isCopyTest,
+						furtherSignature
+					})
+		)
 	)
+}
+
+function ChainEnumSpaceTest(
+	instance: EnumSpace,
+	signature: ReducedEnumSpaceTestSignature
+) {
+	const { increases, joined, mapTests, isCopyTest, furtherSignature } = signature
+
+	if (isCopyTest === false) assert(isEnumSpace(instance))
+
+	// .copy
+	if (isCopyTest || isCopyTest === undefined)
+		EnumSpaceCopyTest(instance, furtherSignature)
+
+	// .add
+	for (const n of increases) EnumSpaceAddTest(instance, n)
+
+	// .join
+	for (const space of joined) EnumSpaceJoinTest(instance, space)
+
+	// .map
+	for (const [f, out] of mapTests) EnumSpaceMapTest(instance, out, f)
 }

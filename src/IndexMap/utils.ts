@@ -32,3 +32,5 @@ export function toPairsList<KeyType = any, ValueType = any>(
 	}
 	return result
 }
+
+export * as HashMap from "./HashMap/utils.js"

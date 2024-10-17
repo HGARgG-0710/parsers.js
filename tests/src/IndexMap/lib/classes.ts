@@ -193,7 +193,8 @@ function indexMapSwapTest<KeyType = any, ValueType = any>(
 }
 
 function indexMapCopyTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>
+	instance: IndexMap<KeyType, ValueType>,
+	copyTestSignature: ReducedMapClassTestSignature
 ) {
 	method("copy", () => {
 		const copied = instance.copy()
@@ -204,6 +205,7 @@ function indexMapCopyTest<KeyType = any, ValueType = any>(
 			assert.strictEqual(origValue, copiedValue)
 			assert.notStrictEqual(instance, copied)
 		}
+		ChainIndexMapTest(copied, copyTestSignature)
 	})
 }
 
@@ -282,6 +284,9 @@ function indexMapDeleteTest<KeyType = any, ValueType = any>(
 
 export type MapClassTestSignature<KeyType = any, ValueType = any> = {
 	instance: [Pairs<KeyType, ValueType>, any]
+} & ReducedMapClassTestSignature<KeyType, ValueType>
+
+type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
 	byIndexTest: [number, [KeyType, ValueType]][]
 	indexTest: Pairs<KeyType, ValueType>
 	swapIndicies: [number, number][]
@@ -291,6 +296,8 @@ export type MapClassTestSignature<KeyType = any, ValueType = any> = {
 	deleteInds: number[]
 	setArgs: Pairs<KeyType, ValueType>
 	replaceKeys: Pairs<KeyType, KeyType>
+	isCopyTest?: boolean
+	furtherSignature?: ReducedMapClassTestSignature<KeyType, ValueType>
 }
 
 export function MapClassTest<KeyType = any, ValueType = any>(
@@ -311,51 +318,78 @@ export function MapClassTest<KeyType = any, ValueType = any>(
 					addTests,
 					deleteInds,
 					setArgs,
-					replaceKeys
+					replaceKeys,
+					isCopyTest,
+					furtherSignature
 				}) =>
 				() => {
-					const mapInstance: IndexMap<KeyType, ValueType> =
-						indexMapConstructorTest(mapConstructor, instance)
-
-					// .index
-					for (const [key, value] of indexTest)
-						indexMapIndexTest(mapInstance, value, key)
-
-					// .copy
-					indexMapCopyTest(mapInstance)
-
-					// .add
-					for (const [i, pair] of addTests)
-						indexMapAddTest(mapInstance, i, pair)
-
-					// .delete
-					for (const i of deleteInds) indexMapDeleteTest(mapInstance, i)
-
-					// .set
-					for (const [setKey, setValue] of setArgs)
-						indexMapSetTest(mapInstance, setKey, setValue)
-
-					// .unique
-					indexMapUniqueTest(mapInstance, uniqueTest)
-
-					// .byIndex
-					for (const [i, pair] of byIndexTest)
-						indexMapByIndexTest(mapInstance, i, pair)
-
-					// .swap
-					for (const [i, j] of swapIndicies) indexMapSwapTest(mapInstance, i, j)
-
-					// .replace
-					for (const [i, pair] of replaceTests)
-						indexMapReplaceTest(mapInstance, i, pair)
-
-					// [Symbol.iterator]
-					indexMapIteratorTest(mapInstance)
-
-					// .replaceKey
-					for (const [keyFrom, keyTo] of replaceKeys)
-						indexMapReplaceKeyTest(mapInstance, keyFrom, keyTo)
+					ChainIndexMapTest(indexMapConstructorTest(mapConstructor, instance), {
+						byIndexTest,
+						indexTest,
+						swapIndicies,
+						uniqueTest,
+						replaceTests,
+						addTests,
+						deleteInds,
+						setArgs,
+						replaceKeys,
+						isCopyTest,
+						furtherSignature
+					})
 				}
 		)
 	)
+}
+
+function ChainIndexMapTest(instance: IndexMap, signature: ReducedMapClassTestSignature) {
+	const {
+		byIndexTest,
+		indexTest,
+		swapIndicies,
+		uniqueTest,
+		replaceTests,
+		addTests,
+		deleteInds,
+		setArgs,
+		replaceKeys,
+		isCopyTest,
+		furtherSignature
+	} = signature
+
+	if (isCopyTest === false) assert(isIndexMap(instance))
+
+	// .index
+	for (const [key, value] of indexTest) indexMapIndexTest(instance, value, key)
+
+	// .copy
+	if (isCopyTest || isCopyTest === undefined)
+		indexMapCopyTest(instance, furtherSignature)
+
+	// .add
+	for (const [i, pair] of addTests) indexMapAddTest(instance, i, pair)
+
+	// .delete
+	for (const i of deleteInds) indexMapDeleteTest(instance, i)
+
+	// .set
+	for (const [setKey, setValue] of setArgs) indexMapSetTest(instance, setKey, setValue)
+
+	// .unique
+	indexMapUniqueTest(instance, uniqueTest)
+
+	// .byIndex
+	for (const [i, pair] of byIndexTest) indexMapByIndexTest(instance, i, pair)
+
+	// .swap
+	for (const [i, j] of swapIndicies) indexMapSwapTest(instance, i, j)
+
+	// .replace
+	for (const [i, pair] of replaceTests) indexMapReplaceTest(instance, i, pair)
+
+	// [Symbol.iterator]
+	indexMapIteratorTest(instance)
+
+	// .replaceKey
+	for (const [keyFrom, keyTo] of replaceKeys)
+		indexMapReplaceKeyTest(instance, keyFrom, keyTo)
 }

@@ -1,3 +1,5 @@
+// * The main file for the testing mini-framework;
+
 import assert from "assert"
 import { it } from "node:test"
 
@@ -106,10 +108,11 @@ export function FlushableResultingTestFlush(
 
 export function iterationTest<Type extends Iterable<any> = any>(
 	collectionInstance: Type,
-	iteratedOver: any[]
+	iteratedOver: any[],
+	compare: (x: any, y: any) => boolean = equals
 ) {
 	method("[Symbol.iterator]", () =>
-		assert(arraysSame([...collectionInstance], iteratedOver))
+		assert(arraysSame([...collectionInstance], iteratedOver, compare))
 	)
 }
 

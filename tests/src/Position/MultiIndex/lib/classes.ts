@@ -46,11 +46,14 @@ const MultiIndexLastLevelTest = comparisonMethodTest<MultiIndex>(
 	levelComparison
 )
 
-function MultiIndexCopyTest(instance: MultiIndex) {
+function MultiIndexCopyTest(
+	instance: MultiIndex,
+	furtherSignature: ReducedMultiIndexTestSignature
+) {
 	method("copy", () => {
 		const copy = instance.copy()
 		assert(arraysSame(instance.value, copy.value))
-		assert(isMultiIndex(copy))
+		ChainMultiIndexTest(instance, furtherSignature)
 	})
 }
 
@@ -68,12 +71,17 @@ const MultiIndexCompareTest = methodTest<MultiIndex>("compare")
 
 type MultiIndexTestSignature = {
 	value: number[]
+} & ReducedMultiIndexTestSignature
+
+type ReducedMultiIndexTestSignature = {
 	conversionTests: [EffectiveTreeStream, number][]
 	comparisonTests: [MultiIndex[], boolean][]
 	sliceTests: [number, number][]
 	equalsTests: [MultiIndex, boolean][]
 	firstLevelTest: number
 	lastLevelTest: number
+	isCopyTest?: boolean
+	furtherSignature?: ReducedMultiIndexTestSignature
 }
 
 export function MultiIndexTest(
@@ -91,36 +99,68 @@ export function MultiIndexTest(
 					sliceTests,
 					equalsTests,
 					firstLevelTest,
-					lastLevelTest
+					lastLevelTest,
+					isCopyTest,
+					furtherSignature
 				}) =>
 				() => {
-					const instance = MultiIndexConstructorTest(multindConstructor, value)
-
-					// .convert
-					for (const [treeStream, expected] of conversionTests)
-						MultiIndexConvertTest(instance, expected, treeStream)
-
-					// .compare
-					for (const [comparedWith, expected] of comparisonTests)
-						MultiIndexCompareTest(instance, expected, comparedWith)
-
-					// .slice
-					for (const [from, to] of sliceTests)
-						MultiIndexSliceTest(instance, from, to)
-
-					// .equals
-					for (const [differedWith, expected] of equalsTests)
-						MultiIndexEqualsTest(instance, expected, differedWith)
-
-					// .copy
-					MultiIndexCopyTest(instance)
-
-					// .firstLevel
-					MultiIndexFirstLevelTest(instance, [firstLevelTest])
-
-					// .lastLevel
-					MultiIndexLastLevelTest(instance, [lastLevelTest])
+					ChainMultiIndexTest(
+						MultiIndexConstructorTest(multindConstructor, value),
+						{
+							conversionTests,
+							comparisonTests,
+							sliceTests,
+							equalsTests,
+							firstLevelTest,
+							lastLevelTest,
+							isCopyTest,
+							furtherSignature
+						}
+					)
 				}
 		)
 	)
+}
+
+function ChainMultiIndexTest(
+	instance: MultiIndex,
+	signature: ReducedMultiIndexTestSignature
+) {
+	const {
+		conversionTests,
+		comparisonTests,
+		sliceTests,
+		equalsTests,
+		firstLevelTest,
+		lastLevelTest,
+		isCopyTest,
+		furtherSignature
+	} = signature
+
+	if (isCopyTest === false) assert(isMultiIndex(instance))
+
+	// .convert
+	for (const [treeStream, expected] of conversionTests)
+		MultiIndexConvertTest(instance, expected, treeStream)
+
+	// .compare
+	for (const [comparedWith, expected] of comparisonTests)
+		MultiIndexCompareTest(instance, expected, comparedWith)
+
+	// .slice
+	for (const [from, to] of sliceTests) MultiIndexSliceTest(instance, from, to)
+
+	// .equals
+	for (const [differedWith, expected] of equalsTests)
+		MultiIndexEqualsTest(instance, expected, differedWith)
+
+	// .copy
+	if (isCopyTest || isCopyTest === undefined)
+		MultiIndexCopyTest(instance, furtherSignature)
+
+	// .firstLevel
+	MultiIndexFirstLevelTest(instance, [firstLevelTest])
+
+	// .lastLevel
+	MultiIndexLastLevelTest(instance, [lastLevelTest])
 }

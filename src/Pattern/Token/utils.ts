@@ -1,13 +1,10 @@
-import { Token } from "./classes.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { TokenInstance } from "./interfaces.js"
 
-import { object, function as f } from "@hgargg-0710/one"
-const { and } = f
-const { structCheck } = object
+import { typeof as type } from "@hgargg-0710/one"
+const { isObject } = type
 
-const emptyStruct = structCheck([])
-export function isType<Type = any>(type: Type): (x: any) => x is TokenInstance<Type> {
-	return and(emptyStruct, (x: any): boolean => Token.type(x) === type) as (
-		x: any
-	) => x is TokenInstance<Type>
+export function isType<Type = any>(type: Type) {
+	return (x: any): x is TokenInstance<Type> =>
+		x && isObject(x) && (x as Summat).type === type
 }

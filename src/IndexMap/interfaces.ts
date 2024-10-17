@@ -27,11 +27,11 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
 
 export type Pairs<KeyType = any, ValueType = any> = [KeyType, ValueType][]
 
-export interface Sizeable {
+export interface Sizeable extends Summat {
 	size: number
 }
 
-export interface DefaultHaving {
+export interface DefaultHaving extends Summat {
 	default: any
 }
 
