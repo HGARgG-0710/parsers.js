@@ -15,7 +15,6 @@
 	Would increase modularity, clarity and test readability/modifiability...; 
 
 Order of TODO-elimination: 
-	A.3.1.0.
 	A.1.1.4. 
 	A.1.1.1.
 
@@ -67,7 +66,7 @@ A. testing:
 
 		1. Stream-s: 
 				1.1.1. Create a plain '.init' test; 
-					All StreamClass-es have it; 
+					All StreamClass-es have it implemented INDIVIDUALLY [due to different signatures - v0.4. won't have such an issue]; 
 					Namely, this is a 'ReInitializationTest', which (fundamentally) looks to verify correctness of behaviour upon RE-INITIALIZATION of the given Stream; 
 						It is done like: 
 
@@ -95,32 +94,6 @@ A. testing:
 		2.1. Add the 'constructor' tests for the copying utils (list those...); 
 	3. Implement test suites: 
 		3.1. Stream-s: 
-			-1. PRE: 
-				2. Unite the SAME methods into the 'StreamClassTest'; 
-					2.0. Works like ['streamonstructor', 'signatures' - higher level Stream-suite constructor and signatures]: 
-						`StreamClassTest(streamConstrucotr, signatures); 
-						... [local test]`
-					2.1. This would be the one, on which the '.pos' goes...; 
-						2.1.1. Works like [local variable INSIDE the generated suite]: 
-							`PosDependentStreamClassTest = StreamClassTest(hasPosition)`
-					2.2. GET RID of the 'blockExtension' stuff (it was unnecessary after all - just do the several 'Generated' suites); 
-
-			3.1.0. Methods:
-				General plan [to be iterated for each Stream-class test suite]: 
-					1. Derivative suites [from the 'StreamClass' suite]; 	
-						LIST THEM! 
-						1. InputStream
-						2. LimitedStream
-						3. NestedStream
-						4. Predicatetream
-						5. ProlongedStream
-						6. ReversibleStream
-						7. TreeStream 
-
-						[unfinished yet]
-						8. StreamTokenizer
-
-			
 			3.1.1. "WrapperStream"-combinations; 
 				Thus, for instance, one has to test ALL of: 
 

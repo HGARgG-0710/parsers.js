@@ -149,7 +149,7 @@ export const InitReversedStreamClassConstructorTest = (hasPosition: boolean = fa
 		streamClassOwnProps(hasPosition)
 	)
 
-type StreamClassTestSignature = {
+export type StreamClassTestSignature = {
 	input: any
 	isEndTest: [any[], (x: any, y: any) => boolean, number?]
 	navigateTests: [Position, any][]
@@ -159,6 +159,7 @@ type StreamClassTestSignature = {
 	isStartTest: [any[], (x: any, y: any) => boolean, number?]
 	posTests: [number, number?][]
 	reversedPosTests: [number, number?][]
+	initTests: any[][]
 }
 
 export function GeneratedStreamClassSuite(
@@ -170,7 +171,7 @@ export function GeneratedStreamClassSuite(
 		streamConstructor: new (...x: any[]) => StreamClassInstance,
 		testSignatures: StreamClassTestSignature[]
 	) {
-		classTest(className, () =>
+		classTest(`(StreamClass) ${className}`, () =>
 			signatures(
 				testSignatures,
 				({
@@ -182,7 +183,8 @@ export function GeneratedStreamClassSuite(
 						rewindTests,
 						isStartTest,
 						posTests,
-						reversedPosTests
+						reversedPosTests,
+						initTests
 					}) =>
 					() => {
 						const createInstance = () => new streamConstructor(input)
@@ -191,12 +193,12 @@ export function GeneratedStreamClassSuite(
 						if (reversed)
 							ReversedStreamClassConstructorTest(hasPosition)(
 								streamConstructor as new () => ReversedStreamClassInstance,
-								input
+								...input
 							)
 						else
 							StreamClassConstructorTest(hasPosition)(
 								streamConstructor,
-								input
+								...input
 							)
 
 						// .isEnd
@@ -233,6 +235,21 @@ export function GeneratedStreamClassSuite(
 							iteratedOver,
 							iterationCompare
 						)
+
+						// .init on bare construction
+						for (const initTest of initTests)
+							if (reversed)
+								InitReversedStreamClassConstructorTest(hasPosition)(
+									streamConstructor as new (
+										...x: any[]
+									) => ReversedStreamClassInstance,
+									...initTest
+								)
+							else
+								InitStreamClassConstructorTest(hasPosition)(
+									streamConstructor,
+									...initTest
+								)
 
 						if (reversed) {
 							// .rewind

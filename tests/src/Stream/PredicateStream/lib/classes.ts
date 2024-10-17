@@ -1,54 +1,70 @@
 import type { EffectivePredicateStream } from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
 import {
-	blockExtension,
 	ClassConstructorTest,
-	InitClassConstructorTest
+	classTest,
+	InitClassConstructorTest,
+	signatures
 } from "lib/lib.js"
 import {
-	InitStreamClassConstructorTest,
+	GeneratedStreamClassSuite,
 	isInputted,
 	isLookahead,
-	isPosed,
 	isProddable,
 	isSuperable,
-	StreamClassConstructorTest
+	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
 import { object, function as _f, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
-const { isFunction, isNumber } = type
+const { isFunction } = type
 
 export function GeneratedPredicateStreamTest(hasPosition: boolean = false) {
+	const PredicateStreamGeneratedSuite = GeneratedStreamClassSuite(false, hasPosition)
+
 	const predicateStreamPrototypeProps = ["super", "prod"]
-	const predicateStreamOwnProps = ["predicate", "lookAhead", "input"].concat(
-		hasPosition ? ["pos"] : []
-	)
+	const predicateStreamOwnProps = ["predicate", "lookAhead", "input"]
 
 	const isPredicateStream = and(
 		structCheck({
 			predicate: isFunction
 		}),
-		...(
-			[isLookahead, isSuperable, isInputted, isProddable] as ((x: any) => boolean)[]
-		).concat(hasPosition ? [isPosed(isNumber)] : [])
+		isLookahead,
+		isSuperable,
+		isInputted,
+		isProddable
 	) as (x: any) => x is EffectivePredicateStream
 
-	const PredicateStreamConstructorTest = blockExtension(
-		StreamClassConstructorTest,
-		ClassConstructorTest<EffectivePredicateStream>(
-			isPredicateStream,
-			predicateStreamPrototypeProps,
-			predicateStreamOwnProps
-		)
+	const PredicateStreamConstructorTest = ClassConstructorTest<EffectivePredicateStream>(
+		isPredicateStream,
+		predicateStreamPrototypeProps,
+		predicateStreamOwnProps
 	)
 
-	const InitPredicateStreamConstructorTest = blockExtension(
-		InitStreamClassConstructorTest,
+	const InitPredicateStreamConstructorTest =
 		InitClassConstructorTest<EffectivePredicateStream>(
 			isPredicateStream,
 			predicateStreamPrototypeProps,
 			predicateStreamOwnProps
 		)
-	)
+
+	function PredicateStreamTest(
+		className: string,
+		streamConstructor: new () => EffectivePredicateStream,
+		testSignatures: StreamClassTestSignature[]
+	) {
+		PredicateStreamGeneratedSuite(className, streamConstructor, testSignatures)
+		classTest(`(PredicateStream) ${className}`, () =>
+			signatures(testSignatures, ({ input, initTests }) => () => {
+				// constructor
+				PredicateStreamConstructorTest(streamConstructor, ...input)
+
+				// .init on bare construction
+				for (const initTest of initTests)
+					InitPredicateStreamConstructorTest(streamConstructor, ...initTest)
+			})
+		)
+	}
+
+	return PredicateStreamTest
 }

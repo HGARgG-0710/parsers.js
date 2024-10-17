@@ -206,12 +206,6 @@ export function tripleUtilTest(
 	}
 }
 
-export function blockExtension(...blocks: Function[]) {
-	return function (...input: any[]) {
-		for (const block of blocks) block(...input)
-	}
-}
-
 export const optional = (type: Function) => or(not, type)
 export const optionalMethod = optional(isFunction)
 

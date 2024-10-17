@@ -1,31 +1,36 @@
 import assert from "assert"
-import { it } from "node:test"
 
 import type { EffectiveNestedStream } from "../../../../../dist/src/Stream/NestedStream/interfaces.js"
 import {
-	blockExtension,
 	ClassConstructorTest,
+	classTest,
 	InitClassConstructorTest,
-	property
+	property,
+	signatures
 } from "lib/lib.js"
 
 import {
-	InitStreamClassConstructorTest,
+	GeneratedStreamClassSuite,
 	isInputted,
-	isPosed,
 	isSuperable,
-	StreamClassConstructorTest
+	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 import { isFastLookupTable } from "IndexMap/FastLookupTable/lib/classes.js"
 
 import { function as _f, object, typeof as type } from "@hgargg-0710/one"
 const { and } = _f
 const { structCheck } = object
-const { isBoolean, isNumber } = type
+const { isBoolean } = type
 
 type NestedStreamCurrNestedTreeList = (false | NestedStreamCurrNestedTreeList)[]
 
+type NestedStreamTestSignature = StreamClassTestSignature & {
+	currNestedTest: NestedStreamCurrNestedTreeList
+}
+
 export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
+	const NestedStreamGeneratedSuite = GeneratedStreamClassSuite(false, hasPosition)
+
 	function NestedStreamCurrNestedPreTest(
 		stream: EffectiveNestedStream,
 		currNestedList: NestedStreamCurrNestedTreeList
@@ -52,35 +57,48 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 	}
 
 	const nestedStreamPrototypeProps = ["super", "typesTable"]
-	const nestedStreamOwnProps = ["currNested", "input"].concat(
-		hasPosition ? ["pos"] : []
-	)
+	const nestedStreamOwnProps = ["currNested", "input"]
 
 	const isNestedStream = and(
 		structCheck({
 			typesTable: isFastLookupTable,
 			currNested: isBoolean
 		}),
-		...([isInputted, isSuperable] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed(isNumber)] : []
-		)
+		isInputted,
+		isSuperable
 	) as (x: any) => x is EffectiveNestedStream
 
-	const NestedStreamConstructorTest = blockExtension(
-		StreamClassConstructorTest,
-		ClassConstructorTest<EffectiveNestedStream>(
-			isNestedStream,
-			nestedStreamPrototypeProps,
-			nestedStreamOwnProps
-		)
+	const NestedStreamConstructorTest = ClassConstructorTest<EffectiveNestedStream>(
+		isNestedStream,
+		nestedStreamPrototypeProps,
+		nestedStreamOwnProps
 	)
 
-	const InitNestedStreamConstructorTest = blockExtension(
-		InitStreamClassConstructorTest,
+	const InitNestedStreamConstructorTest =
 		InitClassConstructorTest<EffectiveNestedStream>(
 			isNestedStream,
 			nestedStreamPrototypeProps,
 			nestedStreamOwnProps
 		)
-	)
+
+	function NestedStreamTest(
+		className: string,
+		streamConstructor: new (...x: any[]) => EffectiveNestedStream,
+		testSignatures: NestedStreamTestSignature[]
+	) {
+		NestedStreamGeneratedSuite(className, streamConstructor, testSignatures)
+		classTest(`(NestedStream) ${className}`, () =>
+			signatures(testSignatures, ({ input, currNestedTest, initTests }) => () => {
+				const instance = NestedStreamConstructorTest(streamConstructor, ...input)
+
+				// .currNested
+				NestedStreamCurrNestedTest(instance, currNestedTest)
+
+				// .init on base constructed
+				InitNestedStreamConstructorTest(streamConstructor, ...initTests)
+			})
+		)
+	}
+
+	return NestedStreamTest
 }

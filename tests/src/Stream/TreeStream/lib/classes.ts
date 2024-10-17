@@ -1,20 +1,21 @@
 import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
+import { isTreeWalker } from "Tree/TreeWalker/lib/classes.js"
 
 import {
-	blockExtension,
 	ClassConstructorTest,
-	InitClassConstructorTest
+	classTest,
+	InitClassConstructorTest,
+	signatures
 } from "lib/lib.js"
 
 import {
-	InitReversedStreamClassConstructorTest,
+	GeneratedStreamClassSuite,
 	isInputted,
 	isSuperable,
-	ReversedStreamClassConstructorTest
+	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
 import { function as _f, object, typeof as type } from "@hgargg-0710/one"
-import { isTreeWalker } from "Tree/TreeWalker/lib/classes.js"
 const { and } = _f
 const { structCheck } = object
 const { isNumber, isString } = type
@@ -32,20 +33,34 @@ const isTreeStream = and(
 	isInputted
 ) as (x: any) => x is EffectiveTreeStream
 
-const TreeStreamConstructorTest = blockExtension(
-	ReversedStreamClassConstructorTest,
-	ClassConstructorTest<EffectiveTreeStream>(
-		isTreeStream,
-		treeStreamPrototypeProps,
-		treeStreamOwnProps
-	)
+const TreeStreamGeneratedSuite = GeneratedStreamClassSuite(true, false)
+
+const TreeStreamConstructorTest = ClassConstructorTest<EffectiveTreeStream>(
+	isTreeStream,
+	treeStreamPrototypeProps,
+	treeStreamOwnProps
 )
 
-const InitTreeStreamConstructorTest = blockExtension(
-	InitReversedStreamClassConstructorTest,
-	InitClassConstructorTest<EffectiveTreeStream>(
-		isTreeStream,
-		treeStreamPrototypeProps,
-		treeStreamOwnProps
-	)
+const InitTreeStreamConstructorTest = InitClassConstructorTest<EffectiveTreeStream>(
+	isTreeStream,
+	treeStreamPrototypeProps,
+	treeStreamOwnProps
 )
+
+export function TreeStreamTest(
+	className: string,
+	streamConstructor: new (...x: any[]) => EffectiveTreeStream,
+	testSignatures: StreamClassTestSignature[]
+) {
+	TreeStreamGeneratedSuite(className, streamConstructor, testSignatures)
+	classTest(`(TreeStream) ${className}`, () =>
+		signatures(testSignatures, ({ input, initTests }) => () => {
+			// constructor
+			TreeStreamConstructorTest(streamConstructor, ...input)
+
+			// .init on bare construction
+			for (const initTest of initTests)
+				InitTreeStreamConstructorTest(streamConstructor, initTest)
+		})
+	)
+}

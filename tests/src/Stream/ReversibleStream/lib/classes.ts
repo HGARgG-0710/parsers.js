@@ -1,48 +1,61 @@
 import type { ReversedStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 
 import {
-	blockExtension,
 	ClassConstructorTest,
-	InitClassConstructorTest
+	classTest,
+	InitClassConstructorTest,
+	signatures
 } from "lib/lib.js"
 
 import {
-	InitReversedStreamClassConstructorTest,
+	GeneratedStreamClassSuite,
 	isInputted,
-	isPosed,
 	isSuperable,
-	ReversedStreamClassConstructorTest
+	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
-import { function as _f, typeof as type } from "@hgargg-0710/one"
+import { function as _f } from "@hgargg-0710/one"
 const { and } = _f
-const { isNumber } = type
 
 export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
+	const ReversedStreamGeneratedSuite = GeneratedStreamClassSuite(true, hasPosition)
+
 	const reversedStreamPrototypeProps = ["super"]
-	const reversedStreamOwnProps = ["input"].concat(hasPosition ? ["pos"] : [])
+	const reversedStreamOwnProps = ["input"]
 
-	const isReversedStream = and(
-		...([isSuperable, isInputted] as ((x: any) => boolean)[]).concat(
-			hasPosition ? [isPosed(isNumber)] : []
-		)
-	) as (x: any) => x is ReversedStream
+	const isReversedStream = and(isSuperable, isInputted) as (
+		x: any
+	) => x is ReversedStream
 
-	const ReversedStreamConstructorTest = blockExtension(
-		ReversedStreamClassConstructorTest,
-		ClassConstructorTest<ReversedStream>(
-			isReversedStream,
-			reversedStreamPrototypeProps,
-			reversedStreamOwnProps
-		)
+	const ReversedStreamConstructorTest = ClassConstructorTest<ReversedStream>(
+		isReversedStream,
+		reversedStreamPrototypeProps,
+		reversedStreamOwnProps
 	)
 
-	const InitReversedStreamConstructorTest = blockExtension(
-		InitReversedStreamClassConstructorTest,
-		InitClassConstructorTest<ReversedStream>(
-			isReversedStream,
-			reversedStreamPrototypeProps,
-			reversedStreamOwnProps
-		)
+	const InitReversedStreamConstructorTest = InitClassConstructorTest<ReversedStream>(
+		isReversedStream,
+		reversedStreamPrototypeProps,
+		reversedStreamOwnProps
 	)
+
+	function ReversedStreamTest(
+		className: string,
+		streamConstructor: new (...x: any[]) => ReversedStream,
+		testSignatures: StreamClassTestSignature[]
+	) {
+		ReversedStreamGeneratedSuite(className, streamConstructor, testSignatures)
+		classTest(`(ReversedStream) ${className}`, () =>
+			signatures(testSignatures, ({ input, initTests }) => () => {
+				// constructor
+				ReversedStreamConstructorTest(streamConstructor, ...input)
+
+				// .init on bare construction
+				for (const initTest of initTests)
+					InitReversedStreamConstructorTest(streamConstructor, initTest)
+			})
+		)
+	}
+
+	return ReversedStreamTest
 }
