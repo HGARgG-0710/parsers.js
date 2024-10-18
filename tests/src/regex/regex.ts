@@ -49,7 +49,7 @@ import {
 	utf16,
 	vtab,
 	word
-} from "../../dist/src/regex.js"
+} from "../../../dist/src/regex.js"
 
 const r1 = /a|b/g
 ;[capture, nonCapture, namedCapture("CAPTURE")].forEach((x) => console.log(x(r1)))

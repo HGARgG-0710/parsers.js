@@ -1,19 +1,4 @@
-import type { StreamPredicate } from "../../../../dist/src/Parser/ParserMap/interfaces.js"
-
-import type {
-	BoundNameType,
-	Rewindable
-} from "../../../../dist/src/Stream/StreamClass/interfaces.js"
-
-import type {
-	DirectionalPosition,
-	PredicatePosition
-} from "../../../../dist/src/Position/interfaces.js"
-
-import type {
-	ChangeType,
-	ReversibleStream
-} from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
+import type { DirectionalPosition } from "../../../../dist/src/Position/interfaces.js"
 
 import {
 	isBackward,
@@ -28,7 +13,7 @@ import {
 	preserveDirection
 } from "../../../../dist/src/Position/utils.js"
 
-import { utilTest } from "lib/lib.js"
+import { ambigiousUtilTest } from "lib/lib.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
 const { isNumber, isFunction } = type
@@ -60,7 +45,7 @@ const [
 	[pickDirection, "pickDirection"],
 	[preserveDirection, "preserveDirection"],
 	[positionStopPoint, "positionStopPoint"]
-].map(([method, name]) => utilTest(method as Function, name as string))
+].map(([method, name]) => ambigiousUtilTest(method as Function, name as string))
 
 export const isPositionObjectTest = baseIsPositionObjectTest(equals)
 export const isPositionTest = baseIsPositionTest(equals)
@@ -76,34 +61,6 @@ export const positionsEqualTest = basePositionEqualTest(equals)
 
 export const isBackwardTest = baseIsBackwardTest(equals)
 export const pickDirectionTest = basePickDirectionTest(equals)
-
-const endPredicateTestCompare = (
-	output: StreamPredicate,
-	streamDirectionPredicate: [
-		ReversibleStream & Rewindable,
-		ChangeType,
-		PredicatePosition,
-		BoundNameType
-	]
-) => {
-	const [stream, change, initPred, stopPoint] = streamDirectionPredicate
-
-	let i = 0
-	stream.rewind()
-	while (!stream[stopPoint] && initPred(stream, i)) {
-		change(stream)
-		++i
-	}
-	const expectedCurr = stream.curr
-
-	stream.rewind()
-	while (output(stream, i)) {
-		change(stream)
-		++i
-	}
-
-	return equals(expectedCurr, stream.curr)
-}
 
 export const preserveDirectionTest = basePreserveDirectionTest(
 	preserveDirectionTestCompare

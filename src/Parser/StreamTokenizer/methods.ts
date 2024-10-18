@@ -6,7 +6,7 @@ import { superInit } from "../../Stream/StreamClass/utils.js"
 export function streamTokenizerNext<InType = any, OutType = any>(
 	this: StreamTokenizer<InType, OutType>
 ) {
-	return this.tokenHandler.call(this, this.input)
+	return this.handler.call(this, this.input)
 }
 
 export function streamTokenizerInitialize<InType = any, OutType = any>(

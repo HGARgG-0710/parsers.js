@@ -25,7 +25,7 @@ const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
 ) as (hasPosition: boolean) => new () => StreamClassInstance
 
 export function StreamTokenizer<OutType = any>(
-	tokenHandler: StreamHandler<OutType>,
+	handler: StreamHandler<OutType>,
 	hasPosition: boolean = false
 ) {
 	const baseClass = StreamTokenizerBase(hasPosition)
@@ -35,7 +35,7 @@ export function StreamTokenizer<OutType = any>(
 	{
 		input: EndableStream<InType>
 		super: Summat
-		tokenHandler: StreamHandler<OutType>
+		handler: StreamHandler<OutType>
 
 		init: (input?: EndableStream<InType>) => StreamTokenizer<InType, OutType>
 
@@ -48,7 +48,7 @@ export function StreamTokenizer<OutType = any>(
 	Object.defineProperties(streamTokenizerClass.prototype, {
 		super: { value: baseClass.prototype },
 		init: { value: streamTokenizerInitialize },
-		tokenHandler: { value: tokenHandler }
+		handler: { value: handler }
 	})
 
 	return streamTokenizerClass

@@ -11,18 +11,15 @@
 	
 	The only benefit of actually having the thing is the ability to reference the "big docs"
 
-5. [maybe?] Structure the 'imports.ts' and 'regex.ts' into their own directories? 
-	Would increase modularity, clarity and test readability/modifiability...; 
-
 Order of TODO-elimination: 
-	A.1.1.4. 
-	A.1.1.1.
+	A.3.5. [complete]
 
-	A.1.3.
 	A.1.2. 
+	A.3.3
+	
+	A.1.1.1.
 	
 	A.2
-	5. 
 
 	A.0.10. 
 	A.3.1.1.
@@ -76,30 +73,26 @@ A. testing:
 
 							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
 							REFACTOR THIS [once again...]; 
-				1.1.4. [Parser/] Do the tests for 'StreamTokenizer' - this one must be tested like a StreamClass [follow the scheme that the others have already used...]
 
 		2. regex/ [re-design the old tests]
-			2.1. Turn into a directory
-			2.2. Split into two parts: 
-				2.2.1. elementary (contain a one-symbol-creation functions); 
-				2.2.2. composite (contain those that actually need to be tested)
-			Design the tests to check the veracity of the resulting regular expressions based off combination of initial inputs; 
-			Call this test-template 'regexTest'; 
-		3. imports/ [design new tests]
-			1. Structure these in a fashion similar to the project's tree. 
-			2. Each would do the 'import * as X from ...', then - verify the 'X'
-			Design a single 'importTest' template to be used for all of these. 
+			1. Use the 'regexLiteralTest' for: 
+				1.1. Checking simple one-symbol functions; 
+				1.2. Creating signatures for complex test-functions; 	
+					Works like [for 'F - working on regexes']: 
+						1.  for (const [a, b, expectedContents] of ...) elementaryRegexTest(F(a, b), expectedContents)
+
 	2. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
-		2.1. Add the 'constructor' tests for the copying utils (list those...); 
+		2.1. Add the 'constructor' tests to the copying utils (list those...); 
+		2.2. Get rid of the 'ambigiousUtilTest' (or, if not feasible - remove where unneeded); 
 	3. Implement test suites: 
 		3.1. Stream-s: 
 			3.1.1. "WrapperStream"-combinations; 
 				Thus, for instance, one has to test ALL of: 
 
 					LimitedStream-NestedStream-InputStream;
-					TransformedStream-LimitedStream-TreeStream;
-					NestedStream-TransformedStream-InputStream;
+					StreamTokenizer-LimitedStream-TreeStream;
+					NestedStream-StreamTokenizer-InputStream;
 						And more...
 				
 				FOR THIS, one needs to be able to do CompositionClassTests; 
@@ -161,16 +154,21 @@ A. testing:
 		3.5. imports/ 
 			The imports are flawed - test them properly [import each and every layer inside the library...]; 
 
+			Organize like [the way that the import system works...]: 
+
+				1. classes/ 
+				2. interfaces/ 
+				3. methods/
+				4. regex/
+				5. utils/
+
 		3.6. Pattern/
-			4.6.1. Test instances: 
-				4.6.1. Empty; 
-				4.6.2. One-element; 
-				4.6.3. Two-element; 
-				4.6.4. Long; 
-		
-		3.7. constants/
-			Check that those correspond to the constant values expected 'assert.strictEqual';
-		
+			3.6.1. Test instances: 
+				3.6.1. Empty; 
+				3.6.2. One-element; 
+				3.6.3. Two-element; 
+				3.6.4. Long; 
+			
 		3.8. IndexMap/
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
 		
@@ -530,6 +528,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Try to make them more minimal...; 
 
 	2.19. [maybe?] Rename the 'array' (Parser/utils.ts) into 'collection' [name clarity]; 
+		Reasoning:
+			1. It can be used with other kinds of collections also; 
+			2. Can be mistaken for transforming a given Stream into an array (which, as per 1., is only one of its many uses): 
 	2.20. [maybe?] Create a module for randomized Stream-generation (`random`);
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
 			it will choose a pair of them for different [distinct] boundries); 
@@ -573,7 +574,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 			1. 'StreamClass(...).prototype.copy()' method; 
 				Solution for '.copy': 
-					1.1. Keep the instance variables inside the single '.vars' property ('.preventsExtension' cast upon it); 
+					1.1. Keep the instance variables inside the single '.vars' property; 
 					1.2. Keep the user-defined variables under '.state'; 
 				
 				Definition [loose, has to have overloads, depending on presence/absence of '.pos']: 
@@ -596,6 +597,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	2.25. For future: improve the 'constructor' tests. 
 		Refactor them, permit the ability to properly test the '.copy()'-ed instances using the constructor
 			tests (namely - the "prototypeProps" and "ownProps" thing - missing currently); 
+		
+	2.26. [maybe? clarity] Rename the 'StreamTokenizer' into 'TokenizerStream' [or, outright, TransformedStream], move it to 'Stream'; 
+		Reasoning:	
+			1. Currently, it is THE ONLY 'new (...x: any[]) => StreamClassInstance' implementation located outside the 'src/Stream/' directory; 
+			2. The only reason that it is inside 'Parser/' is that it can be (and, historically, was being) used for creating Tokenizers; 
+			3. Tokenizers are only one of its applications - the thing can be used for pure stream-transformation; 
+			4. It used to have (a kind of) a parallel with the 'StreamValidator' and 'StreamLocator' (both require iterating the Stream); But now, save for the application, it is almost inexistent; 
+			5. Its tests are completely different from anything in the 'Parser/' directory;
+		
+	2.27. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+		Namely: 
+			1. intersection: 	/[[...]&&[...]]/v
+			2. subtraction: 	/[[...]--[...]]/v
+			3. string literals: /[q{...}]/v
 		
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 

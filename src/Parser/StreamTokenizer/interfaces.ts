@@ -9,7 +9,6 @@ import type { Superable } from "../../Stream/StreamClass/interfaces.js"
 export interface StreamTokenizer<InType = any, OutType = any>
 	extends Inputted<EndableStream<InType>>,
 		StreamClassInstance<OutType>,
-		Superable,
-		Iterable<OutType> {
-	tokenHandler: StreamHandler<OutType>
+		Superable {
+	handler: StreamHandler<OutType>
 }

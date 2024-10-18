@@ -177,6 +177,24 @@ export function ResultingAmbigiousMethodTest<InstanceType extends Resulting = an
 }
 
 export function utilTest(testedUtil: Function, utilName: string) {
+	return function (expected: any, ...input: any[]) {
+		util(utilName, () => assert.strictEqual(testedUtil(...input), expected), ...input)
+	}
+}
+
+export function comparisonUtilTest(compare: (x: any, y: any) => boolean) {
+	return function (testedUtil: Function, utilName: string) {
+		return function (expected: any, ...input: any[]) {
+			util(
+				utilName,
+				() => assert(compare(testedUtil(...input), expected)),
+				...input
+			)
+		}
+	}
+}
+
+export function ambigiousUtilTest(testedUtil: Function, utilName: string) {
 	return function (compare: (x: any, y: any) => boolean) {
 		return function (expected: any, ...input: any[]) {
 			util(
@@ -240,6 +258,6 @@ export const [method, util] = ["method", "util"].map(
 			it(`${typeString}: ${name}(${inputDescribe(args)})`, post)
 )
 
-export const [classTest, property] = ["class", "property"].map(
+export const [classTest, property, namespace] = ["class", "property", "namespace"].map(
 	(typeString) => (name: string, post: () => void) => it(`${typeString}: ${name}`, post)
 )
