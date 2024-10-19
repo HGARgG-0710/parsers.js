@@ -3,7 +3,7 @@ import type { BasicState } from "./interfaces.js"
 
 import { ArrayCollection } from "../../Pattern/Collection/classes.js"
 import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
-import { firstFinished } from "../utils.js"
+import { firstFinished } from "../methods.js"
 import { basicParserChange } from "./methods.js"
 
 // * note: doesn't do iteration - leaves it to the user...

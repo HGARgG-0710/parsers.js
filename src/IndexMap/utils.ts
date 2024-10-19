@@ -34,3 +34,4 @@ export function toPairsList<KeyType = any, ValueType = any>(
 }
 
 export * as HashMap from "./HashMap/utils.js"
+export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"

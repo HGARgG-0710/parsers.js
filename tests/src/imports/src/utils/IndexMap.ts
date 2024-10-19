@@ -2,7 +2,7 @@ import { functionImports, importTest, objectImports } from "imports/lib/imports.
 import * as IndexMap from "../../../../../dist/src/IndexMap/utils.js"
 
 importTest(
-	objectImports("HashMap").concat(
+	objectImports("HashMap", "PersistentIndexMap").concat(
 		functionImports("table", "fromPairsList", "toPairsList")
 	)
 )(IndexMap)

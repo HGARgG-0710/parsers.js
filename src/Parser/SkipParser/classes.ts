@@ -4,7 +4,7 @@ import type { Position } from "../../Position/interfaces.js"
 
 import { ArrayCollection } from "../../Pattern/Collection/classes.js"
 import { GeneralParser, DefineFinished } from "../GeneralParser/classes.js"
-import { firstFinished } from "../utils.js"
+import { firstFinished } from "../methods.js"
 import { fixedParserChange, skipParserChange } from "./methods.js"
 
 export function SkipParser<OutType = any>(

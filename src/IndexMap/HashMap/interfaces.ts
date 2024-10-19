@@ -11,7 +11,6 @@ export interface Settable<KeyType = any, ValueType = any> extends Summat {
 	set: (key: KeyType, value: ValueType) => any
 }
 
-
 export interface KeyReplaceable<KeyType = any> {
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }

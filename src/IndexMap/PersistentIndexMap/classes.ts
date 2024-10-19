@@ -1,5 +1,5 @@
 import type { Pattern } from "../../Pattern/interfaces.js"
-import type { IndexMap, MapClass, Pairs } from "../interfaces.js"
+import type { IndexMap, Pairs } from "../interfaces.js"
 import type { PersistentIndexMap as PersistentIndexMapType } from "./interfaces.js"
 
 import {
@@ -27,6 +27,9 @@ import {
 	persistentIndexMapUnique
 } from "./methods.js"
 
+// * Explanation: objects are passed by reference, ergo, it's possible to keep the 
+// * 	index of a 'PersistentIndexMap' consistent across multiple sources, 
+// * 	via wrapping it into a one-property object; 
 export const Pointer = <Type = any>(value: Type): Pattern<Type> => ({ value })
 
 export class PersistentIndexMap<KeyType = any, ValueType = any>
@@ -67,6 +70,8 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	}
 }
 
+export default PersistentIndexMap
+
 Object.defineProperties(PersistentIndexMap, {
 	index: { value: subIndex },
 	byIndex: { value: subByIndex },
@@ -89,8 +94,3 @@ Object.defineProperties(PersistentIndexMap, {
 		value: indexMapIterator
 	}
 })
-
-export const toIndexPersistent =
-	<KeyType = any, ValueType = any>(mapClass: MapClass<KeyType, ValueType>) =>
-	(pairs: Pairs<KeyType, ValueType>) =>
-		new PersistentIndexMap<KeyType, ValueType>(new mapClass(pairs))

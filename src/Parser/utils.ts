@@ -1,6 +1,3 @@
-import type { ParsingState } from "./GeneralParser/interfaces.js"
-import type { BaseParsingState } from "./interfaces.js"
-
 import type { StreamHandler } from "./TableMap/interfaces.js"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
@@ -11,12 +8,6 @@ import { positionStopPoint, positionNegate } from "../Position/utils.js"
 
 import { uniNavigate } from "../Stream/StreamClass/utils.js"
 import { ArrayCollection } from "../Pattern/Collection/classes.js"
-
-export const firstFinished = function <T extends BaseParsingState = ParsingState>(
-	this: T
-) {
-	return (this.streams as BasicStream[])[0].isEnd
-}
 
 export function skip(input: ReversibleStream, steps: Position = 1) {
 	return uniNavigate(input, positionNegate(steps))
