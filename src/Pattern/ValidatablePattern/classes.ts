@@ -7,11 +7,13 @@ import {
 	validatableStringPatternValidate,
 	validatableStringPatternFlush
 } from "./methods.js"
+import { FlushablePattern } from "../classes.js"
 
-export class ValidatableStringPattern implements ValidatableStringPatternType {
-	value: string
+export class ValidatableStringPattern
+	extends FlushablePattern<string>
+	implements ValidatableStringPatternType
+{
 	result: ValidationOutput<any>
-
 	flush: () => void
 	validate: (
 		key: string | RegExp,
@@ -19,8 +21,7 @@ export class ValidatableStringPattern implements ValidatableStringPatternType {
 	) => ValidationOutput<string>
 
 	constructor(value: string) {
-		this.value = value
-		this.result = [false, []]
+		super(value)
 	}
 }
 

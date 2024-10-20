@@ -1,16 +1,11 @@
+import { classWrapper } from "src/utils.js"
 import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
-import type {
-	ConstEnumSpace,
-	EnumSpace,
-	Mappable
-} from "./interfaces.js"
+import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
 
-import {
-	constEnumAdd,
-	constEnumCopy,
-	constEnumJoin,
-	constEnumMap,
-} from "./methods.js"
+import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./methods.js"
+
+import { function as _f } from "@hgargg-0710/one"
+const { trivialCompose } = _f
 
 export class ConstEnum implements ConstEnumSpace {
 	size: number
@@ -35,14 +30,10 @@ Object.defineProperties(ConstEnum.prototype, {
 	map: { value: constEnumMap }
 })
 
-export const TokenInstanceEnum = (enums: EnumSpace) =>
-	enums.map((x) => {
-		const cachedClass = TokenInstance(x)
-		return () => new cachedClass()
-	})
+const composeTokenInstance = trivialCompose(classWrapper, TokenInstance)
+const composeTokenType = trivialCompose(classWrapper, SimpleTokenType)
 
-export const SimpleTokenTypeEnum = (enums: EnumSpace) =>
-	enums.map((x) => {
-		const cachedClass = SimpleTokenType(x)
-		return (y: any) => new cachedClass(y)
-	})
+export const [TokenInstanceEnum, SimpleTokenTypeEnum] = [
+	composeTokenInstance,
+	composeTokenType
+].map((f) => (enums: EnumSpace) => enums.map(f))

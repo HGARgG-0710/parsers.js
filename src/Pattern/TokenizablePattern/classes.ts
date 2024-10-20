@@ -9,22 +9,20 @@ import type {
 	TokenizableStringPattern as TokenizableStringPatternType,
 	TokenizationResult
 } from "./interfaces.js"
+import { FlushablePattern } from "../classes.js"
 
 export class TokenizableStringPattern<OutType = any>
+	extends FlushablePattern<string>
 	implements TokenizableStringPatternType<OutType>
 {
-	value: string
 	result: TokenizationResult<string, OutType>
-
 	tokenize: (
 		key: string | RegExp,
 		handler: SummatFunction<any, string | RegExp, OutType>
 	) => TokenizationResult<string, OutType>
-	flush: () => void
 
 	constructor(value: string) {
-		this.value = value
-		this.result = []
+		super(value)
 	}
 }
 

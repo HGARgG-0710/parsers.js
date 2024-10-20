@@ -9,7 +9,19 @@ export function tokenizeString<OutType = any>(
 	key: RegExp | string,
 	handler: SummatFunction<any, string, OutType>
 ) {
-	return (matchString(value, key) as any[])
-		.reduce((acc, curr, i) => insert(acc, 2 * i + 1, handler(curr)), value.split(key))
+	return tokenizeMatched<string, OutType>(
+		matchString(value, key),
+		value.split(key),
+		handler
+	)
+}
+
+export function tokenizeMatched<InTypes = any, OutType = any>(
+	matched: any[],
+	split: InTypes[],
+	handler: SummatFunction<any, any, OutType>
+): (OutType | InTypes)[] {
+	return matched
+		.reduce((acc, curr, i) => insert(acc, 2 * i + 1, handler(curr)), split)
 		.filter((x: any) => x.length)
 }

@@ -73,8 +73,7 @@ export function linearIndexMapGetIndex<KeyType = any, ValueType = any>(
 ) {
 	const size = this.size
 	const sought = this.extension(x)
-	for (let i = 0; i < size; ++i)
-		if ((this.change as Function)(this.alteredKeys[i], sought)) return i
+	for (let i = 0; i < size; ++i) if (this.change!(this.alteredKeys[i], sought)) return i
 	return -1
 }
 

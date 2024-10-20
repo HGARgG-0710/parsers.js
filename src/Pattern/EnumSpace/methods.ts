@@ -1,8 +1,10 @@
-import { ConstEnum } from "./classes.js"
 import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
+import { ConstEnum } from "./classes.js"
+
+const newConst = () => ({})
 
 export function constEnumAdd(this: ConstEnumSpace, size: number) {
-	this.value.push(...Array.from({ length: size }, () => ({})))
+	this.value.push(...Array.from({ length: size }, newConst))
 	this.size += size
 	return this
 }

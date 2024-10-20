@@ -1,7 +1,11 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 import type { Pattern, Flushable, Resulting } from "../interfaces.js"
 
-export type ValidationOutput<Type = any> = [boolean, Type[]]
+export type ValidationOutput<Type = any> =
+	| [true, Type[]]
+	| [false, (Type | true | [false, Type])[]]
+
+export type InvalidEntries<Type = any> = [number, Type][]
 
 export interface Validatable<Type = any, KeyType = any> extends Summat {
 	validate: (
@@ -12,7 +16,7 @@ export interface Validatable<Type = any, KeyType = any> extends Summat {
 
 export interface ValidatablePattern<Type = any, KeyType = any>
 	extends Pattern<Type>,
-		Resulting<ValidationOutput>,
+		Resulting<ValidationOutput<Type>>,
 		Flushable,
 		Validatable<Type, KeyType> {}
 

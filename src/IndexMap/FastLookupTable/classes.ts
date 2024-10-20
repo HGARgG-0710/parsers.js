@@ -1,8 +1,11 @@
 import type { Pattern } from "../../Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable } from "./interfaces.js"
 import type { SubHaving } from "../SubHaving/interfaces.js"
+import type {
+	FastLookupTable,
+	HashTableClass as HashTableClassType
+} from "./interfaces.js"
 
 import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
 import {
@@ -12,15 +15,14 @@ import {
 	affirmOwnership
 } from "./methods.js"
 
-import type { HashTableClass as HashTableClassType } from "./interfaces.js"
+import { BasicSubHaving } from "../SubHaving/classes.js"
 
 export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
+	extends BasicSubHaving<PersistentIndexMap<KeyType, ValueType>>
 	implements
 		FastLookupTable<KeyType, ValueType, Pattern<number>>,
 		SubHaving<PersistentIndexMap<KeyType, ValueType>>
 {
-	sub: PersistentIndexMap<KeyType, ValueType>
-
 	getIndex: (x: any) => Pattern<number>
 	own: (x: any, ownIndex: Pattern<number>) => void
 	byOwned: (x: any) => ValueType
@@ -29,8 +31,8 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 	delete: (key: KeyType) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-	constructor(subTable: PersistentIndexMap<KeyType, ValueType>) {
-		this.sub = subTable
+	constructor(table: PersistentIndexMap<KeyType, ValueType>) {
+		super(table)
 	}
 }
 
@@ -44,7 +46,7 @@ Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
 })
 
 const HashTablePrototype = {
-	own: { value: affirmOwnership},
+	own: { value: affirmOwnership },
 	byOwned: { value: hashMapFastLookupTableByOwned },
 	set: { value: subSet },
 	delete: { value: subDelete },
@@ -54,9 +56,10 @@ const HashTablePrototype = {
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	ownership: (x: KeyType) => OwningType
 ) {
-	class HashTableClass implements HashTableClassType<KeyType, ValueType, OwningType> {
-		sub: HashMap<KeyType, ValueType>
-
+	class HashTableClass
+		extends BasicSubHaving<HashMap<KeyType, ValueType>>
+		implements HashTableClassType<KeyType, ValueType, OwningType>
+	{
 		getIndex: (x: any) => OwningType
 		own: (x: any, ownFunc: OwningType) => void
 		byOwned: (x: any) => ValueType
@@ -64,8 +67,8 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 		delete: (key: KeyType) => any
 		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-		constructor(baseHash: HashMap<KeyType, ValueType>) {
-			this.sub = baseHash
+		constructor(hash: HashMap<KeyType, ValueType>) {
+			super(hash)
 		}
 	}
 

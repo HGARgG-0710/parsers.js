@@ -1,3 +1,23 @@
+import type { Flushable, Pattern } from "./interfaces.js"
+
+export abstract class BasicPattern<Type = any> implements Pattern<Type> {
+	value: Type
+	constructor(value: Type) {
+		this.value = value
+	}
+}
+
+export abstract class FlushablePattern<Type = any>
+	extends BasicPattern<Type>
+	implements Flushable
+{
+	flush: () => void
+	constructor(value: Type) {
+		super(value)
+		this.flush()
+	}
+}
+
 export * as Collection from "./Collection/classes.js"
 export * as EliminablePattern from "./EliminablePattern/classes.js"
 export * as EnumSpace from "./EnumSpace/classes.js"

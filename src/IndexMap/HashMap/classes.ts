@@ -13,6 +13,7 @@ import { Token } from "../../Pattern/Token/classes.js"
 import type { Token as TypeToken } from "../../Pattern/Token/interfaces.js"
 
 import { function as _f, typeof as type } from "@hgargg-0710/one"
+import { BasicSubHaving } from "../SubHaving/classes.js"
 const { id } = _f
 const { typeOf } = type
 
@@ -27,9 +28,11 @@ const HashClassPrototype = {
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
 	hash: HashType<KeyType, ValueType, InternalKeyType>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
-	class hashClass implements HashMap<KeyType, ValueType, InternalKeyType> {
+	class hashClass
+		extends BasicSubHaving<InternalHash<InternalKeyType, ValueType>>
+		implements HashMap<KeyType, ValueType, InternalKeyType>
+	{
 		hash: HashType<KeyType, ValueType, InternalKeyType>
-		sub: InternalHash<InternalKeyType, ValueType>
 		size: number
 
 		index: (x: KeyType) => ValueType
@@ -43,7 +46,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		) => HashClass<KeyType, ValueType, InternalKeyType>
 
 		constructor(structure: InternalHash<InternalKeyType, ValueType>) {
-			this.sub = structure
+			super(structure)
 		}
 	}
 

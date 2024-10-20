@@ -3,6 +3,9 @@
 
 [v0.3]
 
+REMINDERS: 
+	1. Finish the 'constants.ts' test (added the 'ValidatablePattern' part); 
+
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
 
@@ -11,10 +14,23 @@
 	
 	The only benefit of actually having the thing is the ability to reference the "big docs"
 
-5. WORK on the 'default' exports from 'classes.ts' and 'interfaces.ts' files [example: PersistentIndexMap]; 
+5. Fix the 'importTest' (add the 'moduleName: string' parameter, to make an 'it(`import: ${moduleName}`, () => {... [current test contents]})')
+
+6. FIX the 'tests/run.ts' to be able to run ONLY SPECIFIED LOCATIONS: 
+	6.1. introduce a path-map [for names shortcuts used from command-line]; 
+	6.2. allow multiple names to be used; 
+		6.2.1. Write a simple parser for this format [use plain JavaScript - not the library itself]; 
+
 
 Order of TODO-elimination: 
 	A.3.5. [complete]
+		Left: 
+			1. Pattern/ 
+				1.1. ValidatablePattern/ 
+			2. Position/ 
+			3. regex/
+			4. Stream/ 
+			5. Tree/
 
 	A.1.2. 
 	A.3.3
@@ -31,6 +47,9 @@ Order of TODO-elimination:
 	
 	A.0.9.
 	A.0.8. 
+	6.
+
+	[run the tests]
 
 	B. 
 	4. 
@@ -193,6 +212,12 @@ B. documentation (change/fix it...);
 		B1.3. Classes: 
 			Describes individual classes; 
 			THEY ARE LISTED AS EXTENSION-HIERARCHIES; 
+
+			B1.3.1. Describe abstract classes: 
+				1.3.1.1. FlushablePattern; 
+				1.3.1.2. BasicPattern; 
+				1.3.1.3. BasicSubHaving; 
+			
 		B1.4. Class-Factories: 
 			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
 		B1.5. Interfaces; 
@@ -290,23 +315,14 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			
 			This would be a class-factory; 
 
-	2.3. Implement a 'PartialValidator': 
-		This, ultimatly, works in THE SAME WAY as the 'PatternValidator' and 'PatternTokenizer'
-		Gets the recursive structure with all the 'split' and 'inserted' bits; 
-		The 'PartialValidator' would RETURN THE INFORMATION FOR INFERENCE OF CORRECT/INCORRECT PARTS! 
-		[Which it does by 'numbering' particular portions of a given Pattern]; 
-		This would allow for a greater ability to analyze/point-out the errors in the original input;
-
-		Unlike plain PatternValidator, it would return ALL the possibly available error information, not just the stuff about the index of the "failed" check, or coverage; 
-
-	2.4. Implement a 'level-by-level TreeStream': 
+	2.3. Implement a 'level-by-level TreeStream': 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 		Would do it via calling '.getJointLayer' function (then - caching for later '.prev'); 
 		This (basically) takes the nodes from the previous 'joint layer', gets their respective children,
 			CONCATENATES THEM into a new layer, then iterates it; 
 
-	2.5. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
+	2.4. Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
 		In particular, functions/abstractions: 
 
 			1. shorten(names); 
@@ -343,13 +359,13 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 				This is useful when implementing things like mass renamings/name shortenings in code mangling software; 
 
-	2.6. RELAX overly demanding interface and types definitions/requirements;
+	2.5. RELAX overly demanding interface and types definitions/requirements;
 		Example: inputStreamCopy, inputStreamNavigate; 
 
 			These do not NEED to have all the parts of the 'InputStream' definition (even though they are originally implemented to work with it);
 			RE-DEFINE them...;
 
-	2.7. [Idea?] Create an error-handling API for the 'v0.4';
+	2.6. [Idea?] Create an error-handling API for the 'v0.4';
 		Create means of: 
 
 			1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -373,7 +389,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Although... This is rather general. Perhaps, better implement as a separate package; 
 		Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 
 
-	2.8. [maybe?] BreakableStream - a major generalization of the library's patterns: 
+	2.7. [maybe?] BreakableStream - a major generalization of the library's patterns: 
 		Returns a class for producing Stream-s: 
 
 		1. Have an '.input' (another Stream); 
@@ -402,7 +418,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			thus - simplifying semantics + unifying a very large number of different abstractions that are creatable via the library using just this one; 	
 		Conclusion: think about it, more of a YES, tha a NO currently;
 	
-	2.9. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
+	2.8. [reminder] Optimize minitua (that is, just go through the code, removing unnecessary repetitions of things, useless work and so forth...); 
 		When the same (even tiny) operations get repeated a large number of times, the speed decay accumulates; 
 		Try to make the library code that avoids this stuff fundamentally; 
 
@@ -412,7 +428,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		2.11.2. Do rabid caching: 
 			Example - for 'IndexMap', always cache the '.keys' and '.values' (sometimes, they are called DYNAMICALLY!)
 	
-	2.10. utility - 'nestedInfo'; 
+	2.9. utility - 'nestedInfo'; 
 
 		1. Finds a depth of a given Stream, based off 'inflate' and 'deflate'; 
 			NOTE: the MAX depth achievable; 
@@ -420,19 +436,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		Returns it as a pair; 
 
-	2.11. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
+	2.10. BufferizedStream - a wrapper around a given Stream, to enable the storage of a buffer
 		for its operations; 
 
 		Once '.next' is called, it stores the '.curr' inside the inner 'buffer', ONLY IF the user-given '.predicate'
 			HOLDS!	 
 
-	2.12. Idea for a method: ProlongedStream.prolong; 	
+	2.11. Idea for a method: ProlongedStream.prolong; 	
 
 		This (utilmately) modifies the 'this.streams' [modifying the '.isEnd' accordingly]; 
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.13. [Maaayybe?] Create a 'samples' directory; 
+	2.12. [Maaayybe?] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -446,7 +462,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
 
-	2.14. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
+	2.13. IDEA: generalize the type of 'T<K> = CollectionLike<K | T<K>>' properly; 
 		It appears at least in 2 places inside the library: 
 
 			1. Tree (InTreeType)
@@ -454,7 +470,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		This might (also) resolve some 'interface'-related issues for the 'NestedStream'; 
 	
-	2.15. v8-specific optimizations: 
+	2.14. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
 	
 		CONCLUSION: 
@@ -491,7 +507,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			3. Optimize for smaller sizes ONLY when it doesn't impair the memory severely; 
 				When it impairs it at all, choose whether or not to do it based off the chosen memory/speed difference measurements...; 
 	
-	2.16. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
+	2.15. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
 	
 		Do only if there are code aspects suffering from this significantly: 
@@ -506,7 +522,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			[need for calling the '.isCurrEnd()' two times more]; 
 		Again, do this ONLY if the performance difference is SIGNIFICANT!
 	
-	2.17. util - enumerateTree; 
+	2.16. util - enumerateTree; 
 		Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
 			to single-array-siblings form (the current ChildrenTree); 	
 		This would permit a more "variable" set of trees (those that have properties with fixed names), 
@@ -530,19 +546,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				]
 			}
 		
-	2.18. About generics - relax them; 
+	2.17. About generics - relax them; 
 		Use ONLY WHEN NEEDED; 
 		For example: a method makes use of X generics, out of which Y < X is needed [id est, used somewhere beyond the 'this: ...' in the parameters list]; 
 			REMOVE the unneeded ones; 
 			RE-ORDER THEM, if need be; 
 			Try to make them more minimal...; 
 
-	2.19. [maybe?] Create a module for randomized Stream-generation (`random`);
+	2.18. [maybe?] Create a module for randomized Stream-generation (`random`);
 		(given, say, an InputStream with an Array of expected values inside of it [that can be picked for Nested], 
 			it will choose a pair of them for different [distinct] boundries); 
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 	
-	2.20. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
+	2.19. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
 		In the 'TreeWalker.renewLevel', it does the 'this.stream.pos.slice', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
 		A 'BacktrackableTree' [interface] is one that has a method: 
 
@@ -570,11 +586,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.stream.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
 			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
 
-	2.21. Add a fast implementation of '.finish' to the 'TreeStream'; 
-	2.22. Re-structure the tests to be made on a per-method basis? 
+	2.20. Add a fast implementation of '.finish' to the 'TreeStream'; 
+	2.21. Re-structure the tests to be made on a per-method basis? 
 		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
 	
-	2.23. INTRODUCE the '.state' property for state-keeping; RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
+	2.22. INTRODUCE the [optional] '.state' property for state-keeping; RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
 		Comes inside the 'StreamClass' (optionally) via the 'hasState' property;
 		Will additionally be supported by: 
 
@@ -600,11 +616,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				1. New 'HashMap' (and IndexMap) aliases to work with ParsingState; 
 				2. New 'HashMap' (and IndexMap) aliases to work with '.state' property; 
 
-	2.24. For future: improve the 'constructor' tests. 
+	2.23. For future: improve the 'constructor' tests. 
 		Refactor them, permit the ability to properly test the '.copy()'-ed instances using the constructor
 			tests (namely - the "prototypeProps" and "ownProps" thing - missing currently); 
 		
-	2.25. [maybe? clarity] Rename the 'StreamTokenizer' into 'TokenizerStream' [or, outright, TransformedStream], move it to 'Stream'; 
+	2.24. [maybe? clarity] Rename the 'StreamTokenizer' into 'TokenizerStream' [or, outright, TransformedStream], move it to 'Stream'; 
 		Reasoning:	
 			1. Currently, it is THE ONLY 'new (...x: any[]) => StreamClassInstance' implementation located outside the 'src/Stream/' directory; 
 			2. The only reason that it is inside 'Parser/' is that it can be (and, historically, was being) used for creating Tokenizers; 
@@ -612,40 +628,17 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			4. It used to have (a kind of) a parallel with the 'StreamValidator' and 'StreamLocator' (both require iterating the Stream); But now, save for the application, it is almost inexistent; 
 			5. Its tests are completely different from anything in the 'Parser/' directory;
 		
-	2.26. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+	2.25. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
 		Namely: 
 			1. intersection: 	/[[...]&&[...]]/v
 			2. subtraction: 	/[[...]--[...]]/v
 			3. string literals: /[q{...}]/v
 		
-	2.27. [maybe?] Re-locate the 'SubHaving' interface into the 'src/interfaces.ts'; 
+	2.26. [maybe?] Re-locate the 'SubHaving' interface into the 'src/interfaces.ts'; 
 		Make it global [besides usages - no reason for 'IndexMap' to keep it...]; 
 		Also - how about uniting the '.sub' with '.input' [have a single name for delegate object-properties]; 
 	
-	2.28. About GeneralParser signatures: 
-		Use prototype-defaulting constructors to create them: 
-
-			function X (a, b, ...) {
-				class _x {
-					init (a, b, ...) {
-						if (a) this.a = a
-						if (b) this.b = b
-						...
-					}
-				}
-				Object.defineProperties(_x.prototype, {
-					a: { value: a, writable: true }
-				})
-				return _x
-			}
-		
-		Will save [a little] memory (crucial in cases, when many different Parsers are created; rare); 
-
-		!!! BEFORE DOING THIS: benchmark; 
-			IF it shows that 'writable: true' causes performance issues, INSTEAD, 
-				add it as a parameter for the class-creation function 'writable?: boolean = false'; 
-		
-		28.1. ALSO : make all the prototype 'value's (in particular - methods) OVERRIDABLE! 
+	2.27. [prototypes, generality] make all the prototype 'value's (in particular - methods) OVERRIDABLE! 
 			via doing: 
 
 				Object.defineProperty(_class.prototype, {	
@@ -655,7 +648,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Currently, they are ALL non-overridable; 
 			This will enable the user to more liberally use the library classes [they are, presently, highly single-purposed (intentionally)]; 
 	
-	2.29. Create a new 'IndexMap' implementation: 'SetMap'; 
+	2.28. Create a new 'IndexMap' implementation: 'SetMap'; 
 		This would be a: 
 			1. IndexMap interface implementation; 
 			2. generalized wrapper around a Set (in a way that HashMap is a wrapper around Object and Map); 
@@ -669,7 +662,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			const SpecialCaseSetMap = SetMap(...)
 			const processNested = (x) => nested(TableMap(new SpecialCaseSetMap([...])), TableMap(new SpecialCaseSetMap([...])))(new WhateverStream(x))
 		
-	2.30. Add the 'TravelableStream' interface, with a '.travel()' method. 
+	2.29. Add the 'TravelableStream' interface, with a '.travel()' method. 
 		It would exist to remedy the: 
 
 			while (pos--) stream.next()
@@ -683,12 +676,13 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			the '.navigate' has become rather useless (in the sense that it is not centralized); 
 		Then: 
 
-			1. InputStream.navigate() [and similar 'deviating' would be re-implemented to use ABSOLUTE position instead]; 
+			1. InputStream.navigate() [and similar 'deviating' cases] would be re-implemented to use ABSOLUTE position instead; 
 			2. 'uniNavigate' will become 'uniTravel' (and 'navigate' default-method of StreamClass will be renamed into 'travel'); 
+				2.1. '.navigate' will be re-implemented on 'StreamClass' by default (via '.rewind() + .travel()'), for 'ReversedStreamClass'-cases; 
 			3. 'skip' will call the '.travel' on the given stream (instead of using the 'uniTravel', as it does now); 
 		CONCLUSION: 'skip' and 'has' utilities optimized, interfaces unified; 
 
-	31. Add 'Sizeable' Stream-s; 
+	2.30. Add 'Sizeable' Stream-s; 
 			An interface, serving as a generalization of 'InputStream' and 'BufferizedStream'; 
 			Basically, one'd have '.size' property on Stream-s,
 				which would permit the number of elements once the Stream has been walked
@@ -703,6 +697,93 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				'StreamValidator' for a complex non-bufferized Stream, then - store the '.size' 
 					after validating successfully, THEN - use the size to iterate more rapidly; 
 		
+		31.1. IMPORTANT: make the '.size', '.buffer', '.state' OPTIONAL PROPERTIES of the 'StreamClass' (like '.pos'); 
+			The '.buffer' property would REPLACE the 'BufferizedStream' - likewise, the 'SizedStream'-s would be replaced by this; 
+			Let it be: 
+				1. If '.pos' is present - define '.size' as a getter: '() -> (this.pos + 1)'; 
+				2. If '.buffer' is present - define '.size' as a getter: '() -> (this.buffer.size)'
+				3. If neither are present, do '.size = 0' iff '.defaultIsEnd() === false', otherwise - '.size >= 1', with increasing value as the Stream size progresses; 
+			
+			31.1.1. HOWEVER, for performance reasons, one'll now have the need of several-variable 'cached' functions:
+				0. [add to 'one.js'] the 'multiCached(props: string[])(object: object)' function: 
+					0.1. Based off an object: 
+						Takes in an object, with predefined list of properties; 
+						This'll be using NESTED 'Map'-s; 
+							Meaning, that 'i'-th property in the 'keyList', would have the 'i'-th-depth Map; 
+				1. 'multiCache' everything:
+					1.1. StreamClass [in terms of given signature objects]; 
+					1.2. Functions that call the StreamClass for BaseClasses [the 'InputStreamBaseClass', ... others]
+					1.3. The GeneratedStream-functions for creation of classes (based off THE SAME sub-signature...); 
+
+					This may be important, because - when writing libraries, the user may want to override some 
+						of the functionality (for instance - add/remove '.bufferized', '.pos'), and end up creating A NEW 
+							class; 
+							This will cause a slowdown [in a long chain, or when done a sufficient number of times - a noticeable one...]; 
+		
+	2.31. refactor the 'imports' tests; 
+	2.32. [general; TypeScript - readability] Replace the 'o.x as Type' (where: 'o.x === undefined' is possible) with 'o.x!'; 
+		Shorter, more concise - better communicates intent; 
+
+	2.33. [important] Replace the 'Parser/' functionality completely with special cases of 'StreamTokenizer': 
+		Because: 
+			34.1. '.result' can be replaced with '.curr'; 
+			34.2. '.finished' can be replaced with '.isEnd'; 
+			[as '.next']
+			34.3. '.parser' can be defined in terms of '.input/.sub'; 
+			34.4. '.change' can be defined in terms of '.input/.sub'; 
+
+		The only interesting thing about 'GeneralParser' (that can't be directly replaced), is its level of dynamicity: 
+			the '.next', '.isEnd' of the 'StreamTokenizer' can't be quite
+				so easily (explicitly) modified from within '.baseNextIter', '.isCurrEnd', so forth, 
+					precisely BECAUSE of the underlying behaviour; 
+				
+		SOLUTION: 
+			1. get rid of the 'GeneralParser'; 
+			2. replace its implementations with cases of 'StreamTokenizer'; 
+			3. allow '.writab'-ility for the StreamClass properties; 
+				3.1. add an optional '.configure' method, for changing them (interface: ConfigurableStream); 
+					Works in a similar fashion to '.init'; 
+				
+		34.5. The ability to work with several '.stream'-s can be replaced with a utility [pseudocode]: 
+
+			[NOTE 1: ADD this to the library]; 
+			function streamSwap(stream: (whatever) BasicStream, i: number) {
+				const swapped = stream.state.streams[i]
+				stream.state.streams[i] = stream.input
+				stream.init({
+					input: swapped
+				})
+			}
+	
+	2.34. create implementation for : 'GeneralBuffer' - new array-generalizing interface; 
+		The thing used by the 'BufferizedStream', 'bufferize'; 
+		It is also a 'Collection' (in that, there is a '.value' and '.push' properties), 
+			so it is usable with 'array' utility and others; 
+
+	2.35. Make the results of the 'StreamClass' calls into 'abstract' classes; 
+		Will require changing the interfaces + converions in places calls to 'StreamClass' are made; 
+		Supposed to become: 
+
+			AbstractConsructor<T = any> = Function & { prototype: T }
+	
+	2.36. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
+		Example [1]: a 'classes.ts/interfaces.ts' with THE ONLY export will have it as default, besides referencing by name; 
+		Example [2]: when a 'classes.ts/interafaces.ts' has an export with THE SAME name as the module, the export is default (besides being present as of itself); 
+
+	2.37. Make more active use of 'abstract' classes; 
+		Examples: BasicSubHaving, BasicPattern - they STILL can be instantiated (unlike FlushablePattern), 
+			but ARE 'abstract', because provide no functionality as of themselves (Pointer is the exception, it's a semantic-marker); 
+
+			ALSO - turn the 'AssignmentClass'-es into abstract classes
+				[ones that aren't redundant - remember the 'replace .input with .sub' 
+					and '.state is an optional StreamClass property' todos...]; 
+				
+	2.38. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
+		This is largely a question of how fast '.split' is compared to building the array manually using the indicies information from 'matchAll' (that is, a large sequence of '.slice()'-es); 
+		Potentially, this could be a large time saving (if '.slice()'-es are relatively short), but otherwise - could be a waste of memory (additional strings allocated without need); 
+			Then, of course comes the question of whether the strings are allocated at all; 
+			BENCHMARK IT; 
+
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
@@ -710,5 +791,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			1. 'delegate' functions [from here]; 
 			2. the 'classWrapper' function; 
 			3. the 'AssignmentClass' function; 
+			4. A 'PropertyDescriptor' class; 
+				4.1. This one is for creation of 'Object.defineProperty' signature-objects (the "property descriptors"); 
 		
 		Expand the list; 
+
+	3.2. All the routine writing of tests made one think whether it may not be more desireable to 
+		automate even the process of their WRITING; 
+
+		Create a library like this containing: 
+
+			1. a path-resolver (for relative/absolute imports); 
+			2. a JS code-generator (based off the 'parsers.js'); 
+			3. various functions for configurable code-template creation; 
+		
+		The combination of the three will permit A LOT of different code to just be "magicked away"; 
+		USE THOSE to "re-write" the 'parsers.js' v0.4 [the repetative parts]; 

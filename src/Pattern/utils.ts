@@ -8,3 +8,4 @@ export function matchString(value: string, key: RegExp | string): string[] {
 
 export * as Token from "./Token/utils.js"
 export * as TokenizablePattern from "./TokenizablePattern/utils.js"
+export * as ValidatablePattern from "./ValidatablePattern/utils.js"

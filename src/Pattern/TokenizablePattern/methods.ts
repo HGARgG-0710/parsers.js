@@ -8,7 +8,6 @@ import type {
 	TokenizableStringPattern as TokenizableStringPatternType
 } from "./interfaces.js"
 import { tokenizeString } from "./utils.js"
-import { TokenizableStringPattern } from "./classes.js"
 
 export function tokenizableStringPatternTokenize<OutType = any>(
 	this: TokenizableStringPatternType<OutType>,
@@ -21,11 +20,7 @@ export function tokenizableStringPatternTokenize<OutType = any>(
 	for (let r = this.result.length; r--; ) {
 		const current = this.result[r]
 		if (isString(current))
-			replace(
-				this.result,
-				r,
-				...new TokenizableStringPattern<OutType>(current).tokenize(key, handler)
-			)
+			replace(this.result, r, ...tokenizeString<OutType>(current, key, handler))
 	}
 
 	return this.result

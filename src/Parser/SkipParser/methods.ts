@@ -1,14 +1,13 @@
-import { skip } from "../utils.js"
 import type { FixedSkipState, SkipState, SkipType } from "./interfaces.js"
 import type { Position } from "../../Position/interfaces.js"
-import type { ReversibleStream } from "../../Stream/ReversibleStream/interfaces.js"
+import { skip } from "../utils.js"
 
 export function skipParserChange<OutType = any>(
 	this: SkipState<OutType>,
 	[toSkip, tempResult]: SkipType<Iterable<OutType>>
 ) {
 	this.result.push(...tempResult)
-	skip((this.streams as ReversibleStream[])[0], toSkip)
+	skip(this.streams![0], toSkip)
 }
 
 export function fixedParserChange(n: Position) {
@@ -17,6 +16,6 @@ export function fixedParserChange(n: Position) {
 		temp: Iterable<OutType>
 	) {
 		this.result.push(...temp)
-		skip((this.streams as ReversibleStream[])[0], n)
+		skip(this.streams![0], n)
 	}
 }

@@ -33,7 +33,16 @@ export const specificChildImports = {
 		"FastLookupTable",
 		"HashMap",
 		"LinearIndexMap",
-		"PersistentIndexMap"
+		"PersistentIndexMap",
+		"SubHaving"
+	),
+	Pattern: objectImports(
+		"Collection",
+		"EliminablePattern",
+		"EnumSpace",
+		"Token",
+		"TokenizablePattern",
+		"ValidatablePattern"
 	)
 }
 

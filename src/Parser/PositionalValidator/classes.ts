@@ -7,9 +7,9 @@ import type { ParserFunction } from "../TableMap/interfaces.js"
 import type { PositionalValidatorState } from "./interfaces.js"
 
 export function PositionalValidator(
-	validatorMap: ParserFunction<PositionalValidatorState, boolean>
+	validator: ParserFunction<PositionalValidatorState, boolean>
 ) {
-	const locator = StreamLocator(trivialCompose(not, validatorMap))
+	const locator = StreamLocator(trivialCompose(not, validator))
 	return function (input: PositionalValidatorState) {
 		const [found, pos] = locator(input).result
 		return [!found, pos]

@@ -26,13 +26,15 @@ import {
 	persistentIndexMapSwap,
 	persistentIndexMapUnique
 } from "./methods.js"
+import { BasicSubHaving } from "../SubHaving/classes.js"
 
-// * Explanation: objects are passed by reference, ergo, it's possible to keep the 
-// * 	index of a 'PersistentIndexMap' consistent across multiple sources, 
-// * 	via wrapping it into a one-property object; 
+// * Explanation: objects are passed by reference, ergo, it's possible to keep the
+// * 	index of a 'PersistentIndexMap' consistent across multiple sources,
+// * 	via wrapping it into a one-property object;
 export const Pointer = <Type = any>(value: Type): Pattern<Type> => ({ value })
 
 export class PersistentIndexMap<KeyType = any, ValueType = any>
+	extends BasicSubHaving<IndexMap<KeyType, ValueType>>
 	implements PersistentIndexMapType<KeyType, ValueType>
 {
 	keys: KeyType[]
@@ -41,7 +43,6 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	size: number
 	default: any
 
-	sub: IndexMap<KeyType, ValueType>
 	index: (x: any) => ValueType
 	copy: () => IndexMap<KeyType, ValueType>
 	set: (key: KeyType, value: ValueType, index: number) => any
@@ -62,15 +63,12 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	>
 
 	constructor(indexMap: IndexMap<KeyType, ValueType>) {
-		this.sub = indexMap
-
+		super(indexMap)
 		const size = indexMap.size
 		this.indexes = Array(size)
 		for (let i = 0; i < size; ++i) this.indexes[i] = Pointer(i)
 	}
 }
-
-export default PersistentIndexMap
 
 Object.defineProperties(PersistentIndexMap, {
 	index: { value: subIndex },

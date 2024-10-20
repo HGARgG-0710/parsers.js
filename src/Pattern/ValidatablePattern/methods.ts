@@ -1,18 +1,19 @@
-import { inplace, typeof as type } from "@hgargg-0710/one"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import { inplace } from "@hgargg-0710/one"
 const { replace } = inplace
-const { isBoolean } = type
 
 import type {
 	ValidatableStringPattern as ValidatableStringPatternType,
 	ValidationOutput
 } from "./interfaces.js"
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import { matchString } from "../utils.js"
 
-import { ValidatableStringPattern } from "./classes.js"
+import { ValidatablePattern } from "src/constants.js"
+import { validateString } from "./utils.js"
+
+const { ValidationFailed } = ValidatablePattern
 
 export function validatableStringPatternFlush(this: ValidatableStringPatternType) {
-	this.result = [false, []]
+	this.result = ValidationFailed([])
 }
 
 export function validatableStringPatternValidate(
@@ -21,18 +22,12 @@ export function validatableStringPatternValidate(
 	handler: SummatFunction<any, string, boolean>
 ): ValidationOutput<string> {
 	const validated = this.result[1]
+	if (!validated.length) return (this.result = validateString(this.value, key, handler))
 
-	if (!validated.length) {
-		const matched: string[] = matchString(this.value, key)
-		for (let i = matched.length; i--; )
-			if (!handler(matched[i])) return (this.result = [false, []])
-		return (this.result = [true, matched.filter((x) => !isBoolean(x))])
-	}
-
-	for (let i = validated.length; i--; ) {
-		const [tempValid, tempRemains] = new ValidatableStringPattern(
-			validated[i]
-		).validate(key, handler)
+	let tempValid = this.result[0]
+	let tempRemains: any[] | null = null
+	for (let i = validated.length; tempValid && i--; ) {
+		;[tempValid, tempRemains] = validateString(validated[i] as string, key, handler)
 		this.result[0] = tempValid
 		replace(validated, i, ...tempRemains)
 	}

@@ -10,10 +10,12 @@ import {
 	objectInternalHashSet
 } from "./methods.js"
 
+import { BasicSubHaving } from "src/IndexMap/SubHaving/classes.js"
+
 export class MapInternalHash<KeyType = any, ValueType = any>
+	extends BasicSubHaving<Map<KeyType, ValueType>>
 	implements InternalHash<KeyType, ValueType>, SubHaving<Map<KeyType, ValueType>>
 {
-	sub: Map<KeyType, ValueType>
 	size: number
 	default: any
 
@@ -22,8 +24,8 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	delete: (key: KeyType) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-	constructor(baseMap: Map<KeyType, ValueType> = new Map(), _default?: any) {
-		this.sub = baseMap
+	constructor(map: Map<KeyType, ValueType> = new Map(), _default?: any) {
+		super(map)
 		this.default = _default
 	}
 }
@@ -37,9 +39,9 @@ Object.defineProperties(MapInternalHash.prototype, {
 })
 
 export class ObjectInternalHash<Type = any>
+	extends BasicSubHaving<object>
 	implements InternalHash<string, Type>, SubHaving<object>
 {
-	sub: object
 	default: any
 	size: number
 
@@ -48,9 +50,9 @@ export class ObjectInternalHash<Type = any>
 	delete: (key: string) => any
 	replaceKey: (keyFrom: string, keyTo: string) => any
 
-	constructor(baseObj: object = {}, _default?: any) {
-		this.size = Object.keys(baseObj).length
-		this.sub = baseObj
+	constructor(object: object = {}, _default?: any) {
+		super(object)
+		this.size = Object.keys(object).length
 		this.default = _default
 	}
 }

@@ -1,19 +1,19 @@
+import { BasicPattern } from "../classes.js"
 import type { Pattern } from "../interfaces.js"
 import type { Collection } from "./interfaces.js"
 import {
 	stringCollectionPush,
 	stringCollectionIterator,
-	accumulatingTokenCollectionPush,
-	accumulatingTokenCollectionIterator
+	accumulatingPatternCollectionPush,
+	accumulatingPatternCollectionIterator
 } from "./methods.js"
 
-export class StringCollection implements Collection<string> {
-	value: string
+export class StringCollection extends BasicPattern<string> implements Collection<string> {
 	push: (...x: string[]) => Collection<string>;
 	[Symbol.iterator]: () => Generator<string>
 
 	constructor(string: string) {
-		this.value = string
+		super(string)
 	}
 }
 
@@ -27,17 +27,19 @@ export function ArrayCollection<Type = any>(x: Type[] = []): Collection<Type> {
 	return x as unknown as Collection<Type>
 }
 
-export class AccumulatingPatternCollection implements Collection<Pattern> {
-	value: Pattern
+export class AccumulatingPatternCollection
+	extends BasicPattern<Pattern>
+	implements Collection<Pattern>
+{
 	push: (...x: Pattern<any>[]) => Collection<Pattern>;
 	[Symbol.iterator]: () => Generator<Pattern>
 
 	constructor(pattern: Pattern) {
-		this.value = pattern
+		super(pattern)
 	}
 }
 
 Object.defineProperties(AccumulatingPatternCollection.prototype, {
-	push: { value: accumulatingTokenCollectionPush },
-	[Symbol.iterator]: { value: accumulatingTokenCollectionIterator }
+	push: { value: accumulatingPatternCollectionPush },
+	[Symbol.iterator]: { value: accumulatingPatternCollectionIterator }
 })
