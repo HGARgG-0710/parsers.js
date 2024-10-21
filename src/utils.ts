@@ -156,6 +156,13 @@ export const AssignmentClass =
 		return x as OutType
 	}
 
+export const SelfAssignmentClass =
+	<Type = any, OutType = any>(propName: string, _default?: Type) =>
+	(x: Type = _default!) => {
+		x[propName] = x
+		return x as unknown as OutType
+	}
+
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"

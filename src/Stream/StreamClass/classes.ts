@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { Constructor } from "../../interfaces.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
@@ -35,7 +36,7 @@ const IterationStreamClassPositionalPrototypeProps = {
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
-): { new (): StreamClassInstance<Type> } {
+): Constructor<StreamClassInstance<Type>> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -48,7 +49,7 @@ export function StreamClass<Type = any>(
 		preInit
 	} = signature
 
-	class streamClass implements StreamClassInstance<Type> {
+	abstract class streamClass implements StreamClassInstance<Type> {
 		realCurr: any
 		isStart: StartedType
 		isEnd: boolean

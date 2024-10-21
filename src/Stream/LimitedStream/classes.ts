@@ -3,6 +3,7 @@ import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Position } from "../../Position/interfaces.js"
 import type { LimitedUnderStream, EffectiveLimitedStream } from "./interfaces.js"
 
+import { inputCurr, inputDefaultIsEnd } from "../StreamClass/methods.js"
 import {
 	effectiveLimitedStreamInitialize,
 	effectiveLimitedStreamProd,
@@ -11,7 +12,6 @@ import {
 	effectiveLimitedStreamPrev,
 	effectiveLimitedStreamIsStart
 } from "./methods.js"
-import { inputCurr, inputDefaultIsEnd } from "../StreamClass/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 

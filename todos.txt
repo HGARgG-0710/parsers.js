@@ -5,6 +5,7 @@
 
 REMINDERS: 
 	1. Finish the 'constants.ts' test (added the 'ValidatablePattern' part); 
+	2. Fix the 'imports/utils.ts' test (missing the "small exports"); 
 
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
@@ -25,12 +26,10 @@ REMINDERS:
 Order of TODO-elimination: 
 	A.3.5. [complete]
 		Left: 
-			1. Pattern/ 
-				1.1. ValidatablePattern/ 
-			2. Position/ 
-			3. regex/
-			4. Stream/ 
-			5. Tree/
+			1. Stream/ 
+				1.7. StreamClass; 
+				1.8. TreeStream; 
+	5.
 
 	A.1.2. 
 	A.3.3
@@ -217,6 +216,7 @@ B. documentation (change/fix it...);
 				1.3.1.1. FlushablePattern; 
 				1.3.1.2. BasicPattern; 
 				1.3.1.3. BasicSubHaving; 
+				1.3.1.4. StreamClass({...}); 
 			
 		B1.4. Class-Factories: 
 			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
@@ -721,6 +721,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 							This will cause a slowdown [in a long chain, or when done a sufficient number of times - a noticeable one...]; 
 		
 	2.31. refactor the 'imports' tests; 
+		1. more use of 'specificChildImports'
+		2. the 'prefixedNames' + 'namesCapitalized' - appears lots more than once, take out; 
+		3. Make better use of the 'namesCapitalized'; 
 	2.32. [general; TypeScript - readability] Replace the 'o.x as Type' (where: 'o.x === undefined' is possible) with 'o.x!'; 
 		Shorter, more concise - better communicates intent; 
 
@@ -759,18 +762,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		The thing used by the 'BufferizedStream', 'bufferize'; 
 		It is also a 'Collection' (in that, there is a '.value' and '.push' properties), 
 			so it is usable with 'array' utility and others; 
-
-	2.35. Make the results of the 'StreamClass' calls into 'abstract' classes; 
-		Will require changing the interfaces + converions in places calls to 'StreamClass' are made; 
-		Supposed to become: 
-
-			AbstractConsructor<T = any> = Function & { prototype: T }
 	
-	2.36. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
+	2.35. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
 		Example [1]: a 'classes.ts/interfaces.ts' with THE ONLY export will have it as default, besides referencing by name; 
 		Example [2]: when a 'classes.ts/interafaces.ts' has an export with THE SAME name as the module, the export is default (besides being present as of itself); 
 
-	2.37. Make more active use of 'abstract' classes; 
+	2.36. Make more active use of 'abstract' classes; 
 		Examples: BasicSubHaving, BasicPattern - they STILL can be instantiated (unlike FlushablePattern), 
 			but ARE 'abstract', because provide no functionality as of themselves (Pointer is the exception, it's a semantic-marker); 
 
@@ -778,12 +775,29 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				[ones that aren't redundant - remember the 'replace .input with .sub' 
 					and '.state is an optional StreamClass property' todos...]; 
 				
-	2.38. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
+	2.37. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
 		This is largely a question of how fast '.split' is compared to building the array manually using the indicies information from 'matchAll' (that is, a large sequence of '.slice()'-es); 
 		Potentially, this could be a large time saving (if '.slice()'-es are relatively short), but otherwise - could be a waste of memory (additional strings allocated without need); 
 			Then, of course comes the question of whether the strings are allocated at all; 
 			BENCHMARK IT; 
 
+	2.38 [implementation - cleanup] Make the '.response', '.lastLevelWithSibilngs' stuff in 'TreeStream' a part of COMPULSORY '.state' field [and '.walker' as a part of '.vars']; 
+		2.38.1. REPEAT the trick with the other library Streams' properties (ex: lookAhead, hasLookahead, and others...); 
+		2.38.2. ALSO - make the '.pos: MultiIndex' on 'TreeStream' a part of '.state' ALSO! 
+
+		Basically, EVERY stream must be describable ONLY in terms of: 
+
+			1. .vars (compulsory, for the '.init(vars)' or '.init(vars, state)')
+			2. .state [optional]
+			3. .pos [optional]
+			4. .buffer [optional] 
+			5. .size [optional]
+			6. methods' list; 
+
+		This will ensure a greater level of predictability, that DOES NOT hinder the flexibility (because '.state' exists), nor the code structure
+			(because they are all 'StreamClass'-es with differently implemented methods). 
+
+[DEFINITELY, for v0.4!]
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
@@ -793,8 +807,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			3. the 'AssignmentClass' function; 
 			4. A 'PropertyDescriptor' class; 
 				4.1. This one is for creation of 'Object.defineProperty' signature-objects (the "property descriptors"); 
-		
-		Expand the list; 
+			5. The 'Constructor' type; 
+			6. SelfAssignmentClass; 
 
 	3.2. All the routine writing of tests made one think whether it may not be more desireable to 
 		automate even the process of their WRITING; 
@@ -802,8 +816,10 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Create a library like this containing: 
 
 			1. a path-resolver (for relative/absolute imports); 
-			2. a JS code-generator (based off the 'parsers.js'); 
+			2. a JS code-generator (based off the 'parsers.js' + the JS parser of one's own...); 
 			3. various functions for configurable code-template creation; 
+			4. functions for recursive directory-traveral, automated file-creation, types for specifying a directory structure; 
 		
 		The combination of the three will permit A LOT of different code to just be "magicked away"; 
-		USE THOSE to "re-write" the 'parsers.js' v0.4 [the repetative parts]; 
+		USE THOSE to "re-write" ["pack", the .ts files will be generated (.gitignore-d) - then run], 
+			the tests/their designs for 'parsers.js' v0.4 [the repetative parts]; 

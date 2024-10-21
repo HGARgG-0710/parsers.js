@@ -1,7 +1,6 @@
 import assert from "node:assert"
-import { typeof as type, string } from "@hgargg-0710/one"
+import { typeof as type } from "@hgargg-0710/one"
 const { isObject, isFunction } = type
-const { capitalize } = string
 
 export function importTest(importsList: [string, (x: any) => boolean][]) {
 	return function (module: object) {
@@ -43,6 +42,19 @@ export const specificChildImports = {
 		"Token",
 		"TokenizablePattern",
 		"ValidatablePattern"
+	),
+	Position: objectImports("MultiIndex"),
+	MultiIndex: objectImports("MultiIndexModifier"),
+	Tree: objectImports("TreeWalker"),
+	Stream: objectImports(
+		"InputStream",
+		"LimitedStream",
+		"NestedStream",
+		"PredicateStream",
+		"ProlongedStream",
+		"ReversibleStream",
+		"StreamClass",
+		"TreeStream"
 	)
 }
 
@@ -53,4 +65,6 @@ export const prefixedImportNames =
 	(...importNames: string[]) =>
 		importNames.map((x) => `${prefix}${x}`)
 
-export const namesCapitalized = (...names: string[]) => names.map(capitalize)
+const firstUpper = (x: string) => `${x[0].toUpperCase()}${x.slice(1)}`
+
+export const namesCapitalized = (...names: string[]) => names.map(firstUpper)

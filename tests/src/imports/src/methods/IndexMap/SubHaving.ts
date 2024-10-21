@@ -12,9 +12,6 @@ importTest(
 		...prefixedImportNames("sub")(
 			...namesCapitalized(
 				"delegate",
-				"thisDelegate",
-				"propDelegate",
-				"replaceKey",
 				"set",
 				"delete",
 				"replace",
@@ -22,10 +19,14 @@ importTest(
 				"keys",
 				"values",
 				"default",
-				"index",
-				"byIndex",
-				"getIndex"
-			)
+				"index"
+			).concat([
+				"ThisDelegate",
+				"PropDelegate",
+				"ReplaceKey",
+				"ByIndex",
+				"GetIndex"
+			])
 		)
 	)
 )(SubHaving)

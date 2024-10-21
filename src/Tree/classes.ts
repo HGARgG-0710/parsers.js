@@ -10,9 +10,9 @@ const { id } = _f
 /**
  * Initializes a new `ChildrenTree` without the `[propName]` (default: `"children"`) value (expected to be set by the user).
  *
- * The `.lastChild` is defined as `this.children.length - 1` [via a getter]
+ * The `.lastChild` is defined as `this[propName].length - 1` [via a getter]
  *
- * The `.index` is defined as `childIndex`
+ * The `.index` is defined as `childIndex(propName)`
  */
 export function ChildrenTree(propName: string = "children") {
 	const countGetter = childrenCount(propName)

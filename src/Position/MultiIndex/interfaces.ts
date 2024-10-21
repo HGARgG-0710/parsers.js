@@ -9,4 +9,4 @@ export interface MultiIndex extends PositionObject<number[]> {
 	copy: () => MultiIndex
 }
 
-export * as MultiIndexModifier from "./MultiIndexModifier/interfaces.js"
+export type * as MultiIndexModifier from "./MultiIndexModifier/interfaces.js"

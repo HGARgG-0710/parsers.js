@@ -20,3 +20,5 @@ export interface PositionObject<Type = any> extends Pattern<Type> {
 export interface Posed<Type = any> extends Summat {
 	pos: Type
 }
+
+export type * as MultiIndex from "./MultiIndex/interfaces.js"

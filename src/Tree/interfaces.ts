@@ -12,4 +12,4 @@ export interface Tree<Type = any> extends Summat {
 export type ChildrenTree<Type = any> = InChildrenTree<Type>[]
 export interface MultChildrenTree<Type = any> extends Summat<InMultTreeType<Type>[]> {}
 
-export * as TreeWalker from "./TreeWalker/interfaces.js"
+export type * as TreeWalker from "./TreeWalker/interfaces.js"

@@ -5,4 +5,5 @@ ignore-notes.txt
 wiki
 main.ts
 tsconfig.json
+ts-types.json
 git/

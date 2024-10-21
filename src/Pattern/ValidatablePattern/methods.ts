@@ -12,6 +12,8 @@ import { validateString } from "./utils.js"
 
 const { ValidationFailed } = ValidatablePattern
 
+// * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]': 
+// * 		it returns an empty array both when '!.result[1].length' and when '!!result[0]'; 
 export function validatableStringPatternFlush(this: ValidatableStringPatternType) {
 	this.result = ValidationFailed([])
 }

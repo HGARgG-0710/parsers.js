@@ -41,4 +41,4 @@ export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
 	hash: HashType<KeyType, ValueType, InternalKeyType>
 }
 
-export * as InternalHash from "./InternalHash/interfaces.js"
+export type * as InternalHash from "./InternalHash/interfaces.js"

@@ -10,7 +10,7 @@ import * as PersistentIndexMap from "../../../../../../dist/src/IndexMap/Persist
 importTest(
 	functionImports(
 		...prefixedImportNames("persistentIndexMap")(
-			...namesCapitalized("add", "delete", "unique", "swap", "getIndex")
+			...namesCapitalized("add", "delete", "unique", "swap").concat(["GetIndex"])
 		)
 	)
 )(PersistentIndexMap)

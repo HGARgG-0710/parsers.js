@@ -71,8 +71,8 @@ export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	extensions: Function[]
 }
 
-export * as SubHaving from "./SubHaving/interfaces.js"
-export * as FastLookupTable from "./FastLookupTable/interfaces.js"
-export * as HashMap from "./HashMap/interfaces.js"
-export * as LinearIndexMap from "./LinearIndexMap/interfaces.js"
-export * as PersistentIndexMap from "./PersistentIndexMap/interfaces.js"
+export type * as SubHaving from "./SubHaving/interfaces.js"
+export type * as FastLookupTable from "./FastLookupTable/interfaces.js"
+export type * as HashMap from "./HashMap/interfaces.js"
+export type * as LinearIndexMap from "./LinearIndexMap/interfaces.js"
+export type * as PersistentIndexMap from "./PersistentIndexMap/interfaces.js"
