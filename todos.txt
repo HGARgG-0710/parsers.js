@@ -3,10 +3,6 @@
 
 [v0.3]
 
-REMINDERS: 
-	1. Finish the 'constants.ts' test (added the 'ValidatablePattern' part); 
-	2. Fix the 'imports/utils.ts' test (missing the "small exports"); 
-
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
 
@@ -15,8 +11,6 @@ REMINDERS:
 	
 	The only benefit of actually having the thing is the ability to reference the "big docs"
 
-5. Fix the 'importTest' (add the 'moduleName: string' parameter, to make an 'it(`import: ${moduleName}`, () => {... [current test contents]})')
-
 6. FIX the 'tests/run.ts' to be able to run ONLY SPECIFIED LOCATIONS: 
 	6.1. introduce a path-map [for names shortcuts used from command-line]; 
 	6.2. allow multiple names to be used; 
@@ -24,19 +18,10 @@ REMINDERS:
 
 
 Order of TODO-elimination: 
-	A.3.5. [complete]
-		Left: 
-			1. Stream/ 
-				1.7. StreamClass; 
-				1.8. TreeStream; 
-	5.
-
-	A.1.2. 
-	A.3.3
-	
-	A.1.1.1.
-	
 	A.2
+
+	A.3.3	
+	A.1.1.1.
 
 	A.0.10. 
 	A.3.1.1.
@@ -48,6 +33,7 @@ Order of TODO-elimination:
 	A.0.8. 
 	6.
 
+	[fix test compilation errors]
 	[run the tests]
 
 	B. 
@@ -93,13 +79,6 @@ A. testing:
 
 							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
 							REFACTOR THIS [once again...]; 
-
-		2. regex/ [re-design the old tests]
-			1. Use the 'regexLiteralTest' for: 
-				1.1. Checking simple one-symbol functions; 
-				1.2. Creating signatures for complex test-functions; 	
-					Works like [for 'F - working on regexes']: 
-						1.  for (const [a, b, expectedContents] of ...) elementaryRegexTest(F(a, b), expectedContents)
 
 	2. Design Utils' tests (and write suites for them...): 
 		These are tested in a regular manner via the 'utilTest'; 
@@ -173,17 +152,6 @@ A. testing:
 				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
 					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
 				
-		3.5. imports/ 
-			The imports are flawed - test them properly [import each and every layer inside the library...]; 
-
-			Organize like [the way that the import system works...]: 
-
-				1. classes/ 
-				2. interfaces/ 
-				3. methods/
-				4. regex/
-				5. utils/
-
 		3.6. Pattern/
 			3.6.1. Test instances: 
 				3.6.1. Empty; 
@@ -506,6 +474,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 							For this, use results from samples from one's benchmarks library;  
 			3. Optimize for smaller sizes ONLY when it doesn't impair the memory severely; 
 				When it impairs it at all, choose whether or not to do it based off the chosen memory/speed difference measurements...; 
+				
+				3.1. FOR THIS [maybe] - have specialized "Heuristics" constant-space in 'constants.ts'; 
+					3.1.1. IF doing them - create the heuristics for DIFFERENT ENGINES; 
+					3.1.2. IF oding them - make the 'Heuristics' only the "default value" for transition of sizes; 
+						THE USER must be able to set their own boundries; 
+					3.1.3. IF DOING THEM - check how to "bounrdies" for the increase in efficiency when using 
+						the custom implementation "shifted" as the versions of Node progressed - TRY IT with different node, v8 
+							versions; 
+					3.1.4. IF DOING THEM - other engines to test: 
+						3.1.4.0. V8 (Chrome)
+						3.1.4.1. SpiderMonkey (Firefox)
+
+					[maybe?] Try building the engines from nil, running the benchmarks for heuristics standalone...; 
 	
 	2.15. [maaayyybe??] Bring the old planned stuff for v0.3 back; 
 		That is the 'Parsers/utils.ts' - 'transform', 'delimited', 'consume' [equivalent of 'LimitedStream', uses 'Collection'-s]; 
@@ -697,14 +678,14 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				'StreamValidator' for a complex non-bufferized Stream, then - store the '.size' 
 					after validating successfully, THEN - use the size to iterate more rapidly; 
 		
-		31.1. IMPORTANT: make the '.size', '.buffer', '.state' OPTIONAL PROPERTIES of the 'StreamClass' (like '.pos'); 
+		30.1. IMPORTANT: make the '.size', '.buffer', '.state' OPTIONAL PROPERTIES of the 'StreamClass' (like '.pos'); 
 			The '.buffer' property would REPLACE the 'BufferizedStream' - likewise, the 'SizedStream'-s would be replaced by this; 
 			Let it be: 
 				1. If '.pos' is present - define '.size' as a getter: '() -> (this.pos + 1)'; 
 				2. If '.buffer' is present - define '.size' as a getter: '() -> (this.buffer.size)'
 				3. If neither are present, do '.size = 0' iff '.defaultIsEnd() === false', otherwise - '.size >= 1', with increasing value as the Stream size progresses; 
 			
-			31.1.1. HOWEVER, for performance reasons, one'll now have the need of several-variable 'cached' functions:
+			30.1.1. HOWEVER, for performance reasons, one'll now have the need of several-variable 'cached' functions:
 				0. [add to 'one.js'] the 'multiCached(props: string[])(object: object)' function: 
 					0.1. Based off an object: 
 						Takes in an object, with predefined list of properties; 
@@ -714,6 +695,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					1.1. StreamClass [in terms of given signature objects]; 
 					1.2. Functions that call the StreamClass for BaseClasses [the 'InputStreamBaseClass', ... others]
 					1.3. The GeneratedStream-functions for creation of classes (based off THE SAME sub-signature...); 
+					1.4. the 'baseStreamInitialize' function (that chooses the appropriate definition for the '.init' method...); 
 
 					This may be important, because - when writing libraries, the user may want to override some 
 						of the functionality (for instance - add/remove '.bufferized', '.pos'), and end up creating A NEW 
@@ -746,6 +728,27 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			3. allow '.writab'-ility for the StreamClass properties; 
 				3.1. add an optional '.configure' method, for changing them (interface: ConfigurableStream); 
 					Works in a similar fashion to '.init'; 
+			4. RELOCATE those of 'Parser/'-classes that are (currently) implemented via GeneralParser-functions and ARE Stream-s, 
+				into 'Stream/'. Let ONLY the Parser-s that aren't that remain: 
+
+					[currently]
+					1. TableMap
+					2. LayeredParser
+					[ALSO - move these three under TokenizablePattern/, ValidatablePattern/ and EliminablePattern/!]
+					3. PatternTokenizer 
+					4. PatternValidator
+					5. PatternEliminator	
+			5. MERGE the 'TableMap' and 'LayeredParser' into the 'src/classes.ts'
+			6. DELETE the 'Parser/' directory altogether; 
+				The final project top-level tree would look like: 
+
+					1. IndexMap
+					2. Pattern [this includes the new stuff for working with Indexed-based Pattern-s - Sequence-s]; 
+						AND this includes 'GeneralBuffer' (as they are also 'Pattern'-s); 
+					3. Position
+					4. regex
+					5. Stream
+					6. Tree
 				
 		34.5. The ability to work with several '.stream'-s can be replaced with a utility [pseudocode]: 
 
@@ -796,6 +799,31 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		This will ensure a greater level of predictability, that DOES NOT hinder the flexibility (because '.state' exists), nor the code structure
 			(because they are all 'StreamClass'-es with differently implemented methods). 
+		
+	2.39. IDEA: remove the purely semantic '.input' and '.sub' in favour of '.value' - make EVERYTHING with delegates inside the library into a 'Pattern'; 
+		Then, do: 
+			1. LIBERATE the sub-directories of 'Pattern/': 
+				1. Token
+				2. EnumSpace
+				3. Collection
+				4. GeneralBuffer 
+				5. Sequence
+				6. TokenizablePattern
+				7. ValidatablePattern
+				8. EliminablePattern
+			2. Make the 'Token.value' into 'export const value = (x: Pattern) => x.value' - an export of 'Pattern/utils.ts'; 
+			3. Make the 'Token.type' into 'export const type = (x: TokenInstance) => x.type' - an export of 'Token/utils.ts'; 
+			4. Make the 'Token.is' into 'export const isToken = ...' - an export of 'Token/utils.ts'
+
+	2.40. Introduce a new Position class - MultilinePosition
+		Basically, a pair of numbers: 
+			(linesNum, symsNum)	
+		Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
+		Which correspond to prior number of newlines and prior number of symbols; 
+		Used frequently throughout for things like debug information; 
+		The '.convert()' would play very nicely with it...; 
+
+	2.41. After re-structuring, walk rigorously through the 'src/utils.ts' - delete things that are no longer necessary (like 'firstStream', for instance...); 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

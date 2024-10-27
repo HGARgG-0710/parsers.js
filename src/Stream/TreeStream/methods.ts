@@ -1,7 +1,5 @@
 import type { Tree } from "../../Tree/interfaces.js"
-import type { EffectiveTreeStream, TreeStream } from "./interfaces.js"
-
-import { TreeStream as TreeStreamConstructor } from "./classes.js"
+import type { EffectiveTreeStream } from "./interfaces.js"
 
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import { superInit } from "../StreamClass/utils.js"

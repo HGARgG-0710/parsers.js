@@ -1,10 +1,11 @@
 import {
 	LimitedStream,
 	PatternValidator,
-	StreamClass
+	StreamClass,
+	ValidatablePattern
 } from "../../../dist/src/constants.js"
 import { arrayConstTest, constTest } from "./lib/constants.js"
-import { namespace } from "lib/lib.js"
+import { namespace, repeat } from "lib/lib.js"
 
 import { boolean, typeof as type } from "@hgargg-0710/one"
 const { T } = boolean
@@ -30,9 +31,36 @@ const { NoFullCoverage, FullCoverage, ValidationError } = PatternValidator
 namespace("PatternValidator", () => {
 	constTest("NoFullCoverage", NoFullCoverage, null)
 	constTest("FullCoverage", FullCoverage, true)
-	for (let i = 0; i < 20; ++i)
+	repeat(20, (i) =>
 		arrayConstTest("ValidationError", ValidationError(i), 2, [
 			[0, (x) => x === false],
 			[1, isNumber]
 		])
+	)
+})
+
+// * ValidatablePattern
+const { ValidationPassed, ValidationFailed, FaultyElement } = ValidatablePattern
+namespace("ValidatablePattern", () => {
+	const letterCheck = (letter: string) => (x: string) => x === letter && x.length === 1
+	const testLetters = ["S", "P"]
+	const falseCheck = (x: boolean) => x === false
+
+	for (const letter of testLetters)
+		arrayConstTest("ValidationPassed", ValidationPassed([letter]), 2, [
+			[0, (x) => x === true],
+			[1, letterCheck(letter)]
+		])
+
+	for (const letter of testLetters) {
+		arrayConstTest("ValidationFailed", ValidationFailed([letter]), 2, [
+			[0, falseCheck],
+			[1, letterCheck(letter)]
+		])
+
+		arrayConstTest("FaultyElement", FaultyElement(letter), 2, [
+			[0, falseCheck],
+			[1, (x) => x === letter]
+		])
+	}
 })

@@ -1,15 +1,18 @@
 import assert from "node:assert"
 import { typeof as type } from "@hgargg-0710/one"
+import { importName } from "lib/lib.js"
 const { isObject, isFunction } = type
 
 export function importTest(importsList: [string, (x: any) => boolean][]) {
-	return function (module: object) {
-		for (const [importName, importType] of importsList)
-			assert(importName in module && importType(module[importName]))
+	return function (moduleName: string, module: object) {
+		importName(moduleName, () => {
+			for (const [importName, importType] of importsList)
+				assert(importName in module && importType(module[importName]))
 
-		const importsNum = importsList.length
-		assert.strictEqual(new Set(importsList.map((x) => x[0])).size, importsNum)
-		assert.strictEqual(Object.keys(module).length, importsNum)
+			const importsNum = importsList.length
+			assert.strictEqual(new Set(importsList.map((x) => x[0])).size, importsNum)
+			assert.strictEqual(Object.keys(module).length, importsNum)
+		})
 	}
 }
 
@@ -23,11 +26,15 @@ export const functionImports = ((...strings: string[]) =>
 	...strings: string[]
 ) => [string, (x: any) => boolean][]
 
-export const topLevelImports = importTest(
-	objectImports("IndexMap", "Parser", "Pattern", "Position", "Stream", "Tree")
-)
-
 export const specificChildImports = {
+	toplevel: objectImports(
+		"IndexMap",
+		"Parser",
+		"Pattern",
+		"Position",
+		"Stream",
+		"Tree"
+	),
 	IndexMap: objectImports(
 		"FastLookupTable",
 		"HashMap",
@@ -57,6 +64,8 @@ export const specificChildImports = {
 		"TreeStream"
 	)
 }
+
+export const topLevelImports = importTest(specificChildImports.toplevel)
 
 export const emptyImportTest = importTest([])
 

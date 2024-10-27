@@ -1,20 +1,16 @@
-import { comparisonUtilTest, utilTest } from "lib/lib.js"
-import { it } from "node:test"
-import { regex_contents } from "../../../../dist/src/regex.js"
+import { utilTest } from "lib/lib.js"
 
-export const regexContentsTest = utilTest(regex_contents, "regexContents")
+import { regex as _regex } from "../../../../dist/main.js"
+import { complexRegexTest, elementaryRegexTest } from "./lib.js"
+const { regex_contents, regex, and, char_ranges } = _regex
 
-export function regex(utilName: string, regexp: RegExp, post: () => void) {
-	it(`regex: [${regexp}] (from ${utilName})`, post)
-}
+export const regex_contents_test = utilTest(regex_contents, "regexContents")
+export const regex_test = elementaryRegexTest("regex", regex) as (
+	x: string | RegExp,
+	string: string
+) => void
 
-const regexLiteralTest = (util: Function) =>
-	comparisonUtilTest(
-		(regex: RegExp, contents: string) => regex_contents(regex) === contents
-	)(util, "literal")
-
-export function elementaryRegexTest(utilName: string, regexUtil: Function) {
-	return function (regexp: RegExp, contents: string) {
-		regex(utilName, regexp, () => regexLiteralTest(regexUtil)(regexp, contents))
-	}
-}
+export const [and_test, char_ranges_test] = [
+	["and", and],
+	["char_ranges", char_ranges]
+].map(([name, util]) => complexRegexTest(name as string, util as Function))

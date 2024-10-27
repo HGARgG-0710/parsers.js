@@ -258,6 +258,15 @@ export const [method, util] = ["method", "util"].map(
 			it(`${typeString}: ${name}(${inputDescribe(args)})`, post)
 )
 
-export const [classTest, property, namespace] = ["class", "property", "namespace"].map(
+export const [classTest, property, namespace, importName] = [
+	"class",
+	"property",
+	"namespace",
+	"import"
+].map(
 	(typeString) => (name: string, post: () => void) => it(`${typeString}: ${name}`, post)
 )
+
+export function repeat(n: number, block: (i?: number) => void) {
+	for (let i = 0; i < n; ++i) block(i)
+}

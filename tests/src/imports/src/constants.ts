@@ -6,7 +6,7 @@ const { isNumber, isBoolean, isNull, isFunction } = type
 
 importTest(objectImports("StreamClass", "LimitedStream", "PatternValidator"))(constants)
 
-const { StreamClass, LimitedStream, PatternValidator } = constants
+const { StreamClass, LimitedStream, PatternValidator, ValidatablePattern } = constants
 
 // * StreamClass
 importTest([
@@ -25,3 +25,10 @@ importTest([
 	["FullCoverage", isBoolean],
 	["ValidationError", isFunction]
 ])(PatternValidator)
+
+// * ValidatablePattern
+importTest([
+	["ValidationPassed", isFunction],
+	["ValidationFailed", isFunction],
+	["FaultyElement", isFunction]
+])(ValidatablePattern)
