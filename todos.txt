@@ -3,6 +3,9 @@
 
 [v0.3]
 
+REMINDERS: 
+	1. [when running the 'import' tests] The 'methods.ts' for 'TokenizablePattern' and 'ValidatablePattern' CAN FAIL (a lot of change there has happened - need an update); 
+
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
 
@@ -18,8 +21,6 @@
 
 
 Order of TODO-elimination: 
-	A.2
-
 	A.3.3	
 	A.1.1.1.
 
@@ -80,10 +81,6 @@ A. testing:
 							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
 							REFACTOR THIS [once again...]; 
 
-	2. Design Utils' tests (and write suites for them...): 
-		These are tested in a regular manner via the 'utilTest'; 
-		2.1. Add the 'constructor' tests to the copying utils (list those...); 
-		2.2. Get rid of the 'ambigiousUtilTest' (or, if not feasible - remove where unneeded); 
 	3. Implement test suites: 
 		3.1. Stream-s: 
 			3.1.1. "WrapperStream"-combinations; 
@@ -162,6 +159,22 @@ A. testing:
 		3.8. IndexMap/
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
 		
+		3.9. utils/	
+			1. Walk through the project tree, enumerating the 'utils.ts' files; 
+				1. IndexMap/utils.ts [design - check]
+				2. HashMap/utils.ts [design - check]
+				3. PersistentIndexMap/utils.ts [design - check]
+				4. Parser/utils.ts [design - check]
+				5. Pattern/utils.ts [design - check]
+				6. Token/utils.ts [design - check]
+				7. TokenizablePattern/utils.ts [design - check]
+				8. ValidatablePattern/utils.ts [design - check]
+				9. Position/utils.ts [design - check]
+				10. InputStream/utils.ts [design - check]
+				11. StreamClass/utils.ts [design - check]
+				12. Tree/utils.ts		 [design - check; VERIFY TESTS FIRST...]
+				13. src/utils.ts		 [design - check]
+		
 B. documentation (change/fix it...);
 	B.1. Create new docs pages:
 		B.1.1. Home: 
@@ -197,6 +210,11 @@ B. documentation (change/fix it...);
 				NOTE [1]: identifying NestedStream-s that are elements as a part of a recursively-defined StreamTokenizer; 
 					To define this is (typically) trivial, via having '.type' of a given 'Stream' to be 'undefined', or 
 						not a part of a given NestedStream's '.typesTable';
+					
+				NOTE [2]: 'DelegateValidatablePattern': 
+					
+					1. the '.validator' is expected to ALSO remove any non-'Type' elements out of the 'result'; 
+					2. when calling '.validate', the 'result[0]' should be 'true' ONLY when the source IS validatable (i.e. not already determined valid - contains only the 'Type' elements); 
 					
 		B1.7. Utils: 
 			Categorize the utils ('is'-functions, 'from'/'to'-functions [ex: fromPairsList, toInputStream], 'uni'-functions, and so forth...); 
@@ -824,6 +842,29 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		The '.convert()' would play very nicely with it...; 
 
 	2.41. After re-structuring, walk rigorously through the 'src/utils.ts' - delete things that are no longer necessary (like 'firstStream', for instance...); 
+	2.42. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
+	2.43. Refactor the 'isType: (x: any) => x is Type' in: 
+		1. TokenizablePattern; 
+		[and other places where it appears...]
+	2.44. About validation and parsing: 
+		This is a somewhat worrysome part of the library, currently, as:
+
+			1. Validation happens separate from parsing, despite using the same abstraction (ex: ValidatablePattern and TokenizablePattern); 
+			2. '1.' causes the entire process of 'validate + parse' to take 2x the time (need another loop); 
+
+		For this reason, a TODO: 
+
+			Create a new abstraction that would encompass BOTH parsing and validation; 
+			Granted, it would take more time than a simple parsing procedure, 
+				but (and this is CRUCIAL) it must take LESS time than combined parsing + validation (in exchange for increased memory); 
+			
+		This is already doable (manually) using 'StreamTokenizer', but one would love to make it a part of the library (general abstractions + interface + algorithm); 
+		'PatternTokenizer' and 'PatternValidator' are a no-go here. It should be a case of 'StreamTokenizer'; 
+
+		Ideas: 
+			0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
+			1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
+			2. Contains a field of '.validator', return values are, then ' const token = this.handler(this.input); return [this.validator(token), token]'
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

@@ -28,6 +28,8 @@ importTest([
 
 // * ValidatablePattern
 importTest([
+	["ValidMatch", isBoolean],
+	["InvalidMatch", isBoolean],
 	["ValidationPassed", isFunction],
 	["ValidationFailed", isFunction],
 	["FaultyElement", isFunction]

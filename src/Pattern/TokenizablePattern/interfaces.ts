@@ -3,11 +3,19 @@ import type { Pattern, Flushable, Resulting } from "../interfaces.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 
+export type FreeTokenizer<Type = any, InType = any> = <OutType = any>(
+	value: Type,
+	key: InType,
+	handler: SummatFunction<any, Type, OutType>
+) => TokenizationResult<Type, OutType>
+
+export type MethodTokenizer<Type = any, InType = any, OutType = any> = (
+	key: InType,
+	handler: SummatFunction<any, Type, OutType>
+) => TokenizationResult<Type, OutType>
+
 export interface Tokenizable<Type = any, InType = any, OutType = any> extends Summat {
-	tokenize: (
-		key: InType,
-		handler: SummatFunction<any, InType, OutType>
-	) => TokenizationResult<Type, OutType>
+	tokenize: MethodTokenizer<Type, InType, OutType>
 }
 
 export interface TokenizablePattern<Type = any, InType = any, OutType = any>
@@ -16,8 +24,8 @@ export interface TokenizablePattern<Type = any, InType = any, OutType = any>
 		Resulting<TokenizationResult<Type, OutType>>,
 		Tokenizable<Type, InType, OutType> {}
 
-export type TokenizableStringPattern<OutType = any> = TokenizablePattern<
-	string,
-	RegExp | string,
-	OutType
->
+export interface DelegateTokenizablePattern<Type = any, InType = any, OutType = any>
+	extends TokenizablePattern<Type, InType, OutType> {
+	tokenizer: FreeTokenizer<Type, InType>
+	isType: (x: any) => x is Type
+}

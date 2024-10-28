@@ -1,43 +1,49 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { InvalidEntries, ValidationOutput } from "./interfaces.js"
+import type {
+	FaultyElement,
+	InvalidEntries,
+	InvalidMatch,
+	ValidationOutput,
+	ValidMatch
+} from "./interfaces.js"
 
 import { ValidatablePattern } from "src/constants.js"
-
-import { tokenizeMatched } from "../TokenizablePattern/utils.js"
-import { matchString } from "../utils.js"
+import { tokenizeString } from "../TokenizablePattern/utils.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
 const { isArray } = type
 const { T } = boolean
 
-const notTrue = (x: any) => x !== true
+const { ValidationPassed, ValidationFailed, FaultyElement, InvalidMatch, ValidMatch } =
+	ValidatablePattern
 
-const { ValidationPassed, ValidationFailed, FaultyElement } = ValidatablePattern
+export const notValidMatch = (x: any) => x !== ValidMatch
 
 export function validateString(
 	string: string,
 	key: string | RegExp,
-	handler: SummatFunction<any, string, boolean>
+	handler: SummatFunction<any, string, ValidMatch | InvalidMatch>
 ): ValidationOutput<string> {
-	const matched = matchString(string, key)
-	const tokenized: (string | boolean | [false, string])[] = tokenizeMatched(
-		matched,
-		string.split(key),
-		handler
-	)
+	const [matched, , tokenized] = tokenizeString(string, key, handler)
+	return validateTokenized(matched, tokenized)
+}
 
+export function validateTokenized<Type = any>(
+	matched: Type[],
+	tokenized: (Type | ValidMatch | InvalidMatch | FaultyElement<Type>)[]
+): ValidationOutput<Type> {
 	let success: boolean = true
 	for (let i = tokenized.length; i--; ) {
 		const current = tokenized[i]
-		if (current === false) {
+		if (current === InvalidMatch) {
 			tokenized[i] = FaultyElement(matched[i])
 			success = false
 		}
 	}
 
 	return success
-		? ValidationPassed<string>(tokenized.filter(notTrue) as string[])
-		: ValidationFailed<string>(tokenized as (string | true | [false, string])[])
+		? ValidationPassed(tokenized.filter(notValidMatch) as Type[])
+		: ValidationFailed(tokenized as (Type | ValidMatch | FaultyElement<Type>)[])
 }
 
 export function analyzeValidity<Type = any>(
@@ -50,13 +56,7 @@ export function analyzeValidity<Type = any>(
 	const final: InvalidEntries<Type> = []
 	for (let i = 0; i < contents.length; ++i) {
 		const current = contents[i]
-		if (
-			isArray<false | Type>(current) &&
-			current.length === 2 &&
-			current[0] === false &&
-			isType(current[1])
-		)
-			final.push([i, current[1]])
+		if (isFaultyElement(current, isType)) final.push([i, current[1]])
 	}
 
 	return final
@@ -67,3 +67,12 @@ export const analyzedIndex = <Type = any>(analyzed: InvalidEntries<Type>, i: num
 
 export const analyzedValue = <Type = any>(analyzed: InvalidEntries<Type>, i: number) =>
 	analyzed[i][1]
+
+export const isFaultyElement = <Type = any>(
+	x: ValidMatch | Type | FaultyElement<Type>,
+	isType: (x: any) => x is Type
+): x is FaultyElement<Type> =>
+	isArray<InvalidMatch | Type>(x) &&
+	x.length === 2 &&
+	x[0] === InvalidMatch &&
+	isType(x[1])

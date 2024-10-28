@@ -1,31 +1,40 @@
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type {
+	DelegateValidatablePattern,
+	FreeValidator,
+	MethodValidator,
 	ValidatableStringPattern as ValidatableStringPatternType,
 	ValidationOutput
 } from "./interfaces.js"
-import {
-	validatableStringPatternValidate,
-	validatableStringPatternFlush
-} from "./methods.js"
+import { delegateValidatablePatternValidate } from "./methods.js"
 import { FlushablePattern } from "../classes.js"
+import { validateString } from "./utils.js"
 
-export class ValidatableStringPattern
-	extends FlushablePattern<string>
-	implements ValidatableStringPatternType
-{
-	result: ValidationOutput<any>
-	flush: () => void
-	validate: (
-		key: string | RegExp,
-		handler: SummatFunction<any, string, boolean>
-	) => ValidationOutput<string>
+export function DelegateValidatablePattern<Type = any, KeyType = any>(
+	validator: FreeValidator<Type, KeyType>
+) {
+	class delegateValidatablePattern
+		extends FlushablePattern<Type>
+		implements DelegateValidatablePattern<Type, KeyType>
+	{
+		result: ValidationOutput<Type>
+		validate: MethodValidator<Type, KeyType>
+		validator: FreeValidator<Type, KeyType>
 
-	constructor(value: string) {
-		super(value)
+		constructor(value: Type) {
+			super(value)
+		}
 	}
+
+	Object.defineProperties(delegateValidatablePattern.prototype, {
+		validate: { value: delegateValidatablePatternValidate },
+		validator: { value: validator }
+	})
+
+	return delegateValidatablePattern
 }
 
-Object.defineProperties(ValidatableStringPattern.prototype, {
-	validate: { value: validatableStringPatternValidate },
-	flush: { value: validatableStringPatternFlush }
-})
+export const ValidatableStringPattern: new (
+	value: string
+) => ValidatableStringPatternType = DelegateValidatablePattern<string, string | RegExp>(
+	validateString
+)

@@ -194,14 +194,10 @@ export function comparisonUtilTest(compare: (x: any, y: any) => boolean) {
 	}
 }
 
-export function ambigiousUtilTest(testedUtil: Function, utilName: string) {
-	return function (compare: (x: any, y: any) => boolean) {
-		return function (expected: any, ...input: any[]) {
-			util(
-				utilName,
-				() => assert(compare(testedUtil(...input), expected)),
-				...input
-			)
+export function predicateUtilTest(pred: (x: any) => boolean) {
+	return function (testedUtil: Function, utilName: string) {
+		return function (...input: any[]) {
+			util(utilName, () => assert(pred(testedUtil(...input))), ...input)
 		}
 	}
 }
@@ -221,6 +217,16 @@ export function tripleUtilTest(
 			() => assert(highCompare(util(...input), expected, lowCompare)),
 			...input
 		)
+	}
+}
+
+export function flexibleUtilTest(testedUtil: Function, utilName: string) {
+	return function (
+		expected: any,
+		compare: (x: any, y: any) => boolean,
+		...input: any[]
+	) {
+		util(utilName, () => assert(compare(testedUtil(...input), expected)), ...input)
 	}
 }
 

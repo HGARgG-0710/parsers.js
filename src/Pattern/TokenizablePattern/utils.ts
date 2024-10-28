@@ -5,15 +5,14 @@ import { inplace } from "@hgargg-0710/one"
 const { insert } = inplace
 
 export function tokenizeString<OutType = any>(
-	value: string,
+	string: string,
 	key: RegExp | string,
-	handler: SummatFunction<any, string, OutType>
-) {
-	return tokenizeMatched<string, OutType>(
-		matchString(value, key),
-		value.split(key),
-		handler
-	)
+	handler: SummatFunction<any, any, OutType>
+): [string[], string[], (string | OutType)[]] {
+	const matched = matchString(string, key)
+	const split = string.split(key)
+	const tokenized = tokenizeMatched(matched, split, handler)
+	return [matched, split, tokenized]
 }
 
 export function tokenizeMatched<InTypes = any, OutType = any>(

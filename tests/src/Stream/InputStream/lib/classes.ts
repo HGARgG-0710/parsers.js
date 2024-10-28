@@ -17,7 +17,7 @@ import {
 import { function as _f } from "@hgargg-0710/one"
 const { and } = _f
 
-const isInputStream = and(isSuperable, isInputted) as (
+export const isInputStream = and(isSuperable, isInputted) as (
 	x: any
 ) => x is EffectiveInputStream
 

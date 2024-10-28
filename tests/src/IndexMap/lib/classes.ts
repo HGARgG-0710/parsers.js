@@ -48,7 +48,7 @@ function indexMapEquality<KeyType = any, ValueType = any>(
 	return true
 }
 
-const isIndexMap = and(
+export const isIndexMap = and(
 	structCheck({
 		keys: isArray,
 		values: isArray,

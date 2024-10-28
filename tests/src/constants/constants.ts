@@ -40,11 +40,15 @@ namespace("PatternValidator", () => {
 })
 
 // * ValidatablePattern
-const { ValidationPassed, ValidationFailed, FaultyElement } = ValidatablePattern
+const { ValidationPassed, ValidationFailed, FaultyElement, ValidMatch, InvalidMatch } =
+	ValidatablePattern
 namespace("ValidatablePattern", () => {
 	const letterCheck = (letter: string) => (x: string) => x === letter && x.length === 1
 	const testLetters = ["S", "P"]
 	const falseCheck = (x: boolean) => x === false
+
+	constTest("ValidMatch", ValidMatch, true)
+	constTest("InvalidMatch", InvalidMatch, false)
 
 	for (const letter of testLetters)
 		arrayConstTest("ValidationPassed", ValidationPassed([letter]), 2, [

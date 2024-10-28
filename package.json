@@ -25,7 +25,8 @@
 		"test": "cd tests && tsc --project tsconfig.json && cd ..",
 		"build": "tsc --project tsconfig.json",
 		"types": "tsc --project ts-types.json",
-		"all": "npm run build && npm run types && npm run test"
+		"build-all": "npm run build && npm run types",
+		"all": "npm run build-all && npm run test"
 	},
 	"devDependencies": {
 		"@hgargg-0710/summat.ts": "^0.0.1",

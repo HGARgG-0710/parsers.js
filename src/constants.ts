@@ -1,4 +1,8 @@
-import type { ValidationOutput } from "./Pattern/ValidatablePattern/interfaces.js"
+import type {
+	InvalidMatch,
+	ValidationOutput,
+	ValidMatch
+} from "./Pattern/ValidatablePattern/interfaces.js"
 
 import type { ValidationError } from "./Parser/PatternValidator/interfaces.js"
 import { boolean } from "@hgargg-0710/one"
@@ -22,13 +26,16 @@ export namespace PatternValidator {
 }
 
 export namespace ValidatablePattern {
+	export const ValidMatch: ValidMatch = true
+	export const InvalidMatch: InvalidMatch = false
+
 	export const ValidationPassed = <Type = any>(
 		result: Type[]
-	): ValidationOutput<Type> => [true, result]
+	): ValidationOutput<Type> => [ValidMatch, result]
 
 	export const ValidationFailed = <Type = any>(
 		result: (Type | true | [false, Type])[]
-	): ValidationOutput<Type> => [false, result]
+	): ValidationOutput<Type> => [InvalidMatch, result]
 
 	export const FaultyElement = ValidationFailed as <Type = any>(
 		x: Type
