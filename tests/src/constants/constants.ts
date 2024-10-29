@@ -2,7 +2,8 @@ import {
 	LimitedStream,
 	PatternValidator,
 	StreamClass,
-	ValidatablePattern
+	ValidatablePattern,
+	regex
 } from "../../../dist/src/constants.js"
 import { arrayConstTest, constTest } from "./lib/constants.js"
 import { namespace, repeat } from "lib/lib.js"
@@ -68,3 +69,7 @@ namespace("ValidatablePattern", () => {
 		])
 	}
 })
+
+// * rege
+const { IndefiniteOccurrences } = regex
+namespace("regex", () => constTest("IndefiniteOccurrences", IndefiniteOccurrences, ""))

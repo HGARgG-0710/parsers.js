@@ -1,6 +1,5 @@
-import { utilTest } from "lib/lib.js"
 import { regex } from "../../../../dist/main.js"
-import { complexRegexTest, elementaryRegexTest } from "./lib.js"
+import { regexTest } from "./lib.js"
 
 const {
 	charclass,
@@ -29,6 +28,7 @@ const {
 
 export const [
 	digit_test,
+	non_digit_test,
 	word_test,
 	non_word_test,
 	space_test,
@@ -66,10 +66,10 @@ export const [
 	["caret", caret],
 	["uni_hex_2", uni_hex_2],
 	["uni_hex_4", uni_hex_4]
-].map(([name, util]) => elementaryRegexTest(name as string, util as Function))
+].map(([name, util]) => regexTest(name as string, util as Function))
 
 export const [charclass_test, neg_charclass_test, or_test] = [
 	["charclass", charclass],
 	["neg_charclass", neg_charclass],
 	["or", or]
-].map(([util, name]) => complexRegexTest(name as string, util as Function))
+].map(([util, name]) => regexTest(name as string, util as Function))

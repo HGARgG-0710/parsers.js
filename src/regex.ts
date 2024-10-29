@@ -8,8 +8,7 @@ export const char_ranges = (...ranges: (string | [string, string])[]) =>
 export const regex_contents = (r: RegExp) =>
 	((x) => x.slice(1, x.length - 1 - r.flags.length))(r.toString())
 
-export const and = (...regexes: RegExp[]) =>
-	regex(non_bracket(regex(regexes.map(non_bracket).join(""))))
+export const and = (...regexes: RegExp[]) => regex(regexes.map(non_bracket).join(""))
 
 export const regex = (string: string | RegExp) => new RegExp(string)
 

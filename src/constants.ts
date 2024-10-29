@@ -1,10 +1,11 @@
+import type { ValidationError } from "./Parser/PatternValidator/interfaces.js"
+
 import type {
 	InvalidMatch,
 	ValidationOutput,
 	ValidMatch
 } from "./Pattern/ValidatablePattern/interfaces.js"
 
-import type { ValidationError } from "./Parser/PatternValidator/interfaces.js"
 import { boolean } from "@hgargg-0710/one"
 const { T } = boolean
 
@@ -40,4 +41,8 @@ export namespace ValidatablePattern {
 	export const FaultyElement = ValidationFailed as <Type = any>(
 		x: Type
 	) => [false, Type]
+}
+
+export namespace regex {
+	export const IndefiniteOccurrences = ""
 }

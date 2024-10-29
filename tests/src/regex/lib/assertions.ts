@@ -1,4 +1,4 @@
-import { elementaryRegexTest } from "./lib.js"
+import { regexTest } from "./lib.js"
 import { regex } from "../../../../dist/main.js"
 
 const {
@@ -30,4 +30,4 @@ export const [
 	["non_word_boundry", non_word_boundry],
 	["begin", begin],
 	["end", end]
-].map(([name, util]) => elementaryRegexTest(name as string, util as Function))
+].map(([name, util]) => regexTest(name as string, util as Function))

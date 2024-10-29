@@ -1,7 +1,7 @@
 import regex, { regex_contents } from "src/regex.js"
 import { non_bracket } from "./groups.js"
 
-export function occurences(...args: [number, (number | string)?]) {
+export function occurrences(...args: [number, (number | "")?]) {
 	return (regexp: RegExp) =>
 		regex(`${non_bracket(regexp)}{${args.slice(0, 2).join(",")}}`)
 }

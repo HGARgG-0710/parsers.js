@@ -1,6 +1,7 @@
 import { utilTest } from "lib/lib.js"
+import {  regexTest } from "./lib.js"
+
 import { regex } from "../../../../dist/main.js"
-import { elementaryRegexTest } from "./lib.js"
 const { bracket, non_bracket, capture, non_capture, named_capture, bref, named_bref } =
 	regex.groups
 
@@ -15,4 +16,4 @@ export const [capture_test, non_capture_test, named_capture_test, bref_test] = [
 	["named_capture", named_capture],
 	["bref", bref],
 	["named_bref", named_bref]
-].map(([name, util]) => elementaryRegexTest(name as string, util as Function))
+].map(([name, util]) => regexTest(name as string, util as Function))

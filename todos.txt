@@ -3,7 +3,7 @@
 
 [v0.3]
 
-REMINDERS: 
+REMINDERS [2.]: 
 	1. [when running the 'import' tests] The 'methods.ts' for 'TokenizablePattern' and 'ValidatablePattern' CAN FAIL (a lot of change there has happened - need an update); 
 
 4. [Part of the docuementation effort] Add the JSDoc; 
@@ -132,7 +132,12 @@ A. testing:
 					8. PositionalValidator; 
 
 		3.3. regex/
-			Re-structure to fit the current mini-testing framework (expand the framework appropriately); 
+			1. Walk the files of 'tests\regex\'
+				4. flags.ts
+				5. groups.ts
+				6. quantifiers.ts
+
+			2. Create a set of tests for each utility function; 
 
 		3.4. benchmarks/	
 			TODO: TO ENSURE the usefulness of the 'imports' tests, use the '.'-imports here (meaning: 'import {X} from "main.js"; const {...} = X[...]...'); 	
@@ -724,10 +729,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		1. more use of 'specificChildImports'
 		2. the 'prefixedNames' + 'namesCapitalized' - appears lots more than once, take out; 
 		3. Make better use of the 'namesCapitalized'; 
-	2.32. [general; TypeScript - readability] Replace the 'o.x as Type' (where: 'o.x === undefined' is possible) with 'o.x!'; 
-		Shorter, more concise - better communicates intent; 
 
-	2.33. [important] Replace the 'Parser/' functionality completely with special cases of 'StreamTokenizer': 
+	2.32. [important] Replace the 'Parser/' functionality completely with special cases of 'StreamTokenizer': 
 		Because: 
 			34.1. '.result' can be replaced with '.curr'; 
 			34.2. '.finished' can be replaced with '.isEnd'; 
@@ -779,16 +782,16 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				})
 			}
 	
-	2.34. create implementation for : 'GeneralBuffer' - new array-generalizing interface; 
+	2.33. create implementation for : 'GeneralBuffer' - new array-generalizing interface; 
 		The thing used by the 'BufferizedStream', 'bufferize'; 
 		It is also a 'Collection' (in that, there is a '.value' and '.push' properties), 
 			so it is usable with 'array' utility and others; 
 	
-	2.35. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
+	2.34. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
 		Example [1]: a 'classes.ts/interfaces.ts' with THE ONLY export will have it as default, besides referencing by name; 
 		Example [2]: when a 'classes.ts/interafaces.ts' has an export with THE SAME name as the module, the export is default (besides being present as of itself); 
 
-	2.36. Make more active use of 'abstract' classes; 
+	2.35. Make more active use of 'abstract' classes; 
 		Examples: BasicSubHaving, BasicPattern - they STILL can be instantiated (unlike FlushablePattern), 
 			but ARE 'abstract', because provide no functionality as of themselves (Pointer is the exception, it's a semantic-marker); 
 
@@ -796,13 +799,13 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				[ones that aren't redundant - remember the 'replace .input with .sub' 
 					and '.state is an optional StreamClass property' todos...]; 
 				
-	2.37. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
+	2.36. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
 		This is largely a question of how fast '.split' is compared to building the array manually using the indicies information from 'matchAll' (that is, a large sequence of '.slice()'-es); 
 		Potentially, this could be a large time saving (if '.slice()'-es are relatively short), but otherwise - could be a waste of memory (additional strings allocated without need); 
 			Then, of course comes the question of whether the strings are allocated at all; 
 			BENCHMARK IT; 
 
-	2.38 [implementation - cleanup] Make the '.response', '.lastLevelWithSibilngs' stuff in 'TreeStream' a part of COMPULSORY '.state' field [and '.walker' as a part of '.vars']; 
+	2.37 [implementation - cleanup] Make the '.response', '.lastLevelWithSibilngs' stuff in 'TreeStream' a part of COMPULSORY '.state' field [and '.walker' as a part of '.vars']; 
 		2.38.1. REPEAT the trick with the other library Streams' properties (ex: lookAhead, hasLookahead, and others...); 
 		2.38.2. ALSO - make the '.pos: MultiIndex' on 'TreeStream' a part of '.state' ALSO! 
 
@@ -818,7 +821,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		This will ensure a greater level of predictability, that DOES NOT hinder the flexibility (because '.state' exists), nor the code structure
 			(because they are all 'StreamClass'-es with differently implemented methods). 
 		
-	2.39. IDEA: remove the purely semantic '.input' and '.sub' in favour of '.value' - make EVERYTHING with delegates inside the library into a 'Pattern'; 
+	2.38. IDEA: remove the purely semantic '.input' and '.sub' in favour of '.value' - make EVERYTHING with delegates inside the library into a 'Pattern'; 
 		Then, do: 
 			1. LIBERATE the sub-directories of 'Pattern/': 
 				1. Token
@@ -833,7 +836,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			3. Make the 'Token.type' into 'export const type = (x: TokenInstance) => x.type' - an export of 'Token/utils.ts'; 
 			4. Make the 'Token.is' into 'export const isToken = ...' - an export of 'Token/utils.ts'
 
-	2.40. Introduce a new Position class - MultilinePosition
+	2.39. Introduce a new Position class - MultilinePosition
 		Basically, a pair of numbers: 
 			(linesNum, symsNum)	
 		Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
@@ -841,12 +844,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Used frequently throughout for things like debug information; 
 		The '.convert()' would play very nicely with it...; 
 
-	2.41. After re-structuring, walk rigorously through the 'src/utils.ts' - delete things that are no longer necessary (like 'firstStream', for instance...); 
-	2.42. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
-	2.43. Refactor the 'isType: (x: any) => x is Type' in: 
+	2.40. After re-structuring, walk rigorously through the 'src/utils.ts' - delete things that are no longer necessary (like 'firstStream', for instance...); 
+	2.41. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
+	2.42. Refactor the 'isType: (x: any) => x is Type' in: 
 		1. TokenizablePattern; 
 		[and other places where it appears...]
-	2.44. About validation and parsing: 
+	2.43. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
 			1. Validation happens separate from parsing, despite using the same abstraction (ex: ValidatablePattern and TokenizablePattern); 
@@ -865,6 +868,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
 			1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
 			2. Contains a field of '.validator', return values are, then ' const token = this.handler(this.input); return [this.validator(token), token]'
+	2.44. [maybe? clarity] Add 'g', 'v', 's' and other regex flags to the 'constants.regex'? 	
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

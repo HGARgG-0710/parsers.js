@@ -30,15 +30,14 @@ export const nil = () => /\0/
 const uni_prop_pair = (x: string | [string, string]) =>
 	isArray(x) ? `${x[0]}=${x[1]}` : x
 
-export const uni_hex_5 = (code: string) => () => regex(`\\u{${code}}`)
+export const uni_hex_5 = (code: string | number) => () => regex(`\\u{${code}}`)
 export const [uni_prop, non_uni_prop] = ["p", "P"].map(
 	(l) => (code: string | [string, string]) => () =>
 		regex(`\\${l}{${uni_prop_pair(code)}}`)
 )
 
 export const [caret, uni_hex_2, uni_hex_4] = ["c", "x", "u"].map(
-	(l) => (letter: string) => () => regex(`\\${l}${letter}`)
+	(l) => (letter: string | number) => () => regex(`\\${l}${letter}`)
 )
 
-export const or = (...regexes: RegExp[]) =>
-	regex(non_bracket(regex(regexes.map(non_bracket).join("|"))))
+export const or = (...regexes: RegExp[]) => regex(regexes.map(non_bracket).join("|"))
