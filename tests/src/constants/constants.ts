@@ -71,5 +71,26 @@ namespace("ValidatablePattern", () => {
 })
 
 // * rege
-const { IndefiniteOccurrences } = regex
-namespace("regex", () => constTest("IndefiniteOccurrences", IndefiniteOccurrences, ""))
+const {
+	IndefiniteOccurrences,
+	GlobalSearchFlag,
+	UnicodeFlag,
+	HasIndiciesFlag,
+	CaseInsensitiveFlag,
+	MultilineFlag,
+	UnicodeSetsFlag,
+	DotAllFlag,
+	StickyFlag
+} = regex
+
+namespace("regex", () => {
+	constTest("IndefiniteOccurrences", IndefiniteOccurrences, "")
+	constTest("GlobalSearchFlag", GlobalSearchFlag, "g")
+	constTest("UnicodeFlag", UnicodeFlag, "u")
+	constTest("HasIndiciesFlag", HasIndiciesFlag, "d")
+	constTest("CaseInsensitiveFlag", CaseInsensitiveFlag, "i")
+	constTest("MultilineFlag", MultilineFlag, "m")
+	constTest("UnicodeSetsFlag", UnicodeSetsFlag, "v")
+	constTest("DotAllFlag", DotAllFlag, "s")
+	constTest("StickyFlag", StickyFlag, "y")
+})

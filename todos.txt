@@ -21,11 +21,20 @@ REMINDERS [2.]:
 
 
 Order of TODO-elimination: 
-	A.3.3	
-	A.1.1.1.
+	A.3.6.
+	A.3.8. 
+	A.3.9.
+	A.3.10.
+	A.3.11. 
+	
+	A.1.1.
+	A.3.1.1.
+	A.3.1.2
+
+	A.3.2.
+	A.3.4.
 
 	A.0.10. 
-	A.3.1.1.
 	A.3.
 	A.0.2. 
 	A.0.7.
@@ -44,9 +53,7 @@ Order of TODO-elimination:
 A. testing: 
 
 	0. FUNDAMENTAL: 
-		0.2. Decide how much of generics must be used inside the test-signature types [some use a lot, while others are satied with 'any']; 
-			0.2.1. DECISION: walk through the tests, make a set of ad-hoc desisions... [sometimes, they're good, sometimes they're just useless fluff]; 
-				LIST them first; 
+		0.2. Delete the generics from test-signatures; 
 		
 		0.7. Tidy up the test suite signatures - make uniform names for similar properties, introduce naming conventions; 
 		0.8. Refactor the 'let times = X; while (times--) it('${X - times}. ${STRING}', FUNCTION(X - times))' into 'timesTest'; 
@@ -67,9 +74,7 @@ A. testing:
 			0.10.1. AFTERWARDS - modify the Stream-s test suites to include OBJECTS [not just the things comparable by reference directly]; 
 
 	1. Changes to tests [for modules]: 
-
-		1. Stream-s: 
-				1.1.1. Create a plain '.init' test; 
+		1. Stream-s: Create a plain '.init' test; 
 					All StreamClass-es have it implemented INDIVIDUALLY [due to different signatures - v0.4. won't have such an issue]; 
 					Namely, this is a 'ReInitializationTest', which (fundamentally) looks to verify correctness of behaviour upon RE-INITIALIZATION of the given Stream; 
 						It is done like: 
@@ -95,7 +100,10 @@ A. testing:
 				Introduce a new function 'classCompose', which does '(...classes) => trivialCompose(...classes.map(classWrapper))'
 					[produces a function for creation of an instance that is the result of a chain (new X)<-(new Y)<-... of classes]
 
-					The tests for them work THE SAME WAY as the top-level cases, BUT they have a different constructor; 
+					The tests for them work THE SAME WAY as the top-level cases, BUT: 
+						
+						1. they have a different [dynamically given] constructor; 
+						2. they check FOR EACH ELEMENT to have one of the permitted types; 
 
 			3.1.2. Test Instances: 	
 				3.1.4.1. They branch: 
@@ -131,14 +139,6 @@ A. testing:
 					7. StreamValidator; 
 					8. PositionalValidator; 
 
-		3.3. regex/
-			1. Walk the files of 'tests\regex\'
-				4. flags.ts
-				5. groups.ts
-				6. quantifiers.ts
-
-			2. Create a set of tests for each utility function; 
-
 		3.4. benchmarks/	
 			TODO: TO ENSURE the usefulness of the 'imports' tests, use the '.'-imports here (meaning: 'import {X} from "main.js"; const {...} = X[...]...'); 	
 				This (a number of samples) + the overall thoroughness of the 'imports/' testing process will ensure that every piece of the library is reachable as intended...; 
@@ -160,6 +160,12 @@ A. testing:
 				3.6.2. One-element; 
 				3.6.3. Two-element; 
 				3.6.4. Long; 
+
+			To write tests for [classes.ts]: 
+				3. EnumSpace
+				4. Token
+				5. TokenizablePattern
+				6. ValidatablePattern
 			
 		3.8. IndexMap/
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
@@ -179,6 +185,15 @@ A. testing:
 				11. StreamClass/utils.ts [design - check]
 				12. Tree/utils.ts		 [design - check; VERIFY TESTS FIRST...]
 				13. src/utils.ts		 [design - check]
+
+		3.10. Tree/
+			To test [classes.ts]: 
+				1. Tree/
+				2. TreeWalker/
+		3.11. Position/
+			To test [classes.ts]: 
+				1. MultiIndex
+				2. MultiIndexModifier
 		
 B. documentation (change/fix it...);
 	B.1. Create new docs pages:
@@ -849,6 +864,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	2.42. Refactor the 'isType: (x: any) => x is Type' in: 
 		1. TokenizablePattern; 
 		[and other places where it appears...]
+
+		ALSO: refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
+			This is (most often) is used inside the library's testing mini-framework; 
 	2.43. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
@@ -868,7 +886,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
 			1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
 			2. Contains a field of '.validator', return values are, then ' const token = this.handler(this.input); return [this.validator(token), token]'
-	2.44. [maybe? clarity] Add 'g', 'v', 's' and other regex flags to the 'constants.regex'? 	
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

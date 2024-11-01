@@ -45,4 +45,14 @@ export namespace ValidatablePattern {
 
 export namespace regex {
 	export const IndefiniteOccurrences = ""
+
+	// * flags constants
+	export const GlobalSearchFlag = "g"
+	export const UnicodeFlag = "u"
+	export const HasIndiciesFlag = "d"
+	export const CaseInsensitiveFlag = "i"
+	export const MultilineFlag = "m"
+	export const UnicodeSetsFlag = "v"
+	export const DotAllFlag = "s"
+	export const StickyFlag = "y"
 }

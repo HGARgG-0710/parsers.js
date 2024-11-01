@@ -2,8 +2,10 @@ import type { Collection } from "../../../../../dist/src/Pattern/Collection/inte
 import {
 	ClassConstructorTest,
 	classTest,
+	FunctionalClassConctructorTest,
 	iterationTest,
 	methodTest,
+	PatternMethodTest,
 	signatures
 } from "lib/lib.js"
 
@@ -18,12 +20,20 @@ const isCollection = structCheck<Collection>({
 	[Symbol.iterator]: isFunction
 })
 
+const collectionPrototypeProps = ["push", Symbol.iterator]
+const collectionOwnProps = ["value"]
+
 const CollectionConstructorTest = ClassConstructorTest<Collection>(
 	isCollection,
-	["push", Symbol.iterator],
-	["value"]
+	collectionPrototypeProps,
+	collectionOwnProps
 )
-const CollectionPushTest = methodTest<Collection>("push")
+const CollectionFunctionalConstructorTest = FunctionalClassConctructorTest(
+	isCollection,
+	collectionPrototypeProps,
+	collectionOwnProps
+)
+const CollectionPushTest = PatternMethodTest<Collection>("push")
 const CollectionIterationTest = iterationTest<Collection>
 
 type CollectionClassTestSignature = {
@@ -32,12 +42,14 @@ type CollectionClassTestSignature = {
 	expectedPushValue: any
 	pushCompare: (x: any, y: any) => boolean
 	iteratedOver: any[]
+	iterationCompare?: (x: any, y: any) => boolean
 }
 
 export function CollectionClassTest(
 	className: string,
-	collectionConstructor: new (x: any) => Collection,
-	testSignatures: CollectionClassTestSignature[]
+	collectionConstructor: (new (x: any) => Collection) | ((x: any) => Collection),
+	testSignatures: CollectionClassTestSignature[],
+	functionalConstructor: boolean = false
 ) {
 	classTest(`(Collection) ${className}`, () =>
 		signatures(
@@ -45,25 +57,35 @@ export function CollectionClassTest(
 			({
 					input,
 					pushed,
-					expectedPushValue: expectedValue,
+					expectedPushValue,
 					pushCompare,
-					iteratedOver
+					iteratedOver,
+					iterationCompare
 				}) =>
 				() => {
-					const collectionInstance = CollectionConstructorTest(
-						collectionConstructor,
-						input
-					)
+					const collectionInstance = functionalConstructor
+						? CollectionFunctionalConstructorTest(
+								collectionConstructor as (x: any) => Collection,
+								input
+						  )
+						: CollectionConstructorTest(
+								collectionConstructor as new (x: any) => Collection,
+								input
+						  )
 
 					// [Symbol.iterator]
-					CollectionIterationTest(collectionInstance, iteratedOver)
+					CollectionIterationTest(
+						collectionInstance,
+						iteratedOver,
+						iterationCompare
+					)
 
 					// .push
 					CollectionPushTest(
 						collectionInstance,
-						expectedValue,
-						pushCompare,
-						pushed
+						expectedPushValue,
+						pushed,
+						pushCompare
 					)
 				}
 		)

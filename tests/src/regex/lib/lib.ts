@@ -1,5 +1,10 @@
 import { it } from "node:test"
-import { arraysSame, comparisonUtilTest, inputDescribe } from "lib/lib.js"
+import {
+	arraysSame,
+	comparisonUtilTest,
+	doubleCurriedComparisonUtilTest,
+	inputDescribe
+} from "lib/lib.js"
 import { regex_contents } from "../../../../dist/src/regex.js"
 
 import flags from "../../../../dist/src/regex/flags.js"
@@ -8,14 +13,15 @@ export function regex(utilName: string, regexps: any[], post: () => void) {
 	it(`regex: [${inputDescribe(regexps)}] (from ${utilName})`, post)
 }
 
-const regexLiteralTest = (util: Function) =>
-	comparisonUtilTest(
-		(regex: RegExp, contents: string) => regex_contents(regex) === contents
-	)(util, "literal")
+const regexCompare = (regex: RegExp, contents: string) =>
+	regex_contents(regex) === contents
+const regexLiteralTest = comparisonUtilTest(regexCompare)
 
 export function regexTest(utilName: string, regexUtil: Function) {
 	return function (contents: string, ...regexp: any[]) {
-		regex(utilName, regexp, () => regexLiteralTest(regexUtil)(contents, regexp))
+		regex(utilName, regexp, () =>
+			regexLiteralTest(regexUtil, utilName)(contents, ...regexp)
+		)
 	}
 }
 
@@ -26,6 +32,19 @@ const regexFlagsLiteralTest = (util: Function) =>
 
 export function flagsRegexTest(utilName: string, regexUtil: Function) {
 	return function (contents: string[], ...regexp: any[]) {
-		regex(utilName, regexp, () => regexFlagsLiteralTest(regexUtil)(contents, regexp))
+		regex(utilName, regexp, () =>
+			regexFlagsLiteralTest(regexUtil)(contents, ...regexp)
+		)
+	}
+}
+
+export function regexCurriedTest(utilName: string, regexUtil: Function, arity: number) {
+	return function (contents: string, ...regexp: any[]) {
+		return regex(utilName, regexp, () =>
+			doubleCurriedComparisonUtilTest(regexCompare)(regexUtil, utilName, arity)(
+				contents,
+				...regexp
+			)
+		)
 	}
 }

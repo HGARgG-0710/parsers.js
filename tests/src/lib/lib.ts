@@ -3,14 +3,19 @@
 import assert from "assert"
 import { it } from "node:test"
 
-import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
+import type {
+	Flushable,
+	Pattern,
+	Resulting
+} from "../../../dist/src/Pattern/interfaces.js"
 import type { Initializable } from "../../../dist/src/Stream/StreamClass/interfaces.js"
 
-import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
+import { object, boolean, function as _f, typeof as type, number } from "@hgargg-0710/one"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = _f
 const { isFunction, isObject, isNull, isArray } = type
+const { sum } = number
 
 export function recursiveToString(x: any) {
 	if (isNull(x)) return "null"
@@ -104,6 +109,20 @@ export function FlushableResultingTestFlush(
 		x.flush()
 		assert(compare(x.result, result))
 	})
+}
+
+export function PatternMethodTest<Type extends Pattern = any>(methodName: string) {
+	return function (
+		instance: Type,
+		value: any,
+		input: any[],
+		compare: (x: any, y: any) => boolean
+	) {
+		method(methodName, () => {
+			instance[methodName](...input)
+			assert(compare(instance.value, value))
+		})
+	}
 }
 
 export function iterationTest<Type extends Iterable<any> = any>(
@@ -202,6 +221,24 @@ export function predicateUtilTest(pred: (x: any) => boolean) {
 	}
 }
 
+export function doubleCurriedComparisonUtilTest(compare: (x: any, y: any) => boolean) {
+	return function (testedUtil: Function, utilName: string, arity: number) {
+		return function (expected: any, ...input: any[]) {
+			util(
+				utilName,
+				() =>
+					assert(
+						compare(
+							testedUtil(...input.slice(0, arity))(...input.slice(arity)),
+							expected
+						)
+					),
+				...input
+			)
+		}
+	}
+}
+
 export function tripleUtilTest(
 	util: Function,
 	utilName: string,
@@ -276,3 +313,6 @@ export const [classTest, property, namespace, importName] = [
 export function repeat(n: number, block: (i?: number) => void) {
 	for (let i = 0; i < n; ++i) block(i)
 }
+
+export const stringSum = (...strings: string[]) =>
+	strings.reduce((last, curr) => last + curr, "")

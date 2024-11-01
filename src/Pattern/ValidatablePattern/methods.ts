@@ -5,7 +5,7 @@ const { replace } = inplace
 import type {
 	DelegateValidatablePattern,
 	InvalidMatch,
-	ValidatableStringPattern as ValidatableStringPatternType,
+	ValidatablePattern as ValidatablePatternType,
 	ValidMatch
 } from "./interfaces.js"
 
@@ -15,8 +15,8 @@ const { ValidationFailed } = ValidatablePattern
 
 // * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]':
 // * 		it returns an empty array both when '!.result[1].length' and when '!!result[0]';
-export function validatablePatternFlush(this: ValidatableStringPatternType) {
-	this.result = ValidationFailed([])
+export function validatablePatternFlush(this: ValidatablePatternType) {
+	this.result = ValidationFailed<any>([])
 }
 
 export function delegateValidatablePatternValidate<Type = any, KeyType = any>(
