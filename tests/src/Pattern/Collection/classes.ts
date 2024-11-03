@@ -17,7 +17,7 @@ const { isObject } = type
 
 // * StringCollection
 
-const stringTestEndvalue = Array(13)
+const stringTestEndvalue = new Array(13)
 	.fill(0)
 	.map((_x, i) => String.fromCharCode(i + "A".charCodeAt(0)))
 	.join("")
@@ -34,9 +34,7 @@ CollectionClassTest("StringCollection", StringCollection, [
 
 // * ArrayCollection
 
-const arrayTestEndvalue = Array(14)
-	.fill(0)
-	.map((_x, i) => i)
+const arrayTestEndvalue = new Array(14).fill(0).map((_x, i) => i)
 
 CollectionClassTest(
 	"ArrayCollection",

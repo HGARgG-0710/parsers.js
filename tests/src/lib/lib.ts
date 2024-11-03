@@ -10,12 +10,11 @@ import type {
 } from "../../../dist/src/Pattern/interfaces.js"
 import type { Initializable } from "../../../dist/src/Stream/StreamClass/interfaces.js"
 
-import { object, boolean, function as _f, typeof as type, number } from "@hgargg-0710/one"
+import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = _f
 const { isFunction, isObject, isNull, isArray } = type
-const { sum } = number
 
 export function recursiveToString(x: any) {
 	if (isNull(x)) return "null"
@@ -40,10 +39,10 @@ export function inputDescribe(...input: any[]) {
 export function arraysSame(
 	arr1: any[],
 	arr2: any[],
-	lowCompare: (x: any, y: any) => boolean = equals
+	lowCompare: (x: any, y: any, i?: number) => boolean = equals
 ) {
 	let size = arr1.length
-	while (size--) if (!lowCompare(arr1[size], arr2[size])) return false
+	while (size--) if (!lowCompare(arr1[size], arr2[size], size)) return false
 	return true
 }
 
@@ -296,18 +295,20 @@ export function signatures<SignatureType extends object = any>(
 }
 
 export const [method, util] = ["method", "util"].map(
-	(typeString) =>
+	(typeString, i) =>
 		(name: string, post: () => void, ...args: any[]) =>
-			it(`${typeString}: ${name}(${inputDescribe(args)})`, post)
+			it(`${typeString}: ${!i ? "." : ""}${name}(${inputDescribe(args)})`, post)
 )
 
-export const [classTest, property, namespace, importName] = [
+export const [classTest, property, namespace, importName, quality] = [
 	"class",
 	"property",
 	"namespace",
-	"import"
+	"import",
+	"quality"
 ].map(
-	(typeString) => (name: string, post: () => void) => it(`${typeString}: ${name}`, post)
+	(typeString, i) => (name: string, post: () => void) =>
+		it(`${typeString}: ${i === 1 ? "." : ""}${name}`, post)
 )
 
 export function repeat(n: number, block: (i?: number) => void) {
@@ -316,3 +317,7 @@ export function repeat(n: number, block: (i?: number) => void) {
 
 export const stringSum = (...strings: string[]) =>
 	strings.reduce((last, curr) => last + curr, "")
+
+export function uniquenessTest(x: Iterable<any>) {
+	quality("uniqueness", () => assert.strictEqual(new Set(x).size, [...x].length))
+}

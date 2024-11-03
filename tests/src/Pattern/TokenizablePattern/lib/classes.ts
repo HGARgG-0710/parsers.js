@@ -56,6 +56,16 @@ export function TokenizablePatternClassTest<Type = any, InType = any, OutType = 
 			testSignatures,
 			({ input, flushResult, resultCompare, tableEntries }) =>
 				() => {
+					const testTokenize = () => {
+						for (const [key, handler, result] of tableEntries)
+							TokenizablePatternTokenizeTest(
+								tokenizablePatternInstance,
+								[key, handler],
+								result,
+								resultCompare
+							)
+					}
+
 					const tokenizablePatternInstance: TokenizablePattern<
 						Type,
 						InType,
@@ -66,13 +76,7 @@ export function TokenizablePatternClassTest<Type = any, InType = any, OutType = 
 					)
 
 					// .tokenize
-					for (const [key, handler, result] of tableEntries)
-						TokenizablePatternTokenizeTest(
-							tokenizablePatternInstance,
-							[key, handler],
-							result,
-							resultCompare
-						)
+					testTokenize()
 
 					// .flush
 					FlushableResultingTestFlush(
@@ -80,6 +84,9 @@ export function TokenizablePatternClassTest<Type = any, InType = any, OutType = 
 						flushResult,
 						resultCompare
 					)
+
+					// testing the re-tokenizabililty post-flushing
+					testTokenize()
 				}
 		)
 	)

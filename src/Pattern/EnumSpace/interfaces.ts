@@ -7,7 +7,7 @@ export type Mappable<Type = any> = (value: Type, index?: number) => unknown
 export interface EnumSpace<Type = any> extends Sizeable, Copiable<EnumSpace<Type>> {
 	add: (n: number) => EnumSpace<Type>
 	join: (enums: EnumSpace) => EnumSpace<Type>
-	map: (f: Mappable<Type>) => unknown[]
+	map: (f?: Mappable<Type>) => unknown[]
 }
 
 export interface ConstEnumSpace extends EnumSpace<{}>, Pattern<{}[]> {}

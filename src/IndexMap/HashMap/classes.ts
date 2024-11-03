@@ -9,13 +9,14 @@ import {
 	hashMapSet
 } from "./methods.js"
 import { subSize } from "../SubHaving/methods.js"
-import { Token } from "../../Pattern/Token/classes.js"
 import type { Token as TypeToken } from "../../Pattern/Token/interfaces.js"
 
-import { function as _f, typeof as type } from "@hgargg-0710/one"
+import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
 import { BasicSubHaving } from "../SubHaving/classes.js"
+import { type } from "src/Pattern/Token/utils.js"
+import { length } from "src/utils.js"
 const { id } = _f
-const { typeOf } = type
+const { typeOf } = _typeof
 
 const HashClassPrototype = {
 	index: { value: hashMapIndex },
@@ -61,8 +62,8 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 
 export const [BasicHash, LengthHash, TokenHash, TypeofHash] = [
 	id,
-	(x: Indexed) => x.length,
-	Token.type,
+	length,
+	type,
 	typeOf
 ].map(HashClass) as [
 	HashClass<any, any, any>,

@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType } from "./IndexMap/interfaces.js"
 import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
 import type { StreamHandler } from "./Parser/TableMap/interfaces.js"
-import type { BasicStream } from "./Stream/interfaces.js"
+import type { BasicStream, Indexed } from "./Stream/interfaces.js"
 import type { Position, PredicatePosition } from "./Position/interfaces.js"
 import type {
 	BasicReversibleStream,
@@ -120,6 +120,8 @@ export const backtrack = (predicate: PredicatePosition) => {
 	predicate.direction = false
 	return predicate
 }
+
+export const length = (x: Indexed) => x.length
 
 export const calledDelegate =
 	(delegatePropName: string) =>

@@ -1,11 +1,12 @@
-import type { Pattern } from "../interfaces.js"
-import type { Token, TokenInstance, TokenInstanceClass, TokenType } from "./interfaces.js"
+import type {
+	Token,
+	TokenInstance as TokenInstanceType,
+	TokenInstanceClass,
+	TokenType
+} from "./interfaces.js"
 import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "../../Tree/classes.js"
 import { isType } from "./utils.js"
-
-import { object } from "@hgargg-0710/one"
 import { BasicPattern } from "../classes.js"
-const { structCheck } = object
 
 export function Token<Type = any, Value = any>(
 	type: Type,
@@ -13,10 +14,6 @@ export function Token<Type = any, Value = any>(
 ): Token<Type, Value> {
 	return { type, value }
 }
-
-Token.is = structCheck<Token>(["type", "value"])
-Token.type = <Type = any>(x: TokenInstance<Type>) => x.type
-Token.value = <Type = any>(x: Pattern<Type>) => x.value
 
 export function SimpleTokenType<Type = any, ValueType = any>(
 	type: Type
@@ -36,8 +33,8 @@ export function SimpleTokenType<Type = any, ValueType = any>(
 }
 
 export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {
-	class ti implements TokenInstance<Type> {
-		static is: (x: any) => x is TokenInstance<Type>
+	class ti implements TokenInstanceType<Type> {
+		static is: (x: any) => x is TokenInstanceType<Type>
 		static type: Type
 		type: Type
 	}

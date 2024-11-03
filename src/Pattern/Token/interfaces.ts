@@ -9,7 +9,7 @@ export interface TokenInstance<Type = any> extends Summat {
 	type: Type
 }
 
-export interface TokenInstanceClass<Type = any> extends Summat {
+export interface TokenInstanceClass<Type = any> extends TokenInstance<Type> {
 	new (): TokenInstance<Type>
 	is: (x: any) => x is TokenInstance<Type>
 }

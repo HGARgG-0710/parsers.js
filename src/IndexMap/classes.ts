@@ -1,12 +1,14 @@
 import type { MapClass } from "./interfaces.js"
+import { type } from "src/Pattern/Token/utils.js"
+import { value } from "src/Pattern/utils.js"
 import { current, firstStream, is } from "../utils.js"
-import { Token } from "../Pattern/Token/classes.js"
-import { typeof as type } from "@hgargg-0710/one"
-const { typeOf } = type
+
+import { typeof as _typeof } from "@hgargg-0710/one"
+const { typeOf } = _typeof
 
 export const [TokenMap, ValueMap, CurrentMap, FirstStreamMap, TypeofMap] = [
-	Token.type,
-	Token.value,
+	type,
+	value,
 	current,
 	firstStream,
 	typeOf

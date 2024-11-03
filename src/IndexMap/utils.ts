@@ -10,7 +10,7 @@ export function fromPairsList<KeyType = any, ValueType = any>(
 	mapPairs: Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
-	const [keys, values]: [KeyType[], ValueType[]] = [Array(size), Array(size)]
+	const [keys, values]: [KeyType[], ValueType[]] = [new Array(size), new Array(size)]
 	while (size--) {
 		keys[size] = mapPairs[size][0]
 		values[size] = mapPairs[size][1]
@@ -23,13 +23,17 @@ export function toPairsList<KeyType = any, ValueType = any>(
 ): Pairs<KeyType, ValueType> {
 	const [keys, values] = keyValues
 	let size = keys.length
-	const result: Pairs<KeyType, ValueType> = Array.from({ length: size }, () =>
-		Array(2)
+
+	const result: Pairs<KeyType, ValueType> = Array.from(
+		{ length: size },
+		() => new Array(2)
 	) as [KeyType, ValueType][]
+
 	while (size--) {
 		result[size][0] = keys[size]
 		result[size][1] = values[size]
 	}
+	
 	return result
 }
 

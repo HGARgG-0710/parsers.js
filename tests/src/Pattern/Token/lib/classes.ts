@@ -8,7 +8,8 @@ import {
 } from "../../../../../dist/src/Pattern/Token/classes.js"
 
 import { object } from "@hgargg-0710/one"
-import { classTest, recursiveToString, signatures } from "lib/lib.js"
+import { classTest, inputDescribe, recursiveToString, signatures } from "lib/lib.js"
+import { isToken } from "../../../../../dist/src/Pattern/Token/utils.js"
 const { ownKeys } = object
 
 type TokenTestSignature = [any, any]
@@ -55,8 +56,8 @@ export function TokenInstanceTest(testsSignatures: TokenInstanceTestSignature[])
 export function TokenTest(testsSignatures: TokenTestSignature[]) {
 	classTest(`Token`, () =>
 		signatures(testsSignatures, ([type, value]) => () => {
-			it(`Token(${(recursiveToString(type), recursiveToString(value))})`, () =>
-				assert(Token.is(Token(type, value))))
+			it(`Token(${inputDescribe(type, value)})`, () =>
+				assert(isToken(Token(type, value))))
 		})
 	)
 }

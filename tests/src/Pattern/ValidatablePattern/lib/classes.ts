@@ -1,4 +1,7 @@
-import type { ValidatablePattern } from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
+import type {
+	ValidatablePattern,
+	ValidationOutput
+} from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
 import {
 	ClassConstructorTest,
 	ResultingAmbigiousMethodTest,
@@ -31,7 +34,7 @@ type ValidatablePatternTestSignature = {
 	input: any
 	flushResult: any
 	resultCompare: (x: any, y: any) => boolean
-	validationInput: [any, any, any][]
+	validationInput: [any, any, ValidationOutput][]
 }
 
 export function ValidatablePatternClassTest(
@@ -44,19 +47,23 @@ export function ValidatablePatternClassTest(
 			testSignatures,
 			({ input, flushResult, resultCompare, validationInput }) =>
 				() => {
+					const testValidate = () => {
+						for (const [key, handler, result] of validationInput)
+							ValidatablePatternValidateTest(
+								validatablePatternInstance,
+								[key, handler],
+								result,
+								resultCompare
+							)
+					}
+
 					const validatablePatternInstance = ValidatablePatternConstructorTest(
 						validatablePatternConstructor,
 						input
 					)
 
 					// .validate
-					for (const [key, handler, result] of validationInput)
-						ValidatablePatternValidateTest(
-							validatablePatternInstance,
-							[key, handler],
-							result,
-							resultCompare
-						)
+					testValidate()
 
 					// .flush
 					FlushableResultingTestFlush(
@@ -64,6 +71,9 @@ export function ValidatablePatternClassTest(
 						flushResult,
 						resultCompare
 					)
+
+					// post-flush .validate test
+					testValidate()
 				}
 		)
 	)

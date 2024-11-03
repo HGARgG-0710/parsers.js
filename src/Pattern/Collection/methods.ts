@@ -1,6 +1,6 @@
 import type { Pattern } from "../interfaces.js"
 import type { Collection } from "./interfaces.js"
-import { Token as TokenClass } from "../Token/classes.js"
+import { value } from "../utils.js"
 
 export function stringCollectionPush(...x: string[]) {
 	this.value += x.join("")
@@ -19,7 +19,7 @@ export function accumulatingPatternCollectionPush(
 	this: Collection<Pattern>,
 	...tokens: Pattern[]
 ) {
-	this.value.value += tokens.map(TokenClass.value).join("")
+	this.value.value += tokens.map(value).join("")
 	return this
 }
 

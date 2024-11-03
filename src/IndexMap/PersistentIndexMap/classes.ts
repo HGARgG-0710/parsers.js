@@ -65,7 +65,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	constructor(indexMap: IndexMap<KeyType, ValueType>) {
 		super(indexMap)
 		const size = indexMap.size
-		this.indexes = Array(size)
+		this.indexes = new Array(size)
 		for (let i = 0; i < size; ++i) this.indexes[i] = Pointer(i)
 	}
 }

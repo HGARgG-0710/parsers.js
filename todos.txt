@@ -19,7 +19,6 @@ REMINDERS [2.]:
 	6.2. allow multiple names to be used; 
 		6.2.1. Write a simple parser for this format [use plain JavaScript - not the library itself]; 
 
-
 Order of TODO-elimination: 
 	A.3.6.
 	A.3.8. 
@@ -34,13 +33,7 @@ Order of TODO-elimination:
 	A.3.2.
 	A.3.4.
 
-	A.0.10. 
-	A.3.
-	A.0.2. 
-	A.0.7.
-	
-	A.0.9.
-	A.0.8. 
+	A.3.	
 	6.
 
 	[fix test compilation errors]
@@ -51,27 +44,6 @@ Order of TODO-elimination:
 	C.
 	
 A. testing: 
-
-	0. FUNDAMENTAL: 
-		0.2. Delete the generics from test-signatures; 
-		
-		0.7. Tidy up the test suite signatures - make uniform names for similar properties, introduce naming conventions; 
-		0.8. Refactor the 'let times = X; while (times--) it('${X - times}. ${STRING}', FUNCTION(X - times))' into 'timesTest'; 
-			When one needs to run a certain test several times, basically...; 
-
-			0.8.1. Use the 'i. ...' thing with the in-signature arrays; 
-			[Example: incTimes inside of 'MultiIndexModifier']; 
-
-		0.9. Introduce the 'instance' it-function [to contrast with 'times', and to also specify the INSTANCE that is used...]; 
-			Use on the top-level of suites; 
-			PASS the 'i' along with the 'signature' inside 'signatures' to acommodate for this...; 
-
-		0.10. Add proper testing mini-framework support for the checking predicates; 
-			For "composite" Streams' tests one will HAVE to be doing the 'comparing'
-				(because it'll be much easier to specify a "structure" to be checked, instead of trying to fish out the references, then use them for constructing tests); 
-			THEREFORE - when it comes to this, do; 
-
-			0.10.1. AFTERWARDS - modify the Stream-s test suites to include OBJECTS [not just the things comparable by reference directly]; 
 
 	1. Changes to tests [for modules]: 
 		1. Stream-s: Create a plain '.init' test; 
@@ -155,16 +127,7 @@ A. testing:
 					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
 				
 		3.6. Pattern/
-			3.6.1. Test instances: 
-				3.6.1. Empty; 
-				3.6.2. One-element; 
-				3.6.3. Two-element; 
-				3.6.4. Long; 
-
 			To write tests for [classes.ts]: 
-				3. EnumSpace
-				4. Token
-				5. TokenizablePattern
 				6. ValidatablePattern
 			
 		3.8. IndexMap/
@@ -847,9 +810,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				6. TokenizablePattern
 				7. ValidatablePattern
 				8. EliminablePattern
-			2. Make the 'Token.value' into 'export const value = (x: Pattern) => x.value' - an export of 'Pattern/utils.ts'; 
-			3. Make the 'Token.type' into 'export const type = (x: TokenInstance) => x.type' - an export of 'Token/utils.ts'; 
-			4. Make the 'Token.is' into 'export const isToken = ...' - an export of 'Token/utils.ts'
 
 	2.39. Introduce a new Position class - MultilinePosition
 		Basically, a pair of numbers: 
@@ -865,27 +825,279 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		1. TokenizablePattern; 
 		[and other places where it appears...]
 
-		ALSO: refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
+		2.42.1. ALSO: refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
 			This is (most often) is used inside the library's testing mini-framework; 
 	2.43. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
 			1. Validation happens separate from parsing, despite using the same abstraction (ex: ValidatablePattern and TokenizablePattern); 
 			2. '1.' causes the entire process of 'validate + parse' to take 2x the time (need another loop); 
-
-		For this reason, a TODO: 
-
-			Create a new abstraction that would encompass BOTH parsing and validation; 
-			Granted, it would take more time than a simple parsing procedure, 
-				but (and this is CRUCIAL) it must take LESS time than combined parsing + validation (in exchange for increased memory); 
+		
+		[SOLUTION 1] In simpler cases (such as when a grammar is FULLY covered by a PatternTokenizer), the user can do this themselves: 
 			
-		This is already doable (manually) using 'StreamTokenizer', but one would love to make it a part of the library (general abstractions + interface + algorithm); 
-		'PatternTokenizer' and 'PatternValidator' are a no-go here. It should be a case of 'StreamTokenizer'; 
+			1. Create a HashMap based off '.type'; 
+			2. Create a PatternValidator; 
+			3. Walk the PatternValidate-d string in a StreamTokenizer defined via the TableParser based off HashMap given; 
+			4. If HashMap DOES NOT manage to match a thing - it's a string, therefore - not covered, therefore - invalid; 
+				4.1. Then - throw an exception/otherwise handle the error; 
 
-		Ideas: 
-			0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
-			1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
-			2. Contains a field of '.validator', return values are, then ' const token = this.handler(this.input); return [this.validator(token), token]'
+			This is highly natural, and requires no additional abstractions; 
+			Update the documentation to include it;
+
+		[SOLUTION 2] Still, for more complex cases (in particular - those that require a per-Stream-element identification - this will not suffice); 
+			For this reason, a TODO: 
+
+				Create a new abstraction that would encompass BOTH parsing and validation; 
+				Granted, it would take more time than a simple parsing procedure, 
+					but (and this is CRUCIAL) it must take LESS time than split parsing + validation (in exchange for increased memory usage); 
+				
+			This is already doable (manually) using 'StreamTokenizer', but one would love to make it a part of the library (general abstractions + interface + algorithm); 
+			From the noted above, 'PatternTokenizer' and 'PatternValidator' are a no-go here 
+				(potentially, an infinite set of possible valid/invalid expressions with convoluted structure); 
+			It should be a case of 'StreamTokenizer'; 
+
+			Ideas: 
+				0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
+				1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
+				2. Contains a field of '.validator', which returns '[boolean, OutType]', where 'OutType' is the UPDATED token (based off current one and 'input'); 
+					return value is, then: 
+						
+						return this.validator(this.handler(this.input), input)
+
+		[SOLUTION 3] It integrates best with current API (although, still carries the downsides of SOLUTION 1); 
+
+			All it requires is to "save" the Fully Tokenized outputs somewhere, separately from the 'ValidatablePattern'; 
+			It requires SPLITTING the Tokenization and Validation procedures; 
+
+			Downside is - takes longer to run for invalid inputs + all of the ones from Solution 1
+				[only really deals with coverage + closed/well-defined expressions of the 'beginning/end' kind]; 
+
+		CONCLUSION: 
+
+			1. Do SOLUTION 3 [split 'tokenizeString' from 'validateString']; 
+				Let THE USER do it (in particular - use the 'validateTokenized' themselves); 
+				Then - there is NO RE-DOING THE ALREADY DONE WORK; 
+
+				The reasons one IS NOT keeping the old solution: 
+
+					1. Code clarity [it's not very general]; 
+					2. Code uniqueness [avoiding duplication]; 
+				
+				NOTE: the 'validateString' STILL remains, only it's standalone from now on; 
+			
+			2. Do SOLUTION 2 [a simple new StreamTokenizer]
+		
+	2.44. Later - improve the tests: 
+
+		2.44.1. Add generics to the class-tests signatures [just for the sake of it - very pretty and give a lot more sense to using TypeScript for tests]; 
+		2.44.2. Refactor the 'while(times--) doTestSmth(...)' into a special 'times' function; 
+		2.44.3. Create a way to print out the class tests' instances (via a special 'instance' library function, based off 'it'); 
+	
+	2.45. Implement a new interface for the library - FiniteEnum: 
+		This, basically, creates an 'EnumSpace', that consists of all the given items, 
+			BUT requires finding out their uniqueness beforehand (using the 'new Set', or the 'one.js' 'norepetitions'). 
+			Thus, for instance, these are equivalent: 
+
+				const a = new FiniteEnum(["800", "elorian", "800", 998])
+				const b = new FiniteEnum(["800", "elorian", 998])
+			
+			Thus, the '.size' of the given EnumSpace is actually fluid; 
+			Likewise, its' '.add()' would NOT be a number (hence - one NEEDS A NEW INTERFACE); 
+
+	2.46. IDEA: how to speed up the tokenization algorithm:
+		Way: 
+		1. Split the "tokenized" and "untokenized" parts with 2 arrays
+		2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
+		3. Split the final result (tokenized) into BATCHES	
+			3.1. The underlying is a NEW structure called 'BatchArray'; 
+				It keeps its values as a list of lists, which HAVE THEIR INDEXES; 
+				The second-level lists are all ordered as the original array is; 
+
+				Operations: 
+					
+					0. bind(array) - binds the given array
+					1. push(from, to) - adds a new batch of elements of the bound array's 'array.slice(from, to)'
+						Also - removes given elements from the array; 
+					2. merge() - combines the batches into a single array, removing the indexes; 
+						For this - use Merge-sort (it's a natural choice here - the structure is precisely what the algorithm requires); 
+						Due to quality of data, the complexity (in this case) is O(nlog k) [considerably better than 'O(nlog n)'];
+					3. replace(i, subarr, subinds) - replaces a given index with a value of 'subarr'
+						This has to be fast, therefore: 
+
+							1. Store the '.bound' NOT as 'any[]', but as a special 'ContinuedElement[]'; 
+								It keeps elements as "referenced" (ContinuedElement), and 
+									items that are referenced can have: 
+										1. a '.value' (when no array is used); 
+										2. an '.array' (when one is used, otherwise - null); 
+									
+								Thus, the replacement-with-array operation becomes O(1);
+
+							2. When this happens, after changing the 'ContinuedElement' one: 
+
+								2.1. Finds the batches that have the affected elements; 
+									To make it fast (for general case), store batches NOT just as 'any[]', 
+										but also have '.minIndex' and '.maxIndex' properties; 
+									Thus, it's possible to determine (in a single check) whether 
+										they are affected ('.maxIndex < .changedIndex')
+										in O(1) time; 
+								2.2. Finds the elements inside the batches; 
+									Done via binary search over the indexes; 
+									Then - as they are linearly ordered, walks the remainder of the batch-list, 
+										doing 2.3.; 
+								2.3. Changes the elements; 
+									Add the 'length-of-the-replaced-subarray - 1'; 
+									O(1) already, no need to change anything; 
+
+								IMPORTANT: for this to be FAST (algorithm becomes O(k^2 logn) and NOT O(nlogn)), 
+									one needs to do this step is done in a SEPARATE 
+							
+							3. When 'replacement' occurrs recursively (inside an existing ContinuedElement): 
+								3.1. It's the same, only difference is - one has to calculate the index manually (which can be mildly cumbersome, but is still O(n)); 
+							
+							4. The '.indexes' list, then, is ALSO altered; 
+								The old 'untokenized' index is "deleted", new UNTOKENIZED items' indexes (subinds) are put in its stead; 
+								It is ALSO kept as a 'ContinuedElement[]'; 
+								When an index is JUST deleted (that is, it's tokenized wholy and singl-y), 
+									one replaces the value with 'null' (no '.splice' necessary); 
+
+								To find it, one has to: 
+
+									1. Take the first 'ContinuedElement' x: 
+										1.1. Increase the value by (if array has no) 'x.array.length', or (if no '.array' is used, just '.value') 1
+											To make checking for presence of a 'ContinuedElement' inside 'ContinuedElement' faster - add a flag-property ('isRecursive: boolean'); 
+											BETTER IDEA: 
+												Use a 'BitArray' (a new data structure - a UInt8Array/UInt32Array, whatever, that keeps flags as bits); 
+												ANOTHER IDEA: 
+													Use a 'BitArray' to store a number [together with a boolean]; 
+													This way, it can have less bits, and more appropriate for a given usage ("cram it" with the flags - these go first); 
+													Then, one can also KEEP TRACK of the first 'ContinuedElement' [helps, when it's > 0]; 
+
+													ANOTHER number stored - count of recursive 'ContinuedElement'-s [allows to sometimes finsh early]; 
+													IDEA: 
+														Keep not the FIRST 'ContinuedElement', but the one that is THE FARTHEST! 
+														Then, what we have is - the largest possible speed increase; 
+														This also requires an ADDITIONAL number getting stored: separate BitArray (for the index that is skipped); 
+														Remainder are linearly walked-through; 
+
+														BETTER IDEA STILL: 	
+															Store it upon the 'CountedElement'-s that are using '.value'; 
+															THEN - there is no need for the flag, as one ONLY works with 'the next' value; 
+
+										1.2. Proceed until the happenstance that it becomes equal to the sought-after index, OR 
+											the difference between the current one, and the next becomes "too far" to be used as an intermediate-point; 
+											From there - one does a literal jump (as there are no more "nested" indexes left); 
+										
+									Therefore, our '.indexes' is capable of getting the current index at about O(k), where 'k' is the table size (number of tokenizations); 
+
+									IMPORTANT: the '.indexes' is actually A 'ContinuedElement' ITSELF; 
+										Thus, all techniques can be used on it also...; 
+						4. indexSync() - see '3.->2.->IMPORTANT'; 
+						5. getIndex(prevIndex: number): number - for iteration, see 'Fields->2.'; 
+
+				Fields: 
+
+					1. .bound: ContinuedElement[] - the array of items; 
+					2. .indexes: number[] - the list of indexes that are NON-REMOVED [used for iteration]
+						IDEA: instead of keeping it as a list of numbers, use 'BitArray'-s, with a changing memory outfit; 
+						This permits to (greatly) economy the memory, because to see if an index is "present" one just 
+							marks it as 1/0; 
+						The "nested" ones will require more memory; 
+
+						(
+							Possibly... One could save *some* memory with a complex bit-layout?
+							Thus, for instance, having, 01 mean 'non-nested, present', 00 - 'non-nested, missing', 
+							'10' - 'nested'; 
+
+							Also - there'd be another - 'ShortArray' (new library data structure; this time - with UInt16Array as a base, not UInt8Array); 
+							This one'll keep a single number; NOTE: the thing is needed at all even because of the '2^53 - 1' number-bound (namely, that one doesn't like it...)
+							The 'UInt16Array' is used because UInt32Array is an overkill (for most cases, anyhow); Plus - one can re-distribute over 2 separate ShortArray objects; 
+
+							'Nested' ones will USE THE SEPARATE INDEXES inside the '.indexes: (...)[]' array; 
+
+							Then - one'll be able to have ANOTHER method on this, called 'getIndex'; 
+							It'll return the next non-missing iteration index, based off the current one; 
+						)
+
+						Also - regarding the 'automatic' empty return from 'tokenization' function - this won't work here (too much per-element overhead); 
+						Conclusion - one has to check the return-array length FROM THE START; 
+
+						PROBLEM: consider this - '.indexes' becomes PARTITIONED! 
+							More importantly - a given portion now becomes more about "missing" than "present" 
+								non-nested bits; 
+							SOLUTION: reverse the bits inside the given 'nested' bit; 
+							To determine WHEN to do it - count the "missing" and "present" parts; 
+
+					3. .batches: [any, number][] - the list of indexed elements inside the array
+					4. .syncInfo: [number, number, number] - the list of REPLACEMENTS that has been done; 
+						Used for increasing speed (namely - DELAYING the slow index-sync operation); 
+						Has form of '[batchHappen, replacementLength, replacementIndex]'
+						
+						1. Because one KNOWS that for all things that are AFTER the 'batchHappen', the index is "fixed", we also know
+							that only 'batchHappen' batches need be checked at all - O(k^2), where k^2 is the size of the table; 
+						2. Because one KNOWS that there are '.minIndex' and '.maxIndex' for a given batch (and it's ordered), 
+							one can find out whether one has the desired changed indexes - O(1)
+						3. Because one has the indexes as NUMBERS, one can use binary search - O(log n)
+
+						IDEA: for an even BETTER optimization - to have better memory consumption, a more complicated structure: 
+
+							1. STORE THE INDEX-ADDITION INFO on a per-batch-basis' (buckets)
+							2. Store them in a linearly ordered fashion (id est, so as to PRESERVE the values...); 
+						
+							QUESTION: how much will this book-keeping piece cost? (the 'number' triple only requires O(1))
+								To do this, however, one is in need of: 
+
+									1. get the triple; 
+									2. put it into one of the 'batch-baskets' of the '.syncInfo' (based off 'batchHappen'); 
+									3. in the chosen basket - '.push([index, length])'; 
+
+									[post-creation, when calling '.sync']
+									4. later - get the value from the appropriate bucket (they are ITERATED from 0 to 'curr-batch-index' for '.batches'); 
+									5. apply all the transformations to the given batch; 
+								
+							ANSWER: not much in terms of performance; 
+								ALSO - it's actually better in terms of cache-locality (because there's less jumping around); 
+		Result: 
+		1. O(n) additional memory usage (where 'n' - number of final tokens)
+		2. O(1)-O(n) performance gain (depends on number of tokenized items, least waste in cases when there's a lot)
+			The current "speedy" O(n^2) (O(n) - walk through the items; O(n) - the '.splice' in replace due to index-keeping) 
+				can be replaced with a "slowish" (meaning - one with a possibly significant factor) O(n).
+			This ability is important, and in certain applications can be considerable; 
+			Only questions are: 
+
+				1. When can this be used? (use-cases)
+				2. [Most important] Can use-cases be identified prior? 
+			
+			Generally, for: 
+
+				1. Large inputs; 
+				2. Large (> 15 items) tokenization-tables; 
+			
+			This could make some sense. 
+
+				1. The '.splice' requires one to go SEVERAL TIMES through the 
+					ALREADY TOKENIZED elements (the reason for O(n))
+				2. The 'isType' requires performing redundant checks; 
+
+			In expense of memory and: 
+
+				1. Book-keeping cost (a noticeably more complex algorithm that runs in O(n) linear time + lots of index-keeping); 
+			
+			this implementation would permit to remove these; 	
+
+			Final performance is: 
+
+				O(nk^2log n), where 'n' - number of tokenized elements, k - table size
+
+	2.47. Performance concern: '.push(...elems)' FAILS for large arrays; 
+		Problem - with the '...elems' spread operator: it creates a new array; 
+
+		1. Do '.push()'-es in batches, or avoid them completely....; 
+			[Idea: use ContinuedList-s instead? - new data structure
+				Same thing as 'ContinuedElement', but without the '.value' to store, 
+					and that references ANOTHER ContinuedList, instead of just an array]; 
+		2. Better idea - where possible, use "mixed signatures"
+			(example: 'string[] | ContinuedList | string[][]' for 'StringCollection.push'); 
+			Then - the methods in question have a higher versatility; 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
