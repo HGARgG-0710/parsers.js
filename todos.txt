@@ -5,6 +5,20 @@
 
 REMINDERS [2.]: 
 	1. [when running the 'import' tests] The 'methods.ts' for 'TokenizablePattern' and 'ValidatablePattern' CAN FAIL (a lot of change there has happened - need an update); 
+	2. You can document inside-functions and inside-classes!
+	3. When the good-ol' inner JSDoc fails one after all [or when "shadowing" the old inner JSDoc], one can do: 
+
+		const UnrecognizedFunction = whatever()
+
+		/**
+		 * I DOCUMENT, THEREFORE I AM! 
+		 * @param {T} x - bababababa, i am a parameter
+		 * ...
+		 */
+		export const ToBeRecognizedFunction = UnrecognizedFunction as (x: T) => TOUT
+
+	4. Re-do the imports' tests for 'Stream', 'Collection', 'Buffer', et cetera...; 
+
 
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
@@ -19,8 +33,72 @@ REMINDERS [2.]:
 	6.2. allow multiple names to be used; 
 		6.2.1. Write a simple parser for this format [use plain JavaScript - not the library itself]; 
 
+5. After all - CLEAN SOME OF THE v0.4 notes [this refactoring is absolutely marvelous... + the 'GeneralParser' really is almost completely useless...]; 
+		Do the 'StreamTokenizer->StreamParser' thing (with its' generalization to allow state, REMOVAL of 'GeneralParser', and so forth...); 
+		Then, one also needs to add: 
+			
+			4. Replace the '.sub' and '.input' with '.value' [popularization of Patterns]; 
+				4.1. Search terms: 
+					delegate
+					delegateProperty
+					calledDelegate
+					
+				4.2. For this [BasicPattern] to work with Streams (which ALREADY extend something), 
+					1. add YET ANOTHER parameter '.isPattern' to the StreamClass signature; 
+					2. this will make the thing a "BasicPattern" 
+
+					The importance of '.value' is: 
+
+						1. It unifies a GREAT deal of interfaces with diverse meanings (prior: '.input')
+						2. It unifies them well - as Pattern-s: 
+							1. things that change the given '.value' [StreamClass+.isPattern, Collection, Buffer, , et cetera]
+							2. or output into the '.result', which is '.flush()'-able (EliminablePattern, ValidatablePattern, TokenizablePattern)
+							3. or just keep the value as-is, for further usage (Token, EnumSpace/Buffer [encapsulated])
+
+					Before formalization of 'InputStream' as a pure 'StreamClass', '.input' (now '.value') also had another meaning - a non-changeable underlying representation (like Token, or EnumSpace without '.add'); 
+					
+				4.3. Get rid of the 'BaseSubHaving' [instead - now one has the 'BasePattern']; 
+				4.4. Get rid of 'Inputted'
+				4.5. Liberate the 'Pattern/' directory (save for ValidatablePattern, TokenizablePattern and EliminablePattern [or - change their respectie names, even better...])
+				
+			7. Make all stuff from 'Parser/' [that IS a 'StreamParser'] a part of the 'StreamParser/' directory (OR, better still, - just put into the 'classes.ts'); 
+				7.0. Fix compile errors in the StreamParser files
+				7.1. Rewrite ALL of the Parser-thingies in terms of StreamParser
+				4.4. RE-LOCATE all the 'delegate' methods into THE 'methods.ts' FILES! [they aren't utils, they have a 'this']; 
+
+			8. Add optional ability of 'toInputStream' to RECOGNIZE the presence of '.buffer', and (hence) not need to do another walk-through the given Stream; 
+				8.1. Add type-predicates: 
+					8.1.1. isFreezableBuffer; 
+					8.1.2. isBufferized; 
+
+			1. '.buffer' [and the 'BufferizedStream' - based off it]; 
+				ALSO: 
+
+					1. create types for different signatures for the '.init' method; 
+						Use them on particular cases of 'StreamClass'; 
+
+
+			10. Clean the 'src/utils.ts' [from the stuff that isn't supposed to be there... 'firstStream' is the first-to-go!]; 
+	
+			13. Refactor the utils from the files with the '.finish', '.init' and other StreamClass methods..; 
+				[These are UTILS, they're to be put into '/utils.ts' files (even though they're very tiny...)]
+
+			14. FIX THE confusing EXPORTS: 
+
+				Sometimes, one'll encounter artifacts during imports such as: 
+
+					import {X} from "..."
+					const A = X.A.A 
+
+				Fix this, by means of using 'export *' instead of the 'export * as', in cases, when 'A' is the ONLY export 'A.A'; 
+
+			15. Fix the notes; 
+
+
 Order of TODO-elimination: 
-	A.3.6.
+	5. 
+	2. 
+
 	A.3.8. 
 	A.3.9.
 	A.3.10.
@@ -57,6 +135,9 @@ A. testing:
 
 							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
 							REFACTOR THIS [once again...]; 
+		
+		2. Stream-s: Allow for testing different '.init' signatures; 
+			Also - expand the "generated suites" to include presence/absence of different properties (altogether - 1-16 different classes to test, depending on the definition); 
 
 	3. Implement test suites: 
 		3.1. Stream-s: 
@@ -78,7 +159,7 @@ A. testing:
 						2. they check FOR EACH ELEMENT to have one of the permitted types; 
 
 			3.1.2. Test Instances: 	
-				3.1.4.1. They branch: 
+			
 					3.1.4.1.0. Empty Stream instance
 					3.1.4.1.1. Single-element Stream instance
 					3.1.4.1.2. Two-element Stream instance
@@ -126,12 +207,18 @@ A. testing:
 				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
 					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
 				
-		3.6. Pattern/
-			To write tests for [classes.ts]: 
-				6. ValidatablePattern
-			
 		3.8. IndexMap/
 			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
+
+			0. [After Everything else]: 
+				IndexMap/
+				[note: there's the "extension" cases... Write minimal tests for this...]; 
+
+			1. LinearIndexMap/
+			2. PersistentIndexMap/
+			3. InternalHash/ 
+			4. HashMap/ 
+			5. FastLookupTable/
 		
 		3.9. utils/	
 			1. Walk through the project tree, enumerating the 'utils.ts' files; 
@@ -158,6 +245,8 @@ A. testing:
 				1. MultiIndex
 				2. MultiIndexModifier
 		
+		3.12. Buffer
+		
 B. documentation (change/fix it...);
 	B.1. Create new docs pages:
 		B.1.1. Home: 
@@ -168,6 +257,14 @@ B. documentation (change/fix it...);
 			B1.1.5. Known issues (this lists known problems that the library currently has);
 			B1.1.6. Terminology
 				This mentions that the library has a distinct terminology [albeit, not very large], that is useful for understanding its concepts; 
+				
+				NOTE [1]: The importance of '.value' is: 
+
+						1. It unifies a GREAT deal of interfaces with diverse meanings (prior: '.input')
+						2. It unifies them well - as Pattern-s: 
+							1. things that change the '.value' [Collection, Buffer, , et cetera]
+							2. or output into the '.result', which is '.flush()'-able (EliminablePattern, ValidatablePattern, TokenizablePattern)
+							3. or just keep the value as-is, for further usage (Token, EnumSpace/Buffer [encapsulated])
 			B1.1.7. Common naming conventions: 'is', repeating util/method names ('fromPairsList', '.getIndex', '.add', ... so forth); 
 		B1.2. Properties: 
 			This describes individual properties (and methods!) that can ocurr on different classes; 
@@ -198,7 +295,13 @@ B. documentation (change/fix it...);
 					
 					1. the '.validator' is expected to ALSO remove any non-'Type' elements out of the 'result'; 
 					2. when calling '.validate', the 'result[0]' should be 'true' ONLY when the source IS validatable (i.e. not already determined valid - contains only the 'Type' elements); 
+			
+				NOTE[3]: StreamClass, .currGetter requires reliability; 
+					'Reliability' of a '.curr'-getter in context of 'StreamClass' is: 
+
+						The results of '.currGetter()' can be safely turned into a buffer and reused
 					
+					Relibility is a needed property of a getter to be usable; 
 		B1.7. Utils: 
 			Categorize the utils ('is'-functions, 'from'/'to'-functions [ex: fromPairsList, toInputStream], 'uni'-functions, and so forth...); 
 
@@ -569,6 +672,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
 
 	2.20. Add a fast implementation of '.finish' to the 'TreeStream'; 
+		When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
 	2.21. Re-structure the tests to be made on a per-method basis? 
 		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
 	
@@ -655,7 +759,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Which is a single instruction; 
 
 		CURRENTLY, this is precisely what the 'InputStream' is doing, HOWEVER, because of this, 
-			the '.navigate' has become rather useless (in the sense that it is not centralized); 
+			the '.navigate' as an interface part has become rather useless
+				(in the sense that it is not centralized); 
 		Then: 
 
 			1. InputStream.navigate() [and similar 'deviating' cases] would be re-implemented to use ABSOLUTE position instead; 
@@ -769,11 +874,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Example [1]: a 'classes.ts/interfaces.ts' with THE ONLY export will have it as default, besides referencing by name; 
 		Example [2]: when a 'classes.ts/interafaces.ts' has an export with THE SAME name as the module, the export is default (besides being present as of itself); 
 
-	2.35. Make more active use of 'abstract' classes; 
-		Examples: BasicSubHaving, BasicPattern - they STILL can be instantiated (unlike FlushablePattern), 
-			but ARE 'abstract', because provide no functionality as of themselves (Pointer is the exception, it's a semantic-marker); 
-
-			ALSO - turn the 'AssignmentClass'-es into abstract classes
+	2.35. turn the 'AssignmentClass'-es into abstract classes
 				[ones that aren't redundant - remember the 'replace .input with .sub' 
 					and '.state is an optional StreamClass property' todos...]; 
 				
@@ -810,6 +911,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				6. TokenizablePattern
 				7. ValidatablePattern
 				8. EliminablePattern
+
+			Meaning - these should be all SEPARATE, with 'Pattern' becoming a new "global interface", imported everywhere...; 
 
 	2.39. Introduce a new Position class - MultilinePosition
 		Basically, a pair of numbers: 
@@ -904,7 +1007,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Thus, the '.size' of the given EnumSpace is actually fluid; 
 			Likewise, its' '.add()' would NOT be a number (hence - one NEEDS A NEW INTERFACE); 
 
-	2.46. IDEA: how to speed up the tokenization algorithm:
+	2.46. IDEA: how to speed up the tokenization algorithm [attempt]:
 		Way: 
 		1. Split the "tokenized" and "untokenized" parts with 2 arrays
 		2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
@@ -916,8 +1019,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				Operations: 
 					
 					0. bind(array) - binds the given array
-					1. push(from, to) - adds a new batch of elements of the bound array's 'array.slice(from, to)'
-						Also - removes given elements from the array; 
+					1. newBatch() - creates a new last batch, to have values written into
 					2. merge() - combines the batches into a single array, removing the indexes; 
 						For this - use Merge-sort (it's a natural choice here - the structure is precisely what the algorithm requires); 
 						Due to quality of data, the complexity (in this case) is O(nlog k) [considerably better than 'O(nlog n)'];
@@ -1005,12 +1107,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 						(
 							Possibly... One could save *some* memory with a complex bit-layout?
-							Thus, for instance, having, 01 mean 'non-nested, present', 00 - 'non-nested, missing', 
-							'10' - 'nested'; 
+							Thus, for instance, having, 01 mean 'non-nested, present', 00 - 'non-nested/nested, missing', 
+							'1' - 'nested' [only a single (first) bit used]; 
 
-							Also - there'd be another - 'ShortArray' (new library data structure; this time - with UInt16Array as a base, not UInt8Array); 
+							Also - there'd be another - 'GrowingNumber' (new library data structure; this time - a single-element UInt8Array/UInt16Array/UInt32Array as a base, not UInt8Array); 
 							This one'll keep a single number; NOTE: the thing is needed at all even because of the '2^53 - 1' number-bound (namely, that one doesn't like it...)
-							The 'UInt16Array' is used because UInt32Array is an overkill (for most cases, anyhow); Plus - one can re-distribute over 2 separate ShortArray objects; 
+							This is (basically) a wrapper around a number to allow for quick manipulations that are ALSO memory-efficient
 
 							'Nested' ones will USE THE SEPARATE INDEXES inside the '.indexes: (...)[]' array; 
 
@@ -1056,7 +1158,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 								
 							ANSWER: not much in terms of performance; 
 								ALSO - it's actually better in terms of cache-locality (because there's less jumping around); 
-		Result: 
+
+							ALSO: the two numbers are kept as GrowingNumber-s! 
+		Result [theory]: 
 		1. O(n) additional memory usage (where 'n' - number of final tokens)
 		2. O(1)-O(n) performance gain (depends on number of tokenized items, least waste in cases when there's a lot)
 			The current "speedy" O(n^2) (O(n) - walk through the items; O(n) - the '.splice' in replace due to index-keeping) 
@@ -1075,7 +1179,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			This could make some sense. 
 
 				1. The '.splice' requires one to go SEVERAL TIMES through the 
-					ALREADY TOKENIZED elements (the reason for O(n))
+					ALREADY TOKENIZED elements (the reason for inner O(n))
 				2. The 'isType' requires performing redundant checks; 
 
 			In expense of memory and: 
@@ -1088,6 +1192,34 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 				O(nk^2log n), where 'n' - number of tokenized elements, k - table size
 
+		CONCLUSION [post-benchmarking]: 
+			1. After some little fiddling with benchmarks, one found out that (actually), 
+				'.splice' is optimized to be extremely fast; 
+			2. One'll need to check the optimization difference betwee this and '.splice'
+				(very well may be that this turns out to be slower regardless)
+			3. (Theoretically), the '.splice' STILL copies the array, even though it happens on a 
+				MUCH lower-level (C++, Asm); IF it's faster (which is quite likely, indeed), 
+					that is only due to the purely numeric part; 
+			
+			4. Important: 
+				(From what is known insofar) The only "really" slow part of the algorithm, 
+					that genuinely would ruin the relative performance to repeated '.splice' (which, for a large enough input would take literally forever...), 
+						is the "setting up". 
+
+				Namely, the process of "guessing" the number of 'nested' indexes [their tree]; 
+				One would be required to "grow" it accordingly, with a relatively few size-increases for it...; 
+
+			5. Before adding ANY memory-saving data structures 
+				1. Benchmark for memory; 
+				2. Benchmark for speed; 
+
+				Because if either is absent, the whole thing could simply collapse due to speed/memory assumptions going horribly wrong; 
+
+			6. FINAL: if it's slower, REMOVE; 
+				First - implement and benchmark performance for some large inputs (see if faster at all, likely not); 
+				Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
+				Third - either delete, or keep; 
+
 	2.47. Performance concern: '.push(...elems)' FAILS for large arrays; 
 		Problem - with the '...elems' spread operator: it creates a new array; 
 
@@ -1099,6 +1231,39 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			(example: 'string[] | ContinuedList | string[][]' for 'StringCollection.push'); 
 			Then - the methods in question have a higher versatility; 
 
+	2.48. BitArrayHash; 
+		Accepts a BitArray, returns a value from it; 
+			A hash based off bit-shifts (<<, >>); 
+		Use for defining the '.init' and '.prototype' choice functions in the StreamClass; 
+
+	2.49. [TypeScript; clarity] Add the 'type ForcePresence<T, K extends keyof T> = {[x in K]-?: T[]}'
+		This (and similar ones), for adding/removing various type features, are handy for refactoring (appears at least in StreamClass); 
+		ALSO: 
+
+			1. Doing this COULD allow one to be switching from the "composite interfaces" to polymorphic ones with optional properties; 
+				(Even create a SINGLE RIGID 'Stream' interface! [NOTE: the OLD ones AREN'T GOING ANYWHERE - they're just getting re-formulated...]; 
+
+					interface Stream<Type = any> extends Summat {
+						pos?: number
+						buffer?: FreezableBuffer<Type>
+						state?: Summat
+						prev?: () => Type
+						isStart?: boolean
+
+						init?: (...x: any[]) => Stream<Type>
+						navigate?: (pos: Position) => Type
+						finish?: () => Type
+						rewind?: () => Type
+
+						curr: Type
+						next: () => Type
+						isEnd: boolean
+					}
+
+					Plus, one COULD start using the OPTIONAL per-element interfaces [then, using the 'ForcePresence' with a "stricter" interfaces]; 
+					This, in particular givest the benefit of being able to recognize properties on a "lower" type WITHOUT requiring an 'as' (no significant type downgrading); 
+				)
+	
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 

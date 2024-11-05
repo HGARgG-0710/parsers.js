@@ -2,6 +2,7 @@ import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
 import type { Posed, Position } from "../../Position/interfaces.js"
+import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
 
 export type BoundNameType = "isEnd" | "isStart"
 export type StartedType = 1 | boolean
@@ -13,16 +14,20 @@ export interface Superable extends Summat {
 	super: Summat
 }
 
-export interface Stateful extends Summat {
-	state: Summat
-}
-
 export interface Copiable<Type = any> extends Summat {
 	copy: () => Type
 }
 
 export interface Inputted<Type = any> extends Summat {
 	input: Type
+}
+
+export interface Stateful extends Summat {
+	state: Summat
+}
+
+export interface Bufferized<Type = any> extends Summat {
+	buffer: FreezableBuffer<Type>
 }
 
 // * Mandatory Property-interfaces
@@ -68,7 +73,7 @@ export interface ConditionalBasePrevIterable<Type = any> extends Summat {
 }
 
 export interface InitGettable<Type = any> extends Summat {
-	initGetter: () => Type
+	initGetter?: () => Type
 }
 
 export interface ConditionalInitGettable<Type = any> extends Summat {
@@ -93,6 +98,14 @@ export interface DefaultEndable extends Summat {
 
 export interface PreInitable extends Summat {
 	preInit?: boolean
+}
+
+export interface Bufferizable extends Summat {
+	buffer?: boolean
+}
+
+export interface StateHaving extends Summat {
+	state?: boolean
 }
 
 export interface ConditionallyRewindable<Type = any> extends Summat {
@@ -120,7 +133,9 @@ export interface StreamClassSignature<Type = any>
 	extends StreamClassTransferable<Type>,
 		ConditionalInitGettable<Type>,
 		HasPositionCheckable,
-		PreInitable {}
+		PreInitable,
+		Bufferizable,
+		StateHaving {}
 
 export interface BasicStreamClassInstance<Type = any>
 	extends BasicStream<Type>,
@@ -128,7 +143,7 @@ export interface BasicStreamClassInstance<Type = any>
 		Initializable<void>,
 		PrimalStreamClassSignature<Type>,
 		StatefulStarted,
-		RealCurrHaving,
+		RealCurrHaving<Type>,
 		Navigable<Type>,
 		Finishable<Type>,
 		Iterable<Type> {}
@@ -153,8 +168,20 @@ export interface PositionalStreamClassInstance<
 > extends StreamClassInstance<Type>,
 		Posed<PosType> {}
 
+export interface BufferizedStreamClassInstance<Type = any>
+	extends StreamClassInstance<Type>,
+		Bufferized<Type> {}
+
+export interface StatefulStreamClassInstance<Type = any>
+	extends StreamClassInstance<Type>,
+		Stateful {}
+
 export interface PositionalReversedStreamClassInstance<
 	Type = any,
 	PosType extends Position = number
 > extends ReversedStreamClassInstance<Type>,
 		Posed<PosType> {}
+
+export interface BufferizedReversedStreamClassInstance<Type = any>
+	extends ReversedStreamClassInstance<Type>,
+		Bufferized<Type> {}

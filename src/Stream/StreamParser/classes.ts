@@ -5,13 +5,13 @@ import type {
 	StreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
 
+import type { StreamHandler } from "../TableMap/interfaces.js"
+
 import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
 import { inputDefaultIsEnd, inputIsEnd } from "../../Stream/StreamClass/methods.js"
-
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 
 import { function as _f } from "@hgargg-0710/one"
-import type { StreamHandler } from "../TableMap/interfaces.js"
 const { cached } = _f
 
 const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
@@ -24,7 +24,7 @@ const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
 	})
 ) as (hasPosition: boolean) => new () => StreamClassInstance
 
-export function StreamTokenizer<OutType = any>(
+export function StreamParser<OutType = any>(
 	handler: StreamHandler<OutType>,
 	hasPosition: boolean = false
 ) {

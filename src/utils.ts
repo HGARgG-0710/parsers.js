@@ -170,4 +170,6 @@ export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"
 export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
+export const getSetDescriptor = ([set, get]) => ({ set, get })
+
 export * as Tree from "./Tree/utils.js"

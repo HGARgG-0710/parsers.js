@@ -3,7 +3,7 @@ import type { Pattern } from "../interfaces.js"
 import type { Collection } from "./interfaces.js"
 import {
 	stringCollectionPush,
-	stringCollectionIterator,
+	collectionIterator,
 	accumulatingPatternCollectionPush,
 	accumulatingPatternCollectionIterator
 } from "./methods.js"
@@ -21,7 +21,7 @@ export class StringCollection extends BasicPattern<string> implements Collection
 
 Object.defineProperties(StringCollection.prototype, {
 	push: { value: stringCollectionPush },
-	[Symbol.iterator]: { value: stringCollectionIterator }
+	[Symbol.iterator]: { value: collectionIterator }
 })
 
 export const ArrayCollection = SelfAssignmentClass<any[], Collection>("value", []) as <
@@ -46,3 +46,5 @@ Object.defineProperties(AccumulatingPatternCollection.prototype, {
 	push: { value: accumulatingPatternCollectionPush },
 	[Symbol.iterator]: { value: accumulatingPatternCollectionIterator }
 })
+
+export * as Buffer from "./Buffer/classes.js"

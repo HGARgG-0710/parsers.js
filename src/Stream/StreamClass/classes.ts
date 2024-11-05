@@ -1,38 +1,23 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Constructor } from "../../interfaces.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
 	StartedType,
-	Stateful as StatefulType,
 	Inputted as InputtedType
 } from "./interfaces.js"
 
 import {
+	finish,
 	rewind,
 	navigate,
 	streamIterator,
-	finish,
-	currSetter,
-	baseCurr,
-	nextHandler,
-	prevHandler,
-	baseStreamInitialize,
-	posNextHandler,
-	posPrevHandler
+	curr,
+	init,
+	next,
+	prev
 } from "./methods.js"
 
 import { AssignmentClass } from "../../utils.js"
-
-const IterationStreamClassPrototypeProps = {
-	next: { value: nextHandler },
-	prev: { value: prevHandler }
-}
-
-const IterationStreamClassPositionalPrototypeProps = {
-	next: { value: posNextHandler },
-	prev: { value: posPrevHandler }
-}
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
@@ -46,14 +31,16 @@ export function StreamClass<Type = any>(
 		currGetter,
 		defaultIsEnd,
 		hasPosition,
-		preInit
+		preInit,
+		state,
+		buffer
 	} = signature
 
 	abstract class streamClass implements StreamClassInstance<Type> {
-		realCurr: any
 		isStart: StartedType
 		isEnd: boolean
 		curr: Type
+		realCurr: Type
 
 		baseNextIter: () => Type
 		next: () => Type
@@ -68,39 +55,42 @@ export function StreamClass<Type = any>(
 		[Symbol.iterator]: () => Generator<Type>
 	}
 
+	// * Defining the basic properties
 	Object.defineProperties(streamClass.prototype, {
-		baseNextIter: { value: baseNextIter },
+		curr: curr.chooseMethod(currGetter, hasPosition, buffer),
 		isCurrEnd: { value: isCurrEnd },
-		isCurrStart: { value: isCurrStart },
-		basePrevIter: { value: basePrevIter },
-		currGetter: { value: currGetter },
-		initGetter: { value: (initGetter || currGetter) as () => Type },
+		baseNextIter: { value: baseNextIter },
 		defaultIsEnd: { value: defaultIsEnd },
-		curr: {
-			set: currSetter<Type>,
-			get: baseCurr<Type>
-		},
-		navigate: { value: navigate },
-		rewind: { value: rewind },
-		finish: { value: finish },
 		[Symbol.iterator]: { value: streamIterator<Type> }
 	})
 
-	// * Adding the '.pos'-specific stream-iteration methods;
-	Object.defineProperties(
-		streamClass.prototype,
-		hasPosition
-			? IterationStreamClassPositionalPrototypeProps
-			: IterationStreamClassPrototypeProps
-	)
+	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
+	Object.defineProperties(streamClass.prototype, {
+		navigate: { value: navigate.chooseMethod<Type>(hasPosition, buffer) },
+		rewind: { value: rewind.chooseMethod<Type>(hasPosition, buffer) },
+		finish: { value: finish.chooseMethod<Type>(hasPosition, buffer) }
+	})
+
+	// * Defining the ReversedStreamClassInstance-specific optional properties
+	Object.defineProperties(streamClass.prototype, {
+		...(isCurrStart ? { isCurrStart: { value: isCurrStart } } : {}),
+		...(basePrevIter ? { basePrevIter: { value: basePrevIter } } : {}),
+		...(currGetter ? { currGetter: { value: currGetter } } : {}),
+		...(initGetter ? { initGetter: { value: initGetter } } : {})
+	})
+
+	// * Adding the '.pos'-specific stream-iteration methods
+	Object.defineProperties(streamClass.prototype, {
+		next: { value: next.chooseMethod<Type>(hasPosition, buffer) },
+		prev: { value: prev.chooseMethod<Type>(hasPosition, buffer) }
+	})
 
 	// * Adding the initialization method
 	Object.defineProperty(streamClass.prototype, "init", {
-		value: baseStreamInitialize(preInit, hasPosition)
+		value: init.chooseMethod<Type>(preInit, hasPosition, buffer, state)
 	})
 
 	return streamClass
 }
 
-export const Stateful = AssignmentClass<Summat, StatefulType>("state")
 export const Inputted = AssignmentClass<any, InputtedType>("input")

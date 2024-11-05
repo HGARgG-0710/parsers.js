@@ -32,8 +32,9 @@ import {
 import { fromPairsList } from "../utils.js"
 import type { LinearIndexMap } from "./interfaces.js"
 
-import { function as _f } from "@hgargg-0710/one"
+import { function as _f, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f
+const { equals } = boolean
 
 const LinearMapClassPrototype = {
 	set: { value: indexMapSet },
@@ -124,7 +125,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 
 export const OptimizedLinearMap = LinearMapClass([], [])
 
-export const [LinearPredicateMap, LinearRegExpMap, LinearSetMap, LinearBasicMap]: [
+export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
 	MapClass<Function>,
 	MapClass<TestType>,
 	MapClass<HasType>,
@@ -133,5 +134,5 @@ export const [LinearPredicateMap, LinearRegExpMap, LinearSetMap, LinearBasicMap]
 	(curr: Function, x: any) => curr(x),
 	(curr: TestType, x: any) => curr.test(x),
 	(curr: HasType, x: any) => curr.has(x),
-	(curr: any, x: any) => curr === x
+	equals
 ].map((change) => LinearMapClass<any, any>([], [], change)) as [any, any, any, any]

@@ -39,7 +39,9 @@ export function indexMapByIndex<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number
 ): [KeyType, ValueType] {
-	return [this.keys[index], this.values[index]]
+	return index >= 0 && this.size > index
+		? [this.keys[index], this.values[index]]
+		: this.default
 }
 
 export function indexMapSwap<KeyType = any, ValueType = any>(

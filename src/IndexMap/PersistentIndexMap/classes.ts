@@ -53,7 +53,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	replace: (index: number, pair: [KeyType, ValueType]) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
-	byIndex: (index: number) => [KeyType, ValueType]
+	byIndex: (index: number) => any
 	swap: (i: number, j: number) => any;
 	[Symbol.iterator]: () => Generator<[KeyType, ValueType]>;
 
@@ -66,7 +66,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 		super(indexMap)
 		const size = indexMap.size
 		this.indexes = new Array(size)
-		for (let i = 0; i < size; ++i) this.indexes[i] = Pointer(i)
+		for (let i = size; i--; ) this.indexes[i] = Pointer(i)
 	}
 }
 

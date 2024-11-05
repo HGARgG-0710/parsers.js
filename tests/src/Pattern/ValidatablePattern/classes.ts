@@ -1,6 +1,7 @@
+import type { ValidationOutput } from "../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
+
 import { arraysSame } from "lib/lib.js"
 import { ValidatableStringPattern } from "../../../../dist/src/Pattern/ValidatablePattern/classes.js"
-import type { ValidationOutput } from "../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
 import { ValidatablePatternClassTest } from "./lib/classes.js"
 
 // * ValidatableStringPattern
@@ -34,9 +35,6 @@ const validationRules = [
 const validationCompare = (x: ValidationOutput, y: ValidationOutput) =>
 	x[0] === y[0] && arraysSame(x[1], y[1])
 
-// TODO:
-// * 1. Write the FAILING tests (ones that is invalid); 
-// ! 	1.1. They should fail AFTER EACH PARTICULAR RULE (of these 2); 
 ValidatablePatternClassTest("ValidatableStringPattern", ValidatableStringPattern, [
 	{
 		input: "BABBBEEDEELEEKBAERB",
@@ -44,6 +42,24 @@ ValidatablePatternClassTest("ValidatableStringPattern", ValidatableStringPattern
 		validationInput: adjacentPush(validationRules, [
 			[true, ["EEDEELEEK"]],
 			[true, []]
+		]) as [RegExp, (input: string) => boolean, ValidationOutput<string>][],
+		resultCompare: validationCompare
+	},
+	{
+		input: "BARBEED",
+		flushResult: [false, []],
+		validationInput: adjacentPush(
+			[validationRules[0]],
+			[[false, [[false, "BARB"], "EED"]]]
+		) as [RegExp, (input: string) => boolean, ValidationOutput<string>][],
+		resultCompare: validationCompare
+	},
+	{
+		input: "BEROBEELEENEES",
+		flushResult: [false, []],
+		validationInput: adjacentPush(validationRules, [
+			[true, ["EELEENEES"]],
+			[false, [true, [false, "EEN"], [false, "EES"]]]
 		]) as [RegExp, (input: string) => boolean, ValidationOutput<string>][],
 		resultCompare: validationCompare
 	}

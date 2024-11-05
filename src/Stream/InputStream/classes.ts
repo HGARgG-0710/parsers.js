@@ -1,55 +1,24 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-
-import type { Indexed } from "../interfaces.js"
-import type { EffectiveInputStream } from "./interfaces.js"
+import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
+import type { InputStream as InputStreamType } from "./interfaces.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
 import {
 	inputStreamDefaultIsEnd,
-	effectiveInputStreamRewind,
-	effectiveInputStreamInitialize,
 	inputStreamCurr,
-	inputStreamIsStart,
-	inputStreamIterator,
-	inputStreamFinish,
 	inputStreamIsEnd,
+	inputStreamIsStart,
 	inputStreamNext,
-	inputStreamPrev,
-	effectiveInputStreamNavigate
+	inputStreamPrev
 } from "./methods.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
-const InputStreamBase = StreamClass({
+export const InputStream = StreamClass({
 	currGetter: inputStreamCurr,
 	baseNextIter: inputStreamNext,
 	basePrevIter: inputStreamPrev,
 	isCurrEnd: inputStreamIsEnd,
 	isCurrStart: inputStreamIsStart,
-	defaultIsEnd: inputStreamDefaultIsEnd
-}) as new () => ReversedStreamClassInstance
-
-export class InputStream<Type = any>
-	extends InputStreamBase
-	implements EffectiveInputStream<Type>
-{
-	pos: number
-	input: Indexed<Type>
-	super: Summat
-
-	init: (input?: Indexed<Type>) => EffectiveInputStream<Type>
-
-	constructor(input?: Indexed<Type>) {
-		super()
-		this.init(input)
-	}
-}
-
-Object.defineProperties(InputStream.prototype, {
-	rewind: { value: effectiveInputStreamRewind },
-	finish: { value: inputStreamFinish },
-	navigate: { value: effectiveInputStreamNavigate },
-	init: { value: effectiveInputStreamInitialize },
-	super: { value: InputStreamBase },
-	[Symbol.iterator]: { value: inputStreamIterator }
-})
+	defaultIsEnd: inputStreamDefaultIsEnd,
+	hasPosition: true,
+	buffer: true
+}) as new <Type = any>(buffer?: FreezableBuffer<Type>) => InputStreamType<Type>

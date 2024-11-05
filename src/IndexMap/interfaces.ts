@@ -49,7 +49,7 @@ export interface IndexMap<KeyType = any, ValueType = any, IndexGetType = number>
 	keys: KeyType[]
 	values: ValueType[]
 	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
-	byIndex: (index: number) => [KeyType, ValueType]
+	byIndex: (index: number) => any
 	swap: (i: number, j: number) => any
 
 	getIndex: (key: any) => IndexGetType

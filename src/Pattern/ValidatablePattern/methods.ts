@@ -29,7 +29,9 @@ export function delegateValidatablePatternValidate<Type = any, KeyType = any>(
 
 	let tempValid = this.result[0]
 	let tempRemains: any[] | null = null
-	for (let i = validated.length; tempValid && i--; ) {
+	let i = validated.length
+	
+	while (i--) {
 		;[tempValid, tempRemains] = this.validator(validated[i] as Type, key, handler)
 		this.result[0] = tempValid
 		replace(validated, i, ...tempRemains)

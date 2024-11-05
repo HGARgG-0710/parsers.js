@@ -12,7 +12,7 @@ const { id } = _f
 const linearMapClassGetIndexTest = baseIndexMapGetIndexTest<number>(id)
 
 type LinearMapClassTestSignature<KeyType = any, ValueType = any> = {
-	getIndexTest: Pairs<KeyType, number>
+	getIndexTest: Pairs<any, number>
 } & MapClassTestSignature<KeyType, ValueType>
 
 export function LinearMapClassTest<KeyType = any, ValueType = any>(

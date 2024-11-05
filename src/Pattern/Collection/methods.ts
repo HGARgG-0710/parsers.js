@@ -7,7 +7,7 @@ export function stringCollectionPush(...x: string[]) {
 	return this
 }
 
-export function* stringCollectionIterator(this: Collection<string>) {
+export function* collectionIterator(this: Collection<string>) {
 	let i = 0
 	while (this.value.length > i) {
 		yield this.value[i]
@@ -26,3 +26,5 @@ export function accumulatingPatternCollectionPush(
 export function* accumulatingPatternCollectionIterator(this: Pattern) {
 	yield this.value
 }
+
+export * as Buffer from "./Buffer/methods.js"

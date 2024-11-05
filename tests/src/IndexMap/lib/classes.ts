@@ -149,13 +149,18 @@ function indexMapIteratorTest<KeyType = any, ValueType = any>(
 function indexMapByIndexTest<KeyType = any, ValueType = any>(
 	instance: IndexMap<KeyType, ValueType>,
 	i: number,
-	expected: [KeyType, ValueType]
+	expected: any
 ) {
 	method(
 		"byIndex",
 		() => {
-			const [allegedKey, allegedValue] = instance.byIndex(i)
-			const [trueKey, trueValue] = expected
+			if (!isArray(expected)) {
+				const allegedValue = instance.byIndex(i)
+				assert.strictEqual(allegedValue, expected)
+				return
+			}
+			const [allegedKey, allegedValue] = instance.byIndex(i) as [KeyType, ValueType]
+			const [trueKey, trueValue] = expected as [KeyType, ValueType]
 			assert.strictEqual(allegedKey, trueKey)
 			assert.strictEqual(allegedValue, trueValue)
 		},
@@ -287,12 +292,12 @@ export type MapClassTestSignature<KeyType = any, ValueType = any> = {
 } & ReducedMapClassTestSignature<KeyType, ValueType>
 
 type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
-	byIndexTest: [number, [KeyType, ValueType]][]
-	indexTest: Pairs<KeyType, ValueType>
+	byIndexTest: Pairs<number, any>
+	indexTest: Pairs<any, ValueType>
 	swapIndicies: [number, number][]
 	uniqueTest: Pairs<KeyType, ValueType>
-	replaceTests: [number, [KeyType, ValueType]][]
-	addTests: [number, [KeyType, ValueType]][]
+	replaceTests: Pairs<number, [KeyType, ValueType]>
+	addTests: Pairs<number, [KeyType, ValueType]>
 	deleteInds: number[]
 	setArgs: Pairs<KeyType, ValueType>
 	replaceKeys: Pairs<KeyType, KeyType>

@@ -1,7 +1,7 @@
 import type { StreamTokenizer } from "./interfaces.js"
-import type { EndableStream } from "../../Stream/StreamClass/interfaces.js"
-import { Inputted } from "../../Stream/StreamClass/classes.js"
-import { superInit } from "../../Stream/StreamClass/utils.js"
+import type { EndableStream } from "../StreamClass/interfaces.js"
+import { Inputted } from "../StreamClass/classes.js"
+import { superInit } from "../StreamClass/utils.js"
 
 export function streamTokenizerNext<InType = any, OutType = any>(
 	this: StreamTokenizer<InType, OutType>
