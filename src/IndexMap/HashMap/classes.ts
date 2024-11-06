@@ -8,13 +8,13 @@ import {
 	hashMapReplaceKey,
 	hashMapSet
 } from "./methods.js"
-import { subSize } from "../SubHaving/methods.js"
+import { valueSize } from "src/Pattern/methods.js"
 import type { Token as TypeToken } from "../../Pattern/Token/interfaces.js"
 
 import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
-import { BasicSubHaving } from "../SubHaving/classes.js"
 import { type } from "src/Pattern/Token/utils.js"
 import { length } from "src/utils.js"
+import { BasicPattern } from "src/Pattern/classes.js"
 const { id } = _f
 const { typeOf } = _typeof
 
@@ -23,14 +23,14 @@ const HashClassPrototype = {
 	set: { value: hashMapSet },
 	replaceKey: { value: hashMapReplaceKey },
 	delete: { value: hashMapDelete },
-	size: { get: subSize }
+	size: { get: valueSize }
 }
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
 	hash: HashType<KeyType, ValueType, InternalKeyType>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass
-		extends BasicSubHaving<InternalHash<InternalKeyType, ValueType>>
+		extends BasicPattern<InternalHash<InternalKeyType, ValueType>>
 		implements HashMap<KeyType, ValueType, InternalKeyType>
 	{
 		hash: HashType<KeyType, ValueType, InternalKeyType>

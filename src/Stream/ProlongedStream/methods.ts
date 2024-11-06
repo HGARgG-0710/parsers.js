@@ -1,33 +1,33 @@
 import type { BasicStream } from "../interfaces.js"
 import type { EffectiveProlongedStream, ProlongedStream } from "./interfaces.js"
-import { Inputted } from "../StreamClass/classes.js"
-import { superInit } from "../StreamClass/utils.js"
+
 import { isEnd } from "../../utils.js"
+import { superInit } from "../StreamClass/utils.js"
 
 export function effectiveProlongedStreamIsEnd<Type = any>(
 	this: EffectiveProlongedStream<Type>
 ) {
 	return (
-		this.input[this.streamIndex].isCurrEnd() &&
-		this.input.length - 1 > this.streamIndex
+		this.value[this.streamIndex].isCurrEnd() &&
+		this.value.length - 1 > this.streamIndex
 	)
 }
 
 export function prolongedStreamCurr<Type = any>(this: ProlongedStream<Type>) {
-	return this.input[this.streamIndex].curr
+	return this.value[this.streamIndex].curr
 }
 
 export function effectiveProlongedStreamNext<Type = any>(
 	this: EffectiveProlongedStream<Type>
 ) {
-	const currStream = this.input[this.streamIndex]
+	const currStream = this.value[this.streamIndex]
 	if (currStream.isCurrEnd()) ++this.streamIndex
 	else currStream.next()
 	return currStream.curr
 }
 
 export function prolongedStreamDefaultIsEnd<Type = any>(this: ProlongedStream<Type>) {
-	return this.input.every(isEnd)
+	return this.value.every(isEnd)
 }
 
 export function prolongedStreamInitialize<Type = any>(
@@ -35,9 +35,8 @@ export function prolongedStreamInitialize<Type = any>(
 	streams?: BasicStream<Type>[]
 ) {
 	if (streams) {
-		Inputted(this, streams)
 		this.streamIndex = 0
-		superInit(this)
+		superInit(this, streams)
 	}
 	return this
 }

@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
 import type {
 	ReversibleStream,
 	BasicReversibleStream,
@@ -7,51 +7,55 @@ import type {
 } from "./interfaces.js"
 
 import {
-	inputRewind,
-	inputCurr,
-	inputPrev,
-	inputIsStart,
-	inputNext,
-	inputIsEnd,
-	inputDefaultIsStart,
-	inputFinish
-} from "../StreamClass/methods.js"
+	valueRewind,
+	valueCurr,
+	valuePrev,
+	valueIsStart,
+	valueNext,
+	valueIsEnd,
+	valueDefaultIsStart,
+	valueFinish
+} from "src/Pattern/methods.js"
 import { reversedStreamInitialize } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { cached } = _f
+const ReversedStreamBase = <Type = any>(
+	hasPosition: boolean = false,
+	buffer: boolean = false
+) =>
+	StreamClass<Type>({
+		currGetter: valueCurr,
+		baseNextIter: valuePrev,
+		basePrevIter: valueNext,
+		isCurrEnd: valueIsStart,
+		isCurrStart: valueIsEnd,
+		defaultIsEnd: valueDefaultIsStart,
+		hasPosition,
+		buffer,
+		isPattern: true
+	}) as PatternReversedStreamConstructor<Type>
 
-const ReversedStreamBase = cached((hasPosition: boolean = false) =>
-	StreamClass({
-		currGetter: inputCurr,
-		baseNextIter: inputPrev,
-		basePrevIter: inputNext,
-		isCurrEnd: inputIsStart,
-		isCurrStart: inputIsEnd,
-		defaultIsEnd: inputDefaultIsStart,
-		hasPosition
-	})
-) as (hasPosition: boolean) => new () => ReversedStreamClassInstance
-
-export function ReversedStream<Type = any>(hasPosition: boolean = false) {
-	const baseClass = ReversedStreamBase(hasPosition)
+export function ReversedStream<Type = any>(
+	hasPosition: boolean = false,
+	buffer: boolean = false
+) {
+	const baseClass = ReversedStreamBase(hasPosition, buffer)
 	class reversedStream extends baseClass implements ReversedStream<Type> {
-		input: BasicReversibleStream<Type>
-		init: (input?: BasicReversibleStream) => ReversedStream<Type>
+		value: BasicReversibleStream<Type>
+		init: (value?: BasicReversibleStream) => ReversedStream<Type>
 		super: Summat
 
-		constructor(input?: ReversibleStream<Type>) {
-			super()
-			this.init(input)
+		constructor(value?: ReversibleStream<Type>) {
+			super(value)
+			this.init(value)
 		}
 	}
 
 	Object.defineProperties(reversedStream.prototype, {
 		super: { value: baseClass.prototype },
-		rewind: { value: inputFinish },
-		finish: { value: inputRewind },
+		rewind: { value: valueFinish },
+		finish: { value: valueRewind },
 		init: { value: reversedStreamInitialize }
 	})
 

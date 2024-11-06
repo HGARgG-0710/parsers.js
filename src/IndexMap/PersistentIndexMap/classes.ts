@@ -3,14 +3,14 @@ import type { IndexMap, Pairs } from "../interfaces.js"
 import type { PersistentIndexMap as PersistentIndexMapType } from "./interfaces.js"
 
 import {
-	subByIndex,
-	subDefault,
-	subIndex,
-	subKeys,
-	subReplace,
-	subReplaceKey,
-	subValues
-} from "../SubHaving/methods.js"
+	valueByIndex,
+	valueDefault,
+	valueIndex,
+	valueKeys,
+	valueReplace,
+	valueReplaceKey,
+	valueValues
+} from "src/Pattern/methods.js"
 
 import {
 	indexMapCopy,
@@ -26,7 +26,7 @@ import {
 	persistentIndexMapSwap,
 	persistentIndexMapUnique
 } from "./methods.js"
-import { BasicSubHaving } from "../SubHaving/classes.js"
+import { BasicPattern } from "src/Pattern/classes.js"
 
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
 // * 	index of a 'PersistentIndexMap' consistent across multiple sources,
@@ -34,7 +34,7 @@ import { BasicSubHaving } from "../SubHaving/classes.js"
 export const Pointer = <Type = any>(value: Type): Pattern<Type> => ({ value })
 
 export class PersistentIndexMap<KeyType = any, ValueType = any>
-	extends BasicSubHaving<IndexMap<KeyType, ValueType>>
+	extends BasicPattern<IndexMap<KeyType, ValueType>>
 	implements PersistentIndexMapType<KeyType, ValueType>
 {
 	keys: KeyType[]
@@ -71,20 +71,20 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 }
 
 Object.defineProperties(PersistentIndexMap, {
-	index: { value: subIndex },
-	byIndex: { value: subByIndex },
+	index: { value: valueIndex },
+	byIndex: { value: valueByIndex },
 	copy: { value: indexMapCopy },
-	replace: { value: subReplace },
+	replace: { value: valueReplace },
 	add: { value: persistentIndexMapAdd },
 	delete: { value: persistentIndexMapDelete },
-	replaceKey: { value: subReplaceKey },
+	replaceKey: { value: valueReplaceKey },
 	unique: { value: persistentIndexMapUnique },
 	set: { value: indexMapSet },
 	swap: { value: persistentIndexMapSwap },
 	getIndex: { value: persistentIndexMapGetIndex },
-	keys: { get: subKeys },
-	values: { get: subValues },
-	default: { get: subDefault },
+	keys: { get: valueKeys },
+	values: { get: valueValues },
+	default: { get: valueDefault },
 	size: {
 		get: indexMapSizeGetter
 	},

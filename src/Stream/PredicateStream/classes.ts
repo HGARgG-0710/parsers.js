@@ -1,9 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { PredicatePosition } from "../../Position/interfaces.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type {
+	IsEndCurrable,
+	PatternStreamConstructor,
+	StreamClassInstance
+} from "../StreamClass/interfaces.js"
 import type { EffectivePredicateStream } from "./interfaces.js"
 
+import { valueDefaultIsEnd } from "src/Pattern/methods.js"
 import {
 	effectivePredicateStreamIsEnd,
 	effectivePredicateStreamProd,
@@ -11,35 +16,36 @@ import {
 	effectivePredicateStreamNext,
 	effectivePredicateStreamInitialize
 } from "./methods.js"
-import { inputDefaultIsEnd } from "../StreamClass/methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { cached } = _f
-
-const PredicateStreamBase = cached((hasPosition: boolean = false) =>
-	StreamClass({
+const PredicateStreamBase = <Type = any>(
+	hasPosition: boolean = false,
+	buffer: boolean = false
+) =>
+	StreamClass<Type>({
 		currGetter: predicateStreamCurr,
 		baseNextIter: effectivePredicateStreamNext,
 		isCurrEnd: effectivePredicateStreamIsEnd,
-		defaultIsEnd: inputDefaultIsEnd,
-		hasPosition
-	})
-) as (hasPosition: boolean) => new () => StreamClassInstance
+		defaultIsEnd: valueDefaultIsEnd,
+		isPattern: true,
+		hasPosition,
+		buffer
+	}) as PatternStreamConstructor<Type>
 
 export function PredicateStream<Type = any>(
-	hasPosition: boolean = false
+	hasPosition: boolean = false,
+	buffer: boolean = false
 ): new (
 	input?: ReversibleStream<Type> & IsEndCurrable,
 	predicate?: PredicatePosition
 ) => EffectivePredicateStream<Type> {
-	const baseClass = PredicateStreamBase(hasPosition)
+	const baseClass = PredicateStreamBase(hasPosition, buffer)
 	class predicateStream extends baseClass implements EffectivePredicateStream<Type> {
-		input: ReversibleStream<Type> & IsEndCurrable
 		lookAhead: Type
 		hasLookAhead: boolean
 		predicate: PredicatePosition
+		value: ReversibleStream<Type> & IsEndCurrable
 
 		super: Summat
 		prod: () => Type
@@ -49,11 +55,11 @@ export function PredicateStream<Type = any>(
 		) => EffectivePredicateStream<Type>
 
 		constructor(
-			input?: ReversibleStream<Type> & IsEndCurrable,
+			value?: ReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition
 		) {
-			super()
-			this.init(input, predicate)
+			super(value)
+			this.init(value, predicate)
 		}
 	}
 

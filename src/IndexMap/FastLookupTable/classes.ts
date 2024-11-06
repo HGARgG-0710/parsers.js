@@ -1,13 +1,14 @@
 import type { Pattern } from "../../Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { SubHaving } from "../SubHaving/interfaces.js"
 import type {
 	FastLookupTable,
 	HashTableClass as HashTableClassType
 } from "./interfaces.js"
 
-import { subDelete, subSet, subReplaceKey, subGetIndex } from "../SubHaving/methods.js"
+import { valueDelete, valueSet, valueReplaceKey, valueGetIndex } from "src/Pattern/methods.js"
+import { BasicPattern } from "src/Pattern/classes.js"
+
 import {
 	persistentIndexFastLookupTableByOwned,
 	persistentIndexFastLookupTableDelete,
@@ -15,13 +16,9 @@ import {
 	affirmOwnership
 } from "./methods.js"
 
-import { BasicSubHaving } from "../SubHaving/classes.js"
-
 export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
-	extends BasicSubHaving<PersistentIndexMap<KeyType, ValueType>>
-	implements
-		FastLookupTable<KeyType, ValueType, Pattern<number>>,
-		SubHaving<PersistentIndexMap<KeyType, ValueType>>
+	extends BasicPattern<PersistentIndexMap<KeyType, ValueType>>
+	implements FastLookupTable<KeyType, ValueType, Pattern<number>>
 {
 	getIndex: (x: any) => Pattern<number>
 	own: (x: any, ownIndex: Pattern<number>) => void
@@ -37,27 +34,27 @@ export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 }
 
 Object.defineProperties(PersistentIndexFastLookupTable.prototype, {
-	getIndex: { value: subGetIndex },
+	getIndex: { value: valueGetIndex },
 	own: { value: affirmOwnership },
 	byOwned: { value: persistentIndexFastLookupTableByOwned },
-	set: { value: subSet },
+	set: { value: valueSet },
 	delete: { value: persistentIndexFastLookupTableDelete },
-	replaceKey: { value: subReplaceKey }
+	replaceKey: { value: valueReplaceKey }
 })
 
 const HashTablePrototype = {
 	own: { value: affirmOwnership },
 	byOwned: { value: hashMapFastLookupTableByOwned },
-	set: { value: subSet },
-	delete: { value: subDelete },
-	replaceKey: { value: subReplaceKey }
+	set: { value: valueSet },
+	delete: { value: valueDelete },
+	replaceKey: { value: valueReplaceKey }
 }
 
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	ownership: (x: KeyType) => OwningType
 ) {
 	class HashTableClass
-		extends BasicSubHaving<HashMap<KeyType, ValueType>>
+		extends BasicPattern<HashMap<KeyType, ValueType>>
 		implements HashTableClassType<KeyType, ValueType, OwningType>
 	{
 		getIndex: (x: any) => OwningType
@@ -78,5 +75,7 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	return HashTableClass
 }
 
-export const [BasicHashTable, StreamHashTable]: [HashTableClassType, HashTableClassType] =
-	[(x: any) => x, (stream: any) => stream.curr].map(HashTable) as [any, any]
+export const [BasicHashTable, StreamHashTable]: [FastLookupTable, FastLookupTable] = [
+	(x: any) => x,
+	(stream: any) => stream.curr
+].map(HashTable) as [any, any]

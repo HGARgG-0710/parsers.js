@@ -1,9 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Position } from "../../Position/interfaces.js"
+import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
 import type { LimitedUnderStream, EffectiveLimitedStream } from "./interfaces.js"
 
-import { inputCurr, inputDefaultIsEnd } from "../StreamClass/methods.js"
+import { valueCurr, valueDefaultIsEnd } from "src/Pattern/methods.js"
 import {
 	effectiveLimitedStreamInitialize,
 	effectiveLimitedStreamProd,
@@ -15,31 +15,33 @@ import {
 
 import { StreamClass } from "../StreamClass/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { cached } = _f
-
-const LimitedStreamBase = cached((hasPosition: boolean = false) =>
-	StreamClass({
-		currGetter: inputCurr,
+const LimitedStreamBase = <Type = any>(
+	hasPosition: boolean = false,
+	buffer: boolean = false
+) =>
+	StreamClass<Type>({
+		currGetter: valueCurr,
 		baseNextIter: effectiveLimitedStreamNext,
 		basePrevIter: effectiveLimitedStreamPrev,
 		isCurrEnd: effectiveLimitedStreamIsEnd,
 		isCurrStart: effectiveLimitedStreamIsStart,
-		defaultIsEnd: inputDefaultIsEnd,
-		hasPosition
-	})
-) as (hasPosition?: boolean) => new () => ReversedStreamClassInstance
+		defaultIsEnd: valueDefaultIsEnd,
+		isPattern: true,
+		hasPosition,
+		buffer
+	}) as PatternReversedStreamConstructor<Type>
 
 export function LimitedStream<Type = any>(
-	hasPosition: boolean = false
+	hasPosition: boolean = false,
+	buffer: boolean = false
 ): new (
-	input?: LimitedUnderStream<Type>,
+	value?: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position
 ) => EffectiveLimitedStream<Type> {
-	const baseClass = LimitedStreamBase(hasPosition)
+	const baseClass = LimitedStreamBase<Type>(hasPosition, buffer)
 	class limitedStream extends baseClass implements EffectiveLimitedStream<Type> {
-		input: LimitedUnderStream<Type>
+		value: LimitedUnderStream<Type>
 		lookAhead: Type
 		hasLookAhead: boolean
 
@@ -51,14 +53,14 @@ export function LimitedStream<Type = any>(
 
 		prod: () => Type
 		init: (
-			input?: LimitedUnderStream<Type>,
+			value: LimitedUnderStream<Type>,
 			from?: Position,
 			to?: Position
 		) => EffectiveLimitedStream<Type>
 
-		constructor(input?: LimitedUnderStream<Type>, from?: Position, to?: Position) {
-			super()
-			this.init(input, from, to)
+		constructor(value: LimitedUnderStream<Type>, from?: Position, to?: Position) {
+			super(value)
+			this.init(value, from, to)
 		}
 	}
 

@@ -36,47 +36,21 @@ REMINDERS [2.]:
 5. After all - CLEAN SOME OF THE v0.4 notes [this refactoring is absolutely marvelous... + the 'GeneralParser' really is almost completely useless...]; 
 		Do the 'StreamTokenizer->StreamParser' thing (with its' generalization to allow state, REMOVAL of 'GeneralParser', and so forth...); 
 		Then, one also needs to add: 
-			
+
 			4. Replace the '.sub' and '.input' with '.value' [popularization of Patterns]; 
-				4.1. Search terms: 
-					delegate
-					delegateProperty
-					calledDelegate
 					
-				4.2. For this [BasicPattern] to work with Streams (which ALREADY extend something), 
-					1. add YET ANOTHER parameter '.isPattern' to the StreamClass signature; 
-					2. this will make the thing a "BasicPattern" 
-
-					The importance of '.value' is: 
-
-						1. It unifies a GREAT deal of interfaces with diverse meanings (prior: '.input')
-						2. It unifies them well - as Pattern-s: 
-							1. things that change the given '.value' [StreamClass+.isPattern, Collection, Buffer, , et cetera]
-							2. or output into the '.result', which is '.flush()'-able (EliminablePattern, ValidatablePattern, TokenizablePattern)
-							3. or just keep the value as-is, for further usage (Token, EnumSpace/Buffer [encapsulated])
-
-					Before formalization of 'InputStream' as a pure 'StreamClass', '.input' (now '.value') also had another meaning - a non-changeable underlying representation (like Token, or EnumSpace without '.add'); 
-					
-				4.3. Get rid of the 'BaseSubHaving' [instead - now one has the 'BasePattern']; 
-				4.4. Get rid of 'Inputted'
 				4.5. Liberate the 'Pattern/' directory (save for ValidatablePattern, TokenizablePattern and EliminablePattern [or - change their respectie names, even better...])
+					THEN - the 'Pattern/' STILL remains and retains all the immidiate exports [and only them...]; 
+					The 'matchString' goes into the new 'TokenizablePattern/utils.ts' [first historical occurence, primary/only-handfirst library usage]; 
 				
 			7. Make all stuff from 'Parser/' [that IS a 'StreamParser'] a part of the 'StreamParser/' directory (OR, better still, - just put into the 'classes.ts'); 
 				7.0. Fix compile errors in the StreamParser files
 				7.1. Rewrite ALL of the Parser-thingies in terms of StreamParser
-				4.4. RE-LOCATE all the 'delegate' methods into THE 'methods.ts' FILES! [they aren't utils, they have a 'this']; 
 
 			8. Add optional ability of 'toInputStream' to RECOGNIZE the presence of '.buffer', and (hence) not need to do another walk-through the given Stream; 
 				8.1. Add type-predicates: 
 					8.1.1. isFreezableBuffer; 
 					8.1.2. isBufferized; 
-
-			1. '.buffer' [and the 'BufferizedStream' - based off it]; 
-				ALSO: 
-
-					1. create types for different signatures for the '.init' method; 
-						Use them on particular cases of 'StreamClass'; 
-
 
 			10. Clean the 'src/utils.ts' [from the stuff that isn't supposed to be there... 'firstStream' is the first-to-go!]; 
 	
@@ -92,8 +66,19 @@ REMINDERS [2.]:
 
 				Fix this, by means of using 'export *' instead of the 'export * as', in cases, when 'A' is the ONLY export 'A.A'; 
 
-			15. Fix the notes; 
+			15. Clean the notes; 
 
+			16. Individually type ['function IGenerateAStream(): __T__'] EACH function for generation of classes for Stream-creation; 
+				Good Example: LimitedStream
+
+			17. USE the optional '.pos' property on EVERY possibility inside the method implementations (namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
+
+			18. GET RID of the '.vars' idea-note; 	
+				Reason - EACH individual class should have their OWN initialization logic; 
+				This is NOT the same as with the '.value' - "reducing common cases", where there are data-filled changing variables; 
+				Those actually make sense on the level of an individual Stream-Class! 
+
+			19. Make the '.multind' of 'MultiIndexModifier' into '.value' AS WELL! 
 
 Order of TODO-elimination: 
 	5. 
@@ -276,8 +261,7 @@ B. documentation (change/fix it...);
 			B1.3.1. Describe abstract classes: 
 				1.3.1.1. FlushablePattern; 
 				1.3.1.2. BasicPattern; 
-				1.3.1.3. BasicSubHaving; 
-				1.3.1.4. StreamClass({...}); 
+				1.3.1.3. StreamClass({...}); 
 			
 		B1.4. Class-Factories: 
 			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
@@ -676,7 +660,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	2.21. Re-structure the tests to be made on a per-method basis? 
 		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
 	
-	2.22. INTRODUCE the [optional] '.state' property for state-keeping; RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
+	2.22. RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
 		Comes inside the 'StreamClass' (optionally) via the 'hasState' property;
 		Will additionally be supported by: 
 
@@ -720,10 +704,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			2. subtraction: 	/[[...]--[...]]/v
 			3. string literals: /[q{...}]/v
 		
-	2.26. [maybe?] Re-locate the 'SubHaving' interface into the 'src/interfaces.ts'; 
-		Make it global [besides usages - no reason for 'IndexMap' to keep it...]; 
-		Also - how about uniting the '.sub' with '.input' [have a single name for delegate object-properties]; 
-	
 	2.27. [prototypes, generality] make all the prototype 'value's (in particular - methods) OVERRIDABLE! 
 			via doing: 
 
@@ -769,45 +749,23 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			3. 'skip' will call the '.travel' on the given stream (instead of using the 'uniTravel', as it does now); 
 		CONCLUSION: 'skip' and 'has' utilities optimized, interfaces unified; 
 
-	2.30. Add 'Sizeable' Stream-s; 
-			An interface, serving as a generalization of 'InputStream' and 'BufferizedStream'; 
-			Basically, one'd have '.size' property on Stream-s,
-				which would permit the number of elements once the Stream has been walked
-					(WITHOUT needing to Bufferize -- When kinds of 'Stream'-s ARE DIFFERENT, BUT, the number of elements IS THE SAME); 
-			After that has been done - one can either '.rewind()' it, or create a new one, with the same input, but this time - with 'size'; 
-			This will permit one to SAVE TIME on the 'isEnd' calling [and the other methods underneath in the StreamClass]; 
+	2.30. [performance] Cache stuff related to StreamClass -- dynamic creation of classes [EVERYTHING...]: 
+			0. [add to 'one.js'] the 'multiCached(props: string[])(object: object)' function: 
+				0.1. Based off an object: 
+					Takes in an object, with predefined list of properties; 
+					This'll be using NESTED 'Map'-s; 
+						Meaning, that 'i'-th property in the 'keyList', would have the 'i'-th-depth Map; 
+			1. 'multiCache' everything:
+				1.1. StreamClass [in terms of given signature objects]; 
+				1.2. Functions that call the StreamClass for BaseClasses [the 'InputStreamBaseClass', ... others]
+				1.3. The GeneratedStream-functions for creation of classes (based off THE SAME sub-signature...); 
+				1.4. the 'baseStreamInitialize' function (that chooses the appropriate definition for the '.init' method...); 
 
-			For InputStream, the size is known at the beginning, so it (fundamentally) equates iterating the Stream to 
-				iterating the underlying array/stream; 
+				This may be important, because - when writing libraries, the user may want to override some 
+					of the functionality (for instance - add/remove '.bufferized', '.pos'), and end up creating A NEW 
+						class; 
+						This will cause a slowdown [in a long chain, or when done a sufficient number of times - a noticeable one...]; 
 
-			This is especially good for practical applications - one can get something like a 
-				'StreamValidator' for a complex non-bufferized Stream, then - store the '.size' 
-					after validating successfully, THEN - use the size to iterate more rapidly; 
-		
-		30.1. IMPORTANT: make the '.size', '.buffer', '.state' OPTIONAL PROPERTIES of the 'StreamClass' (like '.pos'); 
-			The '.buffer' property would REPLACE the 'BufferizedStream' - likewise, the 'SizedStream'-s would be replaced by this; 
-			Let it be: 
-				1. If '.pos' is present - define '.size' as a getter: '() -> (this.pos + 1)'; 
-				2. If '.buffer' is present - define '.size' as a getter: '() -> (this.buffer.size)'
-				3. If neither are present, do '.size = 0' iff '.defaultIsEnd() === false', otherwise - '.size >= 1', with increasing value as the Stream size progresses; 
-			
-			30.1.1. HOWEVER, for performance reasons, one'll now have the need of several-variable 'cached' functions:
-				0. [add to 'one.js'] the 'multiCached(props: string[])(object: object)' function: 
-					0.1. Based off an object: 
-						Takes in an object, with predefined list of properties; 
-						This'll be using NESTED 'Map'-s; 
-							Meaning, that 'i'-th property in the 'keyList', would have the 'i'-th-depth Map; 
-				1. 'multiCache' everything:
-					1.1. StreamClass [in terms of given signature objects]; 
-					1.2. Functions that call the StreamClass for BaseClasses [the 'InputStreamBaseClass', ... others]
-					1.3. The GeneratedStream-functions for creation of classes (based off THE SAME sub-signature...); 
-					1.4. the 'baseStreamInitialize' function (that chooses the appropriate definition for the '.init' method...); 
-
-					This may be important, because - when writing libraries, the user may want to override some 
-						of the functionality (for instance - add/remove '.bufferized', '.pos'), and end up creating A NEW 
-							class; 
-							This will cause a slowdown [in a long chain, or when done a sufficient number of times - a noticeable one...]; 
-		
 	2.31. refactor the 'imports' tests; 
 		1. more use of 'specificChildImports'
 		2. the 'prefixedNames' + 'namesCapitalized' - appears lots more than once, take out; 
@@ -1262,8 +1220,27 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 					Plus, one COULD start using the OPTIONAL per-element interfaces [then, using the 'ForcePresence' with a "stricter" interfaces]; 
 					This, in particular givest the benefit of being able to recognize properties on a "lower" type WITHOUT requiring an 'as' (no significant type downgrading); 
+
+					2.49.1. ALSO  - create a single RIGID 'StreamClass' interface! [for the implementation - write down the optional '.pos, .buffer', and so forth... Missing currently...]; 
 				)
 	
+	2.50. Use C preprocessor with this code; 
+
+		Getting tired of typing "optionalValue(this, value)", and other such things in repetative situations (like 'init.ts'); 
+		Abstract those away with a good old '#define' + '#include'; 
+			Then - introduce C preprocessor tools to the project's build; 
+				The build process, then, would then be : 
+
+					1. steps: 
+						prep/ (with-preprocessor dir, via 'make') -> ts/ (pure TypeScript) -> dist/ (pure JavaScript)
+					2. extension: 
+						change from '.ts', to stop the VSCode from doing its thing; 
+					3. create a basic theme for this "mixed" TypeScript + C-preprocessor thingie [VSCode extension idea]; 
+						For syntax highlighting
+
+			Due to the project's (intended, at least) reliability
+
+
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 

@@ -1,6 +1,5 @@
-import type { SubHaving } from "../../SubHaving/interfaces.js"
 import type { InternalHash } from "./interfaces.js"
-import { subDelete, subSet, subSize } from "../../SubHaving/methods.js"
+import { valueDelete, valueSet, valueSize } from "src/Pattern/methods.js"
 import {
 	mapInternalHashGet,
 	mapInternalHashReplaceKey,
@@ -10,11 +9,11 @@ import {
 	objectInternalHashSet
 } from "./methods.js"
 
-import { BasicSubHaving } from "src/IndexMap/SubHaving/classes.js"
+import { BasicPattern } from "src/Pattern/classes.js"
 
 export class MapInternalHash<KeyType = any, ValueType = any>
-	extends BasicSubHaving<Map<KeyType, ValueType>>
-	implements InternalHash<KeyType, ValueType>, SubHaving<Map<KeyType, ValueType>>
+	extends BasicPattern<Map<KeyType, ValueType>>
+	implements InternalHash<KeyType, ValueType>
 {
 	size: number
 	default: any
@@ -31,16 +30,16 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 }
 
 Object.defineProperties(MapInternalHash.prototype, {
-	set: { value: subSet },
+	set: { value: valueSet },
 	get: { value: mapInternalHashGet },
-	delete: { value: subDelete },
-	size: { get: subSize },
+	delete: { value: valueDelete },
+	size: { get: valueSize },
 	replaceKey: { value: mapInternalHashReplaceKey }
 })
 
 export class ObjectInternalHash<Type = any>
-	extends BasicSubHaving<object>
-	implements InternalHash<string, Type>, SubHaving<object>
+	extends BasicPattern<object>
+	implements InternalHash<string, Type>
 {
 	default: any
 	size: number

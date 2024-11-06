@@ -27,7 +27,7 @@ import { MultiIndexModifier as MultiIndexModifierClass } from "../../Position/Mu
 export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	level: Tree<Type>
 
-	input: Tree<Type>
+	value: Tree<Type>
 	curr: InTreeType<Type>
 	pos: MultiIndex
 	modifier: MultiIndexModifier

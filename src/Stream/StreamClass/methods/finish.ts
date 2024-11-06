@@ -1,3 +1,4 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
 import type { BasicStream } from "src/Stream/interfaces.js"
 import type {
@@ -7,6 +8,10 @@ import type {
 
 import { uniFinish } from "../utils.js"
 import { end, readBuffer } from "./next.js"
+
+export interface Finishable<Type = any> extends Summat {
+	finish: () => Type
+}
 
 // * utility functions
 

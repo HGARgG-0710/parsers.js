@@ -1,4 +1,3 @@
-import { delegateProperty } from "src/utils.js"
 import type { FreezableArray } from "./classes.js"
 import type { UnfreezableBuffer } from "./interfaces.js"
 
@@ -16,9 +15,6 @@ export function freezableArrayFreeze<Type = any>(this: FreezableArray<Type>) {
 export function freezableArrayRead<Type = any>(this: FreezableArray<Type>, i: number) {
 	return this.value[i]
 }
-
-export const valueDelegate = delegateProperty("value")
-export const valueLengthDelegate = valueDelegate("length")
 
 export function unfreezableBufferUnfreeze<Type = any>(this: UnfreezableBuffer<Type>) {
 	this.isFrozen = false

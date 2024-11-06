@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "../../Tree/TreeWalker/interfaces.js"
@@ -14,7 +14,7 @@ import {
 	effectiveTreeStreamIsStart,
 	effectiveTreeStreamInitialize,
 	effectiveTreeStreamCurrGetter,
-	effectiveTreeStreamInputGetter,
+	effectiveTreeStreamValueGetter,
 	effectiveTreeStreamInputSetter
 } from "./methods.js"
 
@@ -31,24 +31,23 @@ const TreeStreamBase = StreamClass({
 	isCurrEnd: effectiveTreeStreamIsEnd,
 	isCurrStart: effectiveTreeStreamIsStart,
 	defaultIsEnd: F
-}) as new () => ReversedStreamClassInstance
+}) as PatternReversedStreamConstructor<InTreeType>
 
 export class TreeStream<Type = any>
 	extends TreeStreamBase
 	implements EffectiveTreeStream<Type>
 {
-	input: Tree<Type>
+	value: Tree<Type>
 	walker: TreeWalkerType<Type>
 	response: string
 	lastLevelWithSiblings: number
 
-	navigate: (position: MultiIndexType) => InTreeType<Type>
 	super: Summat
-
+	navigate: (position: MultiIndexType) => InTreeType<Type>
 	init: (tree?: Tree<Type>) => EffectiveTreeStream<Type>
 
 	constructor(tree?: Tree<Type>) {
-		super()
+		super(tree)
 		this.walker = new TreeWalker(tree)
 		this.response = ""
 		this.lastLevelWithSiblings = 0
@@ -57,7 +56,7 @@ export class TreeStream<Type = any>
 }
 
 Object.defineProperties(TreeStream.prototype, {
-	input: { get: effectiveTreeStreamInputGetter, set: effectiveTreeStreamInputSetter },
+	value: { get: effectiveTreeStreamValueGetter, set: effectiveTreeStreamInputSetter },
 	super: { value: TreeStreamBase.prototype },
 	rewind: { value: effectiveTreeStreamRewind },
 	navigate: { value: effectiveTreeStreamNavigate },

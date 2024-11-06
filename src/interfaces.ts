@@ -1,5 +1,3 @@
-export type Constructor<Type = any> = Function & { prototype: Type }
-
 export type * as IndexMap from "./IndexMap/interfaces.js"
 export type * as Parser from "./Parser/interfaces.js"
 export type * as Pattern from "./Pattern/interfaces.js"

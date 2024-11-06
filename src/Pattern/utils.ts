@@ -8,6 +8,7 @@ export function matchString(value: string, key: RegExp | string): string[] {
 }
 
 export const value = <Type = any>(x: Pattern<Type>) => x.value
+export const setValue = <Type = any>(x: Pattern<Type>, value: Type) => (x.value = value)
 
 export * as Token from "./Token/utils.js"
 export * as TokenizablePattern from "./TokenizablePattern/utils.js"

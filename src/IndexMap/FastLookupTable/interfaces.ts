@@ -1,6 +1,6 @@
+import type { Pattern } from "src/Pattern/interfaces.js"
 import type { Deletable, HashMap, Settable } from "../HashMap/interfaces.js"
 import type { KeyReplaceable } from "../HashMap/interfaces.js"
-import type { SubHaving } from "../SubHaving/interfaces.js"
 
 export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = any>
 	extends KeyReplaceable<KeyType>,
@@ -13,4 +13,4 @@ export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = an
 
 export interface HashTableClass<KeyType = any, ValueType = any, OwningType = any>
 	extends FastLookupTable<KeyType, ValueType, OwningType>,
-		SubHaving<HashMap<KeyType, ValueType>> {}
+		Pattern<HashMap<KeyType, ValueType>> {}

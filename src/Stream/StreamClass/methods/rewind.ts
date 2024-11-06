@@ -1,3 +1,4 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
 import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
 import type {
@@ -8,6 +9,10 @@ import type {
 import { uniRewind } from "../utils.js"
 import { start } from "./prev.js"
 import { nullPos } from "./init.js"
+
+export interface Rewindable<Type = any> extends Summat {
+	rewind: () => Type
+}
 
 // * utility functions
 

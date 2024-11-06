@@ -80,7 +80,6 @@ export function indexMapSet<KeyType = any, ValueType = any>(
 	return this.add(index, [key, value])
 }
 
-export * as SubHaving from "./SubHaving/methods.js"
 export * as FastLookupTable from "./FastLookupTable/methods.js"
 export * as HashMap from "./HashMap/methods.js"
 export * as LinearIndexMap from "./LinearIndexMap/methods.js"

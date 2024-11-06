@@ -2,46 +2,51 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { StreamTokenizer } from "./interfaces.js"
 import type {
 	EndableStream,
-	StreamClassInstance
+	PatternStreamConstructor
 } from "../../Stream/StreamClass/interfaces.js"
 
-import type { StreamHandler } from "../TableMap/interfaces.js"
+import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
 
 import { streamTokenizerInitialize, streamTokenizerNext } from "./methods.js"
-import { inputDefaultIsEnd, inputIsEnd } from "../../Stream/StreamClass/methods.js"
+import { valueDefaultIsEnd, valueIsEnd } from "src/Pattern/methods.js"
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { cached } = _f
-
-const StreamTokenizerBase = cached((hasPosition: boolean = false) =>
-	StreamClass({
+const StreamTokenizerBase = <Type = any>(
+	hasPosition: boolean = false,
+	buffer: boolean = false,
+	state: boolean = false
+) =>
+	StreamClass<Type>({
 		initGetter: streamTokenizerNext,
-		isCurrEnd: inputIsEnd,
+		isCurrEnd: valueIsEnd,
 		baseNextIter: streamTokenizerNext,
-		defaultIsEnd: inputDefaultIsEnd,
-		hasPosition
-	})
-) as (hasPosition: boolean) => new () => StreamClassInstance
+		defaultIsEnd: valueDefaultIsEnd,
+		hasPosition,
+		buffer,
+		state,
+		isPattern: true
+	}) as PatternStreamConstructor<Type>
 
 export function StreamParser<OutType = any>(
 	handler: StreamHandler<OutType>,
-	hasPosition: boolean = false
+	hasPosition: boolean = false,
+	buffer: boolean = false,
+	state: boolean = false
 ) {
-	const baseClass = StreamTokenizerBase(hasPosition)
+	const baseClass = StreamTokenizerBase(hasPosition, buffer, state)
 	class streamTokenizerClass<InType = any>
 		extends baseClass
 		implements StreamTokenizer<InType, OutType>
 	{
-		input: EndableStream<InType>
+		value: EndableStream<InType>
 		super: Summat
 		handler: StreamHandler<OutType>
 
-		init: (input?: EndableStream<InType>) => StreamTokenizer<InType, OutType>
+		init: (value?: EndableStream<InType>) => StreamTokenizer<InType, OutType>
 
-		constructor(input?: EndableStream<InType>) {
-			super()
-			this.init(input)
+		constructor(value?: EndableStream<InType>) {
+			super(value)
+			this.init(value)
 		}
 	}
 

@@ -1,7 +1,9 @@
 import type { Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
-import type { Finishable, Navigable, Rewindable } from "./interfaces.js"
+import type { Rewindable } from "./methods/rewind.js"
+import type { Finishable } from "./methods/finish.js"
+import type { Navigable } from "./methods/navigate.js"
 
 import { calledDelegate } from "../../utils.js"
 import { pickDirection, positionConvert } from "../../Position/utils.js"

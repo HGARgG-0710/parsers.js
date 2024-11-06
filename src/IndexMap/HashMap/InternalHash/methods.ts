@@ -8,7 +8,7 @@ export function mapInternalHashGet<KeyType = any, ValueType = any>(
 	this: MapInternalHash<KeyType, ValueType>,
 	x: KeyType
 ) {
-	const gotten = this.sub.get(x)
+	const gotten = this.value.get(x)
 	return isUndefined(gotten) ? this.default : gotten
 }
 
@@ -29,7 +29,7 @@ export function objectInternalHashGet<Type = any>(
 	this: ObjectInternalHash<Type>,
 	key: string
 ) {
-	const read = this.sub[key]
+	const read = this.value[key]
 	return isUndefined(read) ? this.default : read
 }
 
@@ -38,8 +38,8 @@ export function objectInternalHashSet<Type = any>(
 	key: string,
 	value: Type
 ) {
-	if (isUndefined(this.sub[key])) ++this.size
-	this.sub[key] = value
+	if (isUndefined(this.value[key])) ++this.size
+	this.value[key] = value
 	return this
 }
 
@@ -47,9 +47,9 @@ export function objectInternalHashDelete<Type = any>(
 	this: ObjectInternalHash<Type>,
 	key: string
 ) {
-	if (!isUndefined(this.sub[key])) {
+	if (!isUndefined(this.value[key])) {
 		--this.size
-		this.sub[key] = undefined
+		this.value[key] = undefined
 	}
 	return this
 }
@@ -59,7 +59,7 @@ export function objectInternalHashReplaceKey<Type = any>(
 	keyFrom: string,
 	keyTo: string
 ) {
-	this.sub[keyTo] = this.sub[keyFrom]
-	this.sub[keyFrom] = undefined
+	this.value[keyTo] = this.value[keyFrom]
+	this.value[keyFrom] = undefined
 	return this
 }

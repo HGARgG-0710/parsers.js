@@ -7,9 +7,8 @@ import {
 	freezableArrayFreeze,
 	freezableArrayPush,
 	freezableArrayRead,
-	unfreezableBufferUnfreeze,
-	valueLengthDelegate
-} from "./methods.js"
+	unfreezableBufferUnfreeze} from "./methods.js"
+import { valueLengthDelegate } from "src/Pattern/methods.js"
 
 export class FreezableArray<Type = any>
 	extends BasicPattern<Type[]>

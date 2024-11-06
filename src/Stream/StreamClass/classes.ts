@@ -1,9 +1,9 @@
-import type { Constructor } from "../../interfaces.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
 	StartedType,
-	Inputted as InputtedType
+	StreamConstructor,
+	PatternStreamConstructor
 } from "./interfaces.js"
 
 import {
@@ -17,11 +17,12 @@ import {
 	prev
 } from "./methods.js"
 
-import { AssignmentClass } from "../../utils.js"
+import { BasicPattern } from "src/Pattern/classes.js"
+import type { InitMethod } from "./methods/init.js"
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
-): Constructor<StreamClassInstance<Type>> {
+): StreamConstructor<Type> | PatternStreamConstructor<Type> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -33,10 +34,13 @@ export function StreamClass<Type = any>(
 		hasPosition,
 		preInit,
 		state,
-		buffer
+		buffer,
+		isPattern
 	} = signature
 
-	abstract class streamClass implements StreamClassInstance<Type> {
+	let streamClass: StreamConstructor<Type> | PatternStreamConstructor<Type>
+
+	interface streamClassGuaranteed {
 		isStart: StartedType
 		isEnd: boolean
 		curr: Type
@@ -51,8 +55,25 @@ export function StreamClass<Type = any>(
 
 		navigate: () => Type
 		finish: () => Type
-		init: (...x: any[]) => void;
+		init: InitMethod
 		[Symbol.iterator]: () => Generator<Type>
+	}
+
+	if (isPattern) {
+		interface _streamClass extends streamClassGuaranteed {}
+		abstract class _streamClass
+			extends BasicPattern
+			implements StreamClassInstance<Type>
+		{
+			constructor(value: any) {
+				super(value)
+			}
+		}
+		streamClass = _streamClass
+	} else {
+		interface _streamClass extends streamClassGuaranteed {}
+		abstract class _streamClass implements StreamClassInstance<Type> {}
+		streamClass = _streamClass
 	}
 
 	// * Defining the basic properties
@@ -87,10 +108,15 @@ export function StreamClass<Type = any>(
 
 	// * Adding the initialization method
 	Object.defineProperty(streamClass.prototype, "init", {
-		value: init.chooseMethod<Type>(preInit, hasPosition, buffer, state)
+		value: init.chooseMethod(
+			preInit,
+			hasPosition,
+			buffer,
+			state,
+			isPattern,
+			currGetter
+		)
 	})
 
 	return streamClass
 }
-
-export const Inputted = AssignmentClass<any, InputtedType>("input")

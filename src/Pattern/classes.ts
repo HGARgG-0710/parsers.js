@@ -1,9 +1,10 @@
 import type { Flushable, Pattern } from "./interfaces.js"
+import { setValue } from "./utils.js"
 
 export abstract class BasicPattern<Type = any> implements Pattern<Type> {
 	value: Type
 	constructor(value: Type) {
-		this.value = value
+		setValue(this, value)
 	}
 }
 

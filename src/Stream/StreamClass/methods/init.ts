@@ -1,32 +1,78 @@
 import type {
 	Bufferized,
 	BufferizedStreamClassInstance,
+	PatternStreamClassInstance,
 	PositionalStreamClassInstance,
 	Stateful,
 	StatefulStreamClassInstance,
 	StreamClassInstance
 } from "../interfaces.js"
-import { StreamClass } from "../../../constants.js"
 
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "src/Stream/interfaces.js"
 import type { Posed } from "src/Position/interfaces.js"
 import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
 
+import { StreamClass } from "../../../constants.js"
+import { setValue } from "src/Pattern/utils.js"
+
+import { typeof as type } from "@hgargg-0710/one"
+import type { Pattern } from "src/Pattern/interfaces.js"
+const { isUndefined } = type
+
+// * types
+
+export interface Initializable extends Summat {
+	init: InitMethod
+}
+
+export type InitMethod =
+	| BaseInitMethod
+	| BufferInitMethod
+	| StateInitMethod
+	| BufferStateInitMethod
+	| PatternInitMethod
+	| BufferPatternInitMethod
+	| StatePatternInitMethod
+	| BufferStatePatternInitMethod
+
+export type BaseInitMethod = () => void
+export type BufferInitMethod = <Type = any>(buffer?: FreezableBuffer<Type>) => void
+export type StateInitMethod = (state?: Summat) => void
+export type PatternInitMethod = (value: any) => void
+
+export type BufferStateInitMethod = <Type = any>(
+	buffer?: FreezableBuffer<Type>,
+	state?: Summat
+) => void
+
+export type BufferPatternInitMethod = <Type = any>(
+	value: any,
+	buffer?: FreezableBuffer<Type>
+) => void
+
+export type StatePatternInitMethod = (value: any, state?: Summat) => void
+
+export type BufferStatePatternInitMethod = <Type = any>(
+	value: any,
+	buffer?: FreezableBuffer<Type>,
+	state?: Summat
+) => void
+
 // * utility functions
 
 export function createBuffer<Type = any>(
 	bufferized: Bufferized<Type>,
-	buffer: FreezableBuffer
+	buffer?: FreezableBuffer
 ) {
-	bufferized.buffer = buffer
+	if (!isUndefined(buffer)) bufferized.buffer = buffer
 }
 
 export function nullPos(posed: Posed<number>) {
 	posed.pos = 0
 }
 
-// * Explanation: For 'StreamClassInstance'-s, it's a call to the 'initGetter' (IN CASE IT'S PRESENT); Otherwise, a no-op
+// * Explanation: For 'StreamClassInstance'-s, it's a call to the 'initGetter', or a first call to 'currGetter'
 export function preInit(x: BasicStream) {
 	if (!x.isEnd) x.curr
 }
@@ -37,6 +83,10 @@ export function createState(x: Stateful, state: Summat) {
 
 export function initRealCurr(stream: StreamClassInstance) {
 	stream.realCurr = StreamClass.DefaultRealCurr
+}
+
+export function optionalValue(pattern: Pattern, value?: any) {
+	if (!isUndefined(value)) setValue(pattern, value)
 }
 
 // * possible '.init' methods
@@ -52,7 +102,7 @@ export function initialize<Type = any>(this: StreamClassInstance<Type>) {
 }
 
 // * Explanation: the private function here is only for refactoring;
-function generateInitMethods(initialize: Function) {
+function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	function preInitInitialize<Type = any>(this: StreamClassInstance<Type>) {
 		initialize.call(this)
 		preInit(this)
@@ -86,7 +136,7 @@ function generateInitMethods(initialize: Function) {
 
 	function posBufferInitialize<Type = any>(
 		this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
-		buffer: FreezableBuffer
+		buffer?: FreezableBuffer
 	) {
 		createBuffer(this, buffer)
 		posInitialize.call(this)
@@ -94,7 +144,7 @@ function generateInitMethods(initialize: Function) {
 
 	function preInitPosBufferInitialize<Type = any>(
 		this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
-		buffer: FreezableBuffer
+		buffer?: FreezableBuffer
 	) {
 		createBuffer(this, buffer)
 		preInitPosInitialize.call(this)
@@ -134,8 +184,8 @@ function generateInitMethods(initialize: Function) {
 
 	function bufferStateInitialize<Type = any>(
 		this: StatefulStreamClassInstance<Type> & BufferizedStreamClassInstance<Type>,
-		state: Summat = {},
-		buffer: FreezableBuffer
+		buffer?: FreezableBuffer,
+		state: Summat = {}
 	) {
 		createState(this, state)
 		bufferInitialze.call(this, buffer)
@@ -143,7 +193,7 @@ function generateInitMethods(initialize: Function) {
 
 	function preInitBufferStateInitialize<Type = any>(
 		this: StatefulStreamClassInstance<Type> & BufferizedStreamClassInstance<Type>,
-		buffer: FreezableBuffer,
+		buffer?: FreezableBuffer,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -154,7 +204,7 @@ function generateInitMethods(initialize: Function) {
 		this: StatefulStreamClassInstance<Type> &
 			BufferizedStreamClassInstance<Type> &
 			PositionalStreamClassInstance<Type>,
-		buffer: FreezableBuffer,
+		buffer?: FreezableBuffer,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -165,21 +215,193 @@ function generateInitMethods(initialize: Function) {
 		this: StatefulStreamClassInstance<Type> &
 			BufferizedStreamClassInstance<Type> &
 			PositionalStreamClassInstance<Type>,
-		buffer: FreezableBuffer,
+		buffer?: FreezableBuffer,
 		state: Summat = {}
 	) {
 		createState(this, state)
 		preInitPosBufferInitialize.call(this, buffer)
 	}
 
+	function patternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type>,
+		value?: any
+	) {
+		optionalValue(this, value)
+		initialize.call(this)
+	}
+
+	function preInitPatternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type>,
+		value?: any
+	) {
+		optionalValue(this, value)
+		preInitInitialize.call(this)
+	}
+
+	function posPatternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
+		value?: any
+	) {
+		optionalValue(this, value)
+		posInitialize.call(this)
+	}
+
+	function preInitPosPatternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
+		value?: any
+	) {
+		optionalValue(this, value)
+		preInitPosInitialize.call(this)
+	}
+
+	function bufferPatternInitialize<Type = any>(
+		this: BufferizedStreamClassInstance<Type> & PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>
+	) {
+		optionalValue(this, value)
+		bufferInitialze.call(this, buffer)
+	}
+
+	function preInitBufferPatternInitialize<Type = any>(
+		this: BufferizedStreamClassInstance<Type> & PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>
+	) {
+		optionalValue(this, value)
+		preInitBufferInitialize.call(this, buffer)
+	}
+
+	function posBufferPatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			BufferizedStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>
+	) {
+		optionalValue(this, value)
+		posBufferInitialize.call(this, buffer)
+	}
+
+	function preInitPosBufferPatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			BufferizedStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>
+	) {
+		optionalValue(this, value)
+		preInitPosBufferInitialize.call(this, buffer)
+	}
+
+	function statePatternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type> & StatefulStreamClassInstance<Type>,
+		value?: any,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		stateInitialize.call(this, state)
+	}
+
+	function preInitStatePatternInitialize<Type = any>(
+		this: PatternStreamClassInstance<Type> & StatefulStreamClassInstance<Type>,
+		value?: any,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		preInitStateInitialize.call(this, state)
+	}
+
+	function posStatePatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type>,
+		value?: any,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		posStateInitialize.call(this, state)
+	}
+
+	function preInitPosStatePatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type>,
+		value?: any,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		preInitPosStateInitialize.call(this, state)
+	}
+
+	function bufferStatePatternInitialize<Type = any>(
+		this: BufferizedStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		bufferStateInitialize.call(this, buffer, state)
+	}
+
+	function preInitBufferStatePatternInitialize<Type = any>(
+		this: BufferizedStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		preInitBufferStateInitialize.call(this, buffer, state)
+	}
+
+	function posBufferStatePatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			BufferizedStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		posBufferStateInitialize.call(this, buffer, state)
+	}
+
+	function preInitPosBufferStatePatternInitialize<Type = any>(
+		this: PositionalStreamClassInstance<Type> &
+			BufferizedStreamClassInstance<Type> &
+			StatefulStreamClassInstance<Type> &
+			PatternStreamClassInstance<Type>,
+		value?: any,
+		buffer?: FreezableBuffer<Type>,
+		state: Summat = {}
+	) {
+		optionalValue(this, value)
+		preInitPosStatePatternInitialize.call(this, buffer, state)
+	}
+
 	return [
+		// * 0
+		initialize,
+
+		// * 1 << 0, + 1, '.preInit'
 		preInitInitialize,
+
+		// * 1 << 1, + 2, '.pos'
 		posInitialize,
 		preInitPosInitialize,
+
+		// * 1 << 2, + 4, '.buffer'
 		bufferInitialze,
 		preInitBufferInitialize,
 		posBufferInitialize,
 		preInitPosBufferInitialize,
+
+		// * 1 << 3, + 8, '.state'
 		stateInitialize,
 		preInitStateInitialize,
 		posStateInitialize,
@@ -187,7 +409,25 @@ function generateInitMethods(initialize: Function) {
 		bufferStateInitialize,
 		preInitBufferStateInitialize,
 		posBufferStateInitialize,
-		preInitPosBufferStateInitialize
+		preInitPosBufferStateInitialize,
+
+		// * 1 << 4, + 16, '.pattern'
+		patternInitialize,
+		preInitPatternInitialize,
+		posPatternInitialize,
+		preInitPosPatternInitialize,
+		bufferPatternInitialize,
+		preInitBufferPatternInitialize,
+		posBufferPatternInitialize,
+		preInitPosBufferPatternInitialize,
+		statePatternInitialize,
+		preInitStatePatternInitialize,
+		posStatePatternInitialize,
+		preInitPosStatePatternInitialize,
+		bufferStatePatternInitialize,
+		preInitBufferStatePatternInitialize,
+		posBufferStatePatternInitialize,
+		preInitPosBufferStatePatternInitialize
 	]
 }
 
@@ -195,6 +435,7 @@ const fullInitialize = generateInitMethods(initialize)
 const cutInitialize = generateInitMethods(baseInitialize)
 
 export const [
+	,
 	preInitInitialize,
 	posInitialize,
 	preInitPosInitialize,
@@ -209,10 +450,27 @@ export const [
 	bufferStateInitialize,
 	preInitBufferStateInitialize,
 	posBufferStateInitialize,
-	preInitPosBufferStateInitialize
+	preInitPosBufferStateInitialize,
+	patternInitialize,
+	preInitPatternInitialize,
+	posPatternInitialize,
+	preInitPosPatternInitialize,
+	bufferPatternInitialize,
+	preInitBufferPatternInitialize,
+	posBufferPatternInitialize,
+	preInitPosBufferPatternInitialize,
+	statePatternInitialize,
+	preInitStatePatternInitialize,
+	posStatePatternInitialize,
+	preInitPosStatePatternInitialize,
+	bufferStatePatternInitialize,
+	preInitBufferStatePatternInitialize,
+	posBufferStatePatternInitialize,
+	preInitPosBufferStatePatternInitialize
 ] = fullInitialize
 
 export const [
+	,
 	basePreInitInitialize,
 	basePosInitialize,
 	basePreInitPosInitialize,
@@ -227,18 +485,41 @@ export const [
 	baseBufferStateInitialize,
 	basePreInitBufferStateInitialize,
 	basePosBufferStateInitialize,
-	basePreInitPosBufferStateInitialize
+	basePreInitPosBufferStateInitialize,
+	basePatternInitialize,
+	basePreInitPatternInitialize,
+	basePosPatternInitialize,
+	basePreInitPosPatternInitialize,
+	baseBufferPatternInitialize,
+	basePreInitBufferPatternInitialize,
+	basePosBufferPatternInitialize,
+	basePreInitPosBufferPatternInitialize,
+	baseStatePatternInitialize,
+	basePreInitStatePatternInitialize,
+	basePosStatePatternInitialize,
+	basePreInitPosStatePatternInitialize,
+	baseBufferStatePatternInitialize,
+	basePreInitBufferStatePatternInitialize,
+	basePosBufferStatePatternInitialize,
+	basePreInitPosBufferStatePatternInitialize
 ] = cutInitialize
 
-const methodList = [initialize, ...fullInitialize, baseInitialize, ...cutInitialize]
+const methodList = fullInitialize.concat(cutInitialize)
 
 export function chooseMethod<Type = any>(
 	preInit: boolean = false,
 	hasPosition: boolean = false,
 	buffer: boolean = false,
-	state: boolean = false
+	state: boolean = false,
+	pattern: boolean = false,
+	currGetter?: () => Type
 ) {
 	return methodList[
-		+preInit | (+hasPosition << 1) | (+buffer << 2) | (+state << 3)
-	]<Type>
+		+preInit |
+			(+hasPosition << 1) |
+			(+buffer << 2) |
+			(+state << 3) |
+			(+pattern << 4) |
+			(+!!currGetter << 5)
+	]
 }

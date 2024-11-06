@@ -10,7 +10,6 @@ import {
 import { LimitedStream } from "../../constants.js"
 
 import { fastNavigate } from "../StreamClass/utils.js"
-import { Inputted } from "../StreamClass/classes.js"
 import { superInit } from "../StreamClass/utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
@@ -28,8 +27,8 @@ export function effectiveLimitedStreamProd<Type = any>(
 ) {
 	if (!this.hasLookAhead) {
 		this.hasLookAhead = true
-		this.input[this.direction ? "next" : "prev"]()
-		return this.input.curr
+		this.value[this.direction ? "next" : "prev"]()
+		return this.value.curr
 	}
 	return this.lookAhead
 }
@@ -37,15 +36,15 @@ export function effectiveLimitedStreamProd<Type = any>(
 export function effectiveLimitedStreamIsEnd<Type = any>(
 	this: EffectiveLimitedStream<Type>
 ) {
-	if (this.input.isCurrEnd()) return true
+	if (this.value.isCurrEnd()) return true
 	this.lookAhead = this.prod()
-	return positionEqual(this.input, this.to)
+	return positionEqual(this.value, this.to)
 }
 
 export function effectiveLimitedStreamIsStart<Type = any>(
 	this: EffectiveLimitedStream<Type>
 ) {
-	return this.input.isCurrStart() || positionEqual(this.input, this.from)
+	return this.value.isCurrStart() || positionEqual(this.value, this.from)
 }
 
 export function effectiveLimitedStreamPrev<Type = any>(
@@ -53,35 +52,31 @@ export function effectiveLimitedStreamPrev<Type = any>(
 ) {
 	this.lookAhead = this.curr
 	this.hasLookAhead = true
-	this.input[this.direction ? "prev" : "next"]()
-	return this.input.curr
+	this.value[this.direction ? "prev" : "next"]()
+	return this.value.curr
 }
 
 export function effectiveLimitedStreamInitialize<Type = any>(
 	this: EffectiveLimitedStream<Type>,
-	input?: LimitedUnderStream<Type>,
+	value: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position
 ) {
-	if (input) {
-		Inputted(this, input)
-		this.hasLookAhead = false
+	this.hasLookAhead = false
 
-		if (!isUndefined(from)) {
-			if (isUndefined(to)) {
-				to = from
-				from = LimitedStream.NoMovementPredicate
-			}
-
-			fastNavigate(input, from)
-
-			this.direction = directionCompare(from, to, this.input)
-			this.from = from
-			this.to = positionNegate(positionConvert(this.to, this.input))
+	if (!isUndefined(from)) {
+		if (isUndefined(to)) {
+			to = from
+			from = LimitedStream.NoMovementPredicate
 		}
 
-		superInit(this)
+		fastNavigate(this.value, from)
+
+		this.direction = directionCompare(from, to, this.value)
+		this.from = from
+		this.to = positionNegate(positionConvert(this.to, this.value))
 	}
 
+	superInit(this, value)
 	return this
 }

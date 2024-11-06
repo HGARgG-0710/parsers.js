@@ -15,7 +15,7 @@ export function persistentIndexMapAdd<KeyType = any, ValueType = any>(
 	const size = this.size
 	for (let i = index; i < size; ++i) this.indexes[i].value += increase
 	insert(this.indexes, index, ...pairs.map((_x, i) => Pointer(i + index)))
-	this.sub.add(index, ...pairs)
+	this.value.add(index, ...pairs)
 	return this
 }
 
@@ -26,7 +26,7 @@ export function persistentIndexMapDelete<KeyType = any, ValueType = any>(
 ) {
 	const size = this.size
 	for (let i = index + count; i < size; ++i) this.indexes[i].value -= count
-	this.sub.delete(index, count)
+	this.value.delete(index, count)
 	return this
 }
 
@@ -54,7 +54,7 @@ export function persistentIndexMapUnique<KeyType = any, ValueType = any>(
 	let i = this.size
 	while (i--) this.values[i][0].value = i
 
-	this.sub.unique(start)
+	this.value.unique(start)
 	return this
 }
 
@@ -73,7 +73,7 @@ export function persistentIndexMapSwap<KeyType = any, ValueType = any>(
 	this.indexes[i] = this.indexes[j]
 	this.indexes[j] = tempObj
 
-	this.sub.swap(i, j)
+	this.value.swap(i, j)
 	return this
 }
 
@@ -81,5 +81,5 @@ export function persistentIndexMapGetIndex<KeyType = any, ValueType = any>(
 	this: PersistentIndexMap<KeyType, ValueType>,
 	key: KeyType
 ) {
-	return this.indexes[this.sub.getIndex(key)]
+	return this.indexes[this.value.getIndex(key)]
 }

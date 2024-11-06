@@ -1,7 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
 import type { Position, Posed } from "../../Position/interfaces.js"
-import type { Inputted } from "../StreamClass/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type {
@@ -15,6 +14,7 @@ import type {
 	SinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
+import type { Pattern } from "src/Pattern/interfaces.js"
 
 export interface BasicLimited extends Summat {
 	from: Position
@@ -34,7 +34,7 @@ export interface LimitedStream<Type = any>
 	extends BasicStream<Type>,
 		BasicLimited,
 		SinglePositionLookahead<Type>,
-		Inputted<LimitedUnderStream<Type>> {}
+		Pattern<LimitedUnderStream<Type>> {}
 
 export interface EffectiveLimitedStream<Type = any>
 	extends LimitedStream<Type>,

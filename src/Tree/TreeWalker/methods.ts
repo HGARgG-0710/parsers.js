@@ -11,7 +11,7 @@ const { id } = f
 
 export function treeWalkerRenewLevel<Type = any>(
 	this: TreeWalker<Type>,
-	init: Tree<Type> = this.input,
+	init: Tree<Type> = this.value,
 	from: number = 0,
 	until: number = -1
 ) {
@@ -70,7 +70,7 @@ export function treeWalkerIsChild<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
-	return this.curr !== this.input
+	return this.curr !== this.value
 }
 
 export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Type>) {
@@ -91,13 +91,13 @@ export function treeWalkerGoPrevLast<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerRestart<Type = any>(this: TreeWalker<Type>) {
-	this.curr = this.level = this.input
+	this.curr = this.level = this.value
 	this.modifier.clear()
 }
 
 export function treeWalkerGoIndex<Type = any>(this: TreeWalker<Type>, pos: MultiIndex) {
 	this.pos = pos
-	this.curr = this.input.index(pos.value)
+	this.curr = this.value.index(pos.value)
 	this.renewLevel()
 }
 
@@ -107,7 +107,7 @@ export function treeWalkerInitialize<Type = any>(
 	pos?: MultiIndex
 ) {
 	if (input) {
-		this.input = this.level = input
+		this.value = this.level = input
 		if (!pos) this.modifier.clear()
 	}
 	if (pos) {

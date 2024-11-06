@@ -1,7 +1,7 @@
 import type { Tree } from "../../Tree/interfaces.js"
 import type { EffectiveTreeStream } from "./interfaces.js"
-
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
+
 import { superInit } from "../StreamClass/utils.js"
 import { StreamClass } from "../../constants.js"
 
@@ -71,16 +71,16 @@ export function effectiveTreeStreamInitialize<Type = any>(
 	return this
 }
 
-export function effectiveTreeStreamInputGetter<Type = any>(
+export function effectiveTreeStreamValueGetter<Type = any>(
 	this: EffectiveTreeStream<Type>
 ) {
-	return this.walker.input
+	return this.walker.value
 }
 
 export function effectiveTreeStreamInputSetter<Type = any>(
 	this: EffectiveTreeStream<Type>,
-	input: Tree<Type>
+	input?: Tree<Type>
 ) {
-	this.walker.init(input)
+	if (input) this.walker.init(input)
 	return input
 }

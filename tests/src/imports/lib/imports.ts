@@ -39,8 +39,7 @@ export const specificChildImports = {
 		"FastLookupTable",
 		"HashMap",
 		"LinearIndexMap",
-		"PersistentIndexMap",
-		"SubHaving"
+		"PersistentIndexMap"
 	),
 	Pattern: objectImports(
 		"Collection",

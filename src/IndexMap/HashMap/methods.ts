@@ -5,7 +5,7 @@ export function hashMapIndex<KeyType = any, ValueType = any, InternalKeyType = a
 	this: HashMap<KeyType, ValueType, InternalKeyType>,
 	x: KeyType
 ) {
-	return this.sub.get(this.hash(x, this.sub))
+	return this.value.get(this.hash(x, this.value))
 }
 
 export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any>(
@@ -13,7 +13,7 @@ export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any
 	key: KeyType,
 	value: ValueType
 ) {
-	this.sub.set(this.hash(key, this.sub), value)
+	this.value.set(this.hash(key, this.value), value)
 	return this
 }
 
@@ -21,7 +21,7 @@ export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = 
 	this: HashMap<KeyType, ValueType, InternalKeyType>,
 	key: KeyType
 ) {
-	this.sub.delete(this.hash(key, this.sub))
+	this.value.delete(this.hash(key, this.value))
 	return this
 }
 
@@ -30,7 +30,7 @@ export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyTyp
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {
-	this.sub.replaceKey(this.hash(keyFrom, this.sub), this.hash(keyTo, this.sub))
+	this.value.replaceKey(this.hash(keyFrom, this.value), this.hash(keyTo, this.value))
 	return this
 }
 
@@ -39,7 +39,7 @@ export function hashClassExtend<KeyType = any, ValueType = any, InternalKeyType 
 	f: (x: any) => KeyType
 ) {
 	return HashClass<any, ValueType, InternalKeyType>((x: any) =>
-		this.hash(f(x), this.sub)
+		this.hash(f(x), this.value)
 	)
 }
 
