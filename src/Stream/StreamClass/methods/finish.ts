@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
+import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
 import type { BasicStream } from "src/Stream/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,

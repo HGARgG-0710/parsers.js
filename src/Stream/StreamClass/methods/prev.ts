@@ -6,9 +6,12 @@ import type {
 	StartedType
 } from "../interfaces.js"
 import type { Posed } from "src/Position/interfaces.js"
-import { readBuffer } from "./next.js"
-import { StreamClass } from "src/constants.js"
 import type { Started } from "src/Stream/ReversibleStream/interfaces.js"
+
+import { readBuffer } from "./next.js"
+
+import { Stream } from "src/constants.js"
+const { StreamClass } = Stream
 
 // * utility functions
 

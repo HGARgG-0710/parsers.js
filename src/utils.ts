@@ -1,13 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { HasType } from "./IndexMap/interfaces.js"
-import type { ParsingState } from "./Parser/GeneralParser/interfaces.js"
-import type { StreamHandler } from "./Parser/TableMap/interfaces.js"
+import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
 import type { BasicStream, Indexed } from "./Stream/interfaces.js"
-import type { Position, PredicatePosition } from "./Position/interfaces.js"
+import type { PredicatePosition } from "./Position/interfaces.js"
 import type {
 	BasicReversibleStream,
 	ReversibleStream
 } from "./Stream/ReversibleStream/interfaces.js"
+import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 
 /**
  * Given a string, returns whether it's a Hex number
@@ -33,11 +32,6 @@ export const current = <Type = any>(input: BasicStream<Type>) => input.curr
  * Returns `[x]`
  */
 export const output = (x: any) => [x]
-
-/**
- * Returns 'x.input'
- */
-export const input = (x: any) => x.input
 
 /**
  * Given a `handler` function returns a function of `input: BasicStream` that skips a single stream-element before and after calling the handler.
@@ -78,30 +72,12 @@ export const destroy = (input: BasicStream) => {
 /**
  * For a `input: BasicStream`, If `input.isEnd`, returns an empty array, otherwise `[input.next()]`
  */
-export const forward = (input: BasicStream) => (input.isEnd ? [] : [input.next()])
-
-/**
- * For a given position `pred`, returns a predicate of `f: StreamHandler`, returning a predicate of `input: BasicStream`,
- * returning [pred, f(input)]
- */
-export const skipArg = (pred: Position) => (f: StreamHandler) => (input: BasicStream) =>
-	[pred, f(input)]
-
-/**
- * If `input.isEnd`, returns the empty array, otherwise `[input.curr]`
- */
-export const preserve = <Type = any>(input: BasicStream<Type>) =>
-	input.isEnd ? [] : [input.curr]
+export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.next()])
 
 /**
  * Creates and returns a new empty array
  */
 export const miss = () => []
-
-/**
- * Returns the `.streams[0]` in a given `ParsingState`
- */
-export const firstStream = ({ streams }: ParsingState) => (streams as BasicStream[])[0]
 
 /**
  * Returns whether `x === y`
@@ -122,6 +98,7 @@ export const backtrack = (predicate: PredicatePosition) => {
 }
 
 export const length = (x: Indexed) => x.length
+export const size = (x: Sizeable) => x.size
 
 export const calledDelegate =
 	(delegatePropName: string) =>
@@ -165,11 +142,13 @@ export const SelfAssignmentClass =
 		return x as unknown as OutType
 	}
 
+export const getSetDescriptor = ([set, get]) => ({ set, get })
+
+export const state = (x: Stateful) => x.state
+
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"
 export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
-export const getSetDescriptor = ([set, get]) => ({ set, get })
-
 export * as Tree from "./Tree/utils.js"

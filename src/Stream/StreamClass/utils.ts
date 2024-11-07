@@ -4,11 +4,13 @@ import type { BasicStream } from "../interfaces.js"
 import type { Rewindable } from "./methods/rewind.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
+import type { Bufferized } from "./interfaces.js"
 
 import { calledDelegate } from "../../utils.js"
 import { pickDirection, positionConvert } from "../../Position/utils.js"
 
 import { object, typeof as type } from "@hgargg-0710/one"
+import { isFreezableBuffer } from "src/Collection/Buffer/utils.js"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 
@@ -18,6 +20,7 @@ export const superInit = superDelegate("init")
 export const isFinishable = structCheck<Finishable>({ finish: isFunction })
 export const isNavigable = structCheck<Navigable>({ navigate: isFunction })
 export const isRewindable = structCheck<Rewindable>({ rewind: isFunction })
+export const isBufferized = structCheck<Bufferized>({ buffer: isFreezableBuffer })
 
 /**
  * Iterates the given `BasicStream` until hitting the end.

@@ -1,14 +1,20 @@
 import { InputStream as InputStreamConstructor } from "./classes.js"
 
-import { array } from "../../Parser/utils.js"
 import type { BasicStream } from "../interfaces.js"
 import type { InputStream } from "./interfaces.js"
+
+import { array } from "../../Parser/utils.js"
+import { isBufferized } from "../StreamClass/utils.js"
 
 /**
  * Given a `BasicStream`, converts it to an `InputStream` for the price of a single iteration.
  */
-export function toInputStream<Type = any>(
-	stream: BasicStream<Type>
-): InputStream<Type> {
-	return new InputStreamConstructor(array(stream).value)
+export function toInputStream<Type = any>(stream: BasicStream<Type>): InputStream<Type> {
+	return new InputStreamConstructor(
+		isBufferized(stream)
+			? stream.buffer.isFrozen
+				? stream.buffer
+				: array(stream, stream.buffer)
+			: array(stream)
+	)
 }

@@ -2,12 +2,12 @@ import type { StreamHandler } from "./TableMap/interfaces.js"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
 import type { DirectionalPosition, Position } from "../Position/interfaces.js"
-import type { Collection } from "../Pattern/Collection/interfaces.js"
+import type { Collection } from "../Collection/interfaces.js"
 
 import { positionStopPoint, positionNegate } from "../Position/utils.js"
 
 import { uniNavigate } from "../Stream/StreamClass/utils.js"
-import { ArrayCollection } from "../Pattern/Collection/classes.js"
+import { ArrayCollection } from "../Collection/classes.js"
 
 export function skip(input: ReversibleStream, steps: Position = 1) {
 	return uniNavigate(input, positionNegate(steps))
@@ -34,7 +34,10 @@ export function nested(
 	}
 }
 
-export function array(stream: BasicStream, init: Collection = ArrayCollection<any>([])) {
+export function array<Type = any>(
+	stream: BasicStream<Type>,
+	init: Collection<Type> = ArrayCollection<Type>()
+) {
 	while (!stream.isEnd) init.push(stream.next())
 	return init
 }

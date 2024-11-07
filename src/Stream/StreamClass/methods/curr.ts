@@ -1,7 +1,9 @@
 import type { BufferizedStreamClassInstance, StreamClassInstance } from "../interfaces.js"
-import { StreamClass } from "../../../constants.js"
+import { Stream } from "../../../constants.js"
 import { getSetDescriptor } from "src/utils.js"
 import { readBuffer } from "./next.js"
+
+const { StreamClass } = Stream
 
 // * utilty functions
 

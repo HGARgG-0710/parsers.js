@@ -1,12 +1,24 @@
-export * as BasicParser from "./BasicParser/classes.js"
-export * as GeneralParser from "./GeneralParser/classes.js"
-export * as LayeredParser from "./LayeredParser/classes.js"
-export * as PatternEliminator from "./PatternEliminator/classes.js"
-export * as PatternTokenizer from "./PatternTokenizer/classes.js"
-export * as PatternValidator from "./PatternValidator/classes.js"
-export * as PositionalValidator from "./PositionalValidator/classes.js"
-export * as SkipParser from "./SkipParser/classes.js"
-export * as StreamLocator from "./StreamLocator/classes.js"
-export * as StreamTokenizer from "./StreamTokenizer/classes.js"
-export * as StreamValidator from "./StreamValidator/classes.js"
-export * as TableMap from "./TableMap/classes.js"
+import type { EliminablePattern } from "../Eliminable/interfaces.js"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import type { TokenizablePattern } from "../Tokenizable/interfaces.js"
+import type { IndexMap } from "../IndexMap/interfaces.js"
+
+export function PatternEliminator<EliminatedType = any>(eliminated: EliminatedType[]) {
+	return function <Type = any>(pattern: EliminablePattern<Type, EliminatedType>) {
+		for (const elim of eliminated) pattern.eliminate(elim)
+		return pattern
+	}
+}
+
+export function PatternTokenizer<Type = any, KeyType = any, OutType = any>(
+	tokenMap: IndexMap<KeyType, SummatFunction<any, Type, OutType>>
+) {
+	return function (pattern: TokenizablePattern<Type, KeyType, OutType>) {
+		for (const [key, handler] of tokenMap) pattern.tokenize(key, handler)
+		return pattern.result
+	}
+}
+
+export * from "./PatternValidator/classes.js"
+export * from "./LayeredParser/classes.js"
+export * from "./TableMap/classes.js"

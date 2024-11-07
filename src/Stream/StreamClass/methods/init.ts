@@ -9,15 +9,17 @@ import type {
 } from "../interfaces.js"
 
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { BasicStream } from "src/Stream/interfaces.js"
 import type { Posed } from "src/Position/interfaces.js"
-import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
+import type { Pattern } from "src/Pattern/interfaces.js"
+import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
+import type { BasicStream } from "src/Stream/interfaces.js"
 
-import { StreamClass } from "../../../constants.js"
 import { setValue } from "src/Pattern/utils.js"
 
+import { Stream } from "../../../constants.js"
+const { StreamClass } = Stream
+
 import { typeof as type } from "@hgargg-0710/one"
-import type { Pattern } from "src/Pattern/interfaces.js"
 const { isUndefined } = type
 
 // * types
