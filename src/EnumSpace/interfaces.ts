@@ -1,6 +1,6 @@
 import type { Copiable } from "src/Stream/StreamClass/interfaces.js"
-import type { Sizeable } from "../../IndexMap/interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Sizeable } from "../IndexMap/interfaces.js"
+import type { Pattern } from "../Pattern/interfaces.js"
 
 export type Mappable<Type = any> = (value: Type, index?: number) => unknown
 

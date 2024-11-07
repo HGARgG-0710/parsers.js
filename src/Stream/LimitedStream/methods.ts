@@ -7,7 +7,8 @@ import {
 	positionNegate
 } from "../../Position/utils.js"
 
-import { LimitedStream } from "../../constants.js"
+import { Stream } from "../../constants.js"
+const { LimitedStream } = Stream
 
 import { fastNavigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/utils.js"

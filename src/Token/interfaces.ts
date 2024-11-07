@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Pattern } from "../interfaces.js"
+import type { Pattern } from "../Pattern/interfaces.js"
 
 export interface Token<Type = any, Value = any>
 	extends TokenInstance<Type>,

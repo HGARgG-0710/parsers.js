@@ -1,8 +1,7 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { MultiIndex } from "../interfaces.js"
+import type { Pattern } from "src/Pattern/interfaces.js"
 
-export interface MultiIndexModifier extends Summat {
-	multind: MultiIndex
+export interface MultiIndexModifier extends Pattern<MultiIndex> {
 	init: (multind: MultiIndex) => MultiIndexModifier
 	nextLevel: () => number[]
 	prevLevel: () => number[]

@@ -9,9 +9,9 @@ import type {
 	ValidMatch
 } from "./interfaces.js"
 
-import { ValidatablePattern } from "src/constants.js"
+import { validation } from "src/constants.js"
 
-const { ValidationFailed } = ValidatablePattern
+const { ValidationFailed } = validation.ValidatablePattern
 
 // * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]':
 // * 		it returns an empty array both when '!.result[1].length' and when '!!result[0]';

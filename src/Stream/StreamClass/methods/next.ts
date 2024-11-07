@@ -1,42 +1,13 @@
-import type { Posed } from "src/Position/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
 	PositionalStreamClassInstance,
 	StreamClassInstance
 } from "../interfaces.js"
 
-// * utility functions
-
-export function incPos(posed: Posed<number>) {
-	++posed.pos
-}
-
-export function deStart(stream: StreamClassInstance) {
-	stream.isStart = false
-}
-
-export function end(stream: StreamClassInstance) {
-	stream.isEnd = true
-}
-
-export function bufferPushCurr<Type = any>(
-	stream: BufferizedStreamClassInstance<Type>,
-	pushed: Type
-) {
-	stream.buffer.push(pushed)
-}
-
-export function getNext(stream: StreamClassInstance) {
-	stream.curr = stream.baseNextIter()
-}
-
-export function bufferFreeze(stream: BufferizedStreamClassInstance) {
-	stream.buffer.freeze()
-}
-
-export function readBuffer<Type = any>(stream: BufferizedStreamClassInstance<Type>) {
-	return (stream.curr = stream.buffer.read(stream.pos))
-}
+import { positionIncrement } from "src/Position/utils.js"
+import { deStart, end, getNext, readBuffer } from "../utils.js"
+import { bufferPush } from "src/Collection/Buffer/utils.js"
+import { bufferFreeze } from "src/Collection/Buffer/utils.js"
 
 // * possible '.next' methods
 
@@ -53,7 +24,7 @@ export function posNext<Type = any>(this: PositionalStreamClassInstance<Type>) {
 	deStart(this)
 	if (this.isCurrEnd()) end(this)
 	else {
-		incPos(this)
+		positionIncrement(this)
 		getNext(this)
 	}
 	return last
@@ -61,7 +32,7 @@ export function posNext<Type = any>(this: PositionalStreamClassInstance<Type>) {
 
 export function bufferNext<Type = any>(this: BufferizedStreamClassInstance<Type>) {
 	const last = this.curr
-	bufferPushCurr(this, last)
+	bufferPush(this, last)
 	deStart(this)
 
 	if (this.isCurrEnd()) {
@@ -80,17 +51,17 @@ export function posBufferNext<Type = any>(
 
 	if (this.buffer.isFrozen) {
 		if (this.pos !== this.buffer.size - 1) {
-			incPos(this)
+			positionIncrement(this)
 			readBuffer(this)
 		}
 	} else {
-		bufferPushCurr(this, last)
+		bufferPush(this, last)
 
 		if (this.isCurrEnd()) {
 			bufferFreeze(this)
 			end(this)
 		} else {
-			incPos(this)
+			positionIncrement(this)
 			getNext(this)
 		}
 	}

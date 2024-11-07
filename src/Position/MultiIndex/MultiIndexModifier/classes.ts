@@ -11,8 +11,12 @@ import {
 	multiIndexModifierInitialize
 } from "./methods.js"
 
-export class MultiIndexModifier implements MultiIndexModifierType {
-	multind: MultiIndex
+import { BasicPattern } from "src/Pattern/classes.js"
+
+export class MultiIndexModifier
+	extends BasicPattern<MultiIndex>
+	implements MultiIndexModifierType
+{
 	init: (multind: MultiIndex) => MultiIndexModifierType
 
 	nextLevel: () => number[]
@@ -23,8 +27,8 @@ export class MultiIndexModifier implements MultiIndexModifierType {
 	decLast: () => number
 	extend: (subIndex: number[]) => number
 
-	constructor(multind: MultiIndex) {
-		this.multind = multind
+	constructor(value: MultiIndex) {
+		super(value)
 	}
 }
 

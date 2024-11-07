@@ -3,8 +3,8 @@ import type { IndexMap } from "../../IndexMap/interfaces.js"
 import type { ValidatablePattern } from "../../Validatable/interfaces.js"
 import type { PatternValidatorOutput } from "./interfaces.js"
 
-import { PatternValidator as PatternValidatorNamespace } from "../../constants.js"
-const { FullCoverage, NoFullCoverage, ValidationError } = PatternValidatorNamespace
+import { validation } from "../../constants.js"
+const { FullCoverage, NoFullCoverage, ValidationError } = validation.PatternValidator
 
 type BoolHandler = SummatFunction<any, any, boolean>
 

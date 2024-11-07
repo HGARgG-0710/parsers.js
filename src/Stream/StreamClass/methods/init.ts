@@ -1,26 +1,21 @@
 import type {
-	Bufferized,
 	BufferizedStreamClassInstance,
 	PatternStreamClassInstance,
 	PositionalStreamClassInstance,
-	Stateful,
 	StatefulStreamClassInstance,
 	StreamClassInstance
 } from "../interfaces.js"
 
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Posed } from "src/Position/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
 import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
-import type { BasicStream } from "src/Stream/interfaces.js"
 
-import { setValue } from "src/Pattern/utils.js"
+import { positionNull } from "src/Position/utils.js"
+import { assignBuffer } from "src/Collection/Buffer/utils.js"
+import { optionalValue } from "src/Pattern/utils.js"
+import { createState, preInit, realCurr } from "../utils.js"
 
 import { Stream } from "../../../constants.js"
 const { StreamClass } = Stream
-
-import { typeof as type } from "@hgargg-0710/one"
-const { isUndefined } = type
 
 // * types
 
@@ -61,36 +56,6 @@ export type BufferStatePatternInitMethod = <Type = any>(
 	state?: Summat
 ) => void
 
-// * utility functions
-
-export function createBuffer<Type = any>(
-	bufferized: Bufferized<Type>,
-	buffer?: FreezableBuffer
-) {
-	if (!isUndefined(buffer)) bufferized.buffer = buffer
-}
-
-export function nullPos(posed: Posed<number>) {
-	posed.pos = 0
-}
-
-// * Explanation: For 'StreamClassInstance'-s, it's a call to the 'initGetter', or a first call to 'currGetter'
-export function preInit(x: BasicStream) {
-	if (!x.isEnd) x.curr
-}
-
-export function createState(x: Stateful, state: Summat) {
-	x.state = state
-}
-
-export function initRealCurr(stream: StreamClassInstance) {
-	stream.realCurr = StreamClass.DefaultRealCurr
-}
-
-export function optionalValue(pattern: Pattern, value?: any) {
-	if (!isUndefined(value)) setValue(pattern, value)
-}
-
 // * possible '.init' methods
 
 export function baseInitialize<Type = any>(this: StreamClassInstance<Type>) {
@@ -99,7 +64,7 @@ export function baseInitialize<Type = any>(this: StreamClassInstance<Type>) {
 }
 
 export function initialize<Type = any>(this: StreamClassInstance<Type>) {
-	initRealCurr(this)
+	realCurr(this)
 	baseInitialize.call(this)
 }
 
@@ -111,12 +76,12 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posInitialize<Type = any>(this: PositionalStreamClassInstance<Type>) {
-		nullPos(this)
+		positionNull(this)
 		initialize.call(this)
 	}
 
 	function preInitPosInitialize<Type = any>(this: PositionalStreamClassInstance<Type>) {
-		nullPos(this)
+		positionNull(this)
 		preInitInitialize.call(this)
 	}
 
@@ -124,7 +89,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 		this: BufferizedStreamClassInstance<Type>,
 		buffer: FreezableBuffer
 	) {
-		createBuffer(this, buffer)
+		assignBuffer(this, buffer)
 		initialize.call(this)
 	}
 
@@ -132,7 +97,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 		this: BufferizedStreamClassInstance<Type>,
 		buffer: FreezableBuffer
 	) {
-		createBuffer(this, buffer)
+		assignBuffer(this, buffer)
 		preInitInitialize.call(this)
 	}
 
@@ -140,7 +105,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 		this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
 		buffer?: FreezableBuffer
 	) {
-		createBuffer(this, buffer)
+		assignBuffer(this, buffer)
 		posInitialize.call(this)
 	}
 
@@ -148,7 +113,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 		this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
 		buffer?: FreezableBuffer
 	) {
-		createBuffer(this, buffer)
+		assignBuffer(this, buffer)
 		preInitPosInitialize.call(this)
 	}
 

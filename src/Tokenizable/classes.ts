@@ -6,9 +6,9 @@ import type {
 	TokenizationResult
 } from "./interfaces.js"
 
-import { FlushablePattern } from "../classes.js"
-import { tokenizeString } from "./utils.js"
+import { FlushablePattern } from "../Pattern/classes.js"
 import { tokenizablePatternFlush, delegateTokenizableTokenize } from "./methods.js"
+import { tokenizeString } from "./utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isString } = type

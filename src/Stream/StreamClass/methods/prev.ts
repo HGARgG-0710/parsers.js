@@ -1,35 +1,13 @@
-import type { BasicStream } from "src/Stream/interfaces.js"
 import type {
 	BufferizedReversedStreamClassInstance,
 	PositionalReversedStreamClassInstance,
-	ReversedStreamClassInstance,
-	StartedType
+	ReversedStreamClassInstance
 } from "../interfaces.js"
-import type { Posed } from "src/Position/interfaces.js"
-import type { Started } from "src/Stream/ReversibleStream/interfaces.js"
 
-import { readBuffer } from "./next.js"
+import { deEnd, getPrev, readBuffer } from "../utils.js"
 
-import { Stream } from "src/constants.js"
-const { StreamClass } = Stream
-
-// * utility functions
-
-export function deEnd(stream: BasicStream) {
-	stream.isEnd = false
-}
-
-export function start(stream: Started<StartedType>) {
-	stream.isStart = StreamClass.PostCurrInit
-}
-
-export function getPrev(stream: ReversedStreamClassInstance) {
-	stream.curr = stream.basePrevIter()
-}
-
-export function decPos(posed: Posed<number>) {
-	--posed.pos
-}
+import { start } from "../utils.js"
+import { positionDecrement } from "src/Position/utils.js"
 
 // * possible '.prev' methods
 
@@ -46,7 +24,7 @@ export function posPrev<Type = any>(this: PositionalReversedStreamClassInstance<
 	deEnd(this)
 	if (this.isCurrStart()) start(this)
 	else {
-		decPos(this)
+		positionDecrement(this)
 		getPrev(this)
 	}
 	return last
@@ -61,9 +39,9 @@ export function posBufferPrev<Type = any>(
 	const last = this.curr
 	deEnd(this)
 	const isStart = this.pos === 0
-	if (isStart) this.isStart = true
+	if (isStart) start(this)
 	else {
-		decPos(this)
+		positionDecrement(this)
 		readBuffer(this)
 	}
 	return last

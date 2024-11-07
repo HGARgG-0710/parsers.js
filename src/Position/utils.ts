@@ -130,3 +130,14 @@ export function preserveDirection(
 export function positionStopPoint(pos: DirectionalPosition): BoundNameType {
 	return isBackward(pos) ? "isStart" : "isEnd"
 }
+
+export function positionNull(posed: Posed<number>) {
+	posed.pos = 0
+}
+
+export function positionIncrement(posed: Posed<number>) {
+	++posed.pos
+}export function positionDecrement(posed: Posed<number>) {
+	--posed.pos
+}
+

@@ -3,7 +3,8 @@ import type { EffectiveTreeStream } from "./interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 
 import { superInit } from "../StreamClass/utils.js"
-import { StreamClass } from "../../constants.js"
+import { Stream } from "../../constants.js"
+const { StreamClass } = Stream
 
 export function effectiveTreeStreamNext<Type = any>(this: EffectiveTreeStream<Type>) {
 	const { walker, response } = this

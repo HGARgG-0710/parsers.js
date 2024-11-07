@@ -1,6 +1,8 @@
 import type { Indexed } from "../../Stream/interfaces.js"
 import type { HashClass, HashMap, HashType } from "./interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
+import type { Token as TypeToken } from "../../Token/interfaces.js"
+
 import {
 	hashClassExtend,
 	hashMapDelete,
@@ -9,12 +11,12 @@ import {
 	hashMapSet
 } from "./methods.js"
 import { valueSize } from "src/Pattern/methods.js"
-import type { Token as TypeToken } from "../../Pattern/Token/interfaces.js"
 
-import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
-import { type } from "src/Pattern/Token/utils.js"
+import { type } from "src/Token/utils.js"
 import { length } from "src/utils.js"
 import { BasicPattern } from "src/Pattern/classes.js"
+
+import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
 const { id } = _f
 const { typeOf } = _typeof
 

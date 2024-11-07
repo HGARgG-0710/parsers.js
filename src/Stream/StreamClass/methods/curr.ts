@@ -1,20 +1,7 @@
 import type { BufferizedStreamClassInstance, StreamClassInstance } from "../interfaces.js"
-import { Stream } from "../../../constants.js"
 import { getSetDescriptor } from "src/utils.js"
-import { readBuffer } from "./next.js"
-
-const { StreamClass } = Stream
-
-// * utilty functions
-
-export function initCurr<Type = any>(stream: StreamClassInstance<Type>) {
-	stream.isStart = StreamClass.PostCurrInit
-	return (stream.realCurr = stream.initGetter!())
-}
-
-export function isCurrUninitialized<Type = any>(stream: StreamClassInstance<Type>) {
-	return stream.isStart === StreamClass.PreCurrInit
-}
+import { readBuffer } from "../utils.js"
+import { isCurrUninitialized, initCurr, start } from "../utils.js"
 
 // * possible '.curr=' and '.curr' methods
 
@@ -34,7 +21,10 @@ export function setWithCurrGetter<Type = any>(
 ) {}
 
 export function getWithCurrGetter<Type = any>(this: StreamClassInstance<Type>) {
-	if (this.isStart === StreamClass.PreCurrInit) this.isStart = StreamClass.PostCurrInit
+	if (isCurrUninitialized(this)) {
+		start(this)
+		if (this.initGetter) return this.initGetter()
+	}
 	return this.currGetter!()
 }
 
@@ -45,7 +35,8 @@ export const posBufferSetWithCurrGetter = setWithCurrGetter
 export function posBufferGetWithCurrGetter<Type = any>(
 	this: BufferizedStreamClassInstance<Type>
 ) {
-	return this.buffer.isFrozen ? readBuffer(this) : this.currGetter!()
+	if (this.buffer.isFrozen) return readBuffer(this)
+	return getWithCurrGetter.call(this)
 }
 
 const methodList = [

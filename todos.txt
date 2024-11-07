@@ -21,6 +21,7 @@ REMINDERS [2.]:
 	Let it be brief (very), and work like: 
 
 		1. Contains a short (SHORT) description of the given class/method; 
+			WITHOUT the arguments' types! 
 		2. Contains a reference to the proper documentation; 
 	
 	The only benefit of actually having the thing is the ability to reference the "big docs"
@@ -30,47 +31,38 @@ REMINDERS [2.]:
 	6.2. allow multiple names to be used; 
 		6.2.1. Write a simple parser for this format [use plain JavaScript - not the library itself]; 
 
-5. After all - CLEAN SOME OF THE v0.4 notes [this refactoring is absolutely marvelous... + the 'GeneralParser' really is almost completely useless...]; 
-		Do the 'StreamTokenizer->StreamParser' thing (with its' generalization to allow state, REMOVAL of 'GeneralParser', and so forth...); 
-		Then, one also needs to add: 
+5. Source code TODO-s: 
+	16. Individually type ['function IGenerateAStream(): __T__'] EACH function for generation of classes for Stream-creation; 
+		Good Example: LimitedStream
 
-			13. Refactor the utils from the files with the '.finish', '.init' and other StreamClass methods..; 
-				[These are UTILS, they're to be put into '/utils.ts' files (even though they're very tiny...)]
+	14. FIX THE confusing EXPORTS: 
 
-				1. curr.ts
-				2. finish.ts
-				3. init.ts
-				4. next.ts
-				5. prev.ts
-				6. rewind.ts
+		Sometimes, one'll encounter artifacts during imports such as: 
 
-			14. FIX THE confusing EXPORTS: 
+			import {X} from "..."
+			const A = X.A.A 
 
-				Sometimes, one'll encounter artifacts during imports such as: 
+		Fix this, by means of using 'export *' instead of the 'export * as', in cases, when 'A' is the ONLY export 'A.A'; 
 
-					import {X} from "..."
-					const A = X.A.A 
-
-				Fix this, by means of using 'export *' instead of the 'export * as', in cases, when 'A' is the ONLY export 'A.A'; 
-
-			16. Individually type ['function IGenerateAStream(): __T__'] EACH function for generation of classes for Stream-creation; 
-				Good Example: LimitedStream
-
-			17. USE the optional '.pos' property on EVERY possibility inside the method implementations (namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
-
-			19. Make the '.multind' of 'MultiIndexModifier' into '.value' AS WELL! 
-			20. Fix the imports; 
-			21. Fix the tests; 
+	17. USE the optional '.pos' property on EVERY possibility inside the method implementations (namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
+	
+	21. Fix the tests; 
+		21.1. previous Pattern/ tests; 
+		21.2. import tests 
+		21.3. constants tests
+		21.4. utils tests
+		21.5. Stream tests
 
 Order of TODO-elimination: 
-	5. 
-	2. 
+	5.21.1-4
 
 	A.3.8. 
 	A.3.9.
 	A.3.10.
 	A.3.11. 
 	
+	5.17
+	5.21.5
 	A.1.1.
 	A.3.1.1.
 	A.3.1.2
@@ -85,7 +77,11 @@ Order of TODO-elimination:
 	[run the tests]
 
 	B. 
-	4. 
+	At the same time: 
+		2. 
+		5.16. 
+		4. 
+		
 	C.
 	
 A. testing: 
@@ -835,7 +831,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 	2.35. refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
 		This is (most often) is used inside the library's testing mini-framework; 
-		
+
 	2.36. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
@@ -1185,8 +1181,10 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					3. create a basic theme for this "mixed" TypeScript + C-preprocessor thingie [VSCode extension idea]; 
 						For syntax highlighting
 
-			Due to the project's (intended, at least) reliability
-
+		Due to library's (intended) reliability in therms of name-usage, it ouhgt to be ok; 
+		ALSO - do this only AFTER everything else in the library was ALREADY DONE! 
+		Due to the fact one doesn't want to touch its code again after the v0.4, this particular "hybrid" 
+			language shouldn't become a thing to cause problems [that would need separate solving] during development; 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

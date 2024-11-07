@@ -8,7 +8,7 @@ import type {
 
 import { uniNavigate } from "../utils.js"
 import { isBackward, positionConvert } from "src/Position/utils.js"
-import { readBuffer } from "./next.js"
+import { readBuffer } from "../utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber } = type

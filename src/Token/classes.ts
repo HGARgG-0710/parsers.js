@@ -4,9 +4,10 @@ import type {
 	TokenInstanceClass,
 	TokenType
 } from "./interfaces.js"
-import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "../../Tree/classes.js"
+
+import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "../Tree/classes.js"
+import { BasicPattern } from "../Pattern/classes.js"
 import { isType } from "./utils.js"
-import { BasicPattern } from "../classes.js"
 
 export function Token<Type = any, Value = any>(
 	type: Type,

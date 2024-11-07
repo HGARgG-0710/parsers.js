@@ -7,7 +7,7 @@ import type {
 	ValidMatch
 } from "./interfaces.js"
 
-import { ValidatablePattern } from "src/constants.js"
+import { validation } from "src/constants.js"
 import { tokenizeString } from "../Tokenizable/utils.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
@@ -15,7 +15,7 @@ const { isArray } = type
 const { T } = boolean
 
 const { ValidationPassed, ValidationFailed, FaultyElement, InvalidMatch, ValidMatch } =
-	ValidatablePattern
+	validation.ValidatablePattern
 
 export const notValidMatch = (x: any) => x !== ValidMatch
 

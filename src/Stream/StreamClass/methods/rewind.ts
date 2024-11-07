@@ -1,23 +1,17 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
-import type { FreezableBuffer } from "src/Pattern/Collection/Buffer/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
 	PositionalStreamClassInstance
 } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
-import { start } from "./prev.js"
-import { nullPos } from "./init.js"
+import { start } from "../utils.js"
+import { positionNull } from "src/Position/utils.js"
+import { readFirst } from "src/Collection/Buffer/utils.js"
 
 export interface Rewindable<Type = any> extends Summat {
 	rewind: () => Type
-}
-
-// * utility functions
-
-export function readFirst<Type = any>(buffer: FreezableBuffer<Type>) {
-	return buffer.read(0)
 }
 
 // * possible '.rewind' methods
@@ -44,7 +38,7 @@ export function posBufferRewind<Type = any>(
 ) {
 	const { buffer } = this
 	start(this)
-	nullPos(this)
+	positionNull(this)
 	return buffer.size ? readFirst(buffer) : this.curr
 }
 

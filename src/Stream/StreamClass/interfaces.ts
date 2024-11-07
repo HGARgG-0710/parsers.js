@@ -2,7 +2,7 @@ import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
 import type { Posed, Position } from "../../Position/interfaces.js"
-import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
+import type { Bufferized } from "src/Collection/Buffer/interfaces.js"
 import type { Pattern } from "src/Pattern/interfaces.js"
 import type { Initializable } from "./methods/init.js"
 import type { Navigable } from "./methods/navigate.js"
@@ -11,7 +11,7 @@ import type { Rewindable } from "./methods/rewind.js"
 
 export type BoundNameType = "isEnd" | "isStart"
 export type StartedType = 1 | boolean
-export type StatefulStarted = Started<StartedType>
+export type PreStarted = Started<StartedType>
 
 export type StreamConstructor<Type = any> = abstract new () => StreamClassInstance<Type>
 
@@ -42,10 +42,6 @@ export interface Copiable<Type = any> extends Summat {
 
 export interface Stateful extends Summat {
 	state: Summat
-}
-
-export interface Bufferized<Type = any> extends Summat {
-	buffer: FreezableBuffer<Type>
 }
 
 // * Mandatory Property-interfaces
@@ -149,7 +145,7 @@ export interface BasicStreamClassInstance<Type = any>
 		InitGettable<Type>,
 		Initializable,
 		PrimalStreamClassSignature<Type>,
-		StatefulStarted,
+		PreStarted,
 		RealCurrHaving<Type>,
 		Navigable<Type>,
 		Finishable<Type>,

@@ -5,8 +5,9 @@ import type {
 	ValidatableStringPattern as ValidatableStringPatternType,
 	ValidationOutput
 } from "./interfaces.js"
+
 import { delegateValidatableValidate } from "./methods.js"
-import { FlushablePattern } from "../classes.js"
+import { FlushablePattern } from "../Pattern/classes.js"
 import { validateString } from "./utils.js"
 
 export function DelegateValidatable<Type = any, KeyType = any>(

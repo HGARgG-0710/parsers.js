@@ -13,8 +13,9 @@ import {
 	multiIndexLevelsSetter
 } from "./methods.js"
 
-export class MultiIndex implements MultiIndexType {
-	value: number[]
+import { BasicPattern } from "src/Pattern/classes.js"
+
+export class MultiIndex extends BasicPattern<number[]> implements MultiIndexType {
 	levels: number
 
 	equals: (x: MultiIndex) => boolean
@@ -25,7 +26,7 @@ export class MultiIndex implements MultiIndexType {
 	copy: () => MultiIndex
 
 	constructor(multindex: number[] = []) {
-		this.value = multindex
+		super(multindex)
 	}
 }
 
