@@ -6,7 +6,12 @@ import type {
 	HashTableClass as HashTableClassType
 } from "./interfaces.js"
 
-import { valueDelete, valueSet, valueReplaceKey, valueGetIndex } from "src/Pattern/methods.js"
+import {
+	valueDelete,
+	valueSet,
+	valueReplaceKey,
+	valueGetIndex
+} from "src/Pattern/methods.js"
 import { BasicPattern } from "src/Pattern/classes.js"
 
 import {
@@ -15,6 +20,11 @@ import {
 	hashMapFastLookupTableByOwned,
 	affirmOwnership
 } from "./methods.js"
+
+import { current } from "src/utils.js"
+
+import { function as _f } from "@hgargg-0710/one"
+const { id } = _f
 
 export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 	extends BasicPattern<PersistentIndexMap<KeyType, ValueType>>
@@ -76,6 +86,6 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 }
 
 export const [BasicHashTable, StreamHashTable]: [FastLookupTable, FastLookupTable] = [
-	(x: any) => x,
-	(stream: any) => stream.curr
+	id,
+	current
 ].map(HashTable) as [any, any]

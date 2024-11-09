@@ -41,4 +41,4 @@ Object.defineProperties(MultiIndex.prototype, {
 	lastLevel: { value: multiIndexLastLevel }
 })
 
-export * as MultiIndexModifier from "./MultiIndexModifier/classes.js"
+export * from "./MultiIndexModifier/classes.js"

@@ -9,4 +9,4 @@ importTest(
 		"TokenHash",
 		"TypeofHash"
 	).concat(objectImports("InternalHash"))
-)(HashMap)
+)("HashMap", HashMap)

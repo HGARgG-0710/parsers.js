@@ -54,4 +54,4 @@ export function MultTree(propName: string = "children") {
 	}
 }
 
-export * as TreeWalker from "./TreeWalker/classes.js"
+export * from "./TreeWalker/classes.js"

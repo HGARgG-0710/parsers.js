@@ -1,4 +1,9 @@
-import { functionImports, importTest, specificChildImports } from "imports/lib/imports.js"
+import {
+	functionImports,
+	importTest,
+	objectImports,
+	specificChildImports
+} from "imports/lib/imports.js"
 import * as IndexMap from "../../../../../dist/src/IndexMap/methods.js"
 
 importTest(
@@ -12,4 +17,5 @@ importTest(
 		"indexMapSet"
 	)
 		.concat(specificChildImports.IndexMap)
+		.concat(objectImports("PersistentIndexMap"))
 )(IndexMap)

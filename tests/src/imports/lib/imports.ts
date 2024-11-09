@@ -28,18 +28,23 @@ export const functionImports = ((...strings: string[]) =>
 
 export const specificChildImports = {
 	toplevel: objectImports(
+		"Collection",
+		"Eliminable",
+		"EnumSpace",
 		"IndexMap",
 		"Parser",
 		"Pattern",
 		"Position",
 		"Stream",
-		"Tree"
+		"Token",
+		"Tokenizable",
+		"Tree",
+		"Validatable"
 	),
 	IndexMap: objectImports(
 		"FastLookupTable",
 		"HashMap",
 		"LinearIndexMap",
-		"PersistentIndexMap"
 	),
 	Pattern: objectImports(
 		"Collection",
@@ -49,19 +54,17 @@ export const specificChildImports = {
 		"TokenizablePattern",
 		"ValidatablePattern"
 	),
-	Position: objectImports("MultiIndex"),
 	MultiIndex: objectImports("MultiIndexModifier"),
 	Tree: objectImports("TreeWalker"),
-	Stream: objectImports(
+	Stream: [
 		"InputStream",
 		"LimitedStream",
 		"NestedStream",
 		"PredicateStream",
 		"ProlongedStream",
 		"ReversibleStream",
-		"StreamClass",
-		"TreeStream"
-	)
+		"StreamClass"
+	]
 }
 
 export const topLevelImports = importTest(specificChildImports.toplevel)

@@ -15,7 +15,7 @@ export function PatternTokenizer<Type = any, KeyType = any, OutType = any>(
 ) {
 	return function (pattern: TokenizablePattern<Type, KeyType, OutType>) {
 		for (const [key, handler] of tokenMap) pattern.tokenize(key, handler)
-		return pattern.result
+		return pattern
 	}
 }
 

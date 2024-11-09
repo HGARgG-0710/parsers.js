@@ -2,11 +2,11 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
 import type { BasicStream, Indexed } from "./Stream/interfaces.js"
 import type { PredicatePosition } from "./Position/interfaces.js"
+import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 import type {
 	BasicReversibleStream,
 	ReversibleStream
 } from "./Stream/ReversibleStream/interfaces.js"
-import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 
 /**
  * Given a string, returns whether it's a Hex number
@@ -146,9 +146,13 @@ export const getSetDescriptor = ([set, get]) => ({ set, get })
 
 export const state = (x: Stateful) => x.state
 
+export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"
 export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
+export * as Token from "./Token/utils.js"
+export * as Tokenizable from "./Tokenizable/utils.js"
 export * as Tree from "./Tree/utils.js"
+export * as Validatable from "./Validatable/utils.js"

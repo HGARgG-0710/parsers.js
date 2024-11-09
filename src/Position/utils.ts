@@ -137,7 +137,8 @@ export function positionNull(posed: Posed<number>) {
 
 export function positionIncrement(posed: Posed<number>) {
 	++posed.pos
-}export function positionDecrement(posed: Posed<number>) {
-	--posed.pos
 }
 
+export function positionDecrement(posed: Posed<number>) {
+	--posed.pos
+}

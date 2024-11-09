@@ -7,4 +7,4 @@ importTest(
 		"BasicHashTable",
 		"StreamHashTable"
 	)
-)(FastLookupTable)
+)("FastLookupTable", FastLookupTable)

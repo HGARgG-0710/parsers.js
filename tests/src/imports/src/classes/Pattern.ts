@@ -4,4 +4,4 @@ importTest(
 	specificChildImports.Pattern.concat(
 		functionImports("BasicPattern", "FlushablePattern")
 	)
-)(Pattern)
+)("Pattern", Pattern)

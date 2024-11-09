@@ -3,11 +3,11 @@ import * as LinearIndexMap from "../../../../../../dist/src/IndexMap/LinearIndex
 
 importTest(
 	functionImports(
-		"MapClass",
+		"LinearMapClass",
 		"OptimizedLinearMap",
 		"PredicateMap",
 		"RegExpMap",
 		"SetMap",
 		"BasicMap"
 	)
-)(LinearIndexMap)
+)("LinearIndexMap", LinearIndexMap)

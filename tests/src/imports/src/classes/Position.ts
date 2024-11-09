@@ -1,3 +1,3 @@
-import { importTest, specificChildImports } from "imports/lib/imports.js"
+import { functionImports, importTest } from "imports/lib/imports.js"
 import * as Position from "../../../../../dist/src/Position/classes.js"
-importTest(specificChildImports.Position)(Position)
+importTest(functionImports("MultiIndex", "MultiIndexModifier"))("Position", Position)

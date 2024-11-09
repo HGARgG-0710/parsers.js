@@ -8,6 +8,8 @@ import type {
 	HasType
 } from "../interfaces.js"
 
+import type { LinearIndexMap } from "./interfaces.js"
+
 import {
 	indexMapUnique,
 	indexMapByIndex,
@@ -17,6 +19,7 @@ import {
 	indexMapSizeGetter,
 	indexMapSet
 } from "../methods.js"
+
 import {
 	mapClassExtend,
 	mapClassExtendKey,
@@ -30,7 +33,6 @@ import {
 } from "./methods.js"
 
 import { fromPairsList } from "../utils.js"
-import type { LinearIndexMap } from "./interfaces.js"
 
 import { function as _f, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = _f

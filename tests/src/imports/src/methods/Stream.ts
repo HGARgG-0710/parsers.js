@@ -1,3 +1,6 @@
-import { importTest, specificChildImports } from "imports/lib/imports.js"
+import { importTest, objectImports, specificChildImports } from "imports/lib/imports.js"
 import * as Stream from "../../../../../dist/src/Stream/methods.js"
-importTest(specificChildImports.Stream)(Stream)
+
+importTest(
+	objectImports(...specificChildImports.Stream.concat(["StreamParser", "TreeStream"]))
+)("Stream", Stream)
