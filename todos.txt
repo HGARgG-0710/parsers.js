@@ -15,14 +15,7 @@ REMINDERS [2.]:
 		 * ...
 		 */
 		export const ToBeRecognizedFunction = UnrecognizedFunction as (x: T) => TOUT
-
-[Curr] Fixing import tests: 
-
-	4. utils/
-	5. utils.ts
-	6. constants.ts
-
-
+	
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
 
@@ -53,12 +46,6 @@ REMINDERS [2.]:
 	17. USE the optional '.pos' property on EVERY possibility inside the method implementations (namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
 	
 	21. Fix the tests; 	
-		21.2. import tests 
-			1. Walk the imports-tree; 
-			2. Modify it accordingly: 
-				2.1. Fix compilation errors; 
-				2.2. Fix the package's exports; 
-				2.3. Change the directory structure		
 		21.3. constants tests: 
 			1. Add missing things
 		21.4. utils tests

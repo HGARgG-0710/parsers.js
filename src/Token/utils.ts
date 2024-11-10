@@ -1,4 +1,5 @@
 import type { Token, TokenInstance } from "./interfaces.js"
+
 import { typeof as _typeof, object } from "@hgargg-0710/one"
 const { isObject } = _typeof
 const { structCheck } = object

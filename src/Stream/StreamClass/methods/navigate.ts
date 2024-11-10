@@ -7,7 +7,7 @@ import type {
 } from "../interfaces.js"
 
 import { uniNavigate } from "../utils.js"
-import { isBackward, positionConvert } from "src/Position/utils.js"
+import { isBackward, positionConvert, positionDecrement } from "src/Position/utils.js"
 import { readBuffer } from "../utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
@@ -51,7 +51,8 @@ export function posBufferNavigate<Type = any>(
 		if (converted > 0) while (i++) this.prev()
 		else while (i--) this.next()
 	} else {
-		if (isBackward(converted)) while (!converted(readBuffer(this))) --this.pos
+		if (isBackward(converted))
+			while (!converted(readBuffer(this))) positionDecrement(this)
 		else uniNavigate(this, converted)
 	}
 

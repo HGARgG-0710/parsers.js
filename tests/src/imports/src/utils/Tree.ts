@@ -9,4 +9,4 @@ importTest(
 		"recursiveTreeCopy",
 		"baseRecursiveTreeCopy"
 	)
-)(Tree)
+)("Tree", Tree)

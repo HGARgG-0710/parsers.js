@@ -13,7 +13,7 @@ import { isBufferized } from "src/Collection/Buffer/utils.js"
  */
 export function toInputStream<Type = any>(stream: BasicStream<Type>): InputStream<Type> {
 	return new InputStreamConstructor(
-		isBufferized(stream)
+		isBufferized<Type>(stream)
 			? stream.buffer.isFrozen
 				? stream.buffer
 				: (array(stream, stream.buffer) as FreezableBuffer<Type>)

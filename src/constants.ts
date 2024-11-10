@@ -34,6 +34,10 @@ export namespace Stream {
 	export namespace LimitedStream {
 		export const NoMovementPredicate = T
 	}
+
+	export namespace StreamParser {
+		export const SkippedItem = undefined
+	}
 }
 
 export namespace validation {

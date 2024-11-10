@@ -1,13 +1,14 @@
 import { functionImports, importTest } from "imports/lib/imports.js"
-import * as ValidatablePattern from "../../../../../../dist/src/Pattern/ValidatablePattern/utils.js"
+import * as Validatable from "../../../../../dist/src/Validatable/utils.js"
+
 importTest(
 	functionImports(
+		"notValidMatch",
 		"validateString",
+		"validateTokenized",
 		"analyzeValidity",
 		"analyzedIndex",
 		"analyzedValue",
-		"isFaultyElement", 
-		"notValidMatch", 
-		"validateTokenized"
+		"isFaultyElement"
 	)
-)(ValidatablePattern)
+)("Validatable", Validatable)

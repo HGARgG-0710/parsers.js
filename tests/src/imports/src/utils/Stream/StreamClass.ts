@@ -13,6 +13,18 @@ importTest(
 		"uniNavigate",
 		"fastNavigate",
 		"uniRewind",
-		"fastRewind"
+		"fastRewind",
+		"initCurr",
+		"isCurrUnintialized",
+		"start",
+		"deStart",
+		"end",
+		"deEnd",
+		"preInit",
+		"createState",
+		"realCurr",
+		"getNext",
+		"readBuffer",
+		"getPrev"
 	)
-)(StreamClass)
+)("StreamClass", StreamClass)

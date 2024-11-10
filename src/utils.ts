@@ -1,12 +1,16 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
-import type { BasicStream, Indexed } from "./Stream/interfaces.js"
 import type { PredicatePosition } from "./Position/interfaces.js"
+import type { Bufferized } from "./Collection/Buffer/interfaces.js"
+import type { BasicStream, Indexed } from "./Stream/interfaces.js"
 import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 import type {
 	BasicReversibleStream,
 	ReversibleStream
 } from "./Stream/ReversibleStream/interfaces.js"
+
+import { Stream } from "./constants.js"
+const { SkippedItem } = Stream.StreamParser
 
 /**
  * Given a string, returns whether it's a Hex number
@@ -27,11 +31,6 @@ export const previous = <Type = any>(input: BasicReversibleStream<Type>) => inpu
  * Given a `BasicStream` returns its `.curr` property value
  */
 export const current = <Type = any>(input: BasicStream<Type>) => input.curr
-
-/**
- * Returns `[x]`
- */
-export const output = (x: any) => [x]
 
 /**
  * Given a `handler` function returns a function of `input: BasicStream` that skips a single stream-element before and after calling the handler.
@@ -66,18 +65,13 @@ export const isStart = (input: ReversibleStream) => input.isStart
  */
 export const destroy = (input: BasicStream) => {
 	input.next()
-	return []
+	return SkippedItem
 }
 
 /**
  * For a `input: BasicStream`, If `input.isEnd`, returns an empty array, otherwise `[input.next()]`
  */
-export const preserve = (input: BasicStream) => (input.isEnd ? [] : [input.next()])
-
-/**
- * Creates and returns a new empty array
- */
-export const miss = () => []
+export const preserve = (input: BasicStream) => (input.isEnd ? SkippedItem : input.next())
 
 /**
  * Returns whether `x === y`
@@ -98,6 +92,7 @@ export const backtrack = (predicate: PredicatePosition) => {
 }
 
 export const length = (x: Indexed) => x.length
+
 export const size = (x: Sizeable) => x.size
 
 export const calledDelegate =
@@ -145,6 +140,8 @@ export const SelfAssignmentClass =
 export const getSetDescriptor = ([set, get]) => ({ set, get })
 
 export const state = (x: Stateful) => x.state
+
+export const buffer = (x: Bufferized) => x.buffer
 
 export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"

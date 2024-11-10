@@ -13,6 +13,9 @@ importTest(
 		"isBackward",
 		"pickDirection",
 		"preserveDirection",
-		"positionStopPoint"
+		"positionStopPoint", 
+		"positionNull", 
+		"positionIncrement", 
+		"positionDecrement"
 	)
-)(Position)
+)("Position", Position)

@@ -17,7 +17,11 @@ export const isFreezableBuffer = and(
 	isCollection
 ) as <Type = any>(x: any) => x is FreezableBuffer<Type>
 
-export const isBufferized = structCheck<Bufferized>({ buffer: isFreezableBuffer })
+export const isBufferized = structCheck<Bufferized>({ buffer: isFreezableBuffer }) as <
+	Type = any
+>(
+	x: any
+) => x is Bufferized<Type>
 
 export function assignBuffer<Type = any>(
 	bufferized: Bufferized<Type>,
