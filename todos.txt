@@ -18,8 +18,6 @@ REMINDERS [2.]:
 
 [Curr] Fixing import tests: 
 
-	2. interfaces/
-	3. methods/
 	4. utils/
 	5. utils.ts
 	6. constants.ts
@@ -1259,3 +1257,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		The combination of the three will permit A LOT of different code to just be "magicked away"; 
 		USE THOSE to "re-write" ["pack", the .ts files will be generated (.gitignore-d) - then run], 
 			the tests/their designs for 'parsers.js' v0.4 [the repetative parts]; 
+
+	3.3. Create automatic tool for performance of redundancy analysis of JavaScript functions/classes/components; 
+		Basically - it walks through the project tree, looking for functions/things that aren't GETTING USED/Called ANYWHERE/ANYHOW; 
+		Permits one to remove items that are of no importance, simplifies development...; 

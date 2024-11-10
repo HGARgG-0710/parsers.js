@@ -30,4 +30,4 @@ importTest(
 			)
 		)
 	)
-)(TreeWalker)
+)("TreeWalker", TreeWalker)

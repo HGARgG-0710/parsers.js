@@ -17,4 +17,4 @@ importTest(
 			"DecLast"
 		)
 	)
-)(MultiIndexModifier)
+)("MultiIndexModifier", MultiIndexModifier)

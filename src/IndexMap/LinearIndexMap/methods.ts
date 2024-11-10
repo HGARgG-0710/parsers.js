@@ -1,9 +1,10 @@
 import type { MapClass, Pairs } from "../interfaces.js"
+import type { LinearIndexMap } from "./interfaces.js"
+
+import { LinearMapClass } from "./classes.js"
 import { fromPairsList } from "../utils.js"
 
 import { inplace } from "@hgargg-0710/one"
-import { LinearMapClass } from "./classes.js"
-import type { LinearIndexMap } from "./interfaces.js"
 const { insert, out } = inplace
 
 export function linearIndexMapIndex<KeyType = any, ValueType = any>(

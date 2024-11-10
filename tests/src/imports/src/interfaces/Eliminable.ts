@@ -1,3 +1,3 @@
 import { emptyImportTest } from "imports/lib/imports.js"
-import * as EliminablePattern from "../../../../../../dist/src/Pattern/EliminablePattern/interfaces.js"
-emptyImportTest(EliminablePattern)
+import * as Eliminable from "../../../../../dist/src/Eliminable/interfaces.js"
+emptyImportTest("Eliminable", Eliminable)

@@ -24,4 +24,4 @@ importTest(
 			)
 		)
 	)
-)(TreeStream)
+)("TreeStream", TreeStream)

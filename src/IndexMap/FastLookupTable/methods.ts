@@ -1,8 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { FastLookupTable } from "./interfaces.js"
 import type { PersistentIndexFastLookupTable } from "./classes.js"
 
 import { AssignmentClass } from "../../utils.js"
-import type { FastLookupTable } from "./interfaces.js"
 
 // * general
 

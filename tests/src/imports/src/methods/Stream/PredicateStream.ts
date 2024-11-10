@@ -14,4 +14,4 @@ importTest(
 			...namesCapitalized("next", "prod", "isEnd", "initialize", "defaultIsEnd")
 		)
 	)
-)(PredicateStream)
+)("PredicateStream", PredicateStream)

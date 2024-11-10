@@ -19,4 +19,4 @@ importTest(
 			])
 		)
 	).concat(specificChildImports.MultiIndex)
-)(MultiIndex)
+)("MultiIndex", MultiIndex)

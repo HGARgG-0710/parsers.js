@@ -9,4 +9,4 @@ importTest(
 		"hashMapReplaceKey",
 		"hashClassExtend"
 	).concat(objectImports("InternalHash"))
-)(HashMap)
+)("HashMap", HashMap)

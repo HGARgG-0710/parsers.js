@@ -13,4 +13,4 @@ importTest(
 			...namesCapitalized("add", "delete", "unique", "swap").concat(["GetIndex"])
 		)
 	)
-)(PersistentIndexMap)
+)("PersistentIndexMap", PersistentIndexMap)

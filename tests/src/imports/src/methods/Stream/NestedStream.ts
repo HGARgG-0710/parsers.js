@@ -12,4 +12,4 @@ importTest(
 			...namesCapitalized("initCurr", "next", "isEnd", "initialize")
 		)
 	)
-)(NestedStream)
+)("NestedStream", NestedStream)

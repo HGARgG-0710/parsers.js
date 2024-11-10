@@ -17,4 +17,4 @@ importTest(
 			)
 		)
 	)
-)(ProlongedStream)
+)("ProlongedStream", ProlongedStream)

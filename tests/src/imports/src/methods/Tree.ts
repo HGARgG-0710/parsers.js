@@ -1,4 +1,4 @@
-import { functionImports, importTest } from "imports/lib/imports.js"
+import { functionImports, importTest, objectImports } from "imports/lib/imports.js"
 import * as Tree from "../../../../../dist/src/Tree/methods.js"
 
 importTest(
@@ -7,5 +7,5 @@ importTest(
 		"baseChildrenCount",
 		"childIndex",
 		"childrenCount"
-	).concat(functionImports("TreeWalker"))
+	).concat(objectImports("TreeWalker"))
 )("Tree", Tree)

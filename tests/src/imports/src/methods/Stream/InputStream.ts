@@ -26,4 +26,4 @@ importTest(
 			)
 		)
 	)
-)(InputStream)
+)("InputStream", InputStream)

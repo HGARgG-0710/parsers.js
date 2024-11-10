@@ -19,4 +19,4 @@ importTest(
 			...prefixedImportNames("mapClassExtend")("", "Key")
 		])
 	)
-)(LinearIndexMap)
+)("LinearIndexMap", LinearIndexMap)

@@ -13,4 +13,4 @@ importTest(
 			...namesCapitalized("isStart", "prev", "initialize", "isEnd", "prod", "next")
 		)
 	)
-)(LimitedStream)
+)("LimitedStream", LimitedStream)

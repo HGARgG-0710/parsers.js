@@ -55,7 +55,6 @@ export const specificChildImports = {
 		"ValidatablePattern"
 	),
 	MultiIndex: objectImports("MultiIndexModifier"),
-	Tree: objectImports("TreeWalker"),
 	Stream: [
 		"InputStream",
 		"LimitedStream",

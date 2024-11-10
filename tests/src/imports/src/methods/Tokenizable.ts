@@ -4,7 +4,8 @@ import {
 	namesCapitalized,
 	prefixedImportNames
 } from "imports/lib/imports.js"
-import * as TokenizablePattern from "../../../../../../dist/src/Pattern/TokenizablePattern/methods.js"
+
+import * as Tokenizable from "../../../../../dist/src/Tokenizable/methods.js"
 
 importTest(
 	functionImports(
@@ -12,4 +13,4 @@ importTest(
 			...namesCapitalized("tokenize", "flush")
 		)
 	)
-)(TokenizablePattern)
+)("Tokenizable", Tokenizable)

@@ -4,12 +4,13 @@ import {
 	namesCapitalized,
 	prefixedImportNames
 } from "imports/lib/imports.js"
-import * as ValidatablePattern from "../../.../../../../../../dist/src/Pattern/ValidatablePattern/methods.js"
+
+import * as Validatable from "../../.../../../../../dist/src/Validatable/methods.js"
 
 importTest(
 	functionImports(
-		...prefixedImportNames("validatableStringPattern")(
+		...prefixedImportNames("validatableString")(
 			...namesCapitalized("flush", "validate")
 		)
 	)
-)(ValidatablePattern)
+)("Validatable", Validatable)

@@ -5,12 +5,12 @@ import {
 	prefixedImportNames
 } from "imports/lib/imports.js"
 
-import * as EliminablePattern from "../../../../../../dist/src/Pattern/EliminablePattern/methods.js"
+import * as Eliminable from "../../../../../dist/src/Eliminable/methods.js"
 
 importTest(
 	functionImports(
-		...prefixedImportNames("eliminableStringPattern")(
+		...prefixedImportNames("eliminableString")(
 			...namesCapitalized("flush", "eliminate")
 		)
 	)
-)(EliminablePattern)
+)("Eliminable", Eliminable)

@@ -10,4 +10,4 @@ importTest(
 		"objectInternalHashDelete",
 		"objectInternalHashReplaceKey"
 	)
-)(InternalHash)
+)("InternalHash", InternalHash)

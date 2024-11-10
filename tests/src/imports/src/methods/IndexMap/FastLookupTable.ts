@@ -8,4 +8,4 @@ importTest(
 		"persistentIndexFastLookupTableDelete",
 		"hashMapFastLookupTableByOwned"
 	)
-)(FastLookupTable)
+)("FastLookupTable", FastLookupTable)
