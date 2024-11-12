@@ -1,20 +1,18 @@
-import { TokenizablePatternClassTest } from "./lib/classes.js"
-import { TokenizableStringPattern } from "../../../../dist/src/Pattern/TokenizablePattern/classes.js"
+import { TokenizableClassTest } from "./lib/classes.js"
+import { TokenizableString } from "../../../dist/src/Tokenizable/classes.js"
 import { arraysSame } from "lib/lib.js"
 
-import { classWrapper } from "../../../../dist/src/utils.js"
-import { SimpleTokenType } from "../../../../dist/src/Pattern/Token/classes.js"
+import { classWrapper } from "../../../dist/src/utils.js"
+import { SimpleTokenType } from "../../../dist/src/Token/classes.js"
 
-import { isToken } from "../../../../dist/src/Pattern/Token/utils.js"
+import { isToken } from "../../../dist/src/Token/utils.js"
+
+import { ConstEnum, TokenInstanceEnum } from "../../../dist/src/EnumSpace/classes.js"
 
 import { typeof as type } from "@hgargg-0710/one"
-import {
-	ConstEnum,
-	TokenInstanceEnum
-} from "../../../../dist/src/Pattern/EnumSpace/classes.js"
 const { isString } = type
 
-// * TokenizableStringPattern
+// * TokenizableString
 
 const [A, B, DC, Miss] = ["A", "B", "DC", "Miss"].map((name) =>
 	classWrapper(SimpleTokenType<string, string>(name))
@@ -41,7 +39,7 @@ const tokenizedComparison = (x: any, y: any) =>
 			(isToken(x) && isToken(y) && x.type === y.type && x.value === y.value)
 	)
 
-TokenizablePatternClassTest("TokenizableStringPattern", TokenizableStringPattern, [
+TokenizableClassTest("TokenizableString", TokenizableString, [
 	{
 		input: "A, BBB, C, DCD, D, A, D, C, B, A, A, A, A",
 		tableEntries: [

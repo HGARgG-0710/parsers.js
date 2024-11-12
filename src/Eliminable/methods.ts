@@ -2,7 +2,7 @@ import type { EliminableStringPattern } from "./interfaces.js"
 import { string } from "@hgargg-0710/one"
 const { extract } = string
 
-export function eliminableStringFlush(this: EliminableStringPattern) {
+export function eliminableFlush(this: EliminableStringPattern) {
 	this.result = this.value
 }
 

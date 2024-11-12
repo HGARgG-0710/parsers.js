@@ -46,21 +46,6 @@ REMINDERS [2.]:
 	17. USE the optional '.pos' property on EVERY possibility inside the method implementations (namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
 	
 	21. Fix the tests; 	
-		21.3. constants tests: 
-			1. Add missing things
-		21.4. utils tests
-			0. List and walk the utilities files (including the new); 
-			1. Add missing things
-		21.1. previous Pattern/ tests; 
-			1. Fix prior tests: 
-				1. Validatable; 
-				2. Tokenizable; 
-				3. Eliminable; 
-				4. Token; 
-				5. Collection; 	
-					5.3. Add: 
-						5.3.1. FreezableBuffer, UnfreezableBuffer tests (depend on each other and prior Collection tests)
-				6. EnumSpace; 
 		21.5. Stream tests: 
 			4. Add the new flags' tests for StreamClass-es: 
 				4.1. .buffer; 
@@ -75,17 +60,18 @@ REMINDERS [2.]:
 		21.6. generally: 
 			1. Before writing cases for a given suite, first check the source code (if it needs remedying); 
 				Due to the '.input->.value' and '.sub->value'  thing;
-			
-		21.7. Parser/
-			1. Delete (old) missing exports; 
+
+		21.7. replace (everywhere) the 'import' with 'import {...} from "./dist/main"', then 'const {...} = ...'; 
+			This ensures the import-correctness of the given paths; 
+			Gives first-hand experience of actually using the library; 
 
 Order of TODO-elimination: 
-	5.21.1-4
-
 	A.3.8. 
 	A.3.9.
 	A.3.10.
 	A.3.11. 
+
+	5.21.7
 	
 	5.17
 	5.21.5
@@ -352,6 +338,8 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Would permit user to store a '.state.size: Pattern<number>' property (Pointer(number)) on the ParserState-s, 
 			for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
 				and use the tree for evaluation; 
+
+		If the 'size' is unknown, implements a simple DFS (namely - conversion of a given 'Tree' into an 'Array')
 
 	2.2. TreeStream: create two new versions; 
 
@@ -624,7 +612,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 	
 	2.18. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
-		In the 'TreeWalker.renewLevel', it does the 'this.stream.pos.slice', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
+		In the 'TreeWalker.renewLevel', it does the 'init.index', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
 		A 'BacktrackableTree' [interface] is one that has a method: 
 
 			1. backtrack(pos: number)
@@ -648,11 +636,23 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		The 'ParentTree' implementation would (therefore) assign '.parent = this' on all the pushed children in '.pushChildren', and do 'this[propName] = []' in 'clearChlidren'; 
 		[IMPORTANT!: Make a 'ParentTree' implementation work with the 'ChildrenTree'-s, that is it'd have its own 'propName']; 
 
-		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.stream.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
+		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
 			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
+
+		2.18.1. ALSO, rewrite the '.lastLevelWithSiblings()'; 
+			Now, one can use the more memory-efficient '.backtrack', instead of having to walk linearly, and memoize using the 'sequentialIndex'; 
+
+		PROBLEM [with this approach]: how to define the '.backtrack'-dependent definition of '.renewLevel' for cases when '.backtrack' is unavailable? 
+			Namely, the present 'ChildrenTree'-s; 
+			Solution: 
+				Mandate the 'ParentTree'-s, require this particular structure;
+					Shouldn't be a memory concern (for most cases, anyway), because for this to be a memory-waste, one'd have to have '.children.value.length === 1'
+						to be true for most of the tree items; 
 
 	2.19. Add a fast implementation of '.finish' to the 'TreeStream'; 
 		When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
+		Calls the '.index' on the saved '.lastIndex'; 
+
 	2.20. Re-structure the tests to be made on a per-method basis? 
 		Current per-class suites are rather verbose (don't do this until v0.4, already spent too much time on the tests...); 
 	
@@ -775,73 +775,21 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		2. the 'prefixedNames' + 'namesCapitalized' - appears lots more than once, take out; 
 		3. Make better use of the 'namesCapitalized'; 
 
-	2.29. [important] Replace the 'Parser/' functionality completely with special cases of 'StreamTokenizer': 
-		Because: 
-			34.1. '.result' can be replaced with '.curr'; 
-			34.2. '.finished' can be replaced with '.isEnd'; 
-			[as '.next']
-			34.3. '.parser' can be defined in terms of '.input/.sub'; 
-			34.4. '.change' can be defined in terms of '.input/.sub'; 
-
-		The only interesting thing about 'GeneralParser' (that can't be directly replaced), is its level of dynamicity: 
-			the '.next', '.isEnd' of the 'StreamTokenizer' can't be quite
-				so easily (explicitly) modified from within '.baseNextIter', '.isCurrEnd', so forth, 
-					precisely BECAUSE of the underlying behaviour; 
-				
-		SOLUTION: 
-			1. get rid of the 'GeneralParser'; 
-			2. replace its implementations with cases of 'StreamTokenizer'; 
-			3. allow '.writab'-ility for the StreamClass properties; 
-				3.1. add an optional '.configure' method, for changing them (interface: ConfigurableStream); 
-					Works in a similar fashion to '.init'; 
-			4. RELOCATE those of 'Parser/'-classes that are (currently) implemented via GeneralParser-functions and ARE Stream-s, 
-				into 'Stream/'. Let ONLY the Parser-s that aren't that remain: 
-
-					[currently]
-					1. TableMap
-					2. LayeredParser
-					[ALSO - move these three under TokenizablePattern/, ValidatablePattern/ and EliminablePattern/!]
-					3. PatternTokenizer 
-					4. PatternValidator
-					5. PatternEliminator	
-			5. MERGE the 'TableMap' and 'LayeredParser' into the 'src/classes.ts'
-			6. DELETE the 'Parser/' directory altogether; 
-				The final project top-level tree would look like: 
-
-					1. IndexMap
-					2. Pattern [this includes the new stuff for working with Indexed-based Pattern-s - Sequence-s]; 
-						AND this includes 'GeneralBuffer' (as they are also 'Pattern'-s); 
-					3. Position
-					4. regex
-					5. Stream
-					6. Tree
-				
-		34.5. The ability to work with several '.stream'-s can be replaced with a utility [pseudocode]: 
-
-			[NOTE 1: ADD this to the library]; 
-			function streamSwap(stream: (whatever) BasicStream, i: number) {
-				const swapped = stream.state.streams[i]
-				stream.state.streams[i] = stream.input
-				stream.init({
-					input: swapped
-				})
-			}	
-	
-	2.30. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
+	2.29. Add the 'export default' from 'classes.ts' and 'interfaces.ts' files for their "main" stuff; 
 		Example [1]: a 'classes.ts/interfaces.ts' with THE ONLY export will have it as default, besides referencing by name; 
 		Example [2]: when a 'classes.ts/interafaces.ts' has an export with THE SAME name as the module, the export is default (besides being present as of itself); 
 
-	2.31. turn the 'AssignmentClass'-es into abstract classes
+	2.30. turn the 'AssignmentClass'-es into abstract classes
 				[ones that aren't redundant - remember the 'replace .input with .sub' 
 					and '.state is an optional StreamClass property' todos...]; 
 				
-	2.32. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
+	2.31. [large input optimizations] Investigate whether retaining the indexes information from 'matchAll' in 'tokenizeString' may not be faster on large inputs; 
 		This is largely a question of how fast '.split' is compared to building the array manually using the indicies information from 'matchAll' (that is, a large sequence of '.slice()'-es); 
 		Potentially, this could be a large time saving (if '.slice()'-es are relatively short), but otherwise - could be a waste of memory (additional strings allocated without need); 
 			Then, of course comes the question of whether the strings are allocated at all; 
 			BENCHMARK IT; 
 	
-	2.33. Introduce a new Position class - MultilinePosition
+	2.32. Introduce a new Position class - MultilinePosition
 		Basically, a pair of numbers: 
 			(linesNum, symsNum)	
 		Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
@@ -849,16 +797,16 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Used frequently throughout for things like debug information; 
 		The '.convert()' would play very nicely with it...; 
 
-	2.34. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
+	2.33. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
 		Appears in: 
 			1. Tokenizable; 
 			2. structCheck; 
 			[and some other places...]
 
-	2.35. refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
+	2.34. refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
 		This is (most often) is used inside the library's testing mini-framework; 
 
-	2.36. About validation and parsing: 
+	2.35. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
 			1. Validation happens separate from parsing, despite using the same abstraction (ex: ValidatablePattern and TokenizablePattern); 
@@ -918,12 +866,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			
 			2. Do SOLUTION 2 [a simple new StreamTokenizer]
 		
-	2.37. Later - improve the tests: 
-		2.38.1. Add generics to the class-tests signatures [just for the sake of it - very pretty and give a lot more sense to using TypeScript for tests]; 
-		2.38.2. Refactor the 'while(times--) doTestSmth(...)' into a special 'times' function; 
-		2.38.3. Create a way to print out the class tests' instances (via a special 'instance' library function, based off 'it'); 
+	2.36. Later - improve the tests: 
+		2.37.1. Add generics to the class-tests signatures [just for the sake of it - very pretty and give a lot more sense to using TypeScript for tests]; 
+		2.37.2. Create a way to print out the class tests' instances (via a special 'instance' library function, based off 'it'); 
 	
-	2.38. Implement a new interface for the library - FiniteEnum: 
+	2.37. Implement a new interface for the library - FiniteEnum: 
 		This, basically, creates an 'EnumSpace', that consists of all the given items, 
 			BUT requires finding out their uniqueness beforehand (using the 'new Set', or the 'one.js' 'norepetitions'). 
 			Thus, for instance, these are equivalent: 
@@ -934,7 +881,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Thus, the '.size' of the given EnumSpace is actually fluid; 
 			Likewise, its' '.add()' would NOT be a number (hence - one NEEDS A NEW INTERFACE); 
 
-	2.39. IDEA: how to speed up the tokenization algorithm [attempt]:
+	2.38. IDEA: how to speed up the tokenization algorithm [attempt]:
 		Way: 
 		1. Split the "tokenized" and "untokenized" parts with 2 arrays
 		2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
@@ -1147,7 +1094,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
 				Third - either delete, or keep; 
 
-	2.40. Performance concern: '.push(...elems)' FAILS for large arrays; 
+	2.39. Performance concern: '.push(...elems)' FAILS for large arrays; 
 		Problem - with the '...elems' spread operator: it creates a new array; 
 
 		1. Do '.push()'-es in batches, or avoid them completely....; 
@@ -1158,12 +1105,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			(example: 'string[] | ContinuedList | string[][]' for 'StringCollection.push'); 
 			Then - the methods in question have a higher versatility; 
 
-	2.41. BitArrayHash; 
+	2.40. BitArrayHash; 
 		Accepts a BitArray, returns a value from it; 
 			A hash based off bit-shifts (<<, >>); 
 		Use for defining the '.init', '.curr' and other choice functions in the StreamClass; 
 
-	2.42. [TypeScript; clarity] Add the 'type ForcePresence<T, K extends keyof T> = {[x in K]-?: T[]}'
+	2.41. [TypeScript; clarity] Add the 'type ForcePresence<T, K extends keyof T> = {[x in K]-?: T[]}'
 		This (and similar ones), for adding/removing various type features, are handy for refactoring (appears at least in StreamClass); 
 		ALSO: 
 
@@ -1193,7 +1140,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					2.49.1. ALSO  - create a single RIGID 'StreamClass' interface! [for the implementation - write down the optional '.pos, .buffer', and so forth... Missing currently...]; 
 				)
 	
-	2.43. Use C preprocessor with this code; 
+	2.42. Use C preprocessor with this code; 
 
 		Getting tired of typing "optionalValue(this, value)", and other such things in repetative situations (like 'init.ts'); 
 		Abstract those away with a good old '#define' + '#include'; 
@@ -1212,7 +1159,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Due to the fact one doesn't want to touch its code again after the v0.4, this particular "hybrid" 
 			language shouldn't become a thing to cause problems [that would need separate solving] during development; 
 	
-	2.44. Liberate the 'Parser/' directory as well? 
+	2.43. Liberate the 'Parser/' directory as well? 
 		Due to the reformulation of the library's key terms through 'StreamParser', it has become depressingly empty; 
 		Also - introduces some unnecessary higher-level "bunching"; 
 		This way - there'd be global functions that are exported from the package - PatternTokenizer, PatternValidator, for starters...; 

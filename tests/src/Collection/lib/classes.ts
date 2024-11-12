@@ -1,4 +1,4 @@
-import type { Collection } from "../../../../dist/src/Pattern/Collection/interfaces.js"
+import type { Collection } from "../../../../dist/src/Collection/interfaces.js"
 import {
 	ClassConstructorTest,
 	classTest,
@@ -32,10 +32,10 @@ const CollectionFunctionalConstructorTest = FunctionalClassConctructorTest(
 	collectionPrototypeProps,
 	collectionOwnProps
 )
-const CollectionPushTest = PatternMethodTest<Collection>("push")
+export const CollectionPushTest = PatternMethodTest<Collection>("push")
 const CollectionIterationTest = iterationTest<Collection>
 
-type CollectionClassTestSignature = {
+export type CollectionClassTestSignature = {
 	input: any
 	pushed: any[]
 	expectedPushValue: any

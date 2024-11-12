@@ -1,9 +1,10 @@
+import type { Mappable } from "../../../dist/src/EnumSpace/interfaces.js"
+
 import {
 	ConstEnum,
 	TokenInstanceEnum,
 	SimpleTokenTypeEnum
-} from "../../../../dist/src/Pattern/EnumSpace/classes.js"
-import type { Mappable } from "../../../../dist/src/Pattern/EnumSpace/interfaces.js"
+} from "../../../dist/src/EnumSpace/classes.js"
 
 import { EnumSpaceTest, TokenMappingTest } from "./lib/classes.js"
 

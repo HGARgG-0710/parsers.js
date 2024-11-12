@@ -1,10 +1,10 @@
-import type { ValidationOutput } from "../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
+import type { ValidationOutput } from "../../../dist/src/Validatable/interfaces.js"
 
 import { arraysSame } from "lib/lib.js"
-import { ValidatableStringPattern } from "../../../../dist/src/Pattern/ValidatablePattern/classes.js"
-import { ValidatablePatternClassTest } from "./lib/classes.js"
+import { ValidatableString } from "../../../dist/src/Validatable/classes.js"
+import { ValidatableClassTest } from "./lib/classes.js"
 
-// * ValidatableStringPattern
+// * ValidatableString
 
 function adjacentPush(array: any[][], pushed: any[]) {
 	array = structuredClone(array)
@@ -35,7 +35,7 @@ const validationRules = [
 const validationCompare = (x: ValidationOutput, y: ValidationOutput) =>
 	x[0] === y[0] && arraysSame(x[1], y[1])
 
-ValidatablePatternClassTest("ValidatableStringPattern", ValidatableStringPattern, [
+ValidatableClassTest("ValidatableString", ValidatableString, [
 	{
 		input: "BABBBEEDEELEEKBAERB",
 		flushResult: [false, []],

@@ -8,9 +8,11 @@ import type {
 	Pattern,
 	Resulting
 } from "../../../dist/src/Pattern/interfaces.js"
-import type { Initializable } from "../../../dist/src/Stream/StreamClass/interfaces.js"
+
+import type { Initializable } from "../../../dist/src/Stream/StreamClass/methods/init.js"
 
 import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
+import { classWrapper } from "../../../dist/src/utils.js"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = _f
@@ -92,10 +94,7 @@ export function ClassConstructorTest<ClassType extends object = object>(
 		ownProps
 	)
 	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
-		return UnderFunctionalTest(
-			(...input: any[]) => new constructor(...input),
-			...input
-		)
+		return UnderFunctionalTest(classWrapper(constructor), ...input)
 	}
 }
 
@@ -110,17 +109,21 @@ export function FlushableResultingTestFlush(
 	})
 }
 
-export function PatternMethodTest<Type extends Pattern = any>(methodName: string) {
-	return function (
-		instance: Type,
-		value: any,
-		input: any[],
-		compare: (x: any, y: any) => boolean
-	) {
-		method(methodName, () => {
-			instance[methodName](...input)
-			assert(compare(instance.value, value))
-		})
+export const PatternMethodTest = PropertyMethodTest("value")
+
+export function PropertyMethodTest(propName: string) {
+	return function <Type = any>(methodName: string) {
+		return function (
+			instance: Type,
+			compared: any,
+			input: any[] = [],
+			compare: (x: any, y: any) => boolean = equals
+		) {
+			method(methodName, () => {
+				instance[methodName](...input)
+				assert(compare(instance[propName], compared))
+			})
+		}
 	}
 }
 
@@ -282,7 +285,7 @@ export function InitClassConstructorTest<ClassType extends Initializable = Initi
 	)
 	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
 		const instance = new constructor()
-		instance.init(...input)
+		;(instance.init as (...x: any[]) => any)(...input)
 		return UnderChainTest(instance)
 	}
 }
@@ -314,9 +317,6 @@ export const [classTest, property, namespace, importName, quality] = [
 export function repeat(n: number, block: (i?: number) => void) {
 	for (let i = 0; i < n; ++i) block(i)
 }
-
-export const stringSum = (...strings: string[]) =>
-	strings.reduce((last, curr) => last + curr, "")
 
 export function uniquenessTest(x: Iterable<any>) {
 	quality("uniqueness", () => assert.strictEqual(new Set(x).size, [...x].length))

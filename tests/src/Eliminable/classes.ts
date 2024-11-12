@@ -1,13 +1,13 @@
-import { EliminablePatternClassTest } from "./lib/classes.js"
-import { EliminableStringPattern } from "../../../../dist/src/Pattern/EliminablePattern/classes.js"
+import { EliminableClassTest } from "./lib/classes.js"
+import { EliminableString } from "../../../dist/src/Eliminable/classes.js"
 
 import { boolean } from "@hgargg-0710/one"
 const { equals } = boolean
 
-// * EliminableStringPattern
+// * EliminableString
 
 const origInput = "A, B, CADRRADDKIRAD, AABADIRKI"
-EliminablePatternClassTest("EliminableStringPattern", EliminableStringPattern, [
+EliminableClassTest("EliminableString", EliminableString, [
 	{
 		input: origInput,
 		toEliminate: [

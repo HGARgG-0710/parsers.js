@@ -1,8 +1,7 @@
 import { utilTest } from "lib/lib.js"
-import { utils } from "../../../../../dist/main.js"
-const { isType } = utils.Pattern.Token
+import { isType, isToken } from "../../../../dist/src/Token/utils.js"
 
-export const isTypeTest = utilTest(
-	(type: any, object: any) => isType(type)(object),
-	"isType"
-)
+export const [isTypeTest, isTokenTest] = [
+	[(type: any, object: any) => isType(type)(object), "isType"],
+	[isToken, "isToken"]
+].map(([util, name]) => utilTest(util as Function, name as string))

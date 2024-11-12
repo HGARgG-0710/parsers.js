@@ -1,9 +1,7 @@
 import assert from "node:assert"
 
-import type {
-	EnumSpace,
-	Mappable
-} from "../../../../../dist/src/Pattern/EnumSpace/interfaces.js"
+import type { TokenInstance } from "../../../../dist/src/Token/interfaces.js"
+import type { EnumSpace, Mappable } from "../../../../dist/src/EnumSpace/interfaces.js"
 
 import {
 	arraysSame,
@@ -15,7 +13,6 @@ import {
 } from "lib/lib.js"
 
 import { object, boolean, typeof as type } from "@hgargg-0710/one"
-import type { TokenInstance } from "../../../../../dist/src/Pattern/Token/interfaces.js"
 const { structCheck } = object
 const { isFunction } = type
 const { T } = boolean

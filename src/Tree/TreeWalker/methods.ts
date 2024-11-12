@@ -2,6 +2,7 @@ import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { Tree } from "../interfaces.js"
 import type { TreeWalker } from "./interfaces.js"
 
+import { setValue } from "src/Pattern/utils.js"
 import { sequentialIndex } from "../utils.js"
 
 import { array, object, function as f } from "@hgargg-0710/one"
@@ -107,7 +108,7 @@ export function treeWalkerInitialize<Type = any>(
 	pos?: MultiIndex
 ) {
 	if (input) {
-		this.value = this.level = input
+		this.level = setValue(this, input)
 		if (!pos) this.modifier.clear()
 	}
 	if (pos) {

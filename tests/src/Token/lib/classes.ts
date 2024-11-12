@@ -5,11 +5,12 @@ import {
 	Token,
 	TokenInstance,
 	SimpleTokenType
-} from "../../../../../dist/src/Pattern/Token/classes.js"
+} from "../../../../dist/src/Token/classes.js"
+
+import { classTest, inputDescribe, recursiveToString, signatures } from "lib/lib.js"
+import { isToken } from "../../../../dist/src/Token/utils.js"
 
 import { object } from "@hgargg-0710/one"
-import { classTest, inputDescribe, recursiveToString, signatures } from "lib/lib.js"
-import { isToken } from "../../../../../dist/src/Pattern/Token/utils.js"
 const { ownKeys } = object
 
 type TokenTestSignature = [any, any]

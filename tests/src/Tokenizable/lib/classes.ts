@@ -2,7 +2,7 @@ import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type {
 	TokenizablePattern,
 	TokenizationResult
-} from "../../../../../dist/src/Pattern/TokenizablePattern/interfaces.js"
+} from "../../../../dist/src/Tokenizable/interfaces.js"
 
 import {
 	ClassConstructorTest,
@@ -17,22 +17,22 @@ const { structCheck } = object
 const { T } = boolean
 const { isFunction } = type
 
-const isTokenizablePattern = structCheck<TokenizablePattern>({
+const isTokenizable = structCheck<TokenizablePattern>({
 	value: T,
 	result: T,
 	flush: isFunction,
 	tokenize: isFunction
 })
 
-const TokenizablePatternConstructorTest = ClassConstructorTest(
-	isTokenizablePattern,
+const TokenizableConstructorTest = ClassConstructorTest(
+	isTokenizable,
 	["tokenize", "flush"],
 	["value", "result"]
 )
-const TokenizablePatternTokenizeTest =
+const TokenizableTokenizeTest =
 	ResultingAmbigiousMethodTest<TokenizablePattern>("tokenize")
 
-type TokenizablePatternClassTestSignature<Type = any, InType = any, OutType = any> = {
+type TokenizableClassTestSignature<Type = any, InType = any, OutType = any> = {
 	input: any
 	flushResult: TokenizationResult<Type, OutType>
 	resultCompare: (
@@ -42,45 +42,35 @@ type TokenizablePatternClassTestSignature<Type = any, InType = any, OutType = an
 	tableEntries: [InType, SummatFunction<any, InType, OutType>, any][]
 }
 
-export function TokenizablePatternClassTest<Type = any, InType = any, OutType = any>(
+export function TokenizableClassTest<Type = any, InType = any, OutType = any>(
 	className: string,
-	tokenizablePatternConstructor: new (x: any) => TokenizablePattern<
-		Type,
-		InType,
-		OutType
-	>,
-	testSignatures: TokenizablePatternClassTestSignature<Type, InType, OutType>[]
+	tokenizableConstructor: new (x: any) => TokenizablePattern<Type, InType, OutType>,
+	testSignatures: TokenizableClassTestSignature<Type, InType, OutType>[]
 ) {
-	classTest(`(TokenizablePattern) ${className}`, () =>
+	classTest(`(Tokenizable) ${className}`, () =>
 		signatures(
 			testSignatures,
 			({ input, flushResult, resultCompare, tableEntries }) =>
 				() => {
 					const testTokenize = () => {
 						for (const [key, handler, result] of tableEntries)
-							TokenizablePatternTokenizeTest(
-								tokenizablePatternInstance,
+							TokenizableTokenizeTest(
+								tokenizableInstance,
 								[key, handler],
 								result,
 								resultCompare
 							)
 					}
 
-					const tokenizablePatternInstance: TokenizablePattern<
-						Type,
-						InType,
-						OutType
-					> = TokenizablePatternConstructorTest(
-						tokenizablePatternConstructor,
-						input
-					)
+					const tokenizableInstance: TokenizablePattern<Type, InType, OutType> =
+						TokenizableConstructorTest(tokenizableConstructor, input)
 
 					// .tokenize
 					testTokenize()
 
 					// .flush
 					FlushableResultingTestFlush(
-						tokenizablePatternInstance,
+						tokenizableInstance,
 						flushResult,
 						resultCompare
 					)

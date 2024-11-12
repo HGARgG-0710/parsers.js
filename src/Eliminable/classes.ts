@@ -1,7 +1,7 @@
 import { FlushablePattern } from "../Pattern/classes.js"
 import type { EliminableStringPattern as EliminableStringPatternType } from "./interfaces.js"
 import {
-	eliminableStringFlush,
+	eliminableFlush,
 	eliminableStringEliminate
 } from "./methods.js"
 
@@ -17,6 +17,6 @@ export class EliminableString
 }
 
 Object.defineProperties(EliminableString.prototype, {
-	flush: { value: eliminableStringFlush },
+	flush: { value: eliminableFlush },
 	eliminate: { value: eliminableStringEliminate }
 })

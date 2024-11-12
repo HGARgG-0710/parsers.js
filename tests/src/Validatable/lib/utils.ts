@@ -3,14 +3,15 @@ import { arraysSame, comparisonUtilTest, utilTest } from "lib/lib.js"
 import type {
 	InvalidEntries,
 	ValidationOutput
-} from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
+} from "../../../../dist/src/Validatable/interfaces.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isString } = type
 
-import { utils } from "../../../../../dist/main.js"
+import { utils } from "../../../../dist/main.js"
+
 const { isFaultyElement, analyzeValidity, validateTokenized, validateString } =
-	utils.Pattern.ValidatablePattern
+	utils.Validatable
 
 const validateTestBase = <Type = any>(isType: (x: any) => x is Type) =>
 	comparisonUtilTest(

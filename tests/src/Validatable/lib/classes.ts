@@ -1,7 +1,8 @@
 import type {
 	ValidatablePattern,
 	ValidationOutput
-} from "../../../../../dist/src/Pattern/ValidatablePattern/interfaces.js"
+} from "../../../../dist/src/Validatable/interfaces.js"
+
 import {
 	ClassConstructorTest,
 	ResultingAmbigiousMethodTest,
@@ -15,50 +16,50 @@ const { structCheck } = object
 const { isFunction } = type
 const { T } = boolean
 
-const isValidatablePattern = structCheck<ValidatablePattern>({
+const isValidatable = structCheck<ValidatablePattern>({
 	value: T,
 	result: T,
 	flush: isFunction,
 	validate: isFunction
 })
 
-const ValidatablePatternConstructorTest = ClassConstructorTest<ValidatablePattern>(
-	isValidatablePattern,
+const ValidatableConstructorTest = ClassConstructorTest<ValidatablePattern>(
+	isValidatable,
 	["validate", "flush"],
 	["value", "result"]
 )
 
-const ValidatablePatternValidateTest = ResultingAmbigiousMethodTest("validate")
+const ValidatableValidateTest = ResultingAmbigiousMethodTest("validate")
 
-type ValidatablePatternTestSignature = {
+type ValidatableTestSignature = {
 	input: any
 	flushResult: any
 	resultCompare: (x: any, y: any) => boolean
 	validationInput: [any, any, ValidationOutput][]
 }
 
-export function ValidatablePatternClassTest(
+export function ValidatableClassTest(
 	className: string,
-	validatablePatternConstructor: new (input: any) => ValidatablePattern,
-	testSignatures: ValidatablePatternTestSignature[]
+	validatableConstructor: new (input: any) => ValidatablePattern,
+	testSignatures: ValidatableTestSignature[]
 ) {
-	classTest(`(ValidatablePattern) ${className}`, () =>
+	classTest(`(Validatable) ${className}`, () =>
 		signatures(
 			testSignatures,
 			({ input, flushResult, resultCompare, validationInput }) =>
 				() => {
 					const testValidate = () => {
 						for (const [key, handler, result] of validationInput)
-							ValidatablePatternValidateTest(
-								validatablePatternInstance,
+							ValidatableValidateTest(
+								validatableInstance,
 								[key, handler],
 								result,
 								resultCompare
 							)
 					}
 
-					const validatablePatternInstance = ValidatablePatternConstructorTest(
-						validatablePatternConstructor,
+					const validatableInstance = ValidatableConstructorTest(
+						validatableConstructor,
 						input
 					)
 
@@ -67,7 +68,7 @@ export function ValidatablePatternClassTest(
 
 					// .flush
 					FlushableResultingTestFlush(
-						validatablePatternInstance,
+						validatableInstance,
 						flushResult,
 						resultCompare
 					)
