@@ -1,4 +1,4 @@
-import regex, { char_ranges } from "src/regex.js"
+import regex, { char_ranges } from "../regex.js"
 import { non_bracket } from "./groups.js"
 
 import { function as _f, typeof as type } from "@hgargg-0710/one"

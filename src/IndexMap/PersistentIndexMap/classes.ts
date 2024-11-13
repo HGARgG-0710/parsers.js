@@ -10,7 +10,7 @@ import {
 	valueReplace,
 	valueReplaceKey,
 	valueValues
-} from "src/Pattern/methods.js"
+} from "../../Pattern/methods.js"
 
 import {
 	indexMapCopy,
@@ -26,7 +26,8 @@ import {
 	persistentIndexMapSwap,
 	persistentIndexMapUnique
 } from "./methods.js"
-import { BasicPattern } from "src/Pattern/classes.js"
+
+import { BasicPattern } from "../../Pattern/classes.js"
 
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
 // * 	index of a 'PersistentIndexMap' consistent across multiple sources,

@@ -7,7 +7,7 @@ import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
 
 import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
 import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./methods.js"
-import { BasicPattern } from "src/Pattern/classes.js"
+import { BasicPattern } from "../Pattern/classes.js"
 
 export class ConstEnum extends BasicPattern<{}[]> implements ConstEnumSpace {
 	size: number

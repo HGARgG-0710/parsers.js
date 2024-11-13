@@ -1,14 +1,17 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Position } from "src/Position/interfaces.js"
-import type { BasicReversibleStream } from "src/Stream/ReversibleStream/interfaces.js"
+import type { Position } from "../../../Position/interfaces.js"
+import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type {
 	BufferizedReversedStreamClassInstance,
 	PositionalReversedStreamClassInstance
 } from "../interfaces.js"
 
-import { uniNavigate } from "../utils.js"
-import { isBackward, positionConvert, positionDecrement } from "src/Position/utils.js"
-import { readBuffer } from "../utils.js"
+import { uniNavigate, readBuffer } from "../utils.js"
+import {
+	isBackward,
+	positionConvert,
+	positionDecrement
+} from "../../../Position/utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber } = type

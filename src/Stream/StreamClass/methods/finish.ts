@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { BasicStream } from "src/Stream/interfaces.js"
+import type { BasicStream } from "../../../Stream/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
 	PositionalStreamClassInstance
@@ -8,7 +8,7 @@ import type {
 import { uniFinish } from "../utils.js"
 import { readBuffer } from "../utils.js"
 import { end } from "../utils.js"
-import { lastIndex, readLast } from "src/Collection/Buffer/utils.js"
+import { lastIndex, readLast } from "../../../Collection/Buffer/utils.js"
 
 export interface Finishable<Type = any> extends Summat {
 	finish: () => Type

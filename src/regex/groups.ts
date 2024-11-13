@@ -1,4 +1,4 @@
-import regex, { regex_contents } from "src/regex.js"
+import regex, { regex_contents } from "../regex.js"
 
 export const bracket = (regex: RegExp) => `(${regex_contents(regex)})`
 export const non_bracket = (regex: RegExp) => `(?:${regex_contents(regex)})`

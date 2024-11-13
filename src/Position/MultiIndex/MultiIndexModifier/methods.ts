@@ -1,7 +1,7 @@
 import type { MultiIndex } from "../interfaces.js"
 import type { MultiIndexModifier } from "./interfaces.js"
 
-import { setValue } from "src/Pattern/utils.js"
+import { setValue } from "../../../Pattern/utils.js"
 
 import { array } from "@hgargg-0710/one"
 const { clear } = array

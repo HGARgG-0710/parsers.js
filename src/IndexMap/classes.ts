@@ -1,6 +1,6 @@
 import type { MapClass } from "./interfaces.js"
-import { type } from "src/Token/utils.js"
-import { value } from "src/Pattern/utils.js"
+import { type } from "../Token/utils.js"
+import { value } from "../Pattern/utils.js"
 import { current, is } from "../utils.js"
 
 import { typeof as _typeof } from "@hgargg-0710/one"

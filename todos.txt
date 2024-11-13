@@ -189,7 +189,6 @@ A. testing:
 				IndexMap/
 				[note: there's the "extension" cases... Write minimal tests for this...]; 
 
-			1. LinearIndexMap/
 			2. PersistentIndexMap/
 			3. InternalHash/ 
 			4. HashMap/ 
@@ -1164,6 +1163,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Also - introduces some unnecessary higher-level "bunching"; 
 		This way - there'd be global functions that are exported from the package - PatternTokenizer, PatternValidator, for starters...; 
 		Although - there MAY be come new things coming into the 'Parser' (the new memory-hungry patter-tokenization algorithm, for instance?)
+
+	2.44. About the continiously occurring '[A, B][]' types in code: 
+		Fix those; Replace with 'Pairs'; 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

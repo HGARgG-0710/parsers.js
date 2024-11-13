@@ -4,10 +4,8 @@ import type {
 	ReversedStreamClassInstance
 } from "../interfaces.js"
 
-import { deEnd, getPrev, readBuffer } from "../utils.js"
-
-import { start } from "../utils.js"
-import { positionDecrement } from "src/Position/utils.js"
+import { positionDecrement } from "../../../Position/utils.js"
+import { start, deEnd, getPrev, readBuffer } from "../utils.js"
 
 // * possible '.prev' methods
 

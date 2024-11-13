@@ -4,7 +4,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 
 import { superInit } from "../StreamClass/utils.js"
 
-import { Stream } from "src/constants.js"
+import { Stream } from "../../constants.js"
 const { SkippedItem } = Stream.StreamParser
 
 export function streamParserNext<InType = any, OutType = any>(

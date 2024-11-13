@@ -13,8 +13,9 @@ import type {
 	LookaheadHaving,
 	SinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
+
 import type { Superable } from "../StreamClass/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface BasicLimited extends Summat {
 	from: Position

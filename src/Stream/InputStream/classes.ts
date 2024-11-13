@@ -1,4 +1,4 @@
-import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
+import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 import type { InputStream as InputStreamType } from "./interfaces.js"
 
 import { StreamClass } from "../StreamClass/classes.js"

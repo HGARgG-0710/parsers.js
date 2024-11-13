@@ -4,7 +4,7 @@ import type {
 } from "../../Stream/StreamClass/interfaces.js"
 import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { Superable } from "../../Stream/StreamClass/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface StreamParser<InType = any, OutType = any>
 	extends Pattern<EndableStream<InType>>,

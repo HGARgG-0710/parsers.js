@@ -11,8 +11,9 @@ import {
 	valueSet,
 	valueReplaceKey,
 	valueGetIndex
-} from "src/Pattern/methods.js"
-import { BasicPattern } from "src/Pattern/classes.js"
+} from "../../Pattern/methods.js"
+
+import { BasicPattern } from "../../Pattern/classes.js"
 
 import {
 	persistentIndexFastLookupTableByOwned,
@@ -21,7 +22,7 @@ import {
 	affirmOwnership
 } from "./methods.js"
 
-import { current } from "src/utils.js"
+import { current } from "../../utils.js"
 
 import { function as _f } from "@hgargg-0710/one"
 const { id } = _f

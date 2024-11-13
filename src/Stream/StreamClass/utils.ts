@@ -15,7 +15,7 @@ import type {
 import { calledDelegate } from "../../utils.js"
 import { pickDirection, positionConvert } from "../../Position/utils.js"
 
-import { Stream } from "src/constants.js"
+import { Stream } from "../../constants.js"
 const { StreamClass } = Stream
 
 import { object, typeof as type } from "@hgargg-0710/one"

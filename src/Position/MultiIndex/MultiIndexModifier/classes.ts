@@ -11,7 +11,7 @@ import {
 	multiIndexModifierInitialize
 } from "./methods.js"
 
-import { BasicPattern } from "src/Pattern/classes.js"
+import { BasicPattern } from "../../../Pattern/classes.js"
 
 export class MultiIndexModifier
 	extends BasicPattern<MultiIndex>

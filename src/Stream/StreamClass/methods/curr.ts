@@ -1,5 +1,5 @@
 import type { BufferizedStreamClassInstance, StreamClassInstance } from "../interfaces.js"
-import { getSetDescriptor } from "src/utils.js"
+import { getSetDescriptor } from "../../../utils.js"
 import { readBuffer } from "../utils.js"
 import { isCurrUninitialized, initCurr, start } from "../utils.js"
 

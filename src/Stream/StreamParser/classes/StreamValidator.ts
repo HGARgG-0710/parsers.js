@@ -1,13 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { StreamPredicate } from "src/Parser/TableMap/interfaces.js"
-import type { EndableStream } from "src/Stream/StreamClass/interfaces.js"
+import type { StreamPredicate } from "../../../Parser/TableMap/interfaces.js"
+import type { EndableStream } from "../../../Stream/StreamClass/interfaces.js"
 import type {
 	ValidationError,
 	ValidationResult,
 	ValidationSuccess
-} from "src/Parser/PatternValidator/interfaces.js"
+} from "../../../Parser/PatternValidator/interfaces.js"
 
-import { validation } from "src/constants.js"
+import { validation } from "../../../constants.js"
 const { ValidationSuccess } = validation
 const { ValidationError } = validation.PatternValidator
 

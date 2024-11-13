@@ -1,5 +1,5 @@
 import type { InternalHash } from "./interfaces.js"
-import { valueDelete, valueSet, valueSize } from "src/Pattern/methods.js"
+import { valueDelete, valueSet, valueSize } from "../../../Pattern/methods.js"
 import {
 	mapInternalHashGet,
 	mapInternalHashReplaceKey,
@@ -9,7 +9,7 @@ import {
 	objectInternalHashSet
 } from "./methods.js"
 
-import { BasicPattern } from "src/Pattern/classes.js"
+import { BasicPattern } from "../../../Pattern/classes.js"
 
 export class MapInternalHash<KeyType = any, ValueType = any>
 	extends BasicPattern<Map<KeyType, ValueType>>

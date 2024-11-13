@@ -3,10 +3,10 @@ import { InputStream as InputStreamConstructor } from "./classes.js"
 import type { BasicStream } from "../interfaces.js"
 import type { InputStream } from "./interfaces.js"
 
-import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
+import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 
 import { array } from "../../Parser/utils.js"
-import { isBufferized } from "src/Collection/Buffer/utils.js"
+import { isBufferized } from "../../Collection/Buffer/utils.js"
 
 /**
  * Given a `BasicStream`, converts it to an `InputStream` for the price of a single iteration.

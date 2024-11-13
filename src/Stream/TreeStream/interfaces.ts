@@ -4,7 +4,7 @@ import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface BasicTreeStream<Type = any>
 	extends BasicStream<InTreeType<Type>>,

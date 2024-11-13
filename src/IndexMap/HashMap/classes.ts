@@ -10,11 +10,12 @@ import {
 	hashMapReplaceKey,
 	hashMapSet
 } from "./methods.js"
-import { valueSize } from "src/Pattern/methods.js"
 
-import { type } from "src/Token/utils.js"
-import { length } from "src/utils.js"
-import { BasicPattern } from "src/Pattern/classes.js"
+import { valueSize } from "../../Pattern/methods.js"
+
+import { type } from "../../Token/utils.js"
+import { length } from "../../utils.js"
+import { BasicPattern } from "../../Pattern/classes.js"
 
 import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
 const { id } = _f

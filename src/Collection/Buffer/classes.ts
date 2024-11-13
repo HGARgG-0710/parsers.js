@@ -10,7 +10,7 @@ import {
 	unfreezableStringPush
 } from "./methods.js"
 
-import { valueLength } from "src/Pattern/methods.js"
+import { valueLength } from "../../Pattern/methods.js"
 
 export class UnfreezableArray<Type = any>
 	extends BasicPattern<Type[]>

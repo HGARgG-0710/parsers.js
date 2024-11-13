@@ -7,7 +7,7 @@ import type {
 	PatternStreamConstructor
 } from "../StreamClass/interfaces.js"
 
-import { valueDefaultIsEnd } from "src/Pattern/methods.js"
+import { valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
 	effectiveNestedStreamInitCurr,
 	effectiveNestedStreamNext,

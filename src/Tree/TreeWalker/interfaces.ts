@@ -3,7 +3,7 @@ import type { Posed } from "../../Position/interfaces.js"
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
 import type { Currable } from "../../Stream/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface TreeWalker<Type = any>
 	extends Posed<MultiIndex>,

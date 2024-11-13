@@ -24,16 +24,16 @@ export function toPairsList<KeyType = any, ValueType = any>(
 	const [keys, values] = keyValues
 	let size = keys.length
 
-	const result: Pairs<KeyType, ValueType> = Array.from(
-		{ length: size },
-		() => new Array(2)
-	) as [KeyType, ValueType][]
+	const result = Array.from({ length: size }, () => new Array(2)) as Pairs<
+		KeyType,
+		ValueType
+	>
 
 	while (size--) {
 		result[size][0] = keys[size]
 		result[size][1] = values[size]
 	}
-	
+
 	return result
 }
 

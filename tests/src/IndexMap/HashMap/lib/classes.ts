@@ -20,8 +20,9 @@ import {
 	signatures
 } from "lib/lib.js"
 
-import { object, typeof as type, function as _f } from "@hgargg-0710/one"
 import { isInternalHash } from "IndexMap/InternalHash/lib/classes.js"
+
+import { object, typeof as type, function as _f } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
 const { and } = _f
@@ -29,7 +30,7 @@ const { and } = _f
 const isHashMap = and(
 	structCheck({
 		hash: isFunction,
-		sub: isInternalHash
+		value: isInternalHash
 	}),
 	isSettable,
 	isIndexable,
@@ -41,7 +42,7 @@ const isHashMap = and(
 const HashMapConstructorTest = ClassConstructorTest<HashMap>(
 	isHashMap,
 	["index", "set", "delete", "replaceKey", "hash"],
-	["sub"]
+	["value"]
 )
 
 const HashMapIndexTest = methodTest<HashMap>("index")
@@ -52,7 +53,7 @@ function HashMapDeleteTest(instance: HashMap, key: any) {
 		"delete",
 		() => {
 			instance.delete(key)
-			assert.strictEqual(instance.index(key), instance.sub.default)
+			assert.strictEqual(instance.index(key), instance.value.default)
 		},
 		key
 	)
@@ -65,7 +66,7 @@ function HashMapReplaceKeyTest(instance: HashMap, keyFrom: any, keyTo: any) {
 			const value = instance.index(keyFrom)
 			instance.replaceKey(keyFrom, keyTo)
 			assert.strictEqual(instance.index(keyTo), value)
-			assert.strictEqual(instance.index(keyFrom), instance.sub.default)
+			assert.strictEqual(instance.index(keyFrom), instance.value.default)
 		},
 		keyFrom,
 		keyTo

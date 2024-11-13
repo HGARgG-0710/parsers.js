@@ -5,6 +5,7 @@ import type {
 	Deletable,
 	Settable
 } from "../../../../dist/src/IndexMap/HashMap/interfaces.js"
+
 import type {
 	Sizeable,
 	Indexable,
@@ -13,6 +14,7 @@ import type {
 	Pairs,
 	DefaultHaving
 } from "../../../../dist/src/IndexMap/interfaces.js"
+
 import {
 	ClassConstructorTest,
 	classTest,
@@ -203,7 +205,7 @@ function indexMapCopyTest<KeyType = any, ValueType = any>(
 ) {
 	method("copy", () => {
 		const copied = instance.copy()
-		for (let i = 0; i < instance.keys.length; ++i) {
+		for (let i = 0; i < instance.size; ++i) {
 			const [origKey, origValue] = instance.byIndex(i)
 			const [copiedKey, copiedValue] = copied.byIndex(i)
 			assert.strictEqual(origKey, copiedKey)
@@ -249,16 +251,14 @@ function indexMapAddTest<KeyType = any, ValueType = any>(
 	method(
 		"add",
 		() => {
+			const newLength = instance.size + 1
 			const [origKey, origValue] = instance.byIndex(i)
 			instance.add(i, pair)
 			const [addedKey, addedValue] = instance.byIndex(i)
 
 			assert.notStrictEqual(addedKey, origKey)
 			assert.notStrictEqual(addedValue, origValue)
-
-			const newLength = instance.keys.length + 1
-			assert.strictEqual(newLength, instance.keys.length)
-			assert.strictEqual(newLength, instance.values.length)
+			assert.strictEqual(newLength, instance.size)
 		},
 		i,
 		pair
@@ -272,30 +272,28 @@ function indexMapDeleteTest<KeyType = any, ValueType = any>(
 	method(
 		"delete",
 		() => {
+			const newLength = Math.max(instance.size - 1, 0)
 			const [origKey, origValue] = instance.byIndex(i)
 			instance.delete(i)
 			const [deletedKey, deletedValue] = instance.byIndex(i)
 
 			assert.notStrictEqual(deletedKey, origKey)
 			assert.notStrictEqual(deletedValue, origValue)
-
-			const newLength = Math.max(instance.keys.length - 1, 0)
-			assert.strictEqual(newLength, instance.keys.length)
-			assert.strictEqual(newLength, instance.values.length)
+			assert.strictEqual(newLength, instance.size)
 		},
 		i
 	)
 }
 
 export type MapClassTestSignature<KeyType = any, ValueType = any> = {
-	instance: [Pairs<KeyType, ValueType>, any]
+	instance: [Pairs<KeyType, ValueType>, any?]
 } & ReducedMapClassTestSignature<KeyType, ValueType>
 
-type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
+export type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
 	byIndexTest: Pairs<number, any>
 	indexTest: Pairs<any, ValueType>
 	swapIndicies: [number, number][]
-	uniqueTest: Pairs<KeyType, ValueType>
+	uniqueTest?: Pairs<KeyType, ValueType>
 	replaceTests: Pairs<number, [KeyType, ValueType]>
 	addTests: Pairs<number, [KeyType, ValueType]>
 	deleteInds: number[]
@@ -361,14 +359,18 @@ function ChainIndexMapTest(instance: IndexMap, signature: ReducedMapClassTestSig
 		furtherSignature
 	} = signature
 
+	// * Explanation: when '.isCopyTest !== false', the 'MapClassTest' had been invoked, so the 'instance' is ALREADY 'assert'-ed to be an 'IndexMap';
 	if (isCopyTest === false) assert(isIndexMap(instance))
 
 	// .index
 	for (const [key, value] of indexTest) indexMapIndexTest(instance, value, key)
 
 	// .copy
-	if (isCopyTest || isCopyTest === undefined)
+	if ((isCopyTest || isCopyTest === undefined) && furtherSignature)
 		indexMapCopyTest(instance, furtherSignature)
+
+	// .byIndex
+	for (const [i, pair] of byIndexTest) indexMapByIndexTest(instance, i, pair)
 
 	// .add
 	for (const [i, pair] of addTests) indexMapAddTest(instance, i, pair)
@@ -380,10 +382,7 @@ function ChainIndexMapTest(instance: IndexMap, signature: ReducedMapClassTestSig
 	for (const [setKey, setValue] of setArgs) indexMapSetTest(instance, setKey, setValue)
 
 	// .unique
-	indexMapUniqueTest(instance, uniqueTest)
-
-	// .byIndex
-	for (const [i, pair] of byIndexTest) indexMapByIndexTest(instance, i, pair)
+	if (uniqueTest) indexMapUniqueTest(instance, uniqueTest)
 
 	// .swap
 	for (const [i, j] of swapIndicies) indexMapSwapTest(instance, i, j)

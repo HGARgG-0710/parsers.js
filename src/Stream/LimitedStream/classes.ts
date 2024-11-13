@@ -3,7 +3,7 @@ import type { Position } from "../../Position/interfaces.js"
 import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
 import type { LimitedUnderStream, EffectiveLimitedStream } from "./interfaces.js"
 
-import { valueCurr, valueDefaultIsEnd } from "src/Pattern/methods.js"
+import { valueCurr, valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
 	effectiveLimitedStreamInitialize,
 	effectiveLimitedStreamProd,

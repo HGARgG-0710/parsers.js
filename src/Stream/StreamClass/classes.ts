@@ -1,3 +1,5 @@
+import type { InitMethod } from "./methods/init.js"
+
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
@@ -17,8 +19,7 @@ import {
 	prev
 } from "./methods.js"
 
-import { BasicPattern } from "src/Pattern/classes.js"
-import type { InitMethod } from "./methods/init.js"
+import { BasicPattern } from "../../Pattern/classes.js"
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>

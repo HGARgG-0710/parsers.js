@@ -1,9 +1,9 @@
-import type { BasicStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { BasicStream } from "../interfaces.js"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
 import type { Posed, Position } from "../../Position/interfaces.js"
-import type { Bufferized } from "src/Collection/Buffer/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Initializable } from "./methods/init.js"
 import type { Navigable } from "./methods/navigate.js"
 import type { Finishable } from "./methods/finish.js"
@@ -192,3 +192,8 @@ export interface BufferizedReversedStreamClassInstance<Type = any>
 export interface PatternStreamClassInstance<Type = any>
 	extends StreamClassInstance<Type>,
 		Pattern {}
+
+export type * as finish from "./methods/finish.js"
+export type * as init from "./methods/init.js"
+export type * as navigate from "./methods/navigate.js"
+export type * as rewind from "./methods/rewind.js"

@@ -1,4 +1,4 @@
-import type { Copiable } from "src/Stream/StreamClass/interfaces.js"
+import type { Copiable } from "../Stream/StreamClass/interfaces.js"
 import type { Sizeable } from "../IndexMap/interfaces.js"
 import type { Pattern } from "../Pattern/interfaces.js"
 

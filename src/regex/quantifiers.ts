@@ -1,4 +1,4 @@
-import regex, { regex_contents } from "src/regex.js"
+import regex, { regex_contents } from "../regex.js"
 import { non_bracket } from "./groups.js"
 
 export function occurrences(...args: [number, (number | "")?]) {

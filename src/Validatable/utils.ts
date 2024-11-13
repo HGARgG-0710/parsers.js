@@ -7,7 +7,7 @@ import type {
 	ValidMatch
 } from "./interfaces.js"
 
-import { validation } from "src/constants.js"
+import { validation } from "../constants.js"
 import { tokenizeString } from "../Tokenizable/utils.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"

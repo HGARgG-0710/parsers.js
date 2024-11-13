@@ -3,7 +3,7 @@ import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces
 import type {
 	ReversibleStream,
 	BasicReversibleStream,
-	ReversedStream
+	ReversedStream as ReversedStreamType
 } from "./interfaces.js"
 
 import {
@@ -15,7 +15,8 @@ import {
 	valueIsEnd,
 	valueDefaultIsStart,
 	valueFinish
-} from "src/Pattern/methods.js"
+} from "../../Pattern/methods.js"
+
 import { reversedStreamInitialize } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
@@ -41,9 +42,9 @@ export function ReversedStream<Type = any>(
 	buffer: boolean = false
 ) {
 	const baseClass = ReversedStreamBase(hasPosition, buffer)
-	class reversedStream extends baseClass implements ReversedStream<Type> {
+	class reversedStream extends baseClass implements ReversedStreamType<Type> {
 		value: BasicReversibleStream<Type>
-		init: (value?: BasicReversibleStream) => ReversedStream<Type>
+		init: (value?: BasicReversibleStream) => ReversedStreamType<Type>
 		super: Summat
 
 		constructor(value?: ReversibleStream<Type>) {

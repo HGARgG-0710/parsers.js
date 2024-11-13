@@ -4,7 +4,7 @@ import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { PredicatePosition } from "../../Position/interfaces.js"
 import type { BasicStream } from "../interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface LookaheadHaving extends Summat {
 	hasLookAhead: boolean

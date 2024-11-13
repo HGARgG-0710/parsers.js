@@ -7,11 +7,11 @@ import type {
 } from "../interfaces.js"
 
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { FreezableBuffer } from "src/Collection/Buffer/interfaces.js"
+import type { FreezableBuffer } from "../../../Collection/Buffer/interfaces.js"
 
-import { positionNull } from "src/Position/utils.js"
-import { assignBuffer } from "src/Collection/Buffer/utils.js"
-import { optionalValue } from "src/Pattern/utils.js"
+import { positionNull } from "../../../Position/utils.js"
+import { assignBuffer } from "../../../Collection/Buffer/utils.js"
+import { optionalValue } from "../../../Pattern/utils.js"
 import { createState, preInit, realCurr } from "../utils.js"
 
 import { Stream } from "../../../constants.js"

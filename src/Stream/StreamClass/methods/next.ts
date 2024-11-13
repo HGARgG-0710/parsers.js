@@ -4,10 +4,9 @@ import type {
 	StreamClassInstance
 } from "../interfaces.js"
 
-import { positionIncrement } from "src/Position/utils.js"
+import { positionIncrement } from "../../../Position/utils.js"
+import { bufferPush, bufferFreeze } from "../../../Collection/Buffer/utils.js"
 import { deStart, end, getNext, readBuffer } from "../utils.js"
-import { bufferPush } from "src/Collection/Buffer/utils.js"
-import { bufferFreeze } from "src/Collection/Buffer/utils.js"
 
 // * possible '.next' methods
 

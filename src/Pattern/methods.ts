@@ -1,6 +1,6 @@
 // * The file contains various delegate methods used by the library's classes
 
-import { delegate, thisReturningDelegate, delegateProperty } from "src/utils.js"
+import { delegate, thisReturningDelegate, delegateProperty } from "../utils.js"
 
 export const [valueDelegate, valueThisDelegate, valuePropDelegate] = [
 	delegate,

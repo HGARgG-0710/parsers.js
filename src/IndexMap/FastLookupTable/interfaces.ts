@@ -1,4 +1,4 @@
-import type { Pattern } from "src/Pattern/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Deletable, HashMap, Settable } from "../HashMap/interfaces.js"
 import type { KeyReplaceable } from "../HashMap/interfaces.js"
 

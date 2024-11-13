@@ -13,7 +13,7 @@ import {
 	multiIndexLevelsSetter
 } from "./methods.js"
 
-import { BasicPattern } from "src/Pattern/classes.js"
+import { BasicPattern } from "../../Pattern/classes.js"
 
 export class MultiIndex extends BasicPattern<number[]> implements MultiIndexType {
 	levels: number

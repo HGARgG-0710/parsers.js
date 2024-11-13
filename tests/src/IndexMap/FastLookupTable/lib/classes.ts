@@ -78,7 +78,7 @@ function FastLookupTableDeleteTest(instance: FastLookupTable, key: any) {
 }
 
 type FastLookupTableTestSignature = {
-	sub: any
+	input: any
 	getIndexTests: [any, any][]
 	setTests: [any, any][]
 	ownTests: [any, any, any][]
@@ -94,9 +94,19 @@ export function FastLookupTableTest(
 	classTest(`(FastLookupTable) ${className}`, () =>
 		signatures(
 			testSignatures,
-			({ sub, getIndexTests, setTests, ownTests, replaceKeyTests, deleteTests }) =>
+			({
+					input,
+					getIndexTests,
+					setTests,
+					ownTests,
+					replaceKeyTests,
+					deleteTests
+				}) =>
 				() => {
-					const instance = FastLookupTableConstructorTest(tableConstructor, sub)
+					const instance = FastLookupTableConstructorTest(
+						tableConstructor,
+						input
+					)
 
 					// .getIndex
 					for (const [index, value] of getIndexTests)

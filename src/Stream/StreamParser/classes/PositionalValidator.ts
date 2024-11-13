@@ -1,7 +1,7 @@
-import type { StreamPredicate } from "src/Parser/TableMap/interfaces.js"
-import type { EndableStream } from "src/Stream/StreamClass/interfaces.js"
-import type { InvalidEntries } from "src/Validatable/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { StreamPredicate } from "../../../Parser/TableMap/interfaces.js"
+import type { EndableStream } from "../../../Stream/StreamClass/interfaces.js"
+import type { InvalidEntries } from "../../../Validatable/interfaces.js"
 
 import { LocatorStream } from "../classes.js"
 

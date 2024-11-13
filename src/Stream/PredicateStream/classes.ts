@@ -3,12 +3,11 @@ import type { PredicatePosition } from "../../Position/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type {
 	IsEndCurrable,
-	PatternStreamConstructor,
-	StreamClassInstance
+	PatternStreamConstructor
 } from "../StreamClass/interfaces.js"
 import type { EffectivePredicateStream } from "./interfaces.js"
 
-import { valueDefaultIsEnd } from "src/Pattern/methods.js"
+import { valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
 	effectivePredicateStreamIsEnd,
 	effectivePredicateStreamProd,

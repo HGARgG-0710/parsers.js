@@ -29,7 +29,7 @@ export const isInternalHash = and(
 const InternalHashConstructorTest = ClassConstructorTest<InternalHash>(
 	isInternalHash,
 	["set", "delete", "replaceKey", "get"],
-	["sub"]
+	["value"]
 )
 
 const InternalHashSetTest = setMethodTest<InternalHash>("set", "get")

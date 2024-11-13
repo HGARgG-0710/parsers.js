@@ -1,4 +1,4 @@
-import regex, { regex_contents } from "src/regex.js"
+import regex, { regex_contents } from "../regex.js"
 
 export const [lookahead, neg_lookahead, lookbehind, neg_lookbehind] = [
 	"?=",

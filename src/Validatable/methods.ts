@@ -9,8 +9,7 @@ import type {
 	ValidMatch
 } from "./interfaces.js"
 
-import { validation } from "src/constants.js"
-
+import { validation } from "../constants.js"
 const { ValidationFailed } = validation.ValidatablePattern
 
 // * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]':

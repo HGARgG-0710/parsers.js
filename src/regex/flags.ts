@@ -1,4 +1,5 @@
-import { regex } from "src/constants.js"
+import { regex } from "../constants.js"
+
 const {
 	GlobalSearchFlag,
 	UnicodeFlag,
