@@ -20,10 +20,12 @@ export function linearIndexMapReplace<KeyType = any, ValueType = any>(
 	index: number,
 	pair: [KeyType, ValueType]
 ): LinearIndexMap<KeyType, ValueType> {
-	const [key, value] = pair
-	this.keys[index] = key
-	this.alteredKeys[index] = this.keyExtension(key)
-	this.values[index] = value
+	if (index >= 0 && index < this.size) {
+		const [key, value] = pair
+		this.keys[index] = key
+		this.alteredKeys[index] = this.keyExtension(key)
+		this.values[index] = value
+	}
 	return this
 }
 

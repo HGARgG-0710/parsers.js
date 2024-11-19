@@ -61,7 +61,7 @@ function InternalHashReplaceKeyTest(instance: InternalHash, keyFrom: any, keyTo:
 }
 
 type InternalHashTestSignature = {
-	sub: any
+	input: [any, any?]
 	getTests: [any, any][]
 	setTests: [any, any][]
 	deleteTests: any[]
@@ -76,9 +76,9 @@ export function InternalHashTest(
 	classTest(`(InternalHash) ${className}`, () =>
 		signatures(
 			testSignatures,
-			({ sub, getTests, setTests, deleteTests, replaceKeyTests }) =>
+			({ input, getTests, setTests, deleteTests, replaceKeyTests }) =>
 				() => {
-					const instance = InternalHashConstructorTest(hashConstructor, sub)
+					const instance = InternalHashConstructorTest(hashConstructor, input)
 
 					// .get
 					for (const [key, value] of getTests)

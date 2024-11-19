@@ -1,5 +1,5 @@
-import { HashClass } from "./classes.js"
 import type { HashClass as HashClassType, HashMap } from "./interfaces.js"
+import { HashClass } from "./classes.js"
 
 export function hashMapIndex<KeyType = any, ValueType = any, InternalKeyType = any>(
 	this: HashMap<KeyType, ValueType, InternalKeyType>,

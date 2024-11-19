@@ -70,6 +70,7 @@ Order of TODO-elimination:
 	A.3.9.
 	A.3.10.
 	A.3.11. 
+	A.3.12. 
 
 	5.21.7
 	
@@ -144,28 +145,28 @@ A. testing:
 		
 		3.2. Parser/
 			Test Instances:
-				3.2.1. There is a set of Stream-s, for which they're tested; 
-				3.2.2. With appropriate Collection-s; 
-				3.2.3. They branch [by 4.1. and 4.2.]: 
-					3.2.3.1. The Empty Stream; 
-					3.2.3.2. The One-element Stream; 
-					3.2.3.3. The Two-element Stream; 
-					3.2.3.4. The many-element Stream; 
-
 				[Grouping by test suite type, for each type of parser:]	
 				1. LayeredParserTest - itself
 				2. TableMapTest - itself
+					2 cases: 
+						1. IndexMap; 
+						2. HashMap; 
 				3. GeneralParserTest: 
 					1. PatternEliminator
+						3 cases: 
+							1. where the ENTIRE string is eliminated; 
+							2. where a portion of a string is eliminated; 
+							3. where only one bit of the string is eliminated; 
 					2. PatternTokenizer
+						3 cases: 
+							1. complete coverage; 
+							2. incomplete coverage; 
+							3. no coverage (total miss); 
 					3. PatternValidator	
-					4. BasicParser; 
-					5. SkipParser; 
-						5.1. FixedSkipParser; 
-							5.1.1. StreamParser; 
-					6. StreamLocator; 
-					7. StreamValidator; 
-					8. PositionalValidator; 
+						3 cases: 
+							1. complete coverage; 
+							2. incomplete coverage; 
+							3. validation error; 
 
 		3.4. benchmarks/	
 			TODO: TO ENSURE the usefulness of the 'imports' tests, use the '.'-imports here (meaning: 'import {X} from "main.js"; const {...} = X[...]...'); 	
@@ -189,10 +190,10 @@ A. testing:
 				IndexMap/
 				[note: there's the "extension" cases... Write minimal tests for this...]; 
 
-			2. PersistentIndexMap/
-			3. InternalHash/ 
 			4. HashMap/ 
+				Split the 4 tested classes into 'Map'-versions and 'Object'-versions equally; 
 			5. FastLookupTable/
+				Do 2. One - for 'PersistentIndexMap', another - for 'HashMap'; 
 		
 		3.9. utils/	
 			1. Walk through the project tree, enumerating the 'utils.ts' files; 

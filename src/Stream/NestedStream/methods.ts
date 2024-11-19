@@ -1,6 +1,6 @@
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import type { EffectiveNestedStream } from "./interfaces.js"
-import { uniFinish, superInit } from "../StreamClass/utils.js"
+import { superInit, fastFinish } from "../StreamClass/utils.js"
 
 export function effectiveNestedStreamInitCurr<Type = any>(
 	this: EffectiveNestedStream<Type>
@@ -12,7 +12,7 @@ export function effectiveNestedStreamInitCurr<Type = any>(
 }
 
 export function effectiveNestedStreamNext<Type = any>(this: EffectiveNestedStream<Type>) {
-	if (this.currNested) uniFinish(this.curr as EndableStream<Type>)
+	if (this.currNested) fastFinish(this.curr as EndableStream<Type>)
 	this.value.next()
 	return this.initGetter!()
 }
@@ -22,7 +22,7 @@ export function effectiveNestedStreamIsEnd<Type = any>(
 ) {
 	return (
 		this.value.isCurrEnd() ||
-		(this._index != null && !this.typesTable.byOwned(this)(this, this.pos))
+		(this._index != undefined && !this.typesTable.byOwned(this)(this, this.pos))
 	)
 }
 

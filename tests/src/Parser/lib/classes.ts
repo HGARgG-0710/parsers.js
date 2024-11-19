@@ -16,7 +16,7 @@ export function GeneralParserTest(
 	tested: (x: Resulting) => any,
 	testSignatures: GeneralParserTestSignature[]
 ) {
-	classTest(`(GeneralParser) ${className}`, () =>
+	classTest(className, () =>
 		signatures(testSignatures, (signature: GeneralParserTestSignature) => () => {
 			const { input, expectedOutput, expectedResult } = signature
 			const output = tested(input)

@@ -27,6 +27,7 @@ import {
 import { toPairsList } from "../../../../dist/src/IndexMap/utils.js"
 
 import { object, typeof as type, function as _f } from "@hgargg-0710/one"
+import type { Pattern } from "../../../../dist/src/Pattern/interfaces.js"
 const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
 const { and } = _f
@@ -88,18 +89,23 @@ export function baseIndexMapGetIndexTest<IndexGetType = any>(
 	return function <KeyType = any, ValueType = any>(
 		instance: IndexMap<KeyType, ValueType, IndexGetType>,
 		key: KeyType,
-		index: IndexGetType
+		index: IndexGetType,
+		safe?: Pattern<IndexGetType>
 	) {
 		method(
 			"getIndex",
-			() => assert.strictEqual(converter(instance.getIndex(key)), index),
+			() => {
+				const gotIndex = instance.getIndex(key)
+				if (safe) safe.value = gotIndex
+				assert.strictEqual(converter(gotIndex), index)
+			},
 			key
 		)
 	}
 }
 
-function indexMapReplaceKeyTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapReplaceKeyTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {
@@ -116,8 +122,8 @@ function indexMapReplaceKeyTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function indexMapSetTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapSetTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	setKey: KeyType,
 	setValue: ValueType
 ) {
@@ -132,8 +138,8 @@ function indexMapSetTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function indexMapIteratorTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>
+function indexMapIteratorTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>
 ) {
 	method("[Symbol.iterator]", () => {
 		const pairsList = [...instance]
@@ -148,8 +154,8 @@ function indexMapIteratorTest<KeyType = any, ValueType = any>(
 	})
 }
 
-function indexMapByIndexTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapByIndexTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	i: number,
 	expected: any
 ) {
@@ -170,10 +176,18 @@ function indexMapByIndexTest<KeyType = any, ValueType = any>(
 	)
 }
 
-const indexMapIndexTest = methodTest<IndexMap>("index")
+const indexMapIndexTest = methodTest<IndexMap>("index") as <
+	KeyType = any,
+	ValueType = any,
+	IndexType = number
+>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
+	expectedValue: any,
+	...input: any[]
+) => any
 
-function indexMapSwapTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapSwapTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	i: number,
 	j: number
 ) {
@@ -199,8 +213,8 @@ function indexMapSwapTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function indexMapCopyTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapCopyTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	copyTestSignature: ReducedMapClassTestSignature
 ) {
 	method("copy", () => {
@@ -218,8 +232,8 @@ function indexMapCopyTest<KeyType = any, ValueType = any>(
 
 const indexMapUniqueTest = comparisonMethodTest("unique", indexMapEquality)
 
-function indexMapReplaceTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapReplaceTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
@@ -243,8 +257,8 @@ function indexMapReplaceTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function indexMapAddTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapAddTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
@@ -265,8 +279,8 @@ function indexMapAddTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function indexMapDeleteTest<KeyType = any, ValueType = any>(
-	instance: IndexMap<KeyType, ValueType>,
+function indexMapDeleteTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
 	i: number
 ) {
 	method(
@@ -286,7 +300,7 @@ function indexMapDeleteTest<KeyType = any, ValueType = any>(
 }
 
 export type MapClassTestSignature<KeyType = any, ValueType = any> = {
-	instance: [Pairs<KeyType, ValueType>, any?]
+	instance: [Pairs<KeyType, ValueType>, any?] | IndexMap<KeyType, ValueType>
 } & ReducedMapClassTestSignature<KeyType, ValueType>
 
 export type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
@@ -344,7 +358,10 @@ export function MapClassTest<KeyType = any, ValueType = any>(
 	)
 }
 
-function ChainIndexMapTest(instance: IndexMap, signature: ReducedMapClassTestSignature) {
+export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = number>(
+	instance: IndexMap<KeyType, ValueType, IndexType>,
+	signature: ReducedMapClassTestSignature
+) {
 	const {
 		byIndexTest,
 		indexTest,

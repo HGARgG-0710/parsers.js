@@ -1,30 +1,35 @@
-import type { MapClass, Pairs } from "../../../../../dist/src/IndexMap/interfaces.js"
+import assert from "node:assert"
+
+import type { IndexMap, MapClass } from "../../../../../dist/src/IndexMap/interfaces.js"
 import type { PersistentIndexMap } from "../../../../../dist/src/IndexMap/PersistentIndexMap/interfaces.js"
 import type { Pattern } from "../../../../../dist/src/Pattern/interfaces.js"
 import {
 	baseIndexMapGetIndexTest,
+	ChainIndexMapTest,
 	MapClassTest,
 	type MapClassTestSignature
 } from "../../lib/classes.js"
-import assert from "node:assert"
 
-import { Token } from "../../../../../dist/src/Pattern/Token/classes.js"
-import { classTest, signatures } from "lib/lib.js"
+import { value } from "../../../../../dist/src/Pattern/utils.js"
+import { arraysSame, classTest, property, signatures } from "lib/lib.js"
 
 import { object } from "@hgargg-0710/one"
 const { ownKeys } = object
 
-const persistentIndexMapGetIndexTest = baseIndexMapGetIndexTest<Pattern<number>>(
-	Token.value
-)
+const persistentIndexMapGetIndexTest = baseIndexMapGetIndexTest<Pattern<number>>(value)
+
+export function persistentIndexMapIndexesTest(arr1: Pattern<number>[], arr2: Pattern<number>[]) {
+	property("indexes", () => assert(arraysSame(arr1, arr2, value)))
+}
 
 type PersistentIndexMapTestSignature<KeyType = any, ValueType = any> = {
-	getIndexTest: Pairs<KeyType, Pattern<number>>
+	getIndexTest: [KeyType, Pattern<number>, Pattern<Pattern<number>>][]
+	indexesTest: Pattern<number>[]
 } & MapClassTestSignature<KeyType, ValueType>
 
 export function PersistentIndexMapClassTest<KeyType = any, ValueType = any>(
 	className: string,
-	mapConstructor: new (pairsList: Pairs<KeyType, ValueType>) => PersistentIndexMap<
+	mapConstructor: new (pairsList: IndexMap<KeyType, ValueType>) => PersistentIndexMap<
 		KeyType,
 		ValueType
 	>,
@@ -37,17 +42,29 @@ export function PersistentIndexMapClassTest<KeyType = any, ValueType = any>(
 	)
 
 	classTest(`(PersistentIndexMap) ${className}`, () =>
-		signatures(testSignatures, ({ instance, getIndexTest }) => () => {
-			const mapInstance = new mapConstructor(instance)
-			assert(ownKeys(mapInstance).includes("indexes"))
+		signatures(
+			testSignatures,
+			({ instance, getIndexTest, indexesTest, ...signature }) =>
+				() => {
+					const mapInstance = new mapConstructor(
+						instance as IndexMap<KeyType, ValueType>
+					)
+					assert(ownKeys(mapInstance).includes("indexes"))
 
-			// .getIndex
-			for (const [key, index] of getIndexTest)
-				persistentIndexMapGetIndexTest<KeyType, ValueType>(
-					mapInstance,
-					key,
-					index
-				)
-		})
+					// .getIndex
+					for (const [key, index, safe] of getIndexTest)
+						persistentIndexMapGetIndexTest<KeyType, ValueType>(
+							mapInstance,
+							key,
+							index,
+							safe
+						)
+
+					ChainIndexMapTest(mapInstance, signature)
+
+					// Checking the operations for correctness
+					persistentIndexMapIndexesTest(mapInstance.indexes, indexesTest)
+				}
+		)
 	)
 }
