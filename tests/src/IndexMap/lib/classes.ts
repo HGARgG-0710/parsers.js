@@ -1,5 +1,7 @@
 import assert from "node:assert"
 
+import type { Pattern } from "../../../../dist/src/Pattern/interfaces.js"
+
 import type {
 	KeyReplaceable,
 	Deletable,
@@ -24,10 +26,9 @@ import {
 	comparisonMethodTest
 } from "lib/lib.js"
 
-import { toPairsList } from "../../../../dist/src/IndexMap/utils.js"
+import { keyValuesToPairsList } from "../../../../dist/src/IndexMap/utils.js"
 
 import { object, typeof as type, function as _f } from "@hgargg-0710/one"
-import type { Pattern } from "../../../../dist/src/Pattern/interfaces.js"
 const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
 const { and } = _f
@@ -143,7 +144,7 @@ function indexMapIteratorTest<KeyType = any, ValueType = any, IndexType = number
 ) {
 	method("[Symbol.iterator]", () => {
 		const pairsList = [...instance]
-		const truePairsList = toPairsList([instance.keys, instance.values])
+		const truePairsList = keyValuesToPairsList([instance.keys, instance.values])
 		assert.strictEqual(pairsList.length, truePairsList.length)
 		assert(
 			pairsList.every(

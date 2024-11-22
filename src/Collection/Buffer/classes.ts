@@ -11,6 +11,7 @@ import {
 } from "./methods.js"
 
 import { valueLength } from "../../Pattern/methods.js"
+import { extendClass } from "../../utils.js"
 
 export class UnfreezableArray<Type = any>
 	extends BasicPattern<Type[]>
@@ -22,8 +23,8 @@ export class UnfreezableArray<Type = any>
 	read: (i: number) => Type
 	size: number
 
-	freeze: () => void
-	unfreeze: () => void;
+	freeze: () => UnfreezableArray<Type>
+	unfreeze: () => UnfreezableArray<Type>;
 
 	[Symbol.iterator]: () => Generator<Type>
 
@@ -32,7 +33,7 @@ export class UnfreezableArray<Type = any>
 	}
 }
 
-Object.defineProperties(UnfreezableArray.prototype, {
+extendClass(UnfreezableArray, {
 	unfreeze: { value: unfreezableBufferUnfreeze },
 	freeze: { value: freezableBufferFreeze },
 	push: { value: freezableArrayPush },
@@ -51,8 +52,8 @@ export class UnfreezableString
 	read: (i: number) => string
 	size: number
 
-	freeze: () => void
-	unfreeze: () => void;
+	freeze: () => UnfreezableString
+	unfreeze: () => UnfreezableString;
 
 	[Symbol.iterator]: () => Generator<string>
 
@@ -61,7 +62,7 @@ export class UnfreezableString
 	}
 }
 
-Object.defineProperties(UnfreezableString.prototype, {
+extendClass(UnfreezableString, {
 	unfreeze: { value: unfreezableBufferUnfreeze },
 	freeze: { value: freezableBufferFreeze },
 	push: { value: unfreezableStringPush },

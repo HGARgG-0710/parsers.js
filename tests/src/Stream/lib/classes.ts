@@ -80,7 +80,7 @@ export function generalJumpTest(direction: boolean) {
 	) {
 		if (!direction) uniFinish(stream)
 
-		const bufferCopy = []
+		const bufferCopy: any[] = []
 		while (!stream[boundName]) {
 			bufferCopy.push(stream)
 			change(stream)
@@ -93,7 +93,7 @@ export function generalJumpTest(direction: boolean) {
 			)
 		)
 
-		const bufferRepeat = []
+		const bufferRepeat: any[] = []
 		while (!stream[methodName]()) {
 			bufferRepeat.push(stream.curr)
 			change(stream)

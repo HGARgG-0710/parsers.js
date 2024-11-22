@@ -3,16 +3,12 @@
 import assert from "assert"
 import { it } from "node:test"
 
-import type {
-	Flushable,
-	Pattern,
-	Resulting
-} from "../../../dist/src/Pattern/interfaces.js"
-
+import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
 import type { Initializable } from "../../../dist/src/Stream/StreamClass/methods/init.js"
 
-import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
 import { classWrapper } from "../../../dist/src/utils.js"
+
+import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = _f
@@ -26,7 +22,7 @@ export function recursiveToString(x: any) {
 		const mappedKeys = allKeys.map((x) => x.toString())
 		const mappedValues = values.map(recursiveToString)
 
-		const converted = []
+		const converted: string[] = []
 		for (let i = 0; i < mappedKeys.length; ++i)
 			converted.push(`${mappedKeys[i]}: ${mappedValues[i]}`)
 		return `${x.constructor.name} { ${converted.join(", ")} }`
@@ -152,6 +148,21 @@ export function comparisonMethodTest<InstanceType = any>(
 	compare: (x: any, y: any) => boolean
 ) {
 	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
+		method(
+			methodName,
+			() => assert(compare(instance[methodName](...input), expectedValue)),
+			...input
+		)
+	}
+}
+
+export function flexibleComparisonMethodTest<InstanceType = any>(methodName: string) {
+	return function (
+		instance: InstanceType,
+		expectedValue: any,
+		input: any[],
+		compare: (x: any, y: any) => boolean = equals
+	) {
 		method(
 			methodName,
 			() => assert(compare(instance[methodName](...input), expectedValue)),

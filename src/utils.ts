@@ -9,8 +9,12 @@ import type {
 	ReversibleStream
 } from "./Stream/ReversibleStream/interfaces.js"
 
-import { Stream } from "./constants.js"
+import type { Prototypal } from "./interfaces.js"
+
+import { BadIndex, Stream } from "./constants.js"
 const { SkippedItem } = Stream.StreamParser
+
+export const isGoodIndex = (x: number) => x > BadIndex
 
 /**
  * Given a string, returns whether it's a Hex number
@@ -93,6 +97,8 @@ export const backtrack = (predicate: PredicatePosition) => {
 
 export const length = (x: Indexed) => x.length
 
+export const lastIndex = (x: Indexed) => x.length - 1
+
 export const size = (x: Sizeable) => x.size
 
 export const calledDelegate =
@@ -142,6 +148,15 @@ export const getSetDescriptor = ([set, get]) => ({ set, get })
 export const state = (x: Stateful) => x.state
 
 export const buffer = (x: Bufferized) => x.buffer
+
+export const extendClass = (Extended: Prototypal, properties: PropertyDescriptorMap) =>
+	Object.defineProperties(Extended.prototype, properties)
+
+export const addProperty = (
+	Extended: Prototypal,
+	name: PropertyKey,
+	value: PropertyDescriptor
+) => Object.defineProperty(Extended.prototype, name, value)
 
 export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"

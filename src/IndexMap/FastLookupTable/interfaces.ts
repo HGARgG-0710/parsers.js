@@ -11,6 +11,6 @@ export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = an
 	byOwned: (x: any) => ValueType
 }
 
-export interface HashTableClass<KeyType = any, ValueType = any, OwningType = any>
+export interface HashTable<KeyType = any, ValueType = any, OwningType = any>
 	extends FastLookupTable<KeyType, ValueType, OwningType>,
 		Pattern<HashMap<KeyType, ValueType>> {}

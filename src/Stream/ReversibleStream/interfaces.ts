@@ -12,8 +12,6 @@ export interface Prevable<Type = any> extends Summat {
 	prev: () => Type
 }
 
-export type ChangeType = (input: ReversibleStream) => any
-
 export interface BasicReversibleStream<Type = any, StartedType = any>
 	extends BasicStream<Type>,
 		Started<StartedType>,

@@ -1,13 +1,16 @@
 import assert from "assert"
 import type { FastLookupTable } from "../../../../../dist/src/IndexMap/FastLookupTable/interfaces.js"
+
 import {
 	ClassConstructorTest,
 	classTest,
+	flexibleComparisonMethodTest,
 	method,
 	methodTest,
 	setMethodTest,
 	signatures
 } from "lib/lib.js"
+
 import { isDeletable, isKeyReplaceable, isSettable } from "IndexMap/lib/classes.js"
 
 import { function as _f, object, typeof as type } from "@hgargg-0710/one"
@@ -40,7 +43,8 @@ const FastLookupTableConstructorTest = ClassConstructorTest<FastLookupTable>(
 	fastLookupTablePrototypeProps
 )
 
-const FastLookupTableGetIndexTest = methodTest<FastLookupTable>("getIndex")
+const FastLookupTableGetIndexTest =
+	flexibleComparisonMethodTest<FastLookupTable>("getIndex")
 
 // * note: this one corresponds to BOTH the '.own' and '.byOwned' testing [as they are only ever used in tandem]
 const FastLookupTableOwnByOwnedTest = setMethodTest<FastLookupTable>("own", "byOwned")
@@ -49,15 +53,17 @@ function FastLookupTableReplaceKeyTest(
 	instance: FastLookupTable,
 	keyFrom: any,
 	keyTo: any,
+	ownedSuccess: any,
+	ownedFail: any,
 	failKey: any
 ) {
 	method(
 		"replaceKey",
 		() => {
-			const index = instance.getIndex(keyFrom)
+			const ownedPrior = instance.byOwned(ownedFail)
 			instance.replaceKey(keyFrom, keyTo)
-			assert.strictEqual(index, instance.getIndex(keyTo))
-			assert.strictEqual(failKey, instance.getIndex(keyFrom))
+			assert.strictEqual(ownedPrior, instance.byOwned(ownedSuccess))
+			assert.strictEqual(failKey, instance.byOwned(ownedFail))
 		},
 		keyFrom,
 		keyTo
@@ -79,14 +85,14 @@ function FastLookupTableDeleteTest(instance: FastLookupTable, key: any) {
 
 type FastLookupTableTestSignature = {
 	input: any
-	getIndexTests: [any, any][]
+	getIndexTests: [any, any, ((x: any, y: any) => boolean)?][]
 	setTests: [any, any][]
-	ownTests: [any, any, any][]
-	replaceKeyTests: [any, any, any][]
+	byOwnedTests: [any, any, any][]
+	replaceKeyTests: [any, any, any, any, any][]
 	deleteTests: any[]
 }
 
-export function FastLookupTableTest(
+export function FastLookupTableClassTest(
 	className: string,
 	tableConstructor: new (...input: any[]) => FastLookupTable,
 	testSignatures: FastLookupTableTestSignature[]
@@ -98,7 +104,7 @@ export function FastLookupTableTest(
 					input,
 					getIndexTests,
 					setTests,
-					ownTests,
+					byOwnedTests,
 					replaceKeyTests,
 					deleteTests
 				}) =>
@@ -109,15 +115,15 @@ export function FastLookupTableTest(
 					)
 
 					// .getIndex
-					for (const [index, value] of getIndexTests)
-						FastLookupTableGetIndexTest(instance, value, index)
+					for (const [index, value, comparison] of getIndexTests)
+						FastLookupTableGetIndexTest(instance, value, [index], comparison)
 
 					// .set
 					for (const [key, value] of setTests)
 						FastLookupTableSetTest(instance, value, key, value)
 
 					// .own/.byOwned
-					for (const [owned, ownershipToken, value] of ownTests)
+					for (const [owned, ownershipToken, value] of byOwnedTests)
 						FastLookupTableOwnByOwnedTest(
 							instance,
 							value,
@@ -126,8 +132,21 @@ export function FastLookupTableTest(
 						)
 
 					// .replaceKey
-					for (const [keyFrom, keyTo, failKey] of replaceKeyTests)
-						FastLookupTableReplaceKeyTest(instance, keyFrom, keyTo, failKey)
+					for (const [
+						keyFrom,
+						keyTo,
+						ownedSuccess,
+						ownedFail,
+						failKey
+					] of replaceKeyTests)
+						FastLookupTableReplaceKeyTest(
+							instance,
+							keyFrom,
+							keyTo,
+							ownedSuccess,
+							ownedFail,
+							failKey
+						)
 
 					// .delete
 					for (const key of deleteTests)

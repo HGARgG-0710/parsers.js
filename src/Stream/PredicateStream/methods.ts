@@ -1,41 +1,35 @@
 import type { PredicatePosition } from "../../Position/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IsEndCurrable } from "../StreamClass/interfaces.js"
-import type { EffectivePredicateStream, PredicateStream } from "./interfaces.js"
+import type { PredicateStream } from "./interfaces.js"
 
 import { preserveDirection } from "../../Position/utils.js"
-import { uniNavigate, superInit } from "../StreamClass/utils.js"
+import { superInit, fastNavigate } from "../StreamClass/utils.js"
 
 export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
-	uniNavigate(this.value, this.predicate)
+	fastNavigate(this.value, this.predicate)
 	return this.value.curr
 }
 
-export function effectivePredicateStreamNext<Type = any>(
-	this: EffectivePredicateStream<Type>
-) {
+export function predicateStreamNext<Type = any>(this: PredicateStream<Type>) {
 	this.hasLookAhead = false
 	return this.lookAhead
 }
 
-export function effectivePredicateStreamProd<Type = any>(
-	this: EffectivePredicateStream<Type>
-) {
+export function predicateStreamProd<Type = any>(this: PredicateStream<Type>) {
 	if (this.hasLookAhead) return this.lookAhead
 	this.hasLookAhead = true
 	this.value.next()
 	return this.curr
 }
 
-export function effectivePredicateStreamIsEnd<Type = any>(
-	this: EffectivePredicateStream<Type>
-) {
+export function predicateStreamIsEnd<Type = any>(this: PredicateStream<Type>) {
 	this.lookAhead = this.prod()
 	return this.value.isCurrEnd() || !this.predicate(this, this.pos)
 }
 
-export function effectivePredicateStreamInitialize<Type = any>(
-	this: EffectivePredicateStream<Type>,
+export function predicateStreamInitialize<Type = any>(
+	this: PredicateStream<Type>,
 	value?: ReversibleStream<Type> & IsEndCurrable,
 	predicate?: PredicatePosition
 ) {
@@ -47,8 +41,6 @@ export function effectivePredicateStreamInitialize<Type = any>(
 	return this
 }
 
-export function effectivePredicateStreamDefaultIsEnd<Type = any>(
-	this: EffectivePredicateStream<Type>
-) {
+export function predicateStreamDefaultIsEnd<Type = any>(this: PredicateStream<Type>) {
 	return this.value.isEnd || !this.predicate(this.curr)
 }

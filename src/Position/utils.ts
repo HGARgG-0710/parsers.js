@@ -1,5 +1,5 @@
 import type { BasicStream } from "../Stream/interfaces.js"
-import type { ChangeType } from "../Stream/ReversibleStream/interfaces.js"
+import type { ChangeType } from "./interfaces.js"
 import type { BoundNameType } from "../Stream/StreamClass/interfaces.js"
 
 import type {

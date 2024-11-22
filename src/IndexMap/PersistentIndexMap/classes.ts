@@ -28,6 +28,7 @@ import {
 } from "./methods.js"
 
 import { BasicPattern } from "../../Pattern/classes.js"
+import { extendClass } from "../../utils.js"
 
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
 // * 	index of a 'PersistentIndexMap' consistent across multiple sources,
@@ -71,7 +72,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	}
 }
 
-Object.defineProperties(PersistentIndexMap, {
+extendClass(PersistentIndexMap, {
 	index: { value: valueIndex },
 	byIndex: { value: valueByIndex },
 	copy: { value: indexMapCopy },

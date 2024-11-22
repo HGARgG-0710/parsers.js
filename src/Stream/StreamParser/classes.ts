@@ -9,6 +9,7 @@ import type { StreamParser as StreamParserType } from "./interfaces.js"
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 import { valueDefaultIsEnd, valueIsEnd } from "../../Pattern/methods.js"
 import { streamParserInitialize, streamParserNext } from "./methods.js"
+import { extendClass } from "../../utils.js"
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -52,7 +53,7 @@ export function StreamParser<OutType = any>(
 		}
 	}
 
-	Object.defineProperties(streamTokenizerClass.prototype, {
+	extendClass(streamTokenizerClass, {
 		super: { value: baseClass.prototype },
 		init: { value: streamParserInitialize },
 		handler: { value: handler }

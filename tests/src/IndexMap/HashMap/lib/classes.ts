@@ -74,14 +74,14 @@ function HashMapReplaceKeyTest(instance: HashMap, keyFrom: any, keyTo: any) {
 }
 
 type HashMapTestSignature = {
-	sub: InternalHash
+	input: InternalHash
 	indexTests: [any, any][]
 	setTests: [any, any][]
 	deleteTests: any[]
 	replaceKeyTests: [any, any][]
 }
 
-export function HashMapTest(
+export function HashMapClassTest(
 	className: string,
 	HashMapClass: new (structure: InternalHash) => HashMap,
 	testSignatures: HashMapTestSignature[]
@@ -89,9 +89,9 @@ export function HashMapTest(
 	classTest(`(HashMap) ${className}`, () =>
 		signatures(
 			testSignatures,
-			({ sub, indexTests, setTests, deleteTests, replaceKeyTests }) =>
+			({ input, indexTests, setTests, deleteTests, replaceKeyTests }) =>
 				() => {
-					const instance = HashMapConstructorTest(HashMapClass, sub)
+					const instance = HashMapConstructorTest(HashMapClass, input)
 
 					// .index
 					for (const [key, value] of indexTests)

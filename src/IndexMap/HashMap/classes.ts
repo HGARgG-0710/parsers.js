@@ -14,7 +14,7 @@ import {
 import { valueSize } from "../../Pattern/methods.js"
 
 import { type } from "../../Token/utils.js"
-import { length } from "../../utils.js"
+import { extendClass, length } from "../../utils.js"
 import { BasicPattern } from "../../Pattern/classes.js"
 
 import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
@@ -54,7 +54,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		}
 	}
 
-	Object.defineProperties(hashClass.prototype, HashClassPrototype)
+	extendClass(hashClass, HashClassPrototype)
 	hashClass.prototype.hash = hash
 
 	hashClass.hash = hash
@@ -72,7 +72,7 @@ export const [BasicHash, LengthHash, TokenHash, TypeofHash] = [
 	HashClass<any, any, any>,
 	HashClass<Indexed, any, any>,
 	HashClass<TypeToken, any, any>,
-	HashMap<any, any, any>
+	HashClass<any, any, any>
 ]
 
 export * as InternalHash from "./InternalHash/classes.js"

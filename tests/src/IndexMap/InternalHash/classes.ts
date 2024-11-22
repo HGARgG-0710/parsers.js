@@ -7,12 +7,14 @@ import { InternalHashTest } from "./lib/classes.js"
 
 // * MapInternalHash
 
+const R = {}
+
 InternalHashTest("MapInternalHash", MapInternalHash, [
 	{
 		input: [
 			new Map([
 				["X", 20],
-				["R", 990],
+				[R, 990],
 				[true, 0],
 				[false, null]
 			] as [any, any][]),
@@ -20,20 +22,20 @@ InternalHashTest("MapInternalHash", MapInternalHash, [
 		],
 		getTests: [
 			[false, null],
-			["R", 990],
+			[R, 990],
 			["X", 20],
 			[77, false],
 			[true, 0]
 		],
 		setTests: [
 			["X", 10],
-			["R", 90],
+			[R, 90],
 			[77, 2],
 			[40, 11],
 			["D", "N"],
 			["O", "Kappa"]
 		],
-		deleteTests: ["X", "R"],
+		deleteTests: ["X", R],
 		replaceKeyTests: [
 			[77, true],
 			["O", "D"]

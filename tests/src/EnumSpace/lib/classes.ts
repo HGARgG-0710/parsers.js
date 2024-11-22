@@ -144,7 +144,7 @@ function ChainEnumSpaceTest(
 	if (isCopyTest === false) assert(isEnumSpace(instance))
 
 	// .copy
-	if (isCopyTest || isCopyTest === undefined)
+	if ((isCopyTest || isCopyTest === undefined) && furtherSignature)
 		EnumSpaceCopyTest(instance, furtherSignature)
 
 	// .add

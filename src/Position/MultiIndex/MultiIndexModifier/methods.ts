@@ -7,8 +7,7 @@ import { array } from "@hgargg-0710/one"
 const { clear } = array
 
 export function multiIndexModifierNextLevel(this: MultiIndexModifier) {
-	this.value.value.push(0)
-	return [0]
+	return this.extend([0])
 }
 
 export function multiIndexModifierResize(this: MultiIndexModifier, length: number = 0) {
@@ -17,20 +16,24 @@ export function multiIndexModifierResize(this: MultiIndexModifier, length: numbe
 }
 
 export function multiIndexModifierClear(this: MultiIndexModifier) {
-	clear(this.value.value)
-	return this.value
+	const { value } = this
+	clear(value.value)
+	return value
 }
 
 export function multiIndexModifierIncLast(this: MultiIndexModifier) {
-	return ++this.value.value[this.value.levels - 1]
+	const { value, levels } = this.value
+	return ++value[levels - 1]
 }
 
 export function multiIndexModifierDecLast(this: MultiIndexModifier) {
-	return --this.value.value[this.value.levels - 1]
+	const { value, levels } = this.value
+	return --value[levels - 1]
 }
 
 export function multiIndexModifierExtend(this: MultiIndexModifier, subIndex: number[]) {
-	return this.value.value.push(...subIndex)
+	this.value.value.push(...subIndex)
+	return subIndex
 }
 
 export function multiIndexModifierPrevLevel(this: MultiIndexModifier): number[] {

@@ -1,15 +1,13 @@
 import type { BasicStream } from "../interfaces.js"
-import type { EffectiveProlongedStream, ProlongedStream } from "./interfaces.js"
+import type { ProlongedStream } from "./interfaces.js"
 
-import { isEnd } from "../../utils.js"
+import { isEnd, lastIndex } from "../../utils.js"
 import { superInit } from "../StreamClass/utils.js"
 
-export function effectiveProlongedStreamIsEnd<Type = any>(
-	this: EffectiveProlongedStream<Type>
-) {
+export function prolongedStreamIsEnd<Type = any>(this: ProlongedStream<Type>) {
 	return (
 		this.value[this.streamIndex].isCurrEnd() &&
-		this.value.length - 1 > this.streamIndex
+		lastIndex(this.value) > this.streamIndex
 	)
 }
 
@@ -17,9 +15,7 @@ export function prolongedStreamCurr<Type = any>(this: ProlongedStream<Type>) {
 	return this.value[this.streamIndex].curr
 }
 
-export function effectiveProlongedStreamNext<Type = any>(
-	this: EffectiveProlongedStream<Type>
-) {
+export function prolongedStreamNext<Type = any>(this: ProlongedStream<Type>) {
 	const currStream = this.value[this.streamIndex]
 	if (currStream.isCurrEnd()) ++this.streamIndex
 	else currStream.next()

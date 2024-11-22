@@ -32,6 +32,7 @@ import {
 	optimizedLinearIndexMapGetIndex
 } from "./methods.js"
 
+import { extendClass } from "../../utils.js"
 import { fromPairsList } from "../utils.js"
 
 import { function as _f, boolean } from "@hgargg-0710/one"
@@ -106,7 +107,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		}
 	}
 
-	Object.defineProperties(linearMapClass.prototype, LinearMapClassPrototype)
+	extendClass(linearMapClass, LinearMapClassPrototype)
 
 	linearMapClass.prototype.extension = trivialCompose(...extensions)
 	linearMapClass.prototype.keyExtension = trivialCompose(...keyExtensions)

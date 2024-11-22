@@ -1,5 +1,5 @@
 import type { Position } from "../../Position/interfaces.js"
-import type { EffectiveLimitedStream, LimitedUnderStream } from "./interfaces.js"
+import type { LimitedStream, LimitedUnderStream } from "./interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
@@ -16,16 +16,12 @@ import { superInit } from "../StreamClass/utils.js"
 import { typeof as type } from "@hgargg-0710/one"
 const { isUndefined } = type
 
-export function effectiveLimitedStreamNext<Type = any>(
-	this: EffectiveLimitedStream<Type>
-) {
+export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {
 	this.hasLookAhead = false
 	return this.lookAhead
 }
 
-export function effectiveLimitedStreamProd<Type = any>(
-	this: EffectiveLimitedStream<Type>
-) {
+export function limitedStreamProd<Type = any>(this: LimitedStream<Type>) {
 	if (!this.hasLookAhead) {
 		this.hasLookAhead = true
 		this.value[this.direction ? "next" : "prev"]()
@@ -34,31 +30,25 @@ export function effectiveLimitedStreamProd<Type = any>(
 	return this.lookAhead
 }
 
-export function effectiveLimitedStreamIsEnd<Type = any>(
-	this: EffectiveLimitedStream<Type>
-) {
+export function limitedStreamIsEnd<Type = any>(this: LimitedStream<Type>) {
 	if (this.value.isCurrEnd()) return true
 	this.lookAhead = this.prod()
 	return positionEqual(this.value, this.to)
 }
 
-export function effectiveLimitedStreamIsStart<Type = any>(
-	this: EffectiveLimitedStream<Type>
-) {
+export function limitedStreamIsStart<Type = any>(this: LimitedStream<Type>) {
 	return this.value.isCurrStart() || positionEqual(this.value, this.from)
 }
 
-export function effectiveLimitedStreamPrev<Type = any>(
-	this: EffectiveLimitedStream<Type>
-) {
+export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
 	this.lookAhead = this.curr
 	this.hasLookAhead = true
 	this.value[this.direction ? "prev" : "next"]()
 	return this.value.curr
 }
 
-export function effectiveLimitedStreamInitialize<Type = any>(
-	this: EffectiveLimitedStream<Type>,
+export function limitedStreamInitialize<Type = any>(
+	this: LimitedStream<Type>,
 	value: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position

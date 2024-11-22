@@ -4,10 +4,8 @@ import { ConstEnum } from "./classes.js"
 import { function as _f } from "@hgargg-0710/one"
 const { id } = _f
 
-const newConst = () => ({})
-
 export function constEnumAdd(this: ConstEnumSpace, size: number) {
-	this.value.push(...Array.from({ length: size }, newConst))
+	this.value.push(...Array.from({ length: size }, () => ({})))
 	this.size += size
 	return this
 }

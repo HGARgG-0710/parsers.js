@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Tree, ChildrenTree, MultChildrenTree } from "./interfaces.js"
 import type { Pattern } from "../Pattern/interfaces.js"
+import type { Tree, ChildrenTree, MultChildrenTree } from "./interfaces.js"
 
 import { childrenCount, childIndex } from "./methods.js"
 

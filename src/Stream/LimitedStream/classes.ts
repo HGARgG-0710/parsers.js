@@ -1,19 +1,23 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Position } from "../../Position/interfaces.js"
 import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
-import type { LimitedUnderStream, EffectiveLimitedStream } from "./interfaces.js"
+import type {
+	LimitedUnderStream,
+	LimitedStream as EffectiveLimitedStream
+} from "./interfaces.js"
 
 import { valueCurr, valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
-	effectiveLimitedStreamInitialize,
-	effectiveLimitedStreamProd,
-	effectiveLimitedStreamIsEnd,
-	effectiveLimitedStreamNext,
-	effectiveLimitedStreamPrev,
-	effectiveLimitedStreamIsStart
+	limitedStreamInitialize,
+	limitedStreamProd,
+	limitedStreamIsEnd,
+	limitedStreamNext,
+	limitedStreamPrev,
+	limitedStreamIsStart
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import { extendClass } from "../../utils.js"
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -21,10 +25,10 @@ const LimitedStreamBase = <Type = any>(
 ) =>
 	StreamClass<Type>({
 		currGetter: valueCurr,
-		baseNextIter: effectiveLimitedStreamNext,
-		basePrevIter: effectiveLimitedStreamPrev,
-		isCurrEnd: effectiveLimitedStreamIsEnd,
-		isCurrStart: effectiveLimitedStreamIsStart,
+		baseNextIter: limitedStreamNext,
+		basePrevIter: limitedStreamPrev,
+		isCurrEnd: limitedStreamIsEnd,
+		isCurrStart: limitedStreamIsStart,
 		defaultIsEnd: valueDefaultIsEnd,
 		isPattern: true,
 		hasPosition,
@@ -35,7 +39,7 @@ export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ): new (
-	value?: LimitedUnderStream<Type>,
+	value: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position
 ) => EffectiveLimitedStream<Type> {
@@ -64,10 +68,10 @@ export function LimitedStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(limitedStream.prototype, {
+	extendClass(limitedStream, {
 		super: { value: baseClass.prototype },
-		prod: { value: effectiveLimitedStreamProd },
-		init: { value: effectiveLimitedStreamInitialize }
+		prod: { value: limitedStreamProd },
+		init: { value: limitedStreamInitialize }
 	})
 
 	return limitedStream

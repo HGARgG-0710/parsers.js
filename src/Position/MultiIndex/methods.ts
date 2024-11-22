@@ -1,4 +1,4 @@
-import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
+import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { MultiIndex } from "./interfaces.js"
 import { MultiIndex as MultiIndexConstructor } from "./classes.js"
 
@@ -43,7 +43,7 @@ export function multiIndexLastLevel(this: MultiIndex): number[] {
 	return [last(this.value)]
 }
 
-export function multiIndexConvert(this: MultiIndex, stream: BasicTreeStream) {
+export function multiIndexConvert(this: MultiIndex, stream: TreeStream) {
 	let final = 0
 	stream.rewind()
 	while (!stream.isEnd && !this.equals(stream.pos)) {

@@ -1,5 +1,4 @@
 import assert from "node:assert"
-import { it } from "node:test"
 
 import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
 import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
@@ -37,7 +36,7 @@ function SingleTreeTest(
 		const singled = SingleTree(propName)(childrenTree, converter)
 		assert.strictEqual(singled[propName].length, 1)
 		if (propName === "value") assert.notStrictEqual(oldValue, singled.value)
-		else assert.strictEqual(singled[propName][0], converter(singled.value))
+		else assert.strictEqual(singled[propName][0], converter!(singled.value))
 	})
 }
 

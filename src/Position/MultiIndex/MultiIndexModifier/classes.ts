@@ -12,6 +12,7 @@ import {
 } from "./methods.js"
 
 import { BasicPattern } from "../../../Pattern/classes.js"
+import { extendClass } from "../../../utils.js"
 
 export class MultiIndexModifier
 	extends BasicPattern<MultiIndex>
@@ -32,7 +33,7 @@ export class MultiIndexModifier
 	}
 }
 
-Object.defineProperties(MultiIndexModifier.prototype, {
+extendClass(MultiIndexModifier, {
 	init: { value: multiIndexModifierInitialize },
 	nextLevel: { value: multiIndexModifierNextLevel },
 	prevLevel: { value: multiIndexModifierPrevLevel },

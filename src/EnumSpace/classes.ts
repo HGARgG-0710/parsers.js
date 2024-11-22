@@ -8,6 +8,7 @@ import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
 import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
 import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./methods.js"
 import { BasicPattern } from "../Pattern/classes.js"
+import { extendClass } from "../utils.js"
 
 export class ConstEnum extends BasicPattern<{}[]> implements ConstEnumSpace {
 	size: number
@@ -25,7 +26,7 @@ export class ConstEnum extends BasicPattern<{}[]> implements ConstEnumSpace {
 	}
 }
 
-Object.defineProperties(ConstEnum.prototype, {
+extendClass(ConstEnum, {
 	add: { value: constEnumAdd },
 	join: { value: constEnumJoin },
 	copy: { value: constEnumCopy },

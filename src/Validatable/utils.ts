@@ -8,6 +8,7 @@ import type {
 } from "./interfaces.js"
 
 import { validation } from "../constants.js"
+import { isGoodIndex } from "../utils.js"
 import { tokenizeString } from "../Tokenizable/utils.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
@@ -32,18 +33,18 @@ export function validateTokenized<Type = any>(
 	matched: Type[],
 	tokenized: (Type | ValidMatch | InvalidMatch | FaultyElement<Type>)[]
 ): ValidationOutput<Type> {
-	let success: boolean = true
-	for (let i = tokenized.length; i--; ) {
-		const current = tokenized[i]
-		if (current === InvalidMatch) {
-			tokenized[i] = FaultyElement(matched[i])
-			success = false
-		}
-	}
+	let faultyIndex = tokenized.lastIndexOf(InvalidMatch)
 
-	return success
-		? ValidationPassed(tokenized.filter(notValidMatch) as Type[])
-		: ValidationFailed(tokenized as (Type | ValidMatch | FaultyElement<Type>)[])
+	if (!isGoodIndex(faultyIndex))
+		return ValidationPassed(tokenized.filter(notValidMatch) as Type[])
+
+	do {
+		tokenized[faultyIndex] = FaultyElement(matched[faultyIndex])
+	} while (
+		isGoodIndex((faultyIndex = tokenized.lastIndexOf(InvalidMatch, faultyIndex)))
+	)
+
+	return ValidationFailed(tokenized as (Type | ValidMatch | FaultyElement<Type>)[])
 }
 
 export function analyzeValidity<Type = any>(

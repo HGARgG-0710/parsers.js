@@ -66,3 +66,5 @@ export namespace validation {
 		export const ValidationError = (n: number): ValidationError => [false, n]
 	}
 }
+
+export const BadIndex = -1

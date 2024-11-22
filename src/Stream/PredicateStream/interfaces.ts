@@ -1,8 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { PredicatePosition } from "../../Position/interfaces.js"
-import type { BasicStream } from "../interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
@@ -10,30 +9,16 @@ export interface LookaheadHaving extends Summat {
 	hasLookAhead: boolean
 }
 
-export interface Lookahead<Type = any> extends Summat {
+export interface SinglePositionLookahead<Type = any> extends Summat {
+	prod: () => Type
 	lookAhead: Type
 }
 
-export interface Proddable<Type = any> extends Summat {
-	prod: () => Type
-}
-
-export interface SinglePositionLookahead<Type = any>
-	extends Proddable<Type>,
-		Lookahead<Type> {}
-
-export interface BasicPredicated<Type = any> extends SinglePositionLookahead<Type> {
-	predicate: PredicatePosition
-}
-
 export interface PredicateStream<Type = any>
-	extends BasicStream<Type>,
-		BasicPredicated<Type>,
-		Pattern<ReversibleStream<Type>> {}
-
-export interface EffectivePredicateStream<Type = any>
 	extends StreamClassInstance<Type>,
 		Superable,
-		BasicPredicated<Type>,
-		Pattern<ReversibleStream<Type> & IsEndCurrable>,
-		LookaheadHaving {}
+		SinglePositionLookahead<Type>,
+		Pattern<BasicReversibleStream<Type> & IsEndCurrable>,
+		LookaheadHaving {
+	predicate: PredicatePosition
+}

@@ -3,10 +3,12 @@ import type { UnfreezableBuffer } from "./interfaces.js"
 
 export function freezableBufferFreeze<Type = any>(this: UnfreezableArray<Type>) {
 	this.isFrozen = true
+	return this
 }
 
 export function unfreezableBufferUnfreeze<Type = any>(this: UnfreezableBuffer<Type>) {
 	this.isFrozen = false
+	return this
 }
 
 export function freezableArrayPush<Type = any>(

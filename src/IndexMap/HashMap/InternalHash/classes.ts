@@ -1,4 +1,6 @@
 import type { InternalHash } from "./interfaces.js"
+import type { Pairs } from "../../../IndexMap/interfaces.js"
+
 import { valueDelete, valueSet, valueSize } from "../../../Pattern/methods.js"
 import {
 	mapInternalHashGet,
@@ -10,6 +12,10 @@ import {
 } from "./methods.js"
 
 import { BasicPattern } from "../../../Pattern/classes.js"
+import { extendClass } from "../../../utils.js"
+
+import { typeof as type } from "@hgargg-0710/one"
+const { isArray } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any>
 	extends BasicPattern<Map<KeyType, ValueType>>
@@ -23,13 +29,16 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	delete: (key: KeyType) => any
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
-	constructor(map: Map<KeyType, ValueType> = new Map(), _default?: any) {
-		super(map)
+	constructor(
+		map: Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = new Map(),
+		_default?: any
+	) {
+		super(isArray(map) ? new Map(map) : map)
 		this.default = _default
 	}
 }
 
-Object.defineProperties(MapInternalHash.prototype, {
+extendClass(MapInternalHash, {
 	set: { value: valueSet },
 	get: { value: mapInternalHashGet },
 	delete: { value: valueDelete },
@@ -56,7 +65,7 @@ export class ObjectInternalHash<Type = any>
 	}
 }
 
-Object.defineProperties(ObjectInternalHash.prototype, {
+extendClass(ObjectInternalHash, {
 	get: { value: objectInternalHashGet },
 	set: { value: objectInternalHashSet },
 	delete: { value: objectInternalHashDelete },

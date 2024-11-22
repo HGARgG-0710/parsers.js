@@ -20,6 +20,7 @@ import {
 } from "./methods.js"
 
 import { BasicPattern } from "../../Pattern/classes.js"
+import { addProperty, extendClass } from "../../utils.js"
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
@@ -77,8 +78,11 @@ export function StreamClass<Type = any>(
 		streamClass = _streamClass
 	}
 
+	const extend = (properties: PropertyDescriptorMap) =>
+		extendClass(streamClass, properties)
+
 	// * Defining the basic properties
-	Object.defineProperties(streamClass.prototype, {
+	extend({
 		curr: curr.chooseMethod(currGetter, hasPosition, buffer),
 		isCurrEnd: { value: isCurrEnd },
 		baseNextIter: { value: baseNextIter },
@@ -87,14 +91,14 @@ export function StreamClass<Type = any>(
 	})
 
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
-	Object.defineProperties(streamClass.prototype, {
+	extend({
 		navigate: { value: navigate.chooseMethod<Type>(hasPosition, buffer) },
 		rewind: { value: rewind.chooseMethod<Type>(hasPosition, buffer) },
 		finish: { value: finish.chooseMethod<Type>(hasPosition, buffer) }
 	})
 
 	// * Defining the ReversedStreamClassInstance-specific optional properties
-	Object.defineProperties(streamClass.prototype, {
+	extend({
 		...(isCurrStart ? { isCurrStart: { value: isCurrStart } } : {}),
 		...(basePrevIter ? { basePrevIter: { value: basePrevIter } } : {}),
 		...(currGetter ? { currGetter: { value: currGetter } } : {}),
@@ -102,13 +106,13 @@ export function StreamClass<Type = any>(
 	})
 
 	// * Adding the '.pos'-specific stream-iteration methods
-	Object.defineProperties(streamClass.prototype, {
+	extend({
 		next: { value: next.chooseMethod<Type>(hasPosition, buffer) },
 		prev: { value: prev.chooseMethod<Type>(hasPosition, buffer) }
 	})
 
 	// * Adding the initialization method
-	Object.defineProperty(streamClass.prototype, "init", {
+	addProperty(streamClass, "init", {
 		value: init.chooseMethod(
 			preInit,
 			hasPosition,

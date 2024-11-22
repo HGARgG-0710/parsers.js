@@ -1,6 +1,7 @@
 import type { MapClass, Pairs } from "../../../../../dist/src/IndexMap/interfaces.js"
 import {
 	baseIndexMapGetIndexTest,
+	isIndexMap,
 	MapClassTest,
 	type MapClassTestSignature,
 	type ReducedMapClassTestSignature
@@ -28,9 +29,13 @@ export function LinearMapClassTest<KeyType = any, ValueType = any>(
 	MapClassTest<KeyType, ValueType>(className, mapConstructor, testSignatures)
 	classTest(`(LinearIndexMap) ${className}`, () =>
 		signatures(testSignatures, ({ instance, getIndexTest }) => () => {
+			const mapInstance = isIndexMap(instance)
+				? instance
+				: new mapConstructor(instance)
+
 			// .getIndex
 			for (const [key, index] of getIndexTest)
-				linearMapClassGetIndexTest(new mapConstructor(instance), key, index)
+				linearMapClassGetIndexTest(mapInstance, key, index)
 		})
 	)
 }

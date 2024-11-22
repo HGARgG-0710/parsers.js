@@ -9,6 +9,7 @@ import type {
 import { delegateValidatableValidate } from "./methods.js"
 import { FlushablePattern } from "../Pattern/classes.js"
 import { validateString } from "./utils.js"
+import { extendClass } from "../utils.js"
 
 export function DelegateValidatable<Type = any, KeyType = any>(
 	validator: FreeValidator<Type, KeyType>
@@ -26,7 +27,7 @@ export function DelegateValidatable<Type = any, KeyType = any>(
 		}
 	}
 
-	Object.defineProperties(delegateValidatablePattern.prototype, {
+	extendClass(delegateValidatablePattern, {
 		validate: { value: delegateValidatableValidate },
 		validator: { value: validator }
 	})

@@ -6,6 +6,7 @@ import type {
 	TokenizationResult
 } from "./interfaces.js"
 
+import { extendClass } from "../utils.js"
 import { FlushablePattern } from "../Pattern/classes.js"
 import { tokenizablePatternFlush, delegateTokenizableTokenize } from "./methods.js"
 import { tokenizeString } from "./utils.js"
@@ -31,7 +32,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		}
 	}
 
-	Object.defineProperties(delegateTokenizablePattern.prototype, {
+	extendClass(delegateTokenizablePattern, {
 		tokenizer: { value: tokenizer },
 		isType: { value: isType },
 		tokenize: { value: delegateTokenizableTokenize },

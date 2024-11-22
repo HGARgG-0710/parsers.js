@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { EffectiveNestedStream } from "./interfaces.js"
+import type { NestedStream as EffectiveNestedStream } from "./interfaces.js"
 import type { StreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
 import type {
@@ -9,13 +9,14 @@ import type {
 
 import { valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
-	effectiveNestedStreamInitCurr,
-	effectiveNestedStreamNext,
-	effectiveNestedStreamInitialize,
-	effectiveNestedStreamIsEnd
+	nestedStreamInitCurr,
+	nestedStreamNext,
+	nestedStreamInitialize,
+	nestedStreamIsEnd
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import { extendClass } from "../../utils.js"
 
 // * Explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`, instead of expected 'boolean';
 const NestedStreamBase = <Type = any>(
@@ -23,9 +24,9 @@ const NestedStreamBase = <Type = any>(
 	buffer: boolean = false
 ) =>
 	StreamClass<Type | EffectiveNestedStream<Type>>({
-		isCurrEnd: effectiveNestedStreamIsEnd,
-		baseNextIter: effectiveNestedStreamNext<Type>,
-		initGetter: effectiveNestedStreamInitCurr,
+		isCurrEnd: nestedStreamIsEnd,
+		baseNextIter: nestedStreamNext<Type>,
+		initGetter: nestedStreamInitCurr,
 		defaultIsEnd: valueDefaultIsEnd,
 		hasPosition,
 		buffer,
@@ -59,8 +60,8 @@ export function NestedStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(NestedStream.prototype, {
-		init: { value: effectiveNestedStreamInitialize<Type> },
+	extendClass(NestedStream, {
+		init: { value: nestedStreamInitialize<Type> },
 		super: { value: baseClass.prototype },
 		typesTable: { value: nestedTypes }
 	})

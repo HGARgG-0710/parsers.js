@@ -1,4 +1,4 @@
-import { validation, Stream, regex } from "../../../dist/src/constants.js"
+import { validation, Stream, regex, BadIndex } from "../../../dist/src/constants.js"
 import { arrayConstTest, constTest } from "./lib/constants.js"
 import { namespace, repeat } from "lib/lib.js"
 
@@ -45,7 +45,7 @@ namespace("validation", () => {
 	namespace("PatternValidator", () => {
 		constTest("NoFullCoverage", NoFullCoverage, null)
 		constTest("FullCoverage", FullCoverage, true)
-		repeat(20, (i) =>
+		repeat(20, (i: number) =>
 			arrayConstTest("ValidationError", ValidationError(i), 2, [
 				[0, (x) => x === false],
 				[1, isNumber]
@@ -115,3 +115,6 @@ namespace("regex", () => {
 	constTest("DotAllFlag", DotAllFlag, "s")
 	constTest("StickyFlag", StickyFlag, "y")
 })
+
+// * BadIndex
+constTest("BadIndex", BadIndex, -1)

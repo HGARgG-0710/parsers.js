@@ -4,17 +4,18 @@ import type {
 	PatternStreamConstructor,
 	StreamClassInstance
 } from "../StreamClass/interfaces.js"
-import type { EffectiveProlongedStream } from "./interfaces.js"
+import type { ProlongedStream as EffectivProlongedStream } from "./interfaces.js"
 
 import {
-	effectiveProlongedStreamIsEnd,
-	effectiveProlongedStreamNext,
+	prolongedStreamIsEnd,
+	prolongedStreamNext,
 	prolongedStreamCurr,
 	prolongedStreamDefaultIsEnd,
 	prolongedStreamInitialize
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import { extendClass } from "../../utils.js"
 
 const ProlongedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -22,8 +23,8 @@ const ProlongedStreamBase = <Type = any>(
 ) =>
 	StreamClass<Type>({
 		currGetter: prolongedStreamCurr,
-		isCurrEnd: effectiveProlongedStreamIsEnd,
-		baseNextIter: effectiveProlongedStreamNext,
+		isCurrEnd: prolongedStreamIsEnd,
+		baseNextIter: prolongedStreamNext,
 		defaultIsEnd: prolongedStreamDefaultIsEnd,
 		hasPosition,
 		buffer,
@@ -33,13 +34,13 @@ const ProlongedStreamBase = <Type = any>(
 export function ProlongedStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): new (streams?: BasicStream<Type>[]) => EffectiveProlongedStream<Type> {
+): new (streams?: BasicStream<Type>[]) => EffectivProlongedStream<Type> {
 	const baseClass = ProlongedStreamBase(hasPosition, buffer)
-	class prolongedStream extends baseClass implements EffectiveProlongedStream<Type> {
+	class prolongedStream extends baseClass implements EffectivProlongedStream<Type> {
 		value: StreamClassInstance<Type>[]
 		streamIndex: number
 
-		init: (streams?: BasicStream<Type>[]) => EffectiveProlongedStream<Type>
+		init: (streams?: BasicStream<Type>[]) => EffectivProlongedStream<Type>
 		super: Summat
 
 		constructor(streams?: BasicStream<Type>[]) {
@@ -48,7 +49,7 @@ export function ProlongedStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(prolongedStream.prototype, {
+	extendClass(prolongedStream, {
 		super: { value: baseClass.prototype },
 		init: { value: prolongedStreamInitialize<Type> }
 	})

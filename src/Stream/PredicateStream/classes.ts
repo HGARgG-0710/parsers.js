@@ -1,22 +1,29 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { PredicatePosition } from "../../Position/interfaces.js"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+
+import type {
+	BasicReversibleStream,
+	ReversibleStream
+} from "../ReversibleStream/interfaces.js"
+
 import type {
 	IsEndCurrable,
 	PatternStreamConstructor
 } from "../StreamClass/interfaces.js"
-import type { EffectivePredicateStream } from "./interfaces.js"
+
+import type { PredicateStream as EffectivePredicateStream } from "./interfaces.js"
 
 import { valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
-	effectivePredicateStreamIsEnd,
-	effectivePredicateStreamProd,
+	predicateStreamIsEnd,
+	predicateStreamProd,
 	predicateStreamCurr,
-	effectivePredicateStreamNext,
-	effectivePredicateStreamInitialize
+	predicateStreamNext,
+	predicateStreamInitialize
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import { extendClass } from "../../utils.js"
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -24,8 +31,8 @@ const PredicateStreamBase = <Type = any>(
 ) =>
 	StreamClass<Type>({
 		currGetter: predicateStreamCurr,
-		baseNextIter: effectivePredicateStreamNext,
-		isCurrEnd: effectivePredicateStreamIsEnd,
+		baseNextIter: predicateStreamNext,
+		isCurrEnd: predicateStreamIsEnd,
 		defaultIsEnd: valueDefaultIsEnd,
 		isPattern: true,
 		hasPosition,
@@ -44,17 +51,17 @@ export function PredicateStream<Type = any>(
 		lookAhead: Type
 		hasLookAhead: boolean
 		predicate: PredicatePosition
-		value: ReversibleStream<Type> & IsEndCurrable
+		value: BasicReversibleStream<Type> & IsEndCurrable
 
 		super: Summat
 		prod: () => Type
 		init: (
-			input?: ReversibleStream<Type> & IsEndCurrable,
+			input?: BasicReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition
 		) => EffectivePredicateStream<Type>
 
 		constructor(
-			value?: ReversibleStream<Type> & IsEndCurrable,
+			value?: BasicReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition
 		) {
 			super(value)
@@ -62,10 +69,10 @@ export function PredicateStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(predicateStream.prototype, {
+	extendClass(predicateStream, {
 		super: { value: baseClass.prototype },
-		prod: { value: effectivePredicateStreamProd },
-		init: { value: effectivePredicateStreamInitialize }
+		prod: { value: predicateStreamProd },
+		init: { value: predicateStreamInitialize }
 	})
 
 	return predicateStream

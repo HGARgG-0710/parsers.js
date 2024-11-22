@@ -1,11 +1,12 @@
 import type { Position } from "../../Position/interfaces.js"
-import type { BasicReversibleStream, Started } from "../ReversibleStream/interfaces.js"
+import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream, Endable } from "../interfaces.js"
 import type { Rewindable } from "./methods/rewind.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
 import type {
 	BufferizedStreamClassInstance,
+	PreStarted,
 	ReversedStreamClassInstance,
 	StartedType,
 	Stateful,
@@ -102,7 +103,7 @@ export function isCurrUninitialized<Type = any>(stream: StreamClassInstance<Type
 	return stream.isStart === StreamClass.PreCurrInit
 }
 
-export function start(stream: Started<StartedType>) {
+export function start(stream: PreStarted) {
 	stream.isStart = StreamClass.PostCurrInit
 }
 

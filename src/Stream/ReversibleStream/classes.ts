@@ -20,6 +20,7 @@ import {
 import { reversedStreamInitialize } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
+import { extendClass } from "../../utils.js"
 
 const ReversedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -53,7 +54,7 @@ export function ReversedStream<Type = any>(
 		}
 	}
 
-	Object.defineProperties(reversedStream.prototype, {
+	extendClass(reversedStream, {
 		super: { value: baseClass.prototype },
 		rewind: { value: valueFinish },
 		finish: { value: valueRewind },

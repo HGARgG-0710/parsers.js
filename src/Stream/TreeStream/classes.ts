@@ -3,21 +3,22 @@ import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import type { TreeWalker as TreeWalkerType } from "../../Tree/TreeWalker/interfaces.js"
-import type { EffectiveTreeStream } from "./interfaces.js"
+import type { TreeStream as EffectiveTreeStream } from "./interfaces.js"
 
 import {
-	effectiveTreeStreamIsEnd,
-	effectiveTreeStreamPrev,
-	effectiveTreeStreamRewind,
-	effectiveTreeStreamNext,
-	effectiveTreeStreamNavigate,
-	effectiveTreeStreamIsStart,
-	effectiveTreeStreamInitialize,
-	effectiveTreeStreamCurrGetter,
-	effectiveTreeStreamValueGetter,
-	effectiveTreeStreamInputSetter
+	treeStreamIsEnd,
+	treeStreamPrev,
+	treeStreamRewind,
+	treeStreamNext,
+	treeStreamNavigate,
+	treeStreamIsStart,
+	treeStreamInitialize,
+	treeStreamCurrGetter,
+	treeStreamValueGetter,
+	treeStreamInputSetter
 } from "./methods.js"
 
+import { extendClass } from "../../utils.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
@@ -25,11 +26,11 @@ import { boolean } from "@hgargg-0710/one"
 const { F } = boolean
 
 const TreeStreamBase = StreamClass({
-	currGetter: effectiveTreeStreamCurrGetter,
-	baseNextIter: effectiveTreeStreamNext,
-	basePrevIter: effectiveTreeStreamPrev,
-	isCurrEnd: effectiveTreeStreamIsEnd,
-	isCurrStart: effectiveTreeStreamIsStart,
+	currGetter: treeStreamCurrGetter,
+	baseNextIter: treeStreamNext,
+	basePrevIter: treeStreamPrev,
+	isCurrEnd: treeStreamIsEnd,
+	isCurrStart: treeStreamIsStart,
 	defaultIsEnd: F
 }) as PatternReversedStreamConstructor<InTreeType>
 
@@ -55,10 +56,10 @@ export class TreeStream<Type = any>
 	}
 }
 
-Object.defineProperties(TreeStream.prototype, {
-	value: { get: effectiveTreeStreamValueGetter, set: effectiveTreeStreamInputSetter },
+extendClass(TreeStream, {
 	super: { value: TreeStreamBase.prototype },
-	rewind: { value: effectiveTreeStreamRewind },
-	navigate: { value: effectiveTreeStreamNavigate },
-	init: { value: effectiveTreeStreamInitialize }
+	value: { get: treeStreamValueGetter, set: treeStreamInputSetter },
+	rewind: { value: treeStreamRewind },
+	navigate: { value: treeStreamNavigate },
+	init: { value: treeStreamInitialize }
 })

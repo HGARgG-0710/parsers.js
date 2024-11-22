@@ -2,6 +2,7 @@ import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { Tree } from "../interfaces.js"
 import type { TreeWalker } from "./interfaces.js"
 
+import { isGoodIndex, lastIndex } from "../../utils.js"
 import { setValue } from "../../Pattern/utils.js"
 import { sequentialIndex } from "../utils.js"
 
@@ -58,7 +59,7 @@ const childStruct = structCheck({ lastChild: id })
 export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
 	const lastIndex: number[] = []
 	let current = this.curr as Tree<Type>
-	while (childStruct(current) && current.lastChild >= 0) {
+	while (childStruct(current) && isGoodIndex(current.lastChild)) {
 		const { lastChild } = current
 		lastIndex.push(lastChild)
 		current = current.index([lastChild]) as Tree<Type>
@@ -67,7 +68,7 @@ export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerIsChild<Type = any>(this: TreeWalker<Type>) {
-	return childStruct(this.curr) && (this.curr as Tree).lastChild >= 0
+	return childStruct(this.curr) && isGoodIndex((this.curr as Tree).lastChild)
 }
 
 export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
@@ -79,8 +80,8 @@ export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Typ
 	const sliced = pos.slice(0, -1)
 	const parents = sequentialIndex(input, sliced) as Tree<Type>[]
 
-	let result = parents.length - 1
-	while (result >= 0 && parents[result].lastChild <= sliced[result]) --result
+	let result = lastIndex(parents)
+	while (isGoodIndex(result) && parents[result].lastChild <= sliced[result]) --result
 	return result
 }
 

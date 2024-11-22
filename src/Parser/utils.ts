@@ -13,8 +13,8 @@ export function skip(input: ReversibleStream, steps: Position = 1) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
-// * important pre-doc note: stops IMMIDIATELY, if the 'input.curr' is NOT '!!inflate(x)'; 
-// This increases util flexibility, permits usage in contexts, where such a possibility is immanent [for a cost of 1 more check in "common" scenarios]; 
+// * important pre-doc note: stops IMMIDIATELY, if the 'input.curr' is NOT '!!inflate(x)';
+// This increases util flexibility, permits usage in contexts, where such a possibility is immanent [for a cost of 1 more check in "common" scenarios];
 export function nested(
 	inflation: StreamHandler<boolean | number>,
 	deflation: StreamHandler<boolean | number>

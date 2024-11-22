@@ -7,7 +7,13 @@ import {
 	SimpleTokenType
 } from "../../../../dist/src/Token/classes.js"
 
-import { classTest, inputDescribe, recursiveToString, signatures } from "lib/lib.js"
+import {
+	classTest,
+	inputDescribe,
+	recursiveToString,
+	repeat,
+	signatures
+} from "lib/lib.js"
 import { isToken } from "../../../../dist/src/Token/utils.js"
 
 import { object } from "@hgargg-0710/one"
@@ -42,13 +48,13 @@ export function TokenInstanceTest(testsSignatures: TokenInstanceTestSignature[])
 				assert(ti.is(initial))
 				assert(!ownKeys(initial).includes("type"))
 
-				let i = times
-				while (i--)
-					it(`${times - i}. TokenInstance(${recursiveToString(base)})`, () => {
+				repeat(times, (i: number) => {
+					it(`${i}. TokenInstance(${recursiveToString(base)})`, () => {
 						const nextInstance = new ti()
 						assert.notStrictEqual(initial, nextInstance)
 						assert(ti.is(nextInstance))
 					})
+				})
 			})
 		})
 	)

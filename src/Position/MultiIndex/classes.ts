@@ -1,4 +1,4 @@
-import type { BasicTreeStream } from "../../Stream/TreeStream/interfaces.js"
+import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "./interfaces.js"
 
 import {
@@ -14,13 +14,14 @@ import {
 } from "./methods.js"
 
 import { BasicPattern } from "../../Pattern/classes.js"
+import { extendClass } from "../../utils.js"
 
 export class MultiIndex extends BasicPattern<number[]> implements MultiIndexType {
 	levels: number
 
 	equals: (x: MultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]
-	convert: (stream: BasicTreeStream) => number
+	convert: (stream: TreeStream) => number
 	firstLevel: () => number[]
 	lastLevel: () => number[]
 	copy: () => MultiIndex
@@ -30,7 +31,7 @@ export class MultiIndex extends BasicPattern<number[]> implements MultiIndexType
 	}
 }
 
-Object.defineProperties(MultiIndex.prototype, {
+extendClass(MultiIndex, {
 	levels: { get: multiIndexLevelsGetter, set: multiIndexLevelsSetter },
 	convert: { value: multiIndexConvert },
 	compare: { value: multiIndexCompare },

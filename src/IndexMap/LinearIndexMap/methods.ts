@@ -2,6 +2,7 @@ import type { MapClass, Pairs } from "../interfaces.js"
 import type { LinearIndexMap } from "./interfaces.js"
 
 import { LinearMapClass } from "./classes.js"
+import { isGoodIndex } from "../../utils.js"
 import { fromPairsList } from "../utils.js"
 
 import { inplace } from "@hgargg-0710/one"
@@ -12,7 +13,7 @@ export function linearIndexMapIndex<KeyType = any, ValueType = any>(
 	x: any
 ) {
 	const valueIndex = this.getIndex(this.extension(x))
-	return valueIndex > -1 ? this.values[valueIndex] : this.default
+	return isGoodIndex(valueIndex) ? this.values[valueIndex] : this.default
 }
 
 export function linearIndexMapReplace<KeyType = any, ValueType = any>(
@@ -20,7 +21,7 @@ export function linearIndexMapReplace<KeyType = any, ValueType = any>(
 	index: number,
 	pair: [KeyType, ValueType]
 ): LinearIndexMap<KeyType, ValueType> {
-	if (index >= 0 && index < this.size) {
+	if (isGoodIndex(index) && index < this.size) {
 		const [key, value] = pair
 		this.keys[index] = key
 		this.alteredKeys[index] = this.keyExtension(key)

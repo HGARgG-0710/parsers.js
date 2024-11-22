@@ -1,8 +1,9 @@
-import { toPairsList } from "./utils.js"
 import type { IndexMap } from "./interfaces.js"
 
+import { table, keyValuesToPairsList } from "./utils.js"
+import { isGoodIndex } from "../utils.js"
+
 import { inplace } from "@hgargg-0710/one"
-import { table } from "./utils.js"
 const { swap } = inplace
 
 export function indexMapUnique<KeyType = any, ValueType = any>(
@@ -12,7 +13,7 @@ export function indexMapUnique<KeyType = any, ValueType = any>(
 	const eliminationSet = new Set()
 	const indexSet = new Set()
 
-	const predicate = start ? (i: number) => i < this.size : (i: number) => i >= 0
+	const predicate = start ? (i: number) => i < this.size : isGoodIndex
 	const change = (-1) ** +!start
 
 	for (let i = +!start * (this.size - 1); predicate(i); i += change)
@@ -39,7 +40,7 @@ export function indexMapByIndex<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>,
 	index: number
 ): [KeyType, ValueType] {
-	return index >= 0 && this.size > index
+	return isGoodIndex(index) && this.size > index
 		? [this.keys[index], this.values[index]]
 		: this.default
 }
@@ -57,7 +58,7 @@ export function indexMapSwap<KeyType = any, ValueType = any>(
 export function indexMapCopy<KeyType = any, ValueType = any>(
 	this: IndexMap<KeyType, ValueType>
 ) {
-	return new this.constructor(toPairsList(table(this)))
+	return new this.constructor(keyValuesToPairsList(table(this)))
 }
 
 export function indexMapSizeGetter<KeyType = any, ValueType = any>(
@@ -73,7 +74,7 @@ export function indexMapSet<KeyType = any, ValueType = any>(
 	index: number = this.size
 ) {
 	const keyIndex = this.keys.indexOf(key)
-	if (keyIndex > -1) {
+	if (isGoodIndex(keyIndex)) {
 		this.values[keyIndex] = value
 		return this
 	}

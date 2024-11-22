@@ -1,6 +1,6 @@
 import assert from "node:assert"
 
-import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
+import type { TreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
 import type { MultiIndex } from "../../../../../dist/src/Position/MultiIndex/interfaces.js"
 
 import {
@@ -74,7 +74,7 @@ type MultiIndexTestSignature = {
 } & ReducedMultiIndexTestSignature
 
 type ReducedMultiIndexTestSignature = {
-	conversionTests: [EffectiveTreeStream, number][]
+	conversionTests: [TreeStream, number][]
 	comparisonTests: [MultiIndex[], boolean][]
 	sliceTests: [number, number][]
 	equalsTests: [MultiIndex, boolean][]
@@ -155,7 +155,7 @@ function ChainMultiIndexTest(
 		MultiIndexEqualsTest(instance, expected, differedWith)
 
 	// .copy
-	if (isCopyTest || isCopyTest === undefined)
+	if ((isCopyTest || isCopyTest === undefined) && furtherSignature!)
 		MultiIndexCopyTest(instance, furtherSignature)
 
 	// .firstLevel

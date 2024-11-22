@@ -1,9 +1,8 @@
-import { FlushablePattern } from "../Pattern/classes.js"
 import type { EliminableStringPattern as EliminableStringPatternType } from "./interfaces.js"
-import {
-	eliminableFlush,
-	eliminableStringEliminate
-} from "./methods.js"
+
+import { FlushablePattern } from "../Pattern/classes.js"
+import { extendClass } from "../utils.js"
+import { eliminableFlush, eliminableStringEliminate } from "./methods.js"
 
 export class EliminableString
 	extends FlushablePattern<string>
@@ -16,7 +15,7 @@ export class EliminableString
 	}
 }
 
-Object.defineProperties(EliminableString.prototype, {
+extendClass(EliminableString, {
 	flush: { value: eliminableFlush },
 	eliminate: { value: eliminableStringEliminate }
 })

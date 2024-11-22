@@ -1,4 +1,5 @@
-import type { IndexMap, Pairs } from "./interfaces.js"
+import type { IndexMap, Pairs as PairsType } from "./interfaces.js"
+import { Pairs } from "./classes.js"
 
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType>
@@ -6,35 +7,50 @@ export function table<KeyType = any, OutType = any>(
 	return [indexMap.keys, indexMap.values]
 }
 
+export function linearToPairsList<KeyType = any, ValueType = any>(
+	linear: (KeyType | ValueType)[]
+) {
+	let size = (linear.length >> 1) + (linear.length % 2)
+	const result = Pairs<KeyType, ValueType>(size)
+
+	while (--size) {
+		const curr = result[size]
+		const index = size << 1
+		curr[0] = linear[index] as KeyType
+		curr[1] = linear[index + 1] as ValueType
+	}
+
+	return result
+}
+
+export function keyValuesToPairsList<KeyType = any, ValueType = any>(
+	keyValues: [KeyType[], ValueType[]]
+): PairsType<KeyType, ValueType> {
+	const [keys, values] = keyValues
+	let size = keys.length
+
+	const result = Pairs<KeyType, ValueType>(size)
+
+	while (size--) {
+		const curr = result[size]
+		curr[0] = keys[size]
+		curr[1] = values[size]
+	}
+
+	return result
+}
+
 export function fromPairsList<KeyType = any, ValueType = any>(
-	mapPairs: Pairs<KeyType, ValueType>
+	mapPairs: PairsType<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
 	const [keys, values]: [KeyType[], ValueType[]] = [new Array(size), new Array(size)]
 	while (size--) {
-		keys[size] = mapPairs[size][0]
-		values[size] = mapPairs[size][1]
+		const curr = mapPairs[size]
+		keys[size] = curr[0]
+		values[size] = curr[1]
 	}
 	return [keys, values]
-}
-
-export function toPairsList<KeyType = any, ValueType = any>(
-	keyValues: [KeyType[], ValueType[]]
-): Pairs<KeyType, ValueType> {
-	const [keys, values] = keyValues
-	let size = keys.length
-
-	const result = Array.from({ length: size }, () => new Array(2)) as Pairs<
-		KeyType,
-		ValueType
-	>
-
-	while (size--) {
-		result[size][0] = keys[size]
-		result[size][1] = values[size]
-	}
-
-	return result
 }
 
 export * as HashMap from "./HashMap/utils.js"

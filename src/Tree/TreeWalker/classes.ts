@@ -23,6 +23,7 @@ import {
 
 import { MultiIndex as MultiIndexClass } from "../../Position/MultiIndex/classes.js"
 import { MultiIndexModifier as MultiIndexModifierClass } from "../../Position/MultiIndex/MultiIndexModifier/classes.js"
+import { extendClass } from "../../utils.js"
 
 export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	level: Tree<Type>
@@ -55,7 +56,7 @@ export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	}
 }
 
-Object.defineProperties(TreeWalker.prototype, {
+extendClass(TreeWalker, {
 	pushFirstChild: { value: treeWalkerPushFirstChild },
 	popChild: { value: treeWalkerPopChild },
 	isSiblingAfter: { value: treeWalkerIsSiblingAfter },
