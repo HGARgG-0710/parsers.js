@@ -260,7 +260,7 @@ export function tripleUtilTest(
 	return function (
 		input: any[],
 		expected: any,
-		lowCompare: (x: any, y: any) => boolean
+		lowCompare: (x: any, y: any) => boolean = equals
 	) {
 		util(
 			utilName,

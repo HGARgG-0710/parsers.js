@@ -13,6 +13,8 @@ import {
 	OptimizedLinearMap
 } from "../../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 
+import { linearIndexMapEmptyTest } from "../lib/classes.js"
+
 import { typeof as _typeof } from "@hgargg-0710/one"
 const { isNumber, isString, isObject, isNull, isBoolean } = _typeof
 
@@ -110,17 +112,6 @@ LinearMapClassTest("PredicateMap", PredicateMap, [
 	}
 ])
 
-const emptyTest = {
-	getIndexTest: [],
-	byIndexTest: [],
-	swapIndicies: [],
-	addTests: [],
-	replaceTests: [],
-	deleteInds: [],
-	setArgs: [],
-	replaceKeys: []
-}
-
 // * RegExpMap
 
 LinearMapClassTest("RegExpMap", RegExpMap, [
@@ -140,7 +131,7 @@ LinearMapClassTest("RegExpMap", RegExpMap, [
 			["20100000bbbbbb", "Moo"],
 			["20100000", "Ro"]
 		],
-		...emptyTest
+		...linearIndexMapEmptyTest
 	}
 ])
 
@@ -167,7 +158,7 @@ LinearMapClassTest("SetMap", SetMap, [
 			["boolean", 0],
 			["443", false]
 		],
-		...emptyTest
+		...linearIndexMapEmptyTest
 	}
 ])
 
@@ -195,7 +186,7 @@ const simpleMapTest = {
 		["SKI", 20]
 	] as Pairs<any, any>,
 
-	...emptyTest
+	...linearIndexMapEmptyTest
 }
 
 LinearMapClassTest("BasicMap", BasicMap, [simpleMapTest])

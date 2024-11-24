@@ -1,5 +1,9 @@
-import type { IndexMap, Pairs as PairsType } from "./interfaces.js"
+import type { IndexMap, Pair, Pairs as PairsType } from "./interfaces.js"
 import { Pairs } from "./classes.js"
+
+import { typeof as type, boolean } from "@hgargg-0710/one"
+const { isArray } = type
+const { T } = boolean
 
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType>
@@ -51,6 +55,15 @@ export function fromPairsList<KeyType = any, ValueType = any>(
 		values[size] = curr[1]
 	}
 	return [keys, values]
+}
+
+export const isPair = <KeyType = any, ValueType = any>(
+	keyPred?: (x: any) => x is KeyType,
+	valuePred?: (x: any) => x is ValueType
+) => {
+	const [kp, vp] = [keyPred, valuePred].map((x) => x || T)
+	return (x: any): x is Pair<KeyType, ValueType> =>
+		isArray(x) && x.length === 2 && kp(x[0]) && vp(x[1])
 }
 
 export * as HashMap from "./HashMap/utils.js"

@@ -1,7 +1,7 @@
 import { arraysSame, comparisonUtilTest } from "lib/lib.js"
 
 import { utils } from "../../../../dist/main.js"
-const { table, fromPairsList, toPairsList } = utils.IndexMap
+const { table, fromPairsList, keyValuesToPairsList, linearToPairsList } = utils.IndexMap
 
 const kvUtil = comparisonUtilTest(
 	([gotKeys, gotValues]: [any[], any[]], [expKeys, expValues]: [any[], any[]]) =>
@@ -12,8 +12,13 @@ export const [tableTest, fromPairsListTest] = [
 	[fromPairsList, "fromPairsList"]
 ].map(([util, name]) => kvUtil(util as Function, name as string))
 
-export const toPairsListTest = comparisonUtilTest(
+const toPairsListTest = comparisonUtilTest(
 	(kvResult: [any, any][], kvExp: [any, any][]) =>
 		kvResult.length === kvExp.length &&
-		kvResult.every((x, i) => arraysSame(x, kvExp[i]))
-)(toPairsList, "toPairsList")
+		kvResult.every((x, i) => kvResult.length === 2 && arraysSame(x, kvExp[i]))
+)
+
+export const [keyValuesToPairsListTest, linearToPairsListTest] = [
+	[keyValuesToPairsList, "keyValuesToPairsList"],
+	[linearToPairsList, "linearToPairsList"]
+].map(([util, name]) => toPairsListTest(util as Function, name as string))

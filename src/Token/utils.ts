@@ -1,10 +1,11 @@
+import type { TypePredicate } from "../interfaces.js"
 import type { Token, TokenInstance } from "./interfaces.js"
 
 import { typeof as _typeof, object } from "@hgargg-0710/one"
 const { isObject } = _typeof
 const { structCheck } = object
 
-export function isType<Type = any>(type: Type) {
+export function isType<Type = any>(type: Type): TypePredicate<TokenInstance<Type>> {
 	return (x: any): x is TokenInstance<Type> =>
 		x && isObject<TokenInstance<Type>>(x) && x.type === type
 }

@@ -1,25 +1,32 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 import type { Pattern, Flushable, Resulting } from "../Pattern/interfaces.js"
+import type { Pair, Pairs } from "../IndexMap/interfaces.js"
 
 export type InvalidMatch = false
 export type ValidMatch = true
-export type FaultyElement<Type = any> = [InvalidMatch, Type]
+export type FaultyElement<Type = any> = Pair<InvalidMatch, Type>
 
 export type ValidationOutput<Type = any> =
 	| [true, Type[]]
 	| [false, (Type | ValidMatch | FaultyElement<Type>)[]]
 
-export type InvalidEntries<Type = any> = [number, Type][]
+export type InvalidEntries<Type = any> = Pairs<number, Type>
+
+export type ValidationHandler<Type = any> = SummatFunction<
+	any,
+	Type,
+	ValidMatch | InvalidMatch
+>
 
 export type MethodValidator<Type = any, KeyType = any> = (
 	key: KeyType,
-	handler: SummatFunction<any, Type, ValidMatch | InvalidMatch>
+	handler: ValidationHandler<Type>
 ) => ValidationOutput<Type>
 
 export type FreeValidator<Type = any, KeyType = any> = (
 	value: Type,
 	key: KeyType,
-	handler: SummatFunction<any, Type, ValidMatch | InvalidMatch>
+	handler: ValidationHandler<Type>
 ) => ValidationOutput<Type>
 
 export interface Validatable<Type = any, KeyType = any> extends Summat {

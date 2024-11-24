@@ -16,12 +16,14 @@ import {
 	method,
 	methodTest,
 	signatures,
-	comparisonMethodTest
+	comparisonMethodTest,
+	repeat
 } from "lib/lib.js"
 
 import { object, typeof as type, function as f, array } from "@hgargg-0710/one"
+import type { TypePredicate } from "../../../../../dist/src/interfaces.js"
 const { structCheck } = object
-const { isFunction } = type
+const { isFunction, isUndefined } = type
 const { and } = f
 const { last } = array
 
@@ -49,7 +51,7 @@ export const isTreeWalker = and(
 		init: isFunction
 	}),
 	isPosed(isMultiIndex)
-) as (x: any) => x is TreeWalker
+) as TypePredicate<TreeWalker>
 
 const TreeWalkerConstructorTest = ClassConstructorTest<TreeWalker>(
 	isTreeWalker,
@@ -202,17 +204,18 @@ type TreeWalkerTestSignature = {
 	tree: Tree
 	pushTimes: number
 	popTimes: number
-	isSiblingAfter: boolean
-	isSiblingBefore: boolean
+	isSiblingAfter?: boolean
+	isSiblingBefore?: boolean
 	afterTimes?: number
 	beforeTimes?: number
 	cutLength?: number
-	isChild: boolean
-	isParent: boolean
-	lastLevelWithSiblings: number
-	currentLastIndex: number[]
-	goPrevLastGreater: boolean
+	isChild?: boolean
+	isParent?: boolean
+	lastLevelWithSiblings?: number
+	currentLastIndex?: number[]
+	goPrevLastGreater?: boolean
 	renewLevelTests: [Tree, Tree, number, number][]
+	shouldRestart?: any
 	goIndexTests: MultiIndex[]
 	initTests: [Tree?, MultiIndex?][]
 }
@@ -240,6 +243,7 @@ export function TreeWalkerTest(
 					currentLastIndex,
 					goPrevLastGreater,
 					renewLevelTests,
+					shouldRestart,
 					goIndexTests,
 					initTests
 				}) =>
@@ -247,52 +251,58 @@ export function TreeWalkerTest(
 					const instance = TreeWalkerConstructorTest(walkerConstructor, tree)
 
 					// .pushFirstChild
-					for (let i = 0; i < pushTimes; ++i)
-						TreeWalkerPushFirstChildTest(instance)
+					repeat(pushTimes, () => TreeWalkerPushFirstChildTest(instance))
 
 					// .popChild
-					for (let i = 0; i < popTimes; ++i) TreeWalkerPopChildTest(instance)
+					repeat(popTimes, () => TreeWalkerPopChildTest(instance))
 
 					// .isSiblingAfter
-					TreeWalkerIsSiblingAfterTest(instance, isSiblingAfter)
+					if (isSiblingBefore !== undefined)
+						TreeWalkerIsSiblingAfterTest(instance, isSiblingAfter)
 
 					// .goSibilngAfter
-					if (isSiblingAfter && afterTimes)
-						for (let i = 0; i < afterTimes; ++i)
-							TreeWalkerGoSiblingAfterTest(instance)
+					if (isSiblingAfter && !isUndefined(afterTimes))
+						repeat(afterTimes, () => TreeWalkerGoSiblingAfterTest(instance))
 
 					// .isSiblingBefore
-					TreeWalkerIsSiblingBeforeTest(instance, isSiblingBefore)
+					if (!isUndefined(isSiblingBefore))
+						TreeWalkerIsSiblingBeforeTest(instance, isSiblingBefore)
 
 					// .goSibilngBefore
-					if (isSiblingBefore && beforeTimes)
-						for (let i = 0; i < beforeTimes; ++i)
-							TreeWalkerGoSiblingBeforeTest(instance)
+					if (isSiblingBefore && !isUndefined(beforeTimes))
+						repeat(beforeTimes, () => TreeWalkerGoSiblingBeforeTest(instance))
 
 					// .indexCut
-					TreeWalkerIndexCutTest(instance, cutLength)
+					if (!isUndefined(cutLength))
+						TreeWalkerIndexCutTest(instance, cutLength)
 
 					// .isChild
-					TreeWalkerIsChildTest(instance, isChild)
+					if (!isUndefined(isChild)) TreeWalkerIsChildTest(instance, isChild)
 
 					// .isParent
-					TreeWalkerIsParentTest(instance, isParent)
+					if (!isUndefined(isParent)) TreeWalkerIsParentTest(instance, isParent)
 
 					// .lastLevelWithSiblings
-					TreeWalkerLastLevelWithSiblingsTest(instance, lastLevelWithSiblings)
+					if (!isUndefined(lastLevelWithSiblings))
+						TreeWalkerLastLevelWithSiblingsTest(
+							instance,
+							lastLevelWithSiblings
+						)
 
 					// .currentLastIndex
-					TreeWalkerCurrentLastIndexTest(instance, currentLastIndex)
+					if (!isUndefined(currentLastIndex))
+						TreeWalkerCurrentLastIndexTest(instance, currentLastIndex)
 
 					// .goPrevLast
-					TreeWalkerGoPrevLastTest(instance, goPrevLastGreater)
+					if (!isUndefined(goPrevLastGreater))
+						TreeWalkerGoPrevLastTest(instance, goPrevLastGreater)
 
 					// .renewLevel
 					for (const [expected, init, from, until] of renewLevelTests)
 						TreeWalkerRenewLevelTest(instance, expected, init, from, until)
 
 					// .restart
-					TreeWalkerRestartTest(instance)
+					if (!isUndefined(shouldRestart)) TreeWalkerRestartTest(instance)
 
 					// .goIndex
 					for (const index of goIndexTests)

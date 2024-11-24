@@ -1,8 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
 import type { PredicatePosition } from "./Position/interfaces.js"
-import type { Bufferized } from "./Collection/Buffer/interfaces.js"
 import type { BasicStream, Indexed } from "./Stream/interfaces.js"
+import type { Bufferized } from "./Collection/Buffer/interfaces.js"
 import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 import type {
 	BasicReversibleStream,

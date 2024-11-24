@@ -25,7 +25,8 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
 	...f: ((x: any) => KeyType)[]
 ) => MapClass<any, ValueType>
 
-export type Pairs<KeyType = any, ValueType = any> = [KeyType, ValueType][]
+export type Pair<KeyType = any, ValueType = any> = [KeyType, ValueType]
+export type Pairs<KeyType = any, ValueType = any> = Pair<KeyType, ValueType>[]
 
 export interface Sizeable extends Summat {
 	size: number

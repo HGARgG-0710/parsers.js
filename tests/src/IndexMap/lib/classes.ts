@@ -415,3 +415,14 @@ export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = nu
 	for (const [keyFrom, keyTo] of replaceKeys)
 		indexMapReplaceKeyTest(instance, keyFrom, keyTo)
 }
+
+export const linearIndexMapEmptyTest = {
+	getIndexTest: [],
+	byIndexTest: [],
+	swapIndicies: [],
+	addTests: [],
+	replaceTests: [],
+	deleteInds: [],
+	setArgs: [],
+	replaceKeys: []
+}

@@ -8,6 +8,7 @@ import type {
 import { ChildlessTree, ChildrenTree, MultTree, SingleTree } from "../Tree/classes.js"
 import { BasicPattern } from "../Pattern/classes.js"
 import { isType } from "./utils.js"
+import type { TypePredicate } from "../interfaces.js"
 
 export function Token<Type = any, Value = any>(
 	type: Type,
@@ -20,7 +21,7 @@ export function SimpleTokenType<Type = any, ValueType = any>(
 	type: Type
 ): TokenType<Type, ValueType> {
 	class stt extends BasicPattern<ValueType> implements Token<Type, ValueType> {
-		static is: (x: any) => x is Token<Type, ValueType>
+		static is: TypePredicate<Token<Type, ValueType>>
 		static type: Type
 		type: Type
 
@@ -29,13 +30,13 @@ export function SimpleTokenType<Type = any, ValueType = any>(
 		}
 	}
 	stt.type = stt.prototype.type = type
-	stt.is = isType<Type>(type) as (x: any) => x is Token<Type, ValueType>
+	stt.is = isType<Type>(type) as TypePredicate<Token<Type, ValueType>>
 	return stt
 }
 
 export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {
 	class ti implements TokenInstanceType<Type> {
-		static is: (x: any) => x is TokenInstanceType<Type>
+		static is: TypePredicate<TokenInstanceType<Type>>
 		static type: Type
 		type: Type
 	}

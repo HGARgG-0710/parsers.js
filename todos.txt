@@ -63,24 +63,29 @@ REMINDERS [2.]:
 			Gives first-hand experience of actually using the library; 
 
 Order of TODO-elimination: 
-	A.3.8. 
-	A.3.9.
 	A.3.10.
-	A.3.11. 
-	A.3.12. 
+	A.3.9.12
 
-	5.21.7
-	
+	A.3.11. 
+	A.3.9.9
+
+	A.3.12. 
+		
 	5.17
 	5.21.5
 	A.1.1.
 	A.3.1.1.
 	A.3.1.2
+	A.3.9.10
+	A.3.9.11
 
 	A.3.2.
+	A.3.9.5
 	A.3.4.
-
-	A.3.	
+	
+	A.3.9.13
+	5.21.7
+	
 	6.
 
 	[fix test compilation errors]
@@ -179,29 +184,26 @@ A. testing:
 				4.4.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
 				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
 					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
-				
-		3.8. IndexMap/
-			Every single class/case has 2-3 different instances [depending on the need for thoroughness...]; 
-
-			0. [After Everything else]: 
-				IndexMap/
-				[note: there's the "extension" cases... Write minimal tests for this...]; 
-		
+					
 		3.9. utils/	
-			1. Walk through the project tree, enumerating the 'utils.ts' files; 
-				1. IndexMap/utils.ts [design - check]
-				2. HashMap/utils.ts [design - check]
-				3. PersistentIndexMap/utils.ts [design - check]
-				4. Parser/utils.ts [design - check]
-				5. Pattern/utils.ts [design - check]
-				6. Token/utils.ts [design - check]
-				7. TokenizablePattern/utils.ts [design - check]
-				8. ValidatablePattern/utils.ts [design - check]
-				9. Position/utils.ts [design - check]
-				10. InputStream/utils.ts [design - check]
-				11. StreamClass/utils.ts [design - check]
-				12. Tree/utils.ts		 [design - check; VERIFY TESTS FIRST...]
-				13. src/utils.ts		 [design - check]
+			Walk through the project tree, enumerating the 'utils.ts' files; 
+				[Do Parser/classes.ts first]
+				5. Parser/utils.ts
+
+				8. Validatable/utils.ts
+
+				[Do Position/classes.ts first]
+				9. Position/utils.ts
+
+				[Do Stream/.../classes.ts first]
+				10. InputStream/utils.ts
+				11. StreamClass/utils.ts
+
+				[Do Tree/.../classes.ts first]
+				12. Tree/utils.ts
+
+				[Do last]
+				13. src/utils.ts		 
 
 		3.10. Tree/
 			To test [classes.ts]: 
@@ -760,16 +762,10 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Used frequently throughout for things like debug information; 
 		The '.convert()' would play very nicely with it...; 
 
-	2.28. [clarity, refactoring] Create a type 'TypePredicate<T> = (x: any) => x is T';  Use all over the place...; 
-		Appears in: 
-			1. Tokenizable; 
-			2. structCheck; 
-			[and some other places...]
-
-	2.29. refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
+	2.28. refactor the '(x: any, y: any) => boolean' comparison into a 'Comparison' type; 
 		This is (most often) is used inside the library's testing mini-framework; 
 
-	2.30. About validation and parsing: 
+	2.29. About validation and parsing: 
 		This is a somewhat worrysome part of the library, currently, as:
 
 			1. Validation happens separate from parsing, despite using the same abstraction (ex: ValidatablePattern and TokenizablePattern); 
@@ -815,11 +811,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						Add the ability to return a value from the 'ErrorHandler': 
 							either 'true' - ContinueParsing, or 'false' - HaltParsing
 		
-	2.31. Later - improve the tests: 
+	2.30. Later - improve the tests: 
 		2.34.1. Add generics to the class-tests signatures [just for the sake of it - very pretty and give a lot more sense to using TypeScript for tests]; 
 		2.34.2. Create a way to print out the class tests' instances (via a special 'instance' library function, based off 'it'); 
 	
-	2.32. Implement a new interface for the library - FiniteEnum: 
+	2.31. Implement a new interface for the library - FiniteEnum: 
 		This, basically, creates an 'EnumSpace', that consists of all the given items, 
 			BUT requires finding out their uniqueness beforehand (using the 'new Set', or the 'one.js' 'norepetitions'). 
 			Thus, for instance, these are equivalent: 
@@ -830,7 +826,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			Thus, the '.size' of the given EnumSpace is actually fluid; 
 			Likewise, its' '.add()' would NOT be a number (hence - one NEEDS A NEW INTERFACE); 
 
-	2.33. IDEA: how to speed up the tokenization algorithm [attempt]:
+	2.32. IDEA: how to speed up the tokenization algorithm [attempt]:
 		Way: 
 		1. Split the "tokenized" and "untokenized" parts with 2 arrays
 		2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
@@ -1043,7 +1039,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
 				Third - either delete, or keep; 
 
-	2.34. Performance concern: '.push(...elems)' FAILS for large arrays; 
+	2.33. Performance concern: '.push(...elems)' FAILS for large arrays; 
 		Problem - with the '...elems' spread operator: it creates a new array; 
 
 		1. Do '.push()'-es in batches, or avoid them completely....; 
@@ -1054,13 +1050,13 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			(example: 'string[] | ContinuedList | string[][]' for 'StringCollection.push'); 
 			Then - the methods in question have a higher versatility; 
 
-	2.35. [new type] BitArrayHash; 
+	2.34. [new type] BitArrayHash; 
 		Accepts a BitArray, returns a value from it; 
 			A hash based off bit-shifts (<<, >>); 
 		Use for defining the '.init', '.curr' and other choice functions in the StreamClass; 
 		BitArray - a UInt8Array (or other) array. Look into the '2.35' (pattern-tokenizer speedup) for details
 
-	2.36. [TypeScript; clarity] Add the 'type ForcePresence<T, K extends keyof T> = {[x in K]-?: T[]}'
+	2.35. [TypeScript; clarity] Add the 'type ForcePresence<T, K extends keyof T> = {[x in K]-?: T[]}'
 		This (and similar ones), for adding/removing various type features, are handy for refactoring (appears at least in StreamClass); 
 		ALSO: 
 
@@ -1090,7 +1086,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					2.49.1. ALSO  - create a single RIGID 'StreamClass' interface! [for the implementation - write down the optional '.pos, .buffer', and so forth... Missing currently...]; 
 				)
 	
-	2.37. Use C preprocessor with this code; 
+	2.36. Use C preprocessor with this code; 
 
 		Getting tired of typing "optionalValue(this, value)", and other such things in repetative situations (like 'init.ts'); 
 		Abstract those away with a good old '#define' + '#include'; 
@@ -1109,21 +1105,21 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Due to the fact one doesn't want to touch its code again after the v0.4, this particular "hybrid" 
 			language shouldn't become a thing to cause problems [that would need separate solving] during development; 
 	
-	2.38. Liberate the 'Parser/' directory as well? 
+	2.37. Liberate the 'Parser/' directory as well? 
 		Due to the reformulation of the library's key terms through 'StreamParser', it has become depressingly empty; 
 		Also - introduces some unnecessary higher-level "bunching"; 
 		This way - there'd be global functions that are exported from the package - PatternTokenizer, PatternValidator, for starters...; 
 		Although - there MAY be come new things coming into the 'Parser' (the new memory-hungry patter-tokenization algorithm, for instance?)
 
-	2.39. About the continiously occurring '[A, B][]' types in code: 
+	2.38. About the continiously occurring '[A, B][]' types in code: 
 		Fix those; Replace with 'Pairs'; 
 	
-	2.40. Increase the Library's natural debuggability: 
+	2.39. Increase the Library's natural debuggability: 
 		ADD names to all the nameless functions. 
 		This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 
 		ALSO - do the same for 'one.js'; 
 	
-	2.41. [maybe?] Add another 'hash' function for the 'HashMap'? 
+	2.40. [maybe?] Add another 'hash' function for the 'HashMap'? 
 		In particular, use the 'extension' for 'set', 'replaceKey', 'delete' (by-original-key), 
 			and another hash (the 'indexHash') for 'index' [this one will be optional and default to 'extension']; 
 		This is in parallel with how the 'IndexMap' has it.
@@ -1135,7 +1131,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				Problem here is that one EXPECTS the same hash to work for both the 'index' and 'delete'. 
 				In general, the 'HashClass' does NOT support the categorization (even though in the case of 'SimpleTokenType', it works); 
 	
-	2.42. [new class] Traveller, a point on a Stream; 
+	2.41. [new class] Traveller, a point on a Stream; 
 
 		Prior sketches of the v0.3 included a '.navigate' method that implemented an absolute positioning inside a Stream.
 		This was scratched in favour of relative positioning, which is more widespread. 
@@ -1199,7 +1195,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					}
 				}
 			
-	2.43. Problem: non-reactive '.isEnd' property; 
+	2.42. Problem: non-reactive '.isEnd' property; 
 
 		[Note: WrapperStream - a Stream with '.value' being another Stream]
 		This is the issue with keeping it as a property, and not a getter. 
@@ -1225,9 +1221,12 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 					Conclusion [2]: For this, one'll need to formalize the 'WrapperStream' interface (because, otherwise there's no guarantee that the 'value' is indeed a Stream); 
 
-	2.44. Refactor creation of PropertyDescriptor-s; 
+	2.43. Refactor creation of PropertyDescriptor-s; 
 		They are all over the place, order it, make an ordered, simple and maintainable signature,
 			that would allow one to express PropertyDescriptorMap-s as objects; 
+	
+	2.44. [refactoring] Add a new util: 
+		tokenCompare = (tt: TokenType) => (x: any, y: any) => tt.is(x) && tt.is(y) && value(x) === value(y); 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
@@ -1242,6 +1241,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			5. The 'Constructor' type; 
 			6. SelfAssignmentClass; 
 			7. extendClass; 
+			8. TypePredicate
 
 	3.2. All the routine writing of tests made one think whether it may not be more desireable to 
 		automate even the process of their WRITING; 

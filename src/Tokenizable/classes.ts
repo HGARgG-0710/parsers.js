@@ -1,4 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import type { TypePredicate } from "../interfaces.js"
 import type {
 	DelegateTokenizablePattern,
 	FreeTokenizer,
@@ -16,7 +17,7 @@ const { isString } = type
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
-	isType: (x: any) => x is Type
+	isType: TypePredicate<Type>
 ): new <OutType = any>(value: Type) => DelegateTokenizablePattern<Type, InType, OutType> {
 	class delegateTokenizablePattern<OutType = any>
 		extends FlushablePattern<Type>
@@ -24,7 +25,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 	{
 		tokenize: MethodTokenizer<Type, InType, OutType>
 		tokenizer: FreeTokenizer<Type, InType>
-		isType: (x: any) => x is Type
+		isType: TypePredicate<Type>
 		result: TokenizationResult<Type, OutType>
 
 		constructor(value: Type) {

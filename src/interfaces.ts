@@ -1,4 +1,5 @@
 export type Prototypal = Function & { prototype: any }
+export type TypePredicate<Type = any> = (x?: any) => x is Type
 
 export type * as Collection from "./Collection/interfaces.js"
 export type * as Eliminable from "./Eliminable/interfaces.js"

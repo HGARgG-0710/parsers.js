@@ -5,13 +5,9 @@ import type {
 	ValidationOutput
 } from "../../../../dist/src/Validatable/interfaces.js"
 
-import { typeof as type } from "@hgargg-0710/one"
-const { isString } = type
-
 import { utils } from "../../../../dist/main.js"
 
-const { isFaultyElement, analyzeValidity, validateTokenized, validateString } =
-	utils.Validatable
+const { isFaultyElement, analyzeValidity, validateTokenized } = utils.Validatable
 
 const validateTestBase = <Type = any>(isType: (x: any) => x is Type) =>
 	comparisonUtilTest(
@@ -24,13 +20,10 @@ const validateTestBase = <Type = any>(isType: (x: any) => x is Type) =>
 			arraysSame(resResult, expResult)
 	)
 
-export const validateStringTest = validateTestBase(isString)(
-	validateString,
-	"validateString"
-)
-
-export const validateTokenizedTest = <Type = any>(isType: (x: any) => x is Type) =>
-	validateTestBase(isType)(validateTokenized, "validateTokenized")
+export const validateTokenizedTest = <Type = any>(
+	isType: (x: any) => x is Type,
+	typeName: string
+) => validateTestBase(isType)(validateTokenized, `validateTokenized(${typeName})`)
 
 export const analyzeValidityTest = comparisonUtilTest(
 	(entriesRes: InvalidEntries, entriesExp: InvalidEntries) =>
@@ -39,4 +32,7 @@ export const analyzeValidityTest = comparisonUtilTest(
 		entriesRes.every(([, elem], i) => entriesExp[i][1] === elem)
 )(analyzeValidity, "analyzeValidity")
 
-export const isFaultyElementTest = utilTest(isFaultyElement, "isFaultyElement")
+export const isFaultyElementTest = <Type = any>(
+	isType: (x: any) => x is Type,
+	typeName: string
+) => utilTest(isFaultyElement(isType), `isFaultyElement(${typeName})`)
