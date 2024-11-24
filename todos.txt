@@ -63,7 +63,7 @@ REMINDERS [2.]:
 			Gives first-hand experience of actually using the library; 
 
 Order of TODO-elimination: 
-	A.3.10.
+	A.3.10.2
 	A.3.9.12
 
 	A.3.11. 
@@ -207,7 +207,6 @@ A. testing:
 
 		3.10. Tree/
 			To test [classes.ts]: 
-				1. Tree/
 				2. TreeWalker/
 				
 		3.11. Position/

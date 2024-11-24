@@ -102,7 +102,7 @@ function TreeLastChildTest(tree: Tree, index: number[], expectedLastChild: numbe
 
 type TreeClassTestSignature = {
 	input: any
-	indexTests: [number[], any, (x: any) => any][]
+	indexTests: [number[], any][]
 	lastChildTests: [number[], number][]
 }
 
@@ -116,8 +116,8 @@ export function TreeClassTest(
 			const treeInstance: Tree = TreeConstructorTest(treeConstructor, input)
 
 			// .index
-			for (const [index, expected, compare] of indexTests)
-				TreeIndexTest(treeInstance, expected, compare, index)
+			for (const [index, expected] of indexTests)
+				TreeIndexTest(treeInstance, expected, index)
 
 			// .lastChild
 			for (const [index, lastChild] of lastChildTests)

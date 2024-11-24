@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Pattern } from "../Pattern/interfaces.js"
-import type { Tree, ChildrenTree, MultChildrenTree } from "./interfaces.js"
+import type { Tree } from "./interfaces.js"
 
 import { childrenCount, childIndex } from "./methods.js"
 
@@ -28,9 +28,9 @@ export function ChildrenTree(propName: string = "children") {
 }
 
 export function ChildlessTree(propName: string = "children") {
-	return function (tree: Tree): MultChildrenTree {
+	return function (tree: Tree): Tree {
 		tree[propName] = []
-		return tree as MultChildrenTree
+		return tree
 	}
 }
 
@@ -38,7 +38,7 @@ export function SingleTree(propName: string = "children") {
 	return function <Type = any>(
 		tree: Pattern<Type>,
 		converter: (x: Type) => any = id
-	): MultChildrenTree & Pattern<Type> {
+	): Pattern<Type> {
 		tree[propName] = [converter(tree.value)]
 		return tree
 	}
@@ -48,7 +48,7 @@ export function MultTree(propName: string = "children") {
 	return function <Type = any>(
 		tree: Tree & Pattern<Type[]>,
 		converter: (x: Type) => Type = id
-	): MultChildrenTree & Pattern<Type[]> {
+	): Tree & Pattern<Type[]> {
 		tree[propName] = tree.value.map(converter)
 		return tree
 	}
