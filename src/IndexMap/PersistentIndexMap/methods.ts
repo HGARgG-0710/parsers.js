@@ -1,10 +1,9 @@
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Pointer as PointerType } from "../../Pattern/interfaces.js"
 import type { Pairs } from "../interfaces.js"
-import type { PersistentIndexMap } from "./interfaces.js"
 
 import { BadIndex } from "../../constants.js"
 import { isGoodIndex } from "../../utils.js"
-import { Pointer } from "./classes.js"
+import { Pointer, PersistentIndexMap } from "./classes.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { insert } = inplace
@@ -49,7 +48,7 @@ export function persistentIndexMapUnique<KeyType = any, ValueType = any>(
 			indexSet.add(i)
 		}
 
-	this.indexes = this.indexes.filter((x: Pattern<number>, i: any) => {
+	this.indexes = this.indexes.filter((x: PointerType<number>, i: any) => {
 		if (indexSet.has(i)) return true
 		x.value = BadIndex // invalidating the deleted Pointer-s
 	})

@@ -18,6 +18,7 @@ import { extendClass } from "../../utils.js"
 
 export class MultiIndex extends BasicPattern<number[]> implements MultiIndexType {
 	levels: number
+	value: number[]
 
 	equals: (x: MultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]

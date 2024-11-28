@@ -28,7 +28,7 @@ export class MultiIndexModifier
 	decLast: () => number
 	extend: (subIndex: number[]) => number
 
-	constructor(value: MultiIndex) {
+	constructor(value?: MultiIndex) {
 		super(value)
 	}
 }

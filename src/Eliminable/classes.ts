@@ -8,6 +8,7 @@ export class EliminableString
 	extends FlushablePattern<string>
 	implements EliminableStringPatternType
 {
+	value: string
 	result: string
 	eliminate: (eliminated: string | RegExp) => string
 	constructor(value: string) {

@@ -1,4 +1,4 @@
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Pointer as PointerType } from "../../Pattern/interfaces.js"
 import type { IndexMap, Pairs } from "../interfaces.js"
 import type { PersistentIndexMap as PersistentIndexMapType } from "./interfaces.js"
 
@@ -30,25 +30,31 @@ import {
 import { BasicPattern } from "../../Pattern/classes.js"
 import { extendClass } from "../../utils.js"
 
+import { inplace } from "@hgargg-0710/one"
+const { mutate } = inplace
+
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
 // * 	index of a 'PersistentIndexMap' consistent across multiple sources,
 // * 	via wrapping it into a one-property object;
-export const Pointer = <Type = any>(value: Type): Pattern<Type> => ({ value })
+export const Pointer = <Type = any>(value: Type): PointerType<Type> => ({ value })
 
 export class PersistentIndexMap<KeyType = any, ValueType = any>
 	extends BasicPattern<IndexMap<KeyType, ValueType>>
-	implements PersistentIndexMapType<KeyType, ValueType>
+	implements
+		PersistentIndexMapType<KeyType, ValueType>,
+		PointerType<IndexMap<KeyType, ValueType>>
 {
+	value: IndexMap<KeyType, ValueType, number>
 	keys: KeyType[]
 	values: ValueType[]
-	indexes: Pattern<number>[]
+	indexes: PointerType<number>[]
 	size: number
 	default: any
 
 	index: (x: any) => ValueType
 	copy: () => IndexMap<KeyType, ValueType>
 	set: (key: KeyType, value: ValueType, index: number) => any
-	getIndex: (key: KeyType) => Pattern<number>
+	getIndex: (key: KeyType) => PointerType<number>
 
 	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
@@ -66,9 +72,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 
 	constructor(indexMap: IndexMap<KeyType, ValueType>) {
 		super(indexMap)
-		const size = indexMap.size
-		this.indexes = new Array(size)
-		for (let i = size; i--; ) this.indexes[i] = Pointer(i)
+		mutate((this.indexes = new Array(indexMap.size)), (_x, i) => Pointer(i))
 	}
 }
 

@@ -1,5 +1,5 @@
 import type { Indexed } from "../../Stream/interfaces.js"
-import type { HashClass, HashMap, HashType } from "./interfaces.js"
+import type { ExactHashMap, HashClass, HashMap, HashType } from "./interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
 import type { Token as TypeToken } from "../../Token/interfaces.js"
 
@@ -34,8 +34,9 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass
 		extends BasicPattern<InternalHash<InternalKeyType, ValueType>>
-		implements HashMap<KeyType, ValueType, InternalKeyType>
+		implements ExactHashMap<KeyType, ValueType, InternalKeyType>
 	{
+		value: InternalHash<InternalKeyType, ValueType>
 		hash: HashType<KeyType, ValueType, InternalKeyType>
 		size: number
 

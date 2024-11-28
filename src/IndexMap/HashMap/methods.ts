@@ -1,15 +1,15 @@
-import type { HashClass as HashClassType, HashMap } from "./interfaces.js"
+import type { HashClass as HashClassType, ExactHashMap } from "./interfaces.js"
 import { HashClass } from "./classes.js"
 
 export function hashMapIndex<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: HashMap<KeyType, ValueType, InternalKeyType>,
+	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
 	x: KeyType
 ) {
 	return this.value.get(this.hash(x, this.value))
 }
 
 export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: HashMap<KeyType, ValueType, InternalKeyType>,
+	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
 	key: KeyType,
 	value: ValueType
 ) {
@@ -18,7 +18,7 @@ export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any
 }
 
 export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: HashMap<KeyType, ValueType, InternalKeyType>,
+	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
 	key: KeyType
 ) {
 	this.value.delete(this.hash(key, this.value))
@@ -26,7 +26,7 @@ export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = 
 }
 
 export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: HashMap<KeyType, ValueType, InternalKeyType>,
+	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {

@@ -1,35 +1,37 @@
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { Tree } from "../interfaces.js"
-import type { TreeWalker } from "./interfaces.js"
+import type { TreeWalker, WalkableTree } from "./interfaces.js"
 
-import { isGoodIndex, lastIndex } from "../../utils.js"
 import { setValue } from "../../Pattern/utils.js"
-import { sequentialIndex } from "../utils.js"
+import { hasChildren, treeEndPath } from "../utils.js"
 
-import { array, object, function as f } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
+import type { MultiIndexModifier } from "../../Position/classes.js"
 const { last } = array
-const { structCheck } = object
-const { id } = f
 
-export function treeWalkerRenewLevel<Type = any>(
+export function treeWalkerGetCurrChild<Type = any>(this: TreeWalker<Type>) {
+	const { level, pos } = this
+	return (this.curr = level.index(pos.lastLevel()))
+}
+
+export function treeWalkerLevelUp<Type = any>(
 	this: TreeWalker<Type>,
-	init: Tree<Type> = this.value,
-	from: number = 0,
-	until: number = -1
+	positions: number = 1
 ) {
-	this.level = init.index(this.pos.slice(from, until)) as Tree<Type>
+	const { value, pos } = this
+	return (this.level = value!.backtrack(positions, pos.value) as WalkableTree<Type>)
 }
 
 export function treeWalkerPushFirstChild<Type = any>(this: TreeWalker<Type>) {
-	const index = this.modifier.nextLevel()
-	this.level = this.curr as Tree<Type>
-	this.curr = (this.curr as Tree<Type>).index(index)
+	this.modifier.nextLevel()
+	this.level = this.curr as WalkableTree<Type>
+	this.getCurrChild()
 }
 
 export function treeWalkerPopChild<Type = any>(this: TreeWalker<Type>) {
 	const lastIndexed = this.modifier.prevLevel()
 	this.curr = this.level
-	this.renewLevel()
+	this.levelUp()
 	return lastIndexed
 }
 
@@ -38,37 +40,33 @@ export function treeWalkerIsSiblingAfter<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerIsSiblingBefore<Type = any>(this: TreeWalker<Type>) {
-	return !!last(this.pos.lastLevel())
+	return last(this.pos.lastLevel()) > 0
 }
 
 export function treeWalkerGoSiblingAfter<Type = any>(this: TreeWalker<Type>) {
-	return this.modifier.incLast()
+	const res = this.modifier.incLast()
+	this.getCurrChild()
+	return res
 }
 
 export function treeWalkerGoSiblingBefore<Type = any>(this: TreeWalker<Type>) {
-	return this.modifier.decLast()
+	const res = this.modifier.decLast()
+	this.getCurrChild()
+	return res
 }
 
 export function treeWalkerIndexCut<Type = any>(this: TreeWalker<Type>, length: number) {
 	this.modifier.resize(length)
-	this.renewLevel()
-	this.curr = this.level.index(this.pos.lastLevel())
+	this.levelUp()
+	this.getCurrChild()
 }
 
-const childStruct = structCheck({ lastChild: id })
 export function treeWalkerCurrentLastIndex<Type = any>(this: TreeWalker<Type>) {
-	const lastIndex: number[] = []
-	let current = this.curr as Tree<Type>
-	while (childStruct(current) && isGoodIndex(current.lastChild)) {
-		const { lastChild } = current
-		lastIndex.push(lastChild)
-		current = current.index([lastChild]) as Tree<Type>
-	}
-	return lastIndex
+	return treeEndPath(this.curr as Tree<Type>)
 }
 
 export function treeWalkerIsChild<Type = any>(this: TreeWalker<Type>) {
-	return childStruct(this.curr) && isGoodIndex((this.curr as Tree).lastChild)
+	return hasChildren(this.curr)
 }
 
 export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
@@ -76,40 +74,46 @@ export function treeWalkerIsParent<Type = any>(this: TreeWalker<Type>) {
 }
 
 export function treeWalkerLastLevelWithSiblings<Type = any>(this: TreeWalker<Type>) {
-	const { input, pos } = this
-	const sliced = pos.slice(0, -1)
-	const parents = sequentialIndex(input, sliced) as Tree<Type>[]
-
-	let result = lastIndex(parents)
-	while (isGoodIndex(result) && parents[result].lastChild <= sliced[result]) --result
-	return result
+	const { value, pos } = this
+	return value!.findUnwalkedChildren(pos.slice(0, -1))
 }
 
 export function treeWalkerGoPrevLast<Type = any>(this: TreeWalker<Type>) {
-	this.curr = this.level.index([this.goSiblingBefore()])
+	this.goSiblingBefore()
 	const initLength = this.pos.levels
 	this.modifier.extend(this.currentLastIndex())
-	this.renewLevel(this.curr as Tree<Type>, initLength)
+	this.renewLevel(this.curr as WalkableTree<Type>, initLength)
+}
+
+export function treeWalkerRenewLevel<Type = any>(
+	this: TreeWalker<Type>,
+	init: WalkableTree<Type>,
+	from: number,
+	until: number = -1
+) {
+	return (this.level = init.index(this.pos.slice(from, until)) as WalkableTree<Type>)
 }
 
 export function treeWalkerRestart<Type = any>(this: TreeWalker<Type>) {
-	this.curr = this.level = this.value
+	this.curr = this.level = this.value!
 	this.modifier.clear()
 }
 
 export function treeWalkerGoIndex<Type = any>(this: TreeWalker<Type>, pos: MultiIndex) {
 	this.pos = pos
-	this.curr = this.value.index(pos.value)
-	this.renewLevel()
+	this.curr = this.value!.index(pos.value!)
+	this.levelUp()
 }
 
 export function treeWalkerInitialize<Type = any>(
 	this: TreeWalker<Type>,
-	input?: Tree<Type>,
-	pos?: MultiIndex
+	value?: WalkableTree<Type>,
+	pos?: MultiIndex,
+	modifier?: MultiIndexModifier
 ) {
-	if (input) {
-		this.level = setValue(this, input)
+	if (modifier) this.modifier = modifier
+	if (value) {
+		this.level = setValue(this, value)!
 		if (!pos) this.modifier.clear()
 	}
 	if (pos) {

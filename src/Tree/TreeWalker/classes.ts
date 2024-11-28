@@ -1,7 +1,7 @@
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
-import type { InTreeType, Tree } from "../interfaces.js"
-import type { TreeWalker as TreeWalkerType } from "./interfaces.js"
+import type { Tree, WalkableInTreeType } from "../interfaces.js"
+import type { TreeWalker as TreeWalkerType, WalkableTree } from "./interfaces.js"
 import {
 	treeWalkerPushFirstChild,
 	treeWalkerPopChild,
@@ -18,7 +18,9 @@ import {
 	treeWalkerRenewLevel,
 	treeWalkerRestart,
 	treeWalkerGoIndex,
-	treeWalkerInitialize
+	treeWalkerInitialize,
+	treeWalkerGetCurrChild,
+	treeWalkerLevelUp
 } from "./methods.js"
 
 import { MultiIndex as MultiIndexClass } from "../../Position/MultiIndex/classes.js"
@@ -26,13 +28,15 @@ import { MultiIndexModifier as MultiIndexModifierClass } from "../../Position/Mu
 import { extendClass } from "../../utils.js"
 
 export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
-	level: Tree<Type>
+	level: WalkableTree<Type>
 
-	value: Tree<Type>
-	curr: InTreeType<Type>
+	value: WalkableTree<Type>
+	curr: WalkableInTreeType<Type>
 	pos: MultiIndex
 	modifier: MultiIndexModifier
 
+	getCurrChild: () => WalkableInTreeType<Type>
+	levelUp: (positions?: number) => WalkableTree<Type>
 	pushFirstChild: () => void
 	popChild: () => number[]
 	isSiblingAfter: () => boolean
@@ -45,18 +49,28 @@ export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	lastLevelWithSiblings: () => number
 	currentLastIndex: () => number[]
 	goPrevLast: () => void
-	renewLevel: (init?: Tree<Type>, from?: number, until?: number) => void
+	renewLevel: (init: Tree<Type>, from: number, until?: number) => WalkableTree<Type>
 	restart: () => void
 	goIndex: (pos: MultiIndex) => void
-	init: (input?: Tree<Type>, pos?: MultiIndex) => TreeWalker<Type>
 
-	constructor(input?: Tree<Type>, pos: MultiIndex = new MultiIndexClass()) {
-		this.modifier = new MultiIndexModifierClass(pos)
-		this.init(input, pos)
+	init: (
+		value?: WalkableTree<Type>,
+		pos?: MultiIndex,
+		modifier?: MultiIndexModifier
+	) => TreeWalker<Type>
+
+	constructor(
+		value?: WalkableTree<Type>,
+		pos: MultiIndex = new MultiIndexClass(),
+		modifier: MultiIndexModifier = new MultiIndexModifierClass()
+	) {
+		this.init(value, pos, modifier)
 	}
 }
 
 extendClass(TreeWalker, {
+	getCurrChild: { value: treeWalkerGetCurrChild },
+	levelUp: { value: treeWalkerLevelUp },
 	pushFirstChild: { value: treeWalkerPushFirstChild },
 	popChild: { value: treeWalkerPopChild },
 	isSiblingAfter: { value: treeWalkerIsSiblingAfter },

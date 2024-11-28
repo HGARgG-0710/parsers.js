@@ -6,18 +6,18 @@ export function nestedStreamInitCurr<Type = any>(this: NestedStream<Type>) {
 	const ownershipType = this.typesTable.getIndex(this)
 	return (this.currNested = ownershipType != undefined)
 		? new this.constructor(this.value, ownershipType)
-		: this.value.curr
+		: this.value!.curr
 }
 
 export function nestedStreamNext<Type = any>(this: NestedStream<Type>) {
 	if (this.currNested) fastFinish(this.curr as EndableStream<Type>)
-	this.value.next()
+	this.value!.next()
 	return this.initGetter!()
 }
 
 export function nestedStreamIsEnd<Type = any>(this: NestedStream<Type>) {
 	return (
-		this.value.isCurrEnd() ||
+		this.value!.isCurrEnd() ||
 		(this._index != undefined && !this.typesTable.byOwned(this)(this, this.pos))
 	)
 }

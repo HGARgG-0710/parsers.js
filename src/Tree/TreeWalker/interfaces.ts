@@ -1,4 +1,4 @@
-import type { InTreeType, Tree } from "../interfaces.js"
+import type { Tree, WalkableInTreeType } from "../interfaces.js"
 import type { Posed } from "../../Position/interfaces.js"
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
@@ -7,12 +7,14 @@ import type { Pattern } from "../../Pattern/interfaces.js"
 
 export interface TreeWalker<Type = any>
 	extends Posed<MultiIndex>,
-		Currable<InTreeType<Type>>,
-		Pattern<Tree<Type>> {
-	level: Tree<Type>
+		Currable<WalkableInTreeType<Type>>,
+		Pattern<WalkableTree<Type>> {
+	level: WalkableTree<Type>
 	modifier: MultiIndexModifier
-	init: (input?: Tree<Type>, pos?: MultiIndex) => TreeWalker<Type>
+	init: (input?: WalkableTree<Type>, pos?: MultiIndex) => TreeWalker<Type>
 
+	getCurrChild: () => WalkableInTreeType<Type>
+	levelUp: (positions?: number) => WalkableTree<Type>
 	pushFirstChild: () => void
 	popChild: () => number[]
 	isSiblingAfter: () => boolean
@@ -25,7 +27,17 @@ export interface TreeWalker<Type = any>
 	lastLevelWithSiblings: () => number
 	currentLastIndex: () => number[]
 	goPrevLast: () => void
-	renewLevel: (init?: Tree<Type>, from?: number, until?: number) => void
+	renewLevel: (
+		init: WalkableTree<Type>,
+		from: number,
+		until?: number
+	) => WalkableTree<Type>
 	restart: () => void
 	goIndex: (pos: MultiIndex) => void
+}
+
+export interface WalkableTree<Type = any> extends Tree<Type> {
+	index: (multindex: number[]) => WalkableInTreeType<Type>
+	findUnwalkedChildren: (startIndex: number[]) => number
+	backtrack: (positions: number, currInd?: number[]) => WalkableInTreeType<Type>
 }

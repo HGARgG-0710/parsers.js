@@ -17,6 +17,7 @@ export class UnfreezableArray<Type = any>
 	extends BasicPattern<Type[]>
 	implements UnfreezableBuffer<Type>
 {
+	value: Type[]
 	isFrozen: boolean = false
 
 	push: (...x: Type[]) => UnfreezableArray<Type>
@@ -46,6 +47,7 @@ export class UnfreezableString
 	extends BasicPattern<string>
 	implements FreezableBuffer<string>
 {
+	value: string
 	isFrozen: boolean = false
 
 	push: (...x: string[]) => UnfreezableString

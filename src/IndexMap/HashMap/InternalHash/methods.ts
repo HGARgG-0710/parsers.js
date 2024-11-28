@@ -1,4 +1,5 @@
 import type { MapInternalHash, ObjectInternalHash } from "./classes.js"
+
 import { typeof as type } from "@hgargg-0710/one"
 const { isUndefined } = type
 

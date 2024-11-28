@@ -1,8 +1,24 @@
+// TODO: THESE TESTS ARE BROKEN
+// * 1. the methods must check for THE '.curr' and '.level'!
+// * 2. the methods must check for THE '.multind' VALUE;
+// ! not as it is currently - only the length is checked, and so forth...;
+// ! Do this :
+// % 	1. List all the methods that are supposed to modify the 'this.curr'/'this.level'/'this.pos' respectively;
+// 		% signatures:
+// 			* 1. .pushFirstChild 	- .pos [+ ARG], .level [NO ARG], .curr [+ ARG]
+// 			* 2. .popChild		 	- .pos [+ ARG], .level [+ ARG],  .curr [NO ARG]
+// 			* 3. .isSiblingAfter 	- 1 boolean [result];
+// 			* 4. .isSiblingBefore 	- 1 boolean [result];
+// 			* 5. .goSiblingAfter	- 
+// % 	2. Change them accordingly
+
 import assert from "node:assert"
 
 import type { Tree } from "../../../../../dist/src/Tree/interfaces.js"
 import type { MultiIndex } from "../../../../../dist/src/Position/MultiIndex/interfaces.js"
 import type { TreeWalker } from "../../../../../dist/src/Tree/TreeWalker/interfaces.js"
+
+import type { TypePredicate } from "../../../../../dist/src/interfaces.js"
 
 import { isTree } from "Tree/lib/classes.js"
 import { isMultiIndexModifier } from "Position/MultiIndex/MultiIndexModifier/lib/classes.js"
@@ -21,9 +37,8 @@ import {
 } from "lib/lib.js"
 
 import { object, typeof as type, function as f, array } from "@hgargg-0710/one"
-import type { TypePredicate } from "../../../../../dist/src/interfaces.js"
 const { structCheck } = object
-const { isFunction, isUndefined } = type
+const { isFunction } = type
 const { and } = f
 const { last } = array
 
@@ -200,109 +215,157 @@ function TreeWalkerInitializeTest(instance: TreeWalker, input?: Tree, pos?: Mult
 	)
 }
 
+function GoIndexTest(test: (instance?: TreeWalker, ...input: any[]) => any) {
+	return function (instance: TreeWalker, index?: MultiIndex, ...input: any[]) {
+		if (index) instance.goIndex(index)
+		test(instance, ...input)
+	}
+}
+
 type TreeWalkerTestSignature = {
-	tree: Tree
-	pushTimes: number
-	popTimes: number
-	isSiblingAfter?: boolean
-	isSiblingBefore?: boolean
-	afterTimes?: number
-	beforeTimes?: number
-	cutLength?: number
-	isChild?: boolean
-	isParent?: boolean
-	lastLevelWithSiblings?: number
-	currentLastIndex?: number[]
-	goPrevLastGreater?: boolean
-	renewLevelTests: [Tree, Tree, number, number][]
-	shouldRestart?: any
+	treeInput: [Tree, MultiIndex?]
+	pushTests: [number, MultiIndex?][]
+	popTests: [number, MultiIndex?][]
+	isSiblingAfterTests: [boolean, MultiIndex?][]
+	isSiblingBeforeTests: [boolean, MultiIndex?][]
+	goSiblingAfterTests: [number, MultiIndex?][]
+	goSiblingBeforeTests: [number, MultiIndex?][]
+	indexCutTests: [number, MultiIndex?][]
+	isChildTests: [boolean, MultiIndex?][]
+	isParentTests: [boolean, MultiIndex?][]
+	lastLevelWithSiblingsTests: [number, MultiIndex?][]
+	currentLastIndexTests: [number, MultiIndex?][]
+	goPrevLastTests: [boolean, MultiIndex?][]
+	renewLevelTests: [Tree, Tree, number, number, MultiIndex?][]
+	restartTests: MultiIndex[]
 	goIndexTests: MultiIndex[]
 	initTests: [Tree?, MultiIndex?][]
 }
 
-export function TreeWalkerTest(
+export function TreeWalkerClassTest(
 	className: string,
-	walkerConstructor: new () => TreeWalker,
+	walkerConstructor: new (tree: Tree, multind?: MultiIndex) => TreeWalker,
 	testSignatures: TreeWalkerTestSignature[]
 ) {
 	classTest(`(TreeWalker) ${className}`, () =>
 		signatures(
 			testSignatures,
 			({
-					tree,
-					pushTimes,
-					popTimes,
-					isSiblingAfter,
-					afterTimes,
-					isSiblingBefore,
-					beforeTimes,
-					cutLength,
-					isChild,
-					isParent,
-					lastLevelWithSiblings,
-					currentLastIndex,
-					goPrevLastGreater,
+					treeInput,
+					pushTests,
+					popTests,
+					isSiblingAfterTests: isSiblingAfter,
+					goSiblingAfterTests,
+					isSiblingBeforeTests: isSiblingBefore,
+					goSiblingBeforeTests,
+					indexCutTests: cutLength,
+					isChildTests: isChild,
+					isParentTests: isParent,
+					lastLevelWithSiblingsTests: lastLevelWithSiblings,
+					currentLastIndexTests: currentLastIndex,
+					goPrevLastTests: goPrevLastGreater,
 					renewLevelTests,
-					shouldRestart,
+					restartTests,
 					goIndexTests,
 					initTests
 				}) =>
 				() => {
-					const instance = TreeWalkerConstructorTest(walkerConstructor, tree)
+					const instance = TreeWalkerConstructorTest(
+						walkerConstructor,
+						...treeInput
+					)
 
 					// .pushFirstChild
-					repeat(pushTimes, () => TreeWalkerPushFirstChildTest(instance))
+					for (const [times, index] of pushTests)
+						repeat(times, () =>
+							GoIndexTest(TreeWalkerPushFirstChildTest)(instance, index)
+						)
 
 					// .popChild
-					repeat(popTimes, () => TreeWalkerPopChildTest(instance))
+					for (const [times, index] of popTests)
+						repeat(times, () =>
+							GoIndexTest(TreeWalkerPopChildTest)(instance, index)
+						)
 
 					// .isSiblingAfter
-					if (isSiblingBefore !== undefined)
-						TreeWalkerIsSiblingAfterTest(instance, isSiblingAfter)
+					for (const [expected, index] of isSiblingAfter)
+						GoIndexTest(TreeWalkerIsSiblingAfterTest)(
+							instance,
+							index,
+							expected
+						)
 
 					// .goSibilngAfter
-					if (isSiblingAfter && !isUndefined(afterTimes))
-						repeat(afterTimes, () => TreeWalkerGoSiblingAfterTest(instance))
+					for (const [times, index] of goSiblingAfterTests)
+						repeat(times, () =>
+							GoIndexTest(TreeWalkerGoSiblingAfterTest)(instance, index)
+						)
 
 					// .isSiblingBefore
-					if (!isUndefined(isSiblingBefore))
-						TreeWalkerIsSiblingBeforeTest(instance, isSiblingBefore)
+					for (const [expected, index] of isSiblingBefore)
+						GoIndexTest(TreeWalkerIsSiblingBeforeTest)(
+							instance,
+							index,
+							expected
+						)
 
 					// .goSibilngBefore
-					if (isSiblingBefore && !isUndefined(beforeTimes))
-						repeat(beforeTimes, () => TreeWalkerGoSiblingBeforeTest(instance))
+					for (const [times, index] of goSiblingBeforeTests)
+						repeat(times, () =>
+							GoIndexTest(TreeWalkerGoSiblingBeforeTest)(instance, index)
+						)
 
 					// .indexCut
-					if (!isUndefined(cutLength))
-						TreeWalkerIndexCutTest(instance, cutLength)
+					for (const [length, index] of cutLength)
+						GoIndexTest(TreeWalkerIndexCutTest)(instance, index, length)
 
 					// .isChild
-					if (!isUndefined(isChild)) TreeWalkerIsChildTest(instance, isChild)
+					for (const [expected, index] of isChild)
+						GoIndexTest(TreeWalkerIsChildTest)(
+							instance,
+							index,
+							expected,
+							isChild
+						)
 
 					// .isParent
-					if (!isUndefined(isParent)) TreeWalkerIsParentTest(instance, isParent)
+					for (const [expected, index] of isParent)
+						GoIndexTest(TreeWalkerIsParentTest)(instance, index, expected)
 
 					// .lastLevelWithSiblings
-					if (!isUndefined(lastLevelWithSiblings))
-						TreeWalkerLastLevelWithSiblingsTest(
+					for (const [expected, index] of lastLevelWithSiblings)
+						GoIndexTest(TreeWalkerLastLevelWithSiblingsTest)(
 							instance,
-							lastLevelWithSiblings
+							index,
+							expected
 						)
 
 					// .currentLastIndex
-					if (!isUndefined(currentLastIndex))
-						TreeWalkerCurrentLastIndexTest(instance, currentLastIndex)
+					for (const [expected, index] of currentLastIndex)
+						GoIndexTest(TreeWalkerCurrentLastIndexTest)(
+							instance,
+							index,
+							expected
+						)
 
 					// .goPrevLast
-					if (!isUndefined(goPrevLastGreater))
-						TreeWalkerGoPrevLastTest(instance, goPrevLastGreater)
+					for (const [expected, index] of goPrevLastGreater)
+						GoIndexTest(TreeWalkerGoPrevLastTest)(instance, index, expected)
 
 					// .renewLevel
-					for (const [expected, init, from, until] of renewLevelTests)
-						TreeWalkerRenewLevelTest(instance, expected, init, from, until)
+					for (const [expected, init, from, until, times] of renewLevelTests)
+						GoIndexTest(TreeWalkerRenewLevelTest)(
+							instance,
+							times,
+							expected,
+							init,
+							from,
+							until
+						)
 
 					// .restart
-					if (!isUndefined(shouldRestart)) TreeWalkerRestartTest(instance)
+					for (const index of restartTests)
+						GoIndexTest(TreeWalkerRestartTest)(instance, index)
 
 					// .goIndex
 					for (const index of goIndexTests)

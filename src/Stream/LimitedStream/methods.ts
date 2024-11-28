@@ -22,52 +22,58 @@ export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {
 }
 
 export function limitedStreamProd<Type = any>(this: LimitedStream<Type>) {
-	if (!this.hasLookAhead) {
+	const { value, direction, hasLookAhead, lookAhead } = this
+	if (!hasLookAhead) {
 		this.hasLookAhead = true
-		this.value[this.direction ? "next" : "prev"]()
-		return this.value.curr
+		value![direction ? "next" : "prev"]()
+		return value!.curr
 	}
-	return this.lookAhead
+	return lookAhead
 }
 
 export function limitedStreamIsEnd<Type = any>(this: LimitedStream<Type>) {
-	if (this.value.isCurrEnd()) return true
+	const { value, to } = this
+	if (value!.isCurrEnd()) return true
 	this.lookAhead = this.prod()
-	return positionEqual(this.value, this.to)
+	return positionEqual(value!, to)
 }
 
 export function limitedStreamIsStart<Type = any>(this: LimitedStream<Type>) {
-	return this.value.isCurrStart() || positionEqual(this.value, this.from)
+	const { value, from } = this
+	return value!.isCurrStart() || positionEqual(value!, from)
 }
 
 export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
-	this.lookAhead = this.curr
+	const { curr, direction, value } = this
+	this.lookAhead = curr
 	this.hasLookAhead = true
-	this.value[this.direction ? "prev" : "next"]()
-	return this.value.curr
+	value![direction ? "prev" : "next"]()
+	return value!.curr
 }
 
 export function limitedStreamInitialize<Type = any>(
 	this: LimitedStream<Type>,
-	value: LimitedUnderStream<Type>,
+	value?: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position
 ) {
-	this.hasLookAhead = false
+	if (value || this.value) {
+		if (value) superInit(this, value)
 
-	if (!isUndefined(from)) {
-		if (isUndefined(to)) {
-			to = from
-			from = LimitedStream.NoMovementPredicate
+		this.hasLookAhead = false
+
+		if (!isUndefined(from)) {
+			if (isUndefined(to)) {
+				to = from
+				from = LimitedStream.NoMovementPredicate
+			}
+
+			fastNavigate(this.value!, from)
+
+			this.direction = directionCompare(from, to, this.value)
+			this.from = from
+			this.to = positionNegate(positionConvert(to, this.value))
 		}
-
-		fastNavigate(this.value, from)
-
-		this.direction = directionCompare(from, to, this.value)
-		this.from = from
-		this.to = positionNegate(positionConvert(this.to, this.value))
 	}
-
-	superInit(this, value)
 	return this
 }

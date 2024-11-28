@@ -23,10 +23,12 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		extends FlushablePattern<Type>
 		implements DelegateTokenizablePattern<Type, InType, OutType>
 	{
+		value: Type
+		result: TokenizationResult<Type, OutType>
+
 		tokenize: MethodTokenizer<Type, InType, OutType>
 		tokenizer: FreeTokenizer<Type, InType>
 		isType: TypePredicate<Type>
-		result: TokenizationResult<Type, OutType>
 
 		constructor(value: Type) {
 			super(value)

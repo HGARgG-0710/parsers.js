@@ -61,15 +61,24 @@ REMINDERS [2.]:
 		21.7. replace (everywhere) the 'import' with 'import {...} from "./dist/main"', then 'const {...} = ...'; 
 			This ensures the import-correctness of the given paths; 
 			Gives first-hand experience of actually using the library; 
+				
+	2.48. [constants] Maaaybe... Add defaults of re-initializable classes to 'constants', to prevent errors? 
+		Example: the 'TreeStream'; 
+		Walk through the project's classes, looking for assigned defaults; 
+		Properties to satisfy to be a default: 
 
+			1. If an object, it is a function that returns the object (explicit allocation); 
+			2. If not an object (primitive), save as a 
+
+	2.49. decouple interfaces - take out the redundant 'Pointer' interface from where it's not necessary, make a part of implementations...;
+		
 Order of TODO-elimination: 
+	5.2.48.
+	5.2.49.
+
+	A.3.10.1
 	A.3.10.2
 	A.3.9.12
-
-	A.3.11. 
-	A.3.9.9
-
-	A.3.12. 
 		
 	5.17
 	5.21.5
@@ -78,6 +87,9 @@ Order of TODO-elimination:
 	A.3.1.2
 	A.3.9.10
 	A.3.9.11
+	
+	A.3.11. 
+	A.3.9.9
 
 	A.3.2.
 	A.3.9.5
@@ -201,6 +213,7 @@ A. testing:
 
 				[Do Tree/.../classes.ts first]
 				12. Tree/utils.ts
+					ALSO - this is not complete (check out the 'lib/utils.ts' - there's a missing export out there...); 
 
 				[Do last]
 				13. src/utils.ts		 
@@ -208,13 +221,15 @@ A. testing:
 		3.10. Tree/
 			To test [classes.ts]: 
 				2. TreeWalker/
-				
+
+				1. Tree [complete]: 
+					1. 'ParentTree'; 
+					2. [ChildrenTree] '.backtrack' + '.findUnwalkedChildren'
+			
 		3.11. Position/
 			To test [classes.ts]: 
 				1. MultiIndex
 				2. MultiIndexModifier
-		
-		3.12. Buffer
 		
 B. documentation (change/fix it...);
 	B.1. Create new docs pages:
@@ -246,6 +261,7 @@ B. documentation (change/fix it...);
 				1.3.1.1. FlushablePattern; 
 				1.3.1.2. BasicPattern; 
 				1.3.1.3. StreamClass({...}); 
+				1.3.1.4. BasicTree;
 			
 		B1.4. Class-Factories: 
 			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
@@ -587,6 +603,30 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					// ... or any other order
 				]
 			}
+
+		For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used; 
+		2.12.1. Also: 
+
+			Create a "fast" 'TreeIterator' class; 
+				This is to replace the WalkableTree+TreeWalker+TreeStream combination due to: 
+
+					1. They are slow (require FIRST converting the source to a 'Tree'); 
+					2. They are memory-costly (creating a new Tree-structure is somewhat demanding); 
+				
+			This would (instead) approach iteration directly - it would use PARTICULAR properties for a given Tree;
+			Also, (as it's not a PERSISTENT type), it'd accept a 'converter' (so as to be able to "iterate" AND "convert" a given Tree); 
+
+			The interface works like: 
+
+				TreeIterator(TreeKind(...))(childIterator, converter)
+			
+			Requires NO copying for long-term storage (it's "inlined"), hence - no time needed for unnecessary allocations; 
+
+			The 'childIterator' is (basically) an IndexMap/function that returns for any given item its' sub-iterated items
+				(an array of children); 
+			The 'childIterator' is used for walking through the items INSIDE the 'TreeIterator'; 
+		
+			BENCHMARK THIS [compared to the 'WalkableTree'+'TreeWalker'+'TreeStream' approach to code-generation]!
 		
 	2.13. [generally - see if/where applicable] About generics - relax them; 
 		Use ONLY WHEN NEEDED; 
@@ -600,44 +640,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			it will choose a pair of them for different [distinct] boundries); 
 		Similarly - one could give an Array of limiting characters for a LimitedStream to be defined by...; 
 	
-	2.15. New type of Tree - a BacktrackableTree, takes up more memory, but is (ultimately) faster to use in TreeWalker [when going backwards inside the Tree]; 
-		In the 'TreeWalker.renewLevel', it does the 'init.index', which is O(n) complexity relative to 'n' - number of levels in a tree; 	
-		A 'BacktrackableTree' [interface] is one that has a method: 
-
-			1. backtrack(pos: number)
-
-		Which returns the 'pos'-parent [that being, goes "up" the level in the tree]; 
-		Make the old 'Tree' into the 'BacktrackableTree', create a 'ParentTree' [implementation], where 'backtrack' is defined as: 
-
-			backtrack = (pos: number) => {
-				let result = this
-				while (pos--) result = result.parent
-				return retult
-			}
-		
-		Which is O(1) to get the immidiate parent, and O(p) relative to the number of levels to go back (`p`); 
-		For this to work (the '.parent' property), the Tree must be CONSTRUCTED in a certain fashion; 
-		Add more items to the interface: 
-
-			1. pushChildren(children: any[])
-			2. clearChildren() 
-		
-		The 'ParentTree' implementation would (therefore) assign '.parent = this' on all the pushed children in '.pushChildren', and do 'this[propName] = []' in 'clearChlidren'; 
-		[IMPORTANT!: Make a 'ParentTree' implementation work with the 'ChildrenTree'-s, that is it'd have its own 'propName']; 
-
-		THEN, SPLIT the 'renewLevel' onto 2 functions [one of which uses the 'this.curr' (in '.goPrevLast'), and the other - that uses '.backtrack(1)']; 
-			Better still - for optimization purposes, let it CHOOSE which implementation to use DEPENDING on the number of parent levels and pre-parent levels;
-
-		2.18.1. ALSO, rewrite the '.lastLevelWithSiblings()'; 
-			Now, one can use the more memory-efficient '.backtrack', instead of having to walk linearly, and memoize using the 'sequentialIndex'; 
-
-		PROBLEM [with this approach]: how to define the '.backtrack'-dependent definition of '.renewLevel' for cases when '.backtrack' is unavailable? 
-			Namely, the present 'ChildrenTree'-s; 
-			Solution: 
-				Mandate the 'ParentTree'-s, require this particular structure;
-					Shouldn't be a memory concern (for most cases, anyway), because for this to be a memory-waste, one'd have to have '.children.value.length === 1'
-						to be true for most of the tree items; 
-
 	2.16. Add a fast implementation of '.finish' to the 'TreeStream'; 
 		When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
 		Calls the '.index' on the saved '.lastIndex'; 
@@ -1226,6 +1228,65 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	
 	2.44. [refactoring] Add a new util: 
 		tokenCompare = (tt: TokenType) => (x: any, y: any) => tt.is(x) && tt.is(y) && value(x) === value(y); 
+
+	2.45. TreeStream: flag optimizations; 
+		Allow 'TreeStream' to be a Stream-class-generation function also; 
+		Permit the TreeStream to have overloads for: 	
+
+			1. navigate (work with number-indexes, when '.buffer' is present); 
+			2. next		(same thing - '.buffer' + '.pos')
+			3. prev		(same thing - '.buffer' + '.pos')
+			... [and so forth]
+		
+		Will allow to have the benefits of flag-presence via the overloads; 
+	
+	2.46. [static method] MultiIndex.fromPosition(stream: TreeStream, position: Position): MultiIndex
+		This is a method for converting a 'position' from the given TreeStream to a 'MultiIndex'; 
+		Does NOT '.rewind()'; 
+	
+	2.47. [Big one] Add support for proper PatternMatching;
+		Serves as an abstraction over the 'RegExp'; 
+		Allows one to match 'Token'-s using 'MatchablePattern'-s; 
+		Would have: 
+
+			[1. matching functions]
+			1.1 StreamMatcher - works on Stream-s of items that are '.match(...)'-able [as arguments for 'MatchablePattern.match']; 
+				Expects as input a 'MatchableStream', or a similar thing; 
+
+			[2. MatchablePattern-s]
+			2.1. [StreamClass] MatchableStream 	- walks through a given Stream of items, producing new 'MatchablePattern' on each '.match()' [ex: calls '.next()' on every '.match()']; 
+				Depending on the output of the '.match' ('true', 'false', 'null', number, or PredicatePosition), either: 
+
+					1. 'true' 					- goes forward 1 position; 
+					2. 'false' 					- halts (mismatch)
+					3. 'null' 					- goes backward 1 position;
+					4. number   				- goes forward/backward specified number of positions
+					5. PredicatePosition 		- goes forward/backward until specified condition on a 'MatchablePattern' is met; 
+
+			2.2. FlexibleMatchable				- a 'MatchablePattern' defined by a particular user-given function; 
+			2.3. [ChildrenTree] MatchableTree	- a 'ChildrenTree', that chooses one of the matching "paths" depending on the result of the '.match' function of its own; 
+				Useful in combination with 'TreeStream'+'MatchableStream' - can create "matching trees"; 
+
+			[Possibly, add more stuff... LOOK FOR CASES OF APPLICATIONS!]
+
+	2.48. [codebase consistency] The '.init' methods for StreamClass DO NOT return 'this': 
+		Fix this - let them. All the other '.init' methods do it; 
+		(This, in particular, generally permits usage like: 
+
+				const t = new InitializedClass().init(...)
+			
+		In cases, when the constructor is NOT the same as the '.init(...)';
+		Likewise, a different semantics [copying] for '.init', when a partial copy is necessary: 
+
+				const t = new InitializedClass(...)
+				const r = t.init(...)
+				t === r // false
+		)
+	
+	2.49. [general] Interfaces - more work; 
+		Some little details of interfaces (such as, previously, interface for 'PersistentIndexMap' with 'index: number[]' - fixed) 
+			SHOULD be hidden instead; 
+		Look through the interfaces, remove any data fields that are better left for the implementation; 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

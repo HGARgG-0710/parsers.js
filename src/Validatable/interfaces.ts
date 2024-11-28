@@ -1,5 +1,5 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Pattern, Flushable, Resulting } from "../Pattern/interfaces.js"
+import type { Pointer, Flushable, Resulting } from "../Pattern/interfaces.js"
 import type { Pair, Pairs } from "../IndexMap/interfaces.js"
 
 export type InvalidMatch = false
@@ -34,7 +34,7 @@ export interface Validatable<Type = any, KeyType = any> extends Summat {
 }
 
 export interface ValidatablePattern<Type = any, KeyType = any>
-	extends Pattern<Type>,
+	extends Pointer<Type>,
 		Resulting<ValidationOutput<Type>>,
 		Flushable,
 		Validatable<Type, KeyType> {}

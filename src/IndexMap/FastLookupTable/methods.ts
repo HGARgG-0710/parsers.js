@@ -21,8 +21,8 @@ export function persistentIndexFastLookupTableDelete<KeyType = any, ValueType = 
 	this: PersistentIndexFastLookupTable<KeyType, ValueType>,
 	key: KeyType
 ) {
-	const sub = this.value
-	sub.delete(sub.getIndex(key).value)
+	const { value } = this
+	value.delete(value.getIndex(key).value)
 	return this
 }
 

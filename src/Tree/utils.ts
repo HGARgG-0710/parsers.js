@@ -1,10 +1,12 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Tree, InTreeType } from "./interfaces.js"
+import type { Tree, InTreeType, TreeConverter, TreeConstructor } from "./interfaces.js"
 
-import { array, typeof as type, object } from "@hgargg-0710/one"
-const { isArray } = type
-const { propPreserve } = array
+import { isGoodIndex } from "../utils.js"
+
+import { object, function as _f } from "@hgargg-0710/one"
 const { structCheck } = object
+const { id } = _f
+
+export const hasChildren = structCheck<Tree>({ lastChild: isGoodIndex })
 
 /**
  * Sequentially indexes a given `tree` using `multind` for indicies array.
@@ -22,34 +24,28 @@ export function sequentialIndex<Type = any>(
 }
 
 /**
- * @returns a function that `.map`s the given array using `f`, while preserving all of its properties
- */
-export const mapPropsPreserve = (
-	f: (x?: any, i?: number, arr?: any[]) => any
-): ((x: any[] & Summat) => any[] & Summat) =>
-	propPreserve((array: any[]) => array.map(f), new Set(["length"]))
-
-/**
- * Applies `recursiveArrayCopy` on all the elements of the given array, while copying it (returns the result)
- */
-export const arrayTreeMapPreserve = mapPropsPreserve(baseRecursiveTreeCopy)
-
-/**
  * Creates a deep copy of the given recursive-array structure
  */
-export function recursiveTreeCopy(propName: string = "children") {
-	if (!propName) return baseRecursiveTreeCopy
-	const propCheck = structCheck({ [propName]: isArray })
+export function recursiveTreeCopy<Type = any>(treeConstructor: TreeConstructor<Type>) {
 	const T = (tree: any) =>
-		propCheck(tree)
-			? {
-					...tree,
-					[propName]: tree[propName].map(T)
-			  }
+		tree instanceof treeConstructor
+			? new treeConstructor(tree.children.map(T), id)
 			: tree
 	return T
 }
 
-export function baseRecursiveTreeCopy(tree: any) {
-	return isArray(tree) ? arrayTreeMapPreserve(tree) : tree
+export function treeEndPath<Type = any>(tree: Tree<Type>) {
+	const lastIndex: number[] = []
+	let current = tree
+	while (hasChildren(current)) {
+		const { lastChild } = current
+		lastIndex.push(lastChild)
+		current = current.index([lastChild]) as Tree<Type>
+	}
+	return lastIndex
 }
+
+export const mapper =
+	<Type = any>(converter: (x: any) => Type | Tree<Type>): TreeConverter<Type> =>
+	(x: any[]) =>
+		x.map(converter)

@@ -1,7 +1,7 @@
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Pattern, Pointer } from "../../Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable, HashTable } from "./interfaces.js"
+import type { FastLookupTable, ExactHashTable } from "./interfaces.js"
 
 import {
 	valueDelete,
@@ -26,9 +26,12 @@ const { id } = _f
 
 export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 	extends BasicPattern<PersistentIndexMap<KeyType, ValueType>>
-	implements FastLookupTable<KeyType, ValueType, Pattern<number>>
+	implements
+		FastLookupTable<KeyType, ValueType, Pattern<number>>,
+		Pointer<PersistentIndexMap<KeyType, ValueType>>
 {
-	getIndex: (x: any) => Pattern<number>
+	value: PersistentIndexMap<KeyType, ValueType>
+	getIndex: (x: any) => Pointer<number>
 	own: (x: any, ownIndex: Pattern<number>) => void
 	byOwned: (x: any) => ValueType
 
@@ -63,8 +66,9 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 ) {
 	class HashTableClass
 		extends BasicPattern<HashMap<KeyType, ValueType>>
-		implements HashTable<KeyType, ValueType, OwningType>
+		implements ExactHashTable<KeyType, ValueType, OwningType>
 	{
+		value: HashMap<KeyType, ValueType, any>
 		getIndex: (x: any) => OwningType
 		own: (x: any, ownFunc: OwningType) => void
 		byOwned: (x: any) => ValueType
@@ -86,7 +90,7 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 
 type HashConstructor = new <KeyType = any, ValueType = any>(
 	hash: HashMap<KeyType, ValueType>
-) => HashTable<KeyType, ValueType>
+) => ExactHashTable<KeyType, ValueType>
 
 export const [BasicHashTable, StreamHashTable]: [HashConstructor, HashConstructor] = [
 	id,

@@ -46,7 +46,7 @@ export function multiIndexLastLevel(this: MultiIndex): number[] {
 export function multiIndexConvert(this: MultiIndex, stream: TreeStream) {
 	let final = 0
 	stream.rewind()
-	while (!stream.isEnd && !this.equals(stream.pos)) {
+	while (!stream.isEnd && !this.equals(stream.walker.pos)) {
 		stream.next()
 		++final
 	}

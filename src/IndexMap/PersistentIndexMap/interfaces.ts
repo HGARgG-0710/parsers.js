@@ -1,8 +1,5 @@
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Pointer } from "../../Pattern/interfaces.js"
 import type { IndexMap } from "../interfaces.js"
 
 export interface PersistentIndexMap<KeyType = any, ValueType = any>
-	extends IndexMap<KeyType, ValueType, Pattern<number>>,
-		Pattern<IndexMap<KeyType, ValueType>> {
-	indexes: Pattern<number>[]
-}
+	extends IndexMap<KeyType, ValueType, Pointer<number>> {}

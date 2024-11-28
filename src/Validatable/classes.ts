@@ -18,6 +18,7 @@ export function DelegateValidatable<Type = any, KeyType = any>(
 		extends FlushablePattern<Type>
 		implements DelegateValidatablePattern<Type, KeyType>
 	{
+		value: Type
 		result: ValidationOutput<Type>
 		validate: MethodValidator<Type, KeyType>
 		validator: FreeValidator<Type, KeyType>

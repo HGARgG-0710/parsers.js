@@ -6,24 +6,24 @@ import { superInit } from "../StreamClass/utils.js"
 
 export function prolongedStreamIsEnd<Type = any>(this: ProlongedStream<Type>) {
 	return (
-		this.value[this.streamIndex].isCurrEnd() &&
-		lastIndex(this.value) > this.streamIndex
+		this.value![this.streamIndex].isCurrEnd() &&
+		lastIndex(this.value!) > this.streamIndex
 	)
 }
 
 export function prolongedStreamCurr<Type = any>(this: ProlongedStream<Type>) {
-	return this.value[this.streamIndex].curr
+	return this.value![this.streamIndex].curr
 }
 
 export function prolongedStreamNext<Type = any>(this: ProlongedStream<Type>) {
-	const currStream = this.value[this.streamIndex]
+	const currStream = this.value![this.streamIndex]
 	if (currStream.isCurrEnd()) ++this.streamIndex
 	else currStream.next()
 	return currStream.curr
 }
 
 export function prolongedStreamDefaultIsEnd<Type = any>(this: ProlongedStream<Type>) {
-	return this.value.every(isEnd)
+	return this.value!.every(isEnd)
 }
 
 export function prolongedStreamInitialize<Type = any>(

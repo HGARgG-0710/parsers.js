@@ -57,7 +57,7 @@ type FreezableBufferClassTestSignature<Type = any> = {
 	readTests: [number, Type][]
 } & CollectionClassTestSignature
 
-export function FreezableBufferClassTest<Type = any>(
+function FreezableBufferClassTest<Type = any>(
 	className: string,
 	bufferConstructor: new (...input: any[]) => FreezableBuffer<Type>,
 	testSignatures: FreezableBufferClassTestSignature<Type>[]
@@ -93,20 +93,29 @@ export function UnfreezableBufferClassTest<Type = any>(
 ) {
 	FreezableBufferClassTest(className, bufferConstructor, testSignatures)
 	classTest(`(UnfreezableBuffer) ${className}`, () => {
-		signatures(testSignatures, ({ input, pushed }) => () => {
-			const bufferInstance = UnfreezableBufferConstructorTest(
-				bufferConstructor,
-				input
-			)
+		signatures(
+			testSignatures,
+			({ input, pushed, expectedPushValue, pushCompare }) =>
+				() => {
+					const bufferInstance = UnfreezableBufferConstructorTest(
+						bufferConstructor,
+						input
+					)
 
-			// .freeze
-			FreezableBufferFreezeTest(bufferInstance, true)
+					// .freeze
+					FreezableBufferFreezeTest(bufferInstance, true)
 
-			// .unfreeze
-			UnfreezableBufferUnfreezeTest(bufferInstance, false)
+					// .unfreeze
+					UnfreezableBufferUnfreezeTest(bufferInstance, false)
 
-			// .push
-			CollectionPushTest(bufferInstance, pushed)
-		})
+					// .push
+					CollectionPushTest(
+						bufferInstance,
+						expectedPushValue,
+						pushed,
+						pushCompare
+					)
+				}
+		)
 	})
 }

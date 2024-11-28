@@ -129,6 +129,8 @@ export const classWrapper =
 	(...args: any[]) =>
 		new X(...args)
 
+export const parameterWaster = (X: new (...input: any[]) => any) => () => new X()
+
 export const AssignmentClass =
 	<Type = any, OutType extends Summat = Summat>(propName: string) =>
 	(x: Summat, propVal: Type): OutType => {

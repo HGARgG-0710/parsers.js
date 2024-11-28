@@ -1,5 +1,6 @@
-import type { InternalHash } from "./interfaces.js"
+import type { Pointer } from "../../../Pattern/interfaces.js"
 import type { Pairs } from "../../../IndexMap/interfaces.js"
+import type { InternalHash } from "./interfaces.js"
 
 import { valueDelete, valueSet, valueSize } from "../../../Pattern/methods.js"
 import {
@@ -19,8 +20,9 @@ const { isArray } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any>
 	extends BasicPattern<Map<KeyType, ValueType>>
-	implements InternalHash<KeyType, ValueType>
+	implements InternalHash<KeyType, ValueType>, Pointer<Map<KeyType, ValueType>>
 {
+	value: Map<KeyType, ValueType>
 	size: number
 	default: any
 
@@ -48,8 +50,9 @@ extendClass(MapInternalHash, {
 
 export class ObjectInternalHash<Type = any>
 	extends BasicPattern<object>
-	implements InternalHash<string, Type>
+	implements InternalHash<string, Type>, Pointer<object>
 {
+	value: object
 	default: any
 	size: number
 

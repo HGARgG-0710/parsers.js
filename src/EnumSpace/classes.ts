@@ -3,18 +3,22 @@ import type {
 	TokenInstanceClass
 } from "../Token/interfaces.js"
 
-import type { ConstEnumSpace, EnumSpace, Mappable } from "./interfaces.js"
+import type { Pointer } from "../Pattern/interfaces.js"
+import type { EnumSpace, Mappable } from "./interfaces.js"
 
 import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
 import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./methods.js"
 import { BasicPattern } from "../Pattern/classes.js"
 import { extendClass } from "../utils.js"
 
-export class ConstEnum extends BasicPattern<{}[]> implements ConstEnumSpace {
+export class ConstEnum
+	extends BasicPattern<{}[]>
+	implements EnumSpace<{}>, Pointer<{}[]>
+{
 	size: number
 	value: {}[]
 
-	add: (n: number) => ConstEnumSpace
+	add: (n: number) => ConstEnum
 	join: (enums: EnumSpace) => EnumSpace<{}>
 	copy: () => EnumSpace<{}>
 	map: (f?: Mappable<{}>) => {}[]

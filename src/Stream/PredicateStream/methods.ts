@@ -7,8 +7,8 @@ import { preserveDirection } from "../../Position/utils.js"
 import { superInit, fastNavigate } from "../StreamClass/utils.js"
 
 export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
-	fastNavigate(this.value, this.predicate)
-	return this.value.curr
+	fastNavigate(this.value!, this.predicate)
+	return this.value!.curr
 }
 
 export function predicateStreamNext<Type = any>(this: PredicateStream<Type>) {
@@ -19,13 +19,13 @@ export function predicateStreamNext<Type = any>(this: PredicateStream<Type>) {
 export function predicateStreamProd<Type = any>(this: PredicateStream<Type>) {
 	if (this.hasLookAhead) return this.lookAhead
 	this.hasLookAhead = true
-	this.value.next()
+	this.value!.next()
 	return this.curr
 }
 
 export function predicateStreamIsEnd<Type = any>(this: PredicateStream<Type>) {
 	this.lookAhead = this.prod()
-	return this.value.isCurrEnd() || !this.predicate(this, this.pos)
+	return this.value!.isCurrEnd() || !this.predicate(this, this.pos)
 }
 
 export function predicateStreamInitialize<Type = any>(
@@ -42,5 +42,5 @@ export function predicateStreamInitialize<Type = any>(
 }
 
 export function predicateStreamDefaultIsEnd<Type = any>(this: PredicateStream<Type>) {
-	return this.value.isEnd || !this.predicate(this.curr)
+	return this.value!.isEnd || !this.predicate(this.curr)
 }

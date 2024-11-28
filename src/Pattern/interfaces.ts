@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 export interface Pattern<Type = any> extends Summat {
-	value: Type
+	value?: Type
 }
 
 export interface Resulting<ResultType = any> extends Summat {
@@ -10,4 +10,8 @@ export interface Resulting<ResultType = any> extends Summat {
 
 export interface Flushable extends Summat {
 	flush: () => void
+}
+
+export interface Pointer<Type = any> extends Pattern<Type> {
+	value: Type
 }

@@ -74,5 +74,5 @@ export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 
 export type * as FastLookupTable from "./FastLookupTable/interfaces.js"
 export type * as HashMap from "./HashMap/interfaces.js"
-export type * as LinearIndexMap from "./LinearIndexMap/interfaces.js"
-export type * as PersistentIndexMap from "./PersistentIndexMap/interfaces.js"
+export type * from "./LinearIndexMap/interfaces.js"
+export type * from "./PersistentIndexMap/interfaces.js"

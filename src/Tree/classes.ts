@@ -1,56 +1,118 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Pattern } from "../Pattern/interfaces.js"
-import type { Tree } from "./interfaces.js"
+import type {
+	ChildrenTree as ChildrenTreeType,
+	InTreeType,
+	ParentTree as ParentTreeType,
+	TreeConstructor,
+	TreeConverter,
+	WalkableInTreeType
+} from "./interfaces.js"
 
-import { childrenCount, childIndex } from "./methods.js"
+import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { id } = _f
+import {
+	childrenCount,
+	childIndex,
+	parentTreeBacktrack,
+	parentTreeFindUnwalkedChildren,
+	childrenGetter,
+	childrenSetter,
+	trivialFindUnwalkedChildren,
+	trivialBacktrack
+} from "./methods.js"
 
-/**
- * Initializes a new `ChildrenTree` without the `[propName]` (default: `"children"`) value (expected to be set by the user).
- *
- * The `.lastChild` is defined as `this[propName].length - 1` [via a getter]
- *
- * The `.index` is defined as `childIndex(propName)`
- */
-export function ChildrenTree(propName: string = "children") {
-	const countGetter = childrenCount(propName)
-	const indexator = childIndex(propName)
-	return function (tree: Summat): Tree {
-		Object.defineProperty(tree, "lastChild", {
-			enumerable: true,
-			get: countGetter
-		})
-		tree.index = indexator
-		return tree as Tree
+import { BasicPattern } from "../Pattern/classes.js"
+import { value } from "../Pattern/utils.js"
+import { extendClass, parameterWaster } from "../utils.js"
+import { mapper } from "./utils.js"
+
+import { function as f } from "@hgargg-0710/one"
+const { trivialCompose } = f
+
+export abstract class BasicTree<Type = any> extends BasicPattern<Type[]> {
+	constructor(value: Type[]) {
+		super(value)
 	}
 }
 
-export function ChildlessTree(propName: string = "children") {
-	return function (tree: Tree): Tree {
-		tree[propName] = []
-		return tree
+export class ChildrenTree<Type = any>
+	extends BasicTree<InTreeType<Type>>
+	implements ChildrenTreeType<Type>
+{
+	children: InTreeType<Type>[]
+	lastChild: number
+	index: (multindex: number[]) => InTreeType<Type>
+
+	constructor(value?: any, converter?: TreeConverter<Type>) {
+		super(value ? converter!(value) : [])
 	}
 }
 
-export function SingleTree(propName: string = "children") {
-	return function <Type = any>(
-		tree: Pattern<Type>,
-		converter: (x: Type) => any = id
-	): Pattern<Type> {
-		tree[propName] = [converter(tree.value)]
-		return tree
+extendClass(ChildrenTree, {
+	lastChild: {
+		get: childrenCount
+	},
+	index: { value: childIndex },
+	children: {
+		set: childrenSetter,
+		get: childrenGetter
+	}
+})
+
+export class ParentTree<Type = any>
+	extends ChildrenTree<Type>
+	implements ParentTreeType<Type>
+{
+	index: (multindex: number[]) => WalkableInTreeType<Type>
+	backtrack: (positions: number, currInd: number[]) => WalkableTree<Type>
+	findUnwalkedChildren: (startInd: number[]) => number
+	parent: ParentTreeType<Type> | null
+
+	constructor(value?: any, converter?: TreeConverter<Type>) {
+		super(value, converter)
+		this.parent = null
+
+		const { children, lastChild } = this
+		let i = lastChild
+		while (i >= 0) {
+			const child = children[i--]
+			if (child instanceof ParentTree) child.parent = this
+		}
 	}
 }
 
-export function MultTree(propName: string = "children") {
-	return function <Type = any>(
-		tree: Tree & Pattern<Type[]>,
-		converter: (x: Type) => Type = id
-	): Tree & Pattern<Type[]> {
-		tree[propName] = tree.value.map(converter)
-		return tree
+extendClass(ParentTree, {
+	backtrack: { value: parentTreeBacktrack },
+	findUnwalkedChildren: { value: parentTreeFindUnwalkedChildren }
+})
+
+export class TrivialWalkableTree<Type = any>
+	extends ChildrenTree<Type>
+	implements WalkableTree<Type>
+{
+	index: (multindex: number[]) => WalkableInTreeType<Type>
+	backtrack: (positions: number, currInd?: number[]) => WalkableTree<Type>
+	findUnwalkedChildren: (startIndex: number[]) => number
+}
+
+extendClass(TrivialWalkableTree, {
+	backtrack: { value: trivialBacktrack },
+	findUnwalkedChildren: { value: trivialFindUnwalkedChildren }
+})
+
+export function ChildlessTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
+	return parameterWaster(treeConstructor)
+}
+
+export function SingleTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
+	return function (fromTree: Pattern<Type>, converter: TreeConverter<Type>) {
+		return new treeConstructor(fromTree, (x: Pattern<Type>) => converter(x.value))
+	}
+}
+
+export function MultTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
+	return function (fromTree: Pattern<Type[]>, converter: TreeConverter<Type>) {
+		return new treeConstructor(fromTree, trivialCompose(mapper(converter), value))
 	}
 }
 
