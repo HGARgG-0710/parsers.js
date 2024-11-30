@@ -1,4 +1,4 @@
-import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { Pointer, Flushable, Resulting } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
 
@@ -15,7 +15,7 @@ export type MethodTokenizer<Type = any, InType = any, OutType = any> = (
 	handler: SummatFunction<any, Type, OutType>
 ) => TokenizationResult<Type, OutType>
 
-export interface Tokenizable<Type = any, InType = any, OutType = any> extends Summat {
+export interface Tokenizable<Type = any, InType = any, OutType = any> {
 	tokenize: MethodTokenizer<Type, InType, OutType>
 }
 

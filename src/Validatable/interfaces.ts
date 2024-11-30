@@ -1,4 +1,4 @@
-import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { Pointer, Flushable, Resulting } from "../Pattern/interfaces.js"
 import type { Pair, Pairs } from "../IndexMap/interfaces.js"
 
@@ -29,7 +29,7 @@ export type FreeValidator<Type = any, KeyType = any> = (
 	handler: ValidationHandler<Type>
 ) => ValidationOutput<Type>
 
-export interface Validatable<Type = any, KeyType = any> extends Summat {
+export interface Validatable<Type = any, KeyType = any> {
 	validate: MethodValidator<Type, KeyType>
 }
 

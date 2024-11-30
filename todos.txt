@@ -63,28 +63,105 @@ REMINDERS [2.]:
 		21.7. replace (everywhere) the 'import' with 'import {...} from "./dist/main"', then 'const {...} = ...'; 
 			This ensures the import-correctness of the given paths; 
 			Gives first-hand experience of actually using the library; 
-				
-	2.51. [maybe?] Remove the 'Summat'; 
-		It has proven itself invaluable when dealing with "stray" objects + functions for their creation/extension, 
-			but outside of that context (classes), it actually proves to be quite an issue; 
-		
-		Removal of 'Summat' can reveal all sorts of missed type errors, 
-			in exchange for losing some type flexibility when it comes to using the library with objects; 
-
-		Try, see the consequences of it...
-
-		REASON: 
-
-			The 'Summat' is the best fit, WHEN THE USER NEEDS IT. 
-			The library should assume a stricter and more conservative approach to typing 
-				than what it previously had (probably the reason TypeScript changed its' default behaviour); 
-	
+					
 	2.52. Simplify names of exports in 'methods': 
 		Take out the 'prefixedNames' stuff...; 
+
+	2.54. New concept for library organization: 	
+		MICRO-CLASSES! 
+		Walk through the project, find small (like 1-declaration) classes, 
+			replace them with proper methods-inlining; 
 		
+		Start with: 
+
+			1. EliminableString; 
+
+	2.55. ENCAPSULATION! 
+		Over-use of 'Pattern' contributes to poor encapsulation; 
+		Places with issues (look for more, walk through the "useless" 'Pattern.methods'): 
+
+			1. InternalHash
+		
+		Idea is - create MICRO-CLASSES that have the desired functionality "embedded" within themselves; 
+		Replace the 'BasicPattern' + 'Pattern.methods' with them. 
+		'Pattern' should (ideally) be ONLY used with: 	
+
+			1. Tokenizable
+			2. Validatable
+			3. Eliminable
+
+		Because there, it's a sort of an "input" (one can 'flush', and re-set it...); 
+			[Maybe...: 	
+				1. add an '.init()' method on them instead?
+				2. Rename 'BasicPattern' into 'PrivatePattern', and replace the 'value' with '#value'/'protected value'? 
+					WHICH itself is presented via a different abstract class altogether?
+
+					This will BOTH: 
+						1. Preserve the encapsulation; 
+						2. Leave the classes open for extension [good for refactoring]
+						3. Permit adequate re-use of properties
+					
+					Problems: 	
+						1. Will require inlining the methods for "generated" classes (such as 'Tokenizable', 'Validatable'); 
+							BUT one so dearly did desire for this to be exportable... 
+
+							IDEA 1 [for a solution]: make them UTILS in terms of 'this->input'; Then, define the methods locally as 'REFACTORED_UTIL.call(this, ...arguments)'; 
+								Cost of that is a single call only... [with these two - won't matter...]; 
+
+							SOLUTION [final]: Union-solution: 
+								
+								1. Just make more abstract classes for refactoring; 
+									PROBLEM: does one really want to be exporting all of those? 
+										As in - modularity is King, etc etc, but... is this just really not too much? 
+										See just HOW MUCH of the library starts to consist of "abstract" classes; 
+									
+								2. The abstract classes would use the underlying utils; 
+
+						2. protected vs #: 
+
+							Make a (tiny) TypeScript temp-project + tsconfig that would be trying to: 
+
+								1. Create a local class with 'protected'; 
+								2. Inheriting it (inheriting class has NO 'protected' properties); 
+								3. Exporting the inheriting class; 
+
+								Because then, one would be able to: 
+
+									1. Take the 'PrivatePattern' [now - ProtectedPattern] OUT of the 'ts-types.json'
+									2. Use it everywhere else, compile as-is; 
+									3. USE THE INTERFACES for expression of objects' natures; 
+									4. [very important] REMOVE the overhead of using '#value'; 
+
+								CONCLUSION: 
+									It's possible, with an if: 
+
+										1. WHEN it's a regular (toplevel) class, it works just fine; 
+										2. When it's a 'static' field, or another kind of exported class-expression - one has to use the '#': 
+											CONCLUSION: using the 'private/protected' for near-everything...; 
+											['private' is only used when logic is very simple + not desired for extension]; 
+			
+						3. The SelfAssignmentClass-es; 
+							Namely, the '._index' property; 
+							One NEEDS to formalize it; 
+
+							IDEA: a combination
+
+								1. interface: 
+									interface IndexAssignable<Type = any> {
+										index?: Type
+									}
+								2. Make NestedStream-s into 'IndexAssignable'-s; 
+			]; 
+	
+	2.56. About "generated" classes - REFACTOR THOSE OUT ALSO; 
+		They must contain ONLY the "custom" logic, NO (or - little) METHOD DUPLICATION; 
+		Known Offenders: 
+
+			1. HashTable;
+			2. LinearIndexMap; 
+	
 Order of TODO-elimination: 
 	2.3.
-	5.2.51. 
 	5.2.52. 
 
 	A.3.10.1

@@ -1,22 +1,33 @@
+import type { Pointer, Resulting } from "../Pattern/interfaces.js"
 import type { EliminableStringPattern as EliminableStringPatternType } from "./interfaces.js"
 
 import { FlushablePattern } from "../Pattern/classes.js"
 import { extendClass } from "../utils.js"
-import { eliminableFlush, eliminableStringEliminate } from "./methods.js"
+import { eliminate } from "./methods.js"
 
-export class EliminableString
-	extends FlushablePattern<string>
-	implements EliminableStringPatternType
+export abstract class FlushablEliminable<Type = any>
+	extends FlushablePattern<Type>
+	implements Pointer<Type>, Resulting<Type>
 {
-	value: string
-	result: string
-	eliminate: (eliminated: string | RegExp) => string
-	constructor(value: string) {
+	value: Type
+	result: Type
+
+	flush(): void {
+		this.result = this.value
+	}
+
+	constructor(value: Type) {
 		super(value)
 	}
 }
 
+export class EliminableString
+	extends FlushablEliminable<string>
+	implements EliminableStringPatternType
+{
+	eliminate: (eliminated: string | RegExp) => string
+}
+
 extendClass(EliminableString, {
-	flush: { value: eliminableFlush },
-	eliminate: { value: eliminableStringEliminate }
+	eliminate: { value: eliminate }
 })

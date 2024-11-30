@@ -1,7 +1,6 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Flushable, Resulting, Pointer } from "../Pattern/interfaces.js"
 
-export interface Eliminable<EliminatedType = any, Type = any> extends Summat {
+export interface Eliminable<EliminatedType = any, Type = any> {
 	eliminate: (eliminated: EliminatedType) => Type
 }
 

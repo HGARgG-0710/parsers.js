@@ -1,5 +1,4 @@
-import type { Pointer } from "../../Pattern/interfaces.js"
-import type { Deletable, HashMap, Settable } from "../HashMap/interfaces.js"
+import type { Deletable, Settable } from "../HashMap/interfaces.js"
 import type { KeyReplaceable } from "../HashMap/interfaces.js"
 
 export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = any>
@@ -11,6 +10,6 @@ export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = an
 	byOwned: (x: any) => ValueType
 }
 
-export interface ExactHashTable<KeyType = any, ValueType = any, OwningType = any>
-	extends FastLookupTable<KeyType, ValueType, OwningType>,
-		Pointer<HashMap<KeyType, ValueType>> {}
+export interface IndexAssignable<Type = any> {
+	assignedIndex: Type
+}

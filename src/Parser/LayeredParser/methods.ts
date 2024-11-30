@@ -1,14 +1,8 @@
-import { function as _f } from "@hgargg-0710/one"
-const { trivialCompose } = _f
+import { LayeredParser } from "./classes.js"
 
-import type { LayeredParser } from "./interfaces.js"
+const { get, set } = Object.getOwnPropertyDescriptor(
+	LayeredParser.prototype,
+	"layers"
+)! as { get: () => any; set: (x: Function[]) => any }
 
-export function layersGet(this: LayeredParser) {
-	return this.realLayers
-}
-
-export function layersSet(this: LayeredParser, layers: Function[]) {
-	this.realLayers = layers
-	this.parser = trivialCompose(...layers)
-	return layers
-}
+export const layers = { get, set }

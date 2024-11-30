@@ -1,19 +1,16 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Copiable } from "../Stream/StreamClass/interfaces.js"
 
-export interface IndexingFunction<KeyType = any> extends Summat {
-	(curr: KeyType, x: any): boolean
-}
+export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
 
-export interface HasType extends Summat {
+export interface HasType {
 	has: (x: any) => boolean
 }
 
-export interface TestType extends Summat {
+export interface TestType {
 	test: (x: any) => boolean
 }
 
-export interface Indexable<ValueType = any> extends Summat {
+export interface Indexable<ValueType = any> {
 	index: (x: any) => ValueType
 }
 
@@ -28,11 +25,11 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
 export type Pair<KeyType = any, ValueType = any> = [KeyType, ValueType]
 export type Pairs<KeyType = any, ValueType = any> = Pair<KeyType, ValueType>[]
 
-export interface Sizeable extends Summat {
+export interface Sizeable {
 	size: number
 }
 
-export interface DefaultHaving extends Summat {
+export interface DefaultHaving {
 	default: any
 }
 
@@ -62,7 +59,7 @@ export interface IndexMap<KeyType = any, ValueType = any, IndexGetType = number>
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
-export interface MapClass<KeyType = any, ValueType = any> extends Summat {
+export interface MapClass<KeyType = any, ValueType = any> {
 	new (map: Pairs<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
 	change?: IndexingFunction<KeyType>
 	extend: MapClassValueExtension<KeyType, ValueType>
@@ -72,7 +69,7 @@ export interface MapClass<KeyType = any, ValueType = any> extends Summat {
 	extensions: Function[]
 }
 
-export type * as FastLookupTable from "./FastLookupTable/interfaces.js"
+export type * from "./FastLookupTable/interfaces.js"
 export type * as HashMap from "./HashMap/interfaces.js"
 export type * from "./LinearIndexMap/interfaces.js"
 export type * from "./PersistentIndexMap/interfaces.js"

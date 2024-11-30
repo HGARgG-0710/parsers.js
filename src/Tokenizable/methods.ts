@@ -1,14 +1,12 @@
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import type { DelegateTokenizablePattern } from "./interfaces.js"
+
+import { FlushableTokenizable } from "./classes.js"
+
 import { inplace } from "@hgargg-0710/one"
 const { replace } = inplace
 
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { DelegateTokenizablePattern, TokenizablePattern } from "./interfaces.js"
-
-export function delegateTokenizableTokenize<
-	Type = any,
-	InType = any,
-	OutType = any
->(
+export function tokenize<Type = any, InType = any, OutType = any>(
 	this: DelegateTokenizablePattern<Type, InType, OutType>,
 	key: InType,
 	handler: SummatFunction<any, Type, OutType>
@@ -25,6 +23,4 @@ export function delegateTokenizableTokenize<
 	return this.result
 }
 
-export function tokenizablePatternFlush(this: TokenizablePattern): void {
-	this.result = []
-}
+export const { flush } = FlushableTokenizable.prototype

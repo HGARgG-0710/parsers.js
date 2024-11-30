@@ -1,6 +1,3 @@
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
-
-export interface LayeredParser extends SummatFunction {
+export interface LayeredParser extends Function {
 	layers: Function[]
-	parser: Function
 }

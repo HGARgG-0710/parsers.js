@@ -81,6 +81,7 @@ export namespace defaults {
 
 	export namespace EnumSpace {
 		export const size = 0
+		export const DefaultValue = () => []
 	}
 
 	export namespace InternalHash {

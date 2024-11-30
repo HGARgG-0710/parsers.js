@@ -32,89 +32,93 @@ export type BufferizedPatternReversedStreamConstructor<Type = any> = abstract ne
 
 // * Optional Property-interfaces
 
-export interface Superable extends Summat {
+export interface Superable {
 	super: Summat
 }
 
-export interface Copiable<Type = any> extends Summat {
+export interface Copiable<Type = any> {
 	copy: () => Type
 }
 
-export interface Stateful extends Summat {
+export interface FrozenStateful {
+	state: object
+}
+
+export interface Stateful {
 	state: Summat
 }
 
 // * Mandatory Property-interfaces
 
-export interface IsEndCurrable extends Summat {
+export interface IsEndCurrable {
 	isCurrEnd: () => boolean
 }
 
-export interface IsStartCurrable extends Summat {
+export interface IsStartCurrable {
 	isCurrStart: () => boolean
 }
 
-export interface ConditionalIsStartCurrable extends Summat {
+export interface ConditionalIsStartCurrable {
 	isCurrStart?: () => boolean
 }
 
-export interface BaseNextIterable<Type = any> extends Summat {
+export interface BaseNextIterable<Type = any> {
 	baseNextIter: () => Type
 }
 
-export interface BasePrevIterable<Type = any> extends Summat {
+export interface BasePrevIterable<Type = any> {
 	basePrevIter: () => Type
 }
 
-export interface ConditionalBasePrevIterable<Type = any> extends Summat {
+export interface ConditionalBasePrevIterable<Type = any> {
 	basePrevIter?: () => Type
 }
 
-export interface InitGettable<Type = any> extends Summat {
+export interface InitGettable<Type = any> {
 	initGetter?: () => Type
 }
 
-export interface ConditionalInitGettable<Type = any> extends Summat {
+export interface ConditionalInitGettable<Type = any> {
 	initGetter?: () => Type
 }
 
-export interface RealCurrHaving<Type = any> extends Summat {
+export interface RealCurrHaving<Type = any> {
 	realCurr: Type
 }
 
-export interface ConditionalCurrGettable<Type = any> extends Summat {
+export interface ConditionalCurrGettable<Type = any> {
 	currGetter?: () => Type
 }
 
-export interface ConditionallyPrevable<Type = any> extends Summat {
+export interface ConditionallyPrevable<Type = any> {
 	prev?: () => Type
 }
 
-export interface DefaultEndable extends Summat {
+export interface DefaultEndable {
 	defaultIsEnd: () => boolean
 }
 
-export interface PreInitable extends Summat {
+export interface PreInitable {
 	preInit?: boolean
 }
 
-export interface Bufferizable extends Summat {
+export interface Bufferizable {
 	buffer?: boolean
 }
 
-export interface StateHaving extends Summat {
+export interface StateHaving {
 	state?: boolean
 }
 
-export interface ConditionallyRewindable<Type = any> extends Summat {
+export interface ConditionallyRewindable<Type = any> {
 	rewind?: () => Type
 }
 
-export interface HasPositionCheckable extends Summat {
+export interface HasPositionCheckable {
 	hasPosition?: boolean
 }
 
-export interface IsPatternCheckable extends Summat {
+export interface IsPatternCheckable {
 	isPattern?: boolean
 }
 

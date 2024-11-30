@@ -1,10 +1,10 @@
 import type { Pairs } from "../interfaces.js"
 import type { HashClass } from "./interfaces.js"
-import type { InternalHashClass } from "./InternalHash/interfaces.js"
+import type { InternalHashConstructor } from "./InternalHash/interfaces.js"
 
 export function fromPairsList<KeyType = any, ValueType = any, InternalKeyType = any>(
 	HashClass: HashClass<KeyType, ValueType>,
-	InternalStructure: InternalHashClass<InternalKeyType, ValueType>,
+	InternalStructure: InternalHashConstructor<InternalKeyType, ValueType>,
 	pairsList: Pairs<KeyType, ValueType>,
 	_default?: any
 ) {

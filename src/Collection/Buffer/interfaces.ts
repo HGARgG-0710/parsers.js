@@ -1,4 +1,3 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Collection } from "../interfaces.js"
 
 export interface FreezableBuffer<Type = any> extends Collection<Type> {
@@ -13,6 +12,6 @@ export interface UnfreezableBuffer<Type = any> extends FreezableBuffer<Type> {
 	isFrozen: boolean
 }
 
-export interface Bufferized<Type = any> extends Summat {
+export interface Bufferized<Type = any> {
 	buffer: FreezableBuffer<Type>
 }

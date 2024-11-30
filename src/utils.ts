@@ -1,4 +1,3 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
 import type { PredicatePosition } from "./Position/interfaces.js"
 import type { BasicStream, Indexed } from "./Stream/interfaces.js"
@@ -52,7 +51,7 @@ export function wrapped(handler: (input: BasicStream) => any) {
 /**
  * Returns the `.is` property of a given object
  */
-export const is = (x: Summat) => x.is
+export const is = (x: any) => x.is
 
 /**
  * Returns the `.isEnd` property of a given `BasicStream`

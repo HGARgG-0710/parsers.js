@@ -1,4 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
+import type { Resulting } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
 import type {
 	DelegateTokenizablePattern,
@@ -7,24 +8,33 @@ import type {
 	TokenizationResult
 } from "./interfaces.js"
 
-import { extendClass } from "../utils.js"
 import { FlushablePattern } from "../Pattern/classes.js"
-import { tokenizablePatternFlush, delegateTokenizableTokenize } from "./methods.js"
+import { tokenize } from "./methods.js"
+import { extendClass } from "../utils.js"
 import { tokenizeString } from "./utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
 const { isString } = type
+
+export abstract class FlushableTokenizable<Type = any, OutType = any>
+	extends FlushablePattern<Type>
+	implements Resulting<TokenizationResult<Type, OutType>>
+{
+	result: TokenizationResult<Type, OutType>
+	flush(): void {
+		this.result = []
+	}
+}
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
 	isType: TypePredicate<Type>
 ): new <OutType = any>(value: Type) => DelegateTokenizablePattern<Type, InType, OutType> {
 	class delegateTokenizablePattern<OutType = any>
-		extends FlushablePattern<Type>
+		extends FlushableTokenizable<Type, OutType>
 		implements DelegateTokenizablePattern<Type, InType, OutType>
 	{
 		value: Type
-		result: TokenizationResult<Type, OutType>
 
 		tokenize: MethodTokenizer<Type, InType, OutType>
 		tokenizer: FreeTokenizer<Type, InType>
@@ -38,8 +48,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 	extendClass(delegateTokenizablePattern, {
 		tokenizer: { value: tokenizer },
 		isType: { value: isType },
-		tokenize: { value: delegateTokenizableTokenize },
-		flush: { value: tokenizablePatternFlush }
+		tokenize: { value: tokenize }
 	})
 
 	return delegateTokenizablePattern

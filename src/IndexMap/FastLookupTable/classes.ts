@@ -1,88 +1,100 @@
-import type {  Pointer } from "../../Pattern/interfaces.js"
-import type { HashMap } from "../HashMap/interfaces.js"
+import type { Pointer } from "../../Pattern/interfaces.js"
+import type { HashMap, KeyReplaceable, Settable } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable, ExactHashTable } from "./interfaces.js"
-
-import {
-	valueDelete,
-	valueSet,
-	valueReplaceKey,
-	valueGetIndex
-} from "../../Pattern/methods.js"
-
-import { BasicPattern } from "../../Pattern/classes.js"
-
-import {
-	persistentIndexFastLookupTableByOwned,
-	persistentIndexFastLookupTableDelete,
-	hashMapFastLookupTableByOwned,
-	affirmOwnership
-} from "./methods.js"
+import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 
 import { current, extendClass } from "../../utils.js"
 
 import { function as _f } from "@hgargg-0710/one"
+import { assignIndex } from "./utils.js"
 const { id } = _f
 
-export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
-	extends BasicPattern<PersistentIndexMap<KeyType, ValueType>>
-	implements
-		FastLookupTable<KeyType, ValueType, Pointer<number>>,
-		Pointer<PersistentIndexMap<KeyType, ValueType>>
-{
-	value: PersistentIndexMap<KeyType, ValueType>
-	getIndex: (x: any) => Pointer<number>
-	own: (x: any, ownIndex: Pointer<number>) => void
-	byOwned: (x: any) => ValueType
+export abstract class DelegateLookupTable<
+	KeyType = any,
+	ValueType = any,
+	OwningType = any,
+	DelegateType extends Settable<KeyType, ValueType> & KeyReplaceable<KeyType> = any
+> {
+	protected value: DelegateType
 
-	set: (key: KeyType, value: ValueType) => any
-	delete: (key: KeyType) => any
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
+	set(key: KeyType, value: ValueType) {
+		this.value.set(key, value)
+		return this
+	}
+
+	replaceKey(keyFrom: KeyType, keyTo: KeyType) {
+		this.value.replaceKey(keyFrom, keyTo)
+		return this
+	}
+
+	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
+		assignIndex(x, ownIndex)
+		return x
+	}
+
+	constructor(value: DelegateType) {
+		this.value = value
+	}
+}
+
+export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
+	extends DelegateLookupTable<
+		KeyType,
+		ValueType,
+		Pointer<number>,
+		PersistentIndexMap<KeyType, ValueType>
+	>
+	implements FastLookupTable<KeyType, ValueType, Pointer<number>>
+{
+	getIndex(x: any) {
+		return this.value.getIndex(x)
+	}
+
+	byOwned(priorOwned: IndexAssignable<Pointer<number>>): ValueType {
+		return this.value.byIndex(priorOwned.assignedIndex.value)[1]
+	}
+
+	delete(key: KeyType) {
+		const { value } = this
+		value.delete(value.getIndex(key).value)
+		return this
+	}
 
 	constructor(table: PersistentIndexMap<KeyType, ValueType>) {
 		super(table)
 	}
 }
 
-extendClass(PersistentIndexFastLookupTable, {
-	getIndex: { value: valueGetIndex },
-	own: { value: affirmOwnership },
-	byOwned: { value: persistentIndexFastLookupTableByOwned },
-	set: { value: valueSet },
-	delete: { value: persistentIndexFastLookupTableDelete },
-	replaceKey: { value: valueReplaceKey }
-})
-
-const HashTablePrototype = {
-	own: { value: affirmOwnership },
-	byOwned: { value: hashMapFastLookupTableByOwned },
-	set: { value: valueSet },
-	delete: { value: valueDelete },
-	replaceKey: { value: valueReplaceKey }
-}
-
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	ownership: (x: any) => OwningType
 ) {
 	class HashTableClass
-		extends BasicPattern<HashMap<KeyType, ValueType>>
-		implements ExactHashTable<KeyType, ValueType, OwningType>
+		extends DelegateLookupTable<
+			KeyType,
+			ValueType,
+			OwningType,
+			HashMap<KeyType, ValueType, any>
+		>
+		implements FastLookupTable<KeyType, ValueType, OwningType>
 	{
-		value: HashMap<KeyType, ValueType, any>
-		getIndex: (x: any) => OwningType
-		own: (x: any, ownFunc: OwningType) => void
-		byOwned: (x: any) => ValueType
+		protected value: HashMap<KeyType, ValueType, any>
 
-		set: (key: KeyType, value: ValueType) => any
-		delete: (key: KeyType) => any
-		replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
+		getIndex: (x: any) => OwningType
+
+		byOwned(priorOwned: IndexAssignable<OwningType>) {
+			return this.value.index(priorOwned.assignedIndex)
+		}
+
+		delete(key: KeyType) {
+			this.value.delete(key)
+			return this
+		}
 
 		constructor(hash: HashMap<KeyType, ValueType>) {
 			super(hash)
 		}
 	}
 
-	extendClass(HashTableClass, HashTablePrototype)
 	HashTableClass.prototype.getIndex = ownership
 
 	return HashTableClass
@@ -90,7 +102,7 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 
 type HashConstructor = new <KeyType = any, ValueType = any>(
 	hash: HashMap<KeyType, ValueType>
-) => ExactHashTable<KeyType, ValueType>
+) => FastLookupTable<KeyType, ValueType>
 
 export const [BasicHashTable, StreamHashTable]: [HashConstructor, HashConstructor] = [
 	id,

@@ -1,14 +1,12 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-
-export interface Pattern<Type = any> extends Summat {
+export interface Pattern<Type = any> {
 	value?: Type
 }
 
-export interface Resulting<ResultType = any> extends Summat {
+export interface Resulting<ResultType = any> {
 	result: ResultType
 }
 
-export interface Flushable extends Summat {
+export interface Flushable {
 	flush: () => void
 }
 

@@ -1,32 +1,27 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import { inplace } from "@hgargg-0710/one"
-const { replace } = inplace
 
 import type {
 	DelegateValidatablePattern,
 	InvalidMatch,
-	ValidatablePattern as ValidatablePatternType,
 	ValidMatch
 } from "./interfaces.js"
 
-import { validation } from "../constants.js"
-const { ValidationFailed } = validation.ValidatablePattern
+import { FlushableValidatable } from "./classes.js"
 
-// * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]':
-// * 		it returns an empty array both when '!.result[1].length' and when '!!result[0]';
-export function validatablePatternFlush(this: ValidatablePatternType) {
-	this.result = ValidationFailed<any>([])
-}
+import { inplace } from "@hgargg-0710/one"
+const { replace } = inplace
 
-export function delegateValidatableValidate<Type = any, KeyType = any>(
+export const { flush } = FlushableValidatable.prototype
+
+export function validate<Type = any, KeyType = any>(
 	this: DelegateValidatablePattern<Type, KeyType>,
 	key: KeyType,
 	handler: SummatFunction<any, Type, ValidMatch | InvalidMatch>
 ) {
-	const validated = this.result[1]
+	const [, validated] = this.result
 	if (!validated.length) return (this.result = this.validator(this.value, key, handler))
 
-	let tempValid = this.result[0]
+	let [tempValid] = this.result
 	let tempRemains: any[] | null = null
 	let i = validated.length
 

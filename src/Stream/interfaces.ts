@@ -1,26 +1,24 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-
 export type Indexed<Type = any> =
 	| string
-	| (Summat & {
+	| {
 			[x: number]: Type
 			length: number
-	  })
+	  }
 
 export interface BasicStream<Type = any>
 	extends Endable,
 		Currable<Type>,
 		Nextable<Type> {}
 
-export interface Endable extends Summat {
+export interface Endable {
 	isEnd: boolean
 }
 
-export interface Nextable<Type = any> extends Summat {
+export interface Nextable<Type = any> {
 	next: () => Type
 }
 
-export interface Currable<Type = any> extends Summat {
+export interface Currable<Type = any> {
 	curr: Type
 }
 

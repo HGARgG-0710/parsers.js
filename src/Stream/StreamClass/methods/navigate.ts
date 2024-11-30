@@ -1,4 +1,3 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Position } from "../../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type {
@@ -16,7 +15,7 @@ import {
 import { typeof as type } from "@hgargg-0710/one"
 const { isNumber } = type
 
-export interface Navigable<Type = any> extends Summat {
+export interface Navigable<Type = any> {
 	navigate: (position: Position) => Type
 }
 

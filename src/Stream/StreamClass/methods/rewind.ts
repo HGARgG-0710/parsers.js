@@ -1,4 +1,3 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
@@ -10,7 +9,7 @@ import { start } from "../utils.js"
 import { positionNull } from "../../../Position/utils.js"
 import { readFirst } from "../../../Collection/Buffer/utils.js"
 
-export interface Rewindable<Type = any> extends Summat {
+export interface Rewindable<Type = any> {
 	rewind: () => Type
 }
 

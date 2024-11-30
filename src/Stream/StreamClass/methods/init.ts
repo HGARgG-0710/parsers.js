@@ -16,7 +16,7 @@ import { createState, preEnd, preInit, preStart, realCurr } from "../utils.js"
 
 // * types
 
-export interface Initializable extends Summat {
+export interface Initializable {
 	init: InitMethod
 }
 

@@ -1,4 +1,4 @@
-import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
+import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
 
@@ -6,7 +6,7 @@ export type Position = PredicatePosition | PositionObject | number
 export type DirectionalPosition = PredicatePosition | number
 export type BasicPosition = SummatFunction | number
 
-export interface PredicatePosition extends SummatFunction {
+export interface PredicatePosition extends Function {
 	direction?: boolean
 }
 
@@ -17,7 +17,7 @@ export interface PositionObject {
 	copy?: () => PositionObject
 }
 
-export interface Posed<Type = any> extends Summat {
+export interface Posed<Type = any> {
 	pos: Type
 }
 

@@ -3,44 +3,59 @@ import type {
 	TokenInstanceClass
 } from "../Token/interfaces.js"
 
-import type { Pointer } from "../Pattern/interfaces.js"
-import type { EnumSpace, Mappable } from "./interfaces.js"
+import type { ArrayEnum, EnumSpace, Mappable } from "./interfaces.js"
 
 import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
-import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./methods.js"
-import { BasicPattern } from "../Pattern/classes.js"
-import { extendClass } from "../utils.js"
 
 import { defaults } from "../constants.js"
-const { size: globalSize } = defaults.EnumSpace
+const { size: globalSize, DefaultValue: value } = defaults.EnumSpace
 
-export class ConstEnum
-	extends BasicPattern<{}[]>
-	implements EnumSpace<{}>, Pointer<{}[]>
-{
-	size: number = globalSize
-	value: {}[]
+import { function as _f, inplace } from "@hgargg-0710/one"
+const { id } = _f
+const { out } = inplace
 
-	add: (n: number) => ConstEnum
-	join: (enums: EnumSpace) => EnumSpace<{}>
-	copy: () => EnumSpace<{}>
-	map: (f?: Mappable<{}>) => {}[]
+export class ConstEnum implements ArrayEnum<{}> {
+	#value: {}[] = value()
+	#size: number
 
-	constructor(size?: number) {
-		super([])
-		if (size) {
-			this.size = size
-			this.add(size)
-		}
+	set size(newSize: number) {
+		const diff = this.#size - newSize
+		if (diff < 0) this.add(-diff)
+		else out(this.#value, newSize, diff)
+	}
+
+	get size() {
+		return this.#size
+	}
+
+	add(size: number) {
+		this.#value.push(...Array.from({ length: size }, () => ({})))
+		this.#size += size
+		return this
+	}
+
+	join(enums: ArrayEnum<{}>) {
+		this.#value.push(...enums.get())
+		this.#size += enums.size
+		return this
+	}
+
+	copy() {
+		return new ConstEnum(this.size)
+	}
+
+	map(mapped: Mappable<{}> = id) {
+		return this.#value.map(mapped)
+	}
+
+	get() {
+		return this.#value as readonly {}[]
+	}
+
+	constructor(size: number = globalSize) {
+		this.size = size
 	}
 }
-
-extendClass(ConstEnum, {
-	add: { value: constEnumAdd },
-	join: { value: constEnumJoin },
-	copy: { value: constEnumCopy },
-	map: { value: constEnumMap }
-})
 
 export const [TokenInstanceEnum, SimpleTokenTypeEnum] = [
 	TokenInstance,

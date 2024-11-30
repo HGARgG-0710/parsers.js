@@ -29,7 +29,6 @@ export const [
 export const [
 	valueIndex,
 	valueByIndex,
-	valueGetIndex,
 	valuePrev,
 	valueNext,
 	valueIsEnd,
@@ -40,7 +39,6 @@ export const [
 ] = [
 	"index",
 	"byIndex",
-	"getIndex",
 	"prev",
 	"next",
 	"isCurrEnd",

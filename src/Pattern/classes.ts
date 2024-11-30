@@ -12,7 +12,7 @@ export abstract class FlushablePattern<Type = any>
 	extends BasicPattern<Type>
 	implements Flushable
 {
-	flush: () => void
+	abstract flush(): void
 	constructor(value?: Type) {
 		super(value)
 		this.flush()
