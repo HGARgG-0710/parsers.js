@@ -13,6 +13,7 @@ import type {
 import { previous, next } from "../utils.js"
 
 import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
+import type { TypePredicate } from "../interfaces.js"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 const { trivialCompose, or } = f
@@ -23,9 +24,11 @@ export const isPositionObject = structCheck<PositionObject>({
 	value: T
 })
 
-export const isPosition = or(isNumber, isFunction, isPositionObject) as <Type = any>(
-	x: any
-) => x is Position<Type>
+export const isPosition = or(
+	isNumber,
+	isFunction,
+	isPositionObject
+) as TypePredicate<Position>
 
 /**
  * Given a `Position` and (optionally) a `BasicStream`, it returns one of:
@@ -37,7 +40,7 @@ export function positionConvert(
 	pos: Position,
 	stream?: BasicStream
 ): DirectionalPosition {
-	return isPositionObject(pos) ? pos.convert(stream) : pos
+	return isPositionObject(pos) ? pos.convert(stream!) : pos
 }
 
 /**

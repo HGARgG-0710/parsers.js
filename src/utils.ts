@@ -129,18 +129,21 @@ export const classWrapper =
 	(...args: any[]) =>
 		new X(...args)
 
-export const parameterWaster = (X: new (...input: any[]) => any) => () => new X()
+export const parameterWaster =
+	<Type = any>(X: new (...input: any[]) => Type) =>
+	() =>
+		new X()
 
 export const AssignmentClass =
-	<Type = any, OutType extends Summat = Summat>(propName: string) =>
-	(x: Summat, propVal: Type): OutType => {
+	<Type = any, OutType = any>(propName: string) =>
+	(x: any, propVal: Type): OutType => {
 		x[propName] = propVal
 		return x as OutType
 	}
 
 export const SelfAssignmentClass =
-	<Type = any, OutType = any>(propName: string, _default?: Type) =>
-	(x: Type = _default!) => {
+	<Type = any, OutType = any>(propName: string, _default?: () => Type) =>
+	(x: Type = _default!()) => {
 		x[propName] = x
 		return x as unknown as OutType
 	}

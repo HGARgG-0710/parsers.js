@@ -1,14 +1,14 @@
-import type { TreeWalker } from "../../Tree/TreeWalker/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { Pointer } from "../../Pattern/interfaces.js"
+import type { MultiIndex } from "../../Position/interfaces.js"
 
 export interface TreeStream<Type = any>
-	extends Pattern<Tree<Type>>,
+	extends Pointer<Tree<Type>>,
 		Superable,
 		ReversedStreamClassInstance<InTreeType<Type>> {
-	walker: TreeWalker<Type>
+	multind: MultiIndex
 	response: string
 	lastLevelWithSiblings: number
 }

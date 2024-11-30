@@ -10,11 +10,8 @@ const { SkippedItem } = Stream.StreamParser
 export function streamParserNext<InType = any, OutType = any>(
 	this: StreamParser<InType, OutType>
 ) {
-	const callHandler = () => this.handler.call(this, this.value)
-	let currRes = undefined
-	do {
-		currRes = callHandler()
-	} while (currRes === SkippedItem)
+	let currRes = SkippedItem
+	while (currRes === SkippedItem) currRes = this.handler.call(this, this.value)
 	return currRes
 }
 

@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
+import type { ReversedStreamConstructor } from "../StreamClass/interfaces.js"
 import type { InTreeType, Tree } from "../../Tree/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import type {
@@ -18,12 +18,15 @@ import {
 	treeStreamInitialize,
 	treeStreamCurrGetter,
 	treeStreamValueGetter,
-	treeStreamValueSetter
+	treeStreamMultindGetter
 } from "./methods.js"
 
 import { extendClass } from "../../utils.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
+
+import { defaults } from "../../constants.js"
+const { response, lastLevelWithSiblings } = defaults.TreeStream
 
 import { boolean } from "@hgargg-0710/one"
 const { F } = boolean
@@ -35,16 +38,19 @@ const TreeStreamBase = StreamClass({
 	isCurrEnd: treeStreamIsEnd,
 	isCurrStart: treeStreamIsStart,
 	defaultIsEnd: F
-}) as PatternReversedStreamConstructor<InTreeType>
+}) as ReversedStreamConstructor<InTreeType>
 
 export class TreeStream<Type = any>
 	extends TreeStreamBase
 	implements EffectiveTreeStream<Type>
 {
-	value: WalkableTree<Type>
+	response = response
+	lastLevelWithSiblings = lastLevelWithSiblings
+
+	readonly multind: MultiIndexType
+	readonly value: WalkableTree<Type>
+
 	walker: TreeWalkerType<Type>
-	response: string = ""
-	lastLevelWithSiblings: number = 0
 
 	super: Summat
 	navigate: (position: MultiIndexType) => InTreeType<Type>
@@ -54,14 +60,15 @@ export class TreeStream<Type = any>
 		tree?: WalkableTree<Type>,
 		walker: TreeWalkerType<Type> = new TreeWalker<Type>(tree)
 	) {
-		super(tree)
+		super()
 		this.init(tree, walker)
 	}
 }
 
 extendClass(TreeStream, {
 	super: { value: TreeStreamBase.prototype },
-	value: { get: treeStreamValueGetter, set: treeStreamValueSetter },
+	multind: { get: treeStreamMultindGetter },
+	value: { get: treeStreamValueGetter },
 	rewind: { value: treeStreamRewind },
 	navigate: { value: treeStreamNavigate },
 	init: { value: treeStreamInitialize }

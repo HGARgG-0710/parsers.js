@@ -1,7 +1,8 @@
 import type { PositionObject } from "../interfaces.js"
 
-export interface MultiIndex extends PositionObject<number[]> {
+export interface MultiIndex extends PositionObject {
 	levels: number
+	get(): readonly number[]
 	equals: (position: MultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]
 	firstLevel: () => number[]
@@ -9,4 +10,13 @@ export interface MultiIndex extends PositionObject<number[]> {
 	copy: () => MultiIndex
 }
 
-export type * from "./MultiIndexModifier/interfaces.js"
+export interface MultiIndexModifier {
+	init: (multind?: MultiIndex) => MultiIndexModifier
+	nextLevel: () => number[]
+	prevLevel: () => number[]
+	resize: (length: number) => MultiIndex
+	clear: () => MultiIndex
+	incLast: () => number
+	decLast: () => number
+	extend: (subIndex: number[]) => void
+}

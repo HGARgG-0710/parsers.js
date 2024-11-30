@@ -2,6 +2,7 @@ import type { IndexMap, Pair, Pairs as PairsType } from "./interfaces.js"
 import { Pairs } from "./classes.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
+import type { TypePredicate } from "../interfaces.js"
 const { isArray } = type
 const { T } = boolean
 
@@ -58,8 +59,8 @@ export function fromPairsList<KeyType = any, ValueType = any>(
 }
 
 export const isPair = <KeyType = any, ValueType = any>(
-	keyPred?: (x: any) => x is KeyType,
-	valuePred?: (x: any) => x is ValueType
+	keyPred?: TypePredicate<KeyType>,
+	valuePred?: TypePredicate<ValueType>
 ) => {
 	const [kp, vp] = [keyPred, valuePred].map((x) => x || T)
 	return (x: any): x is Pair<KeyType, ValueType> =>

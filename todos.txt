@@ -12,6 +12,8 @@ REMINDERS [2.]:
 		 * ...
 		 */
 		export const ToBeRecognizedFunction = UnrecognizedFunction as (x: T) => TOUT
+
+	3. Fix the 'tests/constants.ts' [defaults]; 
 	
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
@@ -62,19 +64,28 @@ REMINDERS [2.]:
 			This ensures the import-correctness of the given paths; 
 			Gives first-hand experience of actually using the library; 
 				
-	2.48. [constants] Maaaybe... Add defaults of re-initializable classes to 'constants', to prevent errors? 
-		Example: the 'TreeStream'; 
-		Walk through the project's classes, looking for assigned defaults; 
-		Properties to satisfy to be a default: 
+	2.51. [maybe?] Remove the 'Summat'; 
+		It has proven itself invaluable when dealing with "stray" objects + functions for their creation/extension, 
+			but outside of that context (classes), it actually proves to be quite an issue; 
+		
+		Removal of 'Summat' can reveal all sorts of missed type errors, 
+			in exchange for losing some type flexibility when it comes to using the library with objects; 
 
-			1. If an object, it is a function that returns the object (explicit allocation); 
-			2. If not an object (primitive), save as a 
+		Try, see the consequences of it...
 
-	2.49. decouple interfaces - take out the redundant 'Pointer' interface from where it's not necessary, make a part of implementations...;
+		REASON: 
+
+			The 'Summat' is the best fit, WHEN THE USER NEEDS IT. 
+			The library should assume a stricter and more conservative approach to typing 
+				than what it previously had (probably the reason TypeScript changed its' default behaviour); 
+	
+	2.52. Simplify names of exports in 'methods': 
+		Take out the 'prefixedNames' stuff...; 
 		
 Order of TODO-elimination: 
-	5.2.48.
-	5.2.49.
+	2.3.
+	5.2.51. 
+	5.2.52. 
 
 	A.3.10.1
 	A.3.10.2
@@ -210,6 +221,7 @@ A. testing:
 				[Do Stream/.../classes.ts first]
 				10. InputStream/utils.ts
 				11. StreamClass/utils.ts
+					Also - here, add the 'isEmptyStream' test; 
 
 				[Do Tree/.../classes.ts first]
 				12. Tree/utils.ts
@@ -1287,6 +1299,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Some little details of interfaces (such as, previously, interface for 'PersistentIndexMap' with 'index: number[]' - fixed) 
 			SHOULD be hidden instead; 
 		Look through the interfaces, remove any data fields that are better left for the implementation; 
+
+	2.50. '.init' - popularize even further throughout the library; 
+		Add an '.init' method to most [if not all] the library's classes. 
+		To add, in particular: 
+
+			1. Eliminable
+			2. Tokenizable
+			3. Validatable
+			4. Pattern: 
+				Create a new abstract class - 'InitializablePattern': 
+				This will abstract away the method '.init := ->(this.value = args[0])';  
+				The Eliminable, Tokenizable, Validatable will use it...; 
+			... [think of whether one would want re-usability for other types..., how to implement it...];
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

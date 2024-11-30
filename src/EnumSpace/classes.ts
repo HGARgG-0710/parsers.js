@@ -11,11 +11,14 @@ import { constEnumAdd, constEnumCopy, constEnumJoin, constEnumMap } from "./meth
 import { BasicPattern } from "../Pattern/classes.js"
 import { extendClass } from "../utils.js"
 
+import { defaults } from "../constants.js"
+const { size: globalSize } = defaults.EnumSpace
+
 export class ConstEnum
 	extends BasicPattern<{}[]>
 	implements EnumSpace<{}>, Pointer<{}[]>
 {
-	size: number
+	size: number = globalSize
 	value: {}[]
 
 	add: (n: number) => ConstEnum
@@ -23,10 +26,12 @@ export class ConstEnum
 	copy: () => EnumSpace<{}>
 	map: (f?: Mappable<{}>) => {}[]
 
-	constructor(size: number) {
+	constructor(size?: number) {
 		super([])
-		this.size = size
-		this.add(size)
+		if (size) {
+			this.size = size
+			this.add(size)
+		}
 	}
 }
 

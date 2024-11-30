@@ -8,3 +8,13 @@ export function TableMap<OutType = any>(
 	T.table = indexMap
 	return T
 }
+
+export function MapWrap<OutType = any>(
+	indexMap: Indexable<OutType>
+): (x?: any) => OutType {
+	function T(x?: any) {
+		return T.table.index(x)
+	}
+	T.table = indexMap
+	return T
+}

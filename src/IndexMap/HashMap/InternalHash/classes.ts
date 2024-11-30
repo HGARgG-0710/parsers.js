@@ -15,6 +15,10 @@ import {
 import { BasicPattern } from "../../../Pattern/classes.js"
 import { extendClass } from "../../../utils.js"
 
+import { defaults } from "../../../constants.js"
+const { DefaultValue: objDefaultValue } = defaults.InternalHash.ObjectInternalHash
+const { DefaultValue: mapDefaultValue } = defaults.InternalHash.MapInternalHash
+
 import { typeof as type } from "@hgargg-0710/one"
 const { isArray } = type
 
@@ -32,7 +36,7 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 
 	constructor(
-		map: Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = new Map(),
+		map: Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = mapDefaultValue(),
 		_default?: any
 	) {
 		super(isArray(map) ? new Map(map) : map)
@@ -61,7 +65,7 @@ export class ObjectInternalHash<Type = any>
 	delete: (key: string) => any
 	replaceKey: (keyFrom: string, keyTo: string) => any
 
-	constructor(object: object = {}, _default?: any) {
+	constructor(object: object = objDefaultValue(), _default?: any) {
 		super(object)
 		this.size = Object.keys(object).length
 		this.default = _default

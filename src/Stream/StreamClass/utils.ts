@@ -1,3 +1,4 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream, Endable } from "../interfaces.js"
@@ -8,7 +9,6 @@ import type {
 	BufferizedStreamClassInstance,
 	PreStarted,
 	ReversedStreamClassInstance,
-	StartedType,
 	Stateful,
 	StreamClassInstance
 } from "./interfaces.js"
@@ -16,11 +16,11 @@ import type {
 import { calledDelegate } from "../../utils.js"
 import { pickDirection, positionConvert } from "../../Position/utils.js"
 
-import { Stream } from "../../constants.js"
+import { Stream, defaults } from "../../constants.js"
 const { StreamClass } = Stream
+const { realCurr: defaultRealCurr } = defaults.StreamClass
 
 import { object, typeof as type } from "@hgargg-0710/one"
-import type { Summat } from "@hgargg-0710/summat.ts"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 
@@ -103,6 +103,10 @@ export function isCurrUninitialized<Type = any>(stream: StreamClassInstance<Type
 	return stream.isStart === StreamClass.PreCurrInit
 }
 
+export function preStart(stream: PreStarted) {
+	stream.isStart = StreamClass.PreCurrInit
+}
+
 export function start(stream: PreStarted) {
 	stream.isStart = StreamClass.PostCurrInit
 }
@@ -111,8 +115,16 @@ export function deStart(stream: StreamClassInstance) {
 	stream.isStart = StreamClass.PostStart
 }
 
+export function preEnd(stream: StreamClassInstance) {
+	stream.isEnd = stream.defaultIsEnd()
+}
+
 export function end(stream: StreamClassInstance) {
 	stream.isEnd = true
+}
+
+export function isEmptyStream(stream: StreamClassInstance) {
+	return stream.isEnd && stream.isStart
 }
 
 export function deEnd(stream: Endable) {
@@ -129,7 +141,7 @@ export function createState(x: Stateful, state: Summat) {
 }
 
 export function realCurr(stream: StreamClassInstance) {
-	stream.realCurr = StreamClass.DefaultRealCurr
+	stream.realCurr = defaultRealCurr
 }
 
 export function getNext<Type = any>(stream: StreamClassInstance<Type>) {

@@ -12,10 +12,7 @@ import type { FreezableBuffer } from "../../../Collection/Buffer/interfaces.js"
 import { positionNull } from "../../../Position/utils.js"
 import { assignBuffer } from "../../../Collection/Buffer/utils.js"
 import { optionalValue } from "../../../Pattern/utils.js"
-import { createState, preInit, realCurr } from "../utils.js"
-
-import { Stream } from "../../../constants.js"
-const { StreamClass } = Stream
+import { createState, preEnd, preInit, preStart, realCurr } from "../utils.js"
 
 // * types
 
@@ -59,8 +56,8 @@ export type BufferStatePatternInitMethod = <Type = any>(
 // * possible '.init' methods
 
 export function baseInitialize<Type = any>(this: StreamClassInstance<Type>) {
-	this.isStart = StreamClass.PreCurrInit
-	this.isEnd = this.defaultIsEnd()
+	preStart(this)
+	preEnd(this)
 }
 
 export function initialize<Type = any>(this: StreamClassInstance<Type>) {

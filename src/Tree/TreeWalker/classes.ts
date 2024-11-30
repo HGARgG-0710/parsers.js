@@ -1,5 +1,5 @@
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
-import type { MultiIndexModifier } from "../../Position/MultiIndex/MultiIndexModifier/interfaces.js"
+import type { MultiIndexModifier } from "src/Position/MultiIndex/interfaces.js"
 import type { Tree, WalkableInTreeType } from "../interfaces.js"
 import type { TreeWalker as TreeWalkerType, WalkableTree } from "./interfaces.js"
 import {
@@ -24,12 +24,12 @@ import {
 } from "./methods.js"
 
 import { MultiIndex as MultiIndexClass } from "../../Position/MultiIndex/classes.js"
-import { MultiIndexModifier as MultiIndexModifierClass } from "../../Position/MultiIndex/MultiIndexModifier/classes.js"
 import { extendClass } from "../../utils.js"
+
+const { MultiIndexModifier } = MultiIndexClass
 
 export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	level: WalkableTree<Type>
-
 	value: WalkableTree<Type>
 	curr: WalkableInTreeType<Type>
 	pos: MultiIndex
@@ -62,7 +62,7 @@ export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	constructor(
 		value?: WalkableTree<Type>,
 		pos: MultiIndex = new MultiIndexClass(),
-		modifier: MultiIndexModifier = new MultiIndexModifierClass()
+		modifier: MultiIndexModifier = new MultiIndexModifier()
 	) {
 		this.init(value, pos, modifier)
 	}

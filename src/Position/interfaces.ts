@@ -1,9 +1,8 @@
 import type { Summat, SummatFunction } from "@hgargg-0710/summat.ts"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
-import type { Pointer } from "../Pattern/interfaces.js"
 
-export type Position<Type = any> = PredicatePosition | PositionObject<Type> | number
+export type Position = PredicatePosition | PositionObject | number
 export type DirectionalPosition = PredicatePosition | number
 export type BasicPosition = SummatFunction | number
 
@@ -11,11 +10,11 @@ export interface PredicatePosition extends SummatFunction {
 	direction?: boolean
 }
 
-export interface PositionObject<Type = any> extends Pointer<Type> {
-	convert: (stream?: BasicStream) => number | PredicatePosition
+export interface PositionObject {
+	convert: (stream: BasicStream) => DirectionalPosition
 	equals?: (position: Position) => boolean
 	compare?: (position: Position, stream?: BasicStream) => boolean
-	copy?: () => PositionObject<Type>
+	copy?: () => PositionObject
 }
 
 export interface Posed<Type = any> extends Summat {

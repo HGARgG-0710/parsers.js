@@ -1,4 +1,4 @@
-import type { Pattern, Pointer } from "../../Pattern/interfaces.js"
+import type {  Pointer } from "../../Pattern/interfaces.js"
 import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable, ExactHashTable } from "./interfaces.js"
@@ -27,12 +27,12 @@ const { id } = _f
 export class PersistentIndexFastLookupTable<KeyType = any, ValueType = any>
 	extends BasicPattern<PersistentIndexMap<KeyType, ValueType>>
 	implements
-		FastLookupTable<KeyType, ValueType, Pattern<number>>,
+		FastLookupTable<KeyType, ValueType, Pointer<number>>,
 		Pointer<PersistentIndexMap<KeyType, ValueType>>
 {
 	value: PersistentIndexMap<KeyType, ValueType>
 	getIndex: (x: any) => Pointer<number>
-	own: (x: any, ownIndex: Pattern<number>) => void
+	own: (x: any, ownIndex: Pointer<number>) => void
 	byOwned: (x: any) => ValueType
 
 	set: (key: KeyType, value: ValueType) => any

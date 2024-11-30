@@ -23,7 +23,9 @@ export function SimpleTokenType<Type = any, ValueType = any>(
 	class stt extends BasicPattern<ValueType> implements Token<Type, ValueType> {
 		static is: TypePredicate<Token<Type, ValueType>>
 		static readonly type: Type = type
+
 		type: Type
+		value: ValueType
 
 		constructor(value: ValueType) {
 			super(value)

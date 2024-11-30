@@ -1,64 +1,16 @@
-import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { MultiIndex } from "./interfaces.js"
-import { MultiIndex as MultiIndexConstructor } from "./classes.js"
+import { MultiIndex } from "./classes.js"
 
-import { array } from "@hgargg-0710/one"
-const { last, first, copy } = array
+const { prototype } = MultiIndex
 
-export function multiIndexCompare(this: MultiIndex, position: MultiIndex) {
-	const thisVal = this.value
-	const posVal = position.value
-	const minlen = Math.min(thisVal.length, posVal.length)
-	for (let i = 0; i < minlen; ++i)
-		if (thisVal[i] !== posVal[i]) return thisVal[i] < posVal[i]
-	return thisVal.length < posVal.length
+const { get, set } = Object.getOwnPropertyDescriptor(prototype, "levels")! as {
+	get: () => any
+	set: () => any
 }
 
-export function multiIndexEqual(this: MultiIndex, position: MultiIndex) {
-	const thisVal = this.value
-	const posVal = position.value
-	if (thisVal.length !== posVal.length) return false
-	let i = posVal.length
-	while (i--) if (thisVal[i] !== posVal[i]) return false
-	return true
-}
+export const { firstLevel, lastLevel, slice, compare, equals, copy, convert } = prototype
+export const layers = { get, set }
 
-export function multiIndexCopy(this: MultiIndex) {
-	return new MultiIndexConstructor(copy(this.value))
+export namespace MultiIndexModifier {
+	export const { nextLevel, prevLevel, resize, clear, incLast, decLast, extend, init } =
+		MultiIndex.MultiIndexModifier.prototype
 }
-
-export function multiIndexSlice(
-	this: MultiIndex,
-	from: number = 0,
-	to: number = this.levels
-) {
-	return this.value.slice(from, to < 0 ? this.levels + to : to)
-}
-
-export function multiIndexFirstLevel(this: MultiIndex): number[] {
-	return [first(this.value)]
-}
-
-export function multiIndexLastLevel(this: MultiIndex): number[] {
-	return [last(this.value)]
-}
-
-export function multiIndexConvert(this: MultiIndex, stream: TreeStream) {
-	let final = 0
-	stream.rewind()
-	while (!stream.isEnd && !this.equals(stream.walker.pos)) {
-		stream.next()
-		++final
-	}
-	return final
-}
-
-export function multiIndexLevelsGetter(this: MultiIndex) {
-	return this.value.length
-}
-
-export function multiIndexLevelsSetter(this: MultiIndex, length: number) {
-	return (this.value.length = length)
-}
-
-export * as MultiIndexModifier from "./MultiIndexModifier/methods.js"

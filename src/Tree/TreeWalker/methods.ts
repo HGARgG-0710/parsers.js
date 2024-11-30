@@ -1,12 +1,15 @@
 import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { Tree } from "../interfaces.js"
-import type { TreeWalker, WalkableTree } from "./interfaces.js"
+import type { WalkableTree } from "./interfaces.js"
+
+import { MultiIndex as MultiIndexClass } from "../../Position/classes.js"
+
+import { TreeWalker } from "./classes.js"
 
 import { setValue } from "../../Pattern/utils.js"
 import { hasChildren, treeEndPath } from "../utils.js"
 
 import { array } from "@hgargg-0710/one"
-import type { MultiIndexModifier } from "../../Position/classes.js"
 const { last } = array
 
 export function treeWalkerGetCurrChild<Type = any>(this: TreeWalker<Type>) {
@@ -19,7 +22,7 @@ export function treeWalkerLevelUp<Type = any>(
 	positions: number = 1
 ) {
 	const { value, pos } = this
-	return (this.level = value!.backtrack(positions, pos.value) as WalkableTree<Type>)
+	return (this.level = value!.backtrack(positions, pos.get()) as WalkableTree<Type>)
 }
 
 export function treeWalkerPushFirstChild<Type = any>(this: TreeWalker<Type>) {
@@ -101,7 +104,7 @@ export function treeWalkerRestart<Type = any>(this: TreeWalker<Type>) {
 
 export function treeWalkerGoIndex<Type = any>(this: TreeWalker<Type>, pos: MultiIndex) {
 	this.pos = pos
-	this.curr = this.value!.index(pos.value!)
+	this.curr = this.value!.index(this.pos.get()!)
 	this.levelUp()
 }
 
@@ -109,7 +112,7 @@ export function treeWalkerInitialize<Type = any>(
 	this: TreeWalker<Type>,
 	value?: WalkableTree<Type>,
 	pos?: MultiIndex,
-	modifier?: MultiIndexModifier
+	modifier?: MultiIndexClass.MultiIndexModifier
 ) {
 	if (modifier) this.modifier = modifier
 	if (value) {

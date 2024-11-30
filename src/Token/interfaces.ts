@@ -1,10 +1,10 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Pattern } from "../Pattern/interfaces.js"
+import type { Pointer } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
 
 export interface Token<Type = any, Value = any>
 	extends TokenInstance<Type>,
-		Pattern<Value> {}
+		Pointer<Value> {}
 
 export interface TokenInstance<Type = any> extends Summat {
 	type: Type

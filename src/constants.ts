@@ -6,6 +6,8 @@ import type {
 	ValidMatch
 } from "./Validatable/interfaces.js"
 
+import { parameterWaster } from "./utils.js"
+
 import { boolean } from "@hgargg-0710/one"
 const { T } = boolean
 
@@ -28,7 +30,6 @@ export namespace Stream {
 		export const PreCurrInit = 1
 		export const PostCurrInit = true
 		export const PostStart = false
-		export const DefaultRealCurr = null
 	}
 
 	export namespace LimitedStream {
@@ -68,3 +69,39 @@ export namespace validation {
 }
 
 export const BadIndex = -1
+
+export namespace defaults {
+	export namespace ArrayCollection {
+		export const DefaultValue = () => []
+	}
+
+	export namespace FreezableBuffer {
+		export const isFrozen = false
+	}
+
+	export namespace EnumSpace {
+		export const size = 0
+	}
+
+	export namespace InternalHash {
+		export namespace MapInternalHash {
+			export const DefaultValue = parameterWaster<Map<any, any>>(Map)
+		}
+		export namespace ObjectInternalHash {
+			export const DefaultValue = () => ({})
+		}
+	}
+
+	export namespace MultiIndex {
+		export const DefaultValue = () => []
+	}
+
+	export namespace StreamClass {
+		export const realCurr = null
+	}
+
+	export namespace TreeStream {
+		export const lastLevelWithSiblings = BadIndex
+		export const response = ""
+	}
+}

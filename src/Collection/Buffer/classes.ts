@@ -13,12 +13,15 @@ import {
 import { valueLength } from "../../Pattern/methods.js"
 import { extendClass } from "../../utils.js"
 
+import { defaults } from "../../constants.js"
+const { isFrozen } = defaults.FreezableBuffer
+
 export class UnfreezableArray<Type = any>
 	extends BasicPattern<Type[]>
 	implements UnfreezableBuffer<Type>
 {
 	value: Type[]
-	isFrozen: boolean = false
+	isFrozen: boolean = isFrozen
 
 	push: (...x: Type[]) => UnfreezableArray<Type>
 	read: (i: number) => Type
@@ -45,10 +48,10 @@ extendClass(UnfreezableArray, {
 
 export class UnfreezableString
 	extends BasicPattern<string>
-	implements FreezableBuffer<string>
+	implements UnfreezableBuffer<string>
 {
 	value: string
-	isFrozen: boolean = false
+	isFrozen: boolean = isFrozen
 
 	push: (...x: string[]) => UnfreezableString
 	read: (i: number) => string
