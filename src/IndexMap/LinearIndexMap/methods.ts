@@ -1,87 +1,28 @@
-import type { MapClass, Pairs } from "../interfaces.js"
+import type { MapClass } from "../interfaces.js"
 import type { LinearIndexMap } from "./interfaces.js"
 
 import { LinearMapClass } from "./classes.js"
-import { isGoodIndex } from "../../utils.js"
-import { fromPairsList } from "../utils.js"
+import { BaseLinearMap } from "./abstract.js"
 
-import { inplace } from "@hgargg-0710/one"
-const { insert, out } = inplace
-
-export function linearIndexMapIndex<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	x: any
-) {
-	const valueIndex = this.getIndex(this.extension(x))
-	return isGoodIndex(valueIndex) ? this.values[valueIndex] : this.default
-}
-
-export function linearIndexMapReplace<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	index: number,
-	pair: [KeyType, ValueType]
-): LinearIndexMap<KeyType, ValueType> {
-	if (isGoodIndex(index) && index < this.size) {
-		const [key, value] = pair
-		this.keys[index] = key
-		this.alteredKeys[index] = this.keyExtension(key)
-		this.values[index] = value
+export namespace OptimizedLinearMap {
+	export function optimize<KeyType = any, ValueType = any>(
+		this: LinearIndexMap<KeyType, ValueType>,
+		key: any
+	) {
+		return this.alteredKeys.indexOf(key)
 	}
-	return this
 }
 
-export function linearIndexMapAdd<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	index: number,
-	...pairs: Pairs<KeyType, ValueType>
-): LinearIndexMap<KeyType, ValueType> {
-	const [keys, values] = fromPairsList(pairs)
-	insert(this.keys, index, ...keys)
-	insert(this.alteredKeys, index, ...keys.map((x) => this.keyExtension(x)))
-	insert(this.values, index, ...values)
-	return this
-}
+export const {
+	index,
+	replace,
+	add,
+	delete: _delete,
+	replaceKey,
+	getIndex
+} = BaseLinearMap.prototype
 
-export function linearIndexMapDelete<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	index: number,
-	count: number = 1
-): LinearIndexMap<KeyType, ValueType> {
-	out(this.keys, index, count)
-	out(this.alteredKeys, index, count)
-	out(this.values, index, count)
-	return this
-}
-
-export function linearIndexMapReplaceKey<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	keyFrom: KeyType,
-	keyTo: KeyType
-) {
-	const replacementIndex = this.keys.indexOf(keyFrom)
-	this.keys[replacementIndex] = keyTo
-	this.alteredKeys[replacementIndex] = this.keyExtension(keyTo)
-	return this
-}
-
-export function optimizedLinearIndexMapGetIndex<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	key: any
-) {
-	return this.alteredKeys.indexOf(key)
-}
-
-export function linearIndexMapGetIndex<KeyType = any, ValueType = any>(
-	this: LinearIndexMap<KeyType, ValueType>,
-	x: any
-) {
-	const size = this.size
-	const sought = this.extension(x)
-	for (let i = 0; i < size; ++i) if (this.change!(this.alteredKeys[i], sought)) return i
-	return -1
-}
-
-export function mapClassExtend<KeyType = any, ValueType = any>(
+export function extend<KeyType = any, ValueType = any>(
 	this: MapClass<KeyType, ValueType>,
 	...f: ((x: ValueType) => any)[]
 ): MapClass<KeyType, any> {
@@ -92,7 +33,7 @@ export function mapClassExtend<KeyType = any, ValueType = any>(
 	)
 }
 
-export function mapClassExtendKey<KeyType = any, ValueType = any>(
+export function extendKey<KeyType = any, ValueType = any>(
 	this: MapClass<KeyType, ValueType>,
 	...f: ((x: any) => KeyType)[]
 ): MapClass<any, ValueType> {

@@ -5,6 +5,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import { superInit } from "../StreamClass/utils.js"
 
 import { Stream } from "../../constants.js"
+import { isBufferized } from "../../Collection/Buffer/utils.js"
 const { SkippedItem } = Stream.StreamParser
 
 export function streamParserNext<InType = any, OutType = any>(
@@ -21,7 +22,7 @@ export function streamParserInitialize<InType = any, OutType = any>(
 	state?: Summat
 ) {
 	if (input) {
-		if (this.buffer) superInit(this, input, null, state)
+		if (isBufferized(this)) superInit(this, input, null, state)
 		else superInit(this, input, state)
 	}
 	return this

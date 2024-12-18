@@ -6,6 +6,7 @@ import { isGoodIndex } from "../../utils.js"
 import { Pointer, PersistentIndexMap } from "./classes.js"
 
 import { inplace } from "@hgargg-0710/one"
+import { upperBound } from "../utils.js"
 const { insert } = inplace
 
 export function persistentIndexMapAdd<KeyType = any, ValueType = any>(
@@ -39,14 +40,16 @@ export function persistentIndexMapUnique<KeyType = any, ValueType = any>(
 	const keySet = new Set()
 	const indexSet = new Set()
 
-	const predicate = start ? (i: number) => i < this.size : isGoodIndex
+	const predicate = start ? upperBound(this) : isGoodIndex
 	const change = (-1) ** +!start
 
-	for (let i = +!start * (this.size - 1); predicate(i); i += change)
-		if (!keySet.has(this.keys[i])) {
-			keySet.add(this.keys[i])
+	for (let i = +!start * (this.size - 1); predicate(i); i += change) {
+		const curr = this.keys[i]
+		if (!keySet.has(curr)) {
+			keySet.add(curr)
 			indexSet.add(i)
 		}
+	}
 
 	this.indexes = this.indexes.filter((x: PointerType<number>, i: any) => {
 		if (indexSet.has(i)) return true

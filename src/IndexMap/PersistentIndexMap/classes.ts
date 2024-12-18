@@ -27,8 +27,8 @@ import {
 	persistentIndexMapUnique
 } from "./methods.js"
 
-import { BasicPattern } from "../../Pattern/classes.js"
-import { extendClass } from "../../utils.js"
+import { BasicPattern } from "src/Pattern/abstract.js"
+import { extendPrototype } from "../../utils.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { mutate } = inplace
@@ -76,7 +76,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any>
 	}
 }
 
-extendClass(PersistentIndexMap, {
+extendPrototype(PersistentIndexMap, {
 	index: { value: valueIndex },
 	byIndex: { value: valueByIndex },
 	copy: { value: indexMapCopy },

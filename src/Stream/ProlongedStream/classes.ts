@@ -15,7 +15,7 @@ import {
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 const ProlongedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -49,7 +49,7 @@ export function ProlongedStream<Type = any>(
 		}
 	}
 
-	extendClass(prolongedStream, {
+	extendPrototype(prolongedStream, {
 		super: { value: baseClass.prototype },
 		init: { value: prolongedStreamInitialize<Type> }
 	})

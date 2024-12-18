@@ -1,77 +1,34 @@
-import type { FreezableBuffer, UnfreezableBuffer } from "./interfaces.js"
-
-import { BasicPattern } from "../../Pattern/classes.js"
-import { collectionIterator } from "../methods.js"
-import {
-	freezableBufferFreeze,
-	freezableArrayPush,
-	freezableArrayRead,
-	unfreezableBufferUnfreeze,
-	unfreezableStringPush
-} from "./methods.js"
-
-import { valueLength } from "../../Pattern/methods.js"
-import { extendClass } from "../../utils.js"
-
-import { defaults } from "../../constants.js"
-const { isFrozen } = defaults.FreezableBuffer
+import type { UnfreezableBuffer } from "./interfaces.js"
+import { TypicalUnfreezable } from "./abstract.js"
 
 export class UnfreezableArray<Type = any>
-	extends BasicPattern<Type[]>
+	extends TypicalUnfreezable<Type>
 	implements UnfreezableBuffer<Type>
 {
-	value: Type[]
-	isFrozen: boolean = isFrozen
+	protected value: Type[]
 
-	push: (...x: Type[]) => UnfreezableArray<Type>
-	read: (i: number) => Type
-	size: number
-
-	freeze: () => UnfreezableArray<Type>
-	unfreeze: () => UnfreezableArray<Type>;
-
-	[Symbol.iterator]: () => Generator<Type>
+	push(...elements: Type[]) {
+		if (!this.isFrozen) this.value.push(...elements)
+		return this
+	}
 
 	constructor(value: Type[] = []) {
 		super(value)
 	}
 }
 
-extendClass(UnfreezableArray, {
-	unfreeze: { value: unfreezableBufferUnfreeze },
-	freeze: { value: freezableBufferFreeze },
-	push: { value: freezableArrayPush },
-	read: { value: freezableArrayRead },
-	size: { value: valueLength },
-	[Symbol.iterator]: { value: collectionIterator }
-})
-
 export class UnfreezableString
-	extends BasicPattern<string>
+	extends TypicalUnfreezable<string>
 	implements UnfreezableBuffer<string>
 {
-	value: string
-	isFrozen: boolean = isFrozen
+	protected value: string
 
-	push: (...x: string[]) => UnfreezableString
-	read: (i: number) => string
-	size: number
-
-	freeze: () => UnfreezableString
-	unfreeze: () => UnfreezableString;
-
-	[Symbol.iterator]: () => Generator<string>
+	push(...strings: string[]) {
+		if (!this.isFrozen) this.value += strings.join("")
+		return this
+	}
 
 	constructor(value: string = "") {
 		super(value)
 	}
 }
-
-extendClass(UnfreezableString, {
-	unfreeze: { value: unfreezableBufferUnfreeze },
-	freeze: { value: freezableBufferFreeze },
-	push: { value: unfreezableStringPush },
-	read: { value: freezableArrayRead<string> },
-	size: { value: valueLength },
-	[Symbol.iterator]: { value: collectionIterator }
-})

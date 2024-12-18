@@ -63,9 +63,62 @@ REMINDERS [2.]:
 		21.7. replace (everywhere) the 'import' with 'import {...} from "./dist/main"', then 'const {...} = ...'; 
 			This ensures the import-correctness of the given paths; 
 			Gives first-hand experience of actually using the library; 
+	
+	2.51. 'extendClass' - KNOWN ERROR; 
+
+		Need a new function (put into 'one.js' for getting RECURSIVELY all the 'PropertyDescriptors'); 
+			Equivalent of 'object.keys'/'object.values', but for descriptors; 
+			Replace the 'ownPropertyDescriptors' there (NOTE: the descriptors must be IDENTICAL to those obtained via 'Object.getOwnPropertyDescriptors'); 
+			Then - will be able to express dynamic prototype inheritance like this...; 	
 					
 	2.52. Simplify names of exports in 'methods': 
 		Take out the 'prefixedNames' stuff...; 
+		
+		1. List the remaining classes to work with; 
+			Complete this, via breaking apart into micro-classes; 
+
+				[later]
+				3. IndexMap/FastLookupTable: 
+					ALSO - always make the '.value' thingy into something that is "protected"; 
+					3. refactoring ('abstract', connection to other abstract classes)
+						USE the 'valueReplaceKey' here [at the same time as the 'PersistentIndexMap']
+	
+				7. IndexMap/PersistentIndexMap
+				8. Pattern
+					1. Change the 'value-' delegate methods' names; 
+					2. PROBLEM: what about "shared" methods that are all in 'abstract' classes? 
+						SOLUTION: Let they be exported several times - ONCE for each case of already existing class export; 
+
+						CONCLUSION: one'll need to delete the 'Pattern/methods.ts', RELOCATE the methods somewhere more appropriate; 
+							Example [1] - the 'StreamClass/methods.ts' for appropriate 'StreamClass' methods; 
+							Example [2] - create a new directory - 'refactor/' with appropriate methods [those that are used in several different places]; 
+								The 'refactor.ts' is NOT exported as an object of the library (internal exports usage); 
+
+					4. Delete the BasicPattern; [IF nothing uses it, after all, instead preferring ProtectedPattern]
+						Seems like 'Token' still uses it (try connecting it to 'ProtectedPattern' via inheritance...); 
+						ONLY if 'null' is NOT an acceptable value; 
+
+						Otherwise - use 'protected value?: Type' in 'ProtectedPattern'; 
+				9. Stream/: 
+					1. 'methods.ts' - ALL of them; 
+					2. inline class methods; 
+					3. the 'StreamClass' methods should be renamed (BUT remain untouched - defined as presently-are); 
+
+				10. Tokenizable [the 'tokenize' is NOT yet worked-with in terms of abstract classes]; 
+				11. Tree [inline methods, rename exported]
+					11.1. TreeWalker
+				12. Validatable [the 'validate' is NOT yet worked-with in terms of abstract classes]; 
+
+			AT THE SAME TIME - create the 'abstract' dependency; 
+			Also - use 'ProtectedPattern' (or rename into 'InternalPattern'); 
+			
+		2. [later] Stream: 
+			Quite obviously, one is to work FURTHER on the 'StreamClass'; 
+			In particular, 
+
+				1. Add OPTIONAL 'Bufferized', 'Posed', 'Stateful' to the appropriate Stream interfaces; 
+					For now - only the errors are fixed, but APPROPRIATE USAGE IS STILL MISSING!
+				2. Add the 'LocatorStream' (and other SPECIFIC interfaces, to indicate where and which optional flags are present)
 
 	2.54. New concept for library organization: 	
 		MICRO-CLASSES! 
@@ -74,7 +127,7 @@ REMINDERS [2.]:
 		
 		Start with: 
 
-			1. EliminableString; 
+			1. EliminableString [contains only a declaration right now...]; 
 
 	2.55. ENCAPSULATION! 
 		Over-use of 'Pattern' contributes to poor encapsulation; 
@@ -92,7 +145,7 @@ REMINDERS [2.]:
 
 		Because there, it's a sort of an "input" (one can 'flush', and re-set it...); 
 			[Maybe...: 	
-				1. add an '.init()' method on them instead?
+				1. add an '.init()' method on them [FlushablePattern-s, that is...] instead?
 				2. Rename 'BasicPattern' into 'PrivatePattern', and replace the 'value' with '#value'/'protected value'? 
 					WHICH itself is presented via a different abstract class altogether?
 
@@ -139,8 +192,14 @@ REMINDERS [2.]:
 										2. When it's a 'static' field, or another kind of exported class-expression - one has to use the '#': 
 											CONCLUSION: using the 'private/protected' for near-everything...; 
 											['private' is only used when logic is very simple + not desired for extension]; 
+										
+								ALSO: 
+
+									Do this on Stream-s AS WELL! 
+									The '.value' MUST NOT be marked as "readily available" by default. 
+									The user is to change it ONLY via the '.init()'; 
 			
-						3. The SelfAssignmentClass-es; 
+						3. The AssignmentClass-es; 
 							Namely, the '._index' property; 
 							One NEEDS to formalize it; 
 
@@ -159,10 +218,110 @@ REMINDERS [2.]:
 
 			1. HashTable;
 			2. LinearIndexMap; 
+
+	2.57. With all the refactoring going on, class files has become __quite__ crowded. 
+		Refactor the abstract classes into a WHOLE NEW export of 'main'. 
+		Call it 'abstract'. 
+		Will have a similar structure to the remainder of the project. 
+		The 'abstract' classes would be just as well documented as the rest.
+
+		They would ALSO provide a way to split the methods from generated classes; 
+
+		PROBLEM: __sometimes__, one would need a single-method class, that would be used SEVERAL TIMES. 
+			Then, use the 'mixin' pattern: 
+
+				const Z = (extended) => class extends extended {
+					methodName(...in: any[]) {
+						// ...
+					}
+				}
+			
+			This is NOT good because it forbids usage of 'protected'/'private' (so - avoid it where possible); 
+			Particular places of concern: 
+
+				1. FastLookupTable: 
+
+					Attempt for resolution: 
+						Owning (.own) <- [set + replaceKey: PersistentIndexMap]
+							
+							NOTE: the PersistentIndexMap needs ANOTHER abstract class with also '.byIndex()' + '.replace()', ...
+								PersistentIndexMap <- [big one: byIndex, replace, ...] <- [set + replaceKey]
+							
+					PROBLEM: InternalHash uses 'set' without 'replaceKey': 
+
+						PersistentIndexLookupTable 	<- [.own + .replaceKey + .set] <- [.replaceKey + .set + .size] <- [.set + .size] <- [.size]
+						PersistentIndexMap			<- [.keys + .values + .byIndex + .replace + .index + .default] <- [.replaceKey + .set]
+						InternalHash 				<- [.delete + .set + .size] <- [.set + .size] <- [.size]
+						HashMap						<- [.size]
+
+						NOTE[1]: the 'PersistentIndexMap' has to CHANGE its '.size' definition to 'valueSize'; 
+						NOTE[2]: the 'PersistentIndeLookupTable' has to have the '.size' property from now on; 
+						NOTE[3]: the 'PersistentIndexMap' has to CHANGE its '.set' definition to 'valueSet' [no practical functionality change]; 
+						
+	2.60. '.init' - popularize even further throughout the library; 
+		Add an '.init' method to most [if not all] the library's classes. 
+		To add, in particular: 
+
+			1. Eliminable
+			2. Tokenizable
+			3. Validatable
+			4. Pattern: 
+				Create a new abstract class - 'InitializablePattern': 
+				This will abstract away the method '.init := ->(this.value = args[0])';  
+				The Eliminable, Tokenizable, Validatable will use it...; 
+			... [think of whether one would want re-usability for other types..., how to implement it...];
+		
+	2.61. Code cleaning - abstract classes DO NOT HAVE to do: 'this[x] = ...' in their constructors; 
+		Instead, use the 'constructor(protected name: Type) {}' syntax...; 
+	
+	2.62. PROBLEM - with LayeredParser: 
+
+		1. It is (really) just a modifiable/recomputable composition of functions; 
+			Too general for the library as it currently stands; 
+		2. One needs to specialize it - how? 
+			Largest problem with it is that it's INCAPABLE of working with StreamParser,
+				because: 
+
+					1. self-modification requires storing a reference on NECESSARY LEVELS of 'StreamParser'; 
+					2. 'LayeredParser' ONLY takes functions that accept 1 argument, so 'classWrapper(StreamParser(table))' WON'T DO (accepts 2 - 'input', 'state'); 
+				
+				One could, of course, do this: 
+
+					const layered = LayeredParser(A, ..., (input) => StreamParser(table)(input, { parser: layered })); 
+
+				CONCLUSION: add a new function for [generally] doing '(f, n, v) => (...values: any[]) => f(...insert(values, n, v))'; 
+			
+				Problem then becomes - 'layered' has to be given BEFORE all this is done...; 
+				So, what one actually has to do is: 
+
+					const layered = new LayeredParser()
+					layered.layers = [A, ..., ((v) => (input) => StreamParser(table)(input, v))({ parser: layered }), ...]
+				
+				Then, the 'table' would have a 'function', that would in certain circumstances access the 'this.state.parser', and CHANGE IT; 
+
+	2.63. New function to add - 'digValue'
+		This is intended for "getting" through multiple layers of '.value' in a WrapperStream-hierarchy; 
+		Basic algorithm: 
+
+			dig(valued) {
+				let curr = valued
+				while (curr.value)
+					curr = curr.value
+				return curr
+			}
+		
+		Absolutely crucial in combination with LayeredParser (why it is added in v0.3); 
 	
 Order of TODO-elimination: 
-	2.3.
+	5.2.51. 
 	5.2.52. 
+	5.2.54
+	5.2.55.
+	5.2.56.
+	5.2.60.
+	5.2.61.
+	5.2.62.
+	2.3.
 
 	A.3.10.1
 	A.3.10.2
@@ -1371,24 +1530,22 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				const r = t.init(...)
 				t === r // false
 		)
-	
-	2.49. [general] Interfaces - more work; 
-		Some little details of interfaces (such as, previously, interface for 'PersistentIndexMap' with 'index: number[]' - fixed) 
-			SHOULD be hidden instead; 
-		Look through the interfaces, remove any data fields that are better left for the implementation; 
+		
+	2.49. [maybe?] Turn the 'TableMap' and 'MapWrap' into 'FlexibleFunction' derivatives? 
+		This would [pro]: 
 
-	2.50. '.init' - popularize even further throughout the library; 
-		Add an '.init' method to most [if not all] the library's classes. 
-		To add, in particular: 
+			1. introduce some consistency into the library; 
+			2. reduce "dynamic" addition of properties to objects (particularly - functions); 
 
-			1. Eliminable
-			2. Tokenizable
-			3. Validatable
-			4. Pattern: 
-				Create a new abstract class - 'InitializablePattern': 
-				This will abstract away the method '.init := ->(this.value = args[0])';  
-				The Eliminable, Tokenizable, Validatable will use it...; 
-			... [think of whether one would want re-usability for other types..., how to implement it...];
+		However [con]: 
+
+			1. may cause a performance penalty (check); 
+		
+		IF using FlexibleFunction is NOT slower (in terms of function calls), then do just that...; 
+		The 'FlexibleFunction' is always going to be slower on creation (due to: 1. constructor; 2. runtime-parsing of FlexibleFunction), 
+			but this shouldn't be too costly overall (besides, when string is static, it well may be cached to improve performance); 
+
+	2.50. Change the tests using one's the 'tests.js' library; 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 

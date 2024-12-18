@@ -8,23 +8,18 @@ export const [valueDelegate, valueThisDelegate, valuePropDelegate] = [
 	delegateProperty
 ].map((x) => x("value"))
 
-export const [valueReplaceKey, valueSet, valueDelete, valueReplace] = [
-	"replaceKey",
-	"set",
-	"delete"
-].map(valueThisDelegate)
+export const [valueReplaceKey, valueReplace] = ["replaceKey", "replace"].map(
+	valueThisDelegate
+)
 
 export const [
-	valueSize,
 	valueKeys,
 	valueValues,
 	valueDefault,
 	valueCurr,
 	valueDefaultIsEnd,
 	valueDefaultIsStart
-] = ["size", "keys", "values", "default", "curr", "isEnd", "isStart"].map(
-	valuePropDelegate
-)
+] = ["keys", "values", "default", "curr", "isEnd", "isStart"].map(valuePropDelegate)
 
 export const [
 	valueIndex,
@@ -34,8 +29,7 @@ export const [
 	valueIsEnd,
 	valueIsStart,
 	valueRewind,
-	valueFinish,
-	valueLength
+	valueFinish
 ] = [
 	"index",
 	"byIndex",
@@ -44,6 +38,5 @@ export const [
 	"isCurrEnd",
 	"isCurrStart",
 	"rewind",
-	"finish",
-	"length"
+	"finish"
 ].map(valueDelegate)

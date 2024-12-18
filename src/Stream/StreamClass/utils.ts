@@ -7,6 +7,7 @@ import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
 import type {
 	BufferizedStreamClassInstance,
+	PositionalStreamClassInstance,
 	PreStarted,
 	ReversedStreamClassInstance,
 	Stateful,
@@ -148,7 +149,9 @@ export function getNext<Type = any>(stream: StreamClassInstance<Type>) {
 	return (stream.curr = stream.baseNextIter())
 }
 
-export function readBuffer<Type = any>(stream: BufferizedStreamClassInstance<Type>) {
+export function readBuffer<Type = any>(
+	stream: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
+) {
 	return (stream.curr = stream.buffer.read(stream.pos))
 }
 

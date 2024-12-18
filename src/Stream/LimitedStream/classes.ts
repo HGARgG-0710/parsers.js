@@ -17,7 +17,7 @@ import {
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -68,7 +68,7 @@ export function LimitedStream<Type = any>(
 		}
 	}
 
-	extendClass(limitedStream, {
+	extendPrototype(limitedStream, {
 		super: { value: baseClass.prototype },
 		prod: { value: limitedStreamProd },
 		init: { value: limitedStreamInitialize }

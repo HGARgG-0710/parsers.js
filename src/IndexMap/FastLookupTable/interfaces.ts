@@ -11,5 +11,5 @@ export interface FastLookupTable<KeyType = any, ValueType = any, OwningType = an
 }
 
 export interface IndexAssignable<Type = any> {
-	assignedIndex: Type
+	assignedIndex?: Type
 }

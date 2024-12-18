@@ -1,29 +1,18 @@
-import type { UnfreezableArray, UnfreezableString } from "./classes.js"
-import type { UnfreezableBuffer } from "./interfaces.js"
+import { TypicalUnfreezable } from "./abstract.js"
+import {
+	UnfreezableArray as UnfreezableArrayClass,
+	UnfreezableString as UnfreezableStringClass
+} from "./classes.js"
 
-export function freezableBufferFreeze<Type = any>(this: UnfreezableArray<Type>) {
-	this.isFrozen = true
-	return this
+const { prototype } = TypicalUnfreezable
+
+export const { freeze, unfreeze, read } = prototype
+export const size = Object.getOwnPropertyDescriptor(prototype, "size")!.get!
+
+export namespace UnfreezableArray {
+	export const { push } = UnfreezableArrayClass.prototype
 }
 
-export function unfreezableBufferUnfreeze<Type = any>(this: UnfreezableBuffer<Type>) {
-	this.isFrozen = false
-	return this
-}
-
-export function freezableArrayPush<Type = any>(
-	this: UnfreezableArray<Type>,
-	...elements: Type[]
-) {
-	if (!this.isFrozen) this.value.push(...elements)
-	return this
-}
-
-export function freezableArrayRead<Type = any>(this: UnfreezableArray<Type>, i: number) {
-	return this.value[i]
-}
-
-export function unfreezableStringPush(this: UnfreezableString, ...strings: string[]) {
-	if (!this.isFrozen) this.value += strings.join("")
-	return this
+export namespace UnfreezableString {
+	export const { push } = UnfreezableStringClass.prototype
 }

@@ -1,45 +1,15 @@
-import type { HashClass as HashClassType, ExactHashMap } from "./interfaces.js"
+import type { HashClass as HashClassType } from "./interfaces.js"
+import type { InternalHash } from "./InternalHash/interfaces.js"
+
 import { HashClass } from "./classes.js"
 
-export function hashMapIndex<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
-	x: KeyType
-) {
-	return this.value.get(this.hash(x, this.value))
-}
-
-export function hashMapSet<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
-	key: KeyType,
-	value: ValueType
-) {
-	this.value.set(this.hash(key, this.value), value)
-	return this
-}
-
-export function hashMapDelete<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
-	key: KeyType
-) {
-	this.value.delete(this.hash(key, this.value))
-	return this
-}
-
-export function hashMapReplaceKey<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: ExactHashMap<KeyType, ValueType, InternalKeyType>,
-	keyFrom: KeyType,
-	keyTo: KeyType
-) {
-	this.value.replaceKey(this.hash(keyFrom, this.value), this.hash(keyTo, this.value))
-	return this
-}
-
-export function hashClassExtend<KeyType = any, ValueType = any, InternalKeyType = any>(
+export function extend<KeyType = any, ValueType = any, InternalKeyType = any>(
 	this: HashClassType<KeyType, ValueType, InternalKeyType>,
 	f: (x: any) => KeyType
 ) {
-	return HashClass<any, ValueType, InternalKeyType>((x: any) =>
-		this.hash(f(x), this.value)
+	return HashClass<any, ValueType, InternalKeyType>(
+		(x: any, structure: InternalHash<InternalKeyType, ValueType>) =>
+			this.hash(f(x), structure)
 	)
 }
 

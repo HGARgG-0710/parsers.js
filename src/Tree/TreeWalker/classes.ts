@@ -24,7 +24,7 @@ import {
 } from "./methods.js"
 
 import { MultiIndex as MultiIndexClass } from "../../Position/MultiIndex/classes.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 const { MultiIndexModifier } = MultiIndexClass
 
@@ -68,7 +68,7 @@ export class TreeWalker<Type = any> implements TreeWalkerType<Type> {
 	}
 }
 
-extendClass(TreeWalker, {
+extendPrototype(TreeWalker, {
 	getCurrChild: { value: treeWalkerGetCurrChild },
 	levelUp: { value: treeWalkerLevelUp },
 	pushFirstChild: { value: treeWalkerPushFirstChild },

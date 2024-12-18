@@ -48,6 +48,10 @@ export interface Stateful {
 	state: Summat
 }
 
+export interface OptStateful {
+	state?: Summat
+}
+
 // * Mandatory Property-interfaces
 
 export interface IsEndCurrable {

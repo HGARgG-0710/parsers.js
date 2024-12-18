@@ -29,25 +29,29 @@ export interface Sizeable {
 	size: number
 }
 
-export interface DefaultHaving {
-	default: any
+export interface DefaultHaving<Type = any> {
+	default: Type
 }
 
-export interface IndexMap<KeyType = any, ValueType = any, IndexGetType = number>
-	extends Indexable<ValueType>,
+export interface IndexMap<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexGetType = number
+> extends Indexable<ValueType | DefaultType>,
 		Iterable<[KeyType, ValueType]>,
-		Copiable<IndexMap<KeyType, ValueType>>,
+		Copiable<IndexMap<KeyType, ValueType, DefaultType, IndexGetType>>,
 		Sizeable,
-		DefaultHaving {
-	constructor: new (pairs: Pairs<KeyType, ValueType>, _default?: any) => IndexMap<
-		KeyType,
-		ValueType
-	>
+		DefaultHaving<DefaultType> {
+	constructor: new (
+		pairs: Pairs<KeyType, ValueType>,
+		_default?: DefaultType
+	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 
 	keys: KeyType[]
 	values: ValueType[]
-	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
-	byIndex: (index: number) => any
+	unique: (start?: boolean) => number[]
+	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
 	swap: (i: number, j: number) => any
 
 	getIndex: (key: any) => IndexGetType

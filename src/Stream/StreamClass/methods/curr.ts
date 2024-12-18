@@ -1,4 +1,9 @@
-import type { BufferizedStreamClassInstance, StreamClassInstance } from "../interfaces.js"
+import type {
+	BufferizedStreamClassInstance,
+	PositionalStreamClassInstance,
+	StreamClassInstance
+} from "../interfaces.js"
+
 import { getSetDescriptor } from "../../../utils.js"
 import { readBuffer } from "../utils.js"
 import { isCurrUninitialized, initCurr, start } from "../utils.js"
@@ -33,7 +38,7 @@ export const posBufferGet = set
 
 export const posBufferSetWithCurrGetter = setWithCurrGetter
 export function posBufferGetWithCurrGetter<Type = any>(
-	this: BufferizedStreamClassInstance<Type>
+	this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
 ) {
 	if (this.buffer.isFrozen) return readBuffer(this)
 	return getWithCurrGetter.call(this)

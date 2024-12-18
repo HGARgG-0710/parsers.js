@@ -8,9 +8,9 @@ import type {
 } from "./interfaces.js"
 
 import { validate } from "./methods.js"
-import { FlushablePattern } from "../Pattern/classes.js"
+import { FlushablePattern } from "src/Pattern/abstract.js"
 import { validateString } from "./utils.js"
-import { extendClass } from "../utils.js"
+import { extendPrototype } from "../utils.js"
 
 import { validation } from "../constants.js"
 const { ValidationFailed } = validation.ValidatablePattern
@@ -43,7 +43,7 @@ export function DelegateValidatable<Type = any, KeyType = any>(
 		}
 	}
 
-	extendClass(delegateValidatablePattern, {
+	extendPrototype(delegateValidatablePattern, {
 		validate: { value: validate },
 		validator: { value: validator }
 	})

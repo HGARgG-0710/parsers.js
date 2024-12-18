@@ -18,16 +18,17 @@ export function nestedStreamNext<Type = any>(this: NestedStream<Type>) {
 export function nestedStreamIsEnd<Type = any>(this: NestedStream<Type>) {
 	return (
 		this.value!.isCurrEnd() ||
-		(this._index != undefined && !this.typesTable.byOwned(this)(this, this.pos))
+		(this.assignedIndex != undefined &&
+			!this.typesTable.byOwned(this)(this, this.pos))
 	)
 }
 
 export function nestedStreamInitialize<Type = any>(
 	this: NestedStream<Type>,
 	value?: EndableStream<Type>,
-	_index?: any
+	index?: any
 ) {
-	if (_index) this.typesTable.own(this, _index)
+	if (index) this.typesTable.own(this, index)
 	if (value) superInit(this, value)
 	return this
 }

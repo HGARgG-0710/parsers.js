@@ -21,6 +21,10 @@ export interface Posed<Type = any> {
 	pos: Type
 }
 
+export interface OptPosed<Type = any> {
+	pos?: Type
+}
+
 export type ChangeType<Type = any> = (input: ReversibleStream<Type>) => Type
 
 export type * from "./MultiIndex/interfaces.js"

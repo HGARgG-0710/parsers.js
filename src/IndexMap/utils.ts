@@ -1,13 +1,14 @@
-import type { IndexMap, Pair, Pairs as PairsType } from "./interfaces.js"
+import type { IndexMap, Pair, Pairs as PairsType, Sizeable } from "./interfaces.js"
 import { Pairs } from "./classes.js"
 
 import { typeof as type, boolean } from "@hgargg-0710/one"
 import type { TypePredicate } from "../interfaces.js"
+import { isGoodIndex } from "../utils.js"
 const { isArray } = type
 const { T } = boolean
 
 export function table<KeyType = any, OutType = any>(
-	indexMap: IndexMap<KeyType, OutType>
+	indexMap: IndexMap<KeyType, OutType, any, any>
 ): [KeyType[], OutType[]] {
 	return [indexMap.keys, indexMap.values]
 }
@@ -51,9 +52,9 @@ export function fromPairsList<KeyType = any, ValueType = any>(
 	let size = mapPairs.length
 	const [keys, values]: [KeyType[], ValueType[]] = [new Array(size), new Array(size)]
 	while (size--) {
-		const curr = mapPairs[size]
-		keys[size] = curr[0]
-		values[size] = curr[1]
+		const [key, value] = mapPairs[size]
+		keys[size] = key
+		values[size] = value
 	}
 	return [keys, values]
 }
@@ -66,6 +67,12 @@ export const isPair = <KeyType = any, ValueType = any>(
 	return (x: any): x is Pair<KeyType, ValueType> =>
 		isArray(x) && x.length === 2 && kp(x[0]) && vp(x[1])
 }
+
+export const upperBound = (collection: Sizeable) => (index: number) =>
+	index < collection.size
+
+export const inBound = (index: number, collection: Sizeable) =>
+	isGoodIndex(index) && upperBound(collection)(index)
 
 export * as HashMap from "./HashMap/utils.js"
 export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"

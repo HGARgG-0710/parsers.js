@@ -7,7 +7,7 @@ import type {
 
 import type { TypePredicate } from "../interfaces.js"
 
-import { BasicPattern } from "../Pattern/classes.js"
+import { BasicPattern } from "src/Pattern/abstract.js"
 import { isType } from "./utils.js"
 
 export function Token<Type = any, Value = any>(

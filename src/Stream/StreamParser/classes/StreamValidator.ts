@@ -22,7 +22,7 @@ export function StreamValidator(validator: StreamPredicate, defaultState?: Summa
 	): ValidationResult {
 		validationStream.init(stream, state)
 		while (!validationStream.isEnd) {
-			if (!validationStream.curr) return ValidationError(validationStream.pos)
+			if (!validationStream.curr) return ValidationError(validationStream.pos!)
 			validationStream.next()
 		}
 		return ValidationSuccess

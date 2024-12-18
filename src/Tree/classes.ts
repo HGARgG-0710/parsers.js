@@ -21,9 +21,9 @@ import {
 	trivialBacktrack
 } from "./methods.js"
 
-import { BasicPattern } from "../Pattern/classes.js"
+import { BasicPattern } from "src/Pattern/abstract.js"
 import { value } from "../Pattern/utils.js"
-import { extendClass, parameterWaster } from "../utils.js"
+import { extendPrototype, parameterWaster } from "../utils.js"
 import { mapper } from "./utils.js"
 
 import { function as f } from "@hgargg-0710/one"
@@ -48,7 +48,7 @@ export class ChildrenTree<Type = any>
 	}
 }
 
-extendClass(ChildrenTree, {
+extendPrototype(ChildrenTree, {
 	lastChild: {
 		get: childrenCount
 	},
@@ -81,7 +81,7 @@ export class ParentTree<Type = any>
 	}
 }
 
-extendClass(ParentTree, {
+extendPrototype(ParentTree, {
 	backtrack: { value: parentTreeBacktrack },
 	findUnwalkedChildren: { value: parentTreeFindUnwalkedChildren }
 })
@@ -95,7 +95,7 @@ export class TrivialWalkableTree<Type = any>
 	findUnwalkedChildren: (startIndex: number[]) => number
 }
 
-extendClass(TrivialWalkableTree, {
+extendPrototype(TrivialWalkableTree, {
 	backtrack: { value: trivialBacktrack },
 	findUnwalkedChildren: { value: trivialFindUnwalkedChildren }
 })

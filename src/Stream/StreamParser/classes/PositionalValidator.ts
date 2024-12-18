@@ -18,8 +18,7 @@ export function PositionalValidator(validator: StreamPredicate, defaultState?: S
 
 		while (!validationStream.isEnd) {
 			const curr: Type = stream.curr
-			if (!validationStream.curr)
-				erronous.push([validationStream.pos as number, curr])
+			if (!validationStream.curr) erronous.push([validationStream.pos!, curr])
 			validationStream.next()
 		}
 

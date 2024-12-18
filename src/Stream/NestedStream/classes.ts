@@ -16,7 +16,7 @@ import {
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 // * Explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`, instead of expected 'boolean';
 const NestedStreamBase = <Type = any>(
@@ -43,7 +43,7 @@ export function NestedStream<Type = any>(
 	class NestedStream extends baseClass implements EffectiveNestedStream<Type> {
 		value: EndableStream<Type>
 		currNested: boolean
-		_index: any
+		assignedIndex?: any
 
 		super: Summat
 		typesTable: FastLookupTable<any, StreamPredicate>
@@ -54,13 +54,13 @@ export function NestedStream<Type = any>(
 			_index?: any
 		) => EffectiveNestedStream<Type>
 
-		constructor(value?: EndableStream<Type>, _index?: any) {
+		constructor(value?: EndableStream<Type>, index?: any) {
 			super(value)
-			this.init(value, _index)
+			this.init(value, index)
 		}
 	}
 
-	extendClass(NestedStream, {
+	extendPrototype(NestedStream, {
 		init: { value: nestedStreamInitialize<Type> },
 		super: { value: baseClass.prototype },
 		typesTable: { value: nestedTypes }

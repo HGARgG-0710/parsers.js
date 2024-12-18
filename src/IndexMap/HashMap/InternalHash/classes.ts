@@ -1,39 +1,34 @@
-import type { Pointer } from "../../../Pattern/interfaces.js"
 import type { Pairs } from "../../../IndexMap/interfaces.js"
 import type { InternalHash } from "./interfaces.js"
 
-import { valueDelete, valueSet, valueSize } from "../../../Pattern/methods.js"
-import {
-	mapInternalHashGet,
-	mapInternalHashReplaceKey,
-	objectInternalHashDelete,
-	objectInternalHashGet,
-	objectInternalHashReplaceKey,
-	objectInternalHashSet
-} from "./methods.js"
-
-import { BasicPattern } from "../../../Pattern/classes.js"
-import { extendClass } from "../../../utils.js"
+import { DelegateDeletableSettableSizeable } from "../../abstract.js"
+import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { defaults } from "../../../constants.js"
-const { DefaultValue: objDefaultValue } = defaults.InternalHash.ObjectInternalHash
-const { DefaultValue: mapDefaultValue } = defaults.InternalHash.MapInternalHash
+const { InternalHash } = defaults
+const { DefaultValue: objDefaultValue } = InternalHash.ObjectInternalHash
+const { DefaultValue: mapDefaultValue } = InternalHash.MapInternalHash
 
 import { typeof as type } from "@hgargg-0710/one"
-const { isArray } = type
+const { isArray, isUndefined } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any>
-	extends BasicPattern<Map<KeyType, ValueType>>
-	implements InternalHash<KeyType, ValueType>, Pointer<Map<KeyType, ValueType>>
+	extends DelegateDeletableSettableSizeable<KeyType, ValueType, Map<KeyType, ValueType>>
+	implements InternalHash<KeyType, ValueType>
 {
-	value: Map<KeyType, ValueType>
-	size: number
 	default: any
 
-	get: (key: KeyType) => ValueType
-	set: (key: KeyType, value: ValueType) => any
-	delete: (key: KeyType) => any
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
+	get(x: KeyType) {
+		const gotten = this.value.get(x)
+		return isUndefined(gotten) ? this.default : gotten
+	}
+
+	replaceKey(fromKey: KeyType, toKey: KeyType) {
+		const value = this.get(fromKey)
+		this.delete(fromKey)
+		this.set(toKey, value)
+		return this
+	}
 
 	constructor(
 		map: Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = mapDefaultValue(),
@@ -44,26 +39,37 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	}
 }
 
-extendClass(MapInternalHash, {
-	set: { value: valueSet },
-	get: { value: mapInternalHashGet },
-	delete: { value: valueDelete },
-	size: { get: valueSize },
-	replaceKey: { value: mapInternalHashReplaceKey }
-})
-
 export class ObjectInternalHash<Type = any>
-	extends BasicPattern<object>
-	implements InternalHash<string, Type>, Pointer<object>
+	extends ProtectedPattern<object>
+	implements InternalHash<string, Type>
 {
-	value: object
 	default: any
 	size: number
 
-	get: (key: string) => Type
-	set: (key: string, value: Type) => any
-	delete: (key: string) => any
-	replaceKey: (keyFrom: string, keyTo: string) => any
+	get(key: string) {
+		const read = this.value[key]
+		return isUndefined(read) ? this.default : read
+	}
+
+	set(key: string, value: Type) {
+		if (isUndefined(this.value[key])) ++this.size
+		this.value[key] = value
+		return this
+	}
+
+	delete(key: string) {
+		if (!isUndefined(this.value[key])) {
+			--this.size
+			this.value[key] = undefined
+		}
+		return this
+	}
+
+	replaceKey(keyFrom: string, keyTo: string) {
+		this.value[keyTo] = this.value[keyFrom]
+		this.value[keyFrom] = undefined
+		return this
+	}
 
 	constructor(object: object = objDefaultValue(), _default?: any) {
 		super(object)
@@ -71,10 +77,3 @@ export class ObjectInternalHash<Type = any>
 		this.default = _default
 	}
 }
-
-extendClass(ObjectInternalHash, {
-	get: { value: objectInternalHashGet },
-	set: { value: objectInternalHashSet },
-	delete: { value: objectInternalHashDelete },
-	replaceKey: { value: objectInternalHashReplaceKey }
-})

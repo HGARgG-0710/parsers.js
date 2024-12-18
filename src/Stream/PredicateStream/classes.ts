@@ -23,7 +23,7 @@ import {
 } from "./methods.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -69,7 +69,7 @@ export function PredicateStream<Type = any>(
 		}
 	}
 
-	extendClass(predicateStream, {
+	extendPrototype(predicateStream, {
 		super: { value: baseClass.prototype },
 		prod: { value: predicateStreamProd },
 		init: { value: predicateStreamInitialize }

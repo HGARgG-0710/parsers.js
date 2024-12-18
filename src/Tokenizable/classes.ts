@@ -8,9 +8,9 @@ import type {
 	TokenizationResult
 } from "./interfaces.js"
 
-import { FlushablePattern } from "../Pattern/classes.js"
+import { FlushablePattern } from "src/Pattern/abstract.js"
 import { tokenize } from "./methods.js"
-import { extendClass } from "../utils.js"
+import { extendPrototype } from "../utils.js"
 import { tokenizeString } from "./utils.js"
 
 import { typeof as type } from "@hgargg-0710/one"
@@ -45,7 +45,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		}
 	}
 
-	extendClass(delegateTokenizablePattern, {
+	extendPrototype(delegateTokenizablePattern, {
 		tokenizer: { value: tokenizer },
 		isType: { value: isType },
 		tokenize: { value: tokenize }

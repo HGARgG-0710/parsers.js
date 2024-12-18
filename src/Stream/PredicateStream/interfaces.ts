@@ -1,6 +1,6 @@
 import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { PredicatePosition } from "../../Position/interfaces.js"
+import type { OptPosed, PredicatePosition } from "../../Position/interfaces.js"
 import type { Superable } from "../StreamClass/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
@@ -18,6 +18,7 @@ export interface PredicateStream<Type = any>
 		Superable,
 		SinglePositionLookahead<Type>,
 		Pattern<BasicReversibleStream<Type> & IsEndCurrable>,
-		LookaheadHaving {
+		LookaheadHaving,
+		OptPosed<number> {
 	predicate: PredicatePosition
 }

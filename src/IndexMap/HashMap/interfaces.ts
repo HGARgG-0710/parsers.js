@@ -38,8 +38,4 @@ export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
 	hash: HashType<KeyType, ValueType, InternalKeyType>
 }
 
-export interface ExactHashMap<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends HashMap<KeyType, ValueType, InternalKeyType>,
-		Pointer<InternalHash<InternalKeyType, ValueType>> {}
-
 export type * as InternalHash from "./InternalHash/interfaces.js"

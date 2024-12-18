@@ -21,7 +21,7 @@ import {
 	treeStreamMultindGetter
 } from "./methods.js"
 
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
@@ -65,7 +65,7 @@ export class TreeStream<Type = any>
 	}
 }
 
-extendClass(TreeStream, {
+extendPrototype(TreeStream, {
 	super: { value: TreeStreamBase.prototype },
 	multind: { get: treeStreamMultindGetter },
 	value: { get: treeStreamValueGetter },

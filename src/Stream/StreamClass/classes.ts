@@ -19,8 +19,8 @@ import {
 	prev
 } from "./methods.js"
 
-import { BasicPattern } from "../../Pattern/classes.js"
-import { addProperty, extendClass } from "../../utils.js"
+import { BasicPattern } from "src/Pattern/abstract.js"
+import { addProperty, extendPrototype } from "../../utils.js"
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
@@ -79,7 +79,7 @@ export function StreamClass<Type = any>(
 	}
 
 	const extend = (properties: PropertyDescriptorMap) =>
-		extendClass(streamClass, properties)
+		extendPrototype(streamClass, properties)
 
 	// * Defining the basic properties
 	extend({

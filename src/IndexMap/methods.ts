@@ -1,85 +1,16 @@
-import type { IndexMap } from "./interfaces.js"
+// TODO: add methods [from BaseIndexMap];
 
-import { table, keyValuesToPairsList } from "./utils.js"
-import { isGoodIndex } from "../utils.js"
+import { BaseIndexMap } from "./abstract.js"
 
-import { inplace } from "@hgargg-0710/one"
-const { swap } = inplace
-
-export function indexMapUnique<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	start: boolean = true
-): IndexMap<KeyType, ValueType> {
-	const eliminationSet = new Set()
-	const indexSet = new Set()
-
-	const predicate = start ? (i: number) => i < this.size : isGoodIndex
-	const change = (-1) ** +!start
-
-	for (let i = +!start * (this.size - 1); predicate(i); i += change)
-		if (!eliminationSet.has(this.keys[i])) {
-			eliminationSet.add(this.keys[i])
-			indexSet.add(i)
-		}
-
-	const filterPredicate = (_x: any, i: number) => indexSet.has(i)
-	this.keys = this.keys.filter(filterPredicate)
-	this.values = this.values.filter(filterPredicate)
-
-	return this
-}
-
-export function* indexMapIterator<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>
-): Generator<[KeyType, ValueType]> {
-	const size = this.size
-	for (let i = 0; i < size; ++i) yield [this.keys[i], this.values[i]]
-}
-
-export function indexMapByIndex<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	index: number
-): [KeyType, ValueType] {
-	return isGoodIndex(index) && this.size > index
-		? [this.keys[index], this.values[index]]
-		: this.default
-}
-
-export function indexMapSwap<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	i: number,
-	j: number
-): IndexMap<KeyType, ValueType> {
-	swap(this.keys, i, j)
-	swap(this.values, i, j)
-	return this
-}
-
-export function indexMapCopy<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>
-) {
-	return new this.constructor(keyValuesToPairsList(table(this)))
-}
-
-export function indexMapSizeGetter<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>
-) {
-	return this.keys.length
-}
-
-export function indexMapSet<KeyType = any, ValueType = any>(
-	this: IndexMap<KeyType, ValueType>,
-	key: KeyType,
-	value: ValueType,
-	index: number = this.size
-) {
-	const keyIndex = this.keys.indexOf(key)
-	if (isGoodIndex(keyIndex)) {
-		this.values[keyIndex] = value
-		return this
-	}
-	return this.add(index, [key, value])
-}
+export const {
+	index,
+	replace,
+	add,
+	delete: _delete,
+	replaceKey,
+	getIndex,
+	unique
+} = BaseIndexMap.prototype
 
 export * as FastLookupTable from "./FastLookupTable/methods.js"
 export * as HashMap from "./HashMap/methods.js"

@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 import type {
 	EndableStream,
 	PatternStreamConstructor
@@ -9,7 +10,7 @@ import type { StreamParser as StreamParserType } from "./interfaces.js"
 import { StreamClass } from "../../Stream/StreamClass/classes.js"
 import { valueDefaultIsEnd, valueIsEnd } from "../../Pattern/methods.js"
 import { streamParserInitialize, streamParserNext } from "./methods.js"
-import { extendClass } from "../../utils.js"
+import { extendPrototype } from "../../utils.js"
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -42,6 +43,10 @@ export function StreamParser<OutType = any>(
 		super: Summat
 		handler: StreamHandler<OutType>
 
+		pos?: number
+		buffer?: FreezableBuffer<OutType>
+		state?: Summat
+
 		init: (
 			value?: EndableStream<InType>,
 			state?: Summat
@@ -53,7 +58,7 @@ export function StreamParser<OutType = any>(
 		}
 	}
 
-	extendClass(streamTokenizerClass, {
+	extendPrototype(streamTokenizerClass, {
 		super: { value: baseClass.prototype },
 		init: { value: streamParserInitialize },
 		handler: { value: handler }

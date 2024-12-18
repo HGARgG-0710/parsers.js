@@ -1,7 +1,4 @@
-import type { Indexed } from "../Stream/interfaces.js"
-import type { Pointer } from "../Pattern/interfaces.js"
-
-export interface Collection<Type = any> extends Pointer<Indexed<Type>>, Iterable<Type> {
+export interface Collection<Type = any> extends Iterable<Type> {
 	push: (...x: Type[]) => Collection<Type>
 }
 

@@ -153,8 +153,15 @@ export const state = (x: Stateful) => x.state
 
 export const buffer = (x: Bufferized) => x.buffer
 
-export const extendClass = (Extended: Prototypal, properties: PropertyDescriptorMap) =>
-	Object.defineProperties(Extended.prototype, properties)
+export const extendPrototype = (
+	Extended: Prototypal,
+	properties: PropertyDescriptorMap
+) => Object.defineProperties(Extended.prototype, properties)
+
+export const extendClass = (Extended: Prototypal, ...classes: Prototypal[]) =>
+	classes.forEach((ParentClass) =>
+		extendPrototype(Extended, Object.getOwnPropertyDescriptors(ParentClass.prototype))
+	)
 
 export const addProperty = (
 	Extended: Prototypal,
