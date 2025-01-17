@@ -8,10 +8,10 @@ import type { Initializable } from "../../../dist/src/Stream/StreamClass/methods
 
 import { classWrapper } from "../../../dist/src/utils.js"
 
-import { object, boolean, function as _f, typeof as type } from "@hgargg-0710/one"
+import { object, boolean, functional, type } from "@hgargg-0710/one"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
-const { or } = _f
+const { or } = functional
 const { isFunction, isObject, isNull, isArray } = type
 
 export function recursiveToString(x: any) {

@@ -3,10 +3,11 @@ import type {
 	MapClass,
 	MapClassValueExtension,
 	MapClassKeyExtension,
-	Pairs,
 	TestType,
 	HasType
 } from "../interfaces.js"
+
+import type { array } from "@hgargg-0710/one"
 
 import type { LinearIndexMap } from "./interfaces.js"
 
@@ -19,8 +20,8 @@ import {
 import { fromPairsList } from "../utils.js"
 import { BaseLinearMap } from "./abstract.js"
 
-import { function as f, boolean } from "@hgargg-0710/one"
-const { trivialCompose } = f
+import { functional, boolean } from "@hgargg-0710/one"
+const { trivialCompose } = functional
 const { equals } = boolean
 
 export function LinearMapClass<KeyType = any, ValueType = any>(
@@ -39,7 +40,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		static keyExtensions: Function[]
 		static extensions: Function[]
 
-		constructor(pairsList: Pairs<KeyType, ValueType>, _default?: any) {
+		constructor(pairsList: array.Pairs<KeyType, ValueType>, _default?: any) {
 			super(...fromPairsList(pairsList), _default)
 		}
 	}

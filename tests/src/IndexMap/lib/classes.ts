@@ -28,10 +28,10 @@ import {
 
 import { keyValuesToPairsList } from "../../../../dist/src/IndexMap/utils.js"
 
-import { object, typeof as type, function as _f } from "@hgargg-0710/one"
+import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
-const { and } = _f
+const { and } = functional
 
 export const isIndexable = structCheck<Indexable>({ index: isFunction })
 export const isDeletable = structCheck<Deletable>({ delete: isFunction })

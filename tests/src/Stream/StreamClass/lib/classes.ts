@@ -39,11 +39,11 @@ import { isPosition } from "../../../../../dist/src/Position/utils.js"
 
 import { StreamClass } from "../../../../../dist/src/constants.js"
 
-import { object, function as _f, typeof as type, boolean } from "@hgargg-0710/one"
+import { object, functional, type, boolean } from "@hgargg-0710/one"
 import type { ReversibleStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 import { uniFinish } from "../../../../../dist/src/Stream/StreamClass/utils.js"
 const { structCheck } = object
-const { and, or } = _f
+const { and, or } = functional
 const { isBoolean, isFunction, isObject, isNumber } = type
 const { T } = boolean
 

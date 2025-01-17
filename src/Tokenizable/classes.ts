@@ -13,7 +13,7 @@ import { tokenize } from "./methods.js"
 import { extendPrototype } from "../utils.js"
 import { tokenizeString } from "./utils.js"
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isString } = type
 
 export abstract class FlushableTokenizable<Type = any, OutType = any>

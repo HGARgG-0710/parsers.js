@@ -6,15 +6,14 @@ import {
 	classTest,
 	flexibleComparisonMethodTest,
 	method,
-	methodTest,
 	setMethodTest,
 	signatures
 } from "lib/lib.js"
 
 import { isDeletable, isKeyReplaceable, isSettable } from "IndexMap/lib/classes.js"
 
-import { function as _f, object, typeof as type } from "@hgargg-0710/one"
-const { and } = _f
+import { functional, object, type } from "@hgargg-0710/one"
+const { and } = functional
 const { structCheck } = object
 const { isFunction } = type
 

@@ -1,1 +1,1 @@
-export * as LayeredParser from "./LayeredParser/methods.js"
+export * as LayeredFunction from "./LayeredFunction/methods.js"

@@ -8,7 +8,7 @@ import {
 
 import type { EliminablePattern } from "../../../../dist/src/Eliminable/interfaces.js"
 
-import { object, boolean, typeof as type } from "@hgargg-0710/one"
+import { object, boolean, type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
 const { T } = boolean

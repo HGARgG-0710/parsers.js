@@ -13,8 +13,8 @@ import {
 
 import type { StreamTokenizer } from "../../../../../dist/src/Parser/StreamTokenizer/interfaces.js"
 
-import { function as _f, object, typeof as type } from "@hgargg-0710/one"
-const { and } = _f
+import { functional, object, type } from "@hgargg-0710/one"
+const { and } = functional
 const { structCheck } = object
 const { isFunction } = type
 

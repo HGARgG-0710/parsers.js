@@ -21,9 +21,9 @@ import {
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
-import { object, function as _f, typeof as type } from "@hgargg-0710/one"
+import { object, functional, type } from "@hgargg-0710/one"
 const { structCheck } = object
-const { and } = _f
+const { and } = functional
 const { isBoolean } = type
 
 type LimitedStreamTestSignature = StreamClassTestSignature & {

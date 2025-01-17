@@ -3,16 +3,17 @@ import type { EndableStream } from "../StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 import { superInit } from "../StreamClass/utils.js"
+import { isBufferized } from "../../Collection/Buffer/utils.js"
 
 import { Stream } from "../../constants.js"
-import { isBufferized } from "../../Collection/Buffer/utils.js"
 const { SkippedItem } = Stream.StreamParser
 
 export function streamParserNext<InType = any, OutType = any>(
 	this: StreamParser<InType, OutType>
 ) {
-	let currRes = SkippedItem
-	while (currRes === SkippedItem) currRes = this.handler.call(this, this.value)
+	let currRes: OutType
+	do currRes = this.handler.call(this, this.value)
+	while (currRes === SkippedItem)
 	return currRes
 }
 

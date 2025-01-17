@@ -3,7 +3,7 @@ import * as Parser from "../../../../../dist/src/Parser/classes.js"
 
 importTest(
 	objectImports(
-		"LayeredParser",
+		"LayeredFunction",
 		"PatternEliminator",
 		"PatternTokenizer",
 		"PatternValidator",

@@ -9,7 +9,7 @@
 // 			* 2. .popChild		 	- .pos [+ ARG], .level [+ ARG],  .curr [NO ARG]
 // 			* 3. .isSiblingAfter 	- 1 boolean [result];
 // 			* 4. .isSiblingBefore 	- 1 boolean [result];
-// 			* 5. .goSiblingAfter	- 
+// 			* 5. .goSiblingAfter	-
 // % 	2. Change them accordingly
 
 import assert from "node:assert"
@@ -36,10 +36,10 @@ import {
 	repeat
 } from "lib/lib.js"
 
-import { object, typeof as type, function as f, array } from "@hgargg-0710/one"
+import { object, type, functional, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
-const { and } = f
+const { and } = functional
 const { last } = array
 
 export const isTreeWalker = and(

@@ -16,7 +16,7 @@ import {
 
 import { comparisonUtilTest, utilTest } from "lib/lib.js"
 
-import { typeof as type, boolean } from "@hgargg-0710/one"
+import { type, boolean } from "@hgargg-0710/one"
 const { isNumber, isFunction } = type
 const { equals } = boolean
 

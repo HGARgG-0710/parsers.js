@@ -12,7 +12,7 @@ import {
 	positionDecrement
 } from "../../../Position/utils.js"
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isNumber } = type
 
 export interface Navigable<Type = any> {

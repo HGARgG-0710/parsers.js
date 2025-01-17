@@ -17,8 +17,8 @@ import {
 } from "Stream/StreamClass/lib/classes.js"
 import { isFastLookupTable } from "IndexMap/FastLookupTable/lib/classes.js"
 
-import { function as _f, object, typeof as type } from "@hgargg-0710/one"
-const { and } = _f
+import { functional, object, type } from "@hgargg-0710/one"
+const { and } = functional
 const { structCheck } = object
 const { isBoolean } = type
 

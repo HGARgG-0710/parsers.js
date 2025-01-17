@@ -21,7 +21,7 @@ import { Stream, defaults } from "../../constants.js"
 const { StreamClass } = Stream
 const { realCurr: defaultRealCurr } = defaults.StreamClass
 
-import { object, typeof as type } from "@hgargg-0710/one"
+import { object, type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 

@@ -11,9 +11,9 @@ import {
 } from "lib/lib.js"
 import { isDeletable, isKeyReplaceable, isSettable } from "IndexMap/lib/classes.js"
 
-import { object, function as _f, typeof as type } from "@hgargg-0710/one"
+import { object, functional, type } from "@hgargg-0710/one"
 const { structCheck } = object
-const { and } = _f
+const { and } = functional
 const { isFunction, isObject } = type
 
 export const isInternalHash = and(

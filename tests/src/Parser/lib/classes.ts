@@ -1,7 +1,7 @@
 import assert from "node:assert"
 
 import type { Resulting } from "../../../../dist/src/Pattern/interfaces.js"
-import type { LayeredParser } from "../../../../dist/src/Parser/LayeredParser/interfaces.js"
+import type { LayeredFunction } from "../../../../dist/src/Parser/LayeredFunction/interfaces.js"
 import type { Indexable } from "../../../../dist/src/IndexMap/interfaces.js"
 import { classTest, signatures } from "lib/lib.js"
 
@@ -33,10 +33,10 @@ type LayeredParserTestSignature = {
 
 export function LayeredParserTest(
 	className: string,
-	tested: (...input: any[]) => LayeredParser,
+	tested: (...input: any[]) => LayeredFunction,
 	testSignatures: LayeredParserTestSignature[]
 ) {
-	classTest(`(LayeredParser) ${className}`, () =>
+	classTest(`(LayeredFunction) ${className}`, () =>
 		signatures(testSignatures, ({ layers, inOuts }) => () => {
 			const instance = tested(layers)
 			assert.strictEqual(instance.layers, layers)

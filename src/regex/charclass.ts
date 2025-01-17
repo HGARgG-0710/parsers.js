@@ -1,8 +1,8 @@
 import regex, { char_ranges } from "../regex.js"
 import { non_bracket } from "./groups.js"
 
-import { function as _f, typeof as type } from "@hgargg-0710/one"
-const { id } = _f
+import { functional, type } from "@hgargg-0710/one"
+const { id } = functional
 const { isArray } = type
 
 export const [charclass, neg_charclass] = ["", "^"].map(

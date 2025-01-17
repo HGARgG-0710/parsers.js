@@ -1,5 +1,3 @@
-// TODO: add methods [from BaseIndexMap];
-
 import { BaseIndexMap } from "./abstract.js"
 
 export const {

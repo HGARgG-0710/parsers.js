@@ -3,13 +3,12 @@ import { TokenizableString } from "../../../dist/src/Tokenizable/classes.js"
 import { arraysSame } from "lib/lib.js"
 
 import { classWrapper } from "../../../dist/src/utils.js"
-import { SimpleTokenType } from "../../../dist/src/Token/classes.js"
-
 import { isToken } from "../../../dist/src/Token/utils.js"
 
+import { SimpleTokenType } from "../../../dist/src/Token/classes.js"
 import { ConstEnum, TokenInstanceEnum } from "../../../dist/src/EnumSpace/classes.js"
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isString } = type
 
 // * TokenizableString

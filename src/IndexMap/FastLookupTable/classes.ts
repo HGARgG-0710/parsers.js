@@ -6,16 +6,16 @@ import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 import { DelegateHashTable, DelegateLookupTable } from "./abstract.js"
 import { current } from "../../utils.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { id } = _f
+import { functional } from "@hgargg-0710/one"
+const { id } = functional
 
 export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
 		Pointer<number>,
-		number,
-		PersistentIndexMap<KeyType, ValueType>
+		PersistentIndexMap<KeyType, ValueType>,
+		any
 	>
 	implements FastLookupTable<KeyType, ValueType, Pointer<number>>
 {
@@ -24,7 +24,7 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 	}
 
 	byOwned(priorOwned: IndexAssignable<Pointer<number>>): ValueType {
-		return this.value.byIndex(priorOwned.assignedIndex.value)[1]
+		return this.value.byIndex(priorOwned.assignedIndex!.value)[1]
 	}
 
 	delete(key: KeyType) {

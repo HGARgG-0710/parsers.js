@@ -1,5 +1,5 @@
-import type { Pairs } from "../../../IndexMap/interfaces.js"
 import type { InternalHash } from "./interfaces.js"
+import type { array } from "@hgargg-0710/one"
 
 import { DelegateDeletableSettableSizeable } from "../../abstract.js"
 import { ProtectedPattern } from "src/Pattern/abstract.js"
@@ -9,7 +9,7 @@ const { InternalHash } = defaults
 const { DefaultValue: objDefaultValue } = InternalHash.ObjectInternalHash
 const { DefaultValue: mapDefaultValue } = InternalHash.MapInternalHash
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any>
@@ -31,7 +31,9 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 	}
 
 	constructor(
-		map: Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = mapDefaultValue(),
+		map:
+			| array.Pairs<KeyType, ValueType>
+			| Map<KeyType, ValueType> = mapDefaultValue(),
 		_default?: any
 	) {
 		super(isArray(map) ? new Map(map) : map)

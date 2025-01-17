@@ -40,12 +40,8 @@ export function validateTokenized<Type = any>(
 	if (!isGoodIndex(faultyIndex))
 		return ValidationPassed(tokenized.filter(notValidMatch) as Type[])
 
-	do {
-		tokenized[faultyIndex] = FaultyElement(matched[faultyIndex])
-	} while (
-		isGoodIndex((faultyIndex = tokenized.lastIndexOf(InvalidMatch, faultyIndex)))
-	)
-
+	do tokenized[faultyIndex] = FaultyElement(matched[faultyIndex])
+	while (isGoodIndex((faultyIndex = tokenized.lastIndexOf(InvalidMatch, faultyIndex))))
 	return ValidationFailed(tokenized as (Type | ValidMatch | FaultyElement<Type>)[])
 }
 

@@ -1,5 +1,5 @@
 import assert from "node:assert"
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 import { importName } from "lib/lib.js"
 const { isObject, isFunction } = type
 
@@ -41,11 +41,7 @@ export const specificChildImports = {
 		"Tree",
 		"Validatable"
 	),
-	IndexMap: objectImports(
-		"FastLookupTable",
-		"HashMap",
-		"LinearIndexMap",
-	),
+	IndexMap: objectImports("FastLookupTable", "HashMap", "LinearIndexMap"),
 	Pattern: objectImports(
 		"Collection",
 		"EliminablePattern",

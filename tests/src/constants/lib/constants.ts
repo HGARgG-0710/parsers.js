@@ -1,7 +1,7 @@
 import assert from "node:assert"
 import { it } from "node:test"
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isNumber } = type
 
 export function constant(constName: string, post: () => void) {

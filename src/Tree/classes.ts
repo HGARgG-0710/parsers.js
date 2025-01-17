@@ -26,8 +26,8 @@ import { value } from "../Pattern/utils.js"
 import { extendPrototype, parameterWaster } from "../utils.js"
 import { mapper } from "./utils.js"
 
-import { function as f } from "@hgargg-0710/one"
-const { trivialCompose } = f
+import { functional } from "@hgargg-0710/one"
+const { trivialCompose } = functional
 
 export abstract class BasicTree<Type = any> extends BasicPattern<Type[]> {
 	constructor(value: Type[]) {

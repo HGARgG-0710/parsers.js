@@ -13,7 +13,7 @@ import {
 	comparisonMethodTest
 } from "lib/lib.js"
 
-import { object, typeof as type } from "@hgargg-0710/one"
+import { object, type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isArray } = type
 

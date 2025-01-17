@@ -12,7 +12,7 @@ import {
 	signatures
 } from "lib/lib.js"
 
-import { object, typeof as type, array } from "@hgargg-0710/one"
+import { object, type, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
 const { last } = array

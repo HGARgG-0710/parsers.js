@@ -22,10 +22,10 @@ import {
 
 import { isInternalHash } from "IndexMap/InternalHash/lib/classes.js"
 
-import { object, typeof as type, function as _f } from "@hgargg-0710/one"
+import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
-const { and } = _f
+const { and } = functional
 
 const isHashMap = and(
 	structCheck({

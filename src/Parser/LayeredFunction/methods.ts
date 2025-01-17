@@ -1,7 +1,7 @@
-import { LayeredParser } from "./classes.js"
+import { LayeredFunction } from "./classes.js"
 
 const { get, set } = Object.getOwnPropertyDescriptor(
-	LayeredParser.prototype,
+	LayeredFunction.prototype,
 	"layers"
 )! as { get: () => any; set: (x: Function[]) => any }
 

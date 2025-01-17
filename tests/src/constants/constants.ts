@@ -2,7 +2,7 @@ import { validation, Stream, regex, BadIndex } from "../../../dist/src/constants
 import { arrayConstTest, constTest } from "./lib/constants.js"
 import { namespace, repeat } from "lib/lib.js"
 
-import { boolean, typeof as type } from "@hgargg-0710/one"
+import { boolean, type } from "@hgargg-0710/one"
 const { T } = boolean
 const { isNumber } = type
 

@@ -63,33 +63,17 @@ REMINDERS [2.]:
 		21.7. replace (everywhere) the 'import' with 'import {...} from "./dist/main"', then 'const {...} = ...'; 
 			This ensures the import-correctness of the given paths; 
 			Gives first-hand experience of actually using the library; 
-	
-	2.51. 'extendClass' - KNOWN ERROR; 
-
-		Need a new function (put into 'one.js' for getting RECURSIVELY all the 'PropertyDescriptors'); 
-			Equivalent of 'object.keys'/'object.values', but for descriptors; 
-			Replace the 'ownPropertyDescriptors' there (NOTE: the descriptors must be IDENTICAL to those obtained via 'Object.getOwnPropertyDescriptors'); 
-			Then - will be able to express dynamic prototype inheritance like this...; 	
-					
+		
 	2.52. Simplify names of exports in 'methods': 
 		Take out the 'prefixedNames' stuff...; 
 		
 		1. List the remaining classes to work with; 
 			Complete this, via breaking apart into micro-classes; 
 
-				[later]
-				3. IndexMap/FastLookupTable: 
-					ALSO - always make the '.value' thingy into something that is "protected"; 
-					3. refactoring ('abstract', connection to other abstract classes)
-						USE the 'valueReplaceKey' here [at the same time as the 'PersistentIndexMap']
-	
-				7. IndexMap/PersistentIndexMap
 				8. Pattern
-					1. Change the 'value-' delegate methods' names; 
-					2. PROBLEM: what about "shared" methods that are all in 'abstract' classes? 
-						SOLUTION: Let they be exported several times - ONCE for each case of already existing class export; 
-
-						CONCLUSION: one'll need to delete the 'Pattern/methods.ts', RELOCATE the methods somewhere more appropriate; 
+						1. delete the 'Pattern/methods.ts', 
+						2. relocate the methods somewhere more appropriate; 
+						
 							Example [1] - the 'StreamClass/methods.ts' for appropriate 'StreamClass' methods; 
 							Example [2] - create a new directory - 'refactor/' with appropriate methods [those that are used in several different places]; 
 								The 'refactor.ts' is NOT exported as an object of the library (internal exports usage); 
@@ -124,141 +108,21 @@ REMINDERS [2.]:
 		MICRO-CLASSES! 
 		Walk through the project, find small (like 1-declaration) classes, 
 			replace them with proper methods-inlining; 
+
+	2.55. Decide: 
+		Whether to add '.init()' + 'ProtectedPattern' (and delete BasicPattern after) on:
 		
-		Start with: 
-
-			1. EliminableString [contains only a declaration right now...]; 
-
-	2.55. ENCAPSULATION! 
-		Over-use of 'Pattern' contributes to poor encapsulation; 
-		Places with issues (look for more, walk through the "useless" 'Pattern.methods'): 
-
-			1. InternalHash
-		
-		Idea is - create MICRO-CLASSES that have the desired functionality "embedded" within themselves; 
-		Replace the 'BasicPattern' + 'Pattern.methods' with them. 
-		'Pattern' should (ideally) be ONLY used with: 	
-
 			1. Tokenizable
 			2. Validatable
 			3. Eliminable
+			4. BasicTree
+			5. TokenType
 
-		Because there, it's a sort of an "input" (one can 'flush', and re-set it...); 
-			[Maybe...: 	
-				1. add an '.init()' method on them [FlushablePattern-s, that is...] instead?
-				2. Rename 'BasicPattern' into 'PrivatePattern', and replace the 'value' with '#value'/'protected value'? 
-					WHICH itself is presented via a different abstract class altogether?
-
-					This will BOTH: 
-						1. Preserve the encapsulation; 
-						2. Leave the classes open for extension [good for refactoring]
-						3. Permit adequate re-use of properties
-					
-					Problems: 	
-						1. Will require inlining the methods for "generated" classes (such as 'Tokenizable', 'Validatable'); 
-							BUT one so dearly did desire for this to be exportable... 
-
-							IDEA 1 [for a solution]: make them UTILS in terms of 'this->input'; Then, define the methods locally as 'REFACTORED_UTIL.call(this, ...arguments)'; 
-								Cost of that is a single call only... [with these two - won't matter...]; 
-
-							SOLUTION [final]: Union-solution: 
-								
-								1. Just make more abstract classes for refactoring; 
-									PROBLEM: does one really want to be exporting all of those? 
-										As in - modularity is King, etc etc, but... is this just really not too much? 
-										See just HOW MUCH of the library starts to consist of "abstract" classes; 
-									
-								2. The abstract classes would use the underlying utils; 
-
-						2. protected vs #: 
-
-							Make a (tiny) TypeScript temp-project + tsconfig that would be trying to: 
-
-								1. Create a local class with 'protected'; 
-								2. Inheriting it (inheriting class has NO 'protected' properties); 
-								3. Exporting the inheriting class; 
-
-								Because then, one would be able to: 
-
-									1. Take the 'PrivatePattern' [now - ProtectedPattern] OUT of the 'ts-types.json'
-									2. Use it everywhere else, compile as-is; 
-									3. USE THE INTERFACES for expression of objects' natures; 
-									4. [very important] REMOVE the overhead of using '#value'; 
-
-								CONCLUSION: 
-									It's possible, with an if: 
-
-										1. WHEN it's a regular (toplevel) class, it works just fine; 
-										2. When it's a 'static' field, or another kind of exported class-expression - one has to use the '#': 
-											CONCLUSION: using the 'private/protected' for near-everything...; 
-											['private' is only used when logic is very simple + not desired for extension]; 
-										
-								ALSO: 
-
-									Do this on Stream-s AS WELL! 
-									The '.value' MUST NOT be marked as "readily available" by default. 
-									The user is to change it ONLY via the '.init()'; 
-			
-						3. The AssignmentClass-es; 
-							Namely, the '._index' property; 
-							One NEEDS to formalize it; 
-
-							IDEA: a combination
-
-								1. interface: 
-									interface IndexAssignable<Type = any> {
-										index?: Type
-									}
-								2. Make NestedStream-s into 'IndexAssignable'-s; 
-			]; 
+		Or, keep the 'BasicPattern', but limit it only to these ()
 	
-	2.56. About "generated" classes - REFACTOR THOSE OUT ALSO; 
-		They must contain ONLY the "custom" logic, NO (or - little) METHOD DUPLICATION; 
-		Known Offenders: 
-
-			1. HashTable;
-			2. LinearIndexMap; 
-
-	2.57. With all the refactoring going on, class files has become __quite__ crowded. 
-		Refactor the abstract classes into a WHOLE NEW export of 'main'. 
-		Call it 'abstract'. 
-		Will have a similar structure to the remainder of the project. 
-		The 'abstract' classes would be just as well documented as the rest.
-
-		They would ALSO provide a way to split the methods from generated classes; 
-
-		PROBLEM: __sometimes__, one would need a single-method class, that would be used SEVERAL TIMES. 
-			Then, use the 'mixin' pattern: 
-
-				const Z = (extended) => class extends extended {
-					methodName(...in: any[]) {
-						// ...
-					}
-				}
-			
-			This is NOT good because it forbids usage of 'protected'/'private' (so - avoid it where possible); 
-			Particular places of concern: 
-
-				1. FastLookupTable: 
-
-					Attempt for resolution: 
-						Owning (.own) <- [set + replaceKey: PersistentIndexMap]
-							
-							NOTE: the PersistentIndexMap needs ANOTHER abstract class with also '.byIndex()' + '.replace()', ...
-								PersistentIndexMap <- [big one: byIndex, replace, ...] <- [set + replaceKey]
-							
-					PROBLEM: InternalHash uses 'set' without 'replaceKey': 
-
-						PersistentIndexLookupTable 	<- [.own + .replaceKey + .set] <- [.replaceKey + .set + .size] <- [.set + .size] <- [.size]
-						PersistentIndexMap			<- [.keys + .values + .byIndex + .replace + .index + .default] <- [.replaceKey + .set]
-						InternalHash 				<- [.delete + .set + .size] <- [.set + .size] <- [.size]
-						HashMap						<- [.size]
-
-						NOTE[1]: the 'PersistentIndexMap' has to CHANGE its '.size' definition to 'valueSize'; 
-						NOTE[2]: the 'PersistentIndeLookupTable' has to have the '.size' property from now on; 
-						NOTE[3]: the 'PersistentIndexMap' has to CHANGE its '.set' definition to 'valueSet' [no practical functionality change]; 
+	2.57. finish the 'abstract' export [same structure as others]
 						
-	2.60. '.init' - popularize even further throughout the library; 
+	2.60. [maybe? see 2.55] '.init' - popularize even further throughout the library; 
 		Add an '.init' method to most [if not all] the library's classes. 
 		To add, in particular: 
 
@@ -274,7 +138,16 @@ REMINDERS [2.]:
 	2.61. Code cleaning - abstract classes DO NOT HAVE to do: 'this[x] = ...' in their constructors; 
 		Instead, use the 'constructor(protected name: Type) {}' syntax...; 
 	
-	2.62. PROBLEM - with LayeredParser: 
+	2.62. PROBLEM - with LayeredFunction: 
+
+		TAKEAWAY: add another abstraction OVER IT, that would permit one to pass 
+			a 'new (e: EndableStream, state: Summat) => StreamParser', which would [then], 
+				be used to create the StreamParser instance USING: 
+
+					1. the 'input' [dynamically given, as first argument]
+					2. the initial 'state' [static - later can be changed from inside 'table']
+
+		OLD NOTES:
 
 		1. It is (really) just a modifiable/recomputable composition of functions; 
 			Too general for the library as it currently stands; 
@@ -283,18 +156,19 @@ REMINDERS [2.]:
 				because: 
 
 					1. self-modification requires storing a reference on NECESSARY LEVELS of 'StreamParser'; 
-					2. 'LayeredParser' ONLY takes functions that accept 1 argument, so 'classWrapper(StreamParser(table))' WON'T DO (accepts 2 - 'input', 'state'); 
+					2. 'LayeredFunction' ONLY takes functions that accept 1 argument, so 'classWrapper(StreamParser(table))' WON'T DO (accepts 2 - 'input', 'state'); 
 				
 				One could, of course, do this: 
 
-					const layered = LayeredParser(A, ..., (input) => StreamParser(table)(input, { parser: layered })); 
+					const layered = LayeredFunction(A, ..., (input) => StreamParser(table)(input, { parser: layered })); 
 
 				CONCLUSION: add a new function for [generally] doing '(f, n, v) => (...values: any[]) => f(...insert(values, n, v))'; 
 			
 				Problem then becomes - 'layered' has to be given BEFORE all this is done...; 
+				Also - one ought to be able 
 				So, what one actually has to do is: 
 
-					const layered = new LayeredParser()
+					const layered = new LayeredFunction()
 					layered.layers = [A, ..., ((v) => (input) => StreamParser(table)(input, v))({ parser: layered }), ...]
 				
 				Then, the 'table' would have a 'function', that would in certain circumstances access the 'this.state.parser', and CHANGE IT; 
@@ -310,17 +184,29 @@ REMINDERS [2.]:
 				return curr
 			}
 		
-		Absolutely crucial in combination with LayeredParser (why it is added in v0.3); 
+		Absolutely crucial in combination with LayeredFunction (why it is added in v0.3); 
+
+		2.63.2. Add a new '.repairIndexes' method to the PersistentIndexMap: 
+			Comes from the '.unique' method [which, really, just assigns appropriate values to Pointer-s]; 
+	
+	2.64 Also - add a new method to the 'ChildrenTree': 
+
+		1. '.write(i: MultiIndex, v: InTreeType<Type>)' - for replacing the [possibly grand-*] child at index 'i' with 'v'; 
 	
 Order of TODO-elimination: 
-	5.2.51. 
 	5.2.52. 
 	5.2.54
 	5.2.55.
-	5.2.56.
+	5.2.57.
 	5.2.60.
 	5.2.61.
 	5.2.62.
+	2.64.
+
+	Re-organize test-suites: 
+		Make those into FUNCTIONS, which are THEN imported by the 'run.ts', 
+			and the "mini-language" string passed to the script is used to choose the precise imports.
+
 	2.3.
 
 	A.3.10.1
@@ -762,6 +648,40 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 			1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
 			2. Provide low-level Token-s with specialized given names; 
+
+		1. Tokens: 
+
+			1. Take them from various parsing projects of yours already existing: 
+
+				1. xml
+				2. selector
+				3. regex
+
+				Unite, choose best string-names; 
+				Create appropriate names for sample-token classes (via TokenInstance) [
+					example: 
+					
+					Opbrack - (, 
+					Clbrack - ), 
+					OpSqBrack - [, 
+					ClSqBrack - ], 
+					OpBrace - {, 
+					ClBrace - }, 
+
+				...]; 
+
+		2. 'inSet' functions: 
+
+			'isBinary = inSet(0, 1)'
+			'isDecimal = inSet(0, 1, ..., 9)'
+			'isHex = inSet(0, 1, ..., F)' - TAKE OUT of the global '/utils.ts'
+			'isAscii = inSet(0, 1, ...)'
+			'isAlphanumeric = inSet(0, 1, ..., 9, a, ..., Z)'
+
+			Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
+		
+		3. ALSO - join the 'samples' with the 'constants.ts' file 
+			[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
 	
 	2.10. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
@@ -1547,6 +1467,17 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 	2.50. Change the tests using one's the 'tests.js' library; 
 
+	2.51. Add more complex 'Tree' utilities. Based off previous 'one.js' v0.3.1, add: 
+
+		1. deepSearch - searching inside the given Tree for a value with a given 'prop'
+		2. depth - calculating the depth of the given Tree
+		3. treeCount - counts the values of a given predicate for all items in the tree
+
+		2.51.1. Add new methods to 'ChildrenTree': 
+
+			1. .reverse() - recursively reverses the given tree
+
+
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
@@ -1560,7 +1491,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			5. The 'Constructor' type; 
 			6. SelfAssignmentClass; 
 			7. extendClass; 
-			8. TypePredicate
 
 	3.2. All the routine writing of tests made one think whether it may not be more desireable to 
 		automate even the process of their WRITING; 

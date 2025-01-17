@@ -10,8 +10,8 @@ import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
 import { defaults } from "../constants.js"
 const { size: globalSize, DefaultValue: value } = defaults.EnumSpace
 
-import { function as _f, inplace } from "@hgargg-0710/one"
-const { id } = _f
+import { functional, inplace } from "@hgargg-0710/one"
+const { id } = functional
 const { out } = inplace
 
 export class ConstEnum implements ArrayEnum<{}> {

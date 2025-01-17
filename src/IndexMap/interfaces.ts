@@ -1,4 +1,5 @@
 import type { Copiable } from "../Stream/StreamClass/interfaces.js"
+import type { array } from "@hgargg-0710/one"
 
 export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
 
@@ -22,9 +23,6 @@ export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
 	...f: ((x: any) => KeyType)[]
 ) => MapClass<any, ValueType>
 
-export type Pair<KeyType = any, ValueType = any> = [KeyType, ValueType]
-export type Pairs<KeyType = any, ValueType = any> = Pair<KeyType, ValueType>[]
-
 export interface Sizeable {
 	size: number
 }
@@ -43,11 +41,6 @@ export interface IndexMap<
 		Copiable<IndexMap<KeyType, ValueType, DefaultType, IndexGetType>>,
 		Sizeable,
 		DefaultHaving<DefaultType> {
-	constructor: new (
-		pairs: Pairs<KeyType, ValueType>,
-		_default?: DefaultType
-	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-
 	keys: KeyType[]
 	values: ValueType[]
 	unique: (start?: boolean) => number[]
@@ -56,7 +49,7 @@ export interface IndexMap<
 
 	getIndex: (key: any) => IndexGetType
 
-	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
+	add: (index: number, ...pairs: array.Pairs<KeyType, ValueType>) => any
 	delete: (index: number, count?: number) => any
 	replace: (index: number, pair: [KeyType, ValueType]) => any
 	set: (key: KeyType, value: ValueType, index?: number) => any
@@ -64,7 +57,10 @@ export interface IndexMap<
 }
 
 export interface MapClass<KeyType = any, ValueType = any> {
-	new (map: Pairs<KeyType, ValueType>, _default?: any): IndexMap<KeyType, ValueType>
+	new (map: array.Pairs<KeyType, ValueType>, _default?: any): IndexMap<
+		KeyType,
+		ValueType
+	>
 	change?: IndexingFunction<KeyType>
 	extend: MapClassValueExtension<KeyType, ValueType>
 	extendKey: MapClassKeyExtension<KeyType, ValueType>

@@ -2,15 +2,15 @@ import type { Indexed } from "../../Stream/interfaces.js"
 import type { HashClass, HashMap, HashType } from "./interfaces.js"
 import type { Token as TypeToken } from "../../Token/interfaces.js"
 
+import { BaseHashClass } from "./abstract.js"
 import { extend } from "./methods.js"
 
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"
 
-import { function as _f, typeof as _typeof } from "@hgargg-0710/one"
-import { BaseHashClass } from "./abstract.js"
-const { id } = _f
-const { typeOf } = _typeof
+import { functional, type as _type } from "@hgargg-0710/one"
+const { id } = functional
+const { typeOf } = _type
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
 	hash: HashType<KeyType, ValueType, InternalKeyType>

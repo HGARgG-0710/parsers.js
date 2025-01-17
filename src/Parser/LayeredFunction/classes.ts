@@ -1,7 +1,7 @@
-import type { LayeredParser as LayeredParserType } from "./interfaces.js"
+import type { LayeredFunction as LayeredParserType } from "./interfaces.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { trivialCompose } = _f
+import { functional } from "@hgargg-0710/one"
+const { trivialCompose } = functional
 
 // * Pre-doc note: the infinite (or any) recursion is possible via '__call__() { return this.__call() }'
 export abstract class FlexibleFunction extends Function {
@@ -15,13 +15,13 @@ export abstract class FlexibleFunction extends Function {
 	}
 }
 
-export class LayeredParser<ArgType extends any[] = any[], OutType = any>
+export class LayeredFunction<ArgType extends any[] = any[], OutType = any>
 	extends FlexibleFunction
 	implements LayeredParserType
 {
 	#layers: Function[]
 
-	protected parser: (...x: ArgType) => OutType
+	protected merged: (...x: ArgType) => OutType
 
 	get layers() {
 		return this.#layers
@@ -29,11 +29,11 @@ export class LayeredParser<ArgType extends any[] = any[], OutType = any>
 
 	set layers(v: Function[]) {
 		this.#layers = v
-		this.parser = trivialCompose(...this.layers)
+		this.merged = trivialCompose(...this.layers)
 	}
 
 	protected __call__(...x: ArgType) {
-		return this.parser(...x)
+		return this.merged(...x)
 	}
 
 	constructor(layers: Function[] = []) {

@@ -15,8 +15,8 @@ import {
 
 import { linearIndexMapEmptyTest } from "../lib/classes.js"
 
-import { typeof as _typeof } from "@hgargg-0710/one"
-const { isNumber, isString, isObject, isNull, isBoolean } = _typeof
+import { type } from "@hgargg-0710/one"
+const { isNumber, isString, isObject, isNull, isBoolean } = type
 
 // * PredicateMap
 

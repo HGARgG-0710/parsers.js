@@ -13,7 +13,7 @@ const { LimitedStream } = Stream
 import { fastNavigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/utils.js"
 
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isUndefined } = type
 
 export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {

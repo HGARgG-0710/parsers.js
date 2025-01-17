@@ -1,4 +1,4 @@
-import { typeof as type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 const { isString, isNumber } = type
 
 import { validation } from "../../../dist/src/constants.js"

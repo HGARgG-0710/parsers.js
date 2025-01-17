@@ -1,11 +1,13 @@
-import type { IndexMap, Pair, Pairs as PairsType, Sizeable } from "./interfaces.js"
-import { Pairs } from "./classes.js"
-
-import { typeof as type, boolean } from "@hgargg-0710/one"
+import type { IndexMap, Sizeable } from "./interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
+import type { array } from "@hgargg-0710/one"
+
+import { Pairs } from "./classes.js"
 import { isGoodIndex } from "../utils.js"
-const { isArray } = type
+
+import { boolean, array as _array } from "@hgargg-0710/one"
 const { T } = boolean
+const { isPair: _isPair } = _array
 
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType, any, any>
@@ -31,7 +33,7 @@ export function linearToPairsList<KeyType = any, ValueType = any>(
 
 export function keyValuesToPairsList<KeyType = any, ValueType = any>(
 	keyValues: [KeyType[], ValueType[]]
-): PairsType<KeyType, ValueType> {
+) {
 	const [keys, values] = keyValues
 	let size = keys.length
 
@@ -47,7 +49,7 @@ export function keyValuesToPairsList<KeyType = any, ValueType = any>(
 }
 
 export function fromPairsList<KeyType = any, ValueType = any>(
-	mapPairs: PairsType<KeyType, ValueType>
+	mapPairs: array.Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
 	const [keys, values]: [KeyType[], ValueType[]] = [new Array(size), new Array(size)]
@@ -64,8 +66,8 @@ export const isPair = <KeyType = any, ValueType = any>(
 	valuePred?: TypePredicate<ValueType>
 ) => {
 	const [kp, vp] = [keyPred, valuePred].map((x) => x || T)
-	return (x: any): x is Pair<KeyType, ValueType> =>
-		isArray(x) && x.length === 2 && kp(x[0]) && vp(x[1])
+	return (x: any): x is array.Pair<KeyType, ValueType> =>
+		_isPair<KeyType, ValueType>(x) && kp(x[0]) && vp(x[1])
 }
 
 export const upperBound = (collection: Sizeable) => (index: number) =>

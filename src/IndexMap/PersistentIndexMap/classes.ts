@@ -1,100 +1,80 @@
 import type { Pointer as PointerType } from "../../Pattern/interfaces.js"
-import type { IndexMap, Pairs } from "../interfaces.js"
+import type { IndexMap } from "../interfaces.js"
 import type { PersistentIndexMap as PersistentIndexMapType } from "./interfaces.js"
+import type { array } from "@hgargg-0710/one"
 
-import {
-	valueByIndex,
-	valueDefault,
-	valueIndex,
-	valueKeys,
-	valueReplace,
-	valueReplaceKey,
-	valueValues
-} from "../../Pattern/methods.js"
+import { BadIndex } from "../../constants.js"
 
-import {
-	indexMapCopy,
-	indexMapIterator,
-	indexMapSet,
-	indexMapSizeGetter
-} from "../methods.js"
-
-import {
-	persistentIndexMapAdd,
-	persistentIndexMapDelete,
-	persistentIndexMapGetIndex,
-	persistentIndexMapSwap,
-	persistentIndexMapUnique
-} from "./methods.js"
-
-import { BasicPattern } from "src/Pattern/abstract.js"
-import { extendPrototype } from "../../utils.js"
+import { swapValues } from "../../Pattern/utils.js"
+import { DelegateIndexMap } from "./abstract.js"
 
 import { inplace } from "@hgargg-0710/one"
-const { mutate } = inplace
+const { mutate, swap, insert } = inplace
 
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
 // * 	index of a 'PersistentIndexMap' consistent across multiple sources,
 // * 	via wrapping it into a one-property object;
 export const Pointer = <Type = any>(value: Type): PointerType<Type> => ({ value })
 
-export class PersistentIndexMap<KeyType = any, ValueType = any>
-	extends BasicPattern<IndexMap<KeyType, ValueType>>
-	implements
-		PersistentIndexMapType<KeyType, ValueType>,
-		PointerType<IndexMap<KeyType, ValueType>>
+export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = any>
+	extends DelegateIndexMap<KeyType, ValueType, DefaultType, PointerType<number>>
+	implements PersistentIndexMapType<KeyType, ValueType, DefaultType>
 {
-	value: IndexMap<KeyType, ValueType, number>
-	keys: KeyType[]
-	values: ValueType[]
-	indexes: PointerType<number>[]
-	size: number
-	default: any
+	indexes: PointerType<number>[];
 
-	index: (x: any) => ValueType
-	copy: () => IndexMap<KeyType, ValueType>
-	set: (key: KeyType, value: ValueType, index: number) => any
-	getIndex: (key: KeyType) => PointerType<number>
+	["constructor"]: new (
+		indexMap: IndexMap<KeyType, ValueType, DefaultType>
+	) => PersistentIndexMap<KeyType, ValueType, DefaultType>
 
-	add: (index: number, ...pairs: Pairs<KeyType, ValueType>) => any
-	delete: (index: number, count?: number) => any
-	replace: (index: number, pair: [KeyType, ValueType]) => any
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
-	unique: (start?: boolean) => IndexMap<KeyType, ValueType>
-	byIndex: (index: number) => any
-	swap: (i: number, j: number) => any;
-	[Symbol.iterator]: () => Generator<[KeyType, ValueType]>;
+	copy() {
+		return new this.constructor(this.value)
+	}
 
-	["constructor"]: new (pairs: Pairs<KeyType, ValueType>, _default?: any) => IndexMap<
-		KeyType,
-		ValueType
-	>
+	delete(index: number, count: number = 1) {
+		const size = this.size
+		for (let i = index + count; i < size; ++i) this.indexes[i].value -= count
+		this.value.delete(index, count)
+		return this
+	}
 
-	constructor(indexMap: IndexMap<KeyType, ValueType>) {
+	unique(start?: boolean): number[] {
+		const indexes = this.value.unique(start)
+		const indexSet = new Set(indexes)
+
+		this.indexes = this.indexes.filter((x: PointerType<number>, i: any) => {
+			if (indexSet.has(i)) return true
+			x.value = BadIndex // invalidating the deleted Pointer-s
+		})
+
+		// repairing broken indexes
+		let i = this.size
+		while (i--) this.indexes[i].value = i
+
+		return indexes
+	}
+
+	swap(i: number, j: number) {
+		swapValues(this.indexes[i], this.indexes[j])
+		swap(this.indexes, i, j)
+		this.value.swap(i, j)
+		return this
+	}
+
+	getIndex(key: any): PointerType<number> {
+		return this.indexes[this.value.getIndex(key)]
+	}
+
+	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
+		const increase = pairs.length
+		const size = this.size
+		for (let i = index; i < size; ++i) this.indexes[i].value += increase
+		insert(this.indexes, index, ...pairs.map((_x, i) => Pointer(i + index)))
+		this.value.add(index, ...pairs)
+		return this
+	}
+
+	constructor(indexMap: IndexMap<KeyType, ValueType, DefaultType, number>) {
 		super(indexMap)
 		mutate((this.indexes = new Array(indexMap.size)), (_x, i) => Pointer(i))
 	}
 }
-
-extendPrototype(PersistentIndexMap, {
-	index: { value: valueIndex },
-	byIndex: { value: valueByIndex },
-	copy: { value: indexMapCopy },
-	replace: { value: valueReplace },
-	add: { value: persistentIndexMapAdd },
-	delete: { value: persistentIndexMapDelete },
-	replaceKey: { value: valueReplaceKey },
-	unique: { value: persistentIndexMapUnique },
-	set: { value: indexMapSet },
-	swap: { value: persistentIndexMapSwap },
-	getIndex: { value: persistentIndexMapGetIndex },
-	keys: { get: valueKeys },
-	values: { get: valueValues },
-	default: { get: valueDefault },
-	size: {
-		get: indexMapSizeGetter
-	},
-	[Symbol.iterator]: {
-		value: indexMapIterator
-	}
-})

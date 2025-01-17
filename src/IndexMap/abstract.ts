@@ -1,7 +1,8 @@
-import { ProtectedPattern } from "src/Pattern/abstract.js"
-
 import type { Deletable, Settable } from "./HashMap/interfaces.js"
-import type { IndexMap, Pairs, Sizeable } from "./interfaces.js"
+import type { IndexMap, Sizeable } from "./interfaces.js"
+import type { array } from "@hgargg-0710/one"
+
+import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { isGoodIndex } from "../utils.js"
 import { keyValuesToPairsList, table, upperBound } from "./utils.js"
@@ -31,17 +32,18 @@ export abstract class DelegateSettableSizeable<
 export abstract class DelegateDeletableSettableSizeable<
 	KeyType = any,
 	ValueType = any,
-	DelegateType extends Deletable<KeyType> &
+	DelegateType extends Deletable<DeletedType> &
 		Settable<KeyType, ValueType> &
-		Sizeable = any
+		Sizeable = any,
+	DeletedType = KeyType
 > extends DelegateSettableSizeable<KeyType, ValueType, DelegateType> {
-	delete(key: KeyType) {
+	delete(key: DeletedType) {
 		this.value.delete(key)
 		return this
 	}
 }
 
-export abstract class BaseIndexMap<
+export abstract class PreIndexMap<
 	KeyType = any,
 	ValueType = any,
 	DefaultType = any,
@@ -56,17 +58,47 @@ export abstract class BaseIndexMap<
 
 	abstract getIndex(key: any): IndexGetType
 	abstract delete(index: number, count?: number): any
-	abstract add(index: number, ...pairs: Pairs<KeyType, ValueType>): any
+	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): any
 	abstract replace(index: number, pair: [KeyType, ValueType]): any
 	abstract replaceKey(keyFrom: KeyType, keyTo: KeyType): any
-
-	["constructor"]: new (
-		pairs: Pairs<KeyType, ValueType>,
-		_default: DefaultType
-	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract unique(start?: boolean): number[]
+	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
+	abstract swap(i: number, j: number): any
 
 	get size() {
 		return this.keys.length
+	}
+
+	*[Symbol.iterator]() {
+		const size = this.size
+		for (let i = 0; i < size; ++i)
+			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
+	}
+
+	set(key: KeyType, value: ValueType, index: number = this.size) {
+		const keyIndex = this.keys.indexOf(key)
+		if (isGoodIndex(keyIndex)) {
+			this.values[keyIndex] = value
+			return this
+		}
+		return this.add(index, [key, value])
+	}
+}
+
+export abstract class BaseIndexMap<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexGetType = any
+> extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
+	["constructor"]: new (
+		pairs: array.Pairs<KeyType, ValueType>,
+		_default: DefaultType
+	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+
+	copy() {
+		return new this.constructor(keyValuesToPairsList(table(this)), this.default)
 	}
 
 	unique(start: boolean = true) {
@@ -90,47 +122,20 @@ export abstract class BaseIndexMap<
 		return indexes
 	}
 
-	*[Symbol.iterator]() {
-		const size = this.size
-		for (let i = 0; i < size; ++i)
-			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
-	}
-
 	byIndex(index: number) {
 		return isGoodIndex(index) && this.size > index
 			? ([this.keys[index], this.values[index]] as [KeyType, ValueType])
 			: this.default
 	}
 
-	swap(
-		this: IndexMap<KeyType, ValueType>,
-		i: number,
-		j: number
-	): IndexMap<KeyType, ValueType> {
+	swap(i: number, j: number): any {
 		swap(this.keys, i, j)
 		swap(this.values, i, j)
 		return this
 	}
 
-	copy() {
-		return new this.constructor(keyValuesToPairsList(table(this)), this.default)
-	}
-
-	set(
-		this: IndexMap<KeyType, ValueType>,
-		key: KeyType,
-		value: ValueType,
-		index: number = this.size
-	) {
-		const keyIndex = this.keys.indexOf(key)
-		if (isGoodIndex(keyIndex)) {
-			this.values[keyIndex] = value
-			return this
-		}
-		return this.add(index, [key, value])
-	}
-
 	constructor(keys: KeyType[], values: ValueType[], _default: DefaultType) {
+		super()
 		this.keys = keys
 		this.values = values
 		this.default = _default

@@ -1,3 +1,4 @@
+import type { Sizeable } from "../interfaces.js"
 import type {
 	Settable,
 	KeyReplaceable,
@@ -10,22 +11,37 @@ import type { IndexAssignable } from "./interfaces.js"
 import { DelegateDeletableSettableSizeable } from "../abstract.js"
 import { assignIndex } from "./utils.js"
 
-export abstract class DelegateLookupTable<
+export abstract class DelegateKeyReplaceable<
 	KeyType = any,
 	ValueType = any,
-	OwningType = any,
-	DeletedType = KeyType,
 	DelegateType extends Settable<KeyType, ValueType> &
 		KeyReplaceable<KeyType> &
-		Deletable<DeletedType> = any
-> extends DelegateDeletableSettableSizeable<KeyType, ValueType> {
+		Deletable<DeletedType> &
+		Sizeable = any,
+	DeletedType = KeyType
+> extends DelegateDeletableSettableSizeable<
+	KeyType,
+	ValueType,
+	DelegateType,
+	DeletedType
+> {
 	protected value: DelegateType
-
 	replaceKey(keyFrom: KeyType, keyTo: KeyType) {
 		this.value.replaceKey(keyFrom, keyTo)
 		return this
 	}
+}
 
+export abstract class DelegateLookupTable<
+	KeyType = any,
+	ValueType = any,
+	OwningType = any,
+	DelegateType extends Settable<KeyType, ValueType> &
+		KeyReplaceable<KeyType> &
+		Deletable<DeletedType> &
+		Sizeable = any,
+	DeletedType = KeyType
+> extends DelegateKeyReplaceable<KeyType, ValueType, DelegateType, DeletedType> {
 	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
 		assignIndex(x, ownIndex)
 		return x
@@ -44,8 +60,8 @@ export abstract class DelegateHashTable<
 	KeyType,
 	ValueType,
 	OwningType,
-	KeyType,
-	HashMap<KeyType, ValueType, any>
+	HashMap<KeyType, ValueType, any>,
+	KeyType
 > {
 	byOwned(priorOwned: IndexAssignable<OwningType>) {
 		return this.value.index(priorOwned.assignedIndex)

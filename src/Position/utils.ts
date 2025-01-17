@@ -12,11 +12,11 @@ import type {
 
 import { previous, next } from "../utils.js"
 
-import { object, typeof as type, boolean, function as f } from "@hgargg-0710/one"
+import { object, type, boolean, functional } from "@hgargg-0710/one"
 import type { TypePredicate } from "../interfaces.js"
 const { structCheck } = object
 const { isFunction, isNumber } = type
-const { trivialCompose, or } = f
+const { trivialCompose, or } = functional
 const { not, T } = boolean
 
 export const isPositionObject = structCheck<PositionObject>({

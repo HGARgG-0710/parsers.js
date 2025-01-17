@@ -1,11 +1,11 @@
 import type { FreezableBuffer, Bufferized } from "./interfaces.js"
 import { isCollection } from "../utils.js"
 
-import { object, boolean, typeof as type, function as _f } from "@hgargg-0710/one"
+import { object, boolean, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
 const { T } = boolean
 const { isBoolean, isFunction, isUndefined } = type
-const { and } = _f
+const { and } = functional
 
 export const isFreezableBuffer = and(
 	structCheck({
@@ -42,10 +42,10 @@ export function readFirst<Type = any>(buffer: FreezableBuffer<Type>) {
 	return buffer.read(0)
 }
 
-export function bufferFreeze(stream: Bufferized) {
-	stream.buffer.freeze()
+export function bufferFreeze(bufferized: Bufferized) {
+	bufferized.buffer.freeze()
 }
 
-export function bufferPush<Type = any>(stream: Bufferized<Type>, pushed: Type) {
-	stream.buffer.push(pushed)
+export function bufferPush<Type = any>(bufferized: Bufferized<Type>, pushed: Type) {
+	bufferized.buffer.push(pushed)
 }

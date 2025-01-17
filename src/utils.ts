@@ -13,6 +13,9 @@ import type { Prototypal } from "./interfaces.js"
 import { BadIndex, Stream } from "./constants.js"
 const { SkippedItem } = Stream.StreamParser
 
+import { object } from "@hgargg-0710/one"
+const { propertyDescriptors, withoutProperties } = object
+
 export const isGoodIndex = (x: number) => x > BadIndex
 
 /**
@@ -158,9 +161,16 @@ export const extendPrototype = (
 	properties: PropertyDescriptorMap
 ) => Object.defineProperties(Extended.prototype, properties)
 
+export const withoutConstructor = withoutProperties(new Set(["constructor"]))
+
 export const extendClass = (Extended: Prototypal, ...classes: Prototypal[]) =>
 	classes.forEach((ParentClass) =>
-		extendPrototype(Extended, Object.getOwnPropertyDescriptors(ParentClass.prototype))
+		extendPrototype(
+			Extended,
+			withoutConstructor(
+				propertyDescriptors(ParentClass.prototype)
+			) as PropertyDescriptorMap
+		)
 	)
 
 export const addProperty = (
