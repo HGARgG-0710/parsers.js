@@ -1,10 +1,9 @@
 // * The file contains various delegate methods used by the library's classes
 
-import { delegate, thisReturningDelegate, delegateProperty } from "../utils.js"
+import { delegate, delegateProperty } from "../utils.js"
 
-export const [valueDelegate, valueThisDelegate, valuePropDelegate] = [
+export const [valueDelegate, valuePropDelegate] = [
 	delegate,
-	thisReturningDelegate,
 	delegateProperty
 ].map((x) => x("value"))
 

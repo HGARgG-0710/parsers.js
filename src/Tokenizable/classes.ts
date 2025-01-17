@@ -4,17 +4,18 @@ import type { TypePredicate } from "../interfaces.js"
 import type {
 	DelegateTokenizablePattern,
 	FreeTokenizer,
-	MethodTokenizer,
 	TokenizationResult
 } from "./interfaces.js"
 
 import { FlushablePattern } from "src/Pattern/abstract.js"
-import { tokenize } from "./methods.js"
 import { extendPrototype } from "../utils.js"
 import { tokenizeString } from "./utils.js"
 
 import { type } from "@hgargg-0710/one"
 const { isString } = type
+
+import { inplace } from "@hgargg-0710/one"
+const { replace } = inplace
 
 export abstract class FlushableTokenizable<Type = any, OutType = any>
 	extends FlushablePattern<Type>
@@ -29,26 +30,39 @@ export abstract class FlushableTokenizable<Type = any, OutType = any>
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
 	isType: TypePredicate<Type>
-): new <OutType = any>(value: Type) => DelegateTokenizablePattern<Type, InType, OutType> {
+): new <OutType = any>(value?: Type) => DelegateTokenizablePattern<
+	Type,
+	InType,
+	OutType
+> {
 	class delegateTokenizablePattern<OutType = any>
 		extends FlushableTokenizable<Type, OutType>
 		implements DelegateTokenizablePattern<Type, InType, OutType>
 	{
-		value: Type
-
-		tokenize: MethodTokenizer<Type, InType, OutType>
 		tokenizer: FreeTokenizer<Type, InType>
 		isType: TypePredicate<Type>
 
-		constructor(value: Type) {
+		tokenize(key: InType, handler: SummatFunction<any, Type, OutType>) {
+			if (!this.result.length)
+				return (this.result = this.tokenizer(this.value!, key, handler))
+
+			for (let r = this.result.length; r--; ) {
+				const current = this.result[r]
+				if (this.isType(current))
+					replace(this.result, r, ...this.tokenizer(current, key, handler))
+			}
+
+			return this.result
+		}
+
+		constructor(value?: Type) {
 			super(value)
 		}
 	}
 
 	extendPrototype(delegateTokenizablePattern, {
 		tokenizer: { value: tokenizer },
-		isType: { value: isType },
-		tokenize: { value: tokenize }
+		isType: { value: isType }
 	})
 
 	return delegateTokenizablePattern

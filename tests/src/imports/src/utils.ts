@@ -20,7 +20,6 @@ importTest(
 		"size",
 		"calledDelegate",
 		"delegate",
-		"thisReturningDelegate",
 		"delegateProperty",
 		"classWrapper",
 		"AssignmentClass",

@@ -8,15 +8,27 @@ export abstract class ProtectedPattern<Type = any> {
 	}
 }
 
+export abstract class InitializablePattern<Type = any> extends ProtectedPattern<
+	Type | undefined
+> {
+	init(value?: Type) {
+		this.value = value
+	}
+
+	get() {
+		return this.value
+	}
+}
+
 export abstract class BasicPattern<Type = any> implements Pattern<Type> {
-	value?: Type
+	value: Type
 	constructor(value?: Type) {
 		setValue(this, value)
 	}
 }
 
 export abstract class FlushablePattern<Type = any>
-	extends BasicPattern<Type>
+	extends InitializablePattern<Type>
 	implements Flushable
 {
 	abstract flush(): void

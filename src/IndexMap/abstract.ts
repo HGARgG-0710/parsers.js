@@ -134,11 +134,12 @@ export abstract class BaseIndexMap<
 		return this
 	}
 
-	constructor(keys: KeyType[], values: ValueType[], _default: DefaultType) {
+	constructor(
+		public keys: KeyType[],
+		public values: ValueType[],
+		public _default: DefaultType
+	) {
 		super()
-		this.keys = keys
-		this.values = values
-		this.default = _default
 	}
 }
 

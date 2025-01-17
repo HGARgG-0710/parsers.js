@@ -71,10 +71,6 @@ export namespace validation {
 export const BadIndex = -1
 
 export namespace defaults {
-	export namespace ArrayCollection {
-		export const DefaultValue = () => []
-	}
-
 	export namespace FreezableBuffer {
 		export const isFrozen = false
 	}

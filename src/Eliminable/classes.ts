@@ -9,7 +9,7 @@ export class EliminableString
 	extends FlushablEliminable<string>
 	implements EliminableStringPatternType
 {
-	eliminate(eliminated: string | RegExp) {
-		return (this.result = extract(this.result, eliminated))
+	eliminate(eliminated: string | RegExp, withStr?: string) {
+		return (this.result = extract(this.result, eliminated, withStr))
 	}
 }

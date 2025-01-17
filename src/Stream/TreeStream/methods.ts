@@ -1,5 +1,6 @@
-import type { TreeWalker, WalkableTree } from "../../Tree/TreeWalker/interfaces.js"
+import type { WalkableTree } from "../../Tree/TreeWalker/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
+import type { TreeWalker } from "../../Tree/classes.js"
 
 import { TreeStream } from "./classes.js"
 import { superInit } from "../StreamClass/utils.js"
@@ -62,7 +63,7 @@ export function treeStreamIsStart<Type = any>(this: TreeStream<Type>) {
 }
 
 export function treeStreamValueGetter<Type = any>(this: TreeStream<Type>) {
-	return this.walker.value
+	return this.walker.get()!
 }
 
 export function treeStreamMultindGetter<Type = any>(this: TreeStream<Type>) {

@@ -12,6 +12,10 @@ export class UnfreezableArray<Type = any>
 		return this
 	}
 
+	get() {
+		return super.get() as readonly Type[]
+	}
+
 	constructor(value: Type[] = []) {
 		super(value)
 	}
@@ -22,6 +26,10 @@ export class UnfreezableString
 	implements UnfreezableBuffer<string>
 {
 	protected value: string
+
+	get() {
+		return super.get() as string
+	}
 
 	push(...strings: string[]) {
 		if (!this.isFrozen) this.value += strings.join("")

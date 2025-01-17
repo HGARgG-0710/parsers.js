@@ -1,18 +1,17 @@
-import type { Pointer, Resulting } from "../Pattern/interfaces.js"
+import type { Resulting } from "../Pattern/interfaces.js"
 import { FlushablePattern } from "src/Pattern/abstract.js"
 
 export abstract class FlushablEliminable<Type = any>
 	extends FlushablePattern<Type>
-	implements Pointer<Type>, Resulting<Type>
+	implements Resulting<Type>
 {
-	value: Type
 	result: Type
 
 	flush(): void {
-		this.result = this.value
+		this.result = this.value!
 	}
 
-	constructor(value: Type) {
+	constructor(value?: Type) {
 		super(value)
 	}
 }

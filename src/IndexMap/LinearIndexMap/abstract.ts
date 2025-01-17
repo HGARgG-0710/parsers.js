@@ -1,4 +1,5 @@
-import type { IndexingFunction, Pairs } from "../interfaces.js"
+import type { IndexingFunction } from "../interfaces.js"
+import type { array } from "@hgargg-0710/one"
 
 import { isGoodIndex } from "../../utils.js"
 import { fromPairsList, inBound } from "../utils.js"
@@ -35,7 +36,7 @@ export abstract class BaseLinearMap<
 		return this
 	}
 
-	add(index: number, ...pairs: Pairs<KeyType, ValueType>) {
+	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
 		const [keys, values] = fromPairsList(pairs)
 		insert(this.keys, index, ...keys)
 		insert(this.alteredKeys, index, ...keys.map((x) => this.keyExtension(x)))

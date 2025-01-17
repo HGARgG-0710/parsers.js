@@ -78,20 +78,10 @@ REMINDERS [2.]:
 							Example [2] - create a new directory - 'refactor/' with appropriate methods [those that are used in several different places]; 
 								The 'refactor.ts' is NOT exported as an object of the library (internal exports usage); 
 
-					4. Delete the BasicPattern; [IF nothing uses it, after all, instead preferring ProtectedPattern]
-						Seems like 'Token' still uses it (try connecting it to 'ProtectedPattern' via inheritance...); 
-						ONLY if 'null' is NOT an acceptable value; 
-
-						Otherwise - use 'protected value?: Type' in 'ProtectedPattern'; 
 				9. Stream/: 
 					1. 'methods.ts' - ALL of them; 
 					2. inline class methods; 
 					3. the 'StreamClass' methods should be renamed (BUT remain untouched - defined as presently-are); 
-
-				10. Tokenizable [the 'tokenize' is NOT yet worked-with in terms of abstract classes]; 
-				11. Tree [inline methods, rename exported]
-					11.1. TreeWalker
-				12. Validatable [the 'validate' is NOT yet worked-with in terms of abstract classes]; 
 
 			AT THE SAME TIME - create the 'abstract' dependency; 
 			Also - use 'ProtectedPattern' (or rename into 'InternalPattern'); 
@@ -104,37 +94,8 @@ REMINDERS [2.]:
 					For now - only the errors are fixed, but APPROPRIATE USAGE IS STILL MISSING!
 				2. Add the 'LocatorStream' (and other SPECIFIC interfaces, to indicate where and which optional flags are present)
 
-	2.54. New concept for library organization: 	
-		MICRO-CLASSES! 
-		Walk through the project, find small (like 1-declaration) classes, 
-			replace them with proper methods-inlining; 
-
-	2.55. Decide: 
-		Whether to add '.init()' + 'ProtectedPattern' (and delete BasicPattern after) on:
-		
-			1. Tokenizable
-			2. Validatable
-			3. Eliminable
-			4. BasicTree
-			5. TokenType
-
-		Or, keep the 'BasicPattern', but limit it only to these ()
-	
 	2.57. finish the 'abstract' export [same structure as others]
-						
-	2.60. [maybe? see 2.55] '.init' - popularize even further throughout the library; 
-		Add an '.init' method to most [if not all] the library's classes. 
-		To add, in particular: 
-
-			1. Eliminable
-			2. Tokenizable
-			3. Validatable
-			4. Pattern: 
-				Create a new abstract class - 'InitializablePattern': 
-				This will abstract away the method '.init := ->(this.value = args[0])';  
-				The Eliminable, Tokenizable, Validatable will use it...; 
-			... [think of whether one would want re-usability for other types..., how to implement it...];
-		
+							
 	2.61. Code cleaning - abstract classes DO NOT HAVE to do: 'this[x] = ...' in their constructors; 
 		Instead, use the 'constructor(protected name: Type) {}' syntax...; 
 	
@@ -192,13 +153,12 @@ REMINDERS [2.]:
 	2.64 Also - add a new method to the 'ChildrenTree': 
 
 		1. '.write(i: MultiIndex, v: InTreeType<Type>)' - for replacing the [possibly grand-*] child at index 'i' with 'v'; 
+
+	2.65. Get rid of the 'methods' exports and files (they are useless... once methods transferred to the classes in 'abstract' - SCRAP!)
 	
 Order of TODO-elimination: 
 	5.2.52. 
-	5.2.54
-	5.2.55.
 	5.2.57.
-	5.2.60.
 	5.2.61.
 	5.2.62.
 	2.64.

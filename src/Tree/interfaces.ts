@@ -5,7 +5,7 @@ export type InTreeType<Type = any> = Type | Tree<Type>
 export type WalkableInTreeType<Type = any> = Type | WalkableTree<Type>
 
 export interface Tree<Type = any> {
-	lastChild: number
+	readonly lastChild: number
 	index: (multindex: number[]) => InTreeType<Type>
 }
 
@@ -13,13 +13,9 @@ export interface ParentTree<Type = any> extends WalkableTree<Type> {
 	parent: ParentTree<Type> | null
 }
 
-export interface BasicTree<Type = any> {
-	children: Type[]
+export interface ChildrenTree<Type = any> extends Tree<Type> {
+	children: InTreeType<Type>[]
 }
-
-export interface ChildrenTree<Type = any>
-	extends Tree<Type>,
-		BasicTree<InTreeType<Type>> {}
 
 export type TreeConstructor<Type = any> = new (
 	value?: Summat,

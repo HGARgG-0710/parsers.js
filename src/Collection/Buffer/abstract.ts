@@ -17,10 +17,10 @@ export abstract class TypicalUnfreezable<Type = any> extends IterableCollection<
 	}
 
 	read(i: number) {
-		return this.value[i] as Type
+		return this.value![i] as Type
 	}
 
 	get size() {
-		return this.value.length
+		return this.value!.length
 	}
 }

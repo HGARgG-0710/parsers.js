@@ -5,8 +5,7 @@ export interface Eliminable<EliminatedType = any, Type = any> {
 }
 
 export interface EliminablePattern<Type = any, EliminatedType = any>
-	extends Pointer<Type>,
-		Resulting<Type>,
+	extends Resulting<Type>,
 		Flushable,
 		Eliminable<EliminatedType, Type> {}
 

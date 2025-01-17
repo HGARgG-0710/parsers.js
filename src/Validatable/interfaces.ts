@@ -1,16 +1,17 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Pointer, Flushable, Resulting } from "../Pattern/interfaces.js"
-import type { Pair, Pairs } from "../IndexMap/interfaces.js"
+import type { Flushable, Resulting } from "../Pattern/interfaces.js"
+
+import type { array } from "@hgargg-0710/one"
 
 export type InvalidMatch = false
 export type ValidMatch = true
-export type FaultyElement<Type = any> = Pair<InvalidMatch, Type>
+export type FaultyElement<Type = any> = array.Pair<InvalidMatch, Type>
 
 export type ValidationOutput<Type = any> =
 	| [true, Type[]]
 	| [false, (Type | ValidMatch | FaultyElement<Type>)[]]
 
-export type InvalidEntries<Type = any> = Pairs<number, Type>
+export type InvalidEntries<Type = any> = array.Pairs<number, Type>
 
 export type ValidationHandler<Type = any> = SummatFunction<
 	any,
@@ -34,8 +35,7 @@ export interface Validatable<Type = any, KeyType = any> {
 }
 
 export interface ValidatablePattern<Type = any, KeyType = any>
-	extends Pointer<Type>,
-		Resulting<ValidationOutput<Type>>,
+	extends Resulting<ValidationOutput<Type>>,
 		Flushable,
 		Validatable<Type, KeyType> {}
 

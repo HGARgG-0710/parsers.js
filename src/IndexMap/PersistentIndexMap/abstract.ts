@@ -22,7 +22,7 @@ abstract class FakeIndexMap<
 	abstract swap(i: number, j: number): any
 	abstract unique(start?: boolean): number[]
 
-	// * note: these are fakes - they get replaced by PreIndexMap regardless...
+	// * note: these are fakes - see the comment at the bottom...
 	[Symbol.iterator]: () => Generator<array.Pair<KeyType, ValueType>>
 	set(key: KeyType, value: ValueType): any {}
 	get size(): number {
@@ -69,6 +69,5 @@ export abstract class DelegateIndexMap<
 	}
 }
 
-// * This is where the real '.unique', '.swap' and '[Symbol.iterator]' come from.
-// * '.unique' and '.swap' later get overriden by 'super'-based versions in 'PersistentIndexMap'
+// * This is where the real implementations of the empty FakeIndexMap methods come from.
 extendClass(DelegateIndexMap, PreIndexMap)

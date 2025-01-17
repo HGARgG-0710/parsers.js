@@ -2,9 +2,9 @@ import type { Tree, InTreeType, TreeConverter, TreeConstructor } from "./interfa
 
 import { isGoodIndex } from "../utils.js"
 
-import { object, function as _f } from "@hgargg-0710/one"
+import { object, functional } from "@hgargg-0710/one"
 const { structCheck } = object
-const { id } = _f
+const { id } = functional
 
 export const hasChildren = structCheck<Tree>({ lastChild: isGoodIndex })
 

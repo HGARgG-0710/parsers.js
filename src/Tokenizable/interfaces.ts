@@ -1,5 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Pointer, Flushable, Resulting } from "../Pattern/interfaces.js"
+import type { Flushable, Resulting } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
@@ -10,18 +10,15 @@ export type FreeTokenizer<Type = any, InType = any> = <OutType = any>(
 	handler: SummatFunction<any, Type, OutType>
 ) => TokenizationResult<Type, OutType>
 
-export type MethodTokenizer<Type = any, InType = any, OutType = any> = (
-	key: InType,
-	handler: SummatFunction<any, Type, OutType>
-) => TokenizationResult<Type, OutType>
-
 export interface Tokenizable<Type = any, InType = any, OutType = any> {
-	tokenize: MethodTokenizer<Type, InType, OutType>
+	tokenize: (
+		key: InType,
+		handler: SummatFunction<any, Type, OutType>
+	) => TokenizationResult<Type, OutType>
 }
 
 export interface TokenizablePattern<Type = any, InType = any, OutType = any>
-	extends Pointer<Type>,
-		Flushable,
+	extends Flushable,
 		Resulting<TokenizationResult<Type, OutType>>,
 		Tokenizable<Type, InType, OutType> {}
 

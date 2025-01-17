@@ -19,7 +19,10 @@ export function nested(
 	inflation: StreamHandler<boolean | number>,
 	deflation: StreamHandler<boolean | number>
 ) {
-	return function (input: ReversibleStream, dest: Collection = ArrayCollection([])) {
+	return function (
+		input: ReversibleStream,
+		dest: Collection = new ArrayCollection([])
+	) {
 		const depthInflate = (x: boolean | number) => x && (depth += x as number)
 		const depthDeflate = (x: boolean | number) => !x || (depth -= x as number)
 
@@ -39,7 +42,7 @@ export function nested(
 
 export function array<Type = any>(
 	stream: BasicStream<Type>,
-	init: Collection<Type> = ArrayCollection<Type>()
+	init: Collection<Type> = new ArrayCollection<Type>()
 ) {
 	while (!stream.isEnd) init.push(stream.next())
 	return init

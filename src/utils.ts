@@ -114,13 +114,6 @@ export const delegate = (delegatePropName: string) => (delegateMethodName: strin
 		return this[delegatePropName][delegateMethodName](...delegateArgs)
 	}
 
-export const thisReturningDelegate =
-	(delegatePropName: string) => (delegateMethodName: string) =>
-		function (...delegateArgs: any[]) {
-			this[delegatePropName][delegateMethodName](...delegateArgs)
-			return this
-		}
-
 export const delegateProperty = (delegatePropName: string) => (propName: string) =>
 	function () {
 		return this[delegatePropName][propName]
@@ -141,13 +134,6 @@ export const AssignmentClass =
 	(x: any, propVal: Type): OutType => {
 		x[propName] = propVal
 		return x as OutType
-	}
-
-export const SelfAssignmentClass =
-	<Type = any, OutType = any>(propName: string, _default?: () => Type) =>
-	(x: Type = _default!()) => {
-		x[propName] = x
-		return x as unknown as OutType
 	}
 
 export const getSetDescriptor = ([set, get]) => ({ set, get })

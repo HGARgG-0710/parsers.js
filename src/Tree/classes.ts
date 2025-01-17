@@ -10,63 +10,52 @@ import type {
 
 import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
-import {
-	childrenCount,
-	childIndex,
-	parentTreeBacktrack,
-	parentTreeFindUnwalkedChildren,
-	childrenGetter,
-	childrenSetter,
-	trivialFindUnwalkedChildren,
-	trivialBacktrack
-} from "./methods.js"
-
-import { BasicPattern } from "src/Pattern/abstract.js"
 import { value } from "../Pattern/utils.js"
-import { extendPrototype, parameterWaster } from "../utils.js"
-import { mapper } from "./utils.js"
+import { lastIndex, parameterWaster, isGoodIndex } from "../utils.js"
+import { mapper, sequentialIndex } from "./utils.js"
 
 import { functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 
-export abstract class BasicTree<Type = any> extends BasicPattern<Type[]> {
-	constructor(value: Type[]) {
-		super(value)
-	}
-}
-
-export class ChildrenTree<Type = any>
-	extends BasicTree<InTreeType<Type>>
-	implements ChildrenTreeType<Type>
-{
+export class ChildrenTree<Type = any> implements ChildrenTreeType<Type> {
 	children: InTreeType<Type>[]
-	lastChild: number
-	index: (multindex: number[]) => InTreeType<Type>
+
+	get lastChild() {
+		return lastIndex(this.children)
+	}
+
+	index(multind: number[]) {
+		return multind.reduce(
+			(prev, curr) => prev.children[curr],
+			this as ChildrenTreeType<Type>
+		)
+	}
 
 	constructor(value?: any, converter?: TreeConverter<Type>) {
-		super(value ? converter!(value) : [])
+		this.children = value ? converter!(value) : []
 	}
 }
-
-extendPrototype(ChildrenTree, {
-	lastChild: {
-		get: childrenCount
-	},
-	index: { value: childIndex },
-	children: {
-		set: childrenSetter,
-		get: childrenGetter
-	}
-})
 
 export class ParentTree<Type = any>
 	extends ChildrenTree<Type>
 	implements ParentTreeType<Type>
 {
 	index: (multindex: number[]) => WalkableInTreeType<Type>
-	backtrack: (positions: number, currInd: number[]) => WalkableTree<Type>
-	findUnwalkedChildren: (startInd: number[]) => number
 	parent: ParentTreeType<Type> | null
+
+	backtrack(positions: number) {
+		let curr = this as ParentTreeType<Type> | null
+		while (--positions) curr = curr!.parent
+		return curr
+	}
+
+	findUnwalkedChildren(endInd: number[]) {
+		let result = lastIndex(endInd)
+		let currTree = this as ParentTreeType<Type>
+		while ((currTree = currTree.parent!) && currTree.lastChild <= endInd[result])
+			--result
+		return result
+	}
 
 	constructor(value?: any, converter?: TreeConverter<Type>) {
 		super(value, converter)
@@ -81,24 +70,25 @@ export class ParentTree<Type = any>
 	}
 }
 
-extendPrototype(ParentTree, {
-	backtrack: { value: parentTreeBacktrack },
-	findUnwalkedChildren: { value: parentTreeFindUnwalkedChildren }
-})
-
 export class TrivialWalkableTree<Type = any>
 	extends ChildrenTree<Type>
 	implements WalkableTree<Type>
 {
 	index: (multindex: number[]) => WalkableInTreeType<Type>
-	backtrack: (positions: number, currInd?: number[]) => WalkableTree<Type>
 	findUnwalkedChildren: (startIndex: number[]) => number
-}
 
-extendPrototype(TrivialWalkableTree, {
-	backtrack: { value: trivialBacktrack },
-	findUnwalkedChildren: { value: trivialFindUnwalkedChildren }
-})
+	findUnwalkeChildren(endIndex: number[]) {
+		const parents = sequentialIndex(this, endIndex) as WalkableTree<Type>[]
+		let result = lastIndex(parents)
+		while (isGoodIndex(result) && parents[result].lastChild <= endIndex[result])
+			--result
+		return result
+	}
+
+	backtrack(positions: number, currInd: number[]) {
+		return this.index(currInd.slice(0, -positions))
+	}
+}
 
 export function ChildlessTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
 	return parameterWaster(treeConstructor)
