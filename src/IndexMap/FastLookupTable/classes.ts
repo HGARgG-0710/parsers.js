@@ -4,7 +4,7 @@ import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 
 import { DelegateHashTable, DelegateLookupTable } from "./abstract.js"
-import { current } from "../../utils.js"
+import { current } from "src/Stream/utils.js"
 
 import { functional } from "@hgargg-0710/one"
 const { id } = functional

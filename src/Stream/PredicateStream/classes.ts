@@ -13,27 +13,25 @@ import type {
 
 import type { PredicateStream as EffectivePredicateStream } from "./interfaces.js"
 
-import { valueDefaultIsEnd } from "../../Pattern/methods.js"
 import {
 	predicateStreamIsEnd,
 	predicateStreamProd,
 	predicateStreamCurr,
 	predicateStreamNext,
 	predicateStreamInitialize
-} from "./methods.js"
+} from "./refactor.js"
 
-import { StreamClass } from "../StreamClass/classes.js"
-import { extendPrototype } from "../../utils.js"
+import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { extendPrototype } from "src/refactor.js"
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
-	StreamClass<Type>({
+	DefaultEndStream<Type>({
 		currGetter: predicateStreamCurr,
 		baseNextIter: predicateStreamNext,
 		isCurrEnd: predicateStreamIsEnd,
-		defaultIsEnd: valueDefaultIsEnd,
 		isPattern: true,
 		hasPosition,
 		buffer

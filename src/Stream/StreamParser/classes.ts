@@ -7,21 +7,20 @@ import type {
 import type { StreamHandler, StreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { StreamParser as StreamParserType } from "./interfaces.js"
 
-import { StreamClass } from "../../Stream/StreamClass/classes.js"
-import { valueDefaultIsEnd, valueIsEnd } from "../../Pattern/methods.js"
-import { streamParserInitialize, streamParserNext } from "./methods.js"
-import { extendPrototype } from "../../utils.js"
+import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { valueIsCurrEnd } from "../StreamClass/refactor.js"
+import { streamParserInitialize, streamParserNext } from "./refactor.js"
+import { extendPrototype } from "src/refactor.js"
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false,
 	state: boolean = false
 ) =>
-	StreamClass<Type>({
+	DefaultEndStream<Type>({
 		initGetter: streamParserNext,
-		isCurrEnd: valueIsEnd,
+		isCurrEnd: valueIsCurrEnd,
 		baseNextIter: streamParserNext,
-		defaultIsEnd: valueDefaultIsEnd,
 		hasPosition,
 		buffer,
 		state,

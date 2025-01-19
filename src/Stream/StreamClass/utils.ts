@@ -1,32 +1,15 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { BasicStream, Endable } from "../interfaces.js"
+import type { BasicStream } from "../interfaces.js"
 import type { Rewindable } from "./methods/rewind.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
-import type {
-	BufferizedStreamClassInstance,
-	PositionalStreamClassInstance,
-	PreStarted,
-	ReversedStreamClassInstance,
-	Stateful,
-	StreamClassInstance
-} from "./interfaces.js"
 
-import { calledDelegate } from "../../utils.js"
 import { pickDirection, positionConvert } from "../../Position/utils.js"
-
-import { Stream, defaults } from "../../constants.js"
-const { StreamClass } = Stream
-const { realCurr: defaultRealCurr } = defaults.StreamClass
 
 import { object, type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber } = type
-
-export const superDelegate = calledDelegate("super")
-export const superInit = superDelegate("init")
 
 export const isFinishable = structCheck<Finishable>({ finish: isFunction })
 export const isNavigable = structCheck<Navigable>({ navigate: isFunction })
@@ -93,68 +76,4 @@ export function uniRewind<Type = any>(stream: BasicReversibleStream<Type>) {
 
 export function fastRewind<Type = any>(stream: BasicReversibleStream<Type>): Type {
 	return isRewindable(stream) ? stream.rewind() : uniRewind(stream)
-}
-
-export function initCurr<Type = any>(stream: StreamClassInstance<Type>) {
-	start(stream)
-	return (stream.realCurr = stream.initGetter!())
-}
-
-export function isCurrUninitialized<Type = any>(stream: StreamClassInstance<Type>) {
-	return stream.isStart === StreamClass.PreCurrInit
-}
-
-export function preStart(stream: PreStarted) {
-	stream.isStart = StreamClass.PreCurrInit
-}
-
-export function start(stream: PreStarted) {
-	stream.isStart = StreamClass.PostCurrInit
-}
-
-export function deStart(stream: StreamClassInstance) {
-	stream.isStart = StreamClass.PostStart
-}
-
-export function preEnd(stream: StreamClassInstance) {
-	stream.isEnd = stream.defaultIsEnd()
-}
-
-export function end(stream: StreamClassInstance) {
-	stream.isEnd = true
-}
-
-export function isEmptyStream(stream: StreamClassInstance) {
-	return stream.isEnd && stream.isStart
-}
-
-export function deEnd(stream: Endable) {
-	stream.isEnd = false
-}
-
-// * Explanation: For 'StreamClassInstance'-s, it's a call to the 'initGetter', or a first call to 'currGetter'
-export function preInit(x: BasicStream) {
-	if (!x.isEnd) x.curr
-}
-
-export function createState(x: Stateful, state: Summat) {
-	x.state = state
-}
-
-export function realCurr(stream: StreamClassInstance) {
-	stream.realCurr = defaultRealCurr
-}
-
-export function getNext<Type = any>(stream: StreamClassInstance<Type>) {
-	return (stream.curr = stream.baseNextIter())
-}
-
-export function readBuffer<Type = any>(
-	stream: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
-) {
-	return (stream.curr = stream.buffer.read(stream.pos))
-}
-
-export function getPrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
-	return (stream.curr = stream.basePrevIter())
 }

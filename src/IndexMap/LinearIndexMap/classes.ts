@@ -1,3 +1,5 @@
+import type { array } from "@hgargg-0710/one"
+import type { LinearIndexMap } from "./interfaces.js"
 import type {
 	IndexingFunction,
 	MapClass,
@@ -7,18 +9,14 @@ import type {
 	HasType
 } from "../interfaces.js"
 
-import type { array } from "@hgargg-0710/one"
-
-import type { LinearIndexMap } from "./interfaces.js"
-
 import {
 	extend,
 	extendKey,
 	OptimizedLinearMap as OptimizedLinearMapMethods
-} from "./methods.js"
+} from "./refactor.js"
 
-import { fromPairsList } from "../utils.js"
 import { BaseLinearMap } from "./abstract.js"
+import { fromPairsList } from "../utils.js"
 
 import { functional, boolean } from "@hgargg-0710/one"
 const { trivialCompose } = functional

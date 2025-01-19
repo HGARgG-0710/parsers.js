@@ -7,7 +7,7 @@ export abstract class FlushablEliminable<Type = any>
 {
 	result: Type
 
-	flush(): void {
+	flush() {
 		this.result = this.value!
 	}
 

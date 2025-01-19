@@ -1,20 +1,8 @@
-import type { HasType, Sizeable } from "./IndexMap/interfaces.js"
 import type { PredicatePosition } from "./Position/interfaces.js"
-import type { BasicStream, Indexed } from "./Stream/interfaces.js"
-import type { Bufferized } from "./Collection/Buffer/interfaces.js"
-import type { Stateful } from "./Stream/StreamClass/interfaces.js"
-import type {
-	BasicReversibleStream,
-	ReversibleStream
-} from "./Stream/ReversibleStream/interfaces.js"
+import type { Indexed } from "./Stream/interfaces.js"
 
-import type { Prototypal } from "./interfaces.js"
-
-import { BadIndex, Stream } from "./constants.js"
-const { SkippedItem } = Stream.StreamParser
-
-import { object } from "@hgargg-0710/one"
-const { propertyDescriptors, withoutProperties } = object
+import { BadIndex } from "./constants.js"
+import { propByName } from "./Stream/refactor.js"
 
 export const isGoodIndex = (x: number) => x > BadIndex
 
@@ -24,72 +12,6 @@ export const isGoodIndex = (x: number) => x > BadIndex
 export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
 
 /**
- * Given a `BasicStream`, calls `.next()` on it and returns the result
- */
-export const next = <Type = any>(input: BasicStream<Type>) => input.next()
-
-/**
- * Given a `ReversibleStream`, calls its `.prev()` and returns the result
- */
-export const previous = <Type = any>(input: BasicReversibleStream<Type>) => input.prev()
-
-/**
- * Given a `BasicStream` returns its `.curr` property value
- */
-export const current = <Type = any>(input: BasicStream<Type>) => input.curr
-
-/**
- * Given a `handler` function returns a function of `input: BasicStream` that skips a single stream-element before and after calling the handler.
- * It then proceeds to returns the result of the handler
- */
-export function wrapped(handler: (input: BasicStream) => any) {
-	return function (input: BasicStream) {
-		input.next()
-		const result = handler(input)
-		input.next()
-		return result
-	}
-}
-
-/**
- * Returns the `.is` property of a given object
- */
-export const is = (x: any) => x.is
-
-/**
- * Returns the `.isEnd` property of a given `BasicStream`
- */
-export const isEnd = (input: BasicStream) => input.isEnd
-
-/**
- * Returns the `.isStart` property of a given `ReversibleStream`
- */
-export const isStart = (input: ReversibleStream) => input.isStart
-
-/**
- * Skips a single element of the given `BasicStream` and returns an empty array
- */
-export const destroy = (input: BasicStream) => {
-	input.next()
-	return SkippedItem
-}
-
-/**
- * For a `input: BasicStream`, If `input.isEnd`, returns an empty array, otherwise `[input.next()]`
- */
-export const preserve = (input: BasicStream) => (input.isEnd ? SkippedItem : input.next())
-
-/**
- * Returns whether `x === y`
- */
-export const eq = (x: any) => (y: any) => x === y
-
-/**
- * Returns whether `set.has(x)`
- */
-export const inSet = (set: HasType) => (x: any) => set.has(x)
-
-/**
  * Adds a `.direction = false` property on a given `PredicatePosition`
  */
 export const backtrack = (predicate: PredicatePosition) => {
@@ -97,73 +19,15 @@ export const backtrack = (predicate: PredicatePosition) => {
 	return predicate
 }
 
-export const length = (x: Indexed) => x.length
-
 export const lastIndex = (x: Indexed) => x.length - 1
 
-export const size = (x: Sizeable) => x.size
+export const length = propByName("length")
 
-export const calledDelegate =
-	(delegatePropName: string) =>
-	(delegateMethodName: string) =>
-	(called: any, ...delegateArgs: any[]) =>
-		called[delegatePropName][delegateMethodName].call(called, ...delegateArgs)
+export const size = propByName("size")
 
-export const delegate = (delegatePropName: string) => (delegateMethodName: string) =>
-	function (...delegateArgs: any[]) {
-		return this[delegatePropName][delegateMethodName](...delegateArgs)
-	}
+export const state = propByName("state")
 
-export const delegateProperty = (delegatePropName: string) => (propName: string) =>
-	function () {
-		return this[delegatePropName][propName]
-	}
-
-export const classWrapper =
-	(X: new (...args: any[]) => any) =>
-	(...args: any[]) =>
-		new X(...args)
-
-export const parameterWaster =
-	<Type = any>(X: new (...input: any[]) => Type) =>
-	() =>
-		new X()
-
-export const AssignmentClass =
-	<Type = any, OutType = any>(propName: string) =>
-	(x: any, propVal: Type): OutType => {
-		x[propName] = propVal
-		return x as OutType
-	}
-
-export const getSetDescriptor = ([set, get]) => ({ set, get })
-
-export const state = (x: Stateful) => x.state
-
-export const buffer = (x: Bufferized) => x.buffer
-
-export const extendPrototype = (
-	Extended: Prototypal,
-	properties: PropertyDescriptorMap
-) => Object.defineProperties(Extended.prototype, properties)
-
-export const withoutConstructor = withoutProperties(new Set(["constructor"]))
-
-export const extendClass = (Extended: Prototypal, ...classes: Prototypal[]) =>
-	classes.forEach((ParentClass) =>
-		extendPrototype(
-			Extended,
-			withoutConstructor(
-				propertyDescriptors(ParentClass.prototype)
-			) as PropertyDescriptorMap
-		)
-	)
-
-export const addProperty = (
-	Extended: Prototypal,
-	name: PropertyKey,
-	value: PropertyDescriptor
-) => Object.defineProperty(Extended.prototype, name, value)
+export const buffer = propByName("buffer")
 
 export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"

@@ -1,4 +1,4 @@
-import type { Flushable, Resulting, Pointer } from "../Pattern/interfaces.js"
+import type { Flushable, Resulting } from "../Pattern/interfaces.js"
 
 export interface Eliminable<EliminatedType = any, Type = any> {
 	eliminate: (eliminated: EliminatedType) => Type

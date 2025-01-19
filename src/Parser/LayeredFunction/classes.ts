@@ -1,19 +1,8 @@
 import type { LayeredFunction as LayeredParserType } from "./interfaces.js"
+import { FlexibleFunction } from "./abstract.js"
 
 import { functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
-
-// * Pre-doc note: the infinite (or any) recursion is possible via '__call__() { return this.__call() }'
-export abstract class FlexibleFunction extends Function {
-	protected self: Function
-	protected abstract __call__(...x: any[]): any
-	constructor() {
-		super("...args", "return this.self.__call__(...args)")
-		const self = this.bind(this)
-		this.self = self
-		return self
-	}
-}
 
 export class LayeredFunction<ArgType extends any[] = any[], OutType = any>
 	extends FlexibleFunction

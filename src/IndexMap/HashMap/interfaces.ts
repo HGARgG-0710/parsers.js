@@ -1,4 +1,3 @@
-import type { Pointer } from "../../Pattern/interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
 import type { Indexable, Sizeable } from "../interfaces.js"
 

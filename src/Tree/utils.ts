@@ -1,6 +1,6 @@
-import type { Tree, InTreeType, TreeConverter, TreeConstructor } from "./interfaces.js"
+import type { Tree, InTree, TreeConverter, TreeConstructor } from "./interfaces.js"
 
-import { isGoodIndex } from "../utils.js"
+import { isGoodIndex } from "src/utils.js"
 
 import { object, functional } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -15,9 +15,9 @@ export const hasChildren = structCheck<Tree>({ lastChild: isGoodIndex })
 export function sequentialIndex<Type = any>(
 	tree: Tree<Type>,
 	multind: number[]
-): InTreeType<Type>[] {
-	const result: InTreeType<Type>[] = [tree]
-	let current: InTreeType<Type> = tree
+): InTree<Type>[] {
+	const result: InTree<Type>[] = [tree]
+	let current: InTree<Type> = tree
 	for (const index of multind)
 		result.push((current = (current as Tree<Type>).index([index])))
 	return result

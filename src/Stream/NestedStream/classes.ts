@@ -7,27 +7,25 @@ import type {
 	PatternStreamConstructor
 } from "../StreamClass/interfaces.js"
 
-import { valueDefaultIsEnd } from "../../Pattern/methods.js"
+import { DefaultEndStream } from "../StreamClass/abstract.js"
 import {
 	nestedStreamInitCurr,
 	nestedStreamNext,
 	nestedStreamInitialize,
 	nestedStreamIsEnd
-} from "./methods.js"
+} from "./refactor.js"
 
-import { StreamClass } from "../StreamClass/classes.js"
-import { extendPrototype } from "../../utils.js"
+import { extendPrototype } from "src/refactor.js"
 
 // * Explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`, instead of expected 'boolean';
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
-	StreamClass<Type | EffectiveNestedStream<Type>>({
+	DefaultEndStream<Type | EffectiveNestedStream<Type>>({
 		isCurrEnd: nestedStreamIsEnd,
 		baseNextIter: nestedStreamNext<Type>,
 		initGetter: nestedStreamInitCurr,
-		defaultIsEnd: valueDefaultIsEnd,
 		hasPosition,
 		buffer,
 		preInit: true,

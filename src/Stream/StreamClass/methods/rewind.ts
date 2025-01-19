@@ -5,9 +5,9 @@ import type {
 } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
-import { start } from "../utils.js"
+import { start } from "../refactor.js"
 import { positionNull } from "../../../Position/utils.js"
-import { readFirst } from "../../../Collection/Buffer/utils.js"
+import { readFirst } from "src/Collection/Buffer/refactor.js"
 
 export interface Rewindable<Type = any> {
 	rewind: () => Type

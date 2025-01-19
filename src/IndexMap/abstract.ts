@@ -4,8 +4,9 @@ import type { array } from "@hgargg-0710/one"
 
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
-import { isGoodIndex } from "../utils.js"
-import { keyValuesToPairsList, table, upperBound } from "./utils.js"
+import { isGoodIndex } from "src/utils.js"
+import { keyValuesToPairsList, table } from "./utils.js"
+import { upperBound } from "./refactor.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { swap } = inplace
@@ -128,7 +129,7 @@ export abstract class BaseIndexMap<
 			: this.default
 	}
 
-	swap(i: number, j: number): any {
+	swap(i: number, j: number) {
 		swap(this.keys, i, j)
 		swap(this.values, i, j)
 		return this
@@ -145,3 +146,5 @@ export abstract class BaseIndexMap<
 
 export * as FastLookupTable from "./FastLookupTable/abstract.js"
 export * as HashMap from "./HashMap/abstract.js"
+export * as LinearIndexMap from "./LinearIndexMap/abstract.js"
+export * as PersistentIndexMap from "./PersistentIndexMap/abstract.js"

@@ -6,7 +6,8 @@ import type {
 	LimitedStream as EffectiveLimitedStream
 } from "./interfaces.js"
 
-import { valueCurr, valueDefaultIsEnd } from "../../Pattern/methods.js"
+import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { valueCurr } from "../StreamClass/refactor.js"
 import {
 	limitedStreamInitialize,
 	limitedStreamProd,
@@ -14,22 +15,20 @@ import {
 	limitedStreamNext,
 	limitedStreamPrev,
 	limitedStreamIsStart
-} from "./methods.js"
+} from "./refactor.js"
 
-import { StreamClass } from "../StreamClass/classes.js"
-import { extendPrototype } from "../../utils.js"
+import { extendPrototype } from "src/refactor.js"
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
-	StreamClass<Type>({
+	DefaultEndStream<Type>({
 		currGetter: valueCurr,
 		baseNextIter: limitedStreamNext,
 		basePrevIter: limitedStreamPrev,
 		isCurrEnd: limitedStreamIsEnd,
 		isCurrStart: limitedStreamIsStart,
-		defaultIsEnd: valueDefaultIsEnd,
 		isPattern: true,
 		hasPosition,
 		buffer

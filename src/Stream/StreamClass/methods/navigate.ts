@@ -5,7 +5,8 @@ import type {
 	PositionalReversedStreamClassInstance
 } from "../interfaces.js"
 
-import { uniNavigate, readBuffer } from "../utils.js"
+import { uniNavigate } from "../utils.js"
+import { readBuffer } from "../refactor.js"
 import {
 	isBackward,
 	positionConvert,

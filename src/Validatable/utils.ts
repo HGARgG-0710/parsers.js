@@ -1,3 +1,4 @@
+import type { TypePredicate } from "../interfaces.js"
 import type {
 	FaultyElement,
 	InvalidEntries,
@@ -8,20 +9,19 @@ import type {
 } from "./interfaces.js"
 
 import { validation } from "../constants.js"
-import { eq, isGoodIndex } from "../utils.js"
+import { isGoodIndex } from "src/utils.js"
 import { tokenizeString } from "../Tokenizable/utils.js"
 
-import { isPair } from "../IndexMap/utils.js"
+import { isPair } from "./refactor.js"
 
 import { boolean } from "@hgargg-0710/one"
-import type { TypePredicate } from "../interfaces.js"
-const { T } = boolean
+const { T, eqcurry } = boolean
 
 const { ValidationPassed, ValidationFailed, FaultyElement, InvalidMatch, ValidMatch } =
 	validation.ValidatablePattern
 
 export const notValidMatch = (x: any) => x !== ValidMatch
-export const isInvalidMatch = eq(InvalidMatch) as (x: any) => x is InvalidMatch
+export const isInvalidMatch = eqcurry(InvalidMatch) as (x: any) => x is InvalidMatch
 
 export function validateString(
 	string: string,

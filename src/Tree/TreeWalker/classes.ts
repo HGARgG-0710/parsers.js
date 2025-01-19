@@ -110,14 +110,17 @@ export class TreeWalker<Type = any> extends InitializablePattern<WalkableTree<Ty
 
 	init(value?: WalkableTree<Type>, pos?: MultiIndex, modifier?: MultiIndexModifier) {
 		if (modifier) this.modifier = modifier
+
 		if (value) {
 			this.level = this.value = value
 			if (!pos) this.modifier.clear()
 		}
+
 		if (pos) {
 			this.modifier.init(pos)
 			this.goIndex(pos)
 		}
+
 		return this
 	}
 

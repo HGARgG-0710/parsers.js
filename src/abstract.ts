@@ -1,3 +1,8 @@
 export * as Collection from "./Collection/abstract.js"
 export * as Eliminable from "./Eliminable/abstract.js"
 export * as IndexMap from "./IndexMap/abstract.js"
+export * as Pattern from "./Pattern/abstract.js"
+export * as Parser from "./Parser/abstract.js"
+export * as Stream from "./Stream/abstract.js"
+export * as Tokenizable from "./Tokenizable/abstract.js"
+export * as Validatable from "./Validatable/abstract.js"

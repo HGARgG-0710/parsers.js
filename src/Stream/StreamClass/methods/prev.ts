@@ -5,7 +5,9 @@ import type {
 } from "../interfaces.js"
 
 import { positionDecrement } from "../../../Position/utils.js"
-import { start, deEnd, getPrev, readBuffer } from "../utils.js"
+import { deEnd } from "../refactor.js"
+import { getPrev, readBuffer } from "../refactor.js"
+import { start } from "../refactor.js"
 
 // * possible '.prev' methods
 

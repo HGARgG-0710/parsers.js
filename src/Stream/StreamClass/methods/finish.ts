@@ -5,9 +5,10 @@ import type {
 } from "../interfaces.js"
 
 import { uniFinish } from "../utils.js"
-import { readBuffer } from "../utils.js"
-import { end } from "../utils.js"
-import { lastIndex, readLast } from "../../../Collection/Buffer/utils.js"
+import { readBuffer } from "../refactor.js"
+import { end } from "../refactor.js"
+import { readLast } from "src/Collection/Buffer/refactor.js"
+import { lastIndex } from "src/Collection/Buffer/refactor.js"
 
 export interface Finishable<Type = any>  {
 	finish: () => Type

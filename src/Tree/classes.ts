@@ -1,7 +1,7 @@
 import type { Pattern } from "../Pattern/interfaces.js"
 import type {
-	ChildrenTree as ChildrenTreeType,
-	InTreeType,
+	ChildrenTree as IChildrenTree,
+	InTree,
 	ParentTree as ParentTreeType,
 	TreeConstructor,
 	TreeConverter,
@@ -11,14 +11,17 @@ import type {
 import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
 import { value } from "../Pattern/utils.js"
-import { lastIndex, parameterWaster, isGoodIndex } from "../utils.js"
+import { lastIndex } from "../utils.js"
+import { parameterWaster } from "src/refactor.js"
+import { isGoodIndex } from "src/utils.js"
 import { mapper, sequentialIndex } from "./utils.js"
 
-import { functional } from "@hgargg-0710/one"
+import { functional, array } from "@hgargg-0710/one"
 const { trivialCompose } = functional
+const { last } = array
 
-export class ChildrenTree<Type = any> implements ChildrenTreeType<Type> {
-	children: InTreeType<Type>[]
+export class ChildrenTree<Type = any> implements IChildrenTree<Type> {
+	children: InTree<Type>[]
 
 	get lastChild() {
 		return lastIndex(this.children)
@@ -27,8 +30,13 @@ export class ChildrenTree<Type = any> implements ChildrenTreeType<Type> {
 	index(multind: number[]) {
 		return multind.reduce(
 			(prev, curr) => prev.children[curr],
-			this as ChildrenTreeType<Type>
+			this as IChildrenTree<Type>
 		)
+	}
+
+	write(multind: number[], value: InTree<Type>) {
+		const writtenTo = this.index(multind.slice(0, -1))
+		return (writtenTo[last(multind)] = value)
 	}
 
 	constructor(value?: any, converter?: TreeConverter<Type>) {

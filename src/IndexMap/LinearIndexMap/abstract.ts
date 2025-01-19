@@ -1,8 +1,9 @@
 import type { IndexingFunction } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { isGoodIndex } from "../../utils.js"
-import { fromPairsList, inBound } from "../utils.js"
+import { isGoodIndex } from "src/utils.js"
+import { fromPairsList } from "../utils.js"
+import { inBound } from "../refactor.js"
 
 import { BadIndex } from "../../constants.js"
 import { BaseIndexMap } from "../abstract.js"

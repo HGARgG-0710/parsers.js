@@ -5,8 +5,10 @@ import type {
 } from "../interfaces.js"
 
 import { positionIncrement } from "../../../Position/utils.js"
-import { bufferPush, bufferFreeze } from "../../../Collection/Buffer/utils.js"
-import { deStart, end, getNext, readBuffer } from "../utils.js"
+import { bufferPush } from "src/Collection/Buffer/refactor.js"
+import { bufferFreeze } from "src/Collection/Buffer/refactor.js"
+import { getNext, readBuffer } from "../refactor.js"
+import { deStart, end } from "../refactor.js"
 
 // * possible '.next' methods
 

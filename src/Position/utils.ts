@@ -10,7 +10,7 @@ import type {
 	Posed
 } from "./interfaces.js"
 
-import { previous, next } from "../utils.js"
+import { previous, next } from "src/Stream/utils.js"
 
 import { object, type, boolean, functional } from "@hgargg-0710/one"
 import type { TypePredicate } from "../interfaces.js"

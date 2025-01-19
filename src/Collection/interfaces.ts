@@ -5,4 +5,4 @@ export interface Collection<Type = any> extends Iterable<Type> {
 	get: () => Indexed<Type>
 }
 
-export * as Buffer from "./Buffer/interfaces.js"
+export type * as Buffer from "./Buffer/interfaces.js"

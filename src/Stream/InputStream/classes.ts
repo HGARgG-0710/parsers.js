@@ -1,7 +1,7 @@
 import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 import type { InputStream as InputStreamType } from "./interfaces.js"
 
-import { StreamClass } from "../StreamClass/classes.js"
+import { StreamClass } from "../StreamClass/abstract.js"
 
 import {
 	inputStreamDefaultIsEnd,
@@ -10,7 +10,7 @@ import {
 	inputStreamIsStart,
 	inputStreamNext,
 	inputStreamPrev
-} from "./methods.js"
+} from "./refactor.js"
 
 export const InputStream = StreamClass({
 	currGetter: inputStreamCurr,

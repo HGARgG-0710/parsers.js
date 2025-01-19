@@ -6,21 +6,21 @@ import type {
 	ReversedStream as ReversedStreamType
 } from "./interfaces.js"
 
-import {
-	valueRewind,
-	valueCurr,
-	valuePrev,
-	valueIsStart,
-	valueNext,
-	valueIsEnd,
-	valueDefaultIsStart,
-	valueFinish
-} from "../../Pattern/methods.js"
+import { valueDelegate, valuePropDelegate } from "src/refactor.js"
+import { valueIsCurrEnd } from "../StreamClass/refactor.js"
+import { valueCurr } from "../StreamClass/refactor.js"
+import { StreamClass } from "../StreamClass/abstract.js"
+import { extendPrototype } from "src/refactor.js"
+import { reversedStreamInitialize } from "./refactor.js"
 
-import { reversedStreamInitialize } from "./methods.js"
-
-import { StreamClass } from "../StreamClass/classes.js"
-import { extendPrototype } from "../../utils.js"
+const valueDefaultIsStart = valuePropDelegate("isStart")
+const [valuePrev, valueNext, valueIsStart, valueRewind, valueFinish] = [
+	"prev",
+	"next",
+	"isCurrStart",
+	"rewind",
+	"finish"
+].map(valueDelegate)
 
 const ReversedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -31,7 +31,7 @@ const ReversedStreamBase = <Type = any>(
 		baseNextIter: valuePrev,
 		basePrevIter: valueNext,
 		isCurrEnd: valueIsStart,
-		isCurrStart: valueIsEnd,
+		isCurrStart: valueIsCurrEnd,
 		defaultIsEnd: valueDefaultIsStart,
 		hasPosition,
 		buffer,

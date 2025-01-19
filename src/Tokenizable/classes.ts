@@ -1,14 +1,9 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Resulting } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
-import type {
-	DelegateTokenizablePattern,
-	FreeTokenizer,
-	TokenizationResult
-} from "./interfaces.js"
+import type { DelegateTokenizablePattern, FreeTokenizer } from "./interfaces.js"
 
-import { FlushablePattern } from "src/Pattern/abstract.js"
-import { extendPrototype } from "../utils.js"
+import { FlushableTokenizable } from "./abstract.js"
+import { extendPrototype } from "src/refactor.js"
 import { tokenizeString } from "./utils.js"
 
 import { type } from "@hgargg-0710/one"
@@ -16,16 +11,6 @@ const { isString } = type
 
 import { inplace } from "@hgargg-0710/one"
 const { replace } = inplace
-
-export abstract class FlushableTokenizable<Type = any, OutType = any>
-	extends FlushablePattern<Type>
-	implements Resulting<TokenizationResult<Type, OutType>>
-{
-	result: TokenizationResult<Type, OutType>
-	flush(): void {
-		this.result = []
-	}
-}
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,

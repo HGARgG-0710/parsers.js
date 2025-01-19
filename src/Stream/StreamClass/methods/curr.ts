@@ -4,9 +4,11 @@ import type {
 	StreamClassInstance
 } from "../interfaces.js"
 
-import { getSetDescriptor } from "../../../utils.js"
-import { readBuffer } from "../utils.js"
-import { isCurrUninitialized, initCurr, start } from "../utils.js"
+import { getSetDescriptor } from "src/refactor.js"
+import { readBuffer } from "../refactor.js"
+import { start } from "../refactor.js"
+import { isCurrUninitialized } from "../refactor.js"
+import { initCurr } from "../refactor.js"
 
 // * possible '.curr=' and '.curr' methods
 

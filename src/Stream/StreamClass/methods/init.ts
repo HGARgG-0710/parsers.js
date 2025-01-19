@@ -10,9 +10,10 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { FreezableBuffer } from "../../../Collection/Buffer/interfaces.js"
 
 import { positionNull } from "../../../Position/utils.js"
-import { assignBuffer } from "../../../Collection/Buffer/utils.js"
+import { assignBuffer } from "src/Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../Pattern/utils.js"
-import { createState, preEnd, preInit, preStart, realCurr } from "../utils.js"
+import { createState, preInit, realCurr } from "../refactor.js"
+import { preEnd, preStart } from "../refactor.js"
 
 // * types
 

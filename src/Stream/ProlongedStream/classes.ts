@@ -12,10 +12,10 @@ import {
 	prolongedStreamCurr,
 	prolongedStreamDefaultIsEnd,
 	prolongedStreamInitialize
-} from "./methods.js"
+} from "./refactor.js"
 
-import { StreamClass } from "../StreamClass/classes.js"
-import { extendPrototype } from "../../utils.js"
+import { StreamClass } from "../StreamClass/abstract.js"
+import { extendPrototype } from "src/refactor.js"
 
 const ProlongedStreamBase = <Type = any>(
 	hasPosition: boolean = false,

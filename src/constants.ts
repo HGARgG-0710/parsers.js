@@ -6,7 +6,7 @@ import type {
 	ValidMatch
 } from "./Validatable/interfaces.js"
 
-import { parameterWaster } from "./utils.js"
+import { parameterWaster } from "./refactor.js"
 
 import { boolean } from "@hgargg-0710/one"
 const { T } = boolean

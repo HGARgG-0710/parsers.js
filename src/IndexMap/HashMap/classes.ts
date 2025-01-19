@@ -3,7 +3,7 @@ import type { HashClass, HashMap, HashType } from "./interfaces.js"
 import type { Token as TypeToken } from "../../Token/interfaces.js"
 
 import { BaseHashClass } from "./abstract.js"
-import { extend } from "./methods.js"
+import { extend } from "./refactor.js"
 
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"

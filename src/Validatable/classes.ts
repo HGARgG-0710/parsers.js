@@ -1,35 +1,18 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Resulting } from "../Pattern/interfaces.js"
 import type {
 	DelegateValidatablePattern,
 	FreeValidator,
 	ValidatableStringPattern as ValidatableStringPatternType,
-	ValidationOutput,
 	InvalidMatch,
 	ValidMatch
 } from "./interfaces.js"
 
-import { FlushablePattern } from "src/Pattern/abstract.js"
+import { FlushableValidatable } from "./abstract.js"
 import { validateString } from "./utils.js"
-import { extendPrototype } from "../utils.js"
-
-import { validation } from "../constants.js"
-const { ValidationFailed } = validation.ValidatablePattern
+import { extendPrototype } from "src/refactor.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { replace } = inplace
-
-// * Note: due to the way this is defined, for validity analysis, it's better to use 'analyzeValidity' util than just '!!this.result[0]':
-// * 		it returns an empty array both when '!.result[1].length' and when '!!result[0]';
-export abstract class FlushableValidatable<Type = any>
-	extends FlushablePattern<Type>
-	implements Resulting<ValidationOutput<Type>>
-{
-	result: ValidationOutput<Type>
-	flush(): void {
-		this.result = ValidationFailed<any>([])
-	}
-}
 
 export function DelegateValidatable<Type = any, KeyType = any>(
 	validator: FreeValidator<Type, KeyType>
