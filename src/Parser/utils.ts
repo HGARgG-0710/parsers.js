@@ -4,7 +4,8 @@ import type { BasicStream } from "../Stream/interfaces.js"
 import type { DirectionalPosition, Position } from "../Position/interfaces.js"
 import type { Collection } from "../Collection/interfaces.js"
 
-import { positionStopPoint, positionNegate } from "../Position/utils.js"
+import { positionNegate } from "../Position/utils.js"
+import { positionStopPoint } from "src/Position/refactor.js"
 
 import { uniNavigate } from "../Stream/StreamClass/utils.js"
 import { ArrayCollection } from "../Collection/classes.js"

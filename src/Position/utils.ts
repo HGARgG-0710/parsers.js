@@ -1,6 +1,5 @@
 import type { BasicStream } from "../Stream/interfaces.js"
 import type { ChangeType } from "./interfaces.js"
-import type { BoundNameType } from "../Stream/StreamClass/interfaces.js"
 
 import type {
 	DirectionalPosition,
@@ -122,26 +121,4 @@ export function preserveDirection(
 	const transformed = transform(init)
 	if ("direction" in init) transformed.direction = init.direction
 	return transformed
-}
-
-/**
- * Returns the name of the `bounding` property of `Stream`s based off a given `Position`
- *
- * * 1. `"isStart"` if `isBackward(pos)`
- * * 2. `"isEnd"` otherwise
- */
-export function positionStopPoint(pos: DirectionalPosition): BoundNameType {
-	return isBackward(pos) ? "isStart" : "isEnd"
-}
-
-export function positionNull(posed: Posed<number>) {
-	posed.pos = 0
-}
-
-export function positionIncrement(posed: Posed<number>) {
-	++posed.pos
-}
-
-export function positionDecrement(posed: Posed<number>) {
-	--posed.pos
 }

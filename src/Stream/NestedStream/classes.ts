@@ -17,7 +17,6 @@ import {
 
 import { extendPrototype } from "src/refactor.js"
 
-// * Explanation: the 'preInit: true' is needed on account of 'currNested' - it would not be well to read it, only to discover that the property is `null`, instead of expected 'boolean';
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
@@ -28,7 +27,6 @@ const NestedStreamBase = <Type = any>(
 		initGetter: nestedStreamInitCurr,
 		hasPosition,
 		buffer,
-		preInit: true,
 		isPattern: true
 	}) as PatternStreamConstructor<Type>
 

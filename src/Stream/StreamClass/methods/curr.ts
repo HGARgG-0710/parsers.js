@@ -1,65 +1,37 @@
 import type {
-	BufferizedStreamClassInstance,
-	PositionalStreamClassInstance,
+	PositionalBufferizedStreamClassInstance,
 	StreamClassInstance
 } from "../interfaces.js"
 
 import { getSetDescriptor } from "src/refactor.js"
 import { readBuffer } from "../refactor.js"
-import { start } from "../refactor.js"
-import { isCurrUninitialized } from "../refactor.js"
-import { initCurr } from "../refactor.js"
 
 // * possible '.curr=' and '.curr' methods
 
-export function set<Type = any>(this: StreamClassInstance<Type>, value: Type) {
+function set<Type = any>(this: StreamClassInstance<Type>, value: Type) {
 	return (this.realCurr = value)
 }
 
-export function get<Type = any>(this: StreamClassInstance<Type>) {
-	return isCurrUninitialized(this) ? initCurr(this) : this.realCurr
+function get<Type = any>(this: StreamClassInstance<Type>) {
+	return this.realCurr
 }
 
-// * Explanation: when '.currGetter' is present, writes to '.curr' are ignored
-// * (that is, it's intended that the '.baseNextIter'/'.basePrevIter' do all the high-level state-keeping)
-export function setWithCurrGetter<Type = any>(
-	this: StreamClassInstance<Type>,
-	_curr: Type
-) {}
-
-export function getWithCurrGetter<Type = any>(this: StreamClassInstance<Type>) {
-	if (isCurrUninitialized(this)) {
-		start(this)
-		if (this.initGetter) return this.initGetter()
-	}
-	return this.currGetter!()
-}
-
-export const posBufferSet = get
-export const posBufferGet = set
-
-export const posBufferSetWithCurrGetter = setWithCurrGetter
-export function posBufferGetWithCurrGetter<Type = any>(
-	this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
-) {
+// ! ALSO [later, future release...] - optimize this away [for the 'posBuffer' case - IT MUST be done like 'Object.defineProperty(this, "curr", {get: READ_BUFFER_GETTER, set: set})']
+// ? Problem - what about '.unfreeze()' ?! By making an '.unfreeze()', one ALSO
+// ^ idea: forbid '.unfreeze()' [remove method], then - split the 'posBufferGets' onto *2* parts [similarly, with 'posBufferNext' - SPLIT IT onto 2 parts... Then, one can save even more repeating code from the 'posBufferNext'];
+function posBufferGet<Type = any>(this: PositionalBufferizedStreamClassInstance<Type>) {
 	if (this.buffer.isFrozen) return readBuffer(this)
-	return getWithCurrGetter.call(this)
+	return get.call(this)
 }
 
 const methodList = [
 	[set, get],
-	[setWithCurrGetter, getWithCurrGetter],
-	[posBufferSet, posBufferGet],
-	[posBufferSetWithCurrGetter, posBufferGetWithCurrGetter]
+	[set, posBufferGet]
 ] as [
 	<Type = any>(this: StreamClassInstance<Type>, value: Type) => void,
 	<Type = any>(this: StreamClassInstance<Type>) => Type
 ][]
 
-export function chooseMethod<Type = any>(
-	currGetter?: () => Type,
-	pos: boolean = false,
-	buffer: boolean = false
-) {
-	return getSetDescriptor(methodList[+!!currGetter | (+(pos && buffer) << 1)])
+export function chooseMethod(pos: boolean = false, buffer: boolean = false) {
+	return getSetDescriptor(methodList[+(pos && buffer)])
 }

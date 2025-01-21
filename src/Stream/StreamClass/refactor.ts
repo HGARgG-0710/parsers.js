@@ -31,15 +31,6 @@ const calledDelegate =
 export const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")
 
-export function initCurr<Type = any>(stream: StreamClassInstance<Type>) {
-	start(stream)
-	return (stream.realCurr = stream.initGetter!())
-}
-
-export function isCurrUninitialized<Type = any>(stream: StreamClassInstance<Type>) {
-	return stream.isStart === StreamClass.PreCurrInit
-}
-
 export function preStart(stream: PreStarted) {
 	stream.isStart = StreamClass.PreCurrInit
 }
@@ -60,9 +51,11 @@ export function end(stream: StreamClassInstance) {
 	stream.isEnd = true
 }
 
-// * Explanation: For 'StreamClassInstance'-s, it's a call to the 'initGetter', or a first call to 'currGetter'
-export function preInit(x: BasicStream) {
-	if (!x.isEnd) x.curr
+export function preInit(x: StreamClassInstance) {
+	if (!x.isEnd) {
+		start(x)
+		x.realCurr = (x.initGetter || x.currGetter)!()
+	}
 }
 
 export function createState(x: Stateful, state: Summat) {
@@ -75,6 +68,16 @@ export function realCurr(stream: StreamClassInstance) {
 
 export function getNext<Type = any>(stream: StreamClassInstance<Type>) {
 	return (stream.curr = stream.baseNextIter())
+}
+
+export function updateNext<Type = any>(stream: StreamClassInstance<Type>) {
+	stream.baseNextIter()
+	return stream.update!()
+}
+
+export function updatePrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
+	stream.basePrevIter()
+	return (stream.curr = stream.currGetter!())
 }
 
 export function readBuffer<Type = any>(
@@ -91,10 +94,13 @@ export function deEnd(stream: Endable) {
 	stream.isEnd = false
 }
 
+export function update<Type = any>(this: StreamClassInstance<Type>) {
+	return (this.curr = this.currGetter!())
+}
+
 export * as curr from "./methods/curr.js"
 export * as init from "./methods/init.js"
-export * as next from "./methods/next.js"
-export * as prev from "./methods/prev.js"
+export * as iter from "./methods/iter.js"
 export * as finish from "./methods/finish.js"
 export * as rewind from "./methods/rewind.js"
 export * as navigate from "./methods/navigate.js"

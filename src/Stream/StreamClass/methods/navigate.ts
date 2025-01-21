@@ -9,9 +9,8 @@ import { uniNavigate } from "../utils.js"
 import { readBuffer } from "../refactor.js"
 import {
 	isBackward,
-	positionConvert,
-	positionDecrement
-} from "../../../Position/utils.js"
+	positionConvert} from "../../../Position/utils.js"
+import { positionDecrement } from "src/Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
 const { isNumber } = type
@@ -25,17 +24,14 @@ export interface Navigable<Type = any> {
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-export function navigate<Type = any>(
-	this: BasicReversibleStream<Type>,
-	position: Position
-) {
+function navigate<Type = any>(this: BasicReversibleStream<Type>, position: Position) {
 	return uniNavigate(this, position)
 }
 
-export const posNavigate = navigate
-export const bufferNavigate = navigate
+const posNavigate = navigate
+const bufferNavigate = navigate
 
-export function posBufferNavigate<Type = any>(
+function posBufferNavigate<Type = any>(
 	this: BufferizedReversedStreamClassInstance<Type> &
 		PositionalReversedStreamClassInstance<Type>,
 	position: Position

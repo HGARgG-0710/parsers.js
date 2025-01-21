@@ -98,12 +98,12 @@ export interface ConditionallyPrevable<Type = any> {
 	prev?: () => Type
 }
 
-export interface DefaultEndable {
-	defaultIsEnd: () => boolean
+export interface ConditionallyUpdatable<Type = any> {
+	update?: () => Type
 }
 
-export interface PreInitable {
-	preInit?: boolean
+export interface DefaultEndable {
+	defaultIsEnd: () => boolean
 }
 
 export interface Bufferizable {
@@ -144,7 +144,6 @@ export interface StreamClassSignature<Type = any>
 		ConditionalInitGettable<Type>,
 		HasPositionCheckable,
 		IsPatternCheckable,
-		PreInitable,
 		Bufferizable,
 		StateHaving {}
 
@@ -164,7 +163,8 @@ export interface StreamClassInstance<Type = any>
 		StreamClassTransferable<Type>,
 		ConditionallyPrevable<Type>,
 		ConditionalIsStartCurrable,
-		ConditionallyRewindable<Type> {}
+		ConditionallyRewindable<Type>,
+		ConditionallyUpdatable<Type> {}
 
 export interface ReversedStreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
@@ -200,6 +200,10 @@ export interface BufferizedReversedStreamClassInstance<Type = any>
 export interface PatternStreamClassInstance<Type = any>
 	extends StreamClassInstance<Type>,
 		Pattern {}
+
+export interface PositionalBufferizedStreamClassInstance<Type = any>
+	extends PositionalStreamClassInstance<Type>,
+		BufferizedStreamClassInstance<Type> {}
 
 export type * as finish from "./methods/finish.js"
 export type * as init from "./methods/init.js"

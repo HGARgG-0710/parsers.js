@@ -60,3 +60,5 @@ export const classWrapper =
 	(X: new (...args: any[]) => any) =>
 	(...args: any[]) =>
 		new X(...args)
+
+export const copyFunction = (f: Function) => f.bind(null)

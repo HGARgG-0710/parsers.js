@@ -22,11 +22,11 @@
 	},
 	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
 	"scripts": {
-		"test": "cd tests && tsc --project tsconfig.json && cd ..",
-		"build": "tsc --project tsconfig.json",
-		"types": "tsc --project ts-types.json",
-		"build-all": "npm run build && npm run types",
-		"all": "npm run build-all && npm run test"
+		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
+		"build-js": "tsc --project tsconfig.json",
+		"build-types": "tsc --project ts-types.json",
+		"build": "npm run build-js && npm run build-types",
+		"all": "npm run build && npm run test"
 	},
 	"devDependencies": {
 		"@hgargg-0710/summat.ts": "^0.0.1",

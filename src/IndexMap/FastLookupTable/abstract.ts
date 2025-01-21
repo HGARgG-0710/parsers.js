@@ -6,7 +6,7 @@ import type {
 	HashMap
 } from "../HashMap/interfaces.js"
 
-import type { IndexAssignable } from "./interfaces.js"
+import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 
 import { DelegateDeletableSettableSizeable } from "../abstract.js"
 import { assignIndex } from "./utils.js"
@@ -70,4 +70,11 @@ export abstract class DelegateHashTable<
 	constructor(hash: HashMap<KeyType, ValueType>) {
 		super(hash)
 	}
+}
+
+export abstract class PreHashTableClass<KeyType = any, ValueType = any, OwningType = any>
+	extends DelegateHashTable<KeyType, ValueType, OwningType>
+	implements FastLookupTable<KeyType, ValueType, OwningType>
+{
+	abstract getIndex: (x: any) => OwningType
 }

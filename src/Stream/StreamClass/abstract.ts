@@ -15,8 +15,8 @@ import {
 	streamIterator,
 	curr,
 	init,
-	next,
-	prev
+	iter,
+	update
 } from "./refactor.js"
 
 import { BasicPattern } from "src/Pattern/abstract.js"
@@ -36,7 +36,6 @@ export function StreamClass<Type = any>(
 		currGetter,
 		defaultIsEnd,
 		hasPosition,
-		preInit,
 		state,
 		buffer,
 		isPattern
@@ -63,29 +62,30 @@ export function StreamClass<Type = any>(
 		[Symbol.iterator]: () => Generator<Type>
 	}
 
-	if (isPattern) {
-		interface _streamClass extends streamClassGuaranteed {}
-		abstract class _streamClass
-			extends BasicPattern
-			implements StreamClassInstance<Type>
-		{
-			constructor(value: any) {
-				super(value)
+	streamClass = (() => {
+		if (isPattern) {
+			interface _streamClass extends streamClassGuaranteed {}
+			abstract class _streamClass
+				extends BasicPattern
+				implements StreamClassInstance<Type>
+			{
+				constructor(value: any) {
+					super(value)
+				}
 			}
+			return _streamClass
 		}
-		streamClass = _streamClass
-	} else {
 		interface _streamClass extends streamClassGuaranteed {}
 		abstract class _streamClass implements StreamClassInstance<Type> {}
-		streamClass = _streamClass
-	}
+		return _streamClass
+	})()
 
 	const extend = (properties: PropertyDescriptorMap) =>
 		extendPrototype(streamClass, properties)
 
 	// * Defining the basic properties
 	extend({
-		curr: curr.chooseMethod(currGetter, hasPosition, buffer),
+		curr: curr.chooseMethod(hasPosition, buffer),
 		isCurrEnd: { value: isCurrEnd },
 		baseNextIter: { value: baseNextIter },
 		defaultIsEnd: { value: defaultIsEnd },
@@ -108,22 +108,14 @@ export function StreamClass<Type = any>(
 	})
 
 	// * Adding the '.pos'-specific stream-iteration methods
-	extend({
-		next: { value: next.chooseMethod<Type>(hasPosition, buffer) },
-		prev: { value: prev.chooseMethod<Type>(hasPosition, buffer) }
-	})
+	extend(iter.chooseMethod(currGetter, hasPosition, buffer))
 
 	// * Adding the initialization method
 	addProperty(streamClass, "init", {
-		value: init.chooseMethod(
-			preInit,
-			hasPosition,
-			buffer,
-			state,
-			isPattern,
-			currGetter
-		)
+		value: init.chooseMethod(hasPosition, buffer, state, isPattern)
 	})
+
+	if (currGetter) addProperty(streamClass, "update", { value: update })
 
 	return streamClass
 }

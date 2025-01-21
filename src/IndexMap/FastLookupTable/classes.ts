@@ -3,10 +3,11 @@ import type { HashMap } from "../HashMap/interfaces.js"
 import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 
-import { DelegateHashTable, DelegateLookupTable } from "./abstract.js"
+import { DelegateLookupTable, PreHashTableClass } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
 
 import { functional } from "@hgargg-0710/one"
+import { copyFunction, extendPrototype } from "../../refactor.js"
 const { id } = functional
 
 export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
@@ -40,16 +41,9 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	ownership: (x: any) => OwningType
-) {
-	class HashTableClass
-		extends DelegateHashTable<KeyType, ValueType, OwningType>
-		implements FastLookupTable<KeyType, ValueType, OwningType>
-	{
-		getIndex: (x: any) => OwningType
-	}
-
-	HashTableClass.prototype.getIndex = ownership
-
+): FastLookupTable<KeyType, ValueType, OwningType> {
+	const HashTableClass = copyFunction(PreHashTableClass)
+	extendPrototype(HashTableClass, { getIndex: { value: ownership } })
 	return HashTableClass
 }
 

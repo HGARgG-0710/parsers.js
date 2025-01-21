@@ -10,19 +10,19 @@ import { end } from "../refactor.js"
 import { readLast } from "src/Collection/Buffer/refactor.js"
 import { lastIndex } from "src/Collection/Buffer/refactor.js"
 
-export interface Finishable<Type = any>  {
+export interface Finishable<Type = any> {
 	finish: () => Type
 }
 
 // * possible 'finish' methods
 
-export function finish<Type = any>(this: BasicStream<Type>) {
+function finish<Type = any>(this: BasicStream<Type>) {
 	return uniFinish(this)
 }
 
-export const posFinish = finish
+const posFinish = finish
 
-export function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Type>) {
+function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Type>) {
 	const { buffer } = this
 	if (buffer.isFrozen) {
 		end(this)
@@ -31,7 +31,7 @@ export function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Typ
 	return uniFinish(this)
 }
 
-export function posBufferFinish<Type = any>(
+function posBufferFinish<Type = any>(
 	this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
 ) {
 	const { buffer } = this

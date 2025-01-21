@@ -22,55 +22,23 @@ REMINDERS [2.]:
 			WITHOUT the arguments' types! 
 		2. Contains a reference to the proper documentation; 
 	
-	The only benefit of actually having the thing is the ability to reference the "big docs"
-
-6. FIX the 'tests/run.ts' to be able to run ONLY SPECIFIED LOCATIONS: 
-	6.1. introduce a path-map [for names shortcuts used from command-line]; 
-	6.2. allow multiple names to be used; 
-		6.2.1. Write a simple parser for this format [use plain JavaScript - not the library itself]; 
+	The only benefit of actually having the thing is the ability to reference the "big docs".
 
 5. Source code TODO-s: 
 	16. Individually add return types ['function IGenerateAStream(): __T__'] for EACH function for generation of classes for Stream-creation; 
 		Good Example: LimitedStream
 
-	14. FIX THE confusing EXPORTS: 
-
-		Sometimes, one'll encounter artifacts during imports such as: 
-
-			import {X} from "..."
-			const A = X.A.A 
-
-		Fix this, by means of using 'export *' instead of the 'export * as', in cases, when 'A' is the ONLY export 'A.A'; 
-
 	17. USE the optional '.pos' property [Stream] on EVERY possibility inside the method implementations 
 		(namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
-	
-	21. Fix the tests; 	
-		21.5. Stream tests: 
-			4. Add the new flags' tests for StreamClass-es: 
-				4.1. .buffer; 
-				4.2. .pos; 
-				4.3. .buffer + .pos; 
-				4.4. .state; 
-				4.5. [test] For each signature of the '.init' function: 
-					4.5.1. Take the given signature; 
-					4.5.2. Check that all the properties are present and have expected values, as desired; 
-					4.5.3. Conduct a new complete test-suite; 
-		
-		1. Walk through tests, ensure their correctness, make appropriate fixes, refactor with one.js: 
-
 
 	2.52. work on Stream: 
 			Quite obviously, one is to work FURTHER on the 'StreamClass'; 
 			In particular, 
 
-				1. StreamClass/interfaces.ts - REWRITE in terms of 'Omit': 
-					1. Have a SINGLE large all-type; 
-					2. Have ALL types there defined in terms of 'Pick', 'Partial' and 'Omit'. 
-					3. DO NOT export the micro-types [this was another bad idea...]; 
-					4. Put the "intermediate" (internal) types into 'refactor.ts' AS WELL
+				1. StreamClass/interfaces.ts - refactor types via 'Pick', 'Partial' and 'Omit': 
 				2. Add the 'LocatorStream' (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
-					These are just 'A & B'-type expressions... ;
+					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
+					IDENTIFY them with the respective classes/functions
 	
 	2.62. PROBLEM - with LayeredFunction: 
 
@@ -132,6 +100,7 @@ REMINDERS [2.]:
 				
 				Then, the 'table' would have a 'function', that would in certain circumstances access the 'this.state.parser', and CHANGE IT; 
 
+	[LATER - during testing...]
 	2.66. Cases of "Bad Types" [to fix]: 
 		1. DefaultType - for IndexMap-types: 
 			It's pretty important, as it determines about half the return types of the type's methods. 
@@ -140,92 +109,42 @@ REMINDERS [2.]:
 			Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
 			Just do ': this', AS INTENDED...
 	
-	2.67. Naming conventions - the post-'Type' doesn't look NEARLY as good as the classic prefix-'I'; 
-		Replace [note: with LOCAL imports *only* - things like 'PointerType', say...]. 
-
 	2.68. refactor: 
 		1. 'super: {value: x.prototype}' - create a special 'defineSuper' function inside a 'refactor.ts' file...; 
 
 	2.69. PROBLEM [performance] - StreamClass\methods\curr.ts: 
-		1. The methods: 
 
-				1. get
-				2. getWithCurrGetter
-			
-			Are in a very-very poor state. 
-			Reason: we're doing an 'if'-check EVERY SINGLE TIME that we need to access 'this.curr'. 
-				WORSE STILL, the '.next()' HAS to call 'this.curr', thus, increasing the overhead even more! 
+		1. posBufferGet
 
-		SOLUTION [1.]: create A WHOLE DIFFERENT pair of methods for getting items, that would be WITHOUT this 'if'-statement, 
-			and that WOULD replace the "initialization" code prior. 
-			This kills two birds with one stone: 
-
-				1. user NO LONGER needs to call "special initialization code" themselves [good interfacing]
-				2. there is NO LONGER a fear of constantly needing to make a check...; 
-			
-			Price - possible deoptimization (short-term bump in performance)
-
-		2. .next(): 
-			Same thing: 
+			For this: 
 				
-				1. deStart() - in cases, when there isn't '.prev', WE *DON'T NEED* IT
+				0. Note in the 'UnfreezableArray' docs that AFTER '.unfreeze()' is called, the unerlying Stream behaviour *DOES NOT CHANGE* (meaning - one has to create a NEW Stream...); 
+				1. UNITE the "fast path" of 'posBufferGet' with 'next-prev.ts'
 
-		3. .next()/.prev(): 
-			Same as 2. - the 'deStart()/deEnd()' EVERY SINGLE TIME except for the first - insane. 
-
-		SOLUTION [2., 3.]: Create TWO different methods: 'nextAtStart/next' and 'prevAtEnd/prev', 
-			THE MOMENT that one reaches the end of the stream via '.next', 'prevAtEnd' replaces 'prev' (default), 
-				and the moment AFTER the first call to the '.prev[AtEnd]' one replaces it AGAIN with 'prev'; 
-			
-			Same with 'next' - after THE FIRST call to '.next[AtStart]', it is *REPLACED* with '.next'; 
-				NOTE: this is done *AT* the beginning of the Stream's call. 
-
-				PROBLEM: this will require one to keep the '.next'/'.prev' on the object itself...; 
-					Difficulty then becomes - WHERE do we do it? 
-						Answer - do 'this.next = ...' and 'this.prev = ...' in: 
-							'.isCurrStart/.isCurrEnd' branches. 
-
-	2.70. excess 'export' in 'StreamClass\methods' - IF something is a part of the 'chooseMethod', it should NOT be made public 
-		(and must instead ONLY ever be chosen through 'chooseMethod'); 
+	2.71. file-pile: 
+		Clean up the project root directory: 
+			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
 	
 Order of TODO-elimination: 
-	2.69. 
-	2.70.
-	2.65.
+	5.2.69. 
+	5.2.68. 
+	5.2.71.
 	5.2.52. 
 	5.2.62.
+	5.16.
+	5.17.
+	
+	TESTS [work all anew... too much has changed]: 
+		1. enumerate the things to test; 
+		2. walk through tests, verify them for being satisfactory; 
+		3. re-do where necessary, add new cases; IMPLEMENT MISSING;
+		4. re-do the 'import' tests as well; 
+		5. log the 'run.ts' thingie into a special temp text file; 
+			1. [make into an npm command - 'test-run' and 'test: test-compile + test-run']
+			2. add to '.vscode/launch.json' [to simplify the debugging process... we'll need it]; 
+			3. WORK on the failed tests from there...; 
+	
 	2.66. 
-	2.67.
-
-	Re-organize test-suites: 
-		Make those into FUNCTIONS, which are THEN imported by the 'run.ts', 
-			and the "mini-language" string passed to the script is used to choose the precise imports.
-
-	2.3.
-
-	A.3.10.1
-	A.3.10.2
-	A.3.9.12
-		
-	5.17
-	5.21.5
-	A.1.1.
-	A.3.1.1.
-	A.3.1.2
-	A.3.9.10
-	A.3.9.11
-	
-	A.3.11. 
-	A.3.9.9
-
-	A.3.2.
-	A.3.9.5
-	A.3.4.
-	
-	A.3.9.13
-	5.21.7
-	
-	6.
 
 	[fix test compilation errors]
 	[run the tests]
@@ -238,191 +157,10 @@ Order of TODO-elimination:
 		
 	C.
 	
-A. testing: 
-
-	1. Changes to tests [for modules]: 
-		1. Stream-s: Create a plain '.init' test; 
-					All StreamClass-es have it implemented INDIVIDUALLY [due to different signatures - v0.4. won't have such an issue]; 
-					Namely, this is a 'ReInitializationTest', which (fundamentally) looks to verify correctness of behaviour upon RE-INITIALIZATION of the given Stream; 
-						It is done like: 
-
-							1. '.init' is called with given test arguments [this sequence 1.-... is done several times, depending on the '.init' arguments]; 
-							2. The entire test-suite is RE-DONE, but WITHOUT needing to create an instance...; 
-								2.1. A different signature is given; 
-
-							So, basically, one needs to use a ChainClassConstructorTest together with '.init'; 
-							REFACTOR THIS [once again...]; 
-		
-		2. Stream-s: Allow for testing different '.init' signatures; 
-			Also - expand the "generated suites" to include presence/absence of different properties (altogether - 1-16 different classes to test, depending on the definition); 
-
-	3. Implement test suites: 
-		3.1. Stream-s: 
-			3.1.1. "WrapperStream"-combinations; 
-				Thus, for instance, one has to test ALL of: 
-
-					LimitedStream-NestedStream-InputStream;
-					StreamTokenizer-LimitedStream-TreeStream;
-					NestedStream-StreamTokenizer-InputStream;
-						And more...
-				
-				FOR THIS, one needs to be able to do CompositionClassTests; 
-				Introduce a new function 'classCompose', which does '(...classes) => trivialCompose(...classes.map(classWrapper))'
-					[produces a function for creation of an instance that is the result of a chain (new X)<-(new Y)<-... of classes]
-
-					The tests for them work THE SAME WAY as the top-level cases, BUT: 
-						
-						1. they have a different [dynamically given] constructor; 
-						2. they check FOR EACH ELEMENT to have one of the permitted types; 
-
-			3.1.2. Test Instances: 	
-			
-					3.1.4.1.0. Empty Stream instance
-					3.1.4.1.1. Single-element Stream instance
-					3.1.4.1.2. Two-element Stream instance
-					3.1.4.1.3. Long Stream instance (>= 20 elements)
-				3.1.4.2. There are optimization-specific benchmarks; 	
-					3.1.4.2.1. In particular, IDENTIFY THE BOTTELNECKS IN DEFINITIONS [if there are any]; 
-		
-		3.2. Parser/
-			Test Instances:
-				[Grouping by test suite type, for each type of parser:]	
-				1. LayeredParserTest - itself
-				2. TableMapTest - itself
-					2 cases: 
-						1. IndexMap; 
-						2. HashMap; 
-				3. GeneralParserTest: 
-					1. PatternEliminator
-						3 cases: 
-							1. where the ENTIRE string is eliminated; 
-							2. where a portion of a string is eliminated; 
-							3. where only one bit of the string is eliminated; 
-					2. PatternTokenizer
-						3 cases: 
-							1. complete coverage; 
-							2. incomplete coverage; 
-							3. no coverage (total miss); 
-					3. PatternValidator	
-						3 cases: 
-							1. complete coverage; 
-							2. incomplete coverage; 
-							3. validation error; 
-
-		3.4. benchmarks/	
-			TODO: TO ENSURE the usefulness of the 'imports' tests, use the '.'-imports here (meaning: 'import {X} from "main.js"; const {...} = X[...]...'); 	
-				This (a number of samples) + the overall thoroughness of the 'imports/' testing process will ensure that every piece of the library is reachable as intended...; 
-
-			4.4.1. Stack benchmarks: 
-				4.4.1.1 NestedStream - find out how deep a given NestedStream must be in order for the "default" Stack to break; 
-					Use as metric later
-			4.4.2. Parse really long strings: 
-				4.4.2.1. Try to parse some incredibly long strings;
-					See the speed limits for different string sizes
-			4.4.3. "Cached" TokenInstance vs "Non-Cached" TokenInstance: 
-				4.4.3.1. Auto-generate a GIGANTIC tree in a simple syntax made entirely of TokenInstance-s, then do a version for BOTH cached and non-cached 
-				4.4.3.2. Iterate through them [TreeStream]; Measure time; 
-					NOTE: it is expected that the "cached" 'TokenInstance' will be A LOT faster to build/do; 
-					
-		3.9. utils/	
-			Walk through the project tree, enumerating the 'utils.ts' files; 
-				[Do Parser/classes.ts first]
-				5. Parser/utils.ts
-
-				8. Validatable/utils.ts
-
-				[Do Position/classes.ts first]
-				9. Position/utils.ts
-
-				[Do Stream/.../classes.ts first]
-				10. InputStream/utils.ts
-				11. StreamClass/utils.ts
-					Also - here, add the 'isEmptyStream' test; 
-
-				[Do Tree/.../classes.ts first]
-				12. Tree/utils.ts
-					ALSO - this is not complete (check out the 'lib/utils.ts' - there's a missing export out there...); 
-
-				[Do last]
-				13. src/utils.ts		 
-
-		3.10. Tree/
-			To test [classes.ts]: 
-				2. TreeWalker/
-
-				1. Tree [complete]: 
-					1. 'ParentTree'; 
-					2. [ChildrenTree] '.backtrack' + '.findUnwalkedChildren'
-			
-		3.11. Position/
-			To test [classes.ts]: 
-				1. MultiIndex
-				2. MultiIndexModifier
-		
 B. documentation (change/fix it...);
-	B.1. Create new docs pages:
-		B.1.1. Home: 
-			B1.1.1. Motivation (write that the library was created/conceived primarily as a mean of refactoring of frequent parsing tasks/data-structures); 
-			B1.1.2. "One good approach" principle (write that the library was made to have a single "intended" best approach for all the things that are possible to do using it); 
-			B1.1.3. Examples [projects done using it]; 
-			B1.1.4. Structure - explain how the library structure works (interfaces., methods., classes., utils.); 
-			B1.1.5. Known issues (this lists known problems that the library currently has);
-			B1.1.6. Terminology
-				This mentions that the library has a distinct terminology [albeit, not very large], that is useful for understanding its concepts; 
-				
-				NOTE [1]: The importance of '.value' is: 
-
-						1. It unifies a GREAT deal of interfaces with diverse meanings (prior: '.input')
-						2. It unifies them well - as Pattern-s: 
-							1. things that change the '.value' [Collection, Buffer, , et cetera]
-							2. or output into the '.result', which is '.flush()'-able (EliminablePattern, ValidatablePattern, TokenizablePattern)
-							3. or just keep the value as-is, for further usage (Token, EnumSpace/Buffer [encapsulated])
-			B1.1.7. Common naming conventions: 'is', repeating util/method names ('fromPairsList', '.getIndex', '.add', ... so forth); 
-		B1.2. Properties: 
-			This describes individual properties (and methods!) that can ocurr on different classes; 
-			ONLY describes the properties, methods that ocurr more than once in the library [and have the same meaning]; 
-		B1.3. Classes: 
-			Describes individual classes; 
-			THEY ARE LISTED AS EXTENSION-HIERARCHIES; 
-
-			B1.3.1. Describe abstract classes: 
-				1.3.1.1. FlushablePattern; 
-				1.3.1.2. BasicPattern; 
-				1.3.1.3. StreamClass({...}); 
-				1.3.1.4. BasicTree;
-			
-		B1.4. Class-Factories: 
-			Describes functions for creation of classes (ex: StreamClass, IndexMap, HashMap); 
-		B1.5. Interfaces; 
-			Lists the library's interfaces. 
-			They are described via an, extends-implements hierarchy [where classes that implement the interfaces are the lowest level elements of the tree (the "leaves")]; 
-		B1.6. Usage Notes: 
-			Minor notes for the library usage. 
-					
-				NOTE [1]: identifying NestedStream-s that are elements as a part of a recursively-defined StreamTokenizer; 
-					To define this is (typically) trivial, via having '.type' of a given 'Stream' to be 'undefined', or 
-						not a part of a given NestedStream's '.typesTable';
-					
-				NOTE [2]: 'DelegateValidatablePattern': 
-					
-					1. the '.validator' is expected to ALSO remove any non-'Type' elements out of the 'result'; 
-					2. when calling '.validate', the 'result[0]' should be 'true' ONLY when the source IS validatable (i.e. not already determined valid - contains only the 'Type' elements); 
-			
-				NOTE[3]: StreamClass, .currGetter requires reliability; 
-					'Reliability' of a '.curr'-getter in context of 'StreamClass' is: 
-
-						The results of '.currGetter()' can be safely turned into a buffer and reused
-					
-					Relibility is a needed property of a getter to be usable; 
-		B1.7. Utils: 
-			Categorize the utils ('is'-functions, 'from'/'to'-functions [ex: fromPairsList, toInputStream], 'uni'-functions, and so forth...); 
-
-	B.2 [while working on the concrete documentation]: 
-		1. Patch up the type definitions: 	
-			Pay PARTICULAR attention to the methods return values; 
-			Those are especially likely to be mangled up, due to the way that the methods are defined...; 
-
+	Hosted on the project's GitHub Wiki. 
 	WHEN WRITING DOCUMENTATION, make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values! 
+	
 C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3]; 
 	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
 	C.2. Walk through the v0.3 changes, and write them down [constructive];
@@ -1471,6 +1209,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		Use utility types to make life easier. 
 		Also - REMOVE some of the excess types. 
+
+	2.53. Naming conventions - the post-name-'Type' doesn't look NEARLY as good as the classic prefix-'I'; 
+		Replace [note: with LOCAL imports *only* - things like 'PointerType', say...]. 
 
 [DEFINITELY, for v0.4!]
 3. Dependency management: 
