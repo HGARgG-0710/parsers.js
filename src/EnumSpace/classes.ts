@@ -1,11 +1,7 @@
-import type {
-	SimpleTokenType as SimpleTokenTypeType,
-	TokenInstanceClass
-} from "../Token/interfaces.js"
-
+import type { MarkedTokenType, TokenInstanceClass } from "../Token/interfaces.js"
 import type { ArrayEnum, EnumSpace, Mappable } from "./interfaces.js"
 
-import { SimpleTokenType, TokenInstance } from "../Token/classes.js"
+import { TokenType, TokenInstance } from "../Token/classes.js"
 
 import { defaults } from "../constants.js"
 const { size: globalSize, DefaultValue: value } = defaults.EnumSpace
@@ -57,10 +53,6 @@ export class ConstEnum implements ArrayEnum<{}> {
 	}
 }
 
-export const [TokenInstanceEnum, SimpleTokenTypeEnum] = [
-	TokenInstance,
-	SimpleTokenType
-].map((f) => (enums: EnumSpace) => enums.map(f)) as [
-	(enums: EnumSpace) => TokenInstanceClass[],
-	(enums: EnumSpace) => SimpleTokenTypeType[]
-]
+export const [TokenInstanceEnum, SimpleTokenTypeEnum] = [TokenInstance, TokenType].map(
+	(f) => (enums: EnumSpace) => enums.map(f)
+) as [(enums: EnumSpace) => TokenInstanceClass[], (enums: EnumSpace) => MarkedTokenType[]]

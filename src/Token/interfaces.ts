@@ -1,4 +1,3 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Pointer } from "../Pattern/interfaces.js"
 import type { TypePredicate } from "../interfaces.js"
 
@@ -20,6 +19,6 @@ export interface TokenType<Type = any, Value = any> {
 	is: TypePredicate<Token<Type, Value>>
 }
 
-export interface SimpleTokenType<Type = any, Value = any>
+export interface MarkedTokenType<Type = any, Value = any>
 	extends TokenType<Type, Value>,
 		TokenInstance<Type> {}

@@ -2,7 +2,7 @@ import type {
 	Token,
 	TokenInstance as TokenInstanceType,
 	TokenInstanceClass,
-	TokenType
+	MarkedTokenType
 } from "./interfaces.js"
 
 import type { TypePredicate } from "../interfaces.js"
@@ -17,9 +17,9 @@ export function token<Type = any, Value = any>(
 	return { type, value }
 }
 
-export function SimpleTokenType<Type = any, ValueType = any>(
+export function TokenType<Type = any, ValueType = any>(
 	type: Type
-): TokenType<Type, ValueType> {
+): MarkedTokenType<Type, ValueType> {
 	class stt extends BasicPattern<ValueType> implements Token<Type, ValueType> {
 		static is: TypePredicate<Token<Type, ValueType>>
 		static readonly type: Type = type

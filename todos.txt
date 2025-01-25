@@ -39,6 +39,8 @@ REMINDERS [2.]:
 				2. Add the 'LocatorStream' (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
 					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
 					IDENTIFY them with the respective classes/functions
+				3. OptBufferized, OptPos - I'M LOOKING AT YOU...
+					These can be re-done via 'Partial' - been looking for something of this nature, hadn't dfound previuosly; 
 	
 	2.62. PROBLEM - with LayeredFunction: 
 
@@ -124,15 +126,46 @@ REMINDERS [2.]:
 	2.71. file-pile: 
 		Clean up the project root directory: 
 			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
+
+	2.72. A new abstraction OptimizedCharMap ('HashMap' and 'OptimizedLinearIndexMap' extension): 
+		Uses the '(string, i) => string.charCodeAt(i)', 
+			FOR THIS TO WORK: 
+				1. add multiple arguments: 
+
+					1. HashMap.index(x, ...)
+					2. LinearIndexMap.index(x, ...)
+					3. TableMap.index(x, ...)
+					4. MapWrap.index(x, ...)
+
+				2. Create a function 'streamInfo = (f) => (x: Stream) => f(x.buffer., x.pos, x.state, x)', and so forth. 
+					REASON: the '.extend' would be REALLY hard/unperformant to make work witih multiple arguments the way that '.index' does. 
+					Applying 'streamInfo' on a 'TableMap' would yield desired results. 
+
+	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
+		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
+
+	2.74. Do research (Chevrotain - source, capabilities, optimizations): 
+		It is *the* fastest JS parsing library out there. See what it can do...:
+
+			1. [basics] http://chevrotain.io/docs/tutorial/step0_introduction.html
+			2. [important!] http://chevrotain.io/docs/guide/introduction.html
+
+			[Post parsers.js v0.3; ADD this as parsers.js v0.4 todo...]; 
+			3. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
+			4. [building v8] d8 - USE IT to profile the optimizations of the used library code [reflect upon, and change the library respectively]
+			5. [Stream-specific] see if the '.curr/.next/.prev'  method re-binding optimizations were an overkill [elimination of 'this.isEnd = true/false/whatever-for-each-call']; 
 	
 Order of TODO-elimination: 
 	5.2.69. 
+	5.2.72.
 	5.2.68. 
 	5.2.71.
 	5.2.52. 
 	5.2.62.
 	5.16.
 	5.17.
+	5.2.73.
+	5.2.74.	
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
@@ -1213,34 +1246,131 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	2.53. Naming conventions - the post-name-'Type' doesn't look NEARLY as good as the classic prefix-'I'; 
 		Replace [note: with LOCAL imports *only* - things like 'PointerType', say...]. 
 
-[DEFINITELY, for v0.4!]
+	2.54. CREATE A proper website with documentation for the library. 
+		Do benchmarks, et cetera...; 
+		After doing GitHub Wiki for v0.3, see if it cuts it (spoiler - it likely won't one STILL wants the ravishing types for the library's docs to be present!)
+			For this: 
+
+				1. Learn a new CSS-based tool (either for generating/hosting docs/docs-css-styles like TypeDoc/readthedocs , 
+					OR a new library to create one's own doc-styles like Tailwind CSS); 
+				2. Create a JSON parser in parsers.js and COMPARE it against the [https://chevrotain.io/performance/], with ops/sec. 
+					See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
+					2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
+						The memory usage should be noticeably better than speed...; 
+
+					2.54.1. One MAY want to adopt a new Tokenizer: 
+						Specifically, a more "traditional one", which CAN use regular expression 'RegExpTokenizer' and/or 'RegExpLexer' (for num-positions...). 
+						Reasons: 
+							1. StreamParser as a tokenizer SHOULD be performant (if used correctly), BUT it can't work with regular expressions [no notion of "consuming tokens"]; 
+							2. PatternTokenizer is SHOULD be SLOW AS FUCK because of how simple its algorithm is...
+								PROFILE IT LATER [again, when creating new parsers...]
+							
+					2.54.2. One MAY want to adopt a Chevrotain-style rule-based parser (RuleParser): 
+						Reason - 'StreamParser' (the "MAIN" parser present in the library) is LAYER-BASED, 
+							in other words - it is ONLY intended to be used with some hyper-fast and hyper-simple things, which 
+								END UP being "stacked up" for several layers, causing a rather unpleasant kind of coefficient-jump in O-complexity of the final algorithm; 
+						This, however, does not necessarily signal a need for change and/or adoption of such a thing
+						Although - it may be useful as of itself regardless...; 
+							The Chevrotain's CstParser API is (quite frankly) horrible and uniodiomatic (which appears to be library's general problem - that includes the code)
+								[
+									1. the need for 'this.performSelfAnalysis'
+									2. moronic FLATUPPERCASE conventions
+									3. the unnecessary DSL,
+									4. requirement of using classes for parsers
+									5. this.SUBRULE2-like things...
+									... et cetera
+								]
+
+						Reasons to use a RuleParser: 
+							1. [Potentially] improved performance
+							2. [Potentially, for some cases] Less tedious to write
+							3. Simpler final project architecture
+							4. Natural correspondence with Rules' languages 
+								(can parse rules, and create respective parsers from them - provided the right kind of API, Chevrotain's a bad example)
+							5. More intuitive AST-formation process
+
+						Reasons to NOT use a RuleParser: 
+							1. More complex implementation
+							2. Worse maintainability
+							3. Worse modularity 
+							4. Less intuitive parser reversability [layers help there]
+
+						In order to achieve a good case of parser extensibility (A MUST for parser.js - Chevrotain doesn't have it), 
+							one'll be needing to define the 'Rule' class, which would permit creation of general extensible rules, of which RuleParser-s be 
+								created. 
+
+						IDEA for Rule implementation [bit of a jumble, but is good...]: 	
+
+							0. IdentityRule - this is the "identity" rule, which simply copies the Token as-is [that being, it CHECKS for whether the PRECISE TokenInstance/TokenType is present]; 
+								Equiv RegExp: /./
+							1. ElementaryRule(type) - this is equivalent to creating a rule for a token with type '.type';
+							1. .template: RuleTemplate - a set of operations, based off which a Rule is defined; 
+								1.1. Fundamentally, 'RuleTemplate' is a method with '.inject(rules: CompiledRule[]): CompiledRule' - called during 'Rule.compile()'
+								1.2. The 'CompiledRule' has '.match(x: Token): boolean' method, for checking whether or not a certain item fits the given thing. 
+									These are used (finally) by the 'RuleParser' on the given 'TokenStream' 
+										(interface for the thing one obtains as a result of either 'RegExpTokenizer' or 'StreamParser')
+									to produce a new `TokenStream`;
+
+									1.2.1. 'TokenStream' - another one of library's problems is ITS FUNDAMENTAL LACKING;  
+								1.3. '.operators: Operator[]' (per instance) - a list of operators, each one "consuming" a given number of items (like the *binary* 'a | b', or *binary* 'a b' - following)
+									1. Each one of the operators has to be defined in the '.table' OperatorTable (and be referenced by the respective name); 
+									2. Each one of the operators has to have its own definition (predicate) for determination of whether or not it (specifically) matches; 
+									3. The library provides a default PEG-like 'OperatorTable' and a 'RuleTemplate' class specifically for it...; 
+								1.4. '.table: OperatorTable' - a '.prototype'-based property for keeping the available 'Operator's (it's also an interface...); 
+							2. .sub: Rule[] - rules inserted into the RuleTemplate [note: recursively '.compile()'-d]
+							3. .compile() - CompiledRule (new object, with a new definition for '.invoke' method) - the result of substitution of '.sub' into '.template', optimized; 
+							3. RuleParser: 
+								1. .rules: Rule[]
+								2. .compile() - compiles the '.rules'; Returns the 'CompiledRuleParser' (a function); 
+									The CompiledRuleParser drills through a tree of rules based off a given 'TokenStream'. 
+							4. '.type: Type' - analogous to 'Token.type', used for element categorization and quick identification in 'HashMap'/'LinearIndexMap'/other-places; 
+								Permits using 'Rule' as 'TokenInstance' [of which 'TokenStream' is a Stream]; 
+
+						Performance increase: 
+							1. removes the need for recursive 'this.isCurrEnd()' checks, when advancing to a new high-level token;
+
+						Performance decrease [PROBLEM!]: 
+							1. potentially - a need to "look" for the right rule [linear search - bad]
+								SOLUTION: create optimization techniques for them - specifically: 
+
+									1. COLLECT all the Rules that start with 'IdentityRule' [includes DRILLING]
+									2. For ElementaryRule-s, COLLECT the rules that start with them by underlying '.type' (0th element): 
+										THEN - proceed with this, KEEP collecting a bucket inside-the-bucket by Token-'.type' for 1st element, 
+											and so forth, UNTIL all buckets have a size of 1, and we can CHAIN the given 'Stream', 
+												by means of repeatedly doing 'bucket.get(x.type)', for each new 'x'; 
+									3. Create an '.order'-based optimization 
+										(namely - if '.type' is a number/orderable, one uses binary search of '.type' for the '.order' [number/orderable] 
+											on each one of the given array of 'Rules'); 
+									4. All the other rules - collect them into a single "linear" bucket; 
+												
+									This way, we are capable of killing two birds with one stone:
+										1. choose a 'Rule'
+										2. advance the current 
+										3. minimize backtracking ["deeply" checking for a rule];
+											The PRECISE order of attempts would be determined by the user. 
+											Default is - start with 'IdentityRule', proceed with '.type-at-[0]'-based
+												(max backtracks per element of output Stream - ((sum of cardinalitities of these two sets) - 1) )
+									
+									The optimization structure, however, will need to be separate from the 'ElementaryRule'; 
+									PROBLEM: 
+										How to organize it?
+										The RuleParser HAS to be general, but one also wants to add this optimization.
+										IDEA: make it part of 'RuleParser.compile()', via 'instanceof IdentityRule' and 'instanceof ElementaryRule' (then, use '.type' to group...). 
+											As these things are happening AT COMPILE TIME for the given parser, 
+												one can afford the lavishes of actually doing all that...; 
+	
+	55. MultiMap - [IndexMap-like] this returns THE LAST matched item, running multiple results [with REQUIRED function-values, and only unless early termination has been demanded by a return value]; 
+
+[maybe, for v0.4!]
 3. Dependency management: 
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 
 			1. 'delegate' functions [from here]; 
-			2. the 'classWrapper' function; 
-			3. the 'AssignmentClass' function; 
-			4. A 'PropertyDescriptor' class; 
-				4.1. This one is for creation of 'Object.defineProperty' signature-objects (the "property descriptors"); 
-			5. The 'Constructor' type; 
-			6. SelfAssignmentClass; 
-			7. extendClass; 
+			2. A 'PropertyDescriptor' class; 
+				2.1. This one is for creation of 'Object.defineProperty' signature-objects (the "property descriptors"); 
+			3. The 'Constructor' type; 
 
-	3.2. All the routine writing of tests made one think whether it may not be more desireable to 
-		automate even the process of their WRITING; 
-
-		Create a library like this containing: 
-
-			1. a path-resolver (for relative/absolute imports); 
-			2. a JS code-generator (based off the 'parsers.js' + the JS parser of one's own...); 
-			3. various functions for configurable code-template creation; 
-			4. functions for recursive directory-traveral, automated file-creation, types for specifying a directory structure; 
-		
-		The combination of the three will permit A LOT of different code to just be "magicked away"; 
-		USE THOSE to "re-write" ["pack", the .ts files will be generated (.gitignore-d) - then run], 
-			the tests/their designs for 'parsers.js' v0.4 [the repetative parts]; 
-
-	3.3. Create automatic tool for performance of redundancy analysis of JavaScript functions/classes/components; 
+	3.2. Create automatic tool for performance of redundancy analysis of JavaScript functions/classes/components; 
 		Basically - it walks through the project tree, looking for functions/things that aren't GETTING USED/Called ANYWHERE/ANYHOW; 
 		Permits one to remove items that are of no importance, simplifies development...; 
