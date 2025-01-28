@@ -1,9 +1,14 @@
 import type { Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { BasicStream } from "../interfaces.js"
+import type { BasicStream, Indexed } from "../interfaces.js"
 import type { Rewindable } from "./methods/rewind.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
+
+import type {
+	PositionalBufferizedStreamClassInstance,
+	StreamClassInstance
+} from "./interfaces.js"
 
 import { pickDirection, positionConvert } from "../../Position/utils.js"
 
@@ -76,4 +81,15 @@ export function uniRewind<Type = any>(stream: BasicReversibleStream<Type>) {
 
 export function fastRewind<Type = any>(stream: BasicReversibleStream<Type>): Type {
 	return isRewindable(stream) ? stream.rewind() : uniRewind(stream)
+}
+
+export function isEmptyStream(stream: StreamClassInstance) {
+	return stream.isEnd && stream.isStart
+}
+
+export function byStreamBufferPos(f: (buffer: Indexed, i: number) => any) {
+	return (stream: PositionalBufferizedStreamClassInstance) => {
+		const buffer = stream.buffer.get()
+		return () => f(buffer, stream.pos)
+	}
 }

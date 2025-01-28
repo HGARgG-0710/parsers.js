@@ -1,7 +1,7 @@
 import type { BasicStream } from "../../../Stream/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
-	PositionalStreamClassInstance
+	PositionalBufferizedStreamClassInstance,
 } from "../interfaces.js"
 
 import { uniFinish } from "../utils.js"
@@ -32,7 +32,7 @@ function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Type>) {
 }
 
 function posBufferFinish<Type = any>(
-	this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
+	this: PositionalBufferizedStreamClassInstance<Type>
 ) {
 	const { buffer } = this
 	if (buffer.isFrozen) {

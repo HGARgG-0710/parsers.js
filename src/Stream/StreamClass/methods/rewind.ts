@@ -1,7 +1,7 @@
 import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type {
 	BufferizedStreamClassInstance,
-	PositionalStreamClassInstance
+	PositionalBufferizedStreamClassInstance,
 } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
@@ -33,7 +33,7 @@ function bufferRewind<Type = any>(this: BufferizedStreamClassInstance<Type>) {
 }
 
 function posBufferRewind<Type = any>(
-	this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
+	this: PositionalBufferizedStreamClassInstance<Type>
 ) {
 	const { buffer } = this
 	start(this)

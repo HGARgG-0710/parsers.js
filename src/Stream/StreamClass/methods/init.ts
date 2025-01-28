@@ -1,6 +1,7 @@
 import type {
 	BufferizedStreamClassInstance,
 	PatternStreamClassInstance,
+	PositionalBufferizedStreamClassInstance,
 	PositionalStreamClassInstance,
 	StatefulStreamClassInstance,
 	StreamClassInstance
@@ -79,7 +80,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferInitialize<Type = any>(
-		this: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
+		this: PositionalBufferizedStreamClassInstance<Type>,
 		buffer?: FreezableBuffer
 	) {
 		assignBuffer(this, buffer)

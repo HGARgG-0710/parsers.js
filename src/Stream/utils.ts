@@ -3,7 +3,6 @@ import type { BasicReversibleStream } from "./ReversibleStream/interfaces.js"
 
 import { Stream } from "../constants.js"
 import { propByName } from "./refactor.js"
-import type { StreamClassInstance } from "./StreamClass/interfaces.js"
 const { SkippedItem } = Stream.StreamParser
 
 /**
@@ -58,8 +57,4 @@ export const destroy = (input: BasicStream) => {
 }
 
 export * as InputStream from "./InputStream/utils.js"
-export function isEmptyStream(stream: StreamClassInstance) {
-	return stream.isEnd && stream.isStart
-}
-
 export * as StreamClass from "./StreamClass/utils.js"

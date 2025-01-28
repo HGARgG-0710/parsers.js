@@ -118,12 +118,9 @@ REMINDERS [2.]:
 		Clean up the project root directory: 
 			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
 
-	2.72. A new abstraction OptimizedCharMap ('HashMap' and 'OptimizedLinearIndexMap' extension): 
-		Uses the '(string, i) => string.charCodeAt(i)', 
-			FOR THIS TO WORK: 
-				2. Create a function 'streamInfo = (f) => (x: Stream) => f(x.buffer., x.pos, x.state, x)', and so forth. 
-					REASON: the '.extend' would be REALLY hard/unperformant to make work witih multiple arguments the way that '.index' does. 
-					Applying 'streamInfo' on a 'TableMap' would yield desired results. 
+	2.72. A new abstraction OptimizedCharMap ('HashMap' and 'OptimizedLinearIndexMap' cases): 
+		Uses the 'FI: (string, i) => string.charCodeAt(i)', 
+		ADD a predoc note: INTENDED TO BE USED with 'byStreamBufferPos' + 'InputStream'; 
 
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
