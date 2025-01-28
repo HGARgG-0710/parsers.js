@@ -84,6 +84,11 @@ export abstract class PreIndexMap<
 		}
 		return this.add(index, [key, value])
 	}
+
+	reverse() {
+		this.keys.reverse()
+		this.values.reverse()
+	}
 }
 
 export abstract class BaseIndexMap<

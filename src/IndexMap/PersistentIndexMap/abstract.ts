@@ -28,6 +28,7 @@ abstract class FakeIndexMap<
 	get size(): number {
 		return 0
 	}
+	reverse() {}
 }
 
 export abstract class DelegateIndexMap<

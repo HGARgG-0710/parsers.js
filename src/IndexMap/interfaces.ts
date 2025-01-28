@@ -43,6 +43,9 @@ export interface IndexMap<
 		DefaultHaving<DefaultType> {
 	keys: KeyType[]
 	values: ValueType[]
+
+	reverse: () => any
+
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
 	swap: (i: number, j: number) => any

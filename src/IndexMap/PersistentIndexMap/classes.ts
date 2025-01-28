@@ -77,7 +77,13 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 
 	repairIndexes() {
 		let i = this.size
-		while (i--) this.indexes[i].value = i
+		while (i--) setValue(this.indexes[i], i)
+	}
+
+	reverse() {
+		super.reverse()
+		this.indexes.reverse()
+		this.repairIndexes()
 	}
 
 	constructor(indexMap: IndexMap<KeyType, ValueType, DefaultType, number>) {
