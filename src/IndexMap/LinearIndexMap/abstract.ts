@@ -22,8 +22,8 @@ export abstract class BaseLinearMap<
 	extension: Function
 	keyExtension: (value: KeyType, index?: number, array?: KeyType[]) => any
 
-	index(x: any) {
-		const valueIndex = this.getIndex(this.extension(x))
+	index(x: any, ...y: any[]) {
+		const valueIndex = this.getIndex(this.extension(x, ...y))
 		return isGoodIndex(valueIndex) ? this.values[valueIndex] : this.default
 	}
 
@@ -67,8 +67,8 @@ export abstract class BaseLinearMap<
 		return BadIndex
 	}
 
-	unique(start?: boolean) {
-		const indexes = super.unique(start)
+	unique() {
+		const indexes = super.unique()
 		this.alteredKeys = indexes.map((x) => this.alteredKeys[x])
 		return indexes
 	}

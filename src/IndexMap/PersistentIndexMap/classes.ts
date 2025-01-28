@@ -42,8 +42,8 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 		return this
 	}
 
-	unique(start?: boolean): number[] {
-		const indexes = this.value.unique(start)
+	unique(): number[] {
+		const indexes = this.value.unique()
 		const indexSet = new Set(indexes)
 
 		this.indexes = this.indexes.filter((x: PointerType<number>, i: any) => {

@@ -2,7 +2,6 @@ import type { MapClass } from "../interfaces.js"
 import type { LinearIndexMap } from "./interfaces.js"
 
 import { LinearMapClass } from "./classes.js"
-import { BaseLinearMap } from "./abstract.js"
 
 export namespace OptimizedLinearMap {
 	export function optimize<KeyType = any, ValueType = any>(
@@ -12,15 +11,6 @@ export namespace OptimizedLinearMap {
 		return this.alteredKeys.indexOf(key)
 	}
 }
-
-export const {
-	index,
-	replace,
-	add,
-	delete: _delete,
-	replaceKey,
-	getIndex
-} = BaseLinearMap.prototype
 
 export function extend<KeyType = any, ValueType = any>(
 	this: MapClass<KeyType, ValueType>,

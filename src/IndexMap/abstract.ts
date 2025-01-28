@@ -6,7 +6,6 @@ import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { isGoodIndex } from "src/utils.js"
 import { keyValuesToPairsList, table } from "./utils.js"
-import { upperBound } from "./refactor.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { swap } = inplace
@@ -63,7 +62,7 @@ export abstract class PreIndexMap<
 	abstract replace(index: number, pair: [KeyType, ValueType]): any
 	abstract replaceKey(keyFrom: KeyType, keyTo: KeyType): any
 	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-	abstract unique(start?: boolean): number[]
+	abstract unique(): number[]
 	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
 	abstract swap(i: number, j: number): any
 
@@ -102,14 +101,11 @@ export abstract class BaseIndexMap<
 		return new this.constructor(keyValuesToPairsList(table(this)), this.default)
 	}
 
-	unique(start: boolean = true) {
+	unique() {
 		const uniqueKeys = new Set()
 		const indexes: number[] = []
 
-		const predicate = start ? upperBound(this) : isGoodIndex
-		const change = (-1) ** +!start
-
-		for (let i = +!start * (this.size - 1); predicate(i); i += change) {
+		for (let i = 0; i < this.size; ++i) {
 			const curr = this.keys[i]
 			if (!uniqueKeys.has(curr)) {
 				uniqueKeys.add(curr)

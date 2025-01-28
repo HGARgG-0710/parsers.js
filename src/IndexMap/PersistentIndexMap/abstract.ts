@@ -20,7 +20,7 @@ abstract class FakeIndexMap<
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): any
 	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 	abstract swap(i: number, j: number): any
-	abstract unique(start?: boolean): number[]
+	abstract unique(): number[]
 
 	// * note: these are fakes - see the comment at the bottom...
 	[Symbol.iterator]: () => Generator<array.Pair<KeyType, ValueType>>

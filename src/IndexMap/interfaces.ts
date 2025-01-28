@@ -12,7 +12,7 @@ export interface TestType {
 }
 
 export interface Indexable<ValueType = any> {
-	index: (x: any) => ValueType
+	index: (x: any, ...y: any[]) => ValueType
 }
 
 export type MapClassValueExtension<KeyType = any, ValueType = any> = (
@@ -43,7 +43,7 @@ export interface IndexMap<
 		DefaultHaving<DefaultType> {
 	keys: KeyType[]
 	values: ValueType[]
-	unique: (start?: boolean) => number[]
+	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
 	swap: (i: number, j: number) => any
 
