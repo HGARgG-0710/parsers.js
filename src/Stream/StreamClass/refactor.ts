@@ -1,8 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream, Endable } from "../interfaces.js"
 import type {
-	BufferizedStreamClassInstance,
-	PositionalStreamClassInstance,
+	PositionalBufferizedStreamClassInstance,
 	PreStarted,
 	ReversedStreamClassInstance,
 	Stateful,
@@ -81,7 +80,7 @@ export function updatePrev<Type = any>(stream: ReversedStreamClassInstance<Type>
 }
 
 export function readBuffer<Type = any>(
-	stream: BufferizedStreamClassInstance<Type> & PositionalStreamClassInstance<Type>
+	stream: PositionalBufferizedStreamClassInstance<Type>
 ) {
 	return (stream.curr = stream.buffer.read(stream.pos))
 }
@@ -98,7 +97,20 @@ export function update<Type = any>(this: StreamClassInstance<Type>) {
 	return (this.curr = this.currGetter!())
 }
 
-export * as curr from "./methods/curr.js"
+// * possible '.curr=' and '.curr' methods
+export function currSet<Type = any>(this: StreamClassInstance<Type>, value: Type) {
+	return (this.realCurr = value)
+}
+
+export function currGet<Type = any>(this: StreamClassInstance<Type>) {
+	return this.realCurr
+}
+
+export const curr = {
+	get: currGet,
+	set: currSet
+}
+
 export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"
 export * as finish from "./methods/finish.js"

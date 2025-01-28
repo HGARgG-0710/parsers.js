@@ -14,7 +14,8 @@
 			"@hgargg-0710/*": [
 				"./node_modules/@hgargg-0710/*"
 			]
-		}
+		},
+		"noUnusedLocals": true
 	},
 	"exclude": [
 		"node_modules",

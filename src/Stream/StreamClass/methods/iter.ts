@@ -11,6 +11,7 @@ import { positionDecrement, positionIncrement } from "src/Position/refactor.js"
 import { bufferPush } from "src/Collection/Buffer/refactor.js"
 import { bufferFreeze } from "src/Collection/Buffer/refactor.js"
 import {
+	currSet,
 	deEnd,
 	getNext,
 	getPrev,
@@ -24,6 +25,20 @@ import { deStart, end } from "../refactor.js"
 
 import { functional } from "@hgargg-0710/one"
 const { nil } = functional
+
+// * predoc note: this redefinition [in particular] forbids replacing the '.curr' of the given 'Stream'
+function posBufferIsFrozenGet<Type = any>(
+	this: PositionalBufferizedStreamClassInstance<Type>
+) {
+	return readBuffer(this)
+}
+
+function redefineCurr<Type = any>(x: PositionalBufferizedStreamClassInstance<Type>) {
+	Object.defineProperty(x, "curr", {
+		set: currSet,
+		get: posBufferIsFrozenGet
+	})
+}
 
 // * possible '.next' methods
 
@@ -48,20 +63,24 @@ function generateIterationMethods(
 		optionalPrevCondition
 	]: QuartetConfig) {
 		const [fastNext, fastPrev] = (() => {
+			function altNext<Type = any>(this: StreamClassInstance<Type>) {
+				const last = this.curr
+				nextPreAction(this, last)
+				if (this.isCurrEnd()) {
+					endAction(this)
+					end(this)
+					this.prev = prev
+				} else nextAction(this)
+				return last
+			}
+
 			if (alt) {
 				const [altCondition, altAction] = alt
 				return [
 					function <Type = any>(this: StreamClassInstance<Type>) {
 						const last = this.curr
 						if (altCondition(this)) altAction(this)
-						else {
-							nextPreAction(this, last)
-							if (this.isCurrEnd()) {
-								endAction(this)
-								end(this)
-								this.prev = prev
-							} else nextAction(this)
-						}
+						else altNext.call(this)
 						return last
 					},
 					function <Type = any>(this: ReversedStreamClassInstance<Type>) {
@@ -76,17 +95,8 @@ function generateIterationMethods(
 			}
 
 			return [
-				function <Type = any>(this: StreamClassInstance<Type>) {
-					const last = this.curr
-					nextPreAction(this, last)
-					if (this.isCurrEnd()) {
-						endAction(this)
-						end(this)
-						this.prev = prev
-					} else nextAction(this)
-					return last
-				},
-				function <Type = any>(this: ReversedStreamClassInstance<Type>) {
+				altNext,
+				function altPrev<Type = any>(this: ReversedStreamClassInstance<Type>) {
 					const last = this.curr
 					if (this.isCurrStart()) {
 						start(this)
@@ -148,7 +158,10 @@ function generateIterationMethods(
 			],
 			[
 				bufferPush as (x: BufferizedStreamClassInstance) => any,
-				bufferFreeze as (x: BufferizedStreamClassInstance) => any,
+				(x: PositionalBufferizedStreamClassInstance) => {
+					bufferFreeze(x)
+					redefineCurr(x)
+				},
 				[
 					posNextAction,
 					(x: PositionalBufferizedStreamClassInstance) => {

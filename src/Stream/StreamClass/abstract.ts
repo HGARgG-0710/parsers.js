@@ -85,7 +85,7 @@ export function StreamClass<Type = any>(
 
 	// * Defining the basic properties
 	extend({
-		curr: curr.chooseMethod(hasPosition, buffer),
+		curr,
 		isCurrEnd: { value: isCurrEnd },
 		baseNextIter: { value: baseNextIter },
 		defaultIsEnd: { value: defaultIsEnd },
