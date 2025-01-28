@@ -8,27 +8,24 @@ export abstract class BaseHashClass<
 	ValueType = any,
 	InternalKeyType = any
 > extends DelegateSizeable<InternalHash<InternalKeyType, ValueType>> {
-	hash: HashType<KeyType, ValueType, InternalKeyType>
+	hash: HashType<KeyType, InternalKeyType>
 
-	index(x: KeyType) {
-		return this.value.get(this.hash(x, this.value))
+	index(x: KeyType, ...y: any[]) {
+		return this.value.get(this.hash(x, ...y))
 	}
 
-	set(key: KeyType, value: ValueType) {
-		this.value.set(this.hash(key, this.value), value)
+	set(key: KeyType, value: ValueType, ...y: any[]) {
+		this.value.set(this.hash(key, ...y), value)
 		return this
 	}
 
-	delete(key: KeyType) {
-		this.value.delete(this.hash(key, this.value))
+	delete(key: KeyType, ...y: any[]) {
+		this.value.delete(this.hash(key, ...y))
 		return this
 	}
 
-	replaceKey(keyFrom: KeyType, keyTo: KeyType) {
-		this.value.replaceKey(
-			this.hash(keyFrom, this.value),
-			this.hash(keyTo, this.value)
-		)
+	replaceKey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
+		this.value.replaceKey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
 		return this
 	}
 }

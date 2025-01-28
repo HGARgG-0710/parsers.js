@@ -19,7 +19,7 @@ export abstract class BaseLinearMap<
 	alteredKeys: any[]
 	change?: IndexingFunction<KeyType>
 
-	extension: Function
+	extension: (x: any, ...y: any[]) => any
 	keyExtension: (value: KeyType, index?: number, array?: KeyType[]) => any
 
 	index(x: any, ...y: any[]) {

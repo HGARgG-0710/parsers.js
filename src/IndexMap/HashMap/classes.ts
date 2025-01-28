@@ -13,13 +13,13 @@ const { id } = functional
 const { typeOf } = _type
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
-	hash: HashType<KeyType, ValueType, InternalKeyType>
+	hash: HashType<KeyType, InternalKeyType>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass
 		extends BaseHashClass<KeyType, ValueType, InternalKeyType>
 		implements HashMap<KeyType, ValueType, InternalKeyType>
 	{
-		static hash: HashType<KeyType, ValueType, InternalKeyType>
+		static hash: HashType<KeyType, InternalKeyType>
 		static extend: (
 			f: (x: any) => KeyType
 		) => HashClass<KeyType, ValueType, InternalKeyType>

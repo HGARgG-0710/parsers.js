@@ -13,9 +13,9 @@ export interface KeyReplaceable<KeyType = any> {
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
-export type HashType<KeyType = any, ValueType = any, InternalKeyType = any> = (
+export type HashType<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
-	structure: InternalHash<InternalKeyType, ValueType>
+	...y: any[]
 ) => InternalKeyType
 
 export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any> {
@@ -24,7 +24,7 @@ export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any
 		ValueType,
 		InternalKeyType
 	>
-	hash: HashType<KeyType, ValueType, InternalKeyType>
+	hash: HashType<KeyType, InternalKeyType>
 	extend: (f: (x: any) => KeyType) => HashClass<any, ValueType, InternalKeyType>
 }
 
@@ -34,7 +34,7 @@ export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,
 		Sizeable {
-	hash: HashType<KeyType, ValueType, InternalKeyType>
+	hash: HashType<KeyType, InternalKeyType>
 }
 
 export type * as InternalHash from "./InternalHash/interfaces.js"

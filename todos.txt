@@ -121,12 +121,6 @@ REMINDERS [2.]:
 	2.72. A new abstraction OptimizedCharMap ('HashMap' and 'OptimizedLinearIndexMap' extension): 
 		Uses the '(string, i) => string.charCodeAt(i)', 
 			FOR THIS TO WORK: 
-				1. add multiple arguments: 
-
-					2. LinearIndexMap.index(x, ...)
-					3. TableMap.index(x, ...)
-					4. MapWrap.index(x, ...)
-
 				2. Create a function 'streamInfo = (f) => (x: Stream) => f(x.buffer., x.pos, x.state, x)', and so forth. 
 					REASON: the '.extend' would be REALLY hard/unperformant to make work witih multiple arguments the way that '.index' does. 
 					Applying 'streamInfo' on a 'TableMap' would yield desired results. 
