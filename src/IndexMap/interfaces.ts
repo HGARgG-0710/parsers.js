@@ -15,12 +15,12 @@ export interface Indexable<ValueType = any> {
 	index: (x: any, ...y: any[]) => ValueType
 }
 
-export type MapClassValueExtension<KeyType = any, ValueType = any> = (
-	...f: ((x: ValueType) => any)[]
+export type MapClassValueExtension = <KeyType = any>(
+	...f: ((...x: any[]) => any)[]
 ) => MapClass<KeyType, any>
 
-export type MapClassKeyExtension<KeyType = any, ValueType = any> = (
-	...f: ((x: any) => KeyType)[]
+export type MapClassKeyExtension = <ValueType = any>(
+	...f: ((x: any) => any)[]
 ) => MapClass<any, ValueType>
 
 export interface Sizeable {
@@ -65,8 +65,8 @@ export interface MapClass<KeyType = any, ValueType = any> {
 		ValueType
 	>
 	change?: IndexingFunction<KeyType>
-	extend: MapClassValueExtension<KeyType, ValueType>
-	extendKey: MapClassKeyExtension<KeyType, ValueType>
+	extend: MapClassValueExtension
+	extendKey: MapClassKeyExtension
 
 	keyExtensions: Function[]
 	extensions: Function[]

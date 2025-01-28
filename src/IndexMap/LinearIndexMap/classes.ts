@@ -19,6 +19,7 @@ import { BaseLinearMap } from "./abstract.js"
 import { fromPairsList } from "../utils.js"
 
 import { functional, boolean } from "@hgargg-0710/one"
+import { charCodeAt } from "../../refactor.js"
 const { trivialCompose } = functional
 const { equals } = boolean
 
@@ -32,8 +33,8 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		implements LinearIndexMap<KeyType, ValueType>
 	{
 		static change?: IndexingFunction<KeyType>
-		static extend: MapClassValueExtension<KeyType, ValueType>
-		static extendKey: MapClassKeyExtension<KeyType, ValueType>
+		static extend: MapClassValueExtension
+		static extendKey: MapClassKeyExtension
 
 		static keyExtensions: Function[]
 		static extensions: Function[]
@@ -50,8 +51,8 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 	linearMapClass.extensions = extensions
 	linearMapClass.keyExtensions = keyExtensions
 	linearMapClass.change = change
-	linearMapClass.extend = extend<KeyType>
-	linearMapClass.extendKey = extendKey<KeyType, ValueType>
+	linearMapClass.extend = extend
+	linearMapClass.extendKey = extendKey
 
 	if (!change)
 		linearMapClass.prototype.getIndex = OptimizedLinearMapMethods.optimize<
@@ -63,6 +64,9 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 }
 
 export const OptimizedLinearMap = LinearMapClass([], [])
+
+// * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
+export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
 
 export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
 	MapClass<Function>,

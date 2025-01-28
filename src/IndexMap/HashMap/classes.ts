@@ -9,6 +9,7 @@ import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"
 
 import { functional, type as _type } from "@hgargg-0710/one"
+import { charCodeAt } from "../../refactor.js"
 const { id } = functional
 const { typeOf } = _type
 
@@ -32,16 +33,18 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 	return hashClass
 }
 
-export const [BasicHash, LengthHash, TokenHash, TypeofHash] = [
+export const [BasicHash, LengthHash, TokenHash, TypeofHash, CharHash] = [
 	id,
 	length,
 	type,
-	typeOf
+	typeOf,
+	charCodeAt
 ].map(HashClass) as [
 	HashClass<any, any, any>,
 	HashClass<Indexed, any, any>,
 	HashClass<TypeToken, any, any>,
-	HashClass<any, any, any>
+	HashClass<any, any, any>,
+	HashClass<string, any, number>
 ]
 
 export * as InternalHash from "./InternalHash/classes.js"

@@ -118,10 +118,6 @@ REMINDERS [2.]:
 		Clean up the project root directory: 
 			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
 
-	2.72. A new abstraction OptimizedCharMap ('HashMap' and 'OptimizedLinearIndexMap' cases): 
-		Uses the 'FI: (string, i) => string.charCodeAt(i)', 
-		ADD a predoc note: INTENDED TO BE USED with 'byStreamBufferPos' + 'InputStream'; 
-
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
 
@@ -153,7 +149,6 @@ REMINDERS [2.]:
 	2.78. Remove 'abstract' as a library export. 
 	
 Order of TODO-elimination: 
-	5.2.72.
 	5.2.75.
 	5.2.68. 
 	5.2.71.

@@ -62,3 +62,5 @@ export const classWrapper =
 		new X(...args)
 
 export const copyFunction = (f: Function) => f.bind(null)
+
+export const charCodeAt = (string: string, i: number) => string.charCodeAt(i)
