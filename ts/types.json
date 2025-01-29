@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
-		"outDir": "dist",
+		"baseUrl": "..",
+		"outDir": "../dist",
 		"strictNullChecks": true,
 		"lib": ["ES2020"],
 		"target": "ES2020",
@@ -11,9 +11,9 @@
 		"declaration": true,
 		"verbatimModuleSyntax": true,
 		"paths": {
-			"@hgargg-0710/*": ["./node_modules/@hgargg-0710/*"]
+			"@hgargg-0710/*": ["../node_modules/@hgargg-0710/*"]
 		}
 	},
-	"exclude": ["node_modules", "dist", "tests"],
-	"include": ["./**/*.ts"]
+	"exclude": ["../node_modules", "../dist", "../tests"],
+	"include": ["../**/*.ts"]
 }

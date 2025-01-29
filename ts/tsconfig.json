@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
-		"outDir": "dist",
+		"baseUrl": "..",
+		"outDir": "../dist",
 		"strictNullChecks": true,
 		"lib": [
 			"ES2020"
@@ -12,19 +12,19 @@
 		"verbatimModuleSyntax": true,
 		"paths": {
 			"@hgargg-0710/*": [
-				"./node_modules/@hgargg-0710/*"
+				"../node_modules/@hgargg-0710/*"
 			]
 		},
 		"noUnusedLocals": true
 	},
 	"exclude": [
-		"node_modules",
-		"dist",
-		"tests",
-		"./**/interfaces.ts",
-		"./types.ts"
+		"../node_modules",
+		"../dist",
+		"../tests",
+		"../**/interfaces.ts",
+		"../types.ts"
 	],
 	"include": [
-		"./**/*.ts"
+		"../**/*.ts"
 	]
 }

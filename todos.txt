@@ -119,10 +119,6 @@ REMINDERS [2.]:
 			Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
 			Just do ': this', AS INTENDED...
 	
-	2.71. file-pile: 
-		Clean up the project root directory: 
-			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
-
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
 
@@ -148,7 +144,6 @@ REMINDERS [2.]:
 			4. xml [to npm]
 
 Order of TODO-elimination: 
-	5.2.71.
 	5.16.
 	5.17.
 	

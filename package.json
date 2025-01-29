@@ -23,8 +23,8 @@
 	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
 	"scripts": {
 		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
-		"build-js": "tsc --project tsconfig.json",
-		"build-types": "tsc --project ts-types.json",
+		"build-js": "tsc --project ts/tsconfig.json",
+		"build-types": "tsc --project ts/types.json",
 		"build": "npm run build-js && npm run build-types",
 		"all": "npm run build && npm run test",
 		"unused": "ts-unused-exports ./tsconfig.json"
