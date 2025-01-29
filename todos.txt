@@ -75,14 +75,14 @@ REMINDERS [2.]:
 							Everything related to descriptors, in particular: 
 
 								1. getSetDescriptor,
-								2. valueDescriptor -> {value}
+								2. valueDescriptor -> {value} [const descriptor]
+								3. basicDescriptor -> configurable + value + writable
 								... [everything related - the prior 'PropertyDescriptor class' notes would allude to this...]; 
 
 						8. 'object': 
 
 							1. extendPrototype
 							2. mixin
-							
 
 						9. 'functional.has' - current 'src/refactor.ts' 'has' function; 
 
@@ -119,9 +119,6 @@ REMINDERS [2.]:
 			Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
 			Just do ': this', AS INTENDED...
 	
-	2.68. refactor: 
-		1. 'super: {value: x.prototype}' - create a special 'defineSuper' function inside a 'refactor.ts' file...; 
-
 	2.71. file-pile: 
 		Clean up the project root directory: 
 			1. bunch together the 'ts-types.json' and 'ts-config.json' (change respective paths in "scripts" in package.json); 
@@ -151,7 +148,6 @@ REMINDERS [2.]:
 			4. xml [to npm]
 
 Order of TODO-elimination: 
-	5.2.68. 
 	5.2.71.
 	5.16.
 	5.17.
@@ -162,6 +158,10 @@ Order of TODO-elimination:
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
+
+	JSDoc: 
+		Add it BEFORE doing the tests. 
+		One must first understand PRECISELY how a certain thing is to work, and what to expect from it...;
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 

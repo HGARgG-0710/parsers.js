@@ -17,7 +17,7 @@ import {
 	limitedStreamIsStart
 } from "./refactor.js"
 
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -67,8 +67,7 @@ export function LimitedStream<Type = any>(
 		}
 	}
 
-	extendPrototype(limitedStream, {
-		super: { value: baseClass.prototype },
+	withSuper(limitedStream, baseClass, {
 		prod: { value: limitedStreamProd },
 		init: { value: limitedStreamInitialize }
 	})

@@ -18,7 +18,7 @@ import {
 	treeStreamMultindGetter
 } from "./refactor.js"
 
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/abstract.js"
 
@@ -59,8 +59,7 @@ export class TreeStream<Type = any>
 	}
 }
 
-extendPrototype(TreeStream, {
-	super: { value: TreeStreamBase.prototype },
+withSuper(TreeStream, TreeStreamBase, {
 	multind: { get: treeStreamMultindGetter },
 	value: { get: treeStreamValueGetter },
 	rewind: { value: treeStreamRewind },

@@ -10,7 +10,7 @@ import type { StreamParser as StreamParserType } from "./interfaces.js"
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { streamParserInitialize, streamParserNext } from "./refactor.js"
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -57,8 +57,7 @@ export function StreamParser<OutType = any>(
 		}
 	}
 
-	extendPrototype(streamTokenizerClass, {
-		super: { value: baseClass.prototype },
+	withSuper(streamTokenizerClass, baseClass, {
 		init: { value: streamParserInitialize },
 		handler: { value: handler }
 	})

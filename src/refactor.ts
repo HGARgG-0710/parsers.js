@@ -66,3 +66,17 @@ export const classWrapper =
 export const copyFunction = (f: Function) => f.bind(null)
 
 export const charCodeAt = (string: string, i: number) => string.charCodeAt(i)
+
+export const superDescriptor = (Super: Prototypal) => ({
+	super: { value: Super.prototype }
+})
+
+export const withSuper = (
+	Class: Prototypal,
+	Base: Prototypal,
+	rest: PropertyDescriptorMap
+) =>
+	extendPrototype(Class, {
+		...superDescriptor(Base),
+		...rest
+	})

@@ -15,7 +15,7 @@ import {
 } from "./refactor.js"
 
 import { StreamClass } from "../StreamClass/abstract.js"
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 
 const ProlongedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -49,8 +49,7 @@ export function ProlongedStream<Type = any>(
 		}
 	}
 
-	extendPrototype(prolongedStream, {
-		super: { value: baseClass.prototype },
+	withSuper(prolongedStream, baseClass, {
 		init: { value: prolongedStreamInitialize<Type> }
 	})
 

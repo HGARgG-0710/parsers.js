@@ -15,7 +15,7 @@ import {
 	nestedStreamIsEnd
 } from "./refactor.js"
 
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -56,9 +56,8 @@ export function NestedStream<Type = any>(
 		}
 	}
 
-	extendPrototype(NestedStream, {
+	withSuper(NestedStream, baseClass, {
 		init: { value: nestedStreamInitialize<Type> },
-		super: { value: baseClass.prototype },
 		typesTable: { value: nestedTypes }
 	})
 

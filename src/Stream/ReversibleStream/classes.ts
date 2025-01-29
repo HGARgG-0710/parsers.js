@@ -6,11 +6,14 @@ import type {
 	ReversedStream as ReversedStreamType
 } from "./interfaces.js"
 
-import { valueDelegate, valuePropDelegate } from "src/refactor.js"
+import {
+	valueDelegate,
+	valuePropDelegate,
+	withSuper
+} from "src/refactor.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { valueCurr } from "../StreamClass/refactor.js"
 import { StreamClass } from "../StreamClass/abstract.js"
-import { extendPrototype } from "src/refactor.js"
 import { reversedStreamInitialize } from "./refactor.js"
 
 const valueDefaultIsStart = valuePropDelegate("isStart")
@@ -54,8 +57,7 @@ export function ReversedStream<Type = any>(
 		}
 	}
 
-	extendPrototype(reversedStream, {
-		super: { value: baseClass.prototype },
+	withSuper(reversedStream, baseClass, {
 		rewind: { value: valueFinish },
 		finish: { value: valueRewind },
 		init: { value: reversedStreamInitialize }

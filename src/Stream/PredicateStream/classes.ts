@@ -23,7 +23,7 @@ import {
 } from "./refactor.js"
 
 import { StreamClass } from "../StreamClass/abstract.js"
-import { extendPrototype } from "src/refactor.js"
+import { withSuper } from "src/refactor.js"
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -69,8 +69,7 @@ export function PredicateStream<Type = any>(
 		}
 	}
 
-	extendPrototype(predicateStream, {
-		super: { value: baseClass.prototype },
+	withSuper(predicateStream, baseClass, {
 		prod: { value: predicateStreamProd },
 		init: { value: predicateStreamInitialize }
 	})
