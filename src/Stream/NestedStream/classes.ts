@@ -34,7 +34,7 @@ export function NestedStream<Type = any>(
 	nestedTypes: FastLookupTable<any, StreamPredicate>,
 	hasPosition: boolean = false,
 	buffer: boolean = false
-) {
+): new (value?: EndableStream<Type>, _index?: any) => EffectiveNestedStream<Type> {
 	const baseClass = NestedStreamBase(hasPosition, buffer)
 	class NestedStream extends baseClass implements EffectiveNestedStream<Type> {
 		value: EndableStream<Type>

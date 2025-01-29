@@ -5,7 +5,7 @@ import type {
 	PatternStreamConstructor
 } from "../../Stream/StreamClass/interfaces.js"
 import type { StreamHandler, StreamPredicate } from "../../Parser/TableMap/interfaces.js"
-import type { StreamParser as StreamParserType } from "./interfaces.js"
+import type { StreamParser as IStreamParser } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
@@ -27,16 +27,16 @@ const StreamParserBase = <Type = any>(
 		isPattern: true
 	}) as PatternStreamConstructor<Type>
 
-export function StreamParser<OutType = any>(
+export function StreamParser<InType = any, OutType = any>(
 	handler: StreamHandler<OutType>,
 	hasPosition: boolean = false,
 	buffer: boolean = false,
 	state: boolean = false
-) {
+): new (value?: EndableStream<InType>, state?: Summat) => IStreamParser<InType, OutType> {
 	const baseClass = StreamParserBase(hasPosition, buffer, state)
-	class streamTokenizerClass<InType = any>
+	class streamTokenizerClass
 		extends baseClass
-		implements StreamParserType<InType, OutType>
+		implements IStreamParser<InType, OutType>
 	{
 		value: EndableStream<InType>
 		super: Summat
@@ -49,7 +49,7 @@ export function StreamParser<OutType = any>(
 		init: (
 			value?: EndableStream<InType>,
 			state?: Summat
-		) => StreamParserType<InType, OutType>
+		) => IStreamParser<InType, OutType>
 
 		constructor(value?: EndableStream<InType>, state: Summat = {}) {
 			super(value)

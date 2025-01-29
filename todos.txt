@@ -25,9 +25,6 @@ REMINDERS [2.]:
 	The only benefit of actually having the thing is the ability to reference the "big docs".
 
 5. Source code TODO-s: 
-	16. Individually add return types ['function IGenerateAStream(): __T__'] for EACH function for generation of classes for Stream-creation; 
-		Good Example: LimitedStream
-
 	17. USE the optional '.pos' property [Stream] on EVERY possibility inside the method implementations 
 		(namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
 
@@ -144,7 +141,6 @@ REMINDERS [2.]:
 			4. xml [to npm]
 
 Order of TODO-elimination: 
-	5.16.
 	5.17.
 	
 	5.2.62.
