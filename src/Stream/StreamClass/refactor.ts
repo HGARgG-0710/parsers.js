@@ -1,22 +1,16 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { BasicStream, Endable } from "../interfaces.js"
+import type { Endable } from "../interfaces.js"
 import type {
 	PositionalBufferizedStreamClassInstance,
 	PreStarted,
-	ReversedStreamClassInstance,
 	Stateful,
 	StreamClassInstance
 } from "./interfaces.js"
 
-import { getSetDescriptor, valueDelegate, valuePropDelegate } from "src/refactor.js"
+import { valueDelegate, valuePropDelegate } from "src/refactor.js"
 
-import { Stream, defaults } from "../../constants.js"
+import { Stream } from "../../constants.js"
 const { StreamClass } = Stream
-const { realCurr: defaultRealCurr } = defaults.StreamClass
-
-export function* streamIterator<Type = any>(this: BasicStream<Type>) {
-	while (!this.isEnd) yield this.next()
-}
 
 export const valueIsCurrEnd = valueDelegate("isCurrEnd")
 export const valueCurr = valuePropDelegate("curr")
@@ -30,10 +24,6 @@ const calledDelegate =
 const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")
 
-export function preStart(stream: PreStarted) {
-	stream.isStart = StreamClass.PreCurrInit
-}
-
 export function start(stream: PreStarted) {
 	stream.isStart = StreamClass.PostCurrInit
 }
@@ -42,41 +32,16 @@ export function deStart(stream: StreamClassInstance) {
 	stream.isStart = StreamClass.PostStart
 }
 
-export function preEnd(stream: StreamClassInstance) {
-	stream.isEnd = stream.defaultIsEnd()
-}
-
 export function end(stream: StreamClassInstance) {
 	stream.isEnd = true
 }
 
-export function preInit(x: StreamClassInstance) {
-	if (!x.isEnd) {
-		start(x)
-		x.realCurr = (x.initGetter || x.currGetter)!()
-	}
+export function deEnd(stream: Endable) {
+	stream.isEnd = false
 }
 
 export function createState(x: Stateful, state: Summat) {
 	x.state = state
-}
-
-export function realCurr(stream: StreamClassInstance) {
-	stream.realCurr = defaultRealCurr
-}
-
-export function getNext<Type = any>(stream: StreamClassInstance<Type>) {
-	return (stream.curr = stream.baseNextIter())
-}
-
-export function updateNext<Type = any>(stream: StreamClassInstance<Type>) {
-	stream.baseNextIter()
-	return stream.update!()
-}
-
-export function updatePrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
-	stream.basePrevIter()
-	return (stream.curr = stream.currGetter!())
 }
 
 export function readBuffer<Type = any>(
@@ -85,28 +50,8 @@ export function readBuffer<Type = any>(
 	return (stream.curr = stream.buffer.read(stream.pos))
 }
 
-export function getPrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
-	return (stream.curr = stream.basePrevIter())
-}
-
-export function deEnd(stream: Endable) {
-	stream.isEnd = false
-}
-
-export function update<Type = any>(this: StreamClassInstance<Type>) {
-	return (this.curr = this.currGetter!())
-}
-
-// * possible '.curr=' and '.curr' methods
-export function currSet<Type = any>(this: StreamClassInstance<Type>, value: Type) {
-	return (this.realCurr = value)
-}
-
-function currGet<Type = any>(this: StreamClassInstance<Type>) {
-	return this.realCurr
-}
-
-export const curr = getSetDescriptor(currGet, currSet as () => any)
+import curr from "./methods/curr.js"
+export { curr }
 
 export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"

@@ -13,8 +13,11 @@ import type { FreezableBuffer } from "../../../Collection/Buffer/interfaces.js"
 import { positionNull } from "src/Position/refactor.js"
 import { assignBuffer } from "src/Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../Pattern/utils.js"
-import { createState, preInit, realCurr } from "../refactor.js"
-import { preEnd, preStart } from "../refactor.js"
+import { createState, start } from "../refactor.js"
+
+import { Stream, defaults } from "../../../constants.js"
+const { StreamClass } = Stream
+const { realCurr: defaultRealCurr } = defaults.StreamClass
 
 // * types
 
@@ -58,10 +61,12 @@ export type BufferStatePatternInitMethod = <Type = any>(
 // * possible '.init' methods
 
 function initialize<Type = any>(this: StreamClassInstance<Type>) {
-	realCurr(this)
-	preStart(this)
-	preEnd(this)
-	preInit(this)
+	this.realCurr = defaultRealCurr as any
+	this.isStart = StreamClass.PreCurrInit
+	if (!(this.isEnd = this.defaultIsEnd())) {
+		start(this)
+		this.realCurr = (this.initGetter || this.currGetter)!()
+	}
 }
 
 // * Explanation: the private function here is only for refactoring;

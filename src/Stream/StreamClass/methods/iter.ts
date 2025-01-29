@@ -9,18 +9,8 @@ import type {
 
 import { positionDecrement, positionIncrement } from "src/Position/refactor.js"
 import { bufferFreeze, bufferPush } from "src/Collection/Buffer/refactor.js"
-import {
-	currSet,
-	deEnd,
-	getNext,
-	getPrev,
-	readBuffer,
-	start,
-	updateNext,
-	updatePrev,
-	deStart,
-	end
-} from "../refactor.js"
+import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
+import { currSet } from "./curr.js"
 
 import { getSetDescriptor, alterProp } from "../../../refactor.js"
 
@@ -36,6 +26,24 @@ function posBufferIsFrozenGet<Type = any>(
 
 function redefineCurr<Type = any>(x: PositionalBufferizedStreamClassInstance<Type>) {
 	alterProp(x, "curr", getSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
+}
+
+function getNext<Type = any>(stream: StreamClassInstance<Type>) {
+	return (stream.curr = stream.baseNextIter())
+}
+
+function getPrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
+	return (stream.curr = stream.basePrevIter())
+}
+
+function updateNext<Type = any>(stream: StreamClassInstance<Type>) {
+	stream.baseNextIter()
+	return stream.update!()
+}
+
+function updatePrev<Type = any>(stream: ReversedStreamClassInstance<Type>) {
+	stream.basePrevIter()
+	return (stream.curr = stream.currGetter!())
 }
 
 // * function for generation of possible '.next' methods

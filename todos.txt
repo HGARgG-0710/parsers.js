@@ -150,10 +150,7 @@ REMINDERS [2.]:
 			3. regex [to npm]
 			4. xml [to npm]
 
-	2.77. About local/refactor.ts+exported - TAKE the 'exported' pieces DOWN by the relevant files (specifically shady - StreamClass\refactor.ts...); 
-
 Order of TODO-elimination: 
-	5.2.77.
 	5.2.68. 
 	5.2.71.
 	5.16.

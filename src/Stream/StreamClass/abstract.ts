@@ -1,5 +1,5 @@
 import type { InitMethod } from "./methods/init.js"
-
+import type { BasicStream } from "../interfaces.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
@@ -8,21 +8,18 @@ import type {
 	PatternStreamConstructor
 } from "./interfaces.js"
 
-import {
-	finish,
-	rewind,
-	navigate,
-	streamIterator,
-	curr,
-	init,
-	iter,
-	update
-} from "./refactor.js"
-
 import { BasicPattern } from "src/Pattern/abstract.js"
-import { protoProp } from "src/refactor.js"
-import { extendPrototype } from "src/refactor.js"
-import { valuePropDelegate } from "src/refactor.js"
+
+import { finish, rewind, navigate, init, iter, curr } from "./refactor.js"
+import { valuePropDelegate, protoProp, extendPrototype } from "src/refactor.js"
+
+function* streamIterator<Type = any>(this: BasicStream<Type>) {
+	while (!this.isEnd) yield this.next()
+}
+
+function update<Type = any>(this: StreamClassInstance<Type>) {
+	return (this.curr = this.currGetter!())
+}
 
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
