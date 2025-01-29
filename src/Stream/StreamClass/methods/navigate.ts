@@ -7,9 +7,7 @@ import type {
 
 import { uniNavigate } from "../utils.js"
 import { readBuffer } from "../refactor.js"
-import {
-	isBackward,
-	positionConvert} from "../../../Position/utils.js"
+import { isBackward, positionConvert } from "../../../Position/utils.js"
 import { positionDecrement } from "src/Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"

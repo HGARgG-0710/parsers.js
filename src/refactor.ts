@@ -17,7 +17,7 @@ export const parameterWaster =
 	() =>
 		new X()
 
-export const getSetDescriptor = ([set, get]) => ({ set, get })
+export const getSetDescriptor = (get: () => any, set: () => any) => ({ get, set })
 
 export const withoutConstructor = withoutProperties(new Set(["constructor"]))
 
@@ -26,7 +26,7 @@ export const extendPrototype = (
 	properties: PropertyDescriptorMap
 ) => Object.defineProperties(Extended.prototype, properties)
 
-export const extendClass = (Extended: Prototypal, ...classes: Prototypal[]) =>
+export const mixin = (Extended: Prototypal, ...classes: Prototypal[]) =>
 	classes.forEach((ParentClass) =>
 		extendPrototype(
 			Extended,
@@ -36,7 +36,9 @@ export const extendClass = (Extended: Prototypal, ...classes: Prototypal[]) =>
 		)
 	)
 
-export const addProperty = (
+export const alterProp = Object.defineProperty
+
+export const protoProp = (
 	Extended: Prototypal,
 	name: PropertyKey,
 	value: PropertyDescriptor

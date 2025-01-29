@@ -18,17 +18,19 @@ import {
 	predicateStreamProd,
 	predicateStreamCurr,
 	predicateStreamNext,
-	predicateStreamInitialize
+	predicateStreamInitialize,
+	predicateStreamDefaultIsEnd
 } from "./refactor.js"
 
-import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { StreamClass } from "../StreamClass/abstract.js"
 import { extendPrototype } from "src/refactor.js"
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
-	DefaultEndStream<Type>({
+	StreamClass<Type>({
+		defaultIsEnd: predicateStreamDefaultIsEnd,
 		currGetter: predicateStreamCurr,
 		baseNextIter: predicateStreamNext,
 		isCurrEnd: predicateStreamIsEnd,

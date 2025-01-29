@@ -1,17 +1,45 @@
 import type { Indexed } from "../../Stream/interfaces.js"
 import type { HashClass, HashMap, HashType } from "./interfaces.js"
 import type { Token as TypeToken } from "../../Token/interfaces.js"
+import type { InternalHash } from "./InternalHash/interfaces.js"
 
-import { BaseHashClass } from "./abstract.js"
+import { DelegateSizeable } from "../abstract.js"
+
 import { extend } from "./refactor.js"
-
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"
+import { charCodeAt } from "../../refactor.js"
 
 import { functional, type as _type } from "@hgargg-0710/one"
-import { charCodeAt } from "../../refactor.js"
 const { id } = functional
 const { typeOf } = _type
+
+abstract class BaseHashClass<
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any
+> extends DelegateSizeable<InternalHash<InternalKeyType, ValueType>> {
+	hash: HashType<KeyType, InternalKeyType>
+
+	index(x: KeyType, ...y: any[]) {
+		return this.value.get(this.hash(x, ...y))
+	}
+
+	set(key: KeyType, value: ValueType, ...y: any[]) {
+		this.value.set(this.hash(key, ...y), value)
+		return this
+	}
+
+	delete(key: KeyType, ...y: any[]) {
+		this.value.delete(this.hash(key, ...y))
+		return this
+	}
+
+	replaceKey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
+		this.value.replaceKey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
+		return this
+	}
+}
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
 	hash: HashType<KeyType, InternalKeyType>

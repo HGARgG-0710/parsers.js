@@ -20,7 +20,7 @@ import {
 } from "./refactor.js"
 
 import { BasicPattern } from "src/Pattern/abstract.js"
-import { addProperty } from "src/refactor.js"
+import { protoProp } from "src/refactor.js"
 import { extendPrototype } from "src/refactor.js"
 import { valuePropDelegate } from "src/refactor.js"
 
@@ -111,11 +111,11 @@ export function StreamClass<Type = any>(
 	extend(iter.chooseMethod(currGetter, hasPosition, buffer))
 
 	// * Adding the initialization method
-	addProperty(streamClass, "init", {
+	protoProp(streamClass, "init", {
 		value: init.chooseMethod(hasPosition, buffer, state, isPattern)
 	})
 
-	if (currGetter) addProperty(streamClass, "update", { value: update })
+	if (currGetter) protoProp(streamClass, "update", { value: update })
 
 	return streamClass
 }

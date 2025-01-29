@@ -1,6 +1,5 @@
-import { InitializablePattern } from "src/Pattern/abstract.js"
-
 import type { Indexed } from "../Stream/interfaces.js"
+import { InitializablePattern } from "src/Pattern/abstract.js"
 
 export abstract class IterableCollection<Type = any>
 	extends InitializablePattern<Indexed<Type>>
@@ -14,5 +13,3 @@ export abstract class IterableCollection<Type = any>
 		}
 	}
 }
-
-export * as Buffer from "./Buffer/abstract.js"

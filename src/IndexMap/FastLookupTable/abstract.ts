@@ -1,15 +1,7 @@
 import type { Sizeable } from "../interfaces.js"
-import type {
-	Settable,
-	KeyReplaceable,
-	Deletable,
-	HashMap
-} from "../HashMap/interfaces.js"
-
-import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
+import type { Settable, KeyReplaceable, Deletable } from "../HashMap/interfaces.js"
 
 import { DelegateDeletableSettableSizeable } from "../abstract.js"
-import { assignIndex } from "./utils.js"
 
 export abstract class DelegateKeyReplaceable<
 	KeyType = any,
@@ -30,51 +22,4 @@ export abstract class DelegateKeyReplaceable<
 		this.value.replaceKey(keyFrom, keyTo)
 		return this
 	}
-}
-
-export abstract class DelegateLookupTable<
-	KeyType = any,
-	ValueType = any,
-	OwningType = any,
-	DelegateType extends Settable<KeyType, ValueType> &
-		KeyReplaceable<KeyType> &
-		Deletable<DeletedType> &
-		Sizeable = any,
-	DeletedType = KeyType
-> extends DelegateKeyReplaceable<KeyType, ValueType, DelegateType, DeletedType> {
-	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
-		assignIndex(x, ownIndex)
-		return x
-	}
-
-	constructor(value: DelegateType) {
-		super(value)
-	}
-}
-
-export abstract class DelegateHashTable<
-	KeyType = any,
-	ValueType = any,
-	OwningType = any
-> extends DelegateLookupTable<
-	KeyType,
-	ValueType,
-	OwningType,
-	HashMap<KeyType, ValueType, any>,
-	KeyType
-> {
-	byOwned(priorOwned: IndexAssignable<OwningType>) {
-		return this.value.index(priorOwned.assignedIndex)
-	}
-
-	constructor(hash: HashMap<KeyType, ValueType>) {
-		super(hash)
-	}
-}
-
-export abstract class PreHashTableClass<KeyType = any, ValueType = any, OwningType = any>
-	extends DelegateHashTable<KeyType, ValueType, OwningType>
-	implements FastLookupTable<KeyType, ValueType, OwningType>
-{
-	abstract getIndex: (x: any) => OwningType
 }

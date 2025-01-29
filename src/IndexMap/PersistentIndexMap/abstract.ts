@@ -1,7 +1,7 @@
 import type { IndexMap } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { extendClass } from "src/refactor.js"
+import { mixin } from "src/refactor.js"
 import { PreIndexMap } from "../abstract.js"
 import { DelegateKeyReplaceable } from "../FastLookupTable/abstract.js"
 
@@ -71,4 +71,4 @@ export abstract class DelegateIndexMap<
 }
 
 // * This is where the real implementations of the empty FakeIndexMap methods come from.
-extendClass(DelegateIndexMap, PreIndexMap)
+mixin(DelegateIndexMap, PreIndexMap)

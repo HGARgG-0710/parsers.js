@@ -8,7 +8,7 @@ import type {
 	StreamClassInstance
 } from "./interfaces.js"
 
-import { valueDelegate, valuePropDelegate } from "src/refactor.js"
+import { getSetDescriptor, valueDelegate, valuePropDelegate } from "src/refactor.js"
 
 import { Stream, defaults } from "../../constants.js"
 const { StreamClass } = Stream
@@ -27,7 +27,7 @@ const calledDelegate =
 	(called: any, ...delegateArgs: any[]) =>
 		called[delegatePropName][delegateMethodName].call(called, ...delegateArgs)
 
-export const superDelegate = calledDelegate("super")
+const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")
 
 export function preStart(stream: PreStarted) {
@@ -102,14 +102,11 @@ export function currSet<Type = any>(this: StreamClassInstance<Type>, value: Type
 	return (this.realCurr = value)
 }
 
-export function currGet<Type = any>(this: StreamClassInstance<Type>) {
+function currGet<Type = any>(this: StreamClassInstance<Type>) {
 	return this.realCurr
 }
 
-export const curr = {
-	get: currGet,
-	set: currSet
-}
+export const curr = getSetDescriptor(currGet, currSet as () => any)
 
 export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"

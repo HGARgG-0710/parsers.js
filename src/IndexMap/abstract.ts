@@ -18,17 +18,6 @@ export abstract class DelegateSizeable<
 	}
 }
 
-export abstract class DelegateSettableSizeable<
-	KeyType = any,
-	ValueType = any,
-	DelegateType extends Sizeable & Settable<KeyType, ValueType> = any
-> extends DelegateSizeable<DelegateType> {
-	set(key: KeyType, value: ValueType) {
-		this.value.set(key, value)
-		return this
-	}
-}
-
 export abstract class DelegateDeletableSettableSizeable<
 	KeyType = any,
 	ValueType = any,
@@ -36,7 +25,12 @@ export abstract class DelegateDeletableSettableSizeable<
 		Settable<KeyType, ValueType> &
 		Sizeable = any,
 	DeletedType = KeyType
-> extends DelegateSettableSizeable<KeyType, ValueType, DelegateType> {
+> extends DelegateSizeable<DelegateType> {
+	set(key: KeyType, value: ValueType) {
+		this.value.set(key, value)
+		return this
+	}
+
 	delete(key: DeletedType) {
 		this.value.delete(key)
 		return this
@@ -144,8 +138,3 @@ export abstract class BaseIndexMap<
 		super()
 	}
 }
-
-export * as FastLookupTable from "./FastLookupTable/abstract.js"
-export * as HashMap from "./HashMap/abstract.js"
-export * as LinearIndexMap from "./LinearIndexMap/abstract.js"
-export * as PersistentIndexMap from "./PersistentIndexMap/abstract.js"

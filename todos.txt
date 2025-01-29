@@ -56,6 +56,7 @@ REMINDERS [2.]:
 
 						// the gist is: 
 						1. precompute = (f, indexes: Set<number>) => (...values: any[]) => (...x: any[]) => {
+							// ! NOTE: this is a *WHOLE SEPARATE CURRIED FUNCTION IN TERMS OF 'values' and 'x'* [here - inlined for simplicity...]
 							const concatted = []
 							for (let i = 0, vi = 0, xi = 0; i < f.length; ++i) 
 								concatted.push(indexes.has(i) ? values[vi++] : x[xi++])
@@ -65,42 +66,49 @@ REMINDERS [2.]:
 						[ALSO - include into 'one.js' the results of refactoring]: 
 						2. propByName (Stream/refactor.ts) - an IMMENSELY useful function, would go well into 'functional'; 
 						3. classWrapper (src/refactor.ts)  - very key for the library in particular - SADLY, it falls outside its ontology..., needs to be put someplace else; 
+						4. 'function.copy' - the 'copyFunction' function; 
+						5. 'string.charCodeAt' - same place as 'copyFunction'; 
+						6. 'object.alterProp' and 'object.protoProp' - same place as 'copyFunction', 'alterProp'
 						[GENERALLY - walk through the 'refactor.ts' files and CHOOSE which should go into the new version of 'one.js']
+
+						7. 'descriptor' submodule of 'object': 
+							Everything related to descriptors, in particular: 
+
+								1. getSetDescriptor,
+								2. valueDescriptor -> {value}
+								... [everything related - the prior 'PropertyDescriptor class' notes would allude to this...]; 
+
+						8. 'object': 
+
+							1. extendPrototype
+							2. mixin
+							
+
+						9. 'functional.has' - current 'src/refactor.ts' 'has' function; 
+
+						10. 'classes' submodule: 
+							1. 'delegate'
+							2. 'calledDelegate'
+							3. 'delegateProperty'
+							4. 'classWrapper'
+							5. 'withoutConstructor'
+
+						11. 'functional.waster = (f) => (n) => (...args: any[]) => f(...args.slice(0, n))': 
+							THIS replaces 'parameterWaster' in particular
+
+						12. one.js-specific: 
+							Use the 'PropertyKey' from @types/node instead of making your own definitions in 'object'; 
+							SAME with 'PropertyDescriptor' type; 
 
 					[ADD THIS TO DOCS!!!]
 					Then, one can do: 
 						
 						const layers = new LayeredFunction(...)
 						const singlePrecompute = precompute(new StreamParser(...), new Set([1, ... (other inds)]))
-						layers.layers = [singlePrecompute({ parser: layers })]
+						layers.layers = [singlePrecompute({ parser: layers }), InputStream] // ... example ... 
 
 					Presence of this in one.js would be a PERFECTLY good excuse for keeping 'LayeredFunction' HERE (for the moment, at the very least... - one did plan to refactor it out somewhere, is needed for other porjects as well...); 
 
-		OLD NOTES:
-
-		1. It is (really) just a modifiable/recomputable composition of functions; 
-			Too general for the library as it currently stands; 
-		2. One needs to specialize it - how? 
-			Largest problem with it is that it's INCAPABLE of working with StreamParser,
-				because: 
-
-					1. self-modification requires storing a reference on NECESSARY LEVELS of 'StreamParser'; 
-					2. 'LayeredFunction' ONLY takes functions that accept 1 argument, so 'classWrapper(StreamParser(table))' WON'T DO (accepts 2 - 'input', 'state'); 
-				
-				One could, of course, do this: 
-
-					const layered = LayeredFunction(A, ..., (input) => StreamParser(table)(input, { parser: layered })); 
-
-				CONCLUSION: add a new function for [generally] doing '(f, n, v) => (...values: any[]) => f(...insert(values, n, v))'; 
-			
-				Problem then becomes - 'layered' has to be given BEFORE all this is done...; 
-				Also - one ought to be able 
-				So, what one actually has to do is: 
-
-					const layered = new LayeredFunction()
-					layered.layers = [A, ..., ((v) => (input) => StreamParser(table)(input, v))({ parser: layered }), ...]
-				
-				Then, the 'table' would have a 'function', that would in certain circumstances access the 'this.state.parser', and CHANGE IT; 
 
 	[LATER - during testing...]
 	2.66. Cases of "Bad Types" [to fix]: 
@@ -132,8 +140,6 @@ REMINDERS [2.]:
 			4. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
 			5. [Stream-specific] see if the '.curr/.next/.prev'  method re-binding optimizations were an overkill [elimination of 'this.isEnd = true/false/whatever-for-each-call']; 
 
-	2.75. Use the 'ts-unused-exports' command line tool to find excessive exports (namely - dead code in this case...); 
-
 	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 
@@ -146,19 +152,19 @@ REMINDERS [2.]:
 
 	2.77. About local/refactor.ts+exported - TAKE the 'exported' pieces DOWN by the relevant files (specifically shady - StreamClass\refactor.ts...); 
 
-	2.78. Remove 'abstract' as a library export. 
-	
 Order of TODO-elimination: 
-	5.2.75.
+	5.2.77.
 	5.2.68. 
 	5.2.71.
-	5.2.52. 
-	5.2.62.
 	5.16.
 	5.17.
+	
+	5.2.62.
+	5.2.52. 
+	
 	5.2.73.
 	5.2.74.	
-	5.2.78.
+	5.2.76.	
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
@@ -1363,7 +1369,4 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
 		In particular, it would have: 	
 
-			1. 'delegate' functions [from here]; 
-			2. A 'PropertyDescriptor' class; 
-				2.1. This one is for creation of 'Object.defineProperty' signature-objects (the "property descriptors"); 
 			3. The 'Constructor' type; 

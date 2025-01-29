@@ -8,8 +8,7 @@ import type {
 } from "../interfaces.js"
 
 import { positionDecrement, positionIncrement } from "src/Position/refactor.js"
-import { bufferPush } from "src/Collection/Buffer/refactor.js"
-import { bufferFreeze } from "src/Collection/Buffer/refactor.js"
+import { bufferFreeze, bufferPush } from "src/Collection/Buffer/refactor.js"
 import {
 	currSet,
 	deEnd,
@@ -18,10 +17,12 @@ import {
 	readBuffer,
 	start,
 	updateNext,
-	updatePrev
+	updatePrev,
+	deStart,
+	end
 } from "../refactor.js"
 
-import { deStart, end } from "../refactor.js"
+import { getSetDescriptor, alterProp } from "../../../refactor.js"
 
 import { functional } from "@hgargg-0710/one"
 const { nil } = functional
@@ -34,15 +35,10 @@ function posBufferIsFrozenGet<Type = any>(
 }
 
 function redefineCurr<Type = any>(x: PositionalBufferizedStreamClassInstance<Type>) {
-	Object.defineProperty(x, "curr", {
-		set: currSet,
-		get: posBufferIsFrozenGet
-	})
+	alterProp(x, "curr", getSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
 }
 
-// * possible '.next' methods
-
-// ! BY DEFAULT - one has the pairing 'next - fastPrev' [as it's not '.isEnd' by default],
+// * function for generation of possible '.next' methods
 function generateIterationMethods(
 	nextGetter: (x: StreamClassInstance) => any,
 	prevGetter: (x: ReversedStreamClassInstance) => any
