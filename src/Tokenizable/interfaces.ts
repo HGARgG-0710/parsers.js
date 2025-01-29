@@ -1,6 +1,6 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { Flushable, Resulting } from "../Pattern/interfaces.js"
-import type { TypePredicate } from "../interfaces.js"
+import type { type } from "@hgargg-0710/one"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 
@@ -25,5 +25,5 @@ export interface TokenizablePattern<Type = any, InType = any, OutType = any>
 export interface DelegateTokenizablePattern<Type = any, InType = any, OutType = any>
 	extends TokenizablePattern<Type, InType, OutType> {
 	tokenizer: FreeTokenizer<Type, InType>
-	isType: TypePredicate<Type>
+	isType: type.TypePredicate<Type>
 }

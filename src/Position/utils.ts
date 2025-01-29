@@ -1,18 +1,17 @@
+import type { type as types } from "@hgargg-0710/one"
 import type { BasicStream } from "../Stream/interfaces.js"
-import type { ChangeType } from "./interfaces.js"
-
 import type {
 	DirectionalPosition,
 	Position,
 	PositionObject,
 	PredicatePosition,
-	Posed
+	Posed,
+	ChangeType
 } from "./interfaces.js"
 
 import { previous, next } from "src/Stream/utils.js"
 
 import { object, type, boolean, functional } from "@hgargg-0710/one"
-import type { TypePredicate } from "../interfaces.js"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 const { trivialCompose, or } = functional
@@ -27,7 +26,7 @@ export const isPosition = or(
 	isNumber,
 	isFunction,
 	isPositionObject
-) as TypePredicate<Position>
+) as types.TypePredicate<Position>
 
 /**
  * Given a `Position` and (optionally) a `BasicStream`, it returns one of:

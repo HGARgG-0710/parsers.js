@@ -1,4 +1,4 @@
-import type { TypePredicate } from "../interfaces.js"
+import type { type } from "@hgargg-0710/one"
 import type {
 	FaultyElement,
 	InvalidEntries,
@@ -47,7 +47,7 @@ export function validateTokenized<Type = any>(
 
 export function analyzeValidity<Type = any>(
 	result: ValidationOutput<Type>,
-	isType = T as TypePredicate<Type>
+	isType = T as type.TypePredicate<Type>
 ): InvalidEntries<Type> {
 	const [valid, contents] = result
 	const final: InvalidEntries<Type> = []
@@ -70,6 +70,6 @@ export const analyzedValue = <Type = any>(analyzed: InvalidEntries<Type>, i: num
 	analyzed[i][1]
 
 export const isFaultyElement = <Type = any>(
-	isType: TypePredicate<Type>
+	isType: type.TypePredicate<Type>
 ): ((x: ValidMatch | Type | FaultyElement<Type>) => x is FaultyElement<Type>) =>
 	isPair<InvalidMatch, Type>(isInvalidMatch, isType)

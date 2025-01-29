@@ -21,8 +21,9 @@ export function swapValues<Type = any>(x: Pattern<Type>, y: Pattern<Type>) {
 	y.value = temp
 }
 
-export function dig(pointer: Pattern): any {
+export function dig(pointer: Pattern, depth: number = Infinity): any {
 	let curr = pointer
-	while (isPoiner(curr.value)) curr = value(curr)
+	let currDepth = 0
+	while (isPoiner(curr.value) && currDepth++ <= depth) curr = value(curr)
 	return curr
 }

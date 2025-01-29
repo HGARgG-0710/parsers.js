@@ -1,5 +1,6 @@
+import type { type as types } from "@hgargg-0710/one"
+
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { TypePredicate } from "../interfaces.js"
 import type { DelegateTokenizablePattern, FreeTokenizer } from "./interfaces.js"
 
 import { FlushableTokenizable } from "./abstract.js"
@@ -14,7 +15,7 @@ const { replace } = inplace
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
-	isType: TypePredicate<Type>
+	isType: types.TypePredicate<Type>
 ): new <OutType = any>(value?: Type) => DelegateTokenizablePattern<
 	Type,
 	InType,
@@ -25,7 +26,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		implements DelegateTokenizablePattern<Type, InType, OutType>
 	{
 		tokenizer: FreeTokenizer<Type, InType>
-		isType: TypePredicate<Type>
+		isType: types.TypePredicate<Type>
 
 		tokenize(key: InType, handler: SummatFunction<any, Type, OutType>) {
 			if (!this.result.length)

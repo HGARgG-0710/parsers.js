@@ -1,5 +1,5 @@
+import type { type } from "@hgargg-0710/one"
 import type { Pointer } from "../Pattern/interfaces.js"
-import type { TypePredicate } from "../interfaces.js"
 
 export interface Token<Type = any, Value = any>
 	extends TokenInstance<Type>,
@@ -11,12 +11,12 @@ export interface TokenInstance<Type = any> {
 
 export interface TokenInstanceClass<Type = any> extends TokenInstance<Type> {
 	new (): TokenInstance<Type>
-	is: TypePredicate<TokenInstance<Type>>
+	is: type.TypePredicate<TokenInstance<Type>>
 }
 
 export interface TokenType<Type = any, Value = any> {
 	new (value: Value): Token<Type, Value>
-	is: TypePredicate<Token<Type, Value>>
+	is: type.TypePredicate<Token<Type, Value>>
 }
 
 export interface MarkedTokenType<Type = any, Value = any>
