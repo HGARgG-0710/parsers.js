@@ -13,6 +13,12 @@ export interface WriteTree<Type = any> {
 	write: (multindex: number[], value: InTree<Type>) => InTree<Type>
 }
 
+export interface DynamicTree<Type = any> {
+	append: (value: InTree<Type>) => number
+	insert: (index: number, value: InTree<Type>) => number
+	remove: (index: number) => number
+}
+
 export type Tree<Type = any> = ReadonlyTree<Type> & WriteTree<Type>
 
 export interface ParentTree<Type = any> extends WalkableTree<Type> {

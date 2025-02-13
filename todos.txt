@@ -49,25 +49,14 @@ REMINDERS [2.]:
 					2. the initial 'state' [static - later can be changed from inside 'table']
 
 				PROBLEM: consider doing 'StreamParser()' WITH A '.buffer'?! 
-					Then - INSTEAD, create a function [separate - put in one.js/functional]: 	
+					Then - INSTEAD, create a function [separate - put in one.js/functional; NAME - 'argFiller'; SPECIFICALLY - have an 'export const stateFiller = argFiller(new Set(1))' as *A UTIL*]: 	
 
-						// the gist is: 
-						1. precompute = (f, indexes: Set<number>) => (...values: any[]) => (...x: any[]) => {
-							// ! NOTE: this is a *WHOLE SEPARATE CURRIED FUNCTION IN TERMS OF 'values' and 'x'* [here - inlined for simplicity...]
-							const concatted = []
-							for (let i = 0, vi = 0, xi = 0; i < f.length; ++i) 
-								concatted.push(indexes.has(i) ? values[vi++] : x[xi++])
-							return f(...concatted)
-						}
-
-						[ALSO - include into 'one.js' the results of refactoring]: 
+						[DONE]
 						2. propByName (Stream/refactor.ts) - an IMMENSELY useful function, would go well into 'functional'; 
-						3. classWrapper (src/refactor.ts)  - very key for the library in particular - SADLY, it falls outside its ontology..., needs to be put someplace else; 
-						4. 'function.copy' - the 'copyFunction' function; 
-						5. 'string.charCodeAt' - same place as 'copyFunction'; 
+						3. classWrapper (src/refactor.ts)  - very key for the library in particular - SADLY, it falls outside its ontology..., needs to be put someplace else; 	
+						4. 'function.copy' - the 'copyFunction' function; 	
+						5. 'string.charCodeAt' - same place as 'copyFunction'; 		
 						6. 'object.alterProp' and 'object.protoProp' - same place as 'copyFunction', 'alterProp'
-						[GENERALLY - walk through the 'refactor.ts' files and CHOOSE which should go into the new version of 'one.js']
-
 						7. 'descriptor' submodule of 'object': 
 							Everything related to descriptors, in particular: 
 
@@ -75,27 +64,18 @@ REMINDERS [2.]:
 								2. valueDescriptor -> {value} [const descriptor]
 								3. basicDescriptor -> configurable + value + writable
 								... [everything related - the prior 'PropertyDescriptor class' notes would allude to this...]; 
-
 						8. 'object': 
-
 							1. extendPrototype
 							2. mixin
-
 						9. 'functional.has' - current 'src/refactor.ts' 'has' function; 
-
 						10. 'classes' submodule: 
 							1. 'delegate'
 							2. 'calledDelegate'
 							3. 'delegateProperty'
 							4. 'classWrapper'
 							5. 'withoutConstructor'
-
 						11. 'functional.waster = (f) => (n) => (...args: any[]) => f(...args.slice(0, n))': 
 							THIS replaces 'parameterWaster' in particular
-
-						12. one.js-specific: 
-							Use the 'PropertyKey' from @types/node instead of making your own definitions in 'object'; 
-							SAME with 'PropertyDescriptor' type; 
 
 					[ADD THIS TO DOCS!!!]
 					Then, one can do: 
@@ -134,21 +114,36 @@ REMINDERS [2.]:
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 
 			0. one.js [to npm]
-			1. draw-text [to GitHub Actions]
+			1. draw-text [install-npm + prod-to GitHub Pages]
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
 			2. selector [to npm]
 			3. regex [to npm]
 			4. xml [to npm]
 
+	2.77. Refactor with one.js v0.5...; 
+
+	2.78. Split the 'this.walker.init' from 'TreeStream': 
+		1. DO NOT pass the 'Tree' to the 'TreeStream'
+		2. DO NOT keep the '.value' on 'TreeStream'
+		3. Simplify the 'TreeStream.init' method implementation [no need to check for the 'tree']; 
+	
+	2.79. Add all the 'TrivialWalkableTree' methods into 'ChildrenTree'. 
+		Remove the 'TrivialWalkableTree'; 
+
+	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
+		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
+		Fix it; 
+
 Order of TODO-elimination: 
 	5.17.
 	
-	5.2.62.
 	5.2.52. 
+	5.2.62.
 	
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
+	5.2.77. 
 
 	JSDoc: 
 		Add it BEFORE doing the tests. 
@@ -172,7 +167,6 @@ Order of TODO-elimination:
 	B. 
 	At the same time: 
 		2. 
-		5.16. 
 		4. 
 		
 	C.
@@ -243,7 +237,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		If the 'size' is unknown, implements a simple DFS (namely - conversion of a given 'Tree' into an 'Array')
 
-	2.2. TreeStream: create two new versions; 
+	2.2. TreeStream: create a new versions; 
 
 		The 'TreeStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 		There should be ANOTHER - the 'LR' post-order tree traversal; 
@@ -259,13 +253,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 			[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
 
-		2. Create a 'TreeStreamSwitch', which would be capable of "choosing" [based off underlying IndexMap] 
-			whether to give items in the 'Post' order (parent first - children after), 
-				or the 'Pre' order (children first - parent after);
-			
-			This would be a class-factory; 
-
-	2.3. Implement a 'level-by-level TreeStream': 
+	2.3. Implement a 'level-by-level TreeStream' ('TreeStreamLevel'): 
 		It would get an initial given 'level' (tree root), walk through all of its '.children', 
 			then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 		Would do it via calling '.getJointLayer' function (then - caching for later '.prev'); 
@@ -391,7 +379,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Also, there'd be '.shorten(n: number)' - it'd delete a certain number of elements from '.stream'-s, 
 			optionally changing '.curr', and set '.isEnd = true' (if the .curr is in one of the deleted 'Stream'-s); 
 	
-	2.9. [Maaayybe?] Create a 'samples' directory; 
+	2.9. [DEFINITELY!] Create a 'samples' directory; 
 		This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
 			PRESENT within the previous parsers, use them?
 		
@@ -438,6 +426,9 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		3. ALSO - join the 'samples' with the 'constants.ts' file 
 			[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
+		
+		4. MOST IMPORTANT - generation functions, stuff for working with AST-s: 
+			1. Based off ASTAnalyzer, ASTStream-s, ASTHierarchy, etc... Generally, the 'Tree.AST' module
 	
 	2.10. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
@@ -510,17 +501,19 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		This would permit a more "variable" set of trees (those that have properties with fixed names), 
 			to be enumerated accordingly...; 
 
-		Example: 
+		Example [1]: 
 
 			{
+				type: any, 
 				a: any
 				b: any
 				c: any
 			}
 
-		Becomes: 
+		Becomes [1]: 
 
 			{
+				type: any, 
 				value: [
 					// ... a, b, c
 					// ... or b, a, c
@@ -528,7 +521,18 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				]
 			}
 
-		For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used; 
+		Example [2]: 
+
+			{ type: any }; remains the same
+		
+		Example [3]: 
+
+			{ type: any, namedProp: any }; becomes { type: any, value: any }; by changing the property name to 'value'
+
+		For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used/transformed; 
+		MORE SPECIFICALLY, it creates a 'ASTAnalyzer'- and 'ASTNode'-fit tree, from one that is 
+			too complex (not homogenous enough nodes, more complex node categorization). 
+
 		2.12.1. Also: 
 
 			Create a "fast" 'TreeIterator' class; 
@@ -1350,11 +1354,146 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 											As these things are happening AT COMPILE TIME for the given parser, 
 												one can afford the lavishes of actually doing all that...; 
 	
-	55. MultiMap - [IndexMap-like] this returns THE LAST matched item, running multiple results [with REQUIRED function-values, and only unless early termination has been demanded by a return value]; 
+	55. MultiMap - [IndexMap-like] this returns ALL the matched items, and while running multiple results 
+		[with REQUIRED function-values, and only unless early termination has been demanded by a return value]; 
 
-[maybe, for v0.4!]
-3. Dependency management: 
-	3.1. [maybe???] Create a 'refactor' library, specifically designed to refactor common design patterns; 
-		In particular, it would have: 	
+	56. Create an 'ASTAnalyzer' class [under new 'Tree.AST' module]: 
+		1. gets an 'AST', defined by: 
+			1. Trivial nodes - 'TokenInstance'-like
+			2. Content nodes - 'Token'-like or 'TokenType'-like
+			3. Recursive nodes - 'TokenType'-like, with arrays for values
+		2. Traverses the tree: 
+			1. New abstraction: ASTNode - class, with '.from' method: 
+				1. The '.from' method takes a JavaScript object (JSON), 
+					with values as described above, and transforms it INTO A PROPER TREE, 
+						using: 
+							1. ChildlessTree
+							2. SingleTree
+							3. MultTree
+				2. The ASTNode is a 'ChildrenTree' [see Tree/classes.ts]: 
+					1. Namely, it is based off a 'ChildrenTree' descendant (it's a class-generating function), already provided ones are: 
+						1. ParentTree [for quick iteration via 'TreeStream' - better for subsequent reads]
+						2. TrivialWalkableTree [for better memory footprint - better for initial writes]
+				3. ASTNode can be created via a constructor, like any other tree [uses the 'constructor' of the given parent class]: 
+					1. Namely, it employs a specific 'converter' function [one that converts the elements "simply"]
+					2. Keeps a '.type' property on itself (it's a TokenInstance)
+					3. There are *3* types of ASTNode-s [3 distinct classes - for optimization purposes]: 
+						1. RecursiveASTNode - without '.value' and '.children: ASTNode[]'; NOTE: here 'ASTNode' is an interface
+						2. ContentASTNode - with '.value: any', without '.children'; This is just a 'TokenType' with additional prototype-methods
+						3. TrivialASTNode - with '.value', without '.children'; This is a 'TokenInstance', with additional prototype-methods
+			2. By doing 'ASTStream(TreeWalker(ASTNode.from(...)))', one can iterate a given generated JavaScript AST object! 
+				2.1. This is what the ASTAnalyzer (actually) is doing; 
+				2.2. The 'Stream' is, then, applied a 'StreamParser' upon; 
+				2.3. NOTE: that the 'TreeStream' used is CONFIGURABLE [namely - 'ASTAnalyzer' is, too a function, taking in and returning A CLASS!]
+				2.4. About 'ASTStream' - see below...
 
-			3. The 'Constructor' type; 
+		3. Returns information: 
+			1. [Buckets-Categorization] Arrays of '.trivial', '.content' and '.recursive' nodes
+			2. [Type-Categorization] Returns a 'HashMap' of arrays of nodes, filtered by their '.type'; 
+				NOTE: the 'HashMap' is, TOO, completely configurable by the user [user-defined (if provided), else - default being: when 'string's are used for 'type's - ObjectHashInternal, otherwise - HashMapInternal]; 
+					(another function-argument for returning the final ASTAnalyzer class)
+
+		4. Provides functionality: 
+			1. mapTypes((type_name: string) => string): 
+				creates a new 'ASTNode', by means of mapping the '.type'-s
+					of the current one using the given function. 
+				Immensely powerful for changing between different data formats. 
+
+			2. mapValues((x: any) => any)
+				creates a new 'ASTNode', by means of mapping the '.value's of each 'ContentASTNode', 
+					while preserving all else
+			
+			3. .find(type: ..., pred: (x) => boolean): 
+				Seeks an item in the tree with a type '.type', obeying the predicate '.pred';
+				Optimizes to look specifically in a '.type'-bucket of the given 'type'. 
+				Can be radically faster for large inputs. 
+			
+			4. .find(pred: (x) => boolean): 
+				if the 'type' is not passed, the entire tree is searched; 
+				Optimization - uses prior obtained collections for increasing cache locality of large searches. 
+			
+			5. .iterate(type) - returns a Stream, filled specifically with values of type 'type'; 
+				Namely, it returns an 'InputStream', wrapped around the respective '.type'-bucket; 
+				The items are listed on a from-beginning-to-end of the 'Stream' used to construct the ASTAnalyzer; 
+
+			6. .filter(pred) - returns a new tree, such that it ONLY contains elements that obey the given predicate: 
+				HOWEVER, one can also mandate that in order for a sub-tree (RecursiveASTNode) to remain, 
+					at least one of its children must be 'true' as well. 
+					This is done by means of returning `null`, instead of `true`/`false`.  
+			
+			7. .search(type: any) - searches, and returns for multi-index information for each of the elemenets of a given type. 
+				Optimization: uses ONLY JUST the information from a given '.type'-bucket; 
+				This allows one to: 
+					1. Iterate a portion of the tree INSTEAD of needing to start "at the beginning
+					2. Know exactly when to stop (seeing the *last* item that needs to be iterated over)
+
+			8. .map((x: ContentASTNode | TrivialASTNode) => any): 
+				Maps all the non-RecursiveASTNode parts of the tree to a different 'Tree'. 
+				Useful for creation of generalized non-AST trees, to be used with 'TreeStream': 
+					Example, passing a function that returns 'string', then - CONCATENATING all 
+						the items inside the obtained Tree, via: 
+
+							// [sketch - no types]
+							function GenerationFunction(F) {	
+								return function generate(ast) {	
+									return array(TreeStreamPre(ast.map(F)), new UnfreezableString()).get()
+								}
+							}
+							
+							// this is to create either a SUBSET defined by a recursive IndexMap-like function, *or* via working through a '[type]'-defined set of "superior" nodes; 
+							// NOTE: 'ast.types[type]' is an *ARRAY*
+							function GenerationRecursive(F, type) {	
+								return function generate(ast) {	
+									return array(InputStream(ast.types.index(type).map(F)), new UnfreezableString()).get()
+								}
+							}
+
+					IDEA: ADD a set of 'samples' to the library - see above...
+
+				Also - '.map(F)' OPTIMIZES, so, it expects the given values to be returning FUNCTIONS, for plugging in their children's 'F(x)', 
+					so: 
+
+						1. A -> B
+						2. F(A) -> X(K): X(B) == string
+						3. F(B) == string
+							F(A)(B); 
+						
+				The optimization is - SPLITTING the '.types'-buckets via doing '.types[name].map(...)'; 
+
+		5. Optimization information (additional): 
+			1. IDEA: add a new 'ASTHierarchy' information object, which: 
+				1. Specifies, what '.type'-s CAN be found within which '.type'-s of RecursiveASTNode-s: 
+					IMMENSELY powerful for search-optimization inside a given Tree 
+						[limits the '.type'-buckets in which one needs to look]; 
+				2. Specifies maximum "depth" of a certain particular 'RecursiveASTNode': 
+					1. Allows one to replace a continuous check of 'isGoodIndex(.lastChild)' with 'isGoodIndex(.lastChild) && i < MAX_DEPTH_COUNT'; 
+						Guarantees a performance bound. 
+						When the bound is PRECISE, the 'isGoodIndex' can be dropped
+				3. Specifies maximum length for '.children' of a given 'RecursiveASTNode': very useful for iteration! 
+					1. Replaces '.children.length' check with a 'counter < FIXED_PRECOMPUTED_LENGTH'; 
+				4. Specifies expected structure for a given 'RecursiveASTNode': 
+					1. May permit one to be going one-by-one downwards for it, EXPECTING the given '.type's; 
+					2. Eliminates checks for '.isSiblingAfter'
+
+				'ASTHierarchy' is optional, and its purpose is solely to: 
+					1. provide algorithm optimizations
+					2. enforce bounds for a given format
+
+				NOTE: 'ASTHierarchy' is ONLY good for optimization, when IT IS PRECISE 
+					[id est, we can SKIP certain function-calls/checks]. 
+
+			NOTE: optimizations work via: 	
+				1. ASTStream-s: 
+					0. Alternative to 'TreeStream': less generic, provides better optimizations for AST: 
+						1. ASTStreamPre - alt. of TreeStreamPre
+						2. ASTStreamLevel - alt. of TreeStreamPre
+						3. ASTStreamPost - alt. of TreeStreamPost
+					1. Accepts an 'ASTNode' instead of a 'Tree'
+					2. Optimizations: 
+						1. No '.lastChild' presence check in '.isChild()' method - instead, just '.lastChild > -1'	
+							This is a good optimization for TreeStream-iteration of large trees ('.isChild()' is called ON EVERY '.next()' call); 
+						2. Algorithm Configurable via 'ASTHierarchy':
+							1. Optimizations are present ONLY when ASTHierarchy is PRECISE
+							2. Expects a VALID abstract syntax tree
+
+			2. For '.type's field values, one uses EITHER an 'ObjectHashInternal' (if strings), or a 'MapHashInternal' (if not strings); 

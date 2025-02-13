@@ -16,9 +16,10 @@ import { parameterWaster } from "src/refactor.js"
 import { isGoodIndex } from "src/utils.js"
 import { mapper, sequentialIndex } from "./utils.js"
 
-import { functional, array } from "@hgargg-0710/one"
+import { functional, array, inplace } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 const { last } = array
+const { insert, out } = inplace
 
 export class ChildrenTree<Type = any> implements IChildrenTree<Type> {
 	children: InTree<Type>[]
@@ -37,6 +38,18 @@ export class ChildrenTree<Type = any> implements IChildrenTree<Type> {
 	write(multind: number[], value: InTree<Type>) {
 		const writtenTo = this.index(multind.slice(0, -1))
 		return (writtenTo[last(multind)] = value)
+	}
+
+	append(value: InTree<Type>) {
+		return this.children.push(value) - 1
+	}
+
+	insert(index: number, value: InTree<Type>) {
+		return lastIndex(insert(this.children, index, value))
+	}
+
+	remove(index: number) {
+		return lastIndex(out(this.children, index))
 	}
 
 	constructor(value?: any, converter?: TreeConverter<Type>) {
