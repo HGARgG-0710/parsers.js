@@ -1,80 +1,73 @@
 import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { MultiIndexModifier as MultiIndexModifierType } from "./interfaces.js"
-import type { MultiIndex as MultiIndexType } from "./interfaces.js"
+import type { MultiIndexModifier as IMultiIndexModifier } from "./interfaces.js"
+import type { MultiIndex as IMultiIndex } from "./interfaces.js"
 
 import { BadIndex, defaults } from "../../constants.js"
 const { DefaultValue } = defaults.MultiIndex
 
 import { array } from "@hgargg-0710/one"
+import { InitializablePattern } from "../../Pattern/abstract.js"
 const { last, first, copy, clear } = array
 
-export class MultiIndex implements MultiIndexType {
-	#value: number[]
-
+export class MultiIndex extends InitializablePattern<number[]> implements IMultiIndex {
 	static MultiIndexModifier = class MultiIndexModifier
-		implements MultiIndexModifierType
+		extends InitializablePattern<MultiIndex>
+		implements IMultiIndexModifier
 	{
-		#multind: MultiIndex
-
 		nextLevel() {
 			return this.extend([0])
 		}
 
 		prevLevel() {
-			return [this.#multind.#value.pop() as number]
+			return [this.value!.get().pop() as number]
 		}
 
 		resize(length: number = 0) {
-			const multind = this.#multind
-			multind.levels = length
-			return multind
+			const value = this.value!
+			value.levels = length
+			return value
 		}
 
 		clear() {
-			const multind = this.#multind
-			clear(multind.#value)
-			return multind
+			const value = this.value!
+			clear(value.get())
+			return value
 		}
 
 		incLast() {
-			const multind = this.#multind
-			const value = multind.#value
-			const { levels } = multind
-			return ++value[levels - 1]
+			const value = this.value!
+			const multind = value.get()
+			const { levels } = value
+			return ++multind[levels - 1]
 		}
 
 		decLast() {
-			const multind = this.#multind
-			const { levels } = multind
-			const value = multind.#value
-			return --value[levels - 1]
+			const value = this.value!
+			const { levels } = value
+			const multind = value.get()
+			return --multind[levels - 1]
 		}
 
 		extend(subIndex: number[]) {
-			this.#multind.#value.push(...subIndex)
+			this.value!.get().push(...subIndex)
 			return subIndex
 		}
 
-		init(multind?: MultiIndex) {
-			if (multind) this.#multind = multind
-			return this
-		}
-
-		constructor(value?: MultiIndex) {
-			this.init(value)
+		get() {
+			return this.value!
 		}
 	}
 
 	set levels(length: number) {
-		this.#value.length = length
+		this.value!.length = length
 	}
 
 	get levels() {
-		return this.#value.length
+		return this.value!.length
 	}
 
 	get() {
-		return this.#value as readonly number[]
+		return super.get()!
 	}
 
 	convert(stream: TreeStream) {
@@ -88,20 +81,20 @@ export class MultiIndex implements MultiIndexType {
 	}
 
 	firstLevel() {
-		return [first(this.#value)]
+		return [first(this.value!)]
 	}
 
 	lastLevel() {
-		return [last(this.#value)]
+		return [last(this.value!)]
 	}
 
 	slice(from: number = 0, to: number = this.levels) {
-		return this.#value.slice(from, to < 0 ? this.levels + to : to)
+		return this.value!.slice(from, to < 0 ? this.levels + to : to)
 	}
 
 	compare(position: MultiIndex) {
-		const value = this.#value
-		const posval = position.#value
+		const value = this.value!
+		const posval = position.value!
 
 		const { levels } = this
 		const { levels: polevs } = position
@@ -117,8 +110,8 @@ export class MultiIndex implements MultiIndexType {
 		const { levels } = this
 
 		if (levels === position.levels) {
-			const value = this.#value
-			const posval = position.#value
+			const value = this.value!
+			const posval = position.value!
 
 			let i = levels - 1
 			while (i > BadIndex && value[i] === posval[i]) --i
@@ -129,11 +122,11 @@ export class MultiIndex implements MultiIndexType {
 	}
 
 	copy() {
-		return new MultiIndex(copy(this.#value))
+		return new MultiIndex(copy(this.value!))
 	}
 
 	constructor(multind: number[] = DefaultValue()) {
-		this.#value = multind
+		super(multind)
 	}
 }
 

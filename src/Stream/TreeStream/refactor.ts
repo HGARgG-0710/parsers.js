@@ -1,4 +1,3 @@
-import type { WalkableTree } from "../../Tree/TreeWalker/interfaces.js"
 import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import type { TreeWalker } from "../../Tree/classes.js"
 
@@ -72,14 +71,12 @@ export function treeStreamMultindGetter<Type = any>(this: TreeStream<Type>) {
 
 export function treeStreamInitialize<Type = any>(
 	this: TreeStream<Type>,
-	tree?: WalkableTree<Type>,
 	walker?: TreeWalker<Type>
 ) {
-	if (walker) this.walker = walker
-	if (tree) {
-		this.response = response
-		this.lastLevelWithSiblings = lastLevelWithSiblings
-		this.walker.init(tree)
+	this.response = response
+	this.lastLevelWithSiblings = lastLevelWithSiblings
+	if (walker) {
+		this.walker = walker
 		superInit(this)
 	}
 	return this

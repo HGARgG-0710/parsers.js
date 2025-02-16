@@ -77,6 +77,9 @@ REMINDERS [2.]:
 						11. 'functional.waster = (f) => (n) => (...args: any[]) => f(...args.slice(0, n))': 
 							THIS replaces 'parameterWaster' in particular
 
+						12. New function [common...]: 
+							const negate = (pred: (x: any) => boolean) => trivialCompose(not, pred)
+]
 					[ADD THIS TO DOCS!!!]
 					Then, one can do: 
 						
@@ -121,18 +124,48 @@ REMINDERS [2.]:
 			4. xml [to npm]
 
 	2.77. Refactor with one.js v0.5...; 
-
-	2.78. Split the 'this.walker.init' from 'TreeStream': 
-		1. DO NOT pass the 'Tree' to the 'TreeStream'
-		2. DO NOT keep the '.value' on 'TreeStream'
-		3. Simplify the 'TreeStream.init' method implementation [no need to check for the 'tree']; 
 	
-	2.79. Add all the 'TrivialWalkableTree' methods into 'ChildrenTree'. 
-		Remove the 'TrivialWalkableTree'; 
-
 	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
 		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
 		Fix it; 
+
+		Notes made [BESIDES walking through the whole project tree + critically assessing the types]: 
+			1. Add 'BasicStream<Type>' Generics to *ALL* the Stream-related utils 
+			2. See whether the 'stream.curr' return arguments in things like 'uniRewind' is good or not (maybe, returning 'stream' would have been better?)
+			3. Find all the 'as'-thingies, where polymorphism is expected: 
+				Specific examples: 
+					1. ParentTree: 
+						DESPITE the 'IParentTree' interface, it still IS, in practice, non-polymorphic (requires storage of 'ParentTree'-s DUE TO 'instanceof' in the 'constructor'); 
+						SOLUTION: 
+							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'
+
+	2.81. PROBLEM [Stream-s]: Clarity
+		Currently, this is the code to take a certain `input` Stream, 
+		then - take its portion and transform it: 
+
+			// TODO: add this code as example for THE DOCS later...! 
+			parserStream = new StreamParser(...)()
+			limStream = new LimitedStream(...)()
+			convertPortion = (input) => {
+				limStream.init(input)
+				parserStream.init(limStream)
+				parserStream.finish()
+				return parserStream.buffer.get()
+			}
+		
+		Big problem now is that, EVEN THOUGH, when 
+			composing MULTIPLE 'Stream's, we are INDEED making a memory-saving, 
+				it would have been A LOT clearer to just do [parsers.js v0.2]: 
+
+			parser = transform(...)
+			limStream = new LimitedStream(...)()
+			convertPortion = (input) => {
+				limStream.init(input)
+				return parser(limStream, new CollectionClass()).get()
+			}
+
+		CONCLUSION: the OLD API is also needed, bring it back (ensure it is as one wishes it to be...); 
+				
 
 Order of TODO-elimination: 
 	5.17.
@@ -1497,3 +1530,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 							2. Expects a VALID abstract syntax tree
 
 			2. For '.type's field values, one uses EITHER an 'ObjectHashInternal' (if strings), or a 'MapHashInternal' (if not strings); 
+
+	57. PreallocArray - a new 'Collection' type: 
+		0. new property - 'lastInd: number = this.value.length'
+		1. extends ArrayCollection
+		2. new method - '.prealloc(n)': 
+			1. If 'this.value.length > n', goto 5, else - continue
+			2. this.value.length = n
+			3. this.lastInd = this.value.length
+			4. Finish
+		3. change method - '.push()': 
+			1. this.value[this.lastInd++] = this.value
+		4. change method - '.get()' [as 'readonly number[]']: 
+			1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
+
+		Purpose: 
+			1. Providing an interface for user-level preallocation of an array
+			2. Providing 1. together with an integration with the 'Collection' interface

@@ -7,10 +7,8 @@ import { FlushableTokenizable } from "./abstract.js"
 import { extendPrototype } from "src/refactor.js"
 import { tokenizeString } from "./utils.js"
 
-import { type } from "@hgargg-0710/one"
+import { type, inplace } from "@hgargg-0710/one"
 const { isString } = type
-
-import { inplace } from "@hgargg-0710/one"
 const { replace } = inplace
 
 export function DelegateTokenizable<Type = any, InType = any>(
@@ -26,7 +24,6 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		implements DelegateTokenizablePattern<Type, InType, OutType>
 	{
 		tokenizer: FreeTokenizer<Type, InType>
-		isType: types.TypePredicate<Type>
 
 		tokenize(key: InType, handler: SummatFunction<any, Type, OutType>) {
 			if (!this.result.length)
@@ -34,7 +31,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 
 			for (let r = this.result.length; r--; ) {
 				const current = this.result[r]
-				if (this.isType(current))
+				if (isType(current))
 					replace(this.result, r, ...this.tokenizer(current, key, handler))
 			}
 
@@ -47,8 +44,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 	}
 
 	extendPrototype(delegateTokenizablePattern, {
-		tokenizer: { value: tokenizer },
-		isType: { value: isType }
+		tokenizer: { value: tokenizer }
 	})
 
 	return delegateTokenizablePattern

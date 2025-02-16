@@ -1,6 +1,9 @@
 import type { Pattern, Flushable } from "./interfaces.js"
 import { setValue } from "./utils.js"
 
+import { type } from "@hgargg-0710/one"
+const { isUndefined } = type
+
 export abstract class ProtectedPattern<Type = any> {
 	protected value: Type
 	constructor(value: Type) {
@@ -8,9 +11,14 @@ export abstract class ProtectedPattern<Type = any> {
 	}
 }
 
-export abstract class InitializablePattern<Type = any> extends ProtectedPattern<
-	Type | undefined
-> {
+abstract class OptionalPattern<Type = any> {
+	protected value?: Type
+	constructor(value?: Type) {
+		if (!isUndefined(value)) this.value = value
+	}
+}
+
+export abstract class InitializablePattern<Type = any> extends OptionalPattern<Type> {
 	init(value?: Type) {
 		this.value = value
 	}

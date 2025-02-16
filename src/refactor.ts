@@ -3,7 +3,7 @@
 import type { HasType } from "./IndexMap/interfaces.js"
 import type { Prototypal } from "./interfaces.js"
 
-import { object } from "@hgargg-0710/one"
+import { object} from "@hgargg-0710/one"
 const { propertyDescriptors, withoutProperties } = object
 
 /**

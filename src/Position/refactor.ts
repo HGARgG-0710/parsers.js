@@ -3,7 +3,7 @@ import type { DirectionalPosition, Posed } from "./interfaces.js"
 
 import { isBackward } from "./utils.js"
 
-export function positionStopPoint(pos: DirectionalPosition): BoundNameType {
+export function getStopPoint(pos: DirectionalPosition): BoundNameType {
 	return isBackward(pos) ? "isStart" : "isEnd"
 }
 

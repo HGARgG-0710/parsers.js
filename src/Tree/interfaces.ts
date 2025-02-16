@@ -1,8 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
-export type InTree<Type = any> = Type | Tree<Type>
-export type WalkableInTreeType<Type = any> = Type | WalkableTree<Type>
+export type InTree<Type = any, T extends Tree<Type> = Tree<Type>> = Type | T
 
 export interface ReadonlyTree<Type = any> {
 	readonly lastChild: number
@@ -25,15 +24,18 @@ export interface ParentTree<Type = any> extends WalkableTree<Type> {
 	parent: ParentTree<Type> | null
 }
 
-export interface ChildrenTree<Type = any> extends Tree<Type> {
-	children: InTree<Type>[]
+export interface ChildrenTree<Type = any, T extends Tree<Type> = Tree<Type>>
+	extends Tree<Type> {
+	children: InTree<Type, T>[]
 }
 
-export type TreeConstructor<Type = any> = new (
+export type TreeConstructor<Type = any, T extends Tree<Type> = Tree<Type>> = new (
 	value?: Summat,
-	converter?: TreeConverter
-) => ChildrenTree<Type>
+	converter?: TreeConverter<Type, T>
+) => ChildrenTree<Type, T>
 
-export type TreeConverter<Type = any> = (x: any) => InTree<Type>[]
+export type TreeConverter<Type = any, T extends Tree<Type> = Tree<Type>> = (
+	x: any
+) => InTree<Type, T>[]
 
 export type * as TreeWalker from "./TreeWalker/interfaces.js"

@@ -11,7 +11,8 @@ export interface MultiIndex extends PositionObject {
 }
 
 export interface MultiIndexModifier {
-	init: (multind?: MultiIndex) => MultiIndexModifier
+	init: (multind?: MultiIndex) => any
+	get: () => MultiIndex
 	nextLevel: () => number[]
 	prevLevel: () => number[]
 	resize: (length: number) => MultiIndex
