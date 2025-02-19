@@ -24,8 +24,9 @@ import { StreamClass } from "../StreamClass/abstract.js"
 import { defaults } from "../../constants.js"
 const { response, lastLevelWithSiblings } = defaults.TreeStream
 
-import { boolean } from "@hgargg-0710/one"
+import { boolean, object } from "@hgargg-0710/one"
 const { F } = boolean
+const { ConstDescriptor } = object.descriptor
 
 const TreeStreamBase = StreamClass({
 	currGetter: treeStreamCurrGetter,
@@ -59,7 +60,7 @@ export class TreeStream<Type = any>
 withSuper(TreeStream, TreeStreamBase, {
 	multind: { get: treeStreamMultindGetter },
 	value: { get: treeStreamValueGetter },
-	rewind: { value: treeStreamRewind },
-	navigate: { value: treeStreamNavigate },
-	init: { value: treeStreamInitialize }
+	rewind: ConstDescriptor(treeStreamRewind),
+	navigate: ConstDescriptor(treeStreamNavigate),
+	init: ConstDescriptor(treeStreamInitialize)
 })

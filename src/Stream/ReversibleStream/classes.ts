@@ -11,6 +11,9 @@ import { valueCurr } from "../StreamClass/refactor.js"
 import { StreamClass } from "../StreamClass/abstract.js"
 import { reversedStreamInitialize } from "./refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const valueDefaultIsStart = valuePropDelegate("isStart")
 const [valuePrev, valueNext, valueIsStart, valueRewind, valueFinish] = [
 	"prev",
@@ -53,9 +56,9 @@ export function ReversedStream<Type = any>(
 	}
 
 	withSuper(reversedStream, baseClass, {
-		rewind: { value: valueFinish },
-		finish: { value: valueRewind },
-		init: { value: reversedStreamInitialize }
+		rewind: ConstDescriptor(valueFinish),
+		finish: ConstDescriptor(valueRewind),
+		init: ConstDescriptor(reversedStreamInitialize)
 	})
 
 	return reversedStream

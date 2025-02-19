@@ -18,10 +18,10 @@ import {
 import { BaseLinearMap } from "./abstract.js"
 import { fromPairsList } from "../utils.js"
 
-import { functional, boolean } from "@hgargg-0710/one"
-import { charCodeAt } from "../../refactor.js"
+import { functional, boolean, string } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 const { equals } = boolean
+const { charCodeAt } = string
 
 export function LinearMapClass<KeyType = any, ValueType = any>(
 	extensions: Function[],

@@ -2,7 +2,9 @@ import type { PredicatePosition } from "./Position/interfaces.js"
 import type { Indexed } from "./Stream/interfaces.js"
 
 import { BadIndex } from "./constants.js"
-import { propByName } from "./Stream/refactor.js"
+
+import { object } from "@hgargg-0710/one"
+const { prop } = object
 
 export const isGoodIndex = (x: number) => x > BadIndex
 
@@ -21,13 +23,13 @@ export const backtrack = (predicate: PredicatePosition) => {
 
 export const lastIndex = (x: Indexed) => x.length - 1
 
-export const length = propByName("length")
+export const length = prop("length")
 
-export const size = propByName("size")
+export const size = prop("size")
 
-export const state = propByName("state")
+export const state = prop("state")
 
-export const buffer = propByName("buffer")
+export const buffer = prop("buffer")
 
 export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"

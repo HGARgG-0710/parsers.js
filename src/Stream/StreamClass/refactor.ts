@@ -12,14 +12,11 @@ import { valueDelegate, valuePropDelegate } from "src/refactor.js"
 import { Stream } from "../../constants.js"
 const { StreamClass } = Stream
 
+import { object } from "@hgargg-0710/one"
+const { calledDelegate } = object.classes
+
 export const valueIsCurrEnd = valueDelegate("isCurrEnd")
 export const valueCurr = valuePropDelegate("curr")
-
-const calledDelegate =
-	(delegatePropName: string) =>
-	(delegateMethodName: string) =>
-	(called: any, ...delegateArgs: any[]) =>
-		called[delegatePropName][delegateMethodName].call(called, ...delegateArgs)
 
 const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")

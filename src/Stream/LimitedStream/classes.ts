@@ -19,6 +19,9 @@ import {
 
 import { withSuper } from "src/refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
@@ -68,8 +71,8 @@ export function LimitedStream<Type = any>(
 	}
 
 	withSuper(limitedStream, baseClass, {
-		prod: { value: limitedStreamProd },
-		init: { value: limitedStreamInitialize }
+		prod: ConstDescriptor(limitedStreamProd),
+		init: ConstDescriptor(limitedStreamInitialize)
 	})
 
 	return limitedStream

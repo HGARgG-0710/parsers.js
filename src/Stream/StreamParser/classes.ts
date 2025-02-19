@@ -12,6 +12,9 @@ import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { streamParserInitialize, streamParserNext } from "./refactor.js"
 import { withSuper } from "src/refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false,
@@ -58,8 +61,8 @@ export function StreamParser<InType = any, OutType = any>(
 	}
 
 	withSuper(streamTokenizerClass, baseClass, {
-		init: { value: streamParserInitialize },
-		handler: { value: handler }
+		init: ConstDescriptor(streamParserInitialize),
+		handler: ConstDescriptor(handler)
 	})
 
 	return streamTokenizerClass

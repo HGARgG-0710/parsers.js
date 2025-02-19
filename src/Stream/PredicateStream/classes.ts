@@ -25,6 +25,9 @@ import {
 import { StreamClass } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
@@ -70,8 +73,8 @@ export function PredicateStream<Type = any>(
 	}
 
 	withSuper(predicateStream, baseClass, {
-		prod: { value: predicateStreamProd },
-		init: { value: predicateStreamInitialize }
+		prod: ConstDescriptor(predicateStreamProd),
+		init: ConstDescriptor(predicateStreamInitialize)
 	})
 
 	return predicateStream

@@ -12,11 +12,12 @@ import type { Sizeable } from "../interfaces.js"
 import { DelegateKeyReplaceable } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
 
-import { copyFunction, extendPrototype } from "../../refactor.js"
 import { assignIndex } from "./utils.js"
 
-import { functional } from "@hgargg-0710/one"
-const { id } = functional
+import { functional, object } from "@hgargg-0710/one"
+const { id, copy } = functional
+const { extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
 abstract class DelegateLookupTable<
 	KeyType = any,
@@ -90,9 +91,13 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 
 export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	ownership: (x: any) => OwningType
-): FastLookupTable<KeyType, ValueType, OwningType> {
-	const HashTableClass = copyFunction(DelegateHashTable)
-	extendPrototype(HashTableClass, { getIndex: { value: ownership } })
+): new () => FastLookupTable<KeyType, ValueType, OwningType> {
+	const HashTableClass = copy(DelegateHashTable) as new () => FastLookupTable<
+		KeyType,
+		ValueType,
+		OwningType
+	>
+	extendPrototype(HashTableClass, { getIndex: ConstDescriptor(ownership) })
 	return HashTableClass
 }
 

@@ -4,12 +4,13 @@ import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { DelegateTokenizablePattern, FreeTokenizer } from "./interfaces.js"
 
 import { FlushableTokenizable } from "./abstract.js"
-import { extendPrototype } from "src/refactor.js"
 import { tokenizeString } from "./utils.js"
 
-import { type, inplace } from "@hgargg-0710/one"
+import { type, inplace, object } from "@hgargg-0710/one"
 const { isString } = type
 const { replace } = inplace
+const { extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
@@ -44,7 +45,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 	}
 
 	extendPrototype(delegateTokenizablePattern, {
-		tokenizer: { value: tokenizer }
+		tokenizer: ConstDescriptor(tokenizer)
 	})
 
 	return delegateTokenizablePattern

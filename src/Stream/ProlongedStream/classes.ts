@@ -17,6 +17,9 @@ import {
 import { StreamClass } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const ProlongedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
@@ -50,7 +53,7 @@ export function ProlongedStream<Type = any>(
 	}
 
 	withSuper(prolongedStream, baseClass, {
-		init: { value: prolongedStreamInitialize<Type> }
+		init: ConstDescriptor(prolongedStreamInitialize<Type>)
 	})
 
 	return prolongedStream

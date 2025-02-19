@@ -1,19 +1,4 @@
 [v0.3]
-
-REMINDERS [2.]: 
-	1. You can document inside-functions and inside-classes!
-	2. When the good-ol' inner JSDoc fails one after all [or when "shadowing" the old inner JSDoc], one can do: 
-
-		const UnrecognizedFunction = whatever()
-
-		/**
-		 * I DOCUMENT, THEREFORE I AM! 
-		 * @param {T} x - bababababa, i am a parameter
-		 * ...
-		 */
-		export const ToBeRecognizedFunction = UnrecognizedFunction as (x: T) => TOUT
-
-	3. Fix the 'tests/constants.ts' [defaults]; 
 	
 4. [Part of the docuementation effort] Add the JSDoc; 
 	Let it be brief (very), and work like: 
@@ -50,36 +35,7 @@ REMINDERS [2.]:
 
 				PROBLEM: consider doing 'StreamParser()' WITH A '.buffer'?! 
 					Then - INSTEAD, create a function [separate - put in one.js/functional; NAME - 'argFiller'; SPECIFICALLY - have an 'export const stateFiller = argFiller(new Set(1))' as *A UTIL*]: 	
-
-						[DONE]
-						2. propByName (Stream/refactor.ts) - an IMMENSELY useful function, would go well into 'functional'; 
-						3. classWrapper (src/refactor.ts)  - very key for the library in particular - SADLY, it falls outside its ontology..., needs to be put someplace else; 	
-						4. 'function.copy' - the 'copyFunction' function; 	
-						5. 'string.charCodeAt' - same place as 'copyFunction'; 		
-						6. 'object.alterProp' and 'object.protoProp' - same place as 'copyFunction', 'alterProp'
-						7. 'descriptor' submodule of 'object': 
-							Everything related to descriptors, in particular: 
-
-								1. getSetDescriptor,
-								2. valueDescriptor -> {value} [const descriptor]
-								3. basicDescriptor -> configurable + value + writable
-								... [everything related - the prior 'PropertyDescriptor class' notes would allude to this...]; 
-						8. 'object': 
-							1. extendPrototype
-							2. mixin
-						9. 'functional.has' - current 'src/refactor.ts' 'has' function; 
-						10. 'classes' submodule: 
-							1. 'delegate'
-							2. 'calledDelegate'
-							3. 'delegateProperty'
-							4. 'classWrapper'
-							5. 'withoutConstructor'
-						11. 'functional.waster = (f) => (n) => (...args: any[]) => f(...args.slice(0, n))': 
-							THIS replaces 'parameterWaster' in particular
-
-						12. New function [common...]: 
-							const negate = (pred: (x: any) => boolean) => trivialCompose(not, pred)
-]
+							
 					[ADD THIS TO DOCS!!!]
 					Then, one can do: 
 						
@@ -123,8 +79,6 @@ REMINDERS [2.]:
 			3. regex [to npm]
 			4. xml [to npm]
 
-	2.77. Refactor with one.js v0.5...; 
-	
 	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
 		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
 		Fix it; 
@@ -137,50 +91,22 @@ REMINDERS [2.]:
 					1. ParentTree: 
 						DESPITE the 'IParentTree' interface, it still IS, in practice, non-polymorphic (requires storage of 'ParentTree'-s DUE TO 'instanceof' in the 'constructor'); 
 						SOLUTION: 
-							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'
-
-	2.81. PROBLEM [Stream-s]: Clarity
-		Currently, this is the code to take a certain `input` Stream, 
-		then - take its portion and transform it: 
-
-			// TODO: add this code as example for THE DOCS later...! 
-			parserStream = new StreamParser(...)()
-			limStream = new LimitedStream(...)()
-			convertPortion = (input) => {
-				limStream.init(input)
-				parserStream.init(limStream)
-				parserStream.finish()
-				return parserStream.buffer.get()
-			}
-		
-		Big problem now is that, EVEN THOUGH, when 
-			composing MULTIPLE 'Stream's, we are INDEED making a memory-saving, 
-				it would have been A LOT clearer to just do [parsers.js v0.2]: 
-
-			parser = transform(...)
-			limStream = new LimitedStream(...)()
-			convertPortion = (input) => {
-				limStream.init(input)
-				return parser(limStream, new CollectionClass()).get()
-			}
-
-		CONCLUSION: the OLD API is also needed, bring it back (ensure it is as one wishes it to be...); 
-				
+							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'			
 
 Order of TODO-elimination: 
 	5.17.
-	
-	5.2.52. 
+
+	2.80.	
+	5.2.52. [as part of 2.80]
+	2.66. [as part of 2.80]
+
 	5.2.62.
 	
-	5.2.73.
-	5.2.74.	
-	5.2.76.	
-	5.2.77. 
-
 	JSDoc: 
 		Add it BEFORE doing the tests. 
 		One must first understand PRECISELY how a certain thing is to work, and what to expect from it...;
+		Tests are far too tiresome and long to write 
+			(as it is now "too late" to set the requirements based off them and do proper TDD, docs provide a much better/simpler/faster alternative)
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
@@ -191,8 +117,10 @@ Order of TODO-elimination:
 			1. [make into an npm command - 'test-run' and 'test: test-compile + test-run']
 			2. add to '.vscode/launch.json' [to simplify the debugging process... we'll need it]; 
 			3. WORK on the failed tests from there...; 
-	
-	2.66. 
+		
+	5.2.73.
+	5.2.74.	
+	5.2.76.	
 
 	[fix test compilation errors]
 	[run the tests]
@@ -211,6 +139,29 @@ B. documentation (change/fix it...);
 		0. make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values!	
 		1. Note in the 'UnfreezableArray' docs that AFTER '.unfreeze()' is called, 
 			the underlying Stream behaviour *DOES NOT CHANGE* (meaning - one has to create a NEW Stream...); 
+
+	EXAMPLES: 
+		1. Currently, this is the code to take a certain `input` Stream, 
+			then - take its portion and transform it: 
+
+				// TODO: add this code as example for THE DOCS later...! 
+				parserStream = new StreamParser(...)()
+				limStream = new LimitedStream(...)()
+				convertPortion = (input) => {
+					limStream.init(input)
+					parserStream.init(limStream)
+					parserStream.finish()
+					return parserStream.buffer.get()
+				}
+
+		2. Faster/more-elegant version of 1.: 
+		
+			parser = transform(...)
+			limStream = new LimitedStream(...)()
+			convertPortion = (input) => {
+				limStream.init(input)
+				return parser(limStream, new CollectionClass()).get()
+			}
 	
 C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3]; 
 	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
@@ -462,6 +413,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		4. MOST IMPORTANT - generation functions, stuff for working with AST-s: 
 			1. Based off ASTAnalyzer, ASTStream-s, ASTHierarchy, etc... Generally, the 'Tree.AST' module
+		
+		5. Stuff for Stream-transforming: 
+			Namely, nested-stuff via the 'StreamParser' [WITH '.buffer']: 
+
+				// A VERY common pattern...
+				// Generalize to an arbitrary 'X <- LimitedStream() [here]', with 'StreamParser.init(X())'
+				const l = new LimitedStream()()
+				const t = new StreamParser()()
+				const parse = (input) => {
+					l.init(input)
+					t.init(l)
+					t.finish()
+					return t.buffer.move()
+				}
 	
 	2.10. v8-specific optimizations: 
 		Having done some benchmarking on some typical Array methods, one arrived at a...
@@ -1543,7 +1508,20 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			1. this.value[this.lastInd++] = this.value
 		4. change method - '.get()' [as 'readonly number[]']: 
 			1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
+		5. change method - '.move(n)': 
+			1. this.value.length = this.lastIndex
+			2. const lastValue = this.value
+			3. this.value = Array(this.n)
+			4. return lastValue
 
 		Purpose: 
 			1. Providing an interface for user-level preallocation of an array
 			2. Providing 1. together with an integration with the 'Collection' interface
+
+	58. Add "move semantics" to 'Collection's: 
+		1. '.move' method - for a 'MoveCollection extends Collection': 
+			1. Sets the 'this.value = []', or to a similar "default"/"empty" value. 
+			2. '.move()' returns 'this.value'
+		
+		This permits to achieve the 'PreallocArray' idea WITHOUT the need to copy/change the contents of THE SAME array. 
+		CONCLUSION: YES, add the '.move' to SOME collections via 'ArrayMoveCollection' with '[]'; 

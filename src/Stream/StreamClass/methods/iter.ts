@@ -12,10 +12,10 @@ import { bufferFreeze, bufferPush } from "src/Collection/Buffer/refactor.js"
 import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
 import { currSet } from "./curr.js"
 
-import { getSetDescriptor, alterProp } from "../../../refactor.js"
-
-import { functional } from "@hgargg-0710/one"
+import { functional, object } from "@hgargg-0710/one"
 const { nil } = functional
+const { propDefine } = object
+const { GetSetDescriptor, ConstDescriptor } = object.descriptor
 
 // * predoc note: this redefinition [in particular] forbids replacing the '.curr' of the given 'Stream'
 function posBufferIsFrozenGet<Type = any>(
@@ -25,7 +25,7 @@ function posBufferIsFrozenGet<Type = any>(
 }
 
 function redefineCurr<Type = any>(x: PositionalBufferizedStreamClassInstance<Type>) {
-	alterProp(x, "curr", getSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
+	propDefine(x, "curr", GetSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
 }
 
 function getNext<Type = any>(stream: StreamClassInstance<Type>) {
@@ -237,8 +237,8 @@ const methodList = [
 ] as [() => any, () => any][]
 
 const nextPrevDescriptors = ([next, prev]) => ({
-	next: { value: next },
-	prev: { value: prev }
+	next: ConstDescriptor(next),
+	prev: ConstDescriptor(prev)
 })
 
 export function chooseMethod<Type = any>(

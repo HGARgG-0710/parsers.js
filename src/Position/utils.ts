@@ -14,8 +14,8 @@ import { previous, next } from "src/Stream/utils.js"
 import { object, type, boolean, functional } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber } = type
-const { trivialCompose, or } = functional
-const { not, T } = boolean
+const { or, negate } = functional
+const { T } = boolean
 
 export const isPositionObject = structCheck<PositionObject>({
 	convert: isFunction,
@@ -48,9 +48,7 @@ export function positionConvert(
  * * The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
 export function positionNegate(position: Position): Position {
-	return isFunction(position)
-		? preserveDirection(position, (position) => trivialCompose(not, position))
-		: position
+	return isFunction(position) ? preserveDirection(position, negate) : position
 }
 
 /**

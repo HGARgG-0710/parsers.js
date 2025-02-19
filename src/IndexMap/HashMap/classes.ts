@@ -8,11 +8,11 @@ import { DelegateSizeable } from "../abstract.js"
 import { extend } from "./refactor.js"
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"
-import { charCodeAt } from "../../refactor.js"
 
-import { functional, type as _type } from "@hgargg-0710/one"
+import { functional, type as _type, string } from "@hgargg-0710/one"
 const { id } = functional
 const { typeOf } = _type
+const { charCodeAt } = string
 
 abstract class BaseHashClass<
 	KeyType = any,

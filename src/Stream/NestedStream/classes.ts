@@ -17,6 +17,9 @@ import {
 
 import { withSuper } from "src/refactor.js"
 
+import { object } from "@hgargg-0710/one"
+const { ConstDescriptor } = object.descriptor
+
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
@@ -57,8 +60,8 @@ export function NestedStream<Type = any>(
 	}
 
 	withSuper(NestedStream, baseClass, {
-		init: { value: nestedStreamInitialize<Type> },
-		typesTable: { value: nestedTypes }
+		init: ConstDescriptor(nestedStreamInitialize<Type>),
+		typesTable: ConstDescriptor(nestedTypes)
 	})
 
 	return NestedStream

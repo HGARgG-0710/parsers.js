@@ -11,7 +11,11 @@ import type {
 import { BasicPattern } from "src/Pattern/abstract.js"
 
 import { finish, rewind, navigate, init, iter, curr } from "./refactor.js"
-import { valuePropDelegate, protoProp, extendPrototype } from "src/refactor.js"
+import { valuePropDelegate } from "src/refactor.js"
+
+import { object } from "@hgargg-0710/one"
+const { protoProp, extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
 function* streamIterator<Type = any>(this: BasicStream<Type>) {
 	while (!this.isEnd) yield this.next()
@@ -83,36 +87,38 @@ export function StreamClass<Type = any>(
 	// * Defining the basic properties
 	extend({
 		curr,
-		isCurrEnd: { value: isCurrEnd },
-		baseNextIter: { value: baseNextIter },
-		defaultIsEnd: { value: defaultIsEnd },
-		[Symbol.iterator]: { value: streamIterator<Type> }
+		isCurrEnd: ConstDescriptor(isCurrEnd),
+		baseNextIter: ConstDescriptor(baseNextIter),
+		defaultIsEnd: ConstDescriptor(defaultIsEnd),
+		[Symbol.iterator]: ConstDescriptor(streamIterator<Type>)
 	})
 
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
 	extend({
-		navigate: { value: navigate.chooseMethod<Type>(hasPosition, buffer) },
-		rewind: { value: rewind.chooseMethod<Type>(hasPosition, buffer) },
-		finish: { value: finish.chooseMethod<Type>(hasPosition, buffer) }
+		navigate: ConstDescriptor(navigate.chooseMethod<Type>(hasPosition, buffer)),
+		rewind: ConstDescriptor(rewind.chooseMethod<Type>(hasPosition, buffer)),
+		finish: ConstDescriptor(finish.chooseMethod<Type>(hasPosition, buffer))
 	})
 
 	// * Defining the ReversedStreamClassInstance-specific optional properties
 	extend({
-		...(isCurrStart ? { isCurrStart: { value: isCurrStart } } : {}),
-		...(basePrevIter ? { basePrevIter: { value: basePrevIter } } : {}),
-		...(currGetter ? { currGetter: { value: currGetter } } : {}),
-		...(initGetter ? { initGetter: { value: initGetter } } : {})
+		...(isCurrStart ? { isCurrStart: ConstDescriptor(isCurrStart) } : {}),
+		...(basePrevIter ? { basePrevIter: ConstDescriptor(basePrevIter) } : {}),
+		...(currGetter ? { currGetter: ConstDescriptor(currGetter) } : {}),
+		...(initGetter ? { initGetter: ConstDescriptor(initGetter) } : {})
 	})
 
 	// * Adding the '.pos'-specific stream-iteration methods
 	extend(iter.chooseMethod(currGetter, hasPosition, buffer))
 
 	// * Adding the initialization method
-	protoProp(streamClass, "init", {
-		value: init.chooseMethod(hasPosition, buffer, state, isPattern)
-	})
+	protoProp(
+		streamClass,
+		"init",
+		ConstDescriptor(init.chooseMethod(hasPosition, buffer, state, isPattern))
+	)
 
-	if (currGetter) protoProp(streamClass, "update", { value: update })
+	if (currGetter) protoProp(streamClass, "update", ConstDescriptor(update))
 
 	return streamClass
 }
