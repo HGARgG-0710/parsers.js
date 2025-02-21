@@ -11,11 +11,12 @@ import type {
 import { FlushableValidatable } from "./abstract.js"
 import { validateString } from "./utils.js"
 
-import { inplace, object, functional } from "@hgargg-0710/one"
+import { inplace, object, functional, array } from "@hgargg-0710/one"
 const { replace } = inplace
 const { copy } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isEmpty } = array
 
 export abstract class PreDelegateValidatablePattern<Type = any, KeyType = any>
 	extends FlushableValidatable<Type>
@@ -28,7 +29,7 @@ export abstract class PreDelegateValidatablePattern<Type = any, KeyType = any>
 		handler: SummatFunction<any, Type, ValidMatch | InvalidMatch>
 	) {
 		const [, validated] = this.result
-		if (!validated.length)
+		if (isEmpty(validated))
 			return (this.result = this.validator(this.value!, key, handler))
 
 		let [tempValid] = this.result

@@ -1,4 +1,4 @@
-import type { EliminableStringPattern as EliminableStringPatternType } from "./interfaces.js"
+import type { EliminableStringPattern } from "./interfaces.js"
 import type { Resulting } from "../Pattern/interfaces.js"
 
 import { FlushablePattern } from "../Pattern/abstract.js"
@@ -18,7 +18,7 @@ abstract class FlushableEliminable<Type = any>
 
 export class EliminableString
 	extends FlushableEliminable<string>
-	implements EliminableStringPatternType
+	implements EliminableStringPattern
 {
 	eliminate(eliminated: string | RegExp, withStr?: string) {
 		return (this.result = extract(this.result, eliminated, withStr))

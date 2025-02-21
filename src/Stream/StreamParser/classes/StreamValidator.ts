@@ -6,6 +6,7 @@ import type {
 	ValidationResult,
 	ValidationSuccess
 } from "../../../Parser/PatternValidator/interfaces.js"
+import type { StatePatternInitMethod } from "../../StreamClass/methods/init.js"
 
 import { validation } from "../../../constants.js"
 const { ValidationSuccess } = validation
@@ -14,17 +15,14 @@ const { ValidationError } = validation.PatternValidator
 import { LocatorStream } from "../classes.js"
 
 export function StreamValidator(validator: StreamPredicate, defaultState?: Summat) {
-	const ValidatorStreamBase = LocatorStream(validator, true, !!defaultState)
-	const validationStream = new ValidatorStreamBase()
+	const validationStream = new (LocatorStream(validator, true, !!defaultState))()
 	return function <Type = any>(
 		stream: EndableStream<Type>,
 		state: Summat | undefined = defaultState
 	): ValidationResult {
-		validationStream.init(stream, state)
-		while (!validationStream.isEnd) {
-			if (!validationStream.curr) return ValidationError(validationStream.pos!)
-			validationStream.next()
-		}
+		;(validationStream.init as StatePatternInitMethod)(stream, state)
+		for (const vcurr of validationStream)
+			if (!vcurr) return ValidationError(validationStream.pos!)
 		return ValidationSuccess
 	}
 }

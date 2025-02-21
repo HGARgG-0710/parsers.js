@@ -5,21 +5,10 @@ export type Indexed<Type = any> =
 			length: number
 	  }
 
-export interface BasicStream<Type = any>
-	extends Endable,
-		Currable<Type>,
-		Nextable<Type> {}
-
-export interface Endable {
-	isEnd: boolean
-}
-
-export interface Nextable<Type = any> {
-	next: () => Type
-}
-
-export interface Currable<Type = any> {
+export interface BasicStream<Type = any> {
 	curr: Type
+	isEnd: boolean
+	next: () => Type
 }
 
 export type * from "./InputStream/interfaces.js"

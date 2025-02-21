@@ -6,11 +6,12 @@ import type { DelegateTokenizablePattern, FreeTokenizer } from "./interfaces.js"
 import { FlushableTokenizable } from "./abstract.js"
 import { tokenizeString } from "./utils.js"
 
-import { type, inplace, object } from "@hgargg-0710/one"
+import { type, inplace, object, array } from "@hgargg-0710/one"
 const { isString } = type
 const { replace } = inplace
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isEmpty } = array
 
 export function DelegateTokenizable<Type = any, InType = any>(
 	tokenizer: FreeTokenizer<Type, InType>,
@@ -27,7 +28,7 @@ export function DelegateTokenizable<Type = any, InType = any>(
 		tokenizer: FreeTokenizer<Type, InType>
 
 		tokenize(key: InType, handler: SummatFunction<any, Type, OutType>) {
-			if (!this.result.length)
+			if (isEmpty(this.result))
 				return (this.result = this.tokenizer(this.value!, key, handler))
 
 			for (let r = this.result.length; r--; ) {

@@ -1,28 +1,8 @@
 [v0.3]
 	
-4. [Part of the docuementation effort] Add the JSDoc; 
-	Let it be brief (very), and work like: 
-
-		1. Contains a short (SHORT) description of the given class/method; 
-			WITHOUT the arguments' types! 
-		2. Contains a reference to the proper documentation; 
-	
-	The only benefit of actually having the thing is the ability to reference the "big docs".
-
 5. Source code TODO-s: 
 	17. USE the optional '.pos' property [Stream] on EVERY possibility inside the method implementations 
 		(namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
-
-	2.52. work on Stream: 
-			Quite obviously, one is to work FURTHER on the 'StreamClass'; 
-			In particular, 
-
-				1. StreamClass/interfaces.ts - refactor types via 'Pick', 'Partial' and 'Omit': 
-				2. Add the 'LocatorStream' (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
-					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
-					IDENTIFY them with the respective classes/functions
-				3. OptBufferized, OptPos - I'M LOOKING AT YOU...
-					These can be re-done via 'Partial' - been looking for something of this nature, hadn't dfound previuosly; 
 	
 	2.62. PROBLEM - with LayeredFunction: 
 
@@ -45,16 +25,6 @@
 
 					Presence of this in one.js would be a PERFECTLY good excuse for keeping 'LayeredFunction' HERE (for the moment, at the very least... - one did plan to refactor it out somewhere, is needed for other porjects as well...); 
 
-
-	[LATER - during testing...]
-	2.66. Cases of "Bad Types" [to fix]: 
-		1. DefaultType - for IndexMap-types: 
-			It's pretty important, as it determines about half the return types of the type's methods. 
-				Put those up! [in templates, and as a dependency of *EVERYWHERE*]
-		2. 'this'-returning: 
-			Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
-			Just do ': this', AS INTENDED...
-	
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
 
@@ -81,9 +51,8 @@
 
 	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
 		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
-		Fix it; 
 
-		Notes made [BESIDES walking through the whole project tree + critically assessing the types]: 
+		To Fix [comprehensive list of issues with types]: 
 			1. Add 'BasicStream<Type>' Generics to *ALL* the Stream-related utils 
 			2. See whether the 'stream.curr' return arguments in things like 'uniRewind' is good or not (maybe, returning 'stream' would have been better?)
 			3. Find all the 'as'-thingies, where polymorphism is expected: 
@@ -93,12 +62,46 @@
 						SOLUTION: 
 							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'			
 
-Order of TODO-elimination: 
-	5.17.
+			
+			4. DefaultType - for IndexMap-types: 
+				It's pretty important, as it determines about half the return types of the type's methods. 
+					Put those up! [in templates, and as a dependency of *EVERYWHERE*]
+					ALSO - make it a 'NoInfer'! 
+			5. 'this'-returning: 
+				Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
+				Just do ': this', AS INTENDED...
 
+			6. StreamClasses/interfaces.ts: 
+				1. 'abstract new' types - REMOVE!
+					These (instead) have to be written inline [same way as '6.2.']
+				2. 'BufferizedPositionalVeryBloodyLongStringMyGoodness...' - replace with laconic '&'-s (this includes the 'abstract new' cases); 
+					AND USE: 
+						1. Bufferized
+						2. Posed
+						3. Stateful
+					IN THEIR INITIAL FORM (meaning, for instance, for the "maximum" case - 'Posed<number> & Bufferized<Type> & Stateful & StreamClassInstance<Type>')
+				3. refactor "small" types via 'Pick', 'Partial' and 'Omit': 
+				4. Add the 'LocatorStream' interface (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
+					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
+					IDENTIFY them with the respective classes/functions
+
+	2.77. Do research [learn LR/LALR-parsing properly]: https://en.wikipedia.org/wiki/LR_parser#
+		Compare with the stuff the library currently has, (possibly) implement 
+			some of the stuff from there... (specifically - the LALR parsers, if they aren't already present)
+		Also, See: https://stackoverflow.com/a/24177215
+		Also, See: https://en.wikipedia.org/wiki/Bottom-up_parsing
+			ESPECIALLY: https://en.wikipedia.org/wiki/Shift-reduce_parser
+				This describes how precisely the Shift-reduce parsers (most popular Bottom-Up parsers out there) work. 
+				An LR-parser is a kind of a Shift-reduce parser. 
+			And, finally: https://en.wikipedia.org/wiki/GLR_parser
+			Note: this is the thing that's currently missing from the library. 
+				It's extremely easy and opportune to make Top-Down recursive parsers with it, 
+					however the 'Bottom-Up' approach is still missing
+
+Order of TODO-elimination: 
 	2.80.	
-	5.2.52. [as part of 2.80]
-	2.66. [as part of 2.80]
+	
+	5.17.
 
 	5.2.62.
 	
@@ -107,6 +110,9 @@ Order of TODO-elimination:
 		One must first understand PRECISELY how a certain thing is to work, and what to expect from it...;
 		Tests are far too tiresome and long to write 
 			(as it is now "too late" to set the requirements based off them and do proper TDD, docs provide a much better/simpler/faster alternative)
+		
+		These are short and concise, don't get too deep into the implementation details. 
+		[The "big" full GitHub Wiki will be for this...]
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
@@ -121,18 +127,16 @@ Order of TODO-elimination:
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
+	5.2.77.
 
 	[fix test compilation errors]
 	[run the tests]
 
 	B. 
-	At the same time: 
-		2. 
-		4. 
 		
 	C.
 	
-B. documentation (change/fix it...);
+B. documentation (wiki - change/fix it...);
 	Hosted on the project's GitHub Wiki. 
 	WHEN WRITING DOCUMENTATION, 
 		
@@ -170,35 +174,6 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 [v0.4]
 
 0. Check if this works with Deno; 	
-
-1. STACK! 
-	The library is not too stack heavy, BUT it does have an (ultimate) stack-limitation
-		when working with NestableStream-s and the 'nested' util (generally, anything that is NON-FLAT);
-	This is very much impossible to solve on its own; 
-
-	SOLUTION: use the CPS style. 
-		Re-implement library (whilst keeping the non-CPS version) in CPS, 
-		with an infinite 'stack'; 
-
-	! THIS WILL REQUIRE FOR ONE TO FIRST IMPLEMENT THE INFINITE CPS-BASED STACK LIBRARY!
-	That one should: 
-		0. Be written in TypeScript; 
-		Include Types: 
-		1. InfiniteStack; 
-		2. CPSArray (this is, ultimately, a CPS version of JS array);
-
-	As, CPS is (quite) time-costly to actually run (due to amount of stack usage [primary] + the stack unwinding + additional checks...),
-		this sort of thing would be useful for applications where speed of little importance
-			(that is: NOT things like apps/websites/interpreters, and so forth; Stuff like AOT-compilers, perhaps);
-
-	HOWEVER: 
-
-		1. As said previously, it IS quite costly to do CPS, so: 
-			1.1. See, whether it's feasible from time-perspective (how much slower it is, whether it's possible, or whether it's way too slow); 
-			1.2. If not feasible - abandon the whole CPS idea completely; 
-
-			To find out - benchmark; Write a sketch for parsing a very nested expression [sufficiently nested to crash the current API] 
-				using the Infinite-Stack-CPS approach, then - measure and decide...; 
 	
 2. New Streams/Parsers + some minor stuff/code-quality/minimalism: 
 
@@ -697,7 +672,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				0. It is a StreamClass (a configurable class of StreamTokenizer-s, more precisely); 
 				1. Let stream elements be '<OutType>[valid, token]: [boolean, OutType]'; 
 				2. Contains a field of '.validator', which returns '[boolean, OutType]', where 'OutType' is the UPDATED token (based off current one and 'input'); 
-					return value is, then: 
+					entire return value is, then: 
 						
 						return this.validator(this.handler(this.input), input)
 					
@@ -718,8 +693,16 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						the 'ErrorHandler' be passed the given Stream; 
 				2. Forces stopping of the parsing:	
 					SOLUTION: do not; 
-						Add the ability to return a value from the 'ErrorHandler': 
-							either 'true' - ContinueParsing, or 'false' - HaltParsing
+						Add the ability to return an additional value from the 'ErrorHandler': 
+							either '[false, true]' - ContinueParsing (error), or '[false, false]' - HaltParsing (error). 
+
+			
+		[SOLUTION 3] ASTValidator - for 'ASTAnalyzer/ASTNode' APIs: 
+			1. Due to homogeniety, it is extremely convinient/fast to check for the "right" '.lastChild' value 
+			2. Due to homogeniety, it is 
+			3. [Summary] The 'ASTHierarchy' idea could be used to verify the tree post-parse
+
+			YES, DO THIS
 		
 	2.29. Later - improve the tests: 
 		2.34.1. Add generics to the class-tests signatures [just for the sake of it - very pretty and give a lot more sense to using TypeScript for tests]; 
@@ -1254,104 +1237,10 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					2.54.1. One MAY want to adopt a new Tokenizer: 
 						Specifically, a more "traditional one", which CAN use regular expression 'RegExpTokenizer' and/or 'RegExpLexer' (for num-positions...). 
 						Reasons: 
-							1. StreamParser as a tokenizer SHOULD be performant (if used correctly), BUT it can't work with regular expressions [no notion of "consuming tokens"]; 
+							1. StreamParser as a tokenizer SHOULD be performant (if used correctly - with 'match' util)
 							2. PatternTokenizer is SHOULD be SLOW AS FUCK because of how simple its algorithm is...
 								PROFILE IT LATER [again, when creating new parsers...]
 							
-					2.54.2. One MAY want to adopt a Chevrotain-style rule-based parser (RuleParser): 
-						Reason - 'StreamParser' (the "MAIN" parser present in the library) is LAYER-BASED, 
-							in other words - it is ONLY intended to be used with some hyper-fast and hyper-simple things, which 
-								END UP being "stacked up" for several layers, causing a rather unpleasant kind of coefficient-jump in O-complexity of the final algorithm; 
-						This, however, does not necessarily signal a need for change and/or adoption of such a thing
-						Although - it may be useful as of itself regardless...; 
-							The Chevrotain's CstParser API is (quite frankly) horrible and uniodiomatic (which appears to be library's general problem - that includes the code)
-								[
-									1. the need for 'this.performSelfAnalysis'
-									2. moronic FLATUPPERCASE conventions
-									3. the unnecessary DSL,
-									4. requirement of using classes for parsers
-									5. this.SUBRULE2-like things...
-									... et cetera
-								]
-
-						Reasons to use a RuleParser: 
-							1. [Potentially] improved performance
-							2. [Potentially, for some cases] Less tedious to write
-							3. Simpler final project architecture
-							4. Natural correspondence with Rules' languages 
-								(can parse rules, and create respective parsers from them - provided the right kind of API, Chevrotain's a bad example)
-							5. More intuitive AST-formation process
-
-						Reasons to NOT use a RuleParser: 
-							1. More complex implementation
-							2. Worse maintainability
-							3. Worse modularity 
-							4. Less intuitive parser reversability [layers help there]
-
-						In order to achieve a good case of parser extensibility (A MUST for parser.js - Chevrotain doesn't have it), 
-							one'll be needing to define the 'Rule' class, which would permit creation of general extensible rules, of which RuleParser-s be 
-								created. 
-
-						IDEA for Rule implementation [bit of a jumble, but is good...]: 	
-
-							0. IdentityRule - this is the "identity" rule, which simply copies the Token as-is [that being, it CHECKS for whether the PRECISE TokenInstance/TokenType is present]; 
-								Equiv RegExp: /./
-							1. ElementaryRule(type) - this is equivalent to creating a rule for a token with type '.type';
-							1. .template: RuleTemplate - a set of operations, based off which a Rule is defined; 
-								1.1. Fundamentally, 'RuleTemplate' is a method with '.inject(rules: CompiledRule[]): CompiledRule' - called during 'Rule.compile()'
-								1.2. The 'CompiledRule' has '.match(x: Token): boolean' method, for checking whether or not a certain item fits the given thing. 
-									These are used (finally) by the 'RuleParser' on the given 'TokenStream' 
-										(interface for the thing one obtains as a result of either 'RegExpTokenizer' or 'StreamParser')
-									to produce a new `TokenStream`;
-
-									1.2.1. 'TokenStream' - another one of library's problems is ITS FUNDAMENTAL LACKING;  
-								1.3. '.operators: Operator[]' (per instance) - a list of operators, each one "consuming" a given number of items (like the *binary* 'a | b', or *binary* 'a b' - following)
-									1. Each one of the operators has to be defined in the '.table' OperatorTable (and be referenced by the respective name); 
-									2. Each one of the operators has to have its own definition (predicate) for determination of whether or not it (specifically) matches; 
-									3. The library provides a default PEG-like 'OperatorTable' and a 'RuleTemplate' class specifically for it...; 
-								1.4. '.table: OperatorTable' - a '.prototype'-based property for keeping the available 'Operator's (it's also an interface...); 
-							2. .sub: Rule[] - rules inserted into the RuleTemplate [note: recursively '.compile()'-d]
-							3. .compile() - CompiledRule (new object, with a new definition for '.invoke' method) - the result of substitution of '.sub' into '.template', optimized; 
-							3. RuleParser: 
-								1. .rules: Rule[]
-								2. .compile() - compiles the '.rules'; Returns the 'CompiledRuleParser' (a function); 
-									The CompiledRuleParser drills through a tree of rules based off a given 'TokenStream'. 
-							4. '.type: Type' - analogous to 'Token.type', used for element categorization and quick identification in 'HashMap'/'LinearIndexMap'/other-places; 
-								Permits using 'Rule' as 'TokenInstance' [of which 'TokenStream' is a Stream]; 
-
-						Performance increase: 
-							1. removes the need for recursive 'this.isCurrEnd()' checks, when advancing to a new high-level token;
-
-						Performance decrease [PROBLEM!]: 
-							1. potentially - a need to "look" for the right rule [linear search - bad]
-								SOLUTION: create optimization techniques for them - specifically: 
-
-									1. COLLECT all the Rules that start with 'IdentityRule' [includes DRILLING]
-									2. For ElementaryRule-s, COLLECT the rules that start with them by underlying '.type' (0th element): 
-										THEN - proceed with this, KEEP collecting a bucket inside-the-bucket by Token-'.type' for 1st element, 
-											and so forth, UNTIL all buckets have a size of 1, and we can CHAIN the given 'Stream', 
-												by means of repeatedly doing 'bucket.get(x.type)', for each new 'x'; 
-									3. Create an '.order'-based optimization 
-										(namely - if '.type' is a number/orderable, one uses binary search of '.type' for the '.order' [number/orderable] 
-											on each one of the given array of 'Rules'); 
-									4. All the other rules - collect them into a single "linear" bucket; 
-												
-									This way, we are capable of killing two birds with one stone:
-										1. choose a 'Rule'
-										2. advance the current 
-										3. minimize backtracking ["deeply" checking for a rule];
-											The PRECISE order of attempts would be determined by the user. 
-											Default is - start with 'IdentityRule', proceed with '.type-at-[0]'-based
-												(max backtracks per element of output Stream - ((sum of cardinalitities of these two sets) - 1) )
-									
-									The optimization structure, however, will need to be separate from the 'ElementaryRule'; 
-									PROBLEM: 
-										How to organize it?
-										The RuleParser HAS to be general, but one also wants to add this optimization.
-										IDEA: make it part of 'RuleParser.compile()', via 'instanceof IdentityRule' and 'instanceof ElementaryRule' (then, use '.type' to group...). 
-											As these things are happening AT COMPILE TIME for the given parser, 
-												one can afford the lavishes of actually doing all that...; 
-	
 	55. MultiMap - [IndexMap-like] this returns ALL the matched items, and while running multiple results 
 		[with REQUIRED function-values, and only unless early termination has been demanded by a return value]; 
 
@@ -1391,7 +1280,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				NOTE: the 'HashMap' is, TOO, completely configurable by the user [user-defined (if provided), else - default being: when 'string's are used for 'type's - ObjectHashInternal, otherwise - HashMapInternal]; 
 					(another function-argument for returning the final ASTAnalyzer class)
 
-		4. Provides functionality: 
+		4. Provides functionality [ASTAnalyzer]: 
 			1. mapTypes((type_name: string) => string): 
 				creates a new 'ASTNode', by means of mapping the '.type'-s
 					of the current one using the given function. 
@@ -1457,6 +1346,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 							F(A)(B); 
 						
 				The optimization is - SPLITTING the '.types'-buckets via doing '.types[name].map(...)'; 
+			
+			9. RecursiveASTNode: 
+				1. Contains various copying .value-Array-delegate methods: 
+					1. .map(f) - creates a new RecursiveASTNode via 'new RecursiveASTNode(this.type, this.value.map(f))'
+					2. .filter(f) - creates a new RecursiveASTNode via 'new RecursiveASTNode(this.type, this.value.filter(f))'
 
 		5. Optimization information (additional): 
 			1. IDEA: add a new 'ASTHierarchy' information object, which: 
@@ -1525,3 +1419,117 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		
 		This permits to achieve the 'PreallocArray' idea WITHOUT the need to copy/change the contents of THE SAME array. 
 		CONCLUSION: YES, add the '.move' to SOME collections via 'ArrayMoveCollection' with '[]'; 
+
+	59. [types] Maybe - split the "specific" composed 'X extends A, B, C, ... {}' types from the elementary 'A, B, C, ...': 
+		Currently, they are being exported within the same 'type'-module as the first (original/closest) usage. 
+		However, one could also (instead) export them at the special 'interfaces.mixin' level [which, basically, contains the "small" interfaces]. 
+		
+		One COULD otherwise put them into a single 'refactor.ts' file, HOWEVER, then becomes the problem of needing to actually export some of them 
+			[ex: Indexable]. 
+		
+		Thus, divide them on: 
+			1. "unused" (src/refactor.ts) - those that DON'T appear in any function definitions
+			2. "used" - export them IN THE SAME module as their ontology best demands
+
+	60. FlexibleFunction - make a dependendency, a "mini-package" named "callable"; 
+		Export the function there as 'Callable'
+
+	61. Iterator Helper functions - '.filter', '.take', ...: 
+		Provide them. 
+		Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
+
+	62. *Add* ability to store indexes of various AST nodes within the original 'FreezableBuffer'
+		object passed to the InputStream: 
+			Rather a curious problem here, as the Stream that issues the error HAS TO KNOW what index 
+				the original input 'String' has that the parsing starts at. 
+		
+		SOLUTION [idea/attempt]: an 'IndexBuffer' (a FreezableBuffer) wrapper: 
+			1. This accepts a 'number[]'
+			2. Requires making the given 'Token' an 'IndexAssignable': 
+				1. Create a new class 'IndexedToken', one that would also be having an '.assignedIndex' property; 
+				2. '.assignedIndex' stores the INDEX inside the '.indexBuffer', that the user can store on (say) .state of the given StreamParser;
+					1. IndexBuffer has THE SAME length as an actual '.buffer' would, EXCEPT that it *doesn't* get to store the values, ONLY just the 'indexes': 
+						1. For this, USE '.pos'; 
+						2. [big maybe...] Enable storing the .indexBuffer as an optional 'stream.indexes' property? 
+							1. Would automatically enable '.pos' property
+							2. Would keep the '.pos' associated with each object
+							3. Would assign '.assignedIndex' to the thing...;
+								3.1. Would expect 'IndexAssignable's as its items; 
+							
+							4. Then - create an 'RecoverableStream' [from StreamParser], which would do that sort of thing...: 
+								1. keeping positions for future error-reference
+			3. The 'IndexBuffer' stores FINAL indexes (in the original 'InputStream')
+
+		Then, one can do a setup: 
+			0. All the Stream-s have a running '.pos' that is being '.push'ed to the respective '.state.indexBuffer'
+
+			1. InputStream - contains the original '.buffer' (no '.state')
+			2. [first] StreamParser - tokens contain indexes inside the initial parsed string - 'InputStream.buffer'
+			3. [higher-level] StreamParser - tokens contain indexes within the '.value.state.indexBuffer': 
+				This way, the chain goes: 
+
+					// rough sketch: TODO - add this full-on as a 'util'; 
+					function findErrorOrigin (errToken, stream) {
+						let index = errToken.assignedIndex
+						do index = stream.value.state.indexBuffer[index]
+						while ((stream = stream.value) && stream.value)
+						return stream.buffer.get()[index]
+					}
+				
+				Purpose of keeping the '.assignedIndex' on EVERY level, is that IN CASE that this is a parsing error 
+					that can be discovered early, IT WOULD [alternatively - during later validation, one may want to provide a more precise error information]
+
+	63. Add a 'binarySearch' utility: 
+		1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
+		2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+	64. 'InputStream' - provide a '.peek(n)' method: 
+		1. looks "forward" n items; 
+		2. add a new interface - PeekableStream
+			2.1. Add a general 'StreamClass' implementation: uses a 'PreallocArray' (empty by default), which 
+				keeps the 'next n' items, to be looked up. 
+
+				1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
+					index appropriately [reflect this...]; 
+		3. Permits making more complex parsers
+
+	
+	65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 
+		0. TypeScript
+		1. InfiniteStack [from stack.js]
+		2. CPSArray [from stack.js]
+		3. Implements all the current items within the library using continuation-passing style
+
+		Note: keep this for v0.5 ONLY. *Not* as a part of v0.4
+
+	66. A new utility function (Parser/utils.ts) - match(word, stream): 
+		For a given 'Indexable', it does: 
+
+			// rough sketch - requires the '.peek(n)' method; 
+			// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
+			function matchWord(word, stream) {	
+				for (let i = 0; i < word.length; ++i) 
+					if (word[i] !== stream.peek(i)) 
+						return false
+				return true
+			}
+
+	67. Remove (replace):
+		1. PatternTokenizer + RegExpMap
+		2. PatternValidator + RegExpMap
+
+		With a NEW approach - a: 
+			1. 'RegExpTokenizer'
+			2. 'RegExpValidator'
+		
+		These are function-creation functions that is based off *THE SAME SIGNATURE* as 
+			the 'RegExpMap', with the difference that these get to be used with 'StreamParser/LocatorStream/PositionalValidator/...'; 
+		
+		Reasons: 
+			1. PatternTokenizer, PatternValidator use THE SAME code
+			2. PatternTokenizer, PatternValidator are (both) FAR too generic
+				Used only once. 
+				It's a waste of generality. 
+
+		NOTE: the 'RegExpMap' REMAINS: 
+			Reason: it can still be useful to someone (as a boilerplate saver...)

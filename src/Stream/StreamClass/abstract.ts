@@ -18,7 +18,10 @@ const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
 function* streamIterator<Type = any>(this: BasicStream<Type>) {
-	while (!this.isEnd) yield this.next()
+	while (!this.isEnd) {
+		yield this.curr
+		this.next()
+	}
 }
 
 function update<Type = any>(this: StreamClassInstance<Type>) {

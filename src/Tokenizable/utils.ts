@@ -1,9 +1,10 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 
-import { inplace, array, number } from "@hgargg-0710/one"
+import { inplace, array, number, string } from "@hgargg-0710/one"
 const { first } = array
 const { insert, mutate } = inplace
 const { makeOdd, isOdd } = number
+const { isEmpty } = string
 
 export function matchString(value: string, key: RegExp | string): string[] {
 	return mutate([...value.matchAll(key as RegExp)] as string[][], first)
@@ -20,7 +21,7 @@ export function tokenizeString<OutType = any>(
 	return [matched, split, tokenized]
 }
 
-export const matchedStringTokenizer = tokenizeMatched<string>((x) => !x.length)
+export const matchedStringTokenizer = tokenizeMatched<string>(isEmpty)
 
 export function tokenizeMatched<InType = any>(isEmpty: (x: InType) => boolean) {
 	return function <OutType = any>(

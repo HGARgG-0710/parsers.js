@@ -1,7 +1,10 @@
-import type { Copiable } from "../Stream/StreamClass/interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
+
+export interface Copiable<Type = any> {
+	copy: () => Type
+}
 
 export interface HasType {
 	has: (x: any) => boolean

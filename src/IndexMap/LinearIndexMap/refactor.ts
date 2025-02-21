@@ -8,7 +8,7 @@ export namespace OptimizedLinearMap {
 		this: LinearIndexMap<KeyType, ValueType>,
 		key: any
 	) {
-		return this.alteredKeys.indexOf(key)
+		return (this as any).alteredKeys.indexOf(key)
 	}
 }
 

@@ -6,14 +6,14 @@ import type {
 	IndexAssignable
 } from "../../IndexMap/FastLookupTable/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
-import type { OptPosed } from "../../Position/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
 
 export interface NestedStream<Type = any>
 	extends StreamClassInstance<Type | NestedStream<Type>>,
 		Superable,
 		Pattern<EndableStream<Type>>,
 		IndexAssignable,
-		OptPosed<number> {
+		Partial<Posed<number>> {
 	constructor: new (value?: EndableStream<Type>, _index?: any) => NestedStream<Type>
 	typesTable: FastLookupTable<any, StreamPredicate>
 	currNested: boolean

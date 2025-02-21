@@ -3,7 +3,6 @@ import type {
 	ChildrenTree as IChildrenTree,
 	InTree,
 	ParentTree as IParentTree,
-	Tree,
 	TreeConstructor,
 	TreeConverter
 } from "./interfaces.js"
@@ -21,7 +20,7 @@ const { trivialCompose } = functional
 const { last } = array
 const { insert, out } = inplace
 
-export class ChildrenTree<Type = any, T extends Tree<Type> = Tree<Type>>
+export class ChildrenTree<Type = any, T extends WalkableTree<Type> = WalkableTree<Type>>
 	implements WalkableTree<Type>, IChildrenTree<Type, T>
 {
 	children: InTree<Type, T>[]
@@ -34,7 +33,7 @@ export class ChildrenTree<Type = any, T extends Tree<Type> = Tree<Type>>
 		return multind.reduce(
 			(prev, curr) => prev.children[curr],
 			this as IChildrenTree<Type>
-		) as WalkableTree<Type>
+		) as InTree<Type, WalkableTree<Type>>
 	}
 
 	write(multind: number[], value: InTree<Type>) {

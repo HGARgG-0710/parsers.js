@@ -1,14 +1,9 @@
-import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "../Stream/interfaces.js"
+import type { BasicStream, DirectionHaving } from "../Stream/interfaces.js"
 
 export type Position = PredicatePosition | PositionObject | number
 export type DirectionalPosition = PredicatePosition | number
-export type BasicPosition = SummatFunction | number
-
-export interface PredicatePosition extends Function {
-	direction?: boolean
-}
+export type PredicatePosition = Function & Partial<DirectionHaving>
 
 export interface PositionObject {
 	convert: (stream: BasicStream) => DirectionalPosition
@@ -19,10 +14,6 @@ export interface PositionObject {
 
 export interface Posed<Type = any> {
 	pos: Type
-}
-
-export interface OptPosed<Type = any> {
-	pos?: Type
 }
 
 export type ChangeType<Type = any> = (input: ReversibleStream<Type>) => Type

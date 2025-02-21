@@ -20,13 +20,17 @@ export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
 	IsEndCurrable &
 	IsStartCurrable
 
+export interface DirectionHaving {
+	direction: boolean
+}
+
 export interface LimitedStream<Type = any>
 	extends SinglePositionLookahead<Type>,
 		Pattern<LimitedUnderStream<Type>>,
 		LookaheadHaving,
 		Superable,
-		ReversedStreamClassInstance<Type> {
+		ReversedStreamClassInstance<Type>,
+		DirectionHaving {
 	from: Position
 	to: Position
-	direction: boolean
 }

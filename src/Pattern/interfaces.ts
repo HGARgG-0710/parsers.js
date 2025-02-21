@@ -10,4 +10,4 @@ export interface Pointer<Type = any> {
 	value: Type
 }
 
-export type Pattern<Type = any> = Pointer<Type | undefined>
+export type Pattern<Type = any> = Partial<Pointer<Type>>

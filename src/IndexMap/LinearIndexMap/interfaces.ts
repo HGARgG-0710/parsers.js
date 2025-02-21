@@ -5,5 +5,4 @@ export interface LinearIndexMap<KeyType = any, ValueType = any>
 	change?: IndexingFunction<KeyType>
 	keyExtension: Function
 	extension: (x: any, ...y: any[]) => any
-	alteredKeys: any[]
 }

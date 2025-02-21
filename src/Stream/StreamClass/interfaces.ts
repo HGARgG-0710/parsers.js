@@ -36,20 +36,8 @@ export interface Superable {
 	super: Summat
 }
 
-export interface Copiable<Type = any> {
-	copy: () => Type
-}
-
-export interface FrozenStateful {
-	state: object
-}
-
 export interface Stateful {
 	state: Summat
-}
-
-export interface OptStateful {
-	state?: Summat
 }
 
 // * Mandatory Property-interfaces
@@ -62,116 +50,56 @@ export interface IsStartCurrable {
 	isCurrStart: () => boolean
 }
 
-export interface ConditionalIsStartCurrable {
-	isCurrStart?: () => boolean
-}
-
-export interface BaseNextIterable<Type = any> {
-	baseNextIter: () => Type
-}
-
-export interface BasePrevIterable<Type = any> {
-	basePrevIter: () => Type
-}
-
-export interface ConditionalBasePrevIterable<Type = any> {
-	basePrevIter?: () => Type
-}
-
-export interface InitGettable<Type = any> {
-	initGetter?: () => Type
-}
-
-export interface ConditionalInitGettable<Type = any> {
-	initGetter?: () => Type
-}
-
-export interface RealCurrHaving<Type = any> {
-	realCurr: Type
-}
-
-export interface ConditionalCurrGettable<Type = any> {
-	currGetter?: () => Type
-}
-
-export interface ConditionallyPrevable<Type = any> {
-	prev?: () => Type
-}
-
-export interface ConditionallyUpdatable<Type = any> {
+export interface Updatable<Type = any> {
 	update?: () => Type
-}
-
-export interface DefaultEndable {
-	defaultIsEnd: () => boolean
-}
-
-export interface Bufferizable {
-	buffer?: boolean
-}
-
-export interface StateHaving {
-	state?: boolean
-}
-
-export interface ConditionallyRewindable<Type = any> {
-	rewind?: () => Type
-}
-
-export interface HasPositionCheckable {
-	hasPosition?: boolean
-}
-
-export interface IsPatternCheckable {
-	isPattern?: boolean
 }
 
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
 
-export interface PrimalStreamClassSignature<Type = any>
-	extends IsEndCurrable,
-		BaseNextIterable<Type>,
-		ConditionalCurrGettable<Type>,
-		DefaultEndable {}
+interface PrimalStreamClassSignature<Type = any> extends IsEndCurrable {
+	initGetter?: () => Type
+	baseNextIter: () => Type
+	defaultIsEnd: () => boolean
+	currGetter?: () => Type
+}
 
-export interface StreamClassTransferable<Type = any>
+interface StreamClassTransferable<Type = any>
 	extends PrimalStreamClassSignature<Type>,
-		ConditionalBasePrevIterable<Type>,
-		ConditionalIsStartCurrable {}
+		Partial<Pick<ReversedStreamClassInstance<Type>, "prev">>,
+		Partial<Pick<ReversedStreamClassInstance<Type>, "basePrevIter">>,
+		Partial<IsStartCurrable> {}
 
-export interface StreamClassSignature<Type = any>
-	extends StreamClassTransferable<Type>,
-		ConditionalInitGettable<Type>,
-		HasPositionCheckable,
-		IsPatternCheckable,
-		Bufferizable,
-		StateHaving {}
-
-export interface BasicStreamClassInstance<Type = any>
+interface BasicStreamClassInstance<Type = any>
 	extends BasicStream<Type>,
-		InitGettable<Type>,
 		Initializable,
 		PrimalStreamClassSignature<Type>,
 		PreStarted,
-		RealCurrHaving<Type>,
 		Navigable<Type>,
 		Finishable<Type>,
 		Iterable<Type> {}
 
+export interface StreamClassSignature<Type = any> extends StreamClassTransferable<Type> {
+	buffer?: boolean
+	state?: boolean
+	hasPosition?: boolean
+	isPattern?: boolean
+}
+
 export interface StreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
 		StreamClassTransferable<Type>,
-		ConditionallyPrevable<Type>,
-		ConditionalIsStartCurrable,
-		ConditionallyRewindable<Type>,
-		ConditionallyUpdatable<Type> {}
+		Partial<Prevable<Type>>,
+		Partial<IsStartCurrable>,
+		Partial<Rewindable<Type>>,
+		Updatable<Type> {}
 
 export interface ReversedStreamClassInstance<Type = any>
 	extends BasicStreamClassInstance<Type>,
-		BasePrevIterable<Type>,
 		Prevable<Type>,
 		IsStartCurrable,
-		Rewindable<Type> {}
+		Rewindable<Type> {
+	basePrevIter: () => Type
+}
 
 export interface PositionalStreamClassInstance<
 	Type = any,

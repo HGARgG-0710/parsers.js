@@ -18,13 +18,17 @@ export type HashType<KeyType = any, InternalKeyType = any> = (
 	...y: any[]
 ) => InternalKeyType
 
-export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any> {
+export interface Hashable<KeyType, InternalKeyType> {
+	hash: HashType<KeyType, InternalKeyType>
+}
+
+export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
+	extends Hashable<KeyType, InternalKeyType> {
 	new (structure: InternalHash<InternalKeyType, ValueType>): HashMap<
 		KeyType,
 		ValueType,
 		InternalKeyType
 	>
-	hash: HashType<KeyType, InternalKeyType>
 	extend: (f: (x: any) => KeyType) => HashClass<any, ValueType, InternalKeyType>
 }
 
@@ -33,8 +37,7 @@ export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
 		Settable<KeyType, ValueType>,
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,
-		Sizeable {
-	hash: HashType<KeyType, InternalKeyType>
-}
+		Sizeable,
+		Hashable<KeyType, InternalKeyType> {}
 
 export type * as InternalHash from "./InternalHash/interfaces.js"

@@ -16,6 +16,4 @@ export interface Bufferized<Type = any> {
 	buffer: FreezableBuffer<Type>
 }
 
-export interface OptBufferized<Type = any> {
-	buffer?: FreezableBuffer<Type>
-}
+export type OptBufferized<Type = any> = Partial<Bufferized<Type>>

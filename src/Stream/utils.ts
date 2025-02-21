@@ -2,8 +2,10 @@ import type { BasicStream } from "./interfaces.js"
 import type { BasicReversibleStream } from "./ReversibleStream/interfaces.js"
 
 import { Stream } from "../constants.js"
-import { propByName } from "./refactor.js"
 const { SkippedItem } = Stream.StreamParser
+
+import { object } from "@hgargg-0710/one"
+const { prop } = object
 
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
@@ -33,24 +35,12 @@ export function wrapped(handler: (input: BasicStream) => any) {
 	}
 }
 
-/**
- * Returns the `.is` property of a given object
- */
-export const is = propByName("is")
+export const is = prop("is")
 
-/**
- * Returns the `.isEnd` property of a given `BasicStream`
- */
-export const isEnd = propByName("isEnd")
+export const isEnd = prop("isEnd")
 
-/**
- * Returns the `.isStart` property of a given `ReversibleStream`
- */
-export const isStart = propByName("isStart")
+export const isStart = prop("isStart")
 
-/**
- * Skips a single element of the given `BasicStream` and returns an empty array
- */
 export const destroy = (input: BasicStream) => {
 	input.next()
 	return SkippedItem

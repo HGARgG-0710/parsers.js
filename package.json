@@ -30,7 +30,7 @@
 		"unused": "ts-unused-exports ./tsconfig.json"
 	},
 	"devDependencies": {
-		"@hgargg-0710/summat.ts": "^0.0.1",
-		"@types/node": "^20.14.8"
+		"@hgargg-0710/summat.ts": "0.0.1",
+		"@types/node": "^22.12.0"
 	}
 }

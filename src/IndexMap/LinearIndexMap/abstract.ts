@@ -16,7 +16,8 @@ export abstract class BaseLinearMap<
 	ValueType = any,
 	DefaultType = any
 > extends BaseIndexMap<KeyType, ValueType, DefaultType> {
-	alteredKeys: any[]
+	protected alteredKeys: any[]
+
 	change?: IndexingFunction<KeyType>
 
 	extension: (x: any, ...y: any[]) => any

@@ -1,5 +1,4 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Endable } from "../interfaces.js"
 import type {
 	PositionalBufferizedStreamClassInstance,
 	PreStarted,
@@ -33,7 +32,7 @@ export function end(stream: StreamClassInstance) {
 	stream.isEnd = true
 }
 
-export function deEnd(stream: Endable) {
+export function deEnd(stream: StreamClassInstance) {
 	stream.isEnd = false
 }
 
