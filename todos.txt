@@ -98,6 +98,10 @@
 				It's extremely easy and opportune to make Top-Down recursive parsers with it, 
 					however the 'Bottom-Up' approach is still missing
 
+		IMPORTANT NOTE [add to docs]: the 'StreamParser' is a kind of mean for creating a PARSER-COMBINATOR 
+			(meaning: it allows one to "chain" parsing layers together to form a parser, IMPLICITLY ESTABLISHING 
+				the order of rule-application to the given source). 
+
 Order of TODO-elimination: 
 	2.80.	
 	
@@ -1136,14 +1140,14 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		This is a method for converting a 'position' from the given TreeStream to a 'MultiIndex'; 
 		Does NOT '.rewind()'; 
 	
-	2.46. [Big one] Add support for proper PatternMatching;
+	2.46. [Maybe - add, check for feasibility + redundancy; A Big one] Add support for proper PatternMatching;
 		Serves as an abstraction over the 'RegExp'; 
 		Allows one to match 'Token'-s using 'MatchablePattern'-s; 
 		Would have: 
 
 			[1. matching functions]
 			1.1 StreamMatcher - works on Stream-s of items that are '.match(...)'-able [as arguments for 'MatchablePattern.match']; 
-				Expects as input a 'MatchableStream', or a similar thing; 
+				Expects as a '.value'-input a 'MatchableStream', or a similar thing; 
 
 			[2. MatchablePattern-s]
 			2.1. [StreamClass] MatchableStream 	- walks through a given Stream of items, producing new 'MatchablePattern' on each '.match()' [ex: calls '.next()' on every '.match()']; 
@@ -1233,14 +1237,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 					See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
 					2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
 						The memory usage should be noticeably better than speed...; 
-
-					2.54.1. One MAY want to adopt a new Tokenizer: 
-						Specifically, a more "traditional one", which CAN use regular expression 'RegExpTokenizer' and/or 'RegExpLexer' (for num-positions...). 
-						Reasons: 
-							1. StreamParser as a tokenizer SHOULD be performant (if used correctly - with 'match' util)
-							2. PatternTokenizer is SHOULD be SLOW AS FUCK because of how simple its algorithm is...
-								PROFILE IT LATER [again, when creating new parsers...]
-							
+	
 	55. MultiMap - [IndexMap-like] this returns ALL the matched items, and while running multiple results 
 		[with REQUIRED function-values, and only unless early termination has been demanded by a return value]; 
 
@@ -1268,6 +1265,11 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 						1. RecursiveASTNode - without '.value' and '.children: ASTNode[]'; NOTE: here 'ASTNode' is an interface
 						2. ContentASTNode - with '.value: any', without '.children'; This is just a 'TokenType' with additional prototype-methods
 						3. TrivialASTNode - with '.value', without '.children'; This is a 'TokenInstance', with additional prototype-methods
+				4. The '.to' method CONVERTS BACK to a JSON of 'TokenType-TokenInstance'-kind of an object instead: 
+					1. REASON - *despite* being better than the minimalistic 'TokenType-TokenInstance' approach for ANY kind of work, 
+						ASTNode-s are poorly serializable due to their methods. 
+						Therefore, one needs to retain 'Token' FOR SERIALIZATION PURPOSES *ONLY*. 
+						'Token' is here to stay...
 			2. By doing 'ASTStream(TreeWalker(ASTNode.from(...)))', one can iterate a given generated JavaScript AST object! 
 				2.1. This is what the ASTAnalyzer (actually) is doing; 
 				2.2. The 'Stream' is, then, applied a 'StreamParser' upon; 
@@ -1505,14 +1507,23 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 	66. A new utility function (Parser/utils.ts) - match(word, stream): 
 		For a given 'Indexable', it does: 
 
+			// ! PROBLEM: lacks ability to check for MULTIPLE WORDS: 
+			// 		* Solution: replace 'matchWord' with a more complex hand-written 'RegExp'-matching engine for the library... [uses 'Stream's instead of JS 'string's]: 
+			// 			ALSO - use the *same* engine for the 'RegExpTokenizer'; 
 			// rough sketch - requires the '.peek(n)' method; 
 			// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
-			function matchWord(word, stream) {	
-				for (let i = 0; i < word.length; ++i) 
+			function matchWord(stream, word) {	
+				const positions = word.length
+				for (let i = 0; i < positions; ++i) 
 					if (word[i] !== stream.peek(i)) 
-						return false
-				return true
+						return 0
+				return positions
 			}
+
+			// IDIOM: for skipping a word, call it 'function consume(stream, word, wrapper)' - a 'Parser/utils.ts' utility; 
+			const matched = matchWord(stream, word)
+			skip(stream, matched)
+			if (matched) return wrapper(word)
 
 	67. Remove (replace):
 		1. PatternTokenizer + RegExpMap
@@ -1521,6 +1532,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		With a NEW approach - a: 
 			1. 'RegExpTokenizer'
 			2. 'RegExpValidator'
+			3. 'TokenStream' - output from 'RegExpTokenizer' [or, alternatively - an interface for the 'StreamParser']; 
 		
 		These are function-creation functions that is based off *THE SAME SIGNATURE* as 
 			the 'RegExpMap', with the difference that these get to be used with 'StreamParser/LocatorStream/PositionalValidator/...'; 
@@ -1533,3 +1545,92 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 		NOTE: the 'RegExpMap' REMAINS: 
 			Reason: it can still be useful to someone (as a boilerplate saver...)
+
+	68. [Bottom-up Parsing]: 
+		1. Add: 'Rule'
+			Consists of: 
+			
+			1. .head: 
+				Describes function to "wrap" the matched item with. 
+				One of: 
+					1. 'TokenType'/'ContentASTNode'-like - uses a single item for '.value'
+					2. 'RecursiveASTNode'/'TokenType'-like - uses a multitude of items for '.value' [reads an array from '.body']: 
+						NOTE: if a 'TokenType' is used then PRESENCE OF LAST ARRAY TAKES PRECEDENCE, that is - the body 
+							*ending* with an array will cause a '.value: any[]', whereas one with a SINGLE value, will cause a 
+					3. 'TokenInstance/TrivialASTNode' - has no '.value'
+			2. .body: 
+				This is a sequence of items: 
+					1. 'TokenType'/'RecursiveASTNode'/'ContentASTNode'-like [interface]
+					2. 'TokenInstance'/'TrivialASTNode'-like [interface]
+					3. ('TokenInstance'/'TrivialASTNode'-like | 'TokenType'/'ContentASTNode'-like | Empty)[]
+						This is to describe the ACCEPTABLE TYPES for a '.value: any[]'-TokenType or a 'RecursiveASTNode'. 
+						It is basically equivalent to '(TypeA | TypeB | ...)+'
+
+						WHEN the special object 'Empty' is used instead, ANYTHING (including nothing) is matched. 
+							Id est, it becomes '(TypeA | TypeB | ...)*', NO ITEMS AT ALL is also acceptable. 
+
+						The array of items that is given CONTINUES the array of items that is wrapped into the given '.head' of 'RecursiveASTNode'-like. 
+						Namely, here are the PRECISE TYPES of Rules for each head: 
+
+							1. RecursiveASTNode <- A B ... (or 'TokenType-like <- A B ...') - PRODUCES A '.value: any[]'
+							2. TokenType <- a - PRODUCES A '.value: any (single value)'
+							3. TokenInstance <- a - PRODUCES a 'TokenInstance' (no .value, matched 'a' is ignored)
+
+						ANY OTHER COMBINATIONS ARE *NOT* suppored: will be ignored. 
+
+					4. A special 'Matchable' interface, which would generalize the 'RegExp' with '.match': 
+						This is considered to be the "end" for application of a given Rule. 
+						IF the '.body' of a 'Rule' is NOT a 'Matchable', then a SUB-RULE is used for it, one that PRODUCES
+							a respective '.type' of token (that is, has a '.head' with a respective type of token)
+								is used. 
+								
+						Note, that OTHER kinds of '.type'-possessing classes CAN be used (user-defined EXTENSIONS of 'TokenInstance', for example...)
+				
+				The "matched" item is passed as an argument to '.head'
+
+		2. 'Rule's are kept inside a `RuleTable`
+		3. `StackParser` - a shift-reduce parser for the library:
+			[properties]
+			1. [protected] .stack - the stack of currently unparsed tokens
+			2. [protected] .curr - the current item 
+			3. [protected] .table - RuleTable, a '.prototype' property: 
+				1. During class-creation with 'table', one constructs LOOKAHEAD-'Set's for each of the available Token-s
+			4. [protected] .value - a 'Stream' to be bottom-parsed
+			5. [public] .result - an 'AST'/'Tree' produced: 
+				On the level of the interface - THIS IS A 'readonly' PROPERTY! 
+
+			[methods, internal]
+			5. .shift() - moves the Stream forward one position
+				0. call '.curr = .value.next()'
+				1. push 'this.curr' to the stack
+			6. .reducePlain(x) - applies single-lengthed recursive rules to the given 'x'
+			7. .reduce() - applies the rules from '.table' to the first rule in the parse-trees currently held in the '.stack'; 
+				0. There is a '.currentRules: Rules[]' set of 'Rule's that keeps track of 'Rule's that are *possible* from this particular point. 
+					To make it fast, there is a whole tree generated for obtaining these sets from specific items 
+						AT THE CREATION STEP of the current 'StackParser' class using the '.table'; 
+				1. This applies the currently "chosen" rules to the current item '.curr' in the '.stack'. 
+					1. Each of the 'Rule's have their STATE, which consists of: 
+						1. '.pos' - position [<= '.body.length']
+						2. '.reset()' method (for doing '.pos = 0')
+						3. '.inc()' method (for doing '++.pos')
+
+						NOTE: that the rule is being matched IN REVERSE! 
+							This way, you have: 
+								'A B C .' [.pos = 0] -> 'A B . C' [consumed C, .inc()] -> 'A . B C' [consumed B, .inc()] -> '. A B C' [consumed A; match whole, reduce]
+
+					2. Once '.pos = .body.length', the rule has been fully matched, and it is time that it was '.reduce()'-d 
+						Note: the '.reduce()' AUTOMATICALLY finds all the '.reduce()'-d rules in the '.toReduce' .protected member
+							WHICH contains the next item to be reduced
+
+			[methods, external]
+			7. .inject(value) - injects a new 'Stream' to parse
+			8. .get() - NOTE: this is an 'InitializablePattern', with '.value', '.get()' and '.inject(value)'
+			9. .parse() - method for actually calling the parser: 
+				1. call .shift()
+				2. check if '.isRuleEnd()' is 'true'
+				3. if not 2., goto 1.
+				4. else, call '.reduce()', while '.isRuleEnd()'
+					This works because '.reduce()' continuously '.pop()'s from the 'Stack'
+			10. constructor(value?): 
+				The 'StackParser' is a function-generated class in TERMS OF '.table' (which goes on the prototype). 
+				The '.table'-lookups in the '.parse()' method are OPTIMIZED based off the '.table' function. 
