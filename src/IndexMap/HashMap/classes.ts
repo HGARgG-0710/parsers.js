@@ -1,5 +1,5 @@
 import type { Indexed } from "../../Stream/interfaces.js"
-import type { HashClass, HashMap, HashType } from "./interfaces.js"
+import type { HashClass, HashMap, Hash } from "./interfaces.js"
 import type { Token as TypeToken } from "../../Token/interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
 
@@ -17,9 +17,10 @@ const { charCodeAt } = string
 abstract class BaseHashClass<
 	KeyType = any,
 	ValueType = any,
-	InternalKeyType = any
-> extends DelegateSizeable<InternalHash<InternalKeyType, ValueType>> {
-	hash: HashType<KeyType, InternalKeyType>
+	InternalKeyType = any,
+	DefaultType = any
+> extends DelegateSizeable<InternalHash<InternalKeyType, ValueType, DefaultType>> {
+	hash: Hash<KeyType, InternalKeyType>
 
 	index(x: KeyType, ...y: any[]) {
 		return this.value.get(this.hash(x, ...y))
@@ -42,13 +43,13 @@ abstract class BaseHashClass<
 }
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
-	hash: HashType<KeyType, InternalKeyType>
+	hash: Hash<KeyType, InternalKeyType>
 ): HashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass
 		extends BaseHashClass<KeyType, ValueType, InternalKeyType>
 		implements HashMap<KeyType, ValueType, InternalKeyType>
 	{
-		static hash: HashType<KeyType, InternalKeyType>
+		static hash: Hash<KeyType, InternalKeyType>
 		static extend: (
 			f: (x: any) => KeyType
 		) => HashClass<KeyType, ValueType, InternalKeyType>

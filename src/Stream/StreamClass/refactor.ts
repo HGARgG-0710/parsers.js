@@ -1,15 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type {
-	PositionalBufferizedStreamClassInstance,
-	PreStarted,
-	Stateful,
-	StreamClassInstance
-} from "./interfaces.js"
+import type { PreStarted, Stateful, StreamClassInstance } from "./interfaces.js"
+import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
 
 import { valueDelegate, valuePropDelegate } from "src/refactor.js"
 
 import { Stream } from "../../constants.js"
 const { StreamClass } = Stream
+
+import curr from "./methods/curr.js"
 
 import { object } from "@hgargg-0710/one"
 const { calledDelegate } = object.classes
@@ -41,12 +40,18 @@ export function createState(x: Stateful, state: Summat) {
 }
 
 export function readBuffer<Type = any>(
-	stream: PositionalBufferizedStreamClassInstance<Type>
+	stream: StreamClassInstance<Type> & Bufferized<Type> & Posed<number>
 ) {
 	return (stream.curr = stream.buffer.read(stream.pos))
 }
 
-import curr from "./methods/curr.js"
+export function readBufferThis<Type = any>(
+	stream: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>
+) {
+	readBuffer(stream)
+	return stream
+}
+
 export { curr }
 
 export * as init from "./methods/init.js"

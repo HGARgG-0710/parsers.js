@@ -62,8 +62,8 @@ export interface IndexMap<
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
-export interface MapClass<KeyType = any, ValueType = any> {
-	new (map: array.Pairs<KeyType, ValueType>, _default?: any): IndexMap<
+export interface MapClass<KeyType = any, ValueType = any, DefaultType = any> {
+	new (map: array.Pairs<KeyType, ValueType>, _default?: DefaultType): IndexMap<
 		KeyType,
 		ValueType
 	>

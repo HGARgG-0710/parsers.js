@@ -1,11 +1,7 @@
-import type {
-	BufferizedStreamClassInstance,
-	PositionalBufferizedStreamClassInstance,
-	PositionalReversedStreamClassInstance,
-	PositionalStreamClassInstance,
-	ReversedStreamClassInstance,
-	StreamClassInstance
-} from "../interfaces.js"
+import type { ReversedStreamClassInstance, StreamClassInstance } from "../interfaces.js"
+
+import type { Posed } from "../../../Position/interfaces.js"
+import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
 
 import { positionDecrement, positionIncrement } from "src/Position/refactor.js"
 import { bufferFreeze, bufferPush } from "src/Collection/Buffer/refactor.js"
@@ -19,12 +15,14 @@ const { GetSetDescriptor, ConstDescriptor } = object.descriptor
 
 // * predoc note: this redefinition [in particular] forbids replacing the '.curr' of the given 'Stream'
 function posBufferIsFrozenGet<Type = any>(
-	this: PositionalBufferizedStreamClassInstance<Type>
+	this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>
 ) {
 	return readBuffer(this)
 }
 
-function redefineCurr<Type = any>(x: PositionalBufferizedStreamClassInstance<Type>) {
+function redefineCurr<Type = any>(
+	x: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>
+) {
 	propDefine(x, "curr", GetSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
 }
 
@@ -131,7 +129,7 @@ function generateIterationMethods(
 		]
 	}
 
-	const posNextAction = (x: PositionalStreamClassInstance) => {
+	const posNextAction = (x: StreamClassInstance & Posed<number>) => {
 		positionIncrement(x)
 		nextGetter(x)
 	}
@@ -149,40 +147,40 @@ function generateIterationMethods(
 				nil,
 				[
 					posNextAction,
-					(x: PositionalReversedStreamClassInstance) => {
+					(x: ReversedStreamClassInstance & Posed<number>) => {
 						positionDecrement(x)
 						prevGetter(x)
 					}
 				]
 			],
 			[
-				bufferPush as (x: BufferizedStreamClassInstance) => any,
-				bufferFreeze as (x: BufferizedStreamClassInstance) => any,
+				bufferPush as (x: StreamClassInstance & Bufferized) => any,
+				bufferFreeze as (x: StreamClassInstance & Bufferized) => any,
 				[nextGetter, prevGetter]
 			],
 			[
-				bufferPush as (x: BufferizedStreamClassInstance) => any,
-				(x: PositionalBufferizedStreamClassInstance) => {
+				bufferPush as (x: StreamClassInstance & Bufferized) => any,
+				(x: StreamClassInstance & Bufferized & Posed<number>) => {
 					bufferFreeze(x)
 					redefineCurr(x)
 				},
 				[
 					posNextAction,
-					(x: PositionalBufferizedStreamClassInstance) => {
+					(x: StreamClassInstance & Bufferized & Posed<number>) => {
 						positionDecrement(x)
 						readBuffer(x)
 					}
 				],
 				[
-					(x: BufferizedStreamClassInstance) => x.buffer.isFrozen,
-					(x: PositionalBufferizedStreamClassInstance) => {
+					(x: StreamClassInstance & Bufferized) => x.buffer.isFrozen,
+					(x: StreamClassInstance & Bufferized & Posed<number>) => {
 						if (x.pos !== x.buffer.size - 1) {
 							positionIncrement(x)
 							readBuffer(x)
 						}
 					}
 				],
-				(x: PositionalStreamClassInstance) => x.pos === 0
+				(x: StreamClassInstance & Posed<number>) => x.pos === 0
 			]
 		] as QuartetConfig[]
 	).map(generateQuartet)

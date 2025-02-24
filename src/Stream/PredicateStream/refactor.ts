@@ -7,6 +7,9 @@ import { preserveDirection } from "../../Position/utils.js"
 import { fastNavigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
+import { functional } from "@hgargg-0710/one"
+const { copy } = functional
+
 export function predicateStreamCurr<Type = any>(this: PredicateStream<Type>) {
 	fastNavigate(this.value!, this.predicate)
 	return this.value!.curr
@@ -32,10 +35,13 @@ export function predicateStreamIsEnd<Type = any>(this: PredicateStream<Type>) {
 export function predicateStreamInitialize<Type = any>(
 	this: PredicateStream<Type>,
 	value?: ReversibleStream<Type> & IsEndCurrable,
-	predicate?: PredicatePosition
+	predicate?: PredicatePosition<Type>
 ) {
 	if (predicate) {
-		this.predicate = preserveDirection(predicate, (predicate) => predicate.bind(this))
+		this.predicate = preserveDirection(
+			predicate,
+			(predicate) => copy(predicate, this) as PredicatePosition<Type>
+		)
 		this.hasLookAhead = false
 	}
 	if (value) superInit(this, value)
@@ -43,5 +49,5 @@ export function predicateStreamInitialize<Type = any>(
 }
 
 export function predicateStreamDefaultIsEnd<Type = any>(this: PredicateStream<Type>) {
-	return this.value!.isEnd || !this.predicate(this.curr)
+	return this.value!.isEnd || !this.predicate(this, this.pos)
 }

@@ -20,14 +20,16 @@ export const previous = <Type = any>(input: BasicReversibleStream<Type>) => inpu
 /**
  * Given a `BasicStream` returns its `.curr` property value
  */
-export const current = <Type = any>(input: BasicStream<Type>) => input.curr
+export const current = prop("curr") as <Type = any>(x: BasicStream<Type>) => Type
 
 /**
  * Given a `handler` function returns a function of `input: BasicStream` that skips a single stream-element before and after calling the handler.
  * It then proceeds to returns the result of the handler
  */
-export function wrapped(handler: (input: BasicStream) => any) {
-	return function (input: BasicStream) {
+export function wrapped<Type = any, OutType = any>(
+	handler: (input: BasicStream<Type>) => OutType
+) {
+	return function (input: BasicStream<Type>) {
 		input.next()
 		const result = handler(input)
 		input.next()
@@ -37,11 +39,11 @@ export function wrapped(handler: (input: BasicStream) => any) {
 
 export const is = prop("is")
 
-export const isEnd = prop("isEnd")
+export const isEnd = prop("isEnd") as <Type = any>(x: BasicStream<Type>) => boolean
 
-export const isStart = prop("isStart")
+export const isStart = prop("isStart") as <Type = any>(x: BasicStream<Type>) => boolean
 
-export const destroy = (input: BasicStream) => {
+export function destroy<Type = any>(input: BasicStream<Type>) {
 	input.next()
 	return SkippedItem
 }

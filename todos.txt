@@ -1,9 +1,6 @@
 [v0.3]
 	
-5. Source code TODO-s: 
-	17. USE the optional '.pos' property [Stream] on EVERY possibility inside the method implementations 
-		(namely - passing to member-functions/predicates, if it's not there - it's just not there, if it is - the user gets a new feature);
-	
+5. Source code TODO-s: 	
 	2.62. PROBLEM - with LayeredFunction: 
 
 		TAKEAWAY: add another abstraction OVER IT, that would permit one to pass 
@@ -42,7 +39,6 @@
 	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 
-			0. one.js [to npm]
 			1. draw-text [install-npm + prod-to GitHub Pages]
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
 			2. selector [to npm]
@@ -52,39 +48,43 @@
 	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
 		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
 
-		To Fix [comprehensive list of issues with types]: 
-			1. Add 'BasicStream<Type>' Generics to *ALL* the Stream-related utils 
-			2. See whether the 'stream.curr' return arguments in things like 'uniRewind' is good or not (maybe, returning 'stream' would have been better?)
+		To Fix [comprehensive list of issues with types]:
+			5. 'this'-returning: 
+				Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
+				Just do ': this', AS INTENDED...
+
+				To find: search for 'return this'
+
+			6. StreamClasses/interfaces.ts: 
+				1. 'abstract new' types - REMOVE!
+					These (instead) have to be written inline [same way as '6.2.']
+
+					1. Use these as 'refactor.ts' types
+					2. Introduce a new type 'StreamConstructor<Signature extends any[]> = abstract new<StreamType extends BasicStream> (...s: Signature) => StreamType': 
+						Then, use like: 
+
+							type UsefulPriavateLongStreamTypeName = StreamConstructor<Signature>
+
+							// somewhere... in the actual code: 
+								UsefulPriavateLongStreamTypeName<ConcreteStreamType<Type>>
+
+					This permits one to: 
+						1. Use generics
+						2. Enable adequate refactoring of all the boilerplate
+						3. [Current objective, missing] Clean the 'export type' of the library for the 'StreamClass' module
+					
+				4. Add the 'LocatorStream' interface (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
+					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
+					IDENTIFY them with the respective classes/functions
+
+
 			3. Find all the 'as'-thingies, where polymorphism is expected: 
 				Specific examples: 
 					1. ParentTree: 
 						DESPITE the 'IParentTree' interface, it still IS, in practice, non-polymorphic (requires storage of 'ParentTree'-s DUE TO 'instanceof' in the 'constructor'); 
 						SOLUTION: 
 							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'			
-
-			
-			4. DefaultType - for IndexMap-types: 
-				It's pretty important, as it determines about half the return types of the type's methods. 
-					Put those up! [in templates, and as a dependency of *EVERYWHERE*]
-					ALSO - make it a 'NoInfer'! 
-			5. 'this'-returning: 
-				Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
-				Just do ': this', AS INTENDED...
-
-			6. StreamClasses/interfaces.ts: 
-				1. 'abstract new' types - REMOVE!
-					These (instead) have to be written inline [same way as '6.2.']
-				2. 'BufferizedPositionalVeryBloodyLongStringMyGoodness...' - replace with laconic '&'-s (this includes the 'abstract new' cases); 
-					AND USE: 
-						1. Bufferized
-						2. Posed
-						3. Stateful
-					IN THEIR INITIAL FORM (meaning, for instance, for the "maximum" case - 'Posed<number> & Bufferized<Type> & Stateful & StreamClassInstance<Type>')
-				3. refactor "small" types via 'Pick', 'Partial' and 'Omit': 
-				4. Add the 'LocatorStream' interface (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
-					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
-					IDENTIFY them with the respective classes/functions
-
+	
 	2.77. Do research [learn LR/LALR-parsing properly]: https://en.wikipedia.org/wiki/LR_parser#
 		Compare with the stuff the library currently has, (possibly) implement 
 			some of the stuff from there... (specifically - the LALR parsers, if they aren't already present)
@@ -105,8 +105,6 @@
 Order of TODO-elimination: 
 	2.80.	
 	
-	5.17.
-
 	5.2.62.
 	
 	JSDoc: 
@@ -1634,3 +1632,25 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			10. constructor(value?): 
 				The 'StackParser' is a function-generated class in TERMS OF '.table' (which goes on the prototype). 
 				The '.table'-lookups in the '.parse()' method are OPTIMIZED based off the '.table' function. 
+
+	69. StreamTypes [Collection] - a handler for different "combinations" of 'StreamClass'-initializers: 
+		Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
+			which *happens* to be the exact same one that the user is already using. 
+
+		Instead of creating A NEW class and (potentially): 
+
+			1. wasting memory (insignificant, though noticeable - prototype objects)
+			2. wasting optimizations (significant), by confusing the Engine
+		
+		The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
+			which would be: 
+
+			1. A Global object
+			2. That is connected to 'StreamClass'
+			3. And FOR WHICH 'StreamClass' DOES provide a handle, 
+				via *checking* whether or not the given class configuration already exists. 
+
+				Checks: 
+
+				1. properties/flags - by value/reference (x, y) => x === y
+				2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)

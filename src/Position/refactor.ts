@@ -1,6 +1,5 @@
 import type { BoundNameType } from "../Stream/StreamClass/interfaces.js"
 import type { DirectionalPosition, Posed } from "./interfaces.js"
-
 import { isBackward } from "./utils.js"
 
 export function getStopPoint(pos: DirectionalPosition): BoundNameType {

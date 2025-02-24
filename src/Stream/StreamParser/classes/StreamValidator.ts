@@ -15,7 +15,7 @@ const { ValidationError } = validation.PatternValidator
 import { LocatorStream } from "../classes.js"
 
 export function StreamValidator(validator: StreamPredicate, defaultState?: Summat) {
-	const validationStream = new (LocatorStream(validator, true, !!defaultState))()
+	const validationStream = new (LocatorStream(true, !!defaultState))(validator)
 	return function <Type = any>(
 		stream: EndableStream<Type>,
 		state: Summat | undefined = defaultState

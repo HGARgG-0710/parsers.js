@@ -74,7 +74,7 @@ export abstract class BaseLinearMap<
 		return indexes
 	}
 
-	constructor(keys: KeyType[], values: ValueType[], _default: DefaultType) {
+	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
 		super(keys, values, _default)
 		this.alteredKeys = this.keys.map(this.keyExtension)
 	}

@@ -4,7 +4,7 @@ import type { ParserFunction } from "./interfaces.js"
 export function TableMap<OutType = any>(
 	indexMap: Indexable<ParserFunction<any, OutType>>
 ): (x?: any, ...y: any[]) => OutType {
-	const T = (x?: any, ...y: any[]) => T.table.index(x, ...y)(x, T)
+	const T = (x?: any, ...y: any[]) => T.table.index(x, ...y)(x, T, ...y)
 	T.table = indexMap
 	return T
 }

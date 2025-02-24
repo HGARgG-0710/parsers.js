@@ -23,14 +23,14 @@ const { trivialCompose } = functional
 const { equals } = boolean
 const { charCodeAt } = string
 
-export function LinearMapClass<KeyType = any, ValueType = any>(
+export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	extensions: Function[],
 	keyExtensions: Function[],
 	change?: IndexingFunction<KeyType>
-): MapClass<KeyType, ValueType> {
+): MapClass<KeyType, ValueType, DefaultType> {
 	class linearMapClass
-		extends BaseLinearMap<KeyType, ValueType>
-		implements LinearIndexMap<KeyType, ValueType>
+		extends BaseLinearMap<KeyType, ValueType, DefaultType>
+		implements LinearIndexMap<KeyType, ValueType, DefaultType>
 	{
 		static change?: IndexingFunction<KeyType>
 		static extend: MapClassValueExtension
@@ -39,7 +39,7 @@ export function LinearMapClass<KeyType = any, ValueType = any>(
 		static keyExtensions: Function[]
 		static extensions: Function[]
 
-		constructor(pairsList: array.Pairs<KeyType, ValueType>, _default?: any) {
+		constructor(pairsList: array.Pairs<KeyType, ValueType>, _default?: DefaultType) {
 			super(...fromPairsList(pairsList), _default)
 		}
 	}

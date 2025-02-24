@@ -1,13 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { Posed, Position } from "../../Position/interfaces.js"
-import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Initializable } from "./methods/init.js"
 import type { Navigable } from "./methods/navigate.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Rewindable } from "./methods/rewind.js"
+import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 
 export type BoundNameType = "isEnd" | "isStart"
 export type StartedType = 1 | boolean
@@ -28,7 +27,7 @@ export type PatternReversedStreamConstructor<Type = any> = abstract new (
 
 export type BufferizedPatternReversedStreamConstructor<Type = any> = abstract new (
 	value: any
-) => BufferizedReversedStreamClassInstance<Type> & Pattern
+) => ReversedStreamClassInstance<Type> & Bufferized<Type> & Pattern
 
 // * Optional Property-interfaces
 
@@ -100,38 +99,6 @@ export interface ReversedStreamClassInstance<Type = any>
 		Rewindable<Type> {
 	basePrevIter: () => Type
 }
-
-export interface PositionalStreamClassInstance<
-	Type = any,
-	PosType extends Position = number
-> extends StreamClassInstance<Type>,
-		Posed<PosType> {}
-
-export interface BufferizedStreamClassInstance<Type = any>
-	extends StreamClassInstance<Type>,
-		Bufferized<Type> {}
-
-export interface StatefulStreamClassInstance<Type = any>
-	extends StreamClassInstance<Type>,
-		Stateful {}
-
-export interface PositionalReversedStreamClassInstance<
-	Type = any,
-	PosType extends Position = number
-> extends ReversedStreamClassInstance<Type>,
-		Posed<PosType> {}
-
-export interface BufferizedReversedStreamClassInstance<Type = any>
-	extends ReversedStreamClassInstance<Type>,
-		Bufferized<Type> {}
-
-export interface PatternStreamClassInstance<Type = any>
-	extends StreamClassInstance<Type>,
-		Pattern {}
-
-export interface PositionalBufferizedStreamClassInstance<Type = any>
-	extends PositionalStreamClassInstance<Type>,
-		BufferizedStreamClassInstance<Type> {}
 
 export type * as finish from "./methods/finish.js"
 export type * as init from "./methods/init.js"

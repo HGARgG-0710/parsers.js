@@ -1,14 +1,11 @@
-import type { Position } from "../../Position/interfaces.js"
+import type { Posed, Position } from "../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { BasicStream, Indexed } from "../interfaces.js"
 import type { Rewindable } from "./methods/rewind.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Navigable } from "./methods/navigate.js"
-
-import type {
-	PositionalBufferizedStreamClassInstance,
-	StreamClassInstance
-} from "./interfaces.js"
+import type { StreamClassInstance } from "./interfaces.js"
+import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 
 import { pickDirection, positionConvert } from "../../Position/utils.js"
 
@@ -46,7 +43,7 @@ export function fastFinish<Type = any>(stream: BasicStream<Type>) {
  * @returns `stream.curr`
  */
 export function uniNavigate<Type = any>(
-	stream: BasicReversibleStream<Type>,
+	stream: BasicReversibleStream<Type> & Partial<Posed<number>>,
 	position: Position
 ): Type {
 	if (isNumber((position = positionConvert(position, stream)))) {
@@ -54,7 +51,7 @@ export function uniNavigate<Type = any>(
 		else while (position--) stream.next()
 	} else {
 		const change = pickDirection(position)
-		while (!stream.isEnd && !position(stream)) change(stream)
+		while (!stream.isEnd && !position(stream, stream.pos)) change(stream)
 	}
 
 	return stream.curr
@@ -87,8 +84,8 @@ export function isEmptyStream(stream: StreamClassInstance) {
 	return stream.isEnd && stream.isStart
 }
 
-export function byStreamBufferPos(f: (buffer: Indexed, i: number) => any) {
-	return (stream: PositionalBufferizedStreamClassInstance) => {
+export function byStreamBufferPos<Type = any>(f: (buffer: Indexed, i: Position) => any) {
+	return (stream: StreamClassInstance<Type> & Bufferized<Type> & Posed<Position>) => {
 		const buffer = stream.buffer.get()
 		return () => f(buffer, stream.pos)
 	}

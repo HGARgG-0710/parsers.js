@@ -47,25 +47,25 @@ export function PredicateStream<Type = any>(
 	buffer: boolean = false
 ): new (
 	input?: ReversibleStream<Type> & IsEndCurrable,
-	predicate?: PredicatePosition
+	predicate?: PredicatePosition<Type>
 ) => EffectivePredicateStream<Type> {
 	const baseClass = PredicateStreamBase(hasPosition, buffer)
 	class predicateStream extends baseClass implements EffectivePredicateStream<Type> {
 		lookAhead: Type
 		hasLookAhead: boolean
-		predicate: PredicatePosition
+		predicate: PredicatePosition<Type>
 		value: BasicReversibleStream<Type> & IsEndCurrable
 
 		super: Summat
 		prod: () => Type
 		init: (
 			input?: BasicReversibleStream<Type> & IsEndCurrable,
-			predicate?: PredicatePosition
+			predicate?: PredicatePosition<Type>
 		) => EffectivePredicateStream<Type>
 
 		constructor(
 			value?: BasicReversibleStream<Type> & IsEndCurrable,
-			predicate?: PredicatePosition
+			predicate?: PredicatePosition<Type>
 		) {
 			super(value)
 			this.init(value, predicate)

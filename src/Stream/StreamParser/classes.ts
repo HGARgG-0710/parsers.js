@@ -4,7 +4,7 @@ import type {
 	EndableStream,
 	PatternStreamConstructor
 } from "../../Stream/StreamClass/interfaces.js"
-import type { StreamHandler, StreamPredicate } from "../../Parser/TableMap/interfaces.js"
+import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { StreamParser as IStreamParser } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
@@ -31,11 +31,14 @@ const StreamParserBase = <Type = any>(
 	}) as PatternStreamConstructor<Type>
 
 export function StreamParser<InType = any, OutType = any>(
-	handler: StreamHandler<OutType>,
 	hasPosition: boolean = false,
 	buffer: boolean = false,
 	state: boolean = false
-): new (value?: EndableStream<InType>, state?: Summat) => IStreamParser<InType, OutType> {
+): new (
+	handler?: StreamHandler<OutType>,
+	value?: EndableStream<InType>,
+	state?: Summat
+) => IStreamParser<InType, OutType> {
 	const baseClass = StreamParserBase(hasPosition, buffer, state)
 	class streamTokenizerClass
 		extends baseClass
@@ -50,35 +53,37 @@ export function StreamParser<InType = any, OutType = any>(
 		state?: Summat
 
 		init: (
+			handler?: StreamHandler<OutType>,
 			value?: EndableStream<InType>,
 			state?: Summat
 		) => IStreamParser<InType, OutType>
 
-		constructor(value?: EndableStream<InType>, state: Summat = {}) {
+		constructor(
+			handler: StreamHandler<OutType>,
+			value?: EndableStream<InType>,
+			state: Summat = {}
+		) {
 			super(value)
-			this.init(value, state)
+			this.init(handler, value, state)
 		}
 	}
 
 	withSuper(streamTokenizerClass, baseClass, {
-		init: ConstDescriptor(streamParserInitialize),
-		handler: ConstDescriptor(handler)
+		init: ConstDescriptor(streamParserInitialize)
 	})
 
 	return streamTokenizerClass
 }
 
-export const BasicParser = <OutType = any>(
-	handler: StreamHandler<OutType>,
+export const BasicParser = <InType = any, OutType = any>(
 	hasPosition: boolean = false,
 	state: boolean = false
-) => StreamParser(handler, hasPosition, true, state)
+) => StreamParser<InType, OutType>(hasPosition, true, state)
 
-export const LocatorStream = (
-	locator: StreamPredicate,
+export const LocatorStream = <InType = any>(
 	hasPosition: boolean = false,
 	state: boolean = false
-) => StreamParser(locator, hasPosition, false, state)
+) => StreamParser<InType, boolean>(hasPosition, false, state)
 
 export * from "./classes/PositionalValidator.js"
 export * from "./classes/StreamValidator.js"

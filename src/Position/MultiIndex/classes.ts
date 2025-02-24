@@ -2,62 +2,63 @@ import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
 import type { MultiIndexModifier as IMultiIndexModifier } from "./interfaces.js"
 import type { MultiIndex as IMultiIndex } from "./interfaces.js"
 
+import { InitializablePattern } from "../../Pattern/abstract.js"
+
 import { BadIndex, defaults } from "../../constants.js"
 const { DefaultValue } = defaults.MultiIndex
 
 import { array } from "@hgargg-0710/one"
-import { InitializablePattern } from "../../Pattern/abstract.js"
 const { last, first, copy, clear } = array
 
-export class MultiIndex extends InitializablePattern<number[]> implements IMultiIndex {
-	static MultiIndexModifier = class MultiIndexModifier
-		extends InitializablePattern<MultiIndex>
-		implements IMultiIndexModifier
-	{
-		nextLevel() {
-			return this.extend([0])
-		}
-
-		prevLevel() {
-			return [this.value!.get().pop() as number]
-		}
-
-		resize(length: number = 0) {
-			const value = this.value!
-			value.levels = length
-			return value
-		}
-
-		clear() {
-			const value = this.value!
-			clear(value.get())
-			return value
-		}
-
-		incLast() {
-			const value = this.value!
-			const multind = value.get()
-			const { levels } = value
-			return ++multind[levels - 1]
-		}
-
-		decLast() {
-			const value = this.value!
-			const { levels } = value
-			const multind = value.get()
-			return --multind[levels - 1]
-		}
-
-		extend(subIndex: number[]) {
-			this.value!.get().push(...subIndex)
-			return subIndex
-		}
-
-		get() {
-			return this.value!
-		}
+export class MultiIndexModifier
+	extends InitializablePattern<MultiIndex>
+	implements IMultiIndexModifier
+{
+	nextLevel() {
+		return this.extend([0])
 	}
 
+	prevLevel() {
+		return [this.value!.get().pop() as number]
+	}
+
+	resize(length: number = 0) {
+		const value = this.value!
+		value.levels = length
+		return value
+	}
+
+	clear() {
+		const value = this.value!
+		clear(value.get())
+		return value
+	}
+
+	incLast() {
+		const value = this.value!
+		const multind = value.get()
+		const { levels } = value
+		return ++multind[levels - 1]
+	}
+
+	decLast() {
+		const value = this.value!
+		const { levels } = value
+		const multind = value.get()
+		return --multind[levels - 1]
+	}
+
+	extend(subIndex: number[]) {
+		this.value!.get().push(...subIndex)
+		return subIndex
+	}
+
+	get() {
+		return this.value!
+	}
+}
+
+export class MultiIndex extends InitializablePattern<number[]> implements IMultiIndex {
 	set levels(length: number) {
 		this.value!.length = length
 	}
@@ -128,10 +129,4 @@ export class MultiIndex extends InitializablePattern<number[]> implements IMulti
 	constructor(multind: number[] = DefaultValue()) {
 		super(multind)
 	}
-}
-
-export namespace MultiIndex {
-	export type MultiIndexModifier = InstanceType<
-		(typeof MultiIndex)["MultiIndexModifier"]
-	>
 }

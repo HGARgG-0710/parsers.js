@@ -1,8 +1,7 @@
 import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
-import type {
-	BufferizedStreamClassInstance,
-	PositionalBufferizedStreamClassInstance,
-} from "../interfaces.js"
+import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { StreamClassInstance } from "../interfaces.js"
+import type { Posed } from "../../../Position/interfaces.js"
 
 import { uniRewind } from "../utils.js"
 import { start } from "../refactor.js"
@@ -26,14 +25,14 @@ function rewind<Type = any>(this: BasicReversibleStream<Type>) {
 
 const posRewind = rewind
 
-function bufferRewind<Type = any>(this: BufferizedStreamClassInstance<Type>) {
+function bufferRewind<Type = any>(this: StreamClassInstance<Type> & Bufferized<Type>) {
 	const { buffer } = this
 	start(this)
 	return buffer.size ? readFirst(buffer) : this.curr
 }
 
 function posBufferRewind<Type = any>(
-	this: PositionalBufferizedStreamClassInstance<Type>
+	this: StreamClassInstance<Type> & Bufferized<Type> & Posed<number>
 ) {
 	const { buffer } = this
 	start(this)

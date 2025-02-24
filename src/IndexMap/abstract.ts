@@ -22,11 +22,12 @@ export abstract class DelegateDeletableSettableSizeable<
 	KeyType = any,
 	ValueType = any,
 	DelegateType extends Deletable<DeletedType> &
-		Settable<KeyType, ValueType> &
+		Settable<KeyType, ValueType | DefaultType> &
 		Sizeable = any,
-	DeletedType = KeyType
+	DeletedType = KeyType,
+	DefaultType = any
 > extends DelegateSizeable<DelegateType> {
-	set(key: KeyType, value: ValueType) {
+	set(key: KeyType, value: ValueType | DefaultType) {
 		this.value.set(key, value)
 		return this
 	}
@@ -91,9 +92,11 @@ export abstract class BaseIndexMap<
 	DefaultType = any,
 	IndexGetType = any
 > extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
+	public default: DefaultType;
+
 	["constructor"]: new (
 		pairs: array.Pairs<KeyType, ValueType>,
-		_default: DefaultType
+		_default?: DefaultType
 	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 
 	copy() {
@@ -133,8 +136,9 @@ export abstract class BaseIndexMap<
 	constructor(
 		public keys: KeyType[],
 		public values: ValueType[],
-		public _default: DefaultType
+		_default?: DefaultType
 	) {
 		super()
+		this.default = _default!
 	}
 }

@@ -12,7 +12,7 @@ import {
 	inputStreamPrev
 } from "./refactor.js"
 
-export const InputStream = (state: boolean = false) =>
+export const InputStream =
 	StreamClass({
 		currGetter: inputStreamCurr,
 		baseNextIter: inputStreamNext,
@@ -21,6 +21,5 @@ export const InputStream = (state: boolean = false) =>
 		isCurrStart: inputStreamIsStart,
 		defaultIsEnd: inputStreamDefaultIsEnd,
 		hasPosition: true,
-		state,
 		buffer: true
 	}) as new <Type = any>(buffer?: FreezableBuffer<Type>) => IInputStream<Type>

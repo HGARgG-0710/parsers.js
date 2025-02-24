@@ -1,10 +1,8 @@
-import type {
-	BufferizedReversedStreamClassInstance,
-	PositionalReversedStreamClassInstance,
-	Superable
-} from "../StreamClass/interfaces.js"
+import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
+import type { Posed } from "../../Position/interfaces.js"
+import type { ReversedStreamClassInstance, Superable } from "../StreamClass/interfaces.js"
 
-export interface InputStream<Type = any>
-	extends Superable,
-		PositionalReversedStreamClassInstance<Type>,
-		BufferizedReversedStreamClassInstance<Type> {}
+export type InputStream<Type = any> = Superable &
+	ReversedStreamClassInstance<Type> &
+	Posed<number> &
+	Bufferized<Type>

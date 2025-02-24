@@ -12,11 +12,11 @@ const { DefaultValue: mapDefaultValue } = InternalHash.MapInternalHash
 import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type
 
-export class MapInternalHash<KeyType = any, ValueType = any>
+export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	extends DelegateDeletableSettableSizeable<KeyType, ValueType, Map<KeyType, ValueType>>
-	implements InternalHash<KeyType, ValueType>
+	implements InternalHash<KeyType, ValueType, DefaultType>
 {
-	default: any
+	default: DefaultType
 
 	get(x: KeyType) {
 		const gotten = this.value.get(x)
@@ -34,18 +34,18 @@ export class MapInternalHash<KeyType = any, ValueType = any>
 		map:
 			| array.Pairs<KeyType, ValueType>
 			| Map<KeyType, ValueType> = mapDefaultValue(),
-		_default?: any
+		_default?: DefaultType
 	) {
 		super(isArray(map) ? new Map(map) : map)
-		this.default = _default
+		this.default = _default!
 	}
 }
 
-export class ObjectInternalHash<Type = any>
+export class ObjectInternalHash<Type = any, DefaultType = any>
 	extends ProtectedPattern<object>
-	implements InternalHash<string, Type>
+	implements InternalHash<string, Type, DefaultType>
 {
-	default: any
+	default: DefaultType
 	size: number
 
 	get(key: string) {
@@ -73,9 +73,9 @@ export class ObjectInternalHash<Type = any>
 		return this
 	}
 
-	constructor(object: object = objDefaultValue(), _default?: any) {
+	constructor(object: object = objDefaultValue(), _default?: DefaultType) {
 		super(object)
 		this.size = Object.keys(object).length
-		this.default = _default
+		this.default = _default!
 	}
 }

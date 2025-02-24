@@ -1,8 +1,7 @@
 import type { BasicStream } from "../../../Stream/interfaces.js"
-import type {
-	BufferizedStreamClassInstance,
-	PositionalBufferizedStreamClassInstance,
-} from "../interfaces.js"
+import type { StreamClassInstance } from "../interfaces.js"
+import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { Posed } from "../../../Position/interfaces.js"
 
 import { uniFinish } from "../utils.js"
 import { readBuffer } from "../refactor.js"
@@ -22,7 +21,7 @@ function finish<Type = any>(this: BasicStream<Type>) {
 
 const posFinish = finish
 
-function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Type>) {
+function bufferFinish<Type = any>(this: StreamClassInstance<Type> & Bufferized<Type>) {
 	const { buffer } = this
 	if (buffer.isFrozen) {
 		end(this)
@@ -32,7 +31,7 @@ function bufferFinish<Type = any>(this: BufferizedStreamClassInstance<Type>) {
 }
 
 function posBufferFinish<Type = any>(
-	this: PositionalBufferizedStreamClassInstance<Type>
+	this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>
 ) {
 	const { buffer } = this
 	if (buffer.isFrozen) {

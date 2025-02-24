@@ -1,14 +1,11 @@
-import type {
-	StreamPredicate,
-	StreamTransform
-} from "./TableMap/interfaces.js"
+import type { StreamPredicate, StreamTransform } from "./TableMap/interfaces.js"
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
 import type { BasicStream } from "../Stream/interfaces.js"
 import type { DirectionalPosition, Position } from "../Position/interfaces.js"
 import type { Collection } from "../Collection/interfaces.js"
 
 import { positionNegate } from "../Position/utils.js"
-import { getStopPoint } from "src/Position/refactor.js"
+import { getStopPoint } from "../Position/refactor.js"
 import { uniNavigate } from "../Stream/StreamClass/utils.js"
 import { ArrayCollection } from "../Collection/classes.js"
 

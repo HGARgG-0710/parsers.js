@@ -1,12 +1,10 @@
-import type { Position } from "../../../Position/interfaces.js"
+import type { Posed, Position } from "../../../Position/interfaces.js"
 import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
-import type {
-	BufferizedReversedStreamClassInstance,
-	PositionalReversedStreamClassInstance
-} from "../interfaces.js"
+import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { ReversedStreamClassInstance } from "../interfaces.js"
 
 import { uniNavigate } from "../utils.js"
-import { readBuffer } from "../refactor.js"
+import { readBuffer, readBufferThis } from "../refactor.js"
 import { isBackward, positionConvert } from "../../../Position/utils.js"
 import { positionDecrement } from "src/Position/refactor.js"
 
@@ -30,27 +28,26 @@ const posNavigate = navigate
 const bufferNavigate = navigate
 
 function posBufferNavigate<Type = any>(
-	this: BufferizedReversedStreamClassInstance<Type> &
-		PositionalReversedStreamClassInstance<Type>,
-	position: Position
+	this: ReversedStreamClassInstance<Type> & Bufferized<Type> & Posed<number>,
+	position: Position<Type>
 ) {
-	const converted = positionConvert(position)
+	const dirpos = positionConvert(position)
 
-	if (isNumber(converted)) {
+	if (isNumber(dirpos)) {
 		const { buffer, pos } = this
 
-		if (buffer.isFrozen || buffer.size > pos + converted) {
-			this.pos = Math.min(Math.max(pos + converted, 0), buffer.size)
+		if (buffer.isFrozen || buffer.size > pos + dirpos) {
+			this.pos = Math.min(Math.max(pos + dirpos, 0), buffer.size)
 			return readBuffer(this)
 		}
 
-		let i = converted
-		if (converted > 0) while (i++) this.prev()
+		let i = dirpos
+		if (dirpos > 0) while (i++) this.prev()
 		else while (i--) this.next()
 	} else {
-		if (isBackward(converted))
-			while (!converted(readBuffer(this))) positionDecrement(this)
-		else uniNavigate(this, converted)
+		if (isBackward(dirpos))
+			while (!dirpos(readBufferThis(this))) positionDecrement(this)
+		else uniNavigate(this, dirpos)
 	}
 
 	return this.curr

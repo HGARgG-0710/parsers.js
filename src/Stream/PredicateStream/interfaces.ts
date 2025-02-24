@@ -20,5 +20,5 @@ export interface PredicateStream<Type = any>
 		Pattern<BasicReversibleStream<Type> & IsEndCurrable>,
 		LookaheadHaving,
 		Partial<Posed<number>> {
-	predicate: PredicatePosition
+	predicate: PredicatePosition<Type>
 }

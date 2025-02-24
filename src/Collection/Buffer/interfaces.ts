@@ -15,5 +15,3 @@ export interface UnfreezableBuffer<Type = any> extends FreezableBuffer<Type> {
 export interface Bufferized<Type = any> {
 	buffer: FreezableBuffer<Type>
 }
-
-export type OptBufferized<Type = any> = Partial<Bufferized<Type>>

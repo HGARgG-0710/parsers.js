@@ -16,7 +16,7 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
 /**
  * Adds a `.direction = false` property on a given `PredicatePosition`
  */
-export const backtrack = (predicate: PredicatePosition) => {
+export function backtrack<Type = any>(predicate: PredicatePosition<Type>) {
 	predicate.direction = false
 	return predicate
 }

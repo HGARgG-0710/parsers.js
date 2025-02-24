@@ -13,13 +13,13 @@ export interface KeyReplaceable<KeyType = any> {
 	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
 }
 
-export type HashType<KeyType = any, InternalKeyType = any> = (
+export type Hash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
 	...y: any[]
 ) => InternalKeyType
 
 export interface Hashable<KeyType, InternalKeyType> {
-	hash: HashType<KeyType, InternalKeyType>
+	hash: Hash<KeyType, InternalKeyType>
 }
 
 export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
@@ -32,9 +32,13 @@ export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any
 	extend: (f: (x: any) => KeyType) => HashClass<any, ValueType, InternalKeyType>
 }
 
-export interface HashMap<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends Indexable<ValueType>,
-		Settable<KeyType, ValueType>,
+export interface HashMap<
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any,
+	DefaultType = any
+> extends Indexable<ValueType | DefaultType>,
+		Settable<KeyType, ValueType | DefaultType>,
 		Deletable<KeyType>,
 		KeyReplaceable<KeyType>,
 		Sizeable,

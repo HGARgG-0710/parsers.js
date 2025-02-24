@@ -1,14 +1,12 @@
-import type {
-	BufferizedStreamClassInstance,
-	PatternStreamClassInstance,
-	PositionalBufferizedStreamClassInstance,
-	PositionalStreamClassInstance,
-	StatefulStreamClassInstance,
-	StreamClassInstance
-} from "../interfaces.js"
-
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { FreezableBuffer } from "../../../Collection/Buffer/interfaces.js"
+
+import type { Stateful, StreamClassInstance } from "../interfaces.js"
+import type { Pattern } from "../../../Pattern/interfaces.js"
+import type { Posed } from "../../../Position/interfaces.js"
+import type {
+	Bufferized,
+	FreezableBuffer
+} from "../../../Collection/Buffer/interfaces.js"
 
 import { positionNull } from "src/Position/refactor.js"
 import { assignBuffer } from "src/Collection/Buffer/refactor.js"
@@ -71,13 +69,13 @@ function initialize<Type = any>(this: StreamClassInstance<Type>) {
 
 // * Explanation: the private function here is only for refactoring;
 function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
-	function posInitialize<Type = any>(this: PositionalStreamClassInstance<Type>) {
+	function posInitialize<Type = any>(this: StreamClassInstance<Type> & Posed<number>) {
 		positionNull(this)
 		initialize.call(this)
 	}
 
 	function bufferInitialze<Type = any>(
-		this: BufferizedStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Bufferized<Type>,
 		buffer: FreezableBuffer
 	) {
 		assignBuffer(this, buffer)
@@ -85,7 +83,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferInitialize<Type = any>(
-		this: PositionalBufferizedStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>,
 		buffer?: FreezableBuffer
 	) {
 		assignBuffer(this, buffer)
@@ -93,7 +91,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function stateInitialize<Type = any>(
-		this: StatefulStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Stateful,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -101,7 +99,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posStateInitialize<Type = any>(
-		this: StatefulStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Stateful & Posed<number>,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -109,7 +107,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferStateInitialize<Type = any>(
-		this: StatefulStreamClassInstance<Type> & BufferizedStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Stateful & Bufferized<Type>,
 		buffer?: FreezableBuffer,
 		state: Summat = {}
 	) {
@@ -118,9 +116,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferStateInitialize<Type = any>(
-		this: StatefulStreamClassInstance<Type> &
-			BufferizedStreamClassInstance<Type> &
-			PositionalStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Stateful & Bufferized<Type> & Posed<number>,
 		buffer?: FreezableBuffer,
 		state: Summat = {}
 	) {
@@ -129,7 +125,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function patternInitialize<Type = any>(
-		this: PatternStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Pattern,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -137,7 +133,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posPatternInitialize<Type = any>(
-		this: PatternStreamClassInstance<Type> & PositionalStreamClassInstance<Type>,
+		this: Pattern & StreamClassInstance<Type> & Posed<number>,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -145,7 +141,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferPatternInitialize<Type = any>(
-		this: BufferizedStreamClassInstance<Type> & PatternStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Pattern & Bufferized<Type>,
 		value?: any,
 		buffer?: FreezableBuffer<Type>
 	) {
@@ -154,9 +150,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferPatternInitialize<Type = any>(
-		this: PositionalStreamClassInstance<Type> &
-			BufferizedStreamClassInstance<Type> &
-			PatternStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type> & Pattern,
 		value?: any,
 		buffer?: FreezableBuffer<Type>
 	) {
@@ -165,7 +159,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function statePatternInitialize<Type = any>(
-		this: PatternStreamClassInstance<Type> & StatefulStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Pattern & Stateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -174,9 +168,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posStatePatternInitialize<Type = any>(
-		this: PositionalStreamClassInstance<Type> &
-			PatternStreamClassInstance<Type> &
-			StatefulStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Posed<number> & Pattern & Stateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -185,9 +177,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferStatePatternInitialize<Type = any>(
-		this: BufferizedStreamClassInstance<Type> &
-			StatefulStreamClassInstance<Type> &
-			PatternStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> & Bufferized<Type> & Stateful & Pattern,
 		value?: any,
 		buffer?: FreezableBuffer<Type>,
 		state: Summat = {}
@@ -197,10 +187,11 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferStatePatternInitialize<Type = any>(
-		this: PositionalStreamClassInstance<Type> &
-			BufferizedStreamClassInstance<Type> &
-			StatefulStreamClassInstance<Type> &
-			PatternStreamClassInstance<Type>,
+		this: StreamClassInstance<Type> &
+			Posed<number> &
+			Bufferized<Type> &
+			Stateful &
+			Pattern,
 		value?: any,
 		buffer?: FreezableBuffer<Type>,
 		state: Summat = {}
