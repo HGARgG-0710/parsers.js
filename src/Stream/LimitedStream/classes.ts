@@ -1,10 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Position } from "../../Position/interfaces.js"
-import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
-import type {
-	LimitedUnderStream,
-	LimitedStream as EffectiveLimitedStream
-} from "./interfaces.js"
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
+import type { LimitedUnderStream, LimitedStream as ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueCurr } from "../StreamClass/refactor.js"
@@ -35,7 +34,7 @@ const LimitedStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition,
 		buffer
-	}) as PatternReversedStreamConstructor<Type>
+	}) as AbstractConstructor<[any], ReversedStreamClassInstance<Type> & Pattern>
 
 export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,
@@ -44,9 +43,9 @@ export function LimitedStream<Type = any>(
 	value: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position
-) => EffectiveLimitedStream<Type> {
+) => ILimitedStream<Type> {
 	const baseClass = LimitedStreamBase<Type>(hasPosition, buffer)
-	class limitedStream extends baseClass implements EffectiveLimitedStream<Type> {
+	class limitedStream extends baseClass implements ILimitedStream<Type> {
 		value: LimitedUnderStream<Type>
 		lookAhead: Type
 		hasLookAhead: boolean
@@ -62,7 +61,7 @@ export function LimitedStream<Type = any>(
 			value: LimitedUnderStream<Type>,
 			from?: Position,
 			to?: Position
-		) => EffectiveLimitedStream<Type>
+		) => ILimitedStream<Type>
 
 		constructor(value: LimitedUnderStream<Type>, from?: Position, to?: Position) {
 			super(value)

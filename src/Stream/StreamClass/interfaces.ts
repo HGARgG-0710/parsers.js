@@ -1,33 +1,15 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Initializable } from "./methods/init.js"
 import type { Navigable } from "./methods/navigate.js"
 import type { Finishable } from "./methods/finish.js"
 import type { Rewindable } from "./methods/rewind.js"
-import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
+import type { Updatable } from "./methods/update.js"
 
 export type BoundNameType = "isEnd" | "isStart"
 export type StartedType = 1 | boolean
 export type PreStarted = Started<StartedType>
-
-export type StreamConstructor<Type = any> = abstract new () => StreamClassInstance<Type>
-
-export type ReversedStreamConstructor<Type = any> =
-	abstract new () => ReversedStreamClassInstance<Type>
-
-export type PatternStreamConstructor<Type = any> = abstract new (
-	value: any
-) => StreamClassInstance<Type> & Pattern
-
-export type PatternReversedStreamConstructor<Type = any> = abstract new (
-	value: any
-) => ReversedStreamClassInstance<Type> & Pattern
-
-export type BufferizedPatternReversedStreamConstructor<Type = any> = abstract new (
-	value: any
-) => ReversedStreamClassInstance<Type> & Bufferized<Type> & Pattern
 
 // * Optional Property-interfaces
 
@@ -47,10 +29,6 @@ export interface IsEndCurrable {
 
 export interface IsStartCurrable {
 	isCurrStart: () => boolean
-}
-
-export interface Updatable<Type = any> {
-	update?: () => Type
 }
 
 export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
@@ -104,3 +82,4 @@ export type * as finish from "./methods/finish.js"
 export type * as init from "./methods/init.js"
 export type * as navigate from "./methods/navigate.js"
 export type * as rewind from "./methods/rewind.js"
+export type * as update from "./methods/update.js"

@@ -1,10 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
-import type {
-	PatternStreamConstructor,
-	StreamClassInstance
-} from "../StreamClass/interfaces.js"
-import type { ProlongedStream as EffectivProlongedStream } from "./interfaces.js"
+import type { StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { ProlongedStream as IProlongedStream } from "./interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 import {
 	prolongedStreamIsEnd,
@@ -32,18 +31,18 @@ const ProlongedStreamBase = <Type = any>(
 		hasPosition,
 		buffer,
 		isPattern: true
-	}) as PatternStreamConstructor<Type>
+	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
 
 export function ProlongedStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): new (streams?: BasicStream<Type>[]) => EffectivProlongedStream<Type> {
+): new (streams?: BasicStream<Type>[]) => IProlongedStream<Type> {
 	const baseClass = ProlongedStreamBase(hasPosition, buffer)
-	class prolongedStream extends baseClass implements EffectivProlongedStream<Type> {
+	class prolongedStream extends baseClass implements IProlongedStream<Type> {
 		value: StreamClassInstance<Type>[]
 		streamIndex: number
 
-		init: (streams?: BasicStream<Type>[]) => EffectivProlongedStream<Type>
+		init: (streams?: BasicStream<Type>[]) => IProlongedStream<Type>
 		super: Summat
 
 		constructor(streams?: BasicStream<Type>[]) {

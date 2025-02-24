@@ -47,19 +47,19 @@ export interface IndexMap<
 	keys: KeyType[]
 	values: ValueType[]
 
-	reverse: () => any
+	reverse: () => this
 
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
-	swap: (i: number, j: number) => any
+	swap: (i: number, j: number) => this
 
 	getIndex: (key: any) => IndexGetType
 
-	add: (index: number, ...pairs: array.Pairs<KeyType, ValueType>) => any
-	delete: (index: number, count?: number) => any
-	replace: (index: number, pair: [KeyType, ValueType]) => any
-	set: (key: KeyType, value: ValueType, index?: number) => any
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
+	add: (index: number, ...pairs: array.Pairs<KeyType, ValueType>) => this
+	delete: (index: number, count?: number) => this
+	replace: (index: number, pair: [KeyType, ValueType]) => this
+	set: (key: KeyType, value: ValueType, index?: number) => this
+	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => this
 }
 
 export interface MapClass<KeyType = any, ValueType = any, DefaultType = any> {

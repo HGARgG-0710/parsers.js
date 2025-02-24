@@ -4,8 +4,8 @@ import type { Sizeable } from "../IndexMap/interfaces.js"
 export type Mappable<Type = any> = (value: Type, index?: number) => unknown
 
 export interface EnumSpace<Type = any> extends Sizeable, Copiable<EnumSpace<Type>> {
-	add: (n: number) => EnumSpace<Type>
-	join: (enums: EnumSpace<Type>) => EnumSpace<Type>
+	add: (n: number) => this
+	join: (enums: EnumSpace<Type>) => this
 	map: (f?: Mappable<Type>) => unknown[]
 }
 

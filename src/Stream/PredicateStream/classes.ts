@@ -6,12 +6,10 @@ import type {
 	ReversibleStream
 } from "../ReversibleStream/interfaces.js"
 
-import type {
-	IsEndCurrable,
-	PatternStreamConstructor
-} from "../StreamClass/interfaces.js"
-
-import type { PredicateStream as EffectivePredicateStream } from "./interfaces.js"
+import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { PredicateStream as IPredicateStream } from "./interfaces.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
 
 import {
 	predicateStreamIsEnd,
@@ -40,7 +38,7 @@ const PredicateStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition,
 		buffer
-	}) as PatternStreamConstructor<Type>
+	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
 
 export function PredicateStream<Type = any>(
 	hasPosition: boolean = false,
@@ -48,9 +46,9 @@ export function PredicateStream<Type = any>(
 ): new (
 	input?: ReversibleStream<Type> & IsEndCurrable,
 	predicate?: PredicatePosition<Type>
-) => EffectivePredicateStream<Type> {
+) => IPredicateStream<Type> {
 	const baseClass = PredicateStreamBase(hasPosition, buffer)
-	class predicateStream extends baseClass implements EffectivePredicateStream<Type> {
+	class predicateStream extends baseClass implements IPredicateStream<Type> {
 		lookAhead: Type
 		hasLookAhead: boolean
 		predicate: PredicatePosition<Type>
@@ -61,7 +59,7 @@ export function PredicateStream<Type = any>(
 		init: (
 			input?: BasicReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition<Type>
-		) => EffectivePredicateStream<Type>
+		) => IPredicateStream<Type>
 
 		constructor(
 			value?: BasicReversibleStream<Type> & IsEndCurrable,

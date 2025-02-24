@@ -11,3 +11,5 @@ export interface Pointer<Type = any> {
 }
 
 export type Pattern<Type = any> = Partial<Pointer<Type>>
+
+export type RecursivePointer<T = any> = Pointer<T | RecursivePointer<T>>

@@ -84,6 +84,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 		super.reverse()
 		this.indexes.reverse()
 		this.repairIndexes()
+		return this
 	}
 
 	constructor(indexMap: IndexMap<KeyType, ValueType, DefaultType, number>) {

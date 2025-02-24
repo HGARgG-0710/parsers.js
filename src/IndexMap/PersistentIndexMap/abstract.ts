@@ -19,9 +19,9 @@ abstract class FakeIndexMap<
 	number
 > {
 	abstract getIndex(key: any): IndexGetType
-	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): any
+	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-	abstract swap(i: number, j: number): any
+	abstract swap(i: number, j: number): this
 	abstract unique(): number[]
 
 	// * note: these are fakes - see the comment at the bottom...
@@ -30,7 +30,7 @@ abstract class FakeIndexMap<
 	get size(): number {
 		return 0
 	}
-	reverse() {}
+	reverse(): any {}
 }
 
 export abstract class DelegateIndexMap<
@@ -56,7 +56,8 @@ export abstract class DelegateIndexMap<
 	}
 
 	replace(index: number, pair: [KeyType, ValueType]) {
-		return this.value.replace(index, pair)
+		this.value.replace(index, pair)
+		return this
 	}
 
 	get default() {

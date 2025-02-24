@@ -1,4 +1,3 @@
-import type { Deletable, Settable } from "./HashMap/interfaces.js"
 import type { IndexMap, Sizeable } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
@@ -8,6 +7,7 @@ import { isGoodIndex } from "src/utils.js"
 import { keyValuesToPairsList, table } from "./utils.js"
 
 import { inplace } from "@hgargg-0710/one"
+import type { WeakDeletable, WeakSettable } from "./refactor.js"
 const { swap } = inplace
 
 export abstract class DelegateSizeable<
@@ -21,8 +21,8 @@ export abstract class DelegateSizeable<
 export abstract class DelegateDeletableSettableSizeable<
 	KeyType = any,
 	ValueType = any,
-	DelegateType extends Deletable<DeletedType> &
-		Settable<KeyType, ValueType | DefaultType> &
+	DelegateType extends WeakDeletable<DeletedType> &
+		WeakSettable<KeyType, ValueType | DefaultType> &
 		Sizeable = any,
 	DeletedType = KeyType,
 	DefaultType = any
@@ -52,14 +52,14 @@ export abstract class PreIndexMap<
 	abstract index(x: any): ValueType | DefaultType
 
 	abstract getIndex(key: any): IndexGetType
-	abstract delete(index: number, count?: number): any
-	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): any
-	abstract replace(index: number, pair: [KeyType, ValueType]): any
-	abstract replaceKey(keyFrom: KeyType, keyTo: KeyType): any
+	abstract delete(index: number, count?: number): this
+	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
+	abstract replace(index: number, pair: [KeyType, ValueType]): this
+	abstract replaceKey(keyFrom: KeyType, keyTo: KeyType): this
 	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 	abstract unique(): number[]
 	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
-	abstract swap(i: number, j: number): any
+	abstract swap(i: number, j: number): this
 
 	get size() {
 		return this.keys.length
@@ -73,16 +73,15 @@ export abstract class PreIndexMap<
 
 	set(key: KeyType, value: ValueType, index: number = this.size) {
 		const keyIndex = this.keys.indexOf(key)
-		if (isGoodIndex(keyIndex)) {
-			this.values[keyIndex] = value
-			return this
-		}
-		return this.add(index, [key, value])
+		if (isGoodIndex(keyIndex)) this.values[keyIndex] = value
+		else this.add(index, [key, value])
+		return this
 	}
 
 	reverse() {
 		this.keys.reverse()
 		this.values.reverse()
+		return this
 	}
 }
 

@@ -49,30 +49,7 @@
 		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
 
 		To Fix [comprehensive list of issues with types]:
-			5. 'this'-returning: 
-				Stop with the ': any'-nonsense, or overly-specific-this-return-type-nonsense. 
-				Just do ': this', AS INTENDED...
-
-				To find: search for 'return this'
-
 			6. StreamClasses/interfaces.ts: 
-				1. 'abstract new' types - REMOVE!
-					These (instead) have to be written inline [same way as '6.2.']
-
-					1. Use these as 'refactor.ts' types
-					2. Introduce a new type 'StreamConstructor<Signature extends any[]> = abstract new<StreamType extends BasicStream> (...s: Signature) => StreamType': 
-						Then, use like: 
-
-							type UsefulPriavateLongStreamTypeName = StreamConstructor<Signature>
-
-							// somewhere... in the actual code: 
-								UsefulPriavateLongStreamTypeName<ConcreteStreamType<Type>>
-
-					This permits one to: 
-						1. Use generics
-						2. Enable adequate refactoring of all the boilerplate
-						3. [Current objective, missing] Clean the 'export type' of the library for the 'StreamClass' module
-					
 				4. Add the 'LocatorStream' interface (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
 					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
 					IDENTIFY them with the respective classes/functions
@@ -84,6 +61,7 @@
 						DESPITE the 'IParentTree' interface, it still IS, in practice, non-polymorphic (requires storage of 'ParentTree'-s DUE TO 'instanceof' in the 'constructor'); 
 						SOLUTION: 
 							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'			
+						
 	
 	2.77. Do research [learn LR/LALR-parsing properly]: https://en.wikipedia.org/wiki/LR_parser#
 		Compare with the stuff the library currently has, (possibly) implement 
@@ -1633,7 +1611,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 				The 'StackParser' is a function-generated class in TERMS OF '.table' (which goes on the prototype). 
 				The '.table'-lookups in the '.parse()' method are OPTIMIZED based off the '.table' function. 
 
-	69. StreamTypes [Collection] - a handler for different "combinations" of 'StreamClass'-initializers: 
+	69. GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 		Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
 			which *happens* to be the exact same one that the user is already using. 
 
@@ -1654,3 +1632,23 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 
 				1. properties/flags - by value/reference (x, y) => x === y
 				2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
+
+		The library actually DOES export various GenericCollection-s, namely one for each of: 
+			1. StreamClass
+			2. PredicateStream
+			3. LimitedStream
+			4. StreamParser
+			5. ProlongedStream
+			6. NestedStream
+			[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
+
+	70. IDEA: simplifying the list of available Stream-s further: 
+		Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
+			returning a Stream with precisely this same definition; 
+
+		Then, you can do: 
+			const reversed = stream.reverse()
+		instead of: 
+			const reversed = ReversedStream(stream)
+
+		Nicer semantics. 

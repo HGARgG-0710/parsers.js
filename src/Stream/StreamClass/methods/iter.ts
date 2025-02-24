@@ -9,6 +9,7 @@ import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
 import { currSet } from "./curr.js"
 
 import { functional, object } from "@hgargg-0710/one"
+import type { BasicStream } from "../../interfaces.js"
 const { nil } = functional
 const { propDefine } = object
 const { GetSetDescriptor, ConstDescriptor } = object.descriptor
@@ -245,4 +246,11 @@ export function chooseMethod<Type = any>(
 	buffer: boolean = false
 ) {
 	return nextPrevDescriptors(methodList[+!!currGetter | (+pos << 1) | (+buffer << 2)])
+}
+
+export function* streamIterator<Type = any>(this: BasicStream<Type>) {
+	while (!this.isEnd) {
+		yield this.curr
+		this.next()
+	}
 }

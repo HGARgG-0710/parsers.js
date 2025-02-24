@@ -13,6 +13,7 @@ export class ArrayCollection<Type = any>
 
 	push(...x: Type[]) {
 		this.value.push(...x)
+		return this
 	}
 
 	constructor(value: Type[] = []) {

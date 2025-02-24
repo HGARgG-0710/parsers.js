@@ -2,15 +2,15 @@ import type { InternalHash } from "./InternalHash/interfaces.js"
 import type { Indexable, Sizeable } from "../interfaces.js"
 
 export interface Deletable<KeyType = any> {
-	delete: (key: KeyType) => any
+	delete: (key: KeyType) => this
 }
 
 export interface Settable<KeyType = any, ValueType = any> {
-	set: (key: KeyType, value: ValueType) => any
+	set: (key: KeyType, value: ValueType) => this
 }
 
 export interface KeyReplaceable<KeyType = any> {
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => any
+	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => this
 }
 
 export type Hash<KeyType = any, InternalKeyType = any> = (

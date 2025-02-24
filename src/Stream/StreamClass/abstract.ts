@@ -1,36 +1,28 @@
 import type { InitMethod } from "./methods/init.js"
-import type { BasicStream } from "../interfaces.js"
 import type {
 	StreamClassSignature,
 	StreamClassInstance,
-	StartedType,
-	StreamConstructor,
-	PatternStreamConstructor
+	StartedType
 } from "./interfaces.js"
+import type { AbstractConstructor } from "./refactor.js"
 
 import { BasicPattern } from "src/Pattern/abstract.js"
 
 import { finish, rewind, navigate, init, iter, curr } from "./refactor.js"
 import { valuePropDelegate } from "src/refactor.js"
+import { update } from "./methods/update.js"
+import { streamIterator } from "./methods/iter.js"
 
 import { object } from "@hgargg-0710/one"
+import type { Pattern } from "../../Pattern/interfaces.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-function* streamIterator<Type = any>(this: BasicStream<Type>) {
-	while (!this.isEnd) {
-		yield this.curr
-		this.next()
-	}
-}
-
-function update<Type = any>(this: StreamClassInstance<Type>) {
-	return (this.curr = this.currGetter!())
-}
-
 export function StreamClass<Type = any>(
 	signature: StreamClassSignature<Type>
-): StreamConstructor<Type> | PatternStreamConstructor<Type> {
+):
+	| AbstractConstructor<[], StreamClassInstance<Type>>
+	| AbstractConstructor<[any], StreamClassInstance<Type> & Pattern> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -45,7 +37,9 @@ export function StreamClass<Type = any>(
 		isPattern
 	} = signature
 
-	let streamClass: StreamConstructor<Type> | PatternStreamConstructor<Type>
+	let streamClass:
+		| AbstractConstructor<[], StreamClassInstance<Type>>
+		| AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
 
 	interface streamClassGuaranteed {
 		isStart: StartedType

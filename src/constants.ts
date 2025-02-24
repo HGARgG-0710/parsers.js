@@ -86,6 +86,7 @@ export namespace defaults {
 		}
 		export namespace ObjectInternalHash {
 			export const DefaultValue = object.empty
+			export const MissingKey = undefined
 		}
 	}
 

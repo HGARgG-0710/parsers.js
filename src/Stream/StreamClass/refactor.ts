@@ -1,5 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { PreStarted, Stateful, StreamClassInstance } from "./interfaces.js"
+import type {
+	PreStarted,
+	Stateful,
+	StreamClassInstance
+} from "./interfaces.js"
 import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 import type { Posed } from "../../Position/interfaces.js"
 
@@ -12,6 +16,10 @@ import curr from "./methods/curr.js"
 
 import { object } from "@hgargg-0710/one"
 const { calledDelegate } = object.classes
+
+export type AbstractConstructor<Signature extends any[], Type = any> = abstract new (
+	...x: Signature
+) => Type
 
 export const valueIsCurrEnd = valueDelegate("isCurrEnd")
 export const valueCurr = valuePropDelegate("curr")

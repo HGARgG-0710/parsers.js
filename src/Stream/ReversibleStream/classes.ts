@@ -1,5 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { PatternReversedStreamConstructor } from "../StreamClass/interfaces.js"
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { Pattern } from "../../Pattern/interfaces.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type {
 	BasicReversibleStream,
 	ReversedStream as IReversedStream
@@ -37,7 +39,7 @@ const ReversedStreamBase = <Type = any>(
 		hasPosition,
 		buffer,
 		isPattern: true
-	}) as PatternReversedStreamConstructor<Type>
+	}) as AbstractConstructor<[any], ReversedStreamClassInstance<Type> & Pattern>
 
 export function ReversedStream<Type = any>(
 	hasPosition: boolean = false,

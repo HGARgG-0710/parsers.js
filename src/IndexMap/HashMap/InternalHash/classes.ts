@@ -6,7 +6,7 @@ import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { defaults } from "../../../constants.js"
 const { InternalHash } = defaults
-const { DefaultValue: objDefaultValue } = InternalHash.ObjectInternalHash
+const { DefaultValue: objDefaultValue, MissingKey } = InternalHash.ObjectInternalHash
 const { DefaultValue: mapDefaultValue } = InternalHash.MapInternalHash
 
 import { type } from "@hgargg-0710/one"
@@ -50,26 +50,26 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 
 	get(key: string) {
 		const read = this.value[key]
-		return isUndefined(read) ? this.default : read
+		return read === MissingKey ? this.default : read
 	}
 
 	set(key: string, value: Type) {
-		if (isUndefined(this.value[key])) ++this.size
+		if (this.value[key] === MissingKey) ++this.size
 		this.value[key] = value
 		return this
 	}
 
 	delete(key: string) {
-		if (!isUndefined(this.value[key])) {
+		if (this.value[key] !== MissingKey) {
 			--this.size
-			this.value[key] = undefined
+			this.value[key] = MissingKey
 		}
 		return this
 	}
 
 	replaceKey(keyFrom: string, keyTo: string) {
 		this.value[keyTo] = this.value[keyFrom]
-		this.value[keyFrom] = undefined
+		this.value[keyFrom] = MissingKey
 		return this
 	}
 
