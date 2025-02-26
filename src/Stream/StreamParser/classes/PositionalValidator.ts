@@ -8,7 +8,7 @@ import type { StatePatternInitMethod } from "../../StreamClass/methods/init.js"
 import { LocatorStream } from "../classes.js"
 
 export function PositionalValidator(validator: StreamPredicate, defaultState?: Summat) {
-	const validationStream = new (LocatorStream(true, !!defaultState))(validator)
+	const validationStream = new (LocatorStream(true, !!defaultState)(validator))()
 	return function <Type = any>(
 		stream: EndableStream<Type>,
 		state: Summat | undefined = defaultState

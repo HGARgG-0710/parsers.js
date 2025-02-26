@@ -4,7 +4,7 @@ import type {
 	EndableStream,
 	StreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
 import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { StreamParser as IStreamParser } from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
@@ -36,48 +36,44 @@ export function StreamParser<InType = any, OutType = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false,
 	state: boolean = false
-): new (
-	handler?: StreamHandler<OutType>,
-	value?: EndableStream<InType>,
-	state?: Summat
-) => IStreamParser<InType, OutType> {
+) {
 	const baseClass = StreamParserBase(hasPosition, buffer, state)
-	class streamTokenizerClass
-		extends baseClass
-		implements IStreamParser<InType, OutType>
-	{
-		value: EndableStream<InType>
-		super: Summat
+	return function (
 		handler: StreamHandler<OutType>
+	): Constructor<[EndableStream?, Summat?], IStreamParser<InType, OutType>> {
+		class streamTokenizerClass
+			extends baseClass
+			implements IStreamParser<InType, OutType>
+		{
+			value: EndableStream<InType>
+			super: Summat
+			handler: StreamHandler<OutType>
 
-		pos?: number
-		buffer?: FreezableBuffer<OutType>
-		state?: Summat
-
-		init: (
-			handler?: StreamHandler<OutType>,
-			value?: EndableStream<InType>,
+			pos?: number
+			buffer?: FreezableBuffer<OutType>
 			state?: Summat
-		) => IStreamParser<InType, OutType>
 
-		constructor(
-			handler: StreamHandler<OutType>,
-			value?: EndableStream<InType>,
-			state: Summat = {}
-		) {
-			super(value)
-			this.init(handler, value, state)
+			init: (
+				handler?: StreamHandler<OutType>,
+				value?: EndableStream<InType>,
+				state?: Summat
+			) => IStreamParser<InType, OutType>
+
+			constructor(value?: EndableStream<InType>, state: Summat = {}) {
+				super(value)
+				this.init(handler, value, state)
+			}
 		}
+
+		withSuper(streamTokenizerClass, baseClass, {
+			init: ConstDescriptor(streamParserInitialize)
+		})
+
+		return streamTokenizerClass
 	}
-
-	withSuper(streamTokenizerClass, baseClass, {
-		init: ConstDescriptor(streamParserInitialize)
-	})
-
-	return streamTokenizerClass
 }
 
-export const BasicParser = <InType = any, OutType = any>(
+export const BufferedParser = <InType = any, OutType = any>(
 	hasPosition: boolean = false,
 	state: boolean = false
 ) => StreamParser<InType, OutType>(hasPosition, true, state)

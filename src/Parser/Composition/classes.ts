@@ -1,11 +1,11 @@
-import type { LayeredFunction as ILayeredFunction } from "./interfaces.js"
-import { FlexibleFunction } from "./abstract.js"
+import type { Composition as ILayeredFunction } from "./interfaces.js"
+import { Callable } from "./abstract.js"
 
 import { functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 
-export class LayeredFunction<ArgType extends any[] = any[], OutType = any>
-	extends FlexibleFunction
+export class Composition<ArgType extends any[] = any[], OutType = any>
+	extends Callable
 	implements ILayeredFunction
 {
 	#layers: Function[]
@@ -30,3 +30,5 @@ export class LayeredFunction<ArgType extends any[] = any[], OutType = any>
 		this.layers = layers
 	}
 }
+
+export * from "./DynamicParser/classes.js"

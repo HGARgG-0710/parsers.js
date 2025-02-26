@@ -1,6 +1,7 @@
 import type { Tree, InTree, TreeConverter, TreeConstructor } from "./interfaces.js"
 
 import { isGoodIndex } from "src/utils.js"
+import { ParentTree } from "./classes.js"
 
 import { object, functional } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -49,3 +50,6 @@ export const mapper =
 	<Type = any>(converter: (x: any) => Type | Tree<Type>): TreeConverter<Type> =>
 	(x: any[]) =>
 		x.map(converter)
+
+export const isParentTree = <Type = any>(child: any): child is ParentTree<Type> =>
+	child instanceof ParentTree

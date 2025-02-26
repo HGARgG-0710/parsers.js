@@ -1,13 +1,13 @@
 import type { Bufferized, FreezableBuffer } from "./interfaces.js"
 
 import { type } from "@hgargg-0710/one"
-const { isUndefined } = type
+const { isNullary } = type
 
 export function assignBuffer<Type = any>(
 	bufferized: Bufferized<Type>,
 	buffer?: FreezableBuffer
 ) {
-	if (!isUndefined(buffer)) bufferized.buffer = buffer
+	if (!isNullary(buffer)) bufferized.buffer = buffer
 }
 
 export const lastIndex = (buffer: FreezableBuffer) => buffer.size - 1

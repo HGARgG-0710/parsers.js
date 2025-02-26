@@ -1,27 +1,6 @@
 [v0.3]
 	
-5. Source code TODO-s: 	
-	2.62. PROBLEM - with LayeredFunction: 
-
-		TAKEAWAY: add another abstraction OVER IT, that would permit one to pass 
-			a 'new (e: EndableStream, state: Summat) => StreamParser', which would [then], 
-				be used to create the StreamParser instance USING: 
-
-					1. the 'input' [dynamically given, as first argument]
-					2. the initial 'state' [static - later can be changed from inside 'table']
-
-				PROBLEM: consider doing 'StreamParser()' WITH A '.buffer'?! 
-					Then - INSTEAD, create a function [separate - put in one.js/functional; NAME - 'argFiller'; SPECIFICALLY - have an 'export const stateFiller = argFiller(new Set(1))' as *A UTIL*]: 	
-							
-					[ADD THIS TO DOCS!!!]
-					Then, one can do: 
-						
-						const layers = new LayeredFunction(...)
-						const singlePrecompute = precompute(new StreamParser(...), new Set([1, ... (other inds)]))
-						layers.layers = [singlePrecompute({ parser: layers }), InputStream] // ... example ... 
-
-					Presence of this in one.js would be a PERFECTLY good excuse for keeping 'LayeredFunction' HERE (for the moment, at the very least... - one did plan to refactor it out somewhere, is needed for other porjects as well...); 
-
+5. Source code TODO-s: 
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
 
@@ -43,25 +22,7 @@
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
 			2. selector [to npm]
 			3. regex [to npm]
-			4. xml [to npm]
-
-	2.80. WALK through the types, determine IF they are desired or not... [once again...]; 
-		This time, one has found that (a lot) of types, currently are (somewhat) orphaned/not used, or plainly aren't desired within the library. 
-
-		To Fix [comprehensive list of issues with types]:
-			6. StreamClasses/interfaces.ts: 
-				4. Add the 'LocatorStream' interface (and other SPECIFIC interfaces, to indicate where and which optional flags are present): 
-					These are just 'A & B'-type expressions [marker interfaces, mostly]... ;
-					IDENTIFY them with the respective classes/functions
-
-
-			3. Find all the 'as'-thingies, where polymorphism is expected: 
-				Specific examples: 
-					1. ParentTree: 
-						DESPITE the 'IParentTree' interface, it still IS, in practice, non-polymorphic (requires storage of 'ParentTree'-s DUE TO 'instanceof' in the 'constructor'); 
-						SOLUTION: 
-							1. Provide [in a constructor] a 'isParentTree' function, which defaults to 'x instanceof ParentTree'			
-						
+			4. xml [to npm]						
 	
 	2.77. Do research [learn LR/LALR-parsing properly]: https://en.wikipedia.org/wiki/LR_parser#
 		Compare with the stuff the library currently has, (possibly) implement 
@@ -80,11 +41,7 @@
 			(meaning: it allows one to "chain" parsing layers together to form a parser, IMPLICITLY ESTABLISHING 
 				the order of rule-application to the given source). 
 
-Order of TODO-elimination: 
-	2.80.	
-	
-	5.2.62.
-	
+Order of TODO-elimination: 	
 	JSDoc: 
 		Add it BEFORE doing the tests. 
 		One must first understand PRECISELY how a certain thing is to work, and what to expect from it...;
@@ -103,6 +60,18 @@ Order of TODO-elimination:
 			1. [make into an npm command - 'test-run' and 'test: test-compile + test-run']
 			2. add to '.vscode/launch.json' [to simplify the debugging process... we'll need it]; 
 			3. WORK on the failed tests from there...; 
+		
+		6. WRITE a single large 'tests/demo' INTEGRATION TEST, which is a JSON/hybrid-parser. 
+			It would utilize: 
+				0. JSON: TableMap + HashMap
+				1. hybrid: TableMap + IndexMap [local mutability]
+				2. StreamParser
+				3. DynamicParser
+				4. switching between "hybrid" and JSON-modes BASED off 'JSON' contents [global mutability]
+
+			Reasons: 
+				1. new DynamicParser is EXTREMELY complex [hence, errorprone]
+				2. to test out the overall interface manageability
 		
 	5.2.73.
 	5.2.74.	
@@ -123,6 +92,16 @@ B. documentation (wiki - change/fix it...);
 		0. make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values!	
 		1. Note in the 'UnfreezableArray' docs that AFTER '.unfreeze()' is called, 
 			the underlying Stream behaviour *DOES NOT CHANGE* (meaning - one has to create a NEW Stream...); 
+
+		2. SPECIFY: that (at the moment) parser's best support is for TOP-DOWN RECURSIVE DESCENT PARSERS! 
+		
+		3.	Ways to do self-modification for DynamicParser [!!! - the Holy Grail...]: 				
+			1. 'this.state.parser.layers = ..." [self-modification, GLOBAL]
+				1. Also: 'this.state.parser.layers[i] = ...'; 
+			2. 'parser.table = ...' [self-modification, LOCAL]
+
+			TODO[1]: add examples for using it to the docs with 'StreamParser' + 'InputStream' [by far - *the* most common case...]; 
+			TODO[2]: use the code for doing so WITHIN THE 'demo' integration test...
 
 	EXAMPLES: 
 		1. Currently, this is the code to take a certain `input` Stream, 
@@ -1208,7 +1187,7 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			For this: 
 
 				1. Learn a new CSS-based tool (either for generating/hosting docs/docs-css-styles like TypeDoc/readthedocs , 
-					OR a new library to create one's own doc-styles like Tailwind CSS); 
+					OR a new library to create one's own doc-styles like 'Tailwind CSS'); 
 				2. Create a JSON parser in parsers.js and COMPARE it against the [https://chevrotain.io/performance/], with ops/sec. 
 					See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
 					2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
@@ -1652,3 +1631,60 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 			const reversed = ReversedStream(stream)
 
 		Nicer semantics. 
+
+	71. LATER: important problem - self-modifying parser INTEROP of different self-modifications. 
+		Problem with multiple self-modifying parsers is that they rely on SHARED STATE. 
+		Which is bad. PARTICULARLY, when code of two independent vendors may be doing the modifications. 
+
+		Solution: 
+			1. provide a COLLECTION TYPE [IdCollection] that:
+				0. wraps around Array
+				1. stores IndexAssignable items
+				2. comes with a '.search(id)', by .assignedIndex: 
+					1. Defined via a 'MapInternalHash <- HashMap' [FastLookupTable], which STORES values of '.assignedIndex', and returns items from the Array by it
+			2. provide 'Stream's classes within the library with DEFAULT 'static .assignedIndex'
+			3. for cases, when it's IMPOSSIBLE to have sane defaults (ex: two LimitedStream(), or PredicateStream(), or ...), 
+				user can employ the already existing 'assignIndex' util; 
+
+		Benefits of solution: 
+			1. Generic
+			2. [Relatively] Low-level - wraps around Array more or less directly
+			3. Easy to configure for the user (just set the appropriate '.assignedIndex')
+			4. '.search()' is fast [Map - based off FastLookupTable]
+
+		Then, a self-modification for parser vendor could: 
+			
+			this.state.parser.layers.search(...).handler.table = ... // or something...
+
+	72. To "steal" from Chevrotain: 
+		1. Fault tolerance/error-recovery: 
+			parsers.js has excellent error-reporting and error-representation means. 
+			It has no means for error-recovery (the user has to write them ON THEIR OWN...)
+		2. Incremental parsing: 
+			Consider a language-server for an IDE. 
+			parsers.js would NOT be the ideal choice due to: 
+				1. lack of error recovery mechanisms
+				2. lack of *incremental parsing* - starting parsing from ANY given point in the file: 
+					You can, however, already implement it pretty briskly [pseudo]: 
+						1. StreamParser/other
+						2. x = StreamParser.init(...y = InputStream.init(SOURCE_STRING)...) 
+						3. x.next() ...
+						4. x.isEnd && x.state.error == ...
+						5. [someplace else - error-type matching] if (x.state.error === ...) { ... } else if (...) { ... } ...
+						6. each case - one has a separate 'StreamParser', which alters the original 'y'
+						7. once, the error has been handled [id est - it's a valid symbol to continue parsing from ONCE AGAIN], goto 8.
+						8. we continue with 2. via some kind of 'x.renew()': 
+							To define that, one FIRST, has to work on the 'x.state.error' thing [namely - the no-validation error-discovery]. 
+							There was a todo for this somewhere... [replacing 'PatternValidator' with 'parsing + validation']
+
+	73. validation-related mini-predicates: 
+		At least: 
+			1. 'input.next() == X'
+			2. 'set.has(input.next())'
+
+		Provide as 'trivialCompose'-compositions of elementary methods...
+
+	74. Adopt a new naming convention - the 'I' for interfaces is TERRIBLY useful. 
+		Yes, one *did* prior consider it a semantic bloat, however, it allows one 
+			to see dependency injections/generalized patterns much clearer due to 
+				greater explicitness of using an interface and *not* a class with identical name. 

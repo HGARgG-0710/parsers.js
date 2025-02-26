@@ -15,6 +15,7 @@
 		"maps"
 	],
 	"dependencies": {
+		"@hgargg-0710/flow": "0.0.1",
 		"@hgargg-0710/one": "0.5.0"
 	},
 	"bugs": {

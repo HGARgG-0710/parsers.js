@@ -14,7 +14,7 @@ import { fastNavigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 import { type } from "@hgargg-0710/one"
-const { isUndefined } = type
+const { isNullary } = type
 
 export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {
 	this.hasLookAhead = false
@@ -62,8 +62,8 @@ export function limitedStreamInitialize<Type = any>(
 
 		this.hasLookAhead = false
 
-		if (!isUndefined(from)) {
-			if (isUndefined(to)) {
+		if (!isNullary(from)) {
+			if (isNullary(to)) {
 				to = from
 				from = LimitedStream.NoMovementPredicate
 			}

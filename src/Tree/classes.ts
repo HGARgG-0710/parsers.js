@@ -9,6 +9,7 @@ import type {
 
 import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
+import { isParentTree as uisParentTree } from "./utils.js"
 import { value } from "../Pattern/utils.js"
 import { lastIndex } from "../utils.js"
 import { parameterWaster } from "src/refactor.js"
@@ -90,7 +91,11 @@ export class ParentTree<Type = any>
 		return result
 	}
 
-	constructor(value?: any, converter?: TreeConverter<Type, IParentTree<Type>>) {
+	constructor(
+		value?: any,
+		converter?: TreeConverter<Type, IParentTree<Type>>,
+		isParentTree: (x: any) => x is ParentTree<Type> = uisParentTree
+	) {
 		super(value, converter)
 		this.parent = null
 
@@ -98,7 +103,7 @@ export class ParentTree<Type = any>
 		let i = lastChild
 		while (i >= 0) {
 			const child = children[i--]
-			if (child instanceof ParentTree) child.parent = this
+			if (isParentTree(child)) child.parent = this
 		}
 	}
 }

@@ -1,1 +1,1 @@
-export * from "./LayeredFunction/abstract.js"
+export * from "./Composition/abstract.js"

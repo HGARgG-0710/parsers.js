@@ -20,5 +20,5 @@ export function PatternTokenizer<Type = any, KeyType = any, OutType = any>(
 }
 
 export * from "./PatternValidator/classes.js"
-export * from "./LayeredFunction/classes.js"
+export * from "./Composition/classes.js"
 export * from "./TableMap/classes.js"
