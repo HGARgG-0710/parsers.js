@@ -64,31 +64,36 @@ export class DynamicParser extends Callable {
 	}
 
 	init(signatures: IStateSignature[]) {
-		const preLayers = array.copy(this.layers)
+		function applySignatures(layers: Function[], signatures: IStateSignature[]) {
+			for (const signature of signatures) {
+				const { preSignature, preSignatureFill, toApplyOn, stateIndex } =
+					signature
+				const { arity } = preSignature
+				const accessSet = new Set(toApplyOn)
+				const preFill = preSignature.keepOut(stateIndex)
+				const preFillComplement = Array.from(preFill.complement())
 
-		for (const signature of signatures) {
-			const { preSignature, preSignatureFill, toApplyOn, stateIndex } = signature
-			const { arity } = preSignature
-			const preFill = preSignature.keepOut(stateIndex)
-			const preFillComplement = Array.from(preFill.complement())
+				const substitutor = substitute(
+					arity,
+					Array.from(preFill)
+				)(preSignatureFill)
 
-			const substitutor = substitute(arity, Array.from(preFill))(preSignatureFill)
-			const accessSet = new Set(toApplyOn)
-
-			mutate(preLayers, (layer: Function, i: number) =>
-				accessSet.has(i)
-					? argFiller(layer)(
-							...propSet(
-								substitutor(array.copy(preFillComplement)),
-								stateIndex,
-								this.stateTransform(object.copy(this.state))
-							)
-					  )(...preSignatureFill)
-					: layer
-			)
+				mutate(layers, (layer: Function, i: number) =>
+					accessSet.has(i)
+						? argFiller(layer)(
+								...propSet(
+									substitutor(array.copy(preFillComplement)),
+									stateIndex,
+									this.stateTransform(object.copy(this.state))
+								)
+						  )(...preSignatureFill)
+						: layer
+				)
+			}
+			return layers
 		}
 
-		this.layers = preLayers
+		this.layers = applySignatures(array.copy(this.layers), signatures)
 	}
 
 	constructor(

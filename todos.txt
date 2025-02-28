@@ -1688,3 +1688,21 @@ C. rewrite the CHANGELOG [too much has been altered since the "original" v0.3];
 		Yes, one *did* prior consider it a semantic bloat, however, it allows one 
 			to see dependency injections/generalized patterns much clearer due to 
 				greater explicitness of using an interface and *not* a class with identical name. 
+
+	75. Consider an application case [missing]: large file with a NEED to quickly read/parse a PORTION of its contents: 
+		Provide: 
+			1. LazyFileReader - to lazily read from a file, provides a 'Stream' of symbols
+				ONLY reads up to a given number of characters. 
+				CAN: 
+					1. jump inside the file
+					2. alter the read-length (when increased - proceeds with reading)
+					3. "reset" the read-length (reads next X requested characters, as if current read '.i == 0')
+			2. PROBLEM: suppose that the Stream ENDS abruptly: 
+				1. 'input.next()'
+				2. LACKS DEFINITION - return 'input.curr' [.isEnd]
+				3. error...
+
+				SOLUTION: provide an error-handler, more specifically: 
+					1. provide a Parse + validate thing (find note)
+					2. provide an error-handler that CHECKS for '.isEnd', and SIMPLY returns the already parsed 
+						'chunk' instead. Call this whole construction the 'ChunkParser'. 
