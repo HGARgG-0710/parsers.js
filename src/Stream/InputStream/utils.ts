@@ -6,7 +6,7 @@ import { InputStream } from "./classes.js"
 import { UnfreezableArray } from "../../Collection/Buffer/classes.js"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"
-import { array } from "../../Parser/utils.js"
+import { consume } from "../../Parser/utils.js"
 import { uniFinish } from "../StreamClass/utils.js"
 
 /**
@@ -20,7 +20,7 @@ export function toInputStream<Type = any>(stream: BasicStream<Type>): IInputStre
 
 	return new InputStream(
 		new UnfreezableArray(
-			(array(stream) as ArrayCollection<Type>).get() as Type[]
+			(consume(stream) as ArrayCollection<Type>).get() as Type[]
 		).freeze()
 	)
 }

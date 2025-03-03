@@ -1,14 +1,17 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { PredicatePosition } from "../../Position/interfaces.js"
+import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
 
 import type {
 	BasicReversibleStream,
 	ReversibleStream
 } from "../ReversibleStream/interfaces.js"
 
-import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { PredicateStream as IPredicateStream } from "./interfaces.js"
+import type {
+	PredicateStream as IPredicateStream,
+	PredicateStreamConstructor
+} from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
 import {
@@ -23,8 +26,9 @@ import {
 import { StreamClass } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
 
-import { object } from "@hgargg-0710/one"
+import { object, functional } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
+const { negate, has } = functional
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -43,10 +47,7 @@ const PredicateStreamBase = <Type = any>(
 export function PredicateStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): new (
-	input?: ReversibleStream<Type> & IsEndCurrable,
-	predicate?: PredicatePosition<Type>
-) => IPredicateStream<Type> {
+): PredicateStreamConstructor<Type> {
 	const baseClass = PredicateStreamBase(hasPosition, buffer)
 	class predicateStream extends baseClass implements IPredicateStream<Type> {
 		lookAhead: Type
@@ -76,4 +77,12 @@ export function PredicateStream<Type = any>(
 	})
 
 	return predicateStream
+}
+
+export function DelimitedStream<Type = any>(...delims: Type[]) {
+	const notDelim = negate(has(new Set(delims)))
+	return function (predicateStream: PredicateStreamConstructor<Type>) {
+		return (input?: ReversibleStream<Type> & IsEndCurrable) =>
+			new predicateStream(input, notDelim)
+	}
 }

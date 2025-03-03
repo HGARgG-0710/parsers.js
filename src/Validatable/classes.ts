@@ -18,7 +18,7 @@ const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isEmpty } = array
 
-export abstract class PreDelegateValidatablePattern<Type = any, KeyType = any>
+abstract class PreDelegateValidatable<Type = any, KeyType = any>
 	extends FlushableValidatable<Type>
 	implements DelegateValidatablePattern<Type, KeyType>
 {
@@ -53,7 +53,7 @@ export abstract class PreDelegateValidatablePattern<Type = any, KeyType = any>
 export function DelegateValidatable<Type = any, KeyType = any>(
 	validator: FreeValidator<Type, KeyType>
 ): new (value?: Type) => ValidatablePattern<Type, KeyType> {
-	const _DelegateValidatable = copy(PreDelegateValidatablePattern) as new (
+	const _DelegateValidatable = copy(PreDelegateValidatable) as new (
 		value?: Type
 	) => ValidatablePattern<Type, KeyType>
 	extendPrototype(_DelegateValidatable, { validator: ConstDescriptor(validator) })

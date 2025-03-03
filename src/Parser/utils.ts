@@ -13,7 +13,7 @@ export function skip(input: ReversibleStream, steps: Position = 1) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
-export function array<
+export function consume<
 	Type = any,
 	CollectionType extends Collection<Type> = ArrayCollection<Type>
 >(stream: BasicStream<Type>, init: CollectionType = new ArrayCollection<Type>() as any) {
@@ -43,7 +43,6 @@ export function count(pred: StreamPredicate) {
 	}
 }
 
-// * pre-doc note: Stream-class analogue to this -- 'PredicateStream(negate(inSet(new Set(...)))) - CREATE a new *DelimStream* export for the PredicateStream.classes [ONCE the *one.js* v0.5 has been used for a NEW library refactoring];'
 export function delimited(delimPred: Position) {
 	return function <
 		Type = any,
