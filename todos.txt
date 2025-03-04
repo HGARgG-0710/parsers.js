@@ -1180,14 +1180,14 @@ TODO:
 			1. PatternTokenizer
 			2. PatternValidator
 			3. ValidatablePattern
-			4. TokenizablePatterns
+			4. TokenizablePattern
 
 			With a NEW approach - a: 
 				1. 'RegExpTokenizer'
 				2. 'RegExpValidator'
 				3. 'TokenStream' - output from 'RegExpTokenizer' [or, alternatively - an interface for the 'StreamParser']; 
 
-				IMPORTANT NOTE: THESE *DO NOT* use a RegExpMap, instead a `Pairs<RegExp, ParserFunction (or whatever)>` is passed to them...
+				IMPORTANT NOTE: THESE *DO NOT* use a RegExpMap, instead a `Pairs<RegExp, ParserFunction (or whatever)>` is passed directly to them...
 			
 			These are function-creation functions that is based off *THE SAME SIGNATURE* as 
 				the 'RegExpMap', with the difference that these get to be used with 'StreamParser/LocatorStream/PositionalValidator/...'; 

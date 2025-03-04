@@ -31,6 +31,8 @@ export const state = prop("state")
 
 export const buffer = prop("buffer")
 
+export const pos = prop("pos")
+
 export * as Collection from "./Collection/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"

@@ -1,5 +1,3 @@
-export type Prototypal = Function & { prototype: any }
-
 export type * as Collection from "./Collection/interfaces.js"
 export type * as Eliminable from "./Eliminable/interfaces.js"
 export type * as EnumSpace from "./EnumSpace/interfaces.js"
