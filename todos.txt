@@ -1302,225 +1302,236 @@ TODO:
 
 				1. may cause a performance penalty (check); 
 		
-		IF using FlexibleFunction is NOT slower (in terms of function calls), then do just that...; 
-		The 'FlexibleFunction' is always going to be slower on creation (due to: 1. constructor; 2. runtime-parsing of FlexibleFunction), 
-			but this shouldn't be too costly overall (besides, when string is static, it well may be cached to improve performance); 
+			IF using FlexibleFunction is NOT slower (in terms of function calls), then do just that...; 
+			The 'FlexibleFunction' is always going to be slower on creation (due to: 1. constructor; 2. runtime-parsing of FlexibleFunction), 
+				but this shouldn't be too costly overall (besides, when string is static, it well may be cached to improve performance); 
 
 	6. To Attempt [possible waste, needs investigation/benchmarks]: 
-		TO1. IDEA: how to speed up the tokenization algorithm [attempt]:
-			Way: 
-			1. Split the "tokenized" and "untokenized" parts with 2 arrays
-			2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
-			3. Split the final result (tokenized) into BATCHES	
-				3.1. The underlying is a NEW structure called 'BatchArray'; 
-					It keeps its values as a list of lists, which HAVE THEIR INDEXES; 
-					The second-level lists are all ordered as the original array is; 
+		TO1. OLD - likely redundant, see below...
+			The result of this is O(nk^2 log n). 
+			The RegExp engine [RegExpTokenizer -> TokenStream] would likely give us a "lazy" O(nk). 
+			*If* it performs better than the current TokenizablePattern and ValidatablePattern:
+				1. Remove them
+				2. Remove this note
+			
+			Otherwise, explore the possibility of making this AND THEN benchmarking against the `ValidatablePattern`
+				and `TokenizablePattern`. IF the `O(nk^2log n)`-version *is* faster, 
+					then remove the `ValidatablePattern`/`TokenizablePattern`. Else, keep them, and remove it instead. 
 
-					Operations: 
-						
-						0. bind(array) - binds the given array
-						1. newBatch() - creates a new last batch, to have values written into
-						2. merge() - combines the batches into a single array, removing the indexes; 
-							For this - use Merge-sort (it's a natural choice here - the structure is precisely what the algorithm requires); 
-							Due to quality of data, the complexity (in this case) is O(nlog k) [considerably better than 'O(nlog n)'];
-						3. replace(i, subarr, subinds) - replaces a given index with a value of 'subarr'
-							This has to be fast, therefore: 
+			FULL OLD NOTE: 
+				IDEA: how to speed up the tokenization algorithm [attempt]:
+				Way: 
+				1. Split the "tokenized" and "untokenized" parts with 2 arrays
+				2. Keep the 'indexes' of the tokenized (on a per-item basis) and untokenized (on a "linear" - read below - basis) parts
+				3. Split the final result (tokenized) into BATCHES	
+					3.1. The underlying is a NEW structure called 'BatchArray'; 
+						It keeps its values as a list of lists, which HAVE THEIR INDEXES; 
+						The second-level lists are all ordered as the original array is; 
 
-								1. Store the '.bound' NOT as 'any[]', but as a special 'ContinuedElement[]'; 
-									It keeps elements as "referenced" (ContinuedElement), and 
-										items that are referenced can have: 
-											1. a '.value' (when no array is used); 
-											2. an '.array' (when one is used, otherwise - null); 
-										
-									Thus, the replacement-with-array operation becomes O(1);
+						Operations: 
+							
+							0. bind(array) - binds the given array
+							1. newBatch() - creates a new last batch, to have values written into
+							2. merge() - combines the batches into a single array, removing the indexes; 
+								For this - use Merge-sort (it's a natural choice here - the structure is precisely what the algorithm requires); 
+								Due to quality of data, the complexity (in this case) is O(nlog k) [considerably better than 'O(nlog n)'];
+							3. replace(i, subarr, subinds) - replaces a given index with a value of 'subarr'
+								This has to be fast, therefore: 
 
-								2. When this happens, after changing the 'ContinuedElement' one: 
-
-									2.1. Finds the batches that have the affected elements; 
-										To make it fast (for general case), store batches NOT just as 'any[]', 
-											but also have '.minIndex' and '.maxIndex' properties; 
-										Thus, it's possible to determine (in a single check) whether 
-											they are affected ('.maxIndex < .changedIndex')
-											in O(1) time; 
-									2.2. Finds the elements inside the batches; 
-										Done via binary search over the indexes; 
-										Then - as they are linearly ordered, walks the remainder of the batch-list, 
-											doing 2.3.; 
-									2.3. Changes the elements; 
-										Add the 'length-of-the-replaced-subarray - 1'; 
-										O(1) already, no need to change anything; 
-
-									IMPORTANT: for this to be FAST (algorithm becomes O(k^2 logn) and NOT O(nlogn)), 
-										one needs to do this step is done in a SEPARATE 
-								
-								3. When 'replacement' occurrs recursively (inside an existing ContinuedElement): 
-									3.1. It's the same, only difference is - one has to calculate the index manually (which can be mildly cumbersome, but is still O(n)); 
-								
-								4. The '.indexes' list, then, is ALSO altered; 
-									The old 'untokenized' index is "deleted", new UNTOKENIZED items' indexes (subinds) are put in its stead; 
-									It is ALSO kept as a 'ContinuedElement[]'; 
-									When an index is JUST deleted (that is, it's tokenized wholy and singl-y), 
-										one replaces the value with 'null' (no '.splice' necessary); 
-
-									To find it, one has to: 
-
-										1. Take the first 'ContinuedElement' x: 
-											1.1. Increase the value by (if array has no) 'x.array.length', or (if no '.array' is used, just '.value') 1
-												To make checking for presence of a 'ContinuedElement' inside 'ContinuedElement' faster - add a flag-property ('isRecursive: boolean'); 
-												BETTER IDEA: 
-													Use a 'BitArray' (a new data structure - a UInt8Array/UInt32Array, whatever, that keeps flags as bits); 
-													ANOTHER IDEA: 
-														Use a 'BitArray' to store a number [together with a boolean]; 
-														This way, it can have less bits, and more appropriate for a given usage ("cram it" with the flags - these go first); 
-														Then, one can also KEEP TRACK of the first 'ContinuedElement' [helps, when it's > 0]; 
-
-														ANOTHER number stored - count of recursive 'ContinuedElement'-s [allows to sometimes finsh early]; 
-														IDEA: 
-															Keep not the FIRST 'ContinuedElement', but the one that is THE FARTHEST! 
-															Then, what we have is - the largest possible speed increase; 
-															This also requires an ADDITIONAL number getting stored: separate BitArray (for the index that is skipped); 
-															Remainder are linearly walked-through; 
-
-															BETTER IDEA STILL: 	
-																Store it upon the 'CountedElement'-s that are using '.value'; 
-																THEN - there is no need for the flag, as one ONLY works with 'the next' value; 
-
-											1.2. Proceed until the happenstance that it becomes equal to the sought-after index, OR 
-												the difference between the current one, and the next becomes "too far" to be used as an intermediate-point; 
-												From there - one does a literal jump (as there are no more "nested" indexes left); 
+									1. Store the '.bound' NOT as 'any[]', but as a special 'ContinuedElement[]'; 
+										It keeps elements as "referenced" (ContinuedElement), and 
+											items that are referenced can have: 
+												1. a '.value' (when no array is used); 
+												2. an '.array' (when one is used, otherwise - null); 
 											
-										Therefore, our '.indexes' is capable of getting the current index at about O(k), where 'k' is the table size (number of tokenizations); 
+										Thus, the replacement-with-array operation becomes O(1);
 
-										IMPORTANT: the '.indexes' is actually A 'ContinuedElement' ITSELF; 
-											Thus, all techniques can be used on it also...; 
-							4. indexSync() - see '3.->2.->IMPORTANT'; 
-							5. getIndex(prevIndex: number): number - for iteration, see 'Fields->2.'; 
+									2. When this happens, after changing the 'ContinuedElement' one: 
 
-					Fields: 
+										2.1. Finds the batches that have the affected elements; 
+											To make it fast (for general case), store batches NOT just as 'any[]', 
+												but also have '.minIndex' and '.maxIndex' properties; 
+											Thus, it's possible to determine (in a single check) whether 
+												they are affected ('.maxIndex < .changedIndex')
+												in O(1) time; 
+										2.2. Finds the elements inside the batches; 
+											Done via binary search over the indexes; 
+											Then - as they are linearly ordered, walks the remainder of the batch-list, 
+												doing 2.3.; 
+										2.3. Changes the elements; 
+											Add the 'length-of-the-replaced-subarray - 1'; 
+											O(1) already, no need to change anything; 
 
-						1. .bound: ContinuedElement[] - the array of items; 
-						2. .indexes: number[] - the list of indexes that are NON-REMOVED [used for iteration]
-							IDEA: instead of keeping it as a list of numbers, use 'BitArray'-s, with a changing memory outfit; 
-							This permits to (greatly) economy the memory, because to see if an index is "present" one just 
-								marks it as 1/0; 
-							The "nested" ones will require more memory; 
-
-							(
-								Possibly... One could save *some* memory with a complex bit-layout?
-								Thus, for instance, having, 01 mean 'non-nested, present', 00 - 'non-nested/nested, missing', 
-								'1' - 'nested' [only a single (first) bit used]; 
-
-								Also - there'd be another - 'GrowingNumber' (new library data structure; this time - a single-element UInt8Array/UInt16Array/UInt32Array as a base, not UInt8Array); 
-								This one'll keep a single number; NOTE: the thing is needed at all even because of the '2^53 - 1' number-bound (namely, that one doesn't like it...)
-								This is (basically) a wrapper around a number to allow for quick manipulations that are ALSO memory-efficient
-
-								'Nested' ones will USE THE SEPARATE INDEXES inside the '.indexes: (...)[]' array; 
-
-								Then - one'll be able to have ANOTHER method on this, called 'getIndex'; 
-								It'll return the next non-missing iteration index, based off the current one; 
-							)
-
-							Also - regarding the 'automatic' empty return from 'tokenization' function - this won't work here (too much per-element overhead); 
-							Conclusion - one has to check the return-array length FROM THE START; 
-
-							PROBLEM: consider this - '.indexes' becomes PARTITIONED! 
-								More importantly - a given portion now becomes more about "missing" than "present" 
-									non-nested bits; 
-								SOLUTION: reverse the bits inside the given 'nested' bit; 
-								To determine WHEN to do it - count the "missing" and "present" parts; 
-
-						3. .batches: [any, number][] - the list of indexed elements inside the array
-						4. .syncInfo: [number, number, number] - the list of REPLACEMENTS that has been done; 
-							Used for increasing speed (namely - DELAYING the slow index-sync operation); 
-							Has form of '[batchHappen, replacementLength, replacementIndex]'
-							
-							1. Because one KNOWS that for all things that are AFTER the 'batchHappen', the index is "fixed", we also know
-								that only 'batchHappen' batches need be checked at all - O(k^2), where k^2 is the size of the table; 
-							2. Because one KNOWS that there are '.minIndex' and '.maxIndex' for a given batch (and it's ordered), 
-								one can find out whether one has the desired changed indexes - O(1)
-							3. Because one has the indexes as NUMBERS, one can use binary search - O(log n)
-
-							IDEA: for an even BETTER optimization - to have better memory consumption, a more complicated structure: 
-
-								1. STORE THE INDEX-ADDITION INFO on a per-batch-basis' (buckets)
-								2. Store them in a linearly ordered fashion (id est, so as to PRESERVE the values...); 
-							
-								QUESTION: how much will this book-keeping piece cost? (the 'number' triple only requires O(1))
-									To do this, however, one is in need of: 
-
-										1. get the triple; 
-										2. put it into one of the 'batch-baskets' of the '.syncInfo' (based off 'batchHappen'); 
-										3. in the chosen basket - '.push([index, length])'; 
-
-										[post-creation, when calling '.sync']
-										4. later - get the value from the appropriate bucket (they are ITERATED from 0 to 'curr-batch-index' for '.batches'); 
-										5. apply all the transformations to the given batch; 
+										IMPORTANT: for this to be FAST (algorithm becomes O(k^2 logn) and NOT O(nlogn)), 
+											one needs to do this step is done in a SEPARATE 
 									
-								ANSWER: not much in terms of performance; 
-									ALSO - it's actually better in terms of cache-locality (because there's less jumping around); 
+									3. When 'replacement' occurrs recursively (inside an existing ContinuedElement): 
+										3.1. It's the same, only difference is - one has to calculate the index manually (which can be mildly cumbersome, but is still O(n)); 
+									
+									4. The '.indexes' list, then, is ALSO altered; 
+										The old 'untokenized' index is "deleted", new UNTOKENIZED items' indexes (subinds) are put in its stead; 
+										It is ALSO kept as a 'ContinuedElement[]'; 
+										When an index is JUST deleted (that is, it's tokenized wholy and singl-y), 
+											one replaces the value with 'null' (no '.splice' necessary); 
 
-								ALSO: the two numbers are kept as GrowingNumber-s! 
-			Result [theory]: 
-			1. O(n) additional memory usage (where 'n' - number of final tokens)
-			2. O(1)-O(n) performance gain (depends on number of tokenized items, least waste in cases when there's a lot)
-				The current "speedy" O(n^2) (O(n) - walk through the items; O(n) - the '.splice' in replace due to index-keeping) 
-					can be replaced with a "slowish" (meaning - one with a possibly significant factor) O(n).
-				This ability is important, and in certain applications can be considerable; 
-				Only questions are: 
+										To find it, one has to: 
 
-					1. When can this be used? (use-cases)
-					2. [Most important] Can use-cases be identified prior? 
-				
-				Generally, for: 
+											1. Take the first 'ContinuedElement' x: 
+												1.1. Increase the value by (if array has no) 'x.array.length', or (if no '.array' is used, just '.value') 1
+													To make checking for presence of a 'ContinuedElement' inside 'ContinuedElement' faster - add a flag-property ('isRecursive: boolean'); 
+													BETTER IDEA: 
+														Use a 'BitArray' (a new data structure - a UInt8Array/UInt32Array, whatever, that keeps flags as bits); 
+														ANOTHER IDEA: 
+															Use a 'BitArray' to store a number [together with a boolean]; 
+															This way, it can have less bits, and more appropriate for a given usage ("cram it" with the flags - these go first); 
+															Then, one can also KEEP TRACK of the first 'ContinuedElement' [helps, when it's > 0]; 
 
-					1. Large inputs; 
-					2. Large (> 15 items) tokenization-tables; 
-				
-				This could make some sense. 
+															ANOTHER number stored - count of recursive 'ContinuedElement'-s [allows to sometimes finsh early]; 
+															IDEA: 
+																Keep not the FIRST 'ContinuedElement', but the one that is THE FARTHEST! 
+																Then, what we have is - the largest possible speed increase; 
+																This also requires an ADDITIONAL number getting stored: separate BitArray (for the index that is skipped); 
+																Remainder are linearly walked-through; 
 
-					1. The '.splice' requires one to go SEVERAL TIMES through the 
-						ALREADY TOKENIZED elements (the reason for inner O(n))
-					2. The 'isType' requires performing redundant checks; 
+																BETTER IDEA STILL: 	
+																	Store it upon the 'CountedElement'-s that are using '.value'; 
+																	THEN - there is no need for the flag, as one ONLY works with 'the next' value; 
 
-				In expense of memory and: 
+												1.2. Proceed until the happenstance that it becomes equal to the sought-after index, OR 
+													the difference between the current one, and the next becomes "too far" to be used as an intermediate-point; 
+													From there - one does a literal jump (as there are no more "nested" indexes left); 
+												
+											Therefore, our '.indexes' is capable of getting the current index at about O(k), where 'k' is the table size (number of tokenizations); 
 
-					1. Book-keeping cost (a noticeably more complex algorithm that runs in O(n) linear time + lots of index-keeping); 
-				
-				this implementation would permit to remove these; 	
+											IMPORTANT: the '.indexes' is actually A 'ContinuedElement' ITSELF; 
+												Thus, all techniques can be used on it also...; 
+								4. indexSync() - see '3.->2.->IMPORTANT'; 
+								5. getIndex(prevIndex: number): number - for iteration, see 'Fields->2.'; 
 
-				Final performance is: 
+						Fields: 
 
-					O(nk^2log n), where 'n' - number of tokenized elements, k - table size
+							1. .bound: ContinuedElement[] - the array of items; 
+							2. .indexes: number[] - the list of indexes that are NON-REMOVED [used for iteration]
+								IDEA: instead of keeping it as a list of numbers, use 'BitArray'-s, with a changing memory outfit; 
+								This permits to (greatly) economy the memory, because to see if an index is "present" one just 
+									marks it as 1/0; 
+								The "nested" ones will require more memory; 
 
-			CONCLUSION [post micro-benchmarking]: 
-				1. After some little fiddling with benchmarks, one found out that (actually), 
-					'.splice' is optimized to be extremely fast; 
-				2. One'll need to check the optimization difference betwee this and '.splice'
-					(very well may be that this turns out to be slower regardless)
-				3. (Theoretically), the '.splice' STILL copies the array, even though it happens on a 
-					MUCH lower-level (C++, Asm); IF it's faster (which is quite likely, indeed), 
-						that is only due to the purely numeric part; 
-				
-				4. Important: 
-					(From what is known insofar) The only "really" slow part of the algorithm, 
-						that genuinely would ruin the relative performance to repeated '.splice' (which, for a large enough input would take literally forever...), 
-							is the "setting up". 
+								(
+									Possibly... One could save *some* memory with a complex bit-layout?
+									Thus, for instance, having, 01 mean 'non-nested, present', 00 - 'non-nested/nested, missing', 
+									'1' - 'nested' [only a single (first) bit used]; 
 
-					Namely, the process of "guessing" the number of 'nested' indexes [their tree]; 
-					One would be required to "grow" it accordingly, with a relatively few size-increases for it...; 
+									Also - there'd be another - 'GrowingNumber' (new library data structure; this time - a single-element UInt8Array/UInt16Array/UInt32Array as a base, not UInt8Array); 
+									This one'll keep a single number; NOTE: the thing is needed at all even because of the '2^53 - 1' number-bound (namely, that one doesn't like it...)
+									This is (basically) a wrapper around a number to allow for quick manipulations that are ALSO memory-efficient
 
-				5. Before adding ANY memory-saving data structures 
-					1. Benchmark for memory; 
-					2. Benchmark for speed; 
+									'Nested' ones will USE THE SEPARATE INDEXES inside the '.indexes: (...)[]' array; 
 
-					Because if either is absent, the whole thing could simply collapse due to speed/memory assumptions going horribly wrong; 
+									Then - one'll be able to have ANOTHER method on this, called 'getIndex'; 
+									It'll return the next non-missing iteration index, based off the current one; 
+								)
 
-				6. FINAL: if it's slower, REMOVE; 
-					First - implement and benchmark performance for some large inputs (see if faster at all, likely not); 
-					Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
-					Third - either delete, or keep; 
+								Also - regarding the 'automatic' empty return from 'tokenization' function - this won't work here (too much per-element overhead); 
+								Conclusion - one has to check the return-array length FROM THE START; 
 
-		
+								PROBLEM: consider this - '.indexes' becomes PARTITIONED! 
+									More importantly - a given portion now becomes more about "missing" than "present" 
+										non-nested bits; 
+									SOLUTION: reverse the bits inside the given 'nested' bit; 
+									To determine WHEN to do it - count the "missing" and "present" parts; 
+
+							3. .batches: [any, number][] - the list of indexed elements inside the array
+							4. .syncInfo: [number, number, number] - the list of REPLACEMENTS that has been done; 
+								Used for increasing speed (namely - DELAYING the slow index-sync operation); 
+								Has form of '[batchHappen, replacementLength, replacementIndex]'
+								
+								1. Because one KNOWS that for all things that are AFTER the 'batchHappen', the index is "fixed", we also know
+									that only 'batchHappen' batches need be checked at all - O(k^2), where k^2 is the size of the table; 
+								2. Because one KNOWS that there are '.minIndex' and '.maxIndex' for a given batch (and it's ordered), 
+									one can find out whether one has the desired changed indexes - O(1)
+								3. Because one has the indexes as NUMBERS, one can use binary search - O(log n)
+
+								IDEA: for an even BETTER optimization - to have better memory consumption, a more complicated structure: 
+
+									1. STORE THE INDEX-ADDITION INFO on a per-batch-basis' (buckets)
+									2. Store them in a linearly ordered fashion (id est, so as to PRESERVE the values...); 
+								
+									QUESTION: how much will this book-keeping piece cost? (the 'number' triple only requires O(1))
+										To do this, however, one is in need of: 
+
+											1. get the triple; 
+											2. put it into one of the 'batch-baskets' of the '.syncInfo' (based off 'batchHappen'); 
+											3. in the chosen basket - '.push([index, length])'; 
+
+											[post-creation, when calling '.sync']
+											4. later - get the value from the appropriate bucket (they are ITERATED from 0 to 'curr-batch-index' for '.batches'); 
+											5. apply all the transformations to the given batch; 
+										
+									ANSWER: not much in terms of performance; 
+										ALSO - it's actually better in terms of cache-locality (because there's less jumping around); 
+
+									ALSO: the two numbers are kept as GrowingNumber-s! 
+				Result [theory]: 
+				1. O(n) additional memory usage (where 'n' - number of final tokens)
+				2. O(1)-O(n) performance gain (depends on number of tokenized items, least waste in cases when there's a lot)
+					The current "speedy" O(n^2) (O(n) - walk through the items; O(n) - the '.splice' in replace due to index-keeping) 
+						can be replaced with a "slowish" (meaning - one with a possibly significant factor) O(n).
+					This ability is important, and in certain applications can be considerable; 
+					Only questions are: 
+
+						1. When can this be used? (use-cases)
+						2. [Most important] Can use-cases be identified prior? 
+					
+					Generally, for: 
+
+						1. Large inputs; 
+						2. Large (> 15 items) tokenization-tables; 
+					
+					This could make some sense. 
+
+						1. The '.splice' requires one to go SEVERAL TIMES through the 
+							ALREADY TOKENIZED elements (the reason for inner O(n))
+						2. The 'isType' requires performing redundant checks; 
+
+					In expense of memory and: 
+
+						1. Book-keeping cost (a noticeably more complex algorithm that runs in O(n) linear time + lots of index-keeping); 
+					
+					this implementation would permit to remove these; 	
+
+					Final performance is: 
+
+						O(nk^2log n), where 'n' - number of tokenized elements, k - table size
+
+				CONCLUSION [post micro-benchmarking]: 
+					1. After some little fiddling with benchmarks, one found out that (actually), 
+						'.splice' is optimized to be extremely fast; 
+					2. One'll need to check the optimization difference betwee this and '.splice'
+						(very well may be that this turns out to be slower regardless)
+					3. (Theoretically), the '.splice' STILL copies the array, even though it happens on a 
+						MUCH lower-level (C++, Asm); IF it's faster (which is quite likely, indeed), 
+							that is only due to the purely numeric part; 
+					
+					4. Important: 
+						(From what is known insofar) The only "really" slow part of the algorithm, 
+							that genuinely would ruin the relative performance to repeated '.splice' (which, for a large enough input would take literally forever...), 
+								is the "setting up". 
+
+						Namely, the process of "guessing" the number of 'nested' indexes [their tree]; 
+						One would be required to "grow" it accordingly, with a relatively few size-increases for it...; 
+
+					5. Before adding ANY memory-saving data structures 
+						1. Benchmark for memory; 
+						2. Benchmark for speed; 
+
+						Because if either is absent, the whole thing could simply collapse due to speed/memory assumptions going horribly wrong; 
+
+					6. FINAL: if it's slower, REMOVE; 
+						First - implement and benchmark performance for some large inputs (see if faster at all, likely not); 
+						Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
+						Third - either delete, or keep; 
+	
 		PM1. [Maybe - add, check for feasibility + redundancy; A Big one] Add support for proper PatternMatching;
 			Serves as an abstraction over the 'RegExp'; 
 			Allows one to match 'Token'-s using 'MatchablePattern'-s; 
