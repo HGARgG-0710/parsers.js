@@ -34,6 +34,7 @@ export const buffer = prop("buffer")
 export const pos = prop("pos")
 
 export * as Collection from "./Collection/utils.js"
+export * as EnumSpace from "./EnumSpace/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"

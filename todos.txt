@@ -50,26 +50,50 @@ Order of TODO-elimination:
 				JSDoc ALONE will suffice. 
 				JSDoc contains: 
 					1. brief description
-					2. @type tags: 
-						Read more about `JSDoc` in TypeScript at:
-							https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
+					2. @type tags: 	
+					3. other tags...
+					Read more about `JSDoc` in TypeScript at:
+						https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html	
 			2. IF `x` is a class, it has a page + JSDoc with reference instead
 				Page contains: 
 					1. method documentation/signatures, output types
 					2. public variables documentation/types
 					3. *Notes* [those are important...]
+				JSDoc contains
 			3. IF `x` is an interface, it has a page + JSDoc : 	
 				Page contains: 
 					0. general info (purpose, usage, dependencies links, etc)
 					1. (brief) method/property descriptions
 					2. list of places where it's used
 					3. provided implementations' list
-
+			4. IF `x` is NOT an export, it is: 
+				1. documented, IF it is somehow an important internal detail (ad-hoc decisions)
+				2. otherwise, left without documentation (either a JSDoc, or a Wiki page)
+		
+		4. Wiki preface wording: 
+			Work on the wording for: 
+				1. `classes` pages: 
+					0. low-level: `This module contains implementations for interface ...`
+						Or [when multiple]: `This module contains implementations for interfaces ...`
+					1. high-level: `This module contains items related to ... [process/idea/interface]`
+						Or [when multiple, or contains implementations/utils/interfaces besides]: `... (as before) as well as ...`	
+		
+		5. Wiki page structure: 
+			For structure-pages: 
+				0. # *NAME*
+				1. preface
+				2. ## Exports
+				3. [list of exports]
+			
+			For content pages [classes]: 
+				1. # *NAME* [without the '.'-path]
+				2. Description
+				3. ## Methods
+				4. *use the old ```ts...``` thing + descriptions for each argument
+				5. [optional] per-method notes
+				6. [optional] per-property notes
+				7. [optional] per-class notes
 	2.80. 
-
-	1. ORDER the v0.4 concerns BY IMPORTANCE: 
-		so that one may address them in a timely fashion each...
-		1. Remove redundant notes (things you most definitely WON'T be doing...); 
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -183,6 +207,14 @@ C. write the CHANGELOG [too much has been altered since the "original" v0.3];
 [v0.4]
 
 TODO: 
+
+	0. General (see these before anything else): 
+		DE1. Development order: 
+			1. Start from `Primary` and `Secondary` todo-s
+			2. Finish (or try to, at least) the `Secondary` problems quickly (1-3 days)
+			3. Try not to add excessive amounts of new stuff to the library: 
+				1. it is already quite powerful/loaded
+				2. more things will just make it more obscure
 
 	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
 		TS1. TreeStream: create a new versions; 
@@ -698,8 +730,10 @@ TODO:
 					
 					The "matched" item is passed as an argument to '.head'
 
-			2. 'Rule's are kept inside a `RuleTable`
-			3. `StackParser` - a shift-reduce parser for the library:
+			2. 'Rule's are kept inside a `RuleTable`: 
+				A `RuleTable` is the huge table used by the `TableParser`. 
+
+			3. `UpParser` - a shift-reduce parser for the library:
 				[properties]
 				1. [protected] .stack - the stack of currently unparsed tokens
 				2. [protected] .curr - the current item 
@@ -736,11 +770,8 @@ TODO:
 				7. .inject(value) - injects a new 'Stream' to parse
 				8. .get() - NOTE: this is an 'InitializablePattern', with '.value', '.get()' and '.inject(value)'
 				9. .parse() - method for actually calling the parser: 
-					1. call .shift()
-					2. check if '.isRuleEnd()' is 'true'
-					3. if not 2., goto 1.
-					4. else, call '.reduce()', while '.isRuleEnd()'
-						This works because '.reduce()' continuously '.pop()'s from the 'Stack'
+					This implements a proper shift-reduce parser based off a RuleTable. 
+					TODO: CHOOSE the algorithm for it. LR/LALR/SLR/other [OR - better, make it GENERIC (somehow), add the respective Prefixes - LRTableParser, LALRTableParser, ...]
 				10. constructor(value?): 
 					The 'StackParser' is a function-generated class in TERMS OF '.table' (which goes on the prototype). 
 					The '.table'-lookups in the '.parse()' method are OPTIMIZED based off the '.table' function. 
@@ -799,6 +830,20 @@ TODO:
 			Then, a self-modification for parser vendor could: 
 				
 				this.state.parser.layers.search(...).handler.table = ... // or something...
+
+		TD1. [Top-Down Parsing]: 
+			The library (currently) only has the interfaces for aiding in 
+				creation of Recursive-Descent Parsers. 
+			Create a `DownParser` - similar to the `UpParser` (the Bottom-Up Parser). 
+			It would operate based off a RuleTable. 
+
+			[important] NOTE: one will need TWO different types of `RuleTable`-s: 
+				1. UpTable - Bottom Up Parsing
+				2. DownTable - Top Down Parsing
+
+				Those differ in their construction algorithms. 
+				ALSO: important note - the respective tables, themselves, 
+					MUST BE SELF-MODIFIABLE! 
 
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]
@@ -1219,6 +1264,19 @@ TODO:
 				const reversed = ReversedStream(stream)
 
 			Nicer semantics. 
+
+		EL1. Eliminable - get rid of it: 
+			More specifically, create a `RegExpEliminator` interface, which would replace it: 
+
+			1. Based off the same RegExp engine as `RegExpTokenizer`/`RegExpValidator`
+			2. More efficient [algorithmically], as it requires a single pass over the string, instead of 
+				several with multiple `.split()` calls; s
+			3. Uses *the same*
+
+			ALSO: 
+				1. remove the `EliminableCounter`
+				2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
+				3. remove the `Eliminable` interfaces
 
 	5. Uncertain [incomplete; require conceptual work/verification]	
 		UC1. [maybe?] BreakableStream - a major generalization of the library's patterns: 

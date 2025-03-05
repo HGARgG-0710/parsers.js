@@ -105,7 +105,7 @@ type HashConstructor = new <KeyType = any, ValueType = any>(
 	hash: HashMap<KeyType, ValueType>
 ) => FastLookupTable<KeyType, ValueType>
 
-export const [BasicHashTable, StreamHashTable]: [HashConstructor, HashConstructor] = [
+export const [BasicTable, StreamTable]: [HashConstructor, HashConstructor] = [
 	id,
 	current
 ].map(HashTable) as [any, any]

@@ -22,14 +22,14 @@ export interface Hashable<KeyType, InternalKeyType> {
 	hash: Hash<KeyType, InternalKeyType>
 }
 
-export interface HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
+export interface IHashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 	extends Hashable<KeyType, InternalKeyType> {
 	new (structure: InternalHash<InternalKeyType, ValueType>): HashMap<
 		KeyType,
 		ValueType,
 		InternalKeyType
 	>
-	extend: (f: (x: any) => KeyType) => HashClass<any, ValueType, InternalKeyType>
+	extend: (f: (x: any) => KeyType) => IHashClass<any, ValueType, InternalKeyType>
 }
 
 export interface HashMap<

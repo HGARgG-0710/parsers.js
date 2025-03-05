@@ -8,5 +8,3 @@ export interface EliminablePattern<Type = any, EliminatedType = any>
 	extends Resulting<Type>,
 		Flushable,
 		Eliminable<EliminatedType, Type> {}
-
-export type EliminableStringPattern = EliminablePattern<string, string | RegExp>

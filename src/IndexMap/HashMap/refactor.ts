@@ -1,4 +1,4 @@
-import type { HashClass as IHashClass } from "./interfaces.js"
+import type { IHashClass } from "./interfaces.js"
 import { HashClass } from "./classes.js"
 
 export function extend<KeyType = any, ValueType = any, InternalKeyType = any>(

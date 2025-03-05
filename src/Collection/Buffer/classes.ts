@@ -4,7 +4,7 @@ import { IterableCollection } from "../abstract.js"
 import { defaults } from "../../constants.js"
 const { isFrozen } = defaults.FreezableBuffer
 
-export abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
+abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	isFrozen: boolean = isFrozen
 
 	unfreeze() {

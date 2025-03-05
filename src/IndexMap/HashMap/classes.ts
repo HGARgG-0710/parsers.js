@@ -1,6 +1,6 @@
 import type { Indexed } from "../../Stream/interfaces.js"
-import type { HashClass, HashMap, Hash } from "./interfaces.js"
-import type { Token as TypeToken } from "../../Token/interfaces.js"
+import type { IHashClass, HashMap, Hash } from "./interfaces.js"
+import type { IToken as TypeToken } from "../../Token/interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "../abstract.js"
@@ -44,7 +44,7 @@ abstract class BaseHashClass<
 
 export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
 	hash: Hash<KeyType, InternalKeyType>
-): HashClass<KeyType, ValueType, InternalKeyType> {
+): IHashClass<KeyType, ValueType, InternalKeyType> {
 	class hashClass
 		extends BaseHashClass<KeyType, ValueType, InternalKeyType>
 		implements HashMap<KeyType, ValueType, InternalKeyType>
@@ -52,7 +52,7 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 		static hash: Hash<KeyType, InternalKeyType>
 		static extend: (
 			f: (x: any) => KeyType
-		) => HashClass<KeyType, ValueType, InternalKeyType>
+		) => IHashClass<KeyType, ValueType, InternalKeyType>
 	}
 
 	hashClass.prototype.hash = hash
@@ -69,11 +69,11 @@ export const [BasicHash, LengthHash, TokenHash, TypeofHash, CharHash] = [
 	typeOf,
 	charCodeAt
 ].map(HashClass) as [
-	HashClass<any, any, any>,
-	HashClass<Indexed, any, any>,
-	HashClass<TypeToken, any, any>,
-	HashClass<any, any, any>,
-	HashClass<string, any, number>
+	IHashClass<any, any, any>,
+	IHashClass<Indexed, any, any>,
+	IHashClass<TypeToken, any, any>,
+	IHashClass<any, any, any>,
+	IHashClass<string, any, number>
 ]
 
 export * as InternalHash from "./InternalHash/classes.js"
