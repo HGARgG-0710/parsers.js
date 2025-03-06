@@ -6,10 +6,10 @@ export interface Flushable {
 	flush: () => void
 }
 
-export interface Pointer<Type = any> {
+export interface IPointer<Type = any> {
 	value: Type
 }
 
-export type Pattern<Type = any> = Partial<Pointer<Type>>
+export type Pattern<Type = any> = Partial<IPointer<Type>>
 
-export type RecursivePointer<T = any> = Pointer<T | RecursivePointer<T>>
+export type RecursivePointer<T = any> = IPointer<T | RecursivePointer<T>>

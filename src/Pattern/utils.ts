@@ -1,12 +1,12 @@
-import type { Pattern, Pointer, RecursivePointer } from "./interfaces.js"
+import type { Pattern, IPointer, RecursivePointer } from "./interfaces.js"
 
 import { type, object } from "@hgargg-0710/one"
 const { isUndefined } = type
 const { structCheck } = object
 
-export const isPoiner = structCheck<Pointer>(["value"]) as <T = any>(
+export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
 	x: any
-) => x is Pointer<T>
+) => x is IPointer<T>
 
 export const value = <Type = any>(x: Pattern<Type>) => x.value
 export const setValue = <Type = any>(x: Pattern<Type>, value?: Type) => (x.value = value)

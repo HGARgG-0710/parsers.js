@@ -1,4 +1,4 @@
-import type { Composition as ILayeredFunction } from "./interfaces.js"
+import type { IComposition } from "./interfaces.js"
 import { Callable } from "./abstract.js"
 
 import { functional } from "@hgargg-0710/one"
@@ -6,7 +6,7 @@ const { trivialCompose } = functional
 
 export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
-	implements ILayeredFunction
+	implements IComposition
 {
 	#layers: Function[]
 

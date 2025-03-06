@@ -1,5 +1,5 @@
-import type { MultiIndex } from "../../Position/MultiIndex/interfaces.js"
-import type { MultiIndexModifier as IMultiIndexModifier } from "src/Position/MultiIndex/interfaces.js"
+import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
+import type { IMultiIndexModifier } from "src/Position/MultiIndex/interfaces.js"
 import type { Tree, InTree } from "../interfaces.js"
 import type { WalkableTree } from "./interfaces.js"
 
@@ -102,7 +102,7 @@ export class TreeWalker<Type = any> extends InitializablePattern<WalkableTree<Ty
 		this.modifier.clear()
 	}
 
-	goIndex(pos?: MultiIndex) {
+	goIndex(pos?: IMultiIndex) {
 		if (pos) this.modifier.init(pos)
 		this.curr = this.value!.index(this.pos.get()!)
 		this.levelUp()

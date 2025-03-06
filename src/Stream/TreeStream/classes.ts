@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { InTree } from "../../Tree/interfaces.js"
-import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
-import type { TreeStream as ITreeStream } from "./interfaces.js"
+import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
+import type { ITreeStream } from "./interfaces.js"
 
 import {
 	treeStreamIsEnd,
@@ -38,18 +38,15 @@ const TreeStreamBase = StreamClass({
 	defaultIsEnd: F
 }) as AbstractConstructor<[], ReversedStreamClassInstance<InTree>>
 
-export class TreeStream<Type = any>
-	extends TreeStreamBase
-	implements ITreeStream<Type>
-{
+export class TreeStream<Type = any> extends TreeStreamBase implements ITreeStream<Type> {
 	response = response
 	lastLevelWithSiblings = lastLevelWithSiblings
 
-	readonly multind: MultiIndexType
+	readonly multind: IMultiIndex
 
 	walker: TreeWalker<Type>
 	super: Summat
-	navigate: (position: MultiIndexType) => InTree<Type>
+	navigate: (position: IMultiIndex) => InTree<Type>
 	init: (walker?: TreeWalker<Type>) => ITreeStream<Type>
 
 	constructor(walker: TreeWalker<Type>) {

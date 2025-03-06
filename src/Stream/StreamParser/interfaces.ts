@@ -9,7 +9,7 @@ import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Posed } from "../../Position/interfaces.js"
 import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 
-export interface StreamParser<InType = any, OutType = any>
+export interface IStreamParser<InType = any, OutType = any>
 	extends Pattern<EndableStream<InType>>,
 		StreamClassInstance<OutType>,
 		Superable,

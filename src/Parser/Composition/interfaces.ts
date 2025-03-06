@@ -1,4 +1,4 @@
-export interface Composition extends Function {
+export interface IComposition extends Function {
 	layers: Function[]
 }
 

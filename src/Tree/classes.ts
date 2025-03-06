@@ -1,8 +1,8 @@
 import type { Pattern } from "../Pattern/interfaces.js"
 import type {
-	ChildrenTree as IChildrenTree,
+	IChildrenTree,
 	InTree,
-	ParentTree as IParentTree,
+	IParentTree,
 	TreeConstructor,
 	TreeConverter
 } from "./interfaces.js"

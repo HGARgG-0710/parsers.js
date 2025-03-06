@@ -1,9 +1,9 @@
 import type { type } from "@hgargg-0710/one"
-import type { Pointer } from "../Pattern/interfaces.js"
+import type { IPointer } from "../Pattern/interfaces.js"
 
 export interface IToken<Type = any, Value = any>
 	extends ITokenInstance<Type>,
-		Pointer<Value> {}
+		IPointer<Value> {}
 
 export interface ITokenInstance<Type = any> {
 	type: Type

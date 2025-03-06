@@ -1,6 +1,6 @@
-import type { Pointer as IPointer } from "../../Pattern/interfaces.js"
+import type { IPointer } from "../../Pattern/interfaces.js"
 import type { IndexMap } from "../interfaces.js"
-import type { PersistentIndexMap as IPersistentIndexMap } from "./interfaces.js"
+import type { IPersistentIndexMap } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { BadIndex } from "../../constants.js"

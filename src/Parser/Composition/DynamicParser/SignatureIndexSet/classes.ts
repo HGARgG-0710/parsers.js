@@ -1,4 +1,4 @@
-import type { SignatureIndexSet as ISignatureIndexSet } from "./interfaces.js"
+import type { ISignatureIndexSet } from "./interfaces.js"
 
 import { array, functional, boolean } from "@hgargg-0710/one"
 const { sort, numbers } = array

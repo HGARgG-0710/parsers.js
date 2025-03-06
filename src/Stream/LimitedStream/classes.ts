@@ -3,7 +3,7 @@ import type { Position } from "../../Position/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
-import type { LimitedUnderStream, LimitedStream as ILimitedStream } from "./interfaces.js"
+import type { LimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueCurr } from "../StreamClass/refactor.js"

@@ -6,7 +6,7 @@ import type {
 } from "../../Stream/StreamClass/interfaces.js"
 import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
 import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
-import type { StreamParser as IStreamParser } from "./interfaces.js"
+import type { IStreamParser } from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"

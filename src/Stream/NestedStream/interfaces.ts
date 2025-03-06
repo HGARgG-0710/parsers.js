@@ -8,13 +8,13 @@ import type {
 import type { Pattern } from "../../Pattern/interfaces.js"
 import type { Posed } from "../../Position/interfaces.js"
 
-export interface NestedStream<Type = any>
-	extends StreamClassInstance<Type | NestedStream<Type>>,
+export interface INestedStream<Type = any>
+	extends StreamClassInstance<Type | INestedStream<Type>>,
 		Superable,
 		Pattern<EndableStream<Type>>,
 		IndexAssignable,
 		Partial<Posed<number>> {
-	constructor: new (value?: EndableStream<Type>, _index?: any) => NestedStream<Type>
+	constructor: new (value?: EndableStream<Type>, _index?: any) => INestedStream<Type>
 	typesTable: FastLookupTable<any, StreamPredicate>
 	currNested: boolean
 }

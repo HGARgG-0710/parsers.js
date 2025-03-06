@@ -1,5 +1,5 @@
-import type { Pointer } from "../../Pattern/interfaces.js"
+import type { IPointer } from "../../Pattern/interfaces.js"
 import type { IndexMap } from "../interfaces.js"
 
-export interface PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = any>
-	extends IndexMap<KeyType, ValueType, DefaultType, Pointer<number>> {}
+export interface IPersistentIndexMap<KeyType = any, ValueType = any, DefaultType = any>
+	extends IndexMap<KeyType, ValueType, DefaultType, IPointer<number>> {}

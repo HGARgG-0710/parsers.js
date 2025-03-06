@@ -1,6 +1,6 @@
-import type { TreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { MultiIndexModifier as IMultiIndexModifier } from "./interfaces.js"
-import type { MultiIndex as IMultiIndex } from "./interfaces.js"
+import type { ITreeStream } from "../../Stream/TreeStream/interfaces.js"
+import type { IMultiIndexModifier } from "./interfaces.js"
+import type { IMultiIndex } from "./interfaces.js"
 
 import { InitializablePattern } from "../../Pattern/abstract.js"
 
@@ -71,7 +71,7 @@ export class MultiIndex extends InitializablePattern<number[]> implements IMulti
 		return super.get()!
 	}
 
-	convert(stream: TreeStream) {
+	convert(stream: ITreeStream) {
 		let final = 0
 		stream.rewind()
 		while (!stream.isEnd && !stream.multind.equals(this)) {

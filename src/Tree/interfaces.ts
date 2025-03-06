@@ -19,11 +19,11 @@ export interface WriteTree<Type = any> {
 
 export type Tree<Type = any> = ReadonlyTree<Type> & WriteTree<Type>
 
-export interface ParentTree<Type = any> extends WalkableTree<Type> {
-	parent: ParentTree<Type> | null
+export interface IParentTree<Type = any> extends WalkableTree<Type> {
+	parent: IParentTree<Type> | null
 }
 
-export interface ChildrenTree<
+export interface IChildrenTree<
 	Type = any,
 	T extends ReadonlyTree<Type> = ReadonlyTree<Type>
 > extends ReadonlyTree<Type> {
@@ -33,7 +33,7 @@ export interface ChildrenTree<
 export type TreeConstructor<
 	Type = any,
 	T extends ReadonlyTree<Type> = ReadonlyTree<Type>
-> = new (value?: Summat, converter?: TreeConverter<Type, T>) => ChildrenTree<Type, T>
+> = new (value?: Summat, converter?: TreeConverter<Type, T>) => IChildrenTree<Type, T>
 
 export type TreeConverter<
 	Type = any,

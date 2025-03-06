@@ -17,6 +17,10 @@ export function isType<Type = any>(
 
 export const isToken = structCheck<IToken>(["type", "value"])
 export const type = <Type = any>(x: ITokenInstance<Type>) => x.type
+export const typeSetter =
+	<Type = any>(type: Type) =>
+	(x: ITokenInstance<Type>) =>
+		(x.type = type)
 
 export const tokenInstances = fromEnum(TokenInstance)
 export const tokenTypes = fromEnum(TokenType)

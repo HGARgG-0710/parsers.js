@@ -18,7 +18,7 @@ export interface BasicReversibleStream<Type = any, StartedType = any>
 
 export type ReversibleStream<Type = any> = BasicReversibleStream<Type, boolean>
 
-export interface ReversedStream<Type = any>
+export interface IReversedStream<Type = any>
 	extends Superable,
 		Pattern<BasicReversibleStream<Type>>,
 		ReversedStreamClassInstance<Type> {}

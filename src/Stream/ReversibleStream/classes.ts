@@ -2,10 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type {
-	BasicReversibleStream,
-	ReversedStream as IReversedStream
-} from "./interfaces.js"
+import type { BasicReversibleStream, IReversedStream } from "./interfaces.js"
 
 import { valueDelegate, valuePropDelegate, withSuper } from "src/refactor.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"

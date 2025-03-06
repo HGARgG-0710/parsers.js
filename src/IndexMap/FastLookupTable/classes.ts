@@ -1,11 +1,11 @@
-import type { Pointer } from "../../Pattern/interfaces.js"
+import type { IPointer } from "../../Pattern/interfaces.js"
 import type {
 	Deletable,
 	HashMap,
 	KeyReplaceable,
 	Settable
 } from "../HashMap/interfaces.js"
-import type { PersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
+import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
 import type { Sizeable } from "../interfaces.js"
 
@@ -64,17 +64,17 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
-		Pointer<number>,
-		PersistentIndexMap<KeyType, ValueType>,
+		IPointer<number>,
+		IPersistentIndexMap<KeyType, ValueType>,
 		any
 	>
-	implements FastLookupTable<KeyType, ValueType, Pointer<number>>
+	implements FastLookupTable<KeyType, ValueType, IPointer<number>>
 {
 	getIndex(x: any) {
 		return this.value.getIndex(x)
 	}
 
-	byOwned(priorOwned: IndexAssignable<Pointer<number>>): ValueType {
+	byOwned(priorOwned: IndexAssignable<IPointer<number>>): ValueType {
 		return this.value.byIndex(priorOwned.assignedIndex!.value)[1]
 	}
 
@@ -84,7 +84,7 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 		return this
 	}
 
-	constructor(table: PersistentIndexMap<KeyType, ValueType>) {
+	constructor(table: IPersistentIndexMap<KeyType, ValueType>) {
 		super(table)
 	}
 }

@@ -16,7 +16,7 @@ export interface SinglePositionLookahead<Type = any> {
 	lookAhead: Type
 }
 
-export interface PredicateStream<Type = any>
+export interface IPredicateStream<Type = any>
 	extends StreamClassInstance<Type>,
 		Superable,
 		SinglePositionLookahead<Type>,
@@ -29,4 +29,4 @@ export interface PredicateStream<Type = any>
 export type PredicateStreamConstructor<Type = any> = new (
 	input?: ReversibleStream<Type> & IsEndCurrable,
 	predicate?: PredicatePosition<Type>
-) => PredicateStream<Type>
+) => IPredicateStream<Type>

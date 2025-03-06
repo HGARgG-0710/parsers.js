@@ -1,4 +1,4 @@
-import type { MultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
+import type { IMultiIndex as MultiIndexType } from "../../Position/MultiIndex/interfaces.js"
 import type { TreeWalker } from "../../Tree/classes.js"
 
 import { TreeStream } from "./classes.js"

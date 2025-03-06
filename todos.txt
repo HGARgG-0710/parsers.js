@@ -41,6 +41,11 @@
 
 
 Order of TODO-elimination: 	
+	0. Eradicate small interface files: 
+		1. Let the *small* interfaces BE LOCATED inside the `class.ts` files (as with `abstract` classes); 
+			Reason: fewer pointless microscopic files with < 20 loc
+				We have long abandoned the "total-modularity" philosphy on this project, so why not this too...
+
 	1. Wiki: 
 		0. Outline the overall structure
 		1. VERIFY the exports
@@ -93,6 +98,11 @@ Order of TODO-elimination:
 				5. [optional] per-method notes
 				6. [optional] per-property notes
 				7. [optional] per-class notes
+		6. IMPORTANT - self-references: 
+			EVERY time that a name from the library is mentioned, add: 
+				1. `x` - code-stylization
+				2. [...](...) - references, point to the abstraction's page
+
 	2.80. 
 
 	2. Workflows [GitHub Actions]: 
@@ -844,6 +854,14 @@ TODO:
 				Those differ in their construction algorithms. 
 				ALSO: important note - the respective tables, themselves, 
 					MUST BE SELF-MODIFIABLE! 
+
+		SI7. Expose the `StreamClass`
+			Currently, it is not yet ready to be "released to the user", 
+				however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
+					one may as well do so, as: 
+
+				1. It would now become far too high-level to still be an implementation detail
+				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external
 
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]

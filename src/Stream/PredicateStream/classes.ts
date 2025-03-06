@@ -8,10 +8,7 @@ import type {
 	ReversibleStream
 } from "../ReversibleStream/interfaces.js"
 
-import type {
-	PredicateStream as IPredicateStream,
-	PredicateStreamConstructor
-} from "./interfaces.js"
+import type { IPredicateStream, PredicateStreamConstructor } from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
 import {

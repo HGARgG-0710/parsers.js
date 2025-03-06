@@ -1,15 +1,15 @@
-import type { SignatureIndexSet } from "./interfaces.js"
+import type { ISignatureIndexSet } from "./interfaces.js"
 
-export interface PreSignature {
-	preSignature: SignatureIndexSet
+export interface IPreSignature {
+	preSignature: ISignatureIndexSet
 	preSignatureFill: any[]
 }
 
-export interface LayerSignature extends PreSignature {
-	toApplyOn: SignatureIndexSet
+export interface ILayerSignature extends IPreSignature {
+	toApplyOn: ISignatureIndexSet
 }
 
-export interface StateSignature extends LayerSignature {
+export interface IStateSignature extends ILayerSignature {
 	stateIndex: number
 }
 

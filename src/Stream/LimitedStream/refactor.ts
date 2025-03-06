@@ -1,5 +1,5 @@
 import type { Position } from "../../Position/interfaces.js"
-import type { LimitedStream, LimitedUnderStream } from "./interfaces.js"
+import type { ILimitedStream, LimitedUnderStream } from "./interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
@@ -16,12 +16,12 @@ import { superInit } from "../StreamClass/refactor.js"
 import { type } from "@hgargg-0710/one"
 const { isNullary } = type
 
-export function limitedStreamNext<Type = any>(this: LimitedStream<Type>) {
+export function limitedStreamNext<Type = any>(this: ILimitedStream<Type>) {
 	this.hasLookAhead = false
 	return this.lookAhead
 }
 
-export function limitedStreamProd<Type = any>(this: LimitedStream<Type>) {
+export function limitedStreamProd<Type = any>(this: ILimitedStream<Type>) {
 	const { value, direction, hasLookAhead, lookAhead } = this
 	if (!hasLookAhead) {
 		this.hasLookAhead = true
@@ -31,19 +31,19 @@ export function limitedStreamProd<Type = any>(this: LimitedStream<Type>) {
 	return lookAhead
 }
 
-export function limitedStreamIsEnd<Type = any>(this: LimitedStream<Type>) {
+export function limitedStreamIsEnd<Type = any>(this: ILimitedStream<Type>) {
 	const { value, to } = this
 	if (value!.isCurrEnd()) return true
 	this.lookAhead = this.prod()
 	return positionEqual(value!, to)
 }
 
-export function limitedStreamIsStart<Type = any>(this: LimitedStream<Type>) {
+export function limitedStreamIsStart<Type = any>(this: ILimitedStream<Type>) {
 	const { value, from } = this
 	return value!.isCurrStart() || positionEqual(value!, from)
 }
 
-export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
+export function limitedStreamPrev<Type = any>(this: ILimitedStream<Type>) {
 	const { curr, direction, value } = this
 	this.lookAhead = curr
 	this.hasLookAhead = true
@@ -52,7 +52,7 @@ export function limitedStreamPrev<Type = any>(this: LimitedStream<Type>) {
 }
 
 export function limitedStreamInitialize<Type = any>(
-	this: LimitedStream<Type>,
+	this: ILimitedStream<Type>,
 	value?: LimitedUnderStream<Type>,
 	from?: Position,
 	to?: Position

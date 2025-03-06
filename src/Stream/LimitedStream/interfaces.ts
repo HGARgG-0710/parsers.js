@@ -24,7 +24,7 @@ export interface DirectionHaving {
 	direction: boolean
 }
 
-export interface LimitedStream<Type = any>
+export interface ILimitedStream<Type = any>
 	extends SinglePositionLookahead<Type>,
 		Pattern<LimitedUnderStream<Type>>,
 		LookaheadHaving,

@@ -1,5 +1,5 @@
 import type { BasicStream } from "../interfaces.js"
-import type { InputStream as IInputStream } from "./interfaces.js"
+import type { IInputStream } from "./interfaces.js"
 import type { ArrayCollection } from "../../Collection/classes.js"
 
 import { InputStream } from "./classes.js"

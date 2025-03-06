@@ -1,4 +1,4 @@
-import type { StreamParser } from "./interfaces.js"
+import type { IStreamParser } from "./interfaces.js"
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
@@ -13,7 +13,7 @@ import { functional } from "@hgargg-0710/one"
 const { copy } = functional
 
 export function streamParserNext<InType = any, OutType = any>(
-	this: StreamParser<InType, OutType>
+	this: IStreamParser<InType, OutType>
 ) {
 	let currRes: OutType
 	do currRes = this.handler(this.value)
@@ -22,7 +22,7 @@ export function streamParserNext<InType = any, OutType = any>(
 }
 
 export function streamParserInitialize<InType = any, OutType = any>(
-	this: StreamParser<InType, OutType>,
+	this: IStreamParser<InType, OutType>,
 	handler?: StreamHandler<OutType>,
 	input?: EndableStream<InType>,
 	state?: Summat

@@ -1,13 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type {
-	PreSignature as IPreSignature,
-	LayerSignature as ILayerSignature,
-	StateSignature as IStateSignature,
-	SignatureIndexSet
+	IPreSignature,
+	ILayerSignature,
+	IStateSignature,
+	ISignatureIndexSet
 } from "./interfaces.js"
 
-import type { Composition as IComposition } from "../interfaces.js"
+import type { IComposition } from "../interfaces.js"
 
 import { Callable } from "../abstract.js"
 
@@ -21,7 +21,7 @@ const { substitute } = array
 const { mutate } = inplace
 
 export const PreSignature = (
-	preSignature: SignatureIndexSet,
+	preSignature: ISignatureIndexSet,
 	preSignatureFill: any[]
 ): IPreSignature => ({
 	preSignature,
@@ -30,7 +30,7 @@ export const PreSignature = (
 
 export const LayerSignature = (
 	signature: IPreSignature,
-	toApplyOn: SignatureIndexSet
+	toApplyOn: ISignatureIndexSet
 ): ILayerSignature => ({
 	...signature,
 	toApplyOn
