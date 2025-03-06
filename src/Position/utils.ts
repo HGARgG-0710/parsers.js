@@ -12,7 +12,7 @@ import { previous, next } from "src/Stream/utils.js"
 
 import { object, type, boolean, functional } from "@hgargg-0710/one"
 const { structCheck } = object
-const { isFunction, isNumber } = type
+const { isFunction, isNumber, isUndefined } = type
 const { or, negate } = functional
 const { T } = boolean
 
@@ -128,6 +128,7 @@ export function preserveDirection<Type = any>(
 	transform: (x: PredicatePosition<Type>) => PredicatePosition<Type>
 ) {
 	const transformed = transform(init)
-	if ("direction" in init) transformed.direction = init.direction
+	const direction = init.direction
+	if (!isUndefined(direction)) transformed.direction = direction
 	return transformed
 }

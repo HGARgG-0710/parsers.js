@@ -4,7 +4,7 @@ import type { array } from "@hgargg-0710/one"
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { isGoodIndex } from "src/utils.js"
-import { keyValuesToPairsList, table } from "./utils.js"
+import { kvPairs, table } from "./utils.js"
 
 import { inplace } from "@hgargg-0710/one"
 import type { WeakDeletable, WeakSettable } from "./refactor.js"
@@ -99,7 +99,7 @@ export abstract class BaseIndexMap<
 	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 
 	copy() {
-		return new this.constructor(keyValuesToPairsList(table(this)), this.default)
+		return new this.constructor(kvPairs(table(this)), this.default)
 	}
 
 	unique() {

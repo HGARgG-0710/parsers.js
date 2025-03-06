@@ -3,7 +3,7 @@ import type { InternalHashConstructor } from "./InternalHash/interfaces.js"
 
 import type { array } from "@hgargg-0710/one"
 
-export function fromPairsList<
+export function fromPairs<
 	KeyType = any,
 	ValueType = any,
 	InternalKeyType = any,

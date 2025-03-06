@@ -1,11 +1,15 @@
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import type { INestedStream } from "./interfaces.js"
+
 import { fastFinish } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
+import { type } from "@hgargg-0710/one"
+const { isNullary } = type
+
 export function nestedStreamInitCurr<Type = any>(this: INestedStream<Type>) {
 	const ownershipType = this.typesTable.getIndex(this)
-	return (this.currNested = ownershipType != undefined)
+	return (this.currNested = !isNullary(ownershipType))
 		? new this.constructor(this.value, ownershipType)
 		: this.value!.curr
 }
@@ -17,10 +21,10 @@ export function nestedStreamNext<Type = any>(this: INestedStream<Type>) {
 }
 
 export function nestedStreamIsEnd<Type = any>(this: INestedStream<Type>) {
+	const { value, typesTable } = this
 	return (
-		this.value!.isCurrEnd() ||
-		(this.assignedIndex != undefined &&
-			!this.typesTable.byOwned(this)(this, this.pos))
+		value!.isCurrEnd() ||
+		(typesTable.isOwned(this) && typesTable.byOwned(this)(this, this.pos))
 	)
 }
 

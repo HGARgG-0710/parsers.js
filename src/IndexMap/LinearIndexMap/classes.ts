@@ -16,7 +16,7 @@ import {
 } from "./refactor.js"
 
 import { BaseLinearMap } from "./abstract.js"
-import { fromPairsList } from "../utils.js"
+import { fromPairs } from "../utils.js"
 
 import { functional, boolean, string } from "@hgargg-0710/one"
 const { trivialCompose } = functional
@@ -40,7 +40,7 @@ export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any
 		static extensions: Function[]
 
 		constructor(pairsList: array.Pairs<KeyType, ValueType>, _default?: DefaultType) {
-			super(...fromPairsList(pairsList), _default)
+			super(...fromPairs(pairsList), _default)
 		}
 	}
 

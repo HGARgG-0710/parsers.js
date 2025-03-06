@@ -2,7 +2,7 @@ import type { IndexingFunction } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { isGoodIndex } from "src/utils.js"
-import { fromPairsList } from "../utils.js"
+import { fromPairs } from "../utils.js"
 import { inBound } from "../refactor.js"
 
 import { BadIndex } from "../../constants.js"
@@ -39,7 +39,7 @@ export abstract class BaseLinearMap<
 	}
 
 	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
-		const [keys, values] = fromPairsList(pairs)
+		const [keys, values] = fromPairs(pairs)
 		insert(this.keys, index, ...keys)
 		insert(this.alteredKeys, index, ...keys.map((x) => this.keyExtension(x)))
 		insert(this.values, index, ...values)

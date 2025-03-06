@@ -47,7 +47,11 @@ Order of TODO-elimination:
 				We have long abandoned the "total-modularity" philosphy on this project, so why not this too...
 
 	1. Wiki: 
-		0. Outline the overall structure
+		0. Outline the overall structure: 
+			Remains: 
+				1. interfaces
+				2. regex
+				3. constants
 		1. VERIFY the exports
 		2. Check for all the `export function` and `export class` statements (`export abstract has already been fixed`). 
 		3. DOCUMENTATION POLICY: 
@@ -186,6 +190,11 @@ B. documentation (wiki - change/fix it...);
 
 			TODO[1]: add examples for using it to the docs with 'StreamParser' + 'InputStream' [by far - *the* most common case...]; 
 			TODO[2]: use the code for doing so WITHIN THE 'demo' integration test...
+
+		4. ABOUT the '.typesTable' in `NestedStream`: 
+			IT HAS A CONTRACT, of returning `null/undefined` instead of a valid index in `.getIndex`, IF a given item in the present NestedStream is NOT 
+				supposed to be granted an index (and, thus, be made into a SEPARATE NestedStream), 
+					THEN THE RETURNED INDEX is to be `null` or `undefined`. 
 
 	EXAMPLES: 
 		1. Currently, this is the code to take a certain `input` Stream, 
@@ -863,6 +872,10 @@ TODO:
 				1. It would now become far too high-level to still be an implementation detail
 				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external
 
+		IM6. ArrayInternalHash [InternalHash]: 
+			A wrapper around `ValueType[]` for keeping the number-keys. 
+			Store together with MapInternalHash and ObjectHashInternal; 
+
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]
 			Given a 'Tree', returns an array of values of size `size`: 
@@ -1237,6 +1250,11 @@ TODO:
 
 		SI6. Add constructor types for SPECIFIC cases of `StreamClass` [see ex: PredicateStreamConstructor - used by DelimitedStream]
 			1. ALWAYS, whenever a composite type is RETURNED from a function, and then USED by *another* function, ONE GIVES IT AN ALIAS. 		
+	
+		SI8. Move the current contents of the `utils.Stream.StreamClass` into the `Stream.utils`: 
+			They DO NOT contain anything specific to the implementation/class-creation (which is the purpose of the `StreamClass` as an interface). 
+			Instead, they are concerned with checking existence of properties on given specific objects implementing the general `Stream` interface. 
+			It would make a whole lot more sense, and less confusion for the user. 
 
 	4. Breaking [removals]	
 		TO2. Remove (replace):
@@ -1295,6 +1313,24 @@ TODO:
 				1. remove the `EliminableCounter`
 				2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
 				3. remove the `Eliminable` interfaces
+
+		UT4. REMOVE the `utility` types: 
+			Put them ALL into `samples`. 
+			THE ONLY 'utils' to keep are: 
+
+				1. Parser/utils.ts
+				2. IndexMap/utils.ts (without the `table`)
+				3. Stream/utils.ts (only the 'byStreamBufferPos' and 'isEmptyStream', namely)
+				4. Pattern/utils.ts (only the `dig`)
+				5. Position/utils.ts (everything, except for `is` functions)
+				6. Tree/utils.ts (only: `hasChildren`, `sequentialIndex`, `treeEndPath`)
+
+			Those - MERGE into a single export-file called `utils.ts` (new module -- `utils`); 
+			Split them in a (similar) fashion to how it was before, if you want to, except: 
+				1. `dig` - this one's standalone now
+				2. `Parser/utils.ts` - this combines two types (AT LEAST), hence, it cannot be well-categorized
+
+			The `is` functions are ALL kept inside the special new `types` module.
 
 	5. Uncertain [incomplete; require conceptual work/verification]	
 		UC1. [maybe?] BreakableStream - a major generalization of the library's patterns: 

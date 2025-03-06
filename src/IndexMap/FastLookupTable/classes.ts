@@ -1,23 +1,24 @@
 import type { IPointer } from "../../Pattern/interfaces.js"
+import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
+import type { FastLookupTable, TableConstructor, IndexAssignable } from "./interfaces.js"
+import type { Sizeable } from "../interfaces.js"
 import type {
 	Deletable,
 	HashMap,
 	KeyReplaceable,
 	Settable
 } from "../HashMap/interfaces.js"
-import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable, IndexAssignable } from "./interfaces.js"
-import type { Sizeable } from "../interfaces.js"
 
 import { DelegateKeyReplaceable } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
-
+import { pos } from "../../utils.js"
 import { assignIndex } from "./utils.js"
 
-import { functional, object } from "@hgargg-0710/one"
+import { functional, object, type } from "@hgargg-0710/one"
 const { id, copy } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isNullary } = type
 
 abstract class DelegateLookupTable<
 	KeyType = any,
@@ -32,6 +33,10 @@ abstract class DelegateLookupTable<
 	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
 		assignIndex(x, ownIndex)
 		return x
+	}
+
+	isOwned(x: any) {
+		return !isNullary(x.assignedIndex)
 	}
 
 	constructor(value: DelegateType) {
@@ -101,11 +106,8 @@ export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
 	return HashTableClass
 }
 
-type HashConstructor = new <KeyType = any, ValueType = any>(
-	hash: HashMap<KeyType, ValueType>
-) => FastLookupTable<KeyType, ValueType>
-
-export const [BasicTable, StreamTable]: [HashConstructor, HashConstructor] = [
-	id,
-	current
-].map(HashTable) as [any, any]
+export const [BasicTable, StreamTable, PosTable]: [
+	TableConstructor,
+	TableConstructor,
+	TableConstructor
+] = [id, current, pos].map(HashTable) as [any, any, any]

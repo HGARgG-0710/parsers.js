@@ -9,7 +9,7 @@ export function table<KeyType = any, OutType = any>(
 	return [indexMap.keys, indexMap.values]
 }
 
-export function linearToPairsList<KeyType = any, ValueType = any>(
+export function linearPairs<KeyType = any, ValueType = any>(
 	linear: (KeyType | ValueType)[]
 ) {
 	let size = (linear.length >> 1) + (linear.length % 2)
@@ -25,7 +25,7 @@ export function linearToPairsList<KeyType = any, ValueType = any>(
 	return result
 }
 
-export function keyValuesToPairsList<KeyType = any, ValueType = any>(
+export function kvPairs<KeyType = any, ValueType = any>(
 	keyValues: [KeyType[], ValueType[]]
 ) {
 	const [keys, values] = keyValues
@@ -42,7 +42,7 @@ export function keyValuesToPairsList<KeyType = any, ValueType = any>(
 	return result
 }
 
-export function fromPairsList<KeyType = any, ValueType = any>(
+export function fromPairs<KeyType = any, ValueType = any>(
 	mapPairs: array.Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
