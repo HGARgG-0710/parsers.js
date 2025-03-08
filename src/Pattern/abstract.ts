@@ -1,4 +1,5 @@
-import type { Pattern, Flushable } from "./interfaces.js"
+import type { Pattern } from "./interfaces.js"
+import type { Flushable } from "src/interfaces.js"
 import { setValue } from "./utils.js"
 
 import { type } from "@hgargg-0710/one"

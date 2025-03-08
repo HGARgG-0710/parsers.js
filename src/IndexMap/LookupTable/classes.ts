@@ -1,13 +1,13 @@
 import type { IPointer } from "../../Pattern/interfaces.js"
 import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { FastLookupTable, TableConstructor, IndexAssignable } from "./interfaces.js"
-import type { Sizeable } from "../interfaces.js"
+import type { LookupTable, TableConstructor } from "./interfaces.js"
+import type { IndexAssignable } from "src/interfaces.js"
+import type { Sizeable } from "src/interfaces.js"
 import type {
-	Deletable,
-	HashMap,
-	KeyReplaceable,
-	Settable
-} from "../HashMap/interfaces.js"
+	HashMap} from "../HashMap/interfaces.js"
+import type { Rekeyable } from "src/interfaces.js"
+import type { Deletable } from "src/interfaces.js"
+import type { Settable } from "src/interfaces.js"
 
 import { DelegateKeyReplaceable } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
@@ -25,7 +25,7 @@ abstract class DelegateLookupTable<
 	ValueType = any,
 	OwningType = any,
 	DelegateType extends Settable<KeyType, ValueType> &
-		KeyReplaceable<KeyType> &
+		Rekeyable<KeyType> &
 		Deletable<DeletedType> &
 		Sizeable = any,
 	DeletedType = KeyType
@@ -52,7 +52,7 @@ abstract class DelegateHashTable<KeyType = any, ValueType = any, OwningType = an
 		HashMap<KeyType, ValueType, any>,
 		KeyType
 	>
-	implements FastLookupTable<KeyType, ValueType, OwningType>
+	implements LookupTable<KeyType, ValueType, OwningType>
 {
 	abstract getIndex: (x: any) => OwningType
 
@@ -73,7 +73,7 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 		IPersistentIndexMap<KeyType, ValueType>,
 		any
 	>
-	implements FastLookupTable<KeyType, ValueType, IPointer<number>>
+	implements LookupTable<KeyType, ValueType, IPointer<number>>
 {
 	getIndex(x: any) {
 		return this.value.getIndex(x)
@@ -94,14 +94,10 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 	}
 }
 
-export function HashTable<KeyType = any, ValueType = any, OwningType = any>(
+export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
-): new () => FastLookupTable<KeyType, ValueType, OwningType> {
-	const HashTableClass = copy(DelegateHashTable) as new () => FastLookupTable<
-		KeyType,
-		ValueType,
-		OwningType
-	>
+): TableConstructor<OwningType> {
+	const HashTableClass = copy(DelegateHashTable) as TableConstructor<OwningType>
 	extendPrototype(HashTableClass, { getIndex: ConstDescriptor(ownership) })
 	return HashTableClass
 }

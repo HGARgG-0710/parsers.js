@@ -9,10 +9,6 @@ import { end } from "../refactor.js"
 import { readLast } from "src/Collection/Buffer/refactor.js"
 import { lastIndex } from "src/Collection/Buffer/refactor.js"
 
-export interface Finishable<Type = any> {
-	finish: () => Type
-}
-
 // * possible 'finish' methods
 
 function finish<Type = any>(this: BasicStream<Type>) {

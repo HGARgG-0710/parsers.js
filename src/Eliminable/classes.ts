@@ -1,4 +1,4 @@
-import type { EliminablePattern } from "./interfaces.js"
+import type { EliminablePattern } from "src/Pattern/interfaces.js"
 import type { Resulting } from "../Pattern/interfaces.js"
 
 import { FlushablePattern } from "../Pattern/abstract.js"

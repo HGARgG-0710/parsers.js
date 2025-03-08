@@ -2,23 +2,30 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { BasicStream } from "../interfaces.js"
 import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
 import type { Initializable } from "./methods/init.js"
-import type { Navigable } from "./methods/navigate.js"
-import type { Finishable } from "./methods/finish.js"
-import type { Rewindable } from "./methods/rewind.js"
-import type { Updatable } from "./methods/update.js"
-
-export type BoundNameType = "isEnd" | "isStart"
-export type StartedType = 1 | boolean
-export type PreStarted = Started<StartedType>
+import type { Position } from "../../Position/interfaces.js"
 
 // * Optional Property-interfaces
 
-export interface Superable {
-	super: Summat
-}
-
 export interface Stateful {
 	state: Summat
+}
+
+// * Default Methods (single signature)
+
+export interface Finishable<Type = any> {
+	finish: () => Type
+}
+
+export interface Navigable<Type = any> {
+	navigate: (position: Position) => Type
+}
+
+export interface Rewindable<Type = any> {
+	rewind: () => Type
+}
+
+export interface Updatable<Type = any> {
+	update?: () => Type
 }
 
 // * Mandatory Property-interfaces
@@ -50,7 +57,7 @@ interface BasicStreamClassInstance<Type = any>
 	extends BasicStream<Type>,
 		Initializable,
 		PrimalStreamClassSignature<Type>,
-		PreStarted,
+		Started,
 		Navigable<Type>,
 		Finishable<Type>,
 		Iterable<Type> {}
@@ -78,8 +85,4 @@ export interface ReversedStreamClassInstance<Type = any>
 	basePrevIter: () => Type
 }
 
-export type * as finish from "./methods/finish.js"
 export type * as init from "./methods/init.js"
-export type * as navigate from "./methods/navigate.js"
-export type * as rewind from "./methods/rewind.js"
-export type * as update from "./methods/update.js"

@@ -1,4 +1,4 @@
-import type { Indexed } from "../Stream/interfaces.js"
+import type { Indexed } from "src/interfaces.js"
 import { InitializablePattern } from "src/Pattern/abstract.js"
 
 export abstract class IterableCollection<Type = any>

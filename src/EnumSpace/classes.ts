@@ -1,4 +1,5 @@
-import type { ArrayEnum, Mappable } from "./interfaces.js"
+import type { ArrayEnum } from "./interfaces.js"
+import type { Mappable } from "../interfaces.js"
 
 import { defaults } from "../constants.js"
 const { size: globalSize, DefaultValue: value } = defaults.EnumSpace

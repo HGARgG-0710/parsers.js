@@ -40,4 +40,4 @@ export type TreeConverter<
 	T extends ReadonlyTree<Type> = ReadonlyTree<Type>
 > = (x: any) => InTree<Type, T>[]
 
-export type * as TreeWalker from "./TreeWalker/interfaces.js"
+export type * from "./TreeWalker/interfaces.js"

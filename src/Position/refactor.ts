@@ -1,4 +1,4 @@
-import type { BoundNameType } from "../Stream/StreamClass/interfaces.js"
+import type { BoundNameType } from "src/Stream/StreamClass/refactor.js"
 import type { DirectionalPosition, Posed } from "./interfaces.js"
 import { isBackward } from "./utils.js"
 

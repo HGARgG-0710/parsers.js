@@ -1,5 +1,5 @@
 import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
-import type { BasicStream, DirectionHaving } from "../Stream/interfaces.js"
+import type { BasicStream } from "../Stream/interfaces.js"
 
 export type Position<Type = any> = DirectionalPosition<Type> | PositionObject<Type>
 export type DirectionalPosition<Type = any> = PredicatePosition<Type> | number
@@ -21,5 +21,9 @@ export interface Posed<Type = any> {
 }
 
 export type Change<Type = any> = (input: ReversibleStream<Type>) => Type
+
+export interface DirectionHaving {
+	direction: boolean
+}
 
 export type * from "./MultiIndex/interfaces.js"

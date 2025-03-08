@@ -1,5 +1,5 @@
 import type { PredicatePosition } from "./Position/interfaces.js"
-import type { Indexed } from "./Stream/interfaces.js"
+import type { Indexed } from "./interfaces.js"
 
 import { BadIndex } from "./constants.js"
 

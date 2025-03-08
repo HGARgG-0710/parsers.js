@@ -1,22 +1,14 @@
-import type { DefaultHaving, Sizeable } from "../../interfaces.js"
-import type { Settable, Deletable, KeyReplaceable } from "../interfaces.js"
+import type { Defaulting } from "src/interfaces.js"
+import type { Sizeable } from "src/interfaces.js"
+import type { Rekeyable } from "src/interfaces.js"
+import type { Deletable } from "src/interfaces.js"
+import type { Settable } from "src/interfaces.js"
 
 export interface InternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	extends Settable<KeyType, ValueType | DefaultType>,
 		Deletable<KeyType>,
-		KeyReplaceable<KeyType>,
+		Rekeyable<KeyType>,
 		Sizeable,
-		DefaultHaving<DefaultType> {
+		Defaulting<DefaultType> {
 	get: (key: KeyType) => ValueType | DefaultType
 }
-
-export type InternalHashConstructor<
-	KeyType = any,
-	ValueType = any,
-	InputType = any,
-	DefaultType = any
-> = new (input?: InputType, _default?: DefaultType) => InternalHash<
-	KeyType,
-	ValueType,
-	DefaultType
->

@@ -1,30 +1,25 @@
 import type { InternalHash } from "./InternalHash/interfaces.js"
-import type { Indexable, Sizeable } from "../interfaces.js"
-
-export interface Deletable<KeyType = any> {
-	delete: (key: KeyType) => this
-}
-
-export interface Settable<KeyType = any, ValueType = any> {
-	set: (key: KeyType, value: ValueType) => this
-}
-
-export interface KeyReplaceable<KeyType = any> {
-	replaceKey: (keyFrom: KeyType, keyTo: KeyType) => this
-}
+import type { Indexable } from "../interfaces.js"
+import type {
+	Deletable,
+	Hashable,
+	Rekeyable,
+	Settable,
+	Sizeable
+} from "src/interfaces.js"
 
 export type Hash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
 	...y: any[]
 ) => InternalKeyType
 
-export interface Hashable<KeyType, InternalKeyType> {
-	hash: Hash<KeyType, InternalKeyType>
-}
-
-export interface IHashClass<KeyType = any, ValueType = any, InternalKeyType = any>
-	extends Hashable<KeyType, InternalKeyType> {
-	new (structure: InternalHash<InternalKeyType, ValueType>): HashMap<
+export interface IHashClass<
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any,
+	DefaultType = any
+> extends Hashable<KeyType, InternalKeyType> {
+	new (structure: InternalHash<InternalKeyType, ValueType, DefaultType>): HashMap<
 		KeyType,
 		ValueType,
 		InternalKeyType
@@ -40,8 +35,8 @@ export interface HashMap<
 > extends Indexable<ValueType | DefaultType>,
 		Settable<KeyType, ValueType | DefaultType>,
 		Deletable<KeyType>,
-		KeyReplaceable<KeyType>,
+		Rekeyable<KeyType>,
 		Sizeable,
 		Hashable<KeyType, InternalKeyType> {}
 
-export type * as InternalHash from "./InternalHash/interfaces.js"
+export type * from "./InternalHash/interfaces.js"

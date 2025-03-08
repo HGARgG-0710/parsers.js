@@ -1000,7 +1000,7 @@ TODO:
 				3. string literals: /[q{...}]/v
 
 		IM3. [!!!] Add another 'hash' function for the 'HashMap'? 
-			In particular, use the 'extension' for 'set', 'replaceKey', 'delete' (by-original-key), 
+			In particular, use the 'extension' for 'set', 'rekey', 'delete' (by-original-key), 
 				and another hash (the 'indexHash') for 'index' [this one will be optional and default to 'extension']; 
 			This is in parallel with how the 'IndexMap' has it.
 			Motivating example: 
@@ -1087,17 +1087,32 @@ TODO:
 				where `n` is the number of items TO SKIP [forwards, or backwards respectively]. 
 					The `this.curr` is returned INVARIABLY. 
 					Note: this will require some heavy rewriting on behalf of the `StreamClass.prototype.next`; 
-					1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next(n))(value)` [rough]:
+					1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next/input.prev(n))(value)` [rough]:
 					 	The old `parsers.js` had something similar, except not as well-designed...
         	
 			2. Also - add the `.has(n)` 'Parser/utils.ts'-utils AS A METHOD, 
 				of positive/negative indexes [with respective optimizations]. 
         	
-			3. Then - REMOVE the `skip()` util from the `Parser/utils.ts` (redundant, interface too powerful). 
+			3. Then - REWRITE the `skip()` util from the `Parser/utils.ts`: 
+				Will, from now on, be doing only some fairly simple conversions (PredicatePosition [/w .boolean] -> Function; 
+					Then call either '.next(f/n)' or '.prev(f/n)'
+				). 
 	
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+		SI10. A new `Stream` class: 
+			The `DashStream` - a generalization of `JumpStream`. 
+			A `StreamParser`, provided with `f(stream): number`, it will call EITHER '.next()' or `.prev()` based off the number returned (positive - '.next(n)', negative - '.prev(-n)'). 
+				In other words - it behaves *EXACTLY* like `skip()`
+
+			Let it also permit returning predicates (hello, `skip()`)
+
+		UT5. Add a `serializeJson` and `fromJson` utils [Tree/utils.ts]
+			These two perform a serialization of a simple `Token.value/Token[]/TokenInstance`-tree, 
+				from AND INTO 'JSON', returning the serialized string (serializeJson) and 
+					the tree `fromJson`
 
 	3. Minor [fixes, optimizations, refactoring, types, naming]
 		OE1. v8-specific optimizations: 
@@ -1256,6 +1271,23 @@ TODO:
 			Instead, they are concerned with checking existence of properties on given specific objects implementing the general `Stream` interface. 
 			It would make a whole lot more sense, and less confusion for the user. 
 
+		SI9. Make `Position` a submodule of `Stream`
+			Reason: ontology. 
+			`Position` is ONLY ever used with `Stream`-s. 
+			Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
+			Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
+			The predicates, too, work best when considered in directional context (id est: iteration...)
+
+		SI11. The `.prod()` method - repurpose it. 
+			Replace it with a simple, general `.peek(1)` [PeekableStream]
+			Thus, it will allow a better unification of the library's concepts under the 
+				same terminology. 
+
+		S12. Remove the `.isStart` requirement from the `BasicStreamClassInstance`. 
+
+		SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
+			It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
+
 	4. Breaking [removals]	
 		TO2. Remove (replace):
 			1. PatternTokenizer
@@ -1324,6 +1356,7 @@ TODO:
 				4. Pattern/utils.ts (only the `dig`)
 				5. Position/utils.ts (everything, except for `is` functions)
 				6. Tree/utils.ts (only: `hasChildren`, `sequentialIndex`, `treeEndPath`)
+				7. DynamicParser/utils.ts
 
 			Those - MERGE into a single export-file called `utils.ts` (new module -- `utils`); 
 			Split them in a (similar) fashion to how it was before, if you want to, except: 

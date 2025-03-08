@@ -1,5 +1,5 @@
 import type { IHashClass } from "./interfaces.js"
-import type { InternalHashConstructor } from "./InternalHash/interfaces.js"
+import type { InternalHash } from "./InternalHash/interfaces.js"
 
 import type { array } from "@hgargg-0710/one"
 
@@ -10,11 +10,10 @@ export function fromPairs<
 	DefaultType = any,
 	InputType = any
 >(
-	HashClass: IHashClass<KeyType, ValueType, InternalKeyType>,
-	InternalStructure: InternalHashConstructor<
+	HashClass: IHashClass<KeyType, ValueType, InternalKeyType, DefaultType>,
+	InternalStructure: new (input?: InputType, _default?: DefaultType) => InternalHash<
 		InternalKeyType,
 		ValueType,
-		InputType,
 		DefaultType
 	>,
 	pairsList: array.Pairs<KeyType, ValueType>,

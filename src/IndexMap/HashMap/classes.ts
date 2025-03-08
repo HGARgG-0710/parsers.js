@@ -1,4 +1,4 @@
-import type { Indexed } from "../../Stream/interfaces.js"
+import type { Indexed } from "src/interfaces.js"
 import type { IHashClass, HashMap, Hash } from "./interfaces.js"
 import type { IToken as TypeToken } from "../../Token/interfaces.js"
 import type { InternalHash } from "./InternalHash/interfaces.js"
@@ -36,8 +36,8 @@ abstract class BaseHashClass<
 		return this
 	}
 
-	replaceKey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
-		this.value.replaceKey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
+	rekey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
+		this.value.rekey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
 		return this
 	}
 }

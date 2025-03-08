@@ -1,8 +1,8 @@
-import type { Indexed } from "../Stream/interfaces.js"
+import type { Indexed } from "src/interfaces.js"
 
 export interface Collection<Type = any> extends Iterable<Type> {
 	push: (...x: Type[]) => this
 	get: () => Indexed<Type>
 }
 
-export type * as Buffer from "./Buffer/interfaces.js"
+export type * from "./Buffer/interfaces.js"

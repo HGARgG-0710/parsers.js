@@ -1,4 +1,4 @@
-import type { IndexingFunction } from "../interfaces.js"
+import type { IndexingFunction } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { isGoodIndex } from "src/utils.js"
@@ -53,7 +53,7 @@ export abstract class BaseLinearMap<
 		return this
 	}
 
-	replaceKey(keyFrom: KeyType, keyTo: KeyType) {
+	rekey(keyFrom: KeyType, keyTo: KeyType) {
 		const replacementIndex = this.keys.indexOf(keyFrom)
 		this.keys[replacementIndex] = keyTo
 		this.alteredKeys[replacementIndex] = this.keyExtension(keyTo)

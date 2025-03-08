@@ -2,7 +2,7 @@ import type { IndexMap } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { PreIndexMap } from "../abstract.js"
-import { DelegateKeyReplaceable } from "../FastLookupTable/abstract.js"
+import { DelegateKeyReplaceable } from "../LookupTable/abstract.js"
 
 import { object } from "@hgargg-0710/one"
 const { mixin } = object.classes

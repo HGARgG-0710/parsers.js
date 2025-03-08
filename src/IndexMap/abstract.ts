@@ -1,5 +1,7 @@
-import type { IndexMap, Sizeable } from "./interfaces.js"
+import type { IndexMap } from "./interfaces.js"
+import type { Sizeable } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
+import type { WeakDeletable, WeakSettable } from "./refactor.js"
 
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
@@ -7,7 +9,6 @@ import { isGoodIndex } from "src/utils.js"
 import { kvPairs, table } from "./utils.js"
 
 import { inplace } from "@hgargg-0710/one"
-import type { WeakDeletable, WeakSettable } from "./refactor.js"
 const { swap } = inplace
 
 export abstract class DelegateSizeable<
@@ -55,7 +56,7 @@ export abstract class PreIndexMap<
 	abstract delete(index: number, count?: number): this
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract replace(index: number, pair: [KeyType, ValueType]): this
-	abstract replaceKey(keyFrom: KeyType, keyTo: KeyType): this
+	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
 	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 	abstract unique(): number[]
 	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]

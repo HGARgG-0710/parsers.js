@@ -1,9 +1,10 @@
 import type { Posed, Position } from "../../Position/interfaces.js"
-import type { BasicReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { BasicStream, Indexed } from "../interfaces.js"
-import type { Rewindable } from "./methods/rewind.js"
-import type { Finishable } from "./methods/finish.js"
-import type { Navigable } from "./methods/navigate.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { BasicStream } from "../interfaces.js"
+import type { Indexed } from "src/interfaces.js"
+import type { Rewindable } from "./interfaces.js"
+import type { Finishable } from "./interfaces.js"
+import type { Navigable } from "./interfaces.js"
 import type { StreamClassInstance } from "./interfaces.js"
 import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 
@@ -43,7 +44,7 @@ export function fastFinish<Type = any>(stream: BasicStream<Type>) {
  * @returns `stream.curr`
  */
 export function uniNavigate<Type = any>(
-	stream: BasicReversibleStream<Type> & Partial<Posed<number>>,
+	stream: ReversibleStream<Type> & Partial<Posed<number>>,
 	position: Position
 ): Type {
 	if (isNumber((position = positionConvert(position, stream)))) {
@@ -58,7 +59,7 @@ export function uniNavigate<Type = any>(
 }
 
 export function fastNavigate<Type = any>(
-	stream: BasicReversibleStream<Type>,
+	stream: ReversibleStream<Type>,
 	position: Position
 ) {
 	return isNavigable(stream)
@@ -71,12 +72,12 @@ export function fastNavigate<Type = any>(
  * Continues to call '.prev()' on the given `Stream`, until `stream.isStart` is true;
  * @returns `stream.curr`
  */
-export function uniRewind<Type = any>(stream: BasicReversibleStream<Type>) {
+export function uniRewind<Type = any>(stream: ReversibleStream<Type>) {
 	while (!stream.isStart) stream.prev()
 	return stream.curr
 }
 
-export function fastRewind<Type = any>(stream: BasicReversibleStream<Type>): Type {
+export function fastRewind<Type = any>(stream: ReversibleStream<Type>): Type {
 	return isRewindable(stream) ? stream.rewind() : uniRewind(stream)
 }
 

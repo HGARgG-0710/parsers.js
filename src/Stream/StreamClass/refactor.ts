@@ -1,12 +1,11 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { PreStarted, Stateful, StreamClassInstance } from "./interfaces.js"
+
+import type { Started } from "../ReversibleStream/interfaces.js"
+import type { Stateful, StreamClassInstance } from "./interfaces.js"
 import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
 import type { Posed } from "../../Position/interfaces.js"
 
 import { valueDelegate, valuePropDelegate } from "src/refactor.js"
-
-import { Stream } from "../../constants.js"
-const { StreamClass } = Stream
 
 import curr from "./methods/curr.js"
 
@@ -27,12 +26,12 @@ export const valueCurr = valuePropDelegate("curr")
 const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")
 
-export function start(stream: PreStarted) {
-	stream.isStart = StreamClass.PostCurrInit
+export function start(stream: Started) {
+	stream.isStart = true
 }
 
-export function deStart(stream: StreamClassInstance) {
-	stream.isStart = StreamClass.PostStart
+export function deStart(stream: Started) {
+	stream.isStart = false
 }
 
 export function end(stream: StreamClassInstance) {
@@ -66,4 +65,6 @@ export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"
 export * as finish from "./methods/finish.js"
 export * as rewind from "./methods/rewind.js"
+export type BoundNameType = "isEnd" | "isStart"
+
 export * as navigate from "./methods/navigate.js"

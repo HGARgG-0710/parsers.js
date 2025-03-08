@@ -1,4 +1,4 @@
-import type { EliminablePattern } from "../Eliminable/interfaces.js"
+import type { EliminablePattern } from "src/Pattern/interfaces.js"
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
 import type { TokenizablePattern } from "../Tokenizable/interfaces.js"
 import type { IndexMap } from "../IndexMap/interfaces.js"

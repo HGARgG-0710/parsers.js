@@ -1,5 +1,5 @@
 import type { Posed, Position } from "../../../Position/interfaces.js"
-import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { ReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { ReversedStreamClassInstance } from "../interfaces.js"
 
@@ -11,16 +11,12 @@ import { positionDecrement } from "src/Position/refactor.js"
 import { type } from "@hgargg-0710/one"
 const { isNumber } = type
 
-export interface Navigable<Type = any> {
-	navigate: (position: Position) => Type
-}
-
 /**
  * A definition of `.navigate` method that works for any `Stream`
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-function navigate<Type = any>(this: BasicReversibleStream<Type>, position: Position) {
+function navigate<Type = any>(this: ReversibleStream<Type>, position: Position) {
 	return uniNavigate(this, position)
 }
 

@@ -1,11 +1,11 @@
-import type { BasicReversibleStream, IReversedStream } from "./interfaces.js"
+import type { ReversibleStream, IReversedStream } from "./interfaces.js"
 
 import { fastFinish } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 export function reversedStreamInitialize<Type = any>(
 	this: IReversedStream<Type>,
-	value?: BasicReversibleStream<Type>
+	value?: ReversibleStream<Type>
 ): IReversedStream<Type> {
 	if (value) {
 		fastFinish(value)

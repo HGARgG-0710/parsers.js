@@ -1,16 +1,12 @@
-import type { BasicReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { ReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { StreamClassInstance } from "../interfaces.js"
 import type { Posed } from "../../../Position/interfaces.js"
+import type { StreamClassInstance } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
 import { start } from "../refactor.js"
 import { positionNull } from "src/Position/refactor.js"
 import { readFirst } from "src/Collection/Buffer/refactor.js"
-
-export interface Rewindable<Type = any> {
-	rewind: () => Type
-}
 
 // * possible '.rewind' methods
 
@@ -19,7 +15,7 @@ export interface Rewindable<Type = any> {
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-function rewind<Type = any>(this: BasicReversibleStream<Type>) {
+function rewind<Type = any>(this: ReversibleStream<Type>) {
 	return uniRewind(this)
 }
 

@@ -3,10 +3,7 @@ import type { PredicatePosition } from "../../Position/interfaces.js"
 import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 
-import type {
-	BasicReversibleStream,
-	ReversibleStream
-} from "../ReversibleStream/interfaces.js"
+import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type { IPredicateStream, PredicateStreamConstructor } from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
@@ -50,17 +47,17 @@ export function PredicateStream<Type = any>(
 		lookAhead: Type
 		hasLookAhead: boolean
 		predicate: PredicatePosition<Type>
-		value: BasicReversibleStream<Type> & IsEndCurrable
+		value: ReversibleStream<Type> & IsEndCurrable
 
 		super: Summat
 		prod: () => Type
 		init: (
-			input?: BasicReversibleStream<Type> & IsEndCurrable,
+			input?: ReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition<Type>
 		) => IPredicateStream<Type>
 
 		constructor(
-			value?: BasicReversibleStream<Type> & IsEndCurrable,
+			value?: ReversibleStream<Type> & IsEndCurrable,
 			predicate?: PredicatePosition<Type>
 		) {
 			super(value)

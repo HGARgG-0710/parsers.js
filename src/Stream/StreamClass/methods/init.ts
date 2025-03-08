@@ -13,8 +13,7 @@ import { assignBuffer } from "src/Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../Pattern/utils.js"
 import { createState, start } from "../refactor.js"
 
-import { Stream, defaults } from "../../../constants.js"
-const { StreamClass } = Stream
+import { defaults } from "../../../constants.js"
 const { realCurr: defaultRealCurr } = defaults.StreamClass
 
 // * types
@@ -60,7 +59,6 @@ export type BufferStatePatternInitMethod = <Type = any>(
 
 function initialize<Type = any>(this: StreamClassInstance<Type>) {
 	;(this as any).realCurr = defaultRealCurr
-	this.isStart = StreamClass.PreCurrInit
 	if (!(this.isEnd = this.defaultIsEnd())) {
 		start(this)
 		;(this as any).realCurr = (this.initGetter || this.currGetter)!()

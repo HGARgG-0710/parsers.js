@@ -26,12 +26,6 @@ export namespace regex {
 }
 
 export namespace Stream {
-	export namespace StreamClass {
-		export const PreCurrInit = 1
-		export const PostCurrInit = true
-		export const PostStart = false
-	}
-
 	export namespace LimitedStream {
 		export const NoMovementPredicate = T
 	}
@@ -99,7 +93,7 @@ export namespace defaults {
 	}
 
 	export namespace TreeStream {
-		export const lastLevelWithSiblings = BadIndex
 		export const response = ""
+		export const lastLevelWithSiblings = BadIndex
 	}
 }

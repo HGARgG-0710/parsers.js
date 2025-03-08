@@ -23,7 +23,7 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 		return isUndefined(gotten) ? this.default : gotten
 	}
 
-	replaceKey(fromKey: KeyType, toKey: KeyType) {
+	rekey(fromKey: KeyType, toKey: KeyType) {
 		const value = this.get(fromKey)
 		this.delete(fromKey)
 		this.set(toKey, value)
@@ -67,7 +67,7 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 		return this
 	}
 
-	replaceKey(keyFrom: string, keyTo: string) {
+	rekey(keyFrom: string, keyTo: string) {
 		this.value[keyTo] = this.value[keyFrom]
 		this.value[keyFrom] = MissingKey
 		return this

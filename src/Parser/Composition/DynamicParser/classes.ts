@@ -1,5 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
+import type { IComposition } from "../interfaces.js"
 import type {
 	IPreSignature,
 	ILayerSignature,
@@ -7,18 +8,12 @@ import type {
 	ISignatureIndexSet
 } from "./interfaces.js"
 
-import type { IComposition } from "../interfaces.js"
+import { applySignatures } from "./utils.js"
 
 import { Callable } from "../abstract.js"
 
-import * as flow from "@hgargg-0710/flow"
-const { prop: propSet } = flow.object
-
-import * as one from "@hgargg-0710/one"
-const { functional, array, inplace, object } = one
-const { argFiller, id } = functional
-const { substitute } = array
-const { mutate } = inplace
+import { functional, array } from "@hgargg-0710/one"
+const { id } = functional
 
 export const PreSignature = (
 	preSignature: ISignatureIndexSet,
@@ -48,7 +43,7 @@ export const StateSignature = (
 // ! important things to keep in mind [for future docs]:
 // * 1. Signatures for given 'Function's [except for last one] used have form: f(value [0], ... [preFilledSignature], state [stateIndex], ... [preFilledSignature])
 // * 2. The LAST "entry" function can have ANY 'preFilledSignature'
-export class DynamicParser extends Callable {
+export class DynamicParser extends Callable implements IComposition {
 	state: Summat = { parser: this }
 
 	set layers(layers: Function[]) {
@@ -64,35 +59,6 @@ export class DynamicParser extends Callable {
 	}
 
 	init(signatures: IStateSignature[]) {
-		function applySignatures(layers: Function[], signatures: IStateSignature[]) {
-			for (const signature of signatures) {
-				const { preSignature, preSignatureFill, toApplyOn, stateIndex } =
-					signature
-				const { arity } = preSignature
-				const accessSet = new Set(toApplyOn)
-				const preFill = preSignature.keepOut(stateIndex)
-				const preFillComplement = Array.from(preFill.complement())
-
-				const substitutor = substitute(
-					arity,
-					Array.from(preFill)
-				)(preSignatureFill)
-
-				mutate(layers, (layer: Function, i: number) =>
-					accessSet.has(i)
-						? argFiller(layer)(
-								...propSet(
-									substitutor(array.copy(preFillComplement)),
-									stateIndex,
-									this.stateTransform(object.copy(this.state))
-								)
-						  )(...preSignatureFill)
-						: layer
-				)
-			}
-			return layers
-		}
-
 		this.layers = applySignatures(array.copy(this.layers), signatures)
 	}
 

@@ -1,5 +1,6 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Flushable, Resulting } from "../Pattern/interfaces.js"
+import type { Resulting } from "../Pattern/interfaces.js"
+import type { Flushable } from "src/interfaces.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
 

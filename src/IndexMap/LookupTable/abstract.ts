@@ -1,5 +1,7 @@
-import type { Sizeable } from "../interfaces.js"
-import type { Settable, KeyReplaceable, Deletable } from "../HashMap/interfaces.js"
+import type { Sizeable } from "src/interfaces.js"
+import type { Rekeyable } from "src/interfaces.js"
+import type { Deletable } from "src/interfaces.js"
+import type { Settable } from "src/interfaces.js"
 
 import { DelegateDeletableSettableSizeable } from "../abstract.js"
 
@@ -7,7 +9,7 @@ export abstract class DelegateKeyReplaceable<
 	KeyType = any,
 	ValueType = any,
 	DelegateType extends Settable<KeyType, ValueType> &
-		KeyReplaceable<KeyType> &
+		Rekeyable<KeyType> &
 		Deletable<DeletedType> &
 		Sizeable = any,
 	DeletedType = KeyType
@@ -18,8 +20,8 @@ export abstract class DelegateKeyReplaceable<
 	DeletedType
 > {
 	protected value: DelegateType
-	replaceKey(keyFrom: KeyType, keyTo: KeyType) {
-		this.value.replaceKey(keyFrom, keyTo)
+	rekey(keyFrom: KeyType, keyTo: KeyType) {
+		this.value.rekey(keyFrom, keyTo)
 		return this
 	}
 }

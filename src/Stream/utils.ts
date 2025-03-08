@@ -1,5 +1,5 @@
 import type { BasicStream } from "./interfaces.js"
-import type { BasicReversibleStream } from "./ReversibleStream/interfaces.js"
+import type { ReversibleStream } from "./ReversibleStream/interfaces.js"
 
 import { Stream } from "../constants.js"
 const { SkippedItem } = Stream.StreamParser
@@ -15,7 +15,7 @@ export const next = <Type = any>(input: BasicStream<Type>) => input.next()
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any>(input: BasicReversibleStream<Type>) => input.prev()
+export const previous = <Type = any>(input: ReversibleStream<Type>) => input.prev()
 
 /**
  * Given a `BasicStream` returns its `.curr` property value

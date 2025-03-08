@@ -1,4 +1,4 @@
-import type { Position, Posed } from "../../Position/interfaces.js"
+import type { Position, Posed, DirectionHaving } from "../../Position/interfaces.js"
 import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type {
@@ -12,7 +12,7 @@ import type {
 	SinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 
-import type { Superable } from "../StreamClass/interfaces.js"
+import type { Supered } from "src/interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
 export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
@@ -20,15 +20,11 @@ export type LimitedUnderStream<Type = any> = ReversibleStream<Type> &
 	IsEndCurrable &
 	IsStartCurrable
 
-export interface DirectionHaving {
-	direction: boolean
-}
-
 export interface ILimitedStream<Type = any>
 	extends SinglePositionLookahead<Type>,
 		Pattern<LimitedUnderStream<Type>>,
 		LookaheadHaving,
-		Superable,
+		Supered,
 		ReversedStreamClassInstance<Type>,
 		DirectionHaving {
 	from: Position

@@ -1,13 +1,9 @@
 import type { array } from "@hgargg-0710/one"
-import type { LinearIndexMap } from "./interfaces.js"
-import type {
-	IndexingFunction,
-	MapClass,
-	MapClassValueExtension,
-	MapClassKeyExtension,
-	TestType,
-	HasType
-} from "../interfaces.js"
+import type { ILinearIndexMap } from "./interfaces.js"
+import type { MapClass } from "../interfaces.js"
+import type { IndexingFunction } from "src/interfaces.js"
+import type { Testable } from "src/interfaces.js"
+import type { Having } from "src/interfaces.js"
 
 import {
 	extend,
@@ -30,11 +26,17 @@ export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any
 ): MapClass<KeyType, ValueType, DefaultType> {
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
-		implements LinearIndexMap<KeyType, ValueType, DefaultType>
+		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
 	{
 		static change?: IndexingFunction<KeyType>
-		static extend: MapClassValueExtension
-		static extendKey: MapClassKeyExtension
+		
+		static extend: <KeyType = any>(
+			...f: ((...x: any[]) => any)[]
+		) => MapClass<KeyType, any>
+
+		static extendKey: <ValueType = any>(
+			...f: ((x: any) => any)[]
+		) => MapClass<any, ValueType>
 
 		static keyExtensions: Function[]
 		static extensions: Function[]
@@ -70,12 +72,12 @@ export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
 
 export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
 	MapClass<Function>,
-	MapClass<TestType>,
-	MapClass<HasType>,
+	MapClass<Testable>,
+	MapClass<Having>,
 	MapClass
 ] = [
 	(curr: Function, x: any) => curr(x),
-	(curr: TestType, x: any) => curr.test(x),
-	(curr: HasType, x: any) => curr.has(x),
+	(curr: Testable, x: any) => curr.test(x),
+	(curr: Having, x: any) => curr.has(x),
 	equals
 ].map((change) => LinearMapClass<any, any>([], [], change)) as [any, any, any, any]

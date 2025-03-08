@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { INestedStream } from "./interfaces.js"
 import type { StreamPredicate } from "../../Parser/TableMap/interfaces.js"
-import type { FastLookupTable } from "../../IndexMap/FastLookupTable/interfaces.js"
+import type { LookupTable } from "../../IndexMap/LookupTable/interfaces.js"
 import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
@@ -34,7 +34,7 @@ const NestedStreamBase = <Type = any>(
 	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
 
 export function NestedStream<Type = any>(
-	nestedTypes: FastLookupTable<any, StreamPredicate>,
+	nestedTypes: LookupTable<any, StreamPredicate>,
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ): new (value?: EndableStream<Type>, _index?: any) => INestedStream<Type> {
@@ -45,7 +45,7 @@ export function NestedStream<Type = any>(
 		assignedIndex?: any
 
 		super: Summat
-		typesTable: FastLookupTable<any, StreamPredicate>
+		typesTable: LookupTable<any, StreamPredicate>
 
 		init: (value?: EndableStream<Type>, _index?: any) => INestedStream<Type>;
 		["constructor"]: new (

@@ -1,9 +1,6 @@
 import type { InitMethod } from "./methods/init.js"
-import type {
-	StreamClassSignature,
-	StreamClassInstance,
-	StartedType
-} from "./interfaces.js"
+import type { StreamClassSignature, StreamClassInstance } from "./interfaces.js"
+
 import type { AbstractConstructor } from "./refactor.js"
 
 import { BasicPattern } from "src/Pattern/abstract.js"
@@ -42,7 +39,7 @@ export function StreamClass<Type = any>(
 		| AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
 
 	interface streamClassGuaranteed {
-		isStart: StartedType
+		isStart: boolean
 		isEnd: boolean
 		curr: Type
 		realCurr: Type
