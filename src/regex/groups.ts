@@ -1,14 +1,14 @@
-import regex, { regex_contents } from "../regex.js"
+import regex from "../regex.js"
+import { bracket, non_bracket } from "./refactor.js"
 
-export const bracket = (regex: RegExp) => `(${regex_contents(regex)})`
-export const non_bracket = (regex: RegExp) => `(?:${regex_contents(regex)})`
+import { functional } from "@hgargg-0710/one"
+const { trivialCompose } = functional
 
-export const [capture, non_capture] = [bracket, non_bracket].map(
-	(f) => (regexp: RegExp) => regex(f(regexp))
-)
+export const capture = trivialCompose(regex, bracket) as (r: RegExp) => RegExp
+export const non_capture = trivialCompose(regex, non_bracket) as (r: RegExp) => RegExp
 
 export const named_capture = (name: string) => (regexp: RegExp) =>
 	regex(`(?<${name}>${non_bracket(regexp)})`)
 
-export const bref = (index: number | string) => () => regex(`\\${index}`)
-export const named_bref = (name: string) => () => regex(`\\k<${name}>`)
+export const backref = (index: number | string) => () => regex(`\\${index}`)
+export const named_backref = (name: string) => () => regex(`\\k<${name}>`)

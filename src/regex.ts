@@ -1,10 +1,7 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
-import { non_bracket } from "./regex/groups.js"
+import { non_bracket } from "./regex/refactor.js"
 import { lastIndex } from "./utils.js"
-
-export const char_ranges = (...ranges: (string | [string, string])[]) =>
-	ranges.map((r) => (typeof r === "string" ? r : `${r[0]}-${r[1]}`)).join("")
 
 export const regex_contents = (r: RegExp) =>
 	((x) => x.slice(1, lastIndex(x) - r.flags.length))(r.toString())

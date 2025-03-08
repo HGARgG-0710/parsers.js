@@ -1,5 +1,5 @@
 import regex, { regex_contents } from "../regex.js"
-import { non_bracket } from "./groups.js"
+import { non_bracket } from "./refactor.js"
 
 export function occurrences(...args: [number, (number | "")?]) {
 	return (regexp: RegExp) =>
@@ -7,6 +7,7 @@ export function occurrences(...args: [number, (number | "")?]) {
 }
 
 export const non_greedy = (regexp: RegExp) => regex(`${regex_contents(regexp)}?`)
-export const [plus, star, maybe] = ["+", "*", "?"].map(
-	(s) => (regexp: RegExp) => regex(`${non_bracket(regexp)}${s}`)
-)
+
+export const some = (regexp: RegExp) => regex(`${non_bracket(regexp)}+`)
+export const any = (regexp: RegExp) => regex(`${non_bracket(regexp)}*`)
+export const maybe = (regexp: RegExp) => regex(`${non_bracket(regexp)}?`)

@@ -35,25 +35,11 @@
 			(meaning: it allows one to "chain" parsing layers together to form a parser, IMPLICITLY ESTABLISHING 
 				the order of rule-application to the given source). 
 
-	2.80. FIX the interface names: 
-		1. Add the 'I' to the front for them: 
-			NOT ALL, only the ones that have DIRECT named-equivalents. 
-
-
 Order of TODO-elimination: 	
-	0. Eradicate small interface files: 
-		1. Let the *small* interfaces BE LOCATED inside the `class.ts` files (as with `abstract` classes); 
-			Reason: fewer pointless microscopic files with < 20 loc
-				We have long abandoned the "total-modularity" philosphy on this project, so why not this too...
-
 	1. Wiki: 
 		0. Outline the overall structure: 
 			Remains: 
-				1. interfaces
-				2. regex
 				3. constants
-		1. VERIFY the exports
-		2. Check for all the `export function` and `export class` statements (`export abstract has already been fixed`). 
 		3. DOCUMENTATION POLICY: 
 			1. IF `x` is an alias/util, DO NOT add a new page for it: 
 				JSDoc ALONE will suffice. 
@@ -106,8 +92,6 @@ Order of TODO-elimination:
 			EVERY time that a name from the library is mentioned, add: 
 				1. `x` - code-stylization
 				2. [...](...) - references, point to the abstraction's page
-
-	2.80. 
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -234,6 +218,11 @@ TODO:
 			3. Try not to add excessive amounts of new stuff to the library: 
 				1. it is already quite powerful/loaded
 				2. more things will just make it more obscure
+
+		FI1. Eradicate small interface files: 
+			1. Let the *small* interfaces BE LOCATED inside the `class.ts` files (as with `abstract` classes); 
+				Reason: fewer pointless microscopic files with < 20 loc
+					We have long abandoned the "total-modularity" philosphy on this project, so why not this too...
 
 	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
 		TS1. TreeStream: create a new versions; 
@@ -1321,6 +1310,67 @@ TODO:
 
 			NOTE: the 'RegExpMap' REMAINS: 
 				Reason: it can still be useful to someone (as a boilerplate saver...)
+
+			ALSO: about `RegExpTokenizer`: 
+				[maybe] - create your own flavour for 'RegExp's
+				Then: 
+					1. rewrite the `regex` module to INSTEAD create YOUR flavour [more modular]
+						1. BUT - *do not* delete the current stuff
+							Instead, add a submodule FOR YOUR flavour, and for the "builtin" JS flavour
+							Together add a "convert" submodule to switch between them
+					2. create a submodule for it to CONVERT between the two [JS regex <-> our regex]; 
+					3. write proper docs for it
+						3.1. [possibly] make a separate module; This could be too huge conceptually for the library's ontology
+
+				It will improve upon the "simple" JS regex in the following ways: 
+					0. replace the first and last items "/^$/" with /:#/
+					1. add a general `^x` for NEGATING a pattern. Thus, elementary [^...] becomes composite ^[...]
+						This way, for instance /^ab+/ matches "bbb", but not "ab". 
+					2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
+						to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
+					3. remove the `\D`, `\S`, ..., other negative-classes in favour of the simpler `^x` form
+					4. replace the (?:...) with (:...) [syntax simplification]
+					5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
+					6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
+						Will span the max possible values of the Unicode range
+					7. get rid of the flags: 
+						1. 'g': 
+							replace the different behaviour with METHODS; make it non-exclusive
+
+						2. 'v':
+							remove, provide its functionality by default: 
+								1. `P` not working - it is removed and replaced by `^p{...}`:
+									By default, consumes the max possible string (remaining, if needed). 
+									Limited by (...){n, k}
+
+						3. 'i': 
+							make it a new group type - that matches A GROUP regardless of the case: 
+								/(#...)/; 
+							
+							ALSO: make it possible to *inject* custom functionality 
+								(utilizing the fact that `RegExpTokenizer` CAN be generic); 
+
+						4. 's': 
+							make it default
+						
+						5. 'u': 
+							remove, included by default with `v`
+
+						6. 'y' (????): 
+							find out what this even is (and what it's used for)
+							seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
+					
+						7. 'm': 
+							remove - unnecessary
+							possible to achieve the same thing using a slight modification of:
+								/(?<\n)...(?=\n)/
+						
+						8. 'd': 
+							too specific, ugly
+							make these kinds of behaviours GENERIC instead
+							[note: the 'RegExpTokenizer' WILL be generic...
+
+				IDEA: use this regex-flavour for the HammockLang implementation later...
 
 		SI5. IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
