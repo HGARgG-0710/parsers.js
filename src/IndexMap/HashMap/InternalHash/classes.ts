@@ -5,9 +5,7 @@ import { DelegateDeletableSettableSizeable } from "../../abstract.js"
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
 import { defaults } from "../../../constants.js"
-const { InternalHash } = defaults
-const { DefaultValue: objDefaultValue, MissingKey } = InternalHash.ObjectInternalHash
-const { DefaultValue: mapDefaultValue } = InternalHash.MapInternalHash
+const { MissingKey } = defaults.ObjectInternalHash
 
 import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type
@@ -31,9 +29,7 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	}
 
 	constructor(
-		map:
-			| array.Pairs<KeyType, ValueType>
-			| Map<KeyType, ValueType> = mapDefaultValue(),
+		map: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = new Map(),
 		_default?: DefaultType
 	) {
 		super(isArray(map) ? new Map(map) : map)
@@ -73,7 +69,7 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 		return this
 	}
 
-	constructor(object: object = objDefaultValue(), _default?: DefaultType) {
+	constructor(object: object = {}, _default?: DefaultType) {
 		super(object)
 		this.size = Object.keys(object).length
 		this.default = _default!

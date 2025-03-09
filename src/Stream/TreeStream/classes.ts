@@ -22,8 +22,7 @@ import { withSuper } from "src/refactor.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/abstract.js"
 
-import { defaults } from "../../constants.js"
-const { lastLevelWithSiblings } = defaults.TreeStream
+import { BadIndex } from "../../constants.js"
 
 import { boolean, object } from "@hgargg-0710/one"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
@@ -41,8 +40,8 @@ const TreeStreamBase = StreamClass({
 }) as AbstractConstructor<[], ReversedStreamClassInstance<InTree>>
 
 export class TreeStream<Type = any> extends TreeStreamBase implements ITreeStream<Type> {
-	protected response = ""
-	protected lastLevelWithSiblings = lastLevelWithSiblings
+	protected response: string
+	protected lastLevelWithSiblings = BadIndex
 	protected walker: TreeWalker<Type>
 
 	readonly multind: IMultiIndex

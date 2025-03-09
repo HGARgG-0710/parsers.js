@@ -36,10 +36,28 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	1. Wiki: 
-		0. Outline the overall structure: 
-			Remains: 
-				3. constants
+	JSDoc [on the par with wiki]:
+		These are short and concise, don't get too deep into the implementation details. 
+		[The "big" full GitHub Wiki will be for this...]
+
+		Process: 
+			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
+				1. utils
+				2. interfaces
+				3. classes
+				4. regex
+				5. constants
+
+			2. for each, add one of either: 
+				1. A full JSDoc
+				2. A brief JSDoc + page
+
+				DECIDE WHICH IS WHICH
+
+			3. DO 1-2 PER DAY! 
+				Try to be quick about them...
+
+	1. Wiki:
 		3. DOCUMENTATION POLICY: 
 			1. IF `x` is an alias/util, DO NOT add a new page for it: 
 				JSDoc ALONE will suffice. 
@@ -113,15 +131,6 @@ Order of TODO-elimination:
 			__NOT__ the `test` command. 
 			Reason: too different from project-to-project. 
 			These are the same. []
-
-	JSDoc: 
-		Add it BEFORE doing the tests. 
-		One must first understand PRECISELY how a certain thing is to work, and what to expect from it...;
-		Tests are far too tiresome and long to write 
-			(as it is now "too late" to set the requirements based off them and do proper TDD, docs provide a much better/simpler/faster alternative)
-		
-		These are short and concise, don't get too deep into the implementation details. 
-		[The "big" full GitHub Wiki will be for this...]
 	
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 

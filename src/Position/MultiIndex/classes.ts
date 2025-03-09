@@ -1,11 +1,8 @@
 import type { ITreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { IMultiIndexModifier } from "./interfaces.js"
-import type { IMultiIndex } from "./interfaces.js"
+import type { IMultiIndex, IMultiIndexModifier } from "./interfaces.js"
 
 import { InitializablePattern } from "../../Pattern/abstract.js"
-
-import { BadIndex, defaults } from "../../constants.js"
-const { DefaultValue } = defaults.MultiIndex
+import { BadIndex } from "../../constants.js"
 
 import { array } from "@hgargg-0710/one"
 const { last, first, copy, clear } = array
@@ -126,7 +123,7 @@ export class MultiIndex extends InitializablePattern<number[]> implements IMulti
 		return new MultiIndex(copy(this.value!))
 	}
 
-	constructor(multind: number[] = DefaultValue()) {
+	constructor(multind: number[] = []) {
 		super(multind)
 	}
 }

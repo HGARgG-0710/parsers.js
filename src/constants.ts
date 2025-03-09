@@ -6,9 +6,7 @@ import type {
 	ValidMatch
 } from "./Validatable/interfaces.js"
 
-import { parameterWaster } from "./refactor.js"
-
-import { boolean, object, array } from "@hgargg-0710/one"
+import { boolean } from "@hgargg-0710/one"
 const { T } = boolean
 
 export namespace regex {
@@ -71,29 +69,9 @@ export namespace defaults {
 
 	export namespace EnumSpace {
 		export const size = 0
-		export const DefaultValue = array.empty
 	}
 
-	export namespace InternalHash {
-		export namespace MapInternalHash {
-			export const DefaultValue = parameterWaster(Map)
-		}
-		export namespace ObjectInternalHash {
-			export const DefaultValue = object.empty
-			export const MissingKey = undefined
-		}
-	}
-
-	export namespace MultiIndex {
-		export const DefaultValue = array.empty
-	}
-
-	export namespace StreamClass {
-		export const realCurr = null
-	}
-
-	export namespace TreeStream {
-		export const response = ""
-		export const lastLevelWithSiblings = BadIndex
+	export namespace ObjectInternalHash {
+		export const MissingKey = undefined
 	}
 }

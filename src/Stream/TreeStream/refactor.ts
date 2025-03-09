@@ -3,9 +3,7 @@ import type { TreeWalker } from "../../Tree/classes.js"
 
 import { TreeStream } from "./classes.js"
 import { superInit } from "../StreamClass/refactor.js"
-
-import { defaults } from "../../constants.js"
-const { response, lastLevelWithSiblings } = defaults.TreeStream
+import { BadIndex } from "../../constants.js"
 
 export namespace methods {
 	export function baseNextIter<Type = any>(this: TreeStream<Type>) {
@@ -71,14 +69,14 @@ export namespace methods {
 	}
 
 	export function init<Type = any>(this: TreeStream<Type>, walker?: TreeWalker<Type>) {
-		this.response = response
-		this.lastLevelWithSiblings = lastLevelWithSiblings
+		this.response = ""
+		this.lastLevelWithSiblings = BadIndex
 
 		if (walker) {
 			this.walker = walker
 			superInit(this)
 		}
-		
+
 		return this
 	}
 }
