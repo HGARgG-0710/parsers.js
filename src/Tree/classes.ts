@@ -11,14 +11,13 @@ import type { WalkableTree } from "./TreeWalker/interfaces.js"
 
 import { isParentTree as uisParentTree } from "./utils.js"
 import { value } from "../Pattern/utils.js"
-import { lastIndex } from "../utils.js"
 import { parameterWaster } from "src/refactor.js"
 import { isGoodIndex } from "src/utils.js"
 import { mapper, sequentialIndex } from "./utils.js"
 
 import { functional, array, inplace } from "@hgargg-0710/one"
 const { trivialCompose } = functional
-const { last } = array
+const { last, lastIndex } = array
 const { insert, out } = inplace
 
 export class ChildrenTree<Type = any, T extends WalkableTree<Type> = WalkableTree<Type>>
@@ -94,7 +93,7 @@ export class ParentTree<Type = any>
 	constructor(
 		value?: any,
 		converter?: TreeConverter<Type, IParentTree<Type>>,
-		isParentTree: (x: any) => x is ParentTree<Type> = uisParentTree
+		isParentTree: (x: any) => x is IParentTree<Type> = uisParentTree
 	) {
 		super(value, converter)
 		this.parent = null

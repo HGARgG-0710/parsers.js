@@ -1,7 +1,7 @@
 import type { EndableStream } from "../StreamClass/interfaces.js"
 import type { INestedStream } from "./interfaces.js"
 
-import { fastFinish } from "../StreamClass/utils.js"
+import { finish } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 import { type } from "@hgargg-0710/one"
@@ -15,7 +15,7 @@ export function nestedStreamInitCurr<Type = any>(this: INestedStream<Type>) {
 }
 
 export function nestedStreamNext<Type = any>(this: INestedStream<Type>) {
-	if (this.currNested) fastFinish(this.curr as EndableStream<Type>)
+	if (this.currNested) finish(this.curr as EndableStream<Type>)
 	this.value!.next()
 	return this.initGetter!()
 }

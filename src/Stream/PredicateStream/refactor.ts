@@ -4,14 +4,14 @@ import type { IsEndCurrable } from "../StreamClass/interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
 
 import { preserveDirection } from "../../Position/utils.js"
-import { fastNavigate } from "../StreamClass/utils.js"
+import { navigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 import { functional } from "@hgargg-0710/one"
 const { copy } = functional
 
 export function predicateStreamCurr<Type = any>(this: IPredicateStream<Type>) {
-	fastNavigate(this.value!, this.predicate)
+	navigate(this.value!, this.predicate)
 	return this.value!.curr
 }
 

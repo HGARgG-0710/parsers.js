@@ -5,6 +5,9 @@ const { structCheck } = object
 const { T } = boolean
 const { isFunction } = type
 
+/**
+ * Returns whether the given `x` is a `Collection`
+*/
 export const isCollection = structCheck<Collection>({
 	value: T,
 	push: isFunction

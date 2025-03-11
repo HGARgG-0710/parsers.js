@@ -10,7 +10,7 @@ import {
 import { Stream } from "../../constants.js"
 const { LimitedStream } = Stream
 
-import { fastNavigate } from "../StreamClass/utils.js"
+import { navigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 import { type } from "@hgargg-0710/one"
@@ -68,7 +68,7 @@ export function limitedStreamInitialize<Type = any>(
 				from = LimitedStream.NoMovementPredicate
 			}
 
-			fastNavigate(this.value!, from)
+			navigate(this.value!, from)
 
 			this.direction = directionCompare(from, to, this.value)
 			this.from = from

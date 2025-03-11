@@ -14,21 +14,47 @@ import { object, type } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber } = type
 
-export const isFinishable = structCheck<Finishable>({ finish: isFunction })
-export const isNavigable = structCheck<Navigable>({ navigate: isFunction })
-export const isRewindable = structCheck<Rewindable>({ rewind: isFunction })
+/**
+ * Returns whether the given `x` is a `Finishable`
+ */
+export const isFinishable = structCheck<Finishable>({ finish: isFunction }) as <
+	Type = any
+>(
+	x: any
+) => x is Finishable<Type>
+
+/**
+ * Returns whether the given `x` is a Navigable
+ */
+export const isNavigable = structCheck<Navigable>({ navigate: isFunction }) as <
+	Type = any
+>(
+	x: any
+) => x is Navigable<Type>
+
+/**
+ * Returns whether the given `x` is a Rewindable
+ */
+export const isRewindable = structCheck<Rewindable>({ rewind: isFunction }) as <
+	Type = any
+>(
+	x: any
+) => x is Rewindable<Type>
 
 /**
  * Iterates the given `BasicStream` until hitting the end.
- * When an alternative `.finish()` method is present, it is likely faster.
  */
 export function uniFinish<Type = any>(stream: BasicStream<Type>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
 
-export function fastFinish<Type = any>(stream: BasicStream<Type>) {
-	return isFinishable(stream) ? stream.finish() : uniFinish<Type>(stream)
+/**
+ * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
+ * else - `uniFinish(stream)`
+ */
+export function finish<Type = any>(stream: BasicStream<Type>) {
+	return isFinishable<Type>(stream) ? stream.finish() : uniFinish<Type>(stream)
 }
 
 /**
@@ -58,11 +84,12 @@ export function uniNavigate<Type = any>(
 	return stream.curr
 }
 
-export function fastNavigate<Type = any>(
-	stream: ReversibleStream<Type>,
-	position: Position
-) {
-	return isNavigable(stream)
+/**
+ * If the given `ReversibleStream` is `Navigable`, calls and returns `stream.navigate(position)`,
+ * otherwise - `uniNavigate(stream, position)`.
+ */
+export function navigate<Type = any>(stream: ReversibleStream<Type>, position: Position) {
+	return isNavigable<Type>(stream)
 		? stream.navigate(position)
 		: uniNavigate<Type>(stream, position)
 }
@@ -77,17 +104,24 @@ export function uniRewind<Type = any>(stream: ReversibleStream<Type>) {
 	return stream.curr
 }
 
-export function fastRewind<Type = any>(stream: ReversibleStream<Type>): Type {
-	return isRewindable(stream) ? stream.rewind() : uniRewind(stream)
+/**
+ * Calls and returns `stream.rewind()` if `isRewindable(stream)`, else - `uniRewind(stream)`
+ */
+export function rewind<Type = any>(stream: ReversibleStream<Type>): Type {
+	return isRewindable<Type>(stream) ? stream.rewind() : uniRewind(stream)
 }
 
-export function isEmptyStream(stream: StreamClassInstance) {
+/**
+ * Checks whether the given `StreamClassInstance` is empty
+ */
+export function isEmpty(stream: StreamClassInstance) {
 	return stream.isEnd && stream.isStart
 }
 
+/**
+ * Returns a function that returns invocation of `f(stream.buffer.get(), stream.pos)`
+ */
 export function byStreamBufferPos<Type = any>(f: (buffer: Indexed, i: Position) => any) {
-	return (stream: StreamClassInstance<Type> & Bufferized<Type> & Posed<Position>) => {
-		const buffer = stream.buffer.get()
-		return () => f(buffer, stream.pos)
-	}
+	return (stream: StreamClassInstance<Type> & Bufferized<Type> & Posed<Position>) =>
+		f(stream.buffer.get(), stream.pos)
 }

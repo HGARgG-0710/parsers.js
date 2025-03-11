@@ -2,25 +2,49 @@ import type { Pattern, IPointer, RecursivePointer } from "./interfaces.js"
 
 import { type, object } from "@hgargg-0710/one"
 const { isUndefined } = type
-const { structCheck } = object
+const { structCheck, prop } = object
 
+/**
+ * Returns whether the given value is an `IPointer`
+ */
 export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
 	x: any
 ) => x is IPointer<T>
 
-export const value = <Type = any>(x: Pattern<Type>) => x.value
+/**
+ * Returns the `.value` property of the given `Pattern`
+ */
+export const value = prop("value") as <Type = any>(x: Pattern<Type>) => Type | undefined
+
+/**
+ * Sets the `.value` property of a given `Pattern`
+ */
 export const setValue = <Type = any>(x: Pattern<Type>, value?: Type) => (x.value = value)
 
+/**
+ * Unless given `value` is `undefined`, calls `setValue(pattern, value)`
+ */
 export function optionalValue(pattern: Pattern, value?: any) {
 	if (!isUndefined(value)) setValue(pattern, value)
 }
 
+/**
+ * Swaps `.value`s of two given `Pattern`s
+ */
 export function swapValues<Type = any>(x: Pattern<Type>, y: Pattern<Type>) {
 	const temp = x.value
 	x.value = y.value
 	y.value = temp
 }
 
+/**
+ * Recursively walks down a given `depth` (`Infinity`, by default),
+ * getting the `.value` of the next `RecursivePointer`.
+ *
+ * Returns the last obtainable non-`IPointer` value.
+ *
+ * Note: `isPointer` is used for checking whether the given object is an `IPointer`
+ */
 export function dig<Type = any>(
 	pointer: RecursivePointer<Type>,
 	depth: number = Infinity

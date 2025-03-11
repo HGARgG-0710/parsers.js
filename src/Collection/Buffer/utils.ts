@@ -7,6 +7,9 @@ const { and } = functional
 const { structCheck } = object
 const { isBoolean, isFunction } = type
 
+/**
+ * Returns whether the given `x` is a `FreezableBuffer`
+*/
 export const isFreezableBuffer = and(
 	structCheck({
 		value: T,
@@ -17,6 +20,9 @@ export const isFreezableBuffer = and(
 	isCollection
 ) as <Type = any>(x: any) => x is FreezableBuffer<Type>
 
+/**
+ * Returns whether the given `x` is a `Bufferized`
+*/
 export const isBufferized = structCheck<Bufferized>({ buffer: isFreezableBuffer }) as <
 	Type = any
 >(

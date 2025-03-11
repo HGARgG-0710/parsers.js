@@ -3,12 +3,18 @@ import type { array } from "@hgargg-0710/one"
 
 import { Pairs } from "./classes.js"
 
+/**
+ * Returns the pair of `indexMap.keys` and `indexMap.values`
+ */
 export function table<KeyType = any, OutType = any>(
 	indexMap: IndexMap<KeyType, OutType, any, any>
 ): [KeyType[], OutType[]] {
 	return [indexMap.keys, indexMap.values]
 }
 
+/**
+ * Given an array of linearized pairs `KeyType, ValueType`, returns the equivalent array of pairs
+ */
 export function linearPairs<KeyType = any, ValueType = any>(
 	linear: (KeyType | ValueType)[]
 ) {
@@ -25,6 +31,9 @@ export function linearPairs<KeyType = any, ValueType = any>(
 	return result
 }
 
+/**
+ * Given a pair of arrays of keys and values, returns an array of pairs.
+ */
 export function kvPairs<KeyType = any, ValueType = any>(
 	keyValues: [KeyType[], ValueType[]]
 ) {
@@ -42,6 +51,9 @@ export function kvPairs<KeyType = any, ValueType = any>(
 	return result
 }
 
+/**
+ * Returns a pair of keys and values, based off an array of pairs
+ */
 export function fromPairs<KeyType = any, ValueType = any>(
 	mapPairs: array.Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {

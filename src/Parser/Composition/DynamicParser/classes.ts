@@ -12,8 +12,7 @@ import { applySignatures } from "./utils.js"
 
 import { Callable } from "../abstract.js"
 
-import { functional, array } from "@hgargg-0710/one"
-const { id } = functional
+import { array } from "@hgargg-0710/one"
 
 export const PreSignature = (
 	preSignature: ISignatureIndexSet,
@@ -33,10 +32,12 @@ export const LayerSignature = (
 
 export const StateSignature = (
 	signature: ILayerSignature,
-	stateIndex: number
+	stateIndex: number,
+	stateTransform: (x: Summat) => Summat
 ): IStateSignature => ({
 	...signature,
-	stateIndex
+	stateIndex,
+	stateTransform
 })
 
 // * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
@@ -59,14 +60,10 @@ export class DynamicParser extends Callable implements IComposition {
 	}
 
 	init(signatures: IStateSignature[]) {
-		this.layers = applySignatures(array.copy(this.layers), signatures)
+		this.layers = applySignatures(array.copy(this.layers), signatures, this.state)
 	}
 
-	constructor(
-		protected composition: IComposition,
-		public stateTransform: (state: Summat) => Summat = id,
-		signatures: IStateSignature[] = []
-	) {
+	constructor(protected composition: IComposition, signatures: IStateSignature[] = []) {
 		super()
 		this.init(signatures)
 	}

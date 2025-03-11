@@ -9,10 +9,18 @@ import { getStopPoint } from "../Position/refactor.js"
 import { uniNavigate } from "../Stream/StreamClass/utils.js"
 import { ArrayCollection } from "../Collection/classes.js"
 
+/**
+ * A polymorphic method for skipping the number of steps inside `input`
+ * specified by the `steps` (default - `1`)
+ */
 export function skip(input: ReversibleStream, steps: Position = 1) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
+/**
+ * Collects contigiously the items of `stream` into `init`, starting from `stream.curr`,
+ * consuming the items added in the process
+ */
 export function consume<
 	Type = any,
 	CollectionType extends Collection<Type> = ArrayCollection<Type>
@@ -22,7 +30,9 @@ export function consume<
 }
 
 /**
- * @returns navigates up to the desired position on the given `Stream`, returns whether the bound has been reached
+ * Navigates up to the desired position on the given `Stream`,
+ * returns whether the bound corresponding to the direction of iteration
+ * has been reached
  */
 export function has(pos: DirectionalPosition) {
 	const stopPoint = getStopPoint(pos)
@@ -32,6 +42,10 @@ export function has(pos: DirectionalPosition) {
 	}
 }
 
+/**
+ * Counts the number of items (starting from `stream.curr`),
+ * obeying `pred`
+ */
 export function count(pred: StreamPredicate) {
 	return function <Type = any>(input: BasicStream<Type>) {
 		let count = 0
@@ -43,6 +57,10 @@ export function count(pred: StreamPredicate) {
 	}
 }
 
+/**
+ * Returns a function that collects the items of `input`
+ * into `init`, delimiting them by `delimPred`
+ */
 export function delimited(delimPred: Position) {
 	return function <
 		Type = any,
@@ -59,6 +77,11 @@ export function delimited(delimPred: Position) {
 	}
 }
 
+/**
+ * Returns a function that collects the results of `map(input, i++)`
+ * with running index `i = 0`, starting from `input.curr`, until
+ * the moment that `input.isEnd`
+ */
 export function transform<UnderType = any, UpperType = any>(
 	map: StreamTransform<UnderType, UpperType>
 ) {

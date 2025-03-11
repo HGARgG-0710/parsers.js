@@ -10,7 +10,7 @@ export type PredicatePosition<Type = any> = ((
 	Partial<DirectionHaving>
 
 export interface PositionObject<Type = any> {
-	convert: (stream: BasicStream<Type>) => DirectionalPosition<Type>
+	convert: (stream?: BasicStream<Type>) => DirectionalPosition<Type>
 	equals?: (position: Position<Type>) => boolean
 	compare?: (position: Position<Type>, stream?: BasicStream<Type>) => boolean
 	copy?: () => PositionObject<Type>

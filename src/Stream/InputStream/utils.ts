@@ -10,7 +10,7 @@ import { consume } from "../../Parser/utils.js"
 import { uniFinish } from "../StreamClass/utils.js"
 
 /**
- * Given a `BasicStream`, converts it to an `InputStream` for the price of a single iteration.
+ * Given a `BasicStream`, converts it to an `InputStream`
  */
 export function toInputStream<Type = any>(stream: BasicStream<Type>): IInputStream<Type> {
 	if (isBufferized<Type>(stream)) {

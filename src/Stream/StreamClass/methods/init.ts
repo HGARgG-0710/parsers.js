@@ -56,8 +56,8 @@ export type BufferStatePatternInitMethod = <Type = any>(
 
 function initialize<Type = any>(this: StreamClassInstance<Type>) {
 	;(this as any).realCurr = null
+	start(this)
 	if (!(this.isEnd = this.defaultIsEnd())) {
-		start(this)
 		;(this as any).realCurr = (this.initGetter || this.currGetter)!()
 	}
 }

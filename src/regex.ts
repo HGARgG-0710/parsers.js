@@ -1,7 +1,9 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
 import { non_bracket } from "./regex/refactor.js"
-import { lastIndex } from "./utils.js"
+import { string } from "@hgargg-0710/one"
+
+const { lastIndex } = string
 
 export const regex_contents = (r: RegExp) =>
 	((x) => x.slice(1, lastIndex(x) - r.flags.length))(r.toString())

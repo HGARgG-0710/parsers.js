@@ -9,14 +9,19 @@ export interface ITokenInstance<Type = any> {
 	type: Type
 }
 
-export interface TokenInstanceClass<Type = any> extends ITokenInstance<Type> {
-	new (): ITokenInstance<Type>
-	is: type.TypePredicate<ITokenInstance<Type>>
+export interface TypeCheckable<Type = any> {
+	is: type.TypePredicate<Type>
 }
 
-export interface ITokenType<Type = any, Value = any> {
+export interface TokenInstanceClass<Type = any>
+	extends ITokenInstance<Type>,
+		TypeCheckable<ITokenInstance<Type>> {
+	new (): ITokenInstance<Type>
+}
+
+export interface ITokenType<Type = any, Value = any>
+	extends TypeCheckable<IToken<Type, Value>> {
 	new (value: Value): IToken<Type, Value>
-	is: type.TypePredicate<IToken<Type, Value>>
 }
 
 export interface MarkedTokenType<Type = any, Value = any>

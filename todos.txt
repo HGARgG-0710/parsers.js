@@ -41,12 +41,16 @@ Order of TODO-elimination:
 		[The "big" full GitHub Wiki will be for this...]
 
 		Process: 
+			0. add references to the JSDoc for `utils`
+
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
-				1. utils
-				2. interfaces
-				3. classes
+				[no pages, only JSDoc]
 				4. regex
 				5. constants
+
+				[proper pages]
+				2. interfaces
+				3. classes
 
 			2. for each, add one of either: 
 				1. A full JSDoc
@@ -1923,6 +1927,18 @@ TODO:
 						See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
 						2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
 							The memory usage should be noticeably better than speed...; 
+
+		JD1. JSDoc-s: add references
+			Particularly - add the links to documentation website INSIDE the JSDoc (currently, lacks, the user has to look up themselves). 
+			Reason (that it lacks currently, as of v0.3): time concerns
+
+		JD2. Use a more complex (high-quality) JSDoc
+			Current one is primitive (time concerns). 
+			Add tags: 
+				1. @returns
+				2. @type [JSDoc-level self-reference for types]
+				3. ...
+		
 	
 	10. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 

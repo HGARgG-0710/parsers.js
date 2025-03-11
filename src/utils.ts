@@ -1,37 +1,55 @@
-import type { PredicatePosition } from "./Position/interfaces.js"
-import type { Indexed } from "./interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
+
+import type { Bufferized, FreezableBuffer, Indexed, Sizeable } from "./interfaces.js"
+import type { Stateful } from "./Stream/StreamClass/interfaces.js"
+import type { Posed } from "./Position/interfaces.js"
 
 import { BadIndex } from "./constants.js"
 
 import { object } from "@hgargg-0710/one"
 const { prop } = object
 
+/**
+ * Returns whether or not the given `number` is greater than `BadIndex`
+ */
 export const isGoodIndex = (x: number) => x > BadIndex
 
 /**
- * Given a string, returns whether it's a Hex number
+ * Given a string, returns whether it's a valid hexidecimal number
  */
 export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
 
 /**
- * Adds a `.direction = false` property on a given `PredicatePosition`
+ * Given a string, return whether it's a valid decimal number
+*/
+export const isDecimal = (x: string) => /^[0-9]+$/.test(x)
+
+/**
+ * Returns the `.length` of the given `Indexed` object
  */
-export function backtrack<Type = any>(predicate: PredicatePosition<Type>) {
-	predicate.direction = false
-	return predicate
-}
+export const length = prop("length") as <Type = any>(x: Indexed<Type>) => number
 
-export const lastIndex = (x: Indexed) => x.length - 1
+/**
+ * Returns the `.size` of the given `Sizeable` object
+ */
+export const size = prop("size") as (x: Sizeable) => number
 
-export const length = prop("length")
+/**
+ * Returns the `.state` of the given `Stateful`
+ */
+export const state = prop("state") as (x: Stateful) => Summat
 
-export const size = prop("size")
+/**
+ * Returns the `.buffer` property of the given `Bufferized`
+ */
+export const buffer = prop("buffer") as <Type = any>(
+	x: Bufferized<Type>
+) => FreezableBuffer<Type>
 
-export const state = prop("state")
-
-export const buffer = prop("buffer")
-
-export const pos = prop("pos")
+/**
+ * Returns the `.pos` property of the given `Posed` object
+ */
+export const pos = prop("pos") as <Type = any>(x: Posed<Type>) => Type
 
 export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"

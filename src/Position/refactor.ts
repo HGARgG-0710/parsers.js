@@ -1,9 +1,9 @@
 import type { BoundNameType } from "src/Stream/StreamClass/refactor.js"
 import type { DirectionalPosition, Posed } from "./interfaces.js"
-import { isBackward } from "./utils.js"
+import { direction } from "./utils.js"
 
 export function getStopPoint(pos: DirectionalPosition): BoundNameType {
-	return isBackward(pos) ? "isStart" : "isEnd"
+	return direction(pos) ? "isEnd" : "isStart"
 }
 
 export function positionNull(posed: Posed<number>) {

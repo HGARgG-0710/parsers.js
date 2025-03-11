@@ -5,7 +5,7 @@ import type { ReversedStreamClassInstance } from "../interfaces.js"
 
 import { uniNavigate } from "../utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
-import { isBackward, positionConvert } from "../../../Position/utils.js"
+import { direction, positionConvert } from "../../../Position/utils.js"
 import { positionDecrement } from "src/Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
@@ -41,9 +41,8 @@ function posBufferNavigate<Type = any>(
 		if (dirpos > 0) while (i++) this.prev()
 		else while (i--) this.next()
 	} else {
-		if (isBackward(dirpos))
-			while (!dirpos(readBufferThis(this))) positionDecrement(this)
-		else uniNavigate(this, dirpos)
+		if (direction(dirpos)) uniNavigate(this, dirpos)
+		else while (!dirpos(readBufferThis(this))) positionDecrement(this)
 	}
 
 	return this.curr
