@@ -12,7 +12,7 @@ import type { Settable } from "src/interfaces.js"
 import { DelegateKeyReplaceable } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
 import { pos } from "../../utils.js"
-import { assignIndex } from "./utils.js"
+import { assignIndex } from "src/utils.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
 const { id, copy } = functional

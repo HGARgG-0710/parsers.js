@@ -10,11 +10,10 @@ import type {
 
 import { previous, next } from "src/Stream/utils.js"
 
-import { object, type, boolean, functional } from "@hgargg-0710/one"
+import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction, isNumber, isUndefined } = type
 const { or, negate } = functional
-const { T } = boolean
 
 /**
  * Returns whether given `x` is a `PredicatePosition`

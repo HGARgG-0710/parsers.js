@@ -1,6 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { Bufferized, FreezableBuffer, Indexed, Sizeable } from "./interfaces.js"
+import type {
+	Bufferized,
+	FreezableBuffer,
+	IndexAssignable,
+	Indexed,
+	Sizeable
+} from "./interfaces.js"
 import type { Stateful } from "./Stream/StreamClass/interfaces.js"
 import type { Posed } from "./Position/interfaces.js"
 
@@ -21,7 +27,7 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
 
 /**
  * Given a string, return whether it's a valid decimal number
-*/
+ */
 export const isDecimal = (x: string) => /^[0-9]+$/.test(x)
 
 /**
@@ -50,6 +56,12 @@ export const buffer = prop("buffer") as <Type = any>(
  * Returns the `.pos` property of the given `Posed` object
  */
 export const pos = prop("pos") as <Type = any>(x: Posed<Type>) => Type
+
+/**
+ * Sets the value of the `x.assignedIndex` property to `assignedIndex`
+ */
+export const assignIndex = <Type = any>(x: IndexAssignable<Type>, assignedIndex: Type) =>
+	(x.assignedIndex = assignedIndex)
 
 export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"
