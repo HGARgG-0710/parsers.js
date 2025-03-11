@@ -1,18 +1,16 @@
 import type { FreezableBuffer, Bufferized } from "./interfaces.js"
 import { isCollection } from "../utils.js"
 
-import { type, object, boolean, functional } from "@hgargg-0710/one"
-const { T } = boolean
+import { type, object, functional } from "@hgargg-0710/one"
 const { and } = functional
 const { structCheck } = object
 const { isBoolean, isFunction } = type
 
 /**
  * Returns whether the given `x` is a `FreezableBuffer`
-*/
+ */
 export const isFreezableBuffer = and(
 	structCheck({
-		value: T,
 		isFrozen: isBoolean,
 		freeze: isFunction,
 		read: isFunction
@@ -22,7 +20,7 @@ export const isFreezableBuffer = and(
 
 /**
  * Returns whether the given `x` is a `Bufferized`
-*/
+ */
 export const isBufferized = structCheck<Bufferized>({ buffer: isFreezableBuffer }) as <
 	Type = any
 >(

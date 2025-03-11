@@ -27,8 +27,7 @@ export const isPredicatePosition = isFunction as <Type = any>(
  * Returns whether given `x` is a `PredicatePosition`
  */
 export const isPositionObject = structCheck({
-	convert: isFunction,
-	value: T
+	convert: isFunction
 }) as <Type = any>(x: any) => x is PositionObject<Type>
 
 /**
