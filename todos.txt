@@ -41,8 +41,6 @@ Order of TODO-elimination:
 		[The "big" full GitHub Wiki will be for this...]
 
 		Process: 
-			0. add references to the JSDoc for `utils`
-
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
 				[no pages, only JSDoc]
 				4. regex
@@ -114,6 +112,8 @@ Order of TODO-elimination:
 			EVERY time that a name from the library is mentioned, add: 
 				1. `x` - code-stylization
 				2. [...](...) - references, point to the abstraction's page
+
+	Remove `wiki-jsdoc`
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -231,6 +231,33 @@ TODO:
 			3. Try not to add excessive amounts of new stuff to the library: 
 				1. it is already quite powerful/loaded
 				2. more things will just make it more obscure
+
+			4. [IMPORTANT] Do TDD: 
+				previous versino of the library was a HELL to write, for the following reasons:
+					1. originally, there was a fairly moderate list of requirements
+					2. it was quickly impleemented (~ 2 weeks)
+					3. then, one foudn out that it was a BAD idea to be using arrays for everything 
+					4. decided to implement lazy Streams
+					5. goodbye, 8 months...: 
+						1. more new classes
+						2. changing utils/existing classes
+						3. adding new methods/functionality (constantly)
+						4. ...
+
+					Key issues were: 
+						1. lack of proper list of requirements (no vision for the library)
+						2. lack of good tests (development was NOT test-driven, NO intermediate testing between changes/additions)
+
+					This, way - DO TDD: 
+						1. pick an item
+						2. add skeleton code [passes TypeScript compiler only]
+						3. implement (many) tests
+						4. fail them
+						5. write/fix (a comprehensive) implementation
+						6. rinse and repeat, until it works desireably, and no tests (seem) to be missing
+
+					Accompany all this with intermediate notes (as sometimes important information for later, that CANNOT, 
+						go into tests may be forgotten otherwise)
 
 		FI1. Eradicate small interface files: 
 			1. Let the *small* interfaces BE LOCATED inside the `class.ts` files (as with `abstract` classes); 
