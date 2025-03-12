@@ -259,6 +259,17 @@ TODO:
 					Accompany all this with intermediate notes (as sometimes important information for later, that CANNOT, 
 						go into tests may be forgotten otherwise)
 
+			5. [IMPORTANT] Expand JSDoc: 
+				1. use it more thoroughly (give higher priority for classes and so forth - not just a brief description + Wiki link)
+				2. expand its contents (argument types, @type, self-reference, etc)
+				3. [IMPORTANT] document early - another one of the banes of parsers.js: 
+					Due to the fact that development was (mostly) content- and feature- oriented, 
+						one very much forogt about importance of spending appropriate amount of 
+							time on documentation. Hence, one (slowly) started to forget what one 
+								was doing, and whether it even (sometimes) made any sense. 
+					Had there been documentation, certain specific poor choices may have been more avertable, and 
+						some little time could have been saved. 
+
 		FI1. Eradicate small interface files: 
 			1. Let the *small* interfaces BE LOCATED inside the `class.ts` files (as with `abstract` classes); 
 				Reason: fewer pointless microscopic files with < 20 loc
@@ -1338,7 +1349,12 @@ TODO:
 			NOT based upon JS's one. 
 			It: 
 				1. Takes the signature that is MULTIPLE expressions
-				2. Combines it into a `Stream`, that produces tokens according to the set rules
+				2. Combines it into a `Stream`, that produces tokens according to the set rules: 
+					1. consists of a PARSER for the original regular expression string 
+					2. consists of a COMPILER for the regular expression AST (obtained from parsing)
+					3. consists of methods: 
+						1. amongst which there is '.match', from which 'Stream' is produced by doing something like: 
+							new RegExpEngine(GENERICS)("REGEXP_STRING").match("TARGET_STRING")
 				3. When tokens CANNOT be produced, STRINGS are produced instead
 					Input (.value - it's a 'Pattern') *IS* a string...
 			
@@ -1368,7 +1384,7 @@ TODO:
 						This way, for instance /^ab+/ matches "bbb", but not "ab". 
 					2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
 						to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
-					3. remove the `\D`, `\S`, ..., other negative-classes in favour of the simpler `^x` form
+					3. remove the `\B`, `\D`, `\S`, ..., other negative-classes/assertions in favour of the simpler `^x` form
 					4. replace the (?:...) with (:...) [syntax simplification]
 					5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
 					6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
@@ -1409,6 +1425,8 @@ TODO:
 							too specific, ugly
 							make these kinds of behaviours GENERIC instead
 							[note: the 'RegExpTokenizer' WILL be generic...
+					8. get rid of form-feed (`\f`): 
+						Reason: not useful for parsing
 
 				IDEA: use this regex-flavour for the HammockLang implementation later...
 

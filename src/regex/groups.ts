@@ -1,14 +1,39 @@
-import regex from "../regex.js"
-import { bracket, non_bracket } from "./refactor.js"
+import regex, { regex_contents } from "../regex.js"
+import { non_bracket } from "./refactor.js"
 
 import { functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 
-export const capture = trivialCompose(regex, bracket) as (r: RegExp) => RegExp
-export const non_capture = trivialCompose(regex, non_bracket) as (r: RegExp) => RegExp
+/**
+ * Creates a regular expression defined by putting
+ * `regexp` inside a capture group
+ */
+export const capture = (regexp: RegExp) => regex(`(${regex_contents(regexp)})`)
 
+/**
+ * Creates a regular expression defined by putting `regexp` inside a
+ * non-capture group
+ */
+export const non_capture = trivialCompose(regex, non_bracket) as (
+	regexp: RegExp
+) => RegExp
+
+/**
+ * Returns a function for creating a regular expression
+ * defined by putting `regexp` into a named-capture
+ * using `name` as its name
+ */
 export const named_capture = (name: string) => (regexp: RegExp) =>
-	regex(`(?<${name}>${non_bracket(regexp)})`)
+	regex(`(?<${name}>${regexp})`)
 
+/**
+ * Returns a function for creating a regular expression
+ * defined by a backreference using `index`
+ */
 export const backref = (index: number | string) => () => regex(`\\${index}`)
+
+/**
+ * Returns a function for creating a regular expression defined
+ * by a named backreference using `name`
+ */
 export const named_backref = (name: string) => () => regex(`\\k<${name}>`)
