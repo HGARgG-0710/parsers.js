@@ -8,15 +8,6 @@ import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IPredicateStream, PredicateStreamConstructor } from "./interfaces.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
-import {
-	predicateStreamIsEnd,
-	predicateStreamProd,
-	predicateStreamCurr,
-	predicateStreamNext,
-	predicateStreamInitialize,
-	predicateStreamDefaultIsEnd
-} from "./refactor.js"
-
 import { StreamClass } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
 
@@ -24,15 +15,15 @@ import { object, functional } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 const { negate, has } = functional
 
+import { methods } from "./refactor.js"
+const { init, prod, ...baseMethods } = methods
+
 const PredicateStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
 	StreamClass<Type>({
-		defaultIsEnd: predicateStreamDefaultIsEnd,
-		currGetter: predicateStreamCurr,
-		baseNextIter: predicateStreamNext,
-		isCurrEnd: predicateStreamIsEnd,
+		...baseMethods,
 		isPattern: true,
 		hasPosition,
 		buffer
@@ -66,8 +57,8 @@ export function PredicateStream<Type = any>(
 	}
 
 	withSuper(predicateStream, baseClass, {
-		prod: ConstDescriptor(predicateStreamProd),
-		init: ConstDescriptor(predicateStreamInitialize)
+		prod: ConstDescriptor(prod),
+		init: ConstDescriptor(init)
 	})
 
 	return predicateStream

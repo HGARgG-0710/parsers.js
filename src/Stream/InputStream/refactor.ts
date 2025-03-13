@@ -1,20 +1,22 @@
 import type { IInputStream } from "./interfaces.js"
 
-export function inputStreamIsEnd<Type = any>(this: IInputStream<Type>) {
-	return this.pos >= this.buffer.size - 1
-}
+export namespace methods {
+	export function isCurrEnd<Type = any>(this: IInputStream<Type>) {
+		return this.pos >= this.buffer.size - 1
+	}
 
-export const inputStreamNext = inputStreamCurr
-export const inputStreamPrev = inputStreamCurr
+	export const baseNextIter = currGetter
+	export const basePrevIter = currGetter
 
-export function inputStreamCurr<Type = any>(this: IInputStream<Type>) {
-	return this.buffer.read(this.pos)
-}
+	export function currGetter<Type = any>(this: IInputStream<Type>) {
+		return this.buffer.read(this.pos)
+	}
 
-export function inputStreamIsStart<Type = any>(this: IInputStream<Type>) {
-	return !this.pos
-}
+	export function isCurrStart<Type = any>(this: IInputStream<Type>) {
+		return !this.pos
+	}
 
-export function inputStreamDefaultIsEnd<Type = any>(this: IInputStream<Type>) {
-	return !this.buffer.size
+	export function defaultIsEnd<Type = any>(this: IInputStream<Type>) {
+		return !this.buffer.size
+	}
 }

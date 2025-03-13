@@ -1,9 +1,11 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
+
 import type {
 	EndableStream,
 	StreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
+
 import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
 import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
@@ -11,11 +13,13 @@ import type { Pattern } from "../../Pattern/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
-import { streamParserInitialize, streamParserNext } from "./refactor.js"
 import { withSuper } from "src/refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
+
+import { methods } from "./refactor.js"
+const { init, ...baseMethods } = methods
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -23,9 +27,8 @@ const StreamParserBase = <Type = any>(
 	state: boolean = false
 ) =>
 	DefaultEndStream<Type>({
-		initGetter: streamParserNext,
+		...baseMethods,
 		isCurrEnd: valueIsCurrEnd,
-		baseNextIter: streamParserNext,
 		hasPosition,
 		buffer,
 		state,
@@ -66,7 +69,7 @@ export function StreamParser<InType = any, OutType = any>(
 		}
 
 		withSuper(streamTokenizerClass, baseClass, {
-			init: ConstDescriptor(streamParserInitialize)
+			init: ConstDescriptor(init)
 		})
 
 		return streamTokenizerClass

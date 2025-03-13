@@ -3,20 +3,8 @@ import type { InTree } from "../../Tree/interfaces.js"
 import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { ITreeStream } from "./interfaces.js"
 
-import { methods } from "./refactor.js"
-
-const {
-	isCurrEnd,
-	basePrevIter,
-	rewind,
-	baseNextIter,
-	navigate,
-	isCurrStart,
-	init,
-	currGetter,
-	value,
-	multind
-} = methods
+import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 import { withSuper } from "src/refactor.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
@@ -25,17 +13,14 @@ import { StreamClass } from "../StreamClass/abstract.js"
 import { BadIndex } from "../../constants.js"
 
 import { boolean, object } from "@hgargg-0710/one"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 const { F } = boolean
 const { ConstDescriptor } = object.descriptor
 
+import { methods } from "./refactor.js"
+const { rewind, navigate, init, value, multind, ...baseMethods } = methods
+
 const TreeStreamBase = StreamClass({
-	currGetter,
-	baseNextIter,
-	basePrevIter,
-	isCurrEnd,
-	isCurrStart,
+	...baseMethods,
 	defaultIsEnd: F
 }) as AbstractConstructor<[], ReversedStreamClassInstance<InTree>>
 

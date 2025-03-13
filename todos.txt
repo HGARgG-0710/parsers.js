@@ -41,10 +41,12 @@ Order of TODO-elimination:
 		[The "big" full GitHub Wiki will be for this...]
 
 		Process: 
+			0. add permalinks to: 
+				1. `regex` (no need to list all items - do it module-by-module this time)
+
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
 				[no pages, only JSDoc]
-				4. regex
-				5. constants
+				5. constants (no need to list all items - do it module-by-module this time)
 
 				[proper pages]
 				2. interfaces
@@ -58,6 +60,16 @@ Order of TODO-elimination:
 
 			3. DO 1-2 PER DAY! 
 				Try to be quick about them...
+
+			4. Special pages to write: 
+				1. Usage
+				2. Problems
+				3. Lacking: 
+					Make this a brief list (BASED OFF ONE on 'Home' page): 
+						1. detalize the "various" unspecified options [provide sub-lists for those]
+						2. do not expand the lists (it is complete on 'Home')
+						3. write out a paragraph or two for each of the points "missing" or that are "problematic"
+							1. ALSO - note about WHICH of the abstractions ARE to be deleted (like 'TokenizablePattern/ValidatablePattern', for instance...)
 
 	1. Wiki:
 		3. DOCUMENTATION POLICY: 
@@ -1327,6 +1339,13 @@ TODO:
 
 		SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
 			It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
+
+		SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
+			Currently, missing. 
+			Example: TreeStream. 
+				It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
+				After this change, NO MORE will the "binding" happen outside the "base" definition. 
+				Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
 
 	4. Breaking [removals]	
 		TO2. Remove (replace):

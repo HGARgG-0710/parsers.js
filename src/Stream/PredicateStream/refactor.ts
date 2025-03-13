@@ -10,44 +10,46 @@ import { superInit } from "../StreamClass/refactor.js"
 import { functional } from "@hgargg-0710/one"
 const { copy } = functional
 
-export function predicateStreamCurr<Type = any>(this: IPredicateStream<Type>) {
-	navigate(this.value!, this.predicate)
-	return this.value!.curr
-}
-
-export function predicateStreamNext<Type = any>(this: IPredicateStream<Type>) {
-	this.hasLookAhead = false
-	return this.lookAhead
-}
-
-export function predicateStreamProd<Type = any>(this: IPredicateStream<Type>) {
-	if (this.hasLookAhead) return this.lookAhead
-	this.hasLookAhead = true
-	this.value!.next()
-	return this.curr
-}
-
-export function predicateStreamIsEnd<Type = any>(this: IPredicateStream<Type>) {
-	this.lookAhead = this.prod()
-	return this.value!.isCurrEnd() || !this.predicate(this, this.pos)
-}
-
-export function predicateStreamInitialize<Type = any>(
-	this: IPredicateStream<Type>,
-	value?: ReversibleStream<Type> & IsEndCurrable,
-	predicate?: PredicatePosition<Type>
-) {
-	if (predicate) {
-		this.predicate = preserveDirection(
-			predicate,
-			(predicate) => copy(predicate, this) as PredicatePosition<Type>
-		)
-		this.hasLookAhead = false
+export namespace methods {
+	export function currGetter<Type = any>(this: IPredicateStream<Type>) {
+		navigate(this.value!, this.predicate)
+		return this.value!.curr
 	}
-	if (value) superInit(this, value)
-	return this
-}
 
-export function predicateStreamDefaultIsEnd<Type = any>(this: IPredicateStream<Type>) {
-	return this.value!.isEnd || !this.predicate(this, this.pos)
+	export function baseNextIter<Type = any>(this: IPredicateStream<Type>) {
+		this.hasLookAhead = false
+		return this.lookAhead
+	}
+
+	export function prod<Type = any>(this: IPredicateStream<Type>) {
+		if (this.hasLookAhead) return this.lookAhead
+		this.hasLookAhead = true
+		this.value!.next()
+		return this.curr
+	}
+
+	export function isCurrEnd<Type = any>(this: IPredicateStream<Type>) {
+		this.lookAhead = this.prod()
+		return this.value!.isCurrEnd() || !this.predicate(this, this.pos)
+	}
+
+	export function init<Type = any>(
+		this: IPredicateStream<Type>,
+		value?: ReversibleStream<Type> & IsEndCurrable,
+		predicate?: PredicatePosition<Type>
+	) {
+		if (predicate) {
+			this.predicate = preserveDirection(
+				predicate,
+				(predicate) => copy(predicate, this) as PredicatePosition<Type>
+			)
+			this.hasLookAhead = false
+		}
+		if (value) superInit(this, value)
+		return this
+	}
+
+	export function defaultIsEnd<Type = any>(this: IPredicateStream<Type>) {
+		return this.value!.isEnd || !this.predicate(this, this.pos)
+	}
 }

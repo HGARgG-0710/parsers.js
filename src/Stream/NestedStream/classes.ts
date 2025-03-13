@@ -7,27 +7,20 @@ import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { Pattern } from "../../Pattern/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
-
-import {
-	nestedStreamInitCurr,
-	nestedStreamNext,
-	nestedStreamInitialize,
-	nestedStreamIsEnd
-} from "./refactor.js"
-
 import { withSuper } from "src/refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
+
+import { methods } from "./refactor.js"
+const { init, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
 	DefaultEndStream<Type | INestedStream<Type>>({
-		isCurrEnd: nestedStreamIsEnd,
-		baseNextIter: nestedStreamNext<Type>,
-		initGetter: nestedStreamInitCurr,
+		...baseMethods,
 		hasPosition,
 		buffer,
 		isPattern: true
@@ -60,7 +53,7 @@ export function NestedStream<Type = any>(
 	}
 
 	withSuper(NestedStream, baseClass, {
-		init: ConstDescriptor(nestedStreamInitialize<Type>),
+		init: ConstDescriptor(init),
 		typesTable: ConstDescriptor(nestedTypes)
 	})
 

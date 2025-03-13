@@ -16,64 +16,66 @@ import { superInit } from "../StreamClass/refactor.js"
 import { type } from "@hgargg-0710/one"
 const { isNullary } = type
 
-export function limitedStreamNext<Type = any>(this: ILimitedStream<Type>) {
-	this.hasLookAhead = false
-	return this.lookAhead
-}
+export namespace methods {
+	export function baseNextIter<Type = any>(this: ILimitedStream<Type>) {
+		this.hasLookAhead = false
+		return this.lookAhead
+	}
 
-export function limitedStreamProd<Type = any>(this: ILimitedStream<Type>) {
-	const { value, direction, hasLookAhead, lookAhead } = this
-	if (!hasLookAhead) {
+	export function prod<Type = any>(this: ILimitedStream<Type>) {
+		const { value, direction, hasLookAhead, lookAhead } = this
+		if (!hasLookAhead) {
+			this.hasLookAhead = true
+			value![direction ? "next" : "prev"]()
+			return value!.curr
+		}
+		return lookAhead
+	}
+
+	export function isCurrEnd<Type = any>(this: ILimitedStream<Type>) {
+		const { value, to } = this
+		if (value!.isCurrEnd()) return true
+		this.lookAhead = this.prod()
+		return positionEqual(value!, to)
+	}
+
+	export function isCurrStart<Type = any>(this: ILimitedStream<Type>) {
+		const { value, from } = this
+		return value!.isCurrStart() || positionEqual(value!, from)
+	}
+
+	export function basePrevIter<Type = any>(this: ILimitedStream<Type>) {
+		const { curr, direction, value } = this
+		this.lookAhead = curr
 		this.hasLookAhead = true
-		value![direction ? "next" : "prev"]()
+		value![direction ? "prev" : "next"]()
 		return value!.curr
 	}
-	return lookAhead
-}
 
-export function limitedStreamIsEnd<Type = any>(this: ILimitedStream<Type>) {
-	const { value, to } = this
-	if (value!.isCurrEnd()) return true
-	this.lookAhead = this.prod()
-	return positionEqual(value!, to)
-}
+	export function init<Type = any>(
+		this: ILimitedStream<Type>,
+		value?: LimitedUnderStream<Type>,
+		from?: Position,
+		to?: Position
+	) {
+		if (value || this.value) {
+			if (value) superInit(this, value)
 
-export function limitedStreamIsStart<Type = any>(this: ILimitedStream<Type>) {
-	const { value, from } = this
-	return value!.isCurrStart() || positionEqual(value!, from)
-}
+			this.hasLookAhead = false
 
-export function limitedStreamPrev<Type = any>(this: ILimitedStream<Type>) {
-	const { curr, direction, value } = this
-	this.lookAhead = curr
-	this.hasLookAhead = true
-	value![direction ? "prev" : "next"]()
-	return value!.curr
-}
+			if (!isNullary(from)) {
+				if (isNullary(to)) {
+					to = from
+					from = LimitedStream.NoMovementPredicate
+				}
 
-export function limitedStreamInitialize<Type = any>(
-	this: ILimitedStream<Type>,
-	value?: LimitedUnderStream<Type>,
-	from?: Position,
-	to?: Position
-) {
-	if (value || this.value) {
-		if (value) superInit(this, value)
+				navigate(this.value!, from)
 
-		this.hasLookAhead = false
-
-		if (!isNullary(from)) {
-			if (isNullary(to)) {
-				to = from
-				from = LimitedStream.NoMovementPredicate
+				this.direction = directionCompare(from, to, this.value)
+				this.from = from
+				this.to = positionNegate(positionConvert(to, this.value))
 			}
-
-			navigate(this.value!, from)
-
-			this.direction = directionCompare(from, to, this.value)
-			this.from = from
-			this.to = positionNegate(positionConvert(to, this.value))
 		}
+		return this
 	}
-	return this
 }

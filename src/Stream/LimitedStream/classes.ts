@@ -7,30 +7,21 @@ import type { LimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueCurr } from "../StreamClass/refactor.js"
-import {
-	limitedStreamInitialize,
-	limitedStreamProd,
-	limitedStreamIsEnd,
-	limitedStreamNext,
-	limitedStreamPrev,
-	limitedStreamIsStart
-} from "./refactor.js"
-
 import { withSuper } from "src/refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
+
+import { methods } from "./refactor.js"
+const { init, prod, ...baseMethods } = methods
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ) =>
 	DefaultEndStream<Type>({
+		...baseMethods,
 		currGetter: valueCurr,
-		baseNextIter: limitedStreamNext,
-		basePrevIter: limitedStreamPrev,
-		isCurrEnd: limitedStreamIsEnd,
-		isCurrStart: limitedStreamIsStart,
 		isPattern: true,
 		hasPosition,
 		buffer
@@ -70,8 +61,8 @@ export function LimitedStream<Type = any>(
 	}
 
 	withSuper(limitedStream, baseClass, {
-		prod: ConstDescriptor(limitedStreamProd),
-		init: ConstDescriptor(limitedStreamInitialize)
+		prod: ConstDescriptor(prod),
+		init: ConstDescriptor(init)
 	})
 
 	return limitedStream
