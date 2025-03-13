@@ -1,9 +1,6 @@
 import type { ArrayEnum } from "./interfaces.js"
 import type { Mappable } from "../interfaces.js"
 
-import { defaults } from "../constants.js"
-const { size: globalSize } = defaults.EnumSpace
-
 import { functional, inplace, object } from "@hgargg-0710/one"
 const { id } = functional
 const { out } = inplace
@@ -44,7 +41,7 @@ export class ConstEnum implements ArrayEnum<{}> {
 		return this.value as readonly {}[]
 	}
 
-	constructor(size: number = globalSize) {
+	constructor(size: number = 0) {
 		this.size = size
 	}
 }

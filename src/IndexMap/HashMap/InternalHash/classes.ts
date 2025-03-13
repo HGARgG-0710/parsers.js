@@ -1,18 +1,18 @@
-import type { InternalHash } from "./interfaces.js"
+import type { IInternalHash } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { DelegateDeletableSettableSizeable } from "../../abstract.js"
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
-import { defaults } from "../../../constants.js"
-const { MissingKey } = defaults.ObjectInternalHash
+import { InternalHash} from "../../../constants.js"
+const { MissingKey } = InternalHash.ObjectInternalHash
 
 import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	extends DelegateDeletableSettableSizeable<KeyType, ValueType, Map<KeyType, ValueType>>
-	implements InternalHash<KeyType, ValueType, DefaultType>
+	implements IInternalHash<KeyType, ValueType, DefaultType>
 {
 	default: DefaultType
 
@@ -39,7 +39,7 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 
 export class ObjectInternalHash<Type = any, DefaultType = any>
 	extends ProtectedPattern<object>
-	implements InternalHash<string, Type, DefaultType>
+	implements IInternalHash<string, Type, DefaultType>
 {
 	default: DefaultType
 	size: number
