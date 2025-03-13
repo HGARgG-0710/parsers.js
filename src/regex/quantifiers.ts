@@ -2,23 +2,25 @@ import regex, { regex_contents } from "../regex.js"
 import { non_bracket } from "./refactor.js"
 
 /**
- * Returns a function for creating a regular expression defined by
- * repeating `regexp` a number of occurences defined by args thusly:
- *
- * 1. if `args.length === 1`, it matches when `regexp` is repeated
- * precisely `args[0]` times
- *
- * 2. if `args.length === 2` and `args[1] !== ""`,
- * it matches when `regexp` is repeated between `args[0]` and `args[1]`
- * inclusively
- *
- * 3. if `args.length === 2` and `args[1] === ""`,
- * it matches at least `args[0]` repetitions of `regexp`
+ * Returns a function that creates a regular expression that
+ * matches when `regexp` is repeated precisely `times` times
  */
-export function occurrences(...args: [number, (number | "")?]) {
-	return (regexp: RegExp) =>
-		regex(`${non_bracket(regexp)}{${args.slice(0, 2).join(",")}}`)
-}
+export const repeat = (times: number) => (regexp: RegExp) =>
+	regex(`${non_bracket(regexp)}{${times}}`)
+
+/**
+ * Returns a function for creating a regular that matches
+ * when `regexp` is repeated between `from` and `to` inclusively
+ */
+export const multiple = (from: number, to: number) => (regexp: RegExp) =>
+	regex(`${non_bracket(regexp)}{${from},${to}}}`)
+
+/**
+ * Returns a function for creation of regular expression
+ * that matches at least `times` repetitions of `regexp`
+ */
+export const indefinite = (times: number) => (regexp: RegExp) =>
+	regex(`${non_bracket(regexp)}{${times},}`)
 
 /**
  * (Requies `regexp` to end on a greedy version
