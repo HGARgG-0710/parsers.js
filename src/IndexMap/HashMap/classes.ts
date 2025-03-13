@@ -1,7 +1,7 @@
 import type { Indexed } from "src/interfaces.js"
 import type { IHashClass, HashMap, Hash } from "./interfaces.js"
 import type { IToken as TypeToken } from "../../Token/interfaces.js"
-import type { InternalHash } from "./InternalHash/interfaces.js"
+import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "../abstract.js"
 
@@ -19,7 +19,7 @@ abstract class BaseHashClass<
 	ValueType = any,
 	InternalKeyType = any,
 	DefaultType = any
-> extends DelegateSizeable<InternalHash<InternalKeyType, ValueType, DefaultType>> {
+> extends DelegateSizeable<IInternalHash<InternalKeyType, ValueType, DefaultType>> {
 	hash: Hash<KeyType, InternalKeyType>
 
 	index(x: KeyType, ...y: any[]) {

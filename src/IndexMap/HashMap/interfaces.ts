@@ -1,4 +1,4 @@
-import type { InternalHash } from "./InternalHash/interfaces.js"
+import type { IInternalHash } from "./InternalHash/interfaces.js"
 import type { Indexable } from "../interfaces.js"
 import type {
 	Deletable,
@@ -19,7 +19,7 @@ export interface IHashClass<
 	InternalKeyType = any,
 	DefaultType = any
 > extends Hashable<KeyType, InternalKeyType> {
-	new (structure: InternalHash<InternalKeyType, ValueType, DefaultType>): HashMap<
+	new (structure: IInternalHash<InternalKeyType, ValueType, DefaultType>): HashMap<
 		KeyType,
 		ValueType,
 		InternalKeyType
