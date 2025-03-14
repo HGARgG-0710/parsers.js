@@ -17,3 +17,7 @@ export interface EliminablePattern<Type = any, EliminatedType = any>
 	extends Resulting<Type>,
 		Flushable,
 		Eliminable<EliminatedType, Type> {}
+
+export interface GettablePattern<Type = any> {
+	get: () => Type
+}

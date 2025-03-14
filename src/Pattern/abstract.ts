@@ -1,4 +1,4 @@
-import type { Pattern } from "./interfaces.js"
+import type { GettablePattern, Pattern } from "./interfaces.js"
 import type { Flushable } from "src/interfaces.js"
 import { setValue } from "./utils.js"
 
@@ -19,13 +19,16 @@ abstract class OptionalPattern<Type = any> {
 	}
 }
 
-export abstract class InitializablePattern<Type = any> extends OptionalPattern<Type> {
+export abstract class InitializablePattern<Type = any>
+	extends OptionalPattern<Type>
+	implements GettablePattern<Type>
+{
 	init(value?: Type) {
 		this.value = value
 	}
 
 	get() {
-		return this.value
+		return this.value!
 	}
 }
 

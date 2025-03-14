@@ -1,5 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Resulting } from "../Pattern/interfaces.js"
+import type { GettablePattern, Resulting } from "../Pattern/interfaces.js"
 import type { Flushable } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
@@ -37,7 +37,8 @@ export interface Validatable<Type = any, KeyType = any> {
 export interface ValidatablePattern<Type = any, KeyType = any>
 	extends Resulting<ValidationOutput<Type>>,
 		Flushable,
-		Validatable<Type, KeyType> {}
+		Validatable<Type, KeyType>,
+		GettablePattern<Type> {}
 
 export interface DelegateValidatablePattern<Type = any, KeyType = any>
 	extends ValidatablePattern<Type, KeyType> {

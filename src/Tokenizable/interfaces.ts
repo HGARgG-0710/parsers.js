@@ -1,5 +1,5 @@
 import type { SummatFunction } from "@hgargg-0710/summat.ts"
-import type { Resulting } from "../Pattern/interfaces.js"
+import type { GettablePattern, Resulting } from "../Pattern/interfaces.js"
 import type { Flushable } from "src/interfaces.js"
 
 export type TokenizationResult<Type = any, OutType = any> = (Type | OutType)[]
@@ -20,7 +20,8 @@ export interface Tokenizable<Type = any, InType = any, OutType = any> {
 export interface TokenizablePattern<Type = any, InType = any, OutType = any>
 	extends Flushable,
 		Resulting<TokenizationResult<Type, OutType>>,
-		Tokenizable<Type, InType, OutType> {}
+		Tokenizable<Type, InType, OutType>, 
+		GettablePattern<Type> {}
 
 export interface DelegateTokenizablePattern<Type = any, InType = any, OutType = any>
 	extends TokenizablePattern<Type, InType, OutType> {

@@ -1,6 +1,7 @@
 import type { Copiable } from "src/interfaces.js"
 import type { Sizeable } from "src/interfaces.js"
 import type { Mappable } from "../interfaces.js"
+import type { GettablePattern } from "../Pattern/interfaces.js"
 
 export interface EnumSpace<Type = any> extends Sizeable, Copiable<EnumSpace<Type>> {
 	add: (n: number) => this
@@ -8,6 +9,6 @@ export interface EnumSpace<Type = any> extends Sizeable, Copiable<EnumSpace<Type
 	map: <F extends Mappable<Type> = Mappable<Type>>(f?: F) => ReturnType<F>[]
 }
 
-export interface ArrayEnum<Type = any> extends EnumSpace<Type> {
-	get: () => readonly Type[]
-}
+export interface ArrayEnum<Type = any>
+	extends EnumSpace<Type>,
+		GettablePattern<readonly Type[]> {}

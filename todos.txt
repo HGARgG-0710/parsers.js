@@ -43,12 +43,10 @@ Order of TODO-elimination:
 		Process: 
 			0. add permalinks to: 
 				1. `regex` (no need to list all items - do it module-by-module this time)
+				2. `constants`
 
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
-				[no pages, only JSDoc]
-				5. constants (no need to list all items - do it module-by-module this time)
-
-				[proper pages]
+				[proper pages, + JSDoc that references them /w brief descriptions]
 				2. interfaces
 				3. classes
 
@@ -124,8 +122,7 @@ Order of TODO-elimination:
 			EVERY time that a name from the library is mentioned, add: 
 				1. `x` - code-stylization
 				2. [...](...) - references, point to the abstraction's page
-
-	Remove `wiki-jsdoc`
+			DO IT SEPARATELY! 
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -1347,10 +1344,23 @@ TODO:
 				After this change, NO MORE will the "binding" happen outside the "base" definition. 
 				Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
 
+		IN1. The `Initializable` interface - make it higher level: 
+			1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
+			2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+
+		IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
+			Make it separate. 
+			Reasons:
+				1. Doesn't allow for iteration algorithms
+				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+				3. Will cause less nestedness
+
 	4. Breaking [removals]	
 		TO2. Remove (replace):
 			1. PatternTokenizer
 			2. PatternValidator
+
+			[NOTE: important - only these implementations/algorithms! Keep the interfaces, they're quite good...]
 			3. ValidatablePattern
 			4. TokenizablePattern
 
@@ -1448,6 +1458,29 @@ TODO:
 						Reason: not useful for parsing
 
 				IDEA: use this regex-flavour for the HammockLang implementation later...
+
+			ALSO - retain the `TokenizablePattern` and `ValidatablePattern` interfaces, 
+				KEEP (and use) THEM for your `RegExpTokenizer`. 
+				
+				They are very good at (in general) at expressing the idea of a 
+					"carrier object" and a its "handler function" for tokenization/validation information 
+						(here - regular expressions). 
+
+				Don't use them as-is, and INSTEAD of plain JS RegExp-s, use your flavour (+ the "iterable tables" for handles instead individual [string, handler] pairs,
+					so the interfaces will still have to be changed somewhat...	
+				), BUT *DO NOT* throw them out...
+
+					IDEA: for usage with `RegExpTokenizer`, create an 'IterableMap' function [inside 'Parser/TableMap']: 
+						This is a function that:
+							1. takes in a LinearIndexMap [or other `IndexMap`]
+							2. produces a function that: 
+								0. assigns the map to its own `.table` property
+								1. iterates the given map, CALLING each function-value inside of it with arguments: 
+									0. 'this' [yes, it retains the `this` value...]
+									1. the original value `x`
+									2. the function itself (for access to `.table` property)
+									n. all the other (spread) arguments
+								2. returns the result of the last one
 
 		SI5. IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 

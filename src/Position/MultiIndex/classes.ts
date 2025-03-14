@@ -49,10 +49,6 @@ export class MultiIndexModifier
 		this.value!.get().push(...subIndex)
 		return subIndex
 	}
-
-	get() {
-		return this.value!
-	}
 }
 
 export class MultiIndex extends InitializablePattern<number[]> implements IMultiIndex {
@@ -62,10 +58,6 @@ export class MultiIndex extends InitializablePattern<number[]> implements IMulti
 
 	get levels() {
 		return this.value!.length
-	}
-
-	get() {
-		return super.get()!
 	}
 
 	convert(stream: ITreeStream) {
