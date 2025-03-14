@@ -69,6 +69,8 @@ Order of TODO-elimination:
 						3. write out a paragraph or two for each of the points "missing" or that are "problematic"
 							1. ALSO - note about WHICH of the abstractions ARE to be deleted (like 'TokenizablePattern/ValidatablePattern', for instance...)
 
+			5. VERIFY everthing visually, once the docuementation work is done...; 
+
 	1. Wiki:
 		3. DOCUMENTATION POLICY: 
 			1. IF `x` is an alias/util, DO NOT add a new page for it: 
@@ -2035,7 +2037,6 @@ TODO:
 				1. @returns
 				2. @type [JSDoc-level self-reference for types]
 				3. ...
-		
 	
 	10. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 

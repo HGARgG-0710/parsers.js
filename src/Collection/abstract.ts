@@ -6,10 +6,6 @@ export abstract class IterableCollection<Type = any>
 	implements Iterable<Type>
 {
 	*[Symbol.iterator]() {
-		let i = 0
-		while (this.value!.length > i) {
-			yield this.value![i] as Type
-			++i
-		}
+		yield* this.value as Iterable<Type>
 	}
 }

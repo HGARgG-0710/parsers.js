@@ -51,10 +51,10 @@ export interface Flushable {
 
 export type Indexed<Type = any> =
 	| string
-	| {
+	| ({
 			[x: number]: Type
 			length: number
-	  }
+	  } & Iterable<Type>)
 
 export interface Supered {
 	super: Summat

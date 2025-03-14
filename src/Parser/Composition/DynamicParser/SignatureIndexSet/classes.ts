@@ -21,7 +21,7 @@ export class SignatureIndexSet implements ISignatureIndexSet {
 	}
 
 	*[Symbol.iterator]() {
-		for (let i = 0; i < this.indexes.length; ++i) yield this.indexes[i]
+		yield* this.indexes
 	}
 
 	subtract(x: ISignatureIndexSet): ISignatureIndexSet {
