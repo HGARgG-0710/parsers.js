@@ -6,7 +6,7 @@ import type { GettablePattern } from "../Pattern/interfaces.js"
 export interface EnumSpace<Type = any> extends Sizeable, Copiable<EnumSpace<Type>> {
 	add: (n: number) => this
 	join: (enums: EnumSpace<Type>) => this
-	map: <F extends Mappable<Type> = Mappable<Type>>(f?: F) => ReturnType<F>[]
+	map: <Out = any>(f?: Mappable<Type, Out>) => Out[]
 }
 
 export interface ArrayEnum<Type = any>

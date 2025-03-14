@@ -44,6 +44,8 @@ Order of TODO-elimination:
 			0. add permalinks to: 
 				1. `regex` (no need to list all items - do it module-by-module this time)
 				2. `constants`
+				3. `utils`: leftovers: 
+					1. `utils.EnumSpace.fromArray`
 
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
 				[proper pages, + JSDoc that references them /w brief descriptions]
@@ -404,18 +406,7 @@ TODO:
 			Which correspond to prior number of newlines and prior number of symbols; 
 			Used frequently throughout for things like debug information; 
 			The '.convert()' would play very nicely with it...; 
-
-		ES1. Implement a new class for the library - FiniteEnum: 
-			This, basically, creates an 'EnumSpace', that consists of all the given items, 
-				BUT requires finding out their uniqueness beforehand (using the 'new Set', or the 'one.js' 'uniqueArr'). 
-				Thus, for instance, these are equivalent: 
-
-					const a = new FiniteEnum(["800", "elorian", "800", 998])
-					const b = new FiniteEnum(["800", "elorian", 998])
-				
-				Thus, the '.size' of the given EnumSpace is actually fluid; 
-				Likewise, its' '.add()' would NOT be a number (hence - one NEEDS A NEW INTERFACE); 
-		
+	
 		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
 			This is the early version [rough, unfinished, sketchy]: 
 				interface Stream<Type = any> extends Summat {
@@ -2042,6 +2033,10 @@ TODO:
 				1. @returns
 				2. @type [JSDoc-level self-reference for types]
 				3. ...
+
+		IN2. REMINDER: about the `init` method output type: 
+			After it is generalized to a SINGLE interface, make FOR ALL `.init`-having method
+			so that `init` returns `this`. 
 	
 	10. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 
