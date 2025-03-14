@@ -2,7 +2,7 @@ import type { Eliminable } from "../Eliminable/interfaces.js"
 import type { Flushable } from "../interfaces.js"
 
 export interface Resulting<ResultType = any> {
-	result: ResultType
+	readonly result: ResultType
 }
 
 export interface IPointer<Type = any> {

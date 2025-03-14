@@ -125,6 +125,11 @@ Order of TODO-elimination:
 				1. `x` - code-stylization
 				2. [...](...) - references, point to the abstraction's page
 			DO IT SEPARATELY! 
+		
+		7. remove unused wiki-pages: WALK THROUGH THEM.
+			Some capitalized-functions have themselves a separate page, 
+				even though they don't really deserve it. 
+			Delete those. 
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -1500,8 +1505,8 @@ TODO:
 
 			1. Based off the same RegExp engine as `RegExpTokenizer`/`RegExpValidator`
 			2. More efficient [algorithmically], as it requires a single pass over the string, instead of 
-				several with multiple `.split()` calls; s
-			3. Uses *the same*
+				several with multiple `.split()` calls;
+			3. Uses *the same* table-interfaces to represent multiple "ordered" removals as before
 
 			ALSO: 
 				1. remove the `EliminableCounter`
