@@ -47,8 +47,6 @@ Order of TODO-elimination:
 			0. add permalinks to: 
 				1. `regex` (no need to list all items - do it module-by-module this time)
 				2. `constants`
-				3. `utils`: leftovers: 
-					1. `utils.EnumSpace.fromArray`
 
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
 				[proper pages, + JSDoc that references them /w brief descriptions]
@@ -1971,7 +1969,7 @@ TODO:
 						Second - see the 'time-difference/memory-difference' ratio, see if it's worth it (very likely not); 
 						Third - either delete, or keep; 
 	
-		PM1. [Maybe - add, check for feasibility + redundancy; A Big one] Add support for proper PatternMatching;
+		PM1. [Maybe - add, check for feasibility + redundancy; A Big one] Add support for proper Pattern Matching;
 			Serves as an abstraction over the 'RegExp'; 
 			Allows one to match 'Token'-s using 'MatchablePattern'-s; 
 			Would have: 
