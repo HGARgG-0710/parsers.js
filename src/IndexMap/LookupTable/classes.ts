@@ -14,7 +14,8 @@ import { pos } from "../../utils.js"
 import { assignIndex } from "src/utils.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
-const { id, copy } = functional
+import { makeDelegate } from "src/refactor.js"
+const { id } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isNullary } = type
@@ -105,7 +106,7 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
 ): TableConstructor<OwningType> {
-	const hashTable = copy(DelegateHashTable)
+	const hashTable = makeDelegate(DelegateHashTable, "delegate")
 	extendPrototype(hashTable, { getIndex: ConstDescriptor(ownership) })
 	return hashTable as TableConstructor<OwningType>
 }

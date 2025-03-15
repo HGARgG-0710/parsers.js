@@ -36,6 +36,9 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
+	TODO: 
+		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY!]
+
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 
 		[The "big" full GitHub Wiki will be for this...]
@@ -75,7 +78,9 @@ Order of TODO-elimination:
 
 	1. Wiki:
 		1. RE-DO the "Generic Arguments" thing for: 
-			1. 
+			1. ArrayCollection
+			2. UnfreezableArray
+			3. UnfreezableString
 
 			USE LISTS, and per-case description. 
 			Reason - library uses generic function arguments
@@ -2130,7 +2135,7 @@ TODO:
 			Although... This is rather general. Perhaps, better implement as a separate package; 
 			Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 	
 		
-		PA1. Callable - make a dependendency, a "mini-package" named "callable"; 
+		PA1. Callable [in Parser/Composition/abstract.ts] - make a dependendency, a "mini-package" named "callable"; 
 			Export the function there as 'Callable'
 
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 

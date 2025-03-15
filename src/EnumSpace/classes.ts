@@ -1,6 +1,8 @@
 import type { IEnumSpace } from "./interfaces.js"
 import type { Mappable, Sizeable } from "../interfaces.js"
 
+import { makeDelegate } from "src/refactor.js"
+
 import { functional, inplace, object, array, type } from "@hgargg-0710/one"
 const { id } = functional
 const { out } = inplace
@@ -64,7 +66,7 @@ abstract class PreEnumSpace<Type = any> implements Sizeable, IEnumSpace<Type> {
 export function EnumSpace<Type = any>(
 	generator?: (i?: number, ...x: any[]) => Type
 ): new (init?: Type[] | number) => IEnumSpace<Type> {
-	const enumSpace = functional.copy(PreEnumSpace<Type>)
+	const enumSpace = makeDelegate(PreEnumSpace<Type>, "delegate")
 
 	extendPrototype(enumSpace, {
 		generator: ConstDescriptor(generator)

@@ -11,9 +11,9 @@ import type {
 import { FlushableValidatable } from "./abstract.js"
 import { validateString } from "./utils.js"
 
-import { inplace, object, functional, array } from "@hgargg-0710/one"
+import { inplace, object, array } from "@hgargg-0710/one"
+import { makeDelegate } from "src/refactor.js"
 const { replace } = inplace
-const { copy } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isEmpty } = array
@@ -57,13 +57,13 @@ abstract class PreDelegateValidatable<Type = any, KeyType = any>
 export function DelegateValidatable<Type = any, KeyType = any>(
 	validator: FreeValidator<Type, KeyType>
 ): new (value?: Type) => ValidatablePattern<Type, KeyType> {
-	const _DelegateValidatable = copy(PreDelegateValidatable)
+	const delegateValidatable = makeDelegate(PreDelegateValidatable, "delegate")
 
-	extendPrototype(_DelegateValidatable, {
+	extendPrototype(delegateValidatable, {
 		validator: ConstDescriptor(validator)
 	})
 
-	return _DelegateValidatable as new (value?: Type) => ValidatablePattern<
+	return delegateValidatable as new (value?: Type) => ValidatablePattern<
 		Type,
 		KeyType
 	>
