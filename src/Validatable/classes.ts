@@ -37,7 +37,11 @@ abstract class PreDelegateValidatable<Type = any, KeyType = any>
 		let i = validated.length
 
 		while (i--) {
-			;[tempValid, tempRemains] = this.validator(validated[i] as Type, key, handler)
+			;[tempValid, tempRemains] = this.validator(
+				validated[i] as Type,
+				key,
+				handler
+			)
 			this.result[0] = tempValid
 			replace(validated, i, ...tempRemains)
 		}
@@ -53,12 +57,21 @@ abstract class PreDelegateValidatable<Type = any, KeyType = any>
 export function DelegateValidatable<Type = any, KeyType = any>(
 	validator: FreeValidator<Type, KeyType>
 ): new (value?: Type) => ValidatablePattern<Type, KeyType> {
-	const _DelegateValidatable = copy(PreDelegateValidatable) as new (
-		value?: Type
-	) => ValidatablePattern<Type, KeyType>
-	extendPrototype(_DelegateValidatable, { validator: ConstDescriptor(validator) })
-	return _DelegateValidatable
+	const _DelegateValidatable = copy(PreDelegateValidatable)
+
+	extendPrototype(_DelegateValidatable, {
+		validator: ConstDescriptor(validator)
+	})
+
+	return _DelegateValidatable as new (value?: Type) => ValidatablePattern<
+		Type,
+		KeyType
+	>
 }
 
-export const ValidatableString: new (value?: string) => ValidatableStringPatternType =
-	DelegateValidatable<string, string | RegExp>(validateString)
+export const ValidatableString: new (
+	value?: string
+) => ValidatableStringPatternType = DelegateValidatable<
+	string,
+	string | RegExp
+>(validateString)

@@ -1,80 +1,20 @@
-import type { ArrayEnum, EnumSpace } from "./interfaces.js"
+import type { IEnumSpace } from "./interfaces.js"
 import type { Mappable, Sizeable } from "../interfaces.js"
 
-import { InitializablePattern } from "../Pattern/abstract.js"
-
-import { functional, inplace, object, array } from "@hgargg-0710/one"
+import { functional, inplace, object, array, type } from "@hgargg-0710/one"
 const { id } = functional
 const { out } = inplace
-const { empty } = object
-const { mixin } = object.classes
-const { copy, uniqueArr, numbers } = array
+const { empty, extendPrototype } = object
+const { uniqueArr, numbers } = array
+const { ConstDescriptor } = object.descriptor
+const { isNumber, isArray } = type
 
-abstract class PreEnumSpace<Type = any> implements Sizeable {
+abstract class PreEnumSpace<Type = any> implements Sizeable, IEnumSpace<Type> {
 	protected value: Type[] = []
 
-	abstract add(size: number): void
+	generator?: (i?: number, ...x: any[]) => Type;
 
-	map<Out = any>(mapped: Mappable<Type, Out> = id<Type> as any) {
-		return this.value.map(mapped)
-	}
-
-	set size(size: number) {
-		const diff = this.size - size
-		if (diff > 0) out(this.value, size, diff)
-	}
-
-	get size() {
-		return this.value.length
-	}
-
-	join(space: ArrayEnum<Type>) {
-		this.value.push(...space.get())
-		this.ensureUnique()
-		return this
-	}
-
-	protected ensureUnique() {
-		this.value = uniqueArr(this.value!)
-	}
-
-	constructor(size: number = 0) {
-		this.size = size
-	}
-}
-
-const sizeSetter = Object.getOwnPropertyDescriptor(PreEnumSpace.prototype, "size")!.set!
-const reduceSize = (x: PreEnumSpace, size: number) => sizeSetter.call(x, size)
-
-export class ConstEnum extends PreEnumSpace<{}> implements ArrayEnum<{}> {
-	set size(size: number) {
-		const diff = size - this.size
-		if (diff > 0) this.add(diff)
-		else reduceSize(this, size)
-	}
-
-	add(size: number) {
-		this.value.push(...Array.from({ length: size }, empty))
-		return this
-	}
-
-	copy() {
-		return new ConstEnum(this.size)
-	}
-
-	get() {
-		return this.value as readonly {}[]
-	}
-}
-
-export class FiniteEnum<Type = any>
-	extends InitializablePattern<Type[]>
-	implements ArrayEnum<Type>
-{
-	protected generator?: (i: number, ...x: any[]) => Type
-
-	map: <Out = any>(f?: Mappable<Type, Out> | undefined) => Out[]
-	join: (enums: EnumSpace<Type>) => this
+	["constructor"]: new (value?: Type[]) => IEnumSpace<Type>
 
 	add(size: number): this {
 		this.value!.push(
@@ -85,22 +25,56 @@ export class FiniteEnum<Type = any>
 	}
 
 	copy() {
-		return new FiniteEnum(copy(this.value!), this.generator)
+		return new this.constructor(array.copy(this.value!))
 	}
 
-	// * dummy methods (real ones contributed by `PreEnumSpace`)
+	map<Out = any>(mapped: Mappable<Type, Out> = id<Type> as any) {
+		return this.value.map(mapped)
+	}
+
+	set size(size: number) {
+		const diff = this.size - size
+		if (diff > 0) out(this.value, size, diff)
+		else this.add(diff)
+	}
+
 	get size() {
-		return 0
+		return this.value.length
 	}
 
-	set size(v: number) {}
+	join(space: IEnumSpace<Type>) {
+		this.value.push(...space.map())
+		this.ensureUnique()
+		return this
+	}
 
-	protected ensureUnique(): void {}
+	protected ensureUnique() {
+		this.value = uniqueArr(this.value!)
+	}
 
-	constructor(value: Type[] = [], generator?: (i?: number, ...x: any[]) => Type) {
-		super(value)
-		this.generator = generator?.bind(this)
+	constructor(init: Type[] | number = []) {
+		const value = isNumber(init) ? [] : init
+		const count = isArray(init) ? 0 : init
+
+		this.size = count
+		this.value = value
 	}
 }
 
-mixin(FiniteEnum, [PreEnumSpace])
+export function EnumSpace<Type = any>(
+	generator?: (i?: number, ...x: any[]) => Type
+): new (init?: Type[] | number) => IEnumSpace<Type> {
+	const enumSpace = functional.copy(PreEnumSpace<Type>)
+
+	extendPrototype(enumSpace, {
+		generator: ConstDescriptor(generator)
+	})
+
+	return enumSpace as new (init?: Type[] | number) => IEnumSpace<Type>
+}
+
+// * Pre-doc note: default provides benefits - 1. stable memory footprint; 2. easy to generate new instances (no need for user involvement); 3. unlimited number of instances
+export const ConstEnum = EnumSpace(empty)
+
+// * Pre-doc note: default provides benefits - 1. debugability; 2. serializability; 3. (as consequence of 1.) usage easier to integrate with external tools; 4. lazy evaluation
+export const FiniteEnum = EnumSpace()

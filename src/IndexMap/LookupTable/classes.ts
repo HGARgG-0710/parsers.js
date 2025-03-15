@@ -3,8 +3,7 @@ import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
 import type { LookupTable, TableConstructor } from "./interfaces.js"
 import type { IndexAssignable } from "src/interfaces.js"
 import type { Sizeable } from "src/interfaces.js"
-import type {
-	HashMap} from "../HashMap/interfaces.js"
+import type { HashMap } from "../HashMap/interfaces.js"
 import type { Rekeyable } from "src/interfaces.js"
 import type { Deletable } from "src/interfaces.js"
 import type { Settable } from "src/interfaces.js"
@@ -29,7 +28,12 @@ abstract class DelegateLookupTable<
 		Deletable<DeletedType> &
 		Sizeable = any,
 	DeletedType = KeyType
-> extends DelegateKeyReplaceable<KeyType, ValueType, DelegateType, DeletedType> {
+> extends DelegateKeyReplaceable<
+	KeyType,
+	ValueType,
+	DelegateType,
+	DeletedType
+> {
 	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
 		assignIndex(x, ownIndex)
 		return x
@@ -44,7 +48,11 @@ abstract class DelegateLookupTable<
 	}
 }
 
-abstract class DelegateHashTable<KeyType = any, ValueType = any, OwningType = any>
+abstract class DelegateHashTable<
+		KeyType = any,
+		ValueType = any,
+		OwningType = any
+	>
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
@@ -97,9 +105,9 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
 ): TableConstructor<OwningType> {
-	const HashTableClass = copy(DelegateHashTable) as TableConstructor<OwningType>
-	extendPrototype(HashTableClass, { getIndex: ConstDescriptor(ownership) })
-	return HashTableClass
+	const hashTable = copy(DelegateHashTable)
+	extendPrototype(hashTable, { getIndex: ConstDescriptor(ownership) })
+	return hashTable as TableConstructor<OwningType>
 }
 
 export const [BasicTable, StreamTable, PosTable]: [

@@ -74,6 +74,12 @@ Order of TODO-elimination:
 			5. VERIFY everthing visually, once the docuementation work is done...; 
 
 	1. Wiki:
+		1. RE-DO the "Generic Arguments" thing for: 
+			1. 
+
+			USE LISTS, and per-case description. 
+			Reason - library uses generic function arguments
+	
 		3. DOCUMENTATION POLICY: 
 			1. IF `x` is an alias/util, DO NOT add a new page for it: 
 				JSDoc ALONE will suffice. 
@@ -176,6 +182,548 @@ Order of TODO-elimination:
 				1. new DynamicParser is EXTREMELY complex [hence, errorprone]
 				2. to test out the overall interface manageability
 		
+	PROBLEMS: 
+		Understood that the v0.3 IS NOT YET PRODUCTION-READY
+			from feature perspective - there's just too little stuff. 
+		Thus, one TAKES SOME of the features from v0.4 TO IMPLEMENT HERE. 
+		BUT, before then - ONE NEEDS TO *DIVIDE* the library into "condemned (dead)
+			and *LIVING* pieces. 
+		
+		Among specific restrictions:
+			1. No docs (yet) for: 
+				1. `ValidatablePattern` and `TokenizablePattern`
+				2. `Eliminable` gets deleted
+			2. WRITE DOCS AND TESTS FOR OLD VERSIONS FIRST, then - 
+			3. implement the (a) missing feature(s) that go into the v0.3
+			4. alter docs 
+			5. return to 3., repeat until done
+		
+		TODOS for v0.3: 		
+			Primary: 
+				PO1. Introduce a new Position class - Multiline
+					Basically, a pair of numbers: 
+						(lineNum, charNum)	
+					Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
+					Which correspond to prior number of newlines and prior number of symbols; 
+					Used frequently throughout for things like debug information; 
+					The '.convert()' would play very nicely with it...; 
+
+					REASON TO IMPLEMENT AS V0.3: 
+						1. Every module should ahve at least 2 different classes
+							Exceptions:
+								1. TokenizablePattern
+								2. ValidatablePattern
+							Reason:
+								1. (as learned per v0.3) Implementing lazy algorithms in a fashion that is clean 
+									takes a greater amount of time and effort. 
+						2. `Position` is the only that has "semantically", only one unit - MultiIndex (MultiIndex)
+
+					NOTE: it works ONLY with 'Stream's that have a `string` as input...
+					
+				PO2. [new Position class] Traveller, a point on a Stream [Position/classes.ts]
+
+					REASONS for v0.3: 
+						1. TreeStream.navigate - OUT OF FORM (incorrect implementation)
+							This is supposed to be `.travel`; 
+						2. `Position` is (rather) useless right now, ONLY ever allowing to do `MultiIndex.convert(treeStream)`, and 'treeStream.navigate(new MultiIndex(...))'
+
+					Prior sketches of the v0.3 included a '.navigate' method that implemented an absolute positioning inside a Stream.
+					This was scratched in favour of relative positioning, which is more widespread. 
+					The absolute positioning, however, has a very powerful use case, provided more things are added: 
+
+						1. StreamClass - a new flag '.size', for remembering the precise size of a Stream, in terms of the last position that 
+							is visitable; 
+							This is useful for: 
+
+								1. Remembering a Position, at which the portion of the Stream starts; 
+								2. Traversing the precise distance until the end; 
+									The hard numeric bound gives a speedup due to the lack of need for checking for '.isCurrEnd()'
+										(more precisely, one can replace it with a 'this.pos < this.size'). 
+
+									For this, the 'isCurrEnd' has to be __'.writable'__; 
+
+							For efficient implementation of this, one must be able to get to the beginning of the portion in question; 
+							Therefore, a custom implementation of '.travel' is necessary. 
+							Although, one can define a default that works by an efficient implementation of '.navigate()' and '.rewind()': 
+
+								[sketch - NOTE: requires 'this.pos' to optimize for number-navigation]
+								travelDefault = function (pos: Position) {
+									if (isNumber(pos))
+										return this.navigate((-1) ** (this.pos > pos) * (pos - this.pos)) // final 'this.pos+ = this.pos - (this.pos - pos) == pos'
+									else {
+										// the default WITHOUT this.pos
+										this.rewind()
+										return this.navigate(pos)
+									}
+								}
+
+							Then, one can have: 
+
+								1. A WrapperStream, on a given Stream, with '.size = true'; 
+								2. Remember a Position, where WrapperStream starts on a Stream using a 'Traveller'; 
+								3. Define an efficient '.rewind()' on the WrapperStream, that would use the 'Traveller' in question, after fully iterating through it; 
+									Another reason for formalizing the WrapperStream; 
+							
+							This is absolutely priceless for lazy parsing (skipping pieces of data in order to gain information about it first 
+								- then doing the parsing, on a need-to-know basis). 
+
+							List of Stream-creation classes to make into WrapperStream-s: 
+
+								1. LimitedStream; 
+								2. NestedStream; 
+								3. PredicateStream; 
+							
+							Like StreamClass (on which they'd be based), these are all generated classes;  
+
+							ALSO: 
+								1. Replace `TreeStream.navigate` with `TreeStream.travel`
+									1. LATER: implement the `TreeStream.navigate` DIFFERENTLY - as a RELATIVE *count* for each of the levels: 							
+										multind = [(0), (1), (2), ..., (n)]: 
+											0 - from current level
+											1 - absolute 
+											2 - absolute 
+											...
+											n - absolute
+
+						2. In accordance with '1.', a new default method for StreamClass - '.travel' (does an absolute navigation around the Stream)
+						3. To remember particular Positions on a particular Stream, that may need to be recalled later (as per '1.'), one has a new 'Traveller' class: 
+
+							[sketch]
+							Traveller extends PositionObject<Position> {
+								value: Position
+								stream: TravelableStream
+								convert() {
+									return positionConvert(this.value)
+								}
+								travel () {
+									return this.stream.travel(this.value)
+								}
+							}
+								
+				SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
+					This is the early version [rough, unfinished, sketchy]: 
+						interface Stream<Type = any> extends Summat {
+							pos?: number
+							buffer?: FreezableBuffer<Type>
+							state?: Summat
+							prev?: () => Type
+							isStart?: boolean
+
+							init?: (...x: any[]) => Stream<Type>
+							navigate?: (pos: Position) => Type
+							finish?: () => Type
+							rewind?: () => Type
+
+							curr: Type
+							next: () => Type
+							isEnd: boolean
+						}
+
+					REASON TO BE A PART OF V0.3: 
+						1. library has been divided for too long. 
+							It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 
+					
+				IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
+					Make it separate. 
+					Reasons:
+						1. Doesn't allow for iteration algorithms
+						2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+						3. Will cause less nestedness
+
+				IN1. The `Initializable` interface - make it higher level: 
+					1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
+					2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+
+					REASON FOR v0.3: 
+						1. tired of constantly fixing broken types, want it be done well once and for all
+						2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+				
+				ME5. 'InputStream' - provide a '.peek(n)' method: 
+					1. looks "forward" n items; 
+					2. add a new interface - PeekableStream
+						2.1. Add a general 'StreamClass' implementation: uses a 'PreallocBuffer' (empty by default), which 
+							keeps the 'next n' items, to be looked up. 
+							1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
+								index appropriately [reflect this...]; 
+    				
+							PROBLEM [PreallocBuffer]: what about the `.next()` calls? 
+								In order to *FREE* the buffer for a sufficiently large `.peek(n)` operation after doing `.next(k)`, 
+									one will have to call `.unshift()` [which is horribly slow]. 
+								THEREFORE, create a class that EXTENDS the `PreallocBuffer`, and use that instead. 
+								Call it `RotationBuffer`, and it will work like: 
+									1. keep the internal array [pre-allocated, as per the `super` methods]
+									2. keep the `.rotation: number = .length - 1 (by default)` index
+										It will correspond to the `[i]` index AFTER WHICH the `.peek(1)` [respectively, `.read(0)`] value, starts. 
+										It goes up to `.peek(.length - .rotation)`, after which it "wraps around", with internal `.array[0]` being `.peek(.length - .rotation + 1)`, and so forth, 
+											up until `.peek(.length)`, which is the last permitted '.peek' for the chosen allocation. 
+									3. keep a method for "moving" '.rotation': 
+										1. .rotate(direction: boolean)
+											if 'true', increases the `.rotation`, 
+											otherwise - decreases it. 
+    				
+					Make 'StreamClassInstance' a `Partial<PeekableStream>` [add the generic `.peek()` definition for case of keeping a small '.peekBuffer' - NEW PARAMETER -- 'peekSize: number = 0']. 
+    				
+					1. Also - add `.next(n: DirectionalPosition = 1)` and `.prev(n: DirectionalPosition = 1)`, 
+						where `n` is the number of items TO SKIP [forwards, or backwards respectively]. 
+							The `this.curr` is returned INVARIABLY. 
+							Note: this will require some heavy rewriting on behalf of the `StreamClass.prototype.next`; 
+							1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next/input.prev(n))(value)` [rough]:
+							 	The old `parsers.js` had something similar, except not as well-designed...
+    				
+					2. Also - add the `.has(n)` 'Parser/utils.ts'-utils AS A METHOD, 
+						of positive/negative indexes [with respective optimizations]. 
+    				
+					3. Then - REWRITE the `skip()` util from the `Parser/utils.ts`: 
+						Will, from now on, be doing only some fairly simple conversions (PredicatePosition [/w .boolean] -> Function; 
+							Then call either '.next(f/n)' or '.prev(f/n)'
+						). 
+				
+				UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
+					For a given 'Indexable', it does: 
+
+						// ! PROBLEM: lacks ability to check for MULTIPLE WORDS: 
+						// 		* Solution: replace 'matchWord' with a more complex hand-written 'RegExp'-matching engine for the library... [uses 'Stream's instead of JS 'string's]: 
+						// 			ALSO - use the *same* engine for the 'RegExpTokenizer'; 
+						// rough sketch - requires the '.peek(n)' method; 
+						// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
+						function matchWord(stream, word) {	
+							const positions = word.length
+							for (let i = 0; i < positions; ++i) 
+								if (word[i] !== stream.peek(i)) 
+									return 0
+							return positions
+						}
+
+						// IDIOM: for skipping a word, call it 'function consume(stream, word, wrapper)' - a 'Parser/utils.ts' utility; 
+						const matched = matchWord(stream, word)
+						skip(stream, matched)
+						if (matched) return wrapper(word)
+				
+				CC1. PreallocArray - a new 'Collection' type: 
+					0. new property - 'lastInd: number = this.value.length'
+					1. extends ArrayCollection
+					2. new method - '.prealloc(n)': 
+						1. If 'this.value.length > n', goto 5, else - continue
+						2. this.value.length = n
+						3. this.lastInd = this.value.length
+						4. Finish
+					3. change method - '.push()': 
+						1. this.value[this.lastInd++] = this.value
+					4. change method - '.get()' [as 'readonly number[]']: 
+						1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
+					5. change method - '.move(n)': 
+						1. this.value.length = this.lastIndex
+						2. const lastValue = this.value
+						3. this.value = Array(this.n)
+						4. return lastValue
+
+					Purpose: 
+						1. Providing an interface for user-level preallocation of an array
+						2. Providing 1. together with an integration with the 'Collection' interface
+
+				CC2. RotationBuffer - See `.peek(n)` for more details
+				
+				TO2. Remove (replace):
+					REASON FOR V0.3: 
+						1. PatternTokenizer/PatternValidator is TOO SLOW IN PRACTICE ALGORITHMICALLY (not good - multiple passes instead of a single one)	
+						2. They are unbearable. Seriously. Everything else in the library is SHINY. But one *is* missing that bloody RegExp engine...
+
+					1. PatternTokenizer
+					2. PatternValidator
+
+					[NOTE: important - only these implementations/algorithms! Keep the interfaces, they're quite good...]
+					3. ValidatablePattern
+					4. TokenizablePattern
+
+					With a NEW approach - a: 
+						1. 'RegExpTokenizer'
+						2. 'RegExpValidator'
+						3. 'TokenStream' - output from 'RegExpTokenizer' [or, alternatively - an interface for the 'StreamParser']; 
+
+						IMPORTANT NOTE: THESE *DO NOT* use a RegExpMap, instead a `Pairs<RegExp, ParserFunction (or whatever)>` is passed directly to them...
+					
+					These are function-creation functions that is based off *THE SAME SIGNATURE* as 
+						the 'RegExpMap', with the difference that these get to be used with 'StreamParser/LocatorStream/PositionalValidator/...'; 
+					
+					The RegExpTokenizer is A FULL-FLEDGED RegExp ENGINE. 
+					ALSO: 
+						1. 'Regex' constructor for making the Regular Expression IS THE ENGINE: 
+							Methods: 
+								1. .matchAt(x: Indexed<string>, i: number)
+									Checks that AT THE GIVEN `i` IN `x`, 
+										there is AN IMMIDIATE MATCH. 
+									This is important, as it allows the "tabular" 
+										work that the RegexTokenizer and `RegexValidator` do...
+								2. .sub(from: number, to: number) - returns a new Regex that is the result of LIMITING the current one
+									between `from` and `to` indexes for VALID TOKENS. 
+
+									This way, for instance: 
+										(a(bc)+) has 4 tokens, ordered as: 
+											1. (...) - outer bracket
+											2. a 
+											3. (...) - inner bracket
+											4. + [relative to the outer bracket]
+											5. b
+											6. c
+
+									Thus, recursion is handled BY THE FIRST OCCURENCE. 
+
+								ALSO, add the JavaScript string-compatibility methods: 
+									1. [Symbol.match]
+									2. [Symbol.matchAll]
+									3. [Symbol.replace]
+									4. [Symbol.search]
+									5. [Symbol.split]
+
+								ALSO [imporant]: have ALGEBRAIC methods for it. 
+									Meaning: ability to join them via a disjunction '|', 
+										applying the quantifiers '*', '+', '{a, b}', '?', 
+										applying negation '^'. 
+									Each of those CREATES A NEW 'Regex'! 
+									Purpose is to (basically) replace the `regex` module. 
+								
+								ALSO: the `Regex` implements an NFA
+						2. `RegexTokenizer` is BASED OFF IT
+					NOT based upon JS's one. 
+					It: 
+						1. Takes the signature that is MULTIPLE expressions
+						2. Combines it into a `Stream`, that produces tokens according to the set rules: 
+							1. consists of a PARSER for the original regular expression string 
+							2. consists of a COMPILER for the regular expression AST (obtained from parsing)
+							3. consists of methods: 
+								1. amongst which there is '.match', from which 'Stream' is produced by doing something like: 
+									new RegExpEngine(GENERICS)("REGEXP_STRING").match("TARGET_STRING")
+						3. When tokens CANNOT be produced, STRINGS are produced instead
+							Input (.value - it's a 'Pattern') *IS* a string...
+					
+					Reasons: 
+						1. PatternTokenizer (AND TokenizablePattern), PatternValidator (AND ValidatablePattern) use THE SAME code
+						2. PatternTokenizer, PatternValidator are (both) FAR too generic
+							Used only once. 
+							It's a waste of generality. 
+
+					NOTE: the 'RegExpMap' REMAINS: 
+						Reason: it can still be useful to someone (as a boilerplate saver...)
+
+					ALSO: about `RegExpTokenizer`: 
+						[maybe] - create your own flavour for 'RegExp's
+						Then: 
+							1. rewrite the `regex` module to INSTEAD create YOUR flavour [more modular]
+								1. BUT - *do not* delete the current stuff
+									Instead, add a submodule FOR YOUR flavour, and for the "builtin" JS flavour
+									Together add a "convert" submodule to switch between them
+							2. create a submodule for it to CONVERT between the two [JS regex <-> our regex]; 
+							3. write proper docs for it
+								3.1. [possibly] make a separate module; This could be too huge conceptually for the library's ontology
+
+						It will improve upon the "simple" JS regex in the following ways: 
+							0. replace the first and last items "/^$/" with /:#/
+							1. add a general `^x` for NEGATING a pattern. Thus, elementary [^...] becomes composite ^[...]
+								This way, for instance /^ab+/ matches "bbb", but not "ab". 
+							2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
+								to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
+							3. remove the `\B`, `\D`, `\S`, (?!...), (?<!...), ..., other negative-classes/assertions in favour of the simpler `^x` form
+							4. replace the (?:...) with (:...) [syntax simplification]
+							5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
+							6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
+								Will span the max possible values of the Unicode range
+							7. get rid of the flags: 
+								1. 'g': 
+									replace the different behaviour with METHODS; make it non-exclusive
+
+								2. 'v':
+									remove, provide its functionality by default: 
+										1. `P` not working - it is removed and replaced by `^p{...}`:
+											By default, consumes the max possible string (remaining, if needed). 
+											Limited by (...){n, k}
+
+								3. 'i': 
+									make it a new group type - that matches A GROUP regardless of the case: 
+										Ideas for syntax: 
+											
+											1. /(#i...)/; 
+											2. /(?i...)/; # more traditional...
+									
+									ALSO: make it possible to *inject* custom functionality 
+										(utilizing the fact that `RegExpTokenizer` CAN be generic); 
+
+								4. 's': 
+									make it default
+								
+								5. 'u': 
+									remove, included by default with `v`
+
+								6. 'y' (????): 
+									find out what this even is (and what it's used for)
+									seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
+							
+								7. 'm': 
+									remove - unnecessary
+									possible to achieve the same thing using a slight modification of:
+										/(?<\n)...(?=\n)/
+								
+								8. 'd': 
+									too specific, ugly
+									make these kinds of behaviours GENERIC instead
+									[note: the 'RegExpTokenizer' WILL be generic...
+							8. get rid of form-feed (`\f`): 
+								Reason: not useful for parsing
+							9. ALLOW the space in '{a,b}' (becomes '{a, b}'); 
+							10. Add a possesive quantifier "*+", "?+", "++": 
+								https://www.regular-expressions.info/possessive.html
+							11. Add atomic groups: 
+								https://www.regular-expressions.info/atomic.html
+							12. Double negation inside a class: 
+								^[^\w] is the same as (in JS flavour) [^\W]
+
+								That is, it is COMLEMENT OF A CLASS of items that are NOT A CHARACTER.
+								That is, it's \w. 
+							13. Add relative backreferences: 
+								https://www.regular-expressions.info/backrefrel.html
+							14. Fix the ECMAScript behaviour of empty-matching backreferences: 
+								https://www.regular-expressions.info/backref2.html
+							15. Add the conditionals: 
+								https://www.regular-expressions.info/conditional.html
+							16. Regarding the /(#)/ - modes: 
+								https://www.regular-expressions.info/modifiers.html
+							17. Add subroutines (recursion): 
+								https://www.regular-expressions.info/subroutine.html
+
+						IDEA: use this regex-flavour for the HammockLang implementation later...
+
+					ALSO - retain the `TokenizablePattern` and `ValidatablePattern` interfaces, 
+						KEEP (and use) THEM for your `RegExpTokenizer`. 
+						
+						They are very good at (in general) at expressing the idea of a 
+							"carrier object" and a its "handler function" for tokenization/validation information 
+								(here - regular expressions). 
+
+						Don't use them as-is, and INSTEAD of plain JS RegExp-s, use your flavour (+ the "iterable tables" for handles instead individual [string, handler] pairs,
+							so the interfaces will still have to be changed somewhat...	
+						), BUT *DO NOT* throw them out...
+
+							IDEA: for usage with `RegExpTokenizer`, create an 'IterableMap' function [inside 'Parser/TableMap']: 
+								This is a function that:
+									1. takes in a LinearIndexMap [or other `IndexMap`]
+									2. produces a function that: 
+										0. assigns the map to its own `.table` property
+										1. iterates the given map, CALLING each function-value inside of it with arguments: 
+											0. 'this' [yes, it retains the `this` value...]
+											1. the original value `x`
+											2. the function itself (for access to `.table` property)
+											n. all the other (spread) arguments
+										2. returns the result of the last one
+
+				SI5. IDEA: simplifying the list of available Stream-s further: 
+					Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
+						returning a Stream with precisely this same definition; 
+
+					Then, you can do: 
+						const reversed = stream.reverse()
+					instead of: 
+						const reversed = ReversedStream(stream)
+
+					Nicer semantics. 
+
+				EL1. Eliminable - get rid of it: 
+					More specifically, create a `RegExpEliminator` interface, which would replace it: 
+
+					1. Based off the same RegExp engine as `RegExpTokenizer`/`RegExpValidator`
+					2. More efficient [algorithmically], as it requires a single pass over the string, instead of 
+						several with multiple `.split()` calls;
+					3. Uses *the same* table-interfaces to represent multiple "ordered" removals as before
+
+					ALSO: 
+						1. remove the `EliminableCounter`
+						2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
+						3. remove the `Eliminable` interfaces
+
+				SI2. Add the `WrapperStream<Type, S extends BasicStream<Type> = BasicStream<Type>>` interface: 
+					This is a `BasicStream<Type> & Pattern<S>`. 
+					Let appropriate special-cases of `StreamClass` be marked to implement it: 
+						1. StreamParser
+						2. NestedStream
+						3. LimitedStream
+						4. PredicateStream
+						
+				SI4. GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
+					Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
+						which *happens* to be the exact same one that the user is already using. 
+
+					Instead of creating A NEW class and (potentially): 
+
+						1. wasting memory (insignificant, though noticeable - prototype objects)
+						2. wasting optimizations (significant), by confusing the Engine
+					
+					The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
+						which would be: 
+
+						1. A Global object
+						2. That is connected to 'StreamClass'
+						3. And FOR WHICH 'StreamClass' DOES provide a handle, 
+							via *checking* whether or not the given class configuration already exists. 
+
+							Checks: 
+
+							1. properties/flags - by value/reference (x, y) => x === y
+							2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
+
+					The library actually DOES export various GenericCollection-s, namely one for each of: 
+						1. StreamClass
+						2. PredicateStream
+						3. LimitedStream
+						4. StreamParser
+						5. ProlongedStream
+						6. NestedStream
+						[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
+
+				SI7. Expose the `StreamClass`
+				Currently, it is not yet ready to be "released to the user", 
+					however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
+						one may as well do so, as: 
+
+					1. It would now become far too high-level to still be an implementation detail
+					2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external
+
+			Secondary: 	
+				ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
+					When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
+					Calls the '.index' on the saved '.lastIndex'; 
+					
+				ME3. [StreamClass] Iterator Helper functions - '.filter', '.take', ...: 
+					Provide them. 
+					Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
+					
+				RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+					Namely: 
+						1. intersection: 	/[[...]&&[...]]/v
+						2. subtraction: 	/[[...]--[...]]/v
+						3. string literals: /[q{...}]/v
+			
+			Minor: 	
+				SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
+					Currently, missing. 
+					Example: TreeStream. 
+						It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
+						After this change, NO MORE will the "binding" happen outside the "base" definition. 
+						Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
+
+				DE1. Increase the Library's natural debuggability: 
+					ADD names to all the nameless functions. 
+					This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 	
+					
+				SI9. Make `Position` a submodule of `Stream`
+					Reason: ontology. 
+					`Position` is ONLY ever used with `Stream`-s. 
+					Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
+					Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
+					The predicates, too, work best when considered in directional context (id est: iteration...)
+
+				SI11. The `.prod()` method - repurpose it. 
+					Replace it with a simple, general `.peek(1)` [PeekableStream]
+					Thus, it will allow a better unification of the library's concepts under the 
+						same terminology. 
+
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
@@ -398,113 +946,13 @@ TODO:
 
 				const SpecialCaseSetMap = SetMap(...)
 				const processNested = (x) => nested(TableMap(new SpecialCaseSetMap([...])), TableMap(new SpecialCaseSetMap([...])))(new WhateverStream(x))
-					
-		PO1. Introduce a new Position class - MultilinePosition
-			Basically, a pair of numbers: 
-				(linesNum, symsNum)	
-			Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
-			Which correspond to prior number of newlines and prior number of symbols; 
-			Used frequently throughout for things like debug information; 
-			The '.convert()' would play very nicely with it...; 
-	
-		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
-			This is the early version [rough, unfinished, sketchy]: 
-				interface Stream<Type = any> extends Summat {
-					pos?: number
-					buffer?: FreezableBuffer<Type>
-					state?: Summat
-					prev?: () => Type
-					isStart?: boolean
-
-					init?: (...x: any[]) => Stream<Type>
-					navigate?: (pos: Position) => Type
-					finish?: () => Type
-					rewind?: () => Type
-
-					curr: Type
-					next: () => Type
-					isEnd: boolean
-				}
-			
+								
 		IM2. [new type] BitArrayHash [IndexMap/classes.ts -> *]
 			Accepts a BitArray, returns a value from it; 
 				A hash based off bit-shifts (<<, >>); 
 			Use for defining the '.init', '.curr' and other choice functions in the StreamClass; 
 			BitArray - a UInt8Array (or other) array. Look into the '2.35' (pattern-tokenizer speedup) for details. 
 			[Namely - to properly replace the `chooseMethod` stuff]
-
-		PO2. [new Position class] Traveller, a point on a Stream [Position/classes.ts]
-
-			Prior sketches of the v0.3 included a '.navigate' method that implemented an absolute positioning inside a Stream.
-			This was scratched in favour of relative positioning, which is more widespread. 
-			The absolute positioning, however, has a very powerful use case, provided more things are added: 
-
-				1. StreamClass - a new flag '.size', for remembering the precise size of a Stream, in terms of the last position that 
-					is visitable; 
-					This is useful for: 
-
-						1. Remembering a Position, at which the portion of the Stream starts; 
-						2. Traversing the precise distance until the end; 
-							The hard numeric bound gives a speedup due to the lack of need for checking for '.isCurrEnd()'
-								(more precisely, one can replace it with a 'this.pos < this.size'). 
-
-							For this, the 'isCurrEnd' has to be __'.writable'__; 
-
-					For efficient implementation of this, one must be able to get to the beginning of the portion in question; 
-					Therefore, a custom implementation of '.travel' is necessary. 
-					Although, one can define a default that works by an efficient implementation of '.navigate()' and '.rewind()': 
-
-						[sketch - NOTE: requires 'this.pos' to optimize for number-navigation]
-						travelDefault = function (pos: Position) {
-							if (isNumber(pos))
-								return this.navigate((-1) ** (this.pos > pos) * (pos - this.pos)) // final 'this.pos+ = this.pos - (this.pos - pos) == pos'
-							else {
-								// the default WITHOUT this.pos
-								this.rewind()
-								return this.navigate(pos)
-							}
-						}
-
-					Then, one can have: 
-
-						1. A WrapperStream, on a given Stream, with '.size = true'; 
-						2. Remember a Position, where WrapperStream starts on a Stream using a 'Traveller'; 
-						3. Define an efficient '.rewind()' on the WrapperStream, that would use the 'Traveller' in question, after fully iterating through it; 
-							Another reason for formalizing the WrapperStream; 
-					
-					This is absolutely priceless for lazy parsing (skipping pieces of data in order to gain information about it first 
-						- then doing the parsing, on a need-to-know basis). 
-
-					List of Stream-creation classes to make into WrapperStream-s: 
-
-						1. LimitedStream; 
-						2. NestedStream; 
-						3. PredicateStream; 
-					
-					Like StreamClass (on which they'd be based), these are all generated classes;  
-
-				2. In accordance with '1.', a new default method for StreamClass - '.travel' (does an absolute navigation around the Stream)
-				3. To remember particular Positions on a particular Stream, that may need to be recalled later (as per '1.'), one has a new 'Traveller' class: 
-
-					[sketch]
-					Traveller extends PositionObject<Position> {
-						value: Position
-						stream: TravelableStream
-						convert() {
-							return positionConvert(this.value)
-						}
-						travel () {
-							return this.stream.travel(this.value)
-						}
-					}
-		
-		SI2. Add the `WrapperStream<Type, S extends BasicStream<Type> = BasicStream<Type>>` interface: 
-			This is a `BasicStream<Type> & Pattern<S>`. 
-			Let appropriate special-cases of `StreamClass` be marked to implement it: 
-				1. StreamParser
-				2. NestedStream
-				3. LimitedStream
-				4. PredicateStream
 
 		IM5. [IndexMap/classes.ts -> *] MultiMap - [IndexMap-like] this returns ALL the matched items, and while running multiple results 
 			Can contain functions (called to obtain a value), or values themselves.
@@ -558,11 +1006,21 @@ TODO:
 							1. RecursiveASTNode - without '.value' and '.children: ASTNode[]'; NOTE: here 'ASTNode' is an interface
 							2. ContentASTNode - with '.value: any', without '.children'; This is just a 'TokenType' with additional prototype-methods
 							3. TrivialASTNode - with '.value', without '.children'; This is a 'TokenInstance', with additional prototype-methods
-					4. The '.to' method CONVERTS BACK to a JSON of 'TokenType-TokenInstance'-kind of an object instead: 
-						1. REASON - *despite* being better than the minimalistic 'TokenType-TokenInstance' approach for ANY kind of work, 
-							ASTNode-s are poorly serializable due to their methods. 
-							Therefore, one needs to retain 'Token' FOR SERIALIZATION PURPOSES *ONLY*. 
-							'Token' is here to stay...
+					4. THERE IS a `.toJSON` method that: 
+						1. uses THE CONSTRUCTOR FOR THE APPROPRIATE `Token`/`TokenInstance`/
+						2. THE `Token`/`TokenInstance`, then, will ALSO have a `toJSON` method!
+							1. Defined so that the DEFAULT `.toJSON` for the "non-Token/TokenInstance" items in the tree 
+								WILL BE a "special" 'stripMethods()' util (possibly move to one.js), for 
+									CREATING AN OBJECT WHICH IS **THE SAME** as the current one, EXCEPT 
+							2. IMPORTANT NOTE: 
+								1. IF the implementation of `AST` ends up being simplistic/trivial/Token-like, 
+									REMOVE 'Token' and 'Tree' as a module! 
+									Instead, just add the `AST`! 
+									Then, there have to be the ability to create the 'AST' on a per-layer recursive-descent basis...
+										[like with `Token`]
+									AND to use it for from-tree-source-generation purposes [like with `Tree`]. 
+					5. Likewise, there is the '.fromToken' method for creating an 'AST' object from nested 'Token's
+					6. ALSO - there is a 'fromJSON' util which CREATES A NESTED TREE of 'Token/TokenInstance' ONLY (trying to "guess" via "type" and "value" fields). 
 				2. By doing 'ASTStream(TreeWalker(ASTNode.from(...)))', one can iterate a given generated JavaScript AST object! 
 					2.1. This is what the ASTAnalyzer (actually) is doing; 
 					2.2. The 'Stream' is, then, applied a 'StreamParser' upon; 
@@ -685,30 +1143,6 @@ TODO:
 	
 				2. For '.type's field values, one uses EITHER an 'ObjectHashInternal' (if strings), or a 'MapHashInternal' (if not strings); 
 	
-		CC1. PreallocArray - a new 'Collection' type: 
-			0. new property - 'lastInd: number = this.value.length'
-			1. extends ArrayCollection
-			2. new method - '.prealloc(n)': 
-				1. If 'this.value.length > n', goto 5, else - continue
-				2. this.value.length = n
-				3. this.lastInd = this.value.length
-				4. Finish
-			3. change method - '.push()': 
-				1. this.value[this.lastInd++] = this.value
-			4. change method - '.get()' [as 'readonly number[]']: 
-				1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
-			5. change method - '.move(n)': 
-				1. this.value.length = this.lastIndex
-				2. const lastValue = this.value
-				3. this.value = Array(this.n)
-				4. return lastValue
-
-			Purpose: 
-				1. Providing an interface for user-level preallocation of an array
-				2. Providing 1. together with an integration with the 'Collection' interface
-
-		CC2. RotationBuffer - See `.peek(n)` for more details
-
 		DE3. *Add* ability to store indexes of various AST nodes within the original 'FreezableBuffer'
 			object passed to the InputStream: 
 				Rather a curious problem here, as the Stream that issues the error HAS TO KNOW what index 
@@ -842,37 +1276,6 @@ TODO:
 					The 'StackParser' is a function-generated class in TERMS OF '.table' (which goes on the prototype). 
 					The '.table'-lookups in the '.parse()' method are OPTIMIZED based off the '.table' function. 
 
-		SI4. GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
-			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
-				which *happens* to be the exact same one that the user is already using. 
-
-			Instead of creating A NEW class and (potentially): 
-
-				1. wasting memory (insignificant, though noticeable - prototype objects)
-				2. wasting optimizations (significant), by confusing the Engine
-			
-			The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
-				which would be: 
-
-				1. A Global object
-				2. That is connected to 'StreamClass'
-				3. And FOR WHICH 'StreamClass' DOES provide a handle, 
-					via *checking* whether or not the given class configuration already exists. 
-
-					Checks: 
-
-					1. properties/flags - by value/reference (x, y) => x === y
-					2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
-
-			The library actually DOES export various GenericCollection-s, namely one for each of: 
-				1. StreamClass
-				2. PredicateStream
-				3. LimitedStream
-				4. StreamParser
-				5. ProlongedStream
-				6. NestedStream
-				[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
-
 		SM1. LATER: important problem - self-modifying parser INTEROP of different self-modifications. 
 			Problem with multiple self-modifying parsers is that they rely on SHARED STATE. 
 			Which is bad. PARTICULARLY, when code of two independent vendors may be doing the modifications. 
@@ -910,14 +1313,6 @@ TODO:
 				Those differ in their construction algorithms. 
 				ALSO: important note - the respective tables, themselves, 
 					MUST BE SELF-MODIFIABLE! 
-
-		SI7. Expose the `StreamClass`
-			Currently, it is not yet ready to be "released to the user", 
-				however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
-					one may as well do so, as: 
-
-				1. It would now become far too high-level to still be an implementation detail
-				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external
 
 		IM6. ArrayInternalHash [InternalHash]: 
 			A wrapper around `ValueType[]` for keeping the number-keys. 
@@ -1035,17 +1430,7 @@ TODO:
 			For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used/transformed; 
 			MORE SPECIFICALLY, it creates a 'ASTAnalyzer'- and 'ASTNode'-fit tree, from one that is 
 				too complex (not homogenous enough nodes, more complex node categorization). 	
-
-		ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
-			When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
-			Calls the '.index' on the saved '.lastIndex'; 
 	
-		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-			Namely: 
-				1. intersection: 	/[[...]&&[...]]/v
-				2. subtraction: 	/[[...]--[...]]/v
-				3. string literals: /[q{...}]/v
-
 		IM3. [!!!] Add another 'hash' function for the 'HashMap'? 
 			In particular, use the 'extension' for 'set', 'rekey', 'delete' (by-original-key), 
 				and another hash (the 'indexHash') for 'index' [this one will be optional and default to 'extension']; 
@@ -1071,32 +1456,7 @@ TODO:
 		PO3. [static method] MultiIndex.fromPosition(stream: TreeStream, position: Position): MultiIndex
 			This is a method for converting a 'position' from the given TreeStream to a 'MultiIndex'; 
 			Does NOT '.rewind()'; 
-			
-		UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
-			For a given 'Indexable', it does: 
-
-				// ! PROBLEM: lacks ability to check for MULTIPLE WORDS: 
-				// 		* Solution: replace 'matchWord' with a more complex hand-written 'RegExp'-matching engine for the library... [uses 'Stream's instead of JS 'string's]: 
-				// 			ALSO - use the *same* engine for the 'RegExpTokenizer'; 
-				// rough sketch - requires the '.peek(n)' method; 
-				// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
-				function matchWord(stream, word) {	
-					const positions = word.length
-					for (let i = 0; i < positions; ++i) 
-						if (word[i] !== stream.peek(i)) 
-							return 0
-					return positions
-				}
-
-				// IDIOM: for skipping a word, call it 'function consume(stream, word, wrapper)' - a 'Parser/utils.ts' utility; 
-				const matched = matchWord(stream, word)
-				skip(stream, matched)
-				if (matched) return wrapper(word)
-			
-		ME3. [StreamClass] Iterator Helper functions - '.filter', '.take', ...: 
-			Provide them. 
-			Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
-			
+					
 		ME4. Add "move semantics" to 'Collection's: 
 			1. '.move' method - for a 'MoveCollection extends Collection': 
 				1. Sets the 'this.value = []', or to a similar "default"/"empty" value. 
@@ -1104,47 +1464,7 @@ TODO:
 		
 			This permits to achieve the 'PreallocArray' idea WITHOUT the need to copy/change the contents of THE SAME array. 
 			CONCLUSION: YES, add the '.move' to SOME collections via 'ArrayMoveCollection' with '[]'; 
-		
-		ME5. 'InputStream' - provide a '.peek(n)' method: 
-			1. looks "forward" n items; 
-			2. add a new interface - PeekableStream
-				2.1. Add a general 'StreamClass' implementation: uses a 'PreallocBuffer' (empty by default), which 
-					keeps the 'next n' items, to be looked up. 
-					1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
-						index appropriately [reflect this...]; 
-        	
-					PROBLEM [PreallocBuffer]: what about the `.next()` calls? 
-						In order to *FREE* the buffer for a sufficiently large `.peek(n)` operation after doing `.next(k)`, 
-							one will have to call `.unshift()` [which is horribly slow]. 
-						THEREFORE, create a class that EXTENDS the `PreallocBuffer`, and use that instead. 
-						Call it `RotationBuffer`, and it will work like: 
-							1. keep the internal array [pre-allocated, as per the `super` methods]
-							2. keep the `.rotation: number = .length - 1 (by default)` index
-								It will correspond to the `[i]` index AFTER WHICH the `.peek(1)` [respectively, `.read(0)`] value, starts. 
-								It goes up to `.peek(.length - .rotation)`, after which it "wraps around", with internal `.array[0]` being `.peek(.length - .rotation + 1)`, and so forth, 
-									up until `.peek(.length)`, which is the last permitted '.peek' for the chosen allocation. 
-							3. keep a method for "moving" '.rotation': 
-								1. .rotate(direction: boolean)
-									if 'true', increases the `.rotation`, 
-									otherwise - decreases it. 
-        	
-			Make 'StreamClassInstance' a `Partial<PeekableStream>` [add the generic `.peek()` definition for case of keeping a small '.peekBuffer' - NEW PARAMETER -- 'peekSize: number = 0']. 
-        	
-			1. Also - add `.next(n: DirectionalPosition = 1)` and `.prev(n: DirectionalPosition = 1)`, 
-				where `n` is the number of items TO SKIP [forwards, or backwards respectively]. 
-					The `this.curr` is returned INVARIABLY. 
-					Note: this will require some heavy rewriting on behalf of the `StreamClass.prototype.next`; 
-					1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next/input.prev(n))(value)` [rough]:
-					 	The old `parsers.js` had something similar, except not as well-designed...
-        	
-			2. Also - add the `.has(n)` 'Parser/utils.ts'-utils AS A METHOD, 
-				of positive/negative indexes [with respective optimizations]. 
-        	
-			3. Then - REWRITE the `skip()` util from the `Parser/utils.ts`: 
-				Will, from now on, be doing only some fairly simple conversions (PredicatePosition [/w .boolean] -> Function; 
-					Then call either '.next(f/n)' or '.prev(f/n)'
-				). 
-	
+			
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
@@ -1155,11 +1475,6 @@ TODO:
 				In other words - it behaves *EXACTLY* like `skip()`
 
 			Let it also permit returning predicates (hello, `skip()`)
-
-		UT5. Add a `serializeJson` and `fromJson` utils [Tree/utils.ts]
-			These two perform a serialization of a simple `Token.value/Token[]/TokenInstance`-tree, 
-				from AND INTO 'JSON', returning the serialized string (serializeJson) and 
-					the tree `fromJson`
 
 	3. Minor [fixes, optimizations, refactoring, types, naming]
 		OE1. v8-specific optimizations: 
@@ -1244,10 +1559,6 @@ TODO:
 				Currently, they are ALL non-overridable; 
 				This will enable the user to more liberally use the library classes [they are, presently, highly single-purposed (intentionally)]; 
 
-		DE1. Increase the Library's natural debuggability: 
-			ADD names to all the nameless functions. 
-			This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 
-
 		TO1. [refactoring] Add a new util [Token/utils.ts]: 
 			tokenCompare = (tt: TokenType) => (x: any, y: any) => tt.is(x) && tt.is(y) && value(x) === value(y); 
 			
@@ -1318,192 +1629,12 @@ TODO:
 			Instead, they are concerned with checking existence of properties on given specific objects implementing the general `Stream` interface. 
 			It would make a whole lot more sense, and less confusion for the user. 
 
-		SI9. Make `Position` a submodule of `Stream`
-			Reason: ontology. 
-			`Position` is ONLY ever used with `Stream`-s. 
-			Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
-			Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
-			The predicates, too, work best when considered in directional context (id est: iteration...)
-
-		SI11. The `.prod()` method - repurpose it. 
-			Replace it with a simple, general `.peek(1)` [PeekableStream]
-			Thus, it will allow a better unification of the library's concepts under the 
-				same terminology. 
-
 		S12. Remove the `.isStart` requirement from the `BasicStreamClassInstance`. 
 
 		SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
 			It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
 
-		SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
-			Currently, missing. 
-			Example: TreeStream. 
-				It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
-				After this change, NO MORE will the "binding" happen outside the "base" definition. 
-				Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
-
-		IN1. The `Initializable` interface - make it higher level: 
-			1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
-			2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
-
-		IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
-			Make it separate. 
-			Reasons:
-				1. Doesn't allow for iteration algorithms
-				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-				3. Will cause less nestedness
-
 	4. Breaking [removals]	
-		TO2. Remove (replace):
-			1. PatternTokenizer
-			2. PatternValidator
-
-			[NOTE: important - only these implementations/algorithms! Keep the interfaces, they're quite good...]
-			3. ValidatablePattern
-			4. TokenizablePattern
-
-			With a NEW approach - a: 
-				1. 'RegExpTokenizer'
-				2. 'RegExpValidator'
-				3. 'TokenStream' - output from 'RegExpTokenizer' [or, alternatively - an interface for the 'StreamParser']; 
-
-				IMPORTANT NOTE: THESE *DO NOT* use a RegExpMap, instead a `Pairs<RegExp, ParserFunction (or whatever)>` is passed directly to them...
-			
-			These are function-creation functions that is based off *THE SAME SIGNATURE* as 
-				the 'RegExpMap', with the difference that these get to be used with 'StreamParser/LocatorStream/PositionalValidator/...'; 
-			
-			The RegExpTokenizer is A FULL-FLEDGED RegExp ENGINE. 
-			NOT based upon JS's one. 
-			It: 
-				1. Takes the signature that is MULTIPLE expressions
-				2. Combines it into a `Stream`, that produces tokens according to the set rules: 
-					1. consists of a PARSER for the original regular expression string 
-					2. consists of a COMPILER for the regular expression AST (obtained from parsing)
-					3. consists of methods: 
-						1. amongst which there is '.match', from which 'Stream' is produced by doing something like: 
-							new RegExpEngine(GENERICS)("REGEXP_STRING").match("TARGET_STRING")
-				3. When tokens CANNOT be produced, STRINGS are produced instead
-					Input (.value - it's a 'Pattern') *IS* a string...
-			
-			Reasons: 
-				1. PatternTokenizer (AND TokenizablePattern), PatternValidator (AND ValidatablePattern) use THE SAME code
-				2. PatternTokenizer, PatternValidator are (both) FAR too generic
-					Used only once. 
-					It's a waste of generality. 
-
-			NOTE: the 'RegExpMap' REMAINS: 
-				Reason: it can still be useful to someone (as a boilerplate saver...)
-
-			ALSO: about `RegExpTokenizer`: 
-				[maybe] - create your own flavour for 'RegExp's
-				Then: 
-					1. rewrite the `regex` module to INSTEAD create YOUR flavour [more modular]
-						1. BUT - *do not* delete the current stuff
-							Instead, add a submodule FOR YOUR flavour, and for the "builtin" JS flavour
-							Together add a "convert" submodule to switch between them
-					2. create a submodule for it to CONVERT between the two [JS regex <-> our regex]; 
-					3. write proper docs for it
-						3.1. [possibly] make a separate module; This could be too huge conceptually for the library's ontology
-
-				It will improve upon the "simple" JS regex in the following ways: 
-					0. replace the first and last items "/^$/" with /:#/
-					1. add a general `^x` for NEGATING a pattern. Thus, elementary [^...] becomes composite ^[...]
-						This way, for instance /^ab+/ matches "bbb", but not "ab". 
-					2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
-						to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
-					3. remove the `\B`, `\D`, `\S`, ..., other negative-classes/assertions in favour of the simpler `^x` form
-					4. replace the (?:...) with (:...) [syntax simplification]
-					5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
-					6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
-						Will span the max possible values of the Unicode range
-					7. get rid of the flags: 
-						1. 'g': 
-							replace the different behaviour with METHODS; make it non-exclusive
-
-						2. 'v':
-							remove, provide its functionality by default: 
-								1. `P` not working - it is removed and replaced by `^p{...}`:
-									By default, consumes the max possible string (remaining, if needed). 
-									Limited by (...){n, k}
-
-						3. 'i': 
-							make it a new group type - that matches A GROUP regardless of the case: 
-								/(#...)/; 
-							
-							ALSO: make it possible to *inject* custom functionality 
-								(utilizing the fact that `RegExpTokenizer` CAN be generic); 
-
-						4. 's': 
-							make it default
-						
-						5. 'u': 
-							remove, included by default with `v`
-
-						6. 'y' (????): 
-							find out what this even is (and what it's used for)
-							seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
-					
-						7. 'm': 
-							remove - unnecessary
-							possible to achieve the same thing using a slight modification of:
-								/(?<\n)...(?=\n)/
-						
-						8. 'd': 
-							too specific, ugly
-							make these kinds of behaviours GENERIC instead
-							[note: the 'RegExpTokenizer' WILL be generic...
-					8. get rid of form-feed (`\f`): 
-						Reason: not useful for parsing
-
-				IDEA: use this regex-flavour for the HammockLang implementation later...
-
-			ALSO - retain the `TokenizablePattern` and `ValidatablePattern` interfaces, 
-				KEEP (and use) THEM for your `RegExpTokenizer`. 
-				
-				They are very good at (in general) at expressing the idea of a 
-					"carrier object" and a its "handler function" for tokenization/validation information 
-						(here - regular expressions). 
-
-				Don't use them as-is, and INSTEAD of plain JS RegExp-s, use your flavour (+ the "iterable tables" for handles instead individual [string, handler] pairs,
-					so the interfaces will still have to be changed somewhat...	
-				), BUT *DO NOT* throw them out...
-
-					IDEA: for usage with `RegExpTokenizer`, create an 'IterableMap' function [inside 'Parser/TableMap']: 
-						This is a function that:
-							1. takes in a LinearIndexMap [or other `IndexMap`]
-							2. produces a function that: 
-								0. assigns the map to its own `.table` property
-								1. iterates the given map, CALLING each function-value inside of it with arguments: 
-									0. 'this' [yes, it retains the `this` value...]
-									1. the original value `x`
-									2. the function itself (for access to `.table` property)
-									n. all the other (spread) arguments
-								2. returns the result of the last one
-
-		SI5. IDEA: simplifying the list of available Stream-s further: 
-			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
-				returning a Stream with precisely this same definition; 
-
-			Then, you can do: 
-				const reversed = stream.reverse()
-			instead of: 
-				const reversed = ReversedStream(stream)
-
-			Nicer semantics. 
-
-		EL1. Eliminable - get rid of it: 
-			More specifically, create a `RegExpEliminator` interface, which would replace it: 
-
-			1. Based off the same RegExp engine as `RegExpTokenizer`/`RegExpValidator`
-			2. More efficient [algorithmically], as it requires a single pass over the string, instead of 
-				several with multiple `.split()` calls;
-			3. Uses *the same* table-interfaces to represent multiple "ordered" removals as before
-
-			ALSO: 
-				1. remove the `EliminableCounter`
-				2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
-				3. remove the `Eliminable` interfaces
-
 		UT4. REMOVE the `utility` types: 
 			Put them ALL into `samples`. 
 			THE ONLY 'utils' to keep are: 
@@ -2038,6 +2169,9 @@ TODO:
 			After it is generalized to a SINGLE interface, make FOR ALL `.init`-having method
 			so that `init` returns `this`. 
 	
+		WI1. Add usage examples: 
+			Current API is quite complex considering the need for generic functions (in many cases). 
+
 	10. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 
 			0. TypeScript
@@ -2046,3 +2180,18 @@ TODO:
 			3. Implements all the current items within the library using continuation-passing style
 
 			Note: keep this for v0.5 ONLY. *Not* as a part of v0.4
+
+FUTURE: 
+	1. idea for a project - a command-line based tool for parser-creation: 
+		Works thus, it allows the user to set (sequentially, one-by-one): 
+			1. Enum-labels for types (uses a lazy FiniteEnum): 
+				1. for acceptable tokens
+				2. for acceptable tree-nodes
+			2. Regular Expressions (in out Regex-flavour) for parsing different token types
+			3. Grammar rules for creation of 'AST' nodes (see 'ASTAnalyzer' for v0.4)
+
+		1. ALSO - allows a non-interactive mode
+
+		2. Output: 
+			1. parser (in JavaScript)
+			2. source-generator (in JavaScript)
