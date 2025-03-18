@@ -36,8 +36,57 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO: 
+	TODO [any order]: 
+		0. `utils.isGoodPointer` - ADD PERMALINK
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY!]
+		2. add the (minor) `JSDoc` for classes/big-functions
+		3. add the jsdoc permalinks for classes to wiki
+		4. add the `I` to interfaces
+		5. change the `interfaces` pages
+			1. add the Wiki pages for interfaces
+		6. remove wiki [and tests...]: 
+			1. Eliminable
+			2. Validatable
+			3. PatternTokenizer
+		7. GitHub Workflows
+		8. Special Pages
+		9. Tests: 
+			1. Remove redundant tests
+			2. Add relevant (missing) tests
+			3. Modify existing tests: 
+				1. be ignorant of the internal workings of the thing [behaviour-based]
+				2. refactor using one.js v0.5
+		10. Self-referencing on Wiki
+		11. To add Wiki pages [classes]: 
+			[today]
+			1. PersistentIndexMap
+
+			2. PersistentIndexLookupTable
+			3. HashTable
+			4. Composition
+			5. PreSignature
+			6. LayerSignature
+			7. StateSignature
+			8. DynamicParser
+			9. SignatureIndexSet
+			10. TableMap
+			11. MapWrap
+			12. MultiIndex [shares page with `MultiIndexModifier`]
+			13. InputStream
+			14. LimitedStream
+			15. NestedStream
+			16. PredicateStream
+			17. TreeStream
+			18. StreamParser
+			19. Token
+			20. TokenType
+			21. TokenInstance
+			22. TreeWalker
+			23. ChildrenTree
+			24. ParentTree
+		12. Remove unused wiki
+		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
+		14. Clean out the `constants.md` file 
 
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 
@@ -57,9 +106,6 @@ Order of TODO-elimination:
 				2. A brief JSDoc + page
 
 				DECIDE WHICH IS WHICH
-
-			3. DO 1-2 PER DAY! 
-				Try to be quick about them...
 
 			4. Special pages to write: 
 				1. Usage
