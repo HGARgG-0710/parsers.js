@@ -53,8 +53,23 @@ Order of TODO-elimination:
 		9. Tests: 
 			2. Add relevant (missing) tests
 			3. Modify existing tests: 
-				1. be ignorant of the internal workings of the thing [behaviour-based]
-				2. refactor using one.js v0.5
+				NOTES: 
+					1. be ignorant of the internal workings of the thing [behaviour-based]: 
+					2. refactor using one.js v0.5
+					3. fix TypeScript compiler errors
+
+				Lists of things to do [add/remove/fix]:
+					1. Collection
+					2. EnumSpace
+					3. IndexMap
+					4. Parser
+					5. Pattern [MISSING]
+					6. Position
+					7. regex
+					8. Stream
+					9. Token
+					10. Tree
+					
 		10. Self-referencing on Wiki
 		11. To add Wiki pages [classes]: 
 			2. PersistentIndexLookupTable
