@@ -19,17 +19,21 @@ const { trivialCompose } = functional
 const { equals } = boolean
 const { charCodeAt } = string
 
-export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
-	extensions: Function[],
-	keyExtensions: Function[],
-	change?: IndexingFunction<KeyType>
+export function LinearMapClass<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any
+>(
+	change?: IndexingFunction<KeyType>,
+	extensions: Function[] = [],
+	keyExtensions: Function[] = []
 ): MapClass<KeyType, ValueType, DefaultType> {
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
 		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
 	{
 		static change?: IndexingFunction<KeyType>
-		
+
 		static extend: <KeyType = any>(
 			...f: ((...x: any[]) => any)[]
 		) => MapClass<KeyType, any>
@@ -41,7 +45,10 @@ export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any
 		static keyExtensions: Function[]
 		static extensions: Function[]
 
-		constructor(pairsList: array.Pairs<KeyType, ValueType>, _default?: DefaultType) {
+		constructor(
+			pairsList: array.Pairs<KeyType, ValueType>,
+			_default?: DefaultType
+		) {
 			super(...fromPairs(pairsList), _default)
 		}
 	}
@@ -65,19 +72,21 @@ export function LinearMapClass<KeyType = any, ValueType = any, DefaultType = any
 	return linearMapClass
 }
 
-export const OptimizedLinearMap = LinearMapClass([], [])
+export const OptimizedLinearMap = LinearMapClass()
 
 // * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
 export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
 
-export const [PredicateMap, RegExpMap, SetMap, BasicMap]: [
-	MapClass<Function>,
-	MapClass<Testable>,
-	MapClass<Having>,
-	MapClass
-] = [
-	(curr: Function, x: any) => curr(x),
-	(curr: Testable, x: any) => curr.test(x),
-	(curr: Having, x: any) => curr.has(x),
-	equals
-].map((change) => LinearMapClass<any, any>([], [], change)) as [any, any, any, any]
+export const PredicateMap: MapClass<Function> = LinearMapClass(
+	(curr: Function, x: any) => curr(x)
+)
+
+export const RegExpMap: MapClass<Testable> = LinearMapClass(
+	(curr: Testable, x: any) => curr.test(x)
+)
+
+export const SetMap: MapClass<Having> = LinearMapClass((curr: Having, x: any) =>
+	curr.has(x)
+)
+
+export const BasicMap = LinearMapClass(equals)

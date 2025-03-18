@@ -17,9 +17,9 @@ export function extend<KeyType = any, ValueType = any>(
 	...f: ((x: ValueType) => any)[]
 ) {
 	return LinearMapClass<KeyType>(
+		this.change,
 		this.extensions.concat(f),
-		this.keyExtensions,
-		this.change
+		this.keyExtensions
 	)
 }
 
@@ -28,8 +28,8 @@ export function extendKey<KeyType = any, ValueType = any>(
 	...f: ((x: any) => KeyType)[]
 ) {
 	return LinearMapClass<any, ValueType>(
+		this.change,
 		this.extensions,
-		this.keyExtensions.concat(f),
-		this.change
+		this.keyExtensions.concat(f)
 	)
 }

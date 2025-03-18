@@ -9,6 +9,7 @@ import { setValue, swapValues } from "../../Pattern/utils.js"
 import { DelegateIndexMap } from "./abstract.js"
 
 import { inplace } from "@hgargg-0710/one"
+import { isGoodIndex } from "../../utils.js"
 const { mutate, swap, insert, out } = inplace
 
 // * Explanation: objects are passed by reference, ergo, it's possible to keep the
@@ -16,13 +17,17 @@ const { mutate, swap, insert, out } = inplace
 // * 	via wrapping it into a one-property object;
 export const Pointer = <Type = any>(value: Type): IPointer<Type> => ({ value })
 
-export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = any>
+export class PersistentIndexMap<
+		KeyType = any,
+		ValueType = any,
+		DefaultType = any
+	>
 	extends DelegateIndexMap<KeyType, ValueType, DefaultType, IPointer<number>>
 	implements IPersistentIndexMap<KeyType, ValueType, DefaultType>
 {
 	indexes: IPointer<number>[]
 
-	static invalidateIndex(indexPointer: IPointer<number>) {
+	static invalidatePointer(indexPointer: IPointer<number>) {
 		setValue(indexPointer, BadIndex)
 	}
 
@@ -31,12 +36,13 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 	) => PersistentIndexMap<KeyType, ValueType, DefaultType>
 
 	copy() {
-		return new this.constructor(this.value)
+		return new this.constructor(this.value.copy())
 	}
 
 	delete(index: number, count: number = 1) {
 		const size = this.size
-		for (let i = index + count; i < size; ++i) this.indexes[i].value -= count
+		for (let i = index + count; i < size; ++i)
+			this.indexes[i].value -= count
 		out(this.indexes, index, count)
 		this.value.delete(index, count)
 		return this
@@ -48,7 +54,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 
 		this.indexes = this.indexes.filter((x: IPointer<number>, i: any) => {
 			if (indexSet.has(i)) return true
-			PersistentIndexMap.invalidateIndex(x)
+			PersistentIndexMap.invalidatePointer(x)
 		})
 
 		this.repairIndexes()
@@ -63,7 +69,10 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 	}
 
 	getIndex(key: any) {
-		return this.indexes[this.value.getIndex(key)]
+		const foundIndex = this.value.getIndex(key)
+		return isGoodIndex(foundIndex)
+			? this.indexes[foundIndex]
+			: Pointer(BadIndex)
 	}
 
 	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
@@ -75,7 +84,7 @@ export class PersistentIndexMap<KeyType = any, ValueType = any, DefaultType = an
 		return this
 	}
 
-	repairIndexes() {
+	protected repairIndexes() {
 		let i = this.size
 		while (i--) setValue(this.indexes[i], i)
 	}

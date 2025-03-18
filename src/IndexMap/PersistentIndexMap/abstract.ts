@@ -47,8 +47,8 @@ export abstract class DelegateIndexMap<
 		return this
 	}
 
-	index(x: any) {
-		return this.value.index(x)
+	index(x: any, ...y: any[]) {
+		return this.value.index(x, ...y)
 	}
 
 	byIndex(index: number) {

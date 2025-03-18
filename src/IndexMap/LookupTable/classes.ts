@@ -43,10 +43,6 @@ abstract class DelegateLookupTable<
 	isOwned(x: any) {
 		return !isNullary(x.assignedIndex)
 	}
-
-	constructor(value: DelegateType) {
-		super(value)
-	}
 }
 
 abstract class DelegateHashTable<
@@ -74,12 +70,16 @@ abstract class DelegateHashTable<
 	}
 }
 
-export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
+export class PersistentIndexLookupTable<
+		KeyType = any,
+		ValueType = any,
+		DefaultType = any
+	>
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
 		IPointer<number>,
-		IPersistentIndexMap<KeyType, ValueType>,
+		IPersistentIndexMap<KeyType, ValueType, DefaultType>,
 		any
 	>
 	implements LookupTable<KeyType, ValueType, IPointer<number>>
@@ -97,10 +97,6 @@ export class PersistentIndexLookupTable<KeyType = any, ValueType = any>
 		value.delete(value.getIndex(key).value)
 		return this
 	}
-
-	constructor(table: IPersistentIndexMap<KeyType, ValueType>) {
-		super(table)
-	}
 }
 
 export function HashTable<OwningType = any>(
@@ -111,8 +107,8 @@ export function HashTable<OwningType = any>(
 	return hashTable as TableConstructor<OwningType>
 }
 
-export const [BasicTable, StreamTable, PosTable]: [
-	TableConstructor,
-	TableConstructor,
-	TableConstructor
-] = [id, current, pos].map(HashTable) as [any, any, any]
+export const BasicTable = HashTable(id)
+
+export const StreamTable = HashTable(current)
+
+export const PosTable = HashTable(pos)

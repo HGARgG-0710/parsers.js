@@ -41,7 +41,11 @@ export abstract class BaseLinearMap<
 	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
 		const [keys, values] = fromPairs(pairs)
 		insert(this.keys, index, ...keys)
-		insert(this.alteredKeys, index, ...keys.map((x) => this.keyExtension(x)))
+		insert(
+			this.alteredKeys,
+			index,
+			...keys.map((x) => this.keyExtension(x))
+		)
 		insert(this.values, index, ...values)
 		return this
 	}
@@ -60,9 +64,8 @@ export abstract class BaseLinearMap<
 		return this
 	}
 
-	getIndex(x: any) {
+	getIndex(sought: any) {
 		const size = this.size
-		const sought = this.extension(x)
 		for (let i = 0; i < size; ++i)
 			if (this.change!(this.alteredKeys[i], sought)) return i
 		return BadIndex
