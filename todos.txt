@@ -51,7 +51,6 @@ Order of TODO-elimination:
 		7. GitHub Workflows
 		8. Special Pages
 		9. Tests: 
-			1. Remove redundant tests
 			2. Add relevant (missing) tests
 			3. Modify existing tests: 
 				1. be ignorant of the internal workings of the thing [behaviour-based]
@@ -84,6 +83,7 @@ Order of TODO-elimination:
 		12. Remove unused wiki
 		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
 		14. Clean out the `constants.md` file 
+		15. Clean up the import-paths (none of that `src/` stuff...)
 
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 
