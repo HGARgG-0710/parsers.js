@@ -58,9 +58,6 @@ Order of TODO-elimination:
 				2. refactor using one.js v0.5
 		10. Self-referencing on Wiki
 		11. To add Wiki pages [classes]: 
-			[today]
-			1. PersistentIndexMap
-
 			2. PersistentIndexLookupTable
 			3. HashTable
 			4. Composition

@@ -45,10 +45,6 @@ export interface Hashable<KeyType, InternalKeyType> {
 	hash: Hash<KeyType, InternalKeyType>
 }
 
-export interface Flushable {
-	flush: () => void
-}
-
 export type Indexed<Type = any> =
 	| string
 	| ({
@@ -61,7 +57,6 @@ export interface Supered {
 }
 
 export type * from "./Collection/interfaces.js"
-export type * from "./Eliminable/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
 export type * from "./Parser/interfaces.js"
@@ -71,6 +66,4 @@ export type * from "./Position/interfaces.js"
 export type * from "./Stream/interfaces.js"
 
 export type * from "./Token/interfaces.js"
-export type * from "./Tokenizable/interfaces.js"
 export type * from "./Tree/interfaces.js"
-export type * from "./Validatable/interfaces.js"

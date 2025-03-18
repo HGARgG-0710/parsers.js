@@ -1,11 +1,3 @@
-import type { ValidationError } from "./Parser/PatternValidator/interfaces.js"
-
-import type {
-	InvalidMatch,
-	ValidationOutput,
-	ValidMatch
-} from "./Validatable/interfaces.js"
-
 import { boolean } from "@hgargg-0710/one"
 const { T } = boolean
 
@@ -75,85 +67,6 @@ export namespace Stream {
 		 * it differs from `SkippedItem`.
 		 */
 		export const SkippedItem = undefined
-	}
-}
-
-export namespace validation {
-	/**
-	 * Value returned from various validators to signify success
-	 */
-	export const ValidationSuccess = true
-
-	export namespace ValidatablePattern {
-		/**
-		 * Value used by the `ValidatablePattern` to signify
-		 * a validly matched item
-		 */
-		export const ValidMatch: ValidMatch = true
-
-		/**
-		 * Value used by the `ValidatablePattern` to signify
-		 * an invalidly matched item
-		 */
-		export const InvalidMatch: InvalidMatch = false
-
-		/**
-		 * A wrapper-function, destined to signify that
-		 * the validation has been successful
-		 * (id est, there are no `InvalidMatch`es)
-		 */
-		export const ValidationPassed = <Type = any>(
-			result: Type[]
-		): ValidationOutput<Type> => [true, result]
-
-		/**
-		 * A wrapper-function, destined to signify that
-		 * the validation has not been successful
-		 * (id est, there is at least one `InvalidMatch`)
-		 */
-		export const ValidationFailed = <Type = any>(
-			result: (Type | true | [false, Type])[]
-		): ValidationOutput<Type> => [false, result]
-
-		/**
-		 * A wrapper-function, destined to signify an
-		 * element considered during validation to be
-		 * an `InvalidMatch`
-		 */
-		export const FaultyElement = ValidationFailed as <Type = any>(
-			x: Type
-		) => [false, Type]
-	}
-
-	export namespace PatternValidator {
-		/**
-		 * A value returned from `PatternValidator`
-		 * destined to signify that the given source (`ValidatablePattern`)
-		 * is not fully covered by (id est, ambigiuos in relation to)
-		 * the given validation table
-		 */
-		export const NoFullCoverage = null
-
-		/**
-		 * A value returned from `PatternValidator`
-		 * destined to signify that the given source (`ValidatablePattern`)
-		 * is fully covered by (id est, ambigiuos in relation to)
-		 * the given validation table and is valid
-		 */
-		export const FullCoverage = true
-
-		/**
-		 * A wrapper-function used for return-values from `PatternValidator`
-		 * destined to signify that the given source (`ValidatablePattern`)
-		 * is cannot be validated using given table.
-		 *
-		 * The numeric value at index `1` is the position inside the table that
-		 * has caused problems during validation.
-		 */
-		export const ValidationError = (n: number): ValidationError => [
-			false,
-			n
-		]
 	}
 }
 

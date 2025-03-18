@@ -2,13 +2,21 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { StreamPredicate } from "../../../Parser/TableMap/interfaces.js"
 import type { EndableStream } from "../../../Stream/StreamClass/interfaces.js"
-import type { InvalidEntries } from "../../../Validatable/interfaces.js"
 import type { StatePatternInitMethod } from "../../StreamClass/methods/init.js"
 
 import { LocatorStream } from "../classes.js"
 
-export function PositionalValidator(validator: StreamPredicate, defaultState?: Summat) {
-	const validationStream = new (LocatorStream(true, !!defaultState)(validator))()
+export type InvalidEntries<Type = any> = [number, Type][]
+
+export function PositionalValidator(
+	validator: StreamPredicate,
+	defaultState?: Summat
+) {
+	const validationStream = new (LocatorStream(
+		true,
+		!!defaultState
+	)(validator))()
+	
 	return function <Type = any>(
 		stream: EndableStream<Type>,
 		state: Summat | undefined = defaultState
