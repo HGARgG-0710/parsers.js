@@ -1,6 +1,4 @@
-import type { Indexed } from "src/interfaces.js"
 import type { IHashClass, HashMap, Hash } from "./interfaces.js"
-import type { IToken as TypeToken } from "../../Token/interfaces.js"
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "../abstract.js"
@@ -19,7 +17,9 @@ abstract class BaseHashClass<
 	ValueType = any,
 	InternalKeyType = any,
 	DefaultType = any
-> extends DelegateSizeable<IInternalHash<InternalKeyType, ValueType, DefaultType>> {
+> extends DelegateSizeable<
+	IInternalHash<InternalKeyType, ValueType, DefaultType>
+> {
 	hash: Hash<KeyType, InternalKeyType>
 
 	index(x: KeyType, ...y: any[]) {
@@ -42,12 +42,17 @@ abstract class BaseHashClass<
 	}
 }
 
-export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>(
+export function HashClass<
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any,
+	DefaultType = any
+>(
 	hash: Hash<KeyType, InternalKeyType>
-): IHashClass<KeyType, ValueType, InternalKeyType> {
+): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
 	class hashClass
-		extends BaseHashClass<KeyType, ValueType, InternalKeyType>
-		implements HashMap<KeyType, ValueType, InternalKeyType>
+		extends BaseHashClass<KeyType, ValueType, InternalKeyType, DefaultType>
+		implements HashMap<KeyType, ValueType, InternalKeyType, DefaultType>
 	{
 		static hash: Hash<KeyType, InternalKeyType>
 		static extend: (
@@ -62,18 +67,14 @@ export function HashClass<KeyType = any, ValueType = any, InternalKeyType = any>
 	return hashClass
 }
 
-export const [BasicHash, LengthHash, TokenHash, TypeofHash, CharHash] = [
-	id,
-	length,
-	type,
-	typeOf,
-	charCodeAt
-].map(HashClass) as [
-	IHashClass<any, any, any>,
-	IHashClass<Indexed, any, any>,
-	IHashClass<TypeToken, any, any>,
-	IHashClass<any, any, any>,
-	IHashClass<string, any, number>
-]
+export const BasicHash = HashClass(id)
+
+export const LengthHash = HashClass(length)
+
+export const TokenHash = HashClass(type)
+
+export const TypeofHash = HashClass(typeOf)
+
+export const CharHash = HashClass(charCodeAt)
 
 export * as InternalHash from "./InternalHash/classes.js"

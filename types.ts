@@ -1,1 +1,1 @@
-export type * as interfaces from "./src/interfaces.js"
+export type * from "./src/interfaces.js"

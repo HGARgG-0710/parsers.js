@@ -45,8 +45,7 @@ Order of TODO-elimination:
 
 		Process: 
 			0. add permalinks to: 
-				1. `regex` (no need to list all items - do it module-by-module this time)
-				2. `constants`
+				1. minor classes interfaces [DEICIDE WHICH!!!]
 
 			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
 				[proper pages, + JSDoc that references them /w brief descriptions]
@@ -74,15 +73,7 @@ Order of TODO-elimination:
 
 			5. VERIFY everthing visually, once the docuementation work is done...; 
 
-	1. Wiki:
-		1. RE-DO the "Generic Arguments" thing for: 
-			1. ArrayCollection
-			2. UnfreezableArray
-			3. UnfreezableString
-
-			USE LISTS, and per-case description. 
-			Reason - library uses generic function arguments
-	
+	1. Wiki:	
 		3. DOCUMENTATION POLICY: 
 			1. IF `x` is an alias/util, DO NOT add a new page for it: 
 				JSDoc ALONE will suffice. 
@@ -162,7 +153,25 @@ Order of TODO-elimination:
 			__NOT__ the `test` command. 
 			Reason: too different from project-to-project. 
 			These are the same. []
-	
+
+	TODO [naming]:
+		1. ADD 'I' to ALL the interfaces within the library, INSTEAD of exporting all as `interfaces.*`: 
+			Reasons: 
+				1. simpler/faster to type
+				2. more apparent usage
+				3. [big point] no excessive `interface.` bloat
+				4. [minor point] established convention
+				5. [primary point] too many interfaces: 
+					If one were to unify their naming convention, 
+						instead of treating them the same way as 
+							value-exports, it would simplify the 
+								library's documentation a great deal. 
+
+		2. CHANGE the structure for the `interfaces` documentation:
+			1. No more `sub-pages` for `interfaces` - remove those, bloat the wiki only
+			2. The interfaces are listed ON A SINGLE page
+			3. THEY ARE SEPARATED *BY THEME/MODULE* (within the single `Interfaces.md` file) using the nested `#`-headers
+
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
 		2. walk through tests, verify them for being satisfactory; 

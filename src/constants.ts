@@ -150,7 +150,10 @@ export namespace validation {
 		 * The numeric value at index `1` is the position inside the table that
 		 * has caused problems during validation.
 		 */
-		export const ValidationError = (n: number): ValidationError => [false, n]
+		export const ValidationError = (n: number): ValidationError => [
+			false,
+			n
+		]
 	}
 }
 
@@ -165,13 +168,3 @@ export namespace validation {
  * 4. as a default value whene using a valid value makes no sense
  */
 export const BadIndex = -1
-
-export namespace InternalHash {
-	export namespace ObjectInternalHash {
-		/**
-		 * Value used by `ObjectInternalHash` as a way to signal 
-		 * that a certain key has been removed/replaced
-		*/
-		export const MissingKey = undefined
-	}
-}

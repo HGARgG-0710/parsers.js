@@ -4,14 +4,15 @@ import type { array } from "@hgargg-0710/one"
 import { DelegateDeletableSettableSizeable } from "../../abstract.js"
 import { ProtectedPattern } from "src/Pattern/abstract.js"
 
-import { InternalHash} from "../../../constants.js"
-const { MissingKey } = InternalHash.ObjectInternalHash
-
 import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
-	extends DelegateDeletableSettableSizeable<KeyType, ValueType, Map<KeyType, ValueType>>
+	extends DelegateDeletableSettableSizeable<
+		KeyType,
+		ValueType,
+		Map<KeyType, ValueType>
+	>
 	implements IInternalHash<KeyType, ValueType, DefaultType>
 {
 	default: DefaultType
@@ -29,7 +30,9 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	}
 
 	constructor(
-		map: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType> = new Map(),
+		map:
+			| array.Pairs<KeyType, ValueType>
+			| Map<KeyType, ValueType> = new Map(),
 		_default?: DefaultType
 	) {
 		super(isArray(map) ? new Map(map) : map)
@@ -41,31 +44,37 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 	extends ProtectedPattern<object>
 	implements IInternalHash<string, Type, DefaultType>
 {
+	/**
+	 * Value used by `ObjectInternalHash` as a way to signal
+	 * that a certain key has been removed/replaced
+	 */
+	static readonly MissingKey = undefined
+
 	default: DefaultType
 	size: number
 
 	get(key: string) {
 		const read = this.value[key]
-		return read === MissingKey ? this.default : read
+		return read === ObjectInternalHash.MissingKey ? this.default : read
 	}
 
 	set(key: string, value: Type) {
-		if (this.value[key] === MissingKey) ++this.size
+		if (this.value[key] === ObjectInternalHash.MissingKey) ++this.size
 		this.value[key] = value
 		return this
 	}
 
 	delete(key: string) {
-		if (this.value[key] !== MissingKey) {
+		if (this.value[key] !== ObjectInternalHash.MissingKey) {
 			--this.size
-			this.value[key] = MissingKey
+			this.value[key] = ObjectInternalHash.MissingKey
 		}
 		return this
 	}
 
 	rekey(keyFrom: string, keyTo: string) {
 		this.value[keyTo] = this.value[keyFrom]
-		this.value[keyFrom] = MissingKey
+		this.value[keyFrom] = ObjectInternalHash.MissingKey
 		return this
 	}
 

@@ -85,4 +85,4 @@ export interface ReversedStreamClassInstance<Type = any>
 	basePrevIter: () => Type
 }
 
-export type * as init from "./methods/init.js"
+export type * from "./methods/init.js"

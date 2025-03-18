@@ -64,5 +64,3 @@ export const s = with_flags(DotAllFlag)
  * Alias for `with_flags("y")`
  */
 export const y = with_flags(StickyFlag)
-
-export default flags
