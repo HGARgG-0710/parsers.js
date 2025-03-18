@@ -15,7 +15,7 @@ import {
 	isSuperable,
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
-import { isFastLookupTable } from "IndexMap/FastLookupTable/lib/classes.js"
+import { isFastLookupTable } from "IndexMap/LookupTable/lib/classes.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
 const { and } = functional
