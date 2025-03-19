@@ -1,4 +1,3 @@
-import type { type as types } from "@hgargg-0710/one"
 import type { IToken, ITokenInstance, ITypeCheckable } from "./interfaces.js"
 
 import { TokenInstance, TokenType } from "./classes.js"
@@ -14,7 +13,7 @@ const { trivialCompose } = functional
  */
 export function isType<Type = any>(
 	_type: Type
-): types.TypePredicate<ITokenInstance<Type>> {
+): _type.TypePredicate<ITokenInstance<Type>> {
 	return structCheck<ITokenInstance<Type>>({
 		type: trivialCompose(eqcurry(_type), type)
 	})
@@ -53,4 +52,4 @@ export const tokenTypes = fromEnum(TokenType)
  */
 export const is = prop("is") as <Type = any>(
 	t: ITypeCheckable<Type>
-) => types.TypePredicate<Type>
+) => _type.TypePredicate<Type>

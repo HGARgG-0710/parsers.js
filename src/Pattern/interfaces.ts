@@ -1,7 +1,3 @@
-export interface IResulting<ResultType = any> {
-	readonly result: ResultType
-}
-
 export interface IPointer<Type = any> {
 	value: Type
 }
