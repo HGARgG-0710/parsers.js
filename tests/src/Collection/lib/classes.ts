@@ -1,10 +1,10 @@
-import type { Collection } from "../../../../dist/src/Collection/interfaces.js"
+import type { ICollection } from "../../../../dist/src/Collection/interfaces.js"
 import {
 	ClassConstructorTest,
 	classTest,
 	FunctionalClassConctructorTest,
 	iterationTest,
-	PatternMethodTest,
+	PropertyMethodTest,
 	signatures
 } from "lib/lib.js"
 
@@ -13,7 +13,7 @@ const { structCheck } = object
 const { T } = boolean
 const { isFunction } = type
 
-const isCollection = structCheck<Collection>({
+const isCollection = structCheck<ICollection>({
 	value: T,
 	push: isFunction,
 	[Symbol.iterator]: isFunction
@@ -22,18 +22,22 @@ const isCollection = structCheck<Collection>({
 const collectionPrototypeProps = ["push", Symbol.iterator]
 const collectionOwnProps = ["value"]
 
-const CollectionConstructorTest = ClassConstructorTest<Collection>(
+const CollectionConstructorTest = ClassConstructorTest<ICollection>(
 	isCollection,
 	collectionPrototypeProps,
 	collectionOwnProps
 )
+
 const CollectionFunctionalConstructorTest = FunctionalClassConctructorTest(
 	isCollection,
 	collectionPrototypeProps,
 	collectionOwnProps
 )
-export const CollectionPushTest = PatternMethodTest<Collection>("push")
-const CollectionIterationTest = iterationTest<Collection>
+
+export const CollectionPushTest =
+	PropertyMethodTest("value")<ICollection>("push")
+	
+const CollectionIterationTest = iterationTest<ICollection>
 
 export type CollectionClassTestSignature = {
 	input: any
@@ -46,7 +50,9 @@ export type CollectionClassTestSignature = {
 
 export function CollectionClassTest(
 	className: string,
-	collectionConstructor: (new (x: any) => Collection) | ((x: any) => Collection),
+	collectionConstructor:
+		| (new (x: any) => ICollection)
+		| ((x: any) => ICollection),
 	testSignatures: CollectionClassTestSignature[],
 	functionalConstructor: boolean = false
 ) {
@@ -64,11 +70,15 @@ export function CollectionClassTest(
 				() => {
 					const collectionInstance = functionalConstructor
 						? CollectionFunctionalConstructorTest(
-								collectionConstructor as (x: any) => Collection,
+								collectionConstructor as (
+									x: any
+								) => ICollection,
 								input
 						  )
 						: CollectionConstructorTest(
-								collectionConstructor as new (x: any) => Collection,
+								collectionConstructor as new (
+									x: any
+								) => ICollection,
 								input
 						  )
 

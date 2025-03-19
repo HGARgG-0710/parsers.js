@@ -7,13 +7,10 @@ import {
 } from "lib/lib.js"
 
 import type {
-	BasicStreamClassInstance,
-	Finishable,
-	PositionalReversedStreamClassInstance,
-	PositionalStreamClassInstance,
-	ReversedStreamClassInstance,
-	Rewindable,
-	StreamClassInstance
+	IStreamClassInstance,
+	IFinishable,
+	IReversedStreamClassInstance,
+	IRewindable
 } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
 
 import {
@@ -27,38 +24,36 @@ import {
 	generalRewindTest
 } from "Stream/lib/classes.js"
 
-import type { Superable } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
-import type { Inputted } from "../../../../../dist/src/Stream/StreamClass/interfaces.js"
-import type { Posed, Position } from "../../../../../dist/src/Position/interfaces.js"
 import type {
-	Lookahead,
-	Proddable
-} from "../../../../../dist/src/Stream/PredicateStream/interfaces.js"
+	IReversibleStream,
+	ISupered
+} from "../../../../../dist/src/interfaces.js"
+
+import type {
+	IPosed,
+	IPosition
+} from "../../../../../dist/src/Position/interfaces.js"
 
 import { isPosition } from "../../../../../dist/src/Position/utils.js"
 
-import { StreamClass } from "../../../../../dist/src/constants.js"
-
 import { object, functional, type, boolean } from "@hgargg-0710/one"
-import type { ReversibleStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 import { uniFinish } from "../../../../../dist/src/Stream/StreamClass/utils.js"
 const { structCheck } = object
-const { and, or } = functional
+const { and } = functional
 const { isBoolean, isFunction, isObject, isNumber } = type
 const { T } = boolean
 
-export const isSuperable = structCheck<Superable>({ super: isObject })
-export const isInputted = structCheck<Inputted>({ input: isObject })
+export const isSuperable = structCheck<ISupered>({ super: isObject })
 export const isPosed = (pred: (x: any) => boolean = isPosition) =>
-	structCheck<Posed>({ pos: pred })
+	structCheck<IPosed>({ pos: pred })
 
-export const isProddable = structCheck<Proddable>({
+export const isProddable = structCheck({
 	prod: isFunction
 })
 
-export const isLookahead = structCheck<Lookahead>(["lookAhead"])
+export const isLookahead = structCheck(["lookAhead"])
 
-const isBasicStreamClassInstance = structCheck<BasicStreamClassInstance>({
+const isBasicStreamClassInstance = structCheck<IStreamClassInstance>({
 	// * BasicStream properties
 	isEnd: isBoolean,
 	next: isFunction,
@@ -67,7 +62,7 @@ const isBasicStreamClassInstance = structCheck<BasicStreamClassInstance>({
 	initGetter: optionalMethod,
 	currGetter: optionalMethod,
 	init: isFunction,
-	isStart: or(isBoolean, (x: any) => x === StreamClass.PreCurrInit),
+	isStart: isBoolean,
 	isCurrEnd: isFunction,
 	baseNextIter: isFunction,
 	realCurr: T,
@@ -86,7 +81,7 @@ export const isStreamClassInstance = (hasPosition: boolean = false) =>
 			isCurrStart: optionalMethod,
 			...(hasPosition ? { pos: isNumber } : {})
 		})
-	) as (x: any) => x is StreamClassInstance
+	) as (x: any) => x is IStreamClassInstance
 
 export const isReversedStreamClassInstance = (hasPosition: boolean = false) =>
 	and(
@@ -98,7 +93,7 @@ export const isReversedStreamClassInstance = (hasPosition: boolean = false) =>
 			isCurrStart: isFunction,
 			...(hasPosition ? { pos: isNumber } : {})
 		})
-	) as (x: any) => x is ReversedStreamClassInstance
+	) as (x: any) => x is IReversedStreamClassInstance
 
 const streamClassPrototypeProps = [
 	"next",
@@ -128,7 +123,9 @@ export const StreamClassConstructorTest = (hasPosition: boolean = false) =>
 		streamClassOwnProps(hasPosition)
 	)
 
-export const ReversedStreamClassConstructorTest = (hasPosition: boolean = false) =>
+export const ReversedStreamClassConstructorTest = (
+	hasPosition: boolean = false
+) =>
 	ClassConstructorTest(
 		isReversedStreamClassInstance(hasPosition),
 		streamClassPrototypeProps,
@@ -142,7 +139,9 @@ export const InitStreamClassConstructorTest = (hasPosition: boolean = false) =>
 		streamClassOwnProps(hasPosition)
 	)
 
-export const InitReversedStreamClassConstructorTest = (hasPosition: boolean = false) =>
+export const InitReversedStreamClassConstructorTest = (
+	hasPosition: boolean = false
+) =>
 	InitClassConstructorTest(
 		isReversedStreamClassInstance(hasPosition),
 		streamClassPrototypeProps,
@@ -152,7 +151,7 @@ export const InitReversedStreamClassConstructorTest = (hasPosition: boolean = fa
 export type StreamClassTestSignature = {
 	input: any
 	isEndTest: [any[], (x: any, y: any) => boolean, number?]
-	navigateTests: [Position, any][]
+	navigateTests: [IPosition, any][]
 	finishTests: [number, any[], (x: any, y: any) => boolean][]
 	iteratedTest: [any[], (x: any, y: any) => boolean]
 	rewindTests: [number, any[], (x: any, y: any) => boolean][]
@@ -168,7 +167,7 @@ export function GeneratedStreamClassSuite(
 ) {
 	return function (
 		className: string,
-		streamConstructor: new (...x: any[]) => StreamClassInstance,
+		streamConstructor: new (...x: any[]) => IStreamClassInstance,
 		testSignatures: StreamClassTestSignature[]
 	) {
 		classTest(`(StreamClass) ${className}`, () =>
@@ -187,12 +186,13 @@ export function GeneratedStreamClassSuite(
 						initTests
 					}) =>
 					() => {
-						const createInstance = () => new streamConstructor(input)
+						const createInstance = () =>
+							new streamConstructor(input)
 
 						// constructor
 						if (reversed)
 							ReversedStreamClassConstructorTest(hasPosition)(
-								streamConstructor as new () => ReversedStreamClassInstance,
+								streamConstructor as new () => IReversedStreamClassInstance,
 								...input
 							)
 						else
@@ -202,9 +202,10 @@ export function GeneratedStreamClassSuite(
 							)
 
 						// .isEnd
-						const [expectedBuffer, isEndCompare, isEndReCheck] = isEndTest
+						const [expectedBuffer, isEndCompare, isEndReCheck] =
+							isEndTest
 						generalIsEndTest(
-							createInstance() as ReversibleStream,
+							createInstance() as IReversibleStream,
 							expectedBuffer,
 							isEndCompare,
 							isEndReCheck
@@ -213,16 +214,25 @@ export function GeneratedStreamClassSuite(
 						// .navigate
 						const navigateInstance = createInstance()
 						for (const [position, expected] of navigateTests)
-							generalNavigateTest(navigateInstance, position, expected)
+							generalNavigateTest(
+								navigateInstance,
+								position,
+								expected
+							)
 
 						// .finish
-						for (const [timesSkip, expectedBuffer, compare] of finishTests) {
+						for (const [
+							timesSkip,
+							expectedBuffer,
+							compare
+						] of finishTests) {
 							const finishInstance = createInstance()
-							for (let i = 0; i < timesSkip; ++i) finishInstance.next()
+							for (let i = 0; i < timesSkip; ++i)
+								finishInstance.next()
 							generalFinishTest(
-								finishInstance as ReversibleStream &
-									Rewindable &
-									Finishable,
+								finishInstance as IReversibleStream &
+									IRewindable &
+									IFinishable,
 								expectedBuffer,
 								compare
 							)
@@ -239,10 +249,12 @@ export function GeneratedStreamClassSuite(
 						// .init on bare construction
 						for (const initTest of initTests)
 							if (reversed)
-								InitReversedStreamClassConstructorTest(hasPosition)(
+								InitReversedStreamClassConstructorTest(
+									hasPosition
+								)(
 									streamConstructor as new (
 										...x: any[]
-									) => ReversedStreamClassInstance,
+									) => IReversedStreamClassInstance,
 									...initTest
 								)
 							else
@@ -260,21 +272,25 @@ export function GeneratedStreamClassSuite(
 							] of rewindTests) {
 								const rewindInstance = createInstance()
 								uniFinish(rewindInstance)
-								for (let i = 0; i < itemsSkip; ++i) rewindInstance.prev()
+								for (let i = 0; i < itemsSkip; ++i)
+									rewindInstance.prev()
 								generalRewindTest(
-									rewindInstance as ReversibleStream &
-										Finishable &
-										Rewindable,
+									rewindInstance as IReversibleStream &
+										IFinishable &
+										IRewindable,
 									rewindBuffer,
 									rewindCompare
 								)
 							}
 
 							// .isStart
-							const [isStartExpected, isStartCompare, isStartReCheck] =
-								isStartTest
+							const [
+								isStartExpected,
+								isStartCompare,
+								isStartReCheck
+							] = isStartTest
 							generalIsStartTest(
-								createInstance() as ReversibleStream,
+								createInstance() as IReversibleStream,
 								isStartExpected,
 								isStartCompare,
 								isStartReCheck
@@ -285,9 +301,10 @@ export function GeneratedStreamClassSuite(
 							// .pos
 							for (const [initPos, posReCheck] of posTests) {
 								const posInstance = createInstance()
-								for (let i = 0; i < initPos; ++i) posInstance.next()
+								for (let i = 0; i < initPos; ++i)
+									posInstance.next()
 								generalPosTest(
-									posInstance as PositionalStreamClassInstance,
+									posInstance as IPosed<number> & IStreamClassInstance,
 									initPos,
 									posReCheck
 								)
@@ -295,14 +312,21 @@ export function GeneratedStreamClassSuite(
 
 							// .pos (reversed)
 							if (reversed) {
-								for (const [itemsSkip, posReCheck] of reversedPosTests) {
+								for (const [
+									itemsSkip,
+									posReCheck
+								] of reversedPosTests) {
 									const posReversedInstance = createInstance()
 									uniFinish(posReversedInstance)
-									const initPos = posReversedInstance.pos - itemsSkip
+									const initPos =
+										posReversedInstance.pos - itemsSkip
+
 									for (let i = 0; i < itemsSkip; ++i)
 										posReversedInstance.prev()
+
 									generalReversePosTest(
-										posReversedInstance as PositionalReversedStreamClassInstance,
+										posReversedInstance as IPosed<number> &
+											IReversedStreamClassInstance,
 										initPos,
 										posReCheck
 									)

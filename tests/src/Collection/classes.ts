@@ -1,6 +1,8 @@
 import { CollectionClassTest } from "./lib/classes.js"
 import { ArrayCollection } from "../../../dist/src/Collection/classes.js"
-import { arraysSame } from "lib/lib.js"
+
+import { array } from "@hgargg-0710/one"
+const { same } = array
 
 // * ArrayCollection
 
@@ -14,7 +16,7 @@ CollectionClassTest(
 			input: [1, 2, 3, 4],
 			pushed: arrayTestEndvalue.slice(3),
 			expectedPushValue: arrayTestEndvalue,
-			pushCompare: arraysSame,
+			pushCompare: same,
 			iteratedOver: arrayTestEndvalue
 		}
 	],

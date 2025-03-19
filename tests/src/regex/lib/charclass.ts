@@ -18,7 +18,7 @@ const {
 	ffeed,
 	vtab,
 	nil,
-	uni_hex_5,
+	uni_hex,
 	uni_prop,
 	non_uni_prop,
 	caret,
@@ -70,7 +70,7 @@ export const [
 	uni_hex_2_test,
 	uni_hex_4_test
 ] = [
-	["uni_hex_5", uni_hex_5, 1],
+	["uni_hex", uni_hex, 1],
 	["uni_prop", uni_prop, 1],
 	["non_uni_prop", non_uni_prop, 1],
 	["caret", caret, 1],

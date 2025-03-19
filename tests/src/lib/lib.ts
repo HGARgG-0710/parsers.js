@@ -3,16 +3,16 @@
 import assert from "assert"
 import { it } from "node:test"
 
-import type { Flushable, Resulting } from "../../../dist/src/Pattern/interfaces.js"
-import type { Initializable } from "../../../dist/src/Stream/StreamClass/methods/init.js"
+import type { IInitializable } from "../../../dist/src/Stream/StreamClass/methods/init.js"
 
-import { classWrapper } from "../../../dist/src/utils.js"
+import { classWrapper } from "@hgargg-0710/one/dist/src/object/classes.js"
 
-import { object, boolean, functional, type } from "@hgargg-0710/one"
+import { object, boolean, functional, type, array  } from "@hgargg-0710/one"
 const { ownKeys, kv } = object
 const { equals, not } = boolean
 const { or } = functional
 const { isFunction, isObject, isNull, isArray } = type
+const { same } = array
 
 export function recursiveToString(x: any) {
 	if (isNull(x)) return "null"
@@ -34,16 +34,6 @@ export function inputDescribe(...input: any[]) {
 	return input.map(recursiveToString).join(", ")
 }
 
-export function arraysSame(
-	arr1: any[],
-	arr2: any[],
-	lowCompare: (x: any, y: any, i?: number) => boolean = equals
-) {
-	let size = arr1.length
-	while (size--) if (!lowCompare(arr1[size], arr2[size], size)) return false
-	return true
-}
-
 export function ChainClassConstructorTest<ClassType extends object = object>(
 	checker: (x: any) => x is ClassType,
 	prototypeProps: (string | symbol)[] = [],
@@ -55,7 +45,9 @@ export function ChainClassConstructorTest<ClassType extends object = object>(
 			assert(checker(instance))
 			for (const prop of prototypeProps)
 				it(`Is a Prototype Property? (${prop.toString()})`, () =>
-					assert(prop in instance && !ownKeys(instance).includes(prop)))
+					assert(
+						prop in instance && !ownKeys(instance).includes(prop)
+					))
 			for (const prop of ownProps)
 				it(`Is Own Property? (${prop.toString()})`, () =>
 					assert(ownKeys(instance).includes(prop)))
@@ -64,7 +56,9 @@ export function ChainClassConstructorTest<ClassType extends object = object>(
 	}
 }
 
-export function FunctionalClassConctructorTest<ClassType extends object = object>(
+export function FunctionalClassConctructorTest<
+	ClassType extends object = object
+>(
 	checker: (x: any) => x is ClassType,
 	prototypeProps: (string | symbol)[] = [],
 	ownProps: (string | symbol)[] = []
@@ -89,23 +83,14 @@ export function ClassConstructorTest<ClassType extends object = object>(
 		prototypeProps,
 		ownProps
 	)
-	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
+
+	return function (
+		constructor: new (...x: any[]) => ClassType,
+		...input: any[]
+	) {
 		return UnderFunctionalTest(classWrapper(constructor), ...input)
 	}
 }
-
-export function FlushableResultingTestFlush(
-	x: Flushable & Resulting,
-	result: any,
-	compare: (x: any, y: any) => boolean
-) {
-	method("flush", () => {
-		x.flush()
-		assert(compare(x.result, result))
-	})
-}
-
-export const PatternMethodTest = PropertyMethodTest("value")
 
 export function PropertyMethodTest(propName: string) {
 	return function <Type = any>(methodName: string) {
@@ -129,15 +114,23 @@ export function iterationTest<Type extends Iterable<any> = any>(
 	compare: (x: any, y: any) => boolean = equals
 ) {
 	method("[Symbol.iterator]", () =>
-		assert(arraysSame([...collectionInstance], iteratedOver, compare))
+		assert(same(collectionInstance, iteratedOver, compare))
 	)
 }
 
 export function methodTest<InstanceType = any>(methodName: string) {
-	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
+	return function (
+		instance: InstanceType,
+		expectedValue: any,
+		...input: any[]
+	) {
 		method(
 			methodName,
-			() => assert.strictEqual(instance[methodName](...input), expectedValue),
+			() =>
+				assert.strictEqual(
+					instance[methodName](...input),
+					expectedValue
+				),
 			...input
 		)
 	}
@@ -147,16 +140,23 @@ export function comparisonMethodTest<InstanceType = any>(
 	methodName: string,
 	compare: (x: any, y: any) => boolean
 ) {
-	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
+	return function (
+		instance: InstanceType,
+		expectedValue: any,
+		...input: any[]
+	) {
 		method(
 			methodName,
-			() => assert(compare(instance[methodName](...input), expectedValue)),
+			() =>
+				assert(compare(instance[methodName](...input), expectedValue)),
 			...input
 		)
 	}
 }
 
-export function flexibleComparisonMethodTest<InstanceType = any>(methodName: string) {
+export function flexibleComparisonMethodTest<InstanceType = any>(
+	methodName: string
+) {
 	return function (
 		instance: InstanceType,
 		expectedValue: any,
@@ -165,7 +165,8 @@ export function flexibleComparisonMethodTest<InstanceType = any>(methodName: str
 	) {
 		method(
 			methodName,
-			() => assert(compare(instance[methodName](...input), expectedValue)),
+			() =>
+				assert(compare(instance[methodName](...input), expectedValue)),
 			...input
 		)
 	}
@@ -175,42 +176,32 @@ export function setMethodTest<InstanceType = any>(
 	setMethodName: string,
 	getMethodName: string
 ) {
-	return function (instance: InstanceType, expectedValue: any, ...input: any[]) {
+	return function (
+		instance: InstanceType,
+		expectedValue: any,
+		...input: any[]
+	) {
 		method(
 			setMethodName,
 			() => {
 				instance[setMethodName](...input)
-				assert.strictEqual(input[getMethodName](input[0]), expectedValue)
+				assert.strictEqual(
+					input[getMethodName](input[0]),
+					expectedValue
+				)
 			},
 			...input
 		)
 	}
 }
 
-export function ResultingAmbigiousMethodTest<InstanceType extends Resulting = any>(
-	methodName: string
-) {
-	return function (
-		instance: InstanceType,
-		items: any[],
-		expectedResult: any,
-		compare: any
-	) {
-		method(
-			methodName,
-			() => {
-				const result = instance[methodName](...items)
-				assert(compare(result, expectedResult))
-				assert(compare(result, instance.result))
-			},
-			...items
-		)
-	}
-}
-
 export function utilTest(testedUtil: Function, utilName: string) {
 	return function (expected: any, ...input: any[]) {
-		util(utilName, () => assert.strictEqual(testedUtil(...input), expected), ...input)
+		util(
+			utilName,
+			() => assert.strictEqual(testedUtil(...input), expected),
+			...input
+		)
 	}
 }
 
@@ -234,7 +225,9 @@ export function predicateUtilTest(pred: (x: any) => boolean) {
 	}
 }
 
-export function doubleCurriedComparisonUtilTest(compare: (x: any, y: any) => boolean) {
+export function doubleCurriedComparisonUtilTest(
+	compare: (x: any, y: any) => boolean
+) {
 	return function (testedUtil: Function, utilName: string, arity: number) {
 		return function (expected: any, ...input: any[]) {
 			util(
@@ -242,7 +235,9 @@ export function doubleCurriedComparisonUtilTest(compare: (x: any, y: any) => boo
 				() =>
 					assert(
 						compare(
-							testedUtil(...input.slice(0, arity))(...input.slice(arity)),
+							testedUtil(...input.slice(0, arity))(
+								...input.slice(arity)
+							),
 							expected
 						)
 					),
@@ -276,14 +271,20 @@ export function flexibleUtilTest(testedUtil: Function, utilName: string) {
 		compare: (x: any, y: any) => boolean,
 		...input: any[]
 	) {
-		util(utilName, () => assert(compare(testedUtil(...input), expected)), ...input)
+		util(
+			utilName,
+			() => assert(compare(testedUtil(...input), expected)),
+			...input
+		)
 	}
 }
 
 export const optional = (type: Function) => or(not, type)
 export const optionalMethod = optional(isFunction)
 
-export function InitClassConstructorTest<ClassType extends Initializable = Initializable>(
+export function InitClassConstructorTest<
+	ClassType extends IInitializable = IInitializable
+>(
 	checker: (x: any) => x is ClassType,
 	prototypeProps: (string | symbol)[] = [],
 	ownProps: (string | symbol)[] = []
@@ -294,7 +295,11 @@ export function InitClassConstructorTest<ClassType extends Initializable = Initi
 		ownProps,
 		true
 	)
-	return function (constructor: new (...x: any[]) => ClassType, ...input: any[]) {
+
+	return function (
+		constructor: new (...x: any[]) => ClassType,
+		...input: any[]
+	) {
 		const instance = new constructor()
 		;(instance.init as (...x: any[]) => any)(...input)
 		return UnderChainTest(instance)
@@ -305,13 +310,19 @@ export function signatures<SignatureType extends object = any>(
 	signatures: SignatureType[],
 	post: (signature: SignatureType) => () => void
 ) {
-	for (let i = 0; i < signatures.length; ++i) it(`signature: ${i}`, post(signatures[i]))
+	for (let i = 0; i < signatures.length; ++i)
+		it(`signature: ${i}`, post(signatures[i]))
 }
 
 export const [method, util] = ["method", "util"].map(
 	(typeString, i) =>
 		(name: string, post: () => void, ...args: any[]) =>
-			it(`${typeString}: ${!i ? "." : ""}${name}(${inputDescribe(args)})`, post)
+			it(
+				`${typeString}: ${!i ? "." : ""}${name}(${inputDescribe(
+					args
+				)})`,
+				post
+			)
 )
 
 export const [classTest, property, namespace, importName, quality] = [
@@ -325,10 +336,8 @@ export const [classTest, property, namespace, importName, quality] = [
 		it(`${typeString}: ${i === 1 ? "." : ""}${name}`, post)
 )
 
-export function repeat(n: number, block: (i?: number) => void) {
-	for (let i = 0; i < n; ++i) block(i)
-}
-
 export function uniquenessTest(x: Iterable<any>) {
-	quality("uniqueness", () => assert.strictEqual(new Set(x).size, [...x].length))
+	quality("uniqueness", () =>
+		assert.strictEqual(new Set(x).size, [...x].length)
+	)
 }

@@ -1,7 +1,7 @@
-import type { DirectionalPosition } from "../../../../dist/src/Position/interfaces.js"
+import type { IDirectionalPosition } from "../../../../dist/src/Position/interfaces.js"
 
 import {
-	isBackward,
+	direction,
 	isPosition,
 	isPositionObject,
 	pickDirection,
@@ -9,7 +9,6 @@ import {
 	positionEqual,
 	positionNegate,
 	positionSame,
-	positionStopPoint,
 	preserveDirection,
 	directionCompare
 } from "../../../../dist/src/Position/utils.js"
@@ -34,14 +33,17 @@ export const [
 	[isPosition, "isPosition"],
 	[positionSame, "positionSame"],
 	[positionEqual, "positionEqual"],
-	[isBackward, "isBackward"],
+	[direction, "direction"],
 	[pickDirection, "pickDirection"],
-	[positionStopPoint, "positionStopPoint"],
 	[directionCompare, "directionCompare"]
 ].map(([util, name]) => utilTest(util as Function, name as string))
 
-const preserveDirectionTestCompare = (x: DirectionalPosition, y: DirectionalPosition) =>
+const preserveDirectionTestCompare = (
+	x: IDirectionalPosition,
+	y: IDirectionalPosition
+) =>
 	isFunction(x) ? isFunction(y) && x.direction === y.direction : equals(x, y)
+
 const directionUtilTest = comparisonUtilTest(preserveDirectionTestCompare)
 
 export const preserveDirectionTest = directionUtilTest(
@@ -49,11 +51,17 @@ export const preserveDirectionTest = directionUtilTest(
 	"preserveDirection"
 )
 
-export const positionNegateTest = directionUtilTest(positionNegate, "positionNegate")
+export const positionNegateTest = directionUtilTest(
+	positionNegate,
+	"positionNegate"
+)
 
-const positionTrivialEquality = (x: DirectionalPosition, y: DirectionalPosition) =>
+const positionTrivialEquality = (
+	x: IDirectionalPosition,
+	y: IDirectionalPosition
+) =>
 	(isNumber(x) && isNumber(y)) ||
-	(isFunction(x) && isFunction(y) && isBackward(x) === isBackward(y))
+	(isFunction(x) && isFunction(y) && direction(x) === direction(y))
 
 export const positionConvertTest = comparisonUtilTest(positionTrivialEquality)(
 	positionConvert,

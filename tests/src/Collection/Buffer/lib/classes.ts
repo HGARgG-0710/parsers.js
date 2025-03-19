@@ -1,3 +1,8 @@
+import type {
+	IFreezableBuffer,
+	IUnfreezableBuffer
+} from "../../../../../dist/src/Collection/Buffer/interfaces.js"
+
 import {
 	ClassConstructorTest,
 	classTest,
@@ -7,22 +12,23 @@ import {
 	PropertyMethodTest,
 	signatures
 } from "lib/lib.js"
-import { isFreezableBuffer } from "../../../../../dist/src/Collection/Buffer/utils.js"
-import type {
-	FreezableBuffer,
-	UnfreezableBuffer
-} from "../../../../../dist/src/Collection/Buffer/interfaces.js"
+
 import {
 	CollectionClassTest,
 	CollectionPushTest,
 	type CollectionClassTestSignature
 } from "Collection/lib/classes.js"
+
+import { isFreezableBuffer } from "../../../../../dist/src/Collection/Buffer/utils.js"
+
 import assert from "assert"
 
 const freezableBufferPrototypeProps = ["freeze", "read"]
 const freezableBufferOwnProps = ["value"]
 
-const unfreezableBufferPrototypeProps = freezableBufferPrototypeProps.concat(["unfreeze"])
+const unfreezableBufferPrototypeProps = freezableBufferPrototypeProps.concat([
+	"unfreeze"
+])
 const unfreezableBufferOwnProps = freezableBufferOwnProps
 
 const FreezableBufferConstructorTest = ClassConstructorTest(
@@ -38,11 +44,14 @@ const UnfreezableBufferConstructorTest = ClassConstructorTest(
 )
 
 const FreezableBufferFreezeTest =
-	PropertyMethodTest("isFrozen")<FreezableBuffer>("freeze")
+	PropertyMethodTest("isFrozen")<IFreezableBuffer>("freeze")
 
-const FreezableBufferReadTest = methodTest<FreezableBuffer>("read")
+const FreezableBufferReadTest = methodTest<IFreezableBuffer>("read")
 
-function FreezableBufferPostFreezePushTest(instance: FreezableBuffer, ...input: any[]) {
+function FreezableBufferPostFreezePushTest(
+	instance: IFreezableBuffer,
+	...input: any[]
+) {
 	method(`.push [.isFrozen] (${inputDescribe(input)})`, () => {
 		const oldSize = instance.size
 		instance.push(...input)
@@ -51,7 +60,7 @@ function FreezableBufferPostFreezePushTest(instance: FreezableBuffer, ...input: 
 }
 
 const UnfreezableBufferUnfreezeTest =
-	PropertyMethodTest("isFrozen")<FreezableBuffer>("unfreeze")
+	PropertyMethodTest("isFrozen")<IFreezableBuffer>("unfreeze")
 
 type FreezableBufferClassTestSignature<Type = any> = {
 	readTests: [number, Type][]
@@ -59,7 +68,7 @@ type FreezableBufferClassTestSignature<Type = any> = {
 
 function FreezableBufferClassTest<Type = any>(
 	className: string,
-	bufferConstructor: new (...input: any[]) => FreezableBuffer<Type>,
+	bufferConstructor: new (...input: any[]) => IFreezableBuffer<Type>,
 	testSignatures: FreezableBufferClassTestSignature<Type>[]
 ) {
 	CollectionClassTest(className, bufferConstructor, testSignatures)
@@ -88,7 +97,7 @@ type UnfreezableBufferClassTestSignatures<Type = any> =
 
 export function UnfreezableBufferClassTest<Type = any>(
 	className: string,
-	bufferConstructor: new (...input: any[]) => UnfreezableBuffer<Type>,
+	bufferConstructor: new (...input: any[]) => IUnfreezableBuffer<Type>,
 	testSignatures: UnfreezableBufferClassTestSignatures<Type>[]
 ) {
 	FreezableBufferClassTest(className, bufferConstructor, testSignatures)

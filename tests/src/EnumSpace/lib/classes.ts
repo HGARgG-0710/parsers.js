@@ -1,10 +1,10 @@
 import assert from "node:assert"
 
-import type { TokenInstance } from "../../../../dist/src/Token/interfaces.js"
-import type { EnumSpace, Mappable } from "../../../../dist/src/EnumSpace/interfaces.js"
+import type { ITokenInstance } from "../../../../dist/src/Token/interfaces.js"
+import type { IEnumSpace } from "../../../../dist/src/EnumSpace/interfaces.js"
+import type { IMappable } from "../../../../dist/src/interfaces.js"
 
 import {
-	arraysSame,
 	ClassConstructorTest,
 	classTest,
 	method,
@@ -12,12 +12,13 @@ import {
 	uniquenessTest
 } from "lib/lib.js"
 
-import { object, boolean, type } from "@hgargg-0710/one"
+import { object, boolean, type, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
 const { T } = boolean
+const { same } = array
 
-const isEnumSpace = structCheck<EnumSpace>({
+const isEnumSpace = structCheck<IEnumSpace>({
 	value: T,
 	add: isFunction,
 	map: isFunction,
@@ -25,11 +26,14 @@ const isEnumSpace = structCheck<EnumSpace>({
 	copy: isFunction
 })
 
-const assertSize = (instance: EnumSpace) =>
+const assertSize = (instance: IEnumSpace) =>
 	assert.strictEqual(instance.map().length, instance.size)
 
-function enumEquality(enumSpaceOrig: EnumSpace, enumSpaceCompared: EnumSpace) {
-	return arraysSame(enumSpaceOrig.map(), enumSpaceCompared.map())
+function enumEquality(
+	enumSpaceOrig: IEnumSpace,
+	enumSpaceCompared: IEnumSpace
+) {
+	return same(enumSpaceOrig.map(), enumSpaceCompared.map())
 }
 
 const EnumSpaceConstructorTest = ClassConstructorTest(
@@ -39,7 +43,7 @@ const EnumSpaceConstructorTest = ClassConstructorTest(
 )
 
 function EnumSpaceCopyTest(
-	instance: EnumSpace,
+	instance: IEnumSpace,
 	signature: ReducedEnumSpaceTestSignature
 ) {
 	method("copy", () => {
@@ -60,7 +64,7 @@ function EnumSpaceCopyTest(
 	})
 }
 
-function EnumSpaceAddTest(instance: EnumSpace, n: number) {
+function EnumSpaceAddTest(instance: IEnumSpace, n: number) {
 	method(
 		"add",
 		() => {
@@ -73,7 +77,7 @@ function EnumSpaceAddTest(instance: EnumSpace, n: number) {
 	)
 }
 
-function EnumSpaceJoinTest(instance: EnumSpace, space: EnumSpace) {
+function EnumSpaceJoinTest(instance: IEnumSpace, space: IEnumSpace) {
 	method(
 		"join",
 		() => {
@@ -87,20 +91,21 @@ function EnumSpaceJoinTest(instance: EnumSpace, space: EnumSpace) {
 }
 
 function EnumSpaceMapTest(
-	instance: EnumSpace,
+	instance: IEnumSpace,
 	compare: (x: any, y: any, i?: number) => boolean,
-	f: Mappable
+	f: IMappable
 ) {
 	method("map", () => {
 		const mapped = instance.map()
 		const mappedTested = instance.map(f)
 		assertSize(instance)
-		assert(arraysSame(mappedTested, mapped, compare))
+		assert(same(mappedTested, mapped, compare))
 	})
 }
 
 // NOTE: this is to test the most important property of EnumSpace-s, that all its elements are DISJOINT (otherwise, the structure becomes inherently useless);
-const EnumSpaceUniquenessTest = (instance: EnumSpace) => uniquenessTest(instance.map())
+const EnumSpaceUniquenessTest = (instance: IEnumSpace) =>
+	uniquenessTest(instance.map())
 
 type EnumSpaceClassTestSignature = {
 	size: number
@@ -108,38 +113,49 @@ type EnumSpaceClassTestSignature = {
 
 type ReducedEnumSpaceTestSignature = {
 	increases: number[]
-	joined: EnumSpace[]
-	mapTests: [Mappable, (x: any, y: any, i?: number) => boolean][]
+	joined: IEnumSpace[]
+	mapTests: [IMappable, (x: any, y: any, i?: number) => boolean][]
 	isCopyTest?: boolean
 	furtherSignature?: ReducedEnumSpaceTestSignature
 }
 
 export function EnumSpaceTest(
 	className: string,
-	enumConstructor: new (size: number) => EnumSpace,
+	enumConstructor: new (size: number) => IEnumSpace,
 	testSignatures: EnumSpaceClassTestSignature[]
 ) {
 	classTest(`(EnumSpace) ${className}`, () =>
 		signatures(
 			testSignatures,
-			({ size, increases, joined, mapTests, isCopyTest, furtherSignature }) =>
+			({
+					size,
+					increases,
+					joined,
+					mapTests,
+					isCopyTest,
+					furtherSignature
+				}) =>
 				() =>
-					ChainEnumSpaceTest(EnumSpaceConstructorTest(enumConstructor, size), {
-						increases,
-						joined,
-						mapTests,
-						isCopyTest,
-						furtherSignature
-					})
+					ChainEnumSpaceTest(
+						EnumSpaceConstructorTest(enumConstructor, size),
+						{
+							increases,
+							joined,
+							mapTests,
+							isCopyTest,
+							furtherSignature
+						}
+					)
 		)
 	)
 }
 
 function ChainEnumSpaceTest(
-	instance: EnumSpace,
+	instance: IEnumSpace,
 	signature: ReducedEnumSpaceTestSignature
 ) {
-	const { increases, joined, mapTests, isCopyTest, furtherSignature } = signature
+	const { increases, joined, mapTests, isCopyTest, furtherSignature } =
+		signature
 
 	if (isCopyTest === false) assert(isEnumSpace(instance))
 
@@ -161,12 +177,12 @@ function ChainEnumSpaceTest(
 }
 
 type TokenMappingTestSignature = {
-	instance: EnumSpace
+	instance: IEnumSpace
 }
 
 export function TokenMappingTest(
 	className: string,
-	TokenMapping: (enums: EnumSpace) => TokenInstance[],
+	TokenMapping: (enums: IEnumSpace) => ITokenInstance[],
 	testSignatures: TokenMappingTestSignature[]
 ) {
 	classTest(`(TokenInstanceEnum) ${className}`, () => {
@@ -175,10 +191,10 @@ export function TokenMappingTest(
 			const tokensMapped = TokenMapping(instance)
 
 			assert(
-				arraysSame(
+				same(
 					mapped,
 					tokensMapped,
-					(x: any, y: TokenInstance) => x === y.type
+					(x: any, y: ITokenInstance) => x === y.type
 				)
 			)
 		})

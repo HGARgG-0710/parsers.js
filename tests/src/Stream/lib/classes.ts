@@ -1,30 +1,33 @@
 import assert from "assert"
-import { arraysSame, iterationTest, method, property } from "lib/lib.js"
-
-import type { Position } from "../../../../dist/src/Position/interfaces.js"
+import { iterationTest, method, property } from "lib/lib.js"
 
 import type {
-	BoundNameType,
-	Navigable,
-	StreamClassInstance,
-	Rewindable,
-	Finishable,
-	PositionalStreamClassInstance,
-	PositionalReversedStreamClassInstance
+	IChange,
+	IPosed,
+	IPosition
+} from "../../../../dist/src/Position/interfaces.js"
+
+import type {
+	INavigable,
+	IStreamClassInstance,
+	IRewindable,
+	IFinishable,
+	IReversedStreamClassInstance
 } from "../../../../dist/src/Stream/StreamClass/interfaces.js"
 
-import type {
-	ChangeType,
-	ReversibleStream
-} from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
+import type { IReversibleStream } from "../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 
 import { uniFinish } from "../../../../dist/src/Stream/StreamClass/utils.js"
-import { next, previous } from "../../../../dist/src/utils.js"
+
+import { next, previous } from "../../../../dist/src/Stream/utils.js"
+
+import { array } from "@hgargg-0710/one"
+const { same } = array
 
 export function generalNavigateTest(
-	instance: StreamClassInstance & Navigable,
+	instance: IStreamClassInstance & INavigable,
 	expected: any,
-	position: Position
+	position: IPosition
 ) {
 	method(
 		"navigate",
@@ -36,14 +39,16 @@ export function generalNavigateTest(
 	)
 }
 
-const pickTestDirection = (direction: boolean): [BoundNameType, ChangeType] =>
+const pickTestDirection = (
+	direction: boolean
+): ["isEnd" | "isStart", IChange] =>
 	direction ? ["isEnd", next] : ["isStart", previous]
 
 export function generalBoundTest(direction: boolean) {
 	const [boundName, change] = pickTestDirection(direction)
 	const [beginningBoundName] = pickTestDirection(!direction)
 	return function (
-		stream: ReversibleStream,
+		stream: IReversibleStream,
 		expected: any[],
 		compare: (x: any, y: any) => boolean,
 		timesRecheck: number = 1
@@ -65,7 +70,8 @@ export function generalBoundTest(direction: boolean) {
 
 		if (i) {
 			assert.strictEqual(last, stream.curr)
-			while (timesRecheck--) assert.strictEqual(stream.curr, change(stream))
+			while (timesRecheck--)
+				assert.strictEqual(stream.curr, change(stream))
 		}
 	}
 }
@@ -74,7 +80,7 @@ export function generalJumpTest(direction: boolean) {
 	const [boundName, change] = pickTestDirection(direction)
 	const methodName = direction ? "rewind" : "finish"
 	return function (
-		stream: ReversibleStream & Rewindable & Finishable,
+		stream: IReversibleStream & IRewindable & IFinishable,
 		expectedBuffer: any[],
 		compare: (x: any, y: any) => boolean
 	) {
@@ -99,18 +105,22 @@ export function generalJumpTest(direction: boolean) {
 			change(stream)
 		}
 
-		assert(arraysSame(bufferCopy, bufferRepeat, compare))
-		assert(arraysSame(bufferCopy, expectedBuffer, compare))
+		assert(same(bufferCopy, bufferRepeat, compare))
+		assert(same(bufferCopy, expectedBuffer, compare))
 	}
 }
 
-export const [generalIsEndTest, generalIsStartTest] = [true, false].map(generalBoundTest)
-export const [generalRewindTest, generalFinishTest] = [true, false].map(generalJumpTest)
+export const [generalIsEndTest, generalIsStartTest] = [true, false].map(
+	generalBoundTest
+)
+export const [generalRewindTest, generalFinishTest] = [true, false].map(
+	generalJumpTest
+)
 
-export const generalIterationTest = iterationTest<StreamClassInstance>
+export const generalIterationTest = iterationTest<IStreamClassInstance>
 
 export function generalPosTest(
-	instance: PositionalStreamClassInstance,
+	instance: IPosed<number> & IStreamClassInstance,
 	initPos: number = 0,
 	reCheck: number = 1
 ) {
@@ -132,23 +142,26 @@ export function generalPosTest(
 }
 
 export function generalReversePosTest(
-	instance: PositionalReversedStreamClassInstance,
+	instance: IPosed<number> & IReversedStreamClassInstance,
 	initPos: number,
 	reCheck: number = 1
 ) {
-	property(`.pos [backwards, from ${initPos}, re-checked ${reCheck} times]`, () => {
-		assert.strictEqual(initPos, instance.pos)
+	property(
+		`.pos [backwards, from ${initPos}, re-checked ${reCheck} times]`,
+		() => {
+			assert.strictEqual(initPos, instance.pos)
 
-		while (!instance.isStart) {
-			const prevPos = instance.pos
-			instance.prev()
-			assert.strictEqual(prevPos - 1, instance.pos)
-		}
+			while (!instance.isStart) {
+				const prevPos = instance.pos
+				instance.prev()
+				assert.strictEqual(prevPos - 1, instance.pos)
+			}
 
-		while (reCheck--) {
-			const prevPos = instance.pos
-			instance.prev()
-			assert.strictEqual(prevPos, instance.pos)
+			while (reCheck--) {
+				const prevPos = instance.pos
+				instance.prev()
+				assert.strictEqual(prevPos, instance.pos)
+			}
 		}
-	})
+	)
 }

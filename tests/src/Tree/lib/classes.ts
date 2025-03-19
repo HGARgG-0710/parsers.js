@@ -1,7 +1,12 @@
 import assert from "node:assert"
 
-import type { Tree } from "../../../../dist/src/Tree/interfaces.js"
-import { ChildlessTree, MultTree, SingleTree } from "../../../../dist/src/Tree/classes.js"
+import type { ITree } from "../../../../dist/src/Tree/interfaces.js"
+import {
+	ChildlessTree,
+	MultTree,
+	SingleTree
+} from "../../../../dist/src/Tree/classes.js"
+
 import {
 	classTest,
 	FunctionalClassConctructorTest,
@@ -15,7 +20,7 @@ const { isFunction, isNumber } = type
 
 const { structCheck } = object
 
-export const isTree = structCheck<Tree>({
+export const isTree = structCheck<ITree>({
 	lastChild: isNumber,
 	index: isFunction
 })
@@ -40,7 +45,11 @@ function SingleTreeTest(
 	})
 }
 
-function MultTreeTest(childrenTree: any, propName: string, converter?: (x: any) => any) {
+function MultTreeTest(
+	childrenTree: any,
+	propName: string,
+	converter?: (x: any) => any
+) {
 	classTest(`MultTree(${propName})`, () => {
 		const oldValue = childrenTree.value
 		const multed = MultTree(propName)(childrenTree, converter)
@@ -90,11 +99,15 @@ export function TreeTestSeveral(
 	)
 }
 
-const TreeConstructorTest = FunctionalClassConctructorTest<Tree>(isTree)
+const TreeConstructorTest = FunctionalClassConctructorTest<ITree>(isTree)
 
-const TreeIndexTest = methodTest<Tree>("index")
+const TreeIndexTest = methodTest<ITree>("index")
 
-function TreeLastChildTest(tree: Tree, index: number[], expectedLastChild: number) {
+function TreeLastChildTest(
+	tree: ITree,
+	index: number[],
+	expectedLastChild: number
+) {
 	property("lastChild", () =>
 		assert.strictEqual(tree.index(index).lastChild, expectedLastChild)
 	)
@@ -108,20 +121,27 @@ type TreeClassTestSignature = {
 
 export function TreeClassTest(
 	className: string,
-	treeConstructor: (x: any) => Tree,
+	treeConstructor: (x: any) => ITree,
 	testSignatures: TreeClassTestSignature[]
 ) {
 	classTest(`(Tree) ${className}`, () =>
-		signatures(testSignatures, ({ input, indexTests, lastChildTests }) => () => {
-			const treeInstance: Tree = TreeConstructorTest(treeConstructor, input)
+		signatures(
+			testSignatures,
+			({ input, indexTests, lastChildTests }) =>
+				() => {
+					const treeInstance: ITree = TreeConstructorTest(
+						treeConstructor,
+						input
+					)
 
-			// .index
-			for (const [index, expected] of indexTests)
-				TreeIndexTest(treeInstance, expected, index)
+					// .index
+					for (const [index, expected] of indexTests)
+						TreeIndexTest(treeInstance, expected, index)
 
-			// .lastChild
-			for (const [index, lastChild] of lastChildTests)
-				TreeLastChildTest(treeInstance, index, lastChild)
-		})
+					// .lastChild
+					for (const [index, lastChild] of lastChildTests)
+						TreeLastChildTest(treeInstance, index, lastChild)
+				}
+		)
 	)
 }

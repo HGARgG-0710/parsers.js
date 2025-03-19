@@ -1,21 +1,20 @@
 import assert from "node:assert"
 
-import type { Pattern } from "../../../../dist/src/Pattern/interfaces.js"
+import type { IPattern } from "../../../../dist/src/Pattern/interfaces.js"
 
 import type {
-	KeyReplaceable,
-	Deletable,
-	Settable
-} from "../../../../dist/src/IndexMap/HashMap/interfaces.js"
-
-import type {
-	Sizeable,
-	Indexable,
-	IndexMap,
-	MapClass,
-	Pairs,
-	DefaultHaving
+	IIndexMap,
+	IMapClass
 } from "../../../../dist/src/IndexMap/interfaces.js"
+
+import type {
+	ISizeable,
+	IRekeyable,
+	IIndexable,
+	IDefaulting,
+	IDeletable,
+	ISettable
+} from "../../../../dist/src/interfaces.js"
 
 import {
 	ClassConstructorTest,
@@ -26,23 +25,25 @@ import {
 	comparisonMethodTest
 } from "lib/lib.js"
 
-import { keyValuesToPairsList } from "../../../../dist/src/IndexMap/utils.js"
+import { toPairs } from "../../../../dist/src/IndexMap/utils.js"
 
-import { object, type, functional } from "@hgargg-0710/one"
+import { object, type, functional, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
 const { and } = functional
 
-export const isIndexable = structCheck<Indexable>({ index: isFunction })
-export const isDeletable = structCheck<Deletable>({ delete: isFunction })
-export const isKeyReplaceable = structCheck<KeyReplaceable>({ replaceKey: isFunction })
-export const isSettable = structCheck<Settable>({ set: isFunction })
-export const isSizeable = structCheck<Sizeable>({ size: isNumber })
-export const isDefaultHaving = structCheck<DefaultHaving>(["default"])
+export const isIndexable = structCheck<IIndexable>({ index: isFunction })
+export const isDeletable = structCheck<IDeletable>({ delete: isFunction })
+export const isKeyReplaceable = structCheck<IRekeyable>({
+	replaceKey: isFunction
+})
+export const isSettable = structCheck<ISettable>({ set: isFunction })
+export const isSizeable = structCheck<ISizeable>({ size: isNumber })
+export const isDefaultHaving = structCheck<IDefaulting>(["default"])
 
 function indexMapEquality<KeyType = any, ValueType = any>(
-	indexMap: IndexMap<KeyType, ValueType>,
-	preMap: Pairs<KeyType, ValueType>
+	indexMap: IIndexMap<KeyType, ValueType>,
+	preMap: array.Pairs<KeyType, ValueType>
 ) {
 	for (let i = 0; i < indexMap.size; ++i) {
 		const [origKey, origValue] = indexMap.byIndex(i)
@@ -69,9 +70,9 @@ export const isIndexMap = and(
 	isSizeable,
 	isKeyReplaceable,
 	isDeletable
-) as (x: any) => x is IndexMap
+) as (x: any) => x is IIndexMap
 
-const indexMapConstructorTest = ClassConstructorTest<IndexMap>(isIndexMap, [
+const indexMapConstructorTest = ClassConstructorTest<IIndexMap>(isIndexMap, [
 	"unique",
 	"byIndex",
 	"swap",
@@ -87,11 +88,11 @@ const indexMapConstructorTest = ClassConstructorTest<IndexMap>(isIndexMap, [
 export function baseIndexMapGetIndexTest<IndexGetType = any>(
 	converter: (x: IndexGetType) => number
 ) {
-	return function <KeyType = any, ValueType = any>(
-		instance: IndexMap<KeyType, ValueType, IndexGetType>,
+	return function <KeyType = any, ValueType = any, DefaultType = any>(
+		instance: IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>,
 		key: KeyType,
 		index: IndexGetType,
-		safe?: Pattern<IndexGetType>
+		safe?: IPattern<IndexGetType>
 	) {
 		method(
 			"getIndex",
@@ -105,8 +106,13 @@ export function baseIndexMapGetIndexTest<IndexGetType = any>(
 	}
 }
 
-function indexMapReplaceKeyTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapRekeyTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	keyFrom: KeyType,
 	keyTo: KeyType
 ) {
@@ -114,8 +120,11 @@ function indexMapReplaceKeyTest<KeyType = any, ValueType = any, IndexType = numb
 		"replaceKey",
 		() => {
 			const initVal = instance.index(keyFrom)
-			instance.replaceKey(keyFrom, keyTo)
-			assert.strictEqual(initVal, instance.values[instance.keys.indexOf(keyTo)])
+			instance.rekey(keyFrom, keyTo)
+			assert.strictEqual(
+				initVal,
+				instance.values[instance.keys.indexOf(keyTo)]
+			)
 			assert.strictEqual(-1, instance.keys.indexOf(keyFrom))
 		},
 		keyFrom,
@@ -123,8 +132,13 @@ function indexMapReplaceKeyTest<KeyType = any, ValueType = any, IndexType = numb
 	)
 }
 
-function indexMapSetTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapSetTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	setKey: KeyType,
 	setValue: ValueType
 ) {
@@ -132,19 +146,25 @@ function indexMapSetTest<KeyType = any, ValueType = any, IndexType = number>(
 		"set",
 		() => {
 			instance.set(setKey, setValue)
-			assert.strictEqual(instance.values[instance.keys.indexOf(setKey)], setValue)
+			assert.strictEqual(
+				instance.values[instance.keys.indexOf(setKey)],
+				setValue
+			)
 		},
 		setKey,
 		setValue
 	)
 }
 
-function indexMapIteratorTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>
-) {
+function indexMapIteratorTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>) {
 	method("[Symbol.iterator]", () => {
 		const pairsList = [...instance]
-		const truePairsList = keyValuesToPairsList([instance.keys, instance.values])
+		const truePairsList = toPairs([instance.keys, instance.values])
 		assert.strictEqual(pairsList.length, truePairsList.length)
 		assert(
 			pairsList.every(
@@ -155,8 +175,13 @@ function indexMapIteratorTest<KeyType = any, ValueType = any, IndexType = number
 	})
 }
 
-function indexMapByIndexTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapByIndexTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	i: number,
 	expected: any
 ) {
@@ -168,7 +193,10 @@ function indexMapByIndexTest<KeyType = any, ValueType = any, IndexType = number>
 				assert.strictEqual(allegedValue, expected)
 				return
 			}
-			const [allegedKey, allegedValue] = instance.byIndex(i) as [KeyType, ValueType]
+			const [allegedKey, allegedValue] = instance.byIndex(i) as [
+				KeyType,
+				ValueType
+			]
 			const [trueKey, trueValue] = expected as [KeyType, ValueType]
 			assert.strictEqual(allegedKey, trueKey)
 			assert.strictEqual(allegedValue, trueValue)
@@ -177,18 +205,24 @@ function indexMapByIndexTest<KeyType = any, ValueType = any, IndexType = number>
 	)
 }
 
-const indexMapIndexTest = methodTest<IndexMap>("index") as <
+const indexMapIndexTest = methodTest<IIndexMap>("index") as <
 	KeyType = any,
 	ValueType = any,
+	DefaultType = any,
 	IndexType = number
 >(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	expectedValue: any,
 	...input: any[]
 ) => any
 
-function indexMapSwapTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapSwapTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	i: number,
 	j: number
 ) {
@@ -214,8 +248,13 @@ function indexMapSwapTest<KeyType = any, ValueType = any, IndexType = number>(
 	)
 }
 
-function indexMapCopyTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapCopyTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	copyTestSignature: ReducedMapClassTestSignature
 ) {
 	method("copy", () => {
@@ -233,8 +272,13 @@ function indexMapCopyTest<KeyType = any, ValueType = any, IndexType = number>(
 
 const indexMapUniqueTest = comparisonMethodTest("unique", indexMapEquality)
 
-function indexMapReplaceTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapReplaceTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
@@ -258,8 +302,13 @@ function indexMapReplaceTest<KeyType = any, ValueType = any, IndexType = number>
 	)
 }
 
-function indexMapAddTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+function indexMapAddTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	i: number,
 	pair: [KeyType, ValueType]
 ) {
@@ -280,10 +329,12 @@ function indexMapAddTest<KeyType = any, ValueType = any, IndexType = number>(
 	)
 }
 
-function indexMapDeleteTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
-	i: number
-) {
+function indexMapDeleteTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>, i: number) {
 	method(
 		"delete",
 		() => {
@@ -301,26 +352,28 @@ function indexMapDeleteTest<KeyType = any, ValueType = any, IndexType = number>(
 }
 
 export type MapClassTestSignature<KeyType = any, ValueType = any> = {
-	instance: [Pairs<KeyType, ValueType>, any?] | IndexMap<KeyType, ValueType>
+	instance:
+		| [array.Pairs<KeyType, ValueType>, any?]
+		| IIndexMap<KeyType, ValueType>
 } & ReducedMapClassTestSignature<KeyType, ValueType>
 
 export type ReducedMapClassTestSignature<KeyType = any, ValueType = any> = {
-	byIndexTest: Pairs<number, any>
-	indexTest: Pairs<any, ValueType>
+	byIndexTest: array.Pairs<number, any>
+	indexTest: array.Pairs<any, ValueType>
 	swapIndicies: [number, number][]
-	uniqueTest?: Pairs<KeyType, ValueType>
-	replaceTests: Pairs<number, [KeyType, ValueType]>
-	addTests: Pairs<number, [KeyType, ValueType]>
+	uniqueTest?: array.Pairs<KeyType, ValueType>
+	replaceTests: array.Pairs<number, [KeyType, ValueType]>
+	addTests: array.Pairs<number, [KeyType, ValueType]>
 	deleteInds: number[]
-	setArgs: Pairs<KeyType, ValueType>
-	replaceKeys: Pairs<KeyType, KeyType>
+	setArgs: array.Pairs<KeyType, ValueType>
+	replaceKeys: array.Pairs<KeyType, KeyType>
 	isCopyTest?: boolean
 	furtherSignature?: ReducedMapClassTestSignature<KeyType, ValueType>
 }
 
 export function MapClassTest<KeyType = any, ValueType = any>(
 	className: string,
-	mapConstructor: MapClass<KeyType, ValueType>,
+	mapConstructor: IMapClass<KeyType, ValueType>,
 	testSignatures: MapClassTestSignature<KeyType, ValueType>[]
 ) {
 	classTest(`(IndexMap) ${className}`, () =>
@@ -341,26 +394,34 @@ export function MapClassTest<KeyType = any, ValueType = any>(
 					furtherSignature
 				}) =>
 				() => {
-					ChainIndexMapTest(indexMapConstructorTest(mapConstructor, instance), {
-						byIndexTest,
-						indexTest,
-						swapIndicies,
-						uniqueTest,
-						replaceTests,
-						addTests,
-						deleteInds,
-						setArgs,
-						replaceKeys,
-						isCopyTest,
-						furtherSignature
-					})
+					ChainIndexMapTest(
+						indexMapConstructorTest(mapConstructor, instance),
+						{
+							byIndexTest,
+							indexTest,
+							swapIndicies,
+							uniqueTest,
+							replaceTests,
+							addTests,
+							deleteInds,
+							setArgs,
+							replaceKeys,
+							isCopyTest,
+							furtherSignature
+						}
+					)
 				}
 		)
 	)
 }
 
-export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = number>(
-	instance: IndexMap<KeyType, ValueType, IndexType>,
+export function ChainIndexMapTest<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = number
+>(
+	instance: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
 	signature: ReducedMapClassTestSignature
 ) {
 	const {
@@ -381,7 +442,8 @@ export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = nu
 	if (isCopyTest === false) assert(isIndexMap(instance))
 
 	// .index
-	for (const [key, value] of indexTest) indexMapIndexTest(instance, value, key)
+	for (const [key, value] of indexTest)
+		indexMapIndexTest(instance, value, key)
 
 	// .copy
 	if ((isCopyTest || isCopyTest === undefined) && furtherSignature)
@@ -397,7 +459,8 @@ export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = nu
 	for (const i of deleteInds) indexMapDeleteTest(instance, i)
 
 	// .set
-	for (const [setKey, setValue] of setArgs) indexMapSetTest(instance, setKey, setValue)
+	for (const [setKey, setValue] of setArgs)
+		indexMapSetTest(instance, setKey, setValue)
 
 	// .unique
 	if (uniqueTest) indexMapUniqueTest(instance, uniqueTest)
@@ -413,7 +476,7 @@ export function ChainIndexMapTest<KeyType = any, ValueType = any, IndexType = nu
 
 	// .replaceKey
 	for (const [keyFrom, keyTo] of replaceKeys)
-		indexMapReplaceKeyTest(instance, keyFrom, keyTo)
+		indexMapRekeyTest(instance, keyFrom, keyTo)
 }
 
 export const linearIndexMapEmptyTest = {

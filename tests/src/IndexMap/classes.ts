@@ -1,4 +1,4 @@
-import type { TokenType } from "../../../dist/src/Token/interfaces.js"
+import type { ITokenType } from "../../../dist/src/Token/interfaces.js"
 
 import {
 	CurrentMap,
@@ -14,7 +14,7 @@ import {
 	PredicateMap
 } from "../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 
-import { SimpleTokenType } from "../../../dist/src/Token/classes.js"
+import { TokenType } from "../../../dist/src/Token/classes.js"
 import { linearIndexMapEmptyTest } from "./lib/classes.js"
 import { LinearMapClassTest } from "./LinearIndexMap/lib/classes.js"
 
@@ -22,31 +22,35 @@ import { LinearMapClassTest } from "./LinearIndexMap/lib/classes.js"
 
 const object = {}
 
-LinearMapClassTest("TypeofMap(ValueMap(BasicMap))", TypeofMap(ValueMap(BasicMap)), [
-	{
-		instance: [
-			Pairs<string, any>(
-				["string", 990],
-				["number", -11],
-				["boolean", null],
-				["object", object]
-			),
-			70
-		],
-		indexTest: [
-			[Pointer(29), -11],
-			[Pointer(true), null],
-			[Pointer("Sesame"), 990],
-			[Pointer(function () {}), 70],
-			[Pointer({ x: 99 }), object]
-		],
-		...linearIndexMapEmptyTest
-	}
-])
+LinearMapClassTest(
+	"TypeofMap(ValueMap(BasicMap))",
+	TypeofMap(ValueMap(BasicMap)),
+	[
+		{
+			instance: [
+				Pairs<string, any>(
+					["string", 990],
+					["number", -11],
+					["boolean", null],
+					["object", object]
+				),
+				70
+			],
+			indexTest: [
+				[Pointer(29), -11],
+				[Pointer(true), null],
+				[Pointer("Sesame"), 990],
+				[Pointer(function () {}), 70],
+				[Pointer({ x: 99 }), object]
+			],
+			...linearIndexMapEmptyTest
+		}
+	]
+)
 
 // * CurrentMap, TypeMap
 
-const [A, B, C, D] = ["a", "b", "c", "d"].map(SimpleTokenType)
+const [A, B, C, D] = ["a", "b", "c", "d"].map(TokenType)
 const withCurr = (curr: any) => ({ curr })
 
 LinearMapClassTest(
@@ -54,7 +58,7 @@ LinearMapClassTest(
 	TypeMap(CurrentMap(PredicateMap)),
 	[
 		{
-			instance: [Pairs<TokenType, any>([A, 10], [B, 20], [C, 30]), null],
+			instance: [Pairs<ITokenType, any>([A, 10], [B, 20], [C, 30]), null],
 			indexTest: [
 				[withCurr(new B("?")), 20],
 				[withCurr(new A(200)), 10],
