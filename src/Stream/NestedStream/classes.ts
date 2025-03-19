@@ -1,13 +1,18 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { INestedStream } from "./interfaces.js"
 import type { IStreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { ILookupTable } from "../../IndexMap/LookupTable/interfaces.js"
-import type { IEndableStream, IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 
+import type {
+	IEndableStream,
+	IStreamClassInstance
+} from "../StreamClass/interfaces.js"
+
+import type { INestedStream } from "./interfaces.js"
+
+import { withSuper } from "../../refactor.js"
 import { DefaultEndStream } from "../StreamClass/abstract.js"
-import { withSuper } from "src/refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
@@ -40,7 +45,10 @@ export function NestedStream<Type = any>(
 		super: Summat
 		typesTable: ILookupTable<any, IStreamPredicate>
 
-		init: (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type>;
+		init: (
+			value?: IEndableStream<Type>,
+			_index?: any
+		) => INestedStream<Type>;
 		["constructor"]: new (
 			value?: IEndableStream<Type>,
 			_index?: any

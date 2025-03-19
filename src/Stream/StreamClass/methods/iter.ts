@@ -2,14 +2,14 @@ import type { IReversedStreamClassInstance, IStreamClassInstance } from "../inte
 
 import type { IPosed } from "../../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { IBasicStream } from "../../interfaces.js"
 
-import { positionDecrement, positionIncrement } from "src/Position/refactor.js"
-import { bufferFreeze, bufferPush } from "src/Collection/Buffer/refactor.js"
+import { positionDecrement, positionIncrement } from "../../../Position/refactor.js"
+import { bufferFreeze, bufferPush } from "../../../Collection/Buffer/refactor.js"
 import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
 import { currSet } from "./curr.js"
 
 import { functional, object } from "@hgargg-0710/one"
-import type { IBasicStream } from "../../interfaces.js"
 const { nil } = functional
 const { propDefine } = object
 const { GetSetDescriptor, ConstDescriptor } = object.descriptor

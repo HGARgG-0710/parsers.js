@@ -6,7 +6,7 @@ import type { ITreeStream } from "./interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
-import { withSuper } from "src/refactor.js"
+import { withSuper } from "../../refactor.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
 import { StreamClass } from "../StreamClass/abstract.js"
 
@@ -24,7 +24,10 @@ const TreeStreamBase = StreamClass({
 	defaultIsEnd: F
 }) as AbstractConstructor<[], IReversedStreamClassInstance<IInTree>>
 
-export class TreeStream<Type = any> extends TreeStreamBase implements ITreeStream<Type> {
+export class TreeStream<Type = any>
+	extends TreeStreamBase
+	implements ITreeStream<Type>
+{
 	protected response: string
 	protected lastLevelWithSiblings = BadIndex
 	protected walker: TreeWalker<Type>

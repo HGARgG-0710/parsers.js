@@ -2,7 +2,7 @@ import type { IInternalHash } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { DelegateDeletableSettableSizeable } from "../../abstract.js"
-import { ProtectedPattern } from "src/Pattern/abstract.js"
+import { ProtectedPattern } from "../../../Pattern/abstract.js"
 
 import { type } from "@hgargg-0710/one"
 const { isArray, isUndefined } = type

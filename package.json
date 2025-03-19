@@ -27,7 +27,7 @@
 		"build-js": "tsc --project ts/tsconfig.json",
 		"build-types": "tsc --project ts/types.json",
 		"build": "npm run build-js && npm run build-types",
-		"all": "npm run build && npm run test",
+		"all": "npm run build && npm run test-compile",
 		"unused": "ts-unused-exports ./tsconfig.json"
 	},
 	"devDependencies": {

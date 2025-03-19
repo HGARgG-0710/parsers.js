@@ -55,7 +55,18 @@ Order of TODO-elimination:
 				NOTES: 
 					1. be ignorant of the internal workings of the thing [behaviour-based]: 
 					2. refactor using one.js v0.5
-					3. fix TypeScript compiler errors
+					3. fix TypeScript compiler errors	
+						1. Collection
+						2. EnumSpace
+						3. IndexMap
+						4. Parser
+						5. Pattern [MISSING]
+						6. Position
+						7. regex
+						8. Stream
+						9. Token
+						10. Tree
+						
 
 				Lists of things to do [add/remove/fix]:
 					1. Collection
@@ -97,7 +108,6 @@ Order of TODO-elimination:
 		12. Remove unused wiki
 		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
 		14. Clean out the `constants.md` file 
-		15. Clean up the import-paths (none of that `src/` stuff...)
 
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 

@@ -8,8 +8,8 @@ import type {
 	IFreezableBuffer
 } from "../../../Collection/Buffer/interfaces.js"
 
-import { positionNull } from "src/Position/refactor.js"
-import { assignBuffer } from "src/Collection/Buffer/refactor.js"
+import { positionNull } from "../../../Position/refactor.js"
+import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../Pattern/utils.js"
 import { createState, start } from "../refactor.js"
 
@@ -30,7 +30,9 @@ export type IInitMethod =
 	| IBufferStatePatternInitMethod
 
 export type IBaseInitMethod = () => void
-export type IBufferInitMethod = <Type = any>(buffer?: IFreezableBuffer<Type>) => void
+export type IBufferInitMethod = <Type = any>(
+	buffer?: IFreezableBuffer<Type>
+) => void
 export type IStateInitMethod = (state?: Summat) => void
 export type IPatternInitMethod = (value: any) => void
 
@@ -64,7 +66,9 @@ function initialize<Type = any>(this: IStreamClassInstance<Type>) {
 
 // * Explanation: the private function here is only for refactoring;
 function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
-	function posInitialize<Type = any>(this: IStreamClassInstance<Type> & IPosed<number>) {
+	function posInitialize<Type = any>(
+		this: IStreamClassInstance<Type> & IPosed<number>
+	) {
 		positionNull(this)
 		initialize.call(this)
 	}
@@ -111,7 +115,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	}
 
 	function posBufferStateInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IStateful & IBufferized<Type> & IPosed<number>,
+		this: IStreamClassInstance<Type> &
+			IStateful &
+			IBufferized<Type> &
+			IPosed<number>,
 		buffer?: IFreezableBuffer,
 		state: Summat = {}
 	) {
@@ -145,7 +152,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	}
 
 	function posBufferPatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type> & IPattern,
+		this: IStreamClassInstance<Type> &
+			IPosed<number> &
+			IBufferized<Type> &
+			IPattern,
 		value?: any,
 		buffer?: IFreezableBuffer<Type>
 	) {
@@ -163,7 +173,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	}
 
 	function posStatePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPosed<number> & IPattern & IStateful,
+		this: IStreamClassInstance<Type> &
+			IPosed<number> &
+			IPattern &
+			IStateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -172,7 +185,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	}
 
 	function bufferStatePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IBufferized<Type> & IStateful & IPattern,
+		this: IStreamClassInstance<Type> &
+			IBufferized<Type> &
+			IStateful &
+			IPattern,
 		value?: any,
 		buffer?: IFreezableBuffer<Type>,
 		state: Summat = {}
@@ -232,5 +248,7 @@ export function chooseMethod(
 	state: boolean = false,
 	pattern: boolean = false
 ) {
-	return methodList[+hasPosition | (+buffer << 1) | (+state << 2) | (+pattern << 3)]
+	return methodList[
+		+hasPosition | (+buffer << 1) | (+state << 2) | (+pattern << 3)
+	]
 }

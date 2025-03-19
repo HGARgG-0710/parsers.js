@@ -1,8 +1,13 @@
-import type { IIsEndCurrable, IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IPosed, IPredicatePosition } from "../../Position/interfaces.js"
-import type { ISupered } from "src/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
+
+import type {
+	IIsEndCurrable,
+	IStreamClassInstance
+} from "../StreamClass/interfaces.js"
+
+import type { ISupered } from "../../interfaces.js"
 
 export interface ILookaheadHaving {
 	hasLookAhead: boolean

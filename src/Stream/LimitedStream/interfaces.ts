@@ -1,4 +1,9 @@
-import type { IPosition, IPosed, IDirectionHaving } from "../../Position/interfaces.js"
+import type {
+	IPosition,
+	IPosed,
+	IDirectionHaving
+} from "../../Position/interfaces.js"
+
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type {
@@ -12,8 +17,9 @@ import type {
 	ISinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 
-import type { ISupered } from "src/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
+
+import type { ISupered } from "../../interfaces.js"
 
 export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IPosed<IPosition> &

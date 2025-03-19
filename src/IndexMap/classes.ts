@@ -1,10 +1,9 @@
 import type { IMapClass } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { type } from "../Token/utils.js"
+import { type, is } from "../Token/utils.js"
 import { value } from "../Pattern/utils.js"
-import { current } from "src/Stream/utils.js"
-import { is } from "src/Token/utils.js"
+import { current } from "../Stream/utils.js"
 
 import { type as _type } from "@hgargg-0710/one"
 const { typeOf, isNumber } = _type

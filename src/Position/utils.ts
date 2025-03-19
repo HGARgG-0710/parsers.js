@@ -8,7 +8,7 @@ import type {
 	IChange
 } from "./interfaces.js"
 
-import { previous, next } from "src/Stream/utils.js"
+import { previous, next } from "../Stream/utils.js"
 
 import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -32,11 +32,11 @@ export const isPositionObject = structCheck({
 /**
  * Returns whether given `x` is a `Position`
  */
-export const isPosition = or(isNumber, isPredicatePosition, isPositionObject) as <
-	Type = any
->(
-	x: any
-) => x is IPosition<Type>
+export const isPosition = or(
+	isNumber,
+	isPredicatePosition,
+	isPositionObject
+) as <Type = any>(x: any) => x is IPosition<Type>
 
 /**
  * Given a `Position` and (optionally) a `BasicStream`, it returns one of:
@@ -57,8 +57,12 @@ export function positionConvert<Type = any>(
  * 1. The original position, If it is a `number`
  * 2. The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
-export function positionNegate<Type = any>(position: IPosition<Type>): IPosition<Type> {
-	return isPredicatePosition(position) ? preserveDirection(position, negate) : position
+export function positionNegate<Type = any>(
+	position: IPosition<Type>
+): IPosition<Type> {
+	return isPredicatePosition(position)
+		? preserveDirection(position, negate)
+		: position
 }
 
 /**
@@ -69,7 +73,8 @@ export function positionSame<Type = any>(
 	pos2: IPosition<Type>,
 	stream?: IBasicStream<Type>
 ) {
-	if (isPositionObject(pos1) && isFunction(pos1.equals)) return pos1.equals(pos2)
+	if (isPositionObject(pos1) && isFunction(pos1.equals))
+		return pos1.equals(pos2)
 	return positionConvert(pos1, stream) === positionConvert(pos2, stream)
 }
 
@@ -122,7 +127,9 @@ export function direction<Type = any>(pos: IDirectionalPosition<Type>) {
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export function pickDirection<Type = any>(pos: IDirectionalPosition<Type>): IChange {
+export function pickDirection<Type = any>(
+	pos: IDirectionalPosition<Type>
+): IChange {
 	return direction(pos) ? next : previous
 }
 
@@ -142,7 +149,9 @@ export function preserveDirection<Type = any>(
 /**
  * Adds a `.direction = false` property on a given `PredicatePosition`
  */
-export function positionBacktrack<Type = any>(predicate: IPredicatePosition<Type>) {
+export function positionBacktrack<Type = any>(
+	predicate: IPredicatePosition<Type>
+) {
 	predicate.direction = false
 	return predicate
 }

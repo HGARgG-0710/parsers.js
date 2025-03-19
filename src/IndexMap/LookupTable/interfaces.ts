@@ -1,7 +1,5 @@
 import type { IHashMap } from "../HashMap/interfaces.js"
-import type { IDeletable } from "src/interfaces.js"
-import type { ISettable } from "src/interfaces.js"
-import type { IRekeyable } from "src/interfaces.js"
+import type { IDeletable, ISettable, IRekeyable } from "../../interfaces.js"
 
 export interface ILookupTable<KeyType = any, ValueType = any, OwningType = any>
 	extends IRekeyable<KeyType>,

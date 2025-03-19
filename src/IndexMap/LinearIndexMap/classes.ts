@@ -1,9 +1,7 @@
 import type { array } from "@hgargg-0710/one"
-import type { ILinearIndexMap } from "./interfaces.js"
+import type { IIndexingFunction, ITestable, IHaving } from "../../interfaces.js"
 import type { IMapClass } from "../interfaces.js"
-import type { IIndexingFunction } from "src/interfaces.js"
-import type { ITestable } from "src/interfaces.js"
-import type { IHaving } from "src/interfaces.js"
+import type { ILinearIndexMap } from "./interfaces.js"
 
 import {
 	extend,
@@ -85,8 +83,8 @@ export const RegExpMap: IMapClass<ITestable> = LinearMapClass(
 	(curr: ITestable, x: any) => curr.test(x)
 )
 
-export const SetMap: IMapClass<IHaving> = LinearMapClass((curr: IHaving, x: any) =>
-	curr.has(x)
+export const SetMap: IMapClass<IHaving> = LinearMapClass(
+	(curr: IHaving, x: any) => curr.has(x)
 )
 
 export const BasicMap = LinearMapClass(equals)

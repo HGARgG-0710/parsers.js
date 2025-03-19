@@ -4,7 +4,7 @@ import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IReversedStream, IReversibleStream } from "./interfaces.js"
 
-import { valueDelegate, valuePropDelegate, withSuper } from "src/refactor.js"
+import { valueDelegate, valuePropDelegate, withSuper } from "../../refactor.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { valueCurr } from "../StreamClass/refactor.js"
 import { StreamClass } from "../StreamClass/abstract.js"
@@ -38,7 +38,10 @@ const ReversedStreamBase = <Type = any>(
 		hasPosition,
 		buffer,
 		isPattern: true
-	}) as AbstractConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
+	}) as AbstractConstructor<
+		[any],
+		IReversedStreamClassInstance<Type> & IPattern
+	>
 
 export function ReversedStream<Type = any>(
 	hasPosition: boolean = false,

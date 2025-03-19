@@ -9,7 +9,7 @@ import type { IPredicateStream, IPredicateStreamConstructor } from "./interfaces
 import type { IPattern } from "../../Pattern/interfaces.js"
 
 import { StreamClass } from "../StreamClass/abstract.js"
-import { withSuper } from "src/refactor.js"
+import { withSuper } from "../../refactor.js"
 
 import { object, functional } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor

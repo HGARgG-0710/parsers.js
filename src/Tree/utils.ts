@@ -7,7 +7,7 @@ import type {
 	IParentTree
 } from "./interfaces.js"
 
-import { isGoodIndex } from "src/utils.js"
+import { isGoodIndex } from "../utils.js"
 import { ParentTree } from "./classes.js"
 
 import { object, functional } from "@hgargg-0710/one"

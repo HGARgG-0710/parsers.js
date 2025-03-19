@@ -1,11 +1,11 @@
-import type { IIndexMap } from "./interfaces.js"
-import type { ISizeable } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
+import type { ISizeable } from "../interfaces.js"
+import type { IIndexMap } from "./interfaces.js"
 import type { WeakDeletable, WeakSettable } from "./refactor.js"
 
-import { ProtectedPattern } from "src/Pattern/abstract.js"
+import { ProtectedPattern } from "../Pattern/abstract.js"
 
-import { isGoodIndex } from "src/utils.js"
+import { isGoodIndex } from "../utils.js"
 import { kvPairs, table } from "./utils.js"
 
 import { inplace } from "@hgargg-0710/one"

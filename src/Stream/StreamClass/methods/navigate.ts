@@ -6,7 +6,7 @@ import type { IReversedStreamClassInstance } from "../interfaces.js"
 import { uniNavigate } from "../utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
 import { direction, positionConvert } from "../../../Position/utils.js"
-import { positionDecrement } from "src/Position/refactor.js"
+import { positionDecrement } from "../../../Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
 const { isNumber } = type
@@ -16,7 +16,10 @@ const { isNumber } = type
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-function navigate<Type = any>(this: IReversibleStream<Type>, position: IPosition) {
+function navigate<Type = any>(
+	this: IReversibleStream<Type>,
+	position: IPosition
+) {
 	return uniNavigate(this, position)
 }
 
@@ -24,7 +27,9 @@ const posNavigate = navigate
 const bufferNavigate = navigate
 
 function posBufferNavigate<Type = any>(
-	this: IReversedStreamClassInstance<Type> & IBufferized<Type> & IPosed<number>,
+	this: IReversedStreamClassInstance<Type> &
+		IBufferized<Type> &
+		IPosed<number>,
 	position: IPosition<Type>
 ) {
 	const dirpos = positionConvert(position)
@@ -50,6 +55,9 @@ function posBufferNavigate<Type = any>(
 
 const methodList = [navigate, posNavigate, bufferNavigate, posBufferNavigate]
 
-export function chooseMethod<Type = any>(pos: boolean = false, buffer: boolean = false) {
+export function chooseMethod<Type = any>(
+	pos: boolean = false,
+	buffer: boolean = false
+) {
 	return methodList[+pos | (+buffer << 1)]<Type>
 }

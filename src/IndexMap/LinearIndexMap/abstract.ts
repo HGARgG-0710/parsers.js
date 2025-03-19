@@ -1,7 +1,7 @@
-import type { IIndexingFunction } from "src/interfaces.js"
+import type { IIndexingFunction } from "../../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { isGoodIndex } from "src/utils.js"
+import { isGoodIndex } from "../../utils.js"
 import { fromPairs } from "../utils.js"
 import { inBound } from "../refactor.js"
 

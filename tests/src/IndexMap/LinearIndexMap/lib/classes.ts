@@ -1,4 +1,8 @@
-import type { MapClass, Pairs } from "../../../../../dist/src/IndexMap/interfaces.js"
+import type {
+	MapClass,
+	Pairs
+} from "../../../../../dist/src/IndexMap/interfaces.js"
+
 import {
 	baseIndexMapGetIndexTest,
 	isIndexMap,
@@ -7,9 +11,10 @@ import {
 	type ReducedMapClassTestSignature
 } from "IndexMap/lib/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
 import { classTest, signatures } from "lib/lib.js"
-const { id } = _f
+
+import { functional } from "@hgargg-0710/one"
+const { id } = functional
 
 const linearMapClassGetIndexTest = baseIndexMapGetIndexTest<number>(id)
 
@@ -17,7 +22,10 @@ type LinearMapClassTestSignature<KeyType = any, ValueType = any> = {
 	getIndexTest: Pairs<any, number>
 } & MapClassTestSignature<KeyType, ValueType>
 
-export type ReducedLinearMapClassTestSignature<KeyType = any, ValueType = any> = {
+export type ReducedLinearMapClassTestSignature<
+	KeyType = any,
+	ValueType = any
+> = {
 	getIndexTest: Pairs<any, number>
 } & ReducedMapClassTestSignature<KeyType, ValueType>
 

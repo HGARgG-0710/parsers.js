@@ -1,8 +1,10 @@
-import type { IDefaulting } from "src/interfaces.js"
-import type { ISizeable } from "src/interfaces.js"
-import type { IRekeyable } from "src/interfaces.js"
-import type { IDeletable } from "src/interfaces.js"
-import type { ISettable } from "src/interfaces.js"
+import type {
+	IDefaulting,
+	ISizeable,
+	IRekeyable,
+	IDeletable,
+	ISettable
+} from "../../../interfaces.js"
 
 export interface IInternalHash<
 	KeyType = any,

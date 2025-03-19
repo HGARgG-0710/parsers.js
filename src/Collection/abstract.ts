@@ -1,5 +1,5 @@
-import type { IIndexed } from "src/interfaces.js"
-import { InitializablePattern } from "src/Pattern/abstract.js"
+import type { IIndexed } from "../interfaces.js"
+import { InitializablePattern } from "../Pattern/abstract.js"
 
 export abstract class IterableCollection<Type = any>
 	extends InitializablePattern<IIndexed<Type>>

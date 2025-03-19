@@ -7,7 +7,7 @@ import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueCurr } from "../StreamClass/refactor.js"
-import { withSuper } from "src/refactor.js"
+import { withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
@@ -25,7 +25,10 @@ const LimitedStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition,
 		buffer
-	}) as AbstractConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
+	}) as AbstractConstructor<
+		[any],
+		IReversedStreamClassInstance<Type> & IPattern
+	>
 
 export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,
@@ -54,7 +57,11 @@ export function LimitedStream<Type = any>(
 			to?: IPosition
 		) => ILimitedStream<Type>
 
-		constructor(value: ILimitedUnderStream<Type>, from?: IPosition, to?: IPosition) {
+		constructor(
+			value: ILimitedUnderStream<Type>,
+			from?: IPosition,
+			to?: IPosition
+		) {
 			super(value)
 			this.init(value, from, to)
 		}

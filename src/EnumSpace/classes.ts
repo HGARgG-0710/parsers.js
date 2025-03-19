@@ -1,7 +1,7 @@
 import type { IEnumSpace } from "./interfaces.js"
 import type { IMappable, ISizeable } from "../interfaces.js"
 
-import { makeDelegate } from "src/refactor.js"
+import { makeDelegate } from "../refactor.js"
 
 import { functional, inplace, object, array, type } from "@hgargg-0710/one"
 const { id } = functional

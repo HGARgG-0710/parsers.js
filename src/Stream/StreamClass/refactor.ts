@@ -5,7 +5,7 @@ import type { IStateful, IStreamClassInstance } from "./interfaces.js"
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 
-import { valueDelegate, valuePropDelegate } from "src/refactor.js"
+import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 
 import curr from "./methods/curr.js"
 

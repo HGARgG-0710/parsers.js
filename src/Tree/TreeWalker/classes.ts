@@ -1,15 +1,20 @@
-import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
-import type { IMultiIndexModifier } from "src/Position/MultiIndex/interfaces.js"
+import type {
+	IMultiIndex,
+	IMultiIndexModifier
+} from "../../Position/MultiIndex/interfaces.js"
+
 import type { ITree, IInTree } from "../interfaces.js"
 import type { IWalkableTree } from "./interfaces.js"
 
-import { hasChildren, treeEndPath } from "../utils.js"
 import { InitializablePattern } from "../../Pattern/abstract.js"
+import { hasChildren, treeEndPath } from "../utils.js"
 
 import { array } from "@hgargg-0710/one"
 const { last } = array
 
-export class TreeWalker<Type = any> extends InitializablePattern<IWalkableTree<Type>> {
+export class TreeWalker<Type = any> extends InitializablePattern<
+	IWalkableTree<Type>
+> {
 	level: IWalkableTree<Type>
 	curr: IInTree<Type, IWalkableTree<Type>>
 	modifier: IMultiIndexModifier
@@ -25,7 +30,10 @@ export class TreeWalker<Type = any> extends InitializablePattern<IWalkableTree<T
 
 	levelUp(positions: number = 1) {
 		const { value, pos } = this
-		return (this.level = value!.backtrack(positions, pos.get()) as IWalkableTree<Type>)
+		return (this.level = value!.backtrack(
+			positions,
+			pos.get()
+		) as IWalkableTree<Type>)
 	}
 
 	pushFirstChild() {

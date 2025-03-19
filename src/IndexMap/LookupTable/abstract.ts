@@ -1,7 +1,9 @@
-import type { ISizeable } from "src/interfaces.js"
-import type { IRekeyable } from "src/interfaces.js"
-import type { IDeletable } from "src/interfaces.js"
-import type { ISettable } from "src/interfaces.js"
+import type {
+	ISizeable,
+	IRekeyable,
+	IDeletable,
+	ISettable
+} from "../../interfaces.js"
 
 import { DelegateDeletableSettableSizeable } from "../abstract.js"
 

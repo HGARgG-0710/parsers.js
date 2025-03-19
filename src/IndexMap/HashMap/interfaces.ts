@@ -6,7 +6,7 @@ import type {
 	IRekeyable,
 	ISettable,
 	ISizeable
-} from "src/interfaces.js"
+} from "../../interfaces.js"
 
 export type IHash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
@@ -19,12 +19,12 @@ export interface IHashClass<
 	InternalKeyType = any,
 	DefaultType = any
 > extends IHashable<KeyType, InternalKeyType> {
-	new (structure: IInternalHash<InternalKeyType, ValueType, DefaultType>): IHashMap<
-		KeyType,
-		ValueType,
-		InternalKeyType
-	>
-	extend: (f: (x: any) => KeyType) => IHashClass<any, ValueType, InternalKeyType>
+	new (
+		structure: IInternalHash<InternalKeyType, ValueType, DefaultType>
+	): IHashMap<KeyType, ValueType, InternalKeyType>
+	extend: (
+		f: (x: any) => KeyType
+	) => IHashClass<any, ValueType, InternalKeyType>
 }
 
 export interface IHashMap<

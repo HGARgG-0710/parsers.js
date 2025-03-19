@@ -5,8 +5,8 @@ import type { IStreamClassInstance } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
 import { start } from "../refactor.js"
-import { positionNull } from "src/Position/refactor.js"
-import { readFirst } from "src/Collection/Buffer/refactor.js"
+import { positionNull } from "../../../Position/refactor.js"
+import { readFirst } from "../../../Collection/Buffer/refactor.js"
 
 // * possible '.rewind' methods
 
@@ -21,7 +21,9 @@ function rewind<Type = any>(this: IReversibleStream<Type>) {
 
 const posRewind = rewind
 
-function bufferRewind<Type = any>(this: IStreamClassInstance<Type> & IBufferized<Type>) {
+function bufferRewind<Type = any>(
+	this: IStreamClassInstance<Type> & IBufferized<Type>
+) {
 	const { buffer } = this
 	start(this)
 	return buffer.size ? readFirst(buffer) : this.curr
@@ -38,6 +40,9 @@ function posBufferRewind<Type = any>(
 
 const methodList = [rewind, posRewind, bufferRewind, posBufferRewind]
 
-export function chooseMethod<Type = any>(pos: boolean = false, buffer: boolean = false) {
+export function chooseMethod<Type = any>(
+	pos: boolean = false,
+	buffer: boolean = false
+) {
 	return methodList[+pos | (+buffer << 1)]<Type>
 }

@@ -1,4 +1,4 @@
-import type { ISizeable } from "src/interfaces.js"
+import type { ISizeable } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 
 export const inBound = (index: number, collection: ISizeable) =>

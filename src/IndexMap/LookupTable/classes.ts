@@ -1,20 +1,23 @@
 import type { IPointer } from "../../Pattern/interfaces.js"
 import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { ILookupTable, ITableConstructor } from "./interfaces.js"
-import type { IIndexAssignable } from "src/interfaces.js"
-import type { ISizeable } from "src/interfaces.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
-import type { IRekeyable } from "src/interfaces.js"
-import type { IDeletable } from "src/interfaces.js"
-import type { ISettable } from "src/interfaces.js"
+import type {
+	IRekeyable,
+	IDeletable,
+	ISettable,
+	ISizeable, 
+	IIndexAssignable
+} from "../../interfaces.js"
+
+import type { ILookupTable, ITableConstructor } from "./interfaces.js"
+
+import { current } from "../../Stream/utils.js"
+import { assignIndex, pos } from "../../utils.js"
+import { makeDelegate } from "../../refactor.js"
 
 import { DelegateKeyReplaceable } from "./abstract.js"
-import { current } from "src/Stream/utils.js"
-import { pos } from "../../utils.js"
-import { assignIndex } from "src/utils.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
-import { makeDelegate } from "src/refactor.js"
 const { id } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor

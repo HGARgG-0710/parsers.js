@@ -9,19 +9,25 @@ import type {
 
 import type { IWalkableTree } from "./TreeWalker/interfaces.js"
 
-import { isParentTree as uisParentTree } from "./utils.js"
 import { value } from "../Pattern/utils.js"
-import { parameterWaster } from "src/refactor.js"
-import { isGoodIndex } from "src/utils.js"
-import { mapper, sequentialIndex } from "./utils.js"
+import { parameterWaster } from "../refactor.js"
+import { isGoodIndex } from "../utils.js"
+
+import {
+	mapper,
+	sequentialIndex,
+	isParentTree as uisParentTree
+} from "./utils.js"
 
 import { functional, array, inplace } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 const { last, lastIndex } = array
 const { insert, out } = inplace
 
-export class ChildrenTree<Type = any, T extends IWalkableTree<Type> = IWalkableTree<Type>>
-	implements IWalkableTree<Type>, IChildrenTree<Type, T>
+export class ChildrenTree<
+	Type = any,
+	T extends IWalkableTree<Type> = IWalkableTree<Type>
+> implements IWalkableTree<Type>, IChildrenTree<Type, T>
 {
 	children: IInTree<Type, T>[]
 
@@ -56,12 +62,18 @@ export class ChildrenTree<Type = any, T extends IWalkableTree<Type> = IWalkableT
 	findUnwalkedChildren(endIndex: number[]) {
 		const parents = sequentialIndex(this, endIndex) as IWalkableTree<Type>[]
 		let result = lastIndex(parents)
-		while (isGoodIndex(result) && parents[result].lastChild <= endIndex[result])
+		while (
+			isGoodIndex(result) &&
+			parents[result].lastChild <= endIndex[result]
+		)
 			--result
 		return result
 	}
 
-	backtrack(positions: number, currInd: number[]): IInTree<Type, IWalkableTree<Type>> {
+	backtrack(
+		positions: number,
+		currInd: number[]
+	): IInTree<Type, IWalkableTree<Type>> {
 		return this.index(currInd.slice(0, -positions))
 	}
 
@@ -85,7 +97,10 @@ export class ParentTree<Type = any>
 	findUnwalkedChildren(endInd: number[]) {
 		let result = lastIndex(endInd)
 		let currTree = this as IParentTree<Type>
-		while ((currTree = currTree.parent!) && currTree.lastChild <= endInd[result])
+		while (
+			(currTree = currTree.parent!) &&
+			currTree.lastChild <= endInd[result]
+		)
 			--result
 		return result
 	}
@@ -107,19 +122,32 @@ export class ParentTree<Type = any>
 	}
 }
 
-export function ChildlessTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
+export function ChildlessTree<Type = any>(
+	treeConstructor: ITreeConstructor<Type>
+) {
 	return parameterWaster(treeConstructor)
 }
 
-export function SingleTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
-	return function (fromTree: IPattern<Type>, converter: ITreeConverter<Type>) {
+export function SingleTree<Type = any>(
+	treeConstructor: ITreeConstructor<Type>
+) {
+	return function (
+		fromTree: IPattern<Type>,
+		converter: ITreeConverter<Type>
+	) {
 		return new treeConstructor(fromTree, trivialCompose(converter, value))
 	}
 }
 
 export function MultTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
-	return function (fromTree: IPattern<Type[]>, converter: ITreeConverter<Type>) {
-		return new treeConstructor(fromTree, trivialCompose(mapper(converter), value))
+	return function (
+		fromTree: IPattern<Type[]>,
+		converter: ITreeConverter<Type>
+	) {
+		return new treeConstructor(
+			fromTree,
+			trivialCompose(mapper(converter), value)
+		)
 	}
 }
 

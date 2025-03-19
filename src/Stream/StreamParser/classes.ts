@@ -8,12 +8,12 @@ import type {
 
 import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
 import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
-import type { IStreamParser } from "./interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IStreamParser } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
-import { withSuper } from "src/refactor.js"
+import { withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor

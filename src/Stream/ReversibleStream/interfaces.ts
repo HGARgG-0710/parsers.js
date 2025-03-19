@@ -1,6 +1,6 @@
 import type { IBasicStream } from "../interfaces.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { ISupered } from "src/interfaces.js"
+import type { ISupered } from "../../interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 
 export interface IStarted {
