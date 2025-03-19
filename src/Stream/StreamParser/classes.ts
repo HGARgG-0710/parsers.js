@@ -1,15 +1,15 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { FreezableBuffer } from "../../Collection/Buffer/interfaces.js"
+import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 
 import type {
-	EndableStream,
-	StreamClassInstance
+	IEndableStream,
+	IStreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
 
 import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
-import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
+import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
@@ -33,7 +33,7 @@ const StreamParserBase = <Type = any>(
 		buffer,
 		state,
 		isPattern: true
-	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
+	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function StreamParser<InType = any, OutType = any>(
 	hasPosition: boolean = false,
@@ -42,27 +42,27 @@ export function StreamParser<InType = any, OutType = any>(
 ) {
 	const baseClass = StreamParserBase(hasPosition, buffer, state)
 	return function (
-		handler: StreamHandler<OutType>
-	): Constructor<[EndableStream?, Summat?], IStreamParser<InType, OutType>> {
+		handler: IStreamHandler<OutType>
+	): Constructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
 		class streamTokenizerClass
 			extends baseClass
 			implements IStreamParser<InType, OutType>
 		{
-			value: EndableStream<InType>
+			value: IEndableStream<InType>
 			super: Summat
-			handler: StreamHandler<OutType>
+			handler: IStreamHandler<OutType>
 
 			pos?: number
-			buffer?: FreezableBuffer<OutType>
+			buffer?: IFreezableBuffer<OutType>
 			state?: Summat
 
 			init: (
-				handler?: StreamHandler<OutType>,
-				value?: EndableStream<InType>,
+				handler?: IStreamHandler<OutType>,
+				value?: IEndableStream<InType>,
 				state?: Summat
 			) => IStreamParser<InType, OutType>
 
-			constructor(value?: EndableStream<InType>, state: Summat = {}) {
+			constructor(value?: IEndableStream<InType>, state: Summat = {}) {
 				super(value)
 				this.init(handler, value, state)
 			}

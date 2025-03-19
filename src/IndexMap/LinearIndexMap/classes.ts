@@ -1,9 +1,9 @@
 import type { array } from "@hgargg-0710/one"
 import type { ILinearIndexMap } from "./interfaces.js"
-import type { MapClass } from "../interfaces.js"
-import type { IndexingFunction } from "src/interfaces.js"
-import type { Testable } from "src/interfaces.js"
-import type { Having } from "src/interfaces.js"
+import type { IMapClass } from "../interfaces.js"
+import type { IIndexingFunction } from "src/interfaces.js"
+import type { ITestable } from "src/interfaces.js"
+import type { IHaving } from "src/interfaces.js"
 
 import {
 	extend,
@@ -24,23 +24,23 @@ export function LinearMapClass<
 	ValueType = any,
 	DefaultType = any
 >(
-	change?: IndexingFunction<KeyType>,
+	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
-): MapClass<KeyType, ValueType, DefaultType> {
+): IMapClass<KeyType, ValueType, DefaultType> {
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
 		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
 	{
-		static change?: IndexingFunction<KeyType>
+		static change?: IIndexingFunction<KeyType>
 
 		static extend: <KeyType = any>(
 			...f: ((...x: any[]) => any)[]
-		) => MapClass<KeyType, any>
+		) => IMapClass<KeyType, any>
 
 		static extendKey: <ValueType = any>(
 			...f: ((x: any) => any)[]
-		) => MapClass<any, ValueType>
+		) => IMapClass<any, ValueType>
 
 		static keyExtensions: Function[]
 		static extensions: Function[]
@@ -77,15 +77,15 @@ export const OptimizedLinearMap = LinearMapClass()
 // * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
 export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
 
-export const PredicateMap: MapClass<Function> = LinearMapClass(
+export const PredicateMap: IMapClass<Function> = LinearMapClass(
 	(curr: Function, x: any) => curr(x)
 )
 
-export const RegExpMap: MapClass<Testable> = LinearMapClass(
-	(curr: Testable, x: any) => curr.test(x)
+export const RegExpMap: IMapClass<ITestable> = LinearMapClass(
+	(curr: ITestable, x: any) => curr.test(x)
 )
 
-export const SetMap: MapClass<Having> = LinearMapClass((curr: Having, x: any) =>
+export const SetMap: IMapClass<IHaving> = LinearMapClass((curr: IHaving, x: any) =>
 	curr.has(x)
 )
 

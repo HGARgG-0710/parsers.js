@@ -1,5 +1,5 @@
-import type { InitMethod } from "./methods/init.js"
-import type { StreamClassSignature, StreamClassInstance } from "./interfaces.js"
+import type { IInitMethod } from "./methods/init.js"
+import type { IStreamClassSignature, IStreamClassInstance } from "./interfaces.js"
 
 import type { AbstractConstructor } from "./refactor.js"
 
@@ -11,15 +11,15 @@ import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
 import { object } from "@hgargg-0710/one"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
 export function StreamClass<Type = any>(
-	signature: StreamClassSignature<Type>
+	signature: IStreamClassSignature<Type>
 ):
-	| AbstractConstructor<[], StreamClassInstance<Type>>
-	| AbstractConstructor<[any], StreamClassInstance<Type> & Pattern> {
+	| AbstractConstructor<[], IStreamClassInstance<Type>>
+	| AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -35,8 +35,8 @@ export function StreamClass<Type = any>(
 	} = signature
 
 	let streamClass:
-		| AbstractConstructor<[], StreamClassInstance<Type>>
-		| AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
+		| AbstractConstructor<[], IStreamClassInstance<Type>>
+		| AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 	interface streamClassGuaranteed {
 		isStart: boolean
@@ -53,7 +53,7 @@ export function StreamClass<Type = any>(
 
 		navigate: () => Type
 		finish: () => Type
-		init: InitMethod
+		init: IInitMethod
 		[Symbol.iterator]: () => Generator<Type>
 	}
 
@@ -62,7 +62,7 @@ export function StreamClass<Type = any>(
 			interface _streamClass extends streamClassGuaranteed {}
 			abstract class _streamClass
 				extends BasicPattern
-				implements StreamClassInstance<Type>
+				implements IStreamClassInstance<Type>
 			{
 				constructor(value: any) {
 					super(value)
@@ -71,7 +71,7 @@ export function StreamClass<Type = any>(
 			return _streamClass
 		}
 		interface _streamClass extends streamClassGuaranteed {}
-		abstract class _streamClass implements StreamClassInstance<Type> {}
+		abstract class _streamClass implements IStreamClassInstance<Type> {}
 		return _streamClass
 	})()
 
@@ -119,5 +119,5 @@ export function StreamClass<Type = any>(
 
 const valueIsEnd = valuePropDelegate("isEnd")
 export const DefaultEndStream = <Type = any>(
-	signature: Omit<StreamClassSignature<Type>, "defaultIsEnd">
+	signature: Omit<IStreamClassSignature<Type>, "defaultIsEnd">
 ) => StreamClass({ defaultIsEnd: valueIsEnd, ...signature })

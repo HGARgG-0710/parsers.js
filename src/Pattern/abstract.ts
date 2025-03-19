@@ -1,4 +1,4 @@
-import type { GettablePattern, Pattern } from "./interfaces.js"
+import type { IGettablePattern, IPattern } from "./interfaces.js"
 import { setValue } from "./utils.js"
 
 import { type } from "@hgargg-0710/one"
@@ -20,7 +20,7 @@ abstract class OptionalPattern<Type = any> {
 
 export abstract class InitializablePattern<Type = any>
 	extends OptionalPattern<Type>
-	implements GettablePattern<Type>
+	implements IGettablePattern<Type>
 {
 	init(value?: Type) {
 		this.value = value
@@ -31,7 +31,7 @@ export abstract class InitializablePattern<Type = any>
 	}
 }
 
-export abstract class BasicPattern<Type = any> implements Pattern<Type> {
+export abstract class BasicPattern<Type = any> implements IPattern<Type> {
 	value: Type
 	constructor(value?: Type) {
 		setValue(this, value)

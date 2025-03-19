@@ -1,4 +1,4 @@
-import type { Pattern, IPointer, RecursivePointer } from "./interfaces.js"
+import type { IPattern, IPointer, IRecursivePointer } from "./interfaces.js"
 
 import { type, object } from "@hgargg-0710/one"
 const { isUndefined } = type
@@ -14,24 +14,24 @@ export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
 /**
  * Returns the `.value` property of the given `Pattern`
  */
-export const value = prop("value") as <Type = any>(x: Pattern<Type>) => Type | undefined
+export const value = prop("value") as <Type = any>(x: IPattern<Type>) => Type | undefined
 
 /**
  * Sets the `.value` property of a given `Pattern`
  */
-export const setValue = <Type = any>(x: Pattern<Type>, value?: Type) => (x.value = value)
+export const setValue = <Type = any>(x: IPattern<Type>, value?: Type) => (x.value = value)
 
 /**
  * Unless given `value` is `undefined`, calls `setValue(pattern, value)`
  */
-export function optionalValue(pattern: Pattern, value?: any) {
+export function optionalValue(pattern: IPattern, value?: any) {
 	if (!isUndefined(value)) setValue(pattern, value)
 }
 
 /**
  * Swaps `.value`s of two given `Pattern`s
  */
-export function swapValues<Type = any>(x: Pattern<Type>, y: Pattern<Type>) {
+export function swapValues<Type = any>(x: IPattern<Type>, y: IPattern<Type>) {
 	const temp = x.value
 	x.value = y.value
 	y.value = temp
@@ -46,12 +46,12 @@ export function swapValues<Type = any>(x: Pattern<Type>, y: Pattern<Type>) {
  * Note: `isPointer` is used for checking whether the given object is an `IPointer`
  */
 export function dig<Type = any>(
-	pointer: RecursivePointer<Type>,
+	pointer: IRecursivePointer<Type>,
 	depth: number = Infinity
-): Type | RecursivePointer<Type> {
+): Type | IRecursivePointer<Type> {
 	let curr = pointer
 	let currDepth = 0
 	while (isPoiner(curr.value) && currDepth++ <= depth)
-		curr = value(curr) as RecursivePointer<Type>
+		curr = value(curr) as IRecursivePointer<Type>
 	return curr
 }

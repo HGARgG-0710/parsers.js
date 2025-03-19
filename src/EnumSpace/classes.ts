@@ -1,5 +1,5 @@
 import type { IEnumSpace } from "./interfaces.js"
-import type { Mappable, Sizeable } from "../interfaces.js"
+import type { IMappable, ISizeable } from "../interfaces.js"
 
 import { makeDelegate } from "src/refactor.js"
 
@@ -11,7 +11,7 @@ const { uniqueArr, numbers } = array
 const { ConstDescriptor } = object.descriptor
 const { isNumber, isArray } = type
 
-abstract class PreEnumSpace<Type = any> implements Sizeable, IEnumSpace<Type> {
+abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 	protected value: Type[] = []
 
 	generator?: (i?: number, ...x: any[]) => Type;
@@ -30,7 +30,7 @@ abstract class PreEnumSpace<Type = any> implements Sizeable, IEnumSpace<Type> {
 		return new this.constructor(array.copy(this.value!))
 	}
 
-	map<Out = any>(mapped: Mappable<Type, Out> = id<Type> as any) {
+	map<Out = any>(mapped: IMappable<Type, Out> = id<Type> as any) {
 		return this.value.map(mapped)
 	}
 

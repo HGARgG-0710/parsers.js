@@ -1,11 +1,11 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { Stateful, StreamClassInstance } from "../interfaces.js"
-import type { Pattern } from "../../../Pattern/interfaces.js"
-import type { Posed } from "../../../Position/interfaces.js"
+import type { IStateful, IStreamClassInstance } from "../interfaces.js"
+import type { IPattern } from "../../../Pattern/interfaces.js"
+import type { IPosed } from "../../../Position/interfaces.js"
 import type {
-	Bufferized,
-	FreezableBuffer
+	IBufferized,
+	IFreezableBuffer
 } from "../../../Collection/Buffer/interfaces.js"
 
 import { positionNull } from "src/Position/refactor.js"
@@ -15,46 +15,46 @@ import { createState, start } from "../refactor.js"
 
 // * types
 
-export interface Initializable {
-	init: InitMethod
+export interface IInitializable {
+	init: IInitMethod
 }
 
-export type InitMethod =
-	| BaseInitMethod
-	| BufferInitMethod
-	| StateInitMethod
-	| BufferStateInitMethod
-	| PatternInitMethod
-	| BufferPatternInitMethod
-	| StatePatternInitMethod
-	| BufferStatePatternInitMethod
+export type IInitMethod =
+	| IBaseInitMethod
+	| IBufferInitMethod
+	| IStateInitMethod
+	| IBufferStateInitMethod
+	| IPatternInitMethod
+	| IBufferPatternInitMethod
+	| IStatePatternInitMethod
+	| IBufferStatePatternInitMethod
 
-export type BaseInitMethod = () => void
-export type BufferInitMethod = <Type = any>(buffer?: FreezableBuffer<Type>) => void
-export type StateInitMethod = (state?: Summat) => void
-export type PatternInitMethod = (value: any) => void
+export type IBaseInitMethod = () => void
+export type IBufferInitMethod = <Type = any>(buffer?: IFreezableBuffer<Type>) => void
+export type IStateInitMethod = (state?: Summat) => void
+export type IPatternInitMethod = (value: any) => void
 
-export type BufferStateInitMethod = <Type = any>(
-	buffer?: FreezableBuffer<Type>,
+export type IBufferStateInitMethod = <Type = any>(
+	buffer?: IFreezableBuffer<Type>,
 	state?: Summat
 ) => void
 
-export type BufferPatternInitMethod = <Type = any>(
+export type IBufferPatternInitMethod = <Type = any>(
 	value: any,
-	buffer?: FreezableBuffer<Type>
+	buffer?: IFreezableBuffer<Type>
 ) => void
 
-export type StatePatternInitMethod = (value: any, state?: Summat) => void
+export type IStatePatternInitMethod = (value: any, state?: Summat) => void
 
-export type BufferStatePatternInitMethod = <Type = any>(
+export type IBufferStatePatternInitMethod = <Type = any>(
 	value: any,
-	buffer?: FreezableBuffer<Type>,
+	buffer?: IFreezableBuffer<Type>,
 	state?: Summat
 ) => void
 
 // * possible '.init' methods
 
-function initialize<Type = any>(this: StreamClassInstance<Type>) {
+function initialize<Type = any>(this: IStreamClassInstance<Type>) {
 	;(this as any).realCurr = null
 	start(this)
 	if (!(this.isEnd = this.defaultIsEnd())) {
@@ -63,30 +63,30 @@ function initialize<Type = any>(this: StreamClassInstance<Type>) {
 }
 
 // * Explanation: the private function here is only for refactoring;
-function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
-	function posInitialize<Type = any>(this: StreamClassInstance<Type> & Posed<number>) {
+function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
+	function posInitialize<Type = any>(this: IStreamClassInstance<Type> & IPosed<number>) {
 		positionNull(this)
 		initialize.call(this)
 	}
 
 	function bufferInitialze<Type = any>(
-		this: StreamClassInstance<Type> & Bufferized<Type>,
-		buffer: FreezableBuffer
+		this: IStreamClassInstance<Type> & IBufferized<Type>,
+		buffer: IFreezableBuffer
 	) {
 		assignBuffer(this, buffer)
 		initialize.call(this)
 	}
 
 	function posBufferInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>,
-		buffer?: FreezableBuffer
+		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>,
+		buffer?: IFreezableBuffer
 	) {
 		assignBuffer(this, buffer)
 		posInitialize.call(this)
 	}
 
 	function stateInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Stateful,
+		this: IStreamClassInstance<Type> & IStateful,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -94,7 +94,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posStateInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Stateful & Posed<number>,
+		this: IStreamClassInstance<Type> & IStateful & IPosed<number>,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -102,8 +102,8 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferStateInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Stateful & Bufferized<Type>,
-		buffer?: FreezableBuffer,
+		this: IStreamClassInstance<Type> & IStateful & IBufferized<Type>,
+		buffer?: IFreezableBuffer,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -111,8 +111,8 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferStateInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Stateful & Bufferized<Type> & Posed<number>,
-		buffer?: FreezableBuffer,
+		this: IStreamClassInstance<Type> & IStateful & IBufferized<Type> & IPosed<number>,
+		buffer?: IFreezableBuffer,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -120,7 +120,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function patternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Pattern,
+		this: IStreamClassInstance<Type> & IPattern,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -128,7 +128,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posPatternInitialize<Type = any>(
-		this: Pattern & StreamClassInstance<Type> & Posed<number>,
+		this: IPattern & IStreamClassInstance<Type> & IPosed<number>,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -136,25 +136,25 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferPatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Pattern & Bufferized<Type>,
+		this: IStreamClassInstance<Type> & IPattern & IBufferized<Type>,
 		value?: any,
-		buffer?: FreezableBuffer<Type>
+		buffer?: IFreezableBuffer<Type>
 	) {
 		optionalValue(this, value)
 		bufferInitialze.call(this, buffer)
 	}
 
 	function posBufferPatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Posed<number> & Bufferized<Type> & Pattern,
+		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type> & IPattern,
 		value?: any,
-		buffer?: FreezableBuffer<Type>
+		buffer?: IFreezableBuffer<Type>
 	) {
 		optionalValue(this, value)
 		posBufferInitialize.call(this, buffer)
 	}
 
 	function statePatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Pattern & Stateful,
+		this: IStreamClassInstance<Type> & IPattern & IStateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -163,7 +163,7 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posStatePatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Posed<number> & Pattern & Stateful,
+		this: IStreamClassInstance<Type> & IPosed<number> & IPattern & IStateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -172,9 +172,9 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function bufferStatePatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> & Bufferized<Type> & Stateful & Pattern,
+		this: IStreamClassInstance<Type> & IBufferized<Type> & IStateful & IPattern,
 		value?: any,
-		buffer?: FreezableBuffer<Type>,
+		buffer?: IFreezableBuffer<Type>,
 		state: Summat = {}
 	) {
 		optionalValue(this, value)
@@ -182,13 +182,13 @@ function generateInitMethods(initialize: BaseInitMethod): InitMethod[] {
 	}
 
 	function posBufferStatePatternInitialize<Type = any>(
-		this: StreamClassInstance<Type> &
-			Posed<number> &
-			Bufferized<Type> &
-			Stateful &
-			Pattern,
+		this: IStreamClassInstance<Type> &
+			IPosed<number> &
+			IBufferized<Type> &
+			IStateful &
+			IPattern,
 		value?: any,
-		buffer?: FreezableBuffer<Type>,
+		buffer?: IFreezableBuffer<Type>,
 		state: Summat = {}
 	) {
 		optionalValue(this, value)

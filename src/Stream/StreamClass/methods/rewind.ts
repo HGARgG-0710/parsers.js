@@ -1,7 +1,7 @@
-import type { ReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
-import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { Posed } from "../../../Position/interfaces.js"
-import type { StreamClassInstance } from "../interfaces.js"
+import type { IReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { IPosed } from "../../../Position/interfaces.js"
+import type { IStreamClassInstance } from "../interfaces.js"
 
 import { uniRewind } from "../utils.js"
 import { start } from "../refactor.js"
@@ -15,20 +15,20 @@ import { readFirst } from "src/Collection/Buffer/refactor.js"
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-function rewind<Type = any>(this: ReversibleStream<Type>) {
+function rewind<Type = any>(this: IReversibleStream<Type>) {
 	return uniRewind(this)
 }
 
 const posRewind = rewind
 
-function bufferRewind<Type = any>(this: StreamClassInstance<Type> & Bufferized<Type>) {
+function bufferRewind<Type = any>(this: IStreamClassInstance<Type> & IBufferized<Type>) {
 	const { buffer } = this
 	start(this)
 	return buffer.size ? readFirst(buffer) : this.curr
 }
 
 function posBufferRewind<Type = any>(
-	this: StreamClassInstance<Type> & Bufferized<Type> & Posed<number>
+	this: IStreamClassInstance<Type> & IBufferized<Type> & IPosed<number>
 ) {
 	const { buffer } = this
 	start(this)

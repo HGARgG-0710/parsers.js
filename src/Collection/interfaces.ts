@@ -1,9 +1,9 @@
-import type { Indexed } from "src/interfaces.js"
-import type { GettablePattern } from "../Pattern/interfaces.js"
+import type { IIndexed } from "src/interfaces.js"
+import type { IGettablePattern } from "../Pattern/interfaces.js"
 
-export interface Collection<Type = any>
+export interface ICollection<Type = any>
 	extends Iterable<Type>,
-		GettablePattern<Indexed<Type>> {
+		IGettablePattern<IIndexed<Type>> {
 	push: (...x: Type[]) => this
 }
 

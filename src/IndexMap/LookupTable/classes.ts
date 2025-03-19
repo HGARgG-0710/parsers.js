@@ -1,12 +1,12 @@
 import type { IPointer } from "../../Pattern/interfaces.js"
 import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
-import type { LookupTable, TableConstructor } from "./interfaces.js"
-import type { IndexAssignable } from "src/interfaces.js"
-import type { Sizeable } from "src/interfaces.js"
-import type { HashMap } from "../HashMap/interfaces.js"
-import type { Rekeyable } from "src/interfaces.js"
-import type { Deletable } from "src/interfaces.js"
-import type { Settable } from "src/interfaces.js"
+import type { ILookupTable, ITableConstructor } from "./interfaces.js"
+import type { IIndexAssignable } from "src/interfaces.js"
+import type { ISizeable } from "src/interfaces.js"
+import type { IHashMap } from "../HashMap/interfaces.js"
+import type { IRekeyable } from "src/interfaces.js"
+import type { IDeletable } from "src/interfaces.js"
+import type { ISettable } from "src/interfaces.js"
 
 import { DelegateKeyReplaceable } from "./abstract.js"
 import { current } from "src/Stream/utils.js"
@@ -24,10 +24,10 @@ abstract class DelegateLookupTable<
 	KeyType = any,
 	ValueType = any,
 	OwningType = any,
-	DelegateType extends Settable<KeyType, ValueType> &
-		Rekeyable<KeyType> &
-		Deletable<DeletedType> &
-		Sizeable = any,
+	DelegateType extends ISettable<KeyType, ValueType> &
+		IRekeyable<KeyType> &
+		IDeletable<DeletedType> &
+		ISizeable = any,
 	DeletedType = KeyType
 > extends DelegateKeyReplaceable<
 	KeyType,
@@ -35,7 +35,7 @@ abstract class DelegateLookupTable<
 	DelegateType,
 	DeletedType
 > {
-	own(x: IndexAssignable<OwningType>, ownIndex: OwningType) {
+	own(x: IIndexAssignable<OwningType>, ownIndex: OwningType) {
 		assignIndex(x, ownIndex)
 		return x
 	}
@@ -54,18 +54,18 @@ abstract class DelegateHashTable<
 		KeyType,
 		ValueType,
 		OwningType,
-		HashMap<KeyType, ValueType, any>,
+		IHashMap<KeyType, ValueType, any>,
 		KeyType
 	>
-	implements LookupTable<KeyType, ValueType, OwningType>
+	implements ILookupTable<KeyType, ValueType, OwningType>
 {
 	abstract getIndex: (x: any) => OwningType
 
-	byOwned(priorOwned: IndexAssignable<OwningType>) {
+	byOwned(priorOwned: IIndexAssignable<OwningType>) {
 		return this.value.index(priorOwned.assignedIndex)
 	}
 
-	constructor(hash: HashMap<KeyType, ValueType>) {
+	constructor(hash: IHashMap<KeyType, ValueType>) {
 		super(hash)
 	}
 }
@@ -82,13 +82,13 @@ export class PersistentIndexLookupTable<
 		IPersistentIndexMap<KeyType, ValueType, DefaultType>,
 		any
 	>
-	implements LookupTable<KeyType, ValueType, IPointer<number>>
+	implements ILookupTable<KeyType, ValueType, IPointer<number>>
 {
 	getIndex(x: any) {
 		return this.value.getIndex(x)
 	}
 
-	byOwned(priorOwned: IndexAssignable<IPointer<number>>): ValueType {
+	byOwned(priorOwned: IIndexAssignable<IPointer<number>>): ValueType {
 		return this.value.byIndex(priorOwned.assignedIndex!.value)[1]
 	}
 
@@ -101,10 +101,10 @@ export class PersistentIndexLookupTable<
 
 export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
-): TableConstructor<OwningType> {
+): ITableConstructor<OwningType> {
 	const hashTable = makeDelegate(DelegateHashTable, "delegate")
 	extendPrototype(hashTable, { getIndex: ConstDescriptor(ownership) })
-	return hashTable as TableConstructor<OwningType>
+	return hashTable as ITableConstructor<OwningType>
 }
 
 export const BasicTable = HashTable(id)

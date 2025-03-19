@@ -1,12 +1,12 @@
-import type { InTree, ReadonlyTree } from "../interfaces.js"
+import type { IInTree, IReadonlyTree } from "../interfaces.js"
 
-export interface WalkableTree<Type = any, T extends WalkableTree<Type> = any>
-	extends ReadonlyTree<Type> {
-	index: (multindex: readonly number[]) => InTree<Type, T>
+export interface IWalkableTree<Type = any, T extends IWalkableTree<Type> = any>
+	extends IReadonlyTree<Type> {
+	index: (multindex: readonly number[]) => IInTree<Type, T>
 	findUnwalkedChildren: (startIndex: readonly number[]) => number
 
 	backtrack: (
 		positions: number,
 		currInd?: readonly number[]
-	) => InTree<Type, WalkableTree<Type>> | null
+	) => IInTree<Type, IWalkableTree<Type>> | null
 }

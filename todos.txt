@@ -41,7 +41,6 @@ Order of TODO-elimination:
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY!]
 		2. add the (minor) `JSDoc` for classes/big-functions
 		3. add the jsdoc permalinks for classes to wiki
-		4. add the `I` to interfaces
 		5. change the `interfaces` pages
 			1. add the Wiki pages for interfaces
 		6. remove wiki [and tests...]: 

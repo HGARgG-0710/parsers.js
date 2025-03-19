@@ -1,4 +1,4 @@
-import type { IndexMap } from "./interfaces.js"
+import type { IIndexMap } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { Pairs } from "./classes.js"
@@ -7,7 +7,7 @@ import { Pairs } from "./classes.js"
  * Returns the pair of `indexMap.keys` and `indexMap.values`
  */
 export function table<KeyType = any, OutType = any>(
-	indexMap: IndexMap<KeyType, OutType, any, any>
+	indexMap: IIndexMap<KeyType, OutType, any, any>
 ): [KeyType[], OutType[]] {
 	return [indexMap.keys, indexMap.values]
 }

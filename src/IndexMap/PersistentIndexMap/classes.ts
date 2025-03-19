@@ -1,5 +1,5 @@
 import type { IPointer } from "../../Pattern/interfaces.js"
-import type { IndexMap } from "../interfaces.js"
+import type { IIndexMap } from "../interfaces.js"
 import type { IPersistentIndexMap } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
@@ -32,7 +32,7 @@ export class PersistentIndexMap<
 	}
 
 	["constructor"]: new (
-		indexMap: IndexMap<KeyType, ValueType, DefaultType>
+		indexMap: IIndexMap<KeyType, ValueType, DefaultType>
 	) => PersistentIndexMap<KeyType, ValueType, DefaultType>
 
 	copy() {
@@ -96,7 +96,7 @@ export class PersistentIndexMap<
 		return this
 	}
 
-	constructor(indexMap: IndexMap<KeyType, ValueType, DefaultType, number>) {
+	constructor(indexMap: IIndexMap<KeyType, ValueType, DefaultType, number>) {
 		super(indexMap)
 		mutate((this.indexes = new Array(indexMap.size)), (_x, i) => Pointer(i))
 	}

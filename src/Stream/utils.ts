@@ -1,5 +1,5 @@
-import type { BasicStream } from "./interfaces.js"
-import type { ReversibleStream } from "./ReversibleStream/interfaces.js"
+import type { IBasicStream } from "./interfaces.js"
+import type { IReversibleStream } from "./ReversibleStream/interfaces.js"
 
 import { Stream } from "../constants.js"
 const { SkippedItem } = Stream.StreamParser
@@ -10,17 +10,17 @@ const { prop } = object
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <Type = any>(input: BasicStream<Type>) => input.next()
+export const next = <Type = any>(input: IBasicStream<Type>) => input.next()
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any>(input: ReversibleStream<Type>) => input.prev()
+export const previous = <Type = any>(input: IReversibleStream<Type>) => input.prev()
 
 /**
  * Given a `BasicStream` returns its `.curr` property value
  */
-export const current = prop("curr") as <Type = any>(x: BasicStream<Type>) => Type
+export const current = prop("curr") as <Type = any>(x: IBasicStream<Type>) => Type
 
 /**
  * Given a `handler` function, returns a function of `input: BasicStream` that
@@ -28,9 +28,9 @@ export const current = prop("curr") as <Type = any>(x: BasicStream<Type>) => Typ
  * It then proceeds to returns the result of the handler
  */
 export function wrapped<Type = any, OutType = any>(
-	handler: (input: BasicStream<Type>) => OutType
+	handler: (input: IBasicStream<Type>) => OutType
 ) {
-	return function (input: BasicStream<Type>) {
+	return function (input: IBasicStream<Type>) {
 		input.next()
 		const result = handler(input)
 		input.next()
@@ -41,12 +41,12 @@ export function wrapped<Type = any, OutType = any>(
 /**
  * Returns the value of `.isEnd` property of the given `BasicStream`
  */
-export const isEnd = prop("isEnd") as <Type = any>(x: BasicStream<Type>) => boolean
+export const isEnd = prop("isEnd") as <Type = any>(x: IBasicStream<Type>) => boolean
 
 /**
  * Returns the value of the `.isStart` property of the given `BasicStream`
  */
-export const isStart = prop("isStart") as <Type = any>(x: BasicStream<Type>) => boolean
+export const isStart = prop("isStart") as <Type = any>(x: IBasicStream<Type>) => boolean
 
 /**
  * Calls `input.next()`, and returns `SkippedItem`.
@@ -55,7 +55,7 @@ export const isStart = prop("isStart") as <Type = any>(x: BasicStream<Type>) => 
  * as it allows one to take specific elements of the stream out
  * from the final input
  */
-export function destroy<Type = any>(input: BasicStream<Type>): typeof SkippedItem {
+export function destroy<Type = any>(input: IBasicStream<Type>): typeof SkippedItem {
 	input.next()
 	return SkippedItem
 }

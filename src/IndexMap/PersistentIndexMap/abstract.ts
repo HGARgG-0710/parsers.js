@@ -1,4 +1,4 @@
-import type { IndexMap } from "../interfaces.js"
+import type { IIndexMap } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { PreIndexMap } from "../abstract.js"
@@ -15,12 +15,12 @@ abstract class FakeIndexMap<
 > extends DelegateKeyReplaceable<
 	KeyType,
 	ValueType,
-	IndexMap<KeyType, ValueType, any, number>,
+	IIndexMap<KeyType, ValueType, any, number>,
 	number
 > {
 	abstract getIndex(key: any): IndexGetType
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
-	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 	abstract swap(i: number, j: number): this
 	abstract unique(): number[]
 

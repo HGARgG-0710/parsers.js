@@ -1,9 +1,9 @@
-import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
-import type { Posed } from "../../Position/interfaces.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Supered } from "src/interfaces.js"
+import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { ISupered } from "src/interfaces.js"
 
-export type IInputStream<Type = any> = Supered &
-	ReversedStreamClassInstance<Type> &
-	Posed<number> &
-	Bufferized<Type>
+export type IInputStream<Type = any> = ISupered &
+	IReversedStreamClassInstance<Type> &
+	IPosed<number> &
+	IBufferized<Type>

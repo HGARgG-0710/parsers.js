@@ -1,4 +1,4 @@
-export interface BasicStream<Type = any> {
+export interface IBasicStream<Type = any> {
 	curr: Type
 	isEnd: boolean
 	next: () => Type

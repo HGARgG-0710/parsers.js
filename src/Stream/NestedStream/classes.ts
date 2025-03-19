@@ -1,10 +1,10 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { INestedStream } from "./interfaces.js"
-import type { StreamPredicate } from "../../Parser/TableMap/interfaces.js"
-import type { LookupTable } from "../../IndexMap/LookupTable/interfaces.js"
-import type { EndableStream, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IStreamPredicate } from "../../Parser/TableMap/interfaces.js"
+import type { ILookupTable } from "../../IndexMap/LookupTable/interfaces.js"
+import type { IEndableStream, IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
@@ -24,29 +24,29 @@ const NestedStreamBase = <Type = any>(
 		hasPosition,
 		buffer,
 		isPattern: true
-	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
+	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function NestedStream<Type = any>(
-	nestedTypes: LookupTable<any, StreamPredicate>,
+	nestedTypes: ILookupTable<any, IStreamPredicate>,
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): new (value?: EndableStream<Type>, _index?: any) => INestedStream<Type> {
+): new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
 	const baseClass = NestedStreamBase(hasPosition, buffer)
 	class NestedStream extends baseClass implements INestedStream<Type> {
-		value: EndableStream<Type>
+		value: IEndableStream<Type>
 		currNested: boolean
 		assignedIndex?: any
 
 		super: Summat
-		typesTable: LookupTable<any, StreamPredicate>
+		typesTable: ILookupTable<any, IStreamPredicate>
 
-		init: (value?: EndableStream<Type>, _index?: any) => INestedStream<Type>;
+		init: (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type>;
 		["constructor"]: new (
-			value?: EndableStream<Type>,
+			value?: IEndableStream<Type>,
 			_index?: any
 		) => INestedStream<Type>
 
-		constructor(value?: EndableStream<Type>, index?: any) {
+		constructor(value?: IEndableStream<Type>, index?: any) {
 			super(value)
 			this.init(value, index)
 		}

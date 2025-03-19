@@ -1,4 +1,4 @@
-import type { UnfreezableBuffer } from "./interfaces.js"
+import type { IUnfreezableBuffer } from "./interfaces.js"
 import { IterableCollection } from "../abstract.js"
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
@@ -25,7 +25,7 @@ abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 
 export class UnfreezableArray<Type = any>
 	extends TypicalUnfreezable<Type>
-	implements UnfreezableBuffer<Type>
+	implements IUnfreezableBuffer<Type>
 {
 	protected value: Type[]
 
@@ -45,7 +45,7 @@ export class UnfreezableArray<Type = any>
 
 export class UnfreezableString
 	extends TypicalUnfreezable<string>
-	implements UnfreezableBuffer<string>
+	implements IUnfreezableBuffer<string>
 {
 	protected value: string
 

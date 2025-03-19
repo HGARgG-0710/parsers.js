@@ -1,4 +1,4 @@
-import type { EndableStream } from "../StreamClass/interfaces.js"
+import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { INestedStream } from "./interfaces.js"
 
 import { finish } from "../StreamClass/utils.js"
@@ -16,7 +16,7 @@ export namespace methods {
 	}
 
 	export function baseNextIter<Type = any>(this: INestedStream<Type>) {
-		if (this.currNested) finish(this.curr as EndableStream<Type>)
+		if (this.currNested) finish(this.curr as IEndableStream<Type>)
 		this.value!.next()
 		return this.initGetter!()
 	}
@@ -31,7 +31,7 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: INestedStream<Type>,
-		value?: EndableStream<Type>,
+		value?: IEndableStream<Type>,
 		index?: any
 	) {
 		if (index) this.typesTable.own(this, index)

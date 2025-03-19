@@ -1,16 +1,16 @@
-import type { BasicStream } from "../../Stream/interfaces.js"
+import type { IBasicStream } from "../../Stream/interfaces.js"
 
-export type ParserFunction<InputType = any, OutType = any> = (
+export type IParserFunction<InputType = any, OutType = any> = (
 	state?: InputType,
 	parser?: Function,
 	...x: any[]
 ) => OutType
 
-export type StreamTransform<UnderType = any, UpperType = any> = (
-	input?: BasicStream<UnderType>,
+export type IStreamTransform<UnderType = any, UpperType = any> = (
+	input?: IBasicStream<UnderType>,
 	i?: number,
 	...x: any[]
 ) => UpperType
 
-export type StreamHandler<Type = any[]> = StreamTransform<any, Type>
-export type StreamPredicate = StreamHandler<boolean>
+export type IStreamHandler<Type = any[]> = IStreamTransform<any, Type>
+export type IStreamPredicate = IStreamHandler<boolean>

@@ -1,4 +1,4 @@
-import type { IndexingFunction } from "src/interfaces.js"
+import type { IIndexingFunction } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { isGoodIndex } from "src/utils.js"
@@ -18,7 +18,7 @@ export abstract class BaseLinearMap<
 > extends BaseIndexMap<KeyType, ValueType, DefaultType> {
 	protected alteredKeys: any[]
 
-	change?: IndexingFunction<KeyType>
+	change?: IIndexingFunction<KeyType>
 
 	extension: (x: any, ...y: any[]) => any
 	keyExtension: (value: KeyType, index?: number, array?: KeyType[]) => any

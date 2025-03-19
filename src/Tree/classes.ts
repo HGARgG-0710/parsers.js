@@ -1,13 +1,13 @@
-import type { Pattern } from "../Pattern/interfaces.js"
+import type { IPattern } from "../Pattern/interfaces.js"
 import type {
 	IChildrenTree,
-	InTree,
+	IInTree,
 	IParentTree,
-	TreeConstructor,
-	TreeConverter
+	ITreeConstructor,
+	ITreeConverter
 } from "./interfaces.js"
 
-import type { WalkableTree } from "./TreeWalker/interfaces.js"
+import type { IWalkableTree } from "./TreeWalker/interfaces.js"
 
 import { isParentTree as uisParentTree } from "./utils.js"
 import { value } from "../Pattern/utils.js"
@@ -20,10 +20,10 @@ const { trivialCompose } = functional
 const { last, lastIndex } = array
 const { insert, out } = inplace
 
-export class ChildrenTree<Type = any, T extends WalkableTree<Type> = WalkableTree<Type>>
-	implements WalkableTree<Type>, IChildrenTree<Type, T>
+export class ChildrenTree<Type = any, T extends IWalkableTree<Type> = IWalkableTree<Type>>
+	implements IWalkableTree<Type>, IChildrenTree<Type, T>
 {
-	children: InTree<Type, T>[]
+	children: IInTree<Type, T>[]
 
 	get lastChild() {
 		return lastIndex(this.children)
@@ -33,19 +33,19 @@ export class ChildrenTree<Type = any, T extends WalkableTree<Type> = WalkableTre
 		return multind.reduce(
 			(prev, curr) => prev.children[curr],
 			this as IChildrenTree<Type>
-		) as InTree<Type, WalkableTree<Type>>
+		) as IInTree<Type, IWalkableTree<Type>>
 	}
 
-	write(multind: number[], value: InTree<Type>) {
+	write(multind: number[], value: IInTree<Type>) {
 		const writtenTo = this.index(multind.slice(0, -1))
 		return (writtenTo[last(multind)] = value)
 	}
 
-	append(value: InTree<Type, T>) {
+	append(value: IInTree<Type, T>) {
 		return this.children.push(value) - 1
 	}
 
-	insert(index: number, value: InTree<Type>) {
+	insert(index: number, value: IInTree<Type>) {
 		return lastIndex(insert(this.children, index, value))
 	}
 
@@ -54,18 +54,18 @@ export class ChildrenTree<Type = any, T extends WalkableTree<Type> = WalkableTre
 	}
 
 	findUnwalkedChildren(endIndex: number[]) {
-		const parents = sequentialIndex(this, endIndex) as WalkableTree<Type>[]
+		const parents = sequentialIndex(this, endIndex) as IWalkableTree<Type>[]
 		let result = lastIndex(parents)
 		while (isGoodIndex(result) && parents[result].lastChild <= endIndex[result])
 			--result
 		return result
 	}
 
-	backtrack(positions: number, currInd: number[]): InTree<Type, WalkableTree<Type>> {
+	backtrack(positions: number, currInd: number[]): IInTree<Type, IWalkableTree<Type>> {
 		return this.index(currInd.slice(0, -positions))
 	}
 
-	constructor(value?: any, converter?: TreeConverter<Type, T>) {
+	constructor(value?: any, converter?: ITreeConverter<Type, T>) {
 		this.children = value ? converter!(value) : []
 	}
 }
@@ -79,7 +79,7 @@ export class ParentTree<Type = any>
 	backtrack(positions: number) {
 		let curr = this as IParentTree<Type> | null
 		while (--positions) curr = curr!.parent
-		return curr as WalkableTree<Type>
+		return curr as IWalkableTree<Type>
 	}
 
 	findUnwalkedChildren(endInd: number[]) {
@@ -92,7 +92,7 @@ export class ParentTree<Type = any>
 
 	constructor(
 		value?: any,
-		converter?: TreeConverter<Type, IParentTree<Type>>,
+		converter?: ITreeConverter<Type, IParentTree<Type>>,
 		isParentTree: (x: any) => x is IParentTree<Type> = uisParentTree
 	) {
 		super(value, converter)
@@ -107,18 +107,18 @@ export class ParentTree<Type = any>
 	}
 }
 
-export function ChildlessTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
+export function ChildlessTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
 	return parameterWaster(treeConstructor)
 }
 
-export function SingleTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
-	return function (fromTree: Pattern<Type>, converter: TreeConverter<Type>) {
+export function SingleTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
+	return function (fromTree: IPattern<Type>, converter: ITreeConverter<Type>) {
 		return new treeConstructor(fromTree, trivialCompose(converter, value))
 	}
 }
 
-export function MultTree<Type = any>(treeConstructor: TreeConstructor<Type>) {
-	return function (fromTree: Pattern<Type[]>, converter: TreeConverter<Type>) {
+export function MultTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
+	return function (fromTree: IPattern<Type[]>, converter: ITreeConverter<Type>) {
 		return new treeConstructor(fromTree, trivialCompose(mapper(converter), value))
 	}
 }

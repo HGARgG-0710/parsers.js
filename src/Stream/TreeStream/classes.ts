@@ -1,10 +1,10 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { InTree } from "../../Tree/interfaces.js"
+import type { IInTree } from "../../Tree/interfaces.js"
 import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { ITreeStream } from "./interfaces.js"
 
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 import { withSuper } from "src/refactor.js"
 import { TreeWalker } from "../../Tree/TreeWalker/classes.js"
@@ -22,7 +22,7 @@ const { rewind, navigate, init, value, multind, ...baseMethods } = methods
 const TreeStreamBase = StreamClass({
 	...baseMethods,
 	defaultIsEnd: F
-}) as AbstractConstructor<[], ReversedStreamClassInstance<InTree>>
+}) as AbstractConstructor<[], IReversedStreamClassInstance<IInTree>>
 
 export class TreeStream<Type = any> extends TreeStreamBase implements ITreeStream<Type> {
 	protected response: string
@@ -32,7 +32,7 @@ export class TreeStream<Type = any> extends TreeStreamBase implements ITreeStrea
 	readonly multind: IMultiIndex
 
 	super: Summat
-	navigate: (position: IMultiIndex) => InTree<Type>
+	navigate: (position: IMultiIndex) => IInTree<Type>
 	init: (walker?: TreeWalker<Type>) => ITreeStream<Type>
 
 	constructor(walker: TreeWalker<Type>) {

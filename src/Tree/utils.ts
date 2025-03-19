@@ -1,9 +1,9 @@
 import type {
-	Tree,
-	InTree,
-	TreeConverter,
-	TreeConstructor,
-	ReadonlyTree,
+	ITree,
+	IInTree,
+	ITreeConverter,
+	ITreeConstructor,
+	IReadonlyTree,
 	IParentTree
 } from "./interfaces.js"
 
@@ -17,11 +17,11 @@ const { id } = functional
 /**
  * Returns whether the given `x` is a `ReadonlyTree`, with at least 1 child
  */
-export const hasChildren = structCheck<ReadonlyTree>({ lastChild: isGoodIndex }) as <
+export const hasChildren = structCheck<IReadonlyTree>({ lastChild: isGoodIndex }) as <
 	Type = any
 >(
 	x: any
-) => x is ReadonlyTree<Type>
+) => x is IReadonlyTree<Type>
 
 /**
  * Sequentially indexes a given `tree` using `multind` for indicies array.
@@ -29,19 +29,19 @@ export const hasChildren = structCheck<ReadonlyTree>({ lastChild: isGoodIndex })
  */
 export function sequentialIndex<
 	Type = any,
-	TreeType extends ReadonlyTree<Type> = ReadonlyTree<Type>
->(tree: ReadonlyTree<Type>, multind: number[]): InTree<Type, TreeType>[] {
-	const result: InTree<Type>[] = [tree]
-	let current: InTree<Type> = tree
+	TreeType extends IReadonlyTree<Type> = IReadonlyTree<Type>
+>(tree: IReadonlyTree<Type>, multind: number[]): IInTree<Type, TreeType>[] {
+	const result: IInTree<Type>[] = [tree]
+	let current: IInTree<Type> = tree
 	for (const index of multind)
-		result.push((current = (current as ReadonlyTree<Type>).index([index])))
-	return result as InTree<Type, TreeType>[]
+		result.push((current = (current as IReadonlyTree<Type>).index([index])))
+	return result as IInTree<Type, TreeType>[]
 }
 
 /**
  * Creates a deep copy of the given recursive-array structure
  */
-export function recursiveTreeCopy<Type = any>(treeConstructor: TreeConstructor<Type>) {
+export function recursiveTreeCopy<Type = any>(treeConstructor: ITreeConstructor<Type>) {
 	const T = (tree: any) =>
 		tree instanceof treeConstructor
 			? new treeConstructor(tree.children.map(T), id)
@@ -53,13 +53,13 @@ export function recursiveTreeCopy<Type = any>(treeConstructor: TreeConstructor<T
  * Returns the multi-index (`number[]`) for the rightmost (recursive-last)
  * element of the given `ReadonlyTree`
  */
-export function treeEndPath<Type = any>(tree: ReadonlyTree<Type>) {
+export function treeEndPath<Type = any>(tree: IReadonlyTree<Type>) {
 	const lastIndex: number[] = []
 	let current = tree
 	while (hasChildren(current)) {
 		const { lastChild } = current
 		lastIndex.push(lastChild)
-		current = current.index([lastChild]) as ReadonlyTree<Type>
+		current = current.index([lastChild]) as IReadonlyTree<Type>
 	}
 	return lastIndex
 }
@@ -68,7 +68,7 @@ export function treeEndPath<Type = any>(tree: ReadonlyTree<Type>) {
  * Returns a function that calls `x.map(converter)`
  */
 export const mapper =
-	<Type = any>(converter: (x: any) => Type | Tree<Type>): TreeConverter<Type> =>
+	<Type = any>(converter: (x: any) => Type | ITree<Type>): ITreeConverter<Type> =>
 	(x: any[]) =>
 		x.map(converter)
 

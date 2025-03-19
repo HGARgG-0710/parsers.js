@@ -1,9 +1,9 @@
-import type { IndexMap } from "../interfaces.js"
-import type { IndexingFunction } from "src/interfaces.js"
+import type { IIndexMap } from "../interfaces.js"
+import type { IIndexingFunction } from "src/interfaces.js"
 
 export interface ILinearIndexMap<KeyType = any, ValueType = any, DefaulType = any>
-	extends IndexMap<KeyType, ValueType, DefaulType> {
-	change?: IndexingFunction<KeyType>
+	extends IIndexMap<KeyType, ValueType, DefaulType> {
+	change?: IIndexingFunction<KeyType>
 	keyExtension: Function
 	extension: (x: any, ...y: any[]) => any
 }

@@ -1,7 +1,7 @@
 import type { IStreamParser } from "./interfaces.js"
-import type { EndableStream } from "../StreamClass/interfaces.js"
+import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { StreamHandler } from "../../Parser/TableMap/interfaces.js"
+import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
 
 import { superInit } from "../StreamClass/refactor.js"
 import { isBufferized } from "../../Collection/Buffer/utils.js"
@@ -24,11 +24,11 @@ export namespace methods {
 
 	export function init<InType = any, OutType = any>(
 		this: IStreamParser<InType, OutType>,
-		handler?: StreamHandler<OutType>,
-		input?: EndableStream<InType>,
+		handler?: IStreamHandler<OutType>,
+		input?: IEndableStream<InType>,
 		state?: Summat
 	) {
-		if (handler) this.handler = copy(handler, this) as StreamHandler<OutType>
+		if (handler) this.handler = copy(handler, this) as IStreamHandler<OutType>
 		if (input) {
 			if (isBufferized(this)) superInit(this, input, null, state)
 			else superInit(this, input, state)

@@ -1,5 +1,5 @@
-import type { Position } from "../../Position/interfaces.js"
-import type { ILimitedStream, LimitedUnderStream } from "./interfaces.js"
+import type { IPosition } from "../../Position/interfaces.js"
+import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
@@ -54,9 +54,9 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: ILimitedStream<Type>,
-		value?: LimitedUnderStream<Type>,
-		from?: Position,
-		to?: Position
+		value?: ILimitedUnderStream<Type>,
+		from?: IPosition,
+		to?: IPosition
 	) {
 		if (value || this.value) {
 			if (value) superInit(this, value)
