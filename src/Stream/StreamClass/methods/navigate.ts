@@ -1,7 +1,7 @@
-import type { Posed, Position } from "../../../Position/interfaces.js"
-import type { ReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
-import type { Bufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { ReversedStreamClassInstance } from "../interfaces.js"
+import type { IPosed, IPosition } from "../../../Position/interfaces.js"
+import type { IReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { IReversedStreamClassInstance } from "../interfaces.js"
 
 import { uniNavigate } from "../utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
@@ -16,7 +16,7 @@ const { isNumber } = type
  * 		(used as default, overriden in some classes for performance reasons)
  */
 
-function navigate<Type = any>(this: ReversibleStream<Type>, position: Position) {
+function navigate<Type = any>(this: IReversibleStream<Type>, position: IPosition) {
 	return uniNavigate(this, position)
 }
 
@@ -24,8 +24,8 @@ const posNavigate = navigate
 const bufferNavigate = navigate
 
 function posBufferNavigate<Type = any>(
-	this: ReversedStreamClassInstance<Type> & Bufferized<Type> & Posed<number>,
-	position: Position<Type>
+	this: IReversedStreamClassInstance<Type> & IBufferized<Type> & IPosed<number>,
+	position: IPosition<Type>
 ) {
 	const dirpos = positionConvert(position)
 

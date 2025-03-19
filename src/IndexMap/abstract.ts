@@ -1,5 +1,5 @@
-import type { IndexMap } from "./interfaces.js"
-import type { Sizeable } from "src/interfaces.js"
+import type { IIndexMap } from "./interfaces.js"
+import type { ISizeable } from "src/interfaces.js"
 import type { array } from "@hgargg-0710/one"
 import type { WeakDeletable, WeakSettable } from "./refactor.js"
 
@@ -12,7 +12,7 @@ import { inplace } from "@hgargg-0710/one"
 const { swap } = inplace
 
 export abstract class DelegateSizeable<
-	DelegateType extends Sizeable = any
+	DelegateType extends ISizeable = any
 > extends ProtectedPattern<DelegateType> {
 	get size() {
 		return this.value.size
@@ -24,7 +24,7 @@ export abstract class DelegateDeletableSettableSizeable<
 	ValueType = any,
 	DelegateType extends WeakDeletable<DeletedType> &
 		WeakSettable<KeyType, ValueType | DefaultType> &
-		Sizeable = any,
+		ISizeable = any,
 	DeletedType = KeyType,
 	DefaultType = any
 > extends DelegateSizeable<DelegateType> {
@@ -44,7 +44,7 @@ export abstract class PreIndexMap<
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = any
-> implements IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+> implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 {
 	keys: KeyType[]
 	values: ValueType[]
@@ -57,7 +57,7 @@ export abstract class PreIndexMap<
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract replace(index: number, pair: [KeyType, ValueType]): this
 	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
-	abstract copy(): IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 	abstract unique(): number[]
 	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
 	abstract swap(i: number, j: number): this
@@ -97,7 +97,7 @@ export abstract class BaseIndexMap<
 	["constructor"]: new (
 		pairs: array.Pairs<KeyType, ValueType>,
 		_default?: DefaultType
-	) => IndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	) => IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 
 	copy() {
 		return new this.constructor(kvPairs(table(this)), this.default)

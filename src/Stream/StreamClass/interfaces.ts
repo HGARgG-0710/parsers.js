@@ -1,87 +1,87 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { BasicStream } from "../interfaces.js"
-import type { Prevable, Started } from "../ReversibleStream/interfaces.js"
-import type { Initializable } from "./methods/init.js"
-import type { Position } from "../../Position/interfaces.js"
+import type { IBasicStream } from "../interfaces.js"
+import type { IPrevable, IStarted } from "../ReversibleStream/interfaces.js"
+import type { IInitializable } from "./methods/init.js"
+import type { IPosition } from "../../Position/interfaces.js"
 
 // * Optional Property-interfaces
 
-export interface Stateful {
+export interface IStateful {
 	state: Summat
 }
 
 // * Default Methods (single signature)
 
-export interface Finishable<Type = any> {
+export interface IFinishable<Type = any> {
 	finish: () => Type
 }
 
-export interface Navigable<Type = any> {
-	navigate: (position: Position) => Type
+export interface INavigable<Type = any> {
+	navigate: (position: IPosition) => Type
 }
 
-export interface Rewindable<Type = any> {
+export interface IRewindable<Type = any> {
 	rewind: () => Type
 }
 
-export interface Updatable<Type = any> {
+export interface IUpdatable<Type = any> {
 	update?: () => Type
 }
 
 // * Mandatory Property-interfaces
 
-export interface IsEndCurrable {
+export interface IIsEndCurrable {
 	isCurrEnd: () => boolean
 }
 
-export interface IsStartCurrable {
+export interface IIsStartCurrable {
 	isCurrStart: () => boolean
 }
 
-export interface EndableStream<Type = any> extends BasicStream<Type>, IsEndCurrable {}
+export interface IEndableStream<Type = any> extends IBasicStream<Type>, IIsEndCurrable {}
 
-interface PrimalStreamClassSignature<Type = any> extends IsEndCurrable {
+interface IPrimalStreamClassSignature<Type = any> extends IIsEndCurrable {
 	initGetter?: () => Type
 	baseNextIter: () => Type
 	defaultIsEnd: () => boolean
 	currGetter?: () => Type
 }
 
-interface StreamClassTransferable<Type = any>
-	extends PrimalStreamClassSignature<Type>,
-		Partial<Pick<ReversedStreamClassInstance<Type>, "prev">>,
-		Partial<Pick<ReversedStreamClassInstance<Type>, "basePrevIter">>,
-		Partial<IsStartCurrable> {}
+interface IStreamClassTransferable<Type = any>
+	extends IPrimalStreamClassSignature<Type>,
+		Partial<Pick<IReversedStreamClassInstance<Type>, "prev">>,
+		Partial<Pick<IReversedStreamClassInstance<Type>, "basePrevIter">>,
+		Partial<IIsStartCurrable> {}
 
-interface BasicStreamClassInstance<Type = any>
-	extends BasicStream<Type>,
-		Initializable,
-		PrimalStreamClassSignature<Type>,
-		Started,
-		Navigable<Type>,
-		Finishable<Type>,
+interface IBasicStreamClassInstance<Type = any>
+	extends IBasicStream<Type>,
+		IInitializable,
+		IPrimalStreamClassSignature<Type>,
+		IStarted,
+		INavigable<Type>,
+		IFinishable<Type>,
 		Iterable<Type> {}
 
-export interface StreamClassSignature<Type = any> extends StreamClassTransferable<Type> {
+export interface IStreamClassSignature<Type = any> extends IStreamClassTransferable<Type> {
 	buffer?: boolean
 	state?: boolean
 	hasPosition?: boolean
 	isPattern?: boolean
 }
 
-export interface StreamClassInstance<Type = any>
-	extends BasicStreamClassInstance<Type>,
-		StreamClassTransferable<Type>,
-		Partial<Prevable<Type>>,
-		Partial<IsStartCurrable>,
-		Partial<Rewindable<Type>>,
-		Updatable<Type> {}
+export interface IStreamClassInstance<Type = any>
+	extends IBasicStreamClassInstance<Type>,
+		IStreamClassTransferable<Type>,
+		Partial<IPrevable<Type>>,
+		Partial<IIsStartCurrable>,
+		Partial<IRewindable<Type>>,
+		IUpdatable<Type> {}
 
-export interface ReversedStreamClassInstance<Type = any>
-	extends BasicStreamClassInstance<Type>,
-		Prevable<Type>,
-		IsStartCurrable,
-		Rewindable<Type> {
+export interface IReversedStreamClassInstance<Type = any>
+	extends IBasicStreamClassInstance<Type>,
+		IPrevable<Type>,
+		IIsStartCurrable,
+		IRewindable<Type> {
 	basePrevIter: () => Type
 }
 

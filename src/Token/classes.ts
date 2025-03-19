@@ -2,8 +2,8 @@ import type { type } from "@hgargg-0710/one"
 import type {
 	IToken,
 	ITokenInstance,
-	TokenInstanceClass,
-	MarkedTokenType
+	ITokenInstanceClass,
+	IMarkedTokenType
 } from "./interfaces.js"
 
 import { BasicPattern } from "src/Pattern/abstract.js"
@@ -18,7 +18,7 @@ export function Token<Type = any, Value = any>(
 
 export function TokenType<Type = any, ValueType = any>(
 	type: Type
-): MarkedTokenType<Type, ValueType> {
+): IMarkedTokenType<Type, ValueType> {
 	class stt extends BasicPattern<ValueType> implements IToken<Type, ValueType> {
 		static is: type.TypePredicate<IToken<Type, ValueType>>
 		static readonly type: Type = type
@@ -33,7 +33,7 @@ export function TokenType<Type = any, ValueType = any>(
 	return stt
 }
 
-export function TokenInstance<Type = any>(type: any): TokenInstanceClass<Type> {
+export function TokenInstance<Type = any>(type: any): ITokenInstanceClass<Type> {
 	class ti implements ITokenInstance<Type> {
 		static is: type.TypePredicate<ITokenInstance<Type>>
 		static readonly type: Type = type

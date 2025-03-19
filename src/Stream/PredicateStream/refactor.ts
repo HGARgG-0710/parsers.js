@@ -1,6 +1,6 @@
-import type { PredicatePosition } from "../../Position/interfaces.js"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IsEndCurrable } from "../StreamClass/interfaces.js"
+import type { IPredicatePosition } from "../../Position/interfaces.js"
+import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { IIsEndCurrable } from "../StreamClass/interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
 
 import { preserveDirection } from "../../Position/utils.js"
@@ -35,13 +35,13 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: IPredicateStream<Type>,
-		value?: ReversibleStream<Type> & IsEndCurrable,
-		predicate?: PredicatePosition<Type>
+		value?: IReversibleStream<Type> & IIsEndCurrable,
+		predicate?: IPredicatePosition<Type>
 	) {
 		if (predicate) {
 			this.predicate = preserveDirection(
 				predicate,
-				(predicate) => copy(predicate, this) as PredicatePosition<Type>
+				(predicate) => copy(predicate, this) as IPredicatePosition<Type>
 			)
 			this.hasLookAhead = false
 		}

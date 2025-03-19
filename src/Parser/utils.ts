@@ -1,8 +1,8 @@
-import type { StreamPredicate, StreamTransform } from "./TableMap/interfaces.js"
-import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "../Stream/interfaces.js"
-import type { DirectionalPosition, Position } from "../Position/interfaces.js"
-import type { Collection } from "../Collection/interfaces.js"
+import type { IStreamPredicate, IStreamTransform } from "./TableMap/interfaces.js"
+import type { IReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
+import type { IBasicStream } from "../Stream/interfaces.js"
+import type { IDirectionalPosition, IPosition } from "../Position/interfaces.js"
+import type { ICollection } from "../Collection/interfaces.js"
 
 import { positionNegate } from "../Position/utils.js"
 import { getStopPoint } from "../Position/refactor.js"
@@ -13,7 +13,7 @@ import { ArrayCollection } from "../Collection/classes.js"
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip(input: ReversibleStream, steps: Position = 1) {
+export function skip(input: IReversibleStream, steps: IPosition = 1) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
@@ -23,8 +23,8 @@ export function skip(input: ReversibleStream, steps: Position = 1) {
  */
 export function consume<
 	Type = any,
-	CollectionType extends Collection<Type> = ArrayCollection<Type>
->(stream: BasicStream<Type>, init: CollectionType = new ArrayCollection<Type>() as any) {
+	CollectionType extends ICollection<Type> = ArrayCollection<Type>
+>(stream: IBasicStream<Type>, init: CollectionType = new ArrayCollection<Type>() as any) {
 	while (!stream.isEnd) init.push(stream.next())
 	return init
 }
@@ -34,9 +34,9 @@ export function consume<
  * returns whether the bound corresponding to the direction of iteration
  * has been reached
  */
-export function has(pos: DirectionalPosition) {
+export function has(pos: IDirectionalPosition) {
 	const stopPoint = getStopPoint(pos)
-	return function <Type = any>(input: ReversibleStream<Type>) {
+	return function <Type = any>(input: IReversibleStream<Type>) {
 		uniNavigate(input, pos)
 		return !input[stopPoint]
 	}
@@ -46,8 +46,8 @@ export function has(pos: DirectionalPosition) {
  * Counts the number of items (starting from `stream.curr`),
  * obeying `pred`
  */
-export function count(pred: StreamPredicate) {
-	return function <Type = any>(input: BasicStream<Type>) {
+export function count(pred: IStreamPredicate) {
+	return function <Type = any>(input: IBasicStream<Type>) {
 		let count = 0
 		while (!input.isEnd && pred(input, count)) {
 			++count
@@ -61,12 +61,12 @@ export function count(pred: StreamPredicate) {
  * Returns a function that collects the items of `input`
  * into `init`, delimiting them by `delimPred`
  */
-export function delimited(delimPred: Position) {
+export function delimited(delimPred: IPosition) {
 	return function <
 		Type = any,
-		CollectionType extends Collection<Type> = ArrayCollection<Type>
+		CollectionType extends ICollection<Type> = ArrayCollection<Type>
 	>(
-		input: ReversibleStream<Type>,
+		input: IReversibleStream<Type>,
 		init: CollectionType = new ArrayCollection<Type>() as any
 	) {
 		while (!input.isEnd) {
@@ -83,12 +83,12 @@ export function delimited(delimPred: Position) {
  * the moment that `input.isEnd`
  */
 export function transform<UnderType = any, UpperType = any>(
-	map: StreamTransform<UnderType, UpperType>
+	map: IStreamTransform<UnderType, UpperType>
 ) {
 	return function <
-		CollectionType extends Collection<UpperType> = ArrayCollection<UpperType>
+		CollectionType extends ICollection<UpperType> = ArrayCollection<UpperType>
 	>(
-		input: BasicStream<UnderType>,
+		input: IBasicStream<UnderType>,
 		init: CollectionType = new ArrayCollection<UpperType>() as any
 	) {
 		let i = 0

@@ -1,4 +1,4 @@
-export interface Resulting<ResultType = any> {
+export interface IResulting<ResultType = any> {
 	readonly result: ResultType
 }
 
@@ -6,10 +6,10 @@ export interface IPointer<Type = any> {
 	value: Type
 }
 
-export type Pattern<Type = any> = Partial<IPointer<Type>>
+export type IPattern<Type = any> = Partial<IPointer<Type>>
 
-export type RecursivePointer<T = any> = IPointer<T | RecursivePointer<T>>
+export type IRecursivePointer<T = any> = IPointer<T | IRecursivePointer<T>>
 
-export interface GettablePattern<Type = any> {
+export interface IGettablePattern<Type = any> {
 	get: () => Type
 }

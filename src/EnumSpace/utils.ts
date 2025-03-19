@@ -1,11 +1,11 @@
 import type { IEnumSpace } from "./interfaces.js"
-import type { Mappable } from "../interfaces.js"
+import type { IMappable } from "../interfaces.js"
 
 /**
  * Returns a function mapping `enums` using `f`
  */
 export const fromEnum =
-	<T = any, Type = any>(f?: Mappable<T, Type>) =>
+	<T = any, Type = any>(f?: IMappable<T, Type>) =>
 	(enums: IEnumSpace<T>) =>
 		enums.map(f)
 

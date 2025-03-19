@@ -1,7 +1,7 @@
-import type { GettablePattern } from "../../Pattern/interfaces.js"
-import type { PositionObject } from "../interfaces.js"
+import type { IGettablePattern } from "../../Pattern/interfaces.js"
+import type { IPositionObject } from "../interfaces.js"
 
-export interface IMultiIndex extends PositionObject, GettablePattern<readonly number[]> {
+export interface IMultiIndex extends IPositionObject, IGettablePattern<readonly number[]> {
 	levels: number
 	equals: (position: IMultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]
@@ -10,7 +10,7 @@ export interface IMultiIndex extends PositionObject, GettablePattern<readonly nu
 	copy: () => IMultiIndex
 }
 
-export interface IMultiIndexModifier extends GettablePattern<IMultiIndex> {
+export interface IMultiIndexModifier extends IGettablePattern<IMultiIndex> {
 	init: (multind?: IMultiIndex) => void
 	nextLevel: () => number[]
 	prevLevel: () => number[]

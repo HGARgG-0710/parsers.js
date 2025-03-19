@@ -1,5 +1,5 @@
-import type { StreamClassInstance } from "../interfaces.js"
+import type { IStreamClassInstance } from "../interfaces.js"
 
-export function update<Type = any>(this: StreamClassInstance<Type>) {
+export function update<Type = any>(this: IStreamClassInstance<Type>) {
 	return (this.curr = this.currGetter!())
 }

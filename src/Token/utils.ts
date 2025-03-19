@@ -1,5 +1,5 @@
 import type { type as types } from "@hgargg-0710/one"
-import type { IToken, ITokenInstance, TypeCheckable } from "./interfaces.js"
+import type { IToken, ITokenInstance, ITypeCheckable } from "./interfaces.js"
 
 import { TokenInstance, TokenType } from "./classes.js"
 import { fromEnum } from "../EnumSpace/utils.js"
@@ -52,5 +52,5 @@ export const tokenTypes = fromEnum(TokenType)
  * Returns the value of the `.is` property for the given `TypeCheckable`
  */
 export const is = prop("is") as <Type = any>(
-	t: TypeCheckable<Type>
+	t: ITypeCheckable<Type>
 ) => types.TypePredicate<Type>

@@ -1,7 +1,7 @@
-import type { Sizeable } from "src/interfaces.js"
+import type { ISizeable } from "src/interfaces.js"
 import { isGoodIndex } from "../utils.js"
 
-export const inBound = (index: number, collection: Sizeable) =>
+export const inBound = (index: number, collection: ISizeable) =>
 	isGoodIndex(index) && index < collection.size
 
 export interface WeakSettable<KeyType = any, ValueType = any> {

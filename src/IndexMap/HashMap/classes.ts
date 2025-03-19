@@ -1,4 +1,4 @@
-import type { IHashClass, HashMap, Hash } from "./interfaces.js"
+import type { IHashClass, IHashMap, IHash } from "./interfaces.js"
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "../abstract.js"
@@ -20,7 +20,7 @@ abstract class BaseHashClass<
 > extends DelegateSizeable<
 	IInternalHash<InternalKeyType, ValueType, DefaultType>
 > {
-	hash: Hash<KeyType, InternalKeyType>
+	hash: IHash<KeyType, InternalKeyType>
 
 	index(x: KeyType, ...y: any[]) {
 		return this.value.get(this.hash(x, ...y))
@@ -48,13 +48,13 @@ export function HashClass<
 	InternalKeyType = any,
 	DefaultType = any
 >(
-	hash: Hash<KeyType, InternalKeyType>
+	hash: IHash<KeyType, InternalKeyType>
 ): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
 	class hashClass
 		extends BaseHashClass<KeyType, ValueType, InternalKeyType, DefaultType>
-		implements HashMap<KeyType, ValueType, InternalKeyType, DefaultType>
+		implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
 	{
-		static hash: Hash<KeyType, InternalKeyType>
+		static hash: IHash<KeyType, InternalKeyType>
 		static extend: (
 			f: (x: any) => KeyType
 		) => IHashClass<KeyType, ValueType, InternalKeyType>

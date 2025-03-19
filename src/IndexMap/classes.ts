@@ -1,4 +1,4 @@
-import type { MapClass } from "./interfaces.js"
+import type { IMapClass } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { type } from "../Token/utils.js"
@@ -14,9 +14,9 @@ export const [TokenMap, ValueMap, CurrentMap, TypeofMap] = [
 	value,
 	current,
 	typeOf
-].map((x) => (mapClass: MapClass) => mapClass.extend(x))
+].map((x) => (mapClass: IMapClass) => mapClass.extend(x))
 
-export const TypeMap = (mapClass: MapClass) => mapClass.extendKey(is)
+export const TypeMap = (mapClass: IMapClass) => mapClass.extendKey(is)
 
 export const Pairs = <KeyType = any, ValueType = any>(
 	...pairs: array.Pairs<KeyType, ValueType> | [number]

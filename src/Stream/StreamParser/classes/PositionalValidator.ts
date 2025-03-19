@@ -1,33 +1,32 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { StreamPredicate } from "../../../Parser/TableMap/interfaces.js"
-import type { EndableStream } from "../../../Stream/StreamClass/interfaces.js"
-import type { StatePatternInitMethod } from "../../StreamClass/methods/init.js"
+import type { IInvalidEntries } from "../../../interfaces.js"
+import type { IStreamPredicate } from "../../../Parser/TableMap/interfaces.js"
+import type { IEndableStream } from "../../../Stream/StreamClass/interfaces.js"
+import type { IStatePatternInitMethod } from "../../StreamClass/methods/init.js"
 
 import { LocatorStream } from "../classes.js"
 
-export type InvalidEntries<Type = any> = [number, Type][]
-
 export function PositionalValidator(
-	validator: StreamPredicate,
+	validator: IStreamPredicate,
 	defaultState?: Summat
 ) {
 	const validationStream = new (LocatorStream(
 		true,
 		!!defaultState
 	)(validator))()
-	
+
 	return function <Type = any>(
-		stream: EndableStream<Type>,
+		stream: IEndableStream<Type>,
 		state: Summat | undefined = defaultState
 	) {
 		// * reason: '.initGetter/.currGetter' COULD be calling 'stream.next()' under the hood,
 		// thus, changing the 'stream.curr' value
 		let curr = stream.curr
 
-		;(validationStream.init as StatePatternInitMethod)(stream, state)
+		;(validationStream.init as IStatePatternInitMethod)(stream, state)
 
-		const erronous: InvalidEntries<Type> = []
+		const erronous: IInvalidEntries<Type> = []
 		for (const vcurr of validationStream) {
 			if (!vcurr) erronous.push([validationStream.pos!, curr])
 			curr = stream.curr

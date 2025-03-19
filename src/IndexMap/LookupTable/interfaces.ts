@@ -1,18 +1,21 @@
-import type { HashMap } from "../HashMap/interfaces.js"
-import type { Deletable } from "src/interfaces.js"
-import type { Settable } from "src/interfaces.js"
-import type { Rekeyable } from "src/interfaces.js"
+import type { IHashMap } from "../HashMap/interfaces.js"
+import type { IDeletable } from "src/interfaces.js"
+import type { ISettable } from "src/interfaces.js"
+import type { IRekeyable } from "src/interfaces.js"
 
-export interface LookupTable<KeyType = any, ValueType = any, OwningType = any>
-	extends Rekeyable<KeyType>,
-		Settable<KeyType, ValueType>,
-		Deletable<KeyType> {
+export interface ILookupTable<KeyType = any, ValueType = any, OwningType = any>
+	extends IRekeyable<KeyType>,
+		ISettable<KeyType, ValueType>,
+		IDeletable<KeyType> {
 	getIndex: (x: any) => OwningType
 	own: (x: any, ownType: OwningType) => void
 	byOwned: (x: any) => ValueType
 	isOwned: (x: any) => boolean
 }
 
-export type TableConstructor<OwningType = any> = new <KeyType = any, ValueType = any>(
-	hash: HashMap<KeyType, ValueType>
-) => LookupTable<KeyType, ValueType, OwningType>
+export type ITableConstructor<OwningType = any> = new <
+	KeyType = any,
+	ValueType = any
+>(
+	hash: IHashMap<KeyType, ValueType>
+) => ILookupTable<KeyType, ValueType, OwningType>

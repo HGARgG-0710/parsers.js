@@ -1,8 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IReversedStream, ReversibleStream } from "./interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IReversedStream, IReversibleStream } from "./interfaces.js"
 
 import { valueDelegate, valuePropDelegate, withSuper } from "src/refactor.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
@@ -38,19 +38,19 @@ const ReversedStreamBase = <Type = any>(
 		hasPosition,
 		buffer,
 		isPattern: true
-	}) as AbstractConstructor<[any], ReversedStreamClassInstance<Type> & Pattern>
+	}) as AbstractConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
 export function ReversedStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): new (value?: ReversibleStream<Type>) => IReversedStream<Type> {
+): new (value?: IReversibleStream<Type>) => IReversedStream<Type> {
 	const baseClass = ReversedStreamBase(hasPosition, buffer)
 	class reversedStream extends baseClass implements IReversedStream<Type> {
-		value: ReversibleStream<Type>
-		init: (value?: ReversibleStream<Type>) => IReversedStream<Type>
+		value: IReversibleStream<Type>
+		init: (value?: IReversibleStream<Type>) => IReversedStream<Type>
 		super: Summat
 
-		constructor(value?: ReversibleStream<Type>) {
+		constructor(value?: IReversibleStream<Type>) {
 			super(value)
 			this.init(value)
 		}

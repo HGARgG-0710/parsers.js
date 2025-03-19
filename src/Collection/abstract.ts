@@ -1,8 +1,8 @@
-import type { Indexed } from "src/interfaces.js"
+import type { IIndexed } from "src/interfaces.js"
 import { InitializablePattern } from "src/Pattern/abstract.js"
 
 export abstract class IterableCollection<Type = any>
-	extends InitializablePattern<Indexed<Type>>
+	extends InitializablePattern<IIndexed<Type>>
 	implements Iterable<Type>
 {
 	*[Symbol.iterator]() {

@@ -1,9 +1,9 @@
-import type { Collection } from "./interfaces.js"
+import type { ICollection } from "./interfaces.js"
 import { IterableCollection } from "./abstract.js"
 
 export class ArrayCollection<Type = any>
 	extends IterableCollection<Type>
-	implements Collection<Type>
+	implements ICollection<Type>
 {
 	protected value: Type[]
 

@@ -1,28 +1,28 @@
-import type { ReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
-import type { BasicStream } from "../Stream/interfaces.js"
+import type { IReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
+import type { IBasicStream } from "../Stream/interfaces.js"
 
-export type Position<Type = any> = DirectionalPosition<Type> | PositionObject<Type>
-export type DirectionalPosition<Type = any> = PredicatePosition<Type> | number
-export type PredicatePosition<Type = any> = ((
-	stream: BasicStream<Type>,
+export type IPosition<Type = any> = IDirectionalPosition<Type> | IPositionObject<Type>
+export type IDirectionalPosition<Type = any> = IPredicatePosition<Type> | number
+export type IPredicatePosition<Type = any> = ((
+	stream: IBasicStream<Type>,
 	pos?: number
 ) => boolean) &
-	Partial<DirectionHaving>
+	Partial<IDirectionHaving>
 
-export interface PositionObject<Type = any> {
-	convert: (stream?: BasicStream<Type>) => DirectionalPosition<Type>
-	equals?: (position: Position<Type>) => boolean
-	compare?: (position: Position<Type>, stream?: BasicStream<Type>) => boolean
-	copy?: () => PositionObject<Type>
+export interface IPositionObject<Type = any> {
+	convert: (stream?: IBasicStream<Type>) => IDirectionalPosition<Type>
+	equals?: (position: IPosition<Type>) => boolean
+	compare?: (position: IPosition<Type>, stream?: IBasicStream<Type>) => boolean
+	copy?: () => IPositionObject<Type>
 }
 
-export interface Posed<Type = any> {
+export interface IPosed<Type = any> {
 	pos: Type
 }
 
-export type Change<Type = any> = (input: ReversibleStream<Type>) => Type
+export type IChange<Type = any> = (input: IReversibleStream<Type>) => Type
 
-export interface DirectionHaving {
+export interface IDirectionHaving {
 	direction: boolean
 }
 

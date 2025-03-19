@@ -1,58 +1,64 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Hash } from "./IndexMap/HashMap/interfaces.js"
+import type { IHash } from "./IndexMap/HashMap/interfaces.js"
 
-export type Mappable<Type = any, Out = any> = (value: Type, index?: number) => Out
+export type IMappable<Type = any, Out = any> = (
+	value: Type,
+	index?: number
+) => Out
 
-export interface Copiable<Type = any> {
+export interface ICopiable<Type = any> {
 	copy: () => Type
 }
 
-export interface Having {
+export interface IHaving {
 	has: (x: any) => boolean
 }
 
-export interface Testable {
+export interface ITestable {
 	test: (x: any) => boolean
 }
 
-export type IndexingFunction<KeyType = any> = (curr: KeyType, x: any) => boolean
+export type IIndexingFunction<KeyType = any> = (
+	curr: KeyType,
+	x: any
+) => boolean
 
-export interface Sizeable {
+export interface ISizeable {
 	size: number
 }
 
-export interface Defaulting<Type = any> {
+export interface IDefaulting<Type = any> {
 	default: Type
 }
 
-export interface IndexAssignable<Type = any> {
+export interface IIndexAssignable<Type = any> {
 	assignedIndex?: Type
 }
 
-export interface Settable<KeyType = any, ValueType = any> {
+export interface ISettable<KeyType = any, ValueType = any> {
 	set: (key: KeyType, value: ValueType) => this
 }
 
-export interface Deletable<KeyType = any> {
+export interface IDeletable<KeyType = any> {
 	delete: (key: KeyType) => this
 }
 
-export interface Rekeyable<KeyType = any> {
+export interface IRekeyable<KeyType = any> {
 	rekey: (keyFrom: KeyType, keyTo: KeyType) => this
 }
 
-export interface Hashable<KeyType, InternalKeyType> {
-	hash: Hash<KeyType, InternalKeyType>
+export interface IHashable<KeyType, InternalKeyType> {
+	hash: IHash<KeyType, InternalKeyType>
 }
 
-export type Indexed<Type = any> =
+export type IIndexed<Type = any> =
 	| string
 	| ({
 			[x: number]: Type
 			length: number
 	  } & Iterable<Type>)
 
-export interface Supered {
+export interface ISupered {
 	super: Summat
 }
 
@@ -60,10 +66,12 @@ export type * from "./Collection/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
 export type * from "./Parser/interfaces.js"
-
 export type * from "./Pattern/interfaces.js"
 export type * from "./Position/interfaces.js"
 export type * from "./Stream/interfaces.js"
-
 export type * from "./Token/interfaces.js"
+export type IInvalidEntries<Type = any> = [number, Type][]
+
+export type ValidationResult = true | [false, number]
+
 export type * from "./Tree/interfaces.js"

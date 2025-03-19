@@ -1,28 +1,28 @@
 import type { array } from "@hgargg-0710/one"
 
 import type {
-	Copiable,
-	Defaulting,
-	IndexingFunction,
-	Rekeyable,
-	Sizeable
+	ICopiable,
+	IDefaulting,
+	IIndexingFunction,
+	IRekeyable,
+	ISizeable
 } from "../interfaces.js"
 
-export interface Indexable<ValueType = any> {
+export interface IIndexable<ValueType = any> {
 	index: (x: any, ...y: any[]) => ValueType
 }
 
-export interface IndexMap<
+export interface IIndexMap<
 	KeyType = any,
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = number
-> extends Indexable<ValueType | DefaultType>,
+> extends IIndexable<ValueType | DefaultType>,
 		Iterable<[KeyType, ValueType]>,
-		Copiable<IndexMap<KeyType, ValueType, DefaultType, IndexGetType>>,
-		Sizeable,
-		Defaulting<DefaultType>,
-		Rekeyable<KeyType> {
+		ICopiable<IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>>,
+		ISizeable,
+		IDefaulting<DefaultType>,
+		IRekeyable<KeyType> {
 	keys: KeyType[]
 	values: ValueType[]
 
@@ -40,14 +40,21 @@ export interface IndexMap<
 	set: (key: KeyType, value: ValueType, index?: number) => this
 }
 
-export interface MapClass<KeyType = any, ValueType = any, DefaultType = any> {
-	new (map: array.Pairs<KeyType, ValueType>, _default?: DefaultType): IndexMap<
-		KeyType,
-		ValueType
-	>
-	change?: IndexingFunction<KeyType>
-	extend: <KeyType = any>(...f: ((...x: any[]) => any)[]) => MapClass<KeyType, any>
-	extendKey: <ValueType = any>(...f: ((x: any) => any)[]) => MapClass<any, ValueType>
+export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
+	new (
+		map: array.Pairs<KeyType, ValueType>,
+		_default?: DefaultType
+	): IIndexMap<KeyType, ValueType>
+
+	change?: IIndexingFunction<KeyType>
+
+	extend: <KeyType = any>(
+		...f: ((...x: any[]) => any)[]
+	) => IMapClass<KeyType, any>
+
+	extendKey: <ValueType = any>(
+		...f: ((x: any) => any)[]
+	) => IMapClass<any, ValueType>
 
 	keyExtensions: Function[]
 	extensions: Function[]

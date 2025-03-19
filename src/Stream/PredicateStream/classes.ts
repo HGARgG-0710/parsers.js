@@ -1,12 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { PredicatePosition } from "../../Position/interfaces.js"
-import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IPredicatePosition } from "../../Position/interfaces.js"
+import type { IIsEndCurrable, IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
 
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 
-import type { IPredicateStream, PredicateStreamConstructor } from "./interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { IPredicateStream, IPredicateStreamConstructor } from "./interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
 
 import { StreamClass } from "../StreamClass/abstract.js"
 import { withSuper } from "src/refactor.js"
@@ -27,29 +27,29 @@ const PredicateStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition,
 		buffer
-	}) as AbstractConstructor<[any], StreamClassInstance<Type> & Pattern>
+	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function PredicateStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
-): PredicateStreamConstructor<Type> {
+): IPredicateStreamConstructor<Type> {
 	const baseClass = PredicateStreamBase(hasPosition, buffer)
 	class predicateStream extends baseClass implements IPredicateStream<Type> {
 		lookAhead: Type
 		hasLookAhead: boolean
-		predicate: PredicatePosition<Type>
-		value: ReversibleStream<Type> & IsEndCurrable
+		predicate: IPredicatePosition<Type>
+		value: IReversibleStream<Type> & IIsEndCurrable
 
 		super: Summat
 		prod: () => Type
 		init: (
-			input?: ReversibleStream<Type> & IsEndCurrable,
-			predicate?: PredicatePosition<Type>
+			input?: IReversibleStream<Type> & IIsEndCurrable,
+			predicate?: IPredicatePosition<Type>
 		) => IPredicateStream<Type>
 
 		constructor(
-			value?: ReversibleStream<Type> & IsEndCurrable,
-			predicate?: PredicatePosition<Type>
+			value?: IReversibleStream<Type> & IIsEndCurrable,
+			predicate?: IPredicatePosition<Type>
 		) {
 			super(value)
 			this.init(value, predicate)
@@ -66,8 +66,8 @@ export function PredicateStream<Type = any>(
 
 export function DelimitedStream<Type = any>(...delims: Type[]) {
 	const notDelim = negate(has(new Set(delims)))
-	return function (predicateStream: PredicateStreamConstructor<Type>) {
-		return (input?: ReversibleStream<Type> & IsEndCurrable) =>
+	return function (predicateStream: IPredicateStreamConstructor<Type>) {
+		return (input?: IReversibleStream<Type> & IIsEndCurrable) =>
 			new predicateStream(input, notDelim)
 	}
 }

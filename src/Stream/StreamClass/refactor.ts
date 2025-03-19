@@ -1,9 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { Started } from "../ReversibleStream/interfaces.js"
-import type { Stateful, StreamClassInstance } from "./interfaces.js"
-import type { Bufferized } from "../../Collection/Buffer/interfaces.js"
-import type { Posed } from "../../Position/interfaces.js"
+import type { IStarted } from "../ReversibleStream/interfaces.js"
+import type { IStateful, IStreamClassInstance } from "./interfaces.js"
+import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
 
 import { valueDelegate, valuePropDelegate } from "src/refactor.js"
 
@@ -26,34 +26,34 @@ export const valueCurr = valuePropDelegate("curr")
 const superDelegate = calledDelegate("super")
 export const superInit = superDelegate("init")
 
-export function start(stream: Started) {
+export function start(stream: IStarted) {
 	stream.isStart = true
 }
 
-export function deStart(stream: Started) {
+export function deStart(stream: IStarted) {
 	stream.isStart = false
 }
 
-export function end(stream: StreamClassInstance) {
+export function end(stream: IStreamClassInstance) {
 	stream.isEnd = true
 }
 
-export function deEnd(stream: StreamClassInstance) {
+export function deEnd(stream: IStreamClassInstance) {
 	stream.isEnd = false
 }
 
-export function createState(x: Stateful, state: Summat) {
+export function createState(x: IStateful, state: Summat) {
 	x.state = state
 }
 
 export function readBuffer<Type = any>(
-	stream: StreamClassInstance<Type> & Bufferized<Type> & Posed<number>
+	stream: IStreamClassInstance<Type> & IBufferized<Type> & IPosed<number>
 ) {
 	return (stream.curr = stream.buffer.read(stream.pos))
 }
 
 export function readBufferThis<Type = any>(
-	stream: StreamClassInstance<Type> & Posed<number> & Bufferized<Type>
+	stream: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
 ) {
 	readBuffer(stream)
 	return stream
@@ -65,6 +65,4 @@ export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"
 export * as finish from "./methods/finish.js"
 export * as rewind from "./methods/rewind.js"
-export type BoundNameType = "isEnd" | "isStart"
-
 export * as navigate from "./methods/navigate.js"

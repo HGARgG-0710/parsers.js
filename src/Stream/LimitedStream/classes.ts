@@ -1,9 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Position } from "../../Position/interfaces.js"
+import type { IPosition } from "../../Position/interfaces.js"
 import type { AbstractConstructor } from "../StreamClass/refactor.js"
-import type { ReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
-import type { LimitedUnderStream, ILimitedStream } from "./interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
+import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/abstract.js"
 import { valueCurr } from "../StreamClass/refactor.js"
@@ -25,36 +25,36 @@ const LimitedStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition,
 		buffer
-	}) as AbstractConstructor<[any], ReversedStreamClassInstance<Type> & Pattern>
+	}) as AbstractConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
 export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,
 	buffer: boolean = false
 ): new (
-	value: LimitedUnderStream<Type>,
-	from?: Position,
-	to?: Position
+	value: ILimitedUnderStream<Type>,
+	from?: IPosition,
+	to?: IPosition
 ) => ILimitedStream<Type> {
 	const baseClass = LimitedStreamBase<Type>(hasPosition, buffer)
 	class limitedStream extends baseClass implements ILimitedStream<Type> {
-		value: LimitedUnderStream<Type>
+		value: ILimitedUnderStream<Type>
 		lookAhead: Type
 		hasLookAhead: boolean
 
 		direction: boolean
-		from: Position
-		to: Position
+		from: IPosition
+		to: IPosition
 
 		super: Summat
 
 		prod: () => Type
 		init: (
-			value: LimitedUnderStream<Type>,
-			from?: Position,
-			to?: Position
+			value: ILimitedUnderStream<Type>,
+			from?: IPosition,
+			to?: IPosition
 		) => ILimitedStream<Type>
 
-		constructor(value: LimitedUnderStream<Type>, from?: Position, to?: Position) {
+		constructor(value: ILimitedUnderStream<Type>, from?: IPosition, to?: IPosition) {
 			super(value)
 			this.init(value, from, to)
 		}

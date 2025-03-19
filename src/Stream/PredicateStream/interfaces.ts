@@ -1,29 +1,29 @@
-import type { IsEndCurrable, StreamClassInstance } from "../StreamClass/interfaces.js"
-import type { ReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { Posed, PredicatePosition } from "../../Position/interfaces.js"
-import type { Supered } from "src/interfaces.js"
-import type { Pattern } from "../../Pattern/interfaces.js"
+import type { IIsEndCurrable, IStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { IPosed, IPredicatePosition } from "../../Position/interfaces.js"
+import type { ISupered } from "src/interfaces.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
 
-export interface LookaheadHaving {
+export interface ILookaheadHaving {
 	hasLookAhead: boolean
 }
 
-export interface SinglePositionLookahead<Type = any> {
+export interface ISinglePositionLookahead<Type = any> {
 	prod: () => Type
 	lookAhead: Type
 }
 
 export interface IPredicateStream<Type = any>
-	extends StreamClassInstance<Type>,
-		Supered,
-		SinglePositionLookahead<Type>,
-		Pattern<ReversibleStream<Type> & IsEndCurrable>,
-		LookaheadHaving,
-		Partial<Posed<number>> {
-	predicate: PredicatePosition<Type>
+	extends IStreamClassInstance<Type>,
+		ISupered,
+		ISinglePositionLookahead<Type>,
+		IPattern<IReversibleStream<Type> & IIsEndCurrable>,
+		ILookaheadHaving,
+		Partial<IPosed<number>> {
+	predicate: IPredicatePosition<Type>
 }
 
-export type PredicateStreamConstructor<Type = any> = new (
-	input?: ReversibleStream<Type> & IsEndCurrable,
-	predicate?: PredicatePosition<Type>
+export type IPredicateStreamConstructor<Type = any> = new (
+	input?: IReversibleStream<Type> & IIsEndCurrable,
+	predicate?: IPredicatePosition<Type>
 ) => IPredicateStream<Type>
