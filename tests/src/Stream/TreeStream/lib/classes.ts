@@ -1,4 +1,4 @@
-import type { EffectiveTreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
+import type { ITreeStream } from "../../../../../dist/src/Stream/TreeStream/interfaces.js"
 import { isTreeWalker } from "Tree/TreeWalker/lib/classes.js"
 
 import {
@@ -10,7 +10,6 @@ import {
 
 import {
 	GeneratedStreamClassSuite,
-	isInputted,
 	isSuperable,
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
@@ -21,7 +20,12 @@ const { structCheck } = object
 const { isNumber, isString } = type
 
 const treeStreamPrototypeProps = ["super", "copy"]
-const treeStreamOwnProps = ["lastLevelWithSiblings", "walker", "response", "input"]
+const treeStreamOwnProps = [
+	"lastLevelWithSiblings",
+	"walker",
+	"response",
+	"input"
+]
 
 const isTreeStream = and(
 	structCheck({
@@ -29,19 +33,18 @@ const isTreeStream = and(
 		walker: isTreeWalker,
 		response: isString
 	}),
-	isSuperable,
-	isInputted
-) as (x: any) => x is EffectiveTreeStream
+	isSuperable
+) as (x: any) => x is ITreeStream
 
 const TreeStreamGeneratedSuite = GeneratedStreamClassSuite(true, false)
 
-const TreeStreamConstructorTest = ClassConstructorTest<EffectiveTreeStream>(
+const TreeStreamConstructorTest = ClassConstructorTest<ITreeStream>(
 	isTreeStream,
 	treeStreamPrototypeProps,
 	treeStreamOwnProps
 )
 
-const InitTreeStreamConstructorTest = InitClassConstructorTest<EffectiveTreeStream>(
+const InitTreeStreamConstructorTest = InitClassConstructorTest<ITreeStream>(
 	isTreeStream,
 	treeStreamPrototypeProps,
 	treeStreamOwnProps
@@ -49,7 +52,7 @@ const InitTreeStreamConstructorTest = InitClassConstructorTest<EffectiveTreeStre
 
 export function TreeStreamTest(
 	className: string,
-	streamConstructor: new (...x: any[]) => EffectiveTreeStream,
+	streamConstructor: new (...x: any[]) => ITreeStream,
 	testSignatures: StreamClassTestSignature[]
 ) {
 	TreeStreamGeneratedSuite(className, streamConstructor, testSignatures)

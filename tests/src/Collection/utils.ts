@@ -2,12 +2,13 @@ import {
 	UnfreezableArray,
 	UnfreezableString
 } from "../../../dist/src/Collection/Buffer/classes.js"
+
 import { ArrayCollection } from "../../../dist/src/Collection/classes.js"
 import { isCollectionTest } from "./lib/utils.js"
 
 // * isCollection
 
-isCollectionTest(true, ArrayCollection<any>([10, "s", false]))
+isCollectionTest(true, new ArrayCollection<any>([10, "s", false]))
 isCollectionTest(true, new UnfreezableArray<any>(["a", "b", "c"]))
 isCollectionTest(true, new UnfreezableString("Sesame"))
 

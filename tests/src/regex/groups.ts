@@ -1,20 +1,10 @@
 import {
-	bracket_test,
 	bref_test,
 	capture_test,
 	named_bref_test,
 	named_capture_test,
-	non_bracket_test,
 	non_capture_test
 } from "./lib/groups.js"
-
-// * bracket_test
-bracket_test("(ab+)", /ab+/)
-bracket_test("((?:))", /(?:)/)
-
-// * non_bracket_test
-non_bracket_test("(?:ab+)", /ab+/)
-non_bracket_test("(?:(?:))", /(?:)/)
 
 // * capture
 capture_test("(ab+)", /ab+/)

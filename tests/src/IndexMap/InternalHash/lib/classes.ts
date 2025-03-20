@@ -1,6 +1,7 @@
 import assert from "assert"
 
-import type { InternalHash } from "../../../../../dist/src/IndexMap/HashMap/InternalHash/interfaces.js"
+import type { IInternalHash } from "../../../../../dist/src/IndexMap/HashMap/InternalHash/interfaces.js"
+
 import {
 	ClassConstructorTest,
 	classTest,
@@ -9,7 +10,12 @@ import {
 	setMethodTest,
 	signatures
 } from "lib/lib.js"
-import { isDeletable, isKeyReplaceable, isSettable } from "IndexMap/lib/classes.js"
+
+import {
+	isDeletable,
+	isKeyReplaceable,
+	isSettable
+} from "IndexMap/lib/classes.js"
 
 import { object, functional, type } from "@hgargg-0710/one"
 const { structCheck } = object
@@ -24,18 +30,18 @@ export const isInternalHash = and(
 	isSettable,
 	isDeletable,
 	isKeyReplaceable
-) as (x: any) => x is InternalHash
+) as (x: any) => x is IInternalHash
 
-const InternalHashConstructorTest = ClassConstructorTest<InternalHash>(
+const InternalHashConstructorTest = ClassConstructorTest<IInternalHash>(
 	isInternalHash,
 	["set", "delete", "replaceKey", "get"],
 	["value"]
 )
 
-const InternalHashSetTest = setMethodTest<InternalHash>("set", "get")
-const InternalHashGetTest = methodTest<InternalHash>("get")
+const InternalHashSetTest = setMethodTest<IInternalHash>("set", "get")
+const InternalHashGetTest = methodTest<IInternalHash>("get")
 
-function InternalHashDeleteTest(instance: InternalHash, key: any) {
+function InternalHashDeleteTest(instance: IInternalHash, key: any) {
 	method(
 		"delete",
 		() => {
@@ -46,12 +52,16 @@ function InternalHashDeleteTest(instance: InternalHash, key: any) {
 	)
 }
 
-function InternalHashReplaceKeyTest(instance: InternalHash, keyFrom: any, keyTo: any) {
+function InternalHashReplaceKeyTest(
+	instance: IInternalHash,
+	keyFrom: any,
+	keyTo: any
+) {
 	method(
 		"replaceKey",
 		() => {
 			const value = instance.get(keyFrom)
-			instance.replaceKey(keyFrom, keyTo)
+			instance.rekey(keyFrom, keyTo)
 			assert.strictEqual(value, instance.get(keyTo))
 			assert.strictEqual(instance.default, instance.get(keyFrom))
 		},
@@ -70,7 +80,7 @@ type InternalHashTestSignature = {
 
 export function InternalHashTest(
 	className: string,
-	hashConstructor: new (...x: any[]) => InternalHash,
+	hashConstructor: new (...x: any[]) => IInternalHash,
 	testSignatures: InternalHashTestSignature[]
 ) {
 	classTest(`(InternalHash) ${className}`, () =>
@@ -78,7 +88,10 @@ export function InternalHashTest(
 			testSignatures,
 			({ input, getTests, setTests, deleteTests, replaceKeyTests }) =>
 				() => {
-					const instance = InternalHashConstructorTest(hashConstructor, input)
+					const instance = InternalHashConstructorTest(
+						hashConstructor,
+						input
+					)
 
 					// .get
 					for (const [key, value] of getTests)
@@ -89,7 +102,8 @@ export function InternalHashTest(
 						InternalHashSetTest(instance, value, key, value)
 
 					// .delete
-					for (const key of deleteTests) InternalHashDeleteTest(instance, key)
+					for (const key of deleteTests)
+						InternalHashDeleteTest(instance, key)
 
 					// .replaceKey
 					for (const [keyFrom, keyTo] of replaceKeyTests)

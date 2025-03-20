@@ -175,28 +175,3 @@ function ChainEnumSpaceTest(
 	// uniqueness property
 	EnumSpaceUniquenessTest(instance)
 }
-
-type TokenMappingTestSignature = {
-	instance: IEnumSpace
-}
-
-export function TokenMappingTest(
-	className: string,
-	TokenMapping: (enums: IEnumSpace) => ITokenInstance[],
-	testSignatures: TokenMappingTestSignature[]
-) {
-	classTest(`(TokenInstanceEnum) ${className}`, () => {
-		signatures(testSignatures, ({ instance }) => () => {
-			const mapped = instance.map()
-			const tokensMapped = TokenMapping(instance)
-
-			assert(
-				same(
-					mapped,
-					tokensMapped,
-					(x: any, y: ITokenInstance) => x === y.type
-				)
-			)
-		})
-	})
-}

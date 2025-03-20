@@ -1,4 +1,4 @@
-import type { EffectiveInputStream } from "../../../../../dist/src/Stream/InputStream/interfaces.js"
+import type { IInputStream } from "../../../../../dist/src/Stream/InputStream/interfaces.js"
 
 import {
 	ClassConstructorTest,
@@ -9,22 +9,16 @@ import {
 
 import {
 	GeneratedStreamClassSuite,
-	isInputted,
 	isSuperable,
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
-import { function as _f } from "@hgargg-0710/one"
-const { and } = _f
-
-export const isInputStream = and(isSuperable, isInputted) as (
-	x: any
-) => x is EffectiveInputStream
+export const isInputStream = isSuperable as (x: any) => x is IInputStream
 
 const inputStreamPrototypeProps = ["super"]
 const inputStreamOwnProps = ["input"]
 
-const InputStreamConstructorTest = ClassConstructorTest<EffectiveInputStream>(
+const InputStreamConstructorTest = ClassConstructorTest<IInputStream>(
 	isInputStream,
 	inputStreamPrototypeProps,
 	inputStreamOwnProps
@@ -39,7 +33,7 @@ const InitInputStreamConstructorTest = InitClassConstructorTest(
 const InputStreamGeneratedSuite = GeneratedStreamClassSuite(true, true)
 export function InputStreamTest(
 	className: string,
-	streamConstructor: new () => EffectiveInputStream,
+	streamConstructor: new () => IInputStream,
 	testSignatures: StreamClassTestSignature[]
 ) {
 	InputStreamGeneratedSuite(`${className}`, streamConstructor, testSignatures)

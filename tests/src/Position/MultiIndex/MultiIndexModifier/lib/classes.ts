@@ -1,23 +1,17 @@
 import assert from "node:assert"
 
-import type { MultiIndex } from "../../../../../../dist/src/Position/MultiIndex/interfaces.js"
-import type { MultiIndexModifier } from "../../../../../../dist/src/Position/MultiIndex/MultiIndexModifier/interfaces.js"
+import type { IMultiIndex } from "../../../../../../dist/src/Position/MultiIndex/interfaces.js"
+import type { IMultiIndexModifier } from "../../../../../../dist/src/Position/MultiIndex/interfaces.js"
 import { isMultiIndex } from "Position/MultiIndex/lib/classes.js"
 
-import {
-	arraysSame,
-	ClassConstructorTest,
-	classTest,
-	method,
-	signatures
-} from "lib/lib.js"
+import { ClassConstructorTest, classTest, method, signatures } from "lib/lib.js"
 
 import { object, type, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
-const { last } = array
+const { last, same } = array
 
-export const isMultiIndexModifier = structCheck<MultiIndexModifier>({
+export const isMultiIndexModifier = structCheck<IMultiIndexModifier>({
 	multind: isMultiIndex,
 	init: isFunction,
 	nextLevel: isFunction,
@@ -29,13 +23,22 @@ export const isMultiIndexModifier = structCheck<MultiIndexModifier>({
 	extend: isFunction
 })
 
-const MultiIndexModifierConstructorTest = ClassConstructorTest<MultiIndexModifier>(
-	isMultiIndexModifier,
-	["nextLevel", "prevLevel", "resize", "clear", "incLast", "decLast", "extend"],
-	["multind"]
-)
+const MultiIndexModifierConstructorTest =
+	ClassConstructorTest<IMultiIndexModifier>(
+		isMultiIndexModifier,
+		[
+			"nextLevel",
+			"prevLevel",
+			"resize",
+			"clear",
+			"incLast",
+			"decLast",
+			"extend"
+		],
+		["multind"]
+	)
 
-function MultiIndexModifierNextLevelTest(instance: MultiIndexModifier) {
+function MultiIndexModifierNextLevelTest(instance: IMultiIndexModifier) {
 	method("nextLevel", () => {
 		const oldLength = instance.multind.value.length
 		instance.nextLevel()
@@ -44,27 +47,30 @@ function MultiIndexModifierNextLevelTest(instance: MultiIndexModifier) {
 	})
 }
 
-function MultiIndexModifierPrevLevelTest(instance: MultiIndexModifier) {
+function MultiIndexModifierPrevLevelTest(instance: IMultiIndexModifier) {
 	method("prevLevel", () => {
 		const sliced = instance.multind.slice(0, -1)
 		instance.prevLevel()
-		assert(arraysSame(sliced, instance.multind.value))
+		assert(same(sliced, instance.multind.value))
 	})
 }
 
-function MultiIndexModifierResizeTest(instance: MultiIndexModifier, size: number) {
+function MultiIndexModifierResizeTest(
+	instance: IMultiIndexModifier,
+	size: number
+) {
 	method(
 		"resize",
 		() => {
 			const sliced = instance.multind.slice(0, size)
 			instance.resize(size)
-			assert(arraysSame(sliced, instance.multind.value))
+			assert(same(sliced, instance.multind.value))
 		},
 		size
 	)
 }
 
-function MultiIndexModifierClearTest(instance: MultiIndexModifier) {
+function MultiIndexModifierClearTest(instance: IMultiIndexModifier) {
 	method("clear", () => {
 		instance.clear()
 		assert.strictEqual(instance.multind.value.length, 0)
@@ -76,17 +82,20 @@ const [MultiIndexModifierIncLastTest, MultiIndexModifierDecLastTest] = [
 	"decLast"
 ].map(
 	(name, i) =>
-		function (instance: MultiIndexModifier) {
+		function (instance: IMultiIndexModifier) {
 			method(name, () => {
 				const lastItem = last(instance.multind.value)
 				instance[name]()
-				assert.strictEqual(lastItem + (-1) ** i, last(instance.multind.value))
+				assert.strictEqual(
+					lastItem + (-1) ** i,
+					last(instance.multind.value)
+				)
 			})
 		}
 )
 
 function MultiIndexModifierExtendTest(
-	instance: MultiIndexModifier,
+	instance: IMultiIndexModifier,
 	expectedValue: number[],
 	subIndex: number[]
 ) {
@@ -94,13 +103,16 @@ function MultiIndexModifierExtendTest(
 		"extend",
 		() => {
 			instance.extend(subIndex)
-			assert(arraysSame(instance.multind.value, expectedValue))
+			assert(same(instance.multind.value, expectedValue))
 		},
 		subIndex
 	)
 }
 
-function MultiIndexModifierInitTest(instance: MultiIndexModifier, multind: MultiIndex) {
+function MultiIndexModifierInitTest(
+	instance: IMultiIndexModifier,
+	multind: IMultiIndex
+) {
 	method(
 		"init",
 		() => {
@@ -112,19 +124,19 @@ function MultiIndexModifierInitTest(instance: MultiIndexModifier, multind: Multi
 }
 
 export type MultiIndexModifierTestSignature = {
-	multindex: MultiIndex
+	multindex: IMultiIndex
 	nextLevelTimes: number
 	prevLevelTimes: number
 	resizes: number[]
 	incTimes: number
 	decTimes: number
 	extensions: [number[], number[]][]
-	initTests: MultiIndex[]
+	initTests: IMultiIndex[]
 }
 
 export function MultiIndexModifierTest(
 	className: string,
-	modifierConstructor: new (...input: any[]) => MultiIndexModifier,
+	modifierConstructor: new (...input: any[]) => IMultiIndexModifier,
 	testSignatures: MultiIndexModifierTestSignature[]
 ) {
 	classTest(`(MultiIndexModifier) ${className}`, () =>
@@ -164,7 +176,11 @@ export function MultiIndexModifierTest(
 
 					// .extend
 					for (const [extension, expected] of extensions)
-						MultiIndexModifierExtendTest(instance, expected, extension)
+						MultiIndexModifierExtendTest(
+							instance,
+							expected,
+							extension
+						)
 
 					// .decLast
 					for (let i = 0; i < decTimes; ++i)

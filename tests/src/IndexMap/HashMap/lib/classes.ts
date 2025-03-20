@@ -1,7 +1,7 @@
 import assert from "assert"
 
-import type { HashMap } from "../../../../../dist/src/IndexMap/HashMap/interfaces.js"
-import type { InternalHash } from "../../../../../dist/src/IndexMap/HashMap/InternalHash/interfaces.js"
+import type { IHashMap } from "../../../../../dist/src/IndexMap/HashMap/interfaces.js"
+import type { IInternalHash } from "../../../../../dist/src/IndexMap/HashMap/InternalHash/interfaces.js"
 
 import {
 	isDeletable,
@@ -37,18 +37,18 @@ const isHashMap = and(
 	isKeyReplaceable,
 	isDeletable,
 	isSizeable
-) as (x: any) => x is HashMap
+) as (x: any) => x is IHashMap
 
-const HashMapConstructorTest = ClassConstructorTest<HashMap>(
+const HashMapConstructorTest = ClassConstructorTest<IHashMap>(
 	isHashMap,
 	["index", "set", "delete", "replaceKey", "hash"],
 	["value"]
 )
 
-const HashMapIndexTest = methodTest<HashMap>("index")
-const HashMapSetTest = setMethodTest<HashMap>("set", "index")
+const HashMapIndexTest = methodTest<IHashMap>("index")
+const HashMapSetTest = setMethodTest<IHashMap>("set", "index")
 
-function HashMapDeleteTest(instance: HashMap, key: any) {
+function HashMapDeleteTest(instance: IHashMap, key: any) {
 	method(
 		"delete",
 		() => {
@@ -59,12 +59,12 @@ function HashMapDeleteTest(instance: HashMap, key: any) {
 	)
 }
 
-function HashMapReplaceKeyTest(instance: HashMap, keyFrom: any, keyTo: any) {
+function HashMapReplaceKeyTest(instance: IHashMap, keyFrom: any, keyTo: any) {
 	method(
 		"replaceKey",
 		() => {
 			const value = instance.index(keyFrom)
-			instance.replaceKey(keyFrom, keyTo)
+			instance.rekey(keyFrom, keyTo)
 			assert.strictEqual(instance.index(keyTo), value)
 			assert.strictEqual(instance.index(keyFrom), instance.value.default)
 		},
@@ -74,7 +74,7 @@ function HashMapReplaceKeyTest(instance: HashMap, keyFrom: any, keyTo: any) {
 }
 
 type HashMapTestSignature = {
-	input: InternalHash
+	input: IInternalHash
 	indexTests: [any, any][]
 	setTests: [any, any][]
 	deleteTests: any[]
@@ -83,7 +83,7 @@ type HashMapTestSignature = {
 
 export function HashMapClassTest(
 	className: string,
-	HashMapClass: new (structure: InternalHash) => HashMap,
+	HashMapClass: new (structure: IInternalHash) => IHashMap,
 	testSignatures: HashMapTestSignature[]
 ) {
 	classTest(`(HashMap) ${className}`, () =>
@@ -102,7 +102,8 @@ export function HashMapClassTest(
 						HashMapSetTest(instance, value, key, value)
 
 					// .delete
-					for (const key of deleteTests) HashMapDeleteTest(instance, key)
+					for (const key of deleteTests)
+						HashMapDeleteTest(instance, key)
 
 					// .replaceKey
 					for (const [keyFrom, keyTo] of replaceKeyTests)

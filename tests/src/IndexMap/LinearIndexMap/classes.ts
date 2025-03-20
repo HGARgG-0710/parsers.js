@@ -1,5 +1,3 @@
-import type { Pairs } from "../../../../dist/src/IndexMap/interfaces.js"
-
 import {
 	LinearMapClassTest,
 	type ReducedLinearMapClassTestSignature
@@ -15,7 +13,7 @@ import {
 
 import { linearIndexMapEmptyTest } from "../lib/classes.js"
 
-import { type } from "@hgargg-0710/one"
+import { type, array } from "@hgargg-0710/one"
 const { isNumber, isString, isObject, isNull, isBoolean } = type
 
 // * PredicateMap
@@ -31,7 +29,7 @@ const predicateTableEntries = [
 		"not-long"
 	],
 	[(x: any) => isNull(x), "BOO!"]
-] as Pairs<Function, any>
+] as array.Pairs<Function, any>
 
 const predicateTableDefault = true
 
@@ -174,7 +172,8 @@ const simpleMapTest = {
 			["SKI", 20],
 			["R", 20]
 		]
-	] as [Pairs<any, any>],
+	] as [array.Pairs<any, any>],
+
 	indexTest: [
 		["R", 70],
 		["R", 70],
@@ -184,7 +183,7 @@ const simpleMapTest = {
 		["SKI", 20],
 		[true, 80],
 		["SKI", 20]
-	] as Pairs<any, any>,
+	] as array.Pairs<any, any>,
 
 	...linearIndexMapEmptyTest
 }

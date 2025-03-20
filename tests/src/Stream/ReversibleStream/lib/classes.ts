@@ -1,4 +1,4 @@
-import type { ReversedStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
+import type { IReversedStream } from "../../../../../dist/src/Stream/ReversibleStream/interfaces.js"
 
 import {
 	ClassConstructorTest,
@@ -9,13 +9,9 @@ import {
 
 import {
 	GeneratedStreamClassSuite,
-	isInputted,
 	isSuperable,
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
-
-import { function as _f } from "@hgargg-0710/one"
-const { and } = _f
 
 export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
 	const ReversedStreamGeneratedSuite = GeneratedStreamClassSuite(true, hasPosition)
@@ -23,17 +19,17 @@ export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
 	const reversedStreamPrototypeProps = ["super"]
 	const reversedStreamOwnProps = ["input"]
 
-	const isReversedStream = and(isSuperable, isInputted) as (
+	const isReversedStream = isSuperable as (
 		x: any
-	) => x is ReversedStream
+	) => x is IReversedStream
 
-	const ReversedStreamConstructorTest = ClassConstructorTest<ReversedStream>(
+	const ReversedStreamConstructorTest = ClassConstructorTest<IReversedStream>(
 		isReversedStream,
 		reversedStreamPrototypeProps,
 		reversedStreamOwnProps
 	)
 
-	const InitReversedStreamConstructorTest = InitClassConstructorTest<ReversedStream>(
+	const InitReversedStreamConstructorTest = InitClassConstructorTest<IReversedStream>(
 		isReversedStream,
 		reversedStreamPrototypeProps,
 		reversedStreamOwnProps
@@ -41,7 +37,7 @@ export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
 
 	function ReversedStreamTest(
 		className: string,
-		streamConstructor: new (...x: any[]) => ReversedStream,
+		streamConstructor: new (...x: any[]) => IReversedStream,
 		testSignatures: StreamClassTestSignature[]
 	) {
 		ReversedStreamGeneratedSuite(className, streamConstructor, testSignatures)

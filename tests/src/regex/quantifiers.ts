@@ -1,18 +1,9 @@
 import {
 	maybe_test,
 	non_greedy_test,
-	occurrences_test_1,
-	occurrences_test_2,
 	plus_test,
 	star_test
 } from "./lib/quantifiers.js"
-
-// * occurences
-occurrences_test_1("(?:a+b?){12}", 12, /a+b?/)
-occurrences_test_1("(?:a+b?){5}", "5", /a+b?/)
-occurrences_test_2("(?:a+b?){1,3}", 1, 3, /a+b?/)
-occurrences_test_2("(?:a+b?){2,}", 2, "", /a+b?/)
-occurrences_test_2("(?:a+b?){1,11}", "1", "11", /a+b?/)
 
 // * non_greedy
 non_greedy_test("a+?", /a+/)

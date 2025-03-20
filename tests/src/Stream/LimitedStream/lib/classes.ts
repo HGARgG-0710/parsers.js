@@ -1,20 +1,20 @@
 import assert from "assert"
 
-import type {
-	EffectiveLimitedStream,
-	LimitedStream
-} from "../../../../../dist/src/Stream/LimitedStream/interfaces.js"
+import type { ILimitedStream } from "../../../../../dist/src/Stream/LimitedStream/interfaces.js"
 
-import { isPosition, positionEqual } from "../../../../../dist/src/Position/utils.js"
+import {
+	isPosition,
+	positionEqual
+} from "../../../../../dist/src/Position/utils.js"
 import {
 	ClassConstructorTest,
 	classTest,
 	InitClassConstructorTest,
 	signatures
 } from "lib/lib.js"
+
 import {
 	GeneratedStreamClassSuite,
-	isInputted,
 	isLookahead,
 	isProddable,
 	isSuperable,
@@ -31,7 +31,10 @@ type LimitedStreamTestSignature = StreamClassTestSignature & {
 }
 
 export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
-	const LimitedStreamGeneratedSuite = GeneratedStreamClassSuite(true, hasPosition)
+	const LimitedStreamGeneratedSuite = GeneratedStreamClassSuite(
+		true,
+		hasPosition
+	)
 
 	const isLimitedStream = and(
 		structCheck({
@@ -42,9 +45,8 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		}),
 		isLookahead,
 		isSuperable,
-		isProddable,
-		isInputted
-	) as (x: any) => x is EffectiveLimitedStream
+		isProddable
+	) as (x: any) => x is ILimitedStream
 
 	const limitedStreamPrototypeProps = ["super", "prod"]
 	const limitedStreamOwnProps = [
@@ -56,21 +58,22 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		"input"
 	]
 
-	const LimitedStreamConstructorTest = ClassConstructorTest<EffectiveLimitedStream>(
-		isLimitedStream,
-		limitedStreamPrototypeProps,
-		limitedStreamOwnProps
-	)
+	const LimitedStreamConstructorTest =
+		ClassConstructorTest<ILimitedStream>(
+			isLimitedStream,
+			limitedStreamPrototypeProps,
+			limitedStreamOwnProps
+		)
 
 	const InitLimitedStreamConstructorTest =
-		InitClassConstructorTest<EffectiveLimitedStream>(
+		InitClassConstructorTest<ILimitedStream>(
 			isLimitedStream,
 			limitedStreamPrototypeProps,
 			limitedStreamOwnProps
 		)
 
 	function LimitedStreamBaseTest(
-		stream: LimitedStream,
+		stream: ILimitedStream,
 		expected: any[],
 		compare: (x: any, y: any) => boolean
 	) {
@@ -84,25 +87,44 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 
 	function LimitedStreamTest(
 		className: string,
-		streamConstructor: new (...x: any[]) => EffectiveLimitedStream,
+		streamConstructor: new (...x: any[]) => ILimitedStream,
 		testSignatures: LimitedStreamTestSignature[]
 	) {
-		LimitedStreamGeneratedSuite(className, streamConstructor, testSignatures)
+		LimitedStreamGeneratedSuite(
+			className,
+			streamConstructor,
+			testSignatures
+		)
 		classTest(`(LimitedStream) ${className}`, () =>
-			signatures(testSignatures, ({ input, initTests, baseTests }) => () => {
-				const createInstance = () => new streamConstructor(...input)
+			signatures(
+				testSignatures,
+				({ input, initTests, baseTests }) =>
+					() => {
+						const createInstance = () =>
+							new streamConstructor(...input)
 
-				// constructor
-				LimitedStreamConstructorTest(streamConstructor, ...input)
+						// constructor
+						LimitedStreamConstructorTest(
+							streamConstructor,
+							...input
+						)
 
-				// .init on bare construction
-				for (const initTest of initTests)
-					InitLimitedStreamConstructorTest(streamConstructor, ...initTest)
+						// .init on bare construction
+						for (const initTest of initTests)
+							InitLimitedStreamConstructorTest(
+								streamConstructor,
+								...initTest
+							)
 
-				// base test
-				for (const [expected, compare] of baseTests)
-					LimitedStreamBaseTest(createInstance(), expected, compare)
-			})
+						// base test
+						for (const [expected, compare] of baseTests)
+							LimitedStreamBaseTest(
+								createInstance(),
+								expected,
+								compare
+							)
+					}
+			)
 		)
 	}
 

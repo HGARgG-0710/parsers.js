@@ -1,4 +1,4 @@
-import type { Pattern } from "../../../../dist/src/Pattern/interfaces.js"
+import type { IPattern } from "../../../../dist/src/Pattern/interfaces.js"
 
 import {
 	PersistentIndexMapClassTest,
@@ -14,7 +14,7 @@ const { PersistentIndexMap } = classes.IndexMap
 
 const indexedF1 = function () {}
 
-const indexes = Array.from({ length: 5 }, () => Pointer<Pattern<number>>(Pointer(0)))
+const indexes = Array.from({ length: 5 }, () => Pointer(Pointer(0)))
 
 PersistentIndexMapClassTest("PersistentIndexMap", PersistentIndexMap, [
 	{

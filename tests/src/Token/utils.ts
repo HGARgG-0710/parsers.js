@@ -1,10 +1,15 @@
-import { SimpleTokenType, Token, TokenInstance } from "../../../dist/src/Token/classes.js"
+import {
+	TokenType,
+	Token,
+	TokenInstance
+} from "../../../dist/src/Token/classes.js"
+
 import { isTokenTest, isTypeTest } from "./lib/utils.js"
 
 // * isToken
 
 isTokenTest(true, Token("S", 90))
-isTokenTest(true, new (SimpleTokenType("R"))(false))
+isTokenTest(true, new (TokenType("R"))(false))
 
 isTokenTest(false, new (TokenInstance("R"))())
 isTokenTest(false, null)

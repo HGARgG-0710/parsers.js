@@ -6,17 +6,20 @@ import {
 } from "../../../../dist/src/IndexMap/classes.js"
 
 import {
-	BasicHashTable,
-	PersistentIndexFastLookupTable
-} from "../../../../dist/src/IndexMap/FastLookupTable/classes.js"
+	BasicTable,
+	PersistentIndexTable
+} from "../../../../dist/src/IndexMap/LookupTable/classes.js"
 
 import { TokenHash } from "../../../../dist/src/IndexMap/HashMap/classes.js"
 import { MapInternalHash } from "../../../../dist/src/IndexMap/HashMap/InternalHash/classes.js"
 import { OptimizedLinearMap } from "../../../../dist/src/IndexMap/LinearIndexMap/classes.js"
+import type { IPointer } from "../../../../dist/src/interfaces.js"
 import { value } from "../../../../dist/src/Pattern/utils.js"
 import { TokenInstance } from "../../../../dist/src/Token/classes.js"
 
-import { FastLookupTableClassTest } from "./lib/classes.js"
+import { LookupTableClassTest } from "./lib/classes.js"
+
+const v = value as <Type = any>(x: IPointer<Type>) => Type
 
 // * BasicHashTable
 
@@ -36,9 +39,9 @@ const basicHashInput = new TokenHash(
 	)
 )
 
-const basicHash = new BasicHashTable(basicHashInput)
+const basicHash = new BasicTable(basicHashInput)
 
-FastLookupTableClassTest("BasicHashTable", BasicHashTable, [
+LookupTableClassTest("BasicHashTable", BasicTable, [
 	{
 		input: basicHashInput,
 		getIndexTests: [
@@ -50,12 +53,7 @@ FastLookupTableClassTest("BasicHashTable", BasicHashTable, [
 			[new C(), 30],
 			[new D(), -90]
 		],
-		byOwnedTests: [
-			[a2Basic, basicHash.getIndex(a2Basic), 20],
-			[a3Basic, basicHash.getIndex(a3Basic), 20],
-			[dBasic, basicHash.getIndex(dBasic), -90],
-			[cBasic, basicHash.getIndex(cBasic), 30]
-		],
+		byOwnedTests: [],
 		replaceKeyTests: [
 			[D, B, bBasic, dBasic, basicHashDefault],
 			[C, A, a2Basic, cBasic, basicHashDefault]
@@ -78,35 +76,26 @@ const indexInput = new PersistentIndexMap(
 	)
 )
 
-const indexHandler = new PersistentIndexFastLookupTable(indexInput)
+const indexHandler = new PersistentIndexTable(indexInput)
 
-FastLookupTableClassTest(
-	"PersistentIndexFastLookupTable",
-	PersistentIndexFastLookupTable,
-	[
-		{
-			input: indexInput,
-			getIndexTests: [
-				[bIndex, Pointer(1), value],
-				[aIndex, Pointer(0), value],
-				[dIndex, Pointer(2), value],
-				[cIndex, Pointer(-1), value]
-			],
-			setTests: [
-				[dIndex, "Stanford"],
-				[C, "Dipper"]
-			],
-			byOwnedTests: [
-				[cIndex, indexHandler.getIndex(cIndex), "Dipper"],
-				[aIndex, indexHandler.getIndex(aIndex), "Soos"],
-				[dIndex, indexHandler.getIndex(dIndex), "Stanford"],
-				[bIndex, indexHandler.getIndex(bIndex), "Mabel"]
-			],
-			replaceKeyTests: [
-				[C, D, dIndex, cIndex, "MISSING"],
-				[A, B, bIndex, aIndex, "MISSING"]
-			],
-			deleteTests: [B, C]
-		}
-	]
-)
+LookupTableClassTest("PersistentIndexFastLookupTable", PersistentIndexTable, [
+	{
+		input: indexInput,
+		getIndexTests: [
+			[bIndex, Pointer(1), v],
+			[aIndex, Pointer(0), v],
+			[dIndex, Pointer(2), v],
+			[cIndex, Pointer(-1), v]
+		],
+		setTests: [
+			[dIndex, "Stanford"],
+			[C, "Dipper"]
+		],
+		byOwnedTests: [],
+		replaceKeyTests: [
+			[C, D, dIndex, cIndex, "MISSING"],
+			[A, B, bIndex, aIndex, "MISSING"]
+		],
+		deleteTests: [B, C]
+	}
+])

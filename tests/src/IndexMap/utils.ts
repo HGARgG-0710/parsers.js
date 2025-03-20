@@ -1,8 +1,8 @@
 import { BasicMap } from "../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 import {
-	fromPairsListTest,
-	keyValuesToPairsListTest,
-	linearToPairsListTest,
+	fromPairsTest,
+	toPairsTest,
+	linearPairsTest,
 	tableTest
 } from "./lib/utils.js"
 
@@ -26,12 +26,12 @@ tableTest(new BasicMap(tableEntries), tableKV)
 
 // * fromPairsList
 
-fromPairsListTest(tableEntries, tableKV)
+fromPairsTest(tableEntries, tableKV)
 
 // * keyValueToPairsList
 
-keyValuesToPairsListTest(tableKV, tableEntries)
+toPairsTest(tableKV, tableEntries)
 
 // * linearToPairsList
 
-linearToPairsListTest(linear, tableEntries)
+linearPairsTest(linear, tableEntries)

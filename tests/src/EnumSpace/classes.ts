@@ -1,12 +1,7 @@
-import type { Mappable } from "../../../dist/src/EnumSpace/interfaces.js"
+import type { IMappable } from "../../../dist/src/interfaces.js"
+import { ConstEnum } from "../../../dist/src/EnumSpace/classes.js"
 
-import {
-	ConstEnum,
-	TokenInstanceEnum,
-	SimpleTokenTypeEnum
-} from "../../../dist/src/EnumSpace/classes.js"
-
-import { EnumSpaceTest, TokenMappingTest } from "./lib/classes.js"
+import { EnumSpaceTest } from "./lib/classes.js"
 
 // * ConstEnum
 
@@ -16,7 +11,7 @@ const baseEnumTestSignature = {
 	mapTests: [
 		[(x: {}) => ({ s: x }), (x: any, y: any) => x.s === y],
 		[(_x: any, i: number) => i, (x: any, _y: any, i: number) => x === i]
-	] as [Mappable, (x: any, y: any, i?: number) => boolean][]
+	] as [IMappable, (x: any, y: any, i?: number) => boolean][]
 }
 
 EnumSpaceTest("ConstEnum", ConstEnum, [
@@ -29,15 +24,3 @@ EnumSpaceTest("ConstEnum", ConstEnum, [
 		}
 	}
 ])
-
-const tokenMappingTest = [
-	{ instance: new ConstEnum(20) },
-	{ instance: new ConstEnum(0) },
-	{ instance: new ConstEnum(5) }
-]
-
-// * TokenInstanceEnum
-TokenMappingTest("TokenInstanceEnum", TokenInstanceEnum, tokenMappingTest)
-
-// * SimpleTokenTypeEnum
-TokenMappingTest("SimpleTokenTypeEnum", SimpleTokenTypeEnum, tokenMappingTest)

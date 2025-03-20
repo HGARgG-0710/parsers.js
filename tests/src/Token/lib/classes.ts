@@ -4,20 +4,22 @@ import assert from "node:assert"
 import {
 	Token,
 	TokenInstance,
-	SimpleTokenType
+	TokenType
 } from "../../../../dist/src/Token/classes.js"
 
 import {
 	classTest,
 	inputDescribe,
 	recursiveToString,
-	repeat,
 	signatures
 } from "lib/lib.js"
+
 import { isToken } from "../../../../dist/src/Token/utils.js"
 
-import { object } from "@hgargg-0710/one"
+import { object, functional } from "@hgargg-0710/one"
 const { ownKeys } = object
+
+const { repeat } = functional
 
 type TokenTestSignature = [any, any]
 type TokenTypeTestSignature = [any, any[]]
@@ -26,7 +28,7 @@ type TokenInstanceTestSignature = [any, number]
 export function TokenTypeTest(testSignatures: TokenTypeTestSignature[]) {
 	classTest(`TokenType`, () =>
 		signatures(testSignatures, ([type, values]) => () => {
-			const tt = SimpleTokenType(type)
+			const tt = TokenType(type)
 			classTest(`TokenType(${recursiveToString(type)})`, () =>
 				signatures(values, (value) => () => {
 					const ttInstance = new tt(value)
@@ -38,7 +40,9 @@ export function TokenTypeTest(testSignatures: TokenTypeTestSignature[]) {
 	)
 }
 
-export function TokenInstanceTest(testsSignatures: TokenInstanceTestSignature[]) {
+export function TokenInstanceTest(
+	testsSignatures: TokenInstanceTestSignature[]
+) {
 	classTest(`TokenInstance`, () =>
 		signatures(testsSignatures, ([base, times]) => () => {
 			classTest(`TokenInstance(${recursiveToString(base)})`, () => {
@@ -48,13 +52,15 @@ export function TokenInstanceTest(testsSignatures: TokenInstanceTestSignature[])
 				assert(ti.is(initial))
 				assert(!ownKeys(initial).includes("type"))
 
-				repeat(times, (i: number) => {
-					it(`${i}. TokenInstance(${recursiveToString(base)})`, () => {
+				repeat((i: number) => {
+					it(`${i}. TokenInstance(${recursiveToString(
+						base
+					)})`, () => {
 						const nextInstance = new ti()
 						assert.notStrictEqual(initial, nextInstance)
 						assert(ti.is(nextInstance))
 					})
-				})
+				}, times)
 			})
 		})
 	)

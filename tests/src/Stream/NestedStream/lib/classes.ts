@@ -1,6 +1,6 @@
 import assert from "assert"
 
-import type { EffectiveNestedStream } from "../../../../../dist/src/Stream/NestedStream/interfaces.js"
+import type { INestedStream } from "../../../../../dist/src/Stream/NestedStream/interfaces.js"
 import {
 	ClassConstructorTest,
 	classTest,
@@ -11,11 +11,10 @@ import {
 
 import {
 	GeneratedStreamClassSuite,
-	isInputted,
 	isSuperable,
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
-import { isFastLookupTable } from "IndexMap/LookupTable/lib/classes.js"
+import { isLookupTable } from "IndexMap/LookupTable/lib/classes.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
 const { and } = functional
@@ -29,10 +28,13 @@ type NestedStreamTestSignature = StreamClassTestSignature & {
 }
 
 export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
-	const NestedStreamGeneratedSuite = GeneratedStreamClassSuite(false, hasPosition)
+	const NestedStreamGeneratedSuite = GeneratedStreamClassSuite(
+		false,
+		hasPosition
+	)
 
 	function NestedStreamCurrNestedPreTest(
-		stream: EffectiveNestedStream,
+		stream: INestedStream,
 		currNestedList: NestedStreamCurrNestedTreeList
 	) {
 		let i = 0
@@ -48,7 +50,7 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 	}
 
 	function NestedStreamCurrNestedTest(
-		stream: EffectiveNestedStream,
+		stream: INestedStream,
 		currNestedList: NestedStreamCurrNestedTreeList
 	) {
 		property("currNested", () =>
@@ -61,21 +63,20 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 
 	const isNestedStream = and(
 		structCheck({
-			typesTable: isFastLookupTable,
+			typesTable: isLookupTable,
 			currNested: isBoolean
 		}),
-		isInputted,
 		isSuperable
-	) as (x: any) => x is EffectiveNestedStream
+	) as (x: any) => x is INestedStream
 
-	const NestedStreamConstructorTest = ClassConstructorTest<EffectiveNestedStream>(
+	const NestedStreamConstructorTest = ClassConstructorTest<INestedStream>(
 		isNestedStream,
 		nestedStreamPrototypeProps,
 		nestedStreamOwnProps
 	)
 
 	const InitNestedStreamConstructorTest =
-		InitClassConstructorTest<EffectiveNestedStream>(
+		InitClassConstructorTest<INestedStream>(
 			isNestedStream,
 			nestedStreamPrototypeProps,
 			nestedStreamOwnProps
@@ -83,20 +84,30 @@ export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
 
 	function NestedStreamTest(
 		className: string,
-		streamConstructor: new (...x: any[]) => EffectiveNestedStream,
+		streamConstructor: new (...x: any[]) => INestedStream,
 		testSignatures: NestedStreamTestSignature[]
 	) {
 		NestedStreamGeneratedSuite(className, streamConstructor, testSignatures)
 		classTest(`(NestedStream) ${className}`, () =>
-			signatures(testSignatures, ({ input, currNestedTest, initTests }) => () => {
-				const instance = NestedStreamConstructorTest(streamConstructor, ...input)
+			signatures(
+				testSignatures,
+				({ input, currNestedTest, initTests }) =>
+					() => {
+						const instance = NestedStreamConstructorTest(
+							streamConstructor,
+							...input
+						)
 
-				// .currNested
-				NestedStreamCurrNestedTest(instance, currNestedTest)
+						// .currNested
+						NestedStreamCurrNestedTest(instance, currNestedTest)
 
-				// .init on base constructed
-				InitNestedStreamConstructorTest(streamConstructor, ...initTests)
-			})
+						// .init on base constructed
+						InitNestedStreamConstructorTest(
+							streamConstructor,
+							...initTests
+						)
+					}
+			)
 		)
 	}
 
