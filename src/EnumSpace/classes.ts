@@ -66,7 +66,7 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 export function EnumSpace<Type = any>(
 	generator?: (i?: number, ...x: any[]) => Type
 ): new (init?: Type[] | number) => IEnumSpace<Type> {
-	const enumSpace = makeDelegate(PreEnumSpace<Type>, "delegate")
+	const enumSpace = makeDelegate(PreEnumSpace<Type>, ["value"], "delegate")
 
 	extendPrototype(enumSpace, {
 		generator: ConstDescriptor(generator)
