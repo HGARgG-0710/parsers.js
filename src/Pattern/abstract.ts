@@ -1,4 +1,4 @@
-import type { IGettablePattern, IPattern } from "./interfaces.js"
+import type { IGettablePattern, IPattern, IPointer } from "./interfaces.js"
 import { setValue } from "./utils.js"
 
 import { type } from "@hgargg-0710/one"
@@ -31,8 +31,15 @@ export abstract class InitializablePattern<Type = any>
 	}
 }
 
-export abstract class BasicPattern<Type = any> implements IPattern<Type> {
+export abstract class BasicPattern<Type = any> implements IPointer<Type> {
 	value: Type
+	constructor(value: Type) {
+		setValue(this, value)
+	}
+}
+
+export abstract class Pattern<Type = any> implements IPattern<Type> {
+	value?: Type
 	constructor(value?: Type) {
 		setValue(this, value)
 	}
