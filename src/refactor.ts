@@ -6,7 +6,7 @@ import { functional, object, type } from "@hgargg-0710/one"
 const { argWaster, trivialCompose } = functional
 const { extendPrototype, keys, propertyDescriptors } = object
 const { delegateMethod, delegateProperty, classWrapper } = object.classes
-const { ConstDescriptor } = object.descriptor
+const { ConstDescriptor, GetSetDescriptor } = object.descriptor
 const { isFunction } = type
 
 type Prototypal = t_object.Constructor
@@ -34,8 +34,12 @@ export const withSuper = (
 		...superDescriptor(Base),
 		...rest
 	})
-	
-export function makeDelegate(classObj: any, delegateName: string): Function {
+
+export function makeDelegate(
+	classObj: any,
+	properties: string[],
+	delegateName: string
+): Function {
 	const proto = propertyDescriptors(classObj.prototype)
 	const protoKeys = keys(proto)
 
@@ -69,6 +73,16 @@ export function makeDelegate(classObj: any, delegateName: string): Function {
 				return (this[delegateName][itemName] = v)
 			}
 	}
+
+	for (const prop of properties)
+		delegatePrototype[prop] = GetSetDescriptor(
+			function () {
+				return this[delegateName][prop]
+			},
+			function (v: any) {
+				return (this[delegateName][prop] = v)
+			}
+		)
 
 	class delegateClass {
 		constructor(...args: any[]) {

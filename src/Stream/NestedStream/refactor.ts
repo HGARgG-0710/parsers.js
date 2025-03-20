@@ -5,13 +5,14 @@ import { finish } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
 
 import { type } from "@hgargg-0710/one"
-const { isNullary } = type
+import { assignIndex } from "../../utils.js"
+const { isNull } = type
 
 export namespace methods {
 	export function initGetter<Type = any>(this: INestedStream<Type>) {
-		const ownershipType = this.typesTable.getIndex(this)
-		return (this.currNested = !isNullary(ownershipType))
-			? new this.constructor(this.value, ownershipType)
+		const index = this.typesTable.claim(this)
+		return (this.currNested = !isNull(index))
+			? new this.constructor(this.value, index)
 			: this.value!.curr
 	}
 
@@ -25,7 +26,8 @@ export namespace methods {
 		const { value, typesTable } = this
 		return (
 			value!.isCurrEnd() ||
-			(typesTable.isOwned(this) && typesTable.byOwned(this)(this, this.pos))
+			(typesTable.isOwned(this) &&
+				typesTable.byOwned(this)(this, this.pos))
 		)
 	}
 
@@ -34,7 +36,7 @@ export namespace methods {
 		value?: IEndableStream<Type>,
 		index?: any
 	) {
-		if (index) this.typesTable.own(this, index)
+		if (index) assignIndex(this, index)
 		if (value) superInit(this, value)
 		return this
 	}

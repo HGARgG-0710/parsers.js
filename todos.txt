@@ -40,15 +40,12 @@ Order of TODO-elimination:
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
-		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY!]
+			3. `utils.IndexMap.listRanges`
+			4. `utils.EnumSpace.fromCodePoints`
+			5. `utils.EnumSpace.fromItems`
+		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
 		2. add the (minor) `JSDoc` for classes/big-functions
 		3. add the jsdoc permalinks for classes to wiki
-		5. change the `interfaces` pages
-			1. add the Wiki pages for interfaces
-		6. remove wiki [and tests...]: 
-			1. Eliminable
-			2. Validatable
-			3. PatternTokenizer
 		7. GitHub Workflows
 		8. Special Pages
 		9. Tests: 
@@ -87,8 +84,6 @@ Order of TODO-elimination:
 					
 		10. Self-referencing on Wiki
 		11. To add Wiki pages [classes]: 
-			2. PersistentIndexLookupTable
-			3. HashTable
 			4. Composition
 			5. PreSignature
 			6. LayerSignature
@@ -110,9 +105,7 @@ Order of TODO-elimination:
 			22. TreeWalker
 			23. ChildrenTree
 			24. ParentTree
-		12. Remove unused wiki
 		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
-		14. Clean out the `constants.md` file 
 
 		15. SIMPLIFY TYPES: 
 			1. `A extends B, C, D, ... {}` TURN INTO `A = B & C & D & ...`; 

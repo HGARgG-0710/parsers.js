@@ -5,14 +5,14 @@ import type {
 	IRekeyable,
 	IDeletable,
 	ISettable,
-	ISizeable, 
+	ISizeable,
 	IIndexAssignable
 } from "../../interfaces.js"
 
 import type { ILookupTable, ITableConstructor } from "./interfaces.js"
 
 import { current } from "../../Stream/utils.js"
-import { assignIndex, pos } from "../../utils.js"
+import { isGoodPointer, pos } from "../../utils.js"
 import { makeDelegate } from "../../refactor.js"
 
 import { DelegateKeyReplaceable } from "./abstract.js"
@@ -38,12 +38,9 @@ abstract class DelegateLookupTable<
 	DelegateType,
 	DeletedType
 > {
-	own(x: IIndexAssignable<OwningType>, ownIndex: OwningType) {
-		assignIndex(x, ownIndex)
-		return x
-	}
+	abstract claim(x: any): OwningType
 
-	isOwned(x: any) {
+	isOwned<Type = any>(x: IIndexAssignable<Type>) {
 		return !isNullary(x.assignedIndex)
 	}
 }
@@ -51,19 +48,18 @@ abstract class DelegateLookupTable<
 abstract class DelegateHashTable<
 		KeyType = any,
 		ValueType = any,
+		DefaultType = any, 
 		OwningType = any
 	>
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
 		OwningType,
-		IHashMap<KeyType, ValueType, any>,
+		IHashMap<KeyType, ValueType, DefaultType>,
 		KeyType
 	>
 	implements ILookupTable<KeyType, ValueType, OwningType>
 {
-	abstract getIndex: (x: any) => OwningType
-
 	byOwned(priorOwned: IIndexAssignable<OwningType>) {
 		return this.value.index(priorOwned.assignedIndex)
 	}
@@ -73,7 +69,7 @@ abstract class DelegateHashTable<
 	}
 }
 
-export class PersistentIndexLookupTable<
+export class PersistentIndexTable<
 		KeyType = any,
 		ValueType = any,
 		DefaultType = any
@@ -81,14 +77,14 @@ export class PersistentIndexLookupTable<
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
-		IPointer<number>,
 		IPersistentIndexMap<KeyType, ValueType, DefaultType>,
 		any
 	>
 	implements ILookupTable<KeyType, ValueType, IPointer<number>>
 {
-	getIndex(x: any) {
-		return this.value.getIndex(x)
+	claim(x: any) {
+		const pointer = this.value.getIndex(x)
+		return isGoodPointer(pointer) ? pointer : null
 	}
 
 	byOwned(priorOwned: IIndexAssignable<IPointer<number>>): ValueType {
@@ -105,8 +101,13 @@ export class PersistentIndexLookupTable<
 export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
 ): ITableConstructor<OwningType> {
-	const hashTable = makeDelegate(DelegateHashTable, "delegate")
-	extendPrototype(hashTable, { getIndex: ConstDescriptor(ownership) })
+	const hashTable = makeDelegate(DelegateHashTable, ["value"], "delegate")
+	extendPrototype(hashTable, {
+		claim: ConstDescriptor(function (x: any) {
+			const pointer = ownership(x)
+			return isNullary(pointer) ? null : pointer
+		})
+	})
 	return hashTable as ITableConstructor<OwningType>
 }
 
