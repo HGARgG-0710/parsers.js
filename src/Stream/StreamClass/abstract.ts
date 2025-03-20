@@ -8,7 +8,7 @@ import type {
 
 import type { AbstractConstructor } from "./refactor.js"
 
-import { BasicPattern } from "../../Pattern/abstract.js"
+import { Pattern } from "../../Pattern/abstract.js"
 
 import { valuePropDelegate } from "../../refactor.js"
 import { finish, rewind, navigate, init, iter, curr } from "./refactor.js"
@@ -66,10 +66,10 @@ export function StreamClass<Type = any>(
 		if (isPattern) {
 			interface _streamClass extends streamClassGuaranteed {}
 			abstract class _streamClass
-				extends BasicPattern
+				extends Pattern
 				implements IStreamClassInstance<Type>
 			{
-				constructor(value: any) {
+				constructor(value?: any) {
 					super(value)
 				}
 			}

@@ -18,8 +18,9 @@ export interface INestedStream<Type = any>
 		Partial<IPosed<number>> {
 	constructor: new (
 		value?: IEndableStream<Type>,
-		_index?: any
+		index?: any
 	) => INestedStream<Type>
+
 	typesTable: ILookupTable<any, IStreamPredicate>
 	currNested: boolean
 }
