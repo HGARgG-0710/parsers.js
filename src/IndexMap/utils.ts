@@ -58,13 +58,44 @@ export function fromPairs<KeyType = any, ValueType = any>(
 	mapPairs: array.Pairs<KeyType, ValueType>
 ): [KeyType[], ValueType[]] {
 	let size = mapPairs.length
-	const [keys, values]: [KeyType[], ValueType[]] = [new Array(size), new Array(size)]
+	const [keys, values]: [KeyType[], ValueType[]] = [
+		new Array(size),
+		new Array(size)
+	]
+
 	while (size--) {
 		const [key, value] = mapPairs[size]
 		keys[size] = key
 		values[size] = value
 	}
+
 	return [keys, values]
+}
+
+/**
+ * Constructs arrays representing contigious numeric ranges
+ * using the provided data.
+ *
+ * Here, the first respective number in a pair is the
+ * initial point, from which each of the ranges is calculated.
+ *
+ * The second number in a pair is the length for the
+ * specific range starting point. All the numbers
+ * inside the range will be added contigiously (including
+ * the starting point).
+ *
+ * The result is the concatenation of the ranges that have
+ * been obtained in such a fashion.
+ */
+export function listRanges(...from: [number, number][]) {
+	const fromArr: number[] = []
+
+	for (let i = 0; i < from.length; ++i) {
+		const [point, length] = from[i]
+		fromArr.push(...Array.from({ length }, (x, j) => j + point))
+	}
+
+	return fromArr
 }
 
 export * as HashMap from "./HashMap/utils.js"
