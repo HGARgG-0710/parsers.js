@@ -40,18 +40,18 @@ const MultiIndexModifierConstructorTest =
 
 function MultiIndexModifierNextLevelTest(instance: IMultiIndexModifier) {
 	method("nextLevel", () => {
-		const oldLength = instance.multind.value.length
+		const oldLength = instance.get().levels
 		instance.nextLevel()
-		assert.strictEqual(oldLength, instance.multind.value.length - 1)
-		assert.strictEqual(last(instance.multind.value), 0)
+		assert.strictEqual(oldLength, instance.get().levels - 1)
+		assert.strictEqual(last(instance.get().get() as number[]), 0)
 	})
 }
 
 function MultiIndexModifierPrevLevelTest(instance: IMultiIndexModifier) {
 	method("prevLevel", () => {
-		const sliced = instance.multind.slice(0, -1)
+		const sliced = instance.get().slice(0, -1)
 		instance.prevLevel()
-		assert(same(sliced, instance.multind.value))
+		assert(same(sliced, instance.get().get()))
 	})
 }
 
@@ -62,9 +62,9 @@ function MultiIndexModifierResizeTest(
 	method(
 		"resize",
 		() => {
-			const sliced = instance.multind.slice(0, size)
+			const sliced = instance.get().slice(0, size)
 			instance.resize(size)
-			assert(same(sliced, instance.multind.value))
+			assert(same(sliced, instance.get().get()))
 		},
 		size
 	)
@@ -73,7 +73,7 @@ function MultiIndexModifierResizeTest(
 function MultiIndexModifierClearTest(instance: IMultiIndexModifier) {
 	method("clear", () => {
 		instance.clear()
-		assert.strictEqual(instance.multind.value.length, 0)
+		assert.strictEqual(instance.get().levels, 0)
 	})
 }
 
@@ -84,11 +84,11 @@ const [MultiIndexModifierIncLastTest, MultiIndexModifierDecLastTest] = [
 	(name, i) =>
 		function (instance: IMultiIndexModifier) {
 			method(name, () => {
-				const lastItem = last(instance.multind.value)
+				const lastItem = last(instance.get().get() as number[])
 				instance[name]()
 				assert.strictEqual(
 					lastItem + (-1) ** i,
-					last(instance.multind.value)
+					last(instance.get().get() as number[])
 				)
 			})
 		}
@@ -103,7 +103,7 @@ function MultiIndexModifierExtendTest(
 		"extend",
 		() => {
 			instance.extend(subIndex)
-			assert(same(instance.multind.value, expectedValue))
+			assert(same(instance.get().get(), expectedValue))
 		},
 		subIndex
 	)
@@ -117,7 +117,7 @@ function MultiIndexModifierInitTest(
 		"init",
 		() => {
 			instance.init(multind)
-			assert.strictEqual(multind, instance.multind)
+			assert.strictEqual(multind, instance.get())
 		},
 		multind
 	)
