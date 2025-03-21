@@ -14,12 +14,14 @@
 
 import assert from "node:assert"
 
-import type { ITree } from "../../../../../dist/src/Tree/interfaces.js"
+import type {
+	ITree,
+	IWalkableTree
+} from "../../../../../dist/src/Tree/interfaces.js"
 import type { IMultiIndex } from "../../../../../dist/src/Position/MultiIndex/interfaces.js"
 
 import { TreeWalker } from "../../../../../dist/src/Tree/classes.js"
 
-import { isTree } from "Tree/lib/classes.js"
 import { isMultiIndexModifier } from "Position/MultiIndex/MultiIndexModifier/lib/classes.js"
 import { isPosed } from "Stream/StreamClass/lib/classes.js"
 import { isMultiIndex } from "Position/MultiIndex/lib/classes.js"
@@ -41,9 +43,6 @@ const { last, same } = array
 
 export const isTreeWalker = and(
 	structCheck({
-		input: isTree,
-		level: isTree,
-		curr: isTree,
 		modifier: isMultiIndexModifier,
 		pushFirstChild: isFunction,
 		popChild: isFunction,
@@ -118,11 +117,11 @@ const [TreeWalkerGoSiblingAfterTest, TreeWalkerGoSiblingBeforeTest] = [
 	(methodName, i) =>
 		function (instance: TreeWalker) {
 			method(methodName, () => {
-				const prevLast = last(instance.pos.value)
+				const prevLast = last(instance.pos.get() as number[])
 				instance[methodName]()
 				assert.strictEqual(
 					prevLast - (-1) ** i,
-					last(instance.pos.value)
+					last(instance.pos.get() as number[])
 				)
 			})
 		}
@@ -131,7 +130,7 @@ const [TreeWalkerGoSiblingAfterTest, TreeWalkerGoSiblingBeforeTest] = [
 function TreeWalkerIndexCutTest(instance: TreeWalker, length: number) {
 	method("indexCut", () => {
 		instance.indexCut(length)
-		assert.strictEqual(instance.pos.length, length)
+		assert.strictEqual(instance.pos.levels, length)
 	})
 }
 
@@ -161,7 +160,7 @@ function TreeWalkerGoPrevLastTest(instance: TreeWalker, greater: boolean) {
 function TreeWalkerRenewLevelTest(
 	instance: TreeWalker,
 	expected: ITree,
-	init: ITree,
+	init: IWalkableTree,
 	from: number,
 	until: number = -1
 ) {
@@ -180,8 +179,8 @@ function TreeWalkerRenewLevelTest(
 function TreeWalkerRestartTest(instance: TreeWalker) {
 	method("restart", () => {
 		instance.restart()
-		assert.strictEqual(instance.curr, instance.input)
-		assert.strictEqual(instance.level, instance.input)
+		assert.strictEqual(instance.curr, instance.get())
+		assert.strictEqual(instance.level, instance.get())
 		assert.strictEqual(instance.pos.levels, 0)
 	})
 }
@@ -190,36 +189,23 @@ function TreeWalkerGoIndexTest(instance: TreeWalker, pos: IMultiIndex) {
 	method(
 		"goIndex",
 		() => {
-			const input = instance.input
+			const input = instance.get()
 			instance.goIndex(pos)
 			assert.strictEqual(instance.pos, pos)
-			assert.strictEqual(instance.curr, input.index(pos.value))
+			assert.strictEqual(instance.curr, input.index(pos.get()))
 		},
 		pos
 	)
 }
 
-function TreeWalkerInitializeTest(
-	instance: TreeWalker,
-	input?: ITree,
-	pos?: IMultiIndex
-) {
+function TreeWalkerInitializeTest(instance: TreeWalker, input?: IWalkableTree) {
 	method(
 		"init",
 		() => {
-			instance.init(input, pos)
-			if (input) {
-				assert.strictEqual(instance.input, input)
-				if (!pos) assert.strictEqual(instance.pos.levels, 0)
-			}
-			if (pos) {
-				const input = instance.input
-				assert.strictEqual(instance.pos, pos)
-				assert.strictEqual(instance.curr, input.index(pos.value))
-			}
+			instance.init(input)
+			if (input) assert.strictEqual(instance.get(), input)
 		},
-		input,
-		pos
+		input
 	)
 }
 
@@ -251,7 +237,7 @@ type TreeWalkerTestSignature = {
 	renewLevelTests: [ITree, ITree, number, number, IMultiIndex?][]
 	restartTests: IMultiIndex[]
 	goIndexTests: IMultiIndex[]
-	initTests: [ITree?, IMultiIndex?][]
+	initTests: IWalkableTree[]
 }
 
 export function TreeWalkerClassTest(
@@ -422,8 +408,8 @@ export function TreeWalkerClassTest(
 						TreeWalkerGoIndexTest(instance, index)
 
 					// .init
-					for (const [input, index] of initTests)
-						TreeWalkerInitializeTest(instance, input, index)
+					for (const input of initTests)
+						TreeWalkerInitializeTest(instance, input)
 				}
 		)
 	)

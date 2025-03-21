@@ -77,12 +77,6 @@ Order of TODO-elimination:
 						2. List the methods to be tested
 						3. Implement the tests (from scratch)	
 				
-				1. CURRENT - restoring the encapsulation in tests: 
-					9. src/Tree/classes.ts
-					10. src/Tree/lib/classes.ts
-					11. src/Tree/TreeWalker/classes.ts
-					12. src/Tree/TreeWalker/lib/classes.ts
-
 				2. FIX testing micro-behaviours: 
 					1. add `handlers` to ENSURE that certain specified properties of test-arguments are met: 
 						IF a property is NOT satisfied, THROW an error...
