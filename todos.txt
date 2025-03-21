@@ -51,6 +51,8 @@ Order of TODO-elimination:
 				1. make the `super` property `readonly`
 			4. `ILookupTable`
 				1. added the `.copy()` method
+			5. ALL CLASSES: 
+				1. TO ADD the `.copy()` method
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -76,6 +78,76 @@ Order of TODO-elimination:
 						1. List the methods/properties [classes], and functions [utils]
 						2. List the methods to be tested
 						3. Implement the tests (from scratch)	
+
+				Micro-behaviour plan: 
+					TODOs: 
+						1. INTRODUCE `ICopiable` on EVERY class inside the library: 
+							Reason - otherwise, they are not safely testable...
+						2. FIX the ["constructor"]: new (...) => INTERFACE 
+							to be ["constructor"]: new (...) => CLASS
+
+							Reason: some classes have methods that are NOT on interfaces 
+					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
+						2. Buffer
+						3. EnumSpace
+						4. IndexMap
+						5. HashMap
+						6. InternalHash
+						7. LinearIndexMap
+						8. LookupTable
+						9. PersistentIndexMap
+						10. Composition
+						11. TableMap
+						12. MultiIndex
+						13. MultiIndexModifier
+						14. Stream
+						15. InputStream
+						16. LimitedStream
+						17. NestedStream
+						18. PredicateStream
+						19. ReversibleStream
+						20. StreamClass
+						21. StreamParser
+						22. TreeStream
+						23. Token
+						24. TreeWalker
+					3. eliminate the old test cases
+					4. add new test cases: 
+						They bear form:
+
+							suite("ClassName (case #1)", () => {
+								ClassTestObject.withInstance(
+									new Class(), 
+									(instance) => {
+										test("ClassName.prototype.methodName1 (case #1), () => 
+											instance.methodName1(...)	
+										)
+										
+										test("ClassName.prototype.methodName1 (case #2), () => 
+											instance.methodName1(...)	
+										)
+
+										...
+										
+										test("ClassName.prototype.methodName2 (case #1), () => 
+											instance.methodName2(...)	
+										)
+
+										...
+									}
+								)
+							})
+
+						TODO: create
+							1. `TestCounter` class
+								for *counting* items within the given 
+							2. `TestChain` class, 
+								which has an internal `TestCounter`, 
+									has a `handler` function, and 
+										"inputs: any[][]" arrays of arguments to be 
+											supplied to the `handler`
+
+							USE the `TestChain` to express the chains of tests thusly. 
 				
 				2. FIX testing micro-behaviours: 
 					1. add `handlers` to ENSURE that certain specified properties of test-arguments are met: 
