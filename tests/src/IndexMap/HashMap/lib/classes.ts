@@ -53,7 +53,7 @@ function HashMapDeleteTest(instance: IHashMap, key: any) {
 		"delete",
 		() => {
 			instance.delete(key)
-			assert.strictEqual(instance.index(key), instance.value.default)
+			assert.strictEqual(instance.index(key), instance.default)
 		},
 		key
 	)
@@ -66,7 +66,7 @@ function HashMapReplaceKeyTest(instance: IHashMap, keyFrom: any, keyTo: any) {
 			const value = instance.index(keyFrom)
 			instance.rekey(keyFrom, keyTo)
 			assert.strictEqual(instance.index(keyTo), value)
-			assert.strictEqual(instance.index(keyFrom), instance.value.default)
+			assert.strictEqual(instance.index(keyFrom), instance.default)
 		},
 		keyFrom,
 		keyTo

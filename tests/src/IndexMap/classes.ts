@@ -15,7 +15,7 @@ import {
 } from "../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 
 import { TokenType } from "../../../dist/src/Token/classes.js"
-import { linearIndexMapEmptyTest } from "./lib/classes.js"
+import { indexMapEmptyTest } from "./lib/classes.js"
 import { LinearMapClassTest } from "./LinearIndexMap/lib/classes.js"
 
 // * TypeofMap, ValueMap
@@ -43,7 +43,7 @@ LinearMapClassTest(
 				[Pointer(function () {}), 70],
 				[Pointer({ x: 99 }), object]
 			],
-			...linearIndexMapEmptyTest
+			...indexMapEmptyTest
 		}
 	]
 )
@@ -65,7 +65,7 @@ LinearMapClassTest(
 				[withCurr(new D(null)), null],
 				[withCurr(new C(true)), 30]
 			],
-			...linearIndexMapEmptyTest
+			...indexMapEmptyTest
 		}
 	]
 )

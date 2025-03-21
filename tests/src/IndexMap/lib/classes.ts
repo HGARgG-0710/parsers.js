@@ -32,6 +32,31 @@ const { structCheck } = object
 const { isArray, isFunction, isNumber } = type
 const { and } = functional
 
+function handleDefault<Type = any>(
+	instance: IDefaulting,
+	callback: (x: IDefaulting) => Type
+) {
+	const r = callback(instance)
+	if (r === instance.default)
+		throw new TypeError("expected a non-.default value")
+	return r
+}
+
+const handleByIndex = <
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexType = any
+>(
+	x: IIndexMap<KeyType, ValueType, DefaultType, IndexType>,
+	i: number
+) =>
+	handleDefault(
+		x,
+		(x: IIndexMap<KeyType, ValueType, DefaultType, IndexType>) =>
+			x.byIndex(i) as [KeyType, ValueType]
+	)
+
 export const isIndexable = structCheck<IIndexable>({ index: isFunction })
 export const isDeletable = structCheck<IDeletable>({ delete: isFunction })
 export const isKeyReplaceable = structCheck<IRekeyable>({
@@ -229,13 +254,13 @@ function indexMapSwapTest<
 	method(
 		"swap",
 		() => {
-			const [oldKey, oldValue] = instance.byIndex(i)
-			const [newKey, newValue] = instance.byIndex(j)
+			const [oldKey, oldValue] = handleByIndex(instance, i)
+			const [newKey, newValue] = handleByIndex(instance, j)
 
 			instance.swap(i, j)
 
-			const [postOldKey, postOldValue] = instance.byIndex(i)
-			const [postNewKey, postNewValue] = instance.byIndex(j)
+			const [postOldKey, postOldValue] = handleByIndex(instance, i)
+			const [postNewKey, postNewValue] = handleByIndex(instance, j)
 
 			assert.strictEqual(oldKey, postNewKey)
 			assert.strictEqual(newKey, postOldKey)
@@ -260,8 +285,8 @@ function indexMapCopyTest<
 	method("copy", () => {
 		const copied = instance.copy()
 		for (let i = 0; i < instance.size; ++i) {
-			const [origKey, origValue] = instance.byIndex(i)
-			const [copiedKey, copiedValue] = copied.byIndex(i)
+			const [origKey, origValue] = handleByIndex(copied, i)
+			const [copiedKey, copiedValue] = handleByIndex(copied, i)
 			assert.strictEqual(origKey, copiedKey)
 			assert.strictEqual(origValue, copiedValue)
 			assert.notStrictEqual(instance, copied)
@@ -285,11 +310,11 @@ function indexMapReplaceTest<
 	method(
 		"replace",
 		() => {
-			const [origKey, origValue] = instance.byIndex(i)
+			const [origKey, origValue] = handleByIndex(instance, i)
 			instance.replace(i, pair)
 
 			const [intendedKey, intendedValue] = pair
-			const [replacedKey, replacedValue] = instance.byIndex(i)
+			const [replacedKey, replacedValue] = handleByIndex(instance, i)
 
 			assert.strictEqual(intendedKey, replacedKey)
 			assert.strictEqual(intendedValue, replacedValue)
@@ -316,9 +341,9 @@ function indexMapAddTest<
 		"add",
 		() => {
 			const newLength = instance.size + 1
-			const [origKey, origValue] = instance.byIndex(i)
+			const [origKey, origValue] = handleByIndex(instance, i)
 			instance.add(i, pair)
-			const [addedKey, addedValue] = instance.byIndex(i)
+			const [addedKey, addedValue] = handleByIndex(instance, i)
 
 			assert.notStrictEqual(addedKey, origKey)
 			assert.notStrictEqual(addedValue, origValue)
@@ -339,9 +364,9 @@ function indexMapDeleteTest<
 		"delete",
 		() => {
 			const newLength = Math.max(instance.size - 1, 0)
-			const [origKey, origValue] = instance.byIndex(i)
+			const [origKey, origValue] = handleByIndex(instance, i)
 			instance.delete(i)
-			const [deletedKey, deletedValue] = instance.byIndex(i)
+			const [deletedKey, deletedValue] = handleByIndex(instance, i)
 
 			assert.notStrictEqual(deletedKey, origKey)
 			assert.notStrictEqual(deletedValue, origValue)
@@ -479,7 +504,7 @@ export function ChainIndexMapTest<
 		indexMapRekeyTest(instance, keyFrom, keyTo)
 }
 
-export const linearIndexMapEmptyTest = {
+export const indexMapEmptyTest = {
 	getIndexTest: [],
 	byIndexTest: [],
 	swapIndicies: [],

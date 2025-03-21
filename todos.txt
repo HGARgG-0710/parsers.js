@@ -76,8 +76,6 @@ Order of TODO-elimination:
 						3. Implement the tests (from scratch)	
 				
 				1. CURRENT - restoring the encapsulation in tests: 
-					1. IndexMap/HashMap/lib/classes.ts
-					2. IndexMap/lib/classes.ts
 					3. IndexMap/LookupTable/lib/classes.ts
 					4. IndexMap/PersistentIndexMap/lib/classes.ts
 					5. src/Position/MultiIndex/lib/classes.ts

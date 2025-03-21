@@ -11,7 +11,7 @@ import {
 	OptimizedLinearMap
 } from "../../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 
-import { linearIndexMapEmptyTest } from "../lib/classes.js"
+import { indexMapEmptyTest } from "../lib/classes.js"
 
 import { type, array } from "@hgargg-0710/one"
 const { isNumber, isString, isObject, isNull, isBoolean } = type
@@ -129,7 +129,7 @@ LinearMapClassTest("RegExpMap", RegExpMap, [
 			["20100000bbbbbb", "Moo"],
 			["20100000", "Ro"]
 		],
-		...linearIndexMapEmptyTest
+		...indexMapEmptyTest
 	}
 ])
 
@@ -156,7 +156,7 @@ LinearMapClassTest("SetMap", SetMap, [
 			["boolean", 0],
 			["443", false]
 		],
-		...linearIndexMapEmptyTest
+		...indexMapEmptyTest
 	}
 ])
 
@@ -185,7 +185,7 @@ const simpleMapTest = {
 		["SKI", 20]
 	] as array.Pairs<any, any>,
 
-	...linearIndexMapEmptyTest
+	...indexMapEmptyTest
 }
 
 LinearMapClassTest("BasicMap", BasicMap, [simpleMapTest])
