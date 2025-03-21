@@ -49,6 +49,8 @@ Order of TODO-elimination:
 			 	1. make the `default` property `readonly`
 			3. `ISupered`: 
 				1. make the `super` property `readonly`
+			4. `ILookupTable`
+				1. added the `.copy()` method
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -76,8 +78,6 @@ Order of TODO-elimination:
 						3. Implement the tests (from scratch)	
 				
 				1. CURRENT - restoring the encapsulation in tests: 
-					3. IndexMap/LookupTable/lib/classes.ts
-					4. IndexMap/PersistentIndexMap/lib/classes.ts
 					5. src/Position/MultiIndex/lib/classes.ts
 					6. src/Position/MultiIndex/MultiIndexModifier/lib/classes.ts
 					7. src/Stream/LimitedStream/lib/classes.ts
@@ -86,20 +86,63 @@ Order of TODO-elimination:
 					10. src/Tree/lib/classes.ts
 					11. src/Tree/TreeWalker/classes.ts
 					12. src/Tree/TreeWalker/lib/classes.ts
+
+				2. FIX testing micro-behaviours: 
+					1. add `handlers` to ENSURE that certain specified properties of test-arguments are met: 
+						IF a property is NOT satisfied, THROW an error...
+
+					2. MAKE COPIES, 
+						in other words - DO NOT rely upon a "single state"
+							of the given object; 
+						
+						Do it thus: 
+							1. take in the `instance`
+							2. make A COPY of the instance
+							3. FOR EACH method-test/property-test, 
+								CALL them with THE COPY (which then may be altered)
+
+					3. CHANGE the function-tests to CLASS-tests: 
+						Reasons: 
+							1. STORE the single `instance` property 
+								on `this` (this - simplify the calls)
+							2. SIMPLIFY the naming conventions for method-tests
+								no more needless prefixes, just `this.methodName(...)`; 
+						
+						'ClassTest' is a class to be EXTENDED thus: 
+							0. `ClassTest` COPIES the injected instance, during method/property tests (to permit safe local mutability)
+							1. create a `static` symbol `methods`, which defines symbols for methods to be used
+								1. Accessible (in general) via the `.constructor.methods` property
+							2. methods TESTED DYNAMICALLY, via '.testMethod(methodName, args)'
+							3. add simple method-names like 'name(...args) { return this.testMethod("name", args) }'
+								Purpose: refactoring, simpler code, better modularization
+							4. REMOVE the "big" tests: 
+								1. remove the "signature-types": 
+									Reason: 
+										1. too verbose
+										2. unneeded unification of testing logic
+										3. bad for modularity (due to 2.)
+										4. bad for readabilty (due to 1.)
+					
+					4. ALLOW injectable method-tests: 
+						1. NAMELY: 
+							1. Create CLASS-TESTS for INDIVIDUAL methods (THIS IS BASED off 'MethodTest', which calls the provided injected method-test-handler)
+							2. INJECT the `this` (`instance`) to use with them
+							3. INJECT the `method-test` singleton-instances INTO the class-test singleton instance
+						2. They are THEN called via `ClassTest.prototype.testMethod` [which is abstracted over using properly named methods]
 				
-				2. Add missing methods'/properties tests
+				3. Add missing methods'/properties tests
 					Walk through every class, list the missing methods, 
 						implement tests for them, make adjustments to the 
 							case-signature. 
 							
-				3. Add missing utils tests
+				4. Add missing utils tests
 
-				4. Remove redundant code
+				5. Remove redundant code
 
-				5. Add the missing classes' tests
+				6. Add the missing classes' tests
 					Example: DynamicParser
 
-				6. Add the tests for *THE NEW stuff* [notes moved from v0.4]:
+				7. Add the tests for *THE NEW stuff* [notes moved from v0.4]:
 				 	DO TDD with it (
 						previous functinoality development 
 						took so long due to lack of clear requirements
