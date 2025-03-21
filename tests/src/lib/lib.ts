@@ -5,10 +5,8 @@ import { it } from "node:test"
 
 import type { IInitializable } from "../../../dist/src/Stream/StreamClass/methods/init.js"
 
-import { classWrapper } from "@hgargg-0710/one/dist/src/object/classes.js"
-
-import { object, boolean, functional, type, array  } from "@hgargg-0710/one"
-const { ownKeys, kv } = object
+import { object, boolean, functional, type, array } from "@hgargg-0710/one"
+const { kv } = object
 const { equals, not } = boolean
 const { or } = functional
 const { isFunction, isObject, isNull, isArray } = type
@@ -32,64 +30,6 @@ export function recursiveToString(x: any) {
 
 export function inputDescribe(...input: any[]) {
 	return input.map(recursiveToString).join(", ")
-}
-
-export function ChainClassConstructorTest<ClassType extends object = object>(
-	checker: (x: any) => x is ClassType,
-	prototypeProps: (string | symbol)[] = [],
-	ownProps: (string | symbol)[] = [],
-	isInit: boolean = false
-) {
-	return function (instance: ClassType) {
-		it(`${isInit ? "(delayed) " : ""}constructor`, () => {
-			assert(checker(instance))
-			for (const prop of prototypeProps)
-				it(`Is a Prototype Property? (${prop.toString()})`, () =>
-					assert(
-						prop in instance && !ownKeys(instance).includes(prop)
-					))
-			for (const prop of ownProps)
-				it(`Is Own Property? (${prop.toString()})`, () =>
-					assert(ownKeys(instance).includes(prop)))
-		})
-		return instance
-	}
-}
-
-export function FunctionalClassConctructorTest<
-	ClassType extends object = object
->(
-	checker: (x: any) => x is ClassType,
-	prototypeProps: (string | symbol)[] = [],
-	ownProps: (string | symbol)[] = []
-) {
-	const UnderChainTest = ChainClassConstructorTest<ClassType>(
-		checker,
-		prototypeProps,
-		ownProps
-	)
-	return function (constructor: (...x: any[]) => ClassType, ...input: any[]) {
-		return UnderChainTest(constructor(...input))
-	}
-}
-
-export function ClassConstructorTest<ClassType extends object = object>(
-	checker: (x: any) => x is ClassType,
-	prototypeProps: (string | symbol)[] = [],
-	ownProps: (string | symbol)[] = []
-) {
-	const UnderFunctionalTest = FunctionalClassConctructorTest<ClassType>(
-		checker,
-		prototypeProps,
-		ownProps
-	)
-
-	return function (
-		constructor: new (...x: any[]) => ClassType,
-		...input: any[]
-	) {
-		return UnderFunctionalTest(classWrapper(constructor), ...input)
-	}
 }
 
 export function PropertyMethodTest(propName: string) {
