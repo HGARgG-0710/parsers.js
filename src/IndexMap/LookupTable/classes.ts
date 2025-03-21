@@ -38,7 +38,7 @@ abstract class DelegateLookupTable<
 	DelegateType,
 	DeletedType
 > {
-	abstract claim(x: any): OwningType
+	abstract claim(x: any): OwningType | null
 
 	isOwned<Type = any>(x: IIndexAssignable<Type>) {
 		return !isNullary(x.assignedIndex)
@@ -48,7 +48,7 @@ abstract class DelegateLookupTable<
 abstract class DelegateHashTable<
 		KeyType = any,
 		ValueType = any,
-		DefaultType = any, 
+		DefaultType = any,
 		OwningType = any
 	>
 	extends DelegateLookupTable<
@@ -60,8 +60,18 @@ abstract class DelegateHashTable<
 	>
 	implements ILookupTable<KeyType, ValueType, OwningType>
 {
+	["constructor"]: new (hash: IHashMap<KeyType, ValueType>) => ILookupTable<
+		KeyType,
+		ValueType,
+		OwningType
+	>
+
 	byOwned(priorOwned: IIndexAssignable<OwningType>) {
 		return this.value.index(priorOwned.assignedIndex)
+	}
+
+	copy(): ILookupTable<KeyType, ValueType, OwningType> {
+		return new this.constructor(this.value)
 	}
 
 	constructor(hash: IHashMap<KeyType, ValueType>) {
@@ -77,6 +87,7 @@ export class PersistentIndexTable<
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
+		IPointer<number>,
 		IPersistentIndexMap<KeyType, ValueType, DefaultType>,
 		any
 	>
@@ -95,6 +106,12 @@ export class PersistentIndexTable<
 		const { value } = this
 		value.delete(value.getIndex(key).value)
 		return this
+	}
+
+	copy() {
+		return new PersistentIndexTable<KeyType, ValueType, DefaultType>(
+			this.value.copy()
+		)
 	}
 }
 
