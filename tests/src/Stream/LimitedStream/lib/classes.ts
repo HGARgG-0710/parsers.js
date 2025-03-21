@@ -6,6 +6,7 @@ import {
 	isPosition,
 	positionEqual
 } from "../../../../../dist/src/Position/utils.js"
+
 import {
 	ClassConstructorTest,
 	classTest,
@@ -58,12 +59,11 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		"input"
 	]
 
-	const LimitedStreamConstructorTest =
-		ClassConstructorTest<ILimitedStream>(
-			isLimitedStream,
-			limitedStreamPrototypeProps,
-			limitedStreamOwnProps
-		)
+	const LimitedStreamConstructorTest = ClassConstructorTest<ILimitedStream>(
+		isLimitedStream,
+		limitedStreamPrototypeProps,
+		limitedStreamOwnProps
+	)
 
 	const InitLimitedStreamConstructorTest =
 		InitClassConstructorTest<ILimitedStream>(
@@ -78,10 +78,10 @@ export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
 		compare: (x: any, y: any) => boolean
 	) {
 		classTest("[base] LimitedStream", () => {
-			assert(positionEqual(stream.input, stream.from))
+			assert(positionEqual(stream.value!, stream.from))
 			let i = 0
 			while (!stream.isEnd) assert(compare(stream.next(), expected[i++]))
-			assert(positionEqual(stream.input, stream.to))
+			assert(positionEqual(stream.value!, stream.to))
 		})
 	}
 
