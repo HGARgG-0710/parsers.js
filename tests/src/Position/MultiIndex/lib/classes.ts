@@ -60,7 +60,7 @@ function MultiIndexCopyTest(
 ) {
 	method("copy", () => {
 		const copy = instance.copy()
-		assert(same(instance.value, copy.value))
+		assert(same(instance.get(), copy.get()))
 		ChainMultiIndexTest(instance, furtherSignature)
 	})
 }
@@ -68,7 +68,7 @@ function MultiIndexCopyTest(
 function MultiIndexSliceTest(instance: IMultiIndex, from: number, to: number) {
 	method("slice", () => {
 		const copy = instance.copy()
-		const arr = instance.value.slice(from, to)
+		const arr = instance.slice(from, to)
 		assert(same(arr, instance.slice(from, to)))
 		assert(instance.equals(copy)) // ensuring non-mutating nature of the method
 	})
