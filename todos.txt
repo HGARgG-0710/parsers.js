@@ -129,6 +129,15 @@ Order of TODO-elimination:
 							2. INJECT the `this` (`instance`) to use with them
 							3. INJECT the `method-test` singleton-instances INTO the class-test singleton instance
 						2. They are THEN called via `ClassTest.prototype.testMethod` [which is abstracted over using properly named methods]
+
+					5. REMOVE the "constructor tests": 
+						1. those ARE NOT needed
+							More specifically, REPLACE them with "interface conformance" tests. 
+							These check ONLY for: 
+								1. presence of all required-by-interface properties
+								2. their types (neglecting the TypeScript-only mutability requirments)
+							
+							This ensures that ALL the methods are safe to call on the given object. 
 				
 				3. Add missing methods'/properties tests
 					Walk through every class, list the missing methods, 

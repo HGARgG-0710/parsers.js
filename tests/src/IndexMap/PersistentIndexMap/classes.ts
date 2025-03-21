@@ -1,9 +1,4 @@
-import type { IPattern } from "../../../../dist/src/Pattern/interfaces.js"
-
-import {
-	PersistentIndexMapClassTest,
-	persistentIndexMapIndexesTest
-} from "./lib/classes.js"
+import { PersistentIndexMapClassTest } from "./lib/classes.js"
 import { classes } from "../../../../dist/main.js"
 import { BasicMap } from "../../../../dist/src/IndexMap/LinearIndexMap/classes.js"
 import { Pointer } from "../../../../dist/src/IndexMap/classes.js"
@@ -83,14 +78,6 @@ PersistentIndexMapClassTest("PersistentIndexMap", PersistentIndexMap, [
 		replaceKeys: [
 			["Par", "Li"],
 			["A", "DAR"]
-		],
-		indexesTest: Array.from({ length: 6 }, (_x, i: number) => Pointer(i))
+		]
 	}
 ])
-
-// * verifying the indicies
-
-persistentIndexMapIndexesTest(
-	[-1, -1, 3, 0, 2].map(Pointer),
-	indexes.map((x) => x.value)
-)
