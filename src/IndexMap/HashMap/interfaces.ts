@@ -1,6 +1,7 @@
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 import type { IIndexable } from "../interfaces.js"
 import type {
+	IDefaulting,
 	IDeletable,
 	IHashable,
 	IRekeyable,
@@ -22,6 +23,7 @@ export interface IHashClass<
 	new (
 		structure: IInternalHash<InternalKeyType, ValueType, DefaultType>
 	): IHashMap<KeyType, ValueType, InternalKeyType>
+
 	extend: (
 		f: (x: any) => KeyType
 	) => IHashClass<any, ValueType, InternalKeyType>
@@ -37,6 +39,7 @@ export interface IHashMap<
 		IDeletable<KeyType>,
 		IRekeyable<KeyType>,
 		ISizeable,
-		IHashable<KeyType, InternalKeyType> {}
+		IHashable<KeyType, InternalKeyType>,
+		IDefaulting {}
 
 export type * from "./InternalHash/interfaces.js"

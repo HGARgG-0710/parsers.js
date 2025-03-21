@@ -40,6 +40,10 @@ abstract class BaseHashClass<
 		this.value.rekey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
 		return this
 	}
+
+	get default() {
+		return this.value.default
+	}
 }
 
 export function HashClass<

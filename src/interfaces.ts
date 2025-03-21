@@ -28,7 +28,7 @@ export interface ISizeable {
 }
 
 export interface IDefaulting<Type = any> {
-	default: Type
+	readonly default: Type
 }
 
 export interface IIndexAssignable<Type = any> {
@@ -59,7 +59,7 @@ export type IIndexed<Type = any> =
 	  } & Iterable<Type>)
 
 export interface ISupered {
-	super: Summat
+	readonly super: Summat
 }
 
 export type * from "./Collection/interfaces.js"

@@ -37,6 +37,18 @@
 
 Order of TODO-elimination: 	
 	TODO [any order]: 
+		-2. [minor] source code: 
+			1. fix the `abstract` classes' names: 
+				1. provide a STRICT convention: 
+					1. instead of `Base`, use `Pre` [when extending via the `makeDelegate`]
+				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
+		-1. fix docs [from tests]: 
+			1. IHashMap: 
+				1. added `default` property
+			2. `IDefaulting`:
+			 	1. make the `default` property `readonly`
+			3. `ISupered`: 
+				1. make the `super` property `readonly`
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -53,34 +65,47 @@ Order of TODO-elimination:
 			3. Modify existing tests: 
 				NOTES: 
 					1. be ignorant of the internal workings of the thing [behaviour-based]: 
+						1. currently, some tests are breaking encapsulation
+							FIX, via (instead) providing necessary public methods
+						2. some functionality is (currently) not testable due to 1.
+							Will need to modify the source code (again)
 					2. refactor using one.js v0.5
-					3. fix TypeScript compiler errors	
-						1. Collection
-						2. EnumSpace
-						3. IndexMap
-						4. Parser
-						5. Pattern [MISSING]
-						6. Position
-						7. regex
-						8. Stream
-						9. Token
-						10. Tree
 					4. FOR EACH MODULE, DO: 
 						1. List the methods/properties [classes], and functions [utils]
 						2. List the methods to be tested
 						3. Implement the tests (from scratch)	
+				
+				1. CURRENT - restoring the encapsulation in tests: 
+					1. IndexMap/HashMap/lib/classes.ts
+					2. IndexMap/lib/classes.ts
+					3. IndexMap/LookupTable/lib/classes.ts
+					4. IndexMap/PersistentIndexMap/lib/classes.ts
+					5. src/Position/MultiIndex/lib/classes.ts
+					6. src/Position/MultiIndex/MultiIndexModifier/lib/classes.ts
+					7. src/Stream/LimitedStream/lib/classes.ts
+					8. src/Stream/StreamClass/lib/classes.ts
+					9. src/Tree/classes.ts
+					10. src/Tree/lib/classes.ts
+					11. src/Tree/TreeWalker/classes.ts
+					12. src/Tree/TreeWalker/lib/classes.ts
+				
+				2. Add missing methods'/properties tests
+					Walk through every class, list the missing methods, 
+						implement tests for them, make adjustments to the 
+							case-signature. 
+							
+				3. Add missing utils tests
 
-				Lists of things to do [add/remove/fix]:
-					1. Collection
-					2. EnumSpace
-					3. IndexMap
-					4. Parser
-					5. Pattern [MISSING]
-					6. Position
-					7. regex
-					8. Stream
-					9. Token
-					10. Tree
+				4. Remove redundant code
+
+				5. Add the missing classes' tests
+					Example: DynamicParser
+
+				6. Add the tests for *THE NEW stuff* [notes moved from v0.4]:
+				 	DO TDD with it (
+						previous functinoality development 
+						took so long due to lack of clear requirements
+					)
 					
 		10. Self-referencing on Wiki
 		11. To add Wiki pages [classes]: 
