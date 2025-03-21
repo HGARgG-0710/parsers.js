@@ -20,22 +20,26 @@ import {
 import { functional, object, type } from "@hgargg-0710/one"
 const { and } = functional
 const { structCheck } = object
-const { isFunction } = type
+const { isFunction, isNullary } = type
 
-const fastLookupTablePrototypeProps = [
+const lookupTablePrototypeProps = [
 	"own",
 	"byOwned",
-	"getIndex",
 	"replaceKey",
 	"delete",
 	"set"
 ]
 
+function handleUnowned(instance: ILookupTable, item: any) {
+	if (instance.isOwned(item))
+		throw new Error("Expected an unowned item to be passed")
+	return instance
+}
+
 export const isLookupTable = and(
 	structCheck({
 		own: isFunction,
-		byOwned: isFunction,
-		getIndex: isFunction
+		byOwned: isFunction
 	}),
 	isKeyReplaceable,
 	isSettable,
@@ -44,19 +48,13 @@ export const isLookupTable = and(
 
 const LookupTableConstructorTest = ClassConstructorTest<ILookupTable>(
 	isLookupTable,
-	fastLookupTablePrototypeProps
+	lookupTablePrototypeProps
 )
-
-const LookupTableGetIndexTest =
-	flexibleComparisonMethodTest<ILookupTable>("getIndex")
 
 // * note: this one corresponds to BOTH the '.own' and '.byOwned' testing [as they are only ever used in tandem]
-const LookupTableOwnByOwnedTest = setMethodTest<ILookupTable>(
-	"own",
-	"byOwned"
-)
+const LookupTableOwnByOwnedTest = setMethodTest<ILookupTable>("own", "byOwned")
 
-function FastLookupTableReplaceKeyTest(
+function LookupTableReplaceKeyTest(
 	instance: ILookupTable,
 	keyFrom: any,
 	keyTo: any,
@@ -77,14 +75,18 @@ function FastLookupTableReplaceKeyTest(
 	)
 }
 
-const FastLookupTableSetTest = setMethodTest<ILookupTable>("set", "getIndex")
-
-function FastLookupTableDeleteTest(instance: ILookupTable, key: any) {
+function LookupTableDeleteTest(instance: ILookupTable, key: any, item: any) {
 	method(
 		"delete",
 		() => {
+			instance = handleUnowned(instance, item)
+
+			const copy = instance.copy()
+			assert(!isNullary(copy.claim(item)))
+
 			instance.delete(key)
-			assert.strictEqual(instance.getIndex(key), undefined)
+			assert.strictEqual(instance.claim(item), null)
+			assert(copy.isOwned(item))
 		},
 		key
 	)
@@ -92,11 +94,10 @@ function FastLookupTableDeleteTest(instance: ILookupTable, key: any) {
 
 type FastLookupTableTestSignature = {
 	input: any
-	getIndexTests: [any, any, ((x: any, y: any) => boolean)?][]
 	setTests: [any, any][]
 	byOwnedTests: [any, any, any][]
 	replaceKeyTests: [any, any, any, any, any][]
-	deleteTests: any[]
+	deleteTests: [any, any][]
 }
 
 export function LookupTableClassTest(
@@ -107,32 +108,12 @@ export function LookupTableClassTest(
 	classTest(`(FastLookupTable) ${className}`, () =>
 		signatures(
 			testSignatures,
-			({
-					input,
-					getIndexTests,
-					setTests,
-					byOwnedTests,
-					replaceKeyTests,
-					deleteTests
-				}) =>
+			({ input, byOwnedTests, replaceKeyTests, deleteTests }) =>
 				() => {
 					const instance = LookupTableConstructorTest(
 						tableConstructor,
 						input
 					)
-
-					// .getIndex
-					for (const [index, value, comparison] of getIndexTests)
-						LookupTableGetIndexTest(
-							instance,
-							value,
-							[index],
-							comparison
-						)
-
-					// .set
-					for (const [key, value] of setTests)
-						FastLookupTableSetTest(instance, value, key, value)
 
 					// .own/.byOwned
 					for (const [owned, ownershipToken, value] of byOwnedTests)
@@ -151,7 +132,7 @@ export function LookupTableClassTest(
 						ownedFail,
 						failKey
 					] of replaceKeyTests)
-						FastLookupTableReplaceKeyTest(
+						LookupTableReplaceKeyTest(
 							instance,
 							keyFrom,
 							keyTo,
@@ -161,8 +142,8 @@ export function LookupTableClassTest(
 						)
 
 					// .delete
-					for (const key of deleteTests)
-						FastLookupTableDeleteTest(instance, key)
+					for (const [key, item] of deleteTests)
+						LookupTableDeleteTest(instance, key, item)
 				}
 		)
 	)
