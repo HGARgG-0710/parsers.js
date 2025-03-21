@@ -9,7 +9,9 @@ const { isFunction } = type
  */
 export const isCollection = structCheck<ICollection>({
 	get: isFunction,
-	push: isFunction
+	push: isFunction,
+	copy: isFunction,
+	[Symbol.iterator]: isFunction
 }) as <Type = any>(x: any) => x is ICollection<Type>
 
 export * as Buffer from "./Buffer/utils.js"
