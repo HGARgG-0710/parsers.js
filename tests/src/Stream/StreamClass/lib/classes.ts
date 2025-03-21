@@ -273,7 +273,7 @@ export function GeneratedStreamClassSuite(
 								const rewindInstance = createInstance()
 								uniFinish(rewindInstance)
 								for (let i = 0; i < itemsSkip; ++i)
-									rewindInstance.prev()
+									rewindInstance.prev!()
 								generalRewindTest(
 									rewindInstance as IReversibleStream &
 										IFinishable &
@@ -304,7 +304,8 @@ export function GeneratedStreamClassSuite(
 								for (let i = 0; i < initPos; ++i)
 									posInstance.next()
 								generalPosTest(
-									posInstance as IPosed<number> & IStreamClassInstance,
+									posInstance as IPosed<number> &
+										IStreamClassInstance,
 									initPos,
 									posReCheck
 								)
@@ -319,10 +320,13 @@ export function GeneratedStreamClassSuite(
 									const posReversedInstance = createInstance()
 									uniFinish(posReversedInstance)
 									const initPos =
-										posReversedInstance.pos - itemsSkip
+										(
+											posReversedInstance as IReversedStreamClassInstance &
+												IPosed<number>
+										).pos - itemsSkip
 
 									for (let i = 0; i < itemsSkip; ++i)
-										posReversedInstance.prev()
+										posReversedInstance.prev!()
 
 									generalReversePosTest(
 										posReversedInstance as IPosed<number> &

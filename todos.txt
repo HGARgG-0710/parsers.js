@@ -78,7 +78,6 @@ Order of TODO-elimination:
 						3. Implement the tests (from scratch)	
 				
 				1. CURRENT - restoring the encapsulation in tests: 
-					8. src/Stream/StreamClass/lib/classes.ts
 					9. src/Tree/classes.ts
 					10. src/Tree/lib/classes.ts
 					11. src/Tree/TreeWalker/classes.ts
@@ -89,10 +88,18 @@ Order of TODO-elimination:
 						IF a property is NOT satisfied, THROW an error...
 							SPECIFICALLY: 
 								1. IF `.value` (or other such injectable property) 
-									CAN be `null/undefined`, it must be checked that it isn't
-								
-							Particular examples: 
-								1. StreamClass (those that are `isPattern`)
+									CAN be `null/undefined`, it must be checked that it isn't	
+
+									Particular examples: 
+										1. StreamClass (those that are `isPattern` - LimitedStream, ...)
+								2. IF one has a "main type", from which "child types" 
+									inherit, the "main type" MUST CHECK explicitly for
+										properties/methods of a sub-type before calling 
+											them.
+
+									Particular examples: 
+										1. StreamClass (.prev!(), .pos!, ...); 
+									
 
 					2. MAKE COPIES, 
 						in other words - DO NOT rely upon a "single state"
