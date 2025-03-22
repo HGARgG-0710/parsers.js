@@ -53,6 +53,10 @@ Order of TODO-elimination:
 				1. added the `.copy()` method
 			5. ALL CLASSES: 
 				1. TO ADD the `.copy()` method
+			6. Removed classes: 
+				1. Token [as in Token(type, value) - the function, NOT `TokenType`]
+			7. Added interfaces: 
+				1. ITyped [Token\interfaces.ts]
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -95,7 +99,6 @@ Order of TODO-elimination:
 									3. PredicateStream - DON'T make a separate `.copy` method!: 
 										SUB-TODO: make `PredicateStream` take the `predicate` as a PROTOTYPE PROPERTY
 											[in other words - like 'new (PredicateStream(true, false, ...)(predicate))(value)']
-							7. Token
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
 
