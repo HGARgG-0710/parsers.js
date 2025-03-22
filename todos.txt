@@ -82,11 +82,35 @@ Order of TODO-elimination:
 				Micro-behaviour plan: 
 					TODOs: 
 						1. INTRODUCE `ICopiable` on EVERY class inside the library: 
-							Reason - otherwise, they are not safely testable...
 						2. FIX the ["constructor"]: new (...) => INTERFACE 
 							to be ["constructor"]: new (...) => CLASS
-
 							Reason: some classes have methods that are NOT on interfaces 
+						
+						List: 
+							1. IInternalHash
+							2. Composition
+							3. DynamicParser
+							4. SignatureIndexSet
+							5. MultiIndexModifier
+							6. Stream: 
+								1. StreamClass
+									Define FOR EACH case: 
+										1. IS buffer - need to [additionally] copy it
+										2. IS pos - need to [additionally] copy it
+										3. IS 'value' - need to [additionally] copy it
+											Sub-todo: rename the `isPattern` to `hasDelegate`
+										4. Rest - just copy as-is using the `this.constructor` [BRANCH to check all the needed-to-copy items]; 
+											4.1. [idea] keep the flags from the original signature *AS A PROPERTY ON THE PROTOTYPE*; Makes it trivial to check [no need to hope for user's conformance to the conventions]; 
+								2. Individual StreamClass-es: 
+									1. LimitedStream (the 'from' and 'to')
+									2. NestedStream (the `index`)
+									3. PredicateStream - DON'T make a separate `.copy` method!: 
+										SUB-TODO: make `PredicateStream` take the `predicate` as a PROTOTYPE PROPERTY
+											[in other words - like 'new (PredicateStream(true, false, ...)(predicate))(value)']
+							7. Token
+							8. Tree: 
+								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
+
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
 						3. EnumSpace
 						4. IndexMap
@@ -374,24 +398,6 @@ Order of TODO-elimination:
 			Reason: too different from project-to-project. 
 			These are the same. []
 
-	TODO [naming]:
-		1. ADD 'I' to ALL the interfaces within the library, INSTEAD of exporting all as `interfaces.*`: 
-			Reasons: 
-				1. simpler/faster to type
-				2. more apparent usage
-				3. [big point] no excessive `interface.` bloat
-				4. [minor point] established convention
-				5. [primary point] too many interfaces: 
-					If one were to unify their naming convention, 
-						instead of treating them the same way as 
-							value-exports, it would simplify the 
-								library's documentation a great deal. 
-
-		2. CHANGE the structure for the `interfaces` documentation:
-			1. No more `sub-pages` for `interfaces` - remove those, bloat the wiki only
-			2. The interfaces are listed ON A SINGLE page
-			3. THEY ARE SEPARATED *BY THEME/MODULE* (within the single `Interfaces.md` file) using the nested `#`-headers
-
 	TESTS [work all anew... too much has changed]: 
 		1. enumerate the things to test; 
 		2. walk through tests, verify them for being satisfactory; 
@@ -432,6 +438,52 @@ Order of TODO-elimination:
 		
 		TODOS for v0.3: 		
 			Primary: 
+			
+				ME1. RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
+					Comes inside the 'StreamClass' (optionally) via the '.state' property;
+					Will additionally be supported by: 
+
+						1. 'StreamClass(...).prototype.copy()' method; 
+							Solution for '.copy': 
+								1.1. By default, copy ONLY: 
+									1. the user-defined variables under '.state'; 
+									2. the '.pos', '.buffer', and so forth - predefined "inherited" properties;
+										Any CUSTOM copying/initialization logic can be defined by the user in DERIVED CLASSES; 
+							
+							Definition [loose, has to have overloads, depending on presence/absence of '.pos']: 
+
+								function uniCopy (stream: ...) {	
+									const copy = new (Object.getPrototypeOf(stream).constructor)()
+									copy.uniInit(initSignature(this, this.bits))	
+									return copy
+								}
+
+							NOTE: here, 'this.bits' is the '.prototype'-level BitArray with different properties that ARE PRESENT; 
+								Look below for pseudocode explanation
+
+					ALSO [regarding '.init']: 
+						[Predefined] 
+							To simplify the process, store (on each StreamClass), a 'BitArray' - to indicate, which are present; 
+								Depending on this - the user will be able to call the '.init' with "universal" signature, like so: 
+
+									// note: stored on the '.prototype', no memory waste
+									stream.uniInit(initSignature(this, this.bits))
+								
+								The 'initSignature' is a util, returning the "maximum" '.init'-signature, that is possible; 
+								The '.uniInit' is a method that initializes the given Stream BASED OFF THE "maximum" signature; 
+								This version of 'initSignature' is "from-bits", one that isn't is done via an object like: 
+
+									stream.uniInit({
+										state: this.state, 
+										value: this.value, 
+										...
+									})
+	
+					ALSO: 
+						1. the copy is ALWAYS DEEP [otherwise, one would create some serious synchronization-issues for internal state, like '.pos']
+							This INCLUDES the `.value` property
+						2. the copy is SYNCHRONIZED ON STATE [the '.pos' is copied as well, for instance...]; 
+
 				PO1. Introduce a new Position class - Multiline
 					Basically, a pair of numbers: 
 						(lineNum, charNum)	
@@ -955,6 +1007,22 @@ Order of TODO-elimination:
 					Replace it with a simple, general `.peek(1)` [PeekableStream]
 					Thus, it will allow a better unification of the library's concepts under the 
 						same terminology. 
+						
+				SI3. [codebase consistency] The '.init' methods for StreamClass DO NOT return 'this': 
+					Fix this - let them. All the other '.init' methods do it; 
+					(This, in particular, generally permits usage like: 
+
+							const t = new InitializedClass().init(...)
+						
+					In cases, when the constructor is NOT the same as the '.init(...)';
+					Likewise, a different semantics [copying] for '.init', when a partial copy is necessary: 
+
+							const t = new InitializedClass(...)
+							const r = t.init(...)
+							t === r // false
+					)
+
+					Then, one'll be able to finally add the missing ': this' output type to the 'Initializable' mini-interface
 
 	5.2.73.
 	5.2.74.	
@@ -1578,51 +1646,6 @@ TODO:
 			1. .length: number - number of sub-elements (possibly nested themselves)
 			2. .whichNested: number[] - array of indexes, of nested elements -- those, which the `inflate()-deflate()` pair detected
 			3. .nested: NestedInfo[] - the info for EACH of the `.whichNested` sub-items
-		
-		ME1. RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
-			Comes inside the 'StreamClass' (optionally) via the '.state' property;
-			Will additionally be supported by: 
-
-				1. 'StreamClass(...).prototype.copy()' method; 
-					Solution for '.copy': 
-						1.1. By default, copy ONLY: 
-							1. the user-defined variables under '.state'; 
-							2. the '.pos', '.buffer', and so forth - predefined "inherited" properties;
-								Any CUSTOM copying/initialization logic can be defined by the user in DERIVED CLASSES; 
-					
-					Definition [loose, has to have overloads, depending on presence/absence of '.pos']: 
-
-						function uniCopy (stream: ...) {	
-							const copy = new (Object.getPrototypeOf(stream).constructor)()
-							copy.uniInit(initSignature(this, this.bits))	
-							return copy
-						}
-
-					NOTE: here, 'this.bits' is the '.prototype'-level BitArray with different properties that ARE PRESENT; 
-						Look below for pseudocode explanation
-
-			ALSO [regarding '.init']: 
-				[Predefined] 
-					To simplify the process, store (on each StreamClass), a 'BitArray' - to indicate, which are present; 
-						Depending on this - the user will be able to call the '.init' with "universal" signature, like so: 
-
-							// note: stored on the '.prototype', no memory waste
-							stream.uniInit(initSignature(this, this.bits))
-						
-						The 'initSignature' is a util, returning the "maximum" '.init'-signature, that is possible; 
-						The '.uniInit' is a method that initializes the given Stream BASED OFF THE "maximum" signature; 
-						This version of 'initSignature' is "from-bits", one that isn't is done via an object like: 
-
-							stream.uniInit({
-								state: this.state, 
-								value: this.value, 
-								...
-							})
-	
-			ALSO: 
-				1. the copy is ALWAYS DEEP [otherwise, one would create some serious synchronization-issues for internal state, like '.pos']
-					This INCLUDES the `.value` property
-				2. the copy is SYNCHRONIZED ON STATE [the '.pos' is copied as well, for instance...]; 
 
 		UT2. util - enumerateTree [Tree/utils.ts]
 			Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
@@ -1811,23 +1834,7 @@ TODO:
 				[LinearIndexMap/methods.ts]
 				1. extend
 				2. extendKey
-				
-		SI3. [codebase consistency] The '.init' methods for StreamClass DO NOT return 'this': 
-			Fix this - let them. All the other '.init' methods do it; 
-			(This, in particular, generally permits usage like: 
-
-					const t = new InitializedClass().init(...)
-				
-			In cases, when the constructor is NOT the same as the '.init(...)';
-			Likewise, a different semantics [copying] for '.init', when a partial copy is necessary: 
-
-					const t = new InitializedClass(...)
-					const r = t.init(...)
-					t === r // false
-			)
-
-			Then, one'll be able to finally add the missing ': this' output type to the 'Initializable' mini-interface
-			
+					
 		TY1. [types] Maybe - split the "specific" composed 'X extends A, B, C, ... {}' types from the elementary 'A, B, C, ...': 
 			Currently, they are being exported within the same 'type'-module as the first (original/closest) usage. 
 			However, one could also (instead) export them at the special 'interfaces.mixin' level [which, basically, contains the "small" interfaces]. 
