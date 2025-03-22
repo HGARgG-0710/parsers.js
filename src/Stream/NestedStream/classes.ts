@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IStreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { ILookupTable } from "../../IndexMap/LookupTable/interfaces.js"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { Constructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 
 import type {
@@ -26,10 +26,10 @@ const NestedStreamBase = <Type = any>(
 ) =>
 	DefaultEndStream<Type | INestedStream<Type>>({
 		...baseMethods,
-		hasPosition,
-		buffer,
+		hasPosition: hasPosition,
+		hasBuffer: buffer,
 		isPattern: true
-	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function NestedStream<Type = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate>,

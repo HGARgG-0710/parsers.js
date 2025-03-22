@@ -34,7 +34,7 @@ export type IBufferInitMethod = <Type = any>(
 	buffer?: IFreezableBuffer<Type>
 ) => void
 export type IStateInitMethod = (state?: Summat) => void
-export type IPatternInitMethod = (value: any) => void
+export type IPatternInitMethod = (value?: any) => void
 
 export type IBufferStateInitMethod = <Type = any>(
 	buffer?: IFreezableBuffer<Type>,
@@ -42,14 +42,14 @@ export type IBufferStateInitMethod = <Type = any>(
 ) => void
 
 export type IBufferPatternInitMethod = <Type = any>(
-	value: any,
+	value?: any,
 	buffer?: IFreezableBuffer<Type>
 ) => void
 
-export type IStatePatternInitMethod = (value: any, state?: Summat) => void
+export type IStatePatternInitMethod = (value?: any, state?: Summat) => void
 
 export type IBufferStatePatternInitMethod = <Type = any>(
-	value: any,
+	value?: any,
 	buffer?: IFreezableBuffer<Type>,
 	state?: Summat
 ) => void
@@ -243,12 +243,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 const methodList = generateInitMethods(initialize)
 
 export function chooseMethod(
-	hasPosition: boolean = false,
+	pos: boolean = false,
 	buffer: boolean = false,
 	state: boolean = false,
-	pattern: boolean = false
+	value: boolean = false
 ) {
-	return methodList[
-		+hasPosition | (+buffer << 1) | (+state << 2) | (+pattern << 3)
-	]
+	return methodList[+pos | (+buffer << 1) | (+state << 2) | (+value << 3)]
 }

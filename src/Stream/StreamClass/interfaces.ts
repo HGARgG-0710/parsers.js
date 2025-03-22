@@ -3,6 +3,7 @@ import type { IBasicStream } from "../interfaces.js"
 import type { IPrevable, IStarted } from "../ReversibleStream/interfaces.js"
 import type { IInitializable } from "./methods/init.js"
 import type { IPosition } from "../../Position/interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
 
 // * Optional Property-interfaces
 
@@ -38,7 +39,9 @@ export interface IIsStartCurrable {
 	isCurrStart: () => boolean
 }
 
-export interface IEndableStream<Type = any> extends IBasicStream<Type>, IIsEndCurrable {}
+export interface IEndableStream<Type = any>
+	extends IBasicStream<Type>,
+		IIsEndCurrable {}
 
 interface IPrimalStreamClassSignature<Type = any> extends IIsEndCurrable {
 	initGetter?: () => Type
@@ -60,12 +63,16 @@ interface IBasicStreamClassInstance<Type = any>
 		IStarted,
 		INavigable<Type>,
 		IFinishable<Type>,
-		Iterable<Type> {}
+		ICopiable,
+		Iterable<Type> {
+	["constructor"]: new (...x: any[]) => typeof this
+}
 
-export interface IStreamClassSignature<Type = any> extends IStreamClassTransferable<Type> {
-	buffer?: boolean
-	state?: boolean
+export interface IStreamClassSignature<Type = any>
+	extends IStreamClassTransferable<Type> {
 	hasPosition?: boolean
+	hasBuffer?: boolean
+	hasState?: boolean
 	isPattern?: boolean
 }
 

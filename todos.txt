@@ -89,14 +89,6 @@ Order of TODO-elimination:
 						
 						List: 
 							6. Stream: 
-								1. StreamClass
-									Define FOR EACH case: 
-										1. IS buffer - need to [additionally] copy it
-										2. IS pos - need to [additionally] copy it
-										3. IS 'value' - need to [additionally] copy it
-											Sub-todo: rename the `isPattern` to `hasDelegate`
-										4. Rest - just copy as-is using the `this.constructor` [BRANCH to check all the needed-to-copy items]; 
-											4.1. [idea] keep the flags from the original signature *AS A PROPERTY ON THE PROTOTYPE*; Makes it trivial to check [no need to hope for user's conformance to the conventions]; 
 								2. Individual StreamClass-es: 
 									1. LimitedStream (the 'from' and 'to')
 									2. NestedStream (the `index`)
@@ -434,52 +426,7 @@ Order of TODO-elimination:
 		
 		TODOS for v0.3: 		
 			Primary: 
-			
-				ME1. RE-INTRODUCE the '.copy()' method and 'Copiable' interface; 
-					Comes inside the 'StreamClass' (optionally) via the '.state' property;
-					Will additionally be supported by: 
-
-						1. 'StreamClass(...).prototype.copy()' method; 
-							Solution for '.copy': 
-								1.1. By default, copy ONLY: 
-									1. the user-defined variables under '.state'; 
-									2. the '.pos', '.buffer', and so forth - predefined "inherited" properties;
-										Any CUSTOM copying/initialization logic can be defined by the user in DERIVED CLASSES; 
-							
-							Definition [loose, has to have overloads, depending on presence/absence of '.pos']: 
-
-								function uniCopy (stream: ...) {	
-									const copy = new (Object.getPrototypeOf(stream).constructor)()
-									copy.uniInit(initSignature(this, this.bits))	
-									return copy
-								}
-
-							NOTE: here, 'this.bits' is the '.prototype'-level BitArray with different properties that ARE PRESENT; 
-								Look below for pseudocode explanation
-
-					ALSO [regarding '.init']: 
-						[Predefined] 
-							To simplify the process, store (on each StreamClass), a 'BitArray' - to indicate, which are present; 
-								Depending on this - the user will be able to call the '.init' with "universal" signature, like so: 
-
-									// note: stored on the '.prototype', no memory waste
-									stream.uniInit(initSignature(this, this.bits))
-								
-								The 'initSignature' is a util, returning the "maximum" '.init'-signature, that is possible; 
-								The '.uniInit' is a method that initializes the given Stream BASED OFF THE "maximum" signature; 
-								This version of 'initSignature' is "from-bits", one that isn't is done via an object like: 
-
-									stream.uniInit({
-										state: this.state, 
-										value: this.value, 
-										...
-									})
-	
-					ALSO: 
-						1. the copy is ALWAYS DEEP [otherwise, one would create some serious synchronization-issues for internal state, like '.pos']
-							This INCLUDES the `.value` property
-						2. the copy is SYNCHRONIZED ON STATE [the '.pos' is copied as well, for instance...]; 
-
+		
 				PO1. Introduce a new Position class - Multiline
 					Basically, a pair of numbers: 
 						(lineNum, charNum)	

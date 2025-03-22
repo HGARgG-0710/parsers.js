@@ -12,10 +12,6 @@ import curr from "./methods/curr.js"
 import { object } from "@hgargg-0710/one"
 const { calledDelegate } = object.classes
 
-export type AbstractConstructor<Signature extends any[], Type = any> = abstract new (
-	...x: Signature
-) => Type
-
 export type Constructor<Signature extends any[], Type = any> = new (
 	...x: Signature
 ) => Type
@@ -66,3 +62,4 @@ export * as iter from "./methods/iter.js"
 export * as finish from "./methods/finish.js"
 export * as rewind from "./methods/rewind.js"
 export * as navigate from "./methods/navigate.js"
+export * as copy from "./methods/copy.js"

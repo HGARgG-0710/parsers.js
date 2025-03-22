@@ -3,7 +3,7 @@ import type { IInTree } from "../../Tree/interfaces.js"
 import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
 import type { ITreeStream } from "./interfaces.js"
 
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { Constructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 
 import { withSuper } from "../../refactor.js"
@@ -22,7 +22,7 @@ const { rewind, navigate, init, value, multind, ...baseMethods } = methods
 const TreeStreamBase = StreamClass({
 	...baseMethods,
 	defaultIsEnd: F
-}) as AbstractConstructor<[], IReversedStreamClassInstance<IInTree>>
+}) as Constructor<[], IReversedStreamClassInstance<IInTree>>
 
 export class TreeStream<Type = any>
 	extends TreeStreamBase

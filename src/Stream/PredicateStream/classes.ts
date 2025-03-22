@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPredicatePosition } from "../../Position/interfaces.js"
 import type { IIsEndCurrable, IStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { Constructor } from "../StreamClass/refactor.js"
 
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 
@@ -25,9 +25,9 @@ const PredicateStreamBase = <Type = any>(
 	StreamClass<Type>({
 		...baseMethods,
 		isPattern: true,
-		hasPosition,
-		buffer
-	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
+		hasPosition: hasPosition,
+		hasBuffer: buffer
+	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function PredicateStream<Type = any>(
 	hasPosition: boolean = false,

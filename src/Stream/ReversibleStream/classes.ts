@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { AbstractConstructor } from "../StreamClass/refactor.js"
+import type { Constructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IReversedStream, IReversibleStream } from "./interfaces.js"
@@ -35,10 +35,10 @@ const ReversedStreamBase = <Type = any>(
 		isCurrEnd: valueIsStart,
 		isCurrStart: valueIsCurrEnd,
 		defaultIsEnd: valueDefaultIsStart,
-		hasPosition,
-		buffer,
+		hasPosition: hasPosition,
+		hasBuffer: buffer,
 		isPattern: true
-	}) as AbstractConstructor<
+	}) as Constructor<
 		[any],
 		IReversedStreamClassInstance<Type> & IPattern
 	>

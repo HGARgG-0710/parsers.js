@@ -6,7 +6,7 @@ import type {
 	IStreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
 
-import type { AbstractConstructor, Constructor } from "../StreamClass/refactor.js"
+import type { Constructor } from "../StreamClass/refactor.js"
 import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
@@ -29,11 +29,11 @@ const StreamParserBase = <Type = any>(
 	DefaultEndStream<Type>({
 		...baseMethods,
 		isCurrEnd: valueIsCurrEnd,
-		hasPosition,
-		buffer,
-		state,
+		hasPosition: hasPosition,
+		hasBuffer: buffer,
+		hasState: state,
 		isPattern: true
-	}) as AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function StreamParser<InType = any, OutType = any>(
 	hasPosition: boolean = false,

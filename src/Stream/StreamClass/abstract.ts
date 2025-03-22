@@ -6,25 +6,26 @@ import type {
 	IStreamClassInstance
 } from "./interfaces.js"
 
-import type { AbstractConstructor } from "./refactor.js"
+import type { Constructor } from "./refactor.js"
 
 import { Pattern } from "../../Pattern/abstract.js"
 
 import { valuePropDelegate } from "../../refactor.js"
-import { finish, rewind, navigate, init, iter, curr } from "./refactor.js"
+import { finish, rewind, navigate, init, iter, curr, copy } from "./refactor.js"
 
 import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
 import { object } from "@hgargg-0710/one"
+import type { ICopiable } from "../../interfaces.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
 export function StreamClass<Type = any>(
 	signature: IStreamClassSignature<Type>
 ):
-	| AbstractConstructor<[], IStreamClassInstance<Type>>
-	| AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern> {
+	| Constructor<[], IStreamClassInstance<Type>>
+	| Constructor<[any], IStreamClassInstance<Type> & IPattern> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -33,17 +34,17 @@ export function StreamClass<Type = any>(
 		initGetter,
 		currGetter,
 		defaultIsEnd,
-		hasPosition,
-		state,
-		buffer,
-		isPattern
+		hasPosition: pos,
+		hasState: state,
+		hasBuffer: buffer,
+		isPattern: value
 	} = signature
 
 	let streamClass:
-		| AbstractConstructor<[], IStreamClassInstance<Type>>
-		| AbstractConstructor<[any], IStreamClassInstance<Type> & IPattern>
+		| Constructor<[], IStreamClassInstance<Type>>
+		| Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
-	interface streamClassGuaranteed {
+	interface streamClassGuaranteed extends ICopiable {
 		isStart: boolean
 		isEnd: boolean
 		curr: Type
@@ -63,12 +64,13 @@ export function StreamClass<Type = any>(
 	}
 
 	streamClass = (() => {
-		if (isPattern) {
+		if (value) {
 			interface _streamClass extends streamClassGuaranteed {}
-			abstract class _streamClass
+			class _streamClass
 				extends Pattern
 				implements IStreamClassInstance<Type>
 			{
+				["constructor"]: new (value?: any) => typeof this
 				constructor(value?: any) {
 					super(value)
 				}
@@ -76,7 +78,9 @@ export function StreamClass<Type = any>(
 			return _streamClass
 		}
 		interface _streamClass extends streamClassGuaranteed {}
-		abstract class _streamClass implements IStreamClassInstance<Type> {}
+		class _streamClass implements IStreamClassInstance<Type> {
+			["constructor"]: new () => typeof this
+		}
 		return _streamClass
 	})()
 
@@ -94,11 +98,9 @@ export function StreamClass<Type = any>(
 
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
 	extend({
-		navigate: ConstDescriptor(
-			navigate.chooseMethod<Type>(hasPosition, buffer)
-		),
-		rewind: ConstDescriptor(rewind.chooseMethod<Type>(hasPosition, buffer)),
-		finish: ConstDescriptor(finish.chooseMethod<Type>(hasPosition, buffer))
+		navigate: ConstDescriptor(navigate.chooseMethod<Type>(pos, buffer)),
+		rewind: ConstDescriptor(rewind.chooseMethod<Type>(pos, buffer)),
+		finish: ConstDescriptor(finish.chooseMethod<Type>(pos, buffer))
 	})
 
 	// * Defining the ReversedStreamClassInstance-specific optional properties
@@ -112,16 +114,13 @@ export function StreamClass<Type = any>(
 	})
 
 	// * Adding the '.pos'-specific stream-iteration methods
-	extend(iter.chooseMethod(currGetter, hasPosition, buffer))
+	extend(iter.chooseMethod(currGetter, pos, buffer))
 
-	// * Adding the initialization method
-	protoProp(
-		streamClass,
-		"init",
-		ConstDescriptor(
-			init.chooseMethod(hasPosition, buffer, state, isPattern)
-		)
-	)
+	// * Adding the initialization methods
+	extend({
+		init: ConstDescriptor(init.chooseMethod(pos, buffer, state, value)),
+		copy: ConstDescriptor(copy.chooseMethod(pos, buffer, state, value))
+	})
 
 	if (currGetter) protoProp(streamClass, "update", ConstDescriptor(update))
 

@@ -7,5 +7,5 @@ import { methods } from "./refactor.js"
 export const InputStream = StreamClass({
 	...methods,
 	hasPosition: true,
-	buffer: true
+	hasBuffer: true
 }) as new <Type = any>(buffer?: IFreezableBuffer<Type>) => IInputStream<Type>
