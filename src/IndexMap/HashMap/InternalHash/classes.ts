@@ -4,8 +4,8 @@ import type { array } from "@hgargg-0710/one"
 import { DelegateDeletableSettableSizeable } from "../../abstract.js"
 import { ProtectedPattern } from "../../../Pattern/abstract.js"
 
-import { type } from "@hgargg-0710/one"
-const { isArray, isUndefined } = type
+import { type, object } from "@hgargg-0710/one"
+const { isUndefined } = type
 
 export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	extends DelegateDeletableSettableSizeable<
@@ -15,7 +15,12 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	>
 	implements IInternalHash<KeyType, ValueType, DefaultType>
 {
-	default: DefaultType
+	["constructor"]: new (
+		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,
+		_default?: DefaultType
+	) => MapInternalHash<KeyType, ValueType, DefaultType>
+
+	readonly default: DefaultType
 
 	get(x: KeyType) {
 		const gotten = this.value.get(x)
@@ -29,13 +34,12 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 		return this
 	}
 
-	constructor(
-		map:
-			| array.Pairs<KeyType, ValueType>
-			| Map<KeyType, ValueType> = new Map(),
-		_default?: DefaultType
-	) {
-		super(isArray(map) ? new Map(map) : map)
+	copy() {
+		return new this.constructor(this.value, this.default)
+	}
+
+	constructor(map: Iterable<[KeyType, ValueType]>, _default?: DefaultType) {
+		super(new Map(map))
 		this.default = _default!
 	}
 }
@@ -48,7 +52,12 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 	 * Value used by `ObjectInternalHash` as a way to signal
 	 * that a certain key has been removed/replaced
 	 */
-	static readonly MissingKey = undefined
+	static readonly MissingKey = undefined;
+
+	["constructor"]: new (
+		object?: object,
+		_default?: DefaultType
+	) => ObjectInternalHash<Type, DefaultType>
 
 	default: DefaultType
 	size: number
@@ -76,6 +85,10 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 		this.value[keyTo] = this.value[keyFrom]
 		this.value[keyFrom] = ObjectInternalHash.MissingKey
 		return this
+	}
+
+	copy() {
+		return new this.constructor(object.copy(this.value), this.default)
 	}
 
 	constructor(object: object = {}, _default?: DefaultType) {

@@ -3,7 +3,8 @@ import type {
 	ISizeable,
 	IRekeyable,
 	IDeletable,
-	ISettable
+	ISettable,
+	ICopiable
 } from "../../../interfaces.js"
 
 export interface IInternalHash<
@@ -14,6 +15,7 @@ export interface IInternalHash<
 		IDeletable<KeyType>,
 		IRekeyable<KeyType>,
 		ISizeable,
-		IDefaulting<DefaultType> {
+		IDefaulting<DefaultType>,
+		ICopiable<IInternalHash<KeyType, ValueType, DefaultType>> {
 	get: (key: KeyType) => ValueType | DefaultType
 }

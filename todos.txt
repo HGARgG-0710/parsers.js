@@ -87,7 +87,6 @@ Order of TODO-elimination:
 							Reason: some classes have methods that are NOT on interfaces 
 						
 						List: 
-							1. IInternalHash
 							2. Composition
 							3. DynamicParser
 							4. SignatureIndexSet
@@ -1024,6 +1023,17 @@ Order of TODO-elimination:
 
 					Then, one'll be able to finally add the missing ': this' output type to the 'Initializable' mini-interface
 
+				TY2. Type simplification - the `array.Pairs` overuse: 
+					Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
+					THIS INCLUDES: 
+						1. IndexMap[.*]
+						2. utils.IndexMap[.*]
+
+					Reasons: 
+						1. more generic code
+
+					Also - IF one does need to use the `Pairs` IN THE END (due to mutability concerns), 
+						USE THAT 
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
