@@ -1,13 +1,16 @@
+import type { ICopiable } from "../../interfaces.js"
 import type { IGettablePattern } from "../../Pattern/interfaces.js"
 import type { IPositionObject } from "../interfaces.js"
 
-export interface IMultiIndex extends IPositionObject, IGettablePattern<readonly number[]> {
+export interface IMultiIndex
+	extends IPositionObject<number[]>,
+		IGettablePattern<readonly number[]>,
+		ICopiable<IMultiIndex> {
 	levels: number
 	equals: (position: IMultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]
 	firstLevel: () => number[]
 	lastLevel: () => number[]
-	copy: () => IMultiIndex
 }
 
 export interface IMultiIndexModifier extends IGettablePattern<IMultiIndex> {

@@ -127,11 +127,9 @@ export function direction<Type = any>(pos: IDirectionalPosition<Type>) {
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export function pickDirection<Type = any>(
+export const pickDirection = <Type = any>(
 	pos: IDirectionalPosition<Type>
-): IChange {
-	return direction(pos) ? next : previous
-}
+): IChange => (direction(pos) ? next : previous)
 
 /**
  * Applies a given (supposedly, copying) transform onto the given `PredicatePosition`, whilst preserving the `.direction`
