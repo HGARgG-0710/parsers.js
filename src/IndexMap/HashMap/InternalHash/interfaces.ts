@@ -16,6 +16,6 @@ export interface IInternalHash<
 		IRekeyable<KeyType>,
 		ISizeable,
 		IDefaulting<DefaultType>,
-		ICopiable<IInternalHash<KeyType, ValueType, DefaultType>> {
+		ICopiable {
 	get: (key: KeyType) => ValueType | DefaultType
 }

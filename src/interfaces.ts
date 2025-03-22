@@ -6,8 +6,8 @@ export type IMappable<Type = any, Out = any> = (
 	index?: number
 ) => Out
 
-export interface ICopiable<Type = any> {
-	copy: () => Type
+export interface ICopiable {
+	copy: () => typeof this 
 }
 
 export interface IHaving {

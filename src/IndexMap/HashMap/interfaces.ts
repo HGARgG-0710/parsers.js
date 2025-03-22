@@ -42,6 +42,6 @@ export interface IHashMap<
 		ISizeable,
 		IHashable<KeyType, InternalKeyType>,
 		IDefaulting,
-		ICopiable<IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>> {}
+		ICopiable {}
 
 export type * from "./InternalHash/interfaces.js"

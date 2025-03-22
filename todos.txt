@@ -59,6 +59,7 @@ Order of TODO-elimination:
 			3. `utils.IndexMap.listRanges`
 			4. `utils.EnumSpace.fromCodePoints`
 			5. `utils.EnumSpace.fromItems`
+			6. `utils.Composition.applySignature` (simplified the method to handle one signature only); 
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
 		2. add the (minor) `JSDoc` for classes/big-functions
 		3. add the jsdoc permalinks for classes to wiki
@@ -87,8 +88,6 @@ Order of TODO-elimination:
 							Reason: some classes have methods that are NOT on interfaces 
 						
 						List: 
-							2. Composition
-							3. DynamicParser
 							4. SignatureIndexSet
 							5. MultiIndexModifier
 							6. Stream: 

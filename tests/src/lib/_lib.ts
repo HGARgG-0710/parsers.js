@@ -5,7 +5,7 @@ export interface Interface {
 	conformance(x: any): boolean
 }
 
-export class ClassTest<InstanceType extends ICopiable<InstanceType> = any> {
+export class ClassTest<InstanceType extends ICopiable = any> {
 	protected testMethod(name: string, ...args: any[]) {
 		const { methods } = this
 		const names = this.methods.map((x) => x.name)

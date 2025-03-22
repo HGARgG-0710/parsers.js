@@ -19,7 +19,7 @@ export interface IIndexMap<
 	IndexGetType = number
 > extends IIndexable<ValueType | DefaultType>,
 		Iterable<[KeyType, ValueType]>,
-		ICopiable<IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>>,
+		ICopiable,
 		ISizeable,
 		IDefaulting<DefaultType>,
 		IRekeyable<KeyType> {

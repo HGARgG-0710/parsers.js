@@ -5,7 +5,7 @@ import type { IPositionObject } from "../interfaces.js"
 export interface IMultiIndex
 	extends IPositionObject<number[]>,
 		IGettablePattern<readonly number[]>,
-		ICopiable<IMultiIndex> {
+		ICopiable {
 	levels: number
 	equals: (position: IMultiIndex) => boolean
 	slice: (from?: number, to?: number) => number[]

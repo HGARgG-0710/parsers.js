@@ -12,7 +12,7 @@ export interface ILookupTable<KeyType = any, ValueType = any, OwningType = any>
 		ISettable<KeyType, ValueType>,
 		IDeletable<KeyType>,
 		ISizeable,
-		ICopiable<ILookupTable<KeyType, ValueType, OwningType>> {
+		ICopiable {
 	claim: (x: any) => OwningType | null
 	byOwned: (x: any) => ValueType
 	isOwned: (x: any) => boolean
