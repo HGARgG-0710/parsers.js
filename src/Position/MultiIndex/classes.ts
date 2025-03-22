@@ -11,6 +11,8 @@ export class MultiIndexModifier
 	extends InitializablePattern<MultiIndex>
 	implements IMultiIndexModifier
 {
+	["constructor"]: new (value?: MultiIndex) => MultiIndexModifier
+
 	nextLevel() {
 		return this.extend([0])
 	}
@@ -49,9 +51,16 @@ export class MultiIndexModifier
 		this.value!.get().push(...subIndex)
 		return subIndex
 	}
+
+	copy() {
+		return new this.constructor(this.value?.copy())
+	}
 }
 
-export class MultiIndex extends InitializablePattern<number[]> implements IMultiIndex {
+export class MultiIndex
+	extends InitializablePattern<number[]>
+	implements IMultiIndex
+{
 	set levels(length: number) {
 		this.value!.length = length
 	}

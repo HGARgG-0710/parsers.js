@@ -13,7 +13,9 @@ export interface IMultiIndex
 	lastLevel: () => number[]
 }
 
-export interface IMultiIndexModifier extends IGettablePattern<IMultiIndex> {
+export interface IMultiIndexModifier
+	extends IGettablePattern<IMultiIndex>,
+		ICopiable {
 	init: (multind?: IMultiIndex) => void
 	nextLevel: () => number[]
 	prevLevel: () => number[]
