@@ -3,9 +3,10 @@ import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "../abstract.js"
 
-import { extend } from "./refactor.js"
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"
+
+import { extend } from "./refactor.js"
 
 import { functional, type as _type, string } from "@hgargg-0710/one"
 const { id } = functional
@@ -13,13 +14,20 @@ const { typeOf } = _type
 const { charCodeAt } = string
 
 abstract class BaseHashClass<
-	KeyType = any,
-	ValueType = any,
-	InternalKeyType = any,
-	DefaultType = any
-> extends DelegateSizeable<
-	IInternalHash<InternalKeyType, ValueType, DefaultType>
-> {
+		KeyType = any,
+		ValueType = any,
+		InternalKeyType = any,
+		DefaultType = any
+	>
+	extends DelegateSizeable<
+		IInternalHash<InternalKeyType, ValueType, DefaultType>
+	>
+	implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
+{
+	["constructor"]: new (
+		value: IInternalHash<InternalKeyType, ValueType>
+	) => IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
+
 	hash: IHash<KeyType, InternalKeyType>
 
 	index(x: KeyType, ...y: any[]) {
@@ -44,6 +52,10 @@ abstract class BaseHashClass<
 	get default() {
 		return this.value.default
 	}
+
+	copy() {
+		return new this.constructor(this.value)
+	}
 }
 
 export function HashClass<
@@ -54,10 +66,12 @@ export function HashClass<
 >(
 	hash: IHash<KeyType, InternalKeyType>
 ): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
-	class hashClass
-		extends BaseHashClass<KeyType, ValueType, InternalKeyType, DefaultType>
-		implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
-	{
+	class hashClass extends BaseHashClass<
+		KeyType,
+		ValueType,
+		InternalKeyType,
+		DefaultType
+	> {
 		static hash: IHash<KeyType, InternalKeyType>
 		static extend: (
 			f: (x: any) => KeyType
