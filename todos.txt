@@ -88,7 +88,6 @@ Order of TODO-elimination:
 							Reason: some classes have methods that are NOT on interfaces 
 						
 						List: 
-							4. SignatureIndexSet
 							5. MultiIndexModifier
 							6. Stream: 
 								1. StreamClass

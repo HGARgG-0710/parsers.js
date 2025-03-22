@@ -1,4 +1,6 @@
-export interface ISignatureIndexSet extends Iterable<number> {
+import type { ICopiable } from "../../../../interfaces.js"
+
+export interface ISignatureIndexSet extends Iterable<number>, ICopiable {
 	readonly arity: number
 	subtract(x: ISignatureIndexSet): ISignatureIndexSet
 	complement(): ISignatureIndexSet

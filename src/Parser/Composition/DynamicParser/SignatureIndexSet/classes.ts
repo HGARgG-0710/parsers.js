@@ -7,10 +7,15 @@ const { eqcurry } = boolean
 
 export class SignatureIndexSet implements ISignatureIndexSet {
 	protected readonly indexes: number[]
-	protected readonly indexSet: Set<number>
+	protected readonly indexSet: Set<number>;
+
+	["constructor"]: new (arity: number, indexes: number[]) => SignatureIndexSet
 
 	keepOut(x: number): ISignatureIndexSet {
-		return new SignatureIndexSet(this.arity, this.indexes.filter(negate(eqcurry(x))))
+		return new SignatureIndexSet(
+			this.arity,
+			this.indexes.filter(negate(eqcurry(x)))
+		)
 	}
 
 	complement(): ISignatureIndexSet {
@@ -35,9 +40,15 @@ export class SignatureIndexSet implements ISignatureIndexSet {
 		return this.indexSet.has(x)
 	}
 
+	copy() {
+		return new this.constructor(this.arity, this.indexes)
+	}
+
 	constructor(public readonly arity: number, indexes: number[]) {
 		this.indexes = sort(
-			Array.from((this.indexSet = new Set(indexes.filter((x) => x < arity))))
+			Array.from(
+				(this.indexSet = new Set(indexes.filter((x) => x < arity)))
+			)
 		)
 	}
 }
