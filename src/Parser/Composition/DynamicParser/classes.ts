@@ -1,6 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { IComposition } from "../interfaces.js"
 import type {
 	IPreSignature,
 	ILayerSignature,
@@ -8,11 +7,10 @@ import type {
 	ISignatureIndexSet
 } from "./interfaces.js"
 
-import { applySignatures } from "./utils.js"
-
-import { Callable } from "../abstract.js"
+import { applySignature } from "./utils.js"
 
 import { array } from "@hgargg-0710/one"
+import { Composition } from "../classes.js"
 
 export const PreSignature = (
 	preSignature: ISignatureIndexSet,
@@ -44,27 +42,21 @@ export const StateSignature = (
 // ! important things to keep in mind [for future docs]:
 // * 1. Signatures for given 'Function's [except for last one] used have form: f(value [0], ... [preFilledSignature], state [stateIndex], ... [preFilledSignature])
 // * 2. The LAST "entry" function can have ANY 'preFilledSignature'
-export class DynamicParser extends Callable implements IComposition {
+export class DynamicParser<
+	ArgType extends any[] = any[],
+	OutType = any
+> extends Composition<ArgType, OutType> {
 	state: Summat = { parser: this }
 
-	set layers(layers: Function[]) {
-		this.composition.layers = layers
-	}
-
-	get layers() {
-		return this.composition.layers
-	}
-
-	protected __call__(...x: any[]) {
-		return this.composition(...x)
-	}
-
 	init(signatures: IStateSignature[]) {
-		this.layers = applySignatures(array.copy(this.layers), signatures, this.state)
+		let layers = array.copy(this.layers)
+		for (const signature of signatures)
+			applySignature(layers, signature, this.state)
+		this.layers = layers
 	}
 
-	constructor(protected composition: IComposition, signatures: IStateSignature[] = []) {
-		super()
+	constructor(layers: Function[] = [], signatures: IStateSignature[] = []) {
+		super(layers)
 		this.init(signatures)
 	}
 }

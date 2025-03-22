@@ -1,4 +1,6 @@
-export interface IComposition extends Function {
+import type { ICopiable } from "../../interfaces.js"
+
+export interface IComposition extends Function, ICopiable {
 	layers: Function[]
 }
 

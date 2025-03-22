@@ -1,7 +1,7 @@
 import type { IComposition } from "./interfaces.js"
 import { Callable } from "./abstract.js"
 
-import { functional } from "@hgargg-0710/one"
+import { array, functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 
 export class Composition<ArgType extends any[] = any[], OutType = any>
@@ -10,19 +10,24 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 {
 	#layers: Function[]
 
-	protected merged: (...x: ArgType) => OutType
+	protected merged: (...x: ArgType) => OutType;
+
+	["constructor"]: new (layers?: Function[]) => Composition
 
 	get layers() {
 		return this.#layers
 	}
 
 	set layers(v: Function[]) {
-		this.#layers = v
-		this.merged = trivialCompose(...this.layers)
+		this.merged = trivialCompose(...(this.#layers = v))
 	}
 
 	protected __call__(...x: ArgType) {
 		return this.merged(...x)
+	}
+
+	copy() {
+		return new this.constructor(array.copy(this.layers))
 	}
 
 	constructor(layers: Function[] = []) {
