@@ -88,7 +88,6 @@ Order of TODO-elimination:
 
 							Reason: some classes have methods that are NOT on interfaces 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
-						2. Buffer
 						3. EnumSpace
 						4. IndexMap
 						5. HashMap
@@ -148,6 +147,8 @@ Order of TODO-elimination:
 											supplied to the `handler`
 
 							USE the `TestChain` to express the chains of tests thusly. 
+
+					5. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
 				
 				2. FIX testing micro-behaviours: 
 					1. add `handlers` to ENSURE that certain specified properties of test-arguments are met: 

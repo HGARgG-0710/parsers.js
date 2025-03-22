@@ -11,17 +11,22 @@ const push = new MethodTest("push", function <Type = any>(
 	this: ICollection<Type>,
 	...items: Type[]
 ) {
-	const prior = array.copy(this.get() as Type[])
+	const original = this.copy()
+	const prior = original.get()
 
 	this.push(...items)
-
-	const endIndex = array.lastIndex(prior)
 
 	for (let i = 0; i < prior.length; ++i)
 		assert.strictEqual(this.get()[i], prior[i])
 
-	for (let i = 0; i < items.length; ++i)
-		assert.strictEqual(this.get()[endIndex + i], items[i])
+	let last = original.copy()
+	for (let i = 1; i < items.length; ++i) {
+		const copy = original.copy()
+		copy.push(...items.slice(0, i))
+		last.push(...items.slice(i - 1, i))
+		assert(array.same(last, copy))
+		last = copy
+	}
 })
 
 const get = new MethodTest("get", function <Type = any>(
@@ -51,8 +56,8 @@ const copy = new MethodTest("copy", function <Type = any>(
 	assert(!array.same(this, duplicate))
 })
 
-class CollectionTest<Type = any> extends ClassTest<ICollection<Type>> {
-	static readonly interfaceName = "ICollection"
+export class CollectionTest<Type = any> extends ClassTest<ICollection<Type>> {
+	static readonly interfaceName: string = "ICollection"
 
 	static conformance(x: any) {
 		return isCollection(x)

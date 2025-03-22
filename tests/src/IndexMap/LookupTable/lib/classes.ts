@@ -33,7 +33,6 @@ const lookupTablePrototypeProps = [
 function handleUnowned(instance: ILookupTable, item: any) {
 	if (instance.isOwned(item))
 		throw new Error("Expected an unowned item to be passed")
-	return instance
 }
 
 export const isLookupTable = and(
@@ -79,7 +78,7 @@ function LookupTableDeleteTest(instance: ILookupTable, key: any, item: any) {
 	method(
 		"delete",
 		() => {
-			instance = handleUnowned(instance, item)
+			handleUnowned(instance, item)
 
 			const copy = instance.copy()
 			assert(!isNullary(copy.claim(item)))
