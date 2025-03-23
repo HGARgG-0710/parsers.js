@@ -1,42 +1,41 @@
 import type { MultiIndex } from "../../Position/classes.js"
+import type { IWalkable } from "../../Node/interfaces.js"
 
-import { TreeWalker } from "../../internal/TreeWalker/classes.js"
 import { TreeStream } from "./classes.js"
 import { BadIndex } from "../../constants.js"
 
 export namespace methods {
-	export function baseNextIter<Type = any>(this: TreeStream<Type>) {
+	export function baseNextIter(this: TreeStream) {
 		const { walker, response } = this
 		if (response) walker[response]()
 		else {
 			walker.indexCut(this.lastLevelWithSiblings + 1)
 			walker.goSiblingAfter()
 		}
+		return this.curr
 	}
 
-	export function rewind<Type = any>(this: TreeStream<Type>) {
+	export function rewind(this: TreeStream) {
 		this.walker.restart()
 		this.isStart = true
 	}
 
-	export function navigate<Type = any>(
-		this: TreeStream<Type>,
-		index: MultiIndex
-	) {
+	export function navigate(this: TreeStream, index: MultiIndex) {
 		this.walker.goIndex(index)
 		return this.curr
 	}
 
-	export function basePrevIter<Type = any>(this: TreeStream<Type>) {
+	export function basePrevIter(this: TreeStream) {
 		const { walker, response } = this
 		walker[response]()
+		return this.curr
 	}
 
-	export function currGetter<Type = any>(this: TreeStream<Type>) {
+	export function currGetter(this: TreeStream) {
 		return this.walker.curr
 	}
 
-	export function isCurrEnd<Type = any>(this: TreeStream<Type>) {
+	export function isCurrEnd(this: TreeStream) {
 		const { walker } = this
 		this.response = walker.isChild()
 			? "pushFirstChild"
@@ -49,7 +48,7 @@ export namespace methods {
 		)
 	}
 
-	export function isCurrStart<Type = any>(this: TreeStream<Type>) {
+	export function isCurrStart(this: TreeStream) {
 		const { walker } = this
 		return !(this.response = walker.isSiblingBefore()
 			? "goPrevLast"
@@ -59,26 +58,23 @@ export namespace methods {
 	}
 
 	export namespace value {
-		export function get<Type = any>(this: TreeStream<Type>) {
+		export function get(this: TreeStream) {
 			return this.walker.get()!
 		}
 	}
 
 	export namespace multind {
-		export function get<Type = any>(this: TreeStream<Type>) {
+		export function get(this: TreeStream) {
 			return this.walker.pos
 		}
 	}
 
-	export function init<Type = any>(
-		this: TreeStream<Type>,
-		walker?: TreeWalker<Type>
-	) {
+	export function init(this: TreeStream, walkable?: IWalkable) {
 		this.response = ""
 		this.lastLevelWithSiblings = BadIndex
 
-		if (walker) {
-			this.walker = walker
+		if (walkable) {
+			this.walker.init(walkable)
 			this.super.init.call(this)
 		}
 

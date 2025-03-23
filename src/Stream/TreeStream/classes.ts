@@ -1,13 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IInTree } from "../../Tree/interfaces.js"
+import type { IWalkable } from "../../Node/interfaces.js"
 import type { ITreeStream } from "./interfaces.js"
-
 import type { Constructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { MultiIndex } from "../../Position/classes.js"
 
 import { withSuper } from "../../refactor.js"
-import { TreeWalker } from "../../internal/TreeWalker/classes.js"
+import { TreeWalker } from "src/internal/TreeWalker.js"
 import { StreamClass } from "../StreamClass/classes.js"
 
 import { BadIndex } from "../../constants.js"
@@ -19,28 +18,25 @@ const { ConstDescriptor } = object.descriptor
 import { methods } from "./methods.js"
 const { rewind, navigate, init, value, multind, ...baseMethods } = methods
 
-const TreeStreamBase = StreamClass({
+const TreeStreamBase = StreamClass<IWalkable>({
 	...baseMethods,
 	defaultIsEnd: F
-}) as Constructor<[], IReversedStreamClassInstance<IInTree>>
+}) as Constructor<[], IReversedStreamClassInstance<IWalkable>>
 
-export class TreeStream<Type = any>
-	extends TreeStreamBase
-	implements ITreeStream<Type>
-{
+export class TreeStream extends TreeStreamBase implements ITreeStream {
 	protected response: string
 	protected lastLevelWithSiblings = BadIndex
-	protected walker: TreeWalker<Type>
+	protected walker = new TreeWalker()
 
 	readonly multind: MultiIndex
 
 	super: Summat
-	navigate: (position: MultiIndex) => IInTree<Type>
-	init: (walker?: TreeWalker<Type>) => ITreeStream<Type>
+	init: (walkable?: IWalkable) => ITreeStream
+	navigate: (position: MultiIndex) => IWalkable
 
-	constructor(walker: TreeWalker<Type>) {
+	constructor(walkable?: IWalkable) {
 		super()
-		this.init(walker)
+		this.init(walkable)
 	}
 }
 

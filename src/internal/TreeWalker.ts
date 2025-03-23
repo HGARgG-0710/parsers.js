@@ -1,20 +1,20 @@
-import type { MultiIndex } from "../../Position/classes.js"
-import type { ITree, IInTree } from "../../Tree/interfaces.js"
-import type { IWalkableTree } from "./interfaces.js"
-import type { MultiIndexModifier } from "../MultiIndexModifier.js"
+import type { IWalkable } from "../Node/interfaces.js"
+import type { MultiIndex } from "../Position/classes.js"
+import { MultiIndexModifier } from "./MultiIndexModifier.js"
 
-import { InitializablePattern } from "../Pattern.js"
-import { hasChildren, treeEndPath } from "../../Tree/utils.js"
+import { InitializablePattern } from "./Pattern.js"
+import { hasChildren, treeEndPath } from "../Node/utils.js"
 
 import { array } from "@hgargg-0710/one"
 const { last } = array
 
-export class TreeWalker<Type = any> extends InitializablePattern<
-	IWalkableTree<Type>
-> {
-	level: IWalkableTree<Type>
-	curr: IInTree<Type, IWalkableTree<Type>>
-	modifier: MultiIndexModifier
+export class TreeWalker<
+	Type extends IWalkable<Type> = any
+> extends InitializablePattern<IWalkable<Type>> {
+	level: IWalkable<Type>
+	curr: IWalkable<Type>
+
+	protected modifier: MultiIndexModifier = new MultiIndexModifier()
 
 	get pos() {
 		return this.modifier.get()
@@ -26,16 +26,13 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 	}
 
 	levelUp(positions: number = 1) {
-		const { value, pos } = this
-		return (this.level = value!.backtrack(
-			positions,
-			pos.get()
-		) as IWalkableTree<Type>)
+		const { value } = this
+		return (this.level = value!.backtrack(positions)!)
 	}
 
 	pushFirstChild() {
 		this.modifier.nextLevel()
-		this.level = this.curr as IWalkableTree<Type>
+		this.level = this.curr
 		this.getCurrChild()
 	}
 
@@ -86,20 +83,18 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 	}
 
 	currentLastIndex() {
-		return treeEndPath(this.curr as ITree<Type>)
+		return treeEndPath(this.curr)
 	}
 
 	goPrevLast() {
 		this.goSiblingBefore()
 		const initLength = this.pos.levels
 		this.modifier.extend(this.currentLastIndex())
-		this.renewLevel(this.curr as IWalkableTree<Type>, initLength)
+		this.renewLevel(this.curr, initLength)
 	}
 
-	renewLevel(init: IWalkableTree<Type>, from: number, until: number = -1) {
-		return (this.level = init.index(
-			this.pos.slice(from, until)
-		) as IWalkableTree<Type>)
+	renewLevel(init: IWalkable<Type>, from: number) {
+		return (this.level = init.index(this.pos.slice(from, -1)))
 	}
 
 	restart() {
@@ -113,20 +108,17 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 		this.levelUp()
 	}
 
-	init(value?: IWalkableTree<Type>, modifier?: MultiIndexModifier) {
-		if (modifier) {
-			this.modifier = modifier
-			if (value) this.goIndex()
+	init(walkable?: IWalkable<Type>) {
+		if (walkable) {
+			this.modifier.clear()
+			this.level = this.value = walkable
 		}
-
-		if (value) this.level = this.value = value
-		else if (!modifier) this.modifier.clear()
 
 		return this
 	}
 
-	constructor(value?: IWalkableTree<Type>, modifier?: MultiIndexModifier) {
-		super(value)
-		this.init(value, modifier)
+	constructor(walkable?: IWalkable<Type>) {
+		super(walkable)
+		this.init(walkable)
 	}
 }
