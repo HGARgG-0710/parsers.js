@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IStreamPredicate } from "../../../Parser/TableMap/interfaces.js"
 import type { IEndableStream } from "../../../Stream/StreamClass/interfaces.js"
 import type { IStatePatternInitMethod } from "../../StreamClass/methods/init.js"
-import type { ValidationResult } from "../../../interfaces.js"
+import type { IValidationResult } from "../../../interfaces.js"
 
 import { LocatorStream } from "../classes.js"
 
@@ -21,7 +21,7 @@ export function StreamValidator(
 	return function <Type = any>(
 		stream: IEndableStream<Type>,
 		state: Summat | undefined = defaultState
-	): ValidationResult {
+	): IValidationResult {
 		;(validationStream.init as IStatePatternInitMethod)(stream, state)
 		for (const vcurr of validationStream)
 			if (!vcurr) return ValidationError(validationStream.pos!)

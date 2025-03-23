@@ -7,7 +7,7 @@ export type IMappable<Type = any, Out = any> = (
 ) => Out
 
 export interface ICopiable {
-	copy: () => typeof this 
+	copy: () => typeof this
 }
 
 export interface IHaving {
@@ -62,6 +62,10 @@ export interface ISupered {
 	readonly super: Summat
 }
 
+export type IInvalidEntries<Type = any> = [number, Type][]
+
+export type IValidationResult = true | [false, number]
+
 export type * from "./Collection/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
@@ -70,8 +74,3 @@ export type * from "./Pattern/interfaces.js"
 export type * from "./Position/interfaces.js"
 export type * from "./Stream/interfaces.js"
 export type * from "./Token/interfaces.js"
-export type IInvalidEntries<Type = any> = [number, Type][]
-
-export type ValidationResult = true | [false, number]
-
-export type * from "./Tree/interfaces.js"
