@@ -7,7 +7,10 @@ import type {
 } from "../../Stream/StreamClass/interfaces.js"
 
 import type { Constructor } from "../StreamClass/refactor.js"
-import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
+import type {
+	IStreamHandler,
+	IStreamPredicate
+} from "../../Parser/TableMap/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
 
@@ -23,27 +26,31 @@ const { init, ...baseMethods } = methods
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false,
-	state: boolean = false
+	hasBuffer: boolean = false,
+	hasState: boolean = false
 ) =>
 	DefaultEndStream<Type>({
 		...baseMethods,
 		isCurrEnd: valueIsCurrEnd,
 		hasPosition: hasPosition,
-		hasBuffer: buffer,
-		hasState: state,
+		hasBuffer: hasBuffer,
+		hasState: hasState,
 		isPattern: true
 	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function StreamParser<InType = any, OutType = any>(
-	hasPosition: boolean = false,
-	buffer: boolean = false,
-	state: boolean = false
-) {
-	const baseClass = StreamParserBase(hasPosition, buffer, state)
+	handler: IStreamHandler<OutType>
+): (
+	hasPosition?: boolean,
+	hasBuffer?: boolean,
+	hasState?: boolean
+) => Constructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
 	return function (
-		handler: IStreamHandler<OutType>
-	): Constructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
+		hasPosition: boolean = false,
+		hasBuffer: boolean = false,
+		hasState: boolean = false
+	) {
+		const baseClass = StreamParserBase(hasPosition, hasBuffer, hasState)
 		class streamTokenizerClass
 			extends baseClass
 			implements IStreamParser<InType, OutType>
@@ -57,34 +64,37 @@ export function StreamParser<InType = any, OutType = any>(
 			state?: Summat
 
 			init: (
-				handler?: IStreamHandler<OutType>,
 				value?: IEndableStream<InType>,
 				state?: Summat
 			) => IStreamParser<InType, OutType>
 
 			constructor(value?: IEndableStream<InType>, state: Summat = {}) {
 				super(value)
-				this.init(handler, value, state)
+				this.init(value, state)
 			}
 		}
 
 		withSuper(streamTokenizerClass, baseClass, {
-			init: ConstDescriptor(init)
+			init: ConstDescriptor(init),
+			handler: ConstDescriptor(handler)
 		})
 
 		return streamTokenizerClass
 	}
 }
 
-export const BufferedParser = <InType = any, OutType = any>(
-	hasPosition: boolean = false,
-	state: boolean = false
-) => StreamParser<InType, OutType>(hasPosition, true, state)
+export const BufferedParser =
+	<InType = any, OutType = any>(
+		hasPosition: boolean = false,
+		hasState: boolean = false
+	) =>
+	(handler: IStreamHandler<OutType>) =>
+		StreamParser<InType, OutType>(handler)(hasPosition, true, hasState)
 
-export const LocatorStream = <InType = any>(
-	hasPosition: boolean = false,
-	state: boolean = false
-) => StreamParser<InType, boolean>(hasPosition, false, state)
+export const LocatorStream =
+	<InType = any>(hasPosition: boolean = false, hasState: boolean = false) =>
+	(predicate: IStreamPredicate) =>
+		StreamParser<InType, boolean>(predicate)(hasPosition, false, hasState)
 
 export * from "./classes/PositionalValidator.js"
 export * from "./classes/StreamValidator.js"

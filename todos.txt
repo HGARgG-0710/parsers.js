@@ -107,14 +107,6 @@ Order of TODO-elimination:
 								2. Individual StreamClass-es: 
 									1. LimitedStream (the 'from' and 'to')
 									2. NestedStream (the `index`)
-									3. PredicateStream - DON'T make a separate `.copy` method!: 
-										SUB-TODO: make `PredicateStream` take the `predicate` as a PROTOTYPE PROPERTY
-											[in other words - like 'new (PredicateStream(true, false, ...)(predicate))(value)']
-
-									4. StreamParser - SWITCH ITS ORDER OF CURRIED ARGUMENTS - FIRST the `predicate`, THEN the `flags`: 
-										Reasons: 
-											1. it will allow one (later) to PROPERLY implement the GenericCollection-s for it
-										TODO: DO THE SAME THING for the `PredicateStream`; 
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
 								2. Remove the `recursiveTreeCopy` util

@@ -243,10 +243,10 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 const methodList = generateInitMethods(initialize)
 
 export function chooseMethod(
-	pos: boolean = false,
-	buffer: boolean = false,
-	state: boolean = false,
-	value: boolean = false
+	hasPosition: boolean = false,
+	hasBuffer: boolean = false,
+	hasState: boolean = false,
+	isPattern: boolean = false
 ) {
-	return methodList[+pos | (+buffer << 1) | (+state << 2) | (+value << 3)]
+	return methodList[+hasPosition | (+hasBuffer << 1) | (+hasState << 2) | (+isPattern << 3)]
 }

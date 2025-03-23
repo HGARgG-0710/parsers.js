@@ -1,7 +1,7 @@
 import type { IHashClass, IHashMap, IHash } from "./interfaces.js"
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 
-import { DelegateSizeable } from "src/internal/DelegateSizeable.js"
+import { DelegateSizeable } from "src/internal/delegates/Sizeable.js"
 
 import { type } from "../../Token/utils.js"
 import { length } from "../../utils.js"

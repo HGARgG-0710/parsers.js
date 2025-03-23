@@ -1,11 +1,20 @@
-import type { IReversedStreamClassInstance, IStreamClassInstance } from "../interfaces.js"
+import type {
+	IReversedStreamClassInstance,
+	IStreamClassInstance
+} from "../interfaces.js"
 
 import type { IPosed } from "../../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IBasicStream } from "../../interfaces.js"
 
-import { positionDecrement, positionIncrement } from "../../../Position/refactor.js"
-import { bufferFreeze, bufferPush } from "../../../Collection/Buffer/refactor.js"
+import {
+	positionDecrement,
+	positionIncrement
+} from "../../../Position/refactor.js"
+import {
+	bufferFreeze,
+	bufferPush
+} from "../../../Collection/Buffer/refactor.js"
 import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
 import { currSet } from "./curr.js"
 
@@ -24,7 +33,11 @@ function posBufferIsFrozenGet<Type = any>(
 function redefineCurr<Type = any>(
 	x: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
 ) {
-	propDefine(x, "curr", GetSetDescriptor(posBufferIsFrozenGet, currSet as () => any))
+	propDefine(
+		x,
+		"curr",
+		GetSetDescriptor(posBufferIsFrozenGet, currSet as () => any)
+	)
 }
 
 function getNext<Type = any>(stream: IStreamClassInstance<Type>) {
@@ -53,8 +66,14 @@ function generateIterationMethods(
 	type QuartetConfig = [
 		(x: IStreamClassInstance, last: any) => any,
 		(x: IStreamClassInstance) => any,
-		[(x: IStreamClassInstance) => any, (x: IReversedStreamClassInstance) => any],
-		[(x: IStreamClassInstance) => boolean, (x: IStreamClassInstance) => any]?,
+		[
+			(x: IStreamClassInstance) => any,
+			(x: IReversedStreamClassInstance) => any
+		],
+		[
+			(x: IStreamClassInstance) => boolean,
+			(x: IStreamClassInstance) => any
+		]?,
 		((x: IReversedStreamClassInstance) => boolean)?
 	]
 
@@ -86,7 +105,9 @@ function generateIterationMethods(
 						else altNext.call(this)
 						return last
 					},
-					function <Type = any>(this: IReversedStreamClassInstance<Type>) {
+					function <Type = any>(
+						this: IReversedStreamClassInstance<Type>
+					) {
 						const last = this.curr
 						if (optionalPrevCondition!(this)) {
 							start(this)
@@ -99,7 +120,9 @@ function generateIterationMethods(
 
 			return [
 				altNext,
-				function altPrev<Type = any>(this: IReversedStreamClassInstance<Type>) {
+				function altPrev<Type = any>(
+					this: IReversedStreamClassInstance<Type>
+				) {
 					const last = this.curr
 					if (this.isCurrStart()) {
 						start(this)
@@ -167,14 +190,19 @@ function generateIterationMethods(
 				},
 				[
 					posNextAction,
-					(x: IStreamClassInstance & IBufferized & IPosed<number>) => {
+					(
+						x: IStreamClassInstance & IBufferized & IPosed<number>
+					) => {
 						positionDecrement(x)
 						readBuffer(x)
 					}
 				],
 				[
-					(x: IStreamClassInstance & IBufferized) => x.buffer.isFrozen,
-					(x: IStreamClassInstance & IBufferized & IPosed<number>) => {
+					(x: IStreamClassInstance & IBufferized) =>
+						x.buffer.isFrozen,
+					(
+						x: IStreamClassInstance & IBufferized & IPosed<number>
+					) => {
 						if (x.pos !== x.buffer.size - 1) {
 							positionIncrement(x)
 							readBuffer(x)
@@ -242,10 +270,12 @@ const nextPrevDescriptors = ([next, prev]) => ({
 
 export function chooseMethod<Type = any>(
 	currGetter?: () => Type,
-	pos: boolean = false,
-	buffer: boolean = false
+	hasPosition: boolean = false,
+	hasBuffer: boolean = false
 ) {
-	return nextPrevDescriptors(methodList[+!!currGetter | (+pos << 1) | (+buffer << 2)])
+	return nextPrevDescriptors(
+		methodList[+!!currGetter | (+hasPosition << 1) | (+hasBuffer << 2)]
+	)
 }
 
 export function* streamIterator<Type = any>(this: IBasicStream<Type>) {

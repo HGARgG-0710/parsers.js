@@ -31,5 +31,3 @@ export type IChange<Type = any> = (input: IReversibleStream<Type>) => Type
 export interface IDirectionHaving {
 	direction: boolean
 }
-
-export type * from "./MultiIndex/interfaces.js"

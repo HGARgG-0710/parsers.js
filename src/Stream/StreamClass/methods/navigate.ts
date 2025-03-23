@@ -56,8 +56,8 @@ function posBufferNavigate<Type = any>(
 const methodList = [navigate, posNavigate, bufferNavigate, posBufferNavigate]
 
 export function chooseMethod<Type = any>(
-	pos: boolean = false,
-	buffer: boolean = false
+	hasPosition: boolean = false,
+	hasBuffer: boolean = false
 ) {
-	return methodList[+pos | (+buffer << 1)]<Type>
+	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
 }

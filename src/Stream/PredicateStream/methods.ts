@@ -1,14 +1,9 @@
-import type { IPredicatePosition } from "../../Position/interfaces.js"
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IIsEndCurrable } from "../StreamClass/interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
 
-import { preserveDirection } from "../../Position/utils.js"
 import { navigate } from "../StreamClass/utils.js"
 import { superInit } from "../StreamClass/refactor.js"
-
-import { functional } from "@hgargg-0710/one"
-const { copy } = functional
 
 export namespace methods {
 	export function currGetter<Type = any>(this: IPredicateStream<Type>) {
@@ -35,16 +30,9 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: IPredicateStream<Type>,
-		value?: IReversibleStream<Type> & IIsEndCurrable,
-		predicate?: IPredicatePosition<Type>
+		value?: IReversibleStream<Type> & IIsEndCurrable
 	) {
-		if (predicate) {
-			this.predicate = preserveDirection(
-				predicate,
-				(predicate) => copy(predicate, this) as IPredicatePosition<Type>
-			)
-			this.hasLookAhead = false
-		}
+		this.hasLookAhead = false
 		if (value) superInit(this, value)
 		return this
 	}

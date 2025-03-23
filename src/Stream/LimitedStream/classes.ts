@@ -17,25 +17,25 @@ const { init, prod, ...baseMethods } = methods
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ) =>
 	DefaultEndStream<Type>({
 		...baseMethods,
 		currGetter: valueCurr,
 		isPattern: true,
 		hasPosition: hasPosition,
-		hasBuffer: buffer
+		hasBuffer: hasBuffer
 	}) as Constructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
 export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ): new (
 	value: ILimitedUnderStream<Type>,
 	from?: IPosition,
 	to?: IPosition
 ) => ILimitedStream<Type> {
-	const baseClass = LimitedStreamBase<Type>(hasPosition, buffer)
+	const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
 	class limitedStream extends baseClass implements ILimitedStream<Type> {
 		value: ILimitedUnderStream<Type>
 		lookAhead: Type

@@ -22,21 +22,21 @@ const { init, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ) =>
 	DefaultEndStream<Type | INestedStream<Type>>({
 		...baseMethods,
 		hasPosition: hasPosition,
-		hasBuffer: buffer,
+		hasBuffer: hasBuffer,
 		isPattern: true
 	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function NestedStream<Type = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate>,
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ): new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
-	const baseClass = NestedStreamBase(hasPosition, buffer)
+	const baseClass = NestedStreamBase(hasPosition, hasBuffer)
 	class NestedStream extends baseClass implements INestedStream<Type> {
 		value: IEndableStream<Type>
 		currNested: boolean

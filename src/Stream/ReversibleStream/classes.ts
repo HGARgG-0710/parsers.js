@@ -26,7 +26,7 @@ const [valuePrev, valueNext, valueIsStart, valueRewind, valueFinish] = [
 
 const ReversedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ) =>
 	StreamClass<Type>({
 		currGetter: valueCurr,
@@ -36,18 +36,15 @@ const ReversedStreamBase = <Type = any>(
 		isCurrStart: valueIsCurrEnd,
 		defaultIsEnd: valueDefaultIsStart,
 		hasPosition: hasPosition,
-		hasBuffer: buffer,
+		hasBuffer: hasBuffer,
 		isPattern: true
-	}) as Constructor<
-		[any],
-		IReversedStreamClassInstance<Type> & IPattern
-	>
+	}) as Constructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
 export function ReversedStream<Type = any>(
 	hasPosition: boolean = false,
-	buffer: boolean = false
+	hasBuffer: boolean = false
 ): new (value?: IReversibleStream<Type>) => IReversedStream<Type> {
-	const baseClass = ReversedStreamBase(hasPosition, buffer)
+	const baseClass = ReversedStreamBase(hasPosition, hasBuffer)
 	class reversedStream extends baseClass implements IReversedStream<Type> {
 		value: IReversibleStream<Type>
 		init: (value?: IReversibleStream<Type>) => IReversedStream<Type>

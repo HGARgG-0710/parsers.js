@@ -43,8 +43,8 @@ function posBufferFinish<Type = any>(
 const methodList = [finish, posFinish, bufferFinish, posBufferFinish]
 
 export function chooseMethod<Type = any>(
-	pos: boolean = false,
-	buffer: boolean = false
+	hasPosition: boolean = false,
+	hasBuffer: boolean = false
 ) {
-	return methodList[+pos | (+buffer << 1)]<Type>
+	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
 }
