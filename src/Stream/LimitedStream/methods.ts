@@ -10,8 +10,7 @@ import {
 import { Stream } from "../../constants.js"
 const { LimitedStream } = Stream
 
-import { navigate } from "../StreamClass/utils.js"
-import { superInit } from "../StreamClass/refactor.js"
+import { navigate, rewind } from "../StreamClass/utils.js"
 
 import { type } from "@hgargg-0710/one"
 const { isNullary } = type
@@ -59,7 +58,7 @@ export namespace methods {
 		to?: IPosition
 	) {
 		if (value || this.value) {
-			if (value) superInit(this, value)
+			if (value) this.super.init.call(this, value)
 
 			this.hasLookAhead = false
 
@@ -69,6 +68,7 @@ export namespace methods {
 					from = LimitedStream.NoMovementPredicate
 				}
 
+				rewind(this.value!)
 				navigate(this.value!, from)
 
 				this.direction = directionCompare(from, to, this.value)
@@ -77,5 +77,11 @@ export namespace methods {
 			}
 		}
 		return this
+	}
+
+	export function copy<Type = any>(
+		this: ILimitedStream<Type>
+	): ILimitedStream<Type> {
+		return new this.constructor(this.value!.copy(), this.from, this.to)
 	}
 }

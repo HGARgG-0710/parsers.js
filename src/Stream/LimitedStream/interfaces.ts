@@ -19,12 +19,13 @@ import type {
 
 import type { IPattern } from "../../Pattern/interfaces.js"
 
-import type { ISupered } from "../../interfaces.js"
+import type { ICopiable, ISupered } from "../../interfaces.js"
 
 export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IPosed<IPosition> &
 	IIsEndCurrable &
-	IIsStartCurrable
+	IIsStartCurrable &
+	ICopiable
 
 export interface ILimitedStream<Type = any>
 	extends ISinglePositionLookahead<Type>,

@@ -13,7 +13,7 @@ import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
-const { init, prod, ...baseMethods } = methods
+const { init, prod, copy, ...baseMethods } = methods
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -66,7 +66,8 @@ export function LimitedStream<Type = any>(
 
 	withSuper(limitedStream, baseClass, {
 		prod: ConstDescriptor(prod),
-		init: ConstDescriptor(init)
+		init: ConstDescriptor(init),
+		copy: ConstDescriptor(copy)
 	})
 
 	return limitedStream
