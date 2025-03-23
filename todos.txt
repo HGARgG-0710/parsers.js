@@ -39,6 +39,7 @@ Order of TODO-elimination:
 	TODO [any order]: 
 		-4. removed modules [docs]: 
 			1. Tree
+			2. Token
 		-3. missing modules [docs + permalinks + JSDoc]: 
 			1. 'Node': utils.Node, classes.Node, INode
 		-2. [minor] source code: 
@@ -111,7 +112,6 @@ Order of TODO-elimination:
 							8. Tree: 
 								0. TreeStream: ADD the `Type extends IWalkable<Type> = any` generic to it! 
 									This will permit one to work with `INode`s WITHOUT needing to constantly do type-expansions: `as INode` 
-								1. REMOVE `Token` (and utils) [no longer needed for anything - just an inferior version of `Node`]; 
 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
 						3. EnumSpace

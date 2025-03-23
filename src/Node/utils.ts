@@ -1,8 +1,14 @@
+import type { ITypeCheckable } from "./interfaces.js"
+import type { ITyped, IWalkable } from "./interfaces.js"
+
 import { fromEnum } from "../EnumSpace/utils.js"
 import { isGoodIndex } from "../utils.js"
 import { ContentNode, RecursiveNode, TokenNode } from "./classes.js"
 
-import type { IWalkable } from "./interfaces.js"
+import { object, type as _type, functional, boolean } from "@hgargg-0710/one"
+const { prop } = object
+const { trivialCompose } = functional
+const { eqcurry } = boolean
 
 export const tokenNodes = fromEnum(TokenNode)
 export const contentNodes = fromEnum(ContentNode)
@@ -45,3 +51,24 @@ export function treeEndPath<Type extends IWalkable<Type> = any>(
 	}
 	return lastIndex
 }
+
+/**
+ * Returns the value of the `x.type` for the given `ITokenInstance`
+ */
+export const type = prop("type") as <Type = any>(x: ITyped<Type>) => Type
+
+/**
+ * Returns the value of the `.is` property for the given `TypeCheckable`
+ */
+export const is = prop("is") as <Type = any>(
+	t: ITypeCheckable
+) => _type.TypePredicate<Type>
+
+/**
+ * Returns the predicate for checking that the `.type` property of the given
+ * `ITyped` is equal to `type`
+ */
+export const isType = <Type = any>(_type: Type) =>
+	trivialCompose(eqcurry(_type), type) as <Type = any>(
+		x: ITyped<Type>
+	) => boolean
