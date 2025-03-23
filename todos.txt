@@ -99,8 +99,122 @@ Order of TODO-elimination:
 									3. PredicateStream - DON'T make a separate `.copy` method!: 
 										SUB-TODO: make `PredicateStream` take the `predicate` as a PROTOTYPE PROPERTY
 											[in other words - like 'new (PredicateStream(true, false, ...)(predicate))(value)']
+
+									4. StreamParser - SWITCH ITS ORDER OF CURRIED ARGUMENTS - FIRST the `predicate`, THEN the `flags`: 
+										Reasons: 
+											1. it will allow one (later) to PROPERLY implement the GenericCollection-s for it
+										TODO: DO THE SAME THING for the `PredicateStream`; 
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
+								2. Remove the `recursiveTreeCopy` util
+
+								3. PROBLEM: we need a better `Tree` API: 
+									1. currently, the `ChildrenTree` is just a WRAPPER to be put AROUND the given list of items, 
+										that is provided 
+									2. BECAUSE OF THIS, in order for the `ChildrenTree` to be useful, one has to 
+										MOUNT the `.type` ONTO IT. 
+
+										This is both: 
+											1. inefficient (requires type-transitions...)
+											2. ugly (requires type-transitions... when it doesn't need to!)
+										
+										Conclusion: 
+											1. Implement the `AST` class, extending the `Tree` interfaces: 
+												1. it would have THE SAME methods
+												2. it would have the `.type`
+												3. it would have the distinction into `RecursiveASTNode`, `ContentASTNode` and `TrivialASTNode`
+													GIVE DIFFERENT NAME TO THE `Trivial` one! [simple? marker? token?]
+												4. IT WOULD BE HOMOGENOUS!!! [big one]
+													Because of this, it would permit: 
+														1. optimizing [considerably] certain algorithms [including the iteration...]
+														2. simplifying the implementation of `TreeWalker` [no more `.lastChild !== undefined` in `hasChildren` checks...]
+														3. PROVIDING A UNIFORM `copy` method! 
+															This is the reason we are doing this right now. 
+															IF the codebase is to be kept AS-CURRENTLY-IS, one would need to: 
+																1. Make the items in `Tree` classes NECESSARILY keep an `ICopiable` interface instance
+																	id est, not generic - a failure
+																2. [big one] Keep the references to the original `value` and `converter`, in order to reproduce the 
+																	creation of the Tree-wrapper: 
+																		1. Ugly [unneeded properties, better design clearly pending]
+																		2. Memory-inefficient [unneded references on the instance]
+
+												NOTE [important]: DO NOT implement the `ASTAnalyzer` YET; 
+													Reasons: 
+														1. library not mature enough yetva
+														2. too complex, exceeds basic functionality
+														3. may be unnecessary (BENCHMARK FOR GOODNESS SAKE!!!)
+
+											2. REMOVE the current `Tree` classes
+											3. REMOVE the current `Token` classes
+
+										About usage: 
+											1. It would permit user to make code MORE EFFICIENT, by means of 
+												constructing the AST AS-IS-INTENDED [no more need for (unnecessary) additional copying]
+											2. It would simplify the code (no more additional copying - less stages fro a functional source-generator-from-AST)
+
+								PLAN [for impleenting 3.]: 
+									0. design common interface for the 3 classes
+										1. copy - RECURSIVE
+										2. mutate - RECURSIVE, MUTABLE `.map`
+										3. map - RECURSIVE, COPYING `.map`
+
+										[as-are]
+										4. index
+										5. write
+										6. append
+										7. findUnwalkedChildren
+										8. backtrack
+										9. remove 
+										10. insert
+										11. .lastChild [as-is READONLY, on `ContentASTNode` and `TrivialASTNode` - CONSTANTS, 1, and 0 RESPECTIVELY]: 
+											1. For `RecursiveASTNode`, RETURNS THE LENGTH OF `.children`
+
+										[new]
+										12. read(i: number) returns the `i`th child
+											This way, we'll be able to remove the access to `.children` - MAKE IT AN IMPLEMENTATION DETAIL!
+
+										[REMOVE PUBLIC]
+										13. .children: 
+											1. present AS PROTECTED on `RecursiveASTNode`
+											2. missing on `ContentASTNode` and `TrivialASTNode`
+										
+										NOTE: for `TrivialASTNode` ALL OF THESE are just stubs that DON'T DO ANYTHING!
+									1. skeleton code for the 3 different classes
+									2. use `ParentTree` as a scaffold (keep a `.parent` property, algorithms come from there)
+									3. remove the utils [additionally to `recursiveTreeCopy`]: 
+										1. isParentTree: 
+											FORCE the items withint the `RecursiveASTNode` TO BE `ContentASTNode`/`TrivialASTNode`/`RecursiveASTNode`-like. 
+											CONFORM to the same interface. 
+										2. mapper
+									4. clean up the `ASTAnalyzer` notes for v0.4 [to eliminate already covered points, ONLY the `ASTAnalyzer`-specific stuff]; 
+									5. remove old interfaces
+									6. re-wire the `TreeWalker` to work with new interfaces
+									7. remove old classes: 
+										1. MultTree
+										2. SingleTree
+										3. ChildlessTree
+										4. ParentTree [used as scaffold]
+										5. ChildrenTree
+									8. fix utils: 
+										1. sequentialIndex - use `.read`, instead of `.index`
+										2. treeEndPath - use `.read`, instead of `.index`
+										3. hasChildren - make it into `(x) => isGoodIndex(x.lastChild)` [remove the `structCheck`-added `null`- and type-checks]; 
+
+								4. About `TreeWalker` - MISTAKE: 
+									1. make it an implementation detail [id est - A PRIVATE class, NOT EXPORTED]
+									2. REMOVE the tests for it [they are a part of the IMPLEMENTATION of the `TreeStream`]
+									3. REMOVE it as an argument from the `TreeStream` constructor - instead, it is 
+										CREATED ONCE inside the constructor, and then 
+											SUBSEQUENTLY RE-INITIALIZED! 
+
+									Reason: used ONLY as an intermediate wire-in for the `TreeStream`. 
+										NOT USED anywhere else at all. Has no interface. No sense in introducing polymorphism. 
+
+									ALSO - do the same for the `MultiIndexModifier` [A PRIVATE DETAIL for the `MultiIndex`]; 
+										Reason: 
+											1. modifiabilty is NOT needed outside of `TreeWalker` [used ONLY as a `PositionObject`-implementing class, argument for the `TreeStream.prototype.navigate`]
+
+									REMOVE the tests for it. 
 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
 						3. EnumSpace
