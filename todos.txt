@@ -37,10 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [any order]: 
-		-3. 'internal' directory: 
-			1. populate with the current `abstract.ts` files' contentsva
-			2. `refactor.ts` - RENAME to `methods.ts` [where it IS populated by `methods`, increasing clarity...]; 
-
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
 				1. provide a STRICT convention: 
@@ -81,6 +77,10 @@ Order of TODO-elimination:
 		7. GitHub Workflows
 		8. Special Pages
 		9. Tests: 
+			1. New developments: 
+				1. 'emptied()' - new method on `IFreezableBuffer': 
+					add tests for it
+
 			2. Add relevant (missing) tests
 			3. Modify existing tests: 
 				NOTES: 
@@ -105,7 +105,6 @@ Order of TODO-elimination:
 						List: 
 							6. Stream: 
 								2. Individual StreamClass-es: 
-									1. LimitedStream (the 'from' and 'to')
 									2. NestedStream (the `index`)
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
@@ -651,6 +650,15 @@ Order of TODO-elimination:
 									return this.stream.travel(this.value)
 								}
 							}
+
+						ALSO - TODO: add a `travel` util (analogous to `navigate`, `rewind`, etc), 
+							and REFACTOR IT into the `LimitedStream.prototype.init`; 
+							It would go like: 
+
+								travel = function (stream, point) {
+									rewind(stream)
+									navigate(stream, point)
+								}
 								
 				SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
 					This is the early version [rough, unfinished, sketchy]: 
@@ -1055,7 +1063,7 @@ Order of TODO-elimination:
 			Minor: 	
 				SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
 					Currently, missing. 
-					Example: TreeStream. 
+					Example [ONLY here... others keep binding AS-CURRENTLY-ARE]: TreeStream. 
 						It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
 						After this change, NO MORE will the "binding" happen outside the "base" definition. 
 						Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
