@@ -1,7 +1,6 @@
 import type { IReversibleStream, IReversedStream } from "./interfaces.js"
 
 import { finish } from "../StreamClass/utils.js"
-import { superInit } from "../StreamClass/refactor.js"
 
 export namespace methods {
 	export function init<Type = any>(
@@ -10,7 +9,7 @@ export namespace methods {
 	): IReversedStream<Type> {
 		if (value) {
 			finish(value)
-			superInit(this, value)
+			this.super.init.call(this, value)
 		}
 		return this
 	}

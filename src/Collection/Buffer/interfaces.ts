@@ -4,6 +4,7 @@ import type { ICollection } from "../interfaces.js"
 export interface IFreezableBuffer<Type = any>
 	extends ICollection<Type>,
 		ISizeable {
+	emptied: () => typeof this
 	freeze: () => this
 	read: (i: number) => Type
 	readonly isFrozen: boolean

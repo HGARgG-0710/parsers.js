@@ -1,10 +1,14 @@
 import type { IUnfreezableBuffer } from "./interfaces.js"
+import type { IIndexed } from "../../interfaces.js"
+
 import { IterableCollection } from "src/internal/Collection.js"
 
 import { array } from "@hgargg-0710/one"
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
-	isFrozen: boolean = false
+	isFrozen: boolean = false;
+
+	["constructor"]: new (value?: IIndexed<Type>) => typeof this
 
 	unfreeze() {
 		this.isFrozen = false
@@ -23,15 +27,21 @@ abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	get size() {
 		return this.value!.length
 	}
+
+	copy() {
+		return new this.constructor(this.value)
+	}
+
+	emptied() {
+		return new this.constructor()
+	}
 }
 
 export class UnfreezableArray<Type = any>
 	extends TypicalUnfreezable<Type>
 	implements IUnfreezableBuffer<Type>
 {
-	protected value: Type[];
-
-	["constructor"]: new (value?: Type[]) => UnfreezableArray<Type>
+	protected value: Type[]
 
 	push(...elements: Type[]) {
 		if (!this.isFrozen) this.value.push(...elements)
@@ -55,9 +65,7 @@ export class UnfreezableString
 	extends TypicalUnfreezable<string>
 	implements IUnfreezableBuffer<string>
 {
-	protected value: string;
-
-	["constructor"]: new (value?: string) => UnfreezableString
+	protected value: string
 
 	get() {
 		return super.get() as string
@@ -66,10 +74,6 @@ export class UnfreezableString
 	push(...strings: string[]) {
 		if (!this.isFrozen) this.value += strings.join("")
 		return this
-	}
-
-	copy() {
-		return new this.constructor(this.value)
 	}
 
 	constructor(value: string = "") {

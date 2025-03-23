@@ -2,7 +2,6 @@ import type { MultiIndex } from "../../Position/classes.js"
 
 import { TreeWalker } from "../../internal/TreeWalker/classes.js"
 import { TreeStream } from "./classes.js"
-import { superInit } from "../StreamClass/refactor.js"
 import { BadIndex } from "../../constants.js"
 
 export namespace methods {
@@ -80,7 +79,7 @@ export namespace methods {
 
 		if (walker) {
 			this.walker = walker
-			superInit(this)
+			this.super.init.call(this)
 		}
 
 		return this

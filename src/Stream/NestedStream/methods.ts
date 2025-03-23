@@ -2,7 +2,6 @@ import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { INestedStream } from "./interfaces.js"
 
 import { finish } from "../StreamClass/utils.js"
-import { superInit } from "../StreamClass/refactor.js"
 
 import { type } from "@hgargg-0710/one"
 import { assignIndex } from "../../utils.js"
@@ -37,7 +36,7 @@ export namespace methods {
 		index?: any
 	) {
 		if (index) assignIndex(this, index)
-		if (value) superInit(this, value)
+		if (value) this.super.init.call(this, value)
 		return this
 	}
 }

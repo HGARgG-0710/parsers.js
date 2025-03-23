@@ -2,7 +2,6 @@ import type { IStreamParser } from "./interfaces.js"
 import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import { superInit } from "../StreamClass/refactor.js"
 import { isBufferized } from "../../Collection/Buffer/utils.js"
 
 import { Stream } from "../../constants.js"
@@ -24,8 +23,9 @@ export namespace methods {
 		state?: Summat
 	) {
 		if (input) {
-			if (isBufferized(this)) superInit(this, input, null, state)
-			else superInit(this, input, state)
+			if (isBufferized(this))
+				this.super.init.call(this, input, null, state)
+			else this.super.init.call(this, input, state)
 		}
 		return this
 	}

@@ -3,7 +3,6 @@ import type { IIsEndCurrable } from "../StreamClass/interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
 
 import { navigate } from "../StreamClass/utils.js"
-import { superInit } from "../StreamClass/refactor.js"
 
 export namespace methods {
 	export function currGetter<Type = any>(this: IPredicateStream<Type>) {
@@ -33,7 +32,7 @@ export namespace methods {
 		value?: IReversibleStream<Type> & IIsEndCurrable
 	) {
 		this.hasLookAhead = false
-		if (value) superInit(this, value)
+		if (value) this.super.init.call(this, value)
 		return this
 	}
 

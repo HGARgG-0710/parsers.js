@@ -9,18 +9,12 @@ import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 
 import curr from "./methods/curr.js"
 
-import { object } from "@hgargg-0710/one"
-const { calledDelegate } = object.classes
-
 export type Constructor<Signature extends any[], Type = any> = new (
 	...x: Signature
 ) => Type
 
 export const valueIsCurrEnd = valueDelegate("isCurrEnd")
 export const valueCurr = valuePropDelegate("curr")
-
-const superDelegate = calledDelegate("super")
-export const superInit = superDelegate("init")
 
 export function start(stream: IStarted) {
 	stream.isStart = true
