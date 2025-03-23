@@ -13,6 +13,7 @@ const { LimitedStream } = Stream
 import { navigate, rewind } from "../StreamClass/utils.js"
 
 import { type } from "@hgargg-0710/one"
+import type { IFreezableBuffer } from "../../interfaces.js"
 const { isNullary } = type
 
 export namespace methods {
@@ -55,10 +56,11 @@ export namespace methods {
 		this: ILimitedStream<Type>,
 		value?: ILimitedUnderStream<Type>,
 		from?: IPosition,
-		to?: IPosition
+		to?: IPosition,
+		buffer?: IFreezableBuffer<Type>
 	) {
 		if (value || this.value) {
-			if (value) this.super.init.call(this, value)
+			if (value) this.super.init.call(this, value, buffer)
 
 			this.hasLookAhead = false
 
@@ -82,6 +84,11 @@ export namespace methods {
 	export function copy<Type = any>(
 		this: ILimitedStream<Type>
 	): ILimitedStream<Type> {
-		return new this.constructor(this.value!.copy(), this.from, this.to)
+		return new this.constructor(
+			this.value!.copy(),
+			this.from,
+			this.to,
+			this.buffer
+		)
 	}
 }

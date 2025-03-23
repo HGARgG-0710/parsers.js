@@ -8,7 +8,12 @@ import type {
 	IStreamClassInstance
 } from "../StreamClass/interfaces.js"
 
-import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
+import type {
+	ISupered,
+	IIndexAssignable,
+	ICopiable,
+	IBufferized
+} from "../../interfaces.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
@@ -17,12 +22,8 @@ export interface INestedStream<Type = any>
 		ISupered,
 		IPattern<IUnderNestedStream<Type>>,
 		IIndexAssignable,
-		Partial<IPosed<number>> {
-	constructor: new (
-		value?: IEndableStream<Type>,
-		index?: any
-	) => INestedStream<Type>
-
+		Partial<IPosed<number>>,
+		Partial<IBufferized<Type>> {
 	typesTable: ILookupTable<any, IStreamPredicate>
-	currNested: boolean
+	isCurrNested: boolean
 }

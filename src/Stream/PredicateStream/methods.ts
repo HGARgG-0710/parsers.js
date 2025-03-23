@@ -1,6 +1,7 @@
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IIsEndCurrable } from "../StreamClass/interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
 
 import { navigate } from "../StreamClass/utils.js"
 
@@ -29,10 +30,11 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: IPredicateStream<Type>,
-		value?: IReversibleStream<Type> & IIsEndCurrable
+		value?: IReversibleStream<Type> & IIsEndCurrable, 
+		buffer?: IFreezableBuffer<Type>
 	) {
 		this.hasLookAhead = false
-		if (value) this.super.init.call(this, value)
+		if (value) this.super.init.call(this, value, buffer)
 		return this
 	}
 

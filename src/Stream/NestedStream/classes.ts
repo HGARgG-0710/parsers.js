@@ -3,6 +3,7 @@ import type { IStreamPredicate } from "../../Parser/TableMap/interfaces.js"
 import type { ILookupTable } from "../../IndexMap/LookupTable/interfaces.js"
 import type { Constructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
 
 import type {
 	IEndableStream,
@@ -32,39 +33,44 @@ const NestedStreamBase = <Type = any>(
 	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function NestedStream<Type = any>(
-	nestedTypes: ILookupTable<any, IStreamPredicate>,
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
-): new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
-	const baseClass = NestedStreamBase(hasPosition, hasBuffer)
-	class NestedStream extends baseClass implements INestedStream<Type> {
-		value: IUnderNestedStream<Type>
-		currNested: boolean
-		assignedIndex?: any
+	nestedTypes: ILookupTable<any, IStreamPredicate>
+): (
+	hasPosition?: boolean,
+	hasBuffer?: boolean
+) => new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
+	return function (hasPosition: boolean = false, hasBuffer: boolean = false) {
+		const baseClass = NestedStreamBase(hasPosition, hasBuffer)
+		class NestedStream extends baseClass implements INestedStream<Type> {
+			value: IUnderNestedStream<Type>
+			isCurrNested: boolean
+			assignedIndex?: any
 
-		super: Summat
-		typesTable: ILookupTable<any, IStreamPredicate>
+			super: Summat
+			typesTable: ILookupTable<any, IStreamPredicate>
 
-		init: (
-			value?: IEndableStream<Type>,
-			_index?: any
-		) => INestedStream<Type>;
-		["constructor"]: new (
-			value?: IEndableStream<Type>,
-			_index?: any
-		) => INestedStream<Type>
+			init: (
+				value?: IEndableStream<Type>,
+				_index?: any
+			) => INestedStream<Type>;
 
-		constructor(value?: IEndableStream<Type>, index?: any) {
-			super(value)
-			this.init(value, index)
+			["constructor"]: new (
+				value?: IEndableStream<Type>,
+				_index?: any,
+				buffer?: IFreezableBuffer<Type>
+			) => INestedStream<Type>
+
+			constructor(value?: IEndableStream<Type>, index?: any) {
+				super(value)
+				this.init(value, index)
+			}
 		}
+
+		withSuper(NestedStream, baseClass, {
+			init: ConstDescriptor(init),
+			copy: ConstDescriptor(copy),
+			typesTable: ConstDescriptor(nestedTypes)
+		})
+
+		return NestedStream
 	}
-
-	withSuper(NestedStream, baseClass, {
-		init: ConstDescriptor(init),
-		copy: ConstDescriptor(copy),
-		typesTable: ConstDescriptor(nestedTypes)
-	})
-
-	return NestedStream
 }

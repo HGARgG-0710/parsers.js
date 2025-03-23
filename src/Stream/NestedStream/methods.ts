@@ -1,3 +1,4 @@
+import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { INestedStream } from "./interfaces.js"
 
@@ -10,13 +11,13 @@ const { isNull, isUndefined } = type
 export namespace methods {
 	export function initGetter<Type = any>(this: INestedStream<Type>) {
 		const index = this.typesTable.claim(this)
-		return (this.currNested = !isNull(index))
+		return (this.isCurrNested = !isNull(index))
 			? new this.constructor(this.value, index)
 			: this.value!.curr
 	}
 
 	export function baseNextIter<Type = any>(this: INestedStream<Type>) {
-		if (this.currNested) finish(this.curr as IEndableStream<Type>)
+		if (this.isCurrNested) finish(this.curr as IEndableStream<Type>)
 		this.value!.next()
 		return this.initGetter!()
 	}
@@ -33,14 +34,19 @@ export namespace methods {
 	export function init<Type = any>(
 		this: INestedStream<Type>,
 		value?: IEndableStream<Type>,
-		index?: any
+		index?: any,
+		buffer?: IFreezableBuffer<Type>
 	) {
 		if (!isUndefined(index)) assignIndex(this, index)
-		if (value) this.super.init.call(this, value)
+		if (value) this.super.init.call(this, value, buffer)
 		return this
 	}
 
 	export function copy<Type = any>(this: INestedStream<Type>) {
-		return new this.constructor(this.value!.copy(), this.assignedIndex)
+		return new this.constructor(
+			this.value!.copy(),
+			this.assignedIndex,
+			this.buffer
+		)
 	}
 }

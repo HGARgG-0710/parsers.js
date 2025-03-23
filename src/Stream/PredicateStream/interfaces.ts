@@ -7,7 +7,7 @@ import type {
 	IStreamClassInstance
 } from "../StreamClass/interfaces.js"
 
-import type { ISupered } from "../../interfaces.js"
+import type { ICopiable, IFreezableBuffer, ISupered } from "../../interfaces.js"
 
 export interface ILookaheadHaving {
 	hasLookAhead: boolean
@@ -17,6 +17,10 @@ export interface ISinglePositionLookahead<Type = any> {
 	prod: () => Type
 	lookAhead: Type
 }
+
+export type IUnderPredicateStream<Type = any> = IReversibleStream<Type> &
+	IIsEndCurrable &
+	ICopiable
 
 export interface IPredicateStream<Type = any>
 	extends IStreamClassInstance<Type>,
@@ -29,6 +33,6 @@ export interface IPredicateStream<Type = any>
 }
 
 export type IPredicateStreamConstructor<Type = any> = new (
-	input?: IReversibleStream<Type> & IIsEndCurrable,
-	predicate?: IPredicatePosition<Type>
+	value?: IUnderPredicateStream,
+	buffer?: IFreezableBuffer<Type>
 ) => IPredicateStream<Type>

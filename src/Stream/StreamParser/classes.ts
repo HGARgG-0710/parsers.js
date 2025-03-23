@@ -65,12 +65,17 @@ export function StreamParser<InType = any, OutType = any>(
 
 			init: (
 				value?: IEndableStream<InType>,
+				buffer?: IFreezableBuffer<OutType>,
 				state?: Summat
 			) => IStreamParser<InType, OutType>
 
-			constructor(value?: IEndableStream<InType>, state: Summat = {}) {
+			constructor(
+				value?: IEndableStream<InType>,
+				buffer?: IFreezableBuffer<OutType>,
+				state: Summat = {}
+			) {
 				super(value)
-				this.init(value, state)
+				this.init(value, buffer, state)
 			}
 		}
 

@@ -13,6 +13,7 @@ import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
 const { init, prod, copy, ...baseMethods } = methods
 
 const LimitedStreamBase = <Type = any>(
@@ -51,16 +52,25 @@ export function LimitedStream<Type = any>(
 		init: (
 			value: ILimitedUnderStream<Type>,
 			from?: IPosition,
-			to?: IPosition
+			to?: IPosition,
+			buffer?: IFreezableBuffer<Type>
+		) => ILimitedStream<Type>;
+
+		["constructor"]: new (
+			value: ILimitedUnderStream<Type>,
+			from?: IPosition,
+			to?: IPosition,
+			buffer?: IFreezableBuffer<Type>
 		) => ILimitedStream<Type>
 
 		constructor(
 			value: ILimitedUnderStream<Type>,
 			from?: IPosition,
-			to?: IPosition
+			to?: IPosition,
+			buffer?: IFreezableBuffer<Type>
 		) {
 			super(value)
-			this.init(value, from, to)
+			this.init(value, from, to, buffer)
 		}
 	}
 

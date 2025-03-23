@@ -1,17 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+
+import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IPredicatePosition } from "../../Position/interfaces.js"
-import type {
-	IIsEndCurrable,
-	IStreamClassInstance
-} from "../StreamClass/interfaces.js"
-
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Constructor } from "../StreamClass/refactor.js"
-
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 
 import type {
 	IPredicateStream,
-	IPredicateStreamConstructor
+	IPredicateStreamConstructor,
+	IUnderPredicateStream
 } from "./interfaces.js"
 
 import type { IPattern } from "../../Pattern/interfaces.js"
@@ -51,18 +48,24 @@ export function PredicateStream<Type = any>(
 		{
 			lookAhead: Type
 			hasLookAhead: boolean
+
 			predicate: IPredicatePosition<Type>
-			value: IReversibleStream<Type> & IIsEndCurrable
+			value: IUnderPredicateStream<Type>
 
 			super: Summat
 			prod: () => Type
+
 			init: (
-				input?: IReversibleStream<Type> & IIsEndCurrable
+				value?: IUnderPredicateStream<Type>,
+				buffer?: IFreezableBuffer<Type>
 			) => IPredicateStream<Type>
 
-			constructor(value?: IReversibleStream<Type> & IIsEndCurrable) {
+			constructor(
+				value?: IUnderPredicateStream<Type>,
+				buffer?: IFreezableBuffer<Type>
+			) {
 				super(value)
-				this.init(value)
+				this.init(value, buffer)
 			}
 		}
 
@@ -77,9 +80,5 @@ export function PredicateStream<Type = any>(
 }
 
 export function DelimitedStream<Type = any>(...delims: Type[]) {
-	const notDelim = negate(has(new Set(delims)))
-	return function (predicateStream: IPredicateStreamConstructor<Type>) {
-		return (input?: IReversibleStream<Type> & IIsEndCurrable) =>
-			new predicateStream(input, notDelim)
-	}
+	return PredicateStream(negate(has(new Set(delims))))
 }

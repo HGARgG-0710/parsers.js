@@ -72,7 +72,7 @@ function generateCopyMethods<Type = any>(
 	function patternCopy(
 		this: IStreamClassInstance<Type> & IPattern
 	): typeof this {
-		return copy.call(this, this.value)
+		return copy.call(this, this.value.copy())
 	}
 
 	function posPatternCopy(
@@ -84,7 +84,7 @@ function generateCopyMethods<Type = any>(
 	function bufferPatternCopy(
 		this: IStreamClassInstance<Type> & IBufferized<Type> & IPattern
 	): typeof this {
-		return copy.call(this, this.value, this.buffer)
+		return copy.call(this, this.value.copy(), this.buffer)
 	}
 
 	function posBufferPatternCopy(
@@ -95,14 +95,14 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copyPos(
 			this,
-			copy.call(this, this.value, this.buffer.emptied())
+			copy.call(this, this.value.copy(), this.buffer.emptied())
 		) as typeof this
 	}
 
 	function statePatternCopy(
 		this: IStreamClassInstance<Type> & IStateful & IPattern
 	): typeof this {
-		return copy.call(this.value, this.state)
+		return copy.call(this.value.copy(), this.state)
 	}
 
 	function posStatePatternCopy(
@@ -119,7 +119,7 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copy.call(
 			this,
-			this.value,
+			this.value.copy(),
 			this.buffer,
 			this.state
 		) as typeof this
@@ -134,7 +134,12 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copyPos(
 			this,
-			copy.call(this, this.value, this.buffer.emptied(), this.state)
+			copy.call(
+				this,
+				this.value.copy(),
+				this.buffer.emptied(),
+				this.state
+			)
 		) as typeof this
 	}
 

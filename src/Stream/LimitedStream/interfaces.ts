@@ -19,7 +19,7 @@ import type {
 
 import type { IPattern } from "../../Pattern/interfaces.js"
 
-import type { ICopiable, ISupered } from "../../interfaces.js"
+import type { IBufferized, ICopiable, ISupered } from "../../interfaces.js"
 
 export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IPosed<IPosition> &
@@ -33,7 +33,8 @@ export interface ILimitedStream<Type = any>
 		ILookaheadHaving,
 		ISupered,
 		IReversedStreamClassInstance<Type>,
-		IDirectionHaving {
+		IDirectionHaving,
+		Partial<IBufferized<Type>> {
 	from: IPosition
 	to: IPosition
 }

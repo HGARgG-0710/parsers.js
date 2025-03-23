@@ -103,17 +103,7 @@ Order of TODO-elimination:
 							to be ["constructor"]: new (...) => CLASS
 							Reason: some classes have methods that are NOT on interfaces 
 							
-						List: 
-							6. Stream: 
-								PROBLEM: with derived `.init` methods `Stream`s: 
-									THEIR `.init` METHODS *DO NOT* support the addition of a `buffer`!!! 
-										This is a problem. 
-										The ONLY one actually handling this is `StreamParser` (and only because it actually HAS TO). 
-										The buffer CANNOT be inserted just like `.buffer = ` [or, at least, it's not supposed to be]. 
-										ADD the respective arguments to the respective: 
-											1. child-class derived `.init` methods
-											2. child-class derived `.copy` methods
-											
+						List: 		
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
 								2. Remove the `recursiveTreeCopy` util
