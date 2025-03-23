@@ -1,6 +1,6 @@
-import { BadIndex } from "../../constants.js";
-import type { ITreeStream } from "../../interfaces.js";
-import { InitializablePattern } from "../../internal/Pattern.js";
+import type { ITreeStream } from "../../interfaces.js"
+import { BadIndex } from "../../constants.js"
+import { InitializablePattern } from "../../internal/Pattern.js"
 
 import { array } from "@hgargg-0710/one"
 const { last, first, copy } = array
@@ -24,12 +24,12 @@ export class MultiIndex extends InitializablePattern<number[]> {
 		return final
 	}
 
-	firstLevel() {
-		return [first(this.value!)]
+	first() {
+		return first(this.value!)
 	}
 
-	lastLevel() {
-		return [last(this.value!)]
+	last() {
+		return last(this.value!)
 	}
 
 	slice(from: number = 0, to: number = this.levels) {

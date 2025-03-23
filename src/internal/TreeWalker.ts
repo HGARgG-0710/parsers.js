@@ -5,9 +5,6 @@ import { MultiIndexModifier } from "./MultiIndexModifier.js"
 import { InitializablePattern } from "./Pattern.js"
 import { hasChildren, treeEndPath } from "../Node/utils.js"
 
-import { array } from "@hgargg-0710/one"
-const { last } = array
-
 export class TreeWalker<
 	Type extends IWalkable<Type> = any
 > extends InitializablePattern<IWalkable<Type>> {
@@ -22,7 +19,7 @@ export class TreeWalker<
 
 	getCurrChild() {
 		const { level, pos } = this
-		return (this.curr = level.index(pos.lastLevel()))
+		return (this.curr = level.read(pos.last()))
 	}
 
 	levelUp(positions: number = 1) {
@@ -37,30 +34,27 @@ export class TreeWalker<
 	}
 
 	popChild() {
-		const lastIndexed = this.modifier.prevLevel()
+		this.modifier.prevLevel()
 		this.curr = this.level
 		this.levelUp()
-		return lastIndexed
 	}
 
 	isSiblingAfter() {
-		return this.level.lastChild > last(this.pos.lastLevel())
+		return this.level.lastChild > this.pos.last()
 	}
 
 	isSiblingBefore() {
-		return last(this.pos.lastLevel()) > 0
+		return this.pos.last() > 0
 	}
 
 	goSiblingAfter() {
-		const res = this.modifier.incLast()
+		this.modifier.incLast()
 		this.getCurrChild()
-		return res
 	}
 
 	goSiblingBefore() {
-		const res = this.modifier.decLast()
+		this.modifier.decLast()
 		this.getCurrChild()
-		return res
 	}
 
 	indexCut(length: number) {

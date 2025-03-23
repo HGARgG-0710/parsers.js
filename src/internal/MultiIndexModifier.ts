@@ -1,18 +1,16 @@
 import { InitializablePattern } from "./Pattern.js"
-import type { MultiIndex } from "src/Position/classes/MultiIndex.js"
-
+import { MultiIndex } from "src/Position/classes/MultiIndex.js"
 import { array } from "@hgargg-0710/one"
-const { clear } = array
 
 export class MultiIndexModifier extends InitializablePattern<MultiIndex> {
 	["constructor"]: new (value?: MultiIndex) => MultiIndexModifier
 
 	nextLevel() {
-		return this.extend([0])
+		this.extend([0])
 	}
 
 	prevLevel() {
-		return [this.value!.get().pop() as number]
+		return this.value!.get().pop()!
 	}
 
 	resize(length: number = 0) {
@@ -23,7 +21,7 @@ export class MultiIndexModifier extends InitializablePattern<MultiIndex> {
 
 	clear() {
 		const value = this.value!
-		clear(value.get())
+		array.clear(value.get())
 		return value
 	}
 
@@ -31,22 +29,25 @@ export class MultiIndexModifier extends InitializablePattern<MultiIndex> {
 		const value = this.value!
 		const multind = value.get()
 		const { levels } = value
-		return ++multind[levels - 1]
+		++multind[levels - 1]
 	}
 
 	decLast() {
 		const value = this.value!
 		const { levels } = value
 		const multind = value.get()
-		return --multind[levels - 1]
+		--multind[levels - 1]
 	}
 
 	extend(subIndex: number[]) {
 		this.value!.get().push(...subIndex)
-		return subIndex
 	}
 
 	copy() {
 		return new this.constructor(this.value?.copy())
+	}
+
+	constructor(value = new MultiIndex()) {
+		super(value)
 	}
 }

@@ -109,19 +109,9 @@ Order of TODO-elimination:
 							
 						List: 		
 							8. Tree: 
-								PLAN [for impleenting 3.]: 
-									4. clean up the `ASTAnalyzer` notes for v0.4 [to eliminate already covered points, ONLY the `ASTAnalyzer`-specific stuff]; 
-
-								4. About `TreeWalker` - MISTAKE: 
-									Reason: used ONLY as an intermediate wire-in for the `TreeStream`. 
-										NOT USED anywhere else at all. Has no interface. No sense in introducing polymorphism. 
-
-									ALSO [for MultiIndexModifier]: 
-										2. REMOVE it from the `TreeWalker` constructor as an INJECTABLE, instead - INJECT the 
-											`MultiIndex`. 
-										3. SIMPLIFY IT [get rid of the `lastLevel: () => number[]`, etc]; 
-
-									REMOVE the tests for it. 
+								0. TreeStream: ADD the `Type extends IWalkable<Type> = any` generic to it! 
+									This will permit one to work with `INode`s WITHOUT needing to constantly do type-expansions: `as INode` 
+								1. REMOVE `Token` (and utils) [no longer needed for anything - just an inferior version of `Node`]; 
 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
 						3. EnumSpace
@@ -1269,51 +1259,9 @@ TODO:
 			Also - the user can (optionally) store the '.state' property on these things 
 				(they come "pre-added", as the ignored empty object doesn't take any space at all). 
 	
-		TC1. Create an 'ASTAnalyzer' class [under new 'Tree.AST' module]: 
-			1. gets an 'AST', defined by: 
-				1. Trivial nodes - 'TokenInstance'-like
-				2. Content nodes - 'Token'-like or 'TokenType'-like
-				3. Recursive nodes - 'TokenType'-like, with arrays for values
-			2. Traverses the tree: 
-				1. New abstraction: ASTNode - class, with '.from' method: 
-					1. The '.from' method takes a JavaScript object (JSON), 
-						with values as described above, and transforms it INTO A PROPER TREE, 
-							using: 
-								1. ChildlessTree
-								2. SingleTree
-								3. MultTree
-					2. The ASTNode is a 'ChildrenTree' [see Tree/classes.ts]: 
-						1. Namely, it is based off a 'ChildrenTree' descendant (it's a class-generating function), already provided ones are: 
-							1. ParentTree [for quick iteration via 'TreeStream' - better for subsequent reads]
-							2. TrivialWalkableTree [for better memory footprint - better for initial writes]
-					3. ASTNode can be created via a constructor, like any other tree [uses the 'constructor' of the given parent class]: 
-						1. Namely, it employs a specific 'converter' function [one that converts the elements "simply"]
-						2. Keeps a '.type' property on itself (it's a TokenInstance)
-						3. There are *3* types of ASTNode-s [3 distinct classes - for optimization purposes]: 
-							1. RecursiveASTNode - without '.value' and '.children: ASTNode[]'; NOTE: here 'ASTNode' is an interface
-							2. ContentASTNode - with '.value: any', without '.children'; This is just a 'TokenType' with additional prototype-methods
-							3. TrivialASTNode - with '.value', without '.children'; This is a 'TokenInstance', with additional prototype-methods
-					4. THERE IS a `.toJSON` method that: 
-						1. uses THE CONSTRUCTOR FOR THE APPROPRIATE `Token`/`TokenInstance`/
-						2. THE `Token`/`TokenInstance`, then, will ALSO have a `toJSON` method!
-							1. Defined so that the DEFAULT `.toJSON` for the "non-Token/TokenInstance" items in the tree 
-								WILL BE a "special" 'stripMethods()' util (possibly move to one.js), for 
-									CREATING AN OBJECT WHICH IS **THE SAME** as the current one, EXCEPT 
-							2. IMPORTANT NOTE: 
-								1. IF the implementation of `AST` ends up being simplistic/trivial/Token-like, 
-									REMOVE 'Token' and 'Tree' as a module! 
-									Instead, just add the `AST`! 
-									Then, there have to be the ability to create the 'AST' on a per-layer recursive-descent basis...
-										[like with `Token`]
-									AND to use it for from-tree-source-generation purposes [like with `Tree`]. 
-					5. Likewise, there is the '.fromToken' method for creating an 'AST' object from nested 'Token's
-					6. ALSO - there is a 'fromJSON' util which CREATES A NESTED TREE of 'Token/TokenInstance' ONLY (trying to "guess" via "type" and "value" fields). 
-				2. By doing 'ASTStream(TreeWalker(ASTNode.from(...)))', one can iterate a given generated JavaScript AST object! 
-					2.1. This is what the ASTAnalyzer (actually) is doing; 
-					2.2. The 'Stream' is, then, applied a 'StreamParser' upon; 
-					2.3. NOTE: that the 'TreeStream' used is CONFIGURABLE [namely - 'ASTAnalyzer' is, too a function, taking in and returning A CLASS!]
-					2.4. About 'ASTStream' - see below...
-	
+		TC1. Create an 'ASTAnalyzer' class [under new 'Node' module]: 
+			1. Takes in an `INode`
+			2. Traverses the tree
 			3. Returns information: 
 				1. [Buckets-Categorization] Arrays of '.trivial', '.content' and '.recursive' nodes
 				2. [Type-Categorization] Returns a 'HashMap' of arrays of nodes, filtered by their '.type'; 
@@ -1604,6 +1552,9 @@ TODO:
 		IM6. ArrayInternalHash [InternalHash]: 
 			A wrapper around `ValueType[]` for keeping the number-keys. 
 			Store together with MapInternalHash and ObjectHashInternal; 
+
+		TC2. [Serialization] Add `toJSON` methods on `Node`
+			Reason - serialization (mighty powerful thing...); 
 
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]

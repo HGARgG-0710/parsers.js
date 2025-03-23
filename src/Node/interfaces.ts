@@ -12,8 +12,6 @@ export interface IWalkable<Type extends IWalkable<Type> = any> {
 	findUnwalkedChildren: (startIndex: readonly number[]) => number
 }
 
-// ! REFACTOR THIS ONTO SEPARATE INTERFACES!
-// TODO: integrate with `TreeWalker` [instead of the current `ITree`]
 export interface INode<Type = any, Value = any>
 	extends ICopiable,
 		ITyped<Type>,
