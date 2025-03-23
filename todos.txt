@@ -61,6 +61,7 @@ Order of TODO-elimination:
 				3. [public] MultiIndexModifier
 			7. Added interfaces: 
 				1. ITyped [Token\interfaces.ts]
+				2. IUnderNestedStream
 			8. Removed interfaces: 
 				1. IMultiIndexModifier
 				2. IMultiIndex
@@ -104,8 +105,15 @@ Order of TODO-elimination:
 							
 						List: 
 							6. Stream: 
-								2. Individual StreamClass-es: 
-									2. NestedStream (the `index`)
+								PROBLEM: with derived `.init` methods `Stream`s: 
+									THEIR `.init` METHODS *DO NOT* support the addition of a `buffer`!!! 
+										This is a problem. 
+										The ONLY one actually handling this is `StreamParser` (and only because it actually HAS TO). 
+										The buffer CANNOT be inserted just like `.buffer = ` [or, at least, it's not supposed to be]. 
+										ADD the respective arguments to the respective: 
+											1. child-class derived `.init` methods
+											2. child-class derived `.copy` methods
+											
 							8. Tree: 
 								1. IMPORTANT: implement the `.copy()` method *RECURSIVELY* on these
 								2. Remove the `recursiveTreeCopy` util
