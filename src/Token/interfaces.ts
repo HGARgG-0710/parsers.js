@@ -1,14 +1,11 @@
 import type { type } from "@hgargg-0710/one"
 import type { IPointer } from "../Pattern/interfaces.js"
 import type { ICopiable } from "../interfaces.js"
+import type { ITyped } from "../Node/interfaces.js"
 
 export interface IToken<Type = any, Value = any>
 	extends ITokenInstance<Type>,
 		IPointer<Value> {}
-
-export interface ITyped<Type = any> {
-	type: Type
-}
 
 export interface ITokenInstance<Type = any> extends ITyped<Type>, ICopiable {}
 

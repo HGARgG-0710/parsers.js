@@ -37,6 +37,8 @@
 
 Order of TODO-elimination: 	
 	TODO [any order]: 
+		-3. missing modules [docs + permalinks + JSDoc]: 
+			1. 'Node': utils.Node, classes.Node, INode
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
 				1. provide a STRICT convention: 
@@ -153,34 +155,7 @@ Order of TODO-elimination:
 											2. It would simplify the code (no more additional copying - less stages fro a functional source-generator-from-AST)
 
 								PLAN [for impleenting 3.]: 
-									0. design common interface for the 3 classes
-										1. copy - RECURSIVE
-										2. mutate - RECURSIVE, MUTABLE `.map`
-										3. map - RECURSIVE, COPYING `.map`
-
-										[as-are]
-										4. index
-										5. write
-										6. append
-										7. findUnwalkedChildren
-										8. backtrack
-										9. remove 
-										10. insert
-										11. .lastChild [as-is READONLY, on `ContentASTNode` and `TrivialASTNode` - CONSTANTS, 1, and 0 RESPECTIVELY]: 
-											1. For `RecursiveASTNode`, RETURNS THE LENGTH OF `.children`
-
-										[new]
-										12. read(i: number) returns the `i`th child
-											This way, we'll be able to remove the access to `.children` - MAKE IT AN IMPLEMENTATION DETAIL!
-
-										[REMOVE PUBLIC]
-										13. .children: 
-											1. present AS PROTECTED on `RecursiveASTNode`
-											2. missing on `ContentASTNode` and `TrivialASTNode`
-										
-										NOTE: for `TrivialASTNode` ALL OF THESE are just stubs that DON'T DO ANYTHING!
-									1. skeleton code for the 3 different classes
-									2. use `ParentTree` as a scaffold (keep a `.parent` property, algorithms come from there)
+									note: ADD the `Tree` utils there...; 
 									3. remove the utils [additionally to `recursiveTreeCopy`]: 
 										1. isParentTree: 
 											FORCE the items withint the `RecursiveASTNode` TO BE `ContentASTNode`/`TrivialASTNode`/`RecursiveASTNode`-like. 
@@ -218,6 +193,7 @@ Order of TODO-elimination:
 										1. REMOVE unused [by TreeWalker] methods from it; 
 										2. REMOVE it from the `TreeWalker` constructor as an INJECTABLE, instead - INJECT the 
 											`MultiIndex`. 
+										3. SIMPLIFY IT [get rid of the `lastLevel: () => number[]`, etc]; 
 
 									REMOVE the tests for it. 
 

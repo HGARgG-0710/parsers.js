@@ -47,7 +47,7 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 	}
 
 	isSiblingAfter() {
-		return (this.curr as ITree<Type>).lastChild > last(this.pos.lastLevel())
+		return this.level.lastChild > last(this.pos.lastLevel())
 	}
 
 	isSiblingBefore() {
