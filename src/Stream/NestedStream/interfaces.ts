@@ -8,12 +8,14 @@ import type {
 	IStreamClassInstance
 } from "../StreamClass/interfaces.js"
 
-import type { ISupered, IIndexAssignable } from "../../interfaces.js"
+import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
+
+export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
 export interface INestedStream<Type = any>
 	extends IStreamClassInstance<Type | INestedStream<Type>>,
 		ISupered,
-		IPattern<IEndableStream<Type>>,
+		IPattern<IUnderNestedStream<Type>>,
 		IIndexAssignable,
 		Partial<IPosed<number>> {
 	constructor: new (

@@ -9,7 +9,7 @@ import type {
 	IStreamClassInstance
 } from "../StreamClass/interfaces.js"
 
-import type { INestedStream } from "./interfaces.js"
+import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
 
 import { withSuper } from "../../refactor.js"
 import { DefaultEndStream } from "../StreamClass/classes.js"
@@ -18,7 +18,7 @@ import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
-const { init, ...baseMethods } = methods
+const { init, copy, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(
 	hasPosition: boolean = false,
@@ -38,7 +38,7 @@ export function NestedStream<Type = any>(
 ): new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
 	const baseClass = NestedStreamBase(hasPosition, hasBuffer)
 	class NestedStream extends baseClass implements INestedStream<Type> {
-		value: IEndableStream<Type>
+		value: IUnderNestedStream<Type>
 		currNested: boolean
 		assignedIndex?: any
 
@@ -62,6 +62,7 @@ export function NestedStream<Type = any>(
 
 	withSuper(NestedStream, baseClass, {
 		init: ConstDescriptor(init),
+		copy: ConstDescriptor(copy),
 		typesTable: ConstDescriptor(nestedTypes)
 	})
 

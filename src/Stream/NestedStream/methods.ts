@@ -5,7 +5,7 @@ import { finish } from "../StreamClass/utils.js"
 
 import { type } from "@hgargg-0710/one"
 import { assignIndex } from "../../utils.js"
-const { isNull } = type
+const { isNull, isUndefined } = type
 
 export namespace methods {
 	export function initGetter<Type = any>(this: INestedStream<Type>) {
@@ -35,8 +35,12 @@ export namespace methods {
 		value?: IEndableStream<Type>,
 		index?: any
 	) {
-		if (index) assignIndex(this, index)
+		if (!isUndefined(index)) assignIndex(this, index)
 		if (value) this.super.init.call(this, value)
 		return this
+	}
+
+	export function copy<Type = any>(this: INestedStream<Type>) {
+		return new this.constructor(this.value!.copy(), this.assignedIndex)
 	}
 }
