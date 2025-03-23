@@ -1,4 +1,4 @@
-import type { IInTree, IReadonlyTree } from "../interfaces.js"
+import type { IInTree, IReadonlyTree } from "../../Tree/interfaces.js"
 
 export interface IWalkableTree<Type = any, T extends IWalkableTree<Type> = any>
 	extends IReadonlyTree<Type> {

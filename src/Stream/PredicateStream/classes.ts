@@ -8,14 +8,14 @@ import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IPredicateStream, IPredicateStreamConstructor } from "./interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 
-import { StreamClass } from "../StreamClass/abstract.js"
+import { StreamClass } from "../StreamClass/classes.js"
 import { withSuper } from "../../refactor.js"
 
 import { object, functional } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 const { negate, has } = functional
 
-import { methods } from "./refactor.js"
+import { methods } from "./methods.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(

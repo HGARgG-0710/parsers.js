@@ -15,7 +15,7 @@ import { current } from "../../Stream/utils.js"
 import { isGoodPointer, pos } from "../../utils.js"
 import { makeDelegate } from "../../refactor.js"
 
-import { DelegateKeyReplaceable } from "./abstract.js"
+import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
 const { id } = functional
@@ -32,7 +32,7 @@ abstract class DelegateLookupTable<
 		IDeletable<DeletedType> &
 		ISizeable = any,
 	DeletedType = KeyType
-> extends DelegateKeyReplaceable<
+> extends DelegateRekeyable<
 	KeyType,
 	ValueType,
 	DelegateType,

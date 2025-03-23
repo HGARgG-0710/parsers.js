@@ -1,12 +1,11 @@
-import type { IIndexingFunction } from "../../interfaces.js"
 import type { array } from "@hgargg-0710/one"
+import type { IIndexingFunction } from "../interfaces.js"
 
-import { isGoodIndex } from "../../utils.js"
-import { fromPairs } from "../utils.js"
-import { inBound } from "../refactor.js"
-
-import { BadIndex } from "../../constants.js"
-import { BaseIndexMap } from "../abstract.js"
+import { BadIndex } from "../constants.js"
+import { inBound } from "../IndexMap/refactor.js"
+import { fromPairs } from "../IndexMap/utils.js"
+import { isGoodIndex } from "../utils.js"
+import { BaseIndexMap } from "./IndexMap.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { insert, out } = inplace

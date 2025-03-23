@@ -1,43 +1,11 @@
 import type { array } from "@hgargg-0710/one"
-import type { ISizeable } from "../interfaces.js"
-import type { IIndexMap } from "./interfaces.js"
-import type { WeakDeletable, WeakSettable } from "./refactor.js"
-
-import { ProtectedPattern } from "../Pattern/abstract.js"
+import type { IIndexMap } from "../interfaces.js"
 
 import { isGoodIndex } from "../utils.js"
-import { toPairs, table } from "./utils.js"
+import { toPairs, table } from "../IndexMap/utils.js"
 
 import { inplace } from "@hgargg-0710/one"
 const { swap } = inplace
-
-export abstract class DelegateSizeable<
-	DelegateType extends ISizeable = any
-> extends ProtectedPattern<DelegateType> {
-	get size() {
-		return this.value.size
-	}
-}
-
-export abstract class DelegateDeletableSettableSizeable<
-	KeyType = any,
-	ValueType = any,
-	DelegateType extends WeakDeletable<DeletedType> &
-		WeakSettable<KeyType, ValueType | DefaultType> &
-		ISizeable = any,
-	DeletedType = KeyType,
-	DefaultType = any
-> extends DelegateSizeable<DelegateType> {
-	set(key: KeyType, value: ValueType | DefaultType) {
-		this.value.set(key, value)
-		return this
-	}
-
-	delete(key: DeletedType) {
-		this.value.delete(key)
-		return this
-	}
-}
 
 export abstract class PreIndexMap<
 	KeyType = any,

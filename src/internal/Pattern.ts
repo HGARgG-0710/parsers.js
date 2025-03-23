@@ -1,7 +1,7 @@
-import type { IGettablePattern, IPattern, IPointer } from "./interfaces.js"
-import { setValue } from "./utils.js"
+import type { IGettablePattern, IPattern, IPointer } from "../interfaces.js"
 
 import { type } from "@hgargg-0710/one"
+import { setValue } from "../Pattern/utils.js"
 const { isUndefined } = type
 
 export abstract class ProtectedPattern<Type = any> {
@@ -11,7 +11,7 @@ export abstract class ProtectedPattern<Type = any> {
 	}
 }
 
-abstract class OptionalPattern<Type = any> {
+export abstract class OptionalPattern<Type = any> {
 	protected value?: Type
 	constructor(value?: Type) {
 		if (!isUndefined(value)) this.value = value
@@ -37,7 +37,6 @@ export abstract class BasicPattern<Type = any> implements IPointer<Type> {
 		setValue(this, value)
 	}
 }
-
 export abstract class Pattern<Type = any> implements IPattern<Type> {
 	value?: Type
 	constructor(value?: Type) {

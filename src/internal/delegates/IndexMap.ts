@@ -1,8 +1,8 @@
-import type { IIndexMap } from "../interfaces.js"
+import type { IIndexMap } from "../../interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { PreIndexMap } from "../abstract.js"
-import { DelegateKeyReplaceable } from "../LookupTable/abstract.js"
+import { PreIndexMap } from "src/internal/IndexMap.js"
+import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
 
 import { object } from "@hgargg-0710/one"
 const { mixin } = object.classes
@@ -12,7 +12,7 @@ abstract class FakeIndexMap<
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = any
-> extends DelegateKeyReplaceable<
+> extends DelegateRekeyable<
 	KeyType,
 	ValueType,
 	IIndexMap<KeyType, ValueType, any, number>,

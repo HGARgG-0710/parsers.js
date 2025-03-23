@@ -7,7 +7,7 @@ import type {
 	ITreeConverter
 } from "./interfaces.js"
 
-import type { IWalkableTree } from "./TreeWalker/interfaces.js"
+import type { IWalkableTree } from "../internal/TreeWalker/interfaces.js"
 
 import { value } from "../Pattern/utils.js"
 import { parameterWaster } from "../refactor.js"
@@ -150,5 +150,3 @@ export function MultTree<Type = any>(treeConstructor: ITreeConstructor<Type>) {
 		)
 	}
 }
-
-export * from "./TreeWalker/classes.js"

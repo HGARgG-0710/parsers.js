@@ -12,12 +12,12 @@ import type {
 import type { INestedStream } from "./interfaces.js"
 
 import { withSuper } from "../../refactor.js"
-import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { DefaultEndStream } from "../StreamClass/classes.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
-import { methods } from "./refactor.js"
+import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(

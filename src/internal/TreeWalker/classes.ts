@@ -1,13 +1,10 @@
-import type {
-	IMultiIndex,
-	IMultiIndexModifier
-} from "../../Position/MultiIndex/interfaces.js"
-
-import type { ITree, IInTree } from "../interfaces.js"
+import type { MultiIndex } from "../../Position/classes.js"
+import type { ITree, IInTree } from "../../Tree/interfaces.js"
 import type { IWalkableTree } from "./interfaces.js"
+import type { MultiIndexModifier } from "../MultiIndexModifier.js"
 
-import { InitializablePattern } from "../../Pattern/abstract.js"
-import { hasChildren, treeEndPath } from "../utils.js"
+import { InitializablePattern } from "../Pattern.js"
+import { hasChildren, treeEndPath } from "../../Tree/utils.js"
 
 import { array } from "@hgargg-0710/one"
 const { last } = array
@@ -17,7 +14,7 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 > {
 	level: IWalkableTree<Type>
 	curr: IInTree<Type, IWalkableTree<Type>>
-	modifier: IMultiIndexModifier
+	modifier: MultiIndexModifier
 
 	get pos() {
 		return this.modifier.get()
@@ -110,13 +107,13 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 		this.modifier.clear()
 	}
 
-	goIndex(pos?: IMultiIndex) {
+	goIndex(pos?: MultiIndex) {
 		if (pos) this.modifier.init(pos)
 		this.curr = this.value!.index(this.pos.get()!)
 		this.levelUp()
 	}
 
-	init(value?: IWalkableTree<Type>, modifier?: IMultiIndexModifier) {
+	init(value?: IWalkableTree<Type>, modifier?: MultiIndexModifier) {
 		if (modifier) {
 			this.modifier = modifier
 			if (value) this.goIndex()
@@ -128,7 +125,7 @@ export class TreeWalker<Type = any> extends InitializablePattern<
 		return this
 	}
 
-	constructor(value?: IWalkableTree<Type>, modifier?: IMultiIndexModifier) {
+	constructor(value?: IWalkableTree<Type>, modifier?: MultiIndexModifier) {
 		super(value)
 		this.init(value, modifier)
 	}

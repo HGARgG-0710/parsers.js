@@ -6,7 +6,7 @@ import type { array } from "@hgargg-0710/one"
 import { BadIndex } from "../../constants.js"
 
 import { setValue, swapValues } from "../../Pattern/utils.js"
-import { DelegateIndexMap } from "./abstract.js"
+import { DelegateIndexMap } from "../../internal/delegates/IndexMap.js"
 
 import { inplace } from "@hgargg-0710/one"
 import { isGoodIndex } from "../../utils.js"

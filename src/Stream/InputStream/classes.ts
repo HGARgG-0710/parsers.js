@@ -1,8 +1,8 @@
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 import type { IInputStream } from "./interfaces.js"
 
-import { StreamClass } from "../StreamClass/abstract.js"
-import { methods } from "./refactor.js"
+import { StreamClass } from "../StreamClass/classes.js"
+import { methods } from "./methods.js"
 
 export const InputStream = StreamClass({
 	...methods,

@@ -1,66 +1,11 @@
-import type { ITreeStream } from "../../Stream/TreeStream/interfaces.js"
-import type { IMultiIndex, IMultiIndexModifier } from "./interfaces.js"
-
-import { InitializablePattern } from "../../Pattern/abstract.js"
-import { BadIndex } from "../../constants.js"
+import { BadIndex } from "../../constants.js";
+import type { ITreeStream } from "../../interfaces.js";
+import { InitializablePattern } from "../../internal/Pattern.js";
 
 import { array } from "@hgargg-0710/one"
-const { last, first, copy, clear } = array
+const { last, first, copy } = array
 
-export class MultiIndexModifier
-	extends InitializablePattern<MultiIndex>
-	implements IMultiIndexModifier
-{
-	["constructor"]: new (value?: MultiIndex) => MultiIndexModifier
-
-	nextLevel() {
-		return this.extend([0])
-	}
-
-	prevLevel() {
-		return [this.value!.get().pop() as number]
-	}
-
-	resize(length: number = 0) {
-		const value = this.value!
-		value.levels = length
-		return value
-	}
-
-	clear() {
-		const value = this.value!
-		clear(value.get())
-		return value
-	}
-
-	incLast() {
-		const value = this.value!
-		const multind = value.get()
-		const { levels } = value
-		return ++multind[levels - 1]
-	}
-
-	decLast() {
-		const value = this.value!
-		const { levels } = value
-		const multind = value.get()
-		return --multind[levels - 1]
-	}
-
-	extend(subIndex: number[]) {
-		this.value!.get().push(...subIndex)
-		return subIndex
-	}
-
-	copy() {
-		return new this.constructor(this.value?.copy())
-	}
-}
-
-export class MultiIndex
-	extends InitializablePattern<number[]>
-	implements IMultiIndex
-{
+export class MultiIndex extends InitializablePattern<number[]> {
 	set levels(length: number) {
 		this.value!.length = length
 	}

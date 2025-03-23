@@ -1,1 +1,1 @@
-export * from "./MultiIndex/classes.js"
+export * from "./classes/MultiIndex.js"

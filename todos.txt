@@ -37,10 +37,16 @@
 
 Order of TODO-elimination: 	
 	TODO [any order]: 
+		-3. 'internal' directory: 
+			1. populate with the current `abstract.ts` files' contentsva
+			2. `refactor.ts` - RENAME to `methods.ts` [where it IS populated by `methods`, increasing clarity...]; 
+
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
 				1. provide a STRICT convention: 
-					1. instead of `Base`, use `Pre` [when extending via the `makeDelegate`]
+					1. Pre < Base
+					2. Base contains NO abstract methods [if it does, then it's a PRE-class]; 
+					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
 		-1. fix docs [from tests]: 
 			1. IHashMap: 
@@ -55,8 +61,13 @@ Order of TODO-elimination:
 				1. TO ADD the `.copy()` method
 			6. Removed classes: 
 				1. Token [as in Token(type, value) - the function, NOT `TokenType`]
+				2. [public] TreeWalker
+				3. [public] MultiIndexModifier
 			7. Added interfaces: 
 				1. ITyped [Token\interfaces.ts]
+			8. Removed interfaces: 
+				1. IMultiIndexModifier
+				2. IMultiIndex
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -90,7 +101,7 @@ Order of TODO-elimination:
 						2. FIX the ["constructor"]: new (...) => INTERFACE 
 							to be ["constructor"]: new (...) => CLASS
 							Reason: some classes have methods that are NOT on interfaces 
-						
+							
 						List: 
 							6. Stream: 
 								2. Individual StreamClass-es: 
@@ -213,6 +224,11 @@ Order of TODO-elimination:
 									ALSO - do the same for the `MultiIndexModifier` [A PRIVATE DETAIL for the `MultiIndex`]; 
 										Reason: 
 											1. modifiabilty is NOT needed outside of `TreeWalker` [used ONLY as a `PositionObject`-implementing class, argument for the `TreeStream.prototype.navigate`]
+
+									ALSO [for MultiIndexModifier]: 
+										1. REMOVE unused [by TreeWalker] methods from it; 
+										2. REMOVE it from the `TreeWalker` constructor as an INJECTABLE, instead - INJECT the 
+											`MultiIndex`. 
 
 									REMOVE the tests for it. 
 

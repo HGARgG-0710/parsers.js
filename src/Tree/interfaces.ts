@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IWalkableTree } from "./TreeWalker/interfaces.js"
+import type { IWalkableTree } from "../internal/TreeWalker/interfaces.js"
 
 export type IInTree<Type = any, T extends IReadonlyTree<Type> = IReadonlyTree<Type>> =
 	| Type
@@ -39,5 +39,3 @@ export type ITreeConverter<
 	Type = any,
 	T extends IReadonlyTree<Type> = IReadonlyTree<Type>
 > = (x: any) => IInTree<Type, T>[]
-
-export type * from "./TreeWalker/interfaces.js"

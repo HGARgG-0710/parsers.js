@@ -1,8 +1,8 @@
 import type { IInternalHash } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
-import { DelegateDeletableSettableSizeable } from "../../abstract.js"
-import { ProtectedPattern } from "../../../Pattern/abstract.js"
+import { DelegateDeletableSettableSizeable } from "src/internal/delegates/DeletableSettable.js"
+import { ProtectedPattern } from "src/internal/Pattern.js"
 
 import { type, object } from "@hgargg-0710/one"
 const { isUndefined } = type

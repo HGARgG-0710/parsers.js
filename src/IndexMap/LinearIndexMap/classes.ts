@@ -9,7 +9,7 @@ import {
 	OptimizedLinearMap as OptimizedLinearMapMethods
 } from "./refactor.js"
 
-import { BaseLinearMap } from "./abstract.js"
+import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import { fromPairs } from "../utils.js"
 
 import { functional, boolean, string } from "@hgargg-0710/one"

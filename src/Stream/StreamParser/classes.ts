@@ -11,14 +11,14 @@ import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
 
-import { DefaultEndStream } from "../StreamClass/abstract.js"
+import { DefaultEndStream } from "../StreamClass/classes.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
-import { methods } from "./refactor.js"
+import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
 
 const StreamParserBase = <Type = any>(

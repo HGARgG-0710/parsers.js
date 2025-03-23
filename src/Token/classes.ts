@@ -7,7 +7,7 @@ import type {
 	IMarkedTokenType
 } from "./interfaces.js"
 
-import { BasicPattern } from "../Pattern/abstract.js"
+import { BasicPattern } from "src/internal/Pattern.js";
 import { isType } from "./utils.js"
 
 abstract class PreToken<

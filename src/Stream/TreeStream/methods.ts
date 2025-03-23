@@ -1,6 +1,6 @@
-import type { IMultiIndex } from "../../Position/MultiIndex/interfaces.js"
-import type { TreeWalker } from "../../Tree/classes.js"
+import type { MultiIndex } from "../../Position/classes.js"
 
+import { TreeWalker } from "../../internal/TreeWalker/classes.js"
 import { TreeStream } from "./classes.js"
 import { superInit } from "../StreamClass/refactor.js"
 import { BadIndex } from "../../constants.js"
@@ -20,7 +20,10 @@ export namespace methods {
 		this.isStart = true
 	}
 
-	export function navigate<Type = any>(this: TreeStream<Type>, index: IMultiIndex) {
+	export function navigate<Type = any>(
+		this: TreeStream<Type>,
+		index: MultiIndex
+	) {
 		this.walker.goIndex(index)
 		return this.curr
 	}
@@ -68,7 +71,10 @@ export namespace methods {
 		}
 	}
 
-	export function init<Type = any>(this: TreeStream<Type>, walker?: TreeWalker<Type>) {
+	export function init<Type = any>(
+		this: TreeStream<Type>,
+		walker?: TreeWalker<Type>
+	) {
 		this.response = ""
 		this.lastLevelWithSiblings = BadIndex
 

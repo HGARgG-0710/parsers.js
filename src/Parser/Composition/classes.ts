@@ -1,5 +1,5 @@
 import type { IComposition } from "./interfaces.js"
-import { Callable } from "./abstract.js"
+import { Callable } from "src/internal/Callable.js"
 
 import { array, functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional

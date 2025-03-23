@@ -8,7 +8,7 @@ import type {
 
 import type { Constructor } from "./refactor.js"
 
-import { Pattern } from "../../Pattern/abstract.js"
+import { Pattern } from "src/internal/Pattern.js"
 
 import { valuePropDelegate } from "../../refactor.js"
 import { finish, rewind, navigate, init, iter, curr, copy } from "./refactor.js"

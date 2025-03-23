@@ -7,7 +7,7 @@ import type { IReversedStream, IReversibleStream } from "./interfaces.js"
 import { valueDelegate, valuePropDelegate, withSuper } from "../../refactor.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { valueCurr } from "../StreamClass/refactor.js"
-import { StreamClass } from "../StreamClass/abstract.js"
+import { StreamClass } from "../StreamClass/classes.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
