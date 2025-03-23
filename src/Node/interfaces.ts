@@ -4,25 +4,26 @@ export interface ITyped<Type = any> {
 	type: Type
 }
 
+export interface IWalkable<Type extends IWalkable<Type> = any> {
+	readonly lastChild: number
+	read: (index: number) => Type
+	index: (multindex: readonly number[]) => Type
+	backtrack: (positions: number) => Type | null
+	findUnwalkedChildren: (startIndex: readonly number[]) => number
+}
+
 // ! REFACTOR THIS ONTO SEPARATE INTERFACES!
 // TODO: integrate with `TreeWalker` [instead of the current `ITree`]
 export interface INode<Type = any, Value = any>
 	extends ICopiable,
 		ITyped<Type>,
-		IPattern<Value> {
-	parent: INode<Type> | null
-
-	readonly lastChild: number
+		IPattern<Value>,
+		IWalkable<INode<Type, Value>> {
+	parent: INode<Type, Value> | null
 
 	set: (node: INode<Type, Value>, i: number) => this
 	write: (node: INode<Type, Value>, multindex: readonly number[]) => this
 
 	insert: (node: INode<Type, Value>, index?: number) => this
 	remove: (index?: number) => this
-
-	read: (index: number) => INode<Type, Value>
-	index: (multindex: readonly number[]) => INode<Type>
-
-	findUnwalkedChildren: (startIndex: readonly number[]) => number
-	backtrack: (positions: number) => INode<Type, Value> | null
 }

@@ -30,8 +30,8 @@ abstract class CommonTree<Type = any, Value = any>
 	}
 
 	findUnwalkedChildren(endInd: number[]) {
-		let result = array.lastIndex(endInd)
 		let currTree: INode<Type, Value> = this
+		let result = array.lastIndex(endInd)
 		while (
 			(currTree = currTree.parent!) &&
 			currTree.lastChild <= endInd[result]
