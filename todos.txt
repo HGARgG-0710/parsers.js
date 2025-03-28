@@ -36,6 +36,72 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
+	TODO [fixed order]: 	
+		-1. fix docs [from tests]: 
+			1. Docs [wiki]: 
+				[classes]
+				1. Parser
+				2. Position [MultiIndex]
+
+			2. Tests: 
+				[old]
+				1. EnumSpace
+				2. IndexMap
+			
+			SI5. IDEA: simplifying the list of available Stream-s further: 
+				Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
+					returning a Stream with precisely this same definition; 
+
+				Then, you can do: 
+					const reversed = stream.reverse()
+				instead of: 
+					const reversed = ReversedStream(stream)
+
+				Nicer semantics. 
+
+			IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
+				Make it separate. 
+				Reasons:
+					1. Doesn't allow for iteration algorithms
+					2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+					3. Will cause less nestedness
+				
+			1. Doc-sync
+	
+			SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
+				This is the early version [rough, unfinished, sketchy]: 
+					interface Stream<Type = any> extends Summat {
+						pos?: number
+						buffer?: FreezableBuffer<Type>
+						state?: Summat
+						prev?: () => Type
+						isStart?: boolean
+
+						init?: (...x: any[]) => Stream<Type>
+						navigate?: (pos: Position) => Type
+						finish?: () => Type
+						rewind?: () => Type
+
+						curr: Type
+						next: () => Type
+						isEnd: boolean
+					}
+
+				REASON TO BE A PART OF V0.3: 
+					1. library has been divided for too long. 
+						It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 				
+
+			2. Doc-sync
+
+			IN1. The `Initializable` interface - make it higher level: 
+				1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
+				2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+
+				REASON FOR v0.3: 
+					1. tired of constantly fixing broken types, want it be done well once and for all
+					2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+			
+
 	TODO [any order]: 
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
@@ -44,27 +110,20 @@ Order of TODO-elimination:
 					2. Base contains NO abstract methods [if it does, then it's a PRE-class]; 
 					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
-		-1. fix docs [from tests]: 
-			7. TODO: FIX the `Interfaces` list [new ones have been added, old ones been removed]; 
-				
-		0. missing permalinks:
-			1. `utils.isGoodPointer`
-			2. `utils.IndexMap.toPairs`
-			3. `utils.IndexMap.listRanges`
-			4. `utils.EnumSpace.fromCodePoints`
-			5. `utils.EnumSpace.fromItems`
-			6. `utils.Composition.applySignature` (simplified the method to handle one signature only); 
-			7. `utils.Node`
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
-		2. add the (minor) `JSDoc` for classes/big-functions
-		3. add permalinks leading to wiki to jsdoc for classes/big-functions: 
-			Format for jsdoc for "big" exports: 
-				1. brief description
-				2. link to wiki page
-		4. add permalinks for 
-		5. GitHub Workflows
-		6. Special Pages
-		7. Tests: 
+		2. add permalinks for "minor" class-exports
+		3. Add JSDoc for: 
+			1. minor classes/functions ['classes' exports]
+			2. interfaces [those without a page]
+			3. big classes/interfaces [link to ]	
+				Format for jsdoc for "big" exports: 
+					1. brief description
+					2. link to wiki page
+		4. GitHub Workflows
+		5. Special Pages: 
+			1. Usage
+			2. Home (finish)
+		6. Tests: 
 			1. New developments: 
 				1. 'emptied()' - new method on `IFreezableBuffer': 
 					add tests for it
@@ -239,11 +298,11 @@ Order of TODO-elimination:
 						took so long due to lack of clear requirements
 					)
 					
-		8. Self-referencing on Wiki: 
+		7. Self-referencing on Wiki: 
 			1. provide links to interfaces for class pages
 			2. provide links ot implementations for interfaces to interface pages
 
-		9. To add Wiki pages [classes]: 
+		8. To add Wiki pages [classes]: 
 			[Parser]
 			4. Composition
 			5. PreSignature
@@ -270,13 +329,13 @@ Order of TODO-elimination:
 			20. ContentNode
 			21. RecursiveNode
 
-		10. Add the missing stuff into the library [the "moved from v0.4" todos...]: 
+		9. Add the missing stuff into the library [the "moved from v0.4" todos...]: 
 			1. Do it GRADUALLY, as you complete other todos.
 
-		11. SIMPLIFY TYPES: 
+		10. SIMPLIFY TYPES: 
 			1. `A extends B, C, D, ... {}` TURN INTO `A = B & C & D & ...`; 
 
-		12. OPTIMIZING `TypeScript` property definitions on classes: 
+		11. OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
 				class C {
 					prop: P
@@ -554,45 +613,7 @@ Order of TODO-elimination:
 									rewind(stream)
 									navigate(stream, point)
 								}
-								
-				SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
-					This is the early version [rough, unfinished, sketchy]: 
-						interface Stream<Type = any> extends Summat {
-							pos?: number
-							buffer?: FreezableBuffer<Type>
-							state?: Summat
-							prev?: () => Type
-							isStart?: boolean
-
-							init?: (...x: any[]) => Stream<Type>
-							navigate?: (pos: Position) => Type
-							finish?: () => Type
-							rewind?: () => Type
-
-							curr: Type
-							next: () => Type
-							isEnd: boolean
-						}
-
-					REASON TO BE A PART OF V0.3: 
-						1. library has been divided for too long. 
-							It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 
-					
-				IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
-					Make it separate. 
-					Reasons:
-						1. Doesn't allow for iteration algorithms
-						2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-						3. Will cause less nestedness
-
-				IN1. The `Initializable` interface - make it higher level: 
-					1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
-					2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
-
-					REASON FOR v0.3: 
-						1. tired of constantly fixing broken types, want it be done well once and for all
-						2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
-				
+									
 				ME5. 'InputStream' - provide a '.peek(n)' method: 
 					1. looks "forward" n items; 
 					2. add a new interface - PeekableStream
@@ -868,17 +889,6 @@ Order of TODO-elimination:
 											2. the function itself (for access to `.table` property)
 											n. all the other (spread) arguments
 										2. returns the result of the last one
-
-				SI5. IDEA: simplifying the list of available Stream-s further: 
-					Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
-						returning a Stream with precisely this same definition; 
-
-					Then, you can do: 
-						const reversed = stream.reverse()
-					instead of: 
-						const reversed = ReversedStream(stream)
-
-					Nicer semantics. 
 
 				EL1. Eliminable - get rid of it: 
 					More specifically, create a `RegExpEliminator` interface, which would replace it: 
