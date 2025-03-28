@@ -38,9 +38,24 @@
 Order of TODO-elimination: 	
 	TODO [fixed order]: 	
 		-1. fix docs [from tests]: 
-			1. Docs [wiki]: 
+			1. Docs [wiki, jsdoc]: 
 				[classes]
-				1. Parser
+				1. Parser: 
+					[wiki]
+					Add pages: 
+						1. ComplexComposition
+						2. Signature
+					
+					Change records-pages: 
+						1. classes.Parser
+						2. Interfaces [replace the `Parser/DynamicParser` interfaces with new ones]
+
+					Remove pages: 
+						1. utils.Parser.Composition
+
+					[jsdoc]
+					1. ParserState	
+
 				2. Position [MultiIndex]
 
 			2. Tests: 
@@ -115,7 +130,7 @@ Order of TODO-elimination:
 		3. Add JSDoc for: 
 			1. minor classes/functions ['classes' exports]
 			2. interfaces [those without a page]
-			3. big classes/interfaces [link to ]	
+			3. big classes/interfaces
 				Format for jsdoc for "big" exports: 
 					1. brief description
 					2. link to wiki page
@@ -2322,9 +2337,6 @@ TODO:
 			Although... This is rather general. Perhaps, better implement as a separate package; 
 			Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 	
 		
-		PA1. Callable [in Parser/Composition/abstract.ts] - make a dependendency, a "mini-package" named "callable"; 
-			Export the function there as 'Callable'
-
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
 			1. draw-text [install-npm + prod-to GitHub Pages]
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
@@ -2387,3 +2399,13 @@ FUTURE:
 		2. Output: 
 			1. parser (in JavaScript)
 			2. source-generator (in JavaScript)
+
+	2. REFACTOR [some] of the `internal` APIs into SEPARATE npm PACKAGES: 
+		1. `callable` package: 
+			1. Callable
+			2. Composition
+			3. ComplexComposition: 
+				NOTE [important]: the `DynamicParser` is STILL here (as a case of application of `ComplexComposition`)
+				TODO: rename this to something more interesting (like 'ReducableComposition', or something...); 
+			4. IndexSet
+			5. Signature 

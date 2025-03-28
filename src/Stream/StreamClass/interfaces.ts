@@ -7,8 +7,8 @@ import type { ICopiable } from "../../interfaces.js"
 
 // * Optional Property-interfaces
 
-export interface IStateful {
-	state: Summat
+export interface IStateful<Type extends Summat = Summat> {
+	readonly state: Type
 }
 
 // * Default Methods (single signature)

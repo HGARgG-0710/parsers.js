@@ -1,16 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IndexSet } from "./classes.js"
+import type { IStateful } from "../../../interfaces.js"
+import type { IComposition } from "../interfaces.js"
 
-export interface IPreSignature {
-	preSignature: IndexSet
-	preSignatureFill: any[]
+export interface IComplexComposition<StateType extends Summat = Summat>
+	extends IComposition,
+		IStateful<StateType> {}
+
+export interface IParserState extends Summat {
+	parser: IDynamicParser
 }
 
-export interface ILayerSignature extends IPreSignature {
-	toApplyOn: IndexSet
-}
-
-export interface IStateSignature extends ILayerSignature {
-	stateIndex: number
-	stateTransform?: (x: Summat) => Summat
-}
+export type IDynamicParser = IComplexComposition<IParserState>

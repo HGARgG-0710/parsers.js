@@ -96,5 +96,3 @@ export function transform<UnderType = any, UpperType = any>(
 		return init
 	}
 }
-
-export * as Composition from "./Composition/utils.js"

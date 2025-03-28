@@ -1,154 +1,104 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable } from "../../../interfaces.js"
-
 import type {
-	IPreSignature,
-	ILayerSignature,
-	IStateSignature
+	IComplexComposition,
+	IDynamicParser,
+	IParserState
 } from "./interfaces.js"
 
-import { applySignature } from "./utils.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
+import { IndexSet } from "../../../internal/IndexSet.js"
 import { Composition } from "../classes.js"
 
-import { array, functional, boolean } from "@hgargg-0710/one"
-const { sort, numbers } = array
-const { negate, has } = functional
-const { eqcurry } = boolean
+import { array, object, functional } from "@hgargg-0710/one"
+const { substitute } = array
+const { argFiller } = functional
+const { extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
-export const PreSignature = (
-	preSignature: IndexSet,
-	preSignatureFill: any[]
-): IPreSignature => ({
-	preSignature,
-	preSignatureFill
-})
+export class Signature {
+	protected readonly toApplyOn: IndexSet
+	protected readonly preIndexes: IndexSet
+	protected preFill: any[]
 
-export const LayerSignature = (
-	signature: IPreSignature,
-	toApplyOn: IndexSet
-): ILayerSignature => ({
-	...signature,
-	toApplyOn
-})
+	apply(layers: Function[]) {
+		const { preIndexes, preFill, toApplyOn, arity } = this
 
-export const StateSignature = (
-	signature: ILayerSignature,
-	stateIndex: number,
-	stateTransform: (x: Summat) => Summat
-): IStateSignature => ({
-	...signature,
-	stateIndex,
-	stateTransform
-})
+		const accessSet = new Set(toApplyOn)
+		const preIndsComplement = Array.from(preIndexes.complement())
+		const substitutor = substitute(arity, Array.from(preIndexes))(preFill)
 
-export class IndexSet implements ICopiable, Iterable<number> {
-	protected readonly asArray: number[]
-	protected readonly asSet: Set<number>;
-
-	["constructor"]: new (arity: number, indexes: number[]) => IndexSet
-
-	keepOut(x: number) {
-		return new IndexSet(this.length, this.asArray.filter(negate(eqcurry(x))))
-	}
-
-	complement() {
-		return new IndexSet(
-			this.length,
-			numbers(this.length).filter(negate(has(this.asSet)))
+		return layers.map((layer: Function, i: number) =>
+			accessSet.has(i)
+				? argFiller(layer)(
+						...substitutor(array.copy(preIndsComplement))
+				  )(...preFill)
+				: layer
 		)
 	}
 
-	*[Symbol.iterator]() {
-		yield* this.asArray
+	init(preFill: any[]) {
+		this.preFill = preFill
+		return this
 	}
 
-	subtract(x: IndexSet) {
-		return new IndexSet(
-			this.length,
-			this.asArray.filter(negate(has(new Set(x))))
-		)
-	}
-
-	has(x: number): boolean {
-		return this.asSet.has(x)
-	}
-
-	copy() {
-		return new this.constructor(this.length, this.asArray)
-	}
-
-	constructor(public readonly length: number, indexes: number[]) {
-		this.asArray = sort(
-			Array.from((this.asSet = new Set(indexes.filter((x) => x < length))))
-		)
+	constructor(
+		public readonly arity: number,
+		toApplyOn: number[],
+		preIndexes: number[]
+	) {
+		this.toApplyOn = new IndexSet(this.arity, toApplyOn)
+		this.preIndexes = new IndexSet(this.arity, preIndexes)
 	}
 }
+
+// TODO: USE an `abstract class` FOR THIS [repeated methods... memory cost];
+export function ComplexComposition<StateType extends Summat = Summat>(
+	stateMaker: (thisArg: IComplexComposition) => StateType
+) {
+	class complexComposition<ArgType extends any[] = any[], OutType = any>
+		extends Composition<ArgType, OutType>
+		implements IComplexComposition<StateType>
+	{
+		#original: Function[] = []
+		#state: StateType | null = null
+
+		get state() {
+			return this.#state!
+		}
+
+		protected stateMaker: (thisArg: IComplexComposition) => StateType
+
+		protected makeState() {
+			this.#state = this.stateMaker(this)
+			return this
+		}
+
+		init(callback: (state: IComplexComposition) => Signature[]) {
+			let layers = array.copy(this.#original)
+			for (const signature of callback(this.makeState()))
+				signature.apply(this.layers)
+			this.layers = layers
+			return this
+		}
+
+		constructor(layers?: Function[]) {
+			super(layers)
+			if (layers) this.#original = layers
+		}
+	}
+
+	extendPrototype(complexComposition, {
+		stateMaker: ConstDescriptor(stateMaker)
+	})
+
+	return complexComposition
+}
+
+export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 
 // * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
 // ! important things to keep in mind [for future docs]:
-// * 1. Signatures for given 'Function's [except for last one] used have form: f(value [0], ... [preFilledSignature], state [stateIndex], ... [preFilledSignature])
-// * 2. The LAST "entry" function can have ANY 'preFilledSignature'
-
-// ! PROBLEM: *cannot* use multiple signatures here:
-// 	* Reason:
-// 		1. we are ALREADY using the `this.state` here.
-// 		2. the 'this.state' is needed ONLY FOR THE *LAST* signature
-// TODO: decouple:
-// 		* 1. REMOVE the `copy(state)` from `applySignature`;
-// 		* 2. REMOVE the `stateTransform` thing;
-// 		* 3. '.toApplyOn', '.preSignature' (rename to "preIndexes") and `preSignatureFill (rename to "preFill")` REMAIN
-// 		* 4. merge `ILayerSignature` with `IPreSignature` into `ISignature`
-// 		* 5. remove `IStateSignature` (stateIndex goes as well)
-// 		* 6. DECOUPLE definition of `{ parser: this }` into:
-// 			1. a util 'parserState = (parser) => ({parser})'
-// 			2. a property 'protected stateMaker: (parser: DynamicParser) => Summat'
-// 			3. a call to 'this.stateMaker()' [which produces a new state EACH TIME the user calls `.init()`, BUT WHICH IS SYNCHRONIZED!]
-// 			4. a getter-only property `this.state`, which returns the CURRENTLY CACHED `this.#state` [which is a result of `this.stateMaker(this)` - a protected method called `makeState()`]
-// 			5. A USER-PASSED "signatureMaker" CALLBACK, which:
-// 				1. takes in the `state` property
-// 				2. returns the `signatures` to be used
-// 		* 7. 'applySignature' - SIMPLIFY: 
-// 			1. remove the `state` [and its applications]
-// 			2. sync with the rest of the changes
-// * 		3. replace with a new `Signature` class: 
-// 				0. Replaces the `ISignature` object
-// 				1. takes in the LIST OF ARGUMENTS [constructor, protected, ONLY ONCE]: 
-// 					1. toApplyOn: 
-// 						1. this is ALSO a `number[]` - SEE THE ``
-// 					2. arity
-// 					3. preIndexes: 
-// 						1. this is a `number[]`
-// 						2. the `IndexSet` GOES PRIVATE [id est, into `internal`], and is USED here to construct the item FROM the given `number[]`; 
-// 				2. allows injection of a `.value` property - the previous `.preFill` property [extends 'InitializablePattern']
-// 					1. this is SUPPOSED to be done by the user within the `callback` [object creation + .init, WHICH can be done in a single expression]
-// 				3. has an `.apply` method, which takes in a `layers: Function[]`, and RETURNS the result of applying it. 
-// 	*	8. GENERALIZE the `DynamicParser` into `ComplexComposition` generic function, which returns a class: 
-// 			1. DynamicCallable
-// 				1. takes in the `stateMaker`
-// 				2. binds it to the `.prototype`
-// 				3. uses as-said
-// 			2. DynamicParser = ComplexComposition(parserState)
-export class DynamicParser<
-	ArgType extends any[] = any[],
-	OutType = any
-> extends Composition<ArgType, OutType> {
-	#original: Function[] = []
-
-	state: Summat = { parser: this }
-
-	init(signatures: IStateSignature[]) {
-		let layers = array.copy(this.#original)
-		for (const signature of signatures)
-			applySignature(layers, signature, this.state)
-		this.layers = layers
-	}
-
-	constructor(layers?: Function[], signatures: IStateSignature[] = []) {
-		super(layers)
-		if (layers) {
-			this.#original = layers
-			this.init(signatures)
-		}
-	}
-}
+// * 1. `callback` USES the passed `.state` property when it needs it
+// * 2. THE USER controls how the 'signature's operate precisely
+export const DynamicParser: new (layers?: Function[]) => IDynamicParser =
+	ComplexComposition(ParserState)
