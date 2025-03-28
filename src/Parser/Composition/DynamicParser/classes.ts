@@ -1,19 +1,23 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { ICopiable } from "../../../interfaces.js"
 
 import type {
 	IPreSignature,
 	ILayerSignature,
-	IStateSignature,
-	ISignatureIndexSet
+	IStateSignature
 } from "./interfaces.js"
 
 import { applySignature } from "./utils.js"
 
-import { array } from "@hgargg-0710/one"
 import { Composition } from "../classes.js"
 
+import { array, functional, boolean } from "@hgargg-0710/one"
+const { sort, numbers } = array
+const { negate, has } = functional
+const { eqcurry } = boolean
+
 export const PreSignature = (
-	preSignature: ISignatureIndexSet,
+	preSignature: SignatureIndexSet,
 	preSignatureFill: any[]
 ): IPreSignature => ({
 	preSignature,
@@ -22,7 +26,7 @@ export const PreSignature = (
 
 export const LayerSignature = (
 	signature: IPreSignature,
-	toApplyOn: ISignatureIndexSet
+	toApplyOn: SignatureIndexSet
 ): ILayerSignature => ({
 	...signature,
 	toApplyOn
@@ -37,6 +41,54 @@ export const StateSignature = (
 	stateIndex,
 	stateTransform
 })
+
+export class SignatureIndexSet implements ICopiable {
+	protected readonly indexes: number[]
+	protected readonly indexSet: Set<number>;
+
+	["constructor"]: new (arity: number, indexes: number[]) => SignatureIndexSet
+
+	keepOut(x: number) {
+		return new SignatureIndexSet(
+			this.arity,
+			this.indexes.filter(negate(eqcurry(x)))
+		)
+	}
+
+	complement() {
+		return new SignatureIndexSet(
+			this.arity,
+			numbers(this.arity).filter(negate(has(this.indexSet)))
+		)
+	}
+
+	*[Symbol.iterator]() {
+		yield* this.indexes
+	}
+
+	subtract(x: SignatureIndexSet) {
+		return new SignatureIndexSet(
+			this.arity,
+			this.indexes.filter(negate(has(new Set(x))))
+		)
+	}
+
+	has(x: number): boolean {
+		return this.indexSet.has(x)
+	}
+
+	copy() {
+		return new this.constructor(this.arity, this.indexes)
+	}
+
+	constructor(public readonly arity: number, indexes: number[]) {
+		this.indexes = sort(
+			Array.from(
+				(this.indexSet = new Set(indexes.filter((x) => x < arity)))
+			)
+		)
+	}
+}
 
 // * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
 // ! important things to keep in mind [for future docs]:
@@ -60,5 +112,3 @@ export class DynamicParser<
 		this.init(signatures)
 	}
 }
-
-export * from "./SignatureIndexSet/classes.js"
