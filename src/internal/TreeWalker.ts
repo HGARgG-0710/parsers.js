@@ -6,10 +6,10 @@ import { InitializablePattern } from "./Pattern.js"
 import { hasChildren, treeEndPath } from "../Node/utils.js"
 
 export class TreeWalker<
-	Type extends IWalkable<Type> = any
-> extends InitializablePattern<IWalkable<Type>> {
-	level: IWalkable<Type>
-	curr: IWalkable<Type>
+	TreeLike extends IWalkable<TreeLike> = IWalkable
+> extends InitializablePattern<TreeLike> {
+	level: TreeLike
+	curr: TreeLike
 
 	protected modifier: MultiIndexModifier = new MultiIndexModifier()
 
@@ -87,7 +87,7 @@ export class TreeWalker<
 		this.renewLevel(this.curr, initLength)
 	}
 
-	renewLevel(init: IWalkable<Type>, from: number) {
+	renewLevel(init: IWalkable<TreeLike>, from: number) {
 		return (this.level = init.index(this.pos.slice(from, -1)))
 	}
 
@@ -102,7 +102,7 @@ export class TreeWalker<
 		this.levelUp()
 	}
 
-	init(walkable?: IWalkable<Type>) {
+	init(walkable?: TreeLike) {
 		if (walkable) {
 			this.modifier.clear()
 			this.level = this.value = walkable
@@ -111,7 +111,7 @@ export class TreeWalker<
 		return this
 	}
 
-	constructor(walkable?: IWalkable<Type>) {
+	constructor(walkable?: TreeLike) {
 		super(walkable)
 		this.init(walkable)
 	}

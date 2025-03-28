@@ -102,17 +102,6 @@ Order of TODO-elimination:
 						3. Implement the tests (from scratch)	
 
 				Micro-behaviour plan: 
-					TODOs: 
-						1. INTRODUCE `ICopiable` on EVERY class inside the library: 
-						2. FIX the ["constructor"]: new (...) => INTERFACE 
-							to be ["constructor"]: new (...) => CLASS
-							Reason: some classes have methods that are NOT on interfaces 
-							
-						List: 		
-							8. Tree: 
-								0. TreeStream: ADD the `Type extends IWalkable<Type> = any` generic to it! 
-									This will permit one to work with `INode`s WITHOUT needing to constantly do type-expansions: `as INode` 
-
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
 						3. EnumSpace
 						4. IndexMap
