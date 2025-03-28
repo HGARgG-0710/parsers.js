@@ -36,12 +36,88 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
+	TODO [fixed order]: 	
+		-1. fix docs [from tests]: 
+			1. Docs [wiki, jsdoc]: 
+				[classes]
+				1. Parser: 
+					[wiki]
+					Add pages: 
+						1. ComplexComposition
+						2. Signature
+					
+					Change records-pages: 
+						1. classes.Parser
+						2. Interfaces [replace the `Parser/DynamicParser` interfaces with new ones]
+
+					Remove pages: 
+						1. utils.Parser.Composition
+
+					[jsdoc]
+					1. ParserState	
+
+				2. Position [MultiIndex]
+
+			2. Tests: 
+				[old]
+				1. EnumSpace
+				2. IndexMap
+			
+			SI5. IDEA: simplifying the list of available Stream-s further: 
+				Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
+					returning a Stream with precisely this same definition; 
+
+				Then, you can do: 
+					const reversed = stream.reverse()
+				instead of: 
+					const reversed = ReversedStream(stream)
+
+				Nicer semantics. 
+
+			IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
+				Make it separate. 
+				Reasons:
+					1. Doesn't allow for iteration algorithms
+					2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+					3. Will cause less nestedness
+				
+			1. Doc-sync
+	
+			SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
+				This is the early version [rough, unfinished, sketchy]: 
+					interface Stream<Type = any> extends Summat {
+						pos?: number
+						buffer?: FreezableBuffer<Type>
+						state?: Summat
+						prev?: () => Type
+						isStart?: boolean
+
+						init?: (...x: any[]) => Stream<Type>
+						navigate?: (pos: Position) => Type
+						finish?: () => Type
+						rewind?: () => Type
+
+						curr: Type
+						next: () => Type
+						isEnd: boolean
+					}
+
+				REASON TO BE A PART OF V0.3: 
+					1. library has been divided for too long. 
+						It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 				
+
+			2. Doc-sync
+
+			IN1. The `Initializable` interface - make it higher level: 
+				1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
+				2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+
+				REASON FOR v0.3: 
+					1. tired of constantly fixing broken types, want it be done well once and for all
+					2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+			
+
 	TODO [any order]: 
-		-4. removed modules [docs]: 
-			1. Tree
-			2. Token
-		-3. missing modules [docs + permalinks + JSDoc]: 
-			1. 'Node': utils.Node, classes.Node, INode
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
 				1. provide a STRICT convention: 
@@ -49,40 +125,20 @@ Order of TODO-elimination:
 					2. Base contains NO abstract methods [if it does, then it's a PRE-class]; 
 					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
-		-1. fix docs [from tests]: 
-			1. IHashMap: 
-				1. added `default` property
-			2. `IDefaulting`:
-			 	1. make the `default` property `readonly`
-			3. `ISupered`: 
-				1. make the `super` property `readonly`
-			4. `ILookupTable`
-				1. added the `.copy()` method
-			5. ALL CLASSES: 
-				1. TO ADD the `.copy()` method
-			6. Removed classes: 
-				1. Token [as in Token(type, value) - the function, NOT `TokenType`]
-				2. [public] TreeWalker
-				3. [public] MultiIndexModifier
-			7. Added interfaces: 
-				1. ITyped [Token\interfaces.ts]
-				2. IUnderNestedStream
-			8. Removed interfaces: 
-				1. IMultiIndexModifier
-				2. IMultiIndex
-		0. missing permalinks:
-			1. `utils.isGoodPointer`
-			2. `utils.IndexMap.toPairs`
-			3. `utils.IndexMap.listRanges`
-			4. `utils.EnumSpace.fromCodePoints`
-			5. `utils.EnumSpace.fromItems`
-			6. `utils.Composition.applySignature` (simplified the method to handle one signature only); 
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
-		2. add the (minor) `JSDoc` for classes/big-functions
-		3. add the jsdoc permalinks for classes to wiki
-		7. GitHub Workflows
-		8. Special Pages
-		9. Tests: 
+		2. add permalinks for "minor" class-exports
+		3. Add JSDoc for: 
+			1. minor classes/functions ['classes' exports]
+			2. interfaces [those without a page]
+			3. big classes/interfaces
+				Format for jsdoc for "big" exports: 
+					1. brief description
+					2. link to wiki page
+		4. GitHub Workflows
+		5. Special Pages: 
+			1. Usage
+			2. Home (finish)
+		6. Tests: 
 			1. New developments: 
 				1. 'emptied()' - new method on `IFreezableBuffer': 
 					add tests for it
@@ -103,28 +159,36 @@ Order of TODO-elimination:
 
 				Micro-behaviour plan: 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
+						note: THIS IS THE LIST OF *ALREADY EXISTING* tests, to be fixed...
+
+						[EnumSpace]
 						3. EnumSpace
+
+						[IndexMap]
 						4. IndexMap
 						5. HashMap
 						6. InternalHash
 						7. LinearIndexMap
 						8. LookupTable
 						9. PersistentIndexMap
+
+						[Parser]
 						10. Composition
 						11. TableMap
+
+						[Position]
 						12. MultiIndex
-						13. MultiIndexModifier
+
+						[Stream]
 						14. Stream
 						15. InputStream
 						16. LimitedStream
 						17. NestedStream
 						18. PredicateStream
-						19. ReversibleStream
 						20. StreamClass
 						21. StreamParser
 						22. TreeStream
-						23. Token
-						24. TreeWalker
+						
 					3. eliminate the old test cases
 					4. add new test cases: 
 						They bear form:
@@ -249,8 +313,12 @@ Order of TODO-elimination:
 						took so long due to lack of clear requirements
 					)
 					
-		10. Self-referencing on Wiki
-		11. To add Wiki pages [classes]: 
+		7. Self-referencing on Wiki: 
+			1. provide links to interfaces for class pages
+			2. provide links ot implementations for interfaces to interface pages
+
+		8. To add Wiki pages [classes]: 
+			[Parser]
 			4. Composition
 			5. PreSignature
 			6. LayerSignature
@@ -259,23 +327,45 @@ Order of TODO-elimination:
 			9. SignatureIndexSet
 			10. TableMap
 			11. MapWrap
+
+			[Position]
 			12. MultiIndex [shares page with `MultiIndexModifier`]
+
+			[Stream]
 			13. InputStream
 			14. LimitedStream
 			15. NestedStream
 			16. PredicateStream
 			17. TreeStream
 			18. StreamParser
-			19. Token
-			20. TokenType
-			21. TokenInstance
-			22. TreeWalker
-			23. ChildrenTree
-			24. ParentTree
-		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
 
-		15. SIMPLIFY TYPES: 
+			[Node]
+			19. TokenNode
+			20. ContentNode
+			21. RecursiveNode
+
+		9. Add the missing stuff into the library [the "moved from v0.4" todos...]: 
+			1. Do it GRADUALLY, as you complete other todos.
+
+		10. SIMPLIFY TYPES: 
 			1. `A extends B, C, D, ... {}` TURN INTO `A = B & C & D & ...`; 
+
+		11. OPTIMIZING `TypeScript` property definitions on classes: 
+			When [in TypeScript], one does: 
+				class C {
+					prop: P
+				}	 
+
+			This DOESN'T ACTUALLY create a property of 'prop', however, doing this: 
+
+				class C {
+					props: P = ...
+				}
+
+			DOES. UPON CREATION OF THE OBJECT ['constructor' call]; 
+			When one needs a PROTOTYPE PROPERTY, use the first variant (type-level only), 
+				where it's an INSTANCE PROPERTY, use the second, as doing so wil avoid the 
+					necessity for type-transitions in code. 
 
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 
@@ -538,45 +628,7 @@ Order of TODO-elimination:
 									rewind(stream)
 									navigate(stream, point)
 								}
-								
-				SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
-					This is the early version [rough, unfinished, sketchy]: 
-						interface Stream<Type = any> extends Summat {
-							pos?: number
-							buffer?: FreezableBuffer<Type>
-							state?: Summat
-							prev?: () => Type
-							isStart?: boolean
-
-							init?: (...x: any[]) => Stream<Type>
-							navigate?: (pos: Position) => Type
-							finish?: () => Type
-							rewind?: () => Type
-
-							curr: Type
-							next: () => Type
-							isEnd: boolean
-						}
-
-					REASON TO BE A PART OF V0.3: 
-						1. library has been divided for too long. 
-							It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 
-					
-				IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
-					Make it separate. 
-					Reasons:
-						1. Doesn't allow for iteration algorithms
-						2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-						3. Will cause less nestedness
-
-				IN1. The `Initializable` interface - make it higher level: 
-					1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
-					2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
-
-					REASON FOR v0.3: 
-						1. tired of constantly fixing broken types, want it be done well once and for all
-						2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
-				
+									
 				ME5. 'InputStream' - provide a '.peek(n)' method: 
 					1. looks "forward" n items; 
 					2. add a new interface - PeekableStream
@@ -852,17 +904,6 @@ Order of TODO-elimination:
 											2. the function itself (for access to `.table` property)
 											n. all the other (spread) arguments
 										2. returns the result of the last one
-
-				SI5. IDEA: simplifying the list of available Stream-s further: 
-					Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
-						returning a Stream with precisely this same definition; 
-
-					Then, you can do: 
-						const reversed = stream.reverse()
-					instead of: 
-						const reversed = ReversedStream(stream)
-
-					Nicer semantics. 
 
 				EL1. Eliminable - get rid of it: 
 					More specifically, create a `RegExpEliminator` interface, which would replace it: 
@@ -2296,9 +2337,6 @@ TODO:
 			Although... This is rather general. Perhaps, better implement as a separate package; 
 			Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 	
 		
-		PA1. Callable [in Parser/Composition/abstract.ts] - make a dependendency, a "mini-package" named "callable"; 
-			Export the function there as 'Callable'
-
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
 			1. draw-text [install-npm + prod-to GitHub Pages]
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
@@ -2361,3 +2399,13 @@ FUTURE:
 		2. Output: 
 			1. parser (in JavaScript)
 			2. source-generator (in JavaScript)
+
+	2. REFACTOR [some] of the `internal` APIs into SEPARATE npm PACKAGES: 
+		1. `callable` package: 
+			1. Callable
+			2. Composition
+			3. ComplexComposition: 
+				NOTE [important]: the `DynamicParser` is STILL here (as a case of application of `ComplexComposition`)
+				TODO: rename this to something more interesting (like 'ReducableComposition', or something...); 
+			4. IndexSet
+			5. Signature 

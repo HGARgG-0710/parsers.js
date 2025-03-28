@@ -14,14 +14,15 @@ export abstract class DelegateRekeyable<
 		IRekeyable<KeyType> &
 		IDeletable<DeletedType> &
 		ISizeable = any,
-	DeletedType = KeyType
+	DeletedType = KeyType,
+	DefaultType = any
 > extends DelegateDeletableSettableSizeable<
 	KeyType,
 	ValueType,
 	DelegateType,
-	DeletedType
+	DeletedType,
+	DefaultType
 > {
-	protected value: DelegateType
 	rekey(keyFrom: KeyType, keyTo: KeyType) {
 		this.value.rekey(keyFrom, keyTo)
 		return this

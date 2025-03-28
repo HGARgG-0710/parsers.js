@@ -8,6 +8,7 @@ import type {
 	IPointer,
 	ISizeable
 } from "./interfaces.js"
+
 import type { IStateful } from "./Stream/StreamClass/interfaces.js"
 import type { IPosed } from "./Position/interfaces.js"
 
@@ -39,7 +40,9 @@ export const isDecimal = (x: string) => /^[0-9]+$/.test(x)
 /**
  * Returns the `.length` of the given `Indexed` object
  */
-export const length = prop("length") as <Type = any>(x: IIndexed<Type>) => number
+export const length = prop("length") as <Type = any>(
+	x: IIndexed<Type>
+) => number
 
 /**
  * Returns the `.size` of the given `Sizeable` object
@@ -78,3 +81,4 @@ export * as Parser from "./Parser/utils.js"
 export * as Pattern from "./Pattern/utils.js"
 export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
+export * as Node from "./Node/utils.js"

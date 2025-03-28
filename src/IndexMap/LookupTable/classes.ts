@@ -31,12 +31,14 @@ abstract class DelegateLookupTable<
 		IRekeyable<KeyType> &
 		IDeletable<DeletedType> &
 		ISizeable = any,
-	DeletedType = KeyType
+	DeletedType = KeyType,
+	DefaultType = any
 > extends DelegateRekeyable<
 	KeyType,
 	ValueType,
 	DelegateType,
-	DeletedType
+	DeletedType,
+	DefaultType
 > {
 	abstract claim(x: any): OwningType | null
 
@@ -56,7 +58,8 @@ abstract class DelegateHashTable<
 		ValueType,
 		OwningType,
 		IHashMap<KeyType, ValueType, DefaultType>,
-		KeyType
+		KeyType,
+		DefaultType
 	>
 	implements ILookupTable<KeyType, ValueType, OwningType>
 {

@@ -4,25 +4,17 @@ import type { INode, INodeClass } from "./interfaces.js"
 import { inplace, array } from "@hgargg-0710/one"
 import { isType } from "./utils.js"
 
-abstract class CommonTree<Type = any, Value = any>
+abstract class PreTokenNode<Type = any, Value = any>
 	implements INode<Type, Value>
 {
-	readonly type: Type
+	["constructor"]: new () => typeof this
 
+	type: Type
 	parent: INode<Type> | null = null
 
 	get lastChild() {
 		return -1
 	}
-
-	abstract write(node: INode<Type>, multindex: readonly number[]): this
-	abstract insert(node: INode<Type>, index?: number): this
-	abstract index(multindex: readonly number[]): INode<Type>
-	abstract remove(index?: number): this
-	abstract read(index: number): INode<Type>
-
-	abstract copy(): INode<Type, Value>
-	abstract set(node: INode<Type, Value>, i: number): this
 
 	backtrack(positions: number) {
 		let curr: INode<Type, Value> = this
@@ -40,12 +32,6 @@ abstract class CommonTree<Type = any, Value = any>
 			--result
 		return result
 	}
-}
-
-abstract class PreTokenNode<Type = any> extends CommonTree<Type> {
-	type: Type;
-
-	["constructor"]: new () => typeof this
 
 	// * Dummy methods [interface conformance]
 	set(node: INode<Type>, i: number) {
@@ -75,7 +61,9 @@ abstract class PreTokenNode<Type = any> extends CommonTree<Type> {
 	}
 }
 
-export function TokenNode<Type = any>(type: Type): new () => INode<Type> {
+export function TokenNode<Type = any, Value = any>(
+	type: Type
+): INodeClass<Type, Value> {
 	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
 		static readonly type = type
 		static is = isType(type)
@@ -101,7 +89,7 @@ abstract class PreContentNode<Type = any, Value = any>
 
 export function ContentNode<Type = any, Value = any>(
 	type: Type
-): new (value: Value) => INode<Type, Value> {
+): INodeClass<Type, Value> {
 	class contentNode extends PreContentNode<Type, Value> {
 		static readonly type = type
 		static is = isType(type)

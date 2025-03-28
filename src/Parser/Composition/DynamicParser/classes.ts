@@ -1,64 +1,104 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-
 import type {
-	IPreSignature,
-	ILayerSignature,
-	IStateSignature,
-	ISignatureIndexSet
+	IComplexComposition,
+	IDynamicParser,
+	IParserState
 } from "./interfaces.js"
 
-import { applySignature } from "./utils.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
-import { array } from "@hgargg-0710/one"
+import { IndexSet } from "../../../internal/IndexSet.js"
 import { Composition } from "../classes.js"
 
-export const PreSignature = (
-	preSignature: ISignatureIndexSet,
-	preSignatureFill: any[]
-): IPreSignature => ({
-	preSignature,
-	preSignatureFill
-})
+import { array, object, functional } from "@hgargg-0710/one"
+const { substitute } = array
+const { argFiller } = functional
+const { extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
-export const LayerSignature = (
-	signature: IPreSignature,
-	toApplyOn: ISignatureIndexSet
-): ILayerSignature => ({
-	...signature,
-	toApplyOn
-})
+export class Signature {
+	protected readonly toApplyOn: IndexSet
+	protected readonly preIndexes: IndexSet
+	protected preFill: any[]
 
-export const StateSignature = (
-	signature: ILayerSignature,
-	stateIndex: number,
-	stateTransform: (x: Summat) => Summat
-): IStateSignature => ({
-	...signature,
-	stateIndex,
-	stateTransform
-})
+	apply(layers: Function[]) {
+		const { preIndexes, preFill, toApplyOn, arity } = this
 
-// * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
-// ! important things to keep in mind [for future docs]:
-// * 1. Signatures for given 'Function's [except for last one] used have form: f(value [0], ... [preFilledSignature], state [stateIndex], ... [preFilledSignature])
-// * 2. The LAST "entry" function can have ANY 'preFilledSignature'
-export class DynamicParser<
-	ArgType extends any[] = any[],
-	OutType = any
-> extends Composition<ArgType, OutType> {
-	state: Summat = { parser: this }
+		const accessSet = new Set(toApplyOn)
+		const preIndsComplement = Array.from(preIndexes.complement())
+		const substitutor = substitute(arity, Array.from(preIndexes))(preFill)
 
-	init(signatures: IStateSignature[]) {
-		let layers = array.copy(this.layers)
-		for (const signature of signatures)
-			applySignature(layers, signature, this.state)
-		this.layers = layers
+		return layers.map((layer: Function, i: number) =>
+			accessSet.has(i)
+				? argFiller(layer)(
+						...substitutor(array.copy(preIndsComplement))
+				  )(...preFill)
+				: layer
+		)
 	}
 
-	constructor(layers: Function[] = [], signatures: IStateSignature[] = []) {
-		super(layers)
-		this.init(signatures)
+	init(preFill: any[]) {
+		this.preFill = preFill
+		return this
+	}
+
+	constructor(
+		public readonly arity: number,
+		toApplyOn: number[],
+		preIndexes: number[]
+	) {
+		this.toApplyOn = new IndexSet(this.arity, toApplyOn)
+		this.preIndexes = new IndexSet(this.arity, preIndexes)
 	}
 }
 
-export * from "./SignatureIndexSet/classes.js"
+// TODO: USE an `abstract class` FOR THIS [repeated methods... memory cost];
+export function ComplexComposition<StateType extends Summat = Summat>(
+	stateMaker: (thisArg: IComplexComposition) => StateType
+) {
+	class complexComposition<ArgType extends any[] = any[], OutType = any>
+		extends Composition<ArgType, OutType>
+		implements IComplexComposition<StateType>
+	{
+		#original: Function[] = []
+		#state: StateType | null = null
+
+		get state() {
+			return this.#state!
+		}
+
+		protected stateMaker: (thisArg: IComplexComposition) => StateType
+
+		protected makeState() {
+			this.#state = this.stateMaker(this)
+			return this
+		}
+
+		init(callback: (state: IComplexComposition) => Signature[]) {
+			let layers = array.copy(this.#original)
+			for (const signature of callback(this.makeState()))
+				signature.apply(this.layers)
+			this.layers = layers
+			return this
+		}
+
+		constructor(layers?: Function[]) {
+			super(layers)
+			if (layers) this.#original = layers
+		}
+	}
+
+	extendPrototype(complexComposition, {
+		stateMaker: ConstDescriptor(stateMaker)
+	})
+
+	return complexComposition
+}
+
+export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
+
+// * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
+// ! important things to keep in mind [for future docs]:
+// * 1. `callback` USES the passed `.state` property when it needs it
+// * 2. THE USER controls how the 'signature's operate precisely
+export const DynamicParser: new (layers?: Function[]) => IDynamicParser =
+	ComplexComposition(ParserState)

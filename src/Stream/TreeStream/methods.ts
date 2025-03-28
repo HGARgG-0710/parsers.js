@@ -80,7 +80,7 @@ export namespace methods {
 		}
 	}
 
-	export namespace multind {
+	export namespace pos {
 		export function get<TreeLike extends IWalkable<TreeLike> = IWalkable>(
 			this: TreeStream<TreeLike>
 		) {

@@ -37,7 +37,7 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 	set size(size: number) {
 		const diff = this.size - size
 		if (diff > 0) out(this.value, size, diff)
-		else this.add(diff)
+		else if (diff < 0) this.add(diff)
 	}
 
 	get size() {
@@ -56,10 +56,10 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 
 	constructor(init: Type[] | number = []) {
 		const value = isNumber(init) ? [] : init
-		const count = isArray(init) ? 0 : init
+		const count = isArray(init) ? init.length : init
 
-		this.size = count
 		this.value = value
+		this.size = count
 	}
 }
 
