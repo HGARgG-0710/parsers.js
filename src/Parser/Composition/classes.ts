@@ -2,15 +2,15 @@ import type { IComposition } from "./interfaces.js"
 import { Callable } from "src/internal/Callable.js"
 
 import { array, functional } from "@hgargg-0710/one"
-const { trivialCompose } = functional
+const { trivialCompose, id } = functional
 
 export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
 	implements IComposition
 {
-	#layers: Function[]
+	#layers: Function[] = []
 
-	protected merged: (...x: ArgType) => OutType;
+	protected merged: (...x: ArgType) => OutType = id as any;
 
 	["constructor"]: new (layers?: Function[]) => Composition
 
@@ -30,9 +30,9 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 		return new this.constructor(array.copy(this.layers))
 	}
 
-	constructor(layers: Function[] = []) {
+	constructor(layers?: Function[]) {
 		super()
-		this.layers = layers
+		if (layers) this.layers = layers
 	}
 }
 

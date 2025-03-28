@@ -1,13 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { SignatureIndexSet } from "./classes.js"
+import type { IndexSet } from "./classes.js"
 
 export interface IPreSignature {
-	preSignature: SignatureIndexSet
+	preSignature: IndexSet
 	preSignatureFill: any[]
 }
 
 export interface ILayerSignature extends IPreSignature {
-	toApplyOn: SignatureIndexSet
+	toApplyOn: IndexSet
 }
 
 export interface IStateSignature extends ILayerSignature {

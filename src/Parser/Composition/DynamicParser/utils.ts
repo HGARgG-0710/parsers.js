@@ -34,7 +34,7 @@ export function applySignature(
 		stateTransform
 	} = signature
 
-	const { arity } = preSignature
+	const { length: arity } = preSignature
 
 	const accessSet = new Set(toApplyOn)
 	const preFill = preSignature.keepOut(stateIndex)
