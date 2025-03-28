@@ -1,7 +1,7 @@
 import type { ICopiable, IPattern } from "../interfaces.js"
 
 export interface ITyped<Type = any> {
-	type: Type
+	readonly type: Type
 }
 
 export interface ITypeCheckable {
@@ -16,7 +16,9 @@ export interface IWalkable<Type extends IWalkable<Type> = any> {
 	findUnwalkedChildren: (startIndex: readonly number[]) => number
 }
 
-export interface INodeClass<Type = any, Value = any> extends ITypeCheckable {
+export interface INodeClass<Type = any, Value = any>
+	extends ITyped<Type>,
+		ITypeCheckable {
 	new (...x: any[]): INode<Type, Value>
 }
 

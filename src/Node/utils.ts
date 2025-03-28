@@ -10,8 +10,22 @@ const { prop } = object
 const { trivialCompose } = functional
 const { eqcurry } = boolean
 
+/**
+ * Returns `TokenNode`s with `.type`s defined by the elements of the
+ * given `IEnumSpace`
+ */
 export const tokenNodes = fromEnum(TokenNode)
+
+/**
+ * Returns `ContentNode`s with `.type`s defined by the elements of the
+ * given `IEnumSpace`
+ */
 export const contentNodes = fromEnum(ContentNode)
+
+/**
+ * Returns `RecursiveNode`s with `.type`s defined by the elements of the
+ * given `IEnumSpace`
+ */
 export const recursiveNodes = fromEnum(RecursiveNode)
 
 /**
@@ -36,7 +50,7 @@ export function sequentialIndex<Type extends IWalkable<Type> = any>(
 }
 
 /**
- * Returns the multi-index (`number[]`) for the rightmost (recursive-last)
+ * Returns the multi-index (`number[]`) for the deep-rightmost (recursive-last)
  * element of the given `IWalkable`
  */
 export function treeEndPath<Type extends IWalkable<Type> = any>(
@@ -53,7 +67,7 @@ export function treeEndPath<Type extends IWalkable<Type> = any>(
 }
 
 /**
- * Returns the value of the `x.type` for the given `ITokenInstance`
+ * Returns the value of the `x.type` for the given `ITyped`
  */
 export const type = prop("type") as <Type = any>(x: ITyped<Type>) => Type
 
@@ -68,7 +82,7 @@ export const is = prop("is") as <Type = any>(
  * Returns the predicate for checking that the `.type` property of the given
  * `ITyped` is equal to `type`
  */
-export const isType = <Type = any>(_type: Type) =>
-	trivialCompose(eqcurry(_type), type) as <Type = any>(
-		x: ITyped<Type>
-	) => boolean
+export const isType = <Type = any>(
+	_type: Type
+): (<Type = any>(x: ITyped<Type>) => boolean) =>
+	trivialCompose(eqcurry(_type), type)

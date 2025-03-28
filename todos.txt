@@ -37,11 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [any order]: 
-		-4. removed modules [docs]: 
-			1. Tree
-			2. Token
-		-3. missing modules [docs + permalinks + JSDoc]: 
-			1. 'Node': utils.Node, classes.Node, INode
 		-2. [minor] source code: 
 			1. fix the `abstract` classes' names: 
 				1. provide a STRICT convention: 
@@ -50,26 +45,8 @@ Order of TODO-elimination:
 					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
 		-1. fix docs [from tests]: 
-			1. IHashMap: 
-				1. added `default` property
-			2. `IDefaulting`:
-			 	1. make the `default` property `readonly`
-			3. `ISupered`: 
-				1. make the `super` property `readonly`
-			4. `ILookupTable`
-				1. added the `.copy()` method
-			5. ALL CLASSES: 
-				1. TO ADD the `.copy()` method
-			6. Removed classes: 
-				1. Token [as in Token(type, value) - the function, NOT `TokenType`]
-				2. [public] TreeWalker
-				3. [public] MultiIndexModifier
-			7. Added interfaces: 
-				1. ITyped [Token\interfaces.ts]
-				2. IUnderNestedStream
-			8. Removed interfaces: 
-				1. IMultiIndexModifier
-				2. IMultiIndex
+			7. TODO: FIX the `Interfaces` list [new ones have been added, old ones been removed]; 
+				
 		0. missing permalinks:
 			1. `utils.isGoodPointer`
 			2. `utils.IndexMap.toPairs`
@@ -77,12 +54,17 @@ Order of TODO-elimination:
 			4. `utils.EnumSpace.fromCodePoints`
 			5. `utils.EnumSpace.fromItems`
 			6. `utils.Composition.applySignature` (simplified the method to handle one signature only); 
+			7. `utils.Node`
 		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
 		2. add the (minor) `JSDoc` for classes/big-functions
-		3. add the jsdoc permalinks for classes to wiki
-		7. GitHub Workflows
-		8. Special Pages
-		9. Tests: 
+		3. add permalinks leading to wiki to jsdoc for classes/big-functions: 
+			Format for jsdoc for "big" exports: 
+				1. brief description
+				2. link to wiki page
+		4. add permalinks for 
+		5. GitHub Workflows
+		6. Special Pages
+		7. Tests: 
 			1. New developments: 
 				1. 'emptied()' - new method on `IFreezableBuffer': 
 					add tests for it
@@ -103,28 +85,36 @@ Order of TODO-elimination:
 
 				Micro-behaviour plan: 
 					2. walk through the tests, INTRODUCING CHANGES [do ONLY for methods that are currently, ALREADY PRESENT (stick to modular test-fixing approach)]: 
+						note: THIS IS THE LIST OF *ALREADY EXISTING* tests, to be fixed...
+
+						[EnumSpace]
 						3. EnumSpace
+
+						[IndexMap]
 						4. IndexMap
 						5. HashMap
 						6. InternalHash
 						7. LinearIndexMap
 						8. LookupTable
 						9. PersistentIndexMap
+
+						[Parser]
 						10. Composition
 						11. TableMap
+
+						[Position]
 						12. MultiIndex
-						13. MultiIndexModifier
+
+						[Stream]
 						14. Stream
 						15. InputStream
 						16. LimitedStream
 						17. NestedStream
 						18. PredicateStream
-						19. ReversibleStream
 						20. StreamClass
 						21. StreamParser
 						22. TreeStream
-						23. Token
-						24. TreeWalker
+						
 					3. eliminate the old test cases
 					4. add new test cases: 
 						They bear form:
@@ -249,8 +239,12 @@ Order of TODO-elimination:
 						took so long due to lack of clear requirements
 					)
 					
-		10. Self-referencing on Wiki
-		11. To add Wiki pages [classes]: 
+		8. Self-referencing on Wiki: 
+			1. provide links to interfaces for class pages
+			2. provide links ot implementations for interfaces to interface pages
+
+		9. To add Wiki pages [classes]: 
+			[Parser]
 			4. Composition
 			5. PreSignature
 			6. LayerSignature
@@ -259,23 +253,45 @@ Order of TODO-elimination:
 			9. SignatureIndexSet
 			10. TableMap
 			11. MapWrap
+
+			[Position]
 			12. MultiIndex [shares page with `MultiIndexModifier`]
+
+			[Stream]
 			13. InputStream
 			14. LimitedStream
 			15. NestedStream
 			16. PredicateStream
 			17. TreeStream
 			18. StreamParser
-			19. Token
-			20. TokenType
-			21. TokenInstance
-			22. TreeWalker
-			23. ChildrenTree
-			24. ParentTree
-		13. Add the missing stuff into the library [the "moved from v0.4" todos...]; 
 
-		15. SIMPLIFY TYPES: 
+			[Node]
+			19. TokenNode
+			20. ContentNode
+			21. RecursiveNode
+
+		10. Add the missing stuff into the library [the "moved from v0.4" todos...]: 
+			1. Do it GRADUALLY, as you complete other todos.
+
+		11. SIMPLIFY TYPES: 
 			1. `A extends B, C, D, ... {}` TURN INTO `A = B & C & D & ...`; 
+
+		12. OPTIMIZING `TypeScript` property definitions on classes: 
+			When [in TypeScript], one does: 
+				class C {
+					prop: P
+				}	 
+
+			This DOESN'T ACTUALLY create a property of 'prop', however, doing this: 
+
+				class C {
+					props: P = ...
+				}
+
+			DOES. UPON CREATION OF THE OBJECT ['constructor' call]; 
+			When one needs a PROTOTYPE PROPERTY, use the first variant (type-level only), 
+				where it's an INSTANCE PROPERTY, use the second, as doing so wil avoid the 
+					necessity for type-transitions in code. 
 
 	JSDoc [on the par with wiki]:
 		These are short and concise, don't get too deep into the implementation details. 
