@@ -1,43 +1,50 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+import type { ICopiable } from "../../../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
 	IParserState
 } from "./interfaces.js"
 
-import type { Summat } from "@hgargg-0710/summat.ts"
-
 import { IndexSet } from "../../../internal/IndexSet.js"
 import { Composition } from "../classes.js"
 
 import { array, object, functional } from "@hgargg-0710/one"
-const { substitute } = array
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export class Signature {
+export class Signature implements ICopiable {
 	protected readonly toApplyOn: IndexSet
 	protected readonly preIndexes: IndexSet
-	protected preFill: any[]
+	protected preFill: any[];
+
+	["constructor"]: new (
+		arity: number,
+		toApplyOn: number[],
+		preIndexes: number[]
+	) => typeof this
 
 	apply(layers: Function[]) {
-		const { preIndexes, preFill, toApplyOn, arity } = this
-
+		const { preIndexes, preFill, toApplyOn } = this
 		const accessSet = new Set(toApplyOn)
-		const preIndsComplement = Array.from(preIndexes.complement())
-		const substitutor = substitute(arity, Array.from(preIndexes))(preFill)
-
 		return layers.map((layer: Function, i: number) =>
 			accessSet.has(i)
-				? argFiller(layer)(
-						...substitutor(array.copy(preIndsComplement))
-				  )(...preFill)
+				? argFiller(layer)(...Array.from(preIndexes))(...preFill)
 				: layer
 		)
 	}
 
+	copy() {
+		return new this.constructor(
+			this.arity,
+			Array.from(this.toApplyOn),
+			Array.from(this.preIndexes)
+		)
+	}
+
 	init(preFill: any[]) {
-		this.preFill = preFill
+		this.preFill = array.copy(preFill)
 		return this
 	}
 
@@ -51,41 +58,49 @@ export class Signature {
 	}
 }
 
-// TODO: USE an `abstract class` FOR THIS [repeated methods... memory cost];
+abstract class PreComplexComposition<
+		StateType extends Summat = Summat,
+		ArgType extends any[] = any[],
+		OutType = any
+	>
+	extends Composition<ArgType, OutType>
+	implements IComplexComposition<StateType>
+{
+	#original: Function[] = []
+	#state: StateType | null = null
+
+	get state() {
+		return this.#state!
+	}
+
+	protected stateMaker: (thisArg: IComplexComposition) => StateType
+
+	protected makeState() {
+		this.#state = this.stateMaker(this)
+		return this
+	}
+
+	init(callback: (state: IComplexComposition) => Signature[]) {
+		let layers = array.copy(this.#original)
+		for (const signature of callback(this.makeState()))
+			signature.apply(this.layers)
+		this.layers = layers
+		return this
+	}
+
+	constructor(layers?: Function[]) {
+		super(layers)
+		if (layers) this.#original = layers
+	}
+}
+
 export function ComplexComposition<StateType extends Summat = Summat>(
 	stateMaker: (thisArg: IComplexComposition) => StateType
-) {
-	class complexComposition<ArgType extends any[] = any[], OutType = any>
-		extends Composition<ArgType, OutType>
-		implements IComplexComposition<StateType>
-	{
-		#original: Function[] = []
-		#state: StateType | null = null
-
-		get state() {
-			return this.#state!
-		}
-
-		protected stateMaker: (thisArg: IComplexComposition) => StateType
-
-		protected makeState() {
-			this.#state = this.stateMaker(this)
-			return this
-		}
-
-		init(callback: (state: IComplexComposition) => Signature[]) {
-			let layers = array.copy(this.#original)
-			for (const signature of callback(this.makeState()))
-				signature.apply(this.layers)
-			this.layers = layers
-			return this
-		}
-
-		constructor(layers?: Function[]) {
-			super(layers)
-			if (layers) this.#original = layers
-		}
-	}
+): new (layers?: Function[]) => IComplexComposition<StateType> {
+	class complexComposition<
+		ArgType extends any[] = any[],
+		OutType = any
+	> extends PreComplexComposition<StateType, ArgType, OutType> {}
 
 	extendPrototype(complexComposition, {
 		stateMaker: ConstDescriptor(stateMaker)

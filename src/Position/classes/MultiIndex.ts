@@ -17,7 +17,7 @@ export class MultiIndex extends InitializablePattern<number[]> {
 	convert(stream: ITreeStream) {
 		let final = 0
 		stream.rewind()
-		while (!stream.isEnd && !stream.multind.equals(this)) {
+		while (!stream.isEnd && !stream.pos.equals(this)) {
 			stream.next()
 			++final
 		}
