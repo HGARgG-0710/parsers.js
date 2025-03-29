@@ -37,84 +37,182 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]: 	
-		-1. fix docs [from tests]: 
-			1. Docs [wiki, jsdoc]: 
-				[classes]
-				1. Parser: 
-					[wiki]
-					Add pages: 
-						1. ComplexComposition
-						2. Signature
-					
-					Change records-pages: 
-						1. classes.Parser
-						2. Interfaces [replace the `Parser/DynamicParser` interfaces with new ones]
-
-					Remove pages: 
-						1. utils.Parser.Composition
-
-					[jsdoc]
-					1. ParserState	
-
-				2. Position [MultiIndex]
-
-			2. Tests: 
-				[old]
-				1. EnumSpace
-				2. IndexMap
+		1. PROBLEM: [with 'ComplexComposition.layers' property]
+			Consider an operation: 
+				1. this.layers[i] = x
+			Or: 
+				2. this.layers.push(x)
+			Or, whatever. 
+			THERE ISN'T A GOOD 'Array' INERFACE-WRAPPER FOR AN ARRAY OF 'Function's. 
 			
-			SI5. IDEA: simplifying the list of available Stream-s further: 
-				Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
-					returning a Stream with precisely this same definition; 
+			Namely, must have DYNAMIC [id est, `.#merged`-updating] operations: 
 
-				Then, you can do: 
-					const reversed = stream.reverse()
-				instead of: 
-					const reversed = ReversedStream(stream)
+				1. push(value)
+				2. write(i, value)
+				3. init(value)
 
-				Nicer semantics. 
+			ALSO, EXTEND to a *new* sub-interface, called 'DynamicBuffer': 
 
-			IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
-				Make it separate. 
-				Reasons:
-					1. Doesn't allow for iteration algorithms
-					2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-					3. Will cause less nestedness
-				
-			1. Doc-sync
+				1. insert(i, ...values) - inserts an item at a position 'i'
+				2. remove(i, len = 1) - removes `len` items at a position `i`
+				3. truncate(from, to = this.size) - truncates the internal array via the 'from, to' [`to` is exclusive]
+
+			Finally, create an implementation of `IDynamicBuffer`, called `CallbackBuffer`; 
+			IT IS *NOT* GENERIC, depends upon a function (callback) that gets executed WHENEVER 
+				the mutating methods are called. The callback gets INJECTED via `.init`. 
+					The actual 'Composition'-based stuff will HAVE TO be injecting it with a 
+						'function (newlayers) {this.#merged = trivialCompose(...newlayers)}.bind(this)', 
+							where 'newlayers' is THE UPDATED 'IDynamicBuffer'. 
+
+				NOTE: one will need to update the docs for this (again...);
+
+			[CallbackBuffer] *MUST* have as a dynamic operation: 
+				1. `init`
+				CONCLUSION: refactor the `InitializablePattern` to a smaller class with JUST the `get` method; 
+
+			TODO: 
+				0. Refactor an `IBuffer` interface from `IFreezableBuffer`
+				1. UPDATE the `IBuffer` [AND `IFreezableBuffer` implementaitons] to have `.write(i, value)`
+				2. CHANGE the `layers` definition to (internally) use a `CallbackBuffer`: 
+
+			ALSO: 
+				1. the `.layers = ...` MUST REMAIN [id est - AS AN ARRAY]: 
+					One additionally uses the `.init()` here; 
+				2. the `.layers` MUST REMAIN [id est - AS AN ARRAY]
+					One additionally uses the `.get()` here; 			
+
+		2. Tests: 
+			[old]
+			1. EnumSpace
+			2. IndexMap
+		
+		SI5. IDEA: simplifying the list of available Stream-s further: 
+			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
+				returning a Stream with precisely this same definition; 
+
+			Then, you can do: 
+				const reversed = stream.reverse()
+			instead of: 
+				const reversed = ReversedStream(stream)
+
+			Nicer semantics. 
+
+		IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
+			Make it separate. 
+			Reasons:
+				1. Doesn't allow for iteration algorithms
+				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+				3. Will cause less nestedness
+			
+		1. Doc-sync
 	
-			SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
-				This is the early version [rough, unfinished, sketchy]: 
-					interface Stream<Type = any> extends Summat {
-						pos?: number
-						buffer?: FreezableBuffer<Type>
-						state?: Summat
-						prev?: () => Type
-						isStart?: boolean
+		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
+			This is the early version [rough, unfinished, sketchy]: 
+				interface Stream<Type = any> extends Summat {
+					pos?: number
+					buffer?: FreezableBuffer<Type>
+					state?: Summat
+					prev?: () => Type
+					isStart?: boolean
 
-						init?: (...x: any[]) => Stream<Type>
-						navigate?: (pos: Position) => Type
-						finish?: () => Type
-						rewind?: () => Type
+					init?: (...x: any[]) => Stream<Type>
+					navigate?: (pos: Position) => Type
+					finish?: () => Type
+					rewind?: () => Type
 
-						curr: Type
-						next: () => Type
-						isEnd: boolean
-					}
+					curr: Type
+					next: () => Type
+					isEnd: boolean
+				}
 
-				REASON TO BE A PART OF V0.3: 
-					1. library has been divided for too long. 
-						It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 				
+			REASON TO BE A PART OF V0.3: 
+				1. library has been divided for too long. 
+					It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 				
+		
+		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
+			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
+				which *happens* to be the exact same one that the user is already using. 
 
-			2. Doc-sync
+			Instead of creating A NEW class and (potentially): 
 
-			IN1. The `Initializable` interface - make it higher level: 
-				1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
-				2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+				1. wasting memory (insignificant, though noticeable - prototype objects)
+				2. wasting optimizations (significant), by confusing the Engine
+			
+			The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
+				which would be: 
 
-				REASON FOR v0.3: 
-					1. tired of constantly fixing broken types, want it be done well once and for all
-					2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+				1. A Global object
+				2. That is connected to 'StreamClass'
+				3. And FOR WHICH 'StreamClass' DOES provide a handle, 
+					via *checking* whether or not the given class configuration already exists. 
+
+					Checks: 
+
+					1. properties/flags - by value/reference (x, y) => x === y
+					2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
+
+			The library actually DOES export various GenericCollection-s, namely one for each of: 
+				1. StreamClass
+				2. PredicateStream
+				3. LimitedStream
+				4. StreamParser
+				5. ProlongedStream
+				6. NestedStream
+				[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
+
+		SI7. Expose the `StreamClass`
+			Currently, it is not yet ready to be "released to the user", 
+				however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
+					one may as well do so, as: 
+
+				1. It would now become far too high-level to still be an implementation detail
+				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external		
+
+		Docs: 
+			1. Stream
+
+		2. Doc-sync
+
+		IN1. The `Initializable` interface - make it higher level: 
+			1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
+			2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
+
+			REASON FOR v0.3: 
+				1. tired of constantly fixing broken types, want it be done well once and for all
+				2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+
+		3. Doc-sync 
+		
+				
+		SI9. Make `Position` a submodule of `Stream`
+			Reason: ontology. 
+			`Position` is ONLY ever used with `Stream`-s. 
+			Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
+			Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
+			The predicates, too, work best when considered in directional context (id est: iteration...)
+		
+		Docs:
+			1. Position [MultiIndex]		
+
+		PO1. ['test' branch -> 'dev' branch; *DO TDD*] Introduce a new Position class - Multiline
+			Basically, a pair of numbers: 
+				(lineNum, charNum)	
+			Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
+			Which correspond to prior number of newlines and prior number of symbols; 
+			Used frequently throughout for things like debug information; 
+			The '.convert()' would play very nicely with it...; 
+
+			REASON TO IMPLEMENT AS V0.3: 
+				1. Every module should ahve at least 2 different classes
+					Exceptions:
+						1. TokenizablePattern
+						2. ValidatablePattern
+					Reason:
+						1. (as learned per v0.3) Implementing lazy algorithms in a fashion that is clean 
+							takes a greater amount of time and effort. 
+				2. `Position` is the only that has "semantically", only one unit - MultiIndex (MultiIndex)
+
+			NOTE: it works ONLY with 'Stream's that have a `string` as input...	
 			
 
 	TODO [any order]: 
@@ -509,9 +607,6 @@ Order of TODO-elimination:
 			and *LIVING* pieces. 
 		
 		Among specific restrictions:
-			1. No docs (yet) for: 
-				1. `ValidatablePattern` and `TokenizablePattern`
-				2. `Eliminable` gets deleted
 			2. WRITE DOCS AND TESTS FOR OLD VERSIONS FIRST, then - 
 			3. implement the (a) missing feature(s) that go into the v0.3
 			4. alter docs 
@@ -519,27 +614,7 @@ Order of TODO-elimination:
 		
 		TODOS for v0.3: 		
 			Primary: 
-		
-				PO1. Introduce a new Position class - Multiline
-					Basically, a pair of numbers: 
-						(lineNum, charNum)	
-					Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
-					Which correspond to prior number of newlines and prior number of symbols; 
-					Used frequently throughout for things like debug information; 
-					The '.convert()' would play very nicely with it...; 
-
-					REASON TO IMPLEMENT AS V0.3: 
-						1. Every module should ahve at least 2 different classes
-							Exceptions:
-								1. TokenizablePattern
-								2. ValidatablePattern
-							Reason:
-								1. (as learned per v0.3) Implementing lazy algorithms in a fashion that is clean 
-									takes a greater amount of time and effort. 
-						2. `Position` is the only that has "semantically", only one unit - MultiIndex (MultiIndex)
-
-					NOTE: it works ONLY with 'Stream's that have a `string` as input...
-					
+							
 				PO2. [new Position class] Traveller, a point on a Stream [Position/classes.ts]
 
 					REASONS for v0.3: 
@@ -926,45 +1001,6 @@ Order of TODO-elimination:
 						3. LimitedStream
 						4. PredicateStream
 						
-				SI4. GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
-					Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
-						which *happens* to be the exact same one that the user is already using. 
-
-					Instead of creating A NEW class and (potentially): 
-
-						1. wasting memory (insignificant, though noticeable - prototype objects)
-						2. wasting optimizations (significant), by confusing the Engine
-					
-					The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
-						which would be: 
-
-						1. A Global object
-						2. That is connected to 'StreamClass'
-						3. And FOR WHICH 'StreamClass' DOES provide a handle, 
-							via *checking* whether or not the given class configuration already exists. 
-
-							Checks: 
-
-							1. properties/flags - by value/reference (x, y) => x === y
-							2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
-
-					The library actually DOES export various GenericCollection-s, namely one for each of: 
-						1. StreamClass
-						2. PredicateStream
-						3. LimitedStream
-						4. StreamParser
-						5. ProlongedStream
-						6. NestedStream
-						[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
-
-				SI7. Expose the `StreamClass`
-				Currently, it is not yet ready to be "released to the user", 
-					however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
-						one may as well do so, as: 
-
-					1. It would now become far too high-level to still be an implementation detail
-					2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external
-
 			Secondary: 	
 				ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
 					When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
@@ -991,13 +1027,6 @@ Order of TODO-elimination:
 				DE1. Increase the Library's natural debuggability: 
 					ADD names to all the nameless functions. 
 					This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 	
-					
-				SI9. Make `Position` a submodule of `Stream`
-					Reason: ontology. 
-					`Position` is ONLY ever used with `Stream`-s. 
-					Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
-					Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
-					The predicates, too, work best when considered in directional context (id est: iteration...)
 
 				SI11. The `.prod()` method - repurpose it. 
 					Replace it with a simple, general `.peek(1)` [PeekableStream]
@@ -2409,3 +2438,4 @@ FUTURE:
 				TODO: rename this to something more interesting (like 'ReducableComposition', or something...); 
 			4. IndexSet
 			5. Signature 
+			6. `IBuffer`, `IDynamicBuffer`, `CallbackBuffer` 
