@@ -37,14 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]: 	
-		1. fix docs: 
-			1. 'Interfaces': 
-				1. Buffer-related
-				2. Composition-related
-			2. classes: 
-				1. ArrayCollection [new .size property from `ICollection` interface]
-				2. UnfreezableString, UnfreezableArray [new `.write` method]
-
 		2. Tests: 
 			[old]
 			1. EnumSpace
