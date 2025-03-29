@@ -6,6 +6,7 @@ export interface ICollection<Type = any>
 		IGettablePattern<IIndexed<Type>>,
 		ICopiable {
 	push: (...x: Type[]) => this
+	readonly size: number
 }
 
 export type * from "./Buffer/interfaces.js"

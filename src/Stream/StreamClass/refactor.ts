@@ -33,7 +33,7 @@ export function deEnd(stream: IStreamClassInstance) {
 }
 
 export function createState(x: IStateful, state: Summat) {
-	x.state = state
+	;(x.state as Summat) = state
 }
 
 export function readBuffer<Type = any>(
