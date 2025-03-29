@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable } from "../../../interfaces.js"
+import type { FunctionTuple, ICopiable } from "../../../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
@@ -7,6 +7,8 @@ import type {
 } from "./interfaces.js"
 
 import { IndexSet } from "../../../internal/IndexSet.js"
+import { CallbackBuffer } from "../../../internal/CallbackBuffer.js"
+
 import { Composition } from "../classes.js"
 
 import { array, object, functional } from "@hgargg-0710/one"
@@ -69,13 +71,18 @@ abstract class PreComplexComposition<
 	#original: Function[] = []
 	#state: StateType | null = null
 
+	readonly layers: FunctionTuple = new CallbackBuffer(
+		function (
+			this: PreComplexComposition<StateType, ArgType, OutType>,
+			buffer: CallbackBuffer<Function>
+		) {
+			this.merge(buffer)
+			this.#original = buffer.get() as Function[]
+		}.bind(this)
+	)
+
 	get state() {
 		return this.#state!
-	}
-
-	set layers(layers: Function[]) {
-		super.layers = layers
-		this.#original = layers
 	}
 
 	protected stateMaker: (thisArg: IComplexComposition) => StateType
@@ -89,7 +96,7 @@ abstract class PreComplexComposition<
 		let layers = array.copy(this.#original)
 		for (const signature of callback(this.makeState()))
 			layers = signature.apply(layers)
-		this.layers = layers
+		this.layers.init(layers)
 		return this
 	}
 }
@@ -110,12 +117,12 @@ export function ComplexComposition<StateType extends Summat = Summat>(
 }
 
 /**
- * Returns an `IParserState` object with `x` as the value of the 
- * `parser` property. 
- * 
- * Incredibly useful for self-modifying parsers. 
- * Employed by the library's `DynamicParser`. 
-*/
+ * Returns an `IParserState` object with `x` as the value of the
+ * `parser` property.
+ *
+ * Incredibly useful for self-modifying parsers.
+ * Employed by the library's `DynamicParser`.
+ */
 export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 
 // * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!

@@ -1,38 +1,37 @@
-import type { IComposition } from "./interfaces.js"
-import { Callable } from "src/internal/Callable.js"
+import type { FunctionTuple, IComposition } from "./interfaces.js"
+import type { IDynamicBuffer } from "../../interfaces.js"
 
-import { array, functional } from "@hgargg-0710/one"
+import { Callable } from "src/internal/Callable.js"
+import { CallbackBuffer } from "src/internal/CallbackBuffer.js"
+
+import { functional } from "@hgargg-0710/one"
 const { trivialCompose, id } = functional
 
 export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
 	implements IComposition
 {
-	#layers: Function[] = []
+	readonly layers: FunctionTuple = new CallbackBuffer(this.merge.bind(this))
 
-	protected merged: (...x: ArgType) => OutType = id as any;
+	protected merged: (...x: ArgType) => OutType = id as any
+
+	protected merge(buffer: IDynamicBuffer<Function>) {
+		this.merged = trivialCompose(...buffer)
+	}
 
 	["constructor"]: new (layers?: Function[]) => Composition
-
-	get layers() {
-		return this.#layers
-	}
-
-	set layers(v: Function[]) {
-		this.merged = trivialCompose(...(this.#layers = v))
-	}
 
 	protected __call__(...x: ArgType) {
 		return this.merged(...x)
 	}
 
 	copy() {
-		return new this.constructor(array.copy(this.layers))
+		return new this.constructor(this.layers.get() as Function[])
 	}
 
 	constructor(layers?: Function[]) {
 		super()
-		if (layers) this.layers = layers
+		if (layers) this.layers.init(layers)
 	}
 }
 

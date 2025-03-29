@@ -9,7 +9,7 @@ export class ArrayCollection<Type = any>
 {
 	protected value: Type[];
 
-	["constructor"]: new (value?: Type[]) => ArrayCollection<Type>
+	["constructor"]: new (...x: any[]) => ArrayCollection<Type>
 
 	get() {
 		return super.get() as readonly Type[]

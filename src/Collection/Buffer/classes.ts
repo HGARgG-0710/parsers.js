@@ -24,10 +24,6 @@ abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 		return this.value![i] as Type
 	}
 
-	get size() {
-		return this.value!.length
-	}
-
 	copy() {
 		return new this.constructor(this.value)
 	}
@@ -56,6 +52,11 @@ export class UnfreezableArray<Type = any>
 		return new this.constructor(array.copy(this.value))
 	}
 
+	write(i: number, value: Type) {
+		this.value[i] = value
+		return this
+	}
+
 	constructor(value: Type[] = []) {
 		super(value)
 	}
@@ -73,6 +74,12 @@ export class UnfreezableString
 
 	push(...strings: string[]) {
 		if (!this.isFrozen) this.value += strings.join("")
+		return this
+	}
+
+	write(i: number, char: string) {
+		const { value: currValue } = this
+		this.value = currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
 		return this
 	}
 
