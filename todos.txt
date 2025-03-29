@@ -37,49 +37,13 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]: 	
-		1. PROBLEM: [with 'ComplexComposition.layers' property]
-			Consider an operation: 
-				1. this.layers[i] = x
-			Or: 
-				2. this.layers.push(x)
-			Or, whatever. 
-			THERE ISN'T A GOOD 'Array' INERFACE-WRAPPER FOR AN ARRAY OF 'Function's. 
-			
-			Namely, must have DYNAMIC [id est, `.#merged`-updating] operations: 
-
-				1. push(value)
-				2. write(i, value)
-				3. init(value)
-
-			ALSO, EXTEND to a *new* sub-interface, called 'DynamicBuffer': 
-
-				1. insert(i, ...values) - inserts an item at a position 'i'
-				2. remove(i, len = 1) - removes `len` items at a position `i`
-				3. truncate(from, to = this.size) - truncates the internal array via the 'from, to' [`to` is exclusive]
-
-			Finally, create an implementation of `IDynamicBuffer`, called `CallbackBuffer`; 
-			IT IS *NOT* GENERIC, depends upon a function (callback) that gets executed WHENEVER 
-				the mutating methods are called. The callback gets INJECTED via `.init`. 
-					The actual 'Composition'-based stuff will HAVE TO be injecting it with a 
-						'function (newlayers) {this.#merged = trivialCompose(...newlayers)}.bind(this)', 
-							where 'newlayers' is THE UPDATED 'IDynamicBuffer'. 
-
-				NOTE: one will need to update the docs for this (again...);
-
-			[CallbackBuffer] *MUST* have as a dynamic operation: 
-				1. `init`
-				CONCLUSION: refactor the `InitializablePattern` to a smaller class with JUST the `get` method; 
-
-			TODO: 
-				0. Refactor an `IBuffer` interface from `IFreezableBuffer`
-				1. UPDATE the `IBuffer` [AND `IFreezableBuffer` implementaitons] to have `.write(i, value)`
-				2. CHANGE the `layers` definition to (internally) use a `CallbackBuffer`: 
-
-			ALSO: 
-				1. the `.layers = ...` MUST REMAIN [id est - AS AN ARRAY]: 
-					One additionally uses the `.init()` here; 
-				2. the `.layers` MUST REMAIN [id est - AS AN ARRAY]
-					One additionally uses the `.get()` here; 			
+		1. fix docs: 
+			1. 'Interfaces': 
+				1. Buffer-related
+				2. Composition-related
+			2. classes: 
+				1. ArrayCollection [new .size property from `ICollection` interface]
+				2. UnfreezableString, UnfreezableArray [new `.write` method]
 
 		2. Tests: 
 			[old]
@@ -180,6 +144,12 @@ Order of TODO-elimination:
 			REASON FOR v0.3: 
 				1. tired of constantly fixing broken types, want it be done well once and for all
 				2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
+
+			ALSO: 
+				1. make it INTO PROPER INTERFACE *EVERYWHERE* that it appears: 
+					1. InitializablePattern
+					2. IBuffer
+					3. etc...
 
 		3. Doc-sync 
 		
