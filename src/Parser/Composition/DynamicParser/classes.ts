@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { FunctionTuple, ICopiable } from "../../../interfaces.js"
+import type { IFunctionTuple, ICopiable } from "../../../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
@@ -71,7 +71,7 @@ abstract class PreComplexComposition<
 	#original: Function[] = []
 	#state: StateType | null = null
 
-	readonly layers: FunctionTuple = new CallbackBuffer(
+	readonly layers: IFunctionTuple = new CallbackBuffer(
 		function (
 			this: PreComplexComposition<StateType, ArgType, OutType>,
 			buffer: CallbackBuffer<Function>

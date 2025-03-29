@@ -1,4 +1,4 @@
-import type { FunctionTuple, IComposition } from "./interfaces.js"
+import type { IFunctionTuple, IComposition } from "./interfaces.js"
 import type { IDynamicBuffer } from "../../interfaces.js"
 
 import { Callable } from "src/internal/Callable.js"
@@ -11,7 +11,7 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
 	implements IComposition
 {
-	readonly layers: FunctionTuple = new CallbackBuffer(this.merge.bind(this))
+	readonly layers: IFunctionTuple = new CallbackBuffer(this.merge.bind(this))
 
 	protected merged: (...x: ArgType) => OutType = id as any
 

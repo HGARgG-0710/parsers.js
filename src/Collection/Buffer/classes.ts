@@ -53,7 +53,7 @@ export class UnfreezableArray<Type = any>
 	}
 
 	write(i: number, value: Type) {
-		this.value[i] = value
+		if (!this.isFrozen) this.value[i] = value
 		return this
 	}
 
@@ -79,7 +79,9 @@ export class UnfreezableString
 
 	write(i: number, char: string) {
 		const { value: currValue } = this
-		this.value = currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
+		if (!this.isFrozen)
+			this.value =
+				currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
 		return this
 	}
 
