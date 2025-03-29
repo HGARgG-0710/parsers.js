@@ -73,6 +73,11 @@ abstract class PreComplexComposition<
 		return this.#state!
 	}
 
+	set layers(layers: Function[]) {
+		super.layers = layers
+		this.#original = layers
+	}
+
 	protected stateMaker: (thisArg: IComplexComposition) => StateType
 
 	protected makeState() {
@@ -80,17 +85,12 @@ abstract class PreComplexComposition<
 		return this
 	}
 
-	init(callback: (state: IComplexComposition) => Signature[]) {
+	init(callback: (thisArg: IComplexComposition) => Iterable<Signature>) {
 		let layers = array.copy(this.#original)
 		for (const signature of callback(this.makeState()))
-			signature.apply(this.layers)
+			layers = signature.apply(layers)
 		this.layers = layers
 		return this
-	}
-
-	constructor(layers?: Function[]) {
-		super(layers)
-		if (layers) this.#original = layers
 	}
 }
 
@@ -109,6 +109,13 @@ export function ComplexComposition<StateType extends Summat = Summat>(
 	return complexComposition
 }
 
+/**
+ * Returns an `IParserState` object with `x` as the value of the 
+ * `parser` property. 
+ * 
+ * Incredibly useful for self-modifying parsers. 
+ * Employed by the library's `DynamicParser`. 
+*/
 export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 
 // * important pre-doc note: *THE* Holy Grail of this library [to which StreamParser is second], towards which ALL has been building - The Lord Self-Modifying Parser Cometh!
