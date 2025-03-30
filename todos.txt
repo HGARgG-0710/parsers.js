@@ -39,8 +39,8 @@ Order of TODO-elimination:
 	TODO [fixed order]: 	
 		2. Tests: 
 			[old]
-			1. EnumSpace
-			2. IndexMap
+			2. IndexMap: 
+				1. split the `HashMap` from `IndexMap` [first - on 'test', then - on 'dev']
 		
 		SI5. IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 

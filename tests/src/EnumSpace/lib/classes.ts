@@ -1,177 +1,118 @@
-import assert from "node:assert"
+import assert from "assert"
+import type { IEnumSpace, IMappable } from "../../../../dist/src/interfaces.js"
+import { ClassTest, MethodTest, type Interface } from "../../lib/_lib.js"
 
-import type { ITokenInstance } from "../../../../dist/src/Token/interfaces.js"
-import type { IEnumSpace } from "../../../../dist/src/EnumSpace/interfaces.js"
-import type { IMappable } from "../../../../dist/src/interfaces.js"
-
-import {
-	ClassConstructorTest,
-	classTest,
-	method,
-	signatures,
-	uniquenessTest
-} from "lib/lib.js"
-
-import { object, boolean, type, array } from "@hgargg-0710/one"
+import { object, type, array } from "@hgargg-0710/one"
 const { structCheck } = object
 const { isFunction } = type
-const { T } = boolean
-const { same } = array
+const { uniqueArr } = array
 
 const isEnumSpace = structCheck<IEnumSpace>({
-	value: T,
+	copy: isFunction,
 	add: isFunction,
-	map: isFunction,
 	join: isFunction,
-	copy: isFunction
+	map: isFunction
 })
 
-const assertSize = (instance: IEnumSpace) =>
-	assert.strictEqual(instance.map().length, instance.size)
-
-function enumEquality(
-	enumSpaceOrig: IEnumSpace,
-	enumSpaceCompared: IEnumSpace
-) {
-	return same(enumSpaceOrig.map(), enumSpaceCompared.map())
-}
-
-const EnumSpaceConstructorTest = ClassConstructorTest(
-	isEnumSpace,
-	["add", "map", "join", "copy"],
-	["value"]
-)
-
-function EnumSpaceCopyTest(
-	instance: IEnumSpace,
-	signature: ReducedEnumSpaceTestSignature
-) {
-	method("copy", () => {
-		const copy = instance.copy()
-		assert.notStrictEqual(copy, instance)
-
-		assertSize(instance)
-		assertSize(copy)
-
-		assert.strictEqual(instance.size, copy.size)
-		assert.strictEqual(instance.add, copy.add)
-		assert.strictEqual(instance.join, copy.join)
-		assert.strictEqual(instance.copy, copy.copy)
-		assert.strictEqual(instance.map, copy.map)
-
-		assert(enumEquality(instance, copy))
-		ChainEnumSpaceTest(instance, signature)
-	})
-}
-
-function EnumSpaceAddTest(instance: IEnumSpace, n: number) {
-	method(
-		"add",
-		() => {
-			const initSize = instance.size
-			instance.add(n)
-			assert(instance.size - initSize === n)
-			assertSize(instance)
-		},
-		n
-	)
-}
-
-function EnumSpaceJoinTest(instance: IEnumSpace, space: IEnumSpace) {
-	method(
-		"join",
-		() => {
-			const initSize = instance.size
-			instance.join(space)
-			assert(instance.size - initSize === space.size)
-			assertSize(instance)
-		},
-		space
-	)
-}
-
-function EnumSpaceMapTest(
-	instance: IEnumSpace,
-	compare: (x: any, y: any, i?: number) => boolean,
-	f: IMappable
-) {
-	method("map", () => {
-		const mapped = instance.map()
-		const mappedTested = instance.map(f)
-		assertSize(instance)
-		assert(same(mappedTested, mapped, compare))
-	})
-}
-
-// NOTE: this is to test the most important property of EnumSpace-s, that all its elements are DISJOINT (otherwise, the structure becomes inherently useless);
-const EnumSpaceUniquenessTest = (instance: IEnumSpace) =>
-	uniquenessTest(instance.map())
-
-type EnumSpaceClassTestSignature = {
-	size: number
-} & ReducedEnumSpaceTestSignature
-
-type ReducedEnumSpaceTestSignature = {
-	increases: number[]
-	joined: IEnumSpace[]
-	mapTests: [IMappable, (x: any, y: any, i?: number) => boolean][]
-	isCopyTest?: boolean
-	furtherSignature?: ReducedEnumSpaceTestSignature
-}
-
-export function EnumSpaceTest(
-	className: string,
-	enumConstructor: new (size: number) => IEnumSpace,
-	testSignatures: EnumSpaceClassTestSignature[]
-) {
-	classTest(`(EnumSpace) ${className}`, () =>
-		signatures(
-			testSignatures,
-			({
-					size,
-					increases,
-					joined,
-					mapTests,
-					isCopyTest,
-					furtherSignature
-				}) =>
-				() =>
-					ChainEnumSpaceTest(
-						EnumSpaceConstructorTest(enumConstructor, size),
-						{
-							increases,
-							joined,
-							mapTests,
-							isCopyTest,
-							furtherSignature
-						}
-					)
+function handleNegative(n: number) {
+	if (n < 0)
+		throw new TypeError(
+			`Expected a numeric value 'n' greater than or equal to 0, got ${n}`
 		)
-	)
 }
 
-function ChainEnumSpaceTest(
-	instance: IEnumSpace,
-	signature: ReducedEnumSpaceTestSignature
+function verifyUniqueness<Type = any>(x: IEnumSpace<Type>) {
+	const mapped = x.map()
+	assert(array.same(uniqueArr(mapped), mapped))
+}
+
+const copy = new MethodTest("copy", function <Type = any>(
+	this: IEnumSpace<Type>
 ) {
-	const { increases, joined, mapTests, isCopyTest, furtherSignature } =
-		signature
+	const copied = this.copy()
+	assert.notStrictEqual(this, copied)
+	assert(array.same(this.map(), copied.map()))
+})
 
-	if (isCopyTest === false) assert(isEnumSpace(instance))
+const add = new MethodTest("add", function <Type = any>(
+	this: IEnumSpace<Type>,
+	n: number,
+	expected: Iterable<Type>
+) {
+	handleNegative(n)
 
-	// .copy
-	if ((isCopyTest || isCopyTest === undefined) && furtherSignature)
-		EnumSpaceCopyTest(instance, furtherSignature)
+	const original = this.copy()
+	const origMapped = original.map()
+	const mapped = this.add(n).map()
 
-	// .add
-	for (const n of increases) EnumSpaceAddTest(instance, n)
+	assert(!array.same(origMapped, mapped))
+	assert.strictEqual(original.size, this.size - n)
 
-	// .join
-	for (const space of joined) EnumSpaceJoinTest(instance, space)
+	for (let i = 0; i < origMapped.length; ++i)
+		assert.strictEqual(origMapped[i], mapped[i])
 
-	// .map
-	for (const [f, compare] of mapTests) EnumSpaceMapTest(instance, compare, f)
+	assert(array.same(expected, mapped.slice(original.size, original.size + n)))
 
-	// uniqueness property
-	EnumSpaceUniquenessTest(instance)
+	verifyUniqueness(this)
+})
+
+const join = new MethodTest("join", function <Type = any>(
+	this: IEnumSpace<Type>,
+	enums: IEnumSpace<Type>
+) {
+	const original = this.copy()
+	const origMapped = original.map()
+	const mapped = this.join(enums).map()
+	const enumsMapped = uniqueArr(enums.map())
+
+	assert(!array.same(mapped, origMapped))
+	assert(this.size - enums.size <= original.size)
+
+	for (let i = 0; i < original.size; ++i)
+		assert.strictEqual(mapped[i], origMapped[i])
+
+	for (const x of enumsMapped) assert(mapped.includes(x))
+
+	verifyUniqueness(this)
+})
+
+const map = new MethodTest("map", function <Type = any, Out = any>(
+	this: IEnumSpace<Type>,
+	expected: Iterable<Out>,
+	f?: IMappable<Type, Out>
+) {
+	assert(array.same(this.map(f), expected))
+})
+
+class EnumSpaceTest<Type = any> extends ClassTest<IEnumSpace<Type>> {
+	static readonly interfaceName = "IEnumSpace"
+
+	static conformance(x: any) {
+		return isEnumSpace(x)
+	}
+
+	copy() {
+		return this.testMethod("copy")
+	}
+
+	add(n: number) {
+		return this.testMethod("add", n)
+	}
+
+	join(enums: IEnumSpace<Type>) {
+		return this.testMethod("join", enums)
+	}
+
+	map<Out = any>(expected: Iterable<Out>, f?: IMappable<Type, Out>) {
+		return this.testMethod("map", expected, f)
+	}
+
+	constructor(interfaces: Interface[] = [], methods: MethodTest[] = []) {
+		super(
+			[EnumSpaceTest, ...interfaces],
+			[copy, add, join, map, ...methods]
+		)
+	}
 }
+
+export const EnumSpaceTestObject = new EnumSpaceTest()
