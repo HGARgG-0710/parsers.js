@@ -6,7 +6,7 @@ import { InputStream } from "./classes.js"
 import { UnfreezableArray } from "../../Collection/Buffer/classes.js"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"
-import { consume } from "../../Parser/utils.js"
+import { consume } from "../utils.js"
 import { uniFinish } from "../StreamClass/utils.js"
 
 /**

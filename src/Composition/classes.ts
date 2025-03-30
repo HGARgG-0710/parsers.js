@@ -1,5 +1,5 @@
 import type { IFunctionTuple, IComposition } from "./interfaces.js"
-import type { IDynamicBuffer } from "../../interfaces.js"
+import type { IDynamicBuffer } from "../interfaces.js"
 
 import { Callable } from "src/internal/Callable.js"
 import { CallbackBuffer } from "src/internal/CallbackBuffer.js"

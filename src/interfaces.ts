@@ -67,12 +67,13 @@ export type IInvalidEntries<Type = any> = [number, Type][]
 export type IValidationResult = true | [false, number]
 
 export type * from "./Collection/interfaces.js"
+export type * from "./Composition/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
+export type * from "./HashMap/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
-export type * from "./Parser/interfaces.js"
+export type * from "./LookupTable/interfaces.js"
+export type * from "./Node/interfaces.js"
 export type * from "./Pattern/interfaces.js"
 export type * from "./Position/interfaces.js"
 export type * from "./Stream/interfaces.js"
-export type * from "./Node/interfaces.js"
-export type * from "./LookupTable/interfaces.js"
-export type * from "./HashMap/interfaces.js"
+export type * from "./TableMap/interfaces.js"

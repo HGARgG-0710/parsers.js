@@ -4,7 +4,7 @@ import type {
 	IStreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
 
-import type { IStreamHandler } from "../../Parser/TableMap/interfaces.js"
+import type { IStreamHandler } from "../../TableMap/interfaces.js"
 import type { ISupered } from "../../interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"

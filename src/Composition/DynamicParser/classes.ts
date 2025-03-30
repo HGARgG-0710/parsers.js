@@ -1,13 +1,15 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IFunctionTuple, ICopiable } from "../../../interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
 	IParserState
 } from "./interfaces.js"
 
-import { IndexSet } from "../../../internal/IndexSet.js"
-import { CallbackBuffer } from "../../../internal/CallbackBuffer.js"
+import type { IFunctionTuple } from "../interfaces.js"
+
+import { IndexSet } from "../../internal/IndexSet.js"
+import { CallbackBuffer } from "../../internal/CallbackBuffer.js"
 
 import { Composition } from "../classes.js"
 

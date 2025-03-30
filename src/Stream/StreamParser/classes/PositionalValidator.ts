@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { IInvalidEntries } from "../../../interfaces.js"
-import type { IStreamPredicate } from "../../../Parser/TableMap/interfaces.js"
+import type { IStreamPredicate } from "../../../TableMap/interfaces.js"
 import type { IEndableStream } from "../../../Stream/StreamClass/interfaces.js"
 import type { IStatePatternInitMethod } from "../../StreamClass/methods/init.js"
 

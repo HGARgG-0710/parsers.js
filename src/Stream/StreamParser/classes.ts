@@ -7,12 +7,13 @@ import type {
 } from "../../Stream/StreamClass/interfaces.js"
 
 import type { Constructor } from "../StreamClass/refactor.js"
+import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IStreamParser } from "./interfaces.js"
+
 import type {
 	IStreamHandler,
 	IStreamPredicate
-} from "../../Parser/TableMap/interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IStreamParser } from "./interfaces.js"
+} from "../../TableMap/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
 import { valueIsCurrEnd } from "../StreamClass/refactor.js"

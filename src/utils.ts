@@ -76,10 +76,9 @@ export const assignIndex = <Type = any>(
 
 export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"
+export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
-export * as Parser from "./Parser/utils.js"
+export * as Node from "./Node/utils.js"
 export * as Pattern from "./Pattern/utils.js"
 export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"
-export * as Node from "./Node/utils.js"
-export * as HashMap from "./HashMap/utils.js"

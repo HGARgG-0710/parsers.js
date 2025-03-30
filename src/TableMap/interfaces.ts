@@ -1,4 +1,4 @@
-import type { IBasicStream } from "../../Stream/interfaces.js"
+import type { IBasicStream } from "../Stream/interfaces.js"
 
 export type IParserFunction<InputType = any, OutType = any> = (
 	state?: InputType,

@@ -1,4 +1,4 @@
-import type { ICopiable, IDynamicBuffer } from "../../interfaces.js"
+import type { ICopiable, IDynamicBuffer } from "../interfaces.js"
 
 export interface IComposition extends Function, ICopiable {
 	readonly layers: IFunctionTuple
