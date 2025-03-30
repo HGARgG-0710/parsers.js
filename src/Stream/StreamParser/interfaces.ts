@@ -7,7 +7,7 @@ import type {
 import type { IStreamHandler } from "../../TableMap/interfaces.js"
 import type { ISupered } from "../../interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IPosed } from "../../Position/interfaces.js"
+import type { IPosed } from "../Position/interfaces.js"
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 
 export interface IStreamParser<InType = any, OutType = any>

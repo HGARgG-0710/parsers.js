@@ -5,3 +5,5 @@ export * from "./PredicateStream/classes.js"
 export * from "./ReversibleStream/classes.js"
 export * from "./TreeStream/classes.js"
 export * from "./StreamParser/classes.js"
+
+export * as Position from "./Position/classes.js"

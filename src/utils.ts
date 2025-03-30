@@ -10,7 +10,7 @@ import type {
 } from "./interfaces.js"
 
 import type { IStateful } from "./Stream/StreamClass/interfaces.js"
-import type { IPosed } from "./Position/interfaces.js"
+import type { IPosed } from "./Stream/Position/interfaces.js"
 
 import { BadIndex } from "./constants.js"
 
@@ -80,5 +80,4 @@ export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Node from "./Node/utils.js"
 export * as Pattern from "./Pattern/utils.js"
-export * as Position from "./Position/utils.js"
 export * as Stream from "./Stream/utils.js"

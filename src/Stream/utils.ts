@@ -15,10 +15,10 @@ import type {
 import { Stream } from "../constants.js"
 const { SkippedItem } = Stream.StreamParser
 
-import { positionNegate } from "../Position/utils.js"
+import { positionNegate } from "./Position/utils.js"
 import { uniNavigate } from "./StreamClass/utils.js"
 import { ArrayCollection } from "../Collection/classes.js"
-import { getStopPoint } from "../Position/refactor.js"
+import { getStopPoint } from "./Position/refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { prop } = object
@@ -178,3 +178,4 @@ export function transform<UnderType = any, UpperType = any>(
 
 export * as InputStream from "./InputStream/utils.js"
 export * as StreamClass from "./StreamClass/utils.js"
+export * as Position from "./Position/utils.js"
