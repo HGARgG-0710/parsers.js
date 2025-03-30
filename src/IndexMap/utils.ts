@@ -98,5 +98,4 @@ export function listRanges(...from: [number, number][]) {
 	return fromArr
 }
 
-export * as HashMap from "./HashMap/utils.js"
 export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"

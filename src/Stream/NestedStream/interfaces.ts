@@ -1,5 +1,5 @@
 import type { IStreamPredicate } from "../../Parser/TableMap/interfaces.js"
-import type { ILookupTable } from "../../IndexMap/LookupTable/interfaces.js"
+import type { ILookupTable } from "../../LookupTable/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 

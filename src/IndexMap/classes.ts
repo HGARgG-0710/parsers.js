@@ -27,8 +27,5 @@ export const Pairs = <KeyType = any, ValueType = any>(
 	) as array.Pairs<KeyType, ValueType>
 }
 
-export * as LookupTable from "./LookupTable/classes.js"
-export * as HashMap from "./HashMap/classes.js"
 export * as LinearIndexMap from "./LinearIndexMap/classes.js"
-
 export * from "./PersistentIndexMap/classes.js"

@@ -1,5 +1,5 @@
-import type { IPointer } from "../../Pattern/interfaces.js"
-import type { IPersistentIndexMap } from "../PersistentIndexMap/interfaces.js"
+import type { IPointer } from "../Pattern/interfaces.js"
+import type { IPersistentIndexMap } from "../IndexMap/PersistentIndexMap/interfaces.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
 import type {
 	IRekeyable,
@@ -7,13 +7,13 @@ import type {
 	ISettable,
 	ISizeable,
 	IIndexAssignable
-} from "../../interfaces.js"
+} from "../interfaces.js"
 
 import type { ILookupTable, ITableConstructor } from "./interfaces.js"
 
-import { current } from "../../Stream/utils.js"
-import { isGoodPointer, pos } from "../../utils.js"
-import { makeDelegate } from "../../refactor.js"
+import { current } from "../Stream/utils.js"
+import { isGoodPointer, pos } from "../utils.js"
+import { makeDelegate } from "../refactor.js"
 
 import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
 

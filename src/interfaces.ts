@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IHash } from "./IndexMap/HashMap/interfaces.js"
+import type { IHash } from "./HashMap/interfaces.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -74,3 +74,5 @@ export type * from "./Pattern/interfaces.js"
 export type * from "./Position/interfaces.js"
 export type * from "./Stream/interfaces.js"
 export type * from "./Node/interfaces.js"
+export type * from "./LookupTable/interfaces.js"
+export type * from "./HashMap/interfaces.js"

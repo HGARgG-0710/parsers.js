@@ -4,7 +4,7 @@ import type { IInternalHash } from "./InternalHash/interfaces.js"
 import { DelegateSizeable } from "src/internal/delegates/Sizeable.js"
 
 import { type } from "src/Node/utils.js"
-import { length } from "../../utils.js"
+import { length } from "../utils.js"
 
 import { extend } from "./refactor.js"
 

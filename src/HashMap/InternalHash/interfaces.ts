@@ -5,7 +5,7 @@ import type {
 	IDeletable,
 	ISettable,
 	ICopiable
-} from "../../../interfaces.js"
+} from "../../interfaces.js"
 
 export interface IInternalHash<
 	KeyType = any,

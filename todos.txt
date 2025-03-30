@@ -36,11 +36,31 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO [fixed order]: 	
+	TODO [fixed order]: 		
+		IN2. Make the `HashMap` and `LookupTable` NO LONGER a sub-module of `IndexMap`. 
+			Make it separate. 
+			Reasons:
+				1. Doesn't allow for iteration algorithms
+				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
+				3. Will cause less nestedness
+			
+			TODO: 
+				3. docs: 
+					1. classes
+						1. LookupTable
+						2. HashMap
+					2. utils
+						1. HashMap
+		
+		0. Doc sync
+
 		2. Tests: 
 			[old]
-			2. IndexMap: 
-				1. split the `HashMap` from `IndexMap` [first - on 'test', then - on 'dev']
+			1. HashMap
+			2. LookupTable
+			3. IndexMap: 
+				1. LinearIndexMap
+				2. PersistentIndexMap
 		
 		SI5. IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
@@ -53,13 +73,6 @@ Order of TODO-elimination:
 
 			Nicer semantics. 
 
-		IN2. Make the `HashMap` NO LONGER a sub-module of `IndexMap`. 
-			Make it separate. 
-			Reasons:
-				1. Doesn't allow for iteration algorithms
-				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-				3. Will cause less nestedness
-			
 		1. Doc-sync
 	
 		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 

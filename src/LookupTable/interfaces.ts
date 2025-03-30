@@ -5,7 +5,7 @@ import type {
 	IRekeyable,
 	ISizeable,
 	ICopiable
-} from "../../interfaces.js"
+} from "../interfaces.js"
 
 export interface ILookupTable<KeyType = any, ValueType = any, OwningType = any>
 	extends IRekeyable<KeyType>,

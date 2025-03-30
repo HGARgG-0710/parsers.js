@@ -60,7 +60,5 @@ export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
 	extensions: Function[]
 }
 
-export type * from "./LookupTable/interfaces.js"
-export type * from "./HashMap/interfaces.js"
 export type * from "./LinearIndexMap/interfaces.js"
 export type * from "./PersistentIndexMap/interfaces.js"
