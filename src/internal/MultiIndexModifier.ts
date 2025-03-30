@@ -1,5 +1,5 @@
 import { InitializablePattern } from "./Pattern.js"
-import { MultiIndex } from "src/Position/classes/MultiIndex.js"
+import { MultiIndex } from "src/Stream/Position/classes/MultiIndex.js"
 import { array } from "@hgargg-0710/one"
 
 export class MultiIndexModifier extends InitializablePattern<MultiIndex> {

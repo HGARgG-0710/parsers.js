@@ -1,4 +1,4 @@
-import type { IBasicStream } from "../Stream/interfaces.js"
+import type { IBasicStream } from "../interfaces.js"
 import type {
 	IDirectionalPosition,
 	IPosition,
@@ -8,7 +8,7 @@ import type {
 	IChange
 } from "./interfaces.js"
 
-import { previous, next } from "../Stream/utils.js"
+import { previous, next } from "../utils.js"
 
 import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object

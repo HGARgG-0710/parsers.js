@@ -1,5 +1,5 @@
 import type { IWalkable } from "../Node/interfaces.js"
-import type { MultiIndex } from "../Position/classes.js"
+import type { MultiIndex } from "../Stream/Position/classes.js"
 import { MultiIndexModifier } from "./MultiIndexModifier.js"
 
 import { InitializablePattern } from "./Pattern.js"

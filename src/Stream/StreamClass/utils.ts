@@ -1,4 +1,4 @@
-import type { IPosed, IPosition } from "../../Position/interfaces.js"
+import type { IPosed, IPosition } from "../Position/interfaces.js"
 import type { IIndexed } from "../../interfaces.js"
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 import type { IBasicStream } from "../interfaces.js"
@@ -12,7 +12,7 @@ import type {
 
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 
-import { pickDirection, positionConvert } from "../../Position/utils.js"
+import { pickDirection, positionConvert } from "../Position/utils.js"
 
 import { object, type } from "@hgargg-0710/one"
 const { structCheck } = object

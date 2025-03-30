@@ -3,14 +3,15 @@ import type {
 	IStreamClassInstance
 } from "../interfaces.js"
 
-import type { IPosed } from "../../../Position/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IBasicStream } from "../../interfaces.js"
 
 import {
 	positionDecrement,
 	positionIncrement
-} from "../../../Position/refactor.js"
+} from "../../Position/refactor.js"
+
 import {
 	bufferFreeze,
 	bufferPush

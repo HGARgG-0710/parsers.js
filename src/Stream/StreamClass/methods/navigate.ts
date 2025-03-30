@@ -1,12 +1,12 @@
-import type { IPosed, IPosition } from "../../../Position/interfaces.js"
+import type { IPosed, IPosition } from "../../Position/interfaces.js"
 import type { IReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IReversedStreamClassInstance } from "../interfaces.js"
 
 import { uniNavigate } from "../utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
-import { direction, positionConvert } from "../../../Position/utils.js"
-import { positionDecrement } from "../../../Position/refactor.js"
+import { direction, positionConvert } from "../../Position/utils.js"
+import { positionDecrement } from "../../Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
 const { isNumber } = type

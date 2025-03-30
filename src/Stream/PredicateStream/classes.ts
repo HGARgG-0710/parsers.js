@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IPredicatePosition } from "../../Position/interfaces.js"
+import type { IPredicatePosition } from "../Position/interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { Constructor } from "../StreamClass/refactor.js"
 

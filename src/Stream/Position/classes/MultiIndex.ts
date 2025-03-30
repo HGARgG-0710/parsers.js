@@ -1,6 +1,6 @@
 import type { ITreeStream } from "../../interfaces.js"
-import { BadIndex } from "../../constants.js"
-import { InitializablePattern } from "../../internal/Pattern.js"
+import { BadIndex } from "../../../constants.js"
+import { InitializablePattern } from "../../../internal/Pattern.js"
 
 import { array } from "@hgargg-0710/one"
 const { last, first, copy } = array

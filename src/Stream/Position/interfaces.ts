@@ -1,5 +1,5 @@
-import type { IReversibleStream } from "../Stream/ReversibleStream/interfaces.js"
-import type { IBasicStream } from "../Stream/interfaces.js"
+import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { IBasicStream } from "../interfaces.js"
 
 export type IPosition<Type = any> =
 	| IDirectionalPosition<Type>

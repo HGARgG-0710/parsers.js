@@ -2,13 +2,13 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 
 import type { IStateful, IStreamClassInstance } from "../interfaces.js"
 import type { IPattern } from "../../../Pattern/interfaces.js"
-import type { IPosed } from "../../../Position/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
 import type {
 	IBufferized,
 	IFreezableBuffer
 } from "../../../Collection/Buffer/interfaces.js"
 
-import { positionNull } from "../../../Position/refactor.js"
+import { positionNull } from "../../Position/refactor.js"
 import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../Pattern/utils.js"
 import { createState, start } from "../refactor.js"

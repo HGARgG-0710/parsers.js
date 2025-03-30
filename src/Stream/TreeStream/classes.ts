@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IWalkable } from "../../Node/interfaces.js"
 import type { ITreeStream } from "./interfaces.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { MultiIndex } from "../../Position/classes.js"
+import type { MultiIndex } from "../Position/classes.js"
 
 import { withSuper } from "../../refactor.js"
 import { TreeWalker } from "src/internal/TreeWalker.js"

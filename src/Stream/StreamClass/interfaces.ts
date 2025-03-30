@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IBasicStream } from "../interfaces.js"
 import type { IPrevable, IStarted } from "../ReversibleStream/interfaces.js"
 import type { IInitializable } from "./methods/init.js"
-import type { IPosition } from "../../Position/interfaces.js"
+import type { IPosition } from "../Position/interfaces.js"
 import type { ICopiable } from "../../interfaces.js"
 
 // * Optional Property-interfaces

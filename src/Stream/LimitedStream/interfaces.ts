@@ -2,7 +2,7 @@ import type {
 	IPosition,
 	IPosed,
 	IDirectionHaving
-} from "../../Position/interfaces.js"
+} from "../Position/interfaces.js"
 
 import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
 

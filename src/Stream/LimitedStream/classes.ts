@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPosition } from "../../Position/interfaces.js"
+import type { IPosition } from "../Position/interfaces.js"
 import type { Constructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IPattern } from "../../Pattern/interfaces.js"

@@ -1,11 +1,11 @@
-import type { IPosition } from "../../Position/interfaces.js"
+import type { IPosition } from "../Position/interfaces.js"
 import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
 import {
 	directionCompare,
 	positionConvert,
 	positionEqual,
 	positionNegate
-} from "../../Position/utils.js"
+} from "../Position/utils.js"
 
 import { Stream } from "../../constants.js"
 const { LimitedStream } = Stream
