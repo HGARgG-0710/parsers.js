@@ -20,7 +20,7 @@ import {
 	signatures
 } from "lib/lib.js"
 
-import { isInternalHash } from "IndexMap/InternalHash/lib/classes.js"
+import { isInternalHash } from "HashMap/InternalHash/lib/classes.js"
 
 import { object, type, functional } from "@hgargg-0710/one"
 const { structCheck } = object
