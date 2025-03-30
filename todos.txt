@@ -36,33 +36,8 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO [fixed order]: 		
-		IN2. Make the `HashMap` and `LookupTable` NO LONGER a sub-module of `IndexMap`. 
-			Make it separate. 
-			Reasons:
-				1. Doesn't allow for iteration algorithms
-				2. Different ontology (no `extends` relation between interfaces, considerably differing purpose)
-				3. Will cause less nestedness
-			
-			TODO: 
-				3. docs: 
-					1. classes
-						1. LookupTable
-						2. HashMap
-					2. utils
-						1. HashMap
-		
-		0. Doc sync
-
-		2. Tests: 
-			[old]
-			1. HashMap
-			2. LookupTable
-			3. IndexMap: 
-				1. LinearIndexMap
-				2. PersistentIndexMap
-		
-		SI5. IDEA: simplifying the list of available Stream-s further: 
+	TODO [fixed order]: 					
+		SI5. [no tdd yet] IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
 				returning a Stream with precisely this same definition; 
 
@@ -72,8 +47,6 @@ Order of TODO-elimination:
 				const reversed = ReversedStream(stream)
 
 			Nicer semantics. 
-
-		1. Doc-sync
 	
 		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
 			This is the early version [rough, unfinished, sketchy]: 
@@ -136,6 +109,17 @@ Order of TODO-elimination:
 
 				1. It would now become far too high-level to still be an implementation detail
 				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external		
+				
+		2. Tests: 
+			[old]
+			1. Composition
+			2. HashMap
+			3. IndexMap: 
+				1. LinearIndexMap
+				2. PersistentIndexMap
+			4. LookupTable
+		
+		1. Doc-sync
 
 		Docs: 
 			1. Stream
@@ -156,20 +140,12 @@ Order of TODO-elimination:
 					2. IBuffer
 					3. etc...
 
-		3. Doc-sync 
-		
-				
-		SI9. Make `Position` a submodule of `Stream`
-			Reason: ontology. 
-			`Position` is ONLY ever used with `Stream`-s. 
-			Even when applied to `Tree`s (MultiIndex), it bears most use when combined with `TreeStream`. 
-			Also - it's originally intended to be a "convertable" type for representing fixed (`number`) positions. 
-			The predicates, too, work best when considered in directional context (id est: iteration...)
-		
+		3. Doc-sync 	
+					
 		Docs:
 			1. Position [MultiIndex]		
 
-		PO1. ['test' branch -> 'dev' branch; *DO TDD*] Introduce a new Position class - Multiline
+		PO1. ['test' branch -> 'dev' branch; *DO TDD*] Introduce a new Position class - LineIndex
 			Basically, a pair of numbers: 
 				(lineNum, charNum)	
 			Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
@@ -188,7 +164,28 @@ Order of TODO-elimination:
 				2. `Position` is the only that has "semantically", only one unit - MultiIndex (MultiIndex)
 
 			NOTE: it works ONLY with 'Stream's that have a `string` as input...	
+		
+		TODO [naming issue]: 
+			minor - module `TableMap` has an export `TableMap`, 
+				forcing the user to write `TableMap.TableMap` [not good...]. 
+			Options: 
+				1. [currently preferred, reason - these 2 are (pretty) unique in their own right...] export * from "./TableMap/classes.js" ["pouring out" the 2 exports of the module]
+				2. renaming the module
+				3. renaming the function
 			
+		TODO [docs]: 
+			1. list missing wiki pages [classes]
+			2. write those
+			3. work on interface pages
+			4. cleanup: 
+				1. add the `I`- to ALL the pages (some still missing it)
+				2. proper self-referencing
+				3. other remaining todos [order those...]
+
+		TODO [tests]: 
+			1. finish "old" tests
+			2. add the "new" tests
+			3. DO TDD + DOCS [starting with `LineIndex`]
 
 	TODO [any order]: 
 		-2. [minor] source code: 

@@ -34,7 +34,7 @@ export class CallbackBuffer<Type = any>
 
 	truncate(from: number, to: number = this.size) {
 		this.value = this.value.slice(from, to)
-		this.callback(this)
+		this.registerChange()
 		return this
 	}
 
