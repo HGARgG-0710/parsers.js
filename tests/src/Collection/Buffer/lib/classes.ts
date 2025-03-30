@@ -49,6 +49,38 @@ const pushFrozen = new MethodTest("pushFrozen", function <Type = any>(
 	assert(array.same(this, original))
 })
 
+const write = new MethodTest("write", function <Type = any>(
+	this: IFreezableBuffer<Type>,
+	index: number,
+	value: Type
+) {
+	const original = this.copy()
+
+	this.write(index, value)
+	assert(!array.same(this, original))
+	assert.strictEqual(this.read(index), value)
+	assert.strictEqual(this.size, original.size)
+	assert.notStrictEqual(this.read(index), original.read(index))
+
+	for (let i = 0; i < index - 1; ++i)
+		assert.strictEqual(this.read(i), original.read(i))
+
+	for (let i = index + 1; i < this.size; ++i)
+		assert.strictEqual(this.read(i), original.read(i))
+})
+
+const writeFrozen = new MethodTest("writeFrozen", function <Type = any>(
+	this: IFreezableBuffer<Type>,
+	index: number,
+	value: Type
+) {
+	handleNonFrozen(this)
+
+	const original = this.copy()
+	this.write(index, value)
+	assert(array.same(this, original))
+})
+
 class FreezableBufferTest<Type = any> extends CollectionTest<Type> {
 	static readonly interfaceName: string = "IFreezableBuffer"
 
@@ -56,6 +88,16 @@ class FreezableBufferTest<Type = any> extends CollectionTest<Type> {
 
 	static conformance(x: any) {
 		return isFreezableBuffer(x)
+	}
+
+	read(index: number, expected: Type) {
+		return this.testMethod("read", index, expected)
+	}
+
+	write(index: number, value: Type) {
+		return this.instance!.isFrozen
+			? this.writeFrozen(index, value)
+			: this.testMethod("write", index, value)
 	}
 
 	push(...items: Type[]) {
@@ -68,6 +110,10 @@ class FreezableBufferTest<Type = any> extends CollectionTest<Type> {
 		return this.testMethod("freeze")
 	}
 
+	protected writeFrozen(index: number, value: Type) {
+		return this.testMethod("writeFrozen", index, value)
+	}
+
 	protected pushFrozen(...items: Type[]) {
 		return this.testMethod("pushFrozen", ...items)
 	}
@@ -78,7 +124,7 @@ class FreezableBufferTest<Type = any> extends CollectionTest<Type> {
 	) {
 		super(
 			[FreezableBufferTest, ...interfaces],
-			[freeze, read, pushFrozen, ...methods]
+			[write, writeFrozen, freeze, read, pushFrozen, ...methods]
 		)
 	}
 }

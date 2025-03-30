@@ -13,7 +13,8 @@ export const isFreezableBuffer = and(
 	structCheck({
 		isFrozen: isBoolean,
 		freeze: isFunction,
-		read: isFunction
+		read: isFunction,
+		write: isFunction
 	}),
 	isCollection
 ) as <Type = any>(x: any) => x is IFreezableBuffer<Type>
@@ -21,8 +22,6 @@ export const isFreezableBuffer = and(
 /**
  * Returns whether the given `x` is a `Bufferized`
  */
-export const isBufferized = structCheck<IBufferized>({ buffer: isFreezableBuffer }) as <
-	Type = any
->(
-	x: any
-) => x is IBufferized<Type>
+export const isBufferized = structCheck<IBufferized>({
+	buffer: isFreezableBuffer
+}) as <Type = any>(x: any) => x is IBufferized<Type>
