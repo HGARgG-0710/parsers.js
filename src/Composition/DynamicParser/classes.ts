@@ -1,9 +1,10 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable } from "../../interfaces.js"
+import type { ICopiable, IInitializable } from "../../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
-	IParserState
+	IParserState,
+	ISignatureCallback
 } from "./interfaces.js"
 
 import type { IFunctionTuple } from "../interfaces.js"
@@ -18,7 +19,9 @@ const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export class Signature implements ICopiable {
+export class Signature
+	implements ICopiable, IInitializable<[any[]], Signature>
+{
 	protected readonly toApplyOn: IndexSet
 	protected readonly preIndexes: IndexSet
 	protected preFill: any[];
@@ -94,7 +97,7 @@ abstract class PreComplexComposition<
 		return this
 	}
 
-	init(callback: (thisArg: IComplexComposition) => Iterable<Signature>) {
+	init(callback: ISignatureCallback<StateType>) {
 		let layers = array.copy(this.#original)
 		for (const signature of callback(this.makeState()))
 			layers = signature.apply(layers)

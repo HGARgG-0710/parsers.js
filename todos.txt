@@ -37,10 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:			
-		TODO: 
-			1. POPULARIZE the new `IInitializable` interface. 
-				1. add to interfaces that have it [includes all of those that have impelmentations extending `InitializablePattern`]; 
-				
 		SI5. [no tdd yet] IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
 				returning a Stream with precisely this same definition; 
@@ -57,16 +53,18 @@ Order of TODO-elimination:
 			1. NAMELY, they currently have the generic `IInitializable<any[]>` from the `IStream`. 
 				REPLACE with specific `IInitializable`
 
-		IN5. [StreamClass derivatives] make `super` AN IMPLEMENTATION DETAIL [make it 'protected'];
-
 		IN6. [IStream] FIX the '<Type, SubType, PosType>' generics EVERYWHERE, where there is `IStream` [or a derivative interface...]; 
 			Reason: otherwise, the respective functions/classes become UNUSABLE with specific implementations. 
 		
 		Fix docs: 
 			1. Interfaces.ts [all init-related, Stream-related, RE-ORDER...]
 			2. remove `ReversibleStream` from places
-			3. init - add for all classes, AS INTERFACE-DEPENDENCY!
+			3. init - add for all classes/interfaces that use it, AS INTERFACE-DEPENDENCY!
 			4. `Pattern` - remove module [docs]
+			5. `IComposition`-related
+			6. Big update - WALK THROUGH THE `interfaces`, ENSURING: 
+				1. order
+				2. proper presence of required interfaces/classes
 		
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 

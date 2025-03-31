@@ -50,9 +50,10 @@ export class CallbackBuffer<Type = any>
 		return this
 	}
 
-	init(value?: IIndexed<Type> | undefined): void {
+	init(value?: IIndexed<Type> | undefined): this {
 		super.init(value)
 		if (value) this.registerChange()
+		return this
 	}
 
 	push(...x: Type[]): this {
