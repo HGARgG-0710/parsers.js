@@ -1,4 +1,4 @@
-import type { IPointer } from "../Pattern/interfaces.js"
+import type { IPointer } from "src/interfaces.js"
 import type { IPersistentIndexMap } from "../IndexMap/PersistentIndexMap/interfaces.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
 import type {

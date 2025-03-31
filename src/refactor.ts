@@ -1,7 +1,5 @@
 // * A dump file with a load of good ideas that don't fit the library's ontology (and whose presence is needed for practical reasons - implementation details, in other words)
 
-import type { object as t_object } from "@hgargg-0710/one"
-
 import { functional, object, type } from "@hgargg-0710/one"
 const { argWaster, trivialCompose } = functional
 const { extendPrototype, keys, propertyDescriptors } = object
@@ -9,7 +7,7 @@ const { delegateMethod, delegateProperty, classWrapper } = object.classes
 const { ConstDescriptor, GetSetDescriptor } = object.descriptor
 const { isFunction } = type
 
-type Prototypal = t_object.Constructor
+type Prototypal = object.Constructor
 
 export const parameterWaster = trivialCompose(
 	(f: Function) => argWaster(f)(),
@@ -94,3 +92,11 @@ export function makeDelegate(
 
 	return delegateClass
 }
+
+export interface ConstructorHaving {
+	["constructor"]: new (...x: any[]) => typeof this
+}
+
+export type IThisMethod<ArgType extends any[] = any[], OutType = any> = (
+	...args: ArgType
+) => OutType

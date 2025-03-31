@@ -1,7 +1,7 @@
-import type { IGettablePattern, IPattern, IPointer } from "../interfaces.js"
+import type { IGettable, IPattern, IPointer } from "../interfaces.js"
 
 import { type } from "@hgargg-0710/one"
-import { setValue } from "../Pattern/utils.js"
+import { setValue } from "../utils.js"
 const { isUndefined } = type
 
 export abstract class ProtectedPattern<Type = any> {
@@ -20,7 +20,7 @@ export abstract class OptionalPattern<Type = any> {
 
 export abstract class InitializablePattern<Type = any>
 	extends OptionalPattern<Type>
-	implements IGettablePattern<Type>
+	implements IGettable<Type>
 {
 	init(value?: Type) {
 		this.value = value

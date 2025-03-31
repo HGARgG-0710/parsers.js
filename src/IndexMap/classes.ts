@@ -3,7 +3,7 @@ import type { array } from "@hgargg-0710/one"
 
 import { is } from "../Node/utils.js"
 import { type } from "src/Node/utils.js"
-import { value } from "../Pattern/utils.js"
+import { value } from "../utils.js"
 import { current } from "../Stream/utils.js"
 
 import { type as _type } from "@hgargg-0710/one"

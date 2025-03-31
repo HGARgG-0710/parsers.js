@@ -36,7 +36,11 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO [fixed order]: 					
+	TODO [fixed order]:			
+		TODO: 
+			1. POPULARIZE the new `IInitializable` interface. 
+				1. add to interfaces that have it [includes all of those that have impelmentations extending `InitializablePattern`]; 
+				
 		SI5. [no tdd yet] IDEA: simplifying the list of available Stream-s further: 
 			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
 				returning a Stream with precisely this same definition; 
@@ -47,29 +51,22 @@ Order of TODO-elimination:
 				const reversed = ReversedStream(stream)
 
 			Nicer semantics. 
-	
-		SI1. Add a "whole" Stream-interface, with `Partial` properties, and generics. 
-			This is the early version [rough, unfinished, sketchy]: 
-				interface Stream<Type = any> extends Summat {
-					pos?: number
-					buffer?: FreezableBuffer<Type>
-					state?: Summat
-					prev?: () => Type
-					isStart?: boolean
+			Follow the todos from the `reversed.ts` file; 
 
-					init?: (...x: any[]) => Stream<Type>
-					navigate?: (pos: Position) => Type
-					finish?: () => Type
-					rewind?: () => Type
+		IN4. FIX the `init` methods in `Stream` interfaces. 
+			1. NAMELY, they currently have the generic `IInitializable<any[]>` from the `IStream`. 
+				REPLACE with specific `IInitializable`
 
-					curr: Type
-					next: () => Type
-					isEnd: boolean
-				}
+		IN5. [StreamClass derivatives] make `super` AN IMPLEMENTATION DETAIL [make it 'protected'];
 
-			REASON TO BE A PART OF V0.3: 
-				1. library has been divided for too long. 
-					It would make SO MUCH more sense, if EVERYTHING dealt in `Stream`, instead of `BasicStream`; 				
+		IN6. [IStream] FIX the '<Type, SubType, PosType>' generics EVERYWHERE, where there is `IStream` [or a derivative interface...]; 
+			Reason: otherwise, the respective functions/classes become UNUSABLE with specific implementations. 
+		
+		Fix docs: 
+			1. Interfaces.ts [all init-related, Stream-related, RE-ORDER...]
+			2. remove `ReversibleStream` from places
+			3. init - add for all classes, AS INTERFACE-DEPENDENCY!
+			4. `Pattern` - remove module [docs]
 		
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
@@ -123,22 +120,6 @@ Order of TODO-elimination:
 
 		Docs: 
 			1. Stream
-
-		2. Doc-sync
-
-		IN1. The `Initializable` interface - make it higher level: 
-			1. Make the current `Initializable` into an alias `InitializableStreamClassInstance`
-			2. Make the GLOBAL `Initializable` a generalization of this - `<A> { init: (...x: A) => this }`, where `A extends any[]`
-
-			REASON FOR v0.3: 
-				1. tired of constantly fixing broken types, want it be done well once and for all
-				2. being able to do things like `const x = A.init(...).next()` is FAR too important to be left out of v0.3
-
-			ALSO: 
-				1. make it INTO PROPER INTERFACE *EVERYWHERE* that it appears: 
-					1. InitializablePattern
-					2. IBuffer
-					3. etc...
 
 		3. Doc-sync 	
 					
@@ -195,7 +176,9 @@ Order of TODO-elimination:
 					2. Base contains NO abstract methods [if it does, then it's a PRE-class]; 
 					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
-		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]
+		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]: 
+			1. ALSO - refactor the 'ConstructorHaving' interface into `types`
+			2. ALSO - refactor the `ThisMethod` interface into `types`
 		2. add permalinks for "minor" class-exports
 		3. Add JSDoc for: 
 			1. minor classes/functions ['classes' exports]
