@@ -16,7 +16,7 @@ import { ReversedStream } from "../ReversedStream/classes.js"
 // 					1. TransformBuffer -> ConditionBuffer -> this.value.buffer
 // * 					1. (transformation[1] - 'this._lastPos - i'); (condition - 'i < 0'; transformation[2] - 'this.prev(-i); return 0')
 //  TODO[3]:			2. add the `.next/.prev(i)` for `Stream`, and `StreamClass`, and `ReversedStream`; 
-//  TODO[1]: 		2. ADD `IBuffer.reverse()` method, to then define `.buffer.get()` as `this.buffer.reverse().get()`: 
+//  TODO[1]: 		2. Define the [eager - triggers a '.rewind()' on the `IReversedStream`] `.buffer.get()` as `this.buffer.reverse().get()`: 
 // 	TODO[2]:			1. new abstraction 'ReversedBuffer' - delegates all calls to `this.value, BUT, ends up reversing the buffer upon call to ".get()"`; 
 //  * 					2. Likewise, 'ReversedBuffer' is THE 'TransformBuffer -> ConditionBuffer -> this.value.buffer' thing, so one adds the modified `.get()` on it as well
 // * 3. method definitions: 

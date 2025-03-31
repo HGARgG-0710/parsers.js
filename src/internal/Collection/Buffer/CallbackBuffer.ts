@@ -57,6 +57,12 @@ export class CallbackBuffer<Type = any>
 		return this
 	}
 
+	reverse() {
+		super.reverse()
+		this.registerChange()
+		return this
+	}
+
 	copy() {
 		return new this.constructor(this.callback, array.copy(this.value))
 	}

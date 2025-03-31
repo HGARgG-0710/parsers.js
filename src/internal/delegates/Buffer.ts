@@ -35,6 +35,11 @@ export abstract class DelegateBuffer<Type = any>
 		return new this.constructor(this.value.emptied())
 	}
 
+	reverse() {
+		this.value.reverse()
+		return this
+	}
+
 	get() {
 		return this.value.get()
 	}

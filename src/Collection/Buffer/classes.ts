@@ -37,7 +37,7 @@ export class UnfreezableArray<Type = any>
 	extends TypicalUnfreezable<Type>
 	implements IUnfreezableBuffer<Type>
 {
-	protected value: Type[]	
+	protected value: Type[]
 
 	push(...elements: Type[]) {
 		if (!this.isFrozen) this.value.push(...elements)
@@ -54,6 +54,11 @@ export class UnfreezableArray<Type = any>
 
 	write(i: number, value: Type) {
 		if (!this.isFrozen) this.value[i] = value
+		return this
+	}
+
+	reverse() {
+		this.value.reverse()
 		return this
 	}
 
@@ -82,6 +87,11 @@ export class UnfreezableString
 		if (!this.isFrozen)
 			this.value =
 				currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
+		return this
+	}
+
+	reverse() {
+		this.value = this.value.split("").reverse().join("")
 		return this
 	}
 

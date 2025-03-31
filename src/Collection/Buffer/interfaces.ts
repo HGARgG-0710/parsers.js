@@ -1,6 +1,7 @@
+import type { IReversible } from "../../interfaces.js"
 import type { ICollection } from "../interfaces.js"
 
-export interface IBuffer<Type = any> extends ICollection<Type> {
+export interface IBuffer<Type = any> extends ICollection<Type>, IReversible {
 	read: (i: number) => Type
 	write: (i: number, values: Type) => this
 	emptied: () => typeof this

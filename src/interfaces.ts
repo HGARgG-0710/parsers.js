@@ -87,7 +87,7 @@ export interface IPointer<Type = any> {
 export type IPattern<Type = any> = Partial<IPointer<Type>>
 
 export interface IReversible {
-	reverse: () => typeof this
+	reverse: () => this
 }
 
 export type * from "./Collection/interfaces.js"
