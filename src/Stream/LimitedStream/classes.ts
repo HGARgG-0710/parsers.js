@@ -1,8 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPosition } from "../Position/interfaces.js"
-import type { Constructor } from "../StreamClass/refactor.js"
+import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
@@ -26,7 +26,7 @@ const LimitedStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer
-	}) as Constructor<[any], IReversedStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
 export function LimitedStream<Type = any>(
 	hasPosition: boolean = false,

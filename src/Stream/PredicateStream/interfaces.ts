@@ -1,11 +1,9 @@
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IPosed, IPredicatePosition } from "../Position/interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IReversibleStream } from "../../interfaces.js"
+import type { IPredicatePosition } from "../Position/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 
-import type {
-	IIsEndCurrable,
-	IStreamClassInstance
-} from "../StreamClass/interfaces.js"
+import type { IIsEndCurrable } from "../../interfaces.js"
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 
 import type { ICopiable, IFreezableBuffer, ISupered } from "../../interfaces.js"
 
@@ -22,15 +20,13 @@ export type IUnderPredicateStream<Type = any> = IReversibleStream<Type> &
 	IIsEndCurrable &
 	ICopiable
 
-export interface IPredicateStream<Type = any>
-	extends IStreamClassInstance<Type>,
-		ISupered,
-		ISinglePositionLookahead<Type>,
-		IPattern<IReversibleStream<Type> & IIsEndCurrable>,
-		ILookaheadHaving,
-		Partial<IPosed<number>> {
-	predicate: IPredicatePosition<Type>
-}
+export type IPredicateStream<Type = any> = IStreamClassInstance<Type> &
+	ISupered &
+	ISinglePositionLookahead<Type> &
+	IPattern<IUnderPredicateStream<Type>> &
+	ILookaheadHaving & {
+		predicate: IPredicatePosition<Type>
+	}
 
 export type IPredicateStreamConstructor<Type = any> = new (
 	value?: IUnderPredicateStream,

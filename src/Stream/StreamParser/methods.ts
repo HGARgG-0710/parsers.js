@@ -1,5 +1,5 @@
 import type { IStreamParser } from "./interfaces.js"
-import type { IEndableStream } from "../StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"

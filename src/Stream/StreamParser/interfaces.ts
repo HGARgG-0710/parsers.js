@@ -1,21 +1,16 @@
-import type {
-	IEndableStream,
-	IStateful,
-	IStreamClassInstance
-} from "../../Stream/StreamClass/interfaces.js"
+import type { IStreamClassInstance } from "../../Stream/StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
+import type { IStateful } from "src/interfaces.js"
 
 import type { IStreamHandler } from "../../TableMap/interfaces.js"
 import type { ISupered } from "../../interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IPosed } from "../Position/interfaces.js"
-import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 
-export interface IStreamParser<InType = any, OutType = any>
-	extends IPattern<IEndableStream<InType>>,
-		IStreamClassInstance<OutType>,
-		ISupered,
-		Partial<IPosed<number>>,
-		Partial<IBufferized<OutType>>,
-		Partial<IStateful> {
-	handler: IStreamHandler<OutType>
-}
+export type IStreamParser<InType = any, OutType = any> = IPattern<
+	IEndableStream<InType>
+> &
+	IStreamClassInstance<OutType> &
+	ISupered &
+	Partial<IStateful> & {
+		handler: IStreamHandler<OutType>
+	}

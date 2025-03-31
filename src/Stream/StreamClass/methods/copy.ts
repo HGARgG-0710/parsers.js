@@ -1,5 +1,6 @@
 import type { IBufferized, IPattern, IPosed } from "../../../interfaces.js"
-import type { IStateful, IStreamClassInstance } from "../interfaces.js"
+import type { IStreamClassInstance } from "../interfaces.js"
+import type { IStateful } from "src/interfaces.js"
 
 function copyPos<Type = any>(
 	from: IStreamClassInstance<Type> & IPosed<number>,

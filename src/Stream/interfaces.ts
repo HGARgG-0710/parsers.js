@@ -1,14 +1,86 @@
-export interface IBasicStream<Type = any> {
-	curr: Type
-	isEnd: boolean
-	next: () => Type
+import type {
+	IBufferized,
+	ICopiable,
+	IInitializable,
+	IPattern,
+	IPosition,
+	IStateful
+} from "../interfaces.js"
+
+import type { IPosed } from "./Position/interfaces.js"
+
+export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
+
+export interface IStarted {
+	isStart: boolean
+}
+
+export interface IPrevable<Type = any> {
+	prev: () => Type
+}
+
+export type IPreReversible<Type = any> = IStarted & IPrevable<Type>
+
+export type IReversible<Type = any> = IPreReversible<Type> & {
+	reverse(): IReversible<Type>
+}
+
+export type IReversibleStream<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition = number
+> = IStream<Type, SubType, PosType> & IReversible<Type>
+
+export interface IFinishable<Type = any> {
+	finish: () => Type
+}
+
+export interface INavigable<Type = any, PosType extends IPosition = number> {
+	navigate: (position: PosType) => Type
+}
+
+export interface IRewindable<Type = any> {
+	rewind: () => Type
+}
+
+export interface IIsEndCurrable {
+	isCurrEnd: () => boolean
+}
+
+export interface IIsStartCurrable {
+	isCurrStart: () => boolean
+}
+
+export type IStream<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition = number
+> = ICopiable &
+	Partial<INavigable<Type, PosType>> &
+	Partial<IFinishable<Type>> &
+	Partial<IRewindable<Type>> &
+	Partial<IReversible<Type>> &
+	Partial<IBufferized<Type>> &
+	Partial<IStateful> &
+	Partial<IPosed<PosType>> &
+	Partial<IPattern<SubType>> &
+	Partial<IInitializable<any[], IStream<Type, SubType, PosType>>> &
+	Partial<IIsEndCurrable> &
+	Partial<IIsStartCurrable> &
+	Iterable<Type> & {
+		curr: Type
+		isEnd: boolean
+		next: () => Type
+	}
+
+export interface IPrevable<Type = any> {
+	prev: () => Type
 }
 
 export type * from "./InputStream/interfaces.js"
 export type * from "./LimitedStream/interfaces.js"
 export type * from "./NestedStream/interfaces.js"
 export type * from "./PredicateStream/interfaces.js"
-export type * from "./ReversibleStream/interfaces.js"
 export type * from "./StreamClass/interfaces.js"
 export type * from "./StreamParser/interfaces.js"
 export type * from "./TreeStream/interfaces.js"

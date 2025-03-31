@@ -1,5 +1,4 @@
-import type { IBasicStream } from "./interfaces.js"
-import type { IReversibleStream } from "./ReversibleStream/interfaces.js"
+import type { IStream, IReversibleStream } from "./interfaces.js"
 
 import type {
 	IStreamPredicate,
@@ -26,7 +25,7 @@ const { prop } = object
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <Type = any>(input: IBasicStream<Type>) => input.next()
+export const next = <Type = any>(input: IStream<Type>) => input.next()
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
@@ -37,9 +36,7 @@ export const previous = <Type = any>(input: IReversibleStream<Type>) =>
 /**
  * Given a `BasicStream` returns its `.curr` property value
  */
-export const current = prop("curr") as <Type = any>(
-	x: IBasicStream<Type>
-) => Type
+export const current = prop("curr") as <Type = any>(x: IStream<Type>) => Type
 
 /**
  * Given a `handler` function, returns a function of `input: BasicStream` that
@@ -47,9 +44,9 @@ export const current = prop("curr") as <Type = any>(
  * It then proceeds to returns the result of the handler
  */
 export function wrapped<Type = any, OutType = any>(
-	handler: (input: IBasicStream<Type>) => OutType
+	handler: (input: IStream<Type>) => OutType
 ) {
-	return function (input: IBasicStream<Type>) {
+	return function (input: IStream<Type>) {
 		input.next()
 		const result = handler(input)
 		input.next()
@@ -60,15 +57,13 @@ export function wrapped<Type = any, OutType = any>(
 /**
  * Returns the value of `.isEnd` property of the given `BasicStream`
  */
-export const isEnd = prop("isEnd") as <Type = any>(
-	x: IBasicStream<Type>
-) => boolean
+export const isEnd = prop("isEnd") as <Type = any>(x: IStream<Type>) => boolean
 
 /**
  * Returns the value of the `.isStart` property of the given `BasicStream`
  */
 export const isStart = prop("isStart") as <Type = any>(
-	x: IBasicStream<Type>
+	x: IStream<Type>
 ) => boolean
 
 /**
@@ -78,9 +73,7 @@ export const isStart = prop("isStart") as <Type = any>(
  * as it allows one to take specific elements of the stream out
  * from the final input
  */
-export function destroy<Type = any>(
-	input: IBasicStream<Type>
-): typeof SkippedItem {
+export function destroy<Type = any>(input: IStream<Type>): typeof SkippedItem {
 	input.next()
 	return SkippedItem
 }
@@ -101,7 +94,7 @@ export function consume<
 	Type = any,
 	CollectionType extends ICollection<Type> = ArrayCollection<Type>
 >(
-	stream: IBasicStream<Type>,
+	stream: IStream<Type>,
 	init: CollectionType = new ArrayCollection<Type>() as any
 ) {
 	while (!stream.isEnd) init.push(stream.next())
@@ -126,7 +119,7 @@ export function has(pos: IDirectionalPosition) {
  * obeying `pred`
  */
 export function count(pred: IStreamPredicate) {
-	return function <Type = any>(input: IBasicStream<Type>) {
+	return function <Type = any>(input: IStream<Type>) {
 		let count = 0
 		while (!input.isEnd && pred(input, count)) {
 			++count
@@ -167,7 +160,7 @@ export function transform<UnderType = any, UpperType = any>(
 	return function <
 		CollectionType extends ICollection<UpperType> = ArrayCollection<UpperType>
 	>(
-		input: IBasicStream<UnderType>,
+		input: IStream<UnderType>,
 		init: CollectionType = new ArrayCollection<UpperType>() as any
 	) {
 		let i = 0

@@ -1,5 +1,5 @@
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IBasicStream } from "../interfaces.js"
+import type { IReversibleStream } from "../interfaces.js"
+import type { IStream } from "../interfaces.js"
 
 export type IPosition<Type = any> =
 	| IDirectionalPosition<Type>
@@ -8,18 +8,15 @@ export type IPosition<Type = any> =
 export type IDirectionalPosition<Type = any> = IPredicatePosition<Type> | number
 
 export type IPredicatePosition<Type = any> = ((
-	stream: IBasicStream<Type>,
+	stream: IStream<Type>,
 	pos?: number
 ) => boolean) &
 	Partial<IDirectionHaving>
 
 export interface IPositionObject<Type = any> {
-	convert: (stream?: IBasicStream<Type>) => IDirectionalPosition<Type>
+	convert: (stream?: IStream<Type, any, any>) => IDirectionalPosition<Type>
 	equals?: (position: IPosition<Type>) => boolean
-	compare?: (
-		position: IPosition<Type>,
-		stream?: IBasicStream<Type>
-	) => boolean
+	compare?: (position: IPosition<Type>, stream?: IStream<Type>) => boolean
 }
 
 export interface IPosed<Type = any> {

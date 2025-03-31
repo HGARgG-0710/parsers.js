@@ -3,7 +3,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IPredicatePosition } from "../Position/interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Constructor } from "../StreamClass/refactor.js"
+import type { IConstructor } from "../StreamClass/refactor.js"
 
 import type {
 	IPredicateStream,
@@ -11,7 +11,7 @@ import type {
 	IUnderPredicateStream
 } from "./interfaces.js"
 
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 import { withSuper } from "../../refactor.js"
@@ -32,7 +32,7 @@ const PredicateStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer
-	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function PredicateStream<Type = any>(
 	predicate: IPredicatePosition<Type>

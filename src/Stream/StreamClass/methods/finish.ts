@@ -1,4 +1,4 @@
-import type { IBasicStream } from "../../../Stream/interfaces.js"
+import type { IStream } from "../../../Stream/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IStreamClassInstance } from "../interfaces.js"
@@ -11,7 +11,7 @@ import { uniFinish } from "../utils.js"
 
 // * possible 'finish' methods
 
-function finish<Type = any>(this: IBasicStream<Type>) {
+function finish<Type = any>(this: IStream<Type>) {
 	return uniFinish(this)
 }
 

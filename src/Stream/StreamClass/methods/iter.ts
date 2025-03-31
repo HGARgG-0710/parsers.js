@@ -5,7 +5,7 @@ import type {
 
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IBasicStream } from "../../interfaces.js"
+import type { IStream } from "../../interfaces.js"
 
 import {
 	positionDecrement,
@@ -279,7 +279,7 @@ export function chooseMethod<Type = any>(
 	)
 }
 
-export function* streamIterator<Type = any>(this: IBasicStream<Type>) {
+export function* streamIterator<Type = any>(this: IStream<Type>) {
 	while (!this.isEnd) {
 		yield this.curr
 		this.next()

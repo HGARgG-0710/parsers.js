@@ -1,4 +1,4 @@
-import type { IBasicStream } from "../interfaces.js"
+import type { IStream } from "../interfaces.js"
 import type { IInputStream } from "./interfaces.js"
 import type { ArrayCollection } from "../../Collection/classes.js"
 
@@ -12,7 +12,9 @@ import { uniFinish } from "../StreamClass/utils.js"
 /**
  * Given a `BasicStream`, converts it to an `InputStream`
  */
-export function toInputStream<Type = any>(stream: IBasicStream<Type>): IInputStream<Type> {
+export function toInputStream<Type = any>(
+	stream: IStream<Type>
+): IInputStream<Type> {
 	if (isBufferized<Type>(stream)) {
 		if (!stream.buffer.isFrozen) uniFinish(stream)
 		return new InputStream(stream.buffer)

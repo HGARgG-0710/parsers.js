@@ -1,5 +1,5 @@
 import type { IPosed, IPosition } from "../../Position/interfaces.js"
-import type { IReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { IReversibleStream } from "../../interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IReversedStreamClassInstance } from "../interfaces.js"
 

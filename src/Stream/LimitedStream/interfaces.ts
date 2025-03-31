@@ -1,25 +1,26 @@
+import type { IPattern } from "src/interfaces.js"
+
+import type {
+	IReversibleStream,
+	IBufferized,
+	ICopiable,
+	ISupered
+} from "../../interfaces.js"
+
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+
 import type {
 	IPosition,
 	IPosed,
 	IDirectionHaving
 } from "../Position/interfaces.js"
 
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
-
-import type {
-	IIsEndCurrable,
-	IIsStartCurrable,
-	IReversedStreamClassInstance
-} from "../StreamClass/interfaces.js"
-
 import type {
 	ILookaheadHaving,
 	ISinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 
-import type { IPattern } from "../../Pattern/interfaces.js"
-
-import type { IBufferized, ICopiable, ISupered } from "../../interfaces.js"
+import type { IIsEndCurrable, IIsStartCurrable } from "../interfaces.js"
 
 export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IPosed<IPosition> &
@@ -27,14 +28,13 @@ export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IIsStartCurrable &
 	ICopiable
 
-export interface ILimitedStream<Type = any>
-	extends ISinglePositionLookahead<Type>,
-		IPattern<ILimitedUnderStream<Type>>,
-		ILookaheadHaving,
-		ISupered,
-		IReversedStreamClassInstance<Type>,
-		IDirectionHaving,
-		Partial<IBufferized<Type>> {
-	from: IPosition
-	to: IPosition
-}
+export type ILimitedStream<Type = any> = ISinglePositionLookahead<Type> &
+	IPattern<ILimitedUnderStream<Type>> &
+	ILookaheadHaving &
+	ISupered &
+	IReversedStreamClassInstance<Type> &
+	IDirectionHaving &
+	Partial<IBufferized<Type>> & {
+		from: IPosition
+		to: IPosition
+	}

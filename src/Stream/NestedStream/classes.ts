@@ -1,14 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IStreamPredicate } from "../../TableMap/interfaces.js"
 import type { ILookupTable } from "../../LookupTable/interfaces.js"
-import type { Constructor } from "../StreamClass/refactor.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IConstructor } from "../StreamClass/refactor.js"
+import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
 
 import type {
-	IEndableStream,
 	IStreamClassInstance
 } from "../StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 
 import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
 
@@ -30,7 +30,7 @@ const NestedStreamBase = <Type = any>(
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer,
 		isPattern: true
-	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function NestedStream<Type = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate>

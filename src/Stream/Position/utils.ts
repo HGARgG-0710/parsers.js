@@ -1,4 +1,4 @@
-import type { IBasicStream } from "../interfaces.js"
+import type { IStream } from "../interfaces.js"
 import type {
 	IDirectionalPosition,
 	IPosition,
@@ -46,7 +46,7 @@ export const isPosition = or(
  */
 export function positionConvert<Type = any>(
 	pos: IPosition<Type>,
-	stream?: IBasicStream<Type>
+	stream?: IStream<Type>
 ): IDirectionalPosition<Type> {
 	return isPositionObject(pos) ? pos.convert(stream) : pos
 }
@@ -71,7 +71,7 @@ export function positionNegate<Type = any>(
 export function positionSame<Type = any>(
 	pos1: IPosition<Type>,
 	pos2: IPosition<Type>,
-	stream?: IBasicStream<Type>
+	stream?: IStream<Type>
 ) {
 	if (isPositionObject(pos1) && isFunction(pos1.equals))
 		return pos1.equals(pos2)
@@ -85,7 +85,7 @@ export function positionSame<Type = any>(
  * 2. `positionSame(stream.pos, position, stream)` otherwise
  */
 export function positionEqual<Type = any>(
-	stream: IBasicStream<Type> & IPosed<IPosition<Type>>,
+	stream: IStream<Type> & IPosed<IPosition<Type>>,
 	position: IPosition<Type>
 ): boolean {
 	return isPredicatePosition(position)
@@ -104,7 +104,7 @@ export function positionEqual<Type = any>(
 export function directionCompare<Type = any>(
 	pos1: IPosition<Type>,
 	pos2: IPosition<Type>,
-	stream?: IBasicStream<Type>
+	stream?: IStream<Type>
 ) {
 	const converted = [pos1, pos2].map((pos) => positionConvert(pos, stream))
 	const [cPos1, cPos2] = converted

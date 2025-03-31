@@ -1,14 +1,14 @@
 import type { IPosed, IPosition } from "../Position/interfaces.js"
 import type { IIndexed } from "../../interfaces.js"
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IBasicStream } from "../interfaces.js"
+import type { IStreamClassInstance } from "./interfaces.js"
 
 import type {
 	IRewindable,
 	IFinishable,
 	INavigable,
-	IStreamClassInstance
-} from "./interfaces.js"
+	IReversibleStream,
+	IStream
+} from "../interfaces.js"
 
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 
@@ -30,7 +30,9 @@ export const isFinishable = structCheck<IFinishable>({
  */
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <Type = any>(x: any) => x is INavigable<Type>
+}) as <Type = any, PosType extends IPosition = number>(
+	x: any
+) => x is INavigable<Type, PosType>
 
 /**
  * Returns whether the given `x` is a Rewindable
@@ -42,7 +44,7 @@ export const isRewindable = structCheck<IRewindable>({
 /**
  * Iterates the given `BasicStream` until hitting the end.
  */
-export function uniFinish<Type = any>(stream: IBasicStream<Type>) {
+export function uniFinish<Type = any>(stream: IStream<Type>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
@@ -51,7 +53,7 @@ export function uniFinish<Type = any>(stream: IBasicStream<Type>) {
  * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
  * else - `uniFinish(stream)`
  */
-export function finish<Type = any>(stream: IBasicStream<Type>) {
+export function finish<Type = any>(stream: IStream<Type>) {
 	return isFinishable<Type>(stream)
 		? stream.finish()
 		: uniFinish<Type>(stream)
@@ -70,7 +72,7 @@ export function finish<Type = any>(stream: IBasicStream<Type>) {
  * @returns `stream.curr`
  */
 export function uniNavigate<Type = any>(
-	stream: IReversibleStream<Type> & Partial<IPosed<number>>,
+	stream: IReversibleStream<Type>,
 	position: IPosition
 ): Type {
 	if (isNumber((position = positionConvert(position, stream)))) {
@@ -92,7 +94,7 @@ export function navigate<Type = any>(
 	stream: IReversibleStream<Type>,
 	position: IPosition
 ) {
-	return isNavigable<Type>(stream)
+	return isNavigable<Type, any>(stream)
 		? stream.navigate(position)
 		: uniNavigate<Type>(stream, position)
 }

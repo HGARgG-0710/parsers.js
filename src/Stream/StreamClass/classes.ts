@@ -1,12 +1,11 @@
-import type { IPattern } from "../../Pattern/interfaces.js"
 import type { IInitMethod } from "./methods/init.js"
+import type { ICopiable, IPosition } from "../../interfaces.js"
 
 import type {
-	IStreamClassSignature,
-	IStreamClassInstance
+	IStreamClass,
+	IStreamClassInstance,
+	IStreamClassSignature
 } from "./interfaces.js"
-
-import type { Constructor } from "./refactor.js"
 
 import { Pattern } from "src/internal/Pattern.js"
 
@@ -17,15 +16,16 @@ import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
 import { object } from "@hgargg-0710/one"
-import type { ICopiable } from "../../interfaces.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export function StreamClass<Type = any>(
+export function StreamClass<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type> = number
+>(
 	signature: IStreamClassSignature<Type>
-):
-	| Constructor<[], IStreamClassInstance<Type>>
-	| Constructor<[any], IStreamClassInstance<Type> & IPattern> {
+): IStreamClass<Type, SubType, PosType> {
 	const {
 		baseNextIter,
 		isCurrEnd,
@@ -40,9 +40,7 @@ export function StreamClass<Type = any>(
 		isPattern: value
 	} = signature
 
-	let streamClass:
-		| Constructor<[], IStreamClassInstance<Type>>
-		| Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	let streamClass: IStreamClass<Type, SubType, PosType>
 
 	interface streamClassGuaranteed extends ICopiable {
 		isStart: boolean
@@ -59,7 +57,7 @@ export function StreamClass<Type = any>(
 
 		navigate: () => Type
 		finish: () => Type
-		init: IInitMethod
+		init: IInitMethod<Type, SubType, PosType>
 		[Symbol.iterator]: () => Generator<Type>
 	}
 
@@ -67,18 +65,20 @@ export function StreamClass<Type = any>(
 		if (value) {
 			interface _streamClass extends streamClassGuaranteed {}
 			class _streamClass
-				extends Pattern
-				implements IStreamClassInstance<Type>
+				extends Pattern<SubType>
+				implements IStreamClassInstance<Type, SubType, PosType>
 			{
-				["constructor"]: new (value?: any) => typeof this
-				constructor(value?: any) {
+				["constructor"]: new (value?: SubType) => typeof this
+				constructor(value?: SubType) {
 					super(value)
 				}
 			}
 			return _streamClass
 		}
 		interface _streamClass extends streamClassGuaranteed {}
-		class _streamClass implements IStreamClassInstance<Type> {
+		class _streamClass
+			implements IStreamClassInstance<Type, SubType, PosType>
+		{
 			["constructor"]: new () => typeof this
 		}
 		return _streamClass

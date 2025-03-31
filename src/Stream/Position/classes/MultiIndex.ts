@@ -1,11 +1,16 @@
-import type { ITreeStream } from "../../interfaces.js"
+import type { IPositionObject, ITreeStream } from "../../interfaces.js"
+import type { IWalkable } from "../../../interfaces.js"
+
 import { BadIndex } from "../../../constants.js"
 import { InitializablePattern } from "../../../internal/Pattern.js"
 
 import { array } from "@hgargg-0710/one"
 const { last, first, copy } = array
 
-export class MultiIndex extends InitializablePattern<number[]> {
+export class MultiIndex<Type extends IWalkable<Type> = IWalkable>
+	extends InitializablePattern<number[]>
+	implements IPositionObject<Type>
+{
 	set levels(length: number) {
 		this.value!.length = length
 	}
@@ -14,8 +19,9 @@ export class MultiIndex extends InitializablePattern<number[]> {
 		return this.value!.length
 	}
 
-	convert(stream: ITreeStream) {
+	convert(stream?: ITreeStream<Type>) {
 		let final = 0
+		stream = stream!
 		stream.rewind()
 		while (!stream.isEnd && !stream.pos.equals(this)) {
 			stream.next()
@@ -36,7 +42,7 @@ export class MultiIndex extends InitializablePattern<number[]> {
 		return this.value!.slice(from, to < 0 ? this.levels + to : to)
 	}
 
-	compare(position: MultiIndex) {
+	compare(position: MultiIndex<Type>) {
 		const value = this.value!
 		const posval = position.value!
 
@@ -50,7 +56,7 @@ export class MultiIndex extends InitializablePattern<number[]> {
 		return levels < polevs
 	}
 
-	equals(position: MultiIndex) {
+	equals(position: MultiIndex<Type>) {
 		const { levels } = this
 
 		if (levels === position.levels) {

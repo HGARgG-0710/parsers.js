@@ -1,13 +1,19 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Constructor } from "../StreamClass/refactor.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IReversedStream, IReversibleStream } from "./interfaces.js"
+import type { IPattern } from "src/interfaces.js"
+import type { IConstructor } from "../refactor.js"
+import type { IReversedStreamClassInstance } from "../interfaces.js"
+import type { IReversedStream } from "./interfaces.js"
+import type { IReversibleStream } from "src/Stream/interfaces.js"
 
-import { valueDelegate, valuePropDelegate, withSuper } from "../../refactor.js"
-import { valueIsCurrEnd } from "../StreamClass/refactor.js"
-import { valueCurr } from "../StreamClass/refactor.js"
-import { StreamClass } from "../StreamClass/classes.js"
+import {
+	valueDelegate,
+	valuePropDelegate,
+	withSuper
+} from "../../../refactor.js"
+
+import { valueIsCurrEnd } from "../refactor.js"
+import { valueCurr } from "../refactor.js"
+import { StreamClass } from "../classes.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
@@ -38,8 +44,9 @@ const ReversedStreamBase = <Type = any>(
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer,
 		isPattern: true
-	}) as Constructor<[any], IReversedStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
+// TODO: IMPLEMENT the `.reversed()` method HERE! [it basically just returns the `.value` - NO COPY (same way as with the `this.reversed()` on the value...)];
 export function ReversedStream<Type = any>(
 	hasPosition: boolean = false,
 	hasBuffer: boolean = false

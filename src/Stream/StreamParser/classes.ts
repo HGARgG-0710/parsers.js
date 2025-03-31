@@ -2,12 +2,12 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 
 import type {
-	IEndableStream,
 	IStreamClassInstance
 } from "../../Stream/StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 
-import type { Constructor } from "../StreamClass/refactor.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IConstructor } from "../StreamClass/refactor.js"
+import type { IPattern } from "src/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
 
 import type {
@@ -37,7 +37,7 @@ const StreamParserBase = <Type = any>(
 		hasBuffer: hasBuffer,
 		hasState: hasState,
 		isPattern: true
-	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function StreamParser<InType = any, OutType = any>(
 	handler: IStreamHandler<OutType>
@@ -45,7 +45,7 @@ export function StreamParser<InType = any, OutType = any>(
 	hasPosition?: boolean,
 	hasBuffer?: boolean,
 	hasState?: boolean
-) => Constructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
+) => IConstructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
 	return function (
 		hasPosition: boolean = false,
 		hasBuffer: boolean = false,

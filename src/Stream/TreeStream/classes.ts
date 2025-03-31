@@ -17,25 +17,26 @@ const { ConstDescriptor } = object.descriptor
 import { methods } from "./methods.js"
 const { rewind, navigate, init, value, pos, ...baseMethods } = methods
 
-const TreeStreamBase = StreamClass<IWalkable>({
+const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>({
 	...baseMethods,
 	defaultIsEnd: F
 }) as new <
 	Type extends IWalkable<Type> = IWalkable
->() => IReversedStreamClassInstance<Type>
+>() => IReversedStreamClassInstance<Type, any, MultiIndex>
 
 export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends TreeStreamBase<TreeLike>
 	implements ITreeStream<TreeLike>
 {
+	protected readonly super: Summat
+
 	protected response: string = ""
 	protected lastLevelWithSiblings = BadIndex
 	protected walker = new TreeWalker<TreeLike>()
 
 	readonly pos: MultiIndex
 
-	super: Summat
-	init: (walkable?: TreeLike) => ITreeStream
+	init: (walkable?: TreeLike) => ITreeStream<TreeLike>
 	navigate: (position: MultiIndex) => TreeLike
 
 	constructor(walkable?: TreeLike) {

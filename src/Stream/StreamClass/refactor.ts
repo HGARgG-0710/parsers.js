@@ -1,7 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { IStarted } from "../ReversibleStream/interfaces.js"
-import type { IStateful, IStreamClassInstance } from "./interfaces.js"
+import type { IStarted } from "../interfaces.js"
+import type { IStreamClassInstance } from "./interfaces.js"
+import type { IStateful } from "src/interfaces.js"
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../Position/interfaces.js"
 
@@ -9,7 +10,7 @@ import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 
 import curr from "./methods/curr.js"
 
-export type Constructor<Signature extends any[], Type = any> = new (
+export type IConstructor<Signature extends any[], Type = any> = new (
 	...x: Signature
 ) => Type
 
