@@ -2,7 +2,7 @@ import type { IFunctionTuple, IComposition } from "./interfaces.js"
 import type { IDynamicBuffer } from "../interfaces.js"
 
 import { Callable } from "src/internal/Callable.js"
-import { CallbackBuffer } from "src/internal/CallbackBuffer.js"
+import { CallbackBuffer } from "src/internal/Collection/Buffer/CallbackBuffer.js"
 
 import { functional } from "@hgargg-0710/one"
 const { trivialCompose, id } = functional

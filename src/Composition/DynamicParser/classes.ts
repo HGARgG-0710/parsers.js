@@ -10,7 +10,7 @@ import type {
 import type { IFunctionTuple } from "../interfaces.js"
 
 import { IndexSet } from "../../internal/IndexSet.js"
-import { CallbackBuffer } from "../../internal/CallbackBuffer.js"
+import { CallbackBuffer } from "../../internal/Collection/Buffer/CallbackBuffer.js"
 
 import { Composition } from "../classes.js"
 

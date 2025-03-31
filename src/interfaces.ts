@@ -53,11 +53,10 @@ export interface IHashable<KeyType, InternalKeyType> {
 }
 
 export type IIndexed<Type = any> =
-	| string
-	| ({
+	| {
 			[x: number]: Type
 			length: number
-	  } & Iterable<Type>)
+	  } & Iterable<Type>
 
 export interface ISupered {
 	readonly super: Summat
@@ -86,6 +85,10 @@ export interface IPointer<Type = any> {
 }
 
 export type IPattern<Type = any> = Partial<IPointer<Type>>
+
+export interface IReversible {
+	reverse: () => typeof this
+}
 
 export type * from "./Collection/interfaces.js"
 export type * from "./Composition/interfaces.js"

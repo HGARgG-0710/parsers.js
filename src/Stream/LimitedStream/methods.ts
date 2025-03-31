@@ -10,7 +10,7 @@ import {
 import { Stream } from "../../constants.js"
 const { LimitedStream } = Stream
 
-import { navigate, rewind } from "../StreamClass/utils.js"
+import { navigate, rewind } from "../utils.js"
 
 import { type } from "@hgargg-0710/one"
 import type { IFreezableBuffer } from "../../interfaces.js"

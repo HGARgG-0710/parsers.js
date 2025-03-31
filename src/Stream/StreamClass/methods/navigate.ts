@@ -3,7 +3,7 @@ import type { IReversibleStream } from "../../interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IReversedStreamClassInstance } from "../interfaces.js"
 
-import { uniNavigate } from "../utils.js"
+import { uniNavigate } from "src/Stream/utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
 import { direction, positionConvert } from "../../Position/utils.js"
 import { positionDecrement } from "../../Position/refactor.js"

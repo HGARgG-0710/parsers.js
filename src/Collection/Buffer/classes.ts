@@ -1,7 +1,7 @@
 import type { IUnfreezableBuffer } from "./interfaces.js"
 import type { IIndexed } from "../../interfaces.js"
 
-import { IterableCollection } from "src/internal/Collection.js"
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 
 import { array } from "@hgargg-0710/one"
 
@@ -37,7 +37,7 @@ export class UnfreezableArray<Type = any>
 	extends TypicalUnfreezable<Type>
 	implements IUnfreezableBuffer<Type>
 {
-	protected value: Type[]
+	protected value: Type[]	
 
 	push(...elements: Type[]) {
 		if (!this.isFrozen) this.value.push(...elements)

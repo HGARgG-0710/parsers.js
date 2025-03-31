@@ -1,5 +1,5 @@
 import type { ICollection } from "./interfaces.js"
-import { IterableCollection } from "src/internal/Collection.js";
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js";
 
 import { array } from "@hgargg-0710/one"
 

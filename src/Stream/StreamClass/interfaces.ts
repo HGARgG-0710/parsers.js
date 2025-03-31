@@ -4,7 +4,7 @@ import type {
 	IIsStartCurrable,
 	INavigable,
 	IPosition,
-	IReversible,
+	IBackward,
 	IRewindable,
 	IStream
 } from "../interfaces.js"
@@ -68,7 +68,7 @@ export type IReversedStreamClassInstance<
 > = ICommonStreamClassInstance<Type, SubType, PosType> &
 	IPrevable<Type> &
 	IIsStartCurrable &
-	IReversible<Type> &
+	IBackward<Type> &
 	IRewindable<Type> & {
 		basePrevIter: () => Type
 	}
@@ -90,3 +90,4 @@ export type IStreamClass<
 	  >
 
 export type * from "./methods/init.js"
+export type * from "./ReversedStream/interfaces.js"

@@ -1,7 +1,7 @@
 import type { IReversedStream } from "./interfaces.js"
 import type { IReversibleStream } from "src/Stream/interfaces.js"
 
-import { finish } from "../utils.js"
+import { finish } from "src/Stream/utils.js"
 
 export namespace methods {
 	export function init<Type = any>(

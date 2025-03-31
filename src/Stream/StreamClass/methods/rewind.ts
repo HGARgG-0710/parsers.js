@@ -3,7 +3,7 @@ import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IStreamClassInstance } from "../interfaces.js"
 
-import { uniRewind } from "../utils.js"
+import { uniRewind } from "src/Stream/utils.js"
 import { start } from "../refactor.js"
 import { positionNull } from "../../Position/refactor.js"
 import { readFirst } from "../../../Collection/Buffer/refactor.js"

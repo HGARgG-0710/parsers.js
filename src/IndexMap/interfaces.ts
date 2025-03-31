@@ -5,6 +5,7 @@ import type {
 	IDefaulting,
 	IIndexingFunction,
 	IRekeyable,
+	IReversible,
 	ISizeable
 } from "../interfaces.js"
 
@@ -22,11 +23,9 @@ export interface IIndexMap<
 		ICopiable,
 		ISizeable,
 		IDefaulting<DefaultType>,
-		IRekeyable<KeyType> {
+		IRekeyable<KeyType>, IReversible {
 	keys: KeyType[]
 	values: ValueType[]
-
-	reverse: () => this
 
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]

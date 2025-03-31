@@ -2,7 +2,7 @@ import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
 import type { INestedStream } from "./interfaces.js"
 
-import { finish } from "../StreamClass/utils.js"
+import { finish } from "../utils.js"
 
 import { type } from "@hgargg-0710/one"
 import { assignIndex } from "../../utils.js"

@@ -2,7 +2,7 @@ import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IReversibleStream, IIsEndCurrable } from "../interfaces.js"
 import type { IPredicateStream } from "./interfaces.js"
 
-import { navigate } from "../StreamClass/utils.js"
+import { navigate } from "../utils.js"
 
 export namespace methods {
 	export function currGetter<Type = any>(this: IPredicateStream<Type>) {

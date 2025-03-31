@@ -1,19 +1,8 @@
-import type { IDynamicBuffer, IIndexed } from "../interfaces.js"
-import { ArrayCollection } from "../Collection/classes.js"
+import type { IDynamicBuffer, IIndexed } from "../../../interfaces.js"
 
 import { array, inplace } from "@hgargg-0710/one"
+import { TypicalBuffer } from "./TypicalBuffer.js"
 const { insert, out } = inplace
-
-export abstract class TypicalBuffer<Type = any> extends ArrayCollection<Type> {
-	read(i: number) {
-		return this.value[i]
-	}
-
-	write(i: number, value: Type) {
-		this.value[i] = value
-		return this
-	}
-}
 
 export class CallbackBuffer<Type = any>
 	extends TypicalBuffer<Type>

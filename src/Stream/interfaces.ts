@@ -4,6 +4,7 @@ import type {
 	IInitializable,
 	IPattern,
 	IPosition,
+	IReversible,
 	IStateful
 } from "../interfaces.js"
 
@@ -21,15 +22,13 @@ export interface IPrevable<Type = any> {
 
 export type IPreReversible<Type = any> = IStarted & IPrevable<Type>
 
-export type IReversible<Type = any> = IPreReversible<Type> & {
-	reverse(): IReversible<Type>
-}
+export type IBackward<Type = any> = IPreReversible<Type> & IReversible
 
 export type IReversibleStream<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition = number
-> = IStream<Type, SubType, PosType> & IReversible<Type>
+> = IStream<Type, SubType, PosType> & IBackward<Type>
 
 export interface IFinishable<Type = any> {
 	finish: () => Type
@@ -59,7 +58,7 @@ export type IStream<
 	Partial<INavigable<Type, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
-	Partial<IReversible<Type>> &
+	Partial<IBackward<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
 	Partial<IPosed<PosType>> &

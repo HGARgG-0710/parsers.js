@@ -7,7 +7,7 @@ import { readLast } from "../../../Collection/Buffer/refactor.js"
 import { lastIndex } from "../../../Collection/Buffer/refactor.js"
 import { end, readBuffer } from "../refactor.js"
 
-import { uniFinish } from "../utils.js"
+import { uniFinish } from "src/Stream/utils.js"
 
 // * possible 'finish' methods
 

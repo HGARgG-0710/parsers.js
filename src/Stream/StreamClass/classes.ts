@@ -16,6 +16,7 @@ import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
 import { object } from "@hgargg-0710/one"
+import { reverse } from "./methods/reverse.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
@@ -123,6 +124,9 @@ export function StreamClass<
 	})
 
 	if (currGetter) protoProp(streamClass, "update", ConstDescriptor(update))
+
+	if (basePrevIter)
+		protoProp(streamClass, "reverse", ConstDescriptor(reverse))
 
 	return streamClass
 }

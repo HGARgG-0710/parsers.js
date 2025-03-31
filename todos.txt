@@ -65,6 +65,14 @@ Order of TODO-elimination:
 			6. Big update - WALK THROUGH THE `interfaces`, ENSURING: 
 				1. order
 				2. proper presence of required interfaces/classes
+			7. utils:
+				0. Stream-related stuff: 
+					1. StreamClass\utils.ts: 
+						0. delete [docs]
+					1. Stream\utils.ts
+						1. add missing/bad jsdoc [isPrevable, isStarted, isReversible, isStateful, isEmpty, etc]
+						2. add missing permalinks/update utils.StreamClass page...; 
+				1. walk through current `utils`, add missing, delete redundant
 		
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
