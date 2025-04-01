@@ -2366,6 +2366,41 @@ TODO:
 		WI1. Add usage examples: 
 			Current API is quite complex considering the need for generic functions (in many cases). 
 
+		WI2. Add proper Guides: 
+			Currently, the API code is pretty brutal. 
+			Doesn't explain stuff, only contains crucial-to-be-used notes, 
+				and general explanations. 
+			The API *IS* simple (ultimately), but it is better to be explained,
+				because otherwise quite a lot of things may seem cryptical and/or 
+					unnecessary
+
+			1. Separate the API documentation from Guides
+			2. Guides would include: 
+				1. Examples of code for mini-projects: 
+					It's going to be one of:
+
+					1. A JSON parser: 
+						Use for:
+							1. Stream-s [recursive descent]
+							2. Bottom Up [tabular]
+							3. Top Down  [tabular]
+
+						Reasons: 
+							1. simple to implement
+							2. simple to test
+							3. can unify the code
+							4. not really useful (as builtin JSON.parse exists; e.g. no reason to refactor to another repo, besides tidyness...)
+
+					2. Individualized examples of using SPECIFIC APIs [such as DynamicParser]
+				2. Terminology pages: 
+					Originally intended to be part of v0.3, these have gotten way out of 
+						hand, and no longer feasible without some considerable effort (for which there really isn't much time...); 
+				3. Samples page: 
+					This is a Guide to the `samples` module. 
+					Will list the "out-of-the-box" cases for usage 
+						and link to respective `samples` module 
+							exported definitions. 
+
 	10. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 
 			0. TypeScript
@@ -2391,6 +2426,11 @@ FUTURE:
 			2. source-generator (in JavaScript)
 
 	2. REFACTOR [some] of the `internal` APIs into SEPARATE npm PACKAGES: 
+		0. `copiable` package: 
+			A TypeScript package. 
+			Contains the `ICopiable` trait. 
+			Make a dependency of this. 
+
 		1. `callable` package: 
 			1. Callable
 			2. Composition
@@ -2400,3 +2440,9 @@ FUTURE:
 			4. IndexSet
 			5. Signature 
 			6. `IBuffer`, `IDynamicBuffer`, `CallbackBuffer` 
+		
+		2. `test` package [already developed]: 
+			1. add the current 'ClassTest', 'MethodTest' 
+			2. make `copiable` a dependency of this
+			3. [unrelated] add serialization
+			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
