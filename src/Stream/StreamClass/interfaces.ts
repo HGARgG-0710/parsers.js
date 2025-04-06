@@ -90,4 +90,3 @@ export type IStreamClass<
 	  >
 
 export type * from "./methods/init.js"
-export type * from "./ReversedStream/interfaces.js"

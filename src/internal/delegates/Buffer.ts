@@ -1,4 +1,4 @@
-import type { IBuffer } from "../../interfaces.js"
+import type { IBuffer, IIndexed } from "../../interfaces.js"
 import { DelegateIterable } from "./Iterable.js"
 
 export abstract class DelegateBuffer<Type = any>
@@ -37,6 +37,11 @@ export abstract class DelegateBuffer<Type = any>
 
 	reverse() {
 		this.value.reverse()
+		return this
+	}
+
+	init(value: IIndexed<Type>) {
+		this.value.init(value)
 		return this
 	}
 

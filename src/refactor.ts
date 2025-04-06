@@ -1,5 +1,3 @@
-// * A dump file with a load of good ideas that don't fit the library's ontology (and whose presence is needed for practical reasons - implementation details, in other words)
-
 import { functional, object, type } from "@hgargg-0710/one"
 const { argWaster, trivialCompose } = functional
 const { extendPrototype, keys, propertyDescriptors } = object

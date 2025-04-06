@@ -221,13 +221,9 @@ export const isPrevable = structCheck<IPrevable>({
 	prev: isFunction
 }) as <Type = any>(x: any) => x is IPrevable<Type>
 
-export const isBackward = and(
-	isStarted,
-	isPrevable,
-	structCheck<IBackward>({
-		reverse: isFunction
-	})
-) as <Type = any>(x: any) => x is IBackward<Type>
+export const isBackward = and(isStarted, isPrevable) as <Type = any>(
+	x: any
+) => x is IBackward<Type>
 
 export const isStateful = structCheck<IStateful>({
 	state: isObject

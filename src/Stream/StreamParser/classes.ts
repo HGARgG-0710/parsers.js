@@ -1,9 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 
-import type {
-	IStreamClassInstance
-} from "../../Stream/StreamClass/interfaces.js"
+import type { IStreamClassInstance } from "../../Stream/StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
 
 import type { IConstructor } from "../StreamClass/refactor.js"
@@ -16,14 +14,15 @@ import type {
 } from "../../TableMap/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
-import { valueIsCurrEnd } from "../StreamClass/refactor.js"
-import { withSuper } from "../../refactor.js"
+import { valueDelegate, withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
+
+const valueIsCurrEnd = valueDelegate("isCurrEnd")
 
 const StreamParserBase = <Type = any>(
 	hasPosition: boolean = false,

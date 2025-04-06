@@ -6,16 +6,11 @@ import type { IStateful } from "src/interfaces.js"
 import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../Position/interfaces.js"
 
-import { valueDelegate, valuePropDelegate } from "../../refactor.js"
-
 import curr from "./methods/curr.js"
 
 export type IConstructor<Signature extends any[], Type = any> = new (
 	...x: Signature
 ) => Type
-
-export const valueIsCurrEnd = valueDelegate("isCurrEnd")
-export const valueCurr = valuePropDelegate("curr")
 
 export function start(stream: IStarted) {
 	stream.isStart = true

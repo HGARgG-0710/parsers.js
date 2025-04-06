@@ -6,8 +6,7 @@ import type { IPattern } from "src/interfaces.js"
 import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
-import { valueCurr } from "../StreamClass/refactor.js"
-import { withSuper } from "../../refactor.js"
+import { valuePropDelegate, withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
@@ -15,6 +14,8 @@ const { ConstDescriptor } = object.descriptor
 import { methods } from "./methods.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
 const { init, prod, copy, ...baseMethods } = methods
+
+const valueCurr = valuePropDelegate("curr")
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition: boolean = false,

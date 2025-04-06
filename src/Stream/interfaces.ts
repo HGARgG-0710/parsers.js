@@ -4,7 +4,6 @@ import type {
 	IInitializable,
 	IPattern,
 	IPosition,
-	IReversible,
 	IStateful
 } from "../interfaces.js"
 
@@ -17,12 +16,10 @@ export interface IStarted {
 }
 
 export interface IPrevable<Type = any> {
-	prev: () => Type
+	prev: (n?: IPosition<Type>) => Type
 }
 
-export type IPreReversible<Type = any> = IStarted & IPrevable<Type>
-
-export type IBackward<Type = any> = IPreReversible<Type> & IReversible
+export type IBackward<Type = any> = IStarted & IPrevable<Type>
 
 export type IReversibleStream<
 	Type = any,
@@ -50,6 +47,10 @@ export interface IIsStartCurrable {
 	isCurrStart: () => boolean
 }
 
+export interface INextable<Type = any> {
+	next: (i?: IPosition) => Type
+}
+
 export type IStream<
 	Type = any,
 	SubType = any,
@@ -58,7 +59,6 @@ export type IStream<
 	Partial<INavigable<Type, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
-	Partial<IBackward<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
 	Partial<IPosed<PosType>> &
@@ -66,15 +66,11 @@ export type IStream<
 	Partial<IInitializable<any[], IStream<Type, SubType, PosType>>> &
 	Partial<IIsEndCurrable> &
 	Partial<IIsStartCurrable> &
-	Iterable<Type> & {
+	Iterable<Type> &
+	INextable<Type> & {
 		curr: Type
 		isEnd: boolean
-		next: () => Type
 	}
-
-export interface IPrevable<Type = any> {
-	prev: () => Type
-}
 
 export type * from "./InputStream/interfaces.js"
 export type * from "./LimitedStream/interfaces.js"
