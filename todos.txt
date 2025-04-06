@@ -37,25 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:			
-		SI5. [no tdd yet] IDEA: simplifying the list of available Stream-s further: 
-			Replace the 'ReversibleStream' with a 'StreamClass.reverse()' method 
-				returning a Stream with precisely this same definition; 
-
-			Then, you can do: 
-				const reversed = stream.reverse()
-			instead of: 
-				const reversed = ReversedStream(stream)
-
-			Nicer semantics. 
-			Follow the todos from the `reversed.ts` file; 
-
-		IN4. FIX the `init` methods in `Stream` interfaces. 
-			1. NAMELY, they currently have the generic `IInitializable<any[]>` from the `IStream`. 
-				REPLACE with specific `IInitializable`
-
-		IN6. [IStream] FIX the '<Type, SubType, PosType>' generics EVERYWHERE, where there is `IStream` [or a derivative interface...]; 
-			Reason: otherwise, the respective functions/classes become UNUSABLE with specific implementations. 
-		
 		Fix docs: 
 			1. Interfaces.ts [all init-related, Stream-related, RE-ORDER...]
 			2. remove `ReversibleStream` from places
@@ -1021,6 +1002,10 @@ Order of TODO-elimination:
 
 					Also - IF one does need to use the `Pairs` IN THE END (due to mutability concerns), 
 						USE THAT 
+
+				SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
+					It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
+				
 	5.2.73.
 	5.2.74.	
 	5.2.76.	
@@ -1828,8 +1813,9 @@ TODO:
 
 		S12. Remove the `.isStart` requirement from the `BasicStreamClassInstance`. 
 
-		SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
-			It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
+		SI14. The `.pos` on `StreamClass` should ALWAYS be added, whenever the user also adds the `.buffer`. 
+			Reason - better/simpler implementation, minor memory effect. 
+				No reason not to. 
 
 	4. Breaking [removals]	
 		UT4. REMOVE the `utility` types: 

@@ -3,5 +3,8 @@ import type { IPosed } from "../../interfaces.js"
 import type { MultiIndex } from "../Position/classes.js"
 import type { IWalkable } from "../../Node/interfaces.js"
 
-export type ITreeStream<Type extends IWalkable<Type> = IWalkable> =
-	IReversedStreamClassInstance<Type, any, MultiIndex> & IPosed<MultiIndex>
+export type ITreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable> =
+	IReversedStreamClassInstance<TreeLike, any, MultiIndex> &
+		IPosed<MultiIndex> & {
+			init: (walkable?: TreeLike) => ITreeStream<TreeLike>
+		}

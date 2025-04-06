@@ -5,9 +5,7 @@ import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
 
-import type {
-	IStreamClassInstance
-} from "../StreamClass/interfaces.js"
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
 
 import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
@@ -32,15 +30,21 @@ const NestedStreamBase = <Type = any>(
 		isPattern: true
 	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function NestedStream<Type = any>(
+export function NestedStream<Type = any, IndexType = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate>
 ): (
 	hasPosition?: boolean,
 	hasBuffer?: boolean
-) => new (value?: IEndableStream<Type>, _index?: any) => INestedStream<Type> {
+) => new (value?: IUnderNestedStream<Type>, index?: IndexType) => INestedStream<
+	Type,
+	IndexType
+> {
 	return function (hasPosition: boolean = false, hasBuffer: boolean = false) {
 		const baseClass = NestedStreamBase(hasPosition, hasBuffer)
-		class NestedStream extends baseClass implements INestedStream<Type> {
+		class NestedStream
+			extends baseClass
+			implements INestedStream<Type, IndexType>
+		{
 			value: IUnderNestedStream<Type>
 			isCurrNested: boolean
 			assignedIndex?: any
@@ -50,16 +54,16 @@ export function NestedStream<Type = any>(
 
 			init: (
 				value?: IEndableStream<Type>,
-				_index?: any
+				index?: IndexType
 			) => INestedStream<Type>;
 
 			["constructor"]: new (
-				value?: IEndableStream<Type>,
-				_index?: any,
+				value?: IUnderNestedStream<Type>,
+				index?: IndexType,
 				buffer?: IFreezableBuffer<Type>
 			) => INestedStream<Type>
 
-			constructor(value?: IEndableStream<Type>, index?: any) {
+			constructor(value?: IUnderNestedStream<Type>, index?: IndexType) {
 				super(value)
 				this.init(value, index)
 			}

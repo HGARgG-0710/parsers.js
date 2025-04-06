@@ -10,7 +10,6 @@ import type {
 } from "../interfaces.js"
 
 import type { IStarted } from "../interfaces.js"
-import type { IPrevable } from "../interfaces.js"
 import type { ICopiable, IPattern } from "../../interfaces.js"
 import type { ConstructorHaving } from "../../refactor.js"
 import type { IConstructor } from "./refactor.js"
@@ -66,7 +65,6 @@ export type IReversedStreamClassInstance<
 	SubType = any,
 	PosType extends IPosition = number
 > = ICommonStreamClassInstance<Type, SubType, PosType> &
-	IPrevable<Type> &
 	IIsStartCurrable &
 	IBackward<Type> &
 	IRewindable<Type> & {

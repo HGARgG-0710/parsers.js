@@ -8,14 +8,19 @@ import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
-export interface INestedStream<Type = any>
+export interface INestedStream<Type = any, IndexType = any>
 	extends IStreamClassInstance<
 			Type | INestedStream<Type>,
 			IUnderNestedStream<Type>
 		>,
 		ISupered,
 		IPattern<IUnderNestedStream<Type>>,
-		IIndexAssignable {
+		IIndexAssignable<IndexType> {
 	typesTable: ILookupTable<any, IStreamPredicate>
 	isCurrNested: boolean
+
+	init: (
+		value?: IEndableStream<Type>,
+		index?: IndexType
+	) => INestedStream<Type, IndexType>
 }

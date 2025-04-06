@@ -26,6 +26,11 @@ export type IPredicateStream<Type = any> = IStreamClassInstance<Type> &
 	IPattern<IUnderPredicateStream<Type>> &
 	ILookaheadHaving & {
 		predicate: IPredicatePosition<Type>
+
+		init: (
+			value?: IUnderPredicateStream<Type>,
+			buffer?: IFreezableBuffer<Type>
+		) => IPredicateStream<Type>
 	}
 
 export type IPredicateStreamConstructor<Type = any> = new (
