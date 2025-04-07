@@ -8,19 +8,21 @@ import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
+export type INestedStreamInitSignature<Type = any, IndexType = any> = [
+	IEndableStream<Type>?,
+	IndexType?
+]
+
 export interface INestedStream<Type = any, IndexType = any>
 	extends IStreamClassInstance<
 			Type | INestedStream<Type>,
-			IUnderNestedStream<Type>
+			IUnderNestedStream<Type>,
+			number,
+			INestedStreamInitSignature<Type, IndexType>
 		>,
 		ISupered,
 		IPattern<IUnderNestedStream<Type>>,
 		IIndexAssignable<IndexType> {
 	typesTable: ILookupTable<any, IStreamPredicate>
 	isCurrNested: boolean
-
-	init: (
-		value?: IEndableStream<Type>,
-		index?: IndexType
-	) => INestedStream<Type, IndexType>
 }

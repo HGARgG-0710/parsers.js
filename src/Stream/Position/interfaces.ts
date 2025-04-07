@@ -19,7 +19,10 @@ export type IPredicatePosition<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
-> = ((stream: IStream<Type, SubType, PosType>, pos?: PosType) => boolean) &
+> = ((
+	stream: IStream<Type, SubType, PosType>,
+	pos?: IPosition<Type, SubType, PosType>
+) => boolean) &
 	Partial<IDirectionHaving>
 
 export interface IPositionObject<

@@ -13,8 +13,12 @@ export interface IStarted {
 	isStart: boolean
 }
 
-export interface IPrevable<Type = any> {
-	prev: (n?: IPosition<Type>) => Type
+export interface IPrevable<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> {
+	prev: (n?: IPosition<Type, SubType, PosType>) => Type
 }
 
 export type IBackward<Type = any> = IStarted & IPrevable<Type>
@@ -28,7 +32,7 @@ export interface INavigable<
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
 > {
-	navigate: (position: PosType) => Type
+	navigate: (position: IPosition<Type, SubType, PosType>) => Type
 }
 
 export interface IRewindable<Type = any> {
@@ -58,7 +62,7 @@ export type IStream<
 	Partial<IRewindable<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
-	Partial<IPosed<PosType>> &
+	Partial<IPosed<IPosition<Type, SubType, PosType>>> &
 	Partial<IPattern<SubType>> &
 	Partial<
 		IInitializable<

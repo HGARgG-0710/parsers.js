@@ -1,4 +1,4 @@
-import type { IStream } from "../Stream/interfaces.js"
+import type { IPosition, IStream } from "../Stream/interfaces.js"
 
 export type IParserFunction<InputType = any, OutType = any> = (
 	state?: InputType,
@@ -8,7 +8,7 @@ export type IParserFunction<InputType = any, OutType = any> = (
 
 export type IStreamTransform<UnderType = any, UpperType = any> = (
 	input?: IStream<UnderType>,
-	i?: number,
+	i?: IPosition<UnderType, any, any>,
 	...x: any[]
 ) => UpperType
 

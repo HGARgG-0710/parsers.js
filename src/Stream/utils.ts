@@ -213,9 +213,13 @@ export const isFinishable = structCheck<IFinishable>({
  */
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <Type = any, PosType extends IPosition = number>(
+}) as <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
 	x: any
-) => x is INavigable<Type, PosType>
+) => x is INavigable<Type, SubType, PosType>
 
 /**
  * Returns whether the given `x` is a Rewindable
@@ -303,8 +307,11 @@ export function navigate<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
->(stream: IReversibleStream<Type, SubType, PosType>, position: PosType) {
-	return isNavigable<Type, any>(stream)
+>(
+	stream: IReversibleStream<Type, SubType, PosType>,
+	position: IPosition<Type, SubType, PosType>
+) {
+	return isNavigable(stream)
 		? stream.navigate(position)
 		: uniNavigate(stream, position)
 }
@@ -344,11 +351,11 @@ export function byStreamBufferPos<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
->(f: (buffer: IIndexed, i: PosType) => any) {
+>(f: (buffer: IIndexed, i: IPosition<Type, SubType, PosType>) => any) {
 	return (
 		stream: IStream<Type, SubType, PosType> &
 			IBufferized<Type> &
-			IPosed<PosType>
+			IPosed<IPosition<Type, SubType, PosType>>
 	) => f(stream.buffer.get(), stream.pos)
 }
 

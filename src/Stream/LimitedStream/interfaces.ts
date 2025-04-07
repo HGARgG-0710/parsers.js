@@ -1,4 +1,4 @@
-import type { IFreezableBuffer, IPattern } from "src/interfaces.js"
+import type { IFreezableBuffer, IPointer } from "src/interfaces.js"
 
 import type {
 	IReversibleStream,
@@ -28,20 +28,25 @@ export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
 	IIsStartCurrable &
 	ICopiable
 
+export type ILimitedStreamInitSignature<Type = any> = [
+	ILimitedUnderStream<Type>,
+	IPosition?,
+	IPosition?,
+	IFreezableBuffer<Type>?
+]
+
 export type ILimitedStream<Type = any> = ISinglePositionLookahead<Type> &
-	IPattern<ILimitedUnderStream<Type>> &
 	ILookaheadHaving &
 	ISupered &
-	IReversedStreamClassInstance<Type> &
+	IReversedStreamClassInstance<
+		Type,
+		ILimitedUnderStream<Type>,
+		number,
+		ILimitedStreamInitSignature<Type>
+	> &
+	IPointer<ILimitedUnderStream<Type>> &
 	IDirectionHaving &
 	Partial<IBufferized<Type>> & {
 		from: IPosition
 		to: IPosition
-
-		init: (
-			value: ILimitedUnderStream<Type>,
-			from?: IPosition,
-			to?: IPosition,
-			buffer?: IFreezableBuffer<Type>
-		) => ILimitedStream<Type>
 	}

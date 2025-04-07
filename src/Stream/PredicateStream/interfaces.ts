@@ -20,17 +20,22 @@ export type IUnderPredicateStream<Type = any> = IReversibleStream<Type> &
 	IIsEndCurrable &
 	ICopiable
 
-export type IPredicateStream<Type = any> = IStreamClassInstance<Type> &
+export type IPredicateStreamInitSignature<Type = any> = [
+	IUnderPredicateStream<Type>?,
+	IFreezableBuffer<Type>?
+]
+
+export type IPredicateStream<Type = any> = IStreamClassInstance<
+	Type,
+	IUnderPredicateStream<Type>,
+	number,
+	IPredicateStreamInitSignature<Type>
+> &
 	ISupered &
 	ISinglePositionLookahead<Type> &
 	IPattern<IUnderPredicateStream<Type>> &
 	ILookaheadHaving & {
-		predicate: IPredicatePosition<Type, any, any>
-
-		init: (
-			value?: IUnderPredicateStream<Type>,
-			buffer?: IFreezableBuffer<Type>
-		) => IPredicateStream<Type>
+		predicate: IPredicatePosition<Type>
 	}
 
 export type IPredicateStreamConstructor<Type = any> = new (

@@ -34,7 +34,7 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	protected lastLevelWithSiblings = BadIndex
 	protected walker = new TreeWalker<TreeLike>()
 
-	readonly pos: MultiIndex
+	readonly pos: MultiIndex<TreeLike>
 
 	init: (walkable?: TreeLike) => ITreeStream<TreeLike>
 	navigate: (position: MultiIndex<TreeLike>) => TreeLike
