@@ -45,6 +45,7 @@ export abstract class BasicPattern<Type = any> implements IPointer<Type> {
 		setValue(this, value)
 	}
 }
+
 export abstract class Pattern<Type = any> implements IPattern<Type> {
 	value?: Type
 	constructor(value?: Type) {
