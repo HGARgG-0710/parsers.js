@@ -9,7 +9,7 @@ const { last, first, copy } = array
 
 export class MultiIndex<Type extends IWalkable<Type> = IWalkable>
 	extends InitializablePattern<number[]>
-	implements IPositionObject<Type>
+	implements IPositionObject<Type, Type, MultiIndex<Type>>
 {
 	set levels(length: number) {
 		this.value!.length = length

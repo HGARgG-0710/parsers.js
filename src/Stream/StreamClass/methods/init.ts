@@ -55,87 +55,87 @@ export type IBufferizedStatefulPatternStreamClassInitSignature<Type = any> = [
 	Summat?
 ]
 
-export type IInitMethod<
+export type IStreamClassInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > =
-	| IBaseInitMethod<Type, SubType, PosType>
-	| IBufferInitMethod<Type, SubType, PosType>
-	| IStateInitMethod<Type, SubType, PosType>
-	| IBufferStateInitMethod<Type, SubType, PosType>
-	| IPatternInitMethod<Type, SubType, PosType>
-	| IBufferPatternInitMethod<Type, SubType, PosType>
-	| IStatePatternInitMethod<Type, SubType, PosType>
-	| IBufferStatePatternInitMethod<Type, SubType, PosType>
+	| IStreamClassBaseInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferInitMethod<Type, SubType, PosType>
+	| IStreamClassStateInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferStateInitMethod<Type, SubType, PosType>
+	| IStreamClassPatternInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferPatternInitMethod<Type, SubType, PosType>
+	| IStreamClassStatePatternInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferStatePatternInitMethod<Type, SubType, PosType>
 
-export type IBaseInitMethod<
+export type IStreamClassBaseInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBaseStreamClassInitSignature,
 	IStreamClassInstance<Type, SubType, PosType>
 >
 
-export type IBufferInitMethod<
+export type IStreamClassBufferInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStreamClassInitSignature<Type>,
 	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type>
 >
 
-export type IStateInitMethod<
+export type IStreamClassStateInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IStatefulStreamClassInitSignature,
 	IStreamClassInstance<Type, SubType, PosType> & IStateful
 >
 
-export type IBufferStateInitMethod<
+export type IStreamClassBufferStateInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStatefulStreamClassInitSignature<Type>,
 	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IStateful
 >
 
-export type IPatternInitMethod<
+export type IStreamClassPatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IPatternStreamClassInitSignature,
 	IStreamClassInstance<Type, SubType, PosType> & IPattern
 >
 
-export type IBufferPatternInitMethod<
+export type IStreamClassBufferPatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedPatternStreamClassInitSignature<Type>,
 	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IPattern
 >
 
-export type IStatePatternInitMethod<
+export type IStreamClassStatePatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IStatefulPatternStreamClassInitSignature,
 	IStreamClassInstance<Type, SubType, PosType> & IStateful & IPattern
 >
 
-export type IBufferStatePatternInitMethod<
+export type IStreamClassBufferStatePatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStatefulPatternStreamClassInitSignature<Type>,
 	IStreamClassInstance<Type, SubType, PosType> &
@@ -156,8 +156,8 @@ function initialize<Type = any>(this: IStreamClassInstance<Type>) {
 
 // * Explanation: the private function here is only for refactoring;
 function generateInitMethods<Type = any>(
-	initialize: IBaseInitMethod
-): IInitMethod<Type>[] {
+	initialize: IStreamClassBaseInitMethod
+): IStreamClassInitMethod<Type>[] {
 	function posInitialize<Type = any>(
 		this: IStreamClassInstance<Type> & IPosed<number>
 	) {

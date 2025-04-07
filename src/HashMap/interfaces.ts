@@ -1,5 +1,5 @@
 import type { IInternalHash } from "./InternalHash/interfaces.js"
-import type { IIndexable } from "../IndexMap/interfaces.js"
+import type { IIndexable } from "src/interfaces.js"
 import type {
 	ICopiable,
 	IDefaulting,

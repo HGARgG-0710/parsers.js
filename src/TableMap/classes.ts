@@ -1,4 +1,4 @@
-import type { IIndexable } from "../IndexMap/interfaces.js"
+import type { IIndexable } from "src/interfaces.js"
 import type { IParserFunction } from "./interfaces.js"
 
 export function TableMap<OutType = any>(

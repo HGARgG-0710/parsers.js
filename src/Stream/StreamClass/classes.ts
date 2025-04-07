@@ -1,4 +1,4 @@
-import type { IInitMethod } from "./methods/init.js"
+import type { IStreamClassInitMethod } from "./methods/init.js"
 import type { ICopiable, IPosition } from "../../interfaces.js"
 
 import type {
@@ -22,7 +22,7 @@ const { ConstDescriptor } = object.descriptor
 export function StreamClass<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type> = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 >(
 	signature: IStreamClassSignature<Type>
 ): IStreamClass<Type, SubType, PosType> {
@@ -57,7 +57,7 @@ export function StreamClass<
 
 		navigate: () => Type
 		finish: () => Type
-		init: IInitMethod<Type, SubType, PosType>
+		init: IStreamClassInitMethod<Type, SubType, PosType>
 		[Symbol.iterator]: () => Generator<Type>
 	}
 

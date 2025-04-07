@@ -78,8 +78,6 @@ export interface IInitializable<ArgType extends any[] = any[], OutType = any> {
 	init: IThisMethod<ArgType, OutType>
 }
 
-export type IRecursivePointer<T = any> = IPointer<T | IRecursivePointer<T>>
-
 export interface IPointer<Type = any> {
 	value: Type
 }
@@ -90,6 +88,12 @@ export interface IReversible {
 	reverse: () => this
 }
 
+export type IRecursivePointer<T = any> = IPointer<T | IRecursivePointer<T>>
+
+export interface IIndexable<ValueType = any> {
+	index: (x: any, ...y: any[]) => ValueType
+}
+
 export type * from "./Collection/interfaces.js"
 export type * from "./Composition/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
@@ -98,5 +102,4 @@ export type * from "./IndexMap/interfaces.js"
 export type * from "./LookupTable/interfaces.js"
 export type * from "./Node/interfaces.js"
 export type * from "./Stream/interfaces.js"
-
 export type * from "./TableMap/interfaces.js"

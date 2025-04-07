@@ -27,7 +27,13 @@ export const isPredicatePosition = isFunction as <Type = any>(
  */
 export const isPositionObject = structCheck({
 	convert: isFunction
-}) as <Type = any>(x: any) => x is IPositionObject<Type>
+}) as <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	x: any
+) => x is IPositionObject<Type, SubType, PosType>
 
 /**
  * Returns whether given `x` is a `Position`
@@ -44,11 +50,17 @@ export const isPosition = or(
  * 1. The original position, If it is a `DirectionalPosition`
  * 2. The result of `pos.convert(stream)`, if it's a `PositionObject`
  */
-export function positionConvert<Type = any>(
-	pos: IPosition<Type>,
-	stream?: IStream<Type>
-): IDirectionalPosition<Type> {
-	return isPositionObject(pos) ? pos.convert(stream) : pos
+export function positionConvert<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	pos: IPosition<Type, SubType, PosType>,
+	stream?: IStream<Type, SubType, PosType>
+): IDirectionalPosition<Type, SubType, PosType> {
+	return isPositionObject<Type, SubType, PosType>(pos)
+		? pos.convert(stream)
+		: pos
 }
 
 /**
@@ -101,10 +113,14 @@ export function positionEqual<Type = any>(
  * 2. If `direction(pos1) === direction(pos2)` and not both of them are a `number`: return `true`
  * 3. If `direction(pos1) === direction(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
  */
-export function directionCompare<Type = any>(
-	pos1: IPosition<Type>,
-	pos2: IPosition<Type>,
-	stream?: IStream<Type>
+export function directionCompare<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	pos1: IPosition<Type, SubType, PosType>,
+	pos2: IPosition<Type, SubType, PosType>,
+	stream?: IStream<Type, SubType, PosType>
 ) {
 	const converted = [pos1, pos2].map((pos) => positionConvert(pos, stream))
 	const [cPos1, cPos2] = converted
@@ -120,16 +136,24 @@ export function directionCompare<Type = any>(
  * 1. If `pos` is a number: `pos >= 0`
  * 2. If `pos` is a `PredicatePosition`: `pos.direction`, or, if absent, `true` by default
  */
-export function direction<Type = any>(pos: IDirectionalPosition<Type>) {
+export function direction<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(pos: IDirectionalPosition<Type, SubType, PosType>) {
 	return isNumber(pos) ? pos >= 0 : !("direction" in pos) || pos.direction!
 }
 
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export const pickDirection = <Type = any>(
-	pos: IDirectionalPosition<Type>
-): IChange => (direction(pos) ? next : previous)
+export const pickDirection = <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	pos: IDirectionalPosition<Type, SubType, PosType>
+): IChange<Type, SubType, PosType> => (direction(pos) ? next : previous)
 
 /**
  * Applies a given (supposedly, copying) transform onto the given `PredicatePosition`, whilst preserving the `.direction`

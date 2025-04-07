@@ -5,8 +5,7 @@ import { InputStream } from "./classes.js"
 import { UnfreezableArray } from "../../Collection/Buffer/classes.js"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"
-import { consume } from "../utils.js"
-import { uniFinish } from "../utils.js"
+import { consume, finish } from "../utils.js"
 
 /**
  * Given a `BasicStream`, converts it to an `InputStream`
@@ -14,10 +13,10 @@ import { uniFinish } from "../utils.js"
 export function toInputStream<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 >(stream: IStream<Type, SubType, PosType>): IInputStream<Type> {
 	if (isBufferized<Type>(stream)) {
-		if (!stream.buffer.isFrozen) uniFinish(stream)
+		if (!stream.buffer.isFrozen) finish(stream)
 		return new InputStream(stream.buffer)
 	}
 

@@ -9,8 +9,6 @@ import type {
 
 import type { IPosed } from "./Position/interfaces.js"
 
-export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
-
 export interface IStarted {
 	isStart: boolean
 }
@@ -21,17 +19,15 @@ export interface IPrevable<Type = any> {
 
 export type IBackward<Type = any> = IStarted & IPrevable<Type>
 
-export type IReversibleStream<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition = number
-> = IStream<Type, SubType, PosType> & IBackward<Type>
-
 export interface IFinishable<Type = any> {
 	finish: () => Type
 }
 
-export interface INavigable<Type = any, PosType extends IPosition = number> {
+export interface INavigable<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> {
 	navigate: (position: PosType) => Type
 }
 
@@ -54,16 +50,22 @@ export interface INextable<Type = any> {
 export type IStream<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
 > = ICopiable &
-	Partial<INavigable<Type, PosType>> &
+	Partial<INavigable<Type, SubType, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
 	Partial<IPosed<PosType>> &
 	Partial<IPattern<SubType>> &
-	Partial<IInitializable<any[], IStream<Type, SubType, PosType>>> &
+	Partial<
+		IInitializable<
+			InitSignature,
+			IStream<Type, SubType, PosType, InitSignature>
+		>
+	> &
 	Partial<IIsEndCurrable> &
 	Partial<IIsStartCurrable> &
 	Iterable<Type> &
@@ -71,6 +73,14 @@ export type IStream<
 		curr: Type
 		isEnd: boolean
 	}
+
+export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
+
+export type IReversibleStream<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IStream<Type, SubType, PosType> & IBackward<Type>
 
 export type * from "./InputStream/interfaces.js"
 export type * from "./LimitedStream/interfaces.js"

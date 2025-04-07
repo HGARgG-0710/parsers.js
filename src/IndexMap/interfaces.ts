@@ -3,15 +3,12 @@ import type { array } from "@hgargg-0710/one"
 import type {
 	ICopiable,
 	IDefaulting,
+	IIndexable,
 	IIndexingFunction,
 	IRekeyable,
 	IReversible,
 	ISizeable
 } from "../interfaces.js"
-
-export interface IIndexable<ValueType = any> {
-	index: (x: any, ...y: any[]) => ValueType
-}
 
 export interface IIndexMap<
 	KeyType = any,
@@ -23,7 +20,8 @@ export interface IIndexMap<
 		ICopiable,
 		ISizeable,
 		IDefaulting<DefaultType>,
-		IRekeyable<KeyType>, IReversible {
+		IRekeyable<KeyType>,
+		IReversible {
 	keys: KeyType[]
 	values: ValueType[]
 

@@ -44,13 +44,24 @@ const { and } = functional
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <Type = any>(input: IStream<Type>) => input.next()
+export const next = <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	input: IStream<Type, SubType, PosType>
+) => input.next()
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any>(input: IReversibleStream<Type>) =>
-	input.prev()
+export const previous = <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	input: IReversibleStream<Type, SubType, PosType>
+) => input.prev()
 
 /**
  * Given a `BasicStream` returns its `.curr` property value
@@ -112,14 +123,14 @@ export function skip(input: IReversibleStream, steps: IPosition = 1) {
 export function consume<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number,
+	PosType extends IPosition<Type, SubType, PosType> = number,
 	CollectionType extends ICollection<Type> = ArrayCollection<Type>
 >(
 	stream: IStream<Type, SubType, PosType>,
-	init: CollectionType = new ArrayCollection<Type>() as any
+	result: CollectionType = new ArrayCollection<Type>() as any
 ) {
-	while (!stream.isEnd) init.push(stream.next())
-	return init
+	while (!stream.isEnd) result.push(stream.next())
+	return result
 }
 
 /**
@@ -160,13 +171,13 @@ export function delimited(delimPred: IPosition) {
 		CollectionType extends ICollection<Type> = ArrayCollection<Type>
 	>(
 		input: IReversibleStream<Type>,
-		init: CollectionType = new ArrayCollection<Type>() as any
+		result: CollectionType = new ArrayCollection<Type>() as any
 	) {
 		while (!input.isEnd) {
 			skip(input, delimPred)
-			init.push(input.next())
+			result.push(input.next())
 		}
-		return init
+		return result
 	}
 }
 
@@ -182,11 +193,11 @@ export function transform<UnderType = any, UpperType = any>(
 		CollectionType extends ICollection<UpperType> = ArrayCollection<UpperType>
 	>(
 		input: IStream<UnderType>,
-		init: CollectionType = new ArrayCollection<UpperType>() as any
+		result: CollectionType = new ArrayCollection<UpperType>() as any
 	) {
 		let i = 0
-		while (!input.isEnd) init.push(map(input, i++))
-		return init
+		while (!input.isEnd) result.push(map(input, i++))
+		return result
 	}
 }
 
@@ -235,7 +246,7 @@ export const isStateful = structCheck<IStateful>({
 export function uniFinish<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 >(stream: IStream<Type, SubType, PosType>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
@@ -245,10 +256,12 @@ export function uniFinish<
  * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
  * else - `uniFinish(stream)`
  */
-export function finish<Type = any>(stream: IStream<Type>) {
-	return isFinishable<Type>(stream)
-		? stream.finish()
-		: uniFinish<Type>(stream)
+export function finish<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(stream: IStream<Type, SubType, PosType>) {
+	return isFinishable<Type>(stream) ? stream.finish() : uniFinish(stream)
 }
 
 /**
@@ -263,9 +276,13 @@ export function finish<Type = any>(stream: IStream<Type>) {
  * * 4. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
  * @returns `stream.curr`
  */
-export function uniNavigate<Type = any>(
-	stream: IReversibleStream<Type>,
-	position: IPosition
+export function uniNavigate<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	stream: IReversibleStream<Type, SubType, PosType>,
+	position: IPosition<Type, SubType, PosType>
 ): Type {
 	if (isNumber((position = positionConvert(position, stream)))) {
 		if (position < 0) while (position++) stream.prev()
@@ -282,13 +299,14 @@ export function uniNavigate<Type = any>(
  * If the given `ReversibleStream` is `Navigable`, calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
  */
-export function navigate<Type = any>(
-	stream: IReversibleStream<Type>,
-	position: IPosition
-) {
+export function navigate<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(stream: IReversibleStream<Type, SubType, PosType>, position: PosType) {
 	return isNavigable<Type, any>(stream)
 		? stream.navigate(position)
-		: uniNavigate<Type>(stream, position)
+		: uniNavigate(stream, position)
 }
 
 /**
@@ -314,7 +332,7 @@ export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
 export function isEmpty<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 >(stream: IStream<Type, SubType, PosType> & IStarted) {
 	return stream.isEnd && stream.isStart
 }
@@ -325,8 +343,8 @@ export function isEmpty<
 export function byStreamBufferPos<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
->(f: (buffer: IIndexed, i: IPosition) => any) {
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(f: (buffer: IIndexed, i: PosType) => any) {
 	return (
 		stream: IStream<Type, SubType, PosType> &
 			IBufferized<Type> &
@@ -334,5 +352,6 @@ export function byStreamBufferPos<
 	) => f(stream.buffer.get(), stream.pos)
 }
 
-export * as InputStream from "./InputStream/utils.js"
+export * from "./InputStream/utils.js"
+
 export * as Position from "./Position/utils.js"

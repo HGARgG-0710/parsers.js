@@ -25,7 +25,7 @@ export type IPredicateStream<Type = any> = IStreamClassInstance<Type> &
 	ISinglePositionLookahead<Type> &
 	IPattern<IUnderPredicateStream<Type>> &
 	ILookaheadHaving & {
-		predicate: IPredicatePosition<Type>
+		predicate: IPredicatePosition<Type, any, any>
 
 		init: (
 			value?: IUnderPredicateStream<Type>,

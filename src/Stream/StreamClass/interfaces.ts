@@ -35,11 +35,12 @@ type IStreamClassTransferable<Type = any> = IPrimalStreamClassSignature<Type> &
 type ICommonStreamClassInstance<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
-> = IStream<Type, SubType, PosType> &
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = IStream<Type, SubType, PosType, InitSignature> &
 	IPrimalStreamClassSignature<Type> &
 	IStarted &
-	INavigable<Type, PosType> &
+	INavigable<Type, SubType, PosType> &
 	IFinishable<Type> &
 	ICopiable &
 	ConstructorHaving
@@ -55,16 +56,18 @@ export type IStreamClassSignature<Type = any> =
 export type IStreamClassInstance<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
-> = ICommonStreamClassInstance<Type, SubType, PosType> &
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = ICommonStreamClassInstance<Type, SubType, PosType, InitSignature> &
 	IStreamClassTransferable<Type> &
 	Partial<IUpdatable<Type>>
 
 export type IReversedStreamClassInstance<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
-> = ICommonStreamClassInstance<Type, SubType, PosType> &
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = ICommonStreamClassInstance<Type, SubType, PosType, InitSignature> &
 	IIsStartCurrable &
 	IBackward<Type> &
 	IRewindable<Type> & {
@@ -74,7 +77,7 @@ export type IReversedStreamClassInstance<
 export type IStreamClass<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition = number
+	PosType extends IPosition<Type, SubType, PosType> = number
 > =
 	| IConstructor<[], IStreamClassInstance<Type, SubType, PosType>>
 	| IConstructor<

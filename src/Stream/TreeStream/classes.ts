@@ -22,7 +22,7 @@ const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>({
 	defaultIsEnd: F
 }) as new <
 	Type extends IWalkable<Type> = IWalkable
->() => IReversedStreamClassInstance<Type, any, MultiIndex>
+>() => IReversedStreamClassInstance<Type, any, MultiIndex<Type>>
 
 export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends TreeStreamBase<TreeLike>
@@ -37,7 +37,7 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	readonly pos: MultiIndex
 
 	init: (walkable?: TreeLike) => ITreeStream<TreeLike>
-	navigate: (position: MultiIndex) => TreeLike
+	navigate: (position: MultiIndex<TreeLike>) => TreeLike
 
 	constructor(walkable?: TreeLike) {
 		super()

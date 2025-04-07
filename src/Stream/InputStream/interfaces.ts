@@ -5,7 +5,11 @@ import type {
 	IReversedStreamClassInstance
 } from "../StreamClass/interfaces.js"
 
-export type IInputStream<Type = any> = IReversedStreamClassInstance<Type> &
-	IPosed<number> &
-	IBufferized<Type> &
+export type IInputStream<Type = any> = IReversedStreamClassInstance<
+	Type,
+	any,
+	number,
 	IBufferizedStreamClassInitSignature<Type>
+> &
+	IPosed<number> &
+	IBufferized<Type>
