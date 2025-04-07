@@ -57,11 +57,6 @@ export class UnfreezableArray<Type = any>
 		return this
 	}
 
-	reverse() {
-		this.value.reverse()
-		return this
-	}
-
 	constructor(value: Type[] = []) {
 		super(value)
 	}
@@ -87,11 +82,6 @@ export class UnfreezableString
 		if (!this.isFrozen)
 			this.value =
 				currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
-		return this
-	}
-
-	reverse() {
-		this.value = this.value.split("").reverse().join("")
 		return this
 	}
 
