@@ -40,7 +40,7 @@ export interface IHashMap<
 		IDeletable<KeyType>,
 		IRekeyable<KeyType>,
 		ISizeable,
-		IHashable<KeyType, InternalKeyType>,
+		Partial<IHashable<KeyType, InternalKeyType>>,
 		IDefaulting,
 		ICopiable {}
 

@@ -39,27 +39,14 @@ Order of TODO-elimination:
 	TODO [fixed order]:				
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			SOLUTION: make a `GenericCollection` into two [different] abstractions:
-				1. GenericMap - for object-based cofigurations: 
-				2. BitArrayHash - for boolean-based configurations: 
+				1. ObjectMap - for object-based cofigurations: 
+				2. BitHash - for boolean-based configurations: 
 					1. This uses an array with integer-indexes; 
 
 			NOTE: PROVIDE a specific (hidden) `GenericMap/BitArrayHash` for EACH such case; 	
 				The user DOESN'T NEED to access them. These are only used AS WAYS TO: 
 					1. save memory
 					2. [more important] save JIT optimizations for re-used classes; 
-
-			ALSO: Sub-note, see above: 				
-					IM2. [new type] BitHash [IndexMap/classes.ts -> *]
-						Accepts a BitArray, returns a value from it; 
-							A hash based off bit-shifts (<<, >>); 
-						Use for defining the '.init', '.curr' and other choice functions in the StreamClass; 
-						BitArray - a UInt8Array (or other) array. Look into the '2.35' (pattern-tokenizer speedup) for details. 
-						[Namely - to properly replace the `chooseMethod` stuff]
-
-						ALSO [a sub-note], uses [underneath]: 					
-							IM6. ArrayInternalHash [InternalHash]: 
-								A wrapper around `ValueType[]` for keeping the number-keys. 
-								Store together with MapInternalHash and ObjectHashInternal; 
 			
 			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
 				which *happens* to be the exact same one that the user is already using. 
@@ -92,14 +79,18 @@ Order of TODO-elimination:
 				[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
 
 		Fix docs: 
+			1. classes [add docs]: 
+				1. HashMap.InternalHash.ArrayInternalHash
+				2. HashMap.BitHash
+				3. IndexMap.ObjectMap
 			7. utils:
-				1. walk through current `utils`, add missing, delete redundant
-				0. Stream-related stuff: 
+				1. HashMap.fromFlags [jsdoc + permalink]
+				2. Stream-related stuff: 
 					1. Stream\utils.ts
 						1. add missing/fix bad jsdoc [isPrevable, isStarted, isReversible, isStateful, isEmpty, etc]
 						2. add missing permalinks/update utils.Stream page...; 
 
-				1. Permalinks (missing): 
+				3. Permalinks (missing): 
 					1. utils.md	
 
 		SI7. Expose the `StreamClass`
@@ -118,6 +109,9 @@ Order of TODO-elimination:
 				1. LinearIndexMap
 				2. PersistentIndexMap
 			4. LookupTable
+
+			IMPORTANT: walk through new list of exports, VERIFY that all the tests are IN ACCORDANCE with them - nothing is missing, 
+				in other words. 
 		
 		1. Doc-sync
 

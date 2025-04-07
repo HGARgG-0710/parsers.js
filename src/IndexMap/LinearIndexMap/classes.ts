@@ -12,10 +12,9 @@ import {
 import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import { fromPairs } from "../utils.js"
 
-import { functional, boolean, string } from "@hgargg-0710/one"
+import { functional, boolean, string, object } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 const { equals } = boolean
-const { charCodeAt } = string
 
 export function LinearMapClass<
 	KeyType = any,
@@ -73,7 +72,9 @@ export function LinearMapClass<
 export const OptimizedLinearMap = LinearMapClass()
 
 // * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
-export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
+export const OptimizedCharMap = OptimizedLinearMap.extend<number>(
+	string.charCodeAt
+)
 
 export const PredicateMap: IMapClass<Function> = LinearMapClass(
 	(curr: Function, x: any) => curr(x)
@@ -88,3 +89,5 @@ export const SetMap: IMapClass<IHaving> = LinearMapClass(
 )
 
 export const BasicMap = LinearMapClass(equals)
+
+export const ObjectMap = LinearMapClass(object.same)

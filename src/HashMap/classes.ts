@@ -9,6 +9,7 @@ import { length } from "../utils.js"
 import { extend } from "./refactor.js"
 
 import { functional, type as _type, string } from "@hgargg-0710/one"
+import { fromFlags } from "./utils.js"
 const { id } = functional
 const { typeOf } = _type
 const { charCodeAt } = string
@@ -54,7 +55,7 @@ abstract class BaseHashClass<
 	}
 
 	copy() {
-		return new this.constructor(this.value)
+		return new this.constructor(this.value.copy())
 	}
 }
 
@@ -94,5 +95,7 @@ export const TokenHash = HashClass(type)
 export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
+
+export const BitHash = HashClass(fromFlags)
 
 export * as InternalHash from "./InternalHash/classes.js"

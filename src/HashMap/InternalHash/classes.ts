@@ -59,8 +59,9 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 		_default?: DefaultType
 	) => ObjectInternalHash<Type, DefaultType>
 
-	default: DefaultType
 	size: number
+
+	readonly default: DefaultType
 
 	get(key: string) {
 		const read = this.value[key]
@@ -93,7 +94,60 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 
 	constructor(object: object = {}, _default?: DefaultType) {
 		super(object)
-		this.size = Object.keys(object).length
 		this.default = _default!
+		this.size = Object.keys(object).filter(
+			(x) => object[x] !== ObjectInternalHash.MissingKey
+		).length
+	}
+}
+
+export class ArrayInternalHash<Type = any, DefaultType = any>
+	extends ProtectedPattern<Type[]>
+	implements IInternalHash<number, Type, DefaultType>
+{
+	static readonly MissingKey = undefined;
+
+	["constructor"]: new (
+		array: Type[],
+		_default: DefaultType
+	) => ArrayInternalHash<Type, DefaultType>
+
+	readonly default: DefaultType
+
+	size: number
+
+	set(i: number, value: Type) {
+		this.value[i] = value
+		return this
+	}
+
+	get(i: number) {
+		return this.value[i]
+	}
+
+	delete(i: number) {
+		if (this.value[i] !== ArrayInternalHash.MissingKey) {
+			this.value[i] = ArrayInternalHash.MissingKey as Type
+			--this.size
+		}
+		return this
+	}
+
+	rekey(fromKey: number, toKey: number) {
+		this.value[toKey] = this.value[fromKey]
+		this.value[fromKey] = ArrayInternalHash.MissingKey as Type
+		return this
+	}
+
+	copy() {
+		return new this.constructor(this.value, this.default)
+	}
+
+	constructor(array: Type[] = [], _default?: DefaultType) {
+		super(array)
+		this.default = _default!
+		this.size = this.value.filter(
+			(x) => x !== ArrayInternalHash.MissingKey
+		).length
 	}
 }
