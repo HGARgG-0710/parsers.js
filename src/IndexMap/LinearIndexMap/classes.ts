@@ -1,7 +1,6 @@
-import type { array } from "@hgargg-0710/one"
 import type { IIndexingFunction, ITestable, IHaving } from "../../interfaces.js"
 import type { IMapClass } from "../interfaces.js"
-import type { ILinearIndexMap } from "./interfaces.js"
+import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
 
 import {
 	extend,
@@ -12,9 +11,16 @@ import {
 import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import { fromPairs } from "../utils.js"
 
-import { functional, boolean, string, object } from "@hgargg-0710/one"
+import { functional, boolean, string, object, array } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 const { equals } = boolean
+
+let generics: ILinearIndexMap | null = null
+
+export const ArrayMap = LinearMapClass(array.recursiveSame)
+
+generics = new ArrayMap()
+generics.set([array.recursiveSame, [], []], ArrayMap)
 
 export function LinearMapClass<
 	KeyType = any,
@@ -24,7 +30,14 @@ export function LinearMapClass<
 	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
-): IMapClass<KeyType, ValueType, DefaultType> {
+): ILinearMapClass<KeyType, ValueType, DefaultType> {
+	const classKey = [change, extensions, keyExtensions]
+
+	if (generics) {
+		const cachedClass = generics.index(classKey)
+		if (cachedClass) return cachedClass
+	}
+
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
 		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
@@ -43,7 +56,7 @@ export function LinearMapClass<
 		static extensions: Function[]
 
 		constructor(
-			pairsList: array.Pairs<KeyType, ValueType>,
+			pairsList: array.Pairs<KeyType, ValueType> = [],
 			_default?: DefaultType
 		) {
 			super(...fromPairs(pairsList), _default)
@@ -65,6 +78,8 @@ export function LinearMapClass<
 			KeyType,
 			ValueType
 		>
+
+	if (generics) generics.set(classKey, linearMapClass)
 
 	return linearMapClass
 }

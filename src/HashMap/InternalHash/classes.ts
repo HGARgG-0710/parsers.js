@@ -7,7 +7,7 @@ import { ProtectedPattern } from "src/internal/Pattern.js"
 import { type, object } from "@hgargg-0710/one"
 const { isUndefined } = type
 
-export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
+export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 	extends DelegateDeletableSettableSizeable<
 		KeyType,
 		ValueType,
@@ -18,7 +18,7 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 	["constructor"]: new (
 		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,
 		_default?: DefaultType
-	) => MapInternalHash<KeyType, ValueType, DefaultType>
+	) => MapInternal<KeyType, ValueType, DefaultType>
 
 	readonly default: DefaultType
 
@@ -38,13 +38,13 @@ export class MapInternalHash<KeyType = any, ValueType = any, DefaultType = any>
 		return new this.constructor(this.value, this.default)
 	}
 
-	constructor(map: Iterable<[KeyType, ValueType]>, _default?: DefaultType) {
+	constructor(map: Iterable<[KeyType, ValueType]> = new Map(), _default?: DefaultType) {
 		super(new Map(map))
 		this.default = _default!
 	}
 }
 
-export class ObjectInternalHash<Type = any, DefaultType = any>
+export class ObjectInternal<Type = any, DefaultType = any>
 	extends ProtectedPattern<object>
 	implements IInternalHash<string, Type, DefaultType>
 {
@@ -57,7 +57,7 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 	["constructor"]: new (
 		object?: object,
 		_default?: DefaultType
-	) => ObjectInternalHash<Type, DefaultType>
+	) => ObjectInternal<Type, DefaultType>
 
 	size: number
 
@@ -65,26 +65,26 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 
 	get(key: string) {
 		const read = this.value[key]
-		return read === ObjectInternalHash.MissingKey ? this.default : read
+		return read === ObjectInternal.MissingKey ? this.default : read
 	}
 
 	set(key: string, value: Type) {
-		if (this.value[key] === ObjectInternalHash.MissingKey) ++this.size
+		if (this.value[key] === ObjectInternal.MissingKey) ++this.size
 		this.value[key] = value
 		return this
 	}
 
 	delete(key: string) {
-		if (this.value[key] !== ObjectInternalHash.MissingKey) {
+		if (this.value[key] !== ObjectInternal.MissingKey) {
 			--this.size
-			this.value[key] = ObjectInternalHash.MissingKey
+			this.value[key] = ObjectInternal.MissingKey
 		}
 		return this
 	}
 
 	rekey(keyFrom: string, keyTo: string) {
 		this.value[keyTo] = this.value[keyFrom]
-		this.value[keyFrom] = ObjectInternalHash.MissingKey
+		this.value[keyFrom] = ObjectInternal.MissingKey
 		return this
 	}
 
@@ -96,12 +96,12 @@ export class ObjectInternalHash<Type = any, DefaultType = any>
 		super(object)
 		this.default = _default!
 		this.size = Object.keys(object).filter(
-			(x) => object[x] !== ObjectInternalHash.MissingKey
+			(x) => object[x] !== ObjectInternal.MissingKey
 		).length
 	}
 }
 
-export class ArrayInternalHash<Type = any, DefaultType = any>
+export class ArrayInternal<Type = any, DefaultType = any>
 	extends ProtectedPattern<Type[]>
 	implements IInternalHash<number, Type, DefaultType>
 {
@@ -110,7 +110,7 @@ export class ArrayInternalHash<Type = any, DefaultType = any>
 	["constructor"]: new (
 		array: Type[],
 		_default: DefaultType
-	) => ArrayInternalHash<Type, DefaultType>
+	) => ArrayInternal<Type, DefaultType>
 
 	readonly default: DefaultType
 
@@ -126,8 +126,8 @@ export class ArrayInternalHash<Type = any, DefaultType = any>
 	}
 
 	delete(i: number) {
-		if (this.value[i] !== ArrayInternalHash.MissingKey) {
-			this.value[i] = ArrayInternalHash.MissingKey as Type
+		if (this.value[i] !== ArrayInternal.MissingKey) {
+			this.value[i] = ArrayInternal.MissingKey as Type
 			--this.size
 		}
 		return this
@@ -135,7 +135,7 @@ export class ArrayInternalHash<Type = any, DefaultType = any>
 
 	rekey(fromKey: number, toKey: number) {
 		this.value[toKey] = this.value[fromKey]
-		this.value[fromKey] = ArrayInternalHash.MissingKey as Type
+		this.value[fromKey] = ArrayInternal.MissingKey as Type
 		return this
 	}
 
@@ -147,7 +147,7 @@ export class ArrayInternalHash<Type = any, DefaultType = any>
 		super(array)
 		this.default = _default!
 		this.size = this.value.filter(
-			(x) => x !== ArrayInternalHash.MissingKey
+			(x) => x !== ArrayInternal.MissingKey
 		).length
 	}
 }

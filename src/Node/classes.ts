@@ -3,6 +3,8 @@ import type { INode, INodeClass } from "./interfaces.js"
 
 import { inplace, array } from "@hgargg-0710/one"
 import { isType } from "./utils.js"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
 
 abstract class PreTokenNode<Type = any, Value = any>
 	implements INode<Type, Value>
@@ -61,14 +63,23 @@ abstract class PreTokenNode<Type = any, Value = any>
 	}
 }
 
+const tokenGenerics = new BasicHash(new MapInternal())
+
 export function TokenNode<Type = any, Value = any>(
 	type: Type
 ): INodeClass<Type, Value> {
+	const cachedClass = tokenGenerics.index(type)
+	if (cachedClass) return cachedClass
+
 	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
 		static readonly type = type
 		static is = isType(type)
 	}
+
 	tokenNode.prototype.type = type
+
+	tokenGenerics.set(type, tokenNode)
+
 	return tokenNode
 }
 
@@ -87,14 +98,23 @@ abstract class PreContentNode<Type = any, Value = any>
 	}
 }
 
+const contentGenerics = new BasicHash(new MapInternal())
+
 export function ContentNode<Type = any, Value = any>(
 	type: Type
 ): INodeClass<Type, Value> {
+	const cachedClass = contentGenerics.index(type)
+	if (cachedClass) return cachedClass
+
 	class contentNode extends PreContentNode<Type, Value> {
 		static readonly type = type
 		static is = isType(type)
 	}
+
 	contentNode.prototype.type = type
+
+	contentGenerics.set(type, contentNode)
+
 	return contentNode
 }
 
@@ -156,13 +176,22 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 	}
 }
 
+const recursiveGenerics = new BasicHash(new MapInternal())
+
 export function RecursiveNode<Type = any, Value = any>(
 	type: Type
 ): INodeClass<Type, Value> {
+	const cachedClass = recursiveGenerics.index(type)
+	if (cachedClass) return cachedClass
+
 	class recursiveNode extends PreRecursiveNode<Type, Value> {
 		static readonly type = type
 		static is = isType(type)
 	}
+
 	recursiveNode.prototype.type = type
+
+	recursiveGenerics.set(type, recursiveNode)
+
 	return recursiveNode
 }

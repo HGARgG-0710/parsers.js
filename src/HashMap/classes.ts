@@ -8,11 +8,15 @@ import { length } from "../utils.js"
 
 import { extend } from "./refactor.js"
 
-import { functional, type as _type, string } from "@hgargg-0710/one"
+import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
+
+import { functional, type as _type, string, object } from "@hgargg-0710/one"
 import { fromFlags } from "./utils.js"
 const { id } = functional
 const { typeOf } = _type
 const { charCodeAt } = string
+const { extendPrototype } = object
+const { ConstDescriptor } = object.descriptor
 
 abstract class BaseHashClass<
 		KeyType = any,
@@ -59,6 +63,8 @@ abstract class BaseHashClass<
 	}
 }
 
+const generics = new OptimizedLinearMap()
+
 export function HashClass<
 	KeyType = any,
 	ValueType = any,
@@ -67,6 +73,9 @@ export function HashClass<
 >(
 	hash: IHash<KeyType, InternalKeyType>
 ): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
+	const cachedClass = generics.index(hash)
+	if (!cachedClass) return cachedClass
+
 	class hashClass extends BaseHashClass<
 		KeyType,
 		ValueType,
@@ -79,9 +88,14 @@ export function HashClass<
 		) => IHashClass<KeyType, ValueType, InternalKeyType>
 	}
 
-	hashClass.prototype.hash = hash
+	extendPrototype(hashClass, {
+		hash: ConstDescriptor(hash)
+	})
+
 	hashClass.hash = hash
 	hashClass.extend = extend<KeyType, ValueType, InternalKeyType>
+
+	generics.set(hash, hashClass)
 
 	return hashClass
 }

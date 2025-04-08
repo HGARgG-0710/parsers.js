@@ -3,6 +3,9 @@ import type { IMappable, ISizeable } from "../interfaces.js"
 
 import { makeDelegate } from "../refactor.js"
 
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+
 import { functional, inplace, object, array, type } from "@hgargg-0710/one"
 const { id } = functional
 const { out } = inplace
@@ -10,6 +13,8 @@ const { empty, extendPrototype } = object
 const { uniqueArr, numbers } = array
 const { ConstDescriptor } = object.descriptor
 const { isNumber, isArray } = type
+
+const generics = new BasicHash(new MapInternal())
 
 abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 	protected value: Type[] = []
@@ -66,11 +71,16 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 export function EnumSpace<Type = any>(
 	generator?: (i?: number, ...x: any[]) => Type
 ): new (init?: Type[] | number) => IEnumSpace<Type> {
+	const cachedClass = generics.index(generator)
+	if (cachedClass) return cachedClass
+
 	const enumSpace = makeDelegate(PreEnumSpace<Type>, ["value"], "delegate")
 
 	extendPrototype(enumSpace, {
 		generator: ConstDescriptor(generator)
 	})
+
+	generics.set(generator, enumSpace)
 
 	return enumSpace as new (init?: Type[] | number) => IEnumSpace<Type>
 }

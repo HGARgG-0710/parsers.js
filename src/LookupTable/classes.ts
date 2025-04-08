@@ -18,6 +18,8 @@ import { makeDelegate } from "../refactor.js"
 import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
 const { id } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
@@ -118,16 +120,25 @@ export class PersistentIndexTable<
 	}
 }
 
+const generics = new BasicHash(new MapInternal())
+
 export function HashTable<OwningType = any>(
 	ownership: (x: any) => OwningType
 ): ITableConstructor<OwningType> {
+	const cachedClass = generics.index(ownership)
+	if (cachedClass) return cachedClass
+
 	const hashTable = makeDelegate(DelegateHashTable, ["value"], "delegate")
+
 	extendPrototype(hashTable, {
 		claim: ConstDescriptor(function (x: any) {
 			const pointer = ownership(x)
 			return isNullary(pointer) ? null : pointer
 		})
 	})
+
+	generics.set(ownership, hashTable)
+
 	return hashTable as ITableConstructor<OwningType>
 }
 

@@ -15,6 +15,8 @@ import { CallbackBuffer } from "../../internal/Collection/Buffer/CallbackBuffer.
 import { Composition } from "../classes.js"
 
 import { array, object, functional } from "@hgargg-0710/one"
+import { BasicHash } from "../../HashMap/classes.js"
+import { MapInternal } from "../../HashMap/InternalHash/classes.js"
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
@@ -65,6 +67,8 @@ export class Signature
 	}
 }
 
+const generics = new BasicHash(new MapInternal())
+
 abstract class PreComplexComposition<
 		StateType extends Summat = Summat,
 		ArgType extends any[] = any[],
@@ -109,6 +113,9 @@ abstract class PreComplexComposition<
 export function ComplexComposition<StateType extends Summat = Summat>(
 	stateMaker: (thisArg: IComplexComposition) => StateType
 ): new (layers?: Function[]) => IComplexComposition<StateType> {
+	const cachedClass = generics.index(stateMaker)
+	if (cachedClass) return cachedClass
+
 	class complexComposition<
 		ArgType extends any[] = any[],
 		OutType = any
@@ -117,6 +124,9 @@ export function ComplexComposition<StateType extends Summat = Summat>(
 	extendPrototype(complexComposition, {
 		stateMaker: ConstDescriptor(stateMaker)
 	})
+
+	// * caching the class
+	generics.set(stateMaker, complexComposition)
 
 	return complexComposition
 }

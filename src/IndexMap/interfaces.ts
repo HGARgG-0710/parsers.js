@@ -4,7 +4,6 @@ import type {
 	ICopiable,
 	IDefaulting,
 	IIndexable,
-	IIndexingFunction,
 	IRekeyable,
 	IReversible,
 	ISizeable
@@ -39,22 +38,9 @@ export interface IIndexMap<
 
 export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
 	new (
-		map: array.Pairs<KeyType, ValueType>,
+		map?: array.Pairs<KeyType, ValueType>,
 		_default?: DefaultType
 	): IIndexMap<KeyType, ValueType>
-
-	change?: IIndexingFunction<KeyType>
-
-	extend: <KeyType = any>(
-		...f: ((...x: any[]) => any)[]
-	) => IMapClass<KeyType, any>
-
-	extendKey: <ValueType = any>(
-		...f: ((x: any) => any)[]
-	) => IMapClass<any, ValueType>
-
-	keyExtensions: Function[]
-	extensions: Function[]
 }
 
 export type * from "./LinearIndexMap/interfaces.js"
