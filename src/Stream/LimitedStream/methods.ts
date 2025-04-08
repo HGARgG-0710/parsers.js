@@ -1,20 +1,9 @@
 import type { IDirectionalPosition, IPosed } from "../Position/interfaces.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
 import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
 
-import {
-	directionCompare,
-	positionEqual,
-	positionNegate
-} from "../Position/utils.js"
-
-import { Stream } from "../../constants.js"
-const { LimitedStream } = Stream
-
+import { positionEqual } from "../Position/utils.js"
 import { navigate, rewind } from "../utils.js"
-
-import { type } from "@hgargg-0710/one"
-import type { IFreezableBuffer } from "../../interfaces.js"
-const { isNullary } = type
 
 export namespace methods {
 	export function baseNextIter<Type = any>(this: ILimitedStream<Type>) {
@@ -65,28 +54,13 @@ export namespace methods {
 	export function init<Type = any>(
 		this: ILimitedStream<Type>,
 		value?: ILimitedUnderStream<Type>,
-		from?: IDirectionalPosition,
-		to?: IDirectionalPosition,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		if (value || this.value) {
 			if (value) this.super.init.call(this, value, buffer)
-
 			this.hasLookAhead = false
-
-			if (!isNullary(from)) {
-				if (isNullary(to)) {
-					to = from
-					from = LimitedStream.NoMovementPredicate
-				}
-
-				rewind(this.value!)
-				navigate(this.value!, from)
-
-				this.direction = directionCompare(from, to)
-				this.from = from
-				this.to = positionNegate(to)
-			}
+			rewind(this.value!)
+			navigate(this.value!, this.from)
 		}
 		return this
 	}

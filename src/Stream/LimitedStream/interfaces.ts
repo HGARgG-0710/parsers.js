@@ -1,4 +1,6 @@
 import type { IFreezableBuffer, IPointer } from "src/interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IDirectionHaving } from "../Position/interfaces.js"
 
 import type {
 	IReversibleStream,
@@ -6,9 +8,6 @@ import type {
 	ICopiable,
 	ISupered
 } from "../../interfaces.js"
-
-import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IDirectionHaving } from "../Position/interfaces.js"
 
 import type {
 	ILookaheadHaving,
@@ -32,8 +31,6 @@ export type ILimitedUnderStream<Type = any> = IReversibleStream<
 
 export type ILimitedStreamInitSignature<Type = any> = [
 	ILimitedUnderStream<Type>,
-	IDirectionalPosition?,
-	IDirectionalPosition?,
 	IFreezableBuffer<Type>?
 ]
 

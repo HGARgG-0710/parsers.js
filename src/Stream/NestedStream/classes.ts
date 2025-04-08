@@ -49,8 +49,8 @@ export function NestedStream<Type = any, IndexType = any>(
 			isCurrNested: boolean
 			assignedIndex?: any
 
-			super: Summat
-			typesTable: ILookupTable<any, IStreamPredicate>
+			readonly super: Summat
+			readonly typesTable: ILookupTable<any, IStreamPredicate>
 
 			init: (
 				value?: IEndableStream<Type>,

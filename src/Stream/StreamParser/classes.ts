@@ -55,9 +55,10 @@ export function StreamParser<InType = any, OutType = any>(
 			extends baseClass
 			implements IStreamParser<InType, OutType>
 		{
+			readonly super: Summat
+			readonly handler: IStreamHandler<OutType>
+
 			value: IEndableStream<InType>
-			super: Summat
-			handler: IStreamHandler<OutType>
 
 			pos?: number
 			buffer?: IFreezableBuffer<OutType>

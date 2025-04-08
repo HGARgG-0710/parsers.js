@@ -46,15 +46,15 @@ export function PredicateStream<Type = any>(
 			extends baseClass
 			implements IPredicateStream<Type>
 		{
+			readonly predicate: IPredicatePosition<Type>
+			readonly super: Summat
+
 			lookAhead: Type
 			hasLookAhead: boolean
-
-			predicate: IPredicatePosition<Type>
 			value: IUnderPredicateStream<Type>
 
-			super: Summat
 			prod: () => Type
-
+			
 			init: (
 				value?: IUnderPredicateStream<Type>,
 				buffer?: IFreezableBuffer<Type>
