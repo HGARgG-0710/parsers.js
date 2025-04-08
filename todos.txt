@@ -42,6 +42,7 @@ Order of TODO-elimination:
 				1. ObjectMap - for object-based cofigurations: 
 				2. BitHash - for boolean-based configurations: 
 					1. This uses an array with integer-indexes; 
+				3. OptimizedLinearMap - for single-argument functions
 
 			NOTE: PROVIDE a specific (hidden) `GenericMap/BitArrayHash` for EACH such case; 	
 				The user DOESN'T NEED to access them. These are only used AS WAYS TO: 
@@ -68,21 +69,28 @@ Order of TODO-elimination:
 
 					1. properties/flags - by value/reference (x, y) => x === y
 					2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
-
-			The library actually DOES export various GenericCollection-s, namely one for each of: 
-				1. StreamClass
-				2. PredicateStream
-				3. LimitedStream
-				4. StreamParser
-				5. ProlongedStream
-				6. NestedStream
+			
+			Add generic collections for:
+				6. Stream: 
+					1. StreamClass - ObjectMap
+					2. PredicateStream - BitHash
+					3. LimitedStream - BitHash
+					4. StreamParser - BitHash
+					5. ProlongedStream - BitHash
+					6. NestedStream - BitHash
 				[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
 
 		Fix docs: 
 			1. classes [add docs]: 
-				1. HashMap.InternalHash.ArrayInternalHash
+				1. HashMap.InternalHash.ArrayInternal
 				2. HashMap.BitHash
 				3. IndexMap.ObjectMap
+				Rename: 
+					1. InternalHash - new names of classes end on internal
+
+			2. interfaces: 
+				1. new - ILinearMapClass
+				
 			7. utils:
 				1. HashMap.fromFlags [jsdoc + permalink]
 				2. Stream-related stuff: 
@@ -551,6 +559,25 @@ Order of TODO-elimination:
 				1. new DynamicParser is EXTREMELY complex [hence, errorprone]
 				2. to test out the overall interface manageability
 		
+	PROBLEM: regarding `IPositionObject`: 
+		It's... kind of useless? 
+
+		1. MultiIndex.convert is *slow*
+		2. .convert IS NOT USED ANYWHERE
+		3. LineIndex.convert *IS SLOW*
+
+		? remove the IPositionObject.convert entirely ? 
+
+		Then - use only the `IDirectionalPosition`s for everything, AND LET THE USER 
+			keep track of the stuff? [and/or USE THE `Traveller` INSTEAD??? - allows proper caching]
+
+		CONCLUSION: yes, this is the way: 
+			1. simpler code
+			2. faster code [less checks/function calls]
+			3. better type separation
+			4. simpler types [`IPosition` -> `IDirectionalPosition`]
+			5. better delegation of responsibilities
+
 	PROBLEMS: 
 		Understood that the v0.3 IS NOT YET PRODUCTION-READY
 			from feature perspective - there's just too little stuff. 
@@ -741,6 +768,54 @@ Order of TODO-elimination:
 
 				CC2. RotationBuffer - See `.peek(n)` for more details
 				
+				UM1. [maybe?] Add new `Indexed` module - works on `IIndexed` interface, and derivatives; 
+					In particular, functions/abstractions: 
+
+						1. shorten(names); 
+							Given a sequence of "names" (strings/sequences),
+								and a 'comparison' predicate for each of its elements,
+									it would implement a name-shortening algorithm, 
+										that would preserve the name uniqueness;
+							The return value is an IndexMap; 
+
+						2. renameable(names);
+							Given an IndexMap of names (which could come from, for instance, 'shorten'), 
+								the method: 
+
+								1. Re-orders;
+								2. Creates new name-map entries;
+
+							In a fashion that would allow straightforward implementation of a sequential "exact replacement algorithm" based on the output: 
+								1. Loop through a list of name-maps; 
+									2. [In the loop] Rename current encounters of a name with its mapped value;	
+								
+							There are 2 operations that may be necessary: 
+								1. creation of temp-names (when collisions in present names are far too high to re-order);
+								2. re-order; 
+							
+							The algorithm for the 'renameable' function: 
+								0. Keep the cached (met) names in a 'Set'; 
+								1. Loop through the 'names' given: 
+									1.0. If the name is in the cached Set, continue; 
+									1.1. If the current 'value' of the 'name' is already present amongst 'keys' (another loop): 
+										1.1.1. put the keys in question BEFORE the current value;
+										1.1.2. '.swap' the two indexes;
+										1.1.3. go one position back (because now one needs to check the "others" now); 
+										1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
+
+							This is useful when implementing things like mass renamings/name shortenings in code mangling software; 
+
+					Put identifier, and Indexed-related stuff there (organization, overall tidyness); 
+					Problem with this: 
+						1. short
+						2. (potentially) generics-mania strikes again...
+
+					ALSO - make `RegEx`/`Eliminator`/`Validator`/`Tokenizer` A PART OF THIS [specifically - export those as submodules/classes]; 
+						
+				TC2. [Serialization] Add `toJSON` methods on `Node`
+					Reason - serialization (mighty powerful thing...); 
+						Reason for v0.3: testing [can't endure-test changing parsers properly without ability for serialization]; 
+
 				TO2. Remove (replace):
 					REASON FOR V0.3: 
 						1. PatternTokenizer/PatternValidator is TOO SLOW IN PRACTICE ALGORITHMICALLY (not good - multiple passes instead of a single one)	
@@ -956,6 +1031,129 @@ Order of TODO-elimination:
 				SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
 					Currently - lacking. 
 					THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
+			
+				PA2. Add LazyBuffer: 
+					This is an 'IBuffer' based off an open file socket, 
+						which reads the file LAZILY 
+							[that is, by keeping it open, and only using a small portion of the file in usage]; 
+
+					Note: it DOES NOT *dispose* of the file, 
+						so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
+
+					This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
+					This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
+
+				NM1. [DEFINITELY!] Create a 'samples' directory; 
+					Reason for v0.3: 
+						1. 'FlagHash = BitHash + ArrayInternalHash'; 
+						2. TOO many prerequisites
+						3. the "not-so-util-like" utilities
+
+					This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
+						PRESENT within the previous parsers, use them?
+					
+					Or, better, make this into a separate mini-project called 'parsing-samples'; 
+					[EXAMPLE: handling the 'escaped' strings/sequences all the time];
+	
+					Think about it [this particular refactoring is VERY fine and case-specific, though, it can come in useful...]; 
+	
+					No, if one is to do it, the thing should: 
+	
+						1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
+						2. Provide low-level Token-s with specialized given names; 
+	
+					1. Tokens: 
+	
+						1. Take them from various parsing projects of yours already existing: 
+	
+							1. xml
+							2. selector
+							3. regex
+	
+							Unite, choose best string-names; 
+							Create appropriate names for sample-token classes (via TokenInstance) [
+								example: 
+								
+								Opbrack - (, 
+								Clbrack - ), 
+								OpSqBrack - [, 
+								ClSqBrack - ], 
+								OpBrace - {, 
+								ClBrace - }, 
+	
+							...]; 
+	
+					2. arrays with common items (USED throughout...): 
+	
+						'binary = [0, 1]'
+						'decimal = [0, 1, ..., 9]'
+						'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
+						'ascii = [0, 1, ...]'
+						'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
+	
+						Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
+					
+					3. ALSO - join the 'samples' with the 'constants.ts' file 
+						[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
+					
+					4. MOST IMPORTANT - generation functions, stuff for working with AST-s: 
+						1. Based off ASTAnalyzer, ASTStream-s, ASTHierarchy, etc... Generally, the 'Tree.AST' module
+					
+					5. Stuff for Stream-transforming: 
+						Namely, nested-stuff via the 'StreamParser' [WITH '.buffer']: 
+	
+							// A VERY common pattern...
+							// Generalize to an arbitrary 'X <- LimitedStream() [here]', with 'StreamParser.init(X())'
+							const l = new LimitedStream()()
+							const t = new StreamParser()()
+							const parse = (input) => {
+								l.init(input)
+								t.init(l)
+								t.finish()
+								return t.buffer.move()
+							}
+	
+					6. module-related stuff IS GIVEN ITS OWN MODULE 
+						Example: DelimitedStream goes into the `samples.PredicateStream.*` module
+				
+				RE2. New export - `Autocache`: 
+					Reason for v0.3: 
+						1. too frequent an occurence
+						2. why not export, since it is already here? 
+						3. simple-to-implement/test/document pattern
+
+					1. An `Autocache` is an 'Callable' object, which is constructed like: 
+						1. An underlying `IIndexable` - used for storing items, searching them
+						2. A callback, that is to be USED for creation of a new value to be stored IN CASE that the key is missing
+					2. All the current `generic collections` would be REPLACED with an `Autocache`
+					3. Upon calling with a key, autocache looks for it, and, if not found, creates a record using the underlying callback;
+					4. 'Autocache' works LIKE A FUNCTION: 'autocache(key)'
+					5. All the current "factories" like `EnumSpace`, `ComplexComposition`, `LinearMapClass`, etc, WOULD TURN INTO `Autocache`s. 
+						1. Derivation: 'Autocache's have THE 'ReturnType' of their ARGUMENT [thus, it's a GENERIC type over the type of the function given as a handler]. 
+					
+					'Autocache' has its handler BOUND, instead of using a 'configurator' pattern, 
+						since that would cause unneeded memory waste (most of Autocache-s would be singletons anyway); 
+
+				UT4. REMOVE the `utilities`: 
+					Put them ALL into `samples`. 
+					THE ONLY 'utils' to keep are: 
+
+						1. Parser/utils.ts
+						2. IndexMap/utils.ts (without the `table`)
+						3. Stream/utils.ts (only the 'byStreamBufferPos' and 'isEmpty', namely)
+						4. src/utils.ts (only the `dig`)
+						5. Position/utils.ts (everything, except for `is` functions)
+						6. Node/utils.ts
+						7. DynamicParser/utils.ts
+						[pick which others to keep...]
+
+					Those - MERGE into a single export-file called `utils.ts` (new module -- `utils`); 
+					Split them in a (similar) fashion to how it was before, if you want to, except: 
+						1. `dig` - this one's standalone now
+						2. `Parser/utils.ts` - this combines two types (AT LEAST), hence, it cannot be well-categorized
+
+					The `is` functions are ALL kept inside the special new `types` module.
+
 			Secondary: 	
 				ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
 					When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
@@ -971,6 +1169,8 @@ Order of TODO-elimination:
 						2. subtraction: 	/[[...]--[...]]/v
 						3. string literals: /[q{...}]/v
 			
+				SI16. `chooseMethod` - simplify using `BitHash`; 
+				
 			Minor: 	
 				SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
 					Currently, missing. 
@@ -1159,77 +1359,9 @@ TODO:
 			This (basically) takes the nodes from the previous 'joint layer', gets their respective children,
 				CONCATENATES THEM into a new layer, then iterates it; 
 				
-		NM1. [DEFINITELY!] Create a 'samples' directory; 
-			This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
-				PRESENT within the previous parsers, use them?
-			
-			Or, better, make this into a separate mini-project called 'parsing-samples'; 
-			[EXAMPLE: handling the 'escaped' strings/sequences all the time];
-	
-			Think about it [this particular refactoring is VERY fine and case-specific, though, it can come in useful...]; 
-	
-			No, if one is to do it, the thing should: 
-	
-				1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
-				2. Provide low-level Token-s with specialized given names; 
-	
-			1. Tokens: 
-	
-				1. Take them from various parsing projects of yours already existing: 
-	
-					1. xml
-					2. selector
-					3. regex
-	
-					Unite, choose best string-names; 
-					Create appropriate names for sample-token classes (via TokenInstance) [
-						example: 
-						
-						Opbrack - (, 
-						Clbrack - ), 
-						OpSqBrack - [, 
-						ClSqBrack - ], 
-						OpBrace - {, 
-						ClBrace - }, 
-	
-					...]; 
-	
-			2. arrays with common items (USED throughout...): 
-	
-				'binary = [0, 1]'
-				'decimal = [0, 1, ..., 9]'
-				'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
-				'ascii = [0, 1, ...]'
-				'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
-	
-				Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
-			
-			3. ALSO - join the 'samples' with the 'constants.ts' file 
-				[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
-			
-			4. MOST IMPORTANT - generation functions, stuff for working with AST-s: 
-				1. Based off ASTAnalyzer, ASTStream-s, ASTHierarchy, etc... Generally, the 'Tree.AST' module
-			
-			5. Stuff for Stream-transforming: 
-				Namely, nested-stuff via the 'StreamParser' [WITH '.buffer']: 
-	
-					// A VERY common pattern...
-					// Generalize to an arbitrary 'X <- LimitedStream() [here]', with 'StreamParser.init(X())'
-					const l = new LimitedStream()()
-					const t = new StreamParser()()
-					const parse = (input) => {
-						l.init(input)
-						t.init(l)
-						t.finish()
-						return t.buffer.move()
-					}
-	
-			6. module-related stuff IS GIVEN ITS OWN MODULE 
-				Example: DelimitedStream goes into the `samples.PredicateStream.*` module
-		
-		IM1. Create a new 'IndexMap' implementation: 'SetMap'; 
+		IM1. Create a new 'IndexMap' implementation: 'SetHash'; 
 			This would be a: 
-				1. IndexMap interface implementation; 
+				1. HashClass interface implementation; 
 				2. generalized wrapper around a Set (in a way that HashMap is a wrapper around Object and Map); 
 					2.1. Would have its own 'extension'; 
 					2.2. For 'values' would contain true/false; 
@@ -1238,7 +1370,7 @@ TODO:
 			Example: 'nested' utility; 
 			How it is done [pseudo-code]: 
 
-				const SpecialCaseSetMap = SetMap(...)
+				const SpecialCaseSetMap = SetHash(...)
 				const processNested = (x) => nested(TableMap(new SpecialCaseSetMap([...])), TableMap(new SpecialCaseSetMap([...])))(new WhateverStream(x))
 								
 		IM5. [IndexMap/classes.ts -> *] MultiMap - [IndexMap-like] this returns ALL the matched items, and while running multiple results 
@@ -1514,21 +1646,7 @@ TODO:
 				ALSO: important note - the respective tables, themselves, 
 					MUST BE SELF-MODIFIABLE! 
 
-		TC2. [Serialization] Add `toJSON` methods on `Node`
-			Reason - serialization (mighty powerful thing...); 
-
 		PA1. Add incremental parsing to the library [see Chevrotain for examples]
-
-		PA2. Add LazyBuffer: 
-			This is an 'IBuffer' based off an open file socket, 
-				which reads the file LAZILY 
-					[that is, by keeping it open, and only using a small portion of the file in usage]; 
-
-			Note: it DOES NOT *dispose* of the file, 
-				so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
-
-			This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
-			This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
 
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]
@@ -1738,70 +1856,7 @@ TODO:
 			The redundant second `buffer` argument is STILL needed, even if there
 				IS no `buffer` to be had. Make this more flexible...; 
 
-	4. Breaking [removals]	
-		UT4. REMOVE the `utilities`: 
-			Put them ALL into `samples`. 
-			THE ONLY 'utils' to keep are: 
-
-				1. Parser/utils.ts
-				2. IndexMap/utils.ts (without the `table`)
-				3. Stream/utils.ts (only the 'byStreamBufferPos' and 'isEmpty', namely)
-				4. src/utils.ts (only the `dig`)
-				5. Position/utils.ts (everything, except for `is` functions)
-				6. Node/utils.ts
-				7. DynamicParser/utils.ts
-				[pick which others to keep...]
-
-			Those - MERGE into a single export-file called `utils.ts` (new module -- `utils`); 
-			Split them in a (similar) fashion to how it was before, if you want to, except: 
-				1. `dig` - this one's standalone now
-				2. `Parser/utils.ts` - this combines two types (AT LEAST), hence, it cannot be well-categorized
-
-			The `is` functions are ALL kept inside the special new `types` module.
-
-	5. Uncertain [incomplete; require conceptual work/verification]	
-		UM1. [maybe?] Add a module SPECIFICALLY for working with strings/identifiers/Sequence-s (currently: the 'Indexed' interface); 
-			In particular, functions/abstractions: 
-
-				1. shorten(names); 
-					Given a sequence of "names" (strings/sequences),
-						and a 'comparison' predicate for each of its elements,
-							it would implement a name-shortening algorithm, 
-								that would preserve the name uniqueness;
-					The return value is an IndexMap; 
-
-				2. renameable(names);
-					Given an IndexMap of names (which could come from, for instance, 'shorten'), 
-						the method: 
-
-						1. Re-orders;
-						2. Creates new name-map entries;
-
-					In a fashion that would allow straightforward implementation of a sequential "exact replacement algorithm" based on the output: 
-						1. Loop through a list of name-maps; 
-							2. [In the loop] Rename current encounters of a name with its mapped value;	
-						
-					There are 2 operations that may be necessary: 
-						1. creation of temp-names (when collisions in present names are far too high to re-order);
-						2. re-order; 
-					
-					The algorithm for the 'renameable' function: 
-						0. Keep the cached (met) names in a 'Set'; 
-						1. Loop through the 'names' given: 
-							1.0. If the name is in the cached Set, continue; 
-							1.1. If the current 'value' of the 'name' is already present amongst 'keys' (another loop): 
-								1.1.1. put the keys in question BEFORE the current value;
-								1.1.2. '.swap' the two indexes;
-								1.1.3. go one position back (because now one needs to check the "others" now); 
-								1.1.4. cache the current amongst the checked names in a 'Set', (so that one doesn't get into an infinite loop);
-
-					This is useful when implementing things like mass renamings/name shortenings in code mangling software; 
-
-			Put identifier, and Indexed-related stuff there (organization, overall tidyness); 
-			Problem with this: 
-				1. short
-				2. (potentially) generics-mania strikes again...
-
+	4. Uncertain [incomplete; require conceptual work/verification]	
 		UP1. [maybe?] Turn the 'TableMap' and 'MapWrap' into 'FlexibleFunction' derivatives? 
 			This would [pro]: 
 
@@ -1811,12 +1866,13 @@ TODO:
 			However [con]: 
 
 				1. may cause a performance penalty (check); 
+					Benchmark this rigorously!
 		
 			IF using FlexibleFunction is NOT slower (in terms of function calls), then do just that...; 
 			The 'FlexibleFunction' is always going to be slower on creation (due to: 1. constructor; 2. runtime-parsing of FlexibleFunction), 
 				but this shouldn't be too costly overall (besides, when string is static, it well may be cached to improve performance); 
 
-	6. To Attempt [possible waste, needs investigation/benchmarks]: 
+	5. To Attempt [possible waste, needs investigation/benchmarks]: 
 		PM1. [Maybe - add, check for feasibility + redundancy; A Big one] Add support for proper Pattern Matching;
 			Serves as an abstraction over the 'RegExp'; 
 			Allows one to match 'Token'-s using 'MatchablePattern'-s; 
@@ -1842,7 +1898,7 @@ TODO:
 	
 				[Possibly, add more stuff... LOOK FOR CASES OF APPLICATIONS!]
 
-	8. Unrelated/separate module/grand refactoring: 
+	6. Unrelated/separate module/grand refactoring: 
 		DE2. [Idea?] Create an error-handling API for the 'v0.4';
 			Create means of: 
 				1. Stacking different levels of exceptions (the 'try-catch' blocks); 
@@ -1886,7 +1942,7 @@ TODO:
 			3. regex [to npm]
 			4. xml [to npm]
 
-	9. Docs: 
+	7. Docs: 
 		WE1. CREATE A proper website with documentation for the library. 
 			Do benchmarks, et cetera...; 
 			After doing GitHub Wiki for v0.3, see if it cuts it (spoiler - it likely won't one STILL wants the ravishing types for the library's docs to be present!)
@@ -1966,7 +2022,7 @@ TODO:
 
 			Add a Guide for that.
 
-	10. v0.5+ / future projects / great work / potentially, not worth it: 	
+	8. v0.5+ / future projects / great work / potentially, not worth it: 	
 		65. [Much-much later; big maybe] A Stack-less CPS-based version of the library: 
 			0. TypeScript
 			1. InfiniteStack [from stack.js]
