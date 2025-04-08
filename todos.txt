@@ -37,22 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:
-		RE2. New [internal] class - `Autocache`: 
-			Reason for v0.3: 
-				1. too frequent an occurence
-
-			1. An `Autocache` is an 'Callable' object, which is constructed like: 
-				1. An underlying `IIndexable` - used for storing items, searching them
-				2. A callback, that is to be USED for creation of a new value to be stored IN CASE that the key is missing
-			2. All the current `generic collections` would be REPLACED with an `Autocache`
-			3. Upon calling with a key, autocache looks for it, and, if not found, creates a record using the underlying callback;
-			4. 'Autocache' works LIKE A FUNCTION: 'autocache(key)'
-			5. All the current "factories" like `EnumSpace`, `ComplexComposition`, `LinearMapClass`, etc, WOULD TURN INTO `Autocache`s. 
-				1. Derivation: 'Autocache's have THE 'ReturnType' of their ARGUMENT [thus, it's a GENERIC type over the type of the function given as a handler]. 
-			
-			'Autocache' has its handler BOUND, instead of using a 'configurator' pattern, 
-				since that would cause unneeded memory waste (most of Autocache-s would be singletons anyway); 
-
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			SOLUTION: make a `GenericCollection` into two [different] abstractions:
 				1. ObjectMap - for object-based cofigurations: 
