@@ -5,6 +5,7 @@ import { inplace, array } from "@hgargg-0710/one"
 import { isType } from "./utils.js"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { Autocache } from "../internal/Autocache.js"
 
 abstract class PreTokenNode<Type = any, Value = any>
 	implements INode<Type, Value>
@@ -63,25 +64,17 @@ abstract class PreTokenNode<Type = any, Value = any>
 	}
 }
 
-const tokenGenerics = new BasicHash(new MapInternal())
-
-export function TokenNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	const cachedClass = tokenGenerics.index(type)
-	if (cachedClass) return cachedClass
-
-	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
-		static readonly type = type
-		static is = isType(type)
+export const TokenNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any>(type: Type) {
+		class tokenNode extends PreTokenNode<Type> implements INode<Type> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		tokenNode.prototype.type = type
+		return tokenNode
 	}
-
-	tokenNode.prototype.type = type
-
-	tokenGenerics.set(type, tokenNode)
-
-	return tokenNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -98,25 +91,17 @@ abstract class PreContentNode<Type = any, Value = any>
 	}
 }
 
-const contentGenerics = new BasicHash(new MapInternal())
-
-export function ContentNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	const cachedClass = contentGenerics.index(type)
-	if (cachedClass) return cachedClass
-
-	class contentNode extends PreContentNode<Type, Value> {
-		static readonly type = type
-		static is = isType(type)
+export const ContentNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any, Value = any>(type: Type) {
+		class contentNode extends PreContentNode<Type, Value> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		contentNode.prototype.type = type
+		return contentNode
 	}
-
-	contentNode.prototype.type = type
-
-	contentGenerics.set(type, contentNode)
-
-	return contentNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
 
 abstract class PreRecursiveNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -176,22 +161,14 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 	}
 }
 
-const recursiveGenerics = new BasicHash(new MapInternal())
-
-export function RecursiveNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	const cachedClass = recursiveGenerics.index(type)
-	if (cachedClass) return cachedClass
-
-	class recursiveNode extends PreRecursiveNode<Type, Value> {
-		static readonly type = type
-		static is = isType(type)
+export const RecursiveNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any, Value = any>(type: Type) {
+		class recursiveNode extends PreRecursiveNode<Type, Value> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		recursiveNode.prototype.type = type
+		return recursiveNode
 	}
-
-	recursiveNode.prototype.type = type
-
-	recursiveGenerics.set(type, recursiveNode)
-
-	return recursiveNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>

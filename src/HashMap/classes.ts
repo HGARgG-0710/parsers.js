@@ -2,16 +2,16 @@ import type { IHashClass, IHashMap, IHash } from "./interfaces.js"
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 import { DelegateSizeable } from "src/internal/delegates/Sizeable.js"
+import { Autocache } from "../internal/Autocache.js"
+import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
 
 import { type } from "src/Node/utils.js"
 import { length } from "../utils.js"
+import { fromFlags } from "./utils.js"
 
 import { extend } from "./refactor.js"
 
-import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
-
 import { functional, type as _type, string, object } from "@hgargg-0710/one"
-import { fromFlags } from "./utils.js"
 const { id } = functional
 const { typeOf } = _type
 const { charCodeAt } = string
@@ -63,42 +63,41 @@ abstract class BaseHashClass<
 	}
 }
 
-const generics = new OptimizedLinearMap()
-
-export function HashClass<
+export const HashClass = new Autocache(new OptimizedLinearMap(), function <
 	KeyType = any,
 	ValueType = any,
 	InternalKeyType = any,
 	DefaultType = any
->(
-	hash: IHash<KeyType, InternalKeyType>
-): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
-	const cachedClass = generics.index(hash)
-	if (!cachedClass) return cachedClass
-
+>(hash: IHash<KeyType, InternalKeyType>) {
 	class hashClass extends BaseHashClass<
 		KeyType,
 		ValueType,
 		InternalKeyType,
 		DefaultType
 	> {
-		static hash: IHash<KeyType, InternalKeyType>
+		static hash: IHash<KeyType, InternalKeyType> = hash
 		static extend: (
 			f: (x: any) => KeyType
-		) => IHashClass<KeyType, ValueType, InternalKeyType>
+		) => IHashClass<KeyType, ValueType, InternalKeyType> = extend<
+			KeyType,
+			ValueType,
+			InternalKeyType
+		>
 	}
 
 	extendPrototype(hashClass, {
 		hash: ConstDescriptor(hash)
 	})
 
-	hashClass.hash = hash
-	hashClass.extend = extend<KeyType, ValueType, InternalKeyType>
-
-	generics.set(hash, hashClass)
-
 	return hashClass
-}
+}) as unknown as <
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any,
+	DefaultType = any
+>(
+	hash: IHash<KeyType, InternalKeyType>
+) => IHashClass<KeyType, ValueType, InternalKeyType, DefaultType>
 
 export const BasicHash = HashClass(id)
 

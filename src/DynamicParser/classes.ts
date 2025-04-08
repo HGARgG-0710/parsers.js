@@ -16,6 +16,8 @@ import { Composition } from "src/internal/Composition.js"
 import { array, object, functional } from "@hgargg-0710/one"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { Autocache } from "../internal/Autocache.js"
+
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
@@ -66,8 +68,6 @@ export class Signature
 	}
 }
 
-const generics = new BasicHash(new MapInternal())
-
 abstract class PreComplexComposition<
 		StateType extends Summat = Summat,
 		ArgType extends any[] = any[],
@@ -109,26 +109,25 @@ abstract class PreComplexComposition<
 	}
 }
 
-export function ComplexComposition<StateType extends Summat = Summat>(
+export const ComplexComposition = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <StateType extends Summat = Summat>(
+		stateMaker: (thisArg: IComplexComposition) => StateType
+	) {
+		class complexComposition<
+			ArgType extends any[] = any[],
+			OutType = any
+		> extends PreComplexComposition<StateType, ArgType, OutType> {}
+
+		extendPrototype(complexComposition, {
+			stateMaker: ConstDescriptor(stateMaker)
+		})
+
+		return complexComposition
+	}
+) as unknown as <StateType extends Summat = Summat>(
 	stateMaker: (thisArg: IComplexComposition) => StateType
-): new (layers?: Function[]) => IComplexComposition<StateType> {
-	const cachedClass = generics.index(stateMaker)
-	if (cachedClass) return cachedClass
-
-	class complexComposition<
-		ArgType extends any[] = any[],
-		OutType = any
-	> extends PreComplexComposition<StateType, ArgType, OutType> {}
-
-	extendPrototype(complexComposition, {
-		stateMaker: ConstDescriptor(stateMaker)
-	})
-
-	// * caching the class
-	generics.set(stateMaker, complexComposition)
-
-	return complexComposition
-}
+) => new (layers?: Function[]) => IComplexComposition<StateType>
 
 /**
  * Returns an `IParserState` object with `x` as the value of the

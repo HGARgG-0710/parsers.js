@@ -12,32 +12,15 @@ import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import { fromPairs } from "../utils.js"
 
 import { functional, boolean, string, object, array } from "@hgargg-0710/one"
+import { Autocache } from "../../internal/Autocache.js"
 const { trivialCompose } = functional
 const { equals } = boolean
 
-let generics: ILinearIndexMap | null = null
-
-export const ArrayMap = LinearMapClass(array.recursiveSame)
-
-generics = new ArrayMap()
-generics.set([array.recursiveSame, [], []], ArrayMap)
-
-export function LinearMapClass<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any
->(
+function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
 ): ILinearMapClass<KeyType, ValueType, DefaultType> {
-	const classKey = [change, extensions, keyExtensions]
-
-	if (generics) {
-		const cachedClass = generics.index(classKey)
-		if (cachedClass) return cachedClass
-	}
-
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
 		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
@@ -79,10 +62,22 @@ export function LinearMapClass<
 			ValueType
 		>
 
-	if (generics) generics.set(classKey, linearMapClass)
-
 	return linearMapClass
 }
+
+export const ArrayMap = makeLinearMapClass(array.recursiveSame)
+
+const linMapClassCacher = ([change, extensions, keyExtensions]) =>
+	makeLinearMapClass(change, extensions, keyExtensions)
+
+const LinearMapClass = new Autocache(
+	new ArrayMap([[[array.recursiveSame, [], []], ArrayMap]]),
+	linMapClassCacher
+) as unknown as <KeyType = any, ValueType = any, DefaultType = any>(
+	change?: IIndexingFunction<KeyType>,
+	extensions?: Function[],
+	keyExtensions?: Function[]
+) => ILinearMapClass<KeyType, ValueType, DefaultType>
 
 export const OptimizedLinearMap = LinearMapClass()
 

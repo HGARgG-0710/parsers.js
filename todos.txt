@@ -85,13 +85,14 @@ Order of TODO-elimination:
 				1. HashMap.InternalHash.ArrayInternal
 				2. HashMap.BitHash
 				3. IndexMap.ObjectMap
-				4. MultiIndex [fix]
+				4. Indexmap.ArrayMap
+				5. MultiIndex [fix]
 
 				Rename: 
 					1. InternalHash - new names of classes end on 'Internal'
 				
-				5. remove `Composition`
-				6. WALK through current classes, fix the discrepancies
+				6. remove `Composition`
+				7. WALK through current classes, fix the discrepancies
 
 			2. interfaces: 
 				1. new - ILinearMapClass
