@@ -1,7 +1,12 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IInitializable, IStateful } from "../../interfaces.js"
-import type { IComposition } from "../interfaces.js"
+import type { ICopiable, IDynamicBuffer, IInitializable, IStateful } from "../interfaces.js"
 import type { Signature } from "./classes.js"
+
+export interface IComposition extends Function, ICopiable {
+	readonly layers: IFunctionTuple
+}
+
+export type IFunctionTuple = IDynamicBuffer<Function>
 
 export type ISignatureCallback<StateType extends Summat = Summat> = (
 	thisArg: IComplexComposition<StateType>

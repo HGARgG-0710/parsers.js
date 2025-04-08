@@ -36,7 +36,23 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO [fixed order]:				
+	TODO [fixed order]:
+		RE2. New [internal] class - `Autocache`: 
+			Reason for v0.3: 
+				1. too frequent an occurence
+
+			1. An `Autocache` is an 'Callable' object, which is constructed like: 
+				1. An underlying `IIndexable` - used for storing items, searching them
+				2. A callback, that is to be USED for creation of a new value to be stored IN CASE that the key is missing
+			2. All the current `generic collections` would be REPLACED with an `Autocache`
+			3. Upon calling with a key, autocache looks for it, and, if not found, creates a record using the underlying callback;
+			4. 'Autocache' works LIKE A FUNCTION: 'autocache(key)'
+			5. All the current "factories" like `EnumSpace`, `ComplexComposition`, `LinearMapClass`, etc, WOULD TURN INTO `Autocache`s. 
+				1. Derivation: 'Autocache's have THE 'ReturnType' of their ARGUMENT [thus, it's a GENERIC type over the type of the function given as a handler]. 
+			
+			'Autocache' has its handler BOUND, instead of using a 'configurator' pattern, 
+				since that would cause unneeded memory waste (most of Autocache-s would be singletons anyway); 
+
 		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
 			SOLUTION: make a `GenericCollection` into two [different] abstractions:
 				1. ObjectMap - for object-based cofigurations: 
@@ -85,8 +101,13 @@ Order of TODO-elimination:
 				1. HashMap.InternalHash.ArrayInternal
 				2. HashMap.BitHash
 				3. IndexMap.ObjectMap
+				4. MultiIndex [fix]
+
 				Rename: 
-					1. InternalHash - new names of classes end on internal
+					1. InternalHash - new names of classes end on 'Internal'
+				
+				5. remove `Composition`
+				6. WALK through current classes, fix the discrepancies
 
 			2. interfaces: 
 				1. new - ILinearMapClass
@@ -1132,24 +1153,6 @@ Order of TODO-elimination:
 					6. module-related stuff IS GIVEN ITS OWN MODULE 
 						Example: DelimitedStream goes into the `samples.PredicateStream.*` module
 				
-				RE2. New export - `Autocache`: 
-					Reason for v0.3: 
-						1. too frequent an occurence
-						2. why not export, since it is already here? 
-						3. simple-to-implement/test/document pattern
-
-					1. An `Autocache` is an 'Callable' object, which is constructed like: 
-						1. An underlying `IIndexable` - used for storing items, searching them
-						2. A callback, that is to be USED for creation of a new value to be stored IN CASE that the key is missing
-					2. All the current `generic collections` would be REPLACED with an `Autocache`
-					3. Upon calling with a key, autocache looks for it, and, if not found, creates a record using the underlying callback;
-					4. 'Autocache' works LIKE A FUNCTION: 'autocache(key)'
-					5. All the current "factories" like `EnumSpace`, `ComplexComposition`, `LinearMapClass`, etc, WOULD TURN INTO `Autocache`s. 
-						1. Derivation: 'Autocache's have THE 'ReturnType' of their ARGUMENT [thus, it's a GENERIC type over the type of the function given as a handler]. 
-					
-					'Autocache' has its handler BOUND, instead of using a 'configurator' pattern, 
-						since that would cause unneeded memory waste (most of Autocache-s would be singletons anyway); 
-
 				UT4. REMOVE the `utilities`: 
 					Put them ALL into `samples`. 
 					THE ONLY 'utils' to keep are: 
@@ -2077,6 +2080,11 @@ FUTURE:
 			2. make `copiable` a dependency of this
 			3. [unrelated] add serialization
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
+
+		3. `autocache` package [make a dependency of parsers.js]: 
+			1. Autocache
+			2. IIndexable
+			3. ISettable
 
 	3. Ensure that this works with: 
 		1. Deno

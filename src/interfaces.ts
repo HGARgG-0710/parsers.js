@@ -96,7 +96,7 @@ export interface IIndexable<ValueType = any> {
 }
 
 export type * from "./Collection/interfaces.js"
-export type * from "./Composition/interfaces.js"
+export type * from "./DynamicParser/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
 export type * from "./HashMap/interfaces.js"
 export type * from "./IndexMap/interfaces.js"

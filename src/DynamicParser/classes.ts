@@ -1,22 +1,21 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable, IInitializable } from "../../interfaces.js"
+import type { ICopiable, IInitializable } from "../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
 	IParserState,
-	ISignatureCallback
+	ISignatureCallback,
+	IFunctionTuple
 } from "./interfaces.js"
 
-import type { IFunctionTuple } from "../interfaces.js"
+import { IndexSet } from "../internal/IndexSet.js"
+import { CallbackBuffer } from "../internal/Collection/Buffer/CallbackBuffer.js"
 
-import { IndexSet } from "../../internal/IndexSet.js"
-import { CallbackBuffer } from "../../internal/Collection/Buffer/CallbackBuffer.js"
-
-import { Composition } from "../classes.js"
+import { Composition } from "src/internal/Composition.js"
 
 import { array, object, functional } from "@hgargg-0710/one"
-import { BasicHash } from "../../HashMap/classes.js"
-import { MapInternal } from "../../HashMap/InternalHash/classes.js"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
