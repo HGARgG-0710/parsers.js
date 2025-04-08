@@ -90,8 +90,10 @@ Order of TODO-elimination:
 
 			2. interfaces: 
 				1. new - ILinearMapClass
-				
+
 			7. utils:
+				0. Stream.Position: 
+					1. remove deleted items [positionConvert, positionSame]
 				1. HashMap.fromFlags [jsdoc + permalink]
 				2. Stream-related stuff: 
 					1. Stream\utils.ts
@@ -132,6 +134,76 @@ Order of TODO-elimination:
 			1. Position [MultiIndex]		
 
 		PO1. ['test' branch -> 'dev' branch; *DO TDD*] Introduce a new Position class - LineIndex
+			NEW DEVELOPMENTS: 
+				1. this is (primarily) used for error-handling, namely: 
+					1. keep an "increasing" `LineIndex` on the "lowest" `IStream` that works with `UnfreezableString`, or whatever...
+					2. parsing error encountered
+					3. const lowStream = dig(topStream) // obtain lowest stream
+					4. lowStream.lineIndex // use for error message, or smth
+				2. problems: 
+					1. attempts [failed]: *how* to generalize this to allow for ARBITRARY usage? 
+						1. since one may not even NEED `lineIndex`, a general separate flag-based property is a poor choice [although possible...]
+						2. sometimes, it's more benefitial to use a plain `number` for error-messaging purposes
+						3. one COULDN'T use it for `.pos` for specific implementations (and generalize `number` to a different class of `IPositionObject`), 
+							since that would decrease efficiency of `navigate` algorithm [whenever one uses `LineIndex` instead of `number`-based one]
+						4. the user COULD store it on `.state`... 
+							But it wouldn't update properly... [lacks dynamicity, no point]
+						5. one COULD add a new `IBuffer` called `LineBuffer`, which would: 
+							1. have a `.value: IFreezableBuffer` [based off `DelegateBuffer` - return + extend it, maybe?]
+							2. keep on itself a `readonly lineIndex: LineIndex` 
+								1. PROBLEM: can't, one HASN'T GOT the proper `.next-.prev` interface, reinventing it is a BAD idea
+								2. could solve with bookkeeping, but the runtime cost is too steep (+ highly inelegant - not the way at all)
+							3. be kept on an `IStream`, since it'd be an `IFreezableBuffer`
+
+					2. SINCE we are only keeping it on the "lowest" one, PERHAPS, just make an extension of a "plain" `StreamParser()`, which would delegate to `value`?
+						Then: 
+							1. keeps `lineIndex: LineIndex` [mandatory]
+							2. logic goes in the `handler` [since it only gets called in `baseNextIter`]
+							3. `handler` is: 
+								1. if (.curr === "\n" [or whatever]) this.lineIndex.nextLine()
+								2. else this.lineIndex.nextChar()
+
+						This is perfect in ALMOST every respect: 
+							1. modular
+							2. simple
+							3. no need for touching previuosly written code
+							4. usable with (relative) ease
+							5. lightweight wrapper 
+						
+						However, problems [both minor]: 
+							1. the delegate *is* still a little worrysome
+								Can't do much about it.
+							2. one still would want a concept of a "combined" stream, that is: 'trivialCompose(LineIndexStreamParser, InputStream)'
+								fix: `samples` can help with that!
+					
+					3. Finally: 
+						1. about being generic: 
+							1. since `LineIndex` ITSELF it independent of what is considered "a line", 
+								one very well can make the '=== "\n"' thing GENERIC over some `isNewline` predicate, 
+									which one can make a util `isNewline = eqcurry("\n")` for. 
+
+								1. Problem: fucking '\r\n' [hate Windows]: 
+									1. solution[s]: 
+										1. (global) called `LFStream` [put into `samples`]: 
+											0. is a `StreamParser` (very lightweight on logic)
+											1. expects a (possibly Windows) Stream of characters
+											2. converts all '\r\n' -> '\n'
+								2. Solution generalization: 
+									1. provide `isNewline` predicate (allows curried `match` [work with `RegEx`] as well)
+										POTENTIALLY, moves `this.value` stream forward, called like `this.isNewline(this.value)` 
+											[*not* a bound handler, but a case of Configurator Pattern]; 
+
+									2. returns single item: "\n" [or whatever else - since it's generic, one can return anything the user says]; 
+										Note: the "item" doesn't HAVE to have a length of 1. 
+											Thus, for instance, the user could INSTEAD, convert in reverse like "\n" -> "\r\n". 
+											Useful for writging programs capable of converting between LF and CRLF. 
+
+									3. special case implementations: 
+										1. define 'LFStream' with: 
+											'isNewline = (stream) => stream.curr == "\n" || new RegEx("\r\n").matchCurr(stream) [or whatever...]'; 
+										
+										Excellent for writing crossplatform parsers. 
+
 			Basically, a pair of numbers: 
 				(lineNum, charNum)	
 			Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
@@ -558,26 +630,7 @@ Order of TODO-elimination:
 			Reasons: 
 				1. new DynamicParser is EXTREMELY complex [hence, errorprone]
 				2. to test out the overall interface manageability
-		
-	PROBLEM: regarding `IPositionObject`: 
-		It's... kind of useless? 
-
-		1. MultiIndex.convert is *slow*
-		2. .convert IS NOT USED ANYWHERE
-		3. LineIndex.convert *IS SLOW*
-
-		? remove the IPositionObject.convert entirely ? 
-
-		Then - use only the `IDirectionalPosition`s for everything, AND LET THE USER 
-			keep track of the stuff? [and/or USE THE `Traveller` INSTEAD??? - allows proper caching]
-
-		CONCLUSION: yes, this is the way: 
-			1. simpler code
-			2. faster code [less checks/function calls]
-			3. better type separation
-			4. simpler types [`IPosition` -> `IDirectionalPosition`]
-			5. better delegation of responsibilities
-
+				
 	PROBLEMS: 
 		Understood that the v0.3 IS NOT YET PRODUCTION-READY
 			from feature perspective - there's just too little stuff. 
@@ -595,91 +648,52 @@ Order of TODO-elimination:
 			Primary: 
 							
 				PO2. [new Position class] Traveller, a point on a Stream [Position/classes.ts]
+						New class for remembering absolute Position on a `Stream`. 
 
-					REASONS for v0.3: 
-						1. TreeStream.navigate - OUT OF FORM (incorrect implementation)
-							This is supposed to be `.travel`; 
-						2. `Position` is (rather) useless right now, ONLY ever allowing to do `MultiIndex.convert(treeStream)`, and 'treeStream.navigate(new MultiIndex(...))'
+						To be usable with:
+							1. MultiIndex [on TreeStream]
+							2. LineIndex [on any `IStream<string>`, or (if generic), with "newline"/"non-newline" items]; 
+								Generalize to an n-tuple, possibly?
 
-					Prior sketches of the v0.3 included a '.navigate' method that implemented an absolute positioning inside a Stream.
-					This was scratched in favour of relative positioning, which is more widespread. 
-					The absolute positioning, however, has a very powerful use case, provided more things are added: 
+						Fast implementations through: 
+							1. '.rewind + .nagivate' [default - botha re implemented manually on TreeStream]: 
+								note: ACCEPTS 'IPosition'; like `navigate`
+							2. '.navigate(n: number)' [default - fast default implementation for LineIndex]
 
-						1. StreamClass - a new flag '.size', for remembering the precise size of a Stream, in terms of the last position that 
-							is visitable; 
-							This is useful for: 
+						CONCLUSION: 
+							THE `.travel` method WILL WORK via internal fast-implementations; 
 
-								1. Remembering a Position, at which the portion of the Stream starts; 
-								2. Traversing the precise distance until the end; 
-									The hard numeric bound gives a speedup due to the lack of need for checking for '.isCurrEnd()'
-										(more precisely, one can replace it with a 'this.pos < this.size'). 
+						Default implementation [sketch]: 
 
-									For this, the 'isCurrEnd' has to be __'.writable'__; 
-
-							For efficient implementation of this, one must be able to get to the beginning of the portion in question; 
-							Therefore, a custom implementation of '.travel' is necessary. 
-							Although, one can define a default that works by an efficient implementation of '.navigate()' and '.rewind()': 
-
-								[sketch - NOTE: requires 'this.pos' to optimize for number-navigation]
-								travelDefault = function (pos: Position) {
-									if (isNumber(pos))
-										return this.navigate((-1) ** (this.pos > pos) * (pos - this.pos)) // final 'this.pos+ = this.pos - (this.pos - pos) == pos'
-									else {
-										// the default WITHOUT this.pos
-										this.rewind()
-										return this.navigate(pos)
-									}
+							travelDefault = function (pos: Position) {
+								if (isNumber(pos))
+									return this.navigate((-1) ** (this.pos > pos) * (pos - this.pos)) // final 'this.pos+ = this.pos - (this.pos - pos) == pos'
+								else {
+									// the default WITHOUT this.pos
+									this.rewind()
+									return this.navigate(pos)
 								}
-
-							Then, one can have: 
-
-								1. A WrapperStream, on a given Stream, with '.size = true'; 
-								2. Remember a Position, where WrapperStream starts on a Stream using a 'Traveller'; 
-								3. Define an efficient '.rewind()' on the WrapperStream, that would use the 'Traveller' in question, after fully iterating through it; 
-									Another reason for formalizing the WrapperStream; 
-							
-							This is absolutely priceless for lazy parsing (skipping pieces of data in order to gain information about it first 
-								- then doing the parsing, on a need-to-know basis). 
-
-							List of Stream-creation classes to make into WrapperStream-s: 
-
-								1. LimitedStream; 
-								2. NestedStream; 
-								3. PredicateStream; 
-							
-							Like StreamClass (on which they'd be based), these are all generated classes;  
-
-							ALSO: 
-								1. Replace `TreeStream.navigate` with `TreeStream.travel`
-									1. LATER: implement the `TreeStream.navigate` DIFFERENTLY - as a RELATIVE *count* for each of the levels: 							
-										multind = [(0), (1), (2), ..., (n)]: 
-											0 - from current level
-											1 - absolute 
-											2 - absolute 
-											...
-											n - absolute
-
-						2. In accordance with '1.', a new default method for StreamClass - '.travel' (does an absolute navigation around the Stream)
-						3. To remember particular Positions on a particular Stream, that may need to be recalled later (as per '1.'), one has a new 'Traveller' class: 
+							}
+						
+						The 'Traveller' class [in 'Position/classes.ts'], 
+							is just a utility class: 
 
 							[sketch]
-							Traveller extends PositionObject<Position> {
-								value: Position
-								stream: TravelableStream
-								convert() {
-									return positionConvert(this.value)
-								}
+							Traveller implements PositionObject<IPosition> {
+								protected value: IPosition
+								protected stream: TravelableStream
 								travel () {
 									return this.stream.travel(this.value)
 								}
 							}
+							
 
 						ALSO - TODO: add a `travel` util (analogous to `navigate`, `rewind`, etc), 
 							and REFACTOR IT into the `LimitedStream.prototype.init`; 
 							It would go like: 
 
-								travel = function (stream, point) {
-									rewind(stream)
+								travel = function (this: IStream, point) {
+									rewind()
 									navigate(stream, point)
 								}
 									
@@ -1037,6 +1051,8 @@ Order of TODO-elimination:
 						which reads the file LAZILY 
 							[that is, by keeping it open, and only using a small portion of the file in usage]; 
 
+					Specifically, based off `Readable`/`Stream` APIs of Node. 
+
 					Note: it DOES NOT *dispose* of the file, 
 						so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
 
@@ -1230,6 +1246,10 @@ Order of TODO-elimination:
 	B. 
 		
 	C.
+
+	IMPORTANT: clean the git history - keep only the commits for each individual version; 
+		Squash all the others + change the respective commit messages; 
+		[do this via `git rebase` + `git push --force`]
 	
 B. documentation (wiki - change/fix it...);
 	Hosted on the project's GitHub Wiki. 
@@ -1810,17 +1830,7 @@ TODO:
 							3.1.4.1. SpiderMonkey (Firefox)
 
 						[maybe?] Try building the engines from nil, running the benchmarks for heuristics standalone...; 
-		
-		PR1. [prototypes, generality] make all the prototype 'value's (in particular - methods) OVERRIDABLE! 
-				via doing: 
-
-					Object.defineProperty(_class.prototype, {	
-						methodName: { value: ..., writable: true }
-					})
-				
-				Currently, they are ALL non-overridable; 
-				This will enable the user to more liberally use the library classes [they are, presently, highly single-purposed (intentionally)]; 
-	
+			
 		TS3. TreeStream: flag optimizations; 
 			Allow 'TreeStream' to be a Stream-class-generation function also; 
 			Permit the TreeStream to have overloads for: 	
@@ -2067,3 +2077,7 @@ FUTURE:
 			2. make `copiable` a dependency of this
 			3. [unrelated] add serialization
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
+
+	3. Ensure that this works with: 
+		1. Deno
+		2. Bun

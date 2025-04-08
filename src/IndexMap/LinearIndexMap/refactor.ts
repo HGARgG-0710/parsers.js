@@ -1,5 +1,4 @@
-import type { IMapClass } from "../interfaces.js"
-import type { ILinearIndexMap } from "./interfaces.js"
+import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
 
 import { LinearMapClass } from "./classes.js"
 
@@ -13,7 +12,7 @@ export namespace OptimizedLinearMap {
 }
 
 export function extend<KeyType = any, ValueType = any>(
-	this: IMapClass<KeyType, ValueType>,
+	this: ILinearMapClass<KeyType, ValueType>,
 	...f: ((x: ValueType) => any)[]
 ) {
 	return LinearMapClass<KeyType>(
@@ -24,7 +23,7 @@ export function extend<KeyType = any, ValueType = any>(
 }
 
 export function extendKey<KeyType = any, ValueType = any>(
-	this: IMapClass<KeyType, ValueType>,
+	this: ILinearMapClass<KeyType, ValueType>,
 	...f: ((x: any) => KeyType)[]
 ) {
 	return LinearMapClass<any, ValueType>(

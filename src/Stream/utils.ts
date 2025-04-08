@@ -27,11 +27,7 @@ import type {
 import { Stream } from "../constants.js"
 const { SkippedItem } = Stream.StreamParser
 
-import {
-	pickDirection,
-	positionConvert,
-	positionNegate
-} from "./Position/utils.js"
+import { pickDirection, positionNegate } from "./Position/utils.js"
 
 import { ArrayCollection } from "../Collection/classes.js"
 import { getStopPoint } from "./Position/refactor.js"
@@ -112,7 +108,10 @@ export function destroy<Type = any>(input: IStream<Type>): typeof SkippedItem {
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip(input: IReversibleStream, steps: IPosition = 1) {
+export function skip(
+	input: IReversibleStream,
+	steps: IDirectionalPosition = 1
+) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
@@ -165,7 +164,7 @@ export function count(pred: IStreamPredicate) {
  * Returns a function that collects the items of `input`
  * into `init`, delimiting them by `delimPred`
  */
-export function delimited(delimPred: IPosition) {
+export function delimited(delimPred: IDirectionalPosition) {
 	return function <
 		Type = any,
 		CollectionType extends ICollection<Type> = ArrayCollection<Type>
@@ -274,10 +273,9 @@ export function finish<
  *
  * Provided with a `Stream` and a `Position`, it:
  *
- * * 1. converts all the `PositionObject`-s into `DirectionalPosition`-s;
- * * 2. if the result of the conversion is `number` and it is negative, calls the `stream.prev()` this many times;
- * * 3. if the result of the conversion is `number` and it is positive, calls the `stream.next()` this many times;
- * * 4. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
+ * * 1. if the result of the conversion is `number` and it is negative, calls the `stream.prev()` this many times;
+ * * 2. if the result of the conversion is `number` and it is positive, calls the `stream.next()` this many times;
+ * * 3. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
  * @returns `stream.curr`
  */
 export function uniNavigate<
@@ -286,9 +284,9 @@ export function uniNavigate<
 	PosType extends IPosition<Type, SubType, PosType> = number
 >(
 	stream: IReversibleStream<Type, SubType, PosType>,
-	position: IPosition<Type, SubType, PosType>
+	position: IDirectionalPosition<Type, SubType, PosType>
 ): Type {
-	if (isNumber((position = positionConvert(position, stream)))) {
+	if (isNumber(position)) {
 		if (position < 0) while (position++) stream.prev()
 		else while (position--) stream.next()
 	} else {
@@ -309,7 +307,7 @@ export function navigate<
 	PosType extends IPosition<Type, SubType, PosType> = number
 >(
 	stream: IReversibleStream<Type, SubType, PosType>,
-	position: IPosition<Type, SubType, PosType>
+	position: IDirectionalPosition<Type, SubType, PosType>
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)

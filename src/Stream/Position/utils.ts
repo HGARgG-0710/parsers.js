@@ -1,8 +1,7 @@
-import type { IStream } from "../interfaces.js"
+import type { IPositionObject, IStream } from "../interfaces.js"
 import type {
 	IDirectionalPosition,
 	IPosition,
-	IPositionObject,
 	IPredicatePosition,
 	IPosed,
 	IChange
@@ -10,9 +9,8 @@ import type {
 
 import { previous, next } from "../utils.js"
 
-import { object, type, functional } from "@hgargg-0710/one"
-const { structCheck } = object
-const { isFunction, isNumber, isUndefined } = type
+import { type, functional } from "@hgargg-0710/one"
+const { isFunction, isNumber, isUndefined, isObject } = type
 const { or, negate } = functional
 
 /**
@@ -23,11 +21,9 @@ export const isPredicatePosition = isFunction as <Type = any>(
 ) => x is IPredicatePosition<Type>
 
 /**
- * Returns whether given `x` is a `PredicatePosition`
- */
-export const isPositionObject = structCheck({
-	convert: isFunction
-}) as <
+ * Returns whether the given `x` is an `IPositionObject`
+*/
+export const isPositionObject = isObject as <
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
@@ -45,49 +41,17 @@ export const isPosition = or(
 ) as <Type = any>(x: any) => x is IPosition<Type>
 
 /**
- * Given a `Position` and (optionally) a `BasicStream`, it returns one of:
- *
- * 1. The original position, If it is a `DirectionalPosition`
- * 2. The result of `pos.convert(stream)`, if it's a `PositionObject`
- */
-export function positionConvert<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	pos: IPosition<Type, SubType, PosType>,
-	stream?: IStream<Type, SubType, PosType>
-): IDirectionalPosition<Type, SubType, PosType> {
-	return isPositionObject<Type, SubType, PosType>(pos)
-		? pos.convert(stream)
-		: pos
-}
-
-/**
  * Given a `DirectionalPosition`, it returns one of:
  *
  * 1. The original position, If it is a `number`
  * 2. The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
 export function positionNegate<Type = any>(
-	position: IPosition<Type>
-): IPosition<Type> {
+	position: IDirectionalPosition<Type>
+): IDirectionalPosition<Type> {
 	return isPredicatePosition(position)
 		? preserveDirection(position, negate)
 		: position
-}
-
-/**
- * Returns a `boolean`, indicating whether the results of `(x) => positionConvert(x, stream)` for `pos1` and `pos2` are equal
- */
-export function positionSame<Type = any>(
-	pos1: IPosition<Type>,
-	pos2: IPosition<Type>,
-	stream?: IStream<Type>
-) {
-	if (isPositionObject(pos1) && isFunction(pos1.equals))
-		return pos1.equals(pos2)
-	return positionConvert(pos1, stream) === positionConvert(pos2, stream)
 }
 
 /**
@@ -98,17 +62,16 @@ export function positionSame<Type = any>(
  */
 export function positionEqual<Type = any>(
 	stream: IStream<Type> & IPosed<IPosition<Type>>,
-	position: IPosition<Type>
+	position: IDirectionalPosition<Type>
 ): boolean {
 	return isPredicatePosition(position)
 		? position(stream)
-		: positionSame(stream.pos, position, stream)
+		: stream.pos === position
 }
 
 /**
- * Compares two granted positions directionally relative to an (optional) `Stream` in the following fashion:
+ * Compares two granted directional positions in the following fashion:
  *
- * 0. Convert the given positions to `DirectionalPosition`
  * 1. If `direction(pos1) !== direction(pos2)`: return `direction(pos2) > direction(pos1)`;
  * 2. If `direction(pos1) === direction(pos2)` and not both of them are a `number`: return `true`
  * 3. If `direction(pos1) === direction(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
@@ -118,15 +81,12 @@ export function directionCompare<
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
 >(
-	pos1: IPosition<Type, SubType, PosType>,
-	pos2: IPosition<Type, SubType, PosType>,
-	stream?: IStream<Type, SubType, PosType>
+	pos1: IDirectionalPosition<Type, SubType, PosType>,
+	pos2: IDirectionalPosition<Type, SubType, PosType>
 ) {
-	const converted = [pos1, pos2].map((pos) => positionConvert(pos, stream))
-	const [cPos1, cPos2] = converted
-	const [fPos1, fPos2] = [pos1, pos2].map((_, i) => direction(converted[i]))
+	const [fPos1, fPos2] = [pos1, pos2].map(direction)
 	if (fPos2 !== fPos1) return fPos2 > fPos1
-	return !(isNumber(cPos1) && isNumber(cPos2)) || cPos1 < cPos2
+	return !(isNumber(pos1) && isNumber(pos2)) || pos1 < pos2
 }
 
 /**

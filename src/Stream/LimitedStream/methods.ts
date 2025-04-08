@@ -1,8 +1,8 @@
-import type { IPosition } from "../Position/interfaces.js"
+import type { IDirectionalPosition, IPosed } from "../Position/interfaces.js"
 import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
+
 import {
 	directionCompare,
-	positionConvert,
 	positionEqual,
 	positionNegate
 } from "../Position/utils.js"
@@ -36,12 +36,22 @@ export namespace methods {
 		const { value, to } = this
 		if (value!.isCurrEnd()) return true
 		this.lookAhead = this.prod()
-		return positionEqual(value!, to)
+		return positionEqual(
+			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
+			to
+		)
 	}
 
 	export function isCurrStart<Type = any>(this: ILimitedStream<Type>) {
 		const { value, from } = this
-		return value!.isCurrStart() || positionEqual(value!, from)
+		return (
+			value!.isCurrStart() ||
+			positionEqual(
+				value! as ILimitedUnderStream<Type> &
+					IPosed<IDirectionalPosition>,
+				from
+			)
+		)
 	}
 
 	export function basePrevIter<Type = any>(this: ILimitedStream<Type>) {
@@ -55,8 +65,8 @@ export namespace methods {
 	export function init<Type = any>(
 		this: ILimitedStream<Type>,
 		value?: ILimitedUnderStream<Type>,
-		from?: IPosition,
-		to?: IPosition,
+		from?: IDirectionalPosition,
+		to?: IDirectionalPosition,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		if (value || this.value) {
@@ -73,9 +83,9 @@ export namespace methods {
 				rewind(this.value!)
 				navigate(this.value!, from)
 
-				this.direction = directionCompare(from, to, this.value)
+				this.direction = directionCompare(from, to)
 				this.from = from
-				this.to = positionNegate(positionConvert(to, this.value))
+				this.to = positionNegate(to)
 			}
 		}
 		return this

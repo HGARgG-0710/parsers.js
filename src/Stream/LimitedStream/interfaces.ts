@@ -8,30 +8,32 @@ import type {
 } from "../../interfaces.js"
 
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-
-import type {
-	IPosition,
-	IPosed,
-	IDirectionHaving
-} from "../Position/interfaces.js"
+import type { IDirectionHaving } from "../Position/interfaces.js"
 
 import type {
 	ILookaheadHaving,
 	ISinglePositionLookahead
 } from "../PredicateStream/interfaces.js"
 
-import type { IIsEndCurrable, IIsStartCurrable } from "../interfaces.js"
+import type {
+	IDirectionalPosition,
+	IIsEndCurrable,
+	IIsStartCurrable
+} from "../interfaces.js"
 
-export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
-	IPosed<IPosition> &
+export type ILimitedUnderStream<Type = any> = IReversibleStream<
+	Type,
+	any,
+	IDirectionalPosition
+> &
 	IIsEndCurrable &
 	IIsStartCurrable &
 	ICopiable
 
 export type ILimitedStreamInitSignature<Type = any> = [
 	ILimitedUnderStream<Type>,
-	IPosition?,
-	IPosition?,
+	IDirectionalPosition?,
+	IDirectionalPosition?,
 	IFreezableBuffer<Type>?
 ]
 
@@ -47,6 +49,6 @@ export type ILimitedStream<Type = any> = ISinglePositionLookahead<Type> &
 	IPointer<ILimitedUnderStream<Type>> &
 	IDirectionHaving &
 	Partial<IBufferized<Type>> & {
-		from: IPosition
-		to: IPosition
+		from: IDirectionalPosition
+		to: IDirectionalPosition
 	}

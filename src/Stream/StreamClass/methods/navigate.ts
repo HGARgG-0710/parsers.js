@@ -1,11 +1,14 @@
-import type { IPosed, IPosition } from "../../Position/interfaces.js"
-import type { IReversibleStream } from "../../interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
+import type {
+	IDirectionalPosition,
+	IReversibleStream
+} from "../../interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IReversedStreamClassInstance } from "../interfaces.js"
 
 import { uniNavigate } from "src/Stream/utils.js"
 import { readBuffer, readBufferThis } from "../refactor.js"
-import { direction, positionConvert } from "../../Position/utils.js"
+import { direction } from "../../Position/utils.js"
 import { positionDecrement } from "../../Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
@@ -15,10 +18,9 @@ const { isNumber } = type
  * A definition of `.navigate` method that works for any `Stream`
  * 		(used as default, overriden in some classes for performance reasons)
  */
-
 function navigate<Type = any>(
 	this: IReversibleStream<Type>,
-	position: IPosition
+	position: IDirectionalPosition
 ) {
 	return uniNavigate(this, position)
 }
@@ -30,24 +32,22 @@ function posBufferNavigate<Type = any>(
 	this: IReversedStreamClassInstance<Type> &
 		IBufferized<Type> &
 		IPosed<number>,
-	position: IPosition<Type>
+	position: IDirectionalPosition<Type>
 ) {
-	const dirpos = positionConvert(position)
-
-	if (isNumber(dirpos)) {
+	if (isNumber(position)) {
 		const { buffer, pos } = this
 
-		if (buffer.isFrozen || buffer.size > pos + dirpos) {
-			this.pos = Math.min(Math.max(pos + dirpos, 0), buffer.size)
+		if (buffer.isFrozen || buffer.size > pos + position) {
+			this.pos = Math.min(Math.max(pos + position, 0), buffer.size)
 			return readBuffer(this)
 		}
 
-		let i = dirpos
-		if (dirpos > 0) while (i++) this.prev()
+		let i = position
+		if (position > 0) while (i++) this.prev()
 		else while (i--) this.next()
 	} else {
-		if (direction(dirpos)) uniNavigate(this, dirpos)
-		else while (!dirpos(readBufferThis(this))) positionDecrement(this)
+		if (direction(position)) uniNavigate(this, position)
+		else while (!position(readBufferThis(this))) positionDecrement(this)
 	}
 
 	return this.curr

@@ -29,18 +29,7 @@ export interface IPositionObject<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
-> {
-	equals?: (position: IPosition<Type, SubType, PosType>) => boolean
-
-	convert: (
-		stream?: IStream<Type, SubType, PosType>
-	) => IDirectionalPosition<Type, SubType, PosType>
-
-	compare?: (
-		position: IPosition<Type, SubType, PosType>,
-		stream?: IStream<Type, SubType, PosType>
-	) => boolean
-}
+> {}
 
 export interface IPosed<Type = any> {
 	pos: Type
