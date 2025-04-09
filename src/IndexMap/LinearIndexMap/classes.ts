@@ -70,14 +70,22 @@ export const ArrayMap = makeLinearMapClass(array.recursiveSame)
 const linMapClassCacher = ([change, extensions, keyExtensions]) =>
 	makeLinearMapClass(change, extensions, keyExtensions)
 
-const LinearMapClass = new Autocache(
+const _LinearMapClass = new Autocache(
 	new ArrayMap([[[array.recursiveSame, [], []], ArrayMap]]),
 	linMapClassCacher
-) as unknown as <KeyType = any, ValueType = any, DefaultType = any>(
+)
+
+export function LinearMapClass<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any
+>(
 	change?: IIndexingFunction<KeyType>,
-	extensions?: Function[],
-	keyExtensions?: Function[]
-) => ILinearMapClass<KeyType, ValueType, DefaultType>
+	extensions: Function[] = [],
+	keyExtensions: Function[] = []
+): ILinearMapClass<KeyType, ValueType, DefaultType> {
+	return _LinearMapClass([change, extensions, keyExtensions])
+}
 
 export const OptimizedLinearMap = LinearMapClass()
 
