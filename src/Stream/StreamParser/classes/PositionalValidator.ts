@@ -7,16 +7,16 @@ import type { IStreamClassStatePatternInitMethod } from "../../StreamClass/metho
 
 import { LocatorStream } from "../classes.js"
 
-export function PositionalValidator(
-	validator: IStreamPredicate,
+export function PositionalValidator<Type = any>(
+	validator: IStreamPredicate<Type>,
 	defaultState?: Summat
 ) {
-	const validationStream = new (LocatorStream(
+	const validationStream = new (LocatorStream<Type>(
 		true,
 		!!defaultState
 	)(validator))()
 
-	return function <Type = any>(
+	return function (
 		stream: IEndableStream<Type>,
 		state: Summat | undefined = defaultState
 	) {
@@ -24,7 +24,10 @@ export function PositionalValidator(
 		// thus, changing the 'stream.curr' value
 		let curr = stream.curr
 
-		;(validationStream.init as IStreamClassStatePatternInitMethod)(stream, state)
+		;(validationStream.init as IStreamClassStatePatternInitMethod)(
+			stream,
+			state
+		)
 
 		const erronous: IInvalidEntries<Type> = []
 		for (const vcurr of validationStream) {

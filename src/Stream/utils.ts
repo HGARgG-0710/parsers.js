@@ -149,8 +149,8 @@ export function has(pos: IDirectionalPosition) {
  * Counts the number of items (starting from `stream.curr`),
  * obeying `pred`
  */
-export function count(pred: IStreamPredicate) {
-	return function <Type = any>(input: IStream<Type>) {
+export function count<Type = any>(pred: IStreamPredicate<Type>) {
+	return function (input: IStream<Type>) {
 		let count = 0
 		while (!input.isEnd && pred(input, count)) {
 			++count

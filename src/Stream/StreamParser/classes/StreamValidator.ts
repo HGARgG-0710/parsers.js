@@ -9,16 +9,16 @@ import { LocatorStream } from "../classes.js"
 export const ValidationError = (i: IPosition): [false, IPosition] => [false, i]
 export const ValidationSuccess = true
 
-export function StreamValidator(
-	validator: IStreamPredicate,
+export function StreamValidator<Type = any>(
+	validator: IStreamPredicate<Type>,
 	defaultState?: Summat
 ) {
-	const validationStream = new (LocatorStream(
+	const validationStream = new (LocatorStream<Type>(
 		true,
 		!!defaultState
 	)(validator))()
 
-	return function <Type = any>(
+	return function (
 		stream: IEndableStream<Type>,
 		state: Summat | undefined = defaultState
 	): IValidationResult {
