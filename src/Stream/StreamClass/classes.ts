@@ -15,11 +15,14 @@ import { finish, rewind, navigate, init, iter, curr, copy } from "./refactor.js"
 import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
+import { Autocache } from "../../internal/Autocache.js"
+
 import { object } from "@hgargg-0710/one"
+import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export function StreamClass<
+function makeStreamClass<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
@@ -126,6 +129,17 @@ export function StreamClass<
 
 	return streamClass
 }
+
+export const StreamClass = new Autocache(
+	new ObjectMap(),
+	makeStreamClass
+) as unknown as <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	signature: IStreamClassSignature<Type>
+) => IStreamClass<Type, SubType, PosType>
 
 const valueIsEnd = valuePropDelegate("isEnd")
 export const DefaultEndStream = <Type = any>(
