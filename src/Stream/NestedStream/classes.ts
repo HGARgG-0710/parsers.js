@@ -8,7 +8,11 @@ import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
 
-import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
+import type {
+	INestedStream,
+	INestedStreamConstructor,
+	IUnderNestedStream
+} from "./interfaces.js"
 
 import { withSuper } from "../../refactor.js"
 import { DefaultEndStream } from "../StreamClass/classes.js"
@@ -17,6 +21,8 @@ import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { init, copy, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(
@@ -30,8 +36,8 @@ const NestedStreamBase = <Type = any>(
 		isPattern: true
 	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function NestedStream<Type = any, IndexType = any>(
-	nestedTypes: ILookupTable<any, IStreamPredicate>
+function makeNestedStream<Type = any, IndexType = any>(
+	nestedTypes: ILookupTable<any, IStreamPredicate<Type>, IndexType>
 ): (
 	hasPosition?: boolean,
 	hasBuffer?: boolean
@@ -50,22 +56,31 @@ export function NestedStream<Type = any, IndexType = any>(
 			assignedIndex?: any
 
 			readonly super: Summat
-			readonly typesTable: ILookupTable<any, IStreamPredicate>
+			readonly typesTable: ILookupTable<
+				any,
+				IStreamPredicate<Type>,
+				IndexType
+			>
 
 			init: (
 				value?: IEndableStream<Type>,
-				index?: IndexType
+				index?: IndexType,
+				buffer?: IFreezableBuffer<Type | INestedStream<Type>>
 			) => INestedStream<Type>;
 
 			["constructor"]: new (
 				value?: IUnderNestedStream<Type>,
 				index?: IndexType,
-				buffer?: IFreezableBuffer<Type>
+				buffer?: IFreezableBuffer<Type | INestedStream<Type>>
 			) => INestedStream<Type>
 
-			constructor(value?: IUnderNestedStream<Type>, index?: IndexType) {
+			constructor(
+				value?: IUnderNestedStream<Type>,
+				index?: IndexType,
+				buffer?: IFreezableBuffer<Type | INestedStream<Type, IndexType>>
+			) {
 				super(value)
-				this.init(value, index)
+				this.init(value, index, buffer)
 			}
 		}
 
@@ -76,5 +91,27 @@ export function NestedStream<Type = any, IndexType = any>(
 		})
 
 		return NestedStream
+	}
+}
+
+const _NestedStream = new Autocache(new ArrayMap(), function <
+	Type = any,
+	IndexType = any
+>([nestedTypes, hasPosition, hasBuffer]: [
+	ILookupTable<any, IStreamPredicate<Type>, IndexType>,
+	boolean,
+	boolean
+]) {
+	return makeNestedStream(nestedTypes)(hasPosition, hasBuffer)
+})
+
+export function NestedStream<Type = any, IndexType = any>(
+	nestedTypes: ILookupTable<any, IStreamPredicate<Type>, IndexType>
+) {
+	return function (
+		hasPosition: boolean = false,
+		hasBuffer: boolean = false
+	): INestedStreamConstructor<Type, IndexType> {
+		return _NestedStream([nestedTypes, hasPosition, hasBuffer])
 	}
 }
