@@ -14,7 +14,7 @@ export namespace methods {
 	) {
 		const index = this.typesTable.claim(this)
 		return (this.isCurrNested = !isNull(index))
-			? new this.constructor(this.value, index)
+			? new this.constructor(this.value, index, this.buffer?.emptied())
 			: this.value!.curr
 	}
 
@@ -54,7 +54,7 @@ export namespace methods {
 		return new this.constructor(
 			this.value!.copy(),
 			this.assignedIndex,
-			this.buffer
+			this.buffer?.copy()
 		)
 	}
 }
