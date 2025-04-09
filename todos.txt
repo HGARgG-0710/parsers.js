@@ -37,49 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:
-		SI4. [No TDD yet] GenericCollection - a handler for different "combinations" of 'StreamClass'-initializers: 
-			SOLUTION: make a `GenericCollection` into two [different] abstractions:
-				1. ObjectMap - for object-based cofigurations: 
-				2. BitHash - for boolean-based configurations: 
-					1. This uses an array with integer-indexes; 
-				3. OptimizedLinearMap - for single-argument functions
-
-			NOTE: PROVIDE a specific (hidden) `GenericMap/BitArrayHash` for EACH such case; 	
-				The user DOESN'T NEED to access them. These are only used AS WAYS TO: 
-					1. save memory
-					2. [more important] save JIT optimizations for re-used classes; 
-			
-			Sometimes (ex: PositionalValidator), one MAY need to create A SINGLE instance of the 'StreamClass', 
-				which *happens* to be the exact same one that the user is already using. 
-
-			Instead of creating A NEW class and (potentially): 
-
-				1. wasting memory (insignificant, though noticeable - prototype objects)
-				2. wasting optimizations (significant), by confusing the Engine
-			
-			The user COULD just receive a handle to the already created Class object, handled within a 'StreamClassCollection', 
-				which would be: 
-
-				1. A Global object
-				2. That is connected to 'StreamClass'
-				3. And FOR WHICH 'StreamClass' DOES provide a handle, 
-					via *checking* whether or not the given class configuration already exists. 
-
-					Checks: 
-
-					1. properties/flags - by value/reference (x, y) => x === y
-					2. by categorizing by FLAGS by 'Map' (so as to simplify initial search)
-			
-			Add generic collections for:
-				6. Stream: 
-					1. StreamClass - ObjectMap
-					2. PredicateStream - BitHash
-					3. LimitedStream - BitHash
-					4. StreamParser - BitHash
-					5. ProlongedStream - BitHash
-					6. NestedStream - BitHash
-				[find any other classes that use a 'StreamClass'-like generated "base model" classes, that have to ALSO BE INHERITED]
-
 		Fix docs: 
 			1. classes [add docs]: 
 				1. HashMap.InternalHash.ArrayInternal
@@ -87,15 +44,25 @@ Order of TODO-elimination:
 				3. IndexMap.ObjectMap
 				4. Indexmap.ArrayMap
 				5. MultiIndex [fix]
+				6. EXPOSED `StreamClass` [and `DefaultEndStream`]; 
 
 				Rename: 
 					1. InternalHash - new names of classes end on 'Internal'
 				
-				6. remove `Composition`
-				7. WALK through current classes, fix the discrepancies
+				7. remove `Composition`
+				8. WALK through current classes, fix the discrepancies
+				9. *describe* the `generic collection` thing [whole separate page]
+					It is to be LINKING to the Autocache-based functions that make use of it
+						[LinearMapClass, StreamClass, etc]; 
+					Important part is: they themselves will mention of the page nothing. 
 
 			2. interfaces: 
 				1. new - ILinearMapClass
+				2. new - INestedStreamConstructor
+				3. removed - IStreamHandler
+				4. walk through interfaces - ensure that all are present...; 
+				5. new - IStreamParserConstructor
+				6. new - ILimitedStreamConstructor
 
 			7. utils:
 				0. Stream.Position: 
@@ -108,15 +75,7 @@ Order of TODO-elimination:
 
 				3. Permalinks (missing): 
 					1. utils.md	
-
-		SI7. Expose the `StreamClass`
-			Currently, it is not yet ready to be "released to the user", 
-				however, once the `GenericCollection` [and .copy, and other optimizations...] get implemented, 
-					one may as well do so, as: 
-
-				1. It would now become far too high-level to still be an implementation detail
-				2. [GenericCollection] There's an interface detail attached to it, that ISN'T AT ALL used by the library - it's PURPOSEFULLY external		
-					
+	
 		2. Tests: 
 			[old]
 			1. Composition
@@ -129,6 +88,12 @@ Order of TODO-elimination:
 			IMPORTANT: walk through new list of exports, VERIFY that all the tests are IN ACCORDANCE with them - nothing is missing, 
 				in other words. 
 		
+		TODO: 
+			walk through the code, FIX redundand `new` type expressions. 
+				More specifically: 
+					1. give them names
+					2. add the missing `.constructor` property where it's required (note: ON THE INTERFACE - where one uses the `Autocache` pattern); 
+
 		1. Doc-sync
 
 		Docs: 
@@ -1039,15 +1004,7 @@ Order of TODO-elimination:
 						1. remove the `EliminableCounter`
 						2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
 						3. remove the `Eliminable` interfaces
-
-				SI2. Add the `WrapperStream<Type, S extends BasicStream<Type> = BasicStream<Type>>` interface: 
-					This is a `BasicStream<Type> & Pattern<S>`. 
-					Let appropriate special-cases of `StreamClass` be marked to implement it: 
-						1. StreamParser
-						2. NestedStream
-						3. LimitedStream
-						4. PredicateStream
-						
+		
 				SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
 					Currently - lacking. 
 					THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
