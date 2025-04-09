@@ -1,10 +1,14 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IDirectionalPosition } from "../Position/interfaces.js"
 import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IPattern } from "src/interfaces.js"
 import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
+
+import type {
+	IDirectionalPosition,
+	IPredicatePosition
+} from "../Position/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
 import { valuePropDelegate, withSuper } from "../../refactor.js"
@@ -18,6 +22,8 @@ import { directionCompare, positionNegate } from "../Position/utils.js"
 const { init, prod, copy, ...baseMethods } = methods
 
 import { Stream } from "../../constants.js"
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
 const valueCurr = valuePropDelegate("curr")
 
@@ -33,7 +39,7 @@ const LimitedStreamBase = <Type = any>(
 		hasBuffer: hasBuffer
 	}) as IConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
 
-export function LimitedStream(
+function makeLimitedStream(
 	from: IDirectionalPosition,
 	to?: IDirectionalPosition
 ) {
@@ -92,5 +98,23 @@ export function LimitedStream(
 		})
 
 		return limitedStream
+	}
+}
+
+const _LimitedStream = new Autocache(new ArrayMap(), function ([
+	from,
+	to,
+	hasPosition,
+	hasBuffer
+]: [IPredicatePosition, IPredicatePosition | undefined, boolean, boolean]) {
+	return makeLimitedStream(from, to)(hasPosition, hasBuffer)
+})
+
+export function LimitedStream<Type = any>(
+	from: IPredicatePosition<Type>,
+	to?: IPredicatePosition<Type>
+) {
+	return function (hasPosition: boolean = false, hasBuffer: boolean = false) {
+		return _LimitedStream([from, to, hasPosition, hasBuffer])
 	}
 }
