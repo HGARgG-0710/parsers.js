@@ -21,6 +21,8 @@ const { ConstDescriptor } = object.descriptor
 const { negate, has } = functional
 
 import { methods } from "./methods.js"
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(
@@ -34,9 +36,7 @@ const PredicateStreamBase = <Type = any>(
 		hasBuffer: hasBuffer
 	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function PredicateStream<Type = any>(
-	predicate: IPredicatePosition<Type>
-) {
+function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 	return function (
 		hasPosition: boolean = false,
 		hasBuffer: boolean = false
@@ -54,7 +54,7 @@ export function PredicateStream<Type = any>(
 			value: IUnderPredicateStream<Type>
 
 			prod: () => Type
-			
+
 			init: (
 				value?: IUnderPredicateStream<Type>,
 				buffer?: IFreezableBuffer<Type>
@@ -79,6 +79,34 @@ export function PredicateStream<Type = any>(
 	}
 }
 
-export function DelimitedStream<Type = any>(...delims: Type[]) {
+const _PredicateStream = new Autocache(
+	new ArrayMap(),
+	<Type = any>([predicate, hasPosition, hasBuffer]: [
+		IPredicatePosition<Type>,
+		boolean?,
+		boolean?
+	]) => makePredicateStream(predicate)(hasPosition, hasBuffer)
+)
+
+export function PredicateStream<Type = any>(
+	predicate: IPredicatePosition<Type>
+) {
+	return function (
+		hasPosition?: boolean,
+		hasBuffer?: boolean
+	): IPredicateStreamConstructor<Type> {
+		return _PredicateStream([predicate, hasPosition, hasBuffer])
+	}
+}
+
+function makeDelimitedStream<Type = any>(delims: Type[]) {
 	return PredicateStream(negate(has(new Set(delims))))
+}
+
+const _DelimitedStream = new Autocache(new ArrayMap(), makeDelimitedStream)
+
+export function DelimitedStream<Type = any>(
+	...delims: Type[]
+): IPredicateStreamConstructor<Type> {
+	return _DelimitedStream(delims)
 }
