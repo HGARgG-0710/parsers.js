@@ -9,8 +9,8 @@ import type { IPattern } from "src/interfaces.js"
 import type { IStreamParser } from "./interfaces.js"
 
 import type {
-	IStreamHandler,
-	IStreamPredicate
+	IStreamPredicate,
+	IStreamTransform
 } from "../../TableMap/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
@@ -39,7 +39,7 @@ const StreamParserBase = <Type = any>(
 	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
 export function StreamParser<InType = any, OutType = any>(
-	handler: IStreamHandler<OutType>
+	handler: IStreamTransform<InType, OutType>
 ): (
 	hasPosition?: boolean,
 	hasBuffer?: boolean,
@@ -56,7 +56,7 @@ export function StreamParser<InType = any, OutType = any>(
 			implements IStreamParser<InType, OutType>
 		{
 			readonly super: Summat
-			readonly handler: IStreamHandler<OutType>
+			readonly handler: IStreamTransform<InType, OutType>
 
 			value: IEndableStream<InType>
 
@@ -94,12 +94,12 @@ export const BufferedParser =
 		hasPosition: boolean = false,
 		hasState: boolean = false
 	) =>
-	(handler: IStreamHandler<OutType>) =>
+	(handler: IStreamTransform<InType, OutType>) =>
 		StreamParser<InType, OutType>(handler)(hasPosition, true, hasState)
 
 export const LocatorStream =
 	<InType = any>(hasPosition: boolean = false, hasState: boolean = false) =>
-	(predicate: IStreamPredicate) =>
+	(predicate: IStreamPredicate<InType>) =>
 		StreamParser<InType, boolean>(predicate)(hasPosition, false, hasState)
 
 export * from "./classes/PositionalValidator.js"

@@ -1,7 +1,6 @@
 import type { IStreamClassInstance } from "../../Stream/StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
-
-import type { IStreamHandler } from "../../TableMap/interfaces.js"
+import type { IStreamTransform } from "../../TableMap/interfaces.js"
 import type { IFreezableBuffer, IPointer, ISupered } from "../../interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
 
@@ -19,5 +18,5 @@ export type IStreamParser<InType = any, OutType = any> = IStreamClassInstance<
 > &
 	IPointer<IEndableStream<InType>> &
 	ISupered & {
-		handler: IStreamHandler<OutType>
+		handler: IStreamTransform<InType, OutType>
 	}
