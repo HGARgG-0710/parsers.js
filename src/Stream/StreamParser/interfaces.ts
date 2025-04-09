@@ -10,6 +10,12 @@ export type IStreamParserInitSignature<InType = any, OutType = any> = [
 	Summat?
 ]
 
+export type IStreamParserConstructor<InType = any, OutType = any> = new (
+	value?: IEndableStream<InType>,
+	buffer?: IFreezableBuffer<OutType>,
+	state?: Summat
+) => IStreamParser<InType, OutType>
+
 export type IStreamParser<InType = any, OutType = any> = IStreamClassInstance<
 	OutType,
 	IEndableStream<InType>,
@@ -18,5 +24,6 @@ export type IStreamParser<InType = any, OutType = any> = IStreamClassInstance<
 > &
 	IPointer<IEndableStream<InType>> &
 	ISupered & {
+		["constructor"]: IStreamParserConstructor<InType, OutType>
 		handler: IStreamTransform<InType, OutType>
 	}

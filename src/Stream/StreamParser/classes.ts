@@ -6,7 +6,7 @@ import type { IEndableStream } from "../interfaces.js"
 
 import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "src/interfaces.js"
-import type { IStreamParser } from "./interfaces.js"
+import type { IStreamParser, IStreamParserConstructor } from "./interfaces.js"
 
 import type {
 	IStreamPredicate,
@@ -18,6 +18,9 @@ import { valueDelegate, withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
+
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
 import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
@@ -38,13 +41,13 @@ const StreamParserBase = <Type = any>(
 		isPattern: true
 	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function StreamParser<InType = any, OutType = any>(
+function makeStreamParser<InType = any, OutType = any>(
 	handler: IStreamTransform<InType, OutType>
 ): (
 	hasPosition?: boolean,
 	hasBuffer?: boolean,
 	hasState?: boolean
-) => IConstructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
+) => IStreamParserConstructor<InType, OutType> {
 	return function (
 		hasPosition: boolean = false,
 		hasBuffer: boolean = false,
@@ -86,6 +89,30 @@ export function StreamParser<InType = any, OutType = any>(
 		})
 
 		return streamTokenizerClass
+	}
+}
+
+const _StreamParser = new Autocache(new ArrayMap(), function <
+	InType = any,
+	OutType = any
+>([handler, hasPosition, hasBuffer, hasState]: [
+	IStreamTransform<InType, OutType>,
+	boolean,
+	boolean,
+	boolean
+]) {
+	return makeStreamParser(handler)(hasPosition, hasBuffer, hasState)
+})
+
+export function StreamParser<InType = any, OutType = any>(
+	handler: IStreamTransform<InType, OutType>
+) {
+	return function (
+		hasPosition: boolean = false,
+		hasBuffer: boolean = false,
+		hasState: boolean = false
+	): IStreamParserConstructor<InType, OutType> {
+		return _StreamParser([handler, hasPosition, hasBuffer, hasState])
 	}
 }
 
