@@ -2,8 +2,13 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IPattern } from "src/interfaces.js"
-import type { ILimitedUnderStream, ILimitedStream } from "./interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
+
+import type {
+	ILimitedUnderStream,
+	ILimitedStream,
+	ILimitedStreamConstructor
+} from "./interfaces.js"
 
 import type {
 	IDirectionalPosition,
@@ -55,7 +60,7 @@ function makeLimitedStream(
 	return function <Type = any>(
 		hasPosition: boolean = false,
 		hasBuffer: boolean = false
-	): new (value: ILimitedUnderStream<Type>) => ILimitedStream<Type> {
+	): ILimitedStreamConstructor<Type> {
 		const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
 		class limitedStream extends baseClass implements ILimitedStream<Type> {
 			value: ILimitedUnderStream<Type>
@@ -70,7 +75,7 @@ function makeLimitedStream(
 			prod: () => Type
 
 			init: (
-				value: ILimitedUnderStream<Type>,
+				value?: ILimitedUnderStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) => ILimitedStream<Type>;
 
@@ -80,7 +85,7 @@ function makeLimitedStream(
 			) => ILimitedStream<Type>
 
 			constructor(
-				value: ILimitedUnderStream<Type>,
+				value?: ILimitedUnderStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) {
 				super(value)
@@ -114,7 +119,10 @@ export function LimitedStream<Type = any>(
 	from: IPredicatePosition<Type>,
 	to?: IPredicatePosition<Type>
 ) {
-	return function (hasPosition: boolean = false, hasBuffer: boolean = false) {
+	return function (
+		hasPosition: boolean = false,
+		hasBuffer: boolean = false
+	): ILimitedStreamConstructor<Type> {
 		return _LimitedStream([from, to, hasPosition, hasBuffer])
 	}
 }

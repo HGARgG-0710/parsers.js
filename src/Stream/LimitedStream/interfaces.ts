@@ -34,6 +34,11 @@ export type ILimitedStreamInitSignature<Type = any> = [
 	IFreezableBuffer<Type>?
 ]
 
+export type ILimitedStreamConstructor<Type = any> = new (
+	value?: ILimitedUnderStream<Type>,
+	buffer?: IFreezableBuffer<Type>
+) => ILimitedStream<Type>
+
 export type ILimitedStream<Type = any> = ISinglePositionLookahead<Type> &
 	ILookaheadHaving &
 	ISupered &
