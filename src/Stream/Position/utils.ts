@@ -22,14 +22,8 @@ export const isPredicatePosition = isFunction as <Type = any>(
 
 /**
  * Returns whether the given `x` is an `IPositionObject`
-*/
-export const isPositionObject = isObject as <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	x: any
-) => x is IPositionObject<Type, SubType, PosType>
+ */
+export const isPositionObject = isObject as (x: any) => x is IPositionObject
 
 /**
  * Returns whether given `x` is a `Position`

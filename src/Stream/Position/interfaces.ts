@@ -5,9 +5,7 @@ export type IPosition<
 	Type = any,
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
-> =
-	| IDirectionalPosition<Type, SubType, PosType>
-	| IPositionObject<Type, SubType, PosType>
+> = IDirectionalPosition<Type, SubType, PosType> | IPositionObject
 
 export type IDirectionalPosition<
 	Type = any,
@@ -25,11 +23,7 @@ export type IPredicatePosition<
 ) => boolean) &
 	Partial<IDirectionHaving>
 
-export interface IPositionObject<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> {}
+export interface IPositionObject {}
 
 export interface IPosed<Type = any> {
 	pos: Type
@@ -44,3 +38,5 @@ export type IChange<
 export interface IDirectionHaving {
 	direction: boolean
 }
+
+export type * from "./interfaces/LineIndex.js"
