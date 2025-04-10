@@ -1,8 +1,9 @@
-import type { MultiIndex } from "../Position/classes.js"
+import { MultiIndex } from "../Position/classes.js"
 import type { IWalkable } from "../../Node/interfaces.js"
 
 import { TreeStream } from "./classes.js"
 import { BadIndex } from "../../constants.js"
+import { treeEndPath } from "../../Node/utils.js"
 
 export namespace methods {
 	export function baseNextIter<
@@ -97,9 +98,17 @@ export namespace methods {
 
 		if (walkable) {
 			this.walker.init(walkable)
+			this.endInd = new MultiIndex(treeEndPath(this.value))
 			this.super.init.call(this)
 		}
 
 		return this
+	}
+
+	export function finish<TreeLike extends IWalkable<TreeLike> = IWalkable>(
+		this: TreeStream<TreeLike>
+	) {
+		this.navigate(this.endInd)
+		return this.curr
 	}
 }

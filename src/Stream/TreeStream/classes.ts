@@ -30,6 +30,9 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 {
 	protected readonly super: Summat
 
+	readonly value: TreeLike
+
+	protected endInd: MultiIndex
 	protected response: string = ""
 	protected lastLevelWithSiblings = BadIndex
 	protected walker = new TreeWalker<TreeLike>()
