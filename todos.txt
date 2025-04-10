@@ -37,24 +37,8 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		SI17. `chooseMethod` - simplify using `BitHash`; 
-		
-		ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
-			When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
-			Calls the '.index' on the saved '.lastIndex'; 
-
-		SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
-			Currently, missing. 
-			Example [ONLY here... others keep binding AS-CURRENTLY-ARE]: TreeStream. 
-				It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
-				After this change, NO MORE will the "binding" happen outside the "base" definition. 
-				Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
+		SI17. `chooseMethod` - simplify using `BitHash`; 		
 			
-			
-		TC2. [Serialization] Add `toJSON` methods on `Node`
-			Reason - serialization (mighty powerful thing...); 
-				Reason for v0.3: testing [can't endure-test changing parsers properly without ability for serialization]; 
-				
 		PA2. Add LazyBuffer: 
 			This is an 'IBuffer' based off an open file socket, 
 				which reads the file LAZILY 
@@ -68,6 +52,7 @@ Order of TODO-elimination:
 			This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
 			This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
 
+			ALSO: this *may* involve dealing with UTF-8 [more specifically, handling character-sizes and all that...]; 
 			
 		SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
 			Currently - lacking. 
@@ -1193,6 +1178,52 @@ Order of TODO-elimination:
 
 					The `is` functions are ALL kept inside the special new `types` module.
 
+				PA3. A new class - `LazyTree` [don't be deceived - it's a 'Stream']: 
+					Consider this - one is given a task of transpiling a VERY large file, 
+						and then putting it into another file. 
+					Now, it's possible for one to READ IT (using `LazyBuffer`), and to lazily PARSE IT
+						(using `Stream`s), however, the result of the parsing operation is STILL persistent. 
+						And, likewise, the serialization process is ALSO persistent. 
+
+					Thus, one wants to create a class equivalent to a Stream-transform operation. 
+						Instead of evaluating a sequence of characters, and producing an in-memory AST, 
+							one creates nodes ONE-BY-ONE in a Tree-like fashion. 
+
+					Now, since this is a Recursive Descent parser, we want it to be a Depth-First-iteration 
+						algorithm (the `Breadth-First` does not allow for this unfortunately...). Thus, 
+							we are producing A NEW `Stream`, which provides us with tokens THE SAME WAY 
+								that the `TreeStream` would. 
+
+					The memory savings from this thing (on a scale) would be insane 
+						[the program would use almost no memory at all - everything gets garbage-collected]. 
+					
+					It is a `StreamParser` [put under `StreamParser/classes`]. 
+					Note also that it is RECURSIVELY LAZY, that is, it ONLY JUST holds the 
+						amount of space needed FOR THE CURRENT ITEM. 
+
+					Dev notes: 
+						1. one will want to keep `LazyNode`s for this [lazy equivalent of `RecursiveNode`, since `ContentNode` and `TokenNode` have no children...]; 
+						2. `LazyNode`s will have their children AS AN `IStream` 
+
+					Thus, the complete workflow is: 
+
+						WriterStream((StreamParser(serializerFunction)(LazyTree(...StreamParser(InputStream(LazyBuffer(...)))))))
+					
+					For `WriterStream`, see the note below...
+
+				PA4. A new class - `WriterStream` [a new `Stream`]: 
+					The reverse of a `LazyBuffer`, it WRITES its elements one-by-one into 
+						the given file/other resource. 
+
+					Can be chained, RETURNS ITEMS AS-IS (that is, it STILL has a return value, 
+						even though it's almost totally impure). 
+
+					[Maybe?] provide a wrapper around the basic Node API 'Stream' used here? 
+						Reasons: 
+							1. provide error-handling
+							2. deal with configuration nonsense in a modular manner (.setEncoding, etc)
+							3. platform-independent ontology (Deno + Bun compatibility)
+
 			Secondary: 		
 				ME3. [StreamClass] Iterator Helper functions - '.filter', '.take', ...: 
 					Provide them. 
@@ -1786,6 +1817,17 @@ TODO:
 
 			Let it also permit returning predicates (hello, `skip()`)
 
+		TC3. Add `fromJSON` [JSON deserialization method] onto `INode`-implementing classes; 
+			Better still, make it a util - to obtain a given `tree` fully...; 
+			It would have: 
+
+			1. A proper class-managing system
+			2. As a return value: 
+				1. BasicHash(new MapInternal()) of classes [by their `type` - an `IndexMap`]: 
+					1. `.copy()` of `typesAutocache.value`, the `Autocache` used 
+						within this specific case [easier to do, since we are in need of knowing if something's been already defined or not...]
+				2. A tree, composed of `INode`-implementing items
+
 	3. Minor [fixes, optimizations, refactoring, types, naming]
 		OE1. [maybe? benchmark first] v8-specific optimizations: 
 			Having done some benchmarking on some typical Array methods, one arrived at a...
@@ -2088,7 +2130,17 @@ FUTURE:
 			1. Autocache
 			2. IIndexable
 			3. ISettable
+		
+		4. `serializable`: 
+			1. `ISerializable` interface
+			2. `ISerializableObject` interface
 
 	3. Ensure that this works with: 
 		1. Deno
 		2. Bun
+
+		Rewrite using middleware? 
+		Or just check compabitility details? 
+			[should be relatively simple, since the package doesn't make almost any use of Node specifically...]
+
+	4. [maybe?] try using JSR for this one [https://jsr.io/]
