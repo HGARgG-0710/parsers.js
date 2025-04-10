@@ -13,7 +13,7 @@ export class Autocache<KeyType = any, ValueType = any> extends Callable {
 	}
 
 	constructor(
-		protected value: ISettable<KeyType, ValueType> &
+		readonly value: ISettable<KeyType, ValueType> &
 			IIndexable<ValueType | undefined>,
 		protected callback: (x: KeyType) => ValueType
 	) {

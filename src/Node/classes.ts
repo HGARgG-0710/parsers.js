@@ -62,6 +62,10 @@ abstract class PreTokenNode<Type = any, Value = any>
 	copy() {
 		return new this.constructor()
 	}
+
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(this.type)}}`
+	}
 }
 
 export const TokenNode = new Autocache(
@@ -84,6 +88,12 @@ abstract class PreContentNode<Type = any, Value = any>
 
 	copy() {
 		return new this.constructor(this.value)
+	}
+
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(
+			this.type
+		)}, "value": ${JSON.stringify(this.value)}}`
 	}
 
 	constructor(public value: Value) {
@@ -153,6 +163,12 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 		this.children[index].parent = null
 		inplace.out(this.children, index)
 		return this
+	}
+
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(
+			this.type
+		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
 	constructor(protected children: INode<Type, Value>[] = []) {

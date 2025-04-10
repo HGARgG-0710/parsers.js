@@ -95,6 +95,19 @@ export interface IIndexable<ValueType = any> {
 	index: (x: any, ...y: any[]) => ValueType
 }
 
+export type ISerializableObject = { toJSON: () => string }
+
+export type ISerializable =
+	| ISerializableObject
+	| null
+	| number
+	| string
+	| boolean
+	| ISerializable[]
+	| Number
+	| String
+	| Boolean
+
 export type * from "./Collection/interfaces.js"
 export type * from "./DynamicParser/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
