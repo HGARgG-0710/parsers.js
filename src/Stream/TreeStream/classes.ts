@@ -15,7 +15,7 @@ const { F } = boolean
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
-const { rewind, navigate, init, value, pos, ...baseMethods } = methods
+const { init, value, pos, ...baseMethods } = methods
 
 const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>({
 	...baseMethods,
@@ -49,9 +49,7 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 }
 
 withSuper(TreeStream, TreeStreamBase, {
-	multind: pos,
+	pos,
 	value,
-	rewind: ConstDescriptor(rewind),
-	navigate: ConstDescriptor(navigate),
 	init: ConstDescriptor(init)
 })

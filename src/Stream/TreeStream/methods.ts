@@ -23,6 +23,7 @@ export namespace methods {
 	) {
 		this.walker.restart()
 		this.isStart = true
+		return this.curr
 	}
 
 	export function navigate<TreeLike extends IWalkable<TreeLike> = IWalkable>(
