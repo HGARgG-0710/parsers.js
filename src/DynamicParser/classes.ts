@@ -77,7 +77,7 @@ abstract class PreComplexComposition<
 	implements IComplexComposition<StateType>
 {
 	#original: Function[] = []
-	#state: StateType | null = null
+	#state: StateType | undefined = undefined
 
 	readonly layers: IFunctionTuple = new CallbackBuffer(
 		function (
@@ -90,13 +90,13 @@ abstract class PreComplexComposition<
 	)
 
 	get state() {
-		return this.#state!
+		return this.#state
 	}
 
-	protected stateMaker: (thisArg: IComplexComposition) => StateType
+	protected stateMaker?: (thisArg: IComplexComposition) => StateType
 
 	protected makeState() {
-		this.#state = this.stateMaker(this)
+		this.#state = this.stateMaker?.(this)
 		return this
 	}
 
@@ -112,7 +112,7 @@ abstract class PreComplexComposition<
 export const ComplexComposition = new Autocache(
 	new BasicHash(new MapInternal()),
 	function <StateType extends Summat = Summat>(
-		stateMaker: (thisArg: IComplexComposition) => StateType
+		stateMaker?: (thisArg: IComplexComposition) => StateType
 	) {
 		class complexComposition<
 			ArgType extends any[] = any[],
@@ -126,7 +126,7 @@ export const ComplexComposition = new Autocache(
 		return complexComposition
 	}
 ) as unknown as <StateType extends Summat = Summat>(
-	stateMaker: (thisArg: IComplexComposition) => StateType
+	stateMaker?: (thisArg: IComplexComposition) => StateType
 ) => new (layers?: Function[]) => IComplexComposition<StateType>
 
 /**
@@ -144,3 +144,7 @@ export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 // * 2. THE USER controls how the 'signature's operate precisely
 export const DynamicParser: new (layers?: Function[]) => IDynamicParser =
 	ComplexComposition(ParserState)
+
+// * pre-doc note: this is intended for usage WITHOUT the self-modification of the parser; 
+// useful for error-handling [see ErrorHandler] and other such operations; 
+export const CommonParser = ComplexComposition()
