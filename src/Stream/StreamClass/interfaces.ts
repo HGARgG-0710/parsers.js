@@ -27,10 +27,16 @@ type IPrimalStreamClassSignature<Type = any> = IIsEndCurrable & {
 	currGetter?: () => Type
 }
 
-type IStreamClassTransferable<Type = any> = IPrimalStreamClassSignature<Type> &
-	Partial<Pick<IReversedStreamClassInstance<Type>, "prev">> &
+type IStreamClassTransferable<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IPrimalStreamClassSignature<Type> &
 	Partial<Pick<IReversedStreamClassInstance<Type>, "basePrevIter">> &
-	Partial<IIsStartCurrable>
+	Partial<IIsStartCurrable> &
+	Partial<INavigable<Type, SubType, PosType>> &
+	Partial<IFinishable<Type>> &
+	Partial<IRewindable<Type>>
 
 type ICommonStreamClassInstance<
 	Type = any,
@@ -60,6 +66,7 @@ export type IStreamClassInstance<
 	InitSignature extends any[] = any[]
 > = ICommonStreamClassInstance<Type, SubType, PosType, InitSignature> &
 	IStreamClassTransferable<Type> &
+	Partial<Pick<IReversedStreamClassInstance<Type>, "prev">> &
 	Partial<IUpdatable<Type>>
 
 export type IReversedStreamClassInstance<

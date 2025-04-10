@@ -30,13 +30,19 @@ function makeStreamClass<
 	signature: IStreamClassSignature<Type>
 ): IStreamClass<Type, SubType, PosType> {
 	const {
-		baseNextIter,
-		isCurrEnd,
 		isCurrStart,
 		basePrevIter,
+
+		baseNextIter,
+		isCurrEnd,
 		initGetter,
 		currGetter,
 		defaultIsEnd,
+
+		rewind: rewindOverride,
+		navigate: navigateOverride,
+		finish: finishOverride,
+
 		hasPosition: pos,
 		hasState: state,
 		hasBuffer: buffer,
@@ -101,9 +107,15 @@ function makeStreamClass<
 
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
 	extend({
-		navigate: ConstDescriptor(navigate.chooseMethod<Type>(pos, buffer)),
-		rewind: ConstDescriptor(rewind.chooseMethod<Type>(pos, buffer)),
-		finish: ConstDescriptor(finish.chooseMethod<Type>(pos, buffer))
+		navigate: ConstDescriptor(
+			navigateOverride || navigate.chooseMethod<Type>(pos, buffer)
+		),
+		rewind: ConstDescriptor(
+			rewindOverride || rewind.chooseMethod<Type>(pos, buffer)
+		),
+		finish: ConstDescriptor(
+			finishOverride || finish.chooseMethod<Type>(pos, buffer)
+		)
 	})
 
 	// * Defining the ReversedStreamClassInstance-specific optional properties
