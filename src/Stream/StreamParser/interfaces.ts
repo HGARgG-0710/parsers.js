@@ -27,3 +27,5 @@ export type IStreamParser<InType = any, OutType = any> = IStreamClassInstance<
 		["constructor"]: IStreamParserConstructor<InType, OutType>
 		handler: IStreamTransform<InType, OutType>
 	}
+
+export type * from "./interfaces/IndexStream.js"

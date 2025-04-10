@@ -3,9 +3,10 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPattern } from "src/interfaces.js"
 import type { IRecursivePointer } from "src/interfaces.js"
 
-import { type } from "@hgargg-0710/one"
+import { type, object, boolean } from "@hgargg-0710/one"
 const { isUndefined } = type
-const { structCheck } = object
+const { structCheck, prop } = object
+const { eqcurry } = boolean
 
 import type {
 	IBufferized,
@@ -20,9 +21,6 @@ import type { IStateful } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
 import { BadIndex } from "./constants.js"
-
-import { object } from "@hgargg-0710/one"
-const { prop } = object
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -135,6 +133,8 @@ export function dig<Type = any>(
 		curr = value(curr) as IRecursivePointer<Type>
 	return curr
 }
+
+export const isLF = eqcurry("\n")
 
 export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"

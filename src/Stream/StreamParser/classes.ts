@@ -1,11 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
-
-import type { IStreamClassInstance } from "../../Stream/StreamClass/interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
-
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IConstructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "src/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 import type { IStreamParser, IStreamParserConstructor } from "./interfaces.js"
 
 import type {
@@ -131,3 +129,4 @@ export const LocatorStream =
 
 export * from "./classes/PositionalValidator.js"
 export * from "./classes/StreamValidator.js"
+export * from "./classes/IndexStream.js"
