@@ -36,7 +36,108 @@
 				the order of rule-application to the given source). 
 
 Order of TODO-elimination: 	
-	TODO [fixed order]:
+	TODO [fixed order]:	
+		SI17. `chooseMethod` - simplify using `BitHash`; 
+		
+		ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
+			When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
+			Calls the '.index' on the saved '.lastIndex'; 
+
+		SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
+			Currently, missing. 
+			Example [ONLY here... others keep binding AS-CURRENTLY-ARE]: TreeStream. 
+				It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
+				After this change, NO MORE will the "binding" happen outside the "base" definition. 
+				Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
+			
+			
+		TC2. [Serialization] Add `toJSON` methods on `Node`
+			Reason - serialization (mighty powerful thing...); 
+				Reason for v0.3: testing [can't endure-test changing parsers properly without ability for serialization]; 
+				
+		PA2. Add LazyBuffer: 
+			This is an 'IBuffer' based off an open file socket, 
+				which reads the file LAZILY 
+					[that is, by keeping it open, and only using a small portion of the file in usage]; 
+
+			Specifically, based off `Readable`/`Stream` APIs of Node. 
+
+			Note: it DOES NOT *dispose* of the file, 
+				so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
+
+			This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
+			This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
+
+			
+		SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
+			Currently - lacking. 
+			THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
+
+		BIG: .peek() CYCLE: 	
+			ME5. 'InputStream' - provide a '.peek(n)' method: 
+				1. looks "forward" n items; 
+				2. add a new interface - PeekableStream
+					2.1. Add a general 'StreamClass' implementation: uses a 'PreallocBuffer' (empty by default), which 
+						keeps the 'next n' items, to be looked up. 
+						1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
+							index appropriately [reflect this...]; 
+    			
+						PROBLEM [PreallocBuffer]: what about the `.next()` calls? 
+							In order to *FREE* the buffer for a sufficiently large `.peek(n)` operation after doing `.next(k)`, 
+								one will have to call `.unshift()` [which is horribly slow]. 
+							THEREFORE, create a class that EXTENDS the `PreallocBuffer`, and use that instead. 
+							Call it `RotationBuffer`, and it will work like: 
+								1. keep the internal array [pre-allocated, as per the `super` methods]
+								2. keep the `.rotation: number = .length - 1 (by default)` index
+									It will correspond to the `[i]` index AFTER WHICH the `.peek(1)` [respectively, `.read(0)`] value, starts. 
+									It goes up to `.peek(.length - .rotation)`, after which it "wraps around", with internal `.array[0]` being `.peek(.length - .rotation + 1)`, and so forth, 
+										up until `.peek(.length)`, which is the last permitted '.peek' for the chosen allocation. 
+								3. keep a method for "moving" '.rotation': 
+									1. .rotate(direction: boolean)
+										if 'true', increases the `.rotation`, 
+										otherwise - decreases it. 
+    			
+				Make 'StreamClassInstance' a `Partial<PeekableStream>` [add the generic `.peek()` definition for case of keeping a small '.peekBuffer' - NEW PARAMETER -- 'peekSize: number = 0']. 
+    			
+				1. Also - add `.next(n: DirectionalPosition = 1)` and `.prev(n: DirectionalPosition = 1)`, 
+					where `n` is the number of items TO SKIP [forwards, or backwards respectively]. 
+						The `this.curr` is returned INVARIABLY. 
+						Note: this will require some heavy rewriting on behalf of the `StreamClass.prototype.next`; 
+						1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next/input.prev(n))(value)` [rough]:
+						 	The old `parsers.js` had something similar, except not as well-designed...
+    			
+				2. Also - add the `.has(n)` 'Parser/utils.ts'-utils AS A METHOD, 
+					of positive/negative indexes [with respective optimizations]. 
+    			
+				3. Then - REWRITE the `skip()` util from the `Parser/utils.ts`: 
+					Will, from now on, be doing only some fairly simple conversions (PredicatePosition [/w .boolean] -> Function; 
+						Then call either '.next(f/n)' or '.prev(f/n)'
+					). 
+		
+			CC1. PreallocArray - a new 'Collection' type: 
+				0. new property - 'lastInd: number = this.value.length'
+				1. extends ArrayCollection
+				2. new method - '.prealloc(n)': 
+					1. If 'this.value.length > n', goto 5, else - continue
+					2. this.value.length = n
+					3. this.lastInd = this.value.length
+					4. Finish
+				3. change method - '.push()': 
+					1. this.value[this.lastInd++] = this.value
+				4. change method - '.get()' [as 'readonly number[]']: 
+					1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
+				5. change method - '.move(n)': 
+					1. this.value.length = this.lastIndex
+					2. const lastValue = this.value
+					3. this.value = Array(this.n)
+					4. return lastValue
+
+				Purpose: 
+					1. Providing an interface for user-level preallocation of an array
+					2. Providing 1. together with an integration with the 'Collection' interface
+
+			CC2. RotationBuffer - See `.peek(n)` for more details
+				
 		Fix docs: 
 			1. classes [add docs]: 
 				1. HashMap.InternalHash.ArrayInternal
@@ -51,6 +152,10 @@ Order of TODO-elimination:
 				
 				7. remove `Composition`
 				8. WALK through current classes, fix the discrepancies
+					Includes: 
+						1. missing classes
+						2. missing methods
+						3. changed method signatures
 				9. *describe* the `generic collection` thing [whole separate page]
 					It is to be LINKING to the Autocache-based functions that make use of it
 						[LinearMapClass, StreamClass, etc]; 
@@ -75,7 +180,9 @@ Order of TODO-elimination:
 
 				3. Permalinks (missing): 
 					1. utils.md	
-	
+
+				4. walk through utils - ensure that EVERYTHING is in order...; 
+		
 		2. Tests: 
 			[old]
 			1. Composition
@@ -104,96 +211,6 @@ Order of TODO-elimination:
 		Docs:
 			1. Position [MultiIndex]		
 
-		PO1. ['test' branch -> 'dev' branch; *DO TDD*] Introduce a new Position class - LineIndex
-			NEW DEVELOPMENTS: 
-				1. this is (primarily) used for error-handling, namely: 
-					1. keep an "increasing" `LineIndex` on the "lowest" `IStream` that works with `UnfreezableString`, or whatever...
-					2. parsing error encountered
-					3. const lowStream = dig(topStream) // obtain lowest stream
-					4. lowStream.lineIndex // use for error message, or smth
-				2. problems: 
-					1. attempts [failed]: *how* to generalize this to allow for ARBITRARY usage? 
-						1. since one may not even NEED `lineIndex`, a general separate flag-based property is a poor choice [although possible...]
-						2. sometimes, it's more benefitial to use a plain `number` for error-messaging purposes
-						3. one COULDN'T use it for `.pos` for specific implementations (and generalize `number` to a different class of `IPositionObject`), 
-							since that would decrease efficiency of `navigate` algorithm [whenever one uses `LineIndex` instead of `number`-based one]
-						4. the user COULD store it on `.state`... 
-							But it wouldn't update properly... [lacks dynamicity, no point]
-						5. one COULD add a new `IBuffer` called `LineBuffer`, which would: 
-							1. have a `.value: IFreezableBuffer` [based off `DelegateBuffer` - return + extend it, maybe?]
-							2. keep on itself a `readonly lineIndex: LineIndex` 
-								1. PROBLEM: can't, one HASN'T GOT the proper `.next-.prev` interface, reinventing it is a BAD idea
-								2. could solve with bookkeeping, but the runtime cost is too steep (+ highly inelegant - not the way at all)
-							3. be kept on an `IStream`, since it'd be an `IFreezableBuffer`
-
-					2. SINCE we are only keeping it on the "lowest" one, PERHAPS, just make an extension of a "plain" `StreamParser()`, which would delegate to `value`?
-						Then: 
-							1. keeps `lineIndex: LineIndex` [mandatory]
-							2. logic goes in the `handler` [since it only gets called in `baseNextIter`]
-							3. `handler` is: 
-								1. if (.curr === "\n" [or whatever]) this.lineIndex.nextLine()
-								2. else this.lineIndex.nextChar()
-
-						This is perfect in ALMOST every respect: 
-							1. modular
-							2. simple
-							3. no need for touching previuosly written code
-							4. usable with (relative) ease
-							5. lightweight wrapper 
-						
-						However, problems [both minor]: 
-							1. the delegate *is* still a little worrysome
-								Can't do much about it.
-							2. one still would want a concept of a "combined" stream, that is: 'trivialCompose(LineIndexStreamParser, InputStream)'
-								fix: `samples` can help with that!
-					
-					3. Finally: 
-						1. about being generic: 
-							1. since `LineIndex` ITSELF it independent of what is considered "a line", 
-								one very well can make the '=== "\n"' thing GENERIC over some `isNewline` predicate, 
-									which one can make a util `isNewline = eqcurry("\n")` for. 
-
-								1. Problem: fucking '\r\n' [hate Windows]: 
-									1. solution[s]: 
-										1. (global) called `LFStream` [put into `samples`]: 
-											0. is a `StreamParser` (very lightweight on logic)
-											1. expects a (possibly Windows) Stream of characters
-											2. converts all '\r\n' -> '\n'
-								2. Solution generalization: 
-									1. provide `isNewline` predicate (allows curried `match` [work with `RegEx`] as well)
-										POTENTIALLY, moves `this.value` stream forward, called like `this.isNewline(this.value)` 
-											[*not* a bound handler, but a case of Configurator Pattern]; 
-
-									2. returns single item: "\n" [or whatever else - since it's generic, one can return anything the user says]; 
-										Note: the "item" doesn't HAVE to have a length of 1. 
-											Thus, for instance, the user could INSTEAD, convert in reverse like "\n" -> "\r\n". 
-											Useful for writging programs capable of converting between LF and CRLF. 
-
-									3. special case implementations: 
-										1. define 'LFStream' with: 
-											'isNewline = (stream) => stream.curr == "\n" || new RegEx("\r\n").matchCurr(stream) [or whatever...]'; 
-										
-										Excellent for writing crossplatform parsers. 
-
-			Basically, a pair of numbers: 
-				(lineNum, charNum)	
-			Create a generalization of it (where 'newline' is a context-defined term, like a particular "separation token", or something...): 
-			Which correspond to prior number of newlines and prior number of symbols; 
-			Used frequently throughout for things like debug information; 
-			The '.convert()' would play very nicely with it...; 
-
-			REASON TO IMPLEMENT AS V0.3: 
-				1. Every module should ahve at least 2 different classes
-					Exceptions:
-						1. TokenizablePattern
-						2. ValidatablePattern
-					Reason:
-						1. (as learned per v0.3) Implementing lazy algorithms in a fashion that is clean 
-							takes a greater amount of time and effort. 
-				2. `Position` is the only that has "semantically", only one unit - MultiIndex (MultiIndex)
-
-			NOTE: it works ONLY with 'Stream's that have a `string` as input...	
-		
 		TODO [naming issue]: 
 			minor - module `TableMap` has an export `TableMap`, 
 				forcing the user to write `TableMap.TableMap` [not good...]. 
@@ -445,13 +462,7 @@ Order of TODO-elimination:
 			20. ContentNode
 			21. RecursiveNode
 
-		9. Add the missing stuff into the library [the "moved from v0.4" todos...]: 
-			1. Do it GRADUALLY, as you complete other todos.
-
-		10. SIMPLIFY TYPES: 
-			1. `A extends B, C, D, ... {}` TURN INTO `A = B & C & D & ...`; 
-
-		11. OPTIMIZING `TypeScript` property definitions on classes: 
+		9. OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
 				class C {
 					prop: P
@@ -668,46 +679,6 @@ Order of TODO-elimination:
 									navigate(stream, point)
 								}
 									
-				ME5. 'InputStream' - provide a '.peek(n)' method: 
-					1. looks "forward" n items; 
-					2. add a new interface - PeekableStream
-						2.1. Add a general 'StreamClass' implementation: uses a 'PreallocBuffer' (empty by default), which 
-							keeps the 'next n' items, to be looked up. 
-							1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
-								index appropriately [reflect this...]; 
-    				
-							PROBLEM [PreallocBuffer]: what about the `.next()` calls? 
-								In order to *FREE* the buffer for a sufficiently large `.peek(n)` operation after doing `.next(k)`, 
-									one will have to call `.unshift()` [which is horribly slow]. 
-								THEREFORE, create a class that EXTENDS the `PreallocBuffer`, and use that instead. 
-								Call it `RotationBuffer`, and it will work like: 
-									1. keep the internal array [pre-allocated, as per the `super` methods]
-									2. keep the `.rotation: number = .length - 1 (by default)` index
-										It will correspond to the `[i]` index AFTER WHICH the `.peek(1)` [respectively, `.read(0)`] value, starts. 
-										It goes up to `.peek(.length - .rotation)`, after which it "wraps around", with internal `.array[0]` being `.peek(.length - .rotation + 1)`, and so forth, 
-											up until `.peek(.length)`, which is the last permitted '.peek' for the chosen allocation. 
-									3. keep a method for "moving" '.rotation': 
-										1. .rotate(direction: boolean)
-											if 'true', increases the `.rotation`, 
-											otherwise - decreases it. 
-    				
-					Make 'StreamClassInstance' a `Partial<PeekableStream>` [add the generic `.peek()` definition for case of keeping a small '.peekBuffer' - NEW PARAMETER -- 'peekSize: number = 0']. 
-    				
-					1. Also - add `.next(n: DirectionalPosition = 1)` and `.prev(n: DirectionalPosition = 1)`, 
-						where `n` is the number of items TO SKIP [forwards, or backwards respectively]. 
-							The `this.curr` is returned INVARIABLY. 
-							Note: this will require some heavy rewriting on behalf of the `StreamClass.prototype.next`; 
-							1. ALSO - add the new `JumpStream = (n: number) => (value: Stream) => new StreamParser((input) => input.next/input.prev(n))(value)` [rough]:
-							 	The old `parsers.js` had something similar, except not as well-designed...
-    				
-					2. Also - add the `.has(n)` 'Parser/utils.ts'-utils AS A METHOD, 
-						of positive/negative indexes [with respective optimizations]. 
-    				
-					3. Then - REWRITE the `skip()` util from the `Parser/utils.ts`: 
-						Will, from now on, be doing only some fairly simple conversions (PredicatePosition [/w .boolean] -> Function; 
-							Then call either '.next(f/n)' or '.prev(f/n)'
-						). 
-				
 				UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
 					For a given 'Indexable', it does: 
 
@@ -728,31 +699,7 @@ Order of TODO-elimination:
 						const matched = matchWord(stream, word)
 						skip(stream, matched)
 						if (matched) return wrapper(word)
-				
-				CC1. PreallocArray - a new 'Collection' type: 
-					0. new property - 'lastInd: number = this.value.length'
-					1. extends ArrayCollection
-					2. new method - '.prealloc(n)': 
-						1. If 'this.value.length > n', goto 5, else - continue
-						2. this.value.length = n
-						3. this.lastInd = this.value.length
-						4. Finish
-					3. change method - '.push()': 
-						1. this.value[this.lastInd++] = this.value
-					4. change method - '.get()' [as 'readonly number[]']: 
-						1. return this.lastInd < this.value.length ? this.value.slice(0, this.lastInd) : this.value
-					5. change method - '.move(n)': 
-						1. this.value.length = this.lastIndex
-						2. const lastValue = this.value
-						3. this.value = Array(this.n)
-						4. return lastValue
 
-					Purpose: 
-						1. Providing an interface for user-level preallocation of an array
-						2. Providing 1. together with an integration with the 'Collection' interface
-
-				CC2. RotationBuffer - See `.peek(n)` for more details
-				
 				UM1. [maybe?] Add new `Indexed` module - works on `IIndexed` interface, and derivatives; 
 					In particular, functions/abstractions: 
 
@@ -797,9 +744,157 @@ Order of TODO-elimination:
 
 					ALSO - make `RegEx`/`Eliminator`/`Validator`/`Tokenizer` A PART OF THIS [specifically - export those as submodules/classes]; 
 						
-				TC2. [Serialization] Add `toJSON` methods on `Node`
-					Reason - serialization (mighty powerful thing...); 
-						Reason for v0.3: testing [can't endure-test changing parsers properly without ability for serialization]; 
+				IMPORTANT NOTE: `RegexTokenizer` MUST ALLOW FOR ERROR-HANDLING!!! 
+					More specifically, it takes: 
+						1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
+						2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
+						3. IF none fit, IT PROVIDES AN `error-handling` callback, which the user may employ AS THEY SEE FIT! 
+							More specifically: 
+								1. an instance of an `IErrorHandler`-implementing class, contains a `nextItem()` [optional] and `error()` [mandatory]
+									methods, which work like:
+										1. if `nextItem(stream, info: IErrorInfo)` is present, it passes the respective `tokenStream`
+											to it, and `nextItem` skips the respective nodes until an acceptable one can be 
+												obtained via `stream.curr`. 
+											
+											The return value of `nextItem` is a new interface - `IPositionRange`:
+												it's a pair of positions: [IPosition, IPosition], like [for instance]: 
+													1. [ILineIndex, ILineIndex]
+													2. [MultiIndex, MultiIndex]
+													3. [number, number]
+													4. [IPositionPredicate, IPositionPredicate]
+													...
+
+												TODO: pass an `IPositionRange` to the `LimitedStream`; 
+
+											The returned `IPositionRange` would be correspondently treated 
+												by the interface in question. 
+
+											For the case of `TokenStream` [the "RegexTokenizer"], 
+												it is [basically] a `[ILineIndex, ILineIndex]`. 
+												The `IPositionRange` is then passed to an (optional)
+													`.handleErrRange(this.value.buffer, range: IPositionRange)` method on the 
+													Also, the `this.value.buffer` is the UNDERLYING 
+														buffer on the underlying [used by the 'TokenStream'] `IStream<string>`; 
+														It (basically) allows one to process the given range of positions 
+															"the right way". 
+
+											The `IErrorInfo` is a `number` - error code, 
+												for one of possible errors that can ocurr. 
+												[It's intended that the user will use an `enum` of `number`s for this]
+										2. call error()
+
+								[data access]
+								1. is kept upon a SPECIAL class/interface-instance called `ErrorHandler`: 
+									1. the `handler` has access to various state: 
+										it can be respectively pre-configured  by the user
+									2. `TokenStream` can have the `ErrorHandler` used INJECTABLE
+									3. The "base" `ErrorHandler` would have EXTENSION-CLASSES: 
+										1. [dynamic, via getter] `lineIndex` [use `dig + .value` - would keep the respective "top" Stream, from which to keep counting]
+											Useful for error-throwing inside the `.error()` method; 
+										2. [dynamic, via getter] `errorNode` [use `.value + .curr` - would keep the respective `Stream`, while also SERIALIZING the `Node`, 
+											at which the error has happened and/or use its `.type`/`.value`]; 
+											
+											Useful for error-throwing inside the `.error()` method; 
+										3. [static, via prototype - Configurator pattern] `nextItem()`: 
+											This would be user-defined. 
+											Allows, particularly, to work with
+
+										4. [static, via prototyep - Configurator pattern] `handleErrRange()`: 
+											This is user-defined. 
+
+							ALSO: this behaviour MUST BE INJECTABLE. 
+								Reason: the user may want to keep the tokenizer AS A PROPERTY in their own 
+									`IStream`, which would be responsible for handling errors. 
+						4. add to `samples`: 
+							1. trivialCompose(IndexStream, InputStream)
+							2. trivialCompose(IndexStream, LFStream, InputStream)
+							... [etc, INCLUDING the `LazyBuffer`]; 
+
+						5. generalize the "TokenStream" error-handling mechanism that employs the `ErrorHandler` object, 
+							and employ (generally): 
+								1. uses an `ErrorHandler` with (optional) `handleErrRange`, and (optional) `nextItem`, 
+									and (mandatory, if neither other are present) `error`
+								2. uses an arbitrary `IStream & IBufferized`
+								3. uses an `IErrorDispatcher` - any function that can return a `type IErrorInfo<Type = any> = number | Type`: 
+									more specifically, these (in practice) would be `TableMap`-s, returning either: 
+										1. the `IErrorInfo` (whatever it is)
+										2. the `Type` (on success)
+											There should be a clear `isErrorInfo` predicate to distinct one from the other; 
+											Upon `IErrorInfo`, one has the `ErrorHandler`
+												dealing with it (in the said fashion, working with the `buffer`-ized `Stream`, 
+													which is PROCESSED by the `ErrorDispatcher`, which ITSELF is a 
+														`TableMap` for the current `IStream`; 
+
+														Then, one needs a new kind of `Stream` for this kind of thing. 
+															Call it `ErrorStream(dispatcher)(buffer, pos)` [configurator pattern]
+														
+														Then - one can put it into a `CommonParser`, 
+															and use with a `CommonParser.prototype.init(...)`; 
+															That is where creation of instances of `ErrorHandler`
+																would occur. 
+												). 
+
+									PROBLEM: with using `IErrorInfo = number`: can't handle `Type = number` then. 
+										Solution: allow generics? Think of something, this is nigh-trivial...
+				
+				IMPORTANT NOTE: 
+					after adding `RegexTokenizer` [`TokenStream`], add: 
+						1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
+							Put together with the `isLFSkip` util. 
+							More exactly: 
+								1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
+								2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
+						2. 'isNewlineSkip = or(isLF, isCRLF)'
+							This is for the user to be able to instead of transforming "CRLF -> LF", 
+								just use this as-is [count the newlines]; 
+						3. `LFStream` - a stream returning, for an `isNewline` predicate 
+							[not INewlinePredicate, instead (stream: IStream<string>) => string], 
+								INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
+							
+							Something like: `return isNewline(x)`
+							It's a `StreamParser`
+							Put under 'StreamParser/classes'
+							Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
+								More specifically, to be able to do: 
+									'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
+								MAKE this a proper util.
+				
+				IMPORTANT NOTE: 
+					1. The `TokenStream` must have a candidate-elimination system. 
+						More specifically, consider the following (failing) implementation strategy: 
+							1. one uses `.peek()` [alone] to determine which token to accept next
+							2. due to that, since `peek()` is *limited* by length of the `RotationBuffer`, 
+								one has a limitation on size for tokens-'.value's
+							3. consider good ol' /[a-zA-Z]/; This has arbitrary length. qed
+					2. Thus, one needs a combination of `.peek()` and `.next() + .prev()`. 
+						Thus, we do: 
+							1. peek(n) for MULTIPLE of them
+							2. keep going, until one of: 
+								1. the set of those that can be acceptable is 1
+									1. switch to `.next()/.prev()` [.prev() ONLY if there's an error, and this (ends up) not being a match either]; 
+								2. we run out of `n` for `.peek(n)`
+									1. switch to `.next()/.prev()`
+									2. `.prev()` ONLY when an error is encountered. 
+						
+						Thus, the candidate elimination system: 
+							1. no backtracking
+							2. max-possible-usage of `.peek()`
+								once out-used, `.next(n)` for max `n` for `.peek(n)`, 
+								and then continue with `.next(1)`
+							3. if no matches are found, backtrack to the beginning using `.prev(k)`, with total chars `k`, 
+								and herald error
+							4. else, continue until there's only 1 viable candidate
+							5. IF there are 2+ viable candidates, and one is fully reachable sooner than others, then IT is chosen
+							6. IF no single viable candidate can be produced as per rules 1-5. (id est, there is 2+), 
+								throw an exception [this is a PARSER error, not the input error, end-user shouldn'e need to worry about it, 
+									the parser-maker (direct library user) DOES
+								]
+				
+				IMPORTANT NOTE: 
+					1. `Regex` works with BOTH: 
+						1. string
+						2. IStream<string>: 
+							reason - to allow implementations for faster/lazy algorithms
 
 				TO2. Remove (replace):
 					REASON FOR V0.3: 
@@ -1004,24 +1099,7 @@ Order of TODO-elimination:
 						1. remove the `EliminableCounter`
 						2. remove the `Eliminable` module (as well as Validatable and Tokenizable); 
 						3. remove the `Eliminable` interfaces
-		
-				SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
-					Currently - lacking. 
-					THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
 			
-				PA2. Add LazyBuffer: 
-					This is an 'IBuffer' based off an open file socket, 
-						which reads the file LAZILY 
-							[that is, by keeping it open, and only using a small portion of the file in usage]; 
-
-					Specifically, based off `Readable`/`Stream` APIs of Node. 
-
-					Note: it DOES NOT *dispose* of the file, 
-						so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
-
-					This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
-					This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
-
 				NM1. [DEFINITELY!] Create a 'samples' directory; 
 					Reason for v0.3: 
 						1. 'FlagHash = BitHash + ArrayInternalHash'; 
@@ -1115,31 +1193,33 @@ Order of TODO-elimination:
 
 					The `is` functions are ALL kept inside the special new `types` module.
 
-			Secondary: 	
-				ME2. Add a fast implementation of '.finish' to the 'TreeStream'; 
-					When called for the first time - it SAVES the "last index", THEN - re-uses the computed one on any subsequent '.finish()' calls; 
-					Calls the '.index' on the saved '.lastIndex'; 
-					
+			Secondary: 		
 				ME3. [StreamClass] Iterator Helper functions - '.filter', '.take', ...: 
 					Provide them. 
 					Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
+
+					These will (each) require individual internal-class implementations + public interfaces to use.
+						Reason for "internal" nature of these classes: one doesn't want to allow user to create them on their own
 					
 				RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
 					Namely: 
 						1. intersection: 	/[[...]&&[...]]/v
 						2. subtraction: 	/[[...]--[...]]/v
 						3. string literals: /[q{...}]/v
-			
-				SI16. `chooseMethod` - simplify using `BitHash`; 
 				
-			Minor: 	
-				SI14. Add the ability to bind the custom `.rewind`, `.navigate`, etc implementations ONTO `StreamClass`. 
-					Currently, missing. 
-					Example [ONLY here... others keep binding AS-CURRENTLY-ARE]: TreeStream. 
-						It has to create a SEPARATE class that inherits from the "base" class that is, itself, the `StreamClass({...})`; 
-						After this change, NO MORE will the "binding" happen outside the "base" definition. 
-						Instead, THE ONLY method that is "bound" will be THE `.init` METHOD. 
+				TODO: make all the properties that are currently "public" for both writing and reading, 
+					but are intended to be `readonly` into `accessor varName { get; #set }`
 
+					This creates a public getter and a private setter (precisely the thing). 
+					Particularly, it touches: 
+
+						1. ILinearIndexMap [.values, .keys, etc]
+						2. ILineIndex [.char, .line]
+						3. StreamClass [.value, .buffer, etc]
+						4. all the `protected value` properties [InitializablePattern, etc]; 
+							These are ALSO supposed to only be changeable privately...; 
+
+			Minor: 	
 				DE1. Increase the Library's natural debuggability: 
 					ADD names to all the nameless functions. 
 					This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 	
@@ -1149,22 +1229,6 @@ Order of TODO-elimination:
 					Thus, it will allow a better unification of the library's concepts under the 
 						same terminology. 
 						
-				SI3. [codebase consistency] The '.init' methods for StreamClass DO NOT return 'this': 
-					Fix this - let them. All the other '.init' methods do it; 
-					(This, in particular, generally permits usage like: 
-
-							const t = new InitializedClass().init(...)
-						
-					In cases, when the constructor is NOT the same as the '.init(...)';
-					Likewise, a different semantics [copying] for '.init', when a partial copy is necessary: 
-
-							const t = new InitializedClass(...)
-							const r = t.init(...)
-							t === r // false
-					)
-
-					Then, one'll be able to finally add the missing ': this' output type to the 'Initializable' mini-interface
-
 				TY2. Type simplification - the `array.Pairs` overuse: 
 					Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
 					THIS INCLUDES: 
@@ -1176,9 +1240,6 @@ Order of TODO-elimination:
 
 					Also - IF one does need to use the `Pairs` IN THE END (due to mutability concerns), 
 						USE THAT 
-
-				SI13. DOCUMENTATION: add the `StreamClassSignature` documentation. 
-					It is currently omitted. Reason: implementation detail, the `StreamClass` is not yet properly exposed...
 				
 	5.2.73.
 	5.2.74.	
