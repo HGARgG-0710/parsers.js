@@ -39,13 +39,16 @@ Order of TODO-elimination:
 	TODO [fixed order]:	
 		SI17. `chooseMethod` - simplify using `BitHash`; 		
 
-		TODO: add `UTF32-UTF16` converter (LazyStream/Source); 
-		TODO: add `SourceU8` [UTF8 decoder-IStream]; 
 		TODO: add `SourceU16` [UTF16 decoder-IStream]; 
+
+		TODO: add `.next(n)` for `LazyStream`: 
+			IMPORTANT: ignore the `.direction` property here for the `.next(n: IPredicatePosition)`; 
 				
 		SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
 			Currently - lacking. 
-			THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
+			THIS is supposed to allow the user to do '.next(predicate: IPredicatePosition)' and `.next(i: number)` and `.next()`
+			IMPORTANT: *ignore* the `.direction` of `IPredicatePosition` here, it is *only* relevant to the `.navigate()` method. 
+				Reason: this would lead to overcompilcating the interface
 
 		BIG: .peek() CYCLE: 	
 			ME5. 'InputStream' - provide a '.peek(n)' method: 
@@ -2111,10 +2114,6 @@ FUTURE:
 		4. `serializable`: 
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
-
-		5. `encodings`: 
-			1. Stuff from `LazyStream` - the `u32_u16`, etc
-				A package with various simple wrappers around the `Readable` class interface. 
 
 	3. Ensure that this works with: 
 		1. Deno
