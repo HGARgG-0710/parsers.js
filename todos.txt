@@ -38,22 +38,11 @@
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
 		SI17. `chooseMethod` - simplify using `BitHash`; 		
-			
-		PA2. Add LazyBuffer: 
-			This is an 'IBuffer' based off an open file socket, 
-				which reads the file LAZILY 
-					[that is, by keeping it open, and only using a small portion of the file in usage]; 
 
-			Specifically, based off `Readable`/`Stream` APIs of Node. 
-
-			Note: it DOES NOT *dispose* of the file, 
-				so there should be a SEPARATE method on the `LazyBuffer` for it [call it `LazyBuffer.free()`]; 
-
-			This exists to parse really large files [no need to load them all into memory, like the way the InputStream + UnfreezableString does]. 
-			This, specifically, is used with `InputStream` like `new InputStream(new LazyBuffer(...))`; 
-
-			ALSO: this *may* involve dealing with UTF-8 [more specifically, handling character-sizes and all that...]; 
-			
+		TODO: add `UTF32-UTF16` converter (LazyStream/Source); 
+		TODO: add `SourceU8` [UTF8 decoder-IStream]; 
+		TODO: add `SourceU16` [UTF16 decoder-IStream]; 
+				
 		SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
 			Currently - lacking. 
 			THIS is supposed to allow the user to do '.next(predicate: )' and `.next(i: number)` and `.next()`
@@ -1238,18 +1227,6 @@ Order of TODO-elimination:
 						2. subtraction: 	/[[...]--[...]]/v
 						3. string literals: /[q{...}]/v
 				
-				TODO: make all the properties that are currently "public" for both writing and reading, 
-					but are intended to be `readonly` into `accessor varName { get; #set }`
-
-					This creates a public getter and a private setter (precisely the thing). 
-					Particularly, it touches: 
-
-						1. ILinearIndexMap [.values, .keys, etc]
-						2. ILineIndex [.char, .line]
-						3. StreamClass [.value, .buffer, etc]
-						4. all the `protected value` properties [InitializablePattern, etc]; 
-							These are ALSO supposed to only be changeable privately...; 
-
 			Minor: 	
 				DE1. Increase the Library's natural debuggability: 
 					ADD names to all the nameless functions. 
@@ -2135,6 +2112,10 @@ FUTURE:
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
 
+		5. `encodings`: 
+			1. Stuff from `LazyStream` - the `u32_u16`, etc
+				A package with various simple wrappers around the `Readable` class interface. 
+
 	3. Ensure that this works with: 
 		1. Deno
 		2. Bun
@@ -2144,3 +2125,17 @@ FUTURE:
 			[should be relatively simple, since the package doesn't make almost any use of Node specifically...]
 
 	4. [maybe?] try using JSR for this one [https://jsr.io/]
+
+	5. Standard-dependent [https://github.com/tc39/proposal-grouped-and-auto-accessors]: 
+		This specific proposal absolutely rocks. 
+		TODO: make all the properties that are currently "public" for both writing and reading, 
+			but are intended to be `readonly` into `accessor varName { get; #set }`
+
+			This creates a public getter and a private setter (precisely the thing). 
+			Particularly, it touches: 
+
+				1. ILinearIndexMap [.values, .keys, etc]
+				2. ILineIndex [.char, .line]
+				3. StreamClass [.value, .buffer, etc]
+				4. all the `protected value` properties [InitializablePattern, etc]; 
+					These are ALSO supposed to only be changeable privately...; 

@@ -1,4 +1,5 @@
 export * from "./InputStream/classes.js"
+export * from "./LazyStream/classes.js"
 export * from "./LimitedStream/classes.js"
 export * from "./NestedStream/classes.js"
 export * from "./PredicateStream/classes.js"
