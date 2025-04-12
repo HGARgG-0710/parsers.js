@@ -107,7 +107,7 @@ abstract class PreMultSource extends PreSource {
 		const isTemp = size === FROM_TEMP
 		const currSize = isTemp ? this.temp.length : size
 
-		this.currBuffer = this.charSizes[currSize]!	
+		this.currBuffer = this.charSizes[currSize]!
 		if (!isTemp) PreMultSource.transferTemp(this)
 
 		PreMultSource.readBytes(this, currSize - this.tempRead)
@@ -206,5 +206,15 @@ export class SourceU8 extends MultSource(4, "utf8", 1) {
 
 // * important pre-doc: UTF16
 export class SourceU16 extends MultSource(4, "utf16le", 2, isEven) {
-	
+	protected reader(): number {
+		PreMultSource.fillFirstDefault(this, 2)
+
+		const firstByte = this.temp[0]
+
+		// * U+0000-U+D7FF, U+E000-U+FFFF
+		if (firstByte <= 0xd7 || firstByte >= 0xe0) return FROM_TEMP
+
+		// * surrogate pairs
+		return 4
+	}
 }
