@@ -13,12 +13,8 @@ export interface IStarted {
 	isStart: boolean
 }
 
-export interface IPrevable<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> {
-	prev: (n?: IPosition<Type, SubType, PosType>) => Type
+export interface IPrevable<Type = any> {
+	prev: () => Type
 }
 
 export type IBackward<Type = any> = IStarted & IPrevable<Type>
@@ -48,7 +44,7 @@ export interface IIsStartCurrable {
 }
 
 export interface INextable<Type = any> {
-	next: (i?: IPosition) => Type
+	next: () => Type
 }
 
 export type IStream<

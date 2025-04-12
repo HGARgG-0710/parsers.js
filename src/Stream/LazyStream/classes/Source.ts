@@ -4,11 +4,14 @@ import type { ISource } from "../interfaces.js"
 
 import { openSync, readSync, closeSync, fstatSync } from "node:fs"
 
-import { array, object, boolean } from "@hgargg-0710/one"
+import { array, object, boolean, number } from "@hgargg-0710/one"
 const { numbers } = array
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isEven } = number
 const { T } = boolean
+
+const FROM_TEMP = -1
 
 function readBytes(
 	source: number,
@@ -30,10 +33,6 @@ abstract class PreSource implements ISource {
 	decoded: string;
 
 	["constructor"]: new (url: string) => typeof this
-
-	protected static fillFirstByte(instance: PreSource) {
-		return PreSource.readBytes(instance, 1, 0)
-	}
 
 	static readBytes(
 		instance: PreSource,
@@ -80,7 +79,11 @@ abstract class PreSource implements ISource {
 }
 
 abstract class PreMultSource extends PreSource {
-	protected readonly charSizes: (Buffer | null)[]
+	static fillFirstDefault(instance: PreMultSource, length: number = 1) {
+		readBytes(instance.source, instance.temp, instance.pos, length, 0)
+		instance.pos += length
+		instance.tempRead = length
+	}
 
 	protected static transferTemp(instance: PreMultSource) {
 		instance.temp.copy(instance.currBuffer)
@@ -101,12 +104,19 @@ abstract class PreMultSource extends PreSource {
 	protected abstract decoder(buffer: Buffer): string
 
 	protected pickBuffer(size: number) {
-		this.currBuffer = this.charSizes[size]!
-		PreMultSource.transferTemp(this)
-		PreMultSource.readBytes(this, size - this.temp.length)
+		const isTemp = size === FROM_TEMP
+		const currSize = isTemp ? this.temp.length : size
+
+		this.currBuffer = this.charSizes[currSize]!	
+		if (!isTemp) PreMultSource.transferTemp(this)
+
+		PreMultSource.readBytes(this, currSize - this.tempRead)
 		return this.currBuffer
 	}
 
+	protected readonly charSizes: (Buffer | null)[]
+
+	protected tempRead: number
 	protected lastSize: number
 	protected currBuffer: Buffer
 
@@ -138,24 +148,27 @@ function Source(
 }
 
 function MultSource(
-	tempSize: number,
 	maxSize: number,
 	encoding: BufferEncoding,
+	defaultSize: number,
 	toPick: (size: number) => boolean = T
 ) {
-	assert(tempSize <= maxSize)
+	assert(0 < defaultSize)
+	assert(defaultSize <= maxSize)
 
 	abstract class multSource extends PreMultSource {
-		protected readonly temp = Buffer.alloc(tempSize)
 		protected readonly charSizes = numbers(maxSize).map((size) =>
 			toPick(size + 1) ? Buffer.alloc(size + 1) : null
 		)
+
+		protected readonly temp = this.charSizes[defaultSize - 1]!
 
 		protected decoder: () => string
 	}
 
 	extendPrototype(multSource, {
-		decoder: ConstDescriptor(getBasicDecoderFor(encoding))
+		decoder: ConstDescriptor(getBasicDecoderFor(encoding)),
+		defaultSize: ConstDescriptor(defaultSize)
 	})
 
 	return multSource
@@ -168,14 +181,14 @@ export const Source8 = Source(1, "latin1")
 export const Source16 = Source(2, "ucs2")
 
 // * important pre-doc: UTF8
-export class SourceU8 extends MultSource(1, 4, "utf8") {
+export class SourceU8 extends MultSource(4, "utf8", 1) {
 	protected reader(): number {
-		PreSource.fillFirstByte(this)
+		PreMultSource.fillFirstDefault(this, 1)
 
 		const firstByte = this.temp[0]
 
 		// * U+0000-U+007F
-		if (firstByte >> 7 === 0) return 0
+		if (firstByte >> 7 === 0) return FROM_TEMP
 
 		// * U+0080-U+07FF
 		if (firstByte & 0b11000000) return 1
@@ -192,4 +205,6 @@ export class SourceU8 extends MultSource(1, 4, "utf8") {
 }
 
 // * important pre-doc: UTF16
-export class SourceU16 extends MultSource(2, 4, "utf16le", (x) => x % 2 == 0) {}
+export class SourceU16 extends MultSource(4, "utf16le", 2, isEven) {
+	
+}

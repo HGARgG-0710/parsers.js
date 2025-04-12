@@ -42,4 +42,4 @@ extendPrototype(LazyStream, {
 	[Symbol.iterator]: ConstDescriptor(streamIterator)
 })
 
-export * as Source from "./Source.js"
+export * as Source from "./classes/Source.js"
