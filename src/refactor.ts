@@ -35,7 +35,7 @@ export function makeDelegate(
 	classObj: any,
 	properties: string[],
 	delegateName: string
-): Function {
+): new (...args: any[]) => any {
 	const proto = propertyDescriptors(classObj.prototype)
 	const protoKeys = keys(proto)
 

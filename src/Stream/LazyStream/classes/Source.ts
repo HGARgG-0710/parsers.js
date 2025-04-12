@@ -5,6 +5,7 @@ import type { ISource } from "../interfaces.js"
 import { openSync, readSync, closeSync, fstatSync } from "node:fs"
 
 import { array, object, boolean, number } from "@hgargg-0710/one"
+import { makeDelegate } from "../../../refactor.js"
 const { numbers } = array
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
@@ -117,13 +118,16 @@ abstract class PreMultSource extends PreSource {
 	protected readonly charSizes: (Buffer | null)[]
 
 	protected tempRead: number
-	protected lastSize: number
 	protected currBuffer: Buffer
 
 	nextChar() {
 		if (this.hasChars())
 			this.decoded = this.decoder(this.pickBuffer(this.reader()))
 	}
+}
+
+abstract class _PreMultSource extends PreMultSource {
+	protected decoder: (buffer: Buffer) => string
 }
 
 function Source(
@@ -152,7 +156,7 @@ function MultSource(
 	encoding: BufferEncoding,
 	defaultSize: number,
 	toPick: (size: number) => boolean = T
-) {
+): new (url: string) => _PreMultSource {
 	assert(0 < defaultSize)
 	assert(defaultSize <= maxSize)
 
@@ -171,7 +175,11 @@ function MultSource(
 		defaultSize: ConstDescriptor(defaultSize)
 	})
 
-	return multSource
+	return makeDelegate(
+		multSource,
+		["tempRead", "currBuffer", "charSizes", "temp"],
+		"delegate"
+	)
 }
 
 // * important pre-doc: Latin-1 and ASCII
