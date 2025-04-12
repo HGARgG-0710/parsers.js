@@ -39,17 +39,11 @@ Order of TODO-elimination:
 	TODO [fixed order]:	
 		SI17. `chooseMethod` - simplify using `BitHash`; 		
 
-		TODO: add `SourceU16` [UTF16 decoder-IStream]; 
-
-		TODO: add `.next(n)` for `LazyStream`: 
-			IMPORTANT: ignore the `.direction` property here for the `.next(n: IPredicatePosition)`; 
+		TODO: add `.navigate(n)` for `LazyStream` [only positive numbers - forward-iteration + IPredicatePosition-s - ignores `.direction`, forward iteration only]: 
+			Also: 
+				1. The `ISource`s must implement `nextChar(n?: number = 1)`; 
+				2. The `IPositionPredicate` is handled as a part of `LazyStream` implementation
 				
-		SI16. Add the `.prev(n)`, `.next(n)` for `StreamClass`: 
-			Currently - lacking. 
-			THIS is supposed to allow the user to do '.next(predicate: IPredicatePosition)' and `.next(i: number)` and `.next()`
-			IMPORTANT: *ignore* the `.direction` of `IPredicatePosition` here, it is *only* relevant to the `.navigate()` method. 
-				Reason: this would lead to overcompilcating the interface
-
 		BIG: .peek() CYCLE: 	
 			ME5. 'InputStream' - provide a '.peek(n)' method: 
 				1. looks "forward" n items; 
@@ -114,6 +108,10 @@ Order of TODO-elimination:
 					2. Providing 1. together with an integration with the 'Collection' interface
 
 			CC2. RotationBuffer - See `.peek(n)` for more details
+
+			ME6. `LazyStream` - add `peek(n)`, with `n <= peekSize`
+				`peekSize` - new parameter [either constructor, or configurator pattern, decide which...]; 
+				Since it's not a method, one very well may want to do it the constructor way... 
 				
 		Fix docs: 
 			1. classes [add docs]: 
@@ -1171,6 +1169,92 @@ Order of TODO-elimination:
 					The `is` functions are ALL kept inside the special new `types` module.
 
 				PA3. A new class - `LazyTree` [don't be deceived - it's a 'Stream']: 
+					DESIGN: 
+						1. A Bottom-Up parser
+						2. Has fields: 
+							1. .top [protected]: currently used `LazyNode`
+								It gets to be replaced by the topmost `LazyNode`.
+								`LazyNode` is a node which, itself, is a `Stream` of nodes. 
+								Types of `LazyNodes` gets assigned to the current `.top` `LazyNode` instance 
+									via "choosers" (pre-defined in `.tree` on construction). 
+								
+								The moment that one picks a new `top` is the `reduce` operation. 
+								The `shift` operation is done relative to `low` via (either) 
+									one of the current descendants of `.top` (the lowest of which is `.low`), 
+										or the `.low` itself [when one needs to move a higher-level `LazyNode`]
+
+								A `LazyNode` contains: 	
+									1. `children` - a `Stream`, items in which are constructed using internal mechanism using the `.value` items. 
+										Thus, a `.value` stream is transformed using an INTERNAL `Stream`, giving the publicly available lazy children. 
+										The `children` are the items iterated in the `DFS` of the `LazyTree`. 
+
+										COMMON PATTERNS available for construction of `LazyNode` [to add/present]: 
+
+											1. `LimitedStream` - exists
+											2. `FiniteStream` [or `ParentStream`] - ADD: 
+												1. consists of a finite collection of sub-streams, 
+													each of which is (Itself) gets to use parent's `.value`; 
+
+											3. composition [arbitrary, relies on `value`]; 
+											4. `StreamParser`
+											5. ...etc [all the other current ones]
+
+									2. `value` [protected] - internal, for obtaining new tokens in `children`
+							2. .low [protected]: the initially used `IStream` with items of 
+								some `Type`. Usually is a `TokenStream` in practical contexts; 
+							3. .tree [protected readonly]: 
+								This is a collection of "choosers" for each possible ocurring `type`
+									within each of the `.value` streams. 
+
+								Workflow: 
+
+									1. Start with `.low.curr` - first item
+									2. Map it to respective `LazyNode` type, of which an instance is created 
+										1. Done using `.type` and the "choosers" [possibly - as an abstraction over `TableMap`]
+									3. Make the instance new `.top`, assign previous `.top` to its `.value`
+									4. Repeat the process 2.,3. for current `.top`, until no more reductions can be made [Reduce]
+									5. DFS phase: 
+										1. return .top [assigned as first '.curr' of `LazyTree`]
+										2. return .top.children.curr [assigned as second `.curr` of `LazyTree`]
+										3. return .top.children.curr.children.curr
+										...
+										n. [bottom] return low.curr
+									6. 'low.next()'
+									7. DFS: 
+										1. return `low.curr` [second]
+										...
+										n. return `low.curr` [`low.isCurrEnd()`]
+									8. Find next `.value` in the chain that is NOT `.isEnd`
+									9. Call `.next()` on it
+									10. Repeat, until all are exhausted [up until the topmost `LazyNode`]: 
+										1. RULE [important]: topmost `LazyNode` MUST NOT be exhaustible, that is: 
+											if it is EXHAUSTED, then one is finished. 
+
+											That is, one must know the `LazyTree`'s ULTIMATE DEPTH from the very beginning. 
+												This imposes some restrictions on how it can be structured. 
+
+											IMPORTANT NOTE: 
+												when one has various LOOKAHEAD scenarios, such as: 
+
+													x = tz
+													z = y | yz
+													
+												[requires infinite lookahead]
+
+												One gets into a bit of a pickle. 
+												Then, it is NECESSARY TO ENSURE parsing of THE WHOLE 
+													sequence of the infinite lookahead. 
+												Particularly, it is A LOT more complex to build the 
+													`LazyTree` parser than it is a more conventional 
+														persistent `INode`-based one. 
+										2. Hence, one does `.top.next()`. 
+										3. REPEAT for new `.top.curr`: 
+											obtained the same way, BUILT from `low`, UPWARDS, 
+												with a GUARANTEED fixed `.top` [established in the *BEGINNING*]. 
+
+						3. Behaviour: 
+							1. '.top'
+
 					Consider this - one is given a task of transpiling a VERY large file, 
 						and then putting it into another file. 
 					Now, it's possible for one to READ IT (using `LazyBuffer`), and to lazily PARSE IT
