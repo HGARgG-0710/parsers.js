@@ -1,5 +1,5 @@
 import type { ICollection } from "./interfaces.js"
-import { IterableCollection } from "src/internal/Collection/IterableCollection.js";
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 
 import { array } from "@hgargg-0710/one"
 
@@ -17,6 +17,11 @@ export class ArrayCollection<Type = any>
 
 	push(...x: Type[]) {
 		this.value.push(...x)
+		return this
+	}
+
+	init(value: Type[]) {
+		this.value = value
 		return this
 	}
 
