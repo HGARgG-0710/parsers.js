@@ -1,4 +1,4 @@
-import type { IDynamicBuffer, IIndexed } from "../../../interfaces.js"
+import type { IDynamicBuffer } from "../../../interfaces.js"
 
 import { array, inplace } from "@hgargg-0710/one"
 import { TypicalBuffer } from "./TypicalBuffer.js"
@@ -39,9 +39,11 @@ export class CallbackBuffer<Type = any>
 		return this
 	}
 
-	init(value?: IIndexed<Type> | undefined): this {
-		super.init(value)
-		if (value) this.registerChange()
+	init(value?: Type[] | undefined): this {
+		if (value) {
+			this.value = value
+			this.registerChange()
+		}
 		return this
 	}
 
