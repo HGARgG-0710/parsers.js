@@ -24,7 +24,7 @@ export namespace methods {
 
 	export function isCurrEnd<Type = any>(this: IPredicateStream<Type>) {
 		this.lookAhead = this.prod()
-		return this.value!.isCurrEnd() || !this.predicate(this, this.pos)
+		return this.value!.isCurrEnd() 
 	}
 
 	export function init<Type = any>(
