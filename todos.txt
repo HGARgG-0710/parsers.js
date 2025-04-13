@@ -18,30 +18,11 @@
 	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
-	2.77. Do research [learn LR/LALR-parsing properly]: https://en.wikipedia.org/wiki/LR_parser#
-		Compare with the stuff the library currently has, (possibly) implement 
-			some of the stuff from there... (specifically - the LALR parsers, if they aren't already present)
-		Also, See: https://stackoverflow.com/a/24177215
-		Also, See: https://en.wikipedia.org/wiki/Bottom-up_parsing
-			ESPECIALLY: https://en.wikipedia.org/wiki/Shift-reduce_parser
-				This describes how precisely the Shift-reduce parsers (most popular Bottom-Up parsers out there) work. 
-				An LR-parser is a kind of a Shift-reduce parser. 
-			And, finally: https://en.wikipedia.org/wiki/GLR_parser
-			Note: this is the thing that's currently missing from the library. 
-				It's extremely easy and opportune to make Top-Down recursive parsers with it, 
-					however the 'Bottom-Up' approach is still missing
-
-		IMPORTANT NOTE [add to docs]: the 'StreamParser' is a kind of mean for creating a PARSER-COMBINATOR 
-			(meaning: it allows one to "chain" parsing layers together to form a parser, IMPLICITLY ESTABLISHING 
-				the order of rule-application to the given source). 
-
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		TODO: add `.navigate(n)` for `LazyStream` [only positive numbers - forward-iteration + IPredicatePosition-s - ignores `.direction`, forward iteration only]: 
-			Also: 
-				1. The `ISource`s must implement `nextChar(n?: number = 1)`; 
-				2. The `IPositionPredicate` is handled as a part of `LazyStream` implementation
-				
+		TODO: add `nextChar(n: number)` implementation for `ISource`-implementing classes; 
+			1. The `ISource`s must implement `nextChar(n?: number = 1)`; 
+	
 		BIG: .peek() CYCLE: 	
 			ME5. 'InputStream' - provide a '.peek(n)' method: 
 				1. looks "forward" n items; 
