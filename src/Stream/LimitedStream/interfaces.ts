@@ -9,15 +9,14 @@ import type {
 	ISupered
 } from "../../interfaces.js"
 
-import type {
-	ILookaheadHaving,
-	ISinglePositionLookahead
-} from "../PredicateStream/interfaces.js"
+import type { ILookaheadHaving } from "../interfaces.js"
+import type { IWithLookahead } from "../interfaces.js"
 
 import type {
 	IDirectionalPosition,
 	IIsEndCurrable,
-	IIsStartCurrable
+	IIsStartCurrable,
+	IProddable
 } from "../interfaces.js"
 
 export type ILimitedUnderStream<Type = any> = IReversibleStream<
@@ -39,7 +38,8 @@ export type ILimitedStreamConstructor<Type = any> = new (
 	buffer?: IFreezableBuffer<Type>
 ) => ILimitedStream<Type>
 
-export type ILimitedStream<Type = any> = ISinglePositionLookahead<Type> &
+export type ILimitedStream<Type = any> = IProddable<Type> &
+	IWithLookahead<Type> &
 	ILookaheadHaving &
 	ISupered &
 	IReversedStreamClassInstance<

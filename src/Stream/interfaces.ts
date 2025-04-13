@@ -47,6 +47,18 @@ export interface INextable<Type = any> {
 	next: () => Type
 }
 
+export interface IProddable<Type = any> {
+	prod: () => Type
+}
+
+export interface IWithLookahead<Type> {
+	lookAhead: Type
+}
+
+export interface ILookaheadHaving {
+	hasLookAhead: boolean
+}
+
 export type IStream<
 	Type = any,
 	SubType = any,

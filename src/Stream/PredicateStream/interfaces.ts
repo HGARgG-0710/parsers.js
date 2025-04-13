@@ -1,4 +1,4 @@
-import type { IReversibleStream } from "../../interfaces.js"
+import type { IProddable, IReversibleStream } from "../../interfaces.js"
 import type { IPredicatePosition } from "../Position/interfaces.js"
 import type { IPattern } from "src/interfaces.js"
 
@@ -6,15 +6,8 @@ import type { IIsEndCurrable } from "../../interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 
 import type { ICopiable, IFreezableBuffer, ISupered } from "../../interfaces.js"
-
-export interface ILookaheadHaving {
-	hasLookAhead: boolean
-}
-
-export interface ISinglePositionLookahead<Type = any> {
-	prod: () => Type
-	lookAhead: Type
-}
+import type { IWithLookahead } from "../interfaces.js"
+import type { ILookaheadHaving } from "../interfaces.js"
 
 export type IUnderPredicateStream<Type = any> = IReversibleStream<Type> &
 	IIsEndCurrable &
@@ -32,7 +25,8 @@ export type IPredicateStream<Type = any> = IStreamClassInstance<
 	IPredicateStreamInitSignature<Type>
 > &
 	ISupered &
-	ISinglePositionLookahead<Type> &
+	IProddable<Type> &
+	IWithLookahead<Type> &
 	IPattern<IUnderPredicateStream<Type>> &
 	ILookaheadHaving & {
 		predicate: IPredicatePosition<Type>
