@@ -1,17 +1,31 @@
-import type { IEndableStream, ISource } from "../interfaces.js"
+import type {
+	IDirectionalPosition,
+	IEndableStream,
+	INavigable,
+	ISource
+} from "../interfaces.js"
 
 import { streamIterator } from "../StreamClass/methods/iter.js"
 
-import { object } from "@hgargg-0710/one"
+import { object, type } from "@hgargg-0710/one"
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isNumber } = type
 
-export class LazyStream implements IEndableStream<string> {
+export class LazyStream implements IEndableStream<string>, INavigable<string> {
 	curr: string
 	isEnd: boolean = false;
 
 	["constructor"]: new (source: ISource) => typeof this;
 	[Symbol.iterator]: () => Generator<string>
+
+	protected nextDecoded() {
+		this.source.nextChar()
+	}
+
+	protected transferDecoded() {
+		return (this.curr = this.source.decoded)
+	}
 
 	isCurrEnd() {
 		const isLast = !this.source.hasChars()
@@ -20,8 +34,8 @@ export class LazyStream implements IEndableStream<string> {
 	}
 
 	baseNextIter() {
-		this.source.nextChar()
-		this.curr = this.source.decoded
+		this.nextDecoded()
+		this.transferDecoded()
 	}
 
 	next() {
@@ -29,6 +43,12 @@ export class LazyStream implements IEndableStream<string> {
 		if (this.isCurrEnd()) this.isEnd = true
 		else this.baseNextIter()
 		return curr
+	}
+
+	navigate(pos: IDirectionalPosition) {
+		if (isNumber(pos)) this.source.nextChar(pos)
+		else while (!pos(this)) this.nextDecoded()
+		return this.transferDecoded()
 	}
 
 	copy() {
