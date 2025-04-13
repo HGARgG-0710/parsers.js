@@ -8,6 +8,8 @@ import { lastIndex } from "../../../Collection/Buffer/refactor.js"
 import { end, readBuffer } from "../refactor.js"
 
 import { uniFinish } from "src/Stream/utils.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * possible 'finish' methods
 
@@ -40,11 +42,13 @@ function posBufferFinish<Type = any>(
 	return uniFinish(this)
 }
 
-const methodList = [finish, posFinish, bufferFinish, posBufferFinish]
+const MethodHash = new BitHash(
+	new ArrayInternal([finish, posFinish, bufferFinish, posBufferFinish])
+)
 
-export function chooseMethod<Type = any>(
+export function chooseMethod(
 	hasPosition: boolean = false,
 	hasBuffer: boolean = false
 ) {
-	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
+	return MethodHash.index([hasPosition, hasBuffer])
 }

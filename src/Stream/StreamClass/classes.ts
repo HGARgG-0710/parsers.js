@@ -108,13 +108,13 @@ function makeStreamClass<
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
 	extend({
 		navigate: ConstDescriptor(
-			navigateOverride || navigate.chooseMethod<Type>(pos, buffer)
+			navigateOverride || navigate.chooseMethod(pos, buffer)
 		),
 		rewind: ConstDescriptor(
-			rewindOverride || rewind.chooseMethod<Type>(pos, buffer)
+			rewindOverride || rewind.chooseMethod(pos, buffer)
 		),
 		finish: ConstDescriptor(
-			finishOverride || finish.chooseMethod<Type>(pos, buffer)
+			finishOverride || finish.chooseMethod(pos, buffer)
 		)
 	})
 

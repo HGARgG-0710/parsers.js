@@ -37,8 +37,6 @@
 
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		SI17. `chooseMethod` - simplify using `BitHash`; 		
-
 		TODO: add `.navigate(n)` for `LazyStream` [only positive numbers - forward-iteration + IPredicatePosition-s - ignores `.direction`, forward iteration only]: 
 			Also: 
 				1. The `ISource`s must implement `nextChar(n?: number = 1)`; 

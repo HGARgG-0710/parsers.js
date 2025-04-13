@@ -14,6 +14,8 @@ import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../utils.js"
 import { createState, start } from "../refactor.js"
 import type { IThisMethod } from "../../../refactor.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * types
 
@@ -347,7 +349,9 @@ function generateInitMethods<Type = any>(
 	]
 }
 
-const methodList = generateInitMethods<NonNullable<Summat>>(initialize)
+const MethodHash = new BitHash(
+	new ArrayInternal(generateInitMethods<NonNullable<Summat>>(initialize))
+)
 
 export function chooseMethod(
 	hasPosition: boolean = false,
@@ -355,7 +359,5 @@ export function chooseMethod(
 	hasState: boolean = false,
 	isPattern: boolean = false
 ) {
-	return methodList[
-		+hasPosition | (+hasBuffer << 1) | (+hasState << 2) | (+isPattern << 3)
-	]
+	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

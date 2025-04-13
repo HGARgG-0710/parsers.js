@@ -12,6 +12,8 @@ import { direction } from "../../Position/utils.js"
 import { positionDecrement } from "../../Position/refactor.js"
 
 import { type } from "@hgargg-0710/one"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 const { isNumber } = type
 
 /**
@@ -53,11 +55,18 @@ function posBufferNavigate<Type = any>(
 	return this.curr
 }
 
-const methodList = [navigate, posNavigate, bufferNavigate, posBufferNavigate]
+const MethodHash = new BitHash(
+	new ArrayInternal([
+		navigate,
+		posNavigate,
+		bufferNavigate,
+		posBufferNavigate
+	])
+)
 
-export function chooseMethod<Type = any>(
+export function chooseMethod(
 	hasPosition: boolean = false,
 	hasBuffer: boolean = false
 ) {
-	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
+	return MethodHash.index([hasPosition, hasBuffer])
 }

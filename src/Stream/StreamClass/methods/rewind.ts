@@ -7,6 +7,8 @@ import { uniRewind } from "src/Stream/utils.js"
 import { start } from "../refactor.js"
 import { positionNull } from "../../Position/refactor.js"
 import { readFirst } from "../../../Collection/Buffer/refactor.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * possible '.rewind' methods
 
@@ -38,11 +40,13 @@ function posBufferRewind<Type = any>(
 	return buffer.size ? readFirst(buffer) : this.curr
 }
 
-const methodList = [rewind, posRewind, bufferRewind, posBufferRewind]
+const MethodHash = new BitHash(
+	new ArrayInternal([rewind, posRewind, bufferRewind, posBufferRewind])
+)
 
-export function chooseMethod<Type = any>(
+export function chooseMethod(
 	hasPosition: boolean = false,
 	hasBuffer: boolean = false
 ) {
-	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
+	return MethodHash.index([hasPosition, hasBuffer])
 }
