@@ -16,13 +16,13 @@ import type { IPattern } from "src/interfaces.js"
 import { StreamClass } from "../StreamClass/classes.js"
 import { withSuper } from "../../refactor.js"
 
-import { object, functional } from "@hgargg-0710/one"
+import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
-const { negate, has } = functional
 
-import { methods } from "./methods.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
+
+import { methods } from "./methods.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(
@@ -97,16 +97,4 @@ export function PredicateStream<Type = any>(
 	): IPredicateStreamConstructor<Type> {
 		return _PredicateStream([predicate, hasPosition, hasBuffer])
 	}
-}
-
-function makeDelimitedStream<Type = any>(delims: Type[]) {
-	return PredicateStream(negate(has(new Set(delims))))
-}
-
-const _DelimitedStream = new Autocache(new ArrayMap(), makeDelimitedStream)
-
-export function DelimitedStream<Type = any>(
-	...delims: Type[]
-): IPredicateStreamConstructor<Type> {
-	return _DelimitedStream(delims)
 }
