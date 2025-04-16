@@ -20,9 +20,6 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		TODO: add `nextChar(n: number)` implementation for `ISource`-implementing classes; 
-			1. The `ISource`s must implement `nextChar(n?: number = 1)`; 
-			
 		TODO: StreamClass - encapsulation violation: 
 			The "supposedly" public methods like `baseNextIter`, which REALLY SHOULDN'T 
 				by public, are now joined by an actual PROPERTY [RotationBuffer-containing one, specifically, `protected`]. 

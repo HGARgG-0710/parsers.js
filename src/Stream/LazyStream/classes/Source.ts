@@ -35,13 +35,13 @@ abstract class PreSource implements ISource {
 
 	["constructor"]: new (url: string) => typeof this
 
-	static readBytes(
-		instance: PreSource,
-		length: number = 1,
-		offset: number = 0
-	) {
-		readBytes(instance.source, instance.temp, instance.pos, length, offset)
-		instance.pos += length
+	protected advance(n: number) {
+		this.pos += n
+	}
+
+	protected readBytes(length: number = 1, offset: number = 0) {
+		readBytes(this.source, this.temp, this.pos, length, offset)
+		this.advance(length)
 	}
 
 	protected pos: number = 0
@@ -58,7 +58,8 @@ abstract class PreSource implements ISource {
 		return this.size > this.pos
 	}
 
-	nextChar() {
+	nextChar(n = 1) {
+		if (n > 0) this.advance(n - 1)
 		if (this.hasChars()) {
 			this.reader()
 			this.decoded = this.decoder(this.temp)
@@ -80,26 +81,26 @@ abstract class PreSource implements ISource {
 }
 
 abstract class PreMultSource extends PreSource {
-	static fillFirstDefault(instance: PreMultSource, length: number = 1) {
-		readBytes(instance.source, instance.temp, instance.pos, length, 0)
-		instance.pos += length
-		instance.tempRead = length
+	protected fillFirstDefault(length: number = 1) {
+		readBytes(this.source, this.temp, this.pos, length, 0)
+		this.advance(length)
+		this.tempRead = length
 	}
 
 	protected static transferTemp(instance: PreMultSource) {
 		instance.temp.copy(instance.currBuffer)
 	}
 
-	static readBytes(instance: PreMultSource, length: number = 1) {
+	protected readBytes(length: number = 1) {
 		readBytes(
-			instance.source,
-			instance.currBuffer,
-			instance.pos,
+			this.source,
+			this.currBuffer,
+			this.pos,
 			length,
-			instance.temp.length
+			this.temp.length
 		)
 
-		instance.pos += length
+		this.advance(length)
 	}
 
 	protected abstract decoder(buffer: Buffer): string
@@ -111,7 +112,7 @@ abstract class PreMultSource extends PreSource {
 		this.currBuffer = this.charSizes[currSize]!
 		if (!isTemp) PreMultSource.transferTemp(this)
 
-		PreMultSource.readBytes(this, currSize - this.tempRead)
+		this.readBytes(currSize - this.tempRead)
 		return this.currBuffer
 	}
 
@@ -120,7 +121,8 @@ abstract class PreMultSource extends PreSource {
 	protected tempRead: number
 	protected currBuffer: Buffer
 
-	nextChar() {
+	nextChar(n = 1) {
+		if (n > 0) this.advance(n - 1)
 		if (this.hasChars())
 			this.decoded = this.decoder(this.pickBuffer(this.reader()))
 	}
@@ -142,7 +144,7 @@ function Source(
 
 	extendPrototype(source, {
 		reader: ConstDescriptor(function (this: PreSource) {
-			PreSource.readBytes(this, maxSize)
+			this.readBytes(maxSize)
 			return maxSize
 		}),
 		decoder: ConstDescriptor(getBasicDecoderFor(encoding))
@@ -191,7 +193,7 @@ export const Source16 = Source(2, "ucs2")
 // * important pre-doc: UTF8
 export class SourceU8 extends MultSource(4, "utf8", 1) {
 	protected reader(): number {
-		PreMultSource.fillFirstDefault(this, 1)
+		this.fillFirstDefault(1)
 
 		const firstByte = this.temp[0]
 
@@ -215,7 +217,7 @@ export class SourceU8 extends MultSource(4, "utf8", 1) {
 // * important pre-doc: UTF16
 export class SourceU16 extends MultSource(4, "utf16le", 2, isEven) {
 	protected reader(): number {
-		PreMultSource.fillFirstDefault(this, 2)
+		this.fillFirstDefault(2)
 
 		const firstByte = this.temp[0]
 
