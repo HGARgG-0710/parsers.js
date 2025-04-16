@@ -6,7 +6,7 @@ import { IterableCollection } from "src/internal/Collection/IterableCollection.j
 import { array } from "@hgargg-0710/one"
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
-	isFrozen: boolean = false;
+	isFrozen = false;
 
 	["constructor"]: new (value?: IIndexed<Type>) => typeof this
 

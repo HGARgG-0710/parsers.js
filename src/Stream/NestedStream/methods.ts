@@ -52,7 +52,7 @@ export namespace methods {
 		this: INestedStream<Type, IndexType>
 	) {
 		return new this.constructor(
-			this.value!.copy(),
+			this.value?.copy(),
 			this.assignedIndex,
 			this.buffer?.copy()
 		)

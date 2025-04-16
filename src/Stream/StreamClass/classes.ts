@@ -154,6 +154,14 @@ export const StreamClass = new Autocache(
 ) => IStreamClass<Type, SubType, PosType>
 
 const valueIsEnd = valuePropDelegate("isEnd")
-export const DefaultEndStream = <Type = any>(
+export const DefaultEndStream = <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
 	signature: Omit<IStreamClassSignature<Type>, "defaultIsEnd">
-) => StreamClass({ defaultIsEnd: valueIsEnd, ...signature })
+) =>
+	StreamClass<Type, SubType, PosType>({
+		defaultIsEnd: valueIsEnd,
+		...signature
+	})

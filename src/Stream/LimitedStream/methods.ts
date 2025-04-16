@@ -33,13 +33,9 @@ export namespace methods {
 
 	export function isCurrStart<Type = any>(this: ILimitedStream<Type>) {
 		const { value, from } = this
-		return (
-			value!.isCurrStart() ||
-			positionEqual(
-				value! as ILimitedUnderStream<Type> &
-					IPosed<IDirectionalPosition>,
-				from
-			)
+		return positionEqual(
+			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
+			from
 		)
 	}
 
@@ -69,7 +65,7 @@ export namespace methods {
 		this: ILimitedStream<Type>
 	): ILimitedStream<Type> {
 		return new this.constructor(
-			this.value!.copy(),
+			this.value?.copy(),
 			this.from,
 			this.to,
 			this.buffer

@@ -14,7 +14,7 @@ const { isNumber } = type
 
 export class LazyStream implements IEndableStream<string>, INavigable<string> {
 	curr: string
-	isEnd: boolean = false;
+	isEnd = false;
 
 	["constructor"]: new (source: ISource) => typeof this;
 	[Symbol.iterator]: () => Generator<string>

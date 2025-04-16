@@ -26,8 +26,8 @@ import { methods } from "./methods.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
+	hasPosition = false,
+	hasBuffer = false
 ) =>
 	StreamClass<Type>({
 		...baseMethods,
@@ -38,8 +38,8 @@ const PredicateStreamBase = <Type = any>(
 
 function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 	return function (
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false
+		hasPosition = false,
+		hasBuffer = false
 	): IPredicateStreamConstructor<Type> {
 		const baseClass = PredicateStreamBase(hasPosition, hasBuffer)
 		class predicateStream

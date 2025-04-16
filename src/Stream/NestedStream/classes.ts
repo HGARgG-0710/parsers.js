@@ -25,10 +25,7 @@ import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { init, copy, ...baseMethods } = methods
 
-const NestedStreamBase = <Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
-) =>
+const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>
 	DefaultEndStream<Type | INestedStream<Type>>({
 		...baseMethods,
 		hasPosition: hasPosition,
@@ -45,7 +42,7 @@ function makeNestedStream<Type = any, IndexType = any>(
 	Type,
 	IndexType
 > {
-	return function (hasPosition: boolean = false, hasBuffer: boolean = false) {
+	return function (hasPosition = false, hasBuffer = false) {
 		const baseClass = NestedStreamBase(hasPosition, hasBuffer)
 		class NestedStream
 			extends baseClass
@@ -109,8 +106,8 @@ export function NestedStream<Type = any, IndexType = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate<Type>, IndexType>
 ) {
 	return function (
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false
+		hasPosition = false,
+		hasBuffer = false
 	): INestedStreamConstructor<Type, IndexType> {
 		return _NestedStream([nestedTypes, hasPosition, hasBuffer])
 	}

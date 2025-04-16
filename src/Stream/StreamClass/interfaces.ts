@@ -10,7 +10,7 @@ import type {
 } from "../interfaces.js"
 
 import type { IStarted } from "../interfaces.js"
-import type { ICopiable, IPattern } from "../../interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
 import type { ConstructorHaving } from "../../refactor.js"
 import type { IConstructor } from "./refactor.js"
 
@@ -86,15 +86,7 @@ export type IStreamClass<
 	SubType = any,
 	PosType extends IPosition<Type, SubType, PosType> = number
 > =
-	| IConstructor<[], IStreamClassInstance<Type, SubType, PosType>>
-	| IConstructor<
-			[any?],
-			IStreamClassInstance<Type, SubType, PosType> & IPattern<SubType>
-	  >
-	| IConstructor<[], IReversedStreamClassInstance<Type, SubType, PosType>>
-	| IConstructor<
-			[any?],
-			IReversedStreamClassInstance<Type, SubType> & IPattern<SubType>
-	  >
+	| IConstructor<[any?], IStreamClassInstance<Type, SubType, PosType>>
+	| IConstructor<[any?], IReversedStreamClassInstance<Type, SubType, PosType>>
 
 export type * from "./methods/init.js"

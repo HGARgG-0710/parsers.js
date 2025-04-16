@@ -275,8 +275,8 @@ const nextPrevDescriptors = ([next, prev]) => ({
 
 export function chooseMethod<Type = any>(
 	currGetter?: () => Type,
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
+	hasPosition = false,
+	hasBuffer = false
 ) {
 	return nextPrevDescriptors(
 		MethodHash.index([!!currGetter, hasPosition, hasBuffer])

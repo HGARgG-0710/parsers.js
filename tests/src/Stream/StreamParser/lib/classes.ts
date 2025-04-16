@@ -18,7 +18,7 @@ const { and } = functional
 const { structCheck } = object
 const { isFunction } = type
 
-export function GeneratedStreamTokenizerTest(hasPosition: boolean = false) {
+export function GeneratedStreamTokenizerTest(hasPosition= false) {
 	const StreamTokenizerGeneratedSuite = GeneratedStreamClassSuite(
 		false,
 		hasPosition

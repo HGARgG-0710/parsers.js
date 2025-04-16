@@ -44,9 +44,6 @@ const MethodHash = new BitHash(
 	new ArrayInternal([rewind, posRewind, bufferRewind, posBufferRewind])
 )
 
-export function chooseMethod(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
-) {
+export function chooseMethod(hasPosition = false, hasBuffer = false) {
 	return MethodHash.index([hasPosition, hasBuffer])
 }

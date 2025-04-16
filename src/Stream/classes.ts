@@ -1,6 +1,7 @@
 export * from "./InputStream/classes.js"
 export * from "./LazyStream/classes.js"
 export * from "./LimitedStream/classes.js"
+export * from "./MarkedStream/classes.js"
 export * from "./NestedStream/classes.js"
 export * from "./PredicateStream/classes.js"
 export * from "./StreamClass/classes.js"

@@ -27,7 +27,7 @@ type NestedStreamTestSignature = StreamClassTestSignature & {
 	currNestedTest: NestedStreamCurrNestedTreeList
 }
 
-export function GeneratedNestedStreamTest(hasPosition: boolean = false) {
+export function GeneratedNestedStreamTest(hasPosition = false) {
 	const NestedStreamGeneratedSuite = GeneratedStreamClassSuite(
 		false,
 		hasPosition

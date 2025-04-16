@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IConstructor } from "../StreamClass/refactor.js"
+import { valueCurr, type IConstructor } from "../StreamClass/refactor.js"
 import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
@@ -16,7 +16,7 @@ import type {
 } from "../Position/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
-import { valuePropDelegate, withSuper } from "../../refactor.js"
+import { withSuper } from "../../refactor.js"
 
 import { object, type } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
@@ -30,11 +30,9 @@ import { Stream } from "../../constants.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
-const valueCurr = valuePropDelegate("curr")
-
 const LimitedStreamBase = <Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
+	hasPosition = false,
+	hasBuffer = false
 ) =>
 	DefaultEndStream<Type>({
 		...baseMethods,
@@ -58,14 +56,14 @@ function makeLimitedStream(
 	const direction = directionCompare(from, to)
 
 	return function <Type = any>(
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false
+		hasPosition = false,
+		hasBuffer = false
 	): ILimitedStreamConstructor<Type> {
 		const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
 		class limitedStream extends baseClass implements ILimitedStream<Type> {
 			value: ILimitedUnderStream<Type>
 			lookAhead: Type
-			hasLookAhead: boolean = false
+			hasLookAhead = false
 
 			readonly super: Summat
 			readonly direction: boolean
@@ -120,8 +118,8 @@ export function LimitedStream<Type = any>(
 	to?: IPredicatePosition<Type>
 ) {
 	return function (
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false
+		hasPosition = false,
+		hasBuffer = false
 	): ILimitedStreamConstructor<Type> {
 		return _LimitedStream([from, to, hasPosition, hasBuffer])
 	}

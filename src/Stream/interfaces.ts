@@ -65,13 +65,13 @@ export type IStream<
 	PosType extends IPosition<Type, SubType, PosType> = number,
 	InitSignature extends any[] = any[]
 > = ICopiable &
+	Partial<IBackward<Type>> &
 	Partial<INavigable<Type, SubType, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
 	Partial<IPosed<IPosition<Type, SubType, PosType>>> &
-	Partial<IPattern<SubType>> &
 	Partial<
 		IInitializable<
 			InitSignature,
@@ -80,6 +80,7 @@ export type IStream<
 	> &
 	Partial<IIsEndCurrable> &
 	Partial<IIsStartCurrable> &
+	IPattern<SubType> &
 	Iterable<Type> &
 	INextable<Type> & {
 		curr: Type
@@ -97,6 +98,7 @@ export type IReversibleStream<
 export type * from "./InputStream/interfaces.js"
 export type * from "./LazyStream/interfaces.js"
 export type * from "./LimitedStream/interfaces.js"
+export type * from "./MarkedStream/interfaces.js"
 export type * from "./NestedStream/interfaces.js"
 export type * from "./PredicateStream/interfaces.js"
 export type * from "./StreamClass/interfaces.js"

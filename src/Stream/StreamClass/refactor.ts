@@ -7,6 +7,7 @@ import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../Position/interfaces.js"
 
 import curr from "./methods/curr.js"
+import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 
 export type IConstructor<Signature extends any[], Type = any> = new (
 	...x: Signature
@@ -44,6 +45,12 @@ export function readBufferThis<Type = any>(
 	readBuffer(stream)
 	return stream
 }
+
+export const valueIsCurrEnd = valueDelegate("isCurrEnd")
+
+export const valueCurr = valuePropDelegate("curr")
+
+export const valueIsCurrStart = valueDelegate("isCurrStart")
 
 export { curr }
 

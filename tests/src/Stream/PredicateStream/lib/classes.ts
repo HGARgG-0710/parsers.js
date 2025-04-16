@@ -20,7 +20,7 @@ const { and } = functional
 const { structCheck } = object
 const { isFunction } = type
 
-export function GeneratedPredicateStreamTest(hasPosition: boolean = false) {
+export function GeneratedPredicateStreamTest(hasPosition= false) {
 	const PredicateStreamGeneratedSuite = GeneratedStreamClassSuite(
 		false,
 		hasPosition

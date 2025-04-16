@@ -178,10 +178,10 @@ function generateCopyMethods<Type = any>(
 const MethodHash = new BitHash(new ArrayInternal(generateCopyMethods(copy)))
 
 export function chooseMethod(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false,
-	hasState: boolean = false,
-	isPattern: boolean = false
+	hasPosition = false,
+	hasBuffer = false,
+	hasState = false,
+	isPattern = false
 ): () => IStreamClassInstance {
 	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

@@ -354,10 +354,10 @@ const MethodHash = new BitHash(
 )
 
 export function chooseMethod(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false,
-	hasState: boolean = false,
-	isPattern: boolean = false
+	hasPosition = false,
+	hasBuffer = false,
+	hasState = false,
+	isPattern = false
 ) {
 	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

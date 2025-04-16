@@ -13,7 +13,7 @@ import {
 	type StreamClassTestSignature
 } from "Stream/StreamClass/lib/classes.js"
 
-export function GeneratedReversedStreamTest(hasPosition: boolean = false) {
+export function GeneratedReversedStreamTest(hasPosition= false) {
 	const ReversedStreamGeneratedSuite = GeneratedStreamClassSuite(true, hasPosition)
 
 	const reversedStreamPrototypeProps = ["super"]

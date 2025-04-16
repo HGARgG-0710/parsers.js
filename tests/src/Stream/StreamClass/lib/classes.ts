@@ -71,7 +71,7 @@ const isBasicStreamClassInstance = structCheck<IStreamClassInstance>({
 	[Symbol.iterator]: isFunction
 })
 
-export const isStreamClassInstance = (hasPosition: boolean = false) =>
+export const isStreamClassInstance = (hasPosition= false) =>
 	and(
 		isBasicStreamClassInstance,
 		structCheck({
@@ -83,7 +83,7 @@ export const isStreamClassInstance = (hasPosition: boolean = false) =>
 		})
 	) as (x: any) => x is IStreamClassInstance
 
-export const isReversedStreamClassInstance = (hasPosition: boolean = false) =>
+export const isReversedStreamClassInstance = (hasPosition= false) =>
 	and(
 		isBasicStreamClassInstance,
 		structCheck({
@@ -113,10 +113,10 @@ const streamClassPrototypeProps = [
 	"isCurrStart"
 ]
 
-const streamClassOwnProps = (hasPosition: boolean = false) =>
+const streamClassOwnProps = (hasPosition= false) =>
 	["isEnd", "isStart", "realCurr"].concat(hasPosition ? ["pos"] : [])
 
-export const StreamClassConstructorTest = (hasPosition: boolean = false) =>
+export const StreamClassConstructorTest = (hasPosition= false) =>
 	ClassConstructorTest(
 		isStreamClassInstance(hasPosition),
 		streamClassPrototypeProps,
@@ -124,7 +124,7 @@ export const StreamClassConstructorTest = (hasPosition: boolean = false) =>
 	)
 
 export const ReversedStreamClassConstructorTest = (
-	hasPosition: boolean = false
+	hasPosition= false
 ) =>
 	ClassConstructorTest(
 		isReversedStreamClassInstance(hasPosition),
@@ -132,7 +132,7 @@ export const ReversedStreamClassConstructorTest = (
 		streamClassOwnProps(hasPosition)
 	)
 
-export const InitStreamClassConstructorTest = (hasPosition: boolean = false) =>
+export const InitStreamClassConstructorTest = (hasPosition= false) =>
 	InitClassConstructorTest(
 		isStreamClassInstance(hasPosition),
 		streamClassPrototypeProps,
@@ -140,7 +140,7 @@ export const InitStreamClassConstructorTest = (hasPosition: boolean = false) =>
 	)
 
 export const InitReversedStreamClassConstructorTest = (
-	hasPosition: boolean = false
+	hasPosition= false
 ) =>
 	InitClassConstructorTest(
 		isReversedStreamClassInstance(hasPosition),
@@ -162,8 +162,8 @@ export type StreamClassTestSignature = {
 }
 
 export function GeneratedStreamClassSuite(
-	reversed: boolean = false,
-	hasPosition: boolean = false
+	reversed= false,
+	hasPosition= false
 ) {
 	return function (
 		className: string,
