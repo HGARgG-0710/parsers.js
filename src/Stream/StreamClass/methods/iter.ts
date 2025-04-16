@@ -5,7 +5,7 @@ import type {
 
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IBasicStream } from "../../interfaces.js"
+import type { IStream } from "../../interfaces.js"
 
 import {
 	positionDecrement,
@@ -20,6 +20,8 @@ import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
 import { currSet } from "./curr.js"
 
 import { functional, object } from "@hgargg-0710/one"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 const { nil } = functional
 const { propDefine } = object
 const { GetSetDescriptor, ConstDescriptor } = object.descriptor
@@ -253,16 +255,18 @@ const [
 	[updateNext, updatePrev]
 ].map(([next, prev]) => generateIterationMethods(next, prev))
 
-const methodList = [
-	[next, fastPrev],
-	[nextCurrGetter, fastPrevCurrGetter],
-	[posNext, fastPosPrev],
-	[posNextCurrGetter, fastPosPrevCurrGetter],
-	[bufferNext, fastBufferPrev],
-	[bufferNextCurrGetter, fastBufferPrevCurrGetter],
-	[posBufferNext, fastPosBufferPrev],
-	[posBufferNextCurrGetter, fastPosBufferPrevCurrGetter]
-] as [() => any, () => any][]
+const MethodHash = new BitHash(
+	new ArrayInternal([
+		[next, fastPrev],
+		[nextCurrGetter, fastPrevCurrGetter],
+		[posNext, fastPosPrev],
+		[posNextCurrGetter, fastPosPrevCurrGetter],
+		[bufferNext, fastBufferPrev],
+		[bufferNextCurrGetter, fastBufferPrevCurrGetter],
+		[posBufferNext, fastPosBufferPrev],
+		[posBufferNextCurrGetter, fastPosBufferPrevCurrGetter]
+	] as [() => any, () => any][])
+)
 
 const nextPrevDescriptors = ([next, prev]) => ({
 	next: ConstDescriptor(next),
@@ -271,15 +275,15 @@ const nextPrevDescriptors = ([next, prev]) => ({
 
 export function chooseMethod<Type = any>(
 	currGetter?: () => Type,
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
+	hasPosition = false,
+	hasBuffer = false
 ) {
 	return nextPrevDescriptors(
-		methodList[+!!currGetter | (+hasPosition << 1) | (+hasBuffer << 2)]
+		MethodHash.index([!!currGetter, hasPosition, hasBuffer])
 	)
 }
 
-export function* streamIterator<Type = any>(this: IBasicStream<Type>) {
+export function* streamIterator<Type = any>(this: IStream<Type>) {
 	while (!this.isEnd) {
 		yield this.curr
 		this.next()

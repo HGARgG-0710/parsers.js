@@ -1,5 +1,5 @@
 import type { IInternalHash } from "./InternalHash/interfaces.js"
-import type { IIndexable } from "../IndexMap/interfaces.js"
+import type { IIndexable } from "src/interfaces.js"
 import type {
 	ICopiable,
 	IDefaulting,
@@ -40,7 +40,7 @@ export interface IHashMap<
 		IDeletable<KeyType>,
 		IRekeyable<KeyType>,
 		ISizeable,
-		IHashable<KeyType, InternalKeyType>,
+		Partial<IHashable<KeyType, InternalKeyType>>,
 		IDefaulting,
 		ICopiable {}
 

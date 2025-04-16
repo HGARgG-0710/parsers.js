@@ -1,4 +1,4 @@
-import type { IPointer } from "../Pattern/interfaces.js"
+import type { IPointer } from "src/interfaces.js"
 import type { IPersistentIndexMap } from "../IndexMap/PersistentIndexMap/interfaces.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
 import type {
@@ -16,6 +16,10 @@ import { isGoodPointer, pos } from "../utils.js"
 import { makeDelegate } from "../refactor.js"
 
 import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
+
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { Autocache } from "../internal/Autocache.js"
 
 import { functional, object, type } from "@hgargg-0710/one"
 const { id } = functional
@@ -118,18 +122,23 @@ export class PersistentIndexTable<
 	}
 }
 
-export function HashTable<OwningType = any>(
-	ownership: (x: any) => OwningType
-): ITableConstructor<OwningType> {
-	const hashTable = makeDelegate(DelegateHashTable, ["value"], "delegate")
-	extendPrototype(hashTable, {
-		claim: ConstDescriptor(function (x: any) {
-			const pointer = ownership(x)
-			return isNullary(pointer) ? null : pointer
+export const HashTable = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <OwningType = any>(ownership: (x: any) => OwningType) {
+		const hashTable = makeDelegate(DelegateHashTable, ["value"], "delegate")
+
+		extendPrototype(hashTable, {
+			claim: ConstDescriptor(function (x: any) {
+				const pointer = ownership(x)
+				return isNullary(pointer) ? null : pointer
+			})
 		})
-	})
-	return hashTable as ITableConstructor<OwningType>
-}
+
+		return hashTable
+	}
+) as unknown as <OwningType = any>(
+	ownership: (x: any) => OwningType
+) => ITableConstructor<OwningType>
 
 export const BasicTable = HashTable(id)
 

@@ -1,9 +1,8 @@
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
-import type { IIsEndCurrable } from "../StreamClass/interfaces.js"
-import type { IPredicateStream } from "./interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
+import type { IReversibleStream, IIsEndCurrable } from "../interfaces.js"
+import type { IPredicateStream } from "./interfaces.js"
 
-import { navigate } from "../StreamClass/utils.js"
+import { navigate } from "../utils.js"
 
 export namespace methods {
 	export function currGetter<Type = any>(this: IPredicateStream<Type>) {
@@ -25,12 +24,12 @@ export namespace methods {
 
 	export function isCurrEnd<Type = any>(this: IPredicateStream<Type>) {
 		this.lookAhead = this.prod()
-		return this.value!.isCurrEnd() || !this.predicate(this, this.pos)
+		return this.value!.isCurrEnd() 
 	}
 
 	export function init<Type = any>(
 		this: IPredicateStream<Type>,
-		value?: IReversibleStream<Type> & IIsEndCurrable, 
+		value?: IReversibleStream<Type> & IIsEndCurrable,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		this.hasLookAhead = false

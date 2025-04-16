@@ -1,12 +1,11 @@
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IInitMethod } from "./methods/init.js"
+import type { IStreamClassInitMethod } from "./methods/init.js"
+import type { ICopiable, IPosition } from "../../interfaces.js"
 
 import type {
-	IStreamClassSignature,
-	IStreamClassInstance
+	IStreamClass,
+	IStreamClassInstance,
+	IStreamClassSignature
 } from "./interfaces.js"
-
-import type { Constructor } from "./refactor.js"
 
 import { Pattern } from "src/internal/Pattern.js"
 
@@ -16,33 +15,41 @@ import { finish, rewind, navigate, init, iter, curr, copy } from "./refactor.js"
 import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
+import { Autocache } from "../../internal/Autocache.js"
+
 import { object } from "@hgargg-0710/one"
-import type { ICopiable } from "../../interfaces.js"
+import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export function StreamClass<Type = any>(
+function makeStreamClass<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
 	signature: IStreamClassSignature<Type>
-):
-	| Constructor<[], IStreamClassInstance<Type>>
-	| Constructor<[any], IStreamClassInstance<Type> & IPattern> {
+): IStreamClass<Type, SubType, PosType> {
 	const {
-		baseNextIter,
-		isCurrEnd,
 		isCurrStart,
 		basePrevIter,
+
+		baseNextIter,
+		isCurrEnd,
 		initGetter,
 		currGetter,
 		defaultIsEnd,
+
+		rewind: rewindOverride,
+		navigate: navigateOverride,
+		finish: finishOverride,
+
 		hasPosition: pos,
 		hasState: state,
 		hasBuffer: buffer,
 		isPattern: value
 	} = signature
 
-	let streamClass:
-		| Constructor<[], IStreamClassInstance<Type>>
-		| Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	let streamClass: IStreamClass<Type, SubType, PosType>
 
 	interface streamClassGuaranteed extends ICopiable {
 		isStart: boolean
@@ -59,7 +66,7 @@ export function StreamClass<Type = any>(
 
 		navigate: () => Type
 		finish: () => Type
-		init: IInitMethod
+		init: IStreamClassInitMethod<Type, SubType, PosType>
 		[Symbol.iterator]: () => Generator<Type>
 	}
 
@@ -67,18 +74,20 @@ export function StreamClass<Type = any>(
 		if (value) {
 			interface _streamClass extends streamClassGuaranteed {}
 			class _streamClass
-				extends Pattern
-				implements IStreamClassInstance<Type>
+				extends Pattern<SubType>
+				implements IStreamClassInstance<Type, SubType, PosType>
 			{
-				["constructor"]: new (value?: any) => typeof this
-				constructor(value?: any) {
+				["constructor"]: new (value?: SubType) => typeof this
+				constructor(value?: SubType) {
 					super(value)
 				}
 			}
 			return _streamClass
 		}
 		interface _streamClass extends streamClassGuaranteed {}
-		class _streamClass implements IStreamClassInstance<Type> {
+		class _streamClass
+			implements IStreamClassInstance<Type, SubType, PosType>
+		{
 			["constructor"]: new () => typeof this
 		}
 		return _streamClass
@@ -98,9 +107,15 @@ export function StreamClass<Type = any>(
 
 	// * Defining the mandatory non-primary methods with optional pos-buffer optimizations
 	extend({
-		navigate: ConstDescriptor(navigate.chooseMethod<Type>(pos, buffer)),
-		rewind: ConstDescriptor(rewind.chooseMethod<Type>(pos, buffer)),
-		finish: ConstDescriptor(finish.chooseMethod<Type>(pos, buffer))
+		navigate: ConstDescriptor(
+			navigateOverride || navigate.chooseMethod(pos, buffer)
+		),
+		rewind: ConstDescriptor(
+			rewindOverride || rewind.chooseMethod(pos, buffer)
+		),
+		finish: ConstDescriptor(
+			finishOverride || finish.chooseMethod(pos, buffer)
+		)
 	})
 
 	// * Defining the ReversedStreamClassInstance-specific optional properties
@@ -127,7 +142,26 @@ export function StreamClass<Type = any>(
 	return streamClass
 }
 
+export const StreamClass = new Autocache(
+	new ObjectMap(),
+	makeStreamClass
+) as unknown as <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
+	signature: IStreamClassSignature<Type>
+) => IStreamClass<Type, SubType, PosType>
+
 const valueIsEnd = valuePropDelegate("isEnd")
-export const DefaultEndStream = <Type = any>(
+export const DefaultEndStream = <
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+>(
 	signature: Omit<IStreamClassSignature<Type>, "defaultIsEnd">
-) => StreamClass({ defaultIsEnd: valueIsEnd, ...signature })
+) =>
+	StreamClass<Type, SubType, PosType>({
+		defaultIsEnd: valueIsEnd,
+		...signature
+	})

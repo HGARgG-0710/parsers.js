@@ -3,6 +3,9 @@ import type { INode, INodeClass } from "./interfaces.js"
 
 import { inplace, array } from "@hgargg-0710/one"
 import { isType } from "./utils.js"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { Autocache } from "../internal/Autocache.js"
 
 abstract class PreTokenNode<Type = any, Value = any>
 	implements INode<Type, Value>
@@ -59,18 +62,23 @@ abstract class PreTokenNode<Type = any, Value = any>
 	copy() {
 		return new this.constructor()
 	}
+
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(this.type)}}`
+	}
 }
 
-export function TokenNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
-		static readonly type = type
-		static is = isType(type)
+export const TokenNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any>(type: Type) {
+		class tokenNode extends PreTokenNode<Type> implements INode<Type> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		tokenNode.prototype.type = type
+		return tokenNode
 	}
-	tokenNode.prototype.type = type
-	return tokenNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -82,21 +90,28 @@ abstract class PreContentNode<Type = any, Value = any>
 		return new this.constructor(this.value)
 	}
 
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(
+			this.type
+		)}, "value": ${JSON.stringify(this.value)}}`
+	}
+
 	constructor(public value: Value) {
 		super()
 	}
 }
 
-export function ContentNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	class contentNode extends PreContentNode<Type, Value> {
-		static readonly type = type
-		static is = isType(type)
+export const ContentNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any, Value = any>(type: Type) {
+		class contentNode extends PreContentNode<Type, Value> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		contentNode.prototype.type = type
+		return contentNode
 	}
-	contentNode.prototype.type = type
-	return contentNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
 
 abstract class PreRecursiveNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -150,19 +165,26 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 		return this
 	}
 
+	toJSON(): string {
+		return `{"type": ${JSON.stringify(
+			this.type
+		)}, "children": ${JSON.stringify(this.children)}}`
+	}
+
 	constructor(protected children: INode<Type, Value>[] = []) {
 		super()
 		for (const child of children) child.parent = this
 	}
 }
 
-export function RecursiveNode<Type = any, Value = any>(
-	type: Type
-): INodeClass<Type, Value> {
-	class recursiveNode extends PreRecursiveNode<Type, Value> {
-		static readonly type = type
-		static is = isType(type)
+export const RecursiveNode = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any, Value = any>(type: Type) {
+		class recursiveNode extends PreRecursiveNode<Type, Value> {
+			static readonly type = type
+			static is = isType(type)
+		}
+		recursiveNode.prototype.type = type
+		return recursiveNode
 	}
-	recursiveNode.prototype.type = type
-	return recursiveNode
-}
+) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>

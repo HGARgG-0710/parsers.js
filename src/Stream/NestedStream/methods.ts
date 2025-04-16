@@ -1,28 +1,34 @@
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IEndableStream } from "../StreamClass/interfaces.js"
-import type { INestedStream } from "./interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
+import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
 
-import { finish } from "../StreamClass/utils.js"
+import { assignIndex } from "../../utils.js"
+import { finish } from "../utils.js"
 
 import { type } from "@hgargg-0710/one"
-import { assignIndex } from "../../utils.js"
 const { isNull, isUndefined } = type
 
 export namespace methods {
-	export function initGetter<Type = any>(this: INestedStream<Type>) {
+	export function initGetter<Type = any, IndexType = any>(
+		this: INestedStream<Type, IndexType>
+	) {
 		const index = this.typesTable.claim(this)
 		return (this.isCurrNested = !isNull(index))
-			? new this.constructor(this.value, index)
+			? new this.constructor(this.value, index, this.buffer?.emptied())
 			: this.value!.curr
 	}
 
-	export function baseNextIter<Type = any>(this: INestedStream<Type>) {
+	export function baseNextIter<Type = any, IndexType = any>(
+		this: INestedStream<Type, IndexType>
+	) {
 		if (this.isCurrNested) finish(this.curr as IEndableStream<Type>)
 		this.value!.next()
 		return this.initGetter!()
 	}
 
-	export function isCurrEnd<Type = any>(this: INestedStream<Type>) {
+	export function isCurrEnd<Type = any, IndexType = any>(
+		this: INestedStream<Type, IndexType>
+	) {
 		const { value, typesTable } = this
 		return (
 			value!.isCurrEnd() ||
@@ -31,10 +37,10 @@ export namespace methods {
 		)
 	}
 
-	export function init<Type = any>(
-		this: INestedStream<Type>,
-		value?: IEndableStream<Type>,
-		index?: any,
+	export function init<Type = any, IndexType = any>(
+		this: INestedStream<Type, IndexType>,
+		value?: IUnderNestedStream<Type>,
+		index?: IndexType,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		if (!isUndefined(index)) assignIndex(this, index)
@@ -42,11 +48,13 @@ export namespace methods {
 		return this
 	}
 
-	export function copy<Type = any>(this: INestedStream<Type>) {
+	export function copy<Type = any, IndexType = any>(
+		this: INestedStream<Type, IndexType>
+	) {
 		return new this.constructor(
-			this.value!.copy(),
+			this.value?.copy(),
 			this.assignedIndex,
-			this.buffer
+			this.buffer?.copy()
 		)
 	}
 }

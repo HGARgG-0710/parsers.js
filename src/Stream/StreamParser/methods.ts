@@ -1,11 +1,11 @@
-import type { IStreamParser } from "./interfaces.js"
-import type { IEndableStream } from "../StreamClass/interfaces.js"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { IStreamParser } from "./interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"
 
 import { Stream } from "../../constants.js"
-import type { IFreezableBuffer } from "../../interfaces.js"
 const { SkippedItem } = Stream.StreamParser
 
 export namespace methods {
@@ -20,14 +20,14 @@ export namespace methods {
 
 	export function init<InType = any, OutType = any>(
 		this: IStreamParser<InType, OutType>,
-		input?: IEndableStream<InType>,
+		value?: IEndableStream<InType>,
 		buffer?: IFreezableBuffer<OutType>,
 		state?: Summat
 	) {
-		if (input) {
+		if (value) {
 			if (isBufferized(this))
-				this.super.init.call(this, input, buffer, state)
-			else this.super.init.call(this, input, state)
+				this.super.init.call(this, value, buffer, state)
+			else this.super.init.call(this, value, state)
 		}
 		return this
 	}

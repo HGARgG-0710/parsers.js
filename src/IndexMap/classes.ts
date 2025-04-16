@@ -1,9 +1,9 @@
-import type { IMapClass } from "./interfaces.js"
+import type { ILinearMapClass } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { is } from "../Node/utils.js"
 import { type } from "src/Node/utils.js"
-import { value } from "../Pattern/utils.js"
+import { value } from "../utils.js"
 import { current } from "../Stream/utils.js"
 
 import { type as _type } from "@hgargg-0710/one"
@@ -14,9 +14,9 @@ export const [TokenMap, ValueMap, CurrentMap, TypeofMap] = [
 	value,
 	current,
 	typeOf
-].map((x) => (mapClass: IMapClass) => mapClass.extend(x))
+].map((x) => (mapClass: ILinearMapClass) => mapClass.extend(x))
 
-export const TypeMap = (mapClass: IMapClass) => mapClass.extendKey(is)
+export const TypeMap = (mapClass: ILinearMapClass) => mapClass.extendKey(is)
 
 export const Pairs = <KeyType = any, ValueType = any>(
 	...pairs: array.Pairs<KeyType, ValueType> | [number]

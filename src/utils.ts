@@ -1,5 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
+import type { IPattern } from "src/interfaces.js"
+import type { IRecursivePointer } from "src/interfaces.js"
+
+import { type, object, boolean } from "@hgargg-0710/one"
+const { isUndefined } = type
+const { structCheck, prop } = object
+const { eqcurry } = boolean
+
 import type {
 	IBufferized,
 	IFreezableBuffer,
@@ -9,13 +17,10 @@ import type {
 	ISizeable
 } from "./interfaces.js"
 
-import type { IStateful } from "./Stream/StreamClass/interfaces.js"
+import type { IStateful } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
 import { BadIndex } from "./constants.js"
-
-import { object } from "@hgargg-0710/one"
-const { prop } = object
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -74,10 +79,66 @@ export const assignIndex = <Type = any>(
 	assignedIndex: Type
 ) => (x.assignedIndex = assignedIndex)
 
+/**
+ * Returns whether the given value is an `IPointer`
+ */
+export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
+	x: any
+) => x is IPointer<T>
+
+/**
+ * Returns the `.value` property of the given `Pattern`
+ */
+export const value = prop("value") as <Type = any>(
+	x: IPattern<Type>
+) => Type | undefined
+
+/**
+ * Sets the `.value` property of a given `Pattern`
+ */
+export const setValue = <Type = any>(x: IPattern<Type>, value?: Type) =>
+	(x.value = value)
+
+/**
+ * Unless given `value` is `undefined`, calls `setValue(pattern, value)`
+ */
+export function optionalValue(pattern: IPattern, value?: any) {
+	if (!isUndefined(value)) setValue(pattern, value)
+}
+
+/**
+ * Swaps `.value`s of two given `Pattern`s
+ */
+export function swapValues<Type = any>(x: IPattern<Type>, y: IPattern<Type>) {
+	const temp = x.value
+	x.value = y.value
+	y.value = temp
+}
+
+/**
+ * Recursively walks down a given `depth` (`Infinity`, by default),
+ * getting the `.value` of the next `RecursivePointer`.
+ *
+ * Returns the last obtainable non-`IPointer` value.
+ *
+ * Note: `isPointer` is used for checking whether the given object is an `IPointer`
+ */
+export function dig<Type = any>(
+	pointer: IRecursivePointer<Type>,
+	depth: number = Infinity
+): Type | IRecursivePointer<Type> {
+	let curr = pointer
+	let currDepth = 0
+	while (isPoiner(curr.value) && currDepth++ <= depth)
+		curr = value(curr) as IRecursivePointer<Type>
+	return curr
+}
+
+export const isLF = eqcurry("\n")
+
 export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"
 export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Node from "./Node/utils.js"
-export * as Pattern from "./Pattern/utils.js"
 export * as Stream from "./Stream/utils.js"

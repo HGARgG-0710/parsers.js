@@ -1,9 +1,11 @@
 export * from "./InputStream/classes.js"
+export * from "./LazyStream/classes.js"
 export * from "./LimitedStream/classes.js"
+export * from "./MarkedStream/classes.js"
 export * from "./NestedStream/classes.js"
 export * from "./PredicateStream/classes.js"
-export * from "./ReversibleStream/classes.js"
-export * from "./TreeStream/classes.js"
+export * from "./StreamClass/classes.js"
 export * from "./StreamParser/classes.js"
+export * from "./TreeStream/classes.js"
 
 export * as Position from "./Position/classes.js"

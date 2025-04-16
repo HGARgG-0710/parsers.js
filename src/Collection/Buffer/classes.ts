@@ -1,12 +1,12 @@
 import type { IUnfreezableBuffer } from "./interfaces.js"
 import type { IIndexed } from "../../interfaces.js"
 
-import { IterableCollection } from "src/internal/Collection.js"
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 
 import { array } from "@hgargg-0710/one"
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
-	isFrozen: boolean = false;
+	isFrozen = false;
 
 	["constructor"]: new (value?: IIndexed<Type>) => typeof this
 

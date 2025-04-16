@@ -1,20 +1,9 @@
-import type { IPosition } from "../Position/interfaces.js"
-import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
-import {
-	directionCompare,
-	positionConvert,
-	positionEqual,
-	positionNegate
-} from "../Position/utils.js"
-
-import { Stream } from "../../constants.js"
-const { LimitedStream } = Stream
-
-import { navigate, rewind } from "../StreamClass/utils.js"
-
-import { type } from "@hgargg-0710/one"
+import type { IDirectionalPosition, IPosed } from "../Position/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
-const { isNullary } = type
+import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
+
+import { positionEqual } from "../Position/utils.js"
+import { navigate, rewind } from "../utils.js"
 
 export namespace methods {
 	export function baseNextIter<Type = any>(this: ILimitedStream<Type>) {
@@ -36,12 +25,18 @@ export namespace methods {
 		const { value, to } = this
 		if (value!.isCurrEnd()) return true
 		this.lookAhead = this.prod()
-		return positionEqual(value!, to)
+		return positionEqual(
+			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
+			to
+		)
 	}
 
 	export function isCurrStart<Type = any>(this: ILimitedStream<Type>) {
 		const { value, from } = this
-		return value!.isCurrStart() || positionEqual(value!, from)
+		return positionEqual(
+			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
+			from
+		)
 	}
 
 	export function basePrevIter<Type = any>(this: ILimitedStream<Type>) {
@@ -55,28 +50,13 @@ export namespace methods {
 	export function init<Type = any>(
 		this: ILimitedStream<Type>,
 		value?: ILimitedUnderStream<Type>,
-		from?: IPosition,
-		to?: IPosition,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		if (value || this.value) {
 			if (value) this.super.init.call(this, value, buffer)
-
 			this.hasLookAhead = false
-
-			if (!isNullary(from)) {
-				if (isNullary(to)) {
-					to = from
-					from = LimitedStream.NoMovementPredicate
-				}
-
-				rewind(this.value!)
-				navigate(this.value!, from)
-
-				this.direction = directionCompare(from, to, this.value)
-				this.from = from
-				this.to = positionNegate(positionConvert(to, this.value))
-			}
+			rewind(this.value!)
+			navigate(this.value!, this.from)
 		}
 		return this
 	}
@@ -85,7 +65,7 @@ export namespace methods {
 		this: ILimitedStream<Type>
 	): ILimitedStream<Type> {
 		return new this.constructor(
-			this.value!.copy(),
+			this.value?.copy(),
 			this.from,
 			this.to,
 			this.buffer

@@ -1,4 +1,4 @@
-import type { ICopiable, IPattern } from "../interfaces.js"
+import type { ICopiable, IPattern, ISerializableObject } from "../interfaces.js"
 
 export interface ITyped<Type = any> {
 	readonly type: Type
@@ -26,7 +26,8 @@ export interface INode<Type = any, Value = any>
 	extends ICopiable,
 		ITyped<Type>,
 		IPattern<Value>,
-		IWalkable<INode<Type, Value>> {
+		IWalkable<INode<Type, Value>>,
+		ISerializableObject {
 	parent: INode<Type, Value> | null
 
 	set: (node: INode<Type, Value>, i: number) => this

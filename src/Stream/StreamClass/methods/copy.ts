@@ -1,5 +1,8 @@
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type { IBufferized, IPattern, IPosed } from "../../../interfaces.js"
-import type { IStateful, IStreamClassInstance } from "../interfaces.js"
+import type { IStreamClassInstance } from "../interfaces.js"
+import type { IStateful } from "src/interfaces.js"
 
 function copyPos<Type = any>(
 	from: IStreamClassInstance<Type> & IPosed<number>,
@@ -172,15 +175,13 @@ function generateCopyMethods<Type = any>(
 	]
 }
 
-const methodList = generateCopyMethods(copy)
+const MethodHash = new BitHash(new ArrayInternal(generateCopyMethods(copy)))
 
 export function chooseMethod(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false,
-	hasState: boolean = false,
-	isPattern: boolean = false
-) {
-	return methodList[
-		+hasPosition | (+hasBuffer << 1) | (+hasState << 2) | (+isPattern << 3)
-	]
+	hasPosition = false,
+	hasBuffer = false,
+	hasState = false,
+	isPattern = false
+): () => IStreamClassInstance {
+	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

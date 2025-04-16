@@ -1,12 +1,14 @@
-import type { IReversibleStream } from "../../../Stream/ReversibleStream/interfaces.js"
+import type { IReversibleStream } from "../../interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IStreamClassInstance } from "../interfaces.js"
 
-import { uniRewind } from "../utils.js"
+import { uniRewind } from "src/Stream/utils.js"
 import { start } from "../refactor.js"
 import { positionNull } from "../../Position/refactor.js"
 import { readFirst } from "../../../Collection/Buffer/refactor.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * possible '.rewind' methods
 
@@ -38,11 +40,10 @@ function posBufferRewind<Type = any>(
 	return buffer.size ? readFirst(buffer) : this.curr
 }
 
-const methodList = [rewind, posRewind, bufferRewind, posBufferRewind]
+const MethodHash = new BitHash(
+	new ArrayInternal([rewind, posRewind, bufferRewind, posBufferRewind])
+)
 
-export function chooseMethod<Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
-) {
-	return methodList[+hasPosition | (+hasBuffer << 1)]<Type>
+export function chooseMethod(hasPosition = false, hasBuffer = false) {
+	return MethodHash.index([hasPosition, hasBuffer])
 }

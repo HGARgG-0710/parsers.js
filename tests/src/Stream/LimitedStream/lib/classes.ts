@@ -31,7 +31,7 @@ type LimitedStreamTestSignature = StreamClassTestSignature & {
 	baseTests: [any[], (x: any, y: any) => boolean][]
 }
 
-export function GeneratedLimitedStreamTest(hasPosition: boolean = false) {
+export function GeneratedLimitedStreamTest(hasPosition = false) {
 	const LimitedStreamGeneratedSuite = GeneratedStreamClassSuite(
 		true,
 		hasPosition

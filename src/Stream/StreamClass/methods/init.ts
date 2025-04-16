@@ -1,8 +1,9 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { IStateful, IStreamClassInstance } from "../interfaces.js"
-import type { IPattern } from "../../../Pattern/interfaces.js"
-import type { IPosed } from "../../Position/interfaces.js"
+import type { IStreamClassInstance } from "../interfaces.js"
+import type { IStateful } from "src/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
+import type { IPosed, IPosition } from "../../Position/interfaces.js"
 import type {
 	IBufferized,
 	IFreezableBuffer
@@ -10,67 +11,161 @@ import type {
 
 import { positionNull } from "../../Position/refactor.js"
 import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
-import { optionalValue } from "../../../Pattern/utils.js"
+import { optionalValue } from "../../../utils.js"
 import { createState, start } from "../refactor.js"
+import type { IThisMethod } from "../../../refactor.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * types
 
-export interface IInitializable {
-	init: IInitMethod
-}
+export type IStreamClassInitSignature<Type = any> =
+	| IBaseStreamClassInitSignature
+	| IBufferizedStreamClassInitSignature<Type>
+	| IStatefulStreamClassInitSignature
+	| IBufferizedStatefulStreamClassInitSignature<Type>
+	| IPatternStreamClassInitSignature
+	| IBufferizedPatternStreamClassInitSignature<Type>
+	| IStatefulPatternStreamClassInitSignature
+	| IBufferizedStatefulPatternStreamClassInitSignature<Type>
 
-export type IInitMethod =
-	| IBaseInitMethod
-	| IBufferInitMethod
-	| IStateInitMethod
-	| IBufferStateInitMethod
-	| IPatternInitMethod
-	| IBufferPatternInitMethod
-	| IStatePatternInitMethod
-	| IBufferStatePatternInitMethod
+export type IBaseStreamClassInitSignature = []
 
-export type IBaseInitMethod = () => void
-export type IBufferInitMethod = <Type = any>(
-	buffer?: IFreezableBuffer<Type>
-) => void
-export type IStateInitMethod = (state?: Summat) => void
-export type IPatternInitMethod = (value?: any) => void
+export type IBufferizedStreamClassInitSignature<Type = any> = [
+	IFreezableBuffer<Type>?
+]
 
-export type IBufferStateInitMethod = <Type = any>(
-	buffer?: IFreezableBuffer<Type>,
-	state?: Summat
-) => void
+export type IStatefulStreamClassInitSignature = [Summat?]
 
-export type IBufferPatternInitMethod = <Type = any>(
-	value?: any,
-	buffer?: IFreezableBuffer<Type>
-) => void
+export type IBufferizedStatefulStreamClassInitSignature<Type = any> = [
+	IFreezableBuffer<Type>?,
+	Summat?
+]
 
-export type IStatePatternInitMethod = (value?: any, state?: Summat) => void
+export type IPatternStreamClassInitSignature = [any?]
 
-export type IBufferStatePatternInitMethod = <Type = any>(
-	value?: any,
-	buffer?: IFreezableBuffer<Type>,
-	state?: Summat
-) => void
+export type IBufferizedPatternStreamClassInitSignature<Type = any> = [
+	any?,
+	IFreezableBuffer<Type>?
+]
+
+export type IStatefulPatternStreamClassInitSignature = [any?, Summat?]
+
+export type IBufferizedStatefulPatternStreamClassInitSignature<Type = any> = [
+	any?,
+	IFreezableBuffer<Type>?,
+	Summat?
+]
+
+export type IStreamClassInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> =
+	| IStreamClassBaseInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferInitMethod<Type, SubType, PosType>
+	| IStreamClassStateInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferStateInitMethod<Type, SubType, PosType>
+	| IStreamClassPatternInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferPatternInitMethod<Type, SubType, PosType>
+	| IStreamClassStatePatternInitMethod<Type, SubType, PosType>
+	| IStreamClassBufferStatePatternInitMethod<Type, SubType, PosType>
+
+export type IStreamClassBaseInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IBaseStreamClassInitSignature,
+	IStreamClassInstance<Type, SubType, PosType>
+>
+
+export type IStreamClassBufferInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IBufferizedStreamClassInitSignature<Type>,
+	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type>
+>
+
+export type IStreamClassStateInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IStatefulStreamClassInitSignature,
+	IStreamClassInstance<Type, SubType, PosType> & IStateful
+>
+
+export type IStreamClassBufferStateInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IBufferizedStatefulStreamClassInitSignature<Type>,
+	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IStateful
+>
+
+export type IStreamClassPatternInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IPatternStreamClassInitSignature,
+	IStreamClassInstance<Type, SubType, PosType> & IPattern
+>
+
+export type IStreamClassBufferPatternInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IBufferizedPatternStreamClassInitSignature<Type>,
+	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IPattern
+>
+
+export type IStreamClassStatePatternInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IStatefulPatternStreamClassInitSignature,
+	IStreamClassInstance<Type, SubType, PosType> & IStateful & IPattern
+>
+
+export type IStreamClassBufferStatePatternInitMethod<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number
+> = IThisMethod<
+	IBufferizedStatefulPatternStreamClassInitSignature<Type>,
+	IStreamClassInstance<Type, SubType, PosType> &
+		IBufferized<Type> &
+		IStateful &
+		IPattern
+>
 
 // * possible '.init' methods
 
 function initialize<Type = any>(this: IStreamClassInstance<Type>) {
 	;(this as any).realCurr = null
 	start(this)
-	if (!(this.isEnd = this.defaultIsEnd())) {
-		;(this as any).realCurr = (this.initGetter || this.currGetter)!()
-	}
+	if (!(this.isEnd = this.defaultIsEnd()))
+		(this as any).realCurr = (this.initGetter || this.currGetter)!()
+	return this
 }
 
 // * Explanation: the private function here is only for refactoring;
-function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
+function generateInitMethods<Type = any>(
+	initialize: IStreamClassBaseInitMethod
+): IStreamClassInitMethod<Type>[] {
 	function posInitialize<Type = any>(
 		this: IStreamClassInstance<Type> & IPosed<number>
 	) {
 		positionNull(this)
 		initialize.call(this)
+		return this
 	}
 
 	function bufferInitialze<Type = any>(
@@ -79,6 +174,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		assignBuffer(this, buffer)
 		initialize.call(this)
+		return this
 	}
 
 	function posBufferInitialize<Type = any>(
@@ -87,6 +183,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		assignBuffer(this, buffer)
 		posInitialize.call(this)
+		return this
 	}
 
 	function stateInitialize<Type = any>(
@@ -95,6 +192,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		createState(this, state)
 		initialize.call(this)
+		return this
 	}
 
 	function posStateInitialize<Type = any>(
@@ -103,6 +201,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		createState(this, state)
 		posInitialize.call(this)
+		return this
 	}
 
 	function bufferStateInitialize<Type = any>(
@@ -112,6 +211,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		createState(this, state)
 		bufferInitialze.call(this, buffer)
+		return this
 	}
 
 	function posBufferStateInitialize<Type = any>(
@@ -124,6 +224,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		createState(this, state)
 		posBufferInitialize.call(this, buffer)
+		return this
 	}
 
 	function patternInitialize<Type = any>(
@@ -132,6 +233,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		initialize.call(this)
+		return this
 	}
 
 	function posPatternInitialize<Type = any>(
@@ -140,6 +242,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		posInitialize.call(this)
+		return this
 	}
 
 	function bufferPatternInitialize<Type = any>(
@@ -149,6 +252,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		bufferInitialze.call(this, buffer)
+		return this
 	}
 
 	function posBufferPatternInitialize<Type = any>(
@@ -161,6 +265,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		posBufferInitialize.call(this, buffer)
+		return this
 	}
 
 	function statePatternInitialize<Type = any>(
@@ -170,6 +275,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		stateInitialize.call(this, state)
+		return this
 	}
 
 	function posStatePatternInitialize<Type = any>(
@@ -182,6 +288,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		posStateInitialize.call(this, state)
+		return this
 	}
 
 	function bufferStatePatternInitialize<Type = any>(
@@ -195,6 +302,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		bufferStateInitialize.call(this, buffer, state)
+		return this
 	}
 
 	function posBufferStatePatternInitialize<Type = any>(
@@ -209,6 +317,7 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	) {
 		optionalValue(this, value)
 		posBufferStateInitialize.call(this, buffer, state)
+		return this
 	}
 
 	return [
@@ -240,13 +349,15 @@ function generateInitMethods(initialize: IBaseInitMethod): IInitMethod[] {
 	]
 }
 
-const methodList = generateInitMethods(initialize)
+const MethodHash = new BitHash(
+	new ArrayInternal(generateInitMethods<NonNullable<Summat>>(initialize))
+)
 
 export function chooseMethod(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false,
-	hasState: boolean = false,
-	isPattern: boolean = false
+	hasPosition = false,
+	hasBuffer = false,
+	hasState = false,
+	isPattern = false
 ) {
-	return methodList[+hasPosition | (+hasBuffer << 1) | (+hasState << 2) | (+isPattern << 3)]
+	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

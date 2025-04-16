@@ -1,4 +1,3 @@
-import type { IIndexed } from "../../interfaces.js"
 import type { ICollection } from "../interfaces.js"
 
 export interface IBuffer<Type = any> extends ICollection<Type> {
@@ -11,8 +10,6 @@ export interface IDynamicBuffer<Type = any> extends IBuffer<Type> {
 	insert: (i: number, ...values: Type[]) => this
 	remove: (i: number, count?: number) => this
 	truncate: (from: number, to?: number) => this
-
-	init(value?: IIndexed<Type>): void
 }
 
 export interface IFreezableBuffer<Type = any> extends IBuffer<Type> {

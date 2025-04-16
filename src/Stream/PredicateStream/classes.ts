@@ -3,7 +3,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IPredicatePosition } from "../Position/interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { Constructor } from "../StreamClass/refactor.js"
+import type { IConstructor } from "../StreamClass/refactor.js"
 
 import type {
 	IPredicateStream,
@@ -11,48 +11,48 @@ import type {
 	IUnderPredicateStream
 } from "./interfaces.js"
 
-import type { IPattern } from "../../Pattern/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 
 import { StreamClass } from "../StreamClass/classes.js"
 import { withSuper } from "../../refactor.js"
 
-import { object, functional } from "@hgargg-0710/one"
+import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
-const { negate, has } = functional
+
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
 import { methods } from "./methods.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false
+	hasPosition = false,
+	hasBuffer = false
 ) =>
 	StreamClass<Type>({
 		...baseMethods,
 		isPattern: true,
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer
-	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function PredicateStream<Type = any>(
-	predicate: IPredicatePosition<Type>
-) {
+function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 	return function (
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false
+		hasPosition = false,
+		hasBuffer = false
 	): IPredicateStreamConstructor<Type> {
 		const baseClass = PredicateStreamBase(hasPosition, hasBuffer)
 		class predicateStream
 			extends baseClass
 			implements IPredicateStream<Type>
 		{
+			readonly predicate: IPredicatePosition<Type>
+			readonly super: Summat
+
 			lookAhead: Type
 			hasLookAhead: boolean
-
-			predicate: IPredicatePosition<Type>
 			value: IUnderPredicateStream<Type>
 
-			super: Summat
 			prod: () => Type
 
 			init: (
@@ -79,6 +79,22 @@ export function PredicateStream<Type = any>(
 	}
 }
 
-export function DelimitedStream<Type = any>(...delims: Type[]) {
-	return PredicateStream(negate(has(new Set(delims))))
+const _PredicateStream = new Autocache(
+	new ArrayMap(),
+	<Type = any>([predicate, hasPosition, hasBuffer]: [
+		IPredicatePosition<Type>,
+		boolean?,
+		boolean?
+	]) => makePredicateStream(predicate)(hasPosition, hasBuffer)
+)
+
+export function PredicateStream<Type = any>(
+	predicate: IPredicatePosition<Type>
+) {
+	return function (
+		hasPosition?: boolean,
+		hasBuffer?: boolean
+	): IPredicateStreamConstructor<Type> {
+		return _PredicateStream([predicate, hasPosition, hasBuffer])
+	}
 }

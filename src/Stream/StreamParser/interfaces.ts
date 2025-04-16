@@ -1,21 +1,31 @@
-import type {
-	IEndableStream,
-	IStateful,
-	IStreamClassInstance
-} from "../../Stream/StreamClass/interfaces.js"
+import type { IStreamClassInstance } from "../../Stream/StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
+import type { IStreamTransform } from "../../TableMap/interfaces.js"
+import type { IFreezableBuffer, IPointer, ISupered } from "../../interfaces.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { IStreamHandler } from "../../TableMap/interfaces.js"
-import type { ISupered } from "../../interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IPosed } from "../Position/interfaces.js"
-import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+export type IStreamParserInitSignature<InType = any, OutType = any> = [
+	IEndableStream<InType>?,
+	IFreezableBuffer<OutType>?,
+	Summat?
+]
 
-export interface IStreamParser<InType = any, OutType = any>
-	extends IPattern<IEndableStream<InType>>,
-		IStreamClassInstance<OutType>,
-		ISupered,
-		Partial<IPosed<number>>,
-		Partial<IBufferized<OutType>>,
-		Partial<IStateful> {
-	handler: IStreamHandler<OutType>
-}
+export type IStreamParserConstructor<InType = any, OutType = any> = new (
+	value?: IEndableStream<InType>,
+	buffer?: IFreezableBuffer<OutType>,
+	state?: Summat
+) => IStreamParser<InType, OutType>
+
+export type IStreamParser<InType = any, OutType = any> = IStreamClassInstance<
+	OutType,
+	IEndableStream<InType>,
+	number,
+	IStreamParserInitSignature<InType, OutType>
+> &
+	IPointer<IEndableStream<InType>> &
+	ISupered & {
+		["constructor"]: IStreamParserConstructor<InType, OutType>
+		handler: IStreamTransform<InType, OutType>
+	}
+
+export type * from "./interfaces/IndexStream.js"

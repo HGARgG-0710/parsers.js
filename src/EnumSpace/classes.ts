@@ -3,7 +3,11 @@ import type { IMappable, ISizeable } from "../interfaces.js"
 
 import { makeDelegate } from "../refactor.js"
 
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+
 import { functional, inplace, object, array, type } from "@hgargg-0710/one"
+import { Autocache } from "../internal/Autocache.js"
 const { id } = functional
 const { out } = inplace
 const { empty, extendPrototype } = object
@@ -63,17 +67,24 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 	}
 }
 
-export function EnumSpace<Type = any>(
+export const EnumSpace = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <Type = any>(generator?: (i?: number, ...x: any[]) => Type) {
+		const enumSpace = makeDelegate(
+			PreEnumSpace<Type>,
+			["value"],
+			"delegate"
+		)
+
+		extendPrototype(enumSpace, {
+			generator: ConstDescriptor(generator)
+		})
+
+		return enumSpace
+	}
+) as unknown as <Type = any>(
 	generator?: (i?: number, ...x: any[]) => Type
-): new (init?: Type[] | number) => IEnumSpace<Type> {
-	const enumSpace = makeDelegate(PreEnumSpace<Type>, ["value"], "delegate")
-
-	extendPrototype(enumSpace, {
-		generator: ConstDescriptor(generator)
-	})
-
-	return enumSpace as new (init?: Type[] | number) => IEnumSpace<Type>
-}
+) => new (init?: Type[] | number) => IEnumSpace<Type>
 
 // * Pre-doc note: default provides benefits - 1. stable memory footprint; 2. easy to generate new instances (no need for user involvement); 3. unlimited number of instances
 export const ConstEnum = EnumSpace(empty)

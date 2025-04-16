@@ -1,34 +1,32 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
+import { valueIsCurrEnd, type IConstructor } from "../StreamClass/refactor.js"
+import type { IPattern } from "src/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
+import type { IStreamParser, IStreamParserConstructor } from "./interfaces.js"
 
 import type {
-	IEndableStream,
-	IStreamClassInstance
-} from "../../Stream/StreamClass/interfaces.js"
-
-import type { Constructor } from "../StreamClass/refactor.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IStreamParser } from "./interfaces.js"
-
-import type {
-	IStreamHandler,
-	IStreamPredicate
+	IStreamPredicate,
+	IStreamTransform
 } from "../../TableMap/interfaces.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
-import { valueIsCurrEnd } from "../StreamClass/refactor.js"
 import { withSuper } from "../../refactor.js"
 
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
+import { Autocache } from "../../internal/Autocache.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
+
 import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
 
 const StreamParserBase = <Type = any>(
-	hasPosition: boolean = false,
-	hasBuffer: boolean = false,
-	hasState: boolean = false
+	hasPosition = false,
+	hasBuffer = false,
+	hasState = false
 ) =>
 	DefaultEndStream<Type>({
 		...baseMethods,
@@ -37,28 +35,25 @@ const StreamParserBase = <Type = any>(
 		hasBuffer: hasBuffer,
 		hasState: hasState,
 		isPattern: true
-	}) as Constructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
 
-export function StreamParser<InType = any, OutType = any>(
-	handler: IStreamHandler<OutType>
+function makeStreamParser<InType = any, OutType = any>(
+	handler: IStreamTransform<InType, OutType>
 ): (
 	hasPosition?: boolean,
 	hasBuffer?: boolean,
 	hasState?: boolean
-) => Constructor<[IEndableStream?, Summat?], IStreamParser<InType, OutType>> {
-	return function (
-		hasPosition: boolean = false,
-		hasBuffer: boolean = false,
-		hasState: boolean = false
-	) {
+) => IStreamParserConstructor<InType, OutType> {
+	return function (hasPosition = false, hasBuffer = false, hasState = false) {
 		const baseClass = StreamParserBase(hasPosition, hasBuffer, hasState)
 		class streamTokenizerClass
 			extends baseClass
 			implements IStreamParser<InType, OutType>
 		{
+			readonly super: Summat
+			readonly handler: IStreamTransform<InType, OutType>
+
 			value: IEndableStream<InType>
-			super: Summat
-			handler: IStreamHandler<OutType>
 
 			pos?: number
 			buffer?: IFreezableBuffer<OutType>
@@ -89,18 +84,40 @@ export function StreamParser<InType = any, OutType = any>(
 	}
 }
 
+const _StreamParser = new Autocache(new ArrayMap(), function <
+	InType = any,
+	OutType = any
+>([handler, hasPosition, hasBuffer, hasState]: [
+	IStreamTransform<InType, OutType>,
+	boolean,
+	boolean,
+	boolean
+]) {
+	return makeStreamParser(handler)(hasPosition, hasBuffer, hasState)
+})
+
+export function StreamParser<InType = any, OutType = any>(
+	handler: IStreamTransform<InType, OutType>
+) {
+	return function (
+		hasPosition = false,
+		hasBuffer = false,
+		hasState = false
+	): IStreamParserConstructor<InType, OutType> {
+		return _StreamParser([handler, hasPosition, hasBuffer, hasState])
+	}
+}
+
 export const BufferedParser =
-	<InType = any, OutType = any>(
-		hasPosition: boolean = false,
-		hasState: boolean = false
-	) =>
-	(handler: IStreamHandler<OutType>) =>
+	<InType = any, OutType = any>(hasPosition = false, hasState = false) =>
+	(handler: IStreamTransform<InType, OutType>) =>
 		StreamParser<InType, OutType>(handler)(hasPosition, true, hasState)
 
 export const LocatorStream =
-	<InType = any>(hasPosition: boolean = false, hasState: boolean = false) =>
-	(predicate: IStreamPredicate) =>
+	<InType = any>(hasPosition = false, hasState = false) =>
+	(predicate: IStreamPredicate<InType>) =>
 		StreamParser<InType, boolean>(predicate)(hasPosition, false, hasState)
 
 export * from "./classes/PositionalValidator.js"
 export * from "./classes/StreamValidator.js"
+export * from "./classes/IndexStream.js"

@@ -3,14 +3,11 @@ import type { array } from "@hgargg-0710/one"
 import type {
 	ICopiable,
 	IDefaulting,
-	IIndexingFunction,
+	IIndexable,
 	IRekeyable,
+	IReversible,
 	ISizeable
 } from "../interfaces.js"
-
-export interface IIndexable<ValueType = any> {
-	index: (x: any, ...y: any[]) => ValueType
-}
 
 export interface IIndexMap<
 	KeyType = any,
@@ -22,11 +19,10 @@ export interface IIndexMap<
 		ICopiable,
 		ISizeable,
 		IDefaulting<DefaultType>,
-		IRekeyable<KeyType> {
+		IRekeyable<KeyType>,
+		IReversible {
 	keys: KeyType[]
 	values: ValueType[]
-
-	reverse: () => this
 
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
@@ -42,22 +38,9 @@ export interface IIndexMap<
 
 export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
 	new (
-		map: array.Pairs<KeyType, ValueType>,
+		map?: array.Pairs<KeyType, ValueType>,
 		_default?: DefaultType
 	): IIndexMap<KeyType, ValueType>
-
-	change?: IIndexingFunction<KeyType>
-
-	extend: <KeyType = any>(
-		...f: ((...x: any[]) => any)[]
-	) => IMapClass<KeyType, any>
-
-	extendKey: <ValueType = any>(
-		...f: ((x: any) => any)[]
-	) => IMapClass<any, ValueType>
-
-	keyExtensions: Function[]
-	extensions: Function[]
 }
 
 export type * from "./LinearIndexMap/interfaces.js"

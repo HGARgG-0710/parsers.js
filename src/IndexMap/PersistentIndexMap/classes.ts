@@ -1,21 +1,17 @@
-import type { IPointer } from "../../Pattern/interfaces.js"
+import type { IPointer } from "src/interfaces.js"
 import type { IIndexMap } from "../interfaces.js"
 import type { IPersistentIndexMap } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
 
 import { BadIndex } from "../../constants.js"
 
-import { setValue, swapValues } from "../../Pattern/utils.js"
+import { setValue, swapValues } from "../../utils.js"
 import { DelegateIndexMap } from "../../internal/delegates/IndexMap.js"
 
 import { inplace } from "@hgargg-0710/one"
 import { isGoodIndex } from "../../utils.js"
+import { Pointer } from "../../classes.js"
 const { mutate, swap, insert, out } = inplace
-
-// * Explanation: objects are passed by reference, ergo, it's possible to keep the
-// * 	index of a 'PersistentIndexMap' consistent across multiple sources,
-// * 	via wrapping it into a one-property object;
-export const Pointer = <Type = any>(value: Type): IPointer<Type> => ({ value })
 
 export class PersistentIndexMap<
 		KeyType = any,

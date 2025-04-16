@@ -1,24 +1,30 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable } from "../../interfaces.js"
+import type { ICopiable, IInitializable } from "../interfaces.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
-	IParserState
+	IParserState,
+	ISignatureCallback,
+	IFunctionTuple
 } from "./interfaces.js"
 
-import type { IFunctionTuple } from "../interfaces.js"
+import { IndexSet } from "../internal/IndexSet.js"
+import { CallbackBuffer } from "../internal/Collection/Buffer/CallbackBuffer.js"
 
-import { IndexSet } from "../../internal/IndexSet.js"
-import { CallbackBuffer } from "../../internal/CallbackBuffer.js"
-
-import { Composition } from "../classes.js"
+import { Composition } from "src/internal/Composition.js"
 
 import { array, object, functional } from "@hgargg-0710/one"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { Autocache } from "../internal/Autocache.js"
+
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
-export class Signature implements ICopiable {
+export class Signature
+	implements ICopiable, IInitializable<[any[]], Signature>
+{
 	protected readonly toApplyOn: IndexSet
 	protected readonly preIndexes: IndexSet
 	protected preFill: any[];
@@ -71,7 +77,7 @@ abstract class PreComplexComposition<
 	implements IComplexComposition<StateType>
 {
 	#original: Function[] = []
-	#state: StateType | null = null
+	#state: StateType | undefined = undefined
 
 	readonly layers: IFunctionTuple = new CallbackBuffer(
 		function (
@@ -84,17 +90,17 @@ abstract class PreComplexComposition<
 	)
 
 	get state() {
-		return this.#state!
+		return this.#state
 	}
 
-	protected stateMaker: (thisArg: IComplexComposition) => StateType
+	protected stateMaker?: (thisArg: IComplexComposition) => StateType
 
 	protected makeState() {
-		this.#state = this.stateMaker(this)
+		this.#state = this.stateMaker?.(this)
 		return this
 	}
 
-	init(callback: (thisArg: IComplexComposition) => Iterable<Signature>) {
+	init(callback: ISignatureCallback<StateType>) {
 		let layers = array.copy(this.#original)
 		for (const signature of callback(this.makeState()))
 			layers = signature.apply(layers)
@@ -103,20 +109,25 @@ abstract class PreComplexComposition<
 	}
 }
 
-export function ComplexComposition<StateType extends Summat = Summat>(
-	stateMaker: (thisArg: IComplexComposition) => StateType
-): new (layers?: Function[]) => IComplexComposition<StateType> {
-	class complexComposition<
-		ArgType extends any[] = any[],
-		OutType = any
-	> extends PreComplexComposition<StateType, ArgType, OutType> {}
+export const ComplexComposition = new Autocache(
+	new BasicHash(new MapInternal()),
+	function <StateType extends Summat = Summat>(
+		stateMaker?: (thisArg: IComplexComposition) => StateType
+	) {
+		class complexComposition<
+			ArgType extends any[] = any[],
+			OutType = any
+		> extends PreComplexComposition<StateType, ArgType, OutType> {}
 
-	extendPrototype(complexComposition, {
-		stateMaker: ConstDescriptor(stateMaker)
-	})
+		extendPrototype(complexComposition, {
+			stateMaker: ConstDescriptor(stateMaker)
+		})
 
-	return complexComposition
-}
+		return complexComposition
+	}
+) as unknown as <StateType extends Summat = Summat>(
+	stateMaker?: (thisArg: IComplexComposition) => StateType
+) => new (layers?: Function[]) => IComplexComposition<StateType>
 
 /**
  * Returns an `IParserState` object with `x` as the value of the
@@ -133,3 +144,7 @@ export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 // * 2. THE USER controls how the 'signature's operate precisely
 export const DynamicParser: new (layers?: Function[]) => IDynamicParser =
 	ComplexComposition(ParserState)
+
+// * pre-doc note: this is intended for usage WITHOUT the self-modification of the parser; 
+// useful for error-handling [see ErrorHandler] and other such operations; 
+export const CommonParser = ComplexComposition()

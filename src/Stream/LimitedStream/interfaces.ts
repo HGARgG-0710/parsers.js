@@ -1,40 +1,56 @@
-import type {
-	IPosition,
-	IPosed,
-	IDirectionHaving
-} from "../Position/interfaces.js"
-
-import type { IReversibleStream } from "../ReversibleStream/interfaces.js"
+import type { IFreezableBuffer, IPointer } from "src/interfaces.js"
+import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IDirectionHaving } from "../Position/interfaces.js"
 
 import type {
+	IReversibleStream,
+	IBufferized,
+	ICopiable,
+	ISupered
+} from "../../interfaces.js"
+
+import type { ILookaheadHaving } from "../interfaces.js"
+import type { IWithLookahead } from "../interfaces.js"
+
+import type {
+	IDirectionalPosition,
 	IIsEndCurrable,
 	IIsStartCurrable,
-	IReversedStreamClassInstance
-} from "../StreamClass/interfaces.js"
+	IProddable
+} from "../interfaces.js"
 
-import type {
-	ILookaheadHaving,
-	ISinglePositionLookahead
-} from "../PredicateStream/interfaces.js"
-
-import type { IPattern } from "../../Pattern/interfaces.js"
-
-import type { IBufferized, ICopiable, ISupered } from "../../interfaces.js"
-
-export type ILimitedUnderStream<Type = any> = IReversibleStream<Type> &
-	IPosed<IPosition> &
+export type ILimitedUnderStream<Type = any> = IReversibleStream<
+	Type,
+	any,
+	IDirectionalPosition
+> &
 	IIsEndCurrable &
 	IIsStartCurrable &
 	ICopiable
 
-export interface ILimitedStream<Type = any>
-	extends ISinglePositionLookahead<Type>,
-		IPattern<ILimitedUnderStream<Type>>,
-		ILookaheadHaving,
-		ISupered,
-		IReversedStreamClassInstance<Type>,
-		IDirectionHaving,
-		Partial<IBufferized<Type>> {
-	from: IPosition
-	to: IPosition
-}
+export type ILimitedStreamInitSignature<Type = any> = [
+	ILimitedUnderStream<Type>,
+	IFreezableBuffer<Type>?
+]
+
+export type ILimitedStreamConstructor<Type = any> = new (
+	value?: ILimitedUnderStream<Type>,
+	buffer?: IFreezableBuffer<Type>
+) => ILimitedStream<Type>
+
+export type ILimitedStream<Type = any> = IProddable<Type> &
+	IWithLookahead<Type> &
+	ILookaheadHaving &
+	ISupered &
+	IReversedStreamClassInstance<
+		Type,
+		ILimitedUnderStream<Type>,
+		number,
+		ILimitedStreamInitSignature<Type>
+	> &
+	IPointer<ILimitedUnderStream<Type>> &
+	IDirectionHaving &
+	Partial<IBufferized<Type>> & {
+		from: IDirectionalPosition
+		to: IDirectionalPosition
+	}

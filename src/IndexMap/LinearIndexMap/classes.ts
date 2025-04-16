@@ -1,7 +1,6 @@
-import type { array } from "@hgargg-0710/one"
 import type { IIndexingFunction, ITestable, IHaving } from "../../interfaces.js"
 import type { IMapClass } from "../interfaces.js"
-import type { ILinearIndexMap } from "./interfaces.js"
+import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
 
 import {
 	extend,
@@ -12,20 +11,16 @@ import {
 import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import { fromPairs } from "../utils.js"
 
-import { functional, boolean, string } from "@hgargg-0710/one"
+import { functional, boolean, string, object, array } from "@hgargg-0710/one"
+import { Autocache } from "../../internal/Autocache.js"
 const { trivialCompose } = functional
 const { equals } = boolean
-const { charCodeAt } = string
 
-export function LinearMapClass<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any
->(
+function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
-): IMapClass<KeyType, ValueType, DefaultType> {
+): ILinearMapClass<KeyType, ValueType, DefaultType> {
 	class linearMapClass
 		extends BaseLinearMap<KeyType, ValueType, DefaultType>
 		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
@@ -44,7 +39,7 @@ export function LinearMapClass<
 		static extensions: Function[]
 
 		constructor(
-			pairsList: array.Pairs<KeyType, ValueType>,
+			pairsList: array.Pairs<KeyType, ValueType> = [],
 			_default?: DefaultType
 		) {
 			super(...fromPairs(pairsList), _default)
@@ -70,10 +65,34 @@ export function LinearMapClass<
 	return linearMapClass
 }
 
+export const ArrayMap = makeLinearMapClass(array.recursiveSame)
+
+const linMapClassCacher = ([change, extensions, keyExtensions]) =>
+	makeLinearMapClass(change, extensions, keyExtensions)
+
+const _LinearMapClass = new Autocache(
+	new ArrayMap([[[array.recursiveSame, [], []], ArrayMap]]),
+	linMapClassCacher
+)
+
+export function LinearMapClass<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any
+>(
+	change?: IIndexingFunction<KeyType>,
+	extensions: Function[] = [],
+	keyExtensions: Function[] = []
+): ILinearMapClass<KeyType, ValueType, DefaultType> {
+	return _LinearMapClass([change, extensions, keyExtensions])
+}
+
 export const OptimizedLinearMap = LinearMapClass()
 
 // * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
-export const OptimizedCharMap = OptimizedLinearMap.extend<number>(charCodeAt)
+export const OptimizedCharMap = OptimizedLinearMap.extend<number>(
+	string.charCodeAt
+)
 
 export const PredicateMap: IMapClass<Function> = LinearMapClass(
 	(curr: Function, x: any) => curr(x)
@@ -88,3 +107,5 @@ export const SetMap: IMapClass<IHaving> = LinearMapClass(
 )
 
 export const BasicMap = LinearMapClass(equals)
+
+export const ObjectMap = LinearMapClass(object.same)

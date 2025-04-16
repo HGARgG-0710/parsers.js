@@ -1,29 +1,39 @@
 import type { IStreamPredicate } from "../../TableMap/interfaces.js"
 import type { ILookupTable } from "../../LookupTable/interfaces.js"
-import type { IPattern } from "../../Pattern/interfaces.js"
-import type { IPosed } from "../Position/interfaces.js"
+import type { IFreezableBuffer, IPattern } from "src/interfaces.js"
+import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 
-import type {
-	IEndableStream,
-	IStreamClassInstance
-} from "../StreamClass/interfaces.js"
-
-import type {
-	ISupered,
-	IIndexAssignable,
-	ICopiable,
-	IBufferized
-} from "../../interfaces.js"
+import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
-export interface INestedStream<Type = any>
-	extends IStreamClassInstance<Type | INestedStream<Type>>,
+export type INestedStreamInitSignature<Type = any, IndexType = any> = [
+	IEndableStream<Type>?,
+	IndexType?
+]
+
+export type INestedStreamConstructor<Type = any, IndexType = any> = new (
+	value?: IUnderNestedStream<Type>,
+	index?: IndexType,
+	buffer?: IFreezableBuffer<Type | INestedStream<Type, IndexType>>
+) => INestedStream<Type, IndexType>
+
+export interface INestedStream<Type = any, IndexType = any>
+	extends IStreamClassInstance<
+			Type | INestedStream<Type>,
+			IUnderNestedStream<Type>,
+			number,
+			INestedStreamInitSignature<Type, IndexType>
+		>,
 		ISupered,
 		IPattern<IUnderNestedStream<Type>>,
-		IIndexAssignable,
-		Partial<IPosed<number>>,
-		Partial<IBufferized<Type>> {
-	typesTable: ILookupTable<any, IStreamPredicate>
+		IIndexAssignable<IndexType> {
+	["constructor"]: INestedStreamConstructor<Type, IndexType>
+	typesTable: ILookupTable<
+		any,
+		IStreamPredicate<Type | INestedStream<Type>>,
+		IndexType
+	>
 	isCurrNested: boolean
 }
