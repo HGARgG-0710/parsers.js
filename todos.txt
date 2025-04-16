@@ -20,6 +20,21 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
+		TODO: `ISupered` - remove as a public interface. 
+			Again - an implementation detail. 
+			Encapsulation violation. 
+			Intended to be on a priavte interface instead. 
+
+		TODO: ENCAPSULATION violation in `StreamClass`-deriving configurator-pattern-implementing interfaces/classes: 
+			1. StreamParser - `handler`. 
+				This is intended to be a *private* property (not a part of the interface)
+			2. MarkedStream - 'marker' 
+			3. NestedStream - `typesTable`
+			4. PredicateStream - `predicate`
+			5. LimitedStream - `direction`, `from`, `to`
+
+			PLACE THESE onto "internal interfaces"
+
 		TODO: StreamClass - encapsulation violation: 
 			The "supposedly" public methods like `baseNextIter`, which REALLY SHOULDN'T 
 				by public, are now joined by an actual PROPERTY [RotationBuffer-containing one, specifically, `protected`]. 
@@ -36,24 +51,6 @@ Order of TODO-elimination:
 					1. [RotationBuffer property]
 					2. `baseNextIter`
 					3. `basePrevIter`
-
-		TODO: `DelimitedStream` - re-implement it PROPERLY...
-			The prior (PredicateStream-based) iteration had several grevious flaws: 
-				1. did not allow for limiting the number of delimitors 
-					error-handling, etc
-				2. did not allow "stopping" at a delimiter [only recorded values]
-				3. no support for being able to "capture" the `.isDelimiter` state [biggest drawback]
-
-			New solution: 
-				1. implement as a separate `IStream`
-				2. provide new `.isDelimiter: boolean` property for distinguishing between a delimiter and non-delimiter
-				3. provide new `.checkDelimiter(x: Type): boolean` predicate that is defined FOR A CLASS of `DelimitedStream` [Configurator Pattern]
-					Used to write to `.isDelimiter` [CACHED]
-				4. reads THE WHOLE underlying `IStream` [has a `.value`]
-				5. has its own `classes.ts` + `interfaces.ts` pair of files; 
-			
-			Also: 
-				1. provide special-case `Set`-predicate-based solution [giving a finite number of delimiters]; 
 
 		BIG: .peek() CYCLE: 	
 			ME5. 'StreamClass' - provide a '.peek(n)' method: 
@@ -118,6 +115,22 @@ Order of TODO-elimination:
 				`peekSize` - new parameter [do via the `Configurator` pattern]; 
 				Reason: the user shouldn't need to bother EVERY TIME with choosing the 
 					lookahead. Particularly so if it's *the same*...; 
+			
+			PROBLEM: how to make `.peek(n)` work with `currGetter`? 
+				Suppose one has some state-altering logic (example: MarkedStream). 
+				Then, "looking ahead" will EFFECTIVELY ERASE the changes. 
+				Which is *BAD*. 
+
+					CONCLUSION: one *may*, for this specific thing, need to:
+						1. ISOLATE the variables of the given 'Stream'
+						2. provide a special "state-changing function", calls to which could "accumulate" 
+							as we are fetching previously "seen" items from the `.peekBuffer`; 
+					
+				Meaning: that the `Stream` under question NO LONGER gets to have its 
+					own instance-variables. 
+				
+				Or, more precisely, that those variables will have to delegate to a 
+					sinle mandated `.vars` object on the instance. 
 				
 		TODO: `IWithLookahead` and `ILookaheadHaving` and `IProddable` [in Stream\intrfaces.ts]: 
 			MAKE those into private interfaces [that is, employed by IMPLEMENTATIONS OF `Configurator Pattern` ALONE!]
