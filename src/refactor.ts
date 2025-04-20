@@ -1,3 +1,5 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+
 import { functional, object, type } from "@hgargg-0710/one"
 const { argWaster, trivialCompose } = functional
 const { extendPrototype, keys, propertyDescriptors } = object
@@ -98,3 +100,7 @@ export interface ConstructorHaving {
 export type IThisMethod<ArgType extends any[] = any[], OutType = any> = (
 	...args: ArgType
 ) => OutType
+
+export interface ISupered {
+	readonly super: Summat
+}

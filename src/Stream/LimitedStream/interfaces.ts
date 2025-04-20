@@ -1,32 +1,24 @@
 import type { IFreezableBuffer, IPointer } from "src/interfaces.js"
-import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IDirectionHaving } from "../Position/interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
 
 import type {
-	IReversibleStream,
-	IBufferized,
-	ICopiable,
-	ISupered
-} from "../../interfaces.js"
-
-import type { ILookaheadHaving } from "../interfaces.js"
-import type { IWithLookahead } from "../interfaces.js"
-
-import type {
+	IBackward,
 	IDirectionalPosition,
 	IIsEndCurrable,
 	IIsStartCurrable,
-	IProddable
+	IPosed,
+	IStream
 } from "../interfaces.js"
 
-export type ILimitedUnderStream<Type = any> = IReversibleStream<
+export type ILimitedUnderStream<Type = any> = IStream<
 	Type,
 	any,
 	IDirectionalPosition
 > &
 	IIsEndCurrable &
 	IIsStartCurrable &
-	ICopiable
+	ICopiable &
+	IPosed<IDirectionalPosition>
 
 export type ILimitedStreamInitSignature<Type = any> = [
 	ILimitedUnderStream<Type>,
@@ -38,19 +30,6 @@ export type ILimitedStreamConstructor<Type = any> = new (
 	buffer?: IFreezableBuffer<Type>
 ) => ILimitedStream<Type>
 
-export type ILimitedStream<Type = any> = IProddable<Type> &
-	IWithLookahead<Type> &
-	ILookaheadHaving &
-	ISupered &
-	IReversedStreamClassInstance<
-		Type,
-		ILimitedUnderStream<Type>,
-		number,
-		ILimitedStreamInitSignature<Type>
-	> &
-	IPointer<ILimitedUnderStream<Type>> &
-	IDirectionHaving &
-	Partial<IBufferized<Type>> & {
-		from: IDirectionalPosition
-		to: IDirectionalPosition
-	}
+export type ILimitedStream<Type = any> = IStream<Type> &
+	IBackward<Type> &
+	IPointer<ILimitedUnderStream<Type>>

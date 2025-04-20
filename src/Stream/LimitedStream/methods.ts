@@ -1,17 +1,17 @@
-import type { IDirectionalPosition, IPosed } from "../Position/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { ILimitedStream, ILimitedUnderStream } from "./interfaces.js"
+import type { ILimitedUnderStream } from "./interfaces.js"
+import type { ILimitedStreamImpl } from "./refactor.js"
 
 import { positionEqual } from "../Position/utils.js"
 import { navigate, rewind } from "../utils.js"
 
 export namespace methods {
-	export function baseNextIter<Type = any>(this: ILimitedStream<Type>) {
+	export function baseNextIter<Type = any>(this: ILimitedStreamImpl<Type>) {
 		this.hasLookAhead = false
 		return this.lookAhead
 	}
 
-	export function prod<Type = any>(this: ILimitedStream<Type>) {
+	export function prod<Type = any>(this: ILimitedStreamImpl<Type>) {
 		const { value, direction, hasLookAhead, lookAhead } = this
 		if (!hasLookAhead) {
 			this.hasLookAhead = true
@@ -21,25 +21,19 @@ export namespace methods {
 		return lookAhead
 	}
 
-	export function isCurrEnd<Type = any>(this: ILimitedStream<Type>) {
+	export function isCurrEnd<Type = any>(this: ILimitedStreamImpl<Type>) {
 		const { value, to } = this
 		if (value!.isCurrEnd()) return true
 		this.lookAhead = this.prod()
-		return positionEqual(
-			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
-			to
-		)
+		return positionEqual(value!, to)
 	}
 
-	export function isCurrStart<Type = any>(this: ILimitedStream<Type>) {
+	export function isCurrStart<Type = any>(this: ILimitedStreamImpl<Type>) {
 		const { value, from } = this
-		return positionEqual(
-			value! as ILimitedUnderStream<Type> & IPosed<IDirectionalPosition>,
-			from
-		)
+		return positionEqual(value!, from)
 	}
 
-	export function basePrevIter<Type = any>(this: ILimitedStream<Type>) {
+	export function basePrevIter<Type = any>(this: ILimitedStreamImpl<Type>) {
 		const { curr, direction, value } = this
 		this.lookAhead = curr
 		this.hasLookAhead = true
@@ -48,7 +42,7 @@ export namespace methods {
 	}
 
 	export function init<Type = any>(
-		this: ILimitedStream<Type>,
+		this: ILimitedStreamImpl<Type>,
 		value?: ILimitedUnderStream<Type>,
 		buffer?: IFreezableBuffer<Type>
 	) {
@@ -62,8 +56,8 @@ export namespace methods {
 	}
 
 	export function copy<Type = any>(
-		this: ILimitedStream<Type>
-	): ILimitedStream<Type> {
+		this: ILimitedStreamImpl<Type>
+	): ILimitedStreamImpl<Type> {
 		return new this.constructor(
 			this.value?.copy(),
 			this.from,

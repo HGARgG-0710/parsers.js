@@ -6,9 +6,9 @@ import type { IFreezableBuffer } from "../../interfaces.js"
 
 import type {
 	ILimitedUnderStream,
-	ILimitedStream,
 	ILimitedStreamConstructor
 } from "./interfaces.js"
+import type { ILimitedStreamImpl } from "./refactor.js"
 
 import type {
 	IDirectionalPosition,
@@ -60,7 +60,7 @@ function makeLimitedStream(
 		hasBuffer = false
 	): ILimitedStreamConstructor<Type> {
 		const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
-		class limitedStream extends baseClass implements ILimitedStream<Type> {
+		class limitedStream extends baseClass implements ILimitedStreamImpl<Type> {
 			value: ILimitedUnderStream<Type>
 			lookAhead: Type
 			hasLookAhead = false
@@ -75,12 +75,12 @@ function makeLimitedStream(
 			init: (
 				value?: ILimitedUnderStream<Type>,
 				buffer?: IFreezableBuffer<Type>
-			) => ILimitedStream<Type>;
+			) => ILimitedStreamImpl<Type>;
 
 			["constructor"]: new (
 				value: ILimitedUnderStream<Type>,
 				buffer?: IFreezableBuffer<Type>
-			) => ILimitedStream<Type>
+			) => ILimitedStreamImpl<Type>
 
 			constructor(
 				value?: ILimitedUnderStream<Type>,
