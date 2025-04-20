@@ -59,10 +59,6 @@ export type IIndexed<Type = any> =
 			length: number
 	  } & Iterable<Type>
 
-export interface ISupered {
-	readonly super: Summat
-}
-
 export type IInvalidEntries<Type = any> = [IPosition, Type][]
 
 export type IValidationResult = true | [false, IPosition]
