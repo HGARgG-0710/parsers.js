@@ -1,34 +1,46 @@
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IReversibleStream, IIsEndCurrable } from "../interfaces.js"
-import type { IPredicateStream } from "./interfaces.js"
+import type { IPredicateStreamInitSignature } from "./interfaces.js"
+import type { ISupered } from "../../refactor.js"
+
+import type {
+	IReversibleStream,
+	IIsEndCurrable,
+	IStreamClassInstance,
+	IUnderPredicateStream,
+	IProddable,
+	IWithLookahead,
+	ILookaheadHaving,
+	IPredicatePosition,
+	IPredicateStream
+} from "../interfaces.js"
 
 import { navigate } from "../utils.js"
 
 export namespace methods {
-	export function currGetter<Type = any>(this: IPredicateStream<Type>) {
+	export function currGetter<Type = any>(this: IPredicateStreamImpl<Type>) {
 		navigate(this.value!, this.predicate)
 		return this.value!.curr
 	}
 
-	export function baseNextIter<Type = any>(this: IPredicateStream<Type>) {
+	export function baseNextIter<Type = any>(this: IPredicateStreamImpl<Type>) {
 		this.hasLookAhead = false
 		return this.lookAhead
 	}
 
-	export function prod<Type = any>(this: IPredicateStream<Type>) {
+	export function prod<Type = any>(this: IPredicateStreamImpl<Type>) {
 		if (this.hasLookAhead) return this.lookAhead
 		this.hasLookAhead = true
 		this.value!.next()
 		return this.curr
 	}
 
-	export function isCurrEnd<Type = any>(this: IPredicateStream<Type>) {
+	export function isCurrEnd<Type = any>(this: IPredicateStreamImpl<Type>) {
 		this.lookAhead = this.prod()
-		return this.value!.isCurrEnd() 
+		return this.value!.isCurrEnd()
 	}
 
 	export function init<Type = any>(
-		this: IPredicateStream<Type>,
+		this: IPredicateStreamImpl<Type>,
 		value?: IReversibleStream<Type> & IIsEndCurrable,
 		buffer?: IFreezableBuffer<Type>
 	) {
@@ -37,7 +49,21 @@ export namespace methods {
 		return this
 	}
 
-	export function defaultIsEnd<Type = any>(this: IPredicateStream<Type>) {
+	export function defaultIsEnd<Type = any>(this: IPredicateStreamImpl<Type>) {
 		return this.value!.isEnd || !this.predicate(this, this.pos)
 	}
 }
+
+export type IPredicateStreamImpl<Type = any> = IPredicateStream<Type> &
+	IStreamClassInstance<
+		Type,
+		IUnderPredicateStream<Type>,
+		number,
+		IPredicateStreamInitSignature<Type>
+	> &
+	ISupered &
+	IProddable<Type> &
+	IWithLookahead<Type> &
+	ILookaheadHaving & {
+		predicate: IPredicatePosition<Type>
+	}

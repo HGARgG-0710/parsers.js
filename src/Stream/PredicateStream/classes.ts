@@ -6,7 +6,6 @@ import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IConstructor } from "../StreamClass/refactor.js"
 
 import type {
-	IPredicateStream,
 	IPredicateStreamConstructor,
 	IUnderPredicateStream
 } from "./interfaces.js"
@@ -22,7 +21,7 @@ const { ConstDescriptor } = object.descriptor
 import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
-import { methods } from "./methods.js"
+import { methods, type IPredicateStreamImpl } from "./methods.js"
 const { init, prod, ...baseMethods } = methods
 
 const PredicateStreamBase = <Type = any>(
@@ -44,7 +43,7 @@ function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 		const baseClass = PredicateStreamBase(hasPosition, hasBuffer)
 		class predicateStream
 			extends baseClass
-			implements IPredicateStream<Type>
+			implements IPredicateStreamImpl<Type>
 		{
 			readonly predicate: IPredicatePosition<Type>
 			readonly super: Summat
@@ -58,7 +57,7 @@ function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 			init: (
 				value?: IUnderPredicateStream<Type>,
 				buffer?: IFreezableBuffer<Type>
-			) => IPredicateStream<Type>
+			) => IPredicateStreamImpl<Type>
 
 			constructor(
 				value?: IUnderPredicateStream<Type>,
