@@ -1,7 +1,15 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IStreamParser } from "./interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
-import type { IFreezableBuffer } from "../../interfaces.js"
+import type { ISupered } from "../../refactor.js"
+
+import type {
+	IEndableStream,
+	IStreamClassInstance,
+	IStreamParser,
+	IStreamParserConstructor,
+	IStreamParserInitSignature
+} from "../interfaces.js"
+
+import type { IFreezableBuffer, IStreamTransform } from "../../interfaces.js"
 
 import { isBufferized } from "../../Collection/Buffer/utils.js"
 
@@ -10,7 +18,7 @@ const { SkippedItem } = Stream.StreamParser
 
 export namespace methods {
 	export function baseNextIter<InType = any, OutType = any>(
-		this: IStreamParser<InType, OutType>
+		this: IStreamParserImpl<InType, OutType>
 	) {
 		let currRes: OutType
 		do currRes = this.handler(this.value)
@@ -19,7 +27,7 @@ export namespace methods {
 	}
 
 	export function init<InType = any, OutType = any>(
-		this: IStreamParser<InType, OutType>,
+		this: IStreamParserImpl<InType, OutType>,
 		value?: IEndableStream<InType>,
 		buffer?: IFreezableBuffer<OutType>,
 		state?: Summat
@@ -34,3 +42,18 @@ export namespace methods {
 
 	export const initGetter = baseNextIter
 }
+
+export type IStreamParserImpl<InType = any, OutType = any> = IStreamParser<
+	InType,
+	OutType
+> &
+	IStreamClassInstance<
+		OutType,
+		IEndableStream<InType>,
+		number,
+		IStreamParserInitSignature<InType, OutType>
+	> &
+	ISupered & {
+		["constructor"]: IStreamParserConstructor<InType, OutType>
+		handler: IStreamTransform<InType, OutType>
+	}

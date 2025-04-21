@@ -1,10 +1,11 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../Collection/Buffer/interfaces.js"
 import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
-import { valueIsCurrEnd, type IConstructor } from "../StreamClass/refactor.js"
 import type { IPattern } from "src/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
-import type { IStreamParser, IStreamParserConstructor } from "./interfaces.js"
+import type { IStreamParserConstructor } from "./interfaces.js"
+
+import { valueIsCurrEnd, type IConstructor } from "../StreamClass/refactor.js"
 
 import type {
 	IStreamPredicate,
@@ -20,7 +21,7 @@ const { ConstDescriptor } = object.descriptor
 import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
-import { methods } from "./methods.js"
+import { methods, type IStreamParserImpl } from "./methods.js"
 const { init, ...baseMethods } = methods
 
 const StreamParserBase = <Type = any>(
@@ -48,7 +49,7 @@ function makeStreamParser<InType = any, OutType = any>(
 		const baseClass = StreamParserBase(hasPosition, hasBuffer, hasState)
 		class streamTokenizerClass
 			extends baseClass
-			implements IStreamParser<InType, OutType>
+			implements IStreamParserImpl<InType, OutType>
 		{
 			readonly super: Summat
 			readonly handler: IStreamTransform<InType, OutType>
@@ -63,7 +64,7 @@ function makeStreamParser<InType = any, OutType = any>(
 				value?: IEndableStream<InType>,
 				buffer?: IFreezableBuffer<OutType>,
 				state?: Summat
-			) => IStreamParser<InType, OutType>
+			) => IStreamParserImpl<InType, OutType>
 
 			constructor(
 				value?: IEndableStream<InType>,

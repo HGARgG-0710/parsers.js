@@ -26,15 +26,15 @@ function makeIndexStream(
 ): IIndexStreamConstructor {
 	return class extends __IndexStream(isNewline) {
 		get buffer() {
-			return this.value.buffer
+			return this.value!.buffer
 		}
 
 		set pos(newPos) {
-			this.value.pos = newPos
+			this.value!.pos = newPos
 		}
 
 		get pos() {
-			return this.value.pos
+			return this.value!.pos
 		}
 
 		constructor(
