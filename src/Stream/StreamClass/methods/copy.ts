@@ -1,14 +1,15 @@
-import { BitHash } from "../../../HashMap/classes.js"
-import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type { IBufferized, IPattern, IPosed } from "../../../interfaces.js"
 import type { IStreamClassInstance } from "../interfaces.js"
 import type { IStateful } from "src/interfaces.js"
+
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 function copyPos<Type = any>(
 	from: IStreamClassInstance<Type> & IPosed<number>,
 	copied: IStreamClassInstance<Type> & IPosed<number>
 ) {
-	copied.navigate(from.pos)
+	copied.pos = from.pos
 	return copied
 }
 
@@ -36,10 +37,7 @@ function generateCopyMethods<Type = any>(
 	function posBufferCopy(
 		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
 	) {
-		return copyPos(
-			this,
-			copy.call(this, this.buffer.emptied())
-		) as typeof this
+		return copyPos(this, copy.call(this, this.buffer.copy())) as typeof this
 	}
 
 	function stateCopy(
@@ -68,7 +66,7 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copyPos(
 			this,
-			copy.call(this, this.buffer.emptied(), this.state)
+			copy.call(this, this.buffer.copy(), this.state)
 		) as typeof this
 	}
 
@@ -98,7 +96,7 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copyPos(
 			this,
-			copy.call(this, this.value.copy(), this.buffer.emptied())
+			copy.call(this, this.value.copy(), this.buffer.copy())
 		) as typeof this
 	}
 
@@ -137,12 +135,7 @@ function generateCopyMethods<Type = any>(
 	) {
 		return copyPos(
 			this,
-			copy.call(
-				this,
-				this.value.copy(),
-				this.buffer.emptied(),
-				this.state
-			)
+			copy.call(this, this.value.copy(), this.buffer.copy(), this.state)
 		) as typeof this
 	}
 

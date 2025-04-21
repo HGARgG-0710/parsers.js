@@ -5,7 +5,7 @@ import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
 
 import type {
-	ILimitedUnderStream,
+	IUnderLimitedStream,
 	ILimitedStreamConstructor
 } from "./interfaces.js"
 import type { ILimitedStreamImpl } from "./methods.js"
@@ -61,7 +61,7 @@ function makeLimitedStream(
 	): ILimitedStreamConstructor<Type> {
 		const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
 		class limitedStream extends baseClass implements ILimitedStreamImpl<Type> {
-			value: ILimitedUnderStream<Type>
+			value: IUnderLimitedStream<Type>
 			lookAhead: Type
 			hasLookAhead = false
 
@@ -73,17 +73,17 @@ function makeLimitedStream(
 			prod: () => Type
 
 			init: (
-				value?: ILimitedUnderStream<Type>,
+				value?: IUnderLimitedStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) => ILimitedStreamImpl<Type>;
 
 			["constructor"]: new (
-				value: ILimitedUnderStream<Type>,
+				value: IUnderLimitedStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) => ILimitedStreamImpl<Type>
 
 			constructor(
-				value?: ILimitedUnderStream<Type>,
+				value?: IUnderLimitedStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) {
 				super(value)

@@ -3,6 +3,7 @@ import type { ISupered } from "../../refactor.js"
 import type {
 	IEndableStream,
 	IMarkedStream,
+	IMarkedStreamInitSignature,
 	IStreamClassInstance
 } from "../interfaces.js"
 
@@ -45,7 +46,12 @@ export namespace methods {
 export type IMarkedStreamImpl<
 	Type = any,
 	MarkerType = any
-> = IStreamClassInstance<Type, IEndableStream<Type>> &
+> = IStreamClassInstance<
+	Type,
+	IEndableStream<Type>,
+	number,
+	IMarkedStreamInitSignature<Type>
+> &
 	IMarkedStream<Type, MarkerType> &
 	ISupered & {
 		["constructor"]: new (

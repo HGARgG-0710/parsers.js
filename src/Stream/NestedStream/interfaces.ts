@@ -20,6 +20,8 @@ export type INestedStreamConstructor<Type = any, IndexType = any> = new (
 export interface INestedStream<Type = any, IndexType = any>
 	extends IStream<
 			Type | INestedStream<Type, IndexType>,
-			IUnderNestedStream<Type>
+			IUnderNestedStream<Type>,
+			number,
+			INestedStreamInitSignature<Type>
 		>,
 		IISCurrNestable {}

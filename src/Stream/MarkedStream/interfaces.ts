@@ -1,9 +1,16 @@
 import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IEndableStream, IStream } from "../interfaces.js"
 
+export type IMarkedStreamInitSignature<Type = any> = [
+	IEndableStream<Type>?,
+	IFreezableBuffer<Type>?
+]
+
 export type IMarkedStream<Type = any, MarkerType = any> = IStream<
 	Type,
-	IEndableStream<Type>
+	IEndableStream<Type>,
+	number,
+	IMarkedStreamInitSignature<Type>
 > & {
 	currMarked: MarkerType
 }

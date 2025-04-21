@@ -11,7 +11,7 @@ import type {
 import type {
 	ILimitedStream,
 	ILimitedStreamInitSignature,
-	ILimitedUnderStream
+	IUnderLimitedStream
 } from "./interfaces.js"
 
 import { positionEqual } from "../Position/utils.js"
@@ -56,7 +56,7 @@ export namespace methods {
 
 	export function init<Type = any>(
 		this: ILimitedStreamImpl<Type>,
-		value?: ILimitedUnderStream<Type>,
+		value?: IUnderLimitedStream<Type>,
 		buffer?: IFreezableBuffer<Type>
 	) {
 		if (value || this.value) {
@@ -86,7 +86,7 @@ export type ILimitedStreamImpl<Type = any> = IProddable<Type> &
 	ISupered &
 	IReversedStreamClassInstance<
 		Type,
-		ILimitedUnderStream<Type>,
+		IUnderLimitedStream<Type>,
 		number,
 		ILimitedStreamInitSignature<Type>
 	> &

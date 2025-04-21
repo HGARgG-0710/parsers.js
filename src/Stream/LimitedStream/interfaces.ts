@@ -1,4 +1,4 @@
-import type { IFreezableBuffer, IPointer } from "src/interfaces.js"
+import type { IFreezableBuffer } from "src/interfaces.js"
 import type { ICopiable } from "../../interfaces.js"
 
 import type {
@@ -10,7 +10,7 @@ import type {
 	IStream
 } from "../interfaces.js"
 
-export type ILimitedUnderStream<Type = any> = IStream<
+export type IUnderLimitedStream<Type = any> = IStream<
 	Type,
 	any,
 	IDirectionalPosition
@@ -21,15 +21,19 @@ export type ILimitedUnderStream<Type = any> = IStream<
 	IPosed<IDirectionalPosition>
 
 export type ILimitedStreamInitSignature<Type = any> = [
-	ILimitedUnderStream<Type>,
+	IUnderLimitedStream<Type>,
 	IFreezableBuffer<Type>?
 ]
 
 export type ILimitedStreamConstructor<Type = any> = new (
-	value?: ILimitedUnderStream<Type>,
+	value?: IUnderLimitedStream<Type>,
 	buffer?: IFreezableBuffer<Type>
 ) => ILimitedStream<Type>
 
-export type ILimitedStream<Type = any> = IStream<Type> &
-	IBackward<Type> &
-	IPointer<ILimitedUnderStream<Type>>
+export type ILimitedStream<Type = any> = IStream<
+	Type,
+	IUnderLimitedStream<Type>,
+	number,
+	ILimitedStreamInitSignature<Type>
+> &
+	IBackward<Type>
