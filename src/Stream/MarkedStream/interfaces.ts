@@ -1,19 +1,12 @@
-import type { IFreezableBuffer, ISupered } from "../../interfaces.js"
-import type { IEndableStream, IStreamClassInstance } from "../interfaces.js"
+import type { IFreezableBuffer } from "../../interfaces.js"
+import type { IEndableStream, IStream } from "../interfaces.js"
 
-export type IMarkedStream<Type = any, MarkedType = any> = IStreamClassInstance<
+export type IMarkedStream<Type = any, MarkerType = any> = IStream<
 	Type,
 	IEndableStream<Type>
-> &
-	ISupered & {
-		["constructor"]: new (
-			value?: IEndableStream<Type>,
-			buffer?: IFreezableBuffer<Type>
-		) => IMarkedStream<Type>
-
-		currMarked: MarkedType
-		marker: (value?: IEndableStream<Type>) => MarkedType
-	}
+> & {
+	currMarked: MarkerType
+}
 
 export type IMarkedStreamConstructor<Type = any, MarkerType = any> = new (
 	value?: IEndableStream<Type>,

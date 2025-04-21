@@ -1,10 +1,14 @@
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
-import type { IMarkedStream } from "./interfaces.js"
+import type { ISupered } from "../../refactor.js"
+import type {
+	IEndableStream,
+	IMarkedStream,
+	IStreamClassInstance
+} from "../interfaces.js"
 
 export namespace methods {
 	export function baseNextIter<Type = any, MarkerType = any>(
-		this: IMarkedStream<Type, MarkerType>
+		this: IMarkedStreamImpl<Type, MarkerType>
 	) {
 		const curr = this.value!.next()
 		this.currMarked = this.marker()
@@ -12,7 +16,7 @@ export namespace methods {
 	}
 
 	export function basePrevIter<Type = any, MarkerType = any>(
-		this: IMarkedStream<Type, MarkerType>
+		this: IMarkedStreamImpl<Type, MarkerType>
 	) {
 		const curr = this.value!.prev!()
 		this.currMarked = this.marker(this.value)
@@ -20,13 +24,13 @@ export namespace methods {
 	}
 
 	export function copy<Type = any, MarkerType = any>(
-		this: IMarkedStream<Type, MarkerType>
+		this: IMarkedStreamImpl<Type, MarkerType>
 	) {
 		return new this.constructor(this.value?.copy())
 	}
 
 	export function init<Type = any, MarkerType = any>(
-		this: IMarkedStream<Type, MarkerType>,
+		this: IMarkedStreamImpl<Type, MarkerType>,
 		value?: IEndableStream<Type>,
 		buffer?: IFreezableBuffer<Type>
 	) {
@@ -37,3 +41,17 @@ export namespace methods {
 		return this
 	}
 }
+
+export type IMarkedStreamImpl<
+	Type = any,
+	MarkerType = any
+> = IStreamClassInstance<Type, IEndableStream<Type>> &
+	IMarkedStream<Type, MarkerType> &
+	ISupered & {
+		["constructor"]: new (
+			value?: IEndableStream<Type>,
+			buffer?: IFreezableBuffer<Type>
+		) => IMarkedStreamImpl<Type>
+
+		marker: (value?: IEndableStream<Type>) => MarkerType
+	}

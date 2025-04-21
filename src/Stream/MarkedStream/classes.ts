@@ -1,7 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../interfaces.js"
 import type { IEndableStream, IStreamClassInstance } from "../interfaces.js"
-import type { IMarkedStream, IMarkedStreamConstructor } from "./interfaces.js"
+import type { IMarkedStreamConstructor } from "./interfaces.js"
+import type { IMarkedStreamImpl } from "./methods.js"
 
 import { DefaultEndStream } from "../classes.js"
 
@@ -48,11 +49,11 @@ function makeMarkedStream<Type = any, MarkerType = any>(
 		const baseClass = BaseMarkedStream<Type>(hasPosition, hasBuffer)
 		class markedStream
 			extends baseClass
-			implements IMarkedStream<Type, MarkerType>
+			implements IMarkedStreamImpl<Type, MarkerType>
 		{
 			["constructor"]: new (
 				value?: IEndableStream<Type>
-			) => IMarkedStream<Type>
+			) => IMarkedStreamImpl<Type>
 
 			value: IEndableStream<Type>
 			currMarked: MarkerType
@@ -64,7 +65,7 @@ function makeMarkedStream<Type = any, MarkerType = any>(
 			init: (
 				value?: IEndableStream<Type>,
 				buffer?: IFreezableBuffer<Type>
-			) => IMarkedStream<Type, MarkerType>
+			) => IMarkedStreamImpl<Type, MarkerType>
 
 			constructor(
 				value?: IEndableStream<Type>,
@@ -96,13 +97,13 @@ const _MarkedStream = new Autocache(new ArrayMap(), function <
 	return makeMarkedStream(marker)(hasPosition, hasBuffer)
 })
 
-export function MarkedStream<Type = any, MarkedType = any>(
-	marker: (value?: IEndableStream<Type>) => MarkedType
+export function MarkedStream<Type = any, MarkerType = any>(
+	marker: (value?: IEndableStream<Type>) => MarkerType
 ) {
 	return function (
 		hasPosition = false,
 		hasBuffer = false
-	): IMarkedStreamConstructor<Type, MarkedType> {
+	): IMarkedStreamConstructor<Type, MarkerType> {
 		return _MarkedStream(marker, hasPosition, hasBuffer)
 	}
 }
