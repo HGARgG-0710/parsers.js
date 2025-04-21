@@ -20,37 +20,51 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		TODO: `ISupered` - remove as a public interface. 
-			Again - an implementation detail. 
-			Encapsulation violation. 
-			Intended to be on a priavte interface instead. 
+		TODO: `IIsCurrEndable` and `IIsCurrStartable`: 
+			THESE are prerequisites for implementing certain algorithms. 
+			THEREFORE, they must be a part of the public interfaces of `IStream`, where they *are* 
+				present. 
 
-		TODO: ENCAPSULATION violation in `StreamClass`-deriving configurator-pattern-implementing interfaces/classes: 
-			1. StreamParser - `handler`. 
-				This is intended to be a *private* property (not a part of the interface)
-			2. MarkedStream - 'marker' 
-			3. NestedStream - `typesTable`
-			4. PredicateStream - `predicate`
-			5. LimitedStream - `direction`, `from`, `to`
+			CONCLUSION: create NEW interface for each of the current StreamClass-cases, 
+				which would include the `IIsCurrEndable` and `IIsCurrStartable`. 
+				THESE would be returned from the special-case Configurator-Pattern-function's classes...
+				THESE would *not* be the "implemented" interfaces (which additionally have INTERNAL DETAILS). 
 
-			PLACE THESE onto "internal interfaces"
+		BIG [throughout library]: Configuration Pattern - ENCAPSULATION VIOLATION
+			Namely, there are PROPERTIES on instances of such classes that ARE AN IMPLEMENTATION DETAIL. 
+			Most notably: 
+				1. ["constructor"]: ...
 
-		TODO: StreamClass - encapsulation violation: 
-			The "supposedly" public methods like `baseNextIter`, which REALLY SHOULDN'T 
-				by public, are now joined by an actual PROPERTY [RotationBuffer-containing one, specifically, `protected`]. 
+			SEPARATE THE `Impl` interfaces from "public" ones (those that DO NOT have '["constructor"]: ...'), 
+				SINCE this property is NOT intended to be used by the user-side type-safe code...; 
+
+			Walk through them and see if there are any others. 
+
+		TODO - add `.copy()` overriden method to the `PredicateStream`: 
+			FORGOT TO ADD...
+
+		TODO - make sure that the 'IStreamClass.prototype.copy' definitions that do `.value.copy()` 
+			REQUIRE that it be `ICopiable`
+
+		TODO - add ["constructor"]s on internal types: 
+			1. LimitedStream
+			2. PredicateStream	
+
+		NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 
+		
+		TODO - `.copy()` method [NestedStream and others...] - RE-DO: 
+			Done poorly, in particular: 
+				1. use the `this.super.copy()`
+				2. PRESERVE the `.init` logic [this.super.init]
+				3. PRESERVE the `.init` logic [case-specific override]
+
+			The flow: 
+				1. const c = this.super.copy.call(this)
+				2. c.init(null, null, ...) // other args, COPY-FURTHER-AS-NEEDED
+				3. return c
 			
-			This is an issue. 
-			Gladly, one won't need it on derived classes [`.peek(n)` is a very nice interface in this way], 
-				however, it still does raise the necessity of separating the "internal" 
-					interface for various implementations from the "public" one - StreamClassInstance-related
-						(due to TypeScript's limitations relative to the `Configurator Pattern`); 
-			
-			CONCLUSION - methods/properties to make `protected` 
-				[add a separate INTERNAL interface extending the `IStreamClassInstance`, with them as public]: 
-
-					1. [RotationBuffer property]
-					2. `baseNextIter`
-					3. `basePrevIter`
+			TODO: add a name `MissingArgument` to the `constants.ts`
+				Use FOR BETTER NAMING...; 
 
 		BIG: .peek() CYCLE: 	
 			ME5. 'StreamClass' - provide a '.peek(n)' method: 
@@ -138,6 +152,10 @@ Order of TODO-elimination:
 				1. Separate respective PRIVATE and PUBLIC interfaces 
 
 		Fix docs: 
+			0. JSDoc: 
+				1. FINALLY add it for classes
+				2. Add ANY missing JSDoc that there is to be found
+
 			1. classes [add docs]: 
 				1. HashMap.InternalHash.ArrayInternal
 				2. HashMap.BitHash
