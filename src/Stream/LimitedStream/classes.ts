@@ -8,7 +8,7 @@ import type {
 	ILimitedUnderStream,
 	ILimitedStreamConstructor
 } from "./interfaces.js"
-import type { ILimitedStreamImpl } from "./refactor.js"
+import type { ILimitedStreamImpl } from "./methods.js"
 
 import type {
 	IDirectionalPosition,

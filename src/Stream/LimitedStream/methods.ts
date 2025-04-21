@@ -1,9 +1,22 @@
-import type { IFreezableBuffer } from "../../interfaces.js"
-import type { ILimitedUnderStream } from "./interfaces.js"
-import type { ILimitedStreamImpl } from "./refactor.js"
+import type {
+	IDirectionalPosition,
+	IDirectionHaving,
+	IFreezableBuffer,
+	ILookaheadHaving,
+	IProddable,
+	IReversedStreamClassInstance,
+	IWithLookahead
+} from "../../interfaces.js"
+
+import type {
+	ILimitedStream,
+	ILimitedStreamInitSignature,
+	ILimitedUnderStream
+} from "./interfaces.js"
 
 import { positionEqual } from "../Position/utils.js"
 import { navigate, rewind } from "../utils.js"
+import type { ISupered } from "../../refactor.js"
 
 export namespace methods {
 	export function baseNextIter<Type = any>(this: ILimitedStreamImpl<Type>) {
@@ -66,3 +79,19 @@ export namespace methods {
 		)
 	}
 }
+
+export type ILimitedStreamImpl<Type = any> = IProddable<Type> &
+	IWithLookahead<Type> &
+	ILookaheadHaving &
+	ISupered &
+	IReversedStreamClassInstance<
+		Type,
+		ILimitedUnderStream<Type>,
+		number,
+		ILimitedStreamInitSignature<Type>
+	> &
+	ILimitedStream<Type> &
+	IDirectionHaving & {
+		from: IDirectionalPosition
+		to: IDirectionalPosition
+	}
