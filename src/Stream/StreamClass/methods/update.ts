@@ -1,5 +1,5 @@
-import type { IStreamClassInstance } from "../interfaces.js"
+import type { IStreamClassInstanceImpl } from "../refactor.js"
 
-export function update<Type = any>(this: IStreamClassInstance<Type>) {
+export function update<Type = any>(this: IStreamClassInstanceImpl<Type>) {
 	return (this.curr = this.currGetter!())
 }

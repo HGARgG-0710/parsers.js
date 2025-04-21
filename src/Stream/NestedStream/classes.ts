@@ -1,12 +1,13 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IStreamPredicate } from "../../TableMap/interfaces.js"
 import type { ILookupTable } from "../../LookupTable/interfaces.js"
-import type { IConstructor } from "../StreamClass/refactor.js"
-import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
-
-import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
+
+import type {
+	IConstructor,
+	IStreamClassInstanceImpl
+} from "../StreamClass/refactor.js"
 
 import type {
 	INestedStreamConstructor,
@@ -21,9 +22,10 @@ import { DefaultEndStream } from "../StreamClass/classes.js"
 import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
-import { methods } from "./methods.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
+
+import { methods } from "./methods.js"
 const { init, copy, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>
@@ -32,7 +34,7 @@ const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer,
 		isPattern: true
-	}) as IConstructor<[any], IStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IStreamClassInstanceImpl<Type>>
 
 function makeNestedStream<Type = any, IndexType = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate<Type>, IndexType>

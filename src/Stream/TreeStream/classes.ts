@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IWalkable } from "../../Node/interfaces.js"
-import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { MultiIndex } from "../Position/classes.js"
+import type { IReversedStreamClassInstanceImpl } from "../StreamClass/refactor.js"
 
 import { withSuper } from "../../refactor.js"
 import { TreeWalker } from "src/internal/TreeWalker.js"
@@ -9,19 +9,17 @@ import { StreamClass } from "../StreamClass/classes.js"
 
 import { BadIndex } from "../../constants.js"
 
-import { boolean, object } from "@hgargg-0710/one"
-const { F } = boolean
+import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"
 const { init, value, pos, ...baseMethods } = methods
 
-const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>({
-	...baseMethods,
-	defaultIsEnd: F
-}) as new <
+const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>(
+	baseMethods
+) as new <
 	Type extends IWalkable<Type> = IWalkable
->() => IReversedStreamClassInstance<Type, any, MultiIndex<Type>>
+>() => IReversedStreamClassInstanceImpl<Type, any, MultiIndex<Type>>
 
 export class TreeStream<
 	TreeLike extends IWalkable<TreeLike> = IWalkable

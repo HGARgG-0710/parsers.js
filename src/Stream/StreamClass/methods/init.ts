@@ -1,6 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 
-import type { IStreamClassInstance } from "../interfaces.js"
 import type { IStateful } from "src/interfaces.js"
 import type { IPattern } from "src/interfaces.js"
 import type { IPosed, IPosition } from "../../Position/interfaces.js"
@@ -12,7 +11,11 @@ import type {
 import { positionNull } from "../../Position/refactor.js"
 import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
 import { optionalValue } from "../../../utils.js"
-import { createState, start } from "../refactor.js"
+import {
+	createState,
+	start,
+	type IStreamClassInstanceImpl
+} from "../refactor.js"
 import type { IThisMethod } from "../../../refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
@@ -77,7 +80,7 @@ export type IStreamClassBaseInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBaseStreamClassInitSignature,
-	IStreamClassInstance<Type, SubType, PosType>
+	IStreamClassInstanceImpl<Type, SubType, PosType>
 >
 
 export type IStreamClassBufferInitMethod<
@@ -86,7 +89,7 @@ export type IStreamClassBufferInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStreamClassInitSignature<Type>,
-	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type>
+	IStreamClassInstanceImpl<Type, SubType, PosType> & IBufferized<Type>
 >
 
 export type IStreamClassStateInitMethod<
@@ -95,7 +98,7 @@ export type IStreamClassStateInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IStatefulStreamClassInitSignature,
-	IStreamClassInstance<Type, SubType, PosType> & IStateful
+	IStreamClassInstanceImpl<Type, SubType, PosType> & IStateful
 >
 
 export type IStreamClassBufferStateInitMethod<
@@ -104,7 +107,9 @@ export type IStreamClassBufferStateInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStatefulStreamClassInitSignature<Type>,
-	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IStateful
+	IStreamClassInstanceImpl<Type, SubType, PosType> &
+		IBufferized<Type> &
+		IStateful
 >
 
 export type IStreamClassPatternInitMethod<
@@ -113,7 +118,7 @@ export type IStreamClassPatternInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IPatternStreamClassInitSignature,
-	IStreamClassInstance<Type, SubType, PosType> & IPattern
+	IStreamClassInstanceImpl<Type, SubType, PosType>
 >
 
 export type IStreamClassBufferPatternInitMethod<
@@ -122,7 +127,7 @@ export type IStreamClassBufferPatternInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedPatternStreamClassInitSignature<Type>,
-	IStreamClassInstance<Type, SubType, PosType> & IBufferized<Type> & IPattern
+	IStreamClassInstanceImpl<Type, SubType, PosType> & IBufferized<Type>
 >
 
 export type IStreamClassStatePatternInitMethod<
@@ -131,7 +136,7 @@ export type IStreamClassStatePatternInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IStatefulPatternStreamClassInitSignature,
-	IStreamClassInstance<Type, SubType, PosType> & IStateful & IPattern
+	IStreamClassInstanceImpl<Type, SubType, PosType> & IStateful
 >
 
 export type IStreamClassBufferStatePatternInitMethod<
@@ -140,15 +145,14 @@ export type IStreamClassBufferStatePatternInitMethod<
 	PosType extends IPosition<Type, SubType, PosType> = number
 > = IThisMethod<
 	IBufferizedStatefulPatternStreamClassInitSignature<Type>,
-	IStreamClassInstance<Type, SubType, PosType> &
+	IStreamClassInstanceImpl<Type, SubType, PosType> &
 		IBufferized<Type> &
-		IStateful &
-		IPattern
+		IStateful
 >
 
 // * possible '.init' methods
 
-function initialize<Type = any>(this: IStreamClassInstance<Type>) {
+function initialize<Type = any>(this: IStreamClassInstanceImpl<Type>) {
 	;(this as any).realCurr = null
 	start(this)
 	if (!(this.isEnd = this.defaultIsEnd()))
@@ -161,7 +165,7 @@ function generateInitMethods<Type = any>(
 	initialize: IStreamClassBaseInitMethod
 ): IStreamClassInitMethod<Type>[] {
 	function posInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPosed<number>
+		this: IStreamClassInstanceImpl<Type> & IPosed<number>
 	) {
 		positionNull(this)
 		initialize.call(this)
@@ -169,7 +173,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function bufferInitialze<Type = any>(
-		this: IStreamClassInstance<Type> & IBufferized<Type>,
+		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>,
 		buffer: IFreezableBuffer
 	) {
 		assignBuffer(this, buffer)
@@ -178,7 +182,9 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posBufferInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>,
+		this: IStreamClassInstanceImpl<Type> &
+			IPosed<number> &
+			IBufferized<Type>,
 		buffer?: IFreezableBuffer
 	) {
 		assignBuffer(this, buffer)
@@ -187,7 +193,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function stateInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IStateful,
+		this: IStreamClassInstanceImpl<Type> & IStateful,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -196,7 +202,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posStateInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IStateful & IPosed<number>,
+		this: IStreamClassInstanceImpl<Type> & IStateful & IPosed<number>,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -205,7 +211,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function bufferStateInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IStateful & IBufferized<Type>,
+		this: IStreamClassInstanceImpl<Type> & IStateful & IBufferized<Type>,
 		buffer?: IFreezableBuffer,
 		state: Summat = {}
 	) {
@@ -215,7 +221,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posBufferStateInitialize<Type = any>(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IStateful &
 			IBufferized<Type> &
 			IPosed<number>,
@@ -228,7 +234,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function patternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPattern,
+		this: IStreamClassInstanceImpl<Type>,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -237,7 +243,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posPatternInitialize<Type = any>(
-		this: IPattern & IStreamClassInstance<Type> & IPosed<number>,
+		this: IPattern & IStreamClassInstanceImpl<Type> & IPosed<number>,
 		value?: any
 	) {
 		optionalValue(this, value)
@@ -246,7 +252,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function bufferPatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPattern & IBufferized<Type>,
+		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>,
 		value?: any,
 		buffer?: IFreezableBuffer<Type>
 	) {
@@ -256,7 +262,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posBufferPatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IBufferized<Type> &
 			IPattern,
@@ -269,7 +275,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function statePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> & IPattern & IStateful,
+		this: IStreamClassInstanceImpl<Type> & IStateful,
 		value?: any,
 		state: Summat = {}
 	) {
@@ -279,7 +285,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posStatePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IPattern &
 			IStateful,
@@ -292,7 +298,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function bufferStatePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IBufferized<Type> &
 			IStateful &
 			IPattern,
@@ -306,7 +312,7 @@ function generateInitMethods<Type = any>(
 	}
 
 	function posBufferStatePatternInitialize<Type = any>(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IBufferized<Type> &
 			IStateful &

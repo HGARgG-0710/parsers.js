@@ -5,14 +5,15 @@ import type { ISupered } from "../../refactor.js"
 import type {
 	IReversibleStream,
 	IIsEndCurrable,
-	IStreamClassInstance,
 	IUnderPredicateStream,
 	IProddable,
-	IWithLookahead,
-	ILookaheadHaving,
 	IPredicatePosition,
-	IPredicateStream
+	IPredicateStream,
+	IStreamClassInstance
 } from "../interfaces.js"
+
+import type { IWithLookahead } from "../refactor.js"
+import type { ILookaheadHaving } from "../refactor.js"
 
 import { navigate } from "../utils.js"
 

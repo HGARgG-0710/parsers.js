@@ -1,65 +1,69 @@
 import type { IBufferized, IPattern, IPosed } from "../../../interfaces.js"
-import type { IStreamClassInstance } from "../interfaces.js"
+import type { IStreamClassInstanceImpl } from "../refactor.js"
 import type { IStateful } from "src/interfaces.js"
 
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 function copyPos<Type = any>(
-	from: IStreamClassInstance<Type> & IPosed<number>,
-	copied: IStreamClassInstance<Type> & IPosed<number>
+	from: IStreamClassInstanceImpl<Type> & IPosed<number>,
+	copied: IStreamClassInstanceImpl<Type> & IPosed<number>
 ) {
 	copied.pos = from.pos
 	return copied
 }
 
-function copy<Type = any>(this: IStreamClassInstance<Type>, ...x: any[]) {
+function copy<Type = any>(this: IStreamClassInstanceImpl<Type>, ...x: any[]) {
 	const copied = new this.constructor()
 	copied.init(...x)
 	return copied
 }
 
 function generateCopyMethods<Type = any>(
-	copy: (this: IStreamClassInstance<Type>) => IStreamClassInstance<Type>
+	copy: (
+		this: IStreamClassInstanceImpl<Type>
+	) => IStreamClassInstanceImpl<Type>
 ) {
 	function posCopy(
-		this: IStreamClassInstance<Type> & IPosed<number>
+		this: IStreamClassInstanceImpl<Type> & IPosed<number>
 	): typeof this {
 		return copyPos(this, copy.call(this))
 	}
 
 	function bufferCopy(
-		this: IStreamClassInstance<Type> & IBufferized<Type>
+		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>
 	): typeof this {
 		return copy.call(this, this.buffer)
 	}
 
 	function posBufferCopy(
-		this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
+		this: IStreamClassInstanceImpl<Type> &
+			IPosed<number> &
+			IBufferized<Type>
 	) {
 		return copyPos(this, copy.call(this, this.buffer.copy())) as typeof this
 	}
 
 	function stateCopy(
-		this: IStreamClassInstance<Type> & IStateful
+		this: IStreamClassInstanceImpl<Type> & IStateful
 	): typeof this {
 		return copy.call(this, this.state)
 	}
 
 	function posStateCopy(
-		this: IStreamClassInstance<Type> & IPosed<number> & IStateful
+		this: IStreamClassInstanceImpl<Type> & IPosed<number> & IStateful
 	) {
 		return copyPos(this, stateCopy.call(this)) as typeof this
 	}
 
 	function bufferStateCopy(
-		this: IStreamClassInstance<Type> & IBufferized<Type> & IStateful
+		this: IStreamClassInstanceImpl<Type> & IBufferized<Type> & IStateful
 	): typeof this {
 		return copy.call(this, this.buffer, this.state)
 	}
 
 	function posBufferStateCopy(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IBufferized<Type> &
 			IStateful
@@ -70,29 +74,26 @@ function generateCopyMethods<Type = any>(
 		) as typeof this
 	}
 
-	function patternCopy(
-		this: IStreamClassInstance<Type> & IPattern
-	): typeof this {
+	function patternCopy(this: IStreamClassInstanceImpl<Type>): typeof this {
 		return copy.call(this, this.value.copy())
 	}
 
 	function posPatternCopy(
-		this: IStreamClassInstance<Type> & IPosed<number> & IPattern
+		this: IStreamClassInstanceImpl<Type> & IPosed<number>
 	): typeof this {
 		return copyPos(this, patternCopy.call(this))
 	}
 
 	function bufferPatternCopy(
-		this: IStreamClassInstance<Type> & IBufferized<Type> & IPattern
+		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>
 	): typeof this {
 		return copy.call(this, this.value.copy(), this.buffer)
 	}
 
 	function posBufferPatternCopy(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
-			IBufferized<Type> &
-			IPattern
+			IBufferized<Type>
 	) {
 		return copyPos(
 			this,
@@ -101,19 +102,19 @@ function generateCopyMethods<Type = any>(
 	}
 
 	function statePatternCopy(
-		this: IStreamClassInstance<Type> & IStateful & IPattern
+		this: IStreamClassInstanceImpl<Type> & IStateful
 	): typeof this {
 		return copy.call(this.value.copy(), this.state)
 	}
 
 	function posStatePatternCopy(
-		this: IStreamClassInstance<Type> & IPosed<number> & IStateful & IPattern
+		this: IStreamClassInstanceImpl<Type> & IPosed<number> & IStateful
 	) {
 		return copyPos(this, statePatternCopy.call(this)) as typeof this
 	}
 
 	function bufferStatePatternCopy(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IBufferized<Type> &
 			IStateful &
 			IPattern
@@ -127,7 +128,7 @@ function generateCopyMethods<Type = any>(
 	}
 
 	function posBufferStatePatternCopy(
-		this: IStreamClassInstance<Type> &
+		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IBufferized<Type> &
 			IStateful &
@@ -175,6 +176,6 @@ export function chooseMethod(
 	hasBuffer = false,
 	hasState = false,
 	isPattern = false
-): () => IStreamClassInstance {
+): () => IStreamClassInstanceImpl {
 	return MethodHash.index([hasPosition, hasBuffer, hasState, isPattern])
 }

@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IEndableStream, IStreamClassInstance } from "../interfaces.js"
+import type { IEndableStream } from "../interfaces.js"
 import type { IMarkedStreamConstructor } from "./interfaces.js"
 import type { IMarkedStreamImpl } from "./methods.js"
 
@@ -10,7 +10,8 @@ import {
 	valueCurr,
 	valueIsCurrEnd,
 	valueIsCurrStart,
-	type IConstructor
+	type IConstructor,
+	type IStreamClassInstanceImpl
 } from "../StreamClass/refactor.js"
 
 import { object, functional } from "@hgargg-0710/one"
@@ -36,7 +37,7 @@ const BaseMarkedStream = <Type = any>(hasPosition = false, hasBuffer = false) =>
 		isPattern: true
 	}) as IConstructor<
 		[IEndableStream<Type>?],
-		IStreamClassInstance<Type, IEndableStream<Type>>
+		IStreamClassInstanceImpl<Type, IEndableStream<Type>>
 	>
 
 function makeMarkedStream<Type = any, MarkerType = any>(

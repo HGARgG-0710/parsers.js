@@ -1,55 +1,17 @@
+import type { ConstructorHaving } from "../../refactor.js"
 import type {
 	IFinishable,
 	IIsEndCurrable,
 	IIsStartCurrable,
 	INavigable,
 	IPosition,
-	IBackward,
+	IPrevable,
 	IRewindable,
+	IStarted,
 	IStream
 } from "../interfaces.js"
 
-import type { IStarted } from "../interfaces.js"
-import type { ICopiable } from "../../interfaces.js"
-import type { ConstructorHaving } from "../../refactor.js"
-import type { IConstructor } from "./refactor.js"
-
-// * Default Methods (single signature)
-
-export interface IUpdatable<Type = any> {
-	update: () => Type
-}
-
-type IPrimalStreamClassSignature<Type = any> = IIsEndCurrable & {
-	initGetter?: () => Type
-	baseNextIter: () => Type
-	defaultIsEnd: () => boolean
-	currGetter?: () => Type
-}
-
-type IStreamClassTransferable<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> = IPrimalStreamClassSignature<Type> &
-	Partial<Pick<IReversedStreamClassInstance<Type>, "basePrevIter">> &
-	Partial<IIsStartCurrable> &
-	Partial<INavigable<Type, SubType, PosType>> &
-	Partial<IFinishable<Type>> &
-	Partial<IRewindable<Type>>
-
-type ICommonStreamClassInstance<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
-	InitSignature extends any[] = any[]
-> = IStream<Type, SubType, PosType, InitSignature> &
-	IPrimalStreamClassSignature<Type> &
-	IStarted &
-	INavigable<Type, SubType, PosType> &
-	IFinishable<Type> &
-	ICopiable &
-	ConstructorHaving
+import type { IConstructor, IStreamClassTransferable } from "./refactor.js"
 
 export type IStreamClassSignature<Type = any> =
 	IStreamClassTransferable<Type> & {
@@ -59,28 +21,6 @@ export type IStreamClassSignature<Type = any> =
 		isPattern?: boolean
 	}
 
-export type IStreamClassInstance<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
-	InitSignature extends any[] = any[]
-> = ICommonStreamClassInstance<Type, SubType, PosType, InitSignature> &
-	IStreamClassTransferable<Type> &
-	Partial<Pick<IReversedStreamClassInstance<Type>, "prev">> &
-	Partial<IUpdatable<Type>>
-
-export type IReversedStreamClassInstance<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
-	InitSignature extends any[] = any[]
-> = ICommonStreamClassInstance<Type, SubType, PosType, InitSignature> &
-	IIsStartCurrable &
-	IBackward<Type> &
-	IRewindable<Type> & {
-		basePrevIter: () => Type
-	}
-
 export type IStreamClass<
 	Type = any,
 	SubType = any,
@@ -88,5 +28,27 @@ export type IStreamClass<
 > =
 	| IConstructor<[any?], IStreamClassInstance<Type, SubType, PosType>>
 	| IConstructor<[any?], IReversedStreamClassInstance<Type, SubType, PosType>>
+
+export type IStreamClassInstance<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = IStream<Type, SubType, PosType, InitSignature> &
+	IStarted &
+	IIsEndCurrable &
+	IFinishable<Type> &
+	INavigable<Type, SubType, PosType> &
+	ConstructorHaving
+
+export type IReversedStreamClassInstance<
+	Type = any,
+	SubType = any,
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = IStreamClassInstance<Type, SubType, PosType, InitSignature> &
+	IPrevable<Type> &
+	IIsStartCurrable &
+	IRewindable<Type>
 
 export type * from "./methods/init.js"

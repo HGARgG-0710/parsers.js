@@ -51,14 +51,6 @@ export interface IProddable<Type = any> {
 	prod: () => Type
 }
 
-export interface IWithLookahead<Type> {
-	lookAhead: Type
-}
-
-export interface ILookaheadHaving {
-	hasLookAhead: boolean
-}
-
 export type IStream<
 	Type = any,
 	SubType = any,
@@ -92,8 +84,9 @@ export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
 export type IReversibleStream<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> = IStream<Type, SubType, PosType> & IBackward<Type>
+	PosType extends IPosition<Type, SubType, PosType> = number,
+	InitSignature extends any[] = any[]
+> = IStream<Type, SubType, PosType, InitSignature> & IBackward<Type>
 
 export type * from "./InputStream/interfaces.js"
 export type * from "./LazyStream/interfaces.js"

@@ -1,7 +1,4 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { valueCurr, type IConstructor } from "../StreamClass/refactor.js"
-import type { IReversedStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IPattern } from "src/interfaces.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
 
 import type {
@@ -14,6 +11,12 @@ import type {
 	IDirectionalPosition,
 	IPredicatePosition
 } from "../Position/interfaces.js"
+
+import {
+	valueCurr,
+	type IConstructor,
+	type IReversedStreamClassInstanceImpl
+} from "../StreamClass/refactor.js"
 
 import { DefaultEndStream } from "../StreamClass/classes.js"
 import { withSuper } from "../../refactor.js"
@@ -40,7 +43,7 @@ const LimitedStreamBase = <Type = any>(
 		isPattern: true,
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer
-	}) as IConstructor<[any], IReversedStreamClassInstance<Type> & IPattern>
+	}) as IConstructor<[any], IReversedStreamClassInstanceImpl<Type>>
 
 function makeLimitedStream(
 	from: IDirectionalPosition,
@@ -60,7 +63,10 @@ function makeLimitedStream(
 		hasBuffer = false
 	): ILimitedStreamConstructor<Type> {
 		const baseClass = LimitedStreamBase<Type>(hasPosition, hasBuffer)
-		class limitedStream extends baseClass implements ILimitedStreamImpl<Type> {
+		class limitedStream
+			extends baseClass
+			implements ILimitedStreamImpl<Type>
+		{
 			value: IUnderLimitedStream<Type>
 			lookAhead: Type
 			hasLookAhead = false

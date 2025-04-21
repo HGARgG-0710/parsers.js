@@ -1,19 +1,25 @@
 import type { IPosed } from "../../Position/interfaces.js"
+import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+
 import type {
 	IDirectionalPosition,
 	IReversibleStream
 } from "../../interfaces.js"
-import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IReversedStreamClassInstance } from "../interfaces.js"
+
+import {
+	readBuffer,
+	readBufferThis,
+	type IReversedStreamClassInstanceImpl
+} from "../refactor.js"
 
 import { uniNavigate } from "src/Stream/utils.js"
-import { readBuffer, readBufferThis } from "../refactor.js"
 import { direction } from "../../Position/utils.js"
 import { positionDecrement } from "../../Position/refactor.js"
 
-import { type } from "@hgargg-0710/one"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
+
+import { type } from "@hgargg-0710/one"
 const { isNumber } = type
 
 /**
@@ -31,7 +37,7 @@ const posNavigate = navigate
 const bufferNavigate = navigate
 
 function posBufferNavigate<Type = any>(
-	this: IReversedStreamClassInstance<Type> &
+	this: IReversedStreamClassInstanceImpl<Type> &
 		IBufferized<Type> &
 		IPosed<number>,
 	position: IDirectionalPosition<Type>
@@ -64,9 +70,6 @@ const MethodHash = new BitHash(
 	])
 )
 
-export function chooseMethod(
-	hasPosition= false,
-	hasBuffer= false
-) {
+export function chooseMethod(hasPosition = false, hasBuffer = false) {
 	return MethodHash.index([hasPosition, hasBuffer])
 }

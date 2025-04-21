@@ -1,8 +1,3 @@
-import type {
-	IReversedStreamClassInstance,
-	IStreamClassInstance
-} from "../interfaces.js"
-
 import type { IPosed } from "../../Position/interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IStream } from "../../interfaces.js"
@@ -16,7 +11,17 @@ import {
 	bufferFreeze,
 	bufferPush
 } from "../../../Collection/Buffer/refactor.js"
-import { deEnd, readBuffer, start, deStart, end } from "../refactor.js"
+
+import {
+	deEnd,
+	readBuffer,
+	start,
+	deStart,
+	end,
+	type IStreamClassInstanceImpl,
+	type IReversedStreamClassInstanceImpl
+} from "../refactor.js"
+
 import { currSet } from "./curr.js"
 
 import { functional, object } from "@hgargg-0710/one"
@@ -28,13 +33,13 @@ const { GetSetDescriptor, ConstDescriptor } = object.descriptor
 
 // * predoc note: this redefinition [in particular] forbids replacing the '.curr' of the given 'Stream'
 function posBufferIsFrozenGet<Type = any>(
-	this: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
+	this: IStreamClassInstanceImpl<Type> & IPosed<number> & IBufferized<Type>
 ) {
 	return readBuffer(this)
 }
 
 function redefineCurr<Type = any>(
-	x: IStreamClassInstance<Type> & IPosed<number> & IBufferized<Type>
+	x: IStreamClassInstanceImpl<Type> & IPosed<number> & IBufferized<Type>
 ) {
 	propDefine(
 		x,
@@ -43,41 +48,43 @@ function redefineCurr<Type = any>(
 	)
 }
 
-function getNext<Type = any>(stream: IStreamClassInstance<Type>) {
+function getNext<Type = any>(stream: IStreamClassInstanceImpl<Type>) {
 	return (stream.curr = stream.baseNextIter())
 }
 
-function getPrev<Type = any>(stream: IReversedStreamClassInstance<Type>) {
+function getPrev<Type = any>(stream: IReversedStreamClassInstanceImpl<Type>) {
 	return (stream.curr = stream.basePrevIter())
 }
 
-function updateNext<Type = any>(stream: IStreamClassInstance<Type>) {
+function updateNext<Type = any>(stream: IStreamClassInstanceImpl<Type>) {
 	stream.baseNextIter()
 	return stream.update!()
 }
 
-function updatePrev<Type = any>(stream: IReversedStreamClassInstance<Type>) {
+function updatePrev<Type = any>(
+	stream: IReversedStreamClassInstanceImpl<Type>
+) {
 	stream.basePrevIter()
 	return (stream.curr = stream.currGetter!())
 }
 
 // * function for generation of possible '.next' methods
 function generateIterationMethods(
-	nextGetter: (x: IStreamClassInstance) => any,
-	prevGetter: (x: IReversedStreamClassInstance) => any
+	nextGetter: (x: IStreamClassInstanceImpl) => any,
+	prevGetter: (x: IReversedStreamClassInstanceImpl) => any
 ) {
 	type QuartetConfig = [
-		(x: IStreamClassInstance, last: any) => any,
-		(x: IStreamClassInstance) => any,
+		(x: IStreamClassInstanceImpl, last: any) => any,
+		(x: IStreamClassInstanceImpl) => any,
 		[
-			(x: IStreamClassInstance) => any,
-			(x: IReversedStreamClassInstance) => any
+			(x: IStreamClassInstanceImpl) => any,
+			(x: IReversedStreamClassInstanceImpl) => any
 		],
 		[
-			(x: IStreamClassInstance) => boolean,
-			(x: IStreamClassInstance) => any
+			(x: IStreamClassInstanceImpl) => boolean,
+			(x: IStreamClassInstanceImpl) => any
 		]?,
-		((x: IReversedStreamClassInstance) => boolean)?
+		((x: IReversedStreamClassInstanceImpl) => boolean)?
 	]
 
 	function generateQuartet([
@@ -88,7 +95,7 @@ function generateIterationMethods(
 		optionalPrevCondition
 	]: QuartetConfig) {
 		const [fastNext, fastPrev] = (() => {
-			function altNext<Type = any>(this: IStreamClassInstance<Type>) {
+			function altNext<Type = any>(this: IStreamClassInstanceImpl<Type>) {
 				const last = this.curr
 				nextPreAction(this, last)
 				if (this.isCurrEnd()) {
@@ -102,14 +109,16 @@ function generateIterationMethods(
 			if (alt) {
 				const [altCondition, altAction] = alt
 				return [
-					function <Type = any>(this: IStreamClassInstance<Type>) {
+					function <Type = any>(
+						this: IStreamClassInstanceImpl<Type>
+					) {
 						const last = this.curr
 						if (altCondition(this)) altAction(this)
 						else altNext.call(this)
 						return last
 					},
 					function <Type = any>(
-						this: IReversedStreamClassInstance<Type>
+						this: IReversedStreamClassInstanceImpl<Type>
 					) {
 						const last = this.curr
 						if (optionalPrevCondition!(this)) {
@@ -124,7 +133,7 @@ function generateIterationMethods(
 			return [
 				altNext,
 				function altPrev<Type = any>(
-					this: IReversedStreamClassInstance<Type>
+					this: IReversedStreamClassInstanceImpl<Type>
 				) {
 					const last = this.curr
 					if (this.isCurrStart()) {
@@ -136,14 +145,16 @@ function generateIterationMethods(
 			]
 		})()
 
-		function next<Type = any>(this: IStreamClassInstance<Type>) {
+		function next<Type = any>(this: IStreamClassInstanceImpl<Type>) {
 			const last = this.curr
 			deStart(this)
 			;(this.next = fastNext as () => Type)()
 			return last
 		}
 
-		function prev<Type = any>(this: IReversedStreamClassInstance<Type>) {
+		function prev<Type = any>(
+			this: IReversedStreamClassInstanceImpl<Type>
+		) {
 			const last = this.curr
 			deEnd(this)
 			;(this.prev = fastPrev as () => Type)()
@@ -156,7 +167,7 @@ function generateIterationMethods(
 		]
 	}
 
-	const posNextAction = (x: IStreamClassInstance & IPosed<number>) => {
+	const posNextAction = (x: IStreamClassInstanceImpl & IPosed<number>) => {
 		positionIncrement(x)
 		nextGetter(x)
 	}
@@ -174,37 +185,49 @@ function generateIterationMethods(
 				nil,
 				[
 					posNextAction,
-					(x: IReversedStreamClassInstance & IPosed<number>) => {
+					(x: IReversedStreamClassInstanceImpl & IPosed<number>) => {
 						positionDecrement(x)
 						prevGetter(x)
 					}
 				]
 			],
 			[
-				bufferPush as (x: IStreamClassInstance & IBufferized) => any,
-				bufferFreeze as (x: IStreamClassInstance & IBufferized) => any,
+				bufferPush as (
+					x: IStreamClassInstanceImpl & IBufferized
+				) => any,
+				bufferFreeze as (
+					x: IStreamClassInstanceImpl & IBufferized
+				) => any,
 				[nextGetter, prevGetter]
 			],
 			[
-				bufferPush as (x: IStreamClassInstance & IBufferized) => any,
-				(x: IStreamClassInstance & IBufferized & IPosed<number>) => {
+				bufferPush as (
+					x: IStreamClassInstanceImpl & IBufferized
+				) => any,
+				(
+					x: IStreamClassInstanceImpl & IBufferized & IPosed<number>
+				) => {
 					bufferFreeze(x)
 					redefineCurr(x)
 				},
 				[
 					posNextAction,
 					(
-						x: IStreamClassInstance & IBufferized & IPosed<number>
+						x: IStreamClassInstanceImpl &
+							IBufferized &
+							IPosed<number>
 					) => {
 						positionDecrement(x)
 						readBuffer(x)
 					}
 				],
 				[
-					(x: IStreamClassInstance & IBufferized) =>
+					(x: IStreamClassInstanceImpl & IBufferized) =>
 						x.buffer.isFrozen,
 					(
-						x: IStreamClassInstance & IBufferized & IPosed<number>
+						x: IStreamClassInstanceImpl &
+							IBufferized &
+							IPosed<number>
 					) => {
 						if (x.pos !== x.buffer.size - 1) {
 							positionIncrement(x)
@@ -212,7 +235,7 @@ function generateIterationMethods(
 						}
 					}
 				],
-				(x: IStreamClassInstance & IPosed<number>) => x.pos === 0
+				(x: IStreamClassInstanceImpl & IPosed<number>) => x.pos === 0
 			]
 		] as QuartetConfig[]
 	).map(generateQuartet)

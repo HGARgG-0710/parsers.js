@@ -5,8 +5,8 @@ import type {
 	IStreamPredicate
 } from "../../interfaces.js"
 
-import type { IEndableStream, IStreamClassInstance } from "../interfaces.js"
-
+import type { IEndableStream } from "../interfaces.js"
+import type { IStreamClassInstanceImpl } from "../StreamClass/refactor.js"
 import type { ISupered } from "../../refactor.js"
 
 import type {
@@ -77,7 +77,7 @@ export interface IISCurrNestable {
 
 export interface INestedStreamImpl<Type = any, IndexType = any>
 	extends IISCurrNestable,
-		IStreamClassInstance<
+		IStreamClassInstanceImpl<
 			Type | INestedStreamImpl<Type>,
 			IUnderNestedStream<Type>,
 			number,

@@ -1,26 +1,33 @@
 import type { IStreamClassInitMethod } from "./methods/init.js"
 import type { ICopiable, IPosition } from "../../interfaces.js"
 
-import type {
-	IStreamClass,
-	IStreamClassInstance,
-	IStreamClassSignature
-} from "./interfaces.js"
+import type { IStreamClass, IStreamClassSignature } from "./interfaces.js"
 
 import { Pattern } from "src/internal/Pattern.js"
 
 import { valuePropDelegate } from "../../refactor.js"
-import { finish, rewind, navigate, init, iter, curr, copy } from "./refactor.js"
+
+import {
+	finish,
+	rewind,
+	navigate,
+	init,
+	iter,
+	curr,
+	copy,
+	type IStreamClassInstanceImpl
+} from "./refactor.js"
 
 import { update } from "./methods/update.js"
 import { streamIterator } from "./methods/iter.js"
 
 import { Autocache } from "../../internal/Autocache.js"
-
-import { object } from "@hgargg-0710/one"
 import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
+
+import { object, boolean } from "@hgargg-0710/one"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { F } = boolean
 
 function makeStreamClass<
 	Type = any,
@@ -75,7 +82,7 @@ function makeStreamClass<
 			interface _streamClass extends streamClassGuaranteed {}
 			class _streamClass
 				extends Pattern<SubType>
-				implements IStreamClassInstance<Type, SubType, PosType>
+				implements IStreamClassInstanceImpl<Type, SubType, PosType>
 			{
 				["constructor"]: new (value?: SubType) => typeof this
 				constructor(value?: SubType) {
@@ -86,7 +93,7 @@ function makeStreamClass<
 		}
 		interface _streamClass extends streamClassGuaranteed {}
 		class _streamClass
-			implements IStreamClassInstance<Type, SubType, PosType>
+			implements IStreamClassInstanceImpl<Type, SubType, PosType>
 		{
 			["constructor"]: new () => typeof this
 		}
@@ -101,7 +108,7 @@ function makeStreamClass<
 		curr,
 		isCurrEnd: ConstDescriptor(isCurrEnd),
 		baseNextIter: ConstDescriptor(baseNextIter),
-		defaultIsEnd: ConstDescriptor(defaultIsEnd),
+		defaultIsEnd: ConstDescriptor(defaultIsEnd || F),
 		[Symbol.iterator]: ConstDescriptor(streamIterator<Type>)
 	})
 

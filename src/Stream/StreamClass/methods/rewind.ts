@@ -1,10 +1,9 @@
 import type { IReversibleStream } from "../../interfaces.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
-import type { IStreamClassInstance } from "../interfaces.js"
 
+import { start, type IStreamClassInstanceImpl } from "../refactor.js"
 import { uniRewind } from "src/Stream/utils.js"
-import { start } from "../refactor.js"
 import { positionNull } from "../../Position/refactor.js"
 import { readFirst } from "../../../Collection/Buffer/refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
@@ -24,7 +23,7 @@ function rewind<Type = any>(this: IReversibleStream<Type>) {
 const posRewind = rewind
 
 function bufferRewind<Type = any>(
-	this: IStreamClassInstance<Type> & IBufferized<Type>
+	this: IStreamClassInstanceImpl<Type> & IBufferized<Type>
 ) {
 	const { buffer } = this
 	start(this)
@@ -32,7 +31,7 @@ function bufferRewind<Type = any>(
 }
 
 function posBufferRewind<Type = any>(
-	this: IStreamClassInstance<Type> & IBufferized<Type> & IPosed<number>
+	this: IStreamClassInstanceImpl<Type> & IBufferized<Type> & IPosed<number>
 ) {
 	const { buffer } = this
 	start(this)
