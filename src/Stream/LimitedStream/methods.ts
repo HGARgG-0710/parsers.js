@@ -5,6 +5,7 @@ import type {
 	ILookaheadHaving,
 	IProddable,
 	IReversedStreamClassInstance,
+	IReversibleStream,
 	IWithLookahead
 } from "../../interfaces.js"
 
@@ -14,9 +15,10 @@ import type {
 	IUnderLimitedStream
 } from "./interfaces.js"
 
+import type { ISupered } from "../../refactor.js"
+
 import { positionEqual } from "../Position/utils.js"
 import { navigate, rewind } from "../utils.js"
-import type { ISupered } from "../../refactor.js"
 
 export namespace methods {
 	export function baseNextIter<Type = any>(this: ILimitedStreamImpl<Type>) {
@@ -28,7 +30,7 @@ export namespace methods {
 		const { value, direction, hasLookAhead, lookAhead } = this
 		if (!hasLookAhead) {
 			this.hasLookAhead = true
-			value![direction ? "next" : "prev"]()
+			value![direction ? "next" : "prev"]!()
 			return value!.curr
 		}
 		return lookAhead
@@ -50,7 +52,7 @@ export namespace methods {
 		const { curr, direction, value } = this
 		this.lookAhead = curr
 		this.hasLookAhead = true
-		value![direction ? "prev" : "next"]()
+		value![direction ? "prev" : "next"]!()
 		return value!.curr
 	}
 
@@ -62,8 +64,8 @@ export namespace methods {
 		if (value || this.value) {
 			if (value) this.super.init.call(this, value, buffer)
 			this.hasLookAhead = false
-			rewind(this.value!)
-			navigate(this.value!, this.from)
+			rewind(this.value as IReversibleStream<Type>)
+			navigate(this.value as IReversibleStream<Type>, this.from)
 		}
 		return this
 	}
