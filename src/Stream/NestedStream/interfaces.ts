@@ -1,10 +1,8 @@
-import type { IStreamPredicate } from "../../TableMap/interfaces.js"
-import type { ILookupTable } from "../../LookupTable/interfaces.js"
-import type { IFreezableBuffer, IPattern } from "src/interfaces.js"
-import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
+import type { IFreezableBuffer } from "src/interfaces.js"
+import type { IEndableStream, IStream } from "../interfaces.js"
 
-import type { ISupered, IIndexAssignable, ICopiable } from "../../interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
+import type { IISCurrNestable, INestedStreamImpl } from "./methods.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
@@ -15,25 +13,13 @@ export type INestedStreamInitSignature<Type = any, IndexType = any> = [
 
 export type INestedStreamConstructor<Type = any, IndexType = any> = new (
 	value?: IUnderNestedStream<Type>,
-	index?: IndexType,
-	buffer?: IFreezableBuffer<Type | INestedStream<Type, IndexType>>
+	buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type, IndexType>>,
+	index?: IndexType
 ) => INestedStream<Type, IndexType>
 
 export interface INestedStream<Type = any, IndexType = any>
-	extends IStreamClassInstance<
-			Type | INestedStream<Type>,
-			IUnderNestedStream<Type>,
-			number,
-			INestedStreamInitSignature<Type, IndexType>
+	extends IStream<
+			Type | INestedStream<Type, IndexType>,
+			IUnderNestedStream<Type>
 		>,
-		ISupered,
-		IPattern<IUnderNestedStream<Type>>,
-		IIndexAssignable<IndexType> {
-	["constructor"]: INestedStreamConstructor<Type, IndexType>
-	typesTable: ILookupTable<
-		any,
-		IStreamPredicate<Type | INestedStream<Type>>,
-		IndexType
-	>
-	isCurrNested: boolean
-}
+		IISCurrNestable {}

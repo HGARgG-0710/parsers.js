@@ -1,6 +1,18 @@
-import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
-import type { INestedStream, IUnderNestedStream } from "./interfaces.js"
+import type {
+	IFreezableBuffer,
+	IIndexAssignable,
+	ILookupTable,
+	IStreamPredicate
+} from "../../interfaces.js"
+
+import type { IEndableStream, IStreamClassInstance } from "../interfaces.js"
+
+import type { ISupered } from "../../refactor.js"
+
+import type {
+	INestedStreamInitSignature,
+	IUnderNestedStream
+} from "./interfaces.js"
 
 import { assignIndex } from "../../utils.js"
 import { finish } from "../utils.js"
@@ -10,16 +22,16 @@ const { isNull, isUndefined } = type
 
 export namespace methods {
 	export function initGetter<Type = any, IndexType = any>(
-		this: INestedStream<Type, IndexType>
+		this: INestedStreamImpl<Type, IndexType>
 	) {
 		const index = this.typesTable.claim(this)
 		return (this.isCurrNested = !isNull(index))
-			? new this.constructor(this.value, index, this.buffer?.emptied())
+			? new this.constructor(this.value, this.buffer?.emptied(), index)
 			: this.value!.curr
 	}
 
 	export function baseNextIter<Type = any, IndexType = any>(
-		this: INestedStream<Type, IndexType>
+		this: INestedStreamImpl<Type, IndexType>
 	) {
 		if (this.isCurrNested) finish(this.curr as IEndableStream<Type>)
 		this.value!.next()
@@ -27,7 +39,7 @@ export namespace methods {
 	}
 
 	export function isCurrEnd<Type = any, IndexType = any>(
-		this: INestedStream<Type, IndexType>
+		this: INestedStreamImpl<Type, IndexType>
 	) {
 		const { value, typesTable } = this
 		return (
@@ -38,10 +50,10 @@ export namespace methods {
 	}
 
 	export function init<Type = any, IndexType = any>(
-		this: INestedStream<Type, IndexType>,
+		this: INestedStreamImpl<Type, IndexType>,
 		value?: IUnderNestedStream<Type>,
-		index?: IndexType,
-		buffer?: IFreezableBuffer<Type>
+		buffer?: IFreezableBuffer<Type>,
+		index?: IndexType
 	) {
 		if (!isUndefined(index)) assignIndex(this, index)
 		if (value) this.super.init.call(this, value, buffer)
@@ -49,12 +61,39 @@ export namespace methods {
 	}
 
 	export function copy<Type = any, IndexType = any>(
-		this: INestedStream<Type, IndexType>
+		this: INestedStreamImpl<Type, IndexType>
 	) {
 		return new this.constructor(
 			this.value?.copy(),
-			this.assignedIndex,
-			this.buffer?.copy()
+			this.buffer?.copy(),
+			this.assignedIndex
 		)
 	}
+}
+
+export interface IISCurrNestable {
+	isCurrNested: boolean
+}
+
+export interface INestedStreamImpl<Type = any, IndexType = any>
+	extends IISCurrNestable,
+		IStreamClassInstance<
+			Type | INestedStreamImpl<Type>,
+			IUnderNestedStream<Type>,
+			number,
+			INestedStreamInitSignature<Type, IndexType>
+		>,
+		ISupered,
+		IIndexAssignable<IndexType> {
+	["constructor"]: new (
+		value?: IUnderNestedStream<Type>,
+		buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type, IndexType>>,
+		index?: IndexType
+	) => INestedStreamImpl<Type, IndexType>
+
+	typesTable: ILookupTable<
+		any,
+		IStreamPredicate<Type | INestedStreamImpl<Type>>,
+		IndexType
+	>
 }

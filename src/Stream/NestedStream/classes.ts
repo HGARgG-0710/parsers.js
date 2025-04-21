@@ -9,10 +9,11 @@ import type { IStreamClassInstance } from "../StreamClass/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
 
 import type {
-	INestedStream,
 	INestedStreamConstructor,
 	IUnderNestedStream
 } from "./interfaces.js"
+
+import type { INestedStreamImpl } from "./methods.js"
 
 import { withSuper } from "../../refactor.js"
 import { DefaultEndStream } from "../StreamClass/classes.js"
@@ -26,7 +27,7 @@ import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 const { init, copy, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>
-	DefaultEndStream<Type | INestedStream<Type>>({
+	DefaultEndStream<Type | INestedStreamImpl<Type>>({
 		...baseMethods,
 		hasPosition: hasPosition,
 		hasBuffer: hasBuffer,
@@ -35,18 +36,15 @@ const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>
 
 function makeNestedStream<Type = any, IndexType = any>(
 	nestedTypes: ILookupTable<any, IStreamPredicate<Type>, IndexType>
-): (
-	hasPosition?: boolean,
-	hasBuffer?: boolean
-) => new (value?: IUnderNestedStream<Type>, index?: IndexType) => INestedStream<
-	Type,
-	IndexType
-> {
-	return function (hasPosition = false, hasBuffer = false) {
+) {
+	return function (
+		hasPosition = false,
+		hasBuffer = false
+	): INestedStreamConstructor<Type, IndexType> {
 		const baseClass = NestedStreamBase(hasPosition, hasBuffer)
 		class NestedStream
 			extends baseClass
-			implements INestedStream<Type, IndexType>
+			implements INestedStreamImpl<Type, IndexType>
 		{
 			value: IUnderNestedStream<Type>
 			isCurrNested: boolean
@@ -62,19 +60,21 @@ function makeNestedStream<Type = any, IndexType = any>(
 			init: (
 				value?: IEndableStream<Type>,
 				index?: IndexType,
-				buffer?: IFreezableBuffer<Type | INestedStream<Type>>
-			) => INestedStream<Type>;
+				buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type>>
+			) => INestedStreamImpl<Type>;
 
 			["constructor"]: new (
 				value?: IUnderNestedStream<Type>,
-				index?: IndexType,
-				buffer?: IFreezableBuffer<Type | INestedStream<Type>>
-			) => INestedStream<Type>
+				buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type>>,
+				index?: IndexType
+			) => INestedStreamImpl<Type>
 
 			constructor(
 				value?: IUnderNestedStream<Type>,
-				index?: IndexType,
-				buffer?: IFreezableBuffer<Type | INestedStream<Type, IndexType>>
+				buffer?: IFreezableBuffer<
+					Type | INestedStreamImpl<Type, IndexType>
+				>,
+				index?: IndexType
 			) {
 				super(value)
 				this.init(value, index, buffer)
