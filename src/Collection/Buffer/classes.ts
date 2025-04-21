@@ -81,7 +81,7 @@ export class UnfreezableString
 		const { value: currValue } = this
 		if (!this.isFrozen)
 			this.value =
-				currValue.slice(0, i - 1) + char + currValue.slice(i + 1)
+				currValue.slice(0, i) + char + currValue.slice(i + 1)
 		return this
 	}
 
