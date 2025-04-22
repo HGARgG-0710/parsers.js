@@ -2,7 +2,6 @@ import type {
 	IDirectionalPosition,
 	IDirectionHaving,
 	IFreezableBuffer,
-	IProddable,
 	IReversedStreamClassInstance,
 	IReversibleStream
 } from "../../interfaces.js"
@@ -13,7 +12,11 @@ import type {
 	IUnderLimitedStream
 } from "./interfaces.js"
 
-import type { ILookaheadHaving, IWithLookahead } from "../refactor.js"
+import type {
+	ILookaheadHaving,
+	IProddable,
+	IWithLookahead
+} from "../refactor.js"
 import type { ISupered } from "../../refactor.js"
 
 import { positionEqual } from "../Position/utils.js"

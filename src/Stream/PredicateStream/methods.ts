@@ -6,11 +6,11 @@ import type {
 	IReversibleStream,
 	IIsEndCurrable,
 	IUnderPredicateStream,
-	IProddable,
 	IPredicatePosition,
 	IPredicateStream,
 	IStreamClassInstance
 } from "../interfaces.js"
+import type { IProddable } from "../refactor.js"
 
 import type { IWithLookahead } from "../refactor.js"
 import type { ILookaheadHaving } from "../refactor.js"
