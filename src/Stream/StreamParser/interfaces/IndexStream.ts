@@ -1,4 +1,5 @@
 import type {
+	IConcreteStreamParser,
 	IEndableStream,
 	ILineIndex,
 	IStream,
@@ -12,6 +13,9 @@ export type IIndexStream = IStreamParser<string, string> & {
 export type IIndexStreamConstructor = new (
 	value?: IEndableStream<string>,
 	lineIndex?: ILineIndex
-) => IIndexStream
+) => IConcreteIndexStream
 
 export type INewlinePredicate = (x: IStream<string>) => boolean
+
+export type IConcreteIndexStream = IIndexStream &
+	IConcreteStreamParser<string, string>

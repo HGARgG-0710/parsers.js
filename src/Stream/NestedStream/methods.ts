@@ -71,12 +71,12 @@ export namespace methods {
 	}
 }
 
-export interface IISCurrNestable {
+export interface IISCurrNested {
 	isCurrNested: boolean
 }
 
 export interface INestedStreamImpl<Type = any, IndexType = any>
-	extends IISCurrNestable,
+	extends IISCurrNested,
 		IStreamClassInstanceImpl<
 			Type | INestedStreamImpl<Type>,
 			IUnderNestedStream<Type>,

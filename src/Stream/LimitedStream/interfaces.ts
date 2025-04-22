@@ -7,6 +7,7 @@ import type {
 	IIsEndCurrable,
 	IIsStartCurrable,
 	IPosed,
+	IReversedStreamClassInstance,
 	IStream
 } from "../interfaces.js"
 
@@ -28,7 +29,7 @@ export type ILimitedStreamInitSignature<Type = any> = [
 export type ILimitedStreamConstructor<Type = any> = new (
 	value?: IUnderLimitedStream<Type>,
 	buffer?: IFreezableBuffer<Type>
-) => ILimitedStream<Type>
+) => IConcreteLimitedStream<Type>
 
 export type ILimitedStream<Type = any> = IStream<
 	Type,
@@ -37,3 +38,11 @@ export type ILimitedStream<Type = any> = IStream<
 	ILimitedStreamInitSignature<Type>
 > &
 	IBackward<Type>
+
+export type IConcreteLimitedStream<Type = any> = ILimitedStream<Type> &
+	IReversedStreamClassInstance<
+		Type,
+		IUnderLimitedStream<Type>,
+		number,
+		ILimitedStreamInitSignature<Type>
+	>

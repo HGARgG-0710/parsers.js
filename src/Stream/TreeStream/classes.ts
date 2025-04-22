@@ -1,6 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IWalkable } from "../../Node/interfaces.js"
 import type { MultiIndex } from "../Position/classes.js"
+import type { IStreamClassInstance } from "../interfaces.js"
 import type { IReversedStreamClassInstanceImpl } from "../StreamClass/refactor.js"
 
 import { withSuper } from "../../refactor.js"
@@ -21,9 +22,11 @@ const TreeStreamBase = StreamClass<IWalkable, any, MultiIndex>(
 	Type extends IWalkable<Type> = IWalkable
 >() => IReversedStreamClassInstanceImpl<Type, any, MultiIndex<Type>>
 
-export class TreeStream<
-	TreeLike extends IWalkable<TreeLike> = IWalkable
-> extends TreeStreamBase<TreeLike> {
+export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
+	extends TreeStreamBase<TreeLike>
+	implements
+		IStreamClassInstance<TreeLike, TreeLike, MultiIndex, [TreeLike?]>
+{
 	protected readonly super: Summat
 
 	readonly value: TreeLike

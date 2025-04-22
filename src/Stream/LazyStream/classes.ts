@@ -1,6 +1,7 @@
 import type {
 	IDirectionalPosition,
 	IEndableStream,
+	IIsEndCurrable,
 	INavigable,
 	ISource
 } from "../interfaces.js"
@@ -12,18 +13,20 @@ const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isNumber } = type
 
-export class LazyStream implements IEndableStream<string>, INavigable<string> {
+export class LazyStream
+	implements IEndableStream<string>, INavigable<string>, IIsEndCurrable
+{
 	curr: string
 	isEnd = false;
 
 	["constructor"]: new (source: ISource) => typeof this;
 	[Symbol.iterator]: () => Generator<string>
 
-	protected nextDecoded() {
+	private nextDecoded() {
 		this.source.nextChar()
 	}
 
-	protected transferDecoded() {
+	private transferDecoded() {
 		return (this.curr = this.source.decoded)
 	}
 
@@ -33,7 +36,7 @@ export class LazyStream implements IEndableStream<string>, INavigable<string> {
 		return isLast
 	}
 
-	baseNextIter() {
+	private baseNextIter() {
 		this.nextDecoded()
 		this.transferDecoded()
 	}
