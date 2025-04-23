@@ -1,11 +1,10 @@
-import type { IPointer } from "../interfaces.js"
-import type { INode, INodeClass } from "./interfaces.js"
-
-import { inplace, array } from "@hgargg-0710/one"
-import { isType } from "./utils.js"
+import { array, inplace } from "@hgargg-0710/one"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import type { IPointer } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
+import type { INode, INodeClass } from "./interfaces.js"
+import { isType } from "./utils.js"
 
 abstract class PreTokenNode<Type = any, Value = any>
 	implements INode<Type, Value>

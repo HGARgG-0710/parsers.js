@@ -1,9 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IStreamPredicate } from "../../../TableMap/interfaces.js"
 import type { IEndableStream, IPosition } from "src/Stream/interfaces.js"
-import type { IStreamClassStatePatternInitMethod } from "../../StreamClass/methods/init.js"
 import type { IValidationResult } from "../../../interfaces.js"
-
+import type { IStreamPredicate } from "../../../TableMap/interfaces.js"
+import type { IStreamClassStatePatternInitMethod } from "../../StreamClass/methods/init.js"
 import { LocatorStream } from "../classes.js"
 
 export const ValidationError = (i: IPosition): [false, IPosition] => [false, i]

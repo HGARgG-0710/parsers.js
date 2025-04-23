@@ -1,12 +1,12 @@
+import { type } from "@hgargg-0710/one"
 import type {
 	IGettable,
 	IInitializable,
 	IPattern,
 	IPointer
 } from "../interfaces.js"
-
-import { type } from "@hgargg-0710/one"
 import { setValue } from "../utils.js"
+
 const { isUndefined } = type
 
 export abstract class ProtectedPattern<Type = any> {

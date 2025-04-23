@@ -1,10 +1,10 @@
 import type {
+	ICopiable,
 	IDefaulting,
-	ISizeable,
-	IRekeyable,
 	IDeletable,
+	IRekeyable,
 	ISettable,
-	ICopiable
+	ISizeable
 } from "../../interfaces.js"
 
 export interface IInternalHash<

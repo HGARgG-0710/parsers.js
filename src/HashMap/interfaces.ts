@@ -1,4 +1,3 @@
-import type { IInternalHash } from "./InternalHash/interfaces.js"
 import type { IIndexable } from "src/interfaces.js"
 import type {
 	ICopiable,
@@ -9,6 +8,7 @@ import type {
 	ISettable,
 	ISizeable
 } from "../interfaces.js"
+import type { IInternalHash } from "./InternalHash/interfaces.js"
 
 export type IHash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,

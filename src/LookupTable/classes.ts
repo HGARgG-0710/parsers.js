@@ -1,27 +1,23 @@
+import { functional, object, type } from "@hgargg-0710/one"
 import type { IPointer } from "src/interfaces.js"
-import type { IPersistentIndexMap } from "../IndexMap/PersistentIndexMap/interfaces.js"
+import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
+import { BasicHash } from "../HashMap/classes.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import type { IPersistentIndexMap } from "../IndexMap/PersistentIndexMap/interfaces.js"
 import type {
-	IRekeyable,
 	IDeletable,
+	IIndexAssignable,
+	IRekeyable,
 	ISettable,
-	ISizeable,
-	IIndexAssignable
+	ISizeable
 } from "../interfaces.js"
-
-import type { ILookupTable, ITableConstructor } from "./interfaces.js"
-
+import { Autocache } from "../internal/Autocache.js"
+import { makeDelegate } from "../refactor.js"
 import { current } from "../Stream/utils.js"
 import { isGoodPointer, pos } from "../utils.js"
-import { makeDelegate } from "../refactor.js"
+import type { ILookupTable, ITableConstructor } from "./interfaces.js"
 
-import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
-
-import { BasicHash } from "../HashMap/classes.js"
-import { MapInternal } from "../HashMap/InternalHash/classes.js"
-import { Autocache } from "../internal/Autocache.js"
-
-import { functional, object, type } from "@hgargg-0710/one"
 const { id } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor

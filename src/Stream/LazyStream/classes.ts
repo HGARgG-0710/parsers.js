@@ -1,3 +1,4 @@
+import { object, type } from "@hgargg-0710/one"
 import type {
 	IDirectionalPosition,
 	IEndableStream,
@@ -5,10 +6,8 @@ import type {
 	INavigable,
 	ISource
 } from "../interfaces.js"
-
 import { streamIterator } from "../StreamClass/methods/iter.js"
 
-import { object, type } from "@hgargg-0710/one"
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isNumber } = type

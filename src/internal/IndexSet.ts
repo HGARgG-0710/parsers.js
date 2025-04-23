@@ -1,6 +1,6 @@
+import { array, boolean, functional } from "@hgargg-0710/one"
 import type { ICopiable } from "../interfaces.js"
 
-import { array, functional, boolean } from "@hgargg-0710/one"
 const { sort, numbers } = array
 const { negate, has } = functional
 const { eqcurry } = boolean

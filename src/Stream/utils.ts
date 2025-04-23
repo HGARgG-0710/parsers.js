@@ -1,20 +1,10 @@
-import type {
-	IStream,
-	IReversibleStream,
-	IFinishable,
-	INavigable,
-	IPosed,
-	IPrevable,
-	IBackward,
-	IRewindable,
-	IStarted
-} from "./interfaces.js"
-
+import { functional, object, type } from "@hgargg-0710/one"
+import { ArrayCollection } from "../Collection/classes.js"
 import type {
 	IStreamPredicate,
 	IStreamTransform
 } from "../TableMap/interfaces.js"
-
+import { Stream } from "../constants.js"
 import type {
 	IBufferized,
 	ICollection,
@@ -23,16 +13,21 @@ import type {
 	IPosition,
 	IStateful
 } from "../interfaces.js"
-
-import { Stream } from "../constants.js"
-const { SkippedItem } = Stream.StreamParser
-
-import { pickDirection, positionNegate } from "./Position/utils.js"
-
-import { ArrayCollection } from "../Collection/classes.js"
 import { getStopPoint } from "./Position/refactor.js"
+import { pickDirection, positionNegate } from "./Position/utils.js"
+import type {
+	IBackward,
+	IFinishable,
+	INavigable,
+	IPosed,
+	IPrevable,
+	IReversibleStream,
+	IRewindable,
+	IStarted,
+	IStream
+} from "./interfaces.js"
 
-import { object, type, functional } from "@hgargg-0710/one"
+const { SkippedItem } = Stream.StreamParser
 const { prop, structCheck } = object
 const { isFunction, isNumber, isBoolean, isObject } = type
 const { and } = functional

@@ -1,13 +1,12 @@
-import type { IReversibleStream } from "../../interfaces.js"
-import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IPosed } from "../../Position/interfaces.js"
-
-import { start, type IStreamClassInstanceImpl } from "../refactor.js"
 import { uniRewind } from "src/Stream/utils.js"
-import { positionNull } from "../../Position/refactor.js"
+import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import { readFirst } from "../../../Collection/Buffer/refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
+import type { IReversibleStream } from "../../interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
+import { positionNull } from "../../Position/refactor.js"
+import { start, type IStreamClassInstanceImpl } from "../refactor.js"
 
 // * possible '.rewind' methods
 

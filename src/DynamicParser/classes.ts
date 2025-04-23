@@ -1,22 +1,19 @@
+import { array, functional, object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { Composition } from "src/internal/Composition.js"
+import { BasicHash } from "../HashMap/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes.js"
 import type { ICopiable, IInitializable } from "../interfaces.js"
+import { Autocache } from "../internal/Autocache.js"
+import { CallbackBuffer } from "../internal/Collection/Buffer/CallbackBuffer.js"
+import { IndexSet } from "../internal/IndexSet.js"
 import type {
 	IComplexComposition,
 	IDynamicParser,
+	IFunctionTuple,
 	IParserState,
-	ISignatureCallback,
-	IFunctionTuple
+	ISignatureCallback
 } from "./interfaces.js"
-
-import { IndexSet } from "../internal/IndexSet.js"
-import { CallbackBuffer } from "../internal/Collection/Buffer/CallbackBuffer.js"
-
-import { Composition } from "src/internal/Composition.js"
-
-import { array, object, functional } from "@hgargg-0710/one"
-import { BasicHash } from "../HashMap/classes.js"
-import { MapInternal } from "../HashMap/InternalHash/classes.js"
-import { Autocache } from "../internal/Autocache.js"
 
 const { argFiller } = functional
 const { extendPrototype } = object
@@ -145,6 +142,6 @@ export const ParserState = (x: IDynamicParser): IParserState => ({ parser: x })
 export const DynamicParser: new (layers?: Function[]) => IDynamicParser =
 	ComplexComposition(ParserState)
 
-// * pre-doc note: this is intended for usage WITHOUT the self-modification of the parser; 
-// useful for error-handling [see ErrorHandler] and other such operations; 
+// * pre-doc note: this is intended for usage WITHOUT the self-modification of the parser;
+// useful for error-handling [see ErrorHandler] and other such operations;
 export const CommonParser = ComplexComposition()

@@ -1,6 +1,6 @@
+import { number } from "@hgargg-0710/one"
 import type { ILineIndex } from "../interfaces/LineIndex.js"
 
-import { number } from "@hgargg-0710/one"
 const { sum } = number
 
 export class LineIndex implements ILineIndex {

@@ -1,10 +1,10 @@
 import type { IHashMap } from "../HashMap/interfaces.js"
 import type {
+	ICopiable,
 	IDeletable,
-	ISettable,
 	IRekeyable,
-	ISizeable,
-	ICopiable
+	ISettable,
+	ISizeable
 } from "../interfaces.js"
 
 export interface ILookupTable<KeyType = any, ValueType = any, OwningType = any>

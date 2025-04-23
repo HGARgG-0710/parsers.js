@@ -1,26 +1,21 @@
+import { boolean, object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-
-import type { IPattern } from "src/interfaces.js"
-import type { IRecursivePointer } from "src/interfaces.js"
-
-import { type, object, boolean } from "@hgargg-0710/one"
-const { isUndefined } = type
-const { structCheck, prop } = object
-const { eqcurry } = boolean
-
+import type { IPattern, IRecursivePointer } from "src/interfaces.js"
+import { BadIndex } from "./constants.js"
 import type {
 	IBufferized,
 	IFreezableBuffer,
 	IIndexAssignable,
 	IIndexed,
 	IPointer,
-	ISizeable
+	ISizeable,
+	IStateful
 } from "./interfaces.js"
-
-import type { IStateful } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
-import { BadIndex } from "./constants.js"
+const { isUndefined } = type
+const { structCheck, prop } = object
+const { eqcurry } = boolean
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -142,3 +137,4 @@ export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Node from "./Node/utils.js"
 export * as Stream from "./Stream/utils.js"
+

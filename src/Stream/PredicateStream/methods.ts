@@ -1,21 +1,20 @@
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IPredicateStreamInitSignature } from "./interfaces.js"
 import type { ISupered } from "../../refactor.js"
-
 import type {
-	IReversibleStream,
 	IIsEndCurrable,
-	IUnderPredicateStream,
 	IPredicatePosition,
 	IPredicateStream,
-	IStreamClassInstance
+	IReversibleStream,
+	IStreamClassInstance,
+	IUnderPredicateStream
 } from "../interfaces.js"
-import type { IProddable } from "../refactor.js"
-
-import type { IWithLookahead } from "../refactor.js"
-import type { ILookaheadHaving } from "../refactor.js"
-
+import type {
+	ILookaheadHaving,
+	IProddable,
+	IWithLookahead
+} from "../refactor.js"
 import { navigate } from "../utils.js"
+import type { IPredicateStreamInitSignature } from "./interfaces.js"
 
 export namespace methods {
 	export function currGetter<Type = any>(this: IPredicateStreamImpl<Type>) {

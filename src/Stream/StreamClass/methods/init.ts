@@ -1,24 +1,21 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-
-import type { IStateful } from "src/interfaces.js"
-import type { IPattern } from "src/interfaces.js"
-import type { IPosed, IPosition } from "../../Position/interfaces.js"
+import type { IPattern, IStateful } from "src/interfaces.js"
 import type {
 	IBufferized,
 	IFreezableBuffer
 } from "../../../Collection/Buffer/interfaces.js"
-
-import { positionNull } from "../../Position/refactor.js"
 import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
+import type { IThisMethod } from "../../../refactor.js"
 import { optionalValue } from "../../../utils.js"
+import type { IPosed, IPosition } from "../../Position/interfaces.js"
+import { positionNull } from "../../Position/refactor.js"
 import {
 	createState,
 	start,
 	type IStreamClassInstanceImpl
 } from "../refactor.js"
-import type { IThisMethod } from "../../../refactor.js"
-import { BitHash } from "../../../HashMap/classes.js"
-import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 // * types
 

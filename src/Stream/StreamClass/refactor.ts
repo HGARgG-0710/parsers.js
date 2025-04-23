@@ -1,5 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-
+import type { IStateful } from "src/interfaces.js"
+import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 import type {
 	IFinishable,
 	IIsEndCurrable,
@@ -11,13 +13,7 @@ import type {
 	IStarted,
 	IStreamClassInstance
 } from "../interfaces.js"
-
-import type { IStateful } from "src/interfaces.js"
-import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
 import type { IPosed } from "../Position/interfaces.js"
-
-import { valueDelegate, valuePropDelegate } from "../../refactor.js"
-
 import curr from "./methods/curr.js"
 
 export type IConstructor<Signature extends any[], Type = any> = new (
@@ -118,9 +114,10 @@ export type IReversedStreamClassInstanceImpl<
 
 export { curr }
 
+export * as copy from "./methods/copy.js"
+export * as finish from "./methods/finish.js"
 export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"
-export * as finish from "./methods/finish.js"
-export * as rewind from "./methods/rewind.js"
 export * as navigate from "./methods/navigate.js"
-export * as copy from "./methods/copy.js"
+export * as rewind from "./methods/rewind.js"
+

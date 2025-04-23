@@ -1,10 +1,9 @@
 import type {
-	ISettable,
-	IRekeyable,
 	IDeletable,
+	IRekeyable,
+	ISettable,
 	ISizeable
 } from "../../interfaces.js"
-
 import { DelegateDeletableSettableSizeable } from "./DeletableSettable.js"
 
 export abstract class DelegateRekeyable<

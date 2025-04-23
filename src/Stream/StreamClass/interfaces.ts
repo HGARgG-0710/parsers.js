@@ -10,7 +10,6 @@ import type {
 	IStarted,
 	IStream
 } from "../interfaces.js"
-
 import type { IConstructor, IStreamClassTransferable } from "./refactor.js"
 
 export type IStreamClassSignature<Type = any> =
@@ -52,3 +51,4 @@ export type IReversedStreamClassInstance<
 	IRewindable<Type>
 
 export type * from "./methods/init.js"
+

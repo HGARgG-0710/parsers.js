@@ -1,6 +1,6 @@
-import { InitializablePattern } from "./Pattern.js"
-import { MultiIndex } from "src/Stream/Position/classes/MultiIndex.js"
 import { array } from "@hgargg-0710/one"
+import { MultiIndex } from "src/Stream/Position/classes/MultiIndex.js"
+import { InitializablePattern } from "./Pattern.js"
 
 export class MultiIndexModifier extends InitializablePattern<MultiIndex> {
 	["constructor"]: new (value?: MultiIndex) => MultiIndexModifier

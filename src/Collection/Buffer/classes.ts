@@ -1,9 +1,7 @@
-import type { IUnfreezableBuffer } from "./interfaces.js"
-import type { IIndexed } from "../../interfaces.js"
-
-import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
-
 import { array } from "@hgargg-0710/one"
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
+import type { IIndexed } from "../../interfaces.js"
+import type { IUnfreezableBuffer } from "./interfaces.js"
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	isFrozen = false;
@@ -80,8 +78,7 @@ export class UnfreezableString
 	write(i: number, char: string) {
 		const { value: currValue } = this
 		if (!this.isFrozen)
-			this.value =
-				currValue.slice(0, i) + char + currValue.slice(i + 1)
+			this.value = currValue.slice(0, i) + char + currValue.slice(i + 1)
 		return this
 	}
 

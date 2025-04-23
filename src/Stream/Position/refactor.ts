@@ -1,5 +1,4 @@
 import type { IDirectionalPosition, IPosed } from "./interfaces.js"
-
 import { direction } from "./utils.js"
 
 export function getStopPoint(pos: IDirectionalPosition) {

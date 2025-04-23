@@ -1,16 +1,14 @@
+import { BasicHash } from "../../../HashMap/classes.js"
+import { MapInternal } from "../../../HashMap/InternalHash/classes.js"
+import { Autocache } from "../../../internal/Autocache.js"
 import type { IEndableStream, ILineIndex } from "../../interfaces.js"
-
+import { LineIndex } from "../../Position/classes.js"
+import { StreamParser } from "../classes.js"
 import type {
 	IIndexStream,
 	IIndexStreamConstructor,
 	INewlinePredicate
 } from "../interfaces/IndexStream.js"
-
-import { LineIndex } from "../../Position/classes.js"
-import { StreamParser } from "../classes.js"
-import { Autocache } from "../../../internal/Autocache.js"
-import { BasicHash } from "../../../HashMap/classes.js"
-import { MapInternal } from "../../../HashMap/InternalHash/classes.js"
 
 const indexStreamHandler = (isNewline: INewlinePredicate) =>
 	function (this: IIndexStream, stream: IEndableStream<string>) {

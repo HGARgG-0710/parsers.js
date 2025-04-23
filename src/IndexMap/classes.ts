@@ -1,12 +1,11 @@
-import type { ILinearMapClass } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
-
-import { is } from "../Node/utils.js"
-import { type } from "src/Node/utils.js"
-import { value } from "../utils.js"
-import { current } from "../Stream/utils.js"
-
 import { type as _type } from "@hgargg-0710/one"
+import { type } from "src/Node/utils.js"
+import { is } from "../Node/utils.js"
+import { current } from "../Stream/utils.js"
+import { value } from "../utils.js"
+import type { ILinearMapClass } from "./interfaces.js"
+
 const { typeOf, isNumber } = _type
 
 export const [TokenMap, ValueMap, CurrentMap, TypeofMap] = [

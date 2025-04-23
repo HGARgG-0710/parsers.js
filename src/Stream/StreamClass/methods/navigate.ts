@@ -1,25 +1,21 @@
-import type { IPosed } from "../../Position/interfaces.js"
+import { type } from "@hgargg-0710/one"
+import { uniNavigate } from "src/Stream/utils.js"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type {
 	IDirectionalPosition,
 	IReversibleStream
 } from "../../interfaces.js"
-
+import type { IPosed } from "../../Position/interfaces.js"
+import { positionDecrement } from "../../Position/refactor.js"
+import { direction } from "../../Position/utils.js"
 import {
 	readBuffer,
 	readBufferThis,
 	type IReversedStreamClassInstanceImpl
 } from "../refactor.js"
 
-import { uniNavigate } from "src/Stream/utils.js"
-import { direction } from "../../Position/utils.js"
-import { positionDecrement } from "../../Position/refactor.js"
-
-import { BitHash } from "../../../HashMap/classes.js"
-import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
-
-import { type } from "@hgargg-0710/one"
 const { isNumber } = type
 
 /**

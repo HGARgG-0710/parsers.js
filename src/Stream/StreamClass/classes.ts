@@ -1,30 +1,24 @@
-import type { IStreamClassInitMethod } from "./methods/init.js"
-import type { ICopiable, IPosition } from "../../interfaces.js"
-
-import type { IStreamClass, IStreamClassSignature } from "./interfaces.js"
-
+import { boolean, object } from "@hgargg-0710/one"
 import { Pattern } from "src/internal/Pattern.js"
-
+import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
+import type { ICopiable, IPosition } from "../../interfaces.js"
+import { Autocache } from "../../internal/Autocache.js"
 import { valuePropDelegate } from "../../refactor.js"
-
+import type { IStreamClass, IStreamClassSignature } from "./interfaces.js"
+import type { IStreamClassInitMethod } from "./methods/init.js"
+import { streamIterator } from "./methods/iter.js"
+import { update } from "./methods/update.js"
 import {
+	copy,
+	curr,
 	finish,
-	rewind,
-	navigate,
 	init,
 	iter,
-	curr,
-	copy,
+	navigate,
+	rewind,
 	type IStreamClassInstanceImpl
 } from "./refactor.js"
 
-import { update } from "./methods/update.js"
-import { streamIterator } from "./methods/iter.js"
-
-import { Autocache } from "../../internal/Autocache.js"
-import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
-
-import { object, boolean } from "@hgargg-0710/one"
 const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { F } = boolean

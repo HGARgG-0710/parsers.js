@@ -1,32 +1,28 @@
-import type { IPosed } from "../../Position/interfaces.js"
+import { functional, object } from "@hgargg-0710/one"
 import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IStream } from "../../interfaces.js"
-
-import {
-	positionDecrement,
-	positionIncrement
-} from "../../Position/refactor.js"
-
 import {
 	bufferFreeze,
 	bufferPush
 } from "../../../Collection/Buffer/refactor.js"
-
-import {
-	deEnd,
-	readBuffer,
-	start,
-	deStart,
-	end,
-	type IStreamClassInstanceImpl,
-	type IReversedStreamClassInstanceImpl
-} from "../refactor.js"
-
-import { currSet } from "./curr.js"
-
-import { functional, object } from "@hgargg-0710/one"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
+import type { IStream } from "../../interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
+import {
+	positionDecrement,
+	positionIncrement
+} from "../../Position/refactor.js"
+import {
+	deEnd,
+	deStart,
+	end,
+	readBuffer,
+	start,
+	type IReversedStreamClassInstanceImpl,
+	type IStreamClassInstanceImpl
+} from "../refactor.js"
+import { currSet } from "./curr.js"
+
 const { nil } = functional
 const { propDefine } = object
 const { GetSetDescriptor, ConstDescriptor } = object.descriptor

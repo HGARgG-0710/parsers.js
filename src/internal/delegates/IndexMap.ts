@@ -1,10 +1,9 @@
-import type { IIndexMap } from "../../interfaces.js"
 import type { array } from "@hgargg-0710/one"
-
+import { object } from "@hgargg-0710/one"
 import { PreIndexMap } from "src/internal/IndexMap.js"
 import { DelegateRekeyable } from "src/internal/delegates/Rekeyable.js"
+import type { IIndexMap } from "../../interfaces.js"
 
-import { object } from "@hgargg-0710/one"
 const { mixin } = object.classes
 
 abstract class FakeIndexMap<

@@ -1,10 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-
+import type { IEndableStream } from "src/Stream/interfaces.js"
 import type { IInvalidEntries } from "../../../interfaces.js"
 import type { IStreamPredicate } from "../../../TableMap/interfaces.js"
-import type { IEndableStream } from "src/Stream/interfaces.js"
 import type { IStreamClassStatePatternInitMethod } from "../../StreamClass/methods/init.js"
-
 import { LocatorStream } from "../classes.js"
 
 export function PositionalValidator<Type = any>(

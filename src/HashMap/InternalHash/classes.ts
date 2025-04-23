@@ -1,9 +1,8 @@
-import type { IInternalHash } from "./interfaces.js"
-
+import { array, object, type } from "@hgargg-0710/one"
 import { DelegateDeletableSettableSizeable } from "src/internal/delegates/DeletableSettable.js"
 import { ProtectedPattern } from "src/internal/Pattern.js"
+import type { IInternalHash } from "./interfaces.js"
 
-import { type, object, array } from "@hgargg-0710/one"
 const { isUndefined } = type
 
 export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>

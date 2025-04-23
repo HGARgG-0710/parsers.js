@@ -1,11 +1,11 @@
+import { functional, object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
-import type { IEndableStream } from "../interfaces.js"
-import type { IMarkedStreamConstructor } from "./interfaces.js"
-import type { IMarkedStreamImpl } from "./methods.js"
-
+import { Autocache } from "../../internal/Autocache.js"
+import { withSuper } from "../../refactor.js"
 import { DefaultEndStream } from "../classes.js"
-
+import type { IEndableStream } from "../interfaces.js"
 import {
 	valueCurr,
 	valueIsCurrEnd,
@@ -13,17 +13,13 @@ import {
 	type IConstructor,
 	type IStreamClassInstanceImpl
 } from "../StreamClass/refactor.js"
+import { current } from "../utils.js"
+import type { IMarkedStreamConstructor } from "./interfaces.js"
+import type { IMarkedStreamImpl } from "./methods.js"
+import { methods } from "./methods.js"
 
-import { object, functional } from "@hgargg-0710/one"
 const { has, trivialCompose } = functional
 const { ConstDescriptor } = object.descriptor
-
-import { withSuper } from "../../refactor.js"
-import { Autocache } from "../../internal/Autocache.js"
-import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
-import { current } from "../utils.js"
-
-import { methods } from "./methods.js"
 const { init, ...baseMethods } = methods
 
 const BaseMarkedStream = <Type = any>(hasPosition = false, hasBuffer = false) =>

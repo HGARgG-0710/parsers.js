@@ -1,14 +1,11 @@
-import type { IStream } from "../../../Stream/interfaces.js"
-import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
-import type { IPosed } from "../../Position/interfaces.js"
-
-import { readLast } from "../../../Collection/Buffer/refactor.js"
-import { lastIndex } from "../../../Collection/Buffer/refactor.js"
-import { end, readBuffer, type IStreamClassInstanceImpl } from "../refactor.js"
-
 import { uniFinish } from "src/Stream/utils.js"
+import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import { lastIndex, readLast } from "../../../Collection/Buffer/refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
+import type { IStream } from "../../../Stream/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
+import { end, readBuffer, type IStreamClassInstanceImpl } from "../refactor.js"
 
 // * possible 'finish' methods
 

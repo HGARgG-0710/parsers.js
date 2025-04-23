@@ -1,4 +1,5 @@
 import { boolean } from "@hgargg-0710/one"
+
 const { T } = boolean
 
 export namespace regex {

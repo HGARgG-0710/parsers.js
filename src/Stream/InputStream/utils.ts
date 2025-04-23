@@ -1,11 +1,9 @@
-import type { IPosition, IStream } from "../interfaces.js"
-import type { IInputStream } from "./interfaces.js"
-
-import { InputStream } from "./classes.js"
 import { UnfreezableArray } from "../../Collection/Buffer/classes.js"
-
 import { isBufferized } from "../../Collection/Buffer/utils.js"
+import type { IPosition, IStream } from "../interfaces.js"
 import { consume, finish } from "../utils.js"
+import { InputStream } from "./classes.js"
+import type { IInputStream } from "./interfaces.js"
 
 /**
  * Given a `BasicStream`, converts it to an `InputStream`

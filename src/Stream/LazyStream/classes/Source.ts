@@ -1,11 +1,9 @@
+import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
-
+import { closeSync, fstatSync, openSync, readSync } from "node:fs"
+import { makeDelegate } from "../../../refactor.js"
 import type { ISource } from "../interfaces.js"
 
-import { openSync, readSync, closeSync, fstatSync } from "node:fs"
-
-import { array, object, boolean, number } from "@hgargg-0710/one"
-import { makeDelegate } from "../../../refactor.js"
 const { numbers } = array
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor

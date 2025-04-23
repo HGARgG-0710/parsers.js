@@ -1,24 +1,21 @@
+import { type } from "@hgargg-0710/one"
+import { MissingArgument } from "../../constants.js"
 import type {
 	IFreezableBuffer,
 	IIndexAssignable,
 	ILookupTable,
 	IStreamPredicate
 } from "../../interfaces.js"
-
+import type { ISupered } from "../../refactor.js"
+import { assignIndex } from "../../utils.js"
 import type { IEndableStream } from "../interfaces.js"
 import type { IStreamClassInstanceImpl } from "../StreamClass/refactor.js"
-import type { ISupered } from "../../refactor.js"
-
+import { finish } from "../utils.js"
 import type {
 	INestedStreamInitSignature,
 	IUnderNestedStream
 } from "./interfaces.js"
 
-import { assignIndex } from "../../utils.js"
-import { finish } from "../utils.js"
-
-import { type } from "@hgargg-0710/one"
-import { MissingArgument } from "../../constants.js"
 const { isNull, isUndefined } = type
 
 export namespace methods {

@@ -1,13 +1,12 @@
 import type { array } from "@hgargg-0710/one"
-import type { IIndexingFunction } from "../interfaces.js"
-
+import { inplace } from "@hgargg-0710/one"
 import { BadIndex } from "../constants.js"
 import { inBound } from "../IndexMap/refactor.js"
 import { fromPairs } from "../IndexMap/utils.js"
+import type { IIndexingFunction } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 import { BaseIndexMap } from "./IndexMap.js"
 
-import { inplace } from "@hgargg-0710/one"
 const { insert, out } = inplace
 
 export abstract class BaseLinearMap<

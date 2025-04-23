@@ -1,5 +1,4 @@
-import type { IReversibleStream } from "../interfaces.js"
-import type { IStream } from "../interfaces.js"
+import type { IReversibleStream, IStream } from "../interfaces.js"
 
 export type IPosition<
 	Type = any,

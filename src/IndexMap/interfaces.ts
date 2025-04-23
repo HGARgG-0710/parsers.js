@@ -1,5 +1,4 @@
 import type { array } from "@hgargg-0710/one"
-
 import type {
 	ICopiable,
 	IDefaulting,

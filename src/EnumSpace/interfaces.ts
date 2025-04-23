@@ -1,4 +1,4 @@
-import type { ICopiable, ISizeable, IMappable } from "../interfaces.js"
+import type { ICopiable, IMappable, ISizeable } from "../interfaces.js"
 
 export interface IEnumSpace<Type = any> extends ISizeable, ICopiable {
 	add: (n: number) => this

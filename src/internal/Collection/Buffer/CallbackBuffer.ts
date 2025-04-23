@@ -1,7 +1,7 @@
-import type { IDynamicBuffer } from "../../../interfaces.js"
-
 import { array, inplace } from "@hgargg-0710/one"
+import type { IDynamicBuffer } from "../../../interfaces.js"
 import { TypicalBuffer } from "./TypicalBuffer.js"
+
 const { insert, out } = inplace
 
 export class CallbackBuffer<Type = any>

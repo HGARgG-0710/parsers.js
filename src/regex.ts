@@ -1,7 +1,7 @@
 // * Module containing functions for immidiate construction of regular expressions;
 
-import { non_bracket } from "./regex/refactor.js"
 import { string } from "@hgargg-0710/one"
+import { non_bracket } from "./regex/refactor.js"
 
 const { lastIndex } = string
 

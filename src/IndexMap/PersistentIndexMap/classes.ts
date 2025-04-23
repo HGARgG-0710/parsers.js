@@ -1,16 +1,12 @@
+import { array, inplace } from "@hgargg-0710/one"
 import type { IPointer } from "src/interfaces.js"
+import { Pointer } from "../../classes.js"
+import { BadIndex } from "../../constants.js"
+import { DelegateIndexMap } from "../../internal/delegates/IndexMap.js"
+import { isGoodIndex, setValue, swapValues } from "../../utils.js"
 import type { IIndexMap } from "../interfaces.js"
 import type { IPersistentIndexMap } from "./interfaces.js"
-import type { array } from "@hgargg-0710/one"
 
-import { BadIndex } from "../../constants.js"
-
-import { setValue, swapValues } from "../../utils.js"
-import { DelegateIndexMap } from "../../internal/delegates/IndexMap.js"
-
-import { inplace } from "@hgargg-0710/one"
-import { isGoodIndex } from "../../utils.js"
-import { Pointer } from "../../classes.js"
 const { mutate, swap, insert, out } = inplace
 
 export class PersistentIndexMap<

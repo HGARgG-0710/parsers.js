@@ -1,7 +1,6 @@
-import type { ICollection } from "./interfaces.js"
-import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
-
 import { array } from "@hgargg-0710/one"
+import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
+import type { ICollection } from "./interfaces.js"
 
 export class ArrayCollection<Type = any>
 	extends IterableCollection<Type>

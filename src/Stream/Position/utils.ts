@@ -1,15 +1,14 @@
+import { functional, type } from "@hgargg-0710/one"
 import type { IPositionObject, IStream } from "../interfaces.js"
+import { next, previous } from "../utils.js"
 import type {
+	IChange,
 	IDirectionalPosition,
-	IPosition,
-	IPredicatePosition,
 	IPosed,
-	IChange
+	IPosition,
+	IPredicatePosition
 } from "./interfaces.js"
 
-import { previous, next } from "../utils.js"
-
-import { type, functional } from "@hgargg-0710/one"
 const { isFunction, isNumber, isUndefined, isObject } = type
 const { or, negate } = functional
 

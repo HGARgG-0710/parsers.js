@@ -1,18 +1,16 @@
-import type { IIndexingFunction, ITestable, IHaving } from "../../interfaces.js"
+import { array, boolean, functional, object, string } from "@hgargg-0710/one"
+import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
+import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
+import { Autocache } from "../../internal/Autocache.js"
 import type { IMapClass } from "../interfaces.js"
+import { fromPairs } from "../utils.js"
 import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
-
 import {
 	extend,
 	extendKey,
 	OptimizedLinearMap as OptimizedLinearMapMethods
 } from "./refactor.js"
 
-import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
-import { fromPairs } from "../utils.js"
-
-import { functional, boolean, string, object, array } from "@hgargg-0710/one"
-import { Autocache } from "../../internal/Autocache.js"
 const { trivialCompose } = functional
 const { equals } = boolean
 

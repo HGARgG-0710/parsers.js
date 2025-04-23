@@ -1,16 +1,14 @@
+import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { TreeWalker } from "src/internal/TreeWalker.js"
+import { BadIndex } from "../../constants.js"
 import type { IWalkable } from "../../Node/interfaces.js"
-import type { MultiIndex } from "../Position/classes.js"
+import { withSuper } from "../../refactor.js"
 import type { IStreamClassInstance } from "../interfaces.js"
+import type { MultiIndex } from "../Position/classes.js"
+import { StreamClass } from "../StreamClass/classes.js"
 import type { IReversedStreamClassInstanceImpl } from "../StreamClass/refactor.js"
 
-import { withSuper } from "../../refactor.js"
-import { TreeWalker } from "src/internal/TreeWalker.js"
-import { StreamClass } from "../StreamClass/classes.js"
-
-import { BadIndex } from "../../constants.js"
-
-import { object } from "@hgargg-0710/one"
 const { ConstDescriptor } = object.descriptor
 
 import { methods } from "./methods.js"

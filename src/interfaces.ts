@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IHash } from "./HashMap/interfaces.js"
-import type { IThisMethod } from "./refactor.js"
 import type { IPosition } from "./interfaces.js"
+import type { IThisMethod } from "./refactor.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,

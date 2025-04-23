@@ -1,13 +1,11 @@
-import type { IEnumSpace } from "./interfaces.js"
-import type { IMappable, ISizeable } from "../interfaces.js"
-
-import { makeDelegate } from "../refactor.js"
-
+import { array, functional, inplace, object, type } from "@hgargg-0710/one"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
-
-import { functional, inplace, object, array, type } from "@hgargg-0710/one"
+import type { IMappable, ISizeable } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
+import { makeDelegate } from "../refactor.js"
+import type { IEnumSpace } from "./interfaces.js"
+
 const { id } = functional
 const { out } = inplace
 const { empty, extendPrototype } = object

@@ -6,7 +6,6 @@ import type {
 	IPosition,
 	IStateful
 } from "../interfaces.js"
-
 import type { IPosed } from "./Position/interfaces.js"
 
 export interface IStarted {
@@ -89,7 +88,8 @@ export type * from "./LazyStream/interfaces.js"
 export type * from "./LimitedStream/interfaces.js"
 export type * from "./MarkedStream/interfaces.js"
 export type * from "./NestedStream/interfaces.js"
+export type * from "./Position/interfaces.js"
 export type * from "./PredicateStream/interfaces.js"
 export type * from "./StreamClass/interfaces.js"
 export type * from "./StreamParser/interfaces.js"
-export type * from "./Position/interfaces.js"
+

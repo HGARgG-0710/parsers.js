@@ -1,7 +1,6 @@
-import type { IIndexMap } from "./interfaces.js"
 import type { array } from "@hgargg-0710/one"
-
 import { Pairs } from "./classes.js"
+import type { IIndexMap } from "./interfaces.js"
 
 /**
  * Returns the pair of `indexMap.keys` and `indexMap.values`
@@ -99,3 +98,4 @@ export function listRanges(...from: [number, number][]) {
 }
 
 export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"
+

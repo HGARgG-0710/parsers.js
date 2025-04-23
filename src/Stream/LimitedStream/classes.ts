@@ -1,37 +1,31 @@
+import { object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { Stream } from "../../constants.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
-
-import type {
-	IUnderLimitedStream,
-	ILimitedStreamConstructor
-} from "./interfaces.js"
-import type { ILimitedStreamImpl } from "./methods.js"
-
+import { Autocache } from "../../internal/Autocache.js"
+import { withSuper } from "../../refactor.js"
 import type {
 	IDirectionalPosition,
 	IPredicatePosition
 } from "../Position/interfaces.js"
-
+import { directionCompare, positionNegate } from "../Position/utils.js"
+import { DefaultEndStream } from "../StreamClass/classes.js"
 import {
 	valueCurr,
 	type IConstructor,
 	type IReversedStreamClassInstanceImpl
 } from "../StreamClass/refactor.js"
+import type {
+	ILimitedStreamConstructor,
+	IUnderLimitedStream
+} from "./interfaces.js"
+import type { ILimitedStreamImpl } from "./methods.js"
+import { methods } from "./methods.js"
 
-import { DefaultEndStream } from "../StreamClass/classes.js"
-import { withSuper } from "../../refactor.js"
-
-import { object, type } from "@hgargg-0710/one"
+const { init, prod, ...baseMethods } = methods
 const { ConstDescriptor } = object.descriptor
 const { isNullary } = type
-
-import { methods } from "./methods.js"
-import { directionCompare, positionNegate } from "../Position/utils.js"
-const { init, prod, copy, ...baseMethods } = methods
-
-import { Stream } from "../../constants.js"
-import { Autocache } from "../../internal/Autocache.js"
-import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 
 const LimitedStreamBase = <Type = any>(
 	hasPosition = false,
@@ -100,7 +94,6 @@ function makeLimitedStream(
 		withSuper(limitedStream, baseClass, {
 			prod: ConstDescriptor(prod),
 			init: ConstDescriptor(init),
-			copy: ConstDescriptor(copy),
 			from: ConstDescriptor(from),
 			to: ConstDescriptor(to),
 			direction: ConstDescriptor(direction)

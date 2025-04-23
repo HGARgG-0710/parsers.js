@@ -1,11 +1,9 @@
-import type { ITypeCheckable } from "./interfaces.js"
-import type { ITyped, IWalkable } from "./interfaces.js"
-
+import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
 import { fromEnum } from "../EnumSpace/utils.js"
 import { isGoodIndex } from "../utils.js"
 import { ContentNode, RecursiveNode, TokenNode } from "./classes.js"
+import type { ITypeCheckable, ITyped, IWalkable } from "./interfaces.js"
 
-import { object, type as _type, functional, boolean } from "@hgargg-0710/one"
 const { prop } = object
 const { trivialCompose } = functional
 const { eqcurry } = boolean

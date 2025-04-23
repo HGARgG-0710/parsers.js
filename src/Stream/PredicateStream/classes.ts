@@ -1,28 +1,23 @@
+import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
+import { Autocache } from "../../internal/Autocache.js"
+import { withSuper } from "../../refactor.js"
 import type { IPredicatePosition } from "../Position/interfaces.js"
-
+import { StreamClass } from "../StreamClass/classes.js"
 import type {
 	IConstructor,
 	IStreamClassInstanceImpl
 } from "../StreamClass/refactor.js"
-
 import type {
 	IPredicateStreamConstructor,
 	IUnderPredicateStream
 } from "./interfaces.js"
-
-import { StreamClass } from "../StreamClass/classes.js"
-import { withSuper } from "../../refactor.js"
-
-import { object } from "@hgargg-0710/one"
-const { ConstDescriptor } = object.descriptor
-
-import { Autocache } from "../../internal/Autocache.js"
-import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
-
 import { methods, type IPredicateStreamImpl } from "./methods.js"
+
 const { init, prod, ...baseMethods } = methods
+const { ConstDescriptor } = object.descriptor
 
 const PredicateStreamBase = <Type = any>(
 	hasPosition = false,

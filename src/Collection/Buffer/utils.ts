@@ -1,7 +1,7 @@
-import type { IFreezableBuffer, IBufferized } from "./interfaces.js"
+import { functional, object, type } from "@hgargg-0710/one"
 import { isCollection } from "../utils.js"
+import type { IBufferized, IFreezableBuffer } from "./interfaces.js"
 
-import { type, object, functional } from "@hgargg-0710/one"
 const { and } = functional
 const { structCheck } = object
 const { isBoolean, isFunction } = type

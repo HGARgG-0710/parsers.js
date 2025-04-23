@@ -1,31 +1,25 @@
+import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IStreamPredicate } from "../../TableMap/interfaces.js"
-import type { ILookupTable } from "../../LookupTable/interfaces.js"
+import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 import type { IFreezableBuffer } from "../../interfaces.js"
+import { Autocache } from "../../internal/Autocache.js"
+import type { ILookupTable } from "../../LookupTable/interfaces.js"
+import { withSuper } from "../../refactor.js"
+import type { IStreamPredicate } from "../../TableMap/interfaces.js"
 import type { IEndableStream } from "../interfaces.js"
-
+import { DefaultEndStream } from "../StreamClass/classes.js"
 import type {
 	IConstructor,
 	IStreamClassInstanceImpl
 } from "../StreamClass/refactor.js"
-
 import type {
 	INestedStreamConstructor,
 	IUnderNestedStream
 } from "./interfaces.js"
-
 import type { INestedStreamImpl } from "./methods.js"
-
-import { withSuper } from "../../refactor.js"
-import { DefaultEndStream } from "../StreamClass/classes.js"
-
-import { object } from "@hgargg-0710/one"
-const { ConstDescriptor } = object.descriptor
-
-import { Autocache } from "../../internal/Autocache.js"
-import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
-
 import { methods } from "./methods.js"
+
+const { ConstDescriptor } = object.descriptor
 const { init, copy, ...baseMethods } = methods
 
 const NestedStreamBase = <Type = any>(hasPosition = false, hasBuffer = false) =>

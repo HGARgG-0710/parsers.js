@@ -1,6 +1,6 @@
-import type { IFreezableBuffer, IIsEndCurrable } from "../../interfaces.js"
-
 import type {
+	IFreezableBuffer,
+	IIsEndCurrable,
 	IReversibleStream,
 	IStream,
 	IStreamClassInstance

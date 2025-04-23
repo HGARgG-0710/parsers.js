@@ -1,10 +1,9 @@
 import type { array } from "@hgargg-0710/one"
-import type { IIndexMap } from "../interfaces.js"
-
-import { isGoodIndex } from "../utils.js"
-import { toPairs, table } from "../IndexMap/utils.js"
-
 import { inplace } from "@hgargg-0710/one"
+import { table, toPairs } from "../IndexMap/utils.js"
+import type { IIndexMap } from "../interfaces.js"
+import { isGoodIndex } from "../utils.js"
+
 const { swap } = inplace
 
 export abstract class PreIndexMap<

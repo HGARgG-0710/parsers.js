@@ -1,6 +1,5 @@
-import type { IMapClass } from "../interfaces.js"
 import type { array } from "@hgargg-0710/one"
-
+import type { IMapClass } from "../interfaces.js"
 import { PersistentIndexMap } from "./classes.js"
 
 /**
@@ -12,4 +11,6 @@ export const fromPairs =
 		mapClass: IMapClass<KeyType, ValueType>
 	) =>
 	(pairs: array.Pairs<KeyType, ValueType>, _default?: DefaultType) =>
-		new PersistentIndexMap<KeyType, ValueType>(new mapClass(pairs, _default))
+		new PersistentIndexMap<KeyType, ValueType>(
+			new mapClass(pairs, _default)
+		)

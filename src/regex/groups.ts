@@ -1,7 +1,7 @@
+import { functional } from "@hgargg-0710/one"
 import regex, { regex_contents } from "../regex.js"
 import { non_bracket } from "./refactor.js"
 
-import { functional } from "@hgargg-0710/one"
 const { trivialCompose } = functional
 
 /**

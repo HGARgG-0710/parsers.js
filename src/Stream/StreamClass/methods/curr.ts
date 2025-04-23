@@ -1,4 +1,5 @@
 import { object } from "@hgargg-0710/one"
+
 const { GetSetDescriptor } = object.descriptor
 
 function currGet<Type = any>(): Type {

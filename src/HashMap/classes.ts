@@ -1,17 +1,14 @@
-import type { IHashClass, IHashMap, IHash } from "./interfaces.js"
-import type { IInternalHash } from "./InternalHash/interfaces.js"
-
+import { type as _type, functional, object, string } from "@hgargg-0710/one"
 import { DelegateSizeable } from "src/internal/delegates/Sizeable.js"
-import { Autocache } from "../internal/Autocache.js"
-import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
-
 import { type } from "src/Node/utils.js"
+import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
+import { Autocache } from "../internal/Autocache.js"
 import { length } from "../utils.js"
+import type { IHash, IHashClass, IHashMap } from "./interfaces.js"
+import type { IInternalHash } from "./InternalHash/interfaces.js"
+import { extend } from "./refactor.js"
 import { fromFlags } from "./utils.js"
 
-import { extend } from "./refactor.js"
-
-import { functional, type as _type, string, object } from "@hgargg-0710/one"
 const { id } = functional
 const { typeOf } = _type
 const { charCodeAt } = string
@@ -112,3 +109,4 @@ export const CharHash = HashClass(charCodeAt)
 export const BitHash = HashClass(fromFlags)
 
 export * as InternalHash from "./InternalHash/classes.js"
+

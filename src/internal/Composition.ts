@@ -1,14 +1,12 @@
-import type { IDynamicBuffer } from "../interfaces.js"
-
+import { functional } from "@hgargg-0710/one"
 import type {
 	IComposition,
 	IFunctionTuple
 } from "../DynamicParser/interfaces.js"
-
+import type { IDynamicBuffer } from "../interfaces.js"
 import { Callable } from "./Callable.js"
 import { CallbackBuffer } from "./Collection/Buffer/CallbackBuffer.js"
 
-import { functional } from "@hgargg-0710/one"
 const { trivialCompose, id } = functional
 
 export class Composition<ArgType extends any[] = any[], OutType = any>

@@ -1,5 +1,4 @@
 import type { ISizeable } from "../../interfaces.js"
-
 import { ProtectedPattern } from "../Pattern.js"
 
 export abstract class DelegateSizeable<

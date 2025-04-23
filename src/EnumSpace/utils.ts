@@ -1,7 +1,7 @@
-import type { IEnumSpace } from "./interfaces.js"
-import type { IMappable } from "../interfaces.js"
-
 import { functional } from "@hgargg-0710/one"
+import type { IMappable } from "../interfaces.js"
+import type { IEnumSpace } from "./interfaces.js"
+
 const { trivialCompose } = functional
 
 /**

@@ -1,9 +1,8 @@
-import { MultiIndex } from "../Position/classes.js"
-import type { IWalkable } from "../../Node/interfaces.js"
-
-import { TreeStream } from "./classes.js"
 import { BadIndex } from "../../constants.js"
+import type { IWalkable } from "../../Node/interfaces.js"
 import { treeEndPath } from "../../Node/utils.js"
+import { MultiIndex } from "../Position/classes.js"
+import { TreeStream } from "./classes.js"
 
 export namespace methods {
 	export function baseNextIter<

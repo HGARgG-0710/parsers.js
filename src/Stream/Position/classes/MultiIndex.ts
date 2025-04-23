@@ -1,9 +1,8 @@
-import type { IPositionObject } from "../../interfaces.js"
-import type { IWalkable } from "../../../interfaces.js"
-
-import { InitializablePattern } from "../../../internal/Pattern.js"
-
 import { array } from "@hgargg-0710/one"
+import type { IWalkable } from "../../../interfaces.js"
+import { InitializablePattern } from "../../../internal/Pattern.js"
+import type { IPositionObject } from "../../interfaces.js"
+
 const { last, first, copy } = array
 
 export class MultiIndex<Type extends IWalkable<Type> = IWalkable>

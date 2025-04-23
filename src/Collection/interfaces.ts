@@ -1,5 +1,5 @@
-import type { ICopiable, IIndexed, IInitializable } from "../interfaces.js"
 import type { IGettable } from "src/interfaces.js"
+import type { ICopiable, IIndexed, IInitializable } from "../interfaces.js"
 
 export interface ICollection<Type = any>
 	extends Iterable<Type>,

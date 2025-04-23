@@ -1,6 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { isBufferized } from "../../Collection/Buffer/utils.js"
+import { Stream } from "../../constants.js"
+import type { IFreezableBuffer, IStreamTransform } from "../../interfaces.js"
 import type { ISupered } from "../../refactor.js"
-
 import type {
 	IEndableStream,
 	IStreamClassInstance,
@@ -9,11 +11,6 @@ import type {
 	IStreamParserInitSignature
 } from "../interfaces.js"
 
-import type { IFreezableBuffer, IStreamTransform } from "../../interfaces.js"
-
-import { isBufferized } from "../../Collection/Buffer/utils.js"
-
-import { Stream } from "../../constants.js"
 const { SkippedItem } = Stream.StreamParser
 
 export namespace methods {

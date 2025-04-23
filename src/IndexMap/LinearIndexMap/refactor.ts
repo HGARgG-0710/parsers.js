@@ -1,6 +1,5 @@
-import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
-
 import { LinearMapClass } from "./classes.js"
+import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
 
 export namespace OptimizedLinearMap {
 	export function optimize<KeyType = any, ValueType = any>(

@@ -1,12 +1,11 @@
 import type { IFreezableBuffer } from "src/interfaces.js"
 import type { ICopiable } from "../../interfaces.js"
-import type { IISCurrNested, INestedStreamImpl } from "./methods.js"
-
 import type {
 	IEndableStream,
 	IStream,
 	IStreamClassInstance
 } from "../interfaces.js"
+import type { IISCurrNested, INestedStreamImpl } from "./methods.js"
 
 export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 

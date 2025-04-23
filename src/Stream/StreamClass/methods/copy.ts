@@ -1,3 +1,6 @@
+import type { IStateful } from "src/interfaces.js"
+import { BitHash } from "../../../HashMap/classes.js"
+import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type {
 	IBufferized,
 	ICopiable,
@@ -5,10 +8,6 @@ import type {
 	IPosed
 } from "../../../interfaces.js"
 import type { IStreamClassInstanceImpl } from "../refactor.js"
-import type { IStateful } from "src/interfaces.js"
-
-import { BitHash } from "../../../HashMap/classes.js"
-import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 
 function copyPos<Type = any>(
 	from: IStreamClassInstanceImpl<Type> & IPosed<number>,
