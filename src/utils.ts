@@ -1,6 +1,6 @@
 import { boolean, object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPattern, IRecursivePointer } from "src/interfaces.js"
+import type { IPattern } from "src/interfaces.js"
 import { BadIndex } from "./constants.js"
 import type {
 	IBufferized,
@@ -104,29 +104,10 @@ export function optionalValue(pattern: IPattern, value?: any) {
 /**
  * Swaps `.value`s of two given `Pattern`s
  */
-export function swapValues<Type = any>(x: IPattern<Type>, y: IPattern<Type>) {
+export function swapValues<Type = any>(x: IPointer<Type>, y: IPointer<Type>) {
 	const temp = x.value
 	x.value = y.value
 	y.value = temp
-}
-
-/**
- * Recursively walks down a given `depth` (`Infinity`, by default),
- * getting the `.value` of the next `RecursivePointer`.
- *
- * Returns the last obtainable non-`IPointer` value.
- *
- * Note: `isPointer` is used for checking whether the given object is an `IPointer`
- */
-export function dig<Type = any>(
-	pointer: IRecursivePointer<Type>,
-	depth: number = Infinity
-): Type | IRecursivePointer<Type> {
-	let curr = pointer
-	let currDepth = 0
-	while (isPoiner(curr.value) && currDepth++ <= depth)
-		curr = value(curr) as IRecursivePointer<Type>
-	return curr
 }
 
 export const isLF = eqcurry("\n")
@@ -137,4 +118,3 @@ export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Node from "./Node/utils.js"
 export * as Stream from "./Stream/utils.js"
-

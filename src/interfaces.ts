@@ -85,8 +85,6 @@ export interface IReversible {
 	reverse: () => this
 }
 
-export type IRecursivePointer<T = any> = IPointer<T | IRecursivePointer<T>>
-
 export interface IIndexable<ValueType = any> {
 	index: (x: any, ...y: any[]) => ValueType
 }
