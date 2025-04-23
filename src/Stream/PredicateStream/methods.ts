@@ -53,6 +53,10 @@ export namespace methods {
 	export function defaultIsEnd<Type = any>(this: IPredicateStreamImpl<Type>) {
 		return this.value!.isEnd || !this.predicate(this, this.pos)
 	}
+
+	export function copy<Type = any>(this: IPredicateStreamImpl<Type>) {
+		return new this.constructor(this.value?.copy(), this.buffer?.copy())
+	}
 }
 
 export type IPredicateStreamImpl<Type = any> = IPredicateStream<Type> &
@@ -66,5 +70,10 @@ export type IPredicateStreamImpl<Type = any> = IPredicateStream<Type> &
 	IProddable<Type> &
 	IWithLookahead<Type> &
 	ILookaheadHaving & {
+		["constructor"]: new (
+			value?: IUnderPredicateStream<Type>,
+			buffer?: IFreezableBuffer<Type>
+		) => IPredicateStreamImpl<Type>
+
 		predicate: IPredicatePosition<Type>
 	}

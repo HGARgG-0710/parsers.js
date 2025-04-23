@@ -75,12 +75,7 @@ export namespace methods {
 	export function copy<Type = any>(
 		this: ILimitedStreamImpl<Type>
 	): ILimitedStreamImpl<Type> {
-		return new this.constructor(
-			this.value?.copy(),
-			this.from,
-			this.to,
-			this.buffer
-		)
+		return new this.constructor(this.value?.copy(), this.buffer)
 	}
 }
 
@@ -96,6 +91,11 @@ export type ILimitedStreamImpl<Type = any> = IProddable<Type> &
 	> &
 	ILimitedStream<Type> &
 	IDirectionHaving & {
+		["constructor"]: new (
+			value?: IUnderLimitedStream<Type>,
+			buffer?: IFreezableBuffer<Type>
+		) => ILimitedStreamImpl<Type>
+
 		from: IDirectionalPosition
 		to: IDirectionalPosition
 	}

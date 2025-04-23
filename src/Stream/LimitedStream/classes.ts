@@ -84,7 +84,7 @@ function makeLimitedStream(
 			) => ILimitedStreamImpl<Type>;
 
 			["constructor"]: new (
-				value: IUnderLimitedStream<Type>,
+				value?: IUnderLimitedStream<Type>,
 				buffer?: IFreezableBuffer<Type>
 			) => ILimitedStreamImpl<Type>
 

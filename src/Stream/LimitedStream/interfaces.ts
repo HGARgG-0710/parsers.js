@@ -22,7 +22,7 @@ export type IUnderLimitedStream<Type = any> = IStream<
 	IPosed<IDirectionalPosition>
 
 export type ILimitedStreamInitSignature<Type = any> = [
-	IUnderLimitedStream<Type>,
+	IUnderLimitedStream<Type>?,
 	IFreezableBuffer<Type>?
 ]
 

@@ -1,10 +1,9 @@
 import type { IInternalHash } from "./interfaces.js"
-import type { array } from "@hgargg-0710/one"
 
 import { DelegateDeletableSettableSizeable } from "src/internal/delegates/DeletableSettable.js"
 import { ProtectedPattern } from "src/internal/Pattern.js"
 
-import { type, object } from "@hgargg-0710/one"
+import { type, object, array } from "@hgargg-0710/one"
 const { isUndefined } = type
 
 export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
@@ -38,7 +37,10 @@ export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 		return new this.constructor(this.value, this.default)
 	}
 
-	constructor(map: Iterable<[KeyType, ValueType]> = new Map(), _default?: DefaultType) {
+	constructor(
+		map: Iterable<[KeyType, ValueType]> = new Map(),
+		_default?: DefaultType
+	) {
 		super(new Map(map))
 		this.default = _default!
 	}
@@ -140,7 +142,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 	}
 
 	copy() {
-		return new this.constructor(this.value, this.default)
+		return new this.constructor(array.copy(this.value), this.default)
 	}
 
 	constructor(array: Type[] = [], _default?: DefaultType) {
