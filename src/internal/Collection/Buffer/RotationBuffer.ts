@@ -8,12 +8,12 @@ export class RotationBuffer<Type = any>
 	["constructor"]: new (n?: number) => this
 
 	// * first-read index
-	protected rotation: number = 0
+	private rotation: number = 0
 
 	// * last-read index
-	protected lastInd: number = 0
+	private lastInd: number = 0
 
-	protected shifted(i: number) {
+	private shifted(i: number) {
 		return (i + this.rotation) % this.maxSize
 	}
 
@@ -94,7 +94,7 @@ export class RotationBuffer<Type = any>
 		return this.size === this.maxSize
 	}
 
-	constructor(protected readonly maxSize = Infinity) {
+	constructor(private readonly maxSize = Infinity) {
 		super(new Array(maxSize === Infinity ? 0 : maxSize))
 	}
 }

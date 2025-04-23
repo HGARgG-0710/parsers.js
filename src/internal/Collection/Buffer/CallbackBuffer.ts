@@ -13,7 +13,7 @@ export class CallbackBuffer<Type = any>
 		value?: Type[]
 	) => typeof this
 
-	protected registerChange() {
+	private registerChange() {
 		this.callback(this)
 	}
 
@@ -64,7 +64,7 @@ export class CallbackBuffer<Type = any>
 	}
 
 	constructor(
-		protected readonly callback: (thisArg: IDynamicBuffer<Type>) => void,
+		private readonly callback: (thisArg: IDynamicBuffer<Type>) => void,
 		value?: Type[]
 	) {
 		super(value)

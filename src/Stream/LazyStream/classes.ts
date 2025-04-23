@@ -57,7 +57,7 @@ export class LazyStream
 		return new this.constructor(this.source.copy())
 	}
 
-	constructor(protected source: ISource) {}
+	constructor(private source: ISource) {}
 }
 
 extendPrototype(LazyStream, {
