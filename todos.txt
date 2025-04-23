@@ -20,9 +20,114 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 		
+		TODO [code-cleaning]: get rid of the `.value`-convention
+					Now, the ONLY reason for it to exist currently is the `dig` method. 
+					MORE SPECIFICALLY: 
+						1. error-handling usages of `dig + IndexStream/.buffer/something`
+						2. self-modification [digging "inside" the given class instance]
+
+					SOLUTION: 
+						2. `src/utils.ts` - `value`-related, either: 
+							1. delete
+							2. put into respective `refactor.ts` files; 
+						3. For `Stream`s - `value`: 
+							1. create `WrapperStream` - refactoring of `StreamClass` that would employ:
+								1. a new intermediate piece of hierarchy - a *MIXIN* that would: 
+									1. extend a given Stream-class
+									2. provide a new PROPERTY with a given name (instead of `value`): 
+										1. saves it FROM the arguments of the constructor
+										2. provides a NEW `init` function
+									
+							2. SCRAP the `InitSignature` stuff (part of it, at least...); 
+								Namely, the stuff from `init.ts` - that is, honestly, a little cringy...; 
+						
+						4. AS A RESULT, we could: 
+							1. simplify `copy` [refactor the crazy flag-changing into 2 separate abstractions]
+							2. simplify `init` [no longer need to handle the `value`-case with `StreamClass`]
+							3. [main reason] provide namespace modifiability - NO MORE will the user have to use the confusing `.value`
+								In pure JavaScript, where names are the ONLY indicator of type, this is ESPECIALLY confusing...
+							4. simplify the `IStream` signature (no more of the 2nd generic argument...)
+
+						5. GET RID of the `IPattern` on the `IStream`	
+							1. POSSIBLY, even get rid of `IPattern` ALTOGETHER [replace with sanely pronounced properties]
+
+						6. Change the name for `.value` on `TreeStream`
+						7. (Possibly) remove the whole of `IPattern` stuff. 
+							KEEP only just the `IPointer` (which is objectively useful). 
+							The `IRecursivePointer` gets the boot as well (because of `Digger`s)...
+
+						8. CREATE various `Digger`-objects that are ATTACHED to "stackable" classes. 
+							Specifically: 
+								1. IStream-related [for the new `.value`-properties (GIVE THOSE DIFFERENT NAME FOR EACH TYPE OF STREAM)]
+
+		TODO ['Pointer<number>' function]: TURN INTO A (public - WITH A PROPER INTERFACE) CLASS (for PersistentIndexMap). 
+			(First, however, need to get rid of `IPattern`)
+
+			RENAME into `IndexPointer`
+
+			Let it have methods: 
+				1. invalidate(); // = BadIndex
+				2. swap(); // swapValues
+			
+			ALSO: ADD a new class - 'PointerArray' [internal]. 
+				KEEPS TRACK of `Pointer`-s. 
+				Will be used as the new abstraction over the `.indexes` property on `PersistentIndexMap`. 
+				Has methods: 
+					1. private `.repair()` // .repairIndexes()
+					2. .reverse()
+					3. .filterIndexes() // the `.filter()` thing by `indexSet = new Set(...)` in `unique()`
+
+		TODO: IPosition - fix
+			Having removed the `IPositionObject`, LOTS of things abou tit broke. 
+			The type-bounds, yada, yada...
+			Anyhow, the objective now is to: 
+				1. remove `SubType` from `IStream` [and the `& IPattern`-bit with it... - see Diggers...]
+				2. INavigable - USE `uknown` for `PosType` instead of a generic...
+				3. REMOVE `PosType` from `IStraem`
+
+		TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
+			Reason: works FAR better with the `&`-role-composition
 
 		BIG: .peek() CYCLE: 	
+			Plan: 
+				1. create `.peekBuffer: RotationBuffer` property: 	
+					0. NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 		
+						Put on `StreamClassInstanceImpl`
+					1. peekSize: number = 0 flag - the SIZE of the `peekBuffer`
+						IF 0, then it's NOT EVEN created (memory saving)
+					2. USE whether it is 0 AS A FLAG: 
+						1. alter flag-based method-definitions: 
+							1. next: 
+							2. prev
+							3. init
+							4. copy: 
+								1. need to set the peekBuffer explicitly
+									note: peekBuffer can be a RotationBuffer or a BufferView
+										Better - keep TWO OF THEM, 
+											and, instead, let `peekBuffer` serve as a GETTER/property 
+												which would point to one of the two other ones (ALSO hidden properties). 
+							5. navigate: 
+								1. IMPORTANT - optimize 'navigate(n)' for case with `.peekBuffer`. 
+									LET it first "drain" the peek-buffer, then - CHECK for values 
+										that are available "before" the `.isEnd`
+				2. create new `.bufferView: BufferView` - alternative to `.peekBuffer`...
+					For the case when one has `.buffer` and `.pos` to get the positions...
+				3. write new methods:
+					1. `.peek`:
+						1. new file - methods/peek.ts
+						2. `chooseMethod` flags: 
+							1. hasBuffer
+							2. hasPosition
+								note: in buffer + position case OPTIMIZES to read from it instead...
+									(maybe???) - CREATE a `BufferView implements IBuffer`, which
+										would be a delegating "portion" of some other buffer, 
+										which would start from a single "moving" position, 
+										up to a FIXED-LENGTH contigious array of values. 
+				4. interfaces: 
+					1. IPeekable<Type> - into src\Stream\interfaces.ts
+						peek: (n: number) => ...
+					2. IPeekableStream<Type = any> = IStream<...> & IPeekable<...>
+	
 			ME5. 'StreamClass' - provide a '.peek(n)' method: 
 				1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
 					index appropriately [reflect this...]; 
@@ -101,7 +206,8 @@ Order of TODO-elimination:
 				
 				Or, more precisely, that those variables will have to delegate to a 
 					sinle mandated `.vars` object on the instance. 
-				
+
+
 		Fix docs: 
 			0. JSDoc: 
 				1. FINALLY add it for classes
