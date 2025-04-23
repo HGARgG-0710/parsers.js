@@ -1,9 +1,10 @@
 import { array, object, type } from "@hgargg-0710/one"
+import assert from "assert"
 import { DelegateDeletableSettableSizeable } from "src/internal/delegates/DeletableSettable.js"
 import { ProtectedPattern } from "src/internal/Pattern.js"
 import type { IInternalHash } from "./interfaces.js"
 
-const { isUndefined } = type
+const { isUndefined, isArray, isStruct } = type
 
 export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 	extends DelegateDeletableSettableSizeable<
@@ -94,6 +95,7 @@ export class ObjectInternal<Type = any, DefaultType = any>
 	}
 
 	constructor(object: object = {}, _default?: DefaultType) {
+		assert(isStruct(object))
 		super(object)
 		this.default = _default!
 		this.size = Object.keys(object).filter(
@@ -145,7 +147,9 @@ export class ArrayInternal<Type = any, DefaultType = any>
 	}
 
 	constructor(array: Type[] = [], _default?: DefaultType) {
+		assert(isArray(array))
 		super(array)
+
 		this.default = _default!
 		this.size = this.value.filter(
 			(x) => x !== ArrayInternal.MissingKey

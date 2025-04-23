@@ -1,5 +1,9 @@
+import { type } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IBuffer } from "../../../interfaces.js"
 import { TypicalBuffer } from "./TypicalBuffer.js"
+
+const { isNumber } = type
 
 export class RotationBuffer<Type = any>
 	extends TypicalBuffer<Type>
@@ -95,6 +99,7 @@ export class RotationBuffer<Type = any>
 	}
 
 	constructor(private readonly maxSize = Infinity) {
+		assert(isNumber(maxSize))
 		super(new Array(maxSize === Infinity ? 0 : maxSize))
 	}
 }

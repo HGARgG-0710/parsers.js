@@ -1,13 +1,15 @@
-import { array, boolean, functional } from "@hgargg-0710/one"
+import { array, boolean, functional, type } from "@hgargg-0710/one"
+import assert from "assert"
 import type { ICopiable } from "../interfaces.js"
 
 const { sort, numbers } = array
 const { negate, has } = functional
 const { eqcurry } = boolean
+const { isNumber, isArray } = type
 
 export class IndexSet implements ICopiable, Iterable<number> {
-	protected readonly asArray: number[]
-	protected readonly asSet: Set<number>;
+	private readonly asArray: number[]
+	private readonly asSet: Set<number>;
 
 	["constructor"]: new (arity: number, indexes: number[]) => IndexSet
 
@@ -45,6 +47,9 @@ export class IndexSet implements ICopiable, Iterable<number> {
 	}
 
 	constructor(public readonly length: number, indexes: number[]) {
+		assert(isNumber(length))
+		assert(isArray(indexes))
+
 		this.asArray = sort(
 			Array.from(
 				(this.asSet = new Set(indexes.filter((x) => x < length)))

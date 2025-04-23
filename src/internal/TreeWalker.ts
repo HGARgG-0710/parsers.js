@@ -10,7 +10,7 @@ export class TreeWalker<
 	level: TreeLike
 	curr: TreeLike
 
-	protected modifier: MultiIndexModifier = new MultiIndexModifier()
+	private modifier: MultiIndexModifier = new MultiIndexModifier()
 
 	get pos() {
 		return this.modifier.get()

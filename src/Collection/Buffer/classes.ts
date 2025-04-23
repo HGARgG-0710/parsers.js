@@ -1,7 +1,10 @@
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
+import assert from "assert"
 import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 import type { IIndexed } from "../../interfaces.js"
 import type { IUnfreezableBuffer } from "./interfaces.js"
+
+const { isString, isArray } = type
 
 abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	isFrozen = false;
@@ -56,6 +59,7 @@ export class UnfreezableArray<Type = any>
 	}
 
 	constructor(value: Type[] = []) {
+		assert(isArray(value))
 		super(value)
 	}
 }
@@ -83,6 +87,7 @@ export class UnfreezableString
 	}
 
 	constructor(value: string = "") {
+		assert(isString(value))
 		super(value)
 	}
 }

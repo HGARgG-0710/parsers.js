@@ -1,4 +1,4 @@
-import { functional } from "@hgargg-0710/one"
+import { functional, type } from "@hgargg-0710/one"
 import type {
 	IComposition,
 	IFunctionTuple
@@ -6,8 +6,10 @@ import type {
 import type { IDynamicBuffer } from "../interfaces.js"
 import { Callable } from "./Callable.js"
 import { CallbackBuffer } from "./Collection/Buffer/CallbackBuffer.js"
+import assert from "assert"
 
 const { trivialCompose, id } = functional
+const { isArray } = type
 
 export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
@@ -33,6 +35,8 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 
 	constructor(layers?: Function[]) {
 		super()
+		assert(isArray(layers))
+
 		if (layers) this.layers.init(layers)
 	}
 }

@@ -1,5 +1,5 @@
-import type { array } from "@hgargg-0710/one"
-import { inplace } from "@hgargg-0710/one"
+import { array, inplace, type } from "@hgargg-0710/one"
+import assert from "assert"
 import { BadIndex } from "../constants.js"
 import { inBound } from "../IndexMap/refactor.js"
 import { fromPairs } from "../IndexMap/utils.js"
@@ -7,6 +7,7 @@ import type { IIndexingFunction } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 import { BaseIndexMap } from "./IndexMap.js"
 
+const {isArray} = type
 const { insert, out } = inplace
 
 export abstract class BaseLinearMap<
@@ -75,6 +76,9 @@ export abstract class BaseLinearMap<
 	}
 
 	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
+		assert(isArray(keys))
+		assert(isArray(values))
+
 		super(keys, values, _default)
 		this.alteredKeys = this.keys.map(this.keyExtension)
 	}

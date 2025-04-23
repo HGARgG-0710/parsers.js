@@ -1,5 +1,6 @@
-import { array, functional, object } from "@hgargg-0710/one"
+import { array, functional, object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import assert from "assert"
 import { Composition } from "src/internal/Composition.js"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
@@ -18,6 +19,7 @@ import type {
 const { argFiller } = functional
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
+const { isNumber, isArray } = type
 
 export class Signature
 	implements ICopiable, IInitializable<[any[]], Signature>
@@ -60,6 +62,10 @@ export class Signature
 		toApplyOn: number[],
 		preIndexes: number[]
 	) {
+		assert(isNumber(arity))
+		assert(isArray(toApplyOn))
+		assert(isArray(preIndexes))
+
 		this.toApplyOn = new IndexSet(this.arity, toApplyOn)
 		this.preIndexes = new IndexSet(this.arity, preIndexes)
 	}

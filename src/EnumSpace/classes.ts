@@ -5,6 +5,7 @@ import type { IMappable, ISizeable } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
 import { makeDelegate } from "../refactor.js"
 import type { IEnumSpace } from "./interfaces.js"
+import assert from "assert"
 
 const { id } = functional
 const { out } = inplace
@@ -57,6 +58,8 @@ abstract class PreEnumSpace<Type = any> implements ISizeable, IEnumSpace<Type> {
 	}
 
 	constructor(init: Type[] | number = []) {
+		assert(isNumber(init) || isArray(init))
+
 		const value = isNumber(init) ? [] : init
 		const count = isArray(init) ? init.length : init
 

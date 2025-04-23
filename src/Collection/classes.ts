@@ -1,6 +1,9 @@
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
+import assert from "assert"
 import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 import type { ICollection } from "./interfaces.js"
+
+const { isArray } = type
 
 export class ArrayCollection<Type = any>
 	extends IterableCollection<Type>
@@ -29,6 +32,7 @@ export class ArrayCollection<Type = any>
 	}
 
 	constructor(value: Type[] = []) {
+		assert(isArray(value))
 		super(value)
 	}
 }

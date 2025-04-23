@@ -1,4 +1,11 @@
-import { array, boolean, functional, object, string } from "@hgargg-0710/one"
+import {
+	array,
+	boolean,
+	functional,
+	object,
+	string,
+	type
+} from "@hgargg-0710/one"
 import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
 import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
 import { Autocache } from "../../internal/Autocache.js"
@@ -10,7 +17,9 @@ import {
 	extendKey,
 	OptimizedLinearMap as OptimizedLinearMapMethods
 } from "./refactor.js"
+import assert from "assert"
 
+const { isArray } = type
 const { trivialCompose } = functional
 const { equals } = boolean
 
@@ -40,6 +49,7 @@ function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			pairsList: array.Pairs<KeyType, ValueType> = [],
 			_default?: DefaultType
 		) {
+			assert(isArray(pairsList))
 			super(...fromPairs(pairsList), _default)
 		}
 	}

@@ -1,10 +1,11 @@
-import type { array } from "@hgargg-0710/one"
-import { inplace } from "@hgargg-0710/one"
+import { array, inplace, type } from "@hgargg-0710/one"
+import assert from "assert"
 import { table, toPairs } from "../IndexMap/utils.js"
 import type { IIndexMap } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 
 const { swap } = inplace
+const {isArray} = type
 
 export abstract class PreIndexMap<
 	KeyType = any,
@@ -105,6 +106,9 @@ export abstract class BaseIndexMap<
 		public values: ValueType[],
 		_default?: DefaultType
 	) {
+		assert(isArray(keys))
+		assert(isArray(values))
+		
 		super()
 		this.default = _default!
 	}

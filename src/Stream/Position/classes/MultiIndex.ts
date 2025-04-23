@@ -1,8 +1,10 @@
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IWalkable } from "../../../interfaces.js"
 import { InitializablePattern } from "../../../internal/Pattern.js"
 import type { IPositionObject } from "../../interfaces.js"
 
+const { isArray } = type
 const { last, first, copy } = array
 
 export class MultiIndex<Type extends IWalkable<Type> = IWalkable>
@@ -34,6 +36,7 @@ export class MultiIndex<Type extends IWalkable<Type> = IWalkable>
 	}
 
 	constructor(multind: number[] = []) {
+		assert(isArray(multind))
 		super(multind)
 	}
 }

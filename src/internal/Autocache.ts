@@ -1,5 +1,9 @@
+import assert from "assert"
 import type { IIndexable, ISettable } from "../interfaces.js"
 import { Callable } from "./Callable.js"
+import { type } from "@hgargg-0710/one"
+
+const { isFunction } = type
 
 export class Autocache<KeyType = any, ValueType = any> extends Callable {
 	protected __call__(x: KeyType) {
@@ -15,8 +19,9 @@ export class Autocache<KeyType = any, ValueType = any> extends Callable {
 	constructor(
 		readonly value: ISettable<KeyType, ValueType> &
 			IIndexable<ValueType | undefined>,
-		protected callback: (x: KeyType) => ValueType
+		private callback: (x: KeyType) => ValueType
 	) {
+		assert(isFunction(callback))
 		super()
 	}
 }

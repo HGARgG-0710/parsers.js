@@ -1,7 +1,9 @@
-import { array, inplace } from "@hgargg-0710/one"
+import { array, inplace, type } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IDynamicBuffer } from "../../../interfaces.js"
 import { TypicalBuffer } from "./TypicalBuffer.js"
 
+const { isFunction } = type
 const { insert, out } = inplace
 
 export class CallbackBuffer<Type = any>
@@ -67,6 +69,7 @@ export class CallbackBuffer<Type = any>
 		private readonly callback: (thisArg: IDynamicBuffer<Type>) => void,
 		value?: Type[]
 	) {
+		assert(isFunction(callback))
 		super(value)
 	}
 }
