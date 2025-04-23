@@ -20,48 +20,7 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:	
-		BIG [throughout library]: Configuration Pattern - ENCAPSULATION VIOLATION
-			Namely, there are PROPERTIES on instances of such classes that ARE AN IMPLEMENTATION DETAIL. 
-			Most notably: 
-				1. ["constructor"]: ...
-
-			SEPARATE THE `Impl` interfaces from "public" ones (those that DO NOT have '["constructor"]: ...'), 
-				SINCE this property is NOT intended to be used by the user-side type-safe code...; 
-
-			Walk through them and see if there are any others. 
-
-		TODO - add `.copy()` overriden method to the `PredicateStream`: 
-			FORGOT TO ADD...
-
-		TODO - make sure that the 'IStreamClass.prototype.copy' definitions that do `.value.copy()` 
-			REQUIRE that it be `ICopiable`
-
-		TODO - add ["constructor"]s on internal types: 
-			1. LimitedStream
-			2. PredicateStream	
-
-		NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 
-		
-		TODO: start adding `private` properties instead of `protected`
-			Go around the "protected" definitions (via Search), replacing them with `private`, where necessary. 
-			WALK through all of the library's code, looking for methods to e made 
-				private which aren't yet (public presently). 
-
-		TODO - `.copy()` method [NestedStream and others...] - RE-DO: 
-			Done poorly, in particular: 
-				1. use the `this.super.copy()`
-				2. PRESERVE the `.init` logic [this.super.init]
-				3. PRESERVE the `.init` logic [case-specific override]
-
-			The flow: 
-				1. const c = this.super.copy.call(this)
-				2. c.init(null, null, ...) // other args, COPY-FURTHER-AS-NEEDED
-				3. return c
-			
-			TODO: add a name `MissingArgument` to the `constants.ts`
-				Use FOR BETTER NAMING...; 
-
-		TODO [prettier code]: walk thorugh files - SORT the imports via `Shift + Alt + O` [reason - messy, unordered in many places...]; 
+		NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 		
 
 		BIG: .peek() CYCLE: 	
 			ME5. 'StreamClass' - provide a '.peek(n)' method: 
@@ -143,11 +102,6 @@ Order of TODO-elimination:
 				Or, more precisely, that those variables will have to delegate to a 
 					sinle mandated `.vars` object on the instance. 
 				
-		TODO: `IWithLookahead` and `ILookaheadHaving` and `IProddable` [in Stream\intrfaces.ts]: 
-			MAKE those into private interfaces [that is, employed by IMPLEMENTATIONS OF `Configurator Pattern` ALONE!]
-			Also: 
-				1. Separate respective PRIVATE and PUBLIC interfaces 
-
 		Fix docs: 
 			0. JSDoc: 
 				1. FINALLY add it for classes
@@ -220,27 +174,13 @@ Order of TODO-elimination:
 					1. give them names
 					2. add the missing `.constructor` property where it's required (note: ON THE INTERFACE - where one uses the `Autocache` pattern); 
 
-		TODO: ASSERTIONS. 
-			Add assertions to verify various pre-conditions that arrive within the code. 
-			Reasons: 
-				1. better code
-				2. simpler code
-				3. easier-to-read code
-				4. [big one] easier-to-debug code
-				5. good practice in general
-
-			For instance: 
-
-				1. provide runtime-typechecking in constructors for "heavy" objects that are supposed to be few... [not something like `PreTokenNode`, in other words]
-					As in, say, `assert(isString(value))` in `UnfreezableString`. 
-					Or, similar 'assert'-non-null-checks, for example [where they are needed];
-
 		1. Doc-sync
 
 		Docs: 
 			1. Stream
 
-		3. Doc-sync 	
+		3. Doc-sync: 
+			IMPORTANT: don't forget about the new `constants.ts` export - MissingArgument; 
 					
 		Docs:
 			1. Position [MultiIndex]		
