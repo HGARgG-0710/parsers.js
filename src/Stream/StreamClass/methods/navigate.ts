@@ -4,7 +4,7 @@ import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type {
-	IDirectionalPosition,
+	IPosition,
 	IReversibleStream
 } from "../../interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
@@ -24,7 +24,7 @@ const { isNumber } = type
  */
 function navigate<Type = any>(
 	this: IReversibleStream<Type>,
-	position: IDirectionalPosition
+	position: IPosition
 ) {
 	return uniNavigate(this, position)
 }
@@ -36,7 +36,7 @@ function posBufferNavigate<Type = any>(
 	this: IReversedStreamClassInstanceImpl<Type> &
 		IBufferized<Type> &
 		IPosed<number>,
-	position: IDirectionalPosition<Type>
+	position: IPosition<Type>
 ) {
 	if (isNumber(position)) {
 		const { buffer, pos } = this

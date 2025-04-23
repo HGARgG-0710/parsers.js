@@ -6,7 +6,7 @@ import type { IFreezableBuffer } from "../../interfaces.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { withSuper } from "../../refactor.js"
 import type {
-	IDirectionalPosition,
+	IPosition,
 	IPredicatePosition
 } from "../Position/interfaces.js"
 import { directionCompare, positionNegate } from "../Position/utils.js"
@@ -40,8 +40,8 @@ const LimitedStreamBase = <Type = any>(
 	}) as IConstructor<[any], IReversedStreamClassInstanceImpl<Type>>
 
 function makeLimitedStream(
-	from: IDirectionalPosition,
-	to?: IDirectionalPosition
+	from: IPosition,
+	to?: IPosition
 ) {
 	if (isNullary(to)) {
 		to = from
@@ -67,8 +67,8 @@ function makeLimitedStream(
 
 			readonly super: Summat
 			readonly direction: boolean
-			readonly from: IDirectionalPosition
-			readonly to: IDirectionalPosition
+			readonly from: IPosition
+			readonly to: IPosition
 
 			prod: () => Type
 

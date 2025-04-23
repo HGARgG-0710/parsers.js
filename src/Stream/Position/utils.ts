@@ -1,15 +1,9 @@
 import { functional, type } from "@hgargg-0710/one"
-import type { IPositionObject, IStream } from "../interfaces.js"
+import type { IPosition, IStream } from "../interfaces.js"
 import { next, previous } from "../utils.js"
-import type {
-	IChange,
-	IDirectionalPosition,
-	IPosed,
-	IPosition,
-	IPredicatePosition
-} from "./interfaces.js"
+import type { IChange, IPosed, IPredicatePosition } from "./interfaces.js"
 
-const { isFunction, isNumber, isUndefined, isObject } = type
+const { isFunction, isNumber, isUndefined } = type
 const { or, negate } = functional
 
 /**
@@ -20,18 +14,11 @@ export const isPredicatePosition = isFunction as <Type = any>(
 ) => x is IPredicatePosition<Type>
 
 /**
- * Returns whether the given `x` is an `IPositionObject`
- */
-export const isPositionObject = isObject as (x: any) => x is IPositionObject
-
-/**
  * Returns whether given `x` is a `Position`
  */
-export const isPosition = or(
-	isNumber,
-	isPredicatePosition,
-	isPositionObject
-) as <Type = any>(x: any) => x is IPosition<Type>
+export const isPosition = or(isNumber, isPredicatePosition) as <Type = any>(
+	x: any
+) => x is IPosition<Type>
 
 /**
  * Given a `DirectionalPosition`, it returns one of:
@@ -40,8 +27,8 @@ export const isPosition = or(
  * 2. The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
 export function positionNegate<Type = any>(
-	position: IDirectionalPosition<Type>
-): IDirectionalPosition<Type> {
+	position: IPosition<Type>
+): IPosition<Type> {
 	return isPredicatePosition(position)
 		? preserveDirection(position, negate)
 		: position
@@ -55,7 +42,7 @@ export function positionNegate<Type = any>(
  */
 export function positionEqual<Type = any>(
 	stream: IStream<Type> & IPosed<IPosition<Type>>,
-	position: IDirectionalPosition<Type>
+	position: IPosition<Type>
 ): boolean {
 	return isPredicatePosition(position)
 		? position(stream)
@@ -69,13 +56,9 @@ export function positionEqual<Type = any>(
  * 2. If `direction(pos1) === direction(pos2)` and not both of them are a `number`: return `true`
  * 3. If `direction(pos1) === direction(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
  */
-export function directionCompare<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	pos1: IDirectionalPosition<Type, SubType, PosType>,
-	pos2: IDirectionalPosition<Type, SubType, PosType>
+export function directionCompare<Type = any, SubType = any>(
+	pos1: IPosition<Type, SubType>,
+	pos2: IPosition<Type, SubType>
 ) {
 	const [fPos1, fPos2] = [pos1, pos2].map(direction)
 	if (fPos2 !== fPos1) return fPos2 > fPos1
@@ -89,23 +72,17 @@ export function directionCompare<
  * 1. If `pos` is a number: `pos >= 0`
  * 2. If `pos` is a `PredicatePosition`: `pos.direction`, or, if absent, `true` by default
  */
-export function direction<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(pos: IDirectionalPosition<Type, SubType, PosType>) {
+export function direction<Type = any, SubType = any>(
+	pos: IPosition<Type, SubType>
+) {
 	return isNumber(pos) ? pos >= 0 : !("direction" in pos) || pos.direction!
 }
 
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export const pickDirection = <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	pos: IDirectionalPosition<Type, SubType, PosType>
+export const pickDirection = <Type = any, SubType = any, PosType = any>(
+	pos: IPosition<Type, SubType>
 ): IChange<Type, SubType, PosType> => (direction(pos) ? next : previous)
 
 /**

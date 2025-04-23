@@ -5,18 +5,18 @@ import type { IIndexMap } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 
 const { swap } = inplace
-const {isArray} = type
+const { isArray } = type
 
-export abstract class PreIndexMap<
+abstract class PreIndexMap<
 	KeyType = any,
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = any
 > implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 {
-	keys: KeyType[]
-	values: ValueType[]
-	default: DefaultType
+	abstract keys: KeyType[]
+	abstract values: ValueType[]
+	abstract default: DefaultType
 
 	abstract index(x: any): ValueType | DefaultType
 
@@ -108,8 +108,58 @@ export abstract class BaseIndexMap<
 	) {
 		assert(isArray(keys))
 		assert(isArray(values))
-		
+
 		super()
 		this.default = _default!
+	}
+}
+
+export abstract class DelegateIndexMap<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any,
+	IndexGetType = any
+> extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
+	abstract getIndex(key: any): IndexGetType
+	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
+	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract swap(i: number, j: number): this
+	abstract unique(): number[]
+
+	protected delegate: IIndexMap<KeyType, ValueType, any, number>
+
+	rekey(keyFrom: KeyType, keyTo: KeyType) {
+		this.delegate.rekey(keyFrom, keyTo)
+		return this
+	}
+
+	index(x: any, ...y: any[]) {
+		return this.delegate.index(x, ...y)
+	}
+
+	byIndex(index: number) {
+		return this.delegate.byIndex(index)
+	}
+
+	replace(index: number, pair: [KeyType, ValueType]) {
+		this.delegate.replace(index, pair)
+		return this
+	}
+
+	get default() {
+		return this.delegate.default
+	}
+
+	get values() {
+		return this.delegate.values
+	}
+
+	get keys() {
+		return this.delegate.keys
+	}
+
+	constructor(value: IIndexMap<KeyType, ValueType, any, number>) {
+		super()
+		this.delegate = value
 	}
 }

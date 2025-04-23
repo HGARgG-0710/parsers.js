@@ -7,7 +7,7 @@ import type {
 	IIsEndCurrable,
 	IIsStartCurrable,
 	INavigable,
-	IPosition,
+	IPrevable,
 	IReversedStreamClassInstance,
 	IRewindable,
 	IStarted,
@@ -69,13 +69,12 @@ export interface IUpdatable<Type = any> {
 
 export type IStreamClassTransferable<
 	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IPrimalStreamClassSignature<Type> &
 	Partial<IDefaultIsEndable> &
 	Partial<IBasePrevIterable<Type>> &
 	Partial<IIsStartCurrable> &
-	Partial<INavigable<Type, SubType, PosType>> &
+	Partial<INavigable<Type, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>>
 
@@ -95,18 +94,18 @@ type ICommonStreamClassInstance<Type = any> =
 export type IStreamClassInstanceImpl<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = ICommonStreamClassInstance<Type> &
 	IStreamClassInstance<Type, SubType, PosType, InitSignature> &
-	IStreamClassTransferable<Type> &
-	Partial<Pick<IReversedStreamClassInstanceImpl<Type>, "prev">> &
+	IStreamClassTransferable<Type, PosType> &
+	Partial<IPrevable<Type>> &
 	Partial<IUpdatable<Type>>
 
 export type IReversedStreamClassInstanceImpl<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = ICommonStreamClassInstance<Type> &
 	IReversedStreamClassInstance<Type, SubType, PosType, InitSignature> &
@@ -120,4 +119,3 @@ export * as init from "./methods/init.js"
 export * as iter from "./methods/iter.js"
 export * as navigate from "./methods/navigate.js"
 export * as rewind from "./methods/rewind.js"
-

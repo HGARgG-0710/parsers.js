@@ -1,6 +1,6 @@
 import { object, type } from "@hgargg-0710/one"
 import type {
-	IDirectionalPosition,
+	IPosition,
 	IEndableStream,
 	IIsEndCurrable,
 	INavigable,
@@ -47,7 +47,7 @@ export class LazyStream
 		return curr
 	}
 
-	navigate(pos: IDirectionalPosition) {
+	navigate(pos: IPosition) {
 		if (isNumber(pos)) this.source.nextChar(pos)
 		else while (!pos(this)) this.nextDecoded()
 		return this.transferDecoded()

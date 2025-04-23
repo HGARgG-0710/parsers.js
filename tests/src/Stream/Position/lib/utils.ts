@@ -1,4 +1,4 @@
-import type { IDirectionalPosition } from "../../../../dist/src/Position/interfaces.js"
+import type { IPosition } from "../../../../dist/src/Position/interfaces.js"
 
 import {
 	direction,
@@ -39,8 +39,8 @@ export const [
 ].map(([util, name]) => utilTest(util as Function, name as string))
 
 const preserveDirectionTestCompare = (
-	x: IDirectionalPosition,
-	y: IDirectionalPosition
+	x: IPosition,
+	y: IPosition
 ) =>
 	isFunction(x) ? isFunction(y) && x.direction === y.direction : equals(x, y)
 
@@ -57,8 +57,8 @@ export const positionNegateTest = directionUtilTest(
 )
 
 const positionTrivialEquality = (
-	x: IDirectionalPosition,
-	y: IDirectionalPosition
+	x: IPosition,
+	y: IPosition
 ) =>
 	(isNumber(x) && isNumber(y)) ||
 	(isFunction(x) && isFunction(y) && direction(x) === direction(y))

@@ -1,5 +1,5 @@
 import type {
-	IDirectionalPosition,
+	IPosition,
 	IDirectionHaving,
 	IFreezableBuffer,
 	IReversedStreamClassInstance,
@@ -90,6 +90,6 @@ export type ILimitedStreamImpl<Type = any> = IProddable<Type> &
 			buffer?: IFreezableBuffer<Type>
 		) => ILimitedStreamImpl<Type>
 
-		from: IDirectionalPosition
-		to: IDirectionalPosition
+		from: IPosition
+		to: IPosition
 	}

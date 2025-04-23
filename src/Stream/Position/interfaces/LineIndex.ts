@@ -1,9 +1,6 @@
-import type { IPositionObject } from "../interfaces.js"
-
-export interface ILineIndex extends IPositionObject {
-	nextChar(): void
-	nextLine(): void
-	
+export interface ILineIndex {
 	readonly char: number
 	readonly line: number
+	nextChar(): void
+	nextLine(): void
 }

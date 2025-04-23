@@ -1,5 +1,4 @@
 import { type as _type, functional, object, string } from "@hgargg-0710/one"
-import { DelegateSizeable } from "src/internal/delegates/Sizeable.js"
 import { type } from "src/Node/utils.js"
 import { OptimizedLinearMap } from "../IndexMap/LinearIndexMap/classes.js"
 import { Autocache } from "../internal/Autocache.js"
@@ -16,15 +15,11 @@ const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 
 abstract class BaseHashClass<
-		KeyType = any,
-		ValueType = any,
-		InternalKeyType = any,
-		DefaultType = any
-	>
-	extends DelegateSizeable<
-		IInternalHash<InternalKeyType, ValueType, DefaultType>
-	>
-	implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
+	KeyType = any,
+	ValueType = any,
+	InternalKeyType = any,
+	DefaultType = any
+> implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
 {
 	["constructor"]: new (
 		value: IInternalHash<InternalKeyType, ValueType>
@@ -32,32 +27,44 @@ abstract class BaseHashClass<
 
 	hash: IHash<KeyType, InternalKeyType>
 
+	get default() {
+		return this.internal.default
+	}
+
+	get size() {
+		return this.internal.size
+	}
+
 	index(x: KeyType, ...y: any[]) {
-		return this.value.get(this.hash(x, ...y))
+		return this.internal.get(this.hash(x, ...y))
 	}
 
 	set(key: KeyType, value: ValueType, ...y: any[]) {
-		this.value.set(this.hash(key, ...y), value)
+		this.internal.set(this.hash(key, ...y), value)
 		return this
 	}
 
 	delete(key: KeyType, ...y: any[]) {
-		this.value.delete(this.hash(key, ...y))
+		this.internal.delete(this.hash(key, ...y))
 		return this
 	}
 
 	rekey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
-		this.value.rekey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
+		this.internal.rekey(this.hash(keyFrom, ...y), this.hash(keyTo, ...y))
 		return this
 	}
 
-	get default() {
-		return this.value.default
+	copy() {
+		return new this.constructor(this.internal.copy())
 	}
 
-	copy() {
-		return new this.constructor(this.value.copy())
-	}
+	constructor(
+		protected internal: IInternalHash<
+			InternalKeyType,
+			ValueType,
+			DefaultType
+		>
+	) {}
 }
 
 export const HashClass = new Autocache(new OptimizedLinearMap(), function <

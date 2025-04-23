@@ -2,7 +2,7 @@ import { array, inplace } from "@hgargg-0710/one"
 import type { IPointer } from "src/interfaces.js"
 import { Pointer } from "../../classes.js"
 import { BadIndex } from "../../constants.js"
-import { DelegateIndexMap } from "../../internal/delegates/IndexMap.js"
+import { DelegateIndexMap } from "../../internal/IndexMap.js"
 import { isGoodIndex, setValue, swapValues } from "../../utils.js"
 import type { IIndexMap } from "../interfaces.js"
 import type { IPersistentIndexMap } from "./interfaces.js"
@@ -28,7 +28,7 @@ export class PersistentIndexMap<
 	) => PersistentIndexMap<KeyType, ValueType, DefaultType>
 
 	copy() {
-		return new this.constructor(this.value.copy())
+		return new this.constructor(this.delegate.copy())
 	}
 
 	delete(index: number, count: number = 1) {
@@ -36,12 +36,12 @@ export class PersistentIndexMap<
 		for (let i = index + count; i < size; ++i)
 			this.indexes[i].value -= count
 		out(this.indexes, index, count)
-		this.value.delete(index, count)
+		this.delegate.delete(index, count)
 		return this
 	}
 
 	unique(): number[] {
-		const indexes = this.value.unique()
+		const indexes = this.delegate.unique()
 		const indexSet = new Set(indexes)
 
 		this.indexes = this.indexes.filter((x: IPointer<number>, i: any) => {
@@ -56,12 +56,12 @@ export class PersistentIndexMap<
 	swap(i: number, j: number) {
 		swapValues(this.indexes[i], this.indexes[j])
 		swap(this.indexes, i, j)
-		this.value.swap(i, j)
+		this.delegate.swap(i, j)
 		return this
 	}
 
 	getIndex(key: any) {
-		const foundIndex = this.value.getIndex(key)
+		const foundIndex = this.delegate.getIndex(key)
 		return isGoodIndex(foundIndex)
 			? this.indexes[foundIndex]
 			: Pointer(BadIndex)
@@ -72,11 +72,11 @@ export class PersistentIndexMap<
 		const size = this.size
 		for (let i = index; i < size; ++i) this.indexes[i].value += increase
 		insert(this.indexes, index, ...pairs.map((_x, i) => Pointer(i + index)))
-		this.value.add(index, ...pairs)
+		this.delegate.add(index, ...pairs)
 		return this
 	}
 
-	protected repairIndexes() {
+	private repairIndexes() {
 		let i = this.size
 		while (i--) setValue(this.indexes[i], i)
 	}

@@ -1,7 +1,6 @@
 import { boolean, object } from "@hgargg-0710/one"
-import { Pattern } from "src/internal/Pattern.js"
 import { ObjectMap } from "../../IndexMap/LinearIndexMap/classes.js"
-import type { ICopiable, IPosition } from "../../interfaces.js"
+import type { ICopiable } from "../../interfaces.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { valuePropDelegate } from "../../refactor.js"
 import type { IStreamClass, IStreamClassSignature } from "./interfaces.js"
@@ -23,11 +22,7 @@ const { protoProp, extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { F } = boolean
 
-function makeStreamClass<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+function makeStreamClass<Type = any, SubType = any, PosType = any>(
 	signature: IStreamClassSignature<Type>
 ): IStreamClass<Type, SubType, PosType> {
 	const {
@@ -75,12 +70,12 @@ function makeStreamClass<
 		if (value) {
 			interface _streamClass extends streamClassGuaranteed {}
 			class _streamClass
-				extends Pattern<SubType>
 				implements IStreamClassInstanceImpl<Type, SubType, PosType>
 			{
 				["constructor"]: new (value?: SubType) => typeof this
+				value?: SubType
 				constructor(value?: SubType) {
-					super(value)
+					this.value = value
 				}
 			}
 			return _streamClass
@@ -146,20 +141,12 @@ function makeStreamClass<
 export const StreamClass = new Autocache(
 	new ObjectMap(),
 	makeStreamClass
-) as unknown as <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+) as unknown as <Type = any, SubType = any, PosType = any>(
 	signature: IStreamClassSignature<Type>
 ) => IStreamClass<Type, SubType, PosType>
 
 const valueIsEnd = valuePropDelegate("isEnd")
-export const DefaultEndStream = <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+export const DefaultEndStream = <Type = any, SubType = any, PosType = any>(
 	signature: Omit<IStreamClassSignature<Type>, "defaultIsEnd">
 ) =>
 	StreamClass<Type, SubType, PosType>({

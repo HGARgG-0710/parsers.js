@@ -77,7 +77,7 @@ export namespace methods {
 		export function get<TreeLike extends IWalkable<TreeLike> = IWalkable>(
 			this: TreeStream<TreeLike>
 		) {
-			return this.walker.get()!
+			return this.walker.get()
 		}
 	}
 

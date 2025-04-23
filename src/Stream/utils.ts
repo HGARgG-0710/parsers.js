@@ -8,7 +8,6 @@ import { Stream } from "../constants.js"
 import type {
 	IBufferized,
 	ICollection,
-	IDirectionalPosition,
 	IIndexed,
 	IPosition,
 	IStateful
@@ -35,22 +34,14 @@ const { and } = functional
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+export const next = <Type = any, SubType = any, PosType = any>(
 	input: IStream<Type, SubType, PosType>
 ) => input.next()
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+export const previous = <Type = any, SubType = any, PosType = any>(
 	input: IReversibleStream<Type, SubType, PosType>
 ) => input.prev()
 
@@ -103,10 +94,7 @@ export function destroy<Type = any>(input: IStream<Type>): typeof SkippedItem {
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip(
-	input: IReversibleStream,
-	steps: IDirectionalPosition = 1
-) {
+export function skip(input: IReversibleStream, steps: IPosition = 1) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
@@ -117,7 +105,7 @@ export function skip(
 export function consume<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	CollectionType extends ICollection<Type> = ArrayCollection<Type>
 >(
 	stream: IStream<Type, SubType, PosType>,
@@ -132,7 +120,7 @@ export function consume<
  * returns whether the bound corresponding to the direction of iteration
  * has been reached
  */
-export function has(pos: IDirectionalPosition) {
+export function has(pos: IPosition) {
 	const stopPoint = getStopPoint(pos)
 	return function <Type = any>(input: IReversibleStream<Type>) {
 		uniNavigate(input, pos)
@@ -159,7 +147,7 @@ export function count<Type = any>(pred: IStreamPredicate<Type>) {
  * Returns a function that collects the items of `input`
  * into `init`, delimiting them by `delimPred`
  */
-export function delimited(delimPred: IDirectionalPosition) {
+export function delimited(delimPred: IPosition) {
 	return function <
 		Type = any,
 		CollectionType extends ICollection<Type> = ArrayCollection<Type>
@@ -207,13 +195,7 @@ export const isFinishable = structCheck<IFinishable>({
  */
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	x: any
-) => x is INavigable<Type, SubType, PosType>
+}) as <Type = any, PosType = any>(x: any) => x is INavigable<Type, PosType>
 
 /**
  * Returns whether the given `x` is a Rewindable
@@ -241,11 +223,9 @@ export const isStateful = structCheck<IStateful>({
 /**
  * Iterates the given `BasicStream` until hitting the end.
  */
-export function uniFinish<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(stream: IStream<Type, SubType, PosType>) {
+export function uniFinish<Type = any, SubType = any, PosType = any>(
+	stream: IStream<Type, SubType, PosType>
+) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
@@ -254,11 +234,9 @@ export function uniFinish<
  * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
  * else - `uniFinish(stream)`
  */
-export function finish<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(stream: IStream<Type, SubType, PosType>) {
+export function finish<Type = any, SubType = any, PosType = any>(
+	stream: IStream<Type, SubType, PosType>
+) {
 	return isFinishable<Type>(stream) ? stream.finish() : uniFinish(stream)
 }
 
@@ -273,13 +251,9 @@ export function finish<
  * * 3. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
  * @returns `stream.curr`
  */
-export function uniNavigate<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
+export function uniNavigate<Type = any, SubType = any, PosType = any>(
 	stream: IReversibleStream<Type, SubType, PosType>,
-	position: IDirectionalPosition<Type, SubType, PosType>
+	position: IPosition<Type, SubType>
 ): Type {
 	if (isNumber(position)) {
 		if (position < 0) while (position++) stream.prev()
@@ -296,13 +270,9 @@ export function uniNavigate<
  * If the given `ReversibleStream` is `Navigable`, calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
  */
-export function navigate<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(
-	stream: IReversibleStream<Type, SubType, PosType>,
-	position: IDirectionalPosition<Type, SubType, PosType>
+export function navigate<Type = any, SubType = any>(
+	stream: IReversibleStream<Type, SubType>,
+	position: IPosition<Type>
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)
@@ -329,26 +299,22 @@ export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
 /**
  * Checks whether the given `StreamClassInstance` is empty
  */
-export function isEmpty<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(stream: IStream<Type, SubType, PosType> & IStarted) {
+export function isEmpty<Type = any, SubType = any, PosType = any>(
+	stream: IStream<Type, SubType, PosType> & IStarted
+) {
 	return stream.isEnd && stream.isStart
 }
 
 /**
  * Returns a function that returns invocation of `f(stream.buffer.get(), stream.pos)`
  */
-export function byStreamBufferPos<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
->(f: (buffer: IIndexed, i: IPosition<Type, SubType, PosType>) => any) {
+export function byStreamBufferPos<Type = any, SubType = any, PosType = any>(
+	f: (buffer: IIndexed, i: PosType) => any
+) {
 	return (
 		stream: IStream<Type, SubType, PosType> &
 			IBufferized<Type> &
-			IPosed<IPosition<Type, SubType, PosType>>
+			IPosed<PosType>
 	) => f(stream.buffer.get(), stream.pos)
 }
 

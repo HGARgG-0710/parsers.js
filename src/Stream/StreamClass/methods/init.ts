@@ -9,7 +9,7 @@ import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type { IThisMethod } from "../../../refactor.js"
 import { optionalValue } from "../../../utils.js"
-import type { IPosed, IPosition } from "../../Position/interfaces.js"
+import type { IPosed } from "../../Position/interfaces.js"
 import { positionNull } from "../../Position/refactor.js"
 import {
 	createState,
@@ -57,11 +57,7 @@ export type IBufferizedStatefulPatternStreamClassInitSignature<Type = any> = [
 	Summat?
 ]
 
-export type IStreamClassInitMethod<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> =
+export type IStreamClassInitMethod<Type = any, SubType = any, PosType = any> =
 	| IStreamClassBaseInitMethod<Type, SubType, PosType>
 	| IStreamClassBufferInitMethod<Type, SubType, PosType>
 	| IStreamClassStateInitMethod<Type, SubType, PosType>
@@ -74,7 +70,7 @@ export type IStreamClassInitMethod<
 export type IStreamClassBaseInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IBaseStreamClassInitSignature,
 	IStreamClassInstanceImpl<Type, SubType, PosType>
@@ -83,7 +79,7 @@ export type IStreamClassBaseInitMethod<
 export type IStreamClassBufferInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IBufferizedStreamClassInitSignature<Type>,
 	IStreamClassInstanceImpl<Type, SubType, PosType> & IBufferized<Type>
@@ -92,7 +88,7 @@ export type IStreamClassBufferInitMethod<
 export type IStreamClassStateInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IStatefulStreamClassInitSignature,
 	IStreamClassInstanceImpl<Type, SubType, PosType> & IStateful
@@ -101,7 +97,7 @@ export type IStreamClassStateInitMethod<
 export type IStreamClassBufferStateInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IBufferizedStatefulStreamClassInitSignature<Type>,
 	IStreamClassInstanceImpl<Type, SubType, PosType> &
@@ -112,7 +108,7 @@ export type IStreamClassBufferStateInitMethod<
 export type IStreamClassPatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IPatternStreamClassInitSignature,
 	IStreamClassInstanceImpl<Type, SubType, PosType>
@@ -121,7 +117,7 @@ export type IStreamClassPatternInitMethod<
 export type IStreamClassBufferPatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IBufferizedPatternStreamClassInitSignature<Type>,
 	IStreamClassInstanceImpl<Type, SubType, PosType> & IBufferized<Type>
@@ -130,7 +126,7 @@ export type IStreamClassBufferPatternInitMethod<
 export type IStreamClassStatePatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IStatefulPatternStreamClassInitSignature,
 	IStreamClassInstanceImpl<Type, SubType, PosType> & IStateful
@@ -139,7 +135,7 @@ export type IStreamClassStatePatternInitMethod<
 export type IStreamClassBufferStatePatternInitMethod<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
+	PosType = any
 > = IThisMethod<
 	IBufferizedStatefulPatternStreamClassInitSignature<Type>,
 	IStreamClassInstanceImpl<Type, SubType, PosType> &

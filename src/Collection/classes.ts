@@ -9,7 +9,7 @@ export class ArrayCollection<Type = any>
 	extends IterableCollection<Type>
 	implements ICollection<Type>
 {
-	protected value: Type[];
+	protected collection: Type[];
 
 	["constructor"]: new (...x: any[]) => ArrayCollection<Type>
 
@@ -18,17 +18,17 @@ export class ArrayCollection<Type = any>
 	}
 
 	push(...x: Type[]) {
-		this.value.push(...x)
+		this.collection.push(...x)
 		return this
 	}
 
 	init(value: Type[]) {
-		this.value = value
+		this.collection = value
 		return this
 	}
 
 	copy() {
-		return new this.constructor(array.copy(this.value))
+		return new this.constructor(array.copy(this.collection))
 	}
 
 	constructor(value: Type[] = []) {

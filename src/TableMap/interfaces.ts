@@ -8,7 +8,7 @@ export type IParserFunction<InputType = any, OutType = any> = (
 
 export type IStreamTransform<UnderType = any, UpperType = any> = (
 	input?: IStream<UnderType>,
-	i?: IPosition<UnderType, any, any>,
+	i?: IPosition<UnderType, any>,
 	...x: any[]
 ) => UpperType
 

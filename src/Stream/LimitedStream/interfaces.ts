@@ -3,7 +3,7 @@ import type { ICopiable } from "../../interfaces.js"
 
 import type {
 	IBackward,
-	IDirectionalPosition,
+	IPosition,
 	IIsEndCurrable,
 	IIsStartCurrable,
 	IPosed,
@@ -14,12 +14,12 @@ import type {
 export type IUnderLimitedStream<Type = any> = IStream<
 	Type,
 	any,
-	IDirectionalPosition
+	IPosition
 > &
 	IIsEndCurrable &
 	IIsStartCurrable &
 	ICopiable &
-	IPosed<IDirectionalPosition>
+	IPosed<IPosition>
 
 export type ILimitedStreamInitSignature<Type = any> = [
 	IUnderLimitedStream<Type>?,

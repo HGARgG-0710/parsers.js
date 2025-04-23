@@ -22,11 +22,11 @@ abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	}
 
 	read(i: number) {
-		return this.value![i] as Type
+		return this.collection![i] as Type
 	}
 
 	copy() {
-		return new this.constructor(this.value)
+		return new this.constructor(this.collection)
 	}
 
 	emptied() {
@@ -38,10 +38,10 @@ export class UnfreezableArray<Type = any>
 	extends TypicalUnfreezable<Type>
 	implements IUnfreezableBuffer<Type>
 {
-	protected value: Type[]
+	protected collection: Type[]
 
 	push(...elements: Type[]) {
-		if (!this.isFrozen) this.value.push(...elements)
+		if (!this.isFrozen) this.collection.push(...elements)
 		return this
 	}
 
@@ -50,11 +50,11 @@ export class UnfreezableArray<Type = any>
 	}
 
 	copy() {
-		return new this.constructor(array.copy(this.value))
+		return new this.constructor(array.copy(this.collection))
 	}
 
 	write(i: number, value: Type) {
-		if (!this.isFrozen) this.value[i] = value
+		if (!this.isFrozen) this.collection[i] = value
 		return this
 	}
 
@@ -68,21 +68,22 @@ export class UnfreezableString
 	extends TypicalUnfreezable<string>
 	implements IUnfreezableBuffer<string>
 {
-	protected value: string
+	protected collection: string
 
 	get() {
 		return super.get() as string
 	}
 
 	push(...strings: string[]) {
-		if (!this.isFrozen) this.value += strings.join("")
+		if (!this.isFrozen) this.collection += strings.join("")
 		return this
 	}
 
 	write(i: number, char: string) {
-		const { value: currValue } = this
+		const { collection: currValue } = this
 		if (!this.isFrozen)
-			this.value = currValue.slice(0, i) + char + currValue.slice(i + 1)
+			this.collection =
+				currValue.slice(0, i) + char + currValue.slice(i + 1)
 		return this
 	}
 

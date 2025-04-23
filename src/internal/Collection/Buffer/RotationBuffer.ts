@@ -53,7 +53,7 @@ export class RotationBuffer<Type = any>
 	}
 
 	copy() {
-		return this.emptied().init(this.value)
+		return this.emptied().init(this.collection)
 	}
 
 	emptied() {

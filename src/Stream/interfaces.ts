@@ -3,7 +3,6 @@ import type {
 	ICopiable,
 	IInitializable,
 	IPattern,
-	IPosition,
 	IStateful
 } from "../interfaces.js"
 import type { IPosed } from "./Position/interfaces.js"
@@ -22,12 +21,8 @@ export interface IFinishable<Type = any> {
 	finish: () => Type
 }
 
-export interface INavigable<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> {
-	navigate: (position: IPosition<Type, SubType, PosType>) => Type
+export interface INavigable<Type = any, PosType = any> {
+	navigate: (position: PosType) => Type
 }
 
 export interface IRewindable<Type = any> {
@@ -49,16 +44,16 @@ export interface INextable<Type = any> {
 export type IStream<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = ICopiable &
 	Partial<IBackward<Type>> &
-	Partial<INavigable<Type, SubType, PosType>> &
+	Partial<INavigable<Type, PosType>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IBufferized<Type>> &
 	Partial<IStateful> &
-	Partial<IPosed<IPosition<Type, SubType, PosType>>> &
+	Partial<IPosed> &
 	Partial<
 		IInitializable<
 			InitSignature,
@@ -79,7 +74,7 @@ export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
 export type IReversibleStream<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = IStream<Type, SubType, PosType, InitSignature> & IBackward<Type>
 
@@ -92,4 +87,3 @@ export type * from "./Position/interfaces.js"
 export type * from "./PredicateStream/interfaces.js"
 export type * from "./StreamClass/interfaces.js"
 export type * from "./StreamParser/interfaces.js"
-

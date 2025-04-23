@@ -2,11 +2,11 @@ import { ArrayCollection } from "../../../Collection/classes.js"
 
 export abstract class TypicalBuffer<Type = any> extends ArrayCollection<Type> {
 	read(i: number) {
-		return this.value[i]
+		return this.collection[i]
 	}
 
 	write(i: number, value: Type) {
-		this.value[i] = value
+		this.collection[i] = value
 		return this
 	}
 }

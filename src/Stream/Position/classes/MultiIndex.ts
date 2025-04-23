@@ -1,42 +1,74 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IWalkable } from "../../../interfaces.js"
-import { InitializablePattern } from "../../../internal/Pattern.js"
-import type { IPositionObject } from "../../interfaces.js"
 
 const { isArray } = type
-const { last, first, copy } = array
+const { last, first, copy, clear } = array
 
-export class MultiIndex<Type extends IWalkable<Type> = IWalkable>
-	extends InitializablePattern<number[]>
-	implements IPositionObject
-{
-	set levels(length: number) {
-		this.value!.length = length
+export class MultiIndex {
+	private set levels(length: number) {
+		this.index.length = length
 	}
 
 	get levels() {
-		return this.value!.length
+		return this.index.length
+	}
+
+	get(): readonly number[] {
+		return this.index
 	}
 
 	first() {
-		return first(this.value!)
+		return first(this.index)
 	}
 
 	last() {
-		return last(this.value!)
+		return last(this.index)
 	}
 
 	slice(from: number = 0, to: number = this.levels) {
-		return this.value!.slice(from, to < 0 ? this.levels + to : to)
+		return this.index.slice(from, to < 0 ? this.levels + to : to)
 	}
 
 	copy() {
-		return new MultiIndex(copy(this.value!))
+		return new MultiIndex(copy(this.index))
 	}
 
-	constructor(multind: number[] = []) {
-		assert(isArray(multind))
-		super(multind)
+	nextLevel() {
+		this.extend([0])
+	}
+
+	prevLevel() {
+		return this.index.pop()
+	}
+
+	resize(length: number = 0) {
+		this.levels = length
+		return this
+	}
+
+	clear() {
+		clear(this.index)
+		return this
+	}
+
+	incLast() {
+		++this.index[this.levels - 1]
+	}
+
+	decLast() {
+		--this.index[this.levels - 1]
+	}
+
+	extend(subIndex: number[]) {
+		this.index.push(...subIndex)
+	}
+
+	from(multind: MultiIndex) {
+		this.index = copy(multind.index)
+		return this
+	}
+
+	constructor(private index: number[] = []) {
+		assert(isArray(index))
 	}
 }

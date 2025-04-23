@@ -4,7 +4,6 @@ import type {
 	IIsEndCurrable,
 	IIsStartCurrable,
 	INavigable,
-	IPosition,
 	IPrevable,
 	IRewindable,
 	IStarted,
@@ -20,30 +19,26 @@ export type IStreamClassSignature<Type = any> =
 		isPattern?: boolean
 	}
 
-export type IStreamClass<
-	Type = any,
-	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number
-> =
+export type IStreamClass<Type = any, SubType = any, PosType = any> =
 	| IConstructor<[any?], IStreamClassInstance<Type, SubType, PosType>>
 	| IConstructor<[any?], IReversedStreamClassInstance<Type, SubType, PosType>>
 
 export type IStreamClassInstance<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = IStream<Type, SubType, PosType, InitSignature> &
 	IStarted &
 	IIsEndCurrable &
 	IFinishable<Type> &
-	INavigable<Type, SubType, PosType> &
+	INavigable<Type, PosType> &
 	ConstructorHaving
 
 export type IReversedStreamClassInstance<
 	Type = any,
 	SubType = any,
-	PosType extends IPosition<Type, SubType, PosType> = number,
+	PosType = any,
 	InitSignature extends any[] = any[]
 > = IStreamClassInstance<Type, SubType, PosType, InitSignature> &
 	IPrevable<Type> &
@@ -51,4 +46,3 @@ export type IReversedStreamClassInstance<
 	IRewindable<Type>
 
 export type * from "./methods/init.js"
-
