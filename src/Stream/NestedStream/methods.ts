@@ -18,6 +18,7 @@ import { assignIndex } from "../../utils.js"
 import { finish } from "../utils.js"
 
 import { type } from "@hgargg-0710/one"
+import { MissingArgument } from "../../constants.js"
 const { isNull, isUndefined } = type
 
 export namespace methods {
@@ -62,10 +63,10 @@ export namespace methods {
 
 	export function copy<Type = any, IndexType = any>(
 		this: INestedStreamImpl<Type, IndexType>
-	) {
-		return new this.constructor(
-			this.value?.copy(),
-			this.buffer?.copy(),
+	): INestedStreamImpl<Type, IndexType> {
+		return this.super.copy.call(this).init!(
+			MissingArgument,
+			MissingArgument,
 			this.assignedIndex
 		)
 	}

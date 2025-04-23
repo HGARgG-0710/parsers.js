@@ -61,8 +61,8 @@ function makeNestedStream<Type = any, IndexType = any>(
 
 			init: (
 				value?: IEndableStream<Type>,
-				index?: IndexType,
-				buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type>>
+				buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type>>,
+				index?: IndexType
 			) => INestedStreamImpl<Type>;
 
 			["constructor"]: new (
@@ -79,7 +79,7 @@ function makeNestedStream<Type = any, IndexType = any>(
 				index?: IndexType
 			) {
 				super(value)
-				this.init(value, index, buffer)
+				this.init(value, buffer, index)
 			}
 		}
 

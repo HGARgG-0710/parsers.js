@@ -24,12 +24,6 @@ export namespace methods {
 		return curr
 	}
 
-	export function copy<Type = any, MarkerType = any>(
-		this: IMarkedStreamImpl<Type, MarkerType>
-	) {
-		return new this.constructor(this.value?.copy())
-	}
-
 	export function init<Type = any, MarkerType = any>(
 		this: IMarkedStreamImpl<Type, MarkerType>,
 		value?: IEndableStream<Type>,

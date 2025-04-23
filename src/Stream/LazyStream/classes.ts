@@ -30,21 +30,21 @@ export class LazyStream
 		return (this.curr = this.source.decoded)
 	}
 
-	isCurrEnd() {
-		const isLast = !this.source.hasChars()
-		if (isLast) this.source.cleanup()
-		return isLast
-	}
-
 	private baseNextIter() {
 		this.nextDecoded()
 		this.transferDecoded()
 	}
 
+	isCurrEnd() {
+		return !this.source.hasChars()
+	}
+
 	next() {
 		const { curr } = this
-		if (this.isCurrEnd()) this.isEnd = true
-		else this.baseNextIter()
+		if (this.isCurrEnd()) {
+			this.isEnd = true
+			this.source.cleanup()
+		} else this.baseNextIter()
 		return curr
 	}
 

@@ -12,6 +12,7 @@ export type IUnderNestedStream<Type = any> = ICopiable & IEndableStream<Type>
 
 export type INestedStreamInitSignature<Type = any, IndexType = any> = [
 	IEndableStream<Type>?,
+	IFreezableBuffer<Type>?,
 	IndexType?
 ]
 

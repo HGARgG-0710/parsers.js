@@ -71,12 +71,6 @@ export namespace methods {
 		}
 		return this
 	}
-
-	export function copy<Type = any>(
-		this: ILimitedStreamImpl<Type>
-	): ILimitedStreamImpl<Type> {
-		return new this.constructor(this.value?.copy(), this.buffer)
-	}
 }
 
 export type ILimitedStreamImpl<Type = any> = IProddable<Type> &

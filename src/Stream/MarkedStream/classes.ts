@@ -24,7 +24,7 @@ import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
 import { current } from "../utils.js"
 
 import { methods } from "./methods.js"
-const { copy, init, ...baseMethods } = methods
+const { init, ...baseMethods } = methods
 
 const BaseMarkedStream = <Type = any>(hasPosition = false, hasBuffer = false) =>
 	DefaultEndStream<Type, IEndableStream<Type>>({
@@ -78,7 +78,6 @@ function makeMarkedStream<Type = any, MarkerType = any>(
 		}
 
 		withSuper(markedStream, baseClass, {
-			copy: ConstDescriptor(copy),
 			marker: ConstDescriptor(marker),
 			init: ConstDescriptor(init)
 		})

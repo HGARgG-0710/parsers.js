@@ -81,3 +81,5 @@ export namespace Stream {
  * 4. as a default value whene using a valid value makes no sense
  */
 export const BadIndex = -1
+
+export const MissingArgument = undefined
