@@ -1,11 +1,5 @@
 import { readFileSync } from "fs"
-
-// TODO: refactor - MULTIPLE FILES, this thing needs its own module...
-
-// TODO: into a new interfaces.ts files...
-export interface IReadable<Type = any> {
-	read(i: number): Type
-}
+import type { IReadable } from "../interfaces.js"
 
 function DecodedLoaded(
 	encoding: BufferEncoding

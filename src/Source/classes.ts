@@ -1,8 +1,8 @@
 import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { closeSync, fstatSync, openSync, readSync } from "node:fs"
-import { makeDelegate } from "../../../refactor.js"
-import type { ISource } from "../interfaces.js"
+import { makeDelegate } from "../refactor.js"
+import type { ISource } from "./interfaces.js"
 
 const { numbers } = array
 const { extendPrototype } = object

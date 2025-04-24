@@ -1,5 +1,6 @@
-import { UnfreezableArray } from "../../Collection/Buffer/classes.js"
-import { isBufferized } from "../../Collection/Buffer/utils.js"
+import { ArrayCollection } from "../../Collection/classes.js"
+import { OutputBuffer } from "../../Collection/Sequence/classes.js"
+import { isBufferized } from "../../Collection/Sequence/utils.js"
 import type { IStream } from "../interfaces.js"
 import { consume, finish } from "../utils.js"
 import { InputStream } from "./classes.js"
@@ -17,6 +18,8 @@ export function toInputStream<Type = any, SubType = any, PosType = any>(
 	}
 
 	return new InputStream(
-		consume(stream, new UnfreezableArray<Type>()).freeze()
+		new OutputBuffer<Type>(
+			consume(stream, new ArrayCollection<Type>())
+		).freeze()
 	)
 }

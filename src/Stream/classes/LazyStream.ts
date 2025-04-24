@@ -1,10 +1,10 @@
 import { object, type } from "@hgargg-0710/one"
+import type { ISource } from "../../interfaces.js"
 import type {
-	IPosition,
 	IEndableStream,
 	IIsEndCurrable,
 	INavigable,
-	ISource
+	IPosition
 } from "../interfaces.js"
 import { streamIterator } from "../StreamClass/methods/iter.js"
 
@@ -64,4 +64,5 @@ extendPrototype(LazyStream, {
 	[Symbol.iterator]: ConstDescriptor(streamIterator)
 })
 
-export * as Source from "./classes/Source.js"
+export * as Source from "../../Source/classes.js"
+
