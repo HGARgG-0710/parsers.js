@@ -7,6 +7,7 @@ import type { IPointer } from "./interfaces.js"
 export const Pointer = <Type = any>(value: Type): IPointer<Type> => ({ value })
 
 export * from "./classes/PropDigger.js"
+export * from "./classes/Loaded.js"
 export * as Collection from "./Collection/classes.js"
 export * as Parser from "./DynamicParser/classes.js"
 export * as EnumSpace from "./EnumSpace/classes.js"
