@@ -2,7 +2,7 @@ import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
 import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 import type { IIndexed } from "../../interfaces.js"
-import type { IUnfreezableBuffer } from "./interfaces.js"
+import type { IUnfreezableSequence, IWritableSequence } from "./interfaces.js"
 
 const { isString, isArray } = type
 
@@ -34,9 +34,9 @@ abstract class TypicalUnfreezable<Type = any> extends IterableCollection<Type> {
 	}
 }
 
-export class UnfreezableArray<Type = any>
+export class OutputBuffer<Type = any>
 	extends TypicalUnfreezable<Type>
-	implements IUnfreezableBuffer<Type>
+	implements IUnfreezableSequence<Type>, IWritableSequence<Type>
 {
 	protected collection: Type[]
 
@@ -64,9 +64,9 @@ export class UnfreezableArray<Type = any>
 	}
 }
 
-export class UnfreezableString
+export class SourceBuilder
 	extends TypicalUnfreezable<string>
-	implements IUnfreezableBuffer<string>
+	implements IUnfreezableSequence<string>
 {
 	protected collection: string
 
@@ -76,14 +76,6 @@ export class UnfreezableString
 
 	push(...strings: string[]) {
 		if (!this.isFrozen) this.collection += strings.join("")
-		return this
-	}
-
-	write(i: number, char: string) {
-		const { collection: currValue } = this
-		if (!this.isFrozen)
-			this.collection =
-				currValue.slice(0, i) + char + currValue.slice(i + 1)
 		return this
 	}
 

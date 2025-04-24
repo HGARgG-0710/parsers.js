@@ -37,4 +37,4 @@ export class ArrayCollection<Type = any>
 	}
 }
 
-export * as Buffer from "./Buffer/classes.js"
+export * as Sequence from "./Sequence/classes.js"

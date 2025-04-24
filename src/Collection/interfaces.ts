@@ -10,4 +10,4 @@ export interface ICollection<Type = any>
 	readonly size: number
 }
 
-export type * from "./Buffer/interfaces.js"
+export type * from "./Sequence/interfaces.js"

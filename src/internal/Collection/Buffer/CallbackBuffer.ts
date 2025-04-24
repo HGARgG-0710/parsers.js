@@ -1,6 +1,6 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IDynamicBuffer } from "../../../interfaces.js"
+import type { IDynamicSequence } from "../../../interfaces.js"
 import { TypicalBuffer } from "./TypicalBuffer.js"
 
 const { isFunction } = type
@@ -8,10 +8,10 @@ const { insert, out } = inplace
 
 export class CallbackBuffer<Type = any>
 	extends TypicalBuffer<Type>
-	implements IDynamicBuffer<Type>
+	implements IDynamicSequence<Type>
 {
 	["constructor"]: new (
-		callback: (thisArg: IDynamicBuffer<Type>) => void,
+		callback: (thisArg: IDynamicSequence<Type>) => void,
 		value?: Type[]
 	) => typeof this
 
@@ -66,7 +66,7 @@ export class CallbackBuffer<Type = any>
 	}
 
 	constructor(
-		private readonly callback: (thisArg: IDynamicBuffer<Type>) => void,
+		private readonly callback: (thisArg: IDynamicSequence<Type>) => void,
 		value?: Type[]
 	) {
 		assert(isFunction(callback))

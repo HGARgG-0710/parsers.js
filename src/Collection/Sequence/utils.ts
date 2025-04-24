@@ -1,6 +1,6 @@
 import { functional, object, type } from "@hgargg-0710/one"
 import { isCollection } from "../utils.js"
-import type { IBufferized, IFreezableBuffer } from "./interfaces.js"
+import type { IBufferized, IFreezableSequence } from "./interfaces.js"
 
 const { and } = functional
 const { structCheck } = object
@@ -17,7 +17,7 @@ export const isFreezableBuffer = and(
 		write: isFunction
 	}),
 	isCollection
-) as <Type = any>(x: any) => x is IFreezableBuffer<Type>
+) as <Type = any>(x: any) => x is IFreezableSequence<Type>
 
 /**
  * Returns whether the given `x` is a `Bufferized`

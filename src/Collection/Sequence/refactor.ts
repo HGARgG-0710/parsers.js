@@ -1,22 +1,22 @@
-import type { IBufferized, IFreezableBuffer } from "./interfaces.js"
+import type { IBufferized, IFreezableSequence } from "./interfaces.js"
 
 import { type } from "@hgargg-0710/one"
 const { isNullary } = type
 
 export function assignBuffer<Type = any>(
 	bufferized: IBufferized<Type>,
-	buffer?: IFreezableBuffer
+	buffer?: IFreezableSequence
 ) {
 	if (!isNullary(buffer)) bufferized.buffer = buffer
 }
 
-export const lastIndex = (buffer: IFreezableBuffer) => buffer.size - 1
+export const lastIndex = (buffer: IFreezableSequence) => buffer.size - 1
 
-export function readLast<Type = any>(buffer: IFreezableBuffer<Type>) {
+export function readLast<Type = any>(buffer: IFreezableSequence<Type>) {
 	return buffer.read(lastIndex(buffer))
 }
 
-export function readFirst<Type = any>(buffer: IFreezableBuffer<Type>) {
+export function readFirst<Type = any>(buffer: IFreezableSequence<Type>) {
 	return buffer.read(0)
 }
 

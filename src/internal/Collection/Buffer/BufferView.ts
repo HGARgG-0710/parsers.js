@@ -1,22 +1,25 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IBuffer, ICopiable } from "../../../interfaces.js"
+import type { ICopiable, ISequence } from "../../../interfaces.js"
 
 const { isNumber } = type
 
 export class BufferView<Type = any> implements ICopiable {
-	["constructor"]: new (offset: number, buffer: IBuffer<Type>) => typeof this
+	["constructor"]: new (
+		offset: number,
+		buffer: ISequence<Type>
+	) => typeof this
 
 	//
 	// * Interface Methods
 	//
 
 	copy() {
-		return new this.constructor(this.offset, this.buffer)
+		return new this.constructor(this.offset, this.sequence)
 	}
 
 	read(i: number) {
-		return this.buffer.read(this.offset + i)
+		return this.sequence.read(this.offset + i)
 	}
 
 	//
@@ -33,7 +36,7 @@ export class BufferView<Type = any> implements ICopiable {
 
 	constructor(
 		private offset: number,
-		private readonly buffer: IBuffer<Type>
+		private readonly sequence: ISequence<Type>
 	) {
 		assert(isNumber(offset))
 		assert(offset > 0)
