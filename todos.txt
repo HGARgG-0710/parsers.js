@@ -19,7 +19,22 @@
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
-	TODO [fixed order]:	
+	TODO [fixed order]:				
+		TODO: IPosition - fix
+			Having removed the `IPositionObject`, LOTS of things about it broke. 
+			The type-bounds, yada, yada...
+			Anyhow, the objective now is to: 
+				1. remove `SubType` from `IStream` [and the `& IPattern`-bit with it... - see Diggers...]
+				2. INavigable - USE `uknown` for `PosType` instead of a generic...
+				3. REMOVE `PosType` from `IStraem`
+
+		TODO - ABOUT removing `.pos` from various Stream-s - effect on functionality. 
+			This will cause one to need to remove the `pos: number` from certain functions (for instance - `.predicate`, `.handler`). 
+				Solution: ADD a new mini-class `OwnedStream` - with an `.owner` property. 
+					LET: 
+						1. `WrapperStream` ONLY accept `OwnedStream`s
+						2. `OwnedStream` be the PARENT CLASS for `StreamParser`, `PosStream`, LITERALLY every `IStream` in the library...; 
+
 		TODO [code-cleaning]: get rid of the `.value`-convention
 					Now, the ONLY reason for it to exist currently is the `dig` method. 
 					MORE SPECIFICALLY: 
@@ -29,28 +44,6 @@ Order of TODO-elimination:
 					SOLUTION: 	
 						3. For `Stream`s: 
 							1. For flags: 
-								1. create `WrapperStream<T>` - refactoring of `StreamClass` that would:
-									1. have a single new property `resource: T`
-									2. behaves JUST like `.value` of `StreamClass`
-								2. create `PosStream` - a Stream with a `.pos` property: 
-									1. incremented on `.next()`
-									2. decremented on `.prev()`
-									...
-
-									IMPORTANT: when creating the new 'IStream'-s, *DO NOT*, 
-										call the same method TWICE [example: .isCurrEnd()]. 
-										*Cache it*. 
-										More specifically: 
-											1. keep a hidden `.cache` property on EACH of these `IStream`-s
-											2. let it be used for providing answers to THE SAME questions: 
-												1. delegation to `this.resource.isCurrEnd()` + .cache, leads to... (2.)
-												2. NO LONGER NEEDING TO VERIFY THE SAME THING FOR SEVERAL DIFFERENT STREAMS 
-
-								3. create `FreezableStream` - extends `PosStream`: 
-									1. `.next()`, `.prev()`, etc - USES the `.buffer + .pos` overrides
-									2. has a new method - `.freeze()`: 
-										This freezes the underlying `IFreezableBuffer`, and ends the stream (isEnd = true)
-
 								4. REMOVE the `Configurator` pattern from `Stream`s: 
 									After all, it appears, that composition has come out victorious. 
 
@@ -69,11 +62,35 @@ Order of TODO-elimination:
 									4.1. ALSO - remove the `Autocache` from them. 
 										It should STILL be present on `StreamClass`, though, since it is so used. 
 
-								5. REDEFINE `InputStream` as an EXTENSION of `FreezableStream` that EXPECTS the `buffer`
-									to be *ALREADY FROZEN*. 
+									4.2. ALSO - about the `.predicate/.handler`, REMOVE THESE as well... 
+										That is to say, they are STILL given via a curried function
+										Instead, do via: 
+											1. closure
+											2. currying
+
+										This way, the "configurator pattern" DOES still remain, one is just no longer as intent on saving memory. 
+										Since, INSTEAD of keeping DISTINCT METHODS, one STILL has to keep distinct ".handler/.predicate" instances on the prototype
+											 (which is, really, NO BETTER; only difference is [maybe], that one is keeping just a reference, instead of a different piece of code). 
 
 								6. StreamClass: 
-									1. remove flags from definition
+									1. DELETE IT: 
+										1. no .buffer, .pos - NO SHARED FUNCTIONALITY
+										2. unnecessarily complex method-binding mechanism (since it's now all monomorphic, would be better if done all manually)
+									2. Re-implement all the other ones like so: 
+										1. BasicStream - abstract class: 
+											1. abstract isCurrEnd
+											2. abstract protected baseNextIter
+											3. abstract protected basePrevIter
+											4. abstract protected update(x): 
+												this is either: 
+													1. this.curr = x [state-keeping ones]
+													2. this.curr = this.currGetter() [.currGetter-having-ones]
+											5. next(): 
+												if isCurrEnd(): 
+													this.update(this.baseNextIter())
+
+										2. .curr - ALL the classes have the `.curr` property as a WRITABLE PROPERTY
+										3. SOME have a `currGetter` + `update` setup; 
 
 								7. IndexStream: 
 									1. Detach from `StreamParser` [its own class]
@@ -140,8 +157,28 @@ Order of TODO-elimination:
 							Specifically: 
 								1. IStream-related [for the new `.value`-properties (GIVE THOSE DIFFERENT NAME FOR EACH TYPE OF STREAM)]
 
-		TODO: rename `IBuffer` to `ISequence` 
-			[reason: "buffers" are low-level, this is just an index-ordered collection of items...]; 
+		TODO: about implementing the `.isEnd` in `IStream`
+			Make it `readonly` on the interface level... 
+			Implement internal mutability			
+
+		TODO: separate the `SourceBuilder` and `ArrayCollection` into their own modules (classes/SourceBuilder.ts and classes/ArrayCollection.ts); 
+
+		TODO: re-implementation of `InputStream`. 
+			DO NOT re-define as 'FreezableStream' extension. 
+			INSTEAD, let it take in the `IReadable`
+			THIS requires one to: 
+				1. Accept an 'IReadable' INSTEAD of `IBuffer`
+					A NEW INTERFACE `IReadable`: 
+						1. add for `IReadableSequence`
+					PARTICULARLY, the library PROVIDES an `IReadable` - the `Loaded`, 
+						based off loaded file contents. 
+				2. REMOVING all the "safety checks" regarding the `isFrozen`
+
+		TODO: PROVIDE a public interface for working withthe HIDDEN `OutputBuffer`; 
+			More specicically - one that corresponds to it PRECISELY. 
+
+		TODO: REMOVE any `.buffer` properties. 
+			ANY conventions related to the old "IBuffer" (removing the name now...): 
 
 		TODO: problem (with DynamicParser): 
 			Current usage: 
@@ -224,16 +261,32 @@ Order of TODO-elimination:
 					2. .reverse()
 					3. .filterIndexes() // the `.filter()` thing by `indexSet = new Set(...)` in `unique()`
 
-		TODO: IPosition - fix
-			Having removed the `IPositionObject`, LOTS of things abou tit broke. 
-			The type-bounds, yada, yada...
-			Anyhow, the objective now is to: 
-				1. remove `SubType` from `IStream` [and the `& IPattern`-bit with it... - see Diggers...]
-				2. INavigable - USE `uknown` for `PosType` instead of a generic...
-				3. REMOVE `PosType` from `IStraem`
-
 		TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
 			Reason: works FAR better with the `&`-role-composition
+		
+		TODO: 'IStream'-s
+			1. '.navigate()', '.finish()', '.rewind()' [fate - after the IStream-reworking completion...]
+				1. ['.navigate()'] Keep on: 
+					2. LazyStream
+					3. TreeStream
+					4. InputStream
+
+				2. ['finish()'] Keep on: 
+					2. TreeStream
+					3. InputStream
+
+
+				3. ['rewind()'] Keep on: 
+					2. TreeStream
+					3. InputStream
+				
+				Reason: they have generic implementations for all the others, 
+					and these are the only ones for which there exist decent optimizations
+
+			2. LimitedStream, PredicateStream, StreamParser, ...
+				They REMAIN Configurator-Patterns. 
+				However, the `StreamClass` DOES NOT. 
+				So, they lose 1 layer of complexity (simplification of their map-functions); 
 
 		BIG: .peek() CYCLE: 	
 			Plan: 
