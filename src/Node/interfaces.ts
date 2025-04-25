@@ -1,4 +1,8 @@
-import type { ICopiable, IPattern, ISerializableObject } from "../interfaces.js"
+import type {
+	ICopiable,
+	IPointer,
+	ISerializableObject
+} from "../interfaces.js"
 
 export interface ITyped<Type = any> {
 	readonly type: Type
@@ -16,23 +20,24 @@ export interface IWalkable<Type extends IWalkable<Type> = any> {
 	findUnwalkedChildren: (startIndex: readonly number[]) => number
 }
 
-export interface INodeClass<Type = any, Value = any>
-	extends ITyped<Type>,
-		ITypeCheckable {
-	new (...x: any[]): INode<Type, Value>
+export interface INodeClass<Type = any> extends ITyped<Type>, ITypeCheckable {
+	new (...x: any[]): INode<Type>
 }
 
-export interface INode<Type = any, Value = any>
+export interface INode<Type = any>
 	extends ICopiable,
 		ITyped<Type>,
-		IPattern<Value>,
-		IWalkable<INode<Type, Value>>,
+		IWalkable<INode<Type>>,
 		ISerializableObject {
-	parent: INode<Type, Value> | null
+	parent: INode<Type> | null
 
-	set: (node: INode<Type, Value>, i: number) => this
-	write: (node: INode<Type, Value>, multindex: readonly number[]) => this
+	set: (node: INode<Type>, i: number) => this
+	write: (node: INode<Type>, multindex: readonly number[]) => this
 
-	insert: (node: INode<Type, Value>, index?: number) => this
+	insert: (node: INode<Type>, index?: number) => this
 	remove: (index?: number) => this
 }
+
+export interface ICellNode<Type = any, Value = any>
+	extends INode<Type>,
+		IPointer<Value> {}

@@ -1,10 +1,9 @@
-import { boolean, object, type } from "@hgargg-0710/one"
+import { boolean, object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPattern } from "src/interfaces.js"
 import { BadIndex } from "./constants.js"
 import type {
+	IAccumulator,
 	IBufferized,
-	IFreezableBuffer,
 	IIndexAssignable,
 	IIndexed,
 	IPointer,
@@ -13,7 +12,6 @@ import type {
 } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
-const { isUndefined } = type
 const { structCheck, prop } = object
 const { eqcurry } = boolean
 
@@ -59,7 +57,7 @@ export const state = prop("state") as (x: IStateful) => Summat
  */
 export const buffer = prop("buffer") as <Type = any>(
 	x: IBufferized<Type>
-) => IFreezableBuffer<Type>
+) => IAccumulator<Type>
 
 /**
  * Returns the `.pos` property of the given `Posed` object
@@ -80,26 +78,6 @@ export const assignIndex = <Type = any>(
 export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
 	x: any
 ) => x is IPointer<T>
-
-/**
- * Returns the `.value` property of the given `Pattern`
- */
-export const value = prop("value") as <Type = any>(
-	x: IPattern<Type>
-) => Type | undefined
-
-/**
- * Sets the `.value` property of a given `Pattern`
- */
-export const setValue = <Type = any>(x: IPattern<Type>, value?: Type) =>
-	(x.value = value)
-
-/**
- * Unless given `value` is `undefined`, calls `setValue(pattern, value)`
- */
-export function optionalValue(pattern: IPattern, value?: any) {
-	if (!isUndefined(value)) setValue(pattern, value)
-}
 
 /**
  * Swaps `.value`s of two given `Pattern`s

@@ -79,8 +79,6 @@ export interface IPointer<Type = any> {
 	value: Type
 }
 
-export type IPattern<Type = any> = Partial<IPointer<Type>>
-
 export interface IReversible {
 	reverse: () => this
 }

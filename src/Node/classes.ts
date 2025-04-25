@@ -1,14 +1,11 @@
 import { array, inplace } from "@hgargg-0710/one"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
-import type { IPointer } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
-import type { INode, INodeClass } from "./interfaces.js"
+import type { ICellNode, INode, INodeClass } from "./interfaces.js"
 import { isType } from "./utils.js"
 
-abstract class PreTokenNode<Type = any, Value = any>
-	implements INode<Type, Value>
-{
+abstract class PreTokenNode<Type = any> implements INode<Type> {
 	["constructor"]: new () => typeof this
 
 	type: Type
@@ -19,13 +16,13 @@ abstract class PreTokenNode<Type = any, Value = any>
 	}
 
 	backtrack(positions: number) {
-		let curr: INode<Type, Value> = this
+		let curr: INode<Type> = this
 		while (--positions) curr = curr.parent!
 		return curr
 	}
 
 	findUnwalkedChildren(endInd: number[]) {
-		let currTree: INode<Type, Value> = this
+		let currTree: INode<Type> = this
 		let result = array.lastIndex(endInd)
 		while (
 			(currTree = currTree.parent!) &&
@@ -77,11 +74,11 @@ export const TokenNode = new Autocache(
 		tokenNode.prototype.type = type
 		return tokenNode
 	}
-) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
+) as unknown as <Type = any>(type: Type) => INodeClass<Type>
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
-	implements IPointer<Value>
+	implements ICellNode<Type, Value>
 {
 	["constructor"]: new (value?: Value) => typeof this
 
@@ -95,7 +92,7 @@ abstract class PreContentNode<Type = any, Value = any>
 		)}, "value": ${JSON.stringify(this.value)}}`
 	}
 
-	constructor(public value: Value) {
+	constructor(public readonly value: Value) {
 		super()
 	}
 }
@@ -110,19 +107,19 @@ export const ContentNode = new Autocache(
 		contentNode.prototype.type = type
 		return contentNode
 	}
-) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
+) as unknown as <Type = any>(type: Type) => INodeClass<Type>
 
-abstract class PreRecursiveNode<Type = any, Value = any>
+abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
-	implements INode<Type, Value>
+	implements INode<Type>
 {
-	["constructor"]: new (children?: INode<Type, Value>[]) => typeof this
+	["constructor"]: new (children?: INode<Type>[]) => typeof this
 
-	read(i: number): INode<Type, Value> {
+	read(i: number): INode<Type> {
 		return this.children[i]
 	}
 
-	set(node: INode<Type, Value>, i: number): this {
+	set(node: INode<Type>, i: number): this {
 		this.children[i] = node
 		return this
 	}
@@ -131,15 +128,15 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 		return this.children.length - 1
 	}
 
-	index(multindex: number[]): INode<Type, Value> {
-		let result: INode<Type, Value> = this
+	index(multindex: number[]): INode<Type> {
+		let result: INode<Type> = this
 		for (let i = 0; i < multindex.length; ++i)
 			result = result.read(multindex[i])
 		return result
 	}
 
-	write(node: INode<Type, Value>, multindex: number[]) {
-		let writtenTo: INode<Type, Value> = this
+	write(node: INode<Type>, multindex: number[]) {
+		let writtenTo: INode<Type> = this
 		for (let i = 0; i < multindex.length - 1; ++i)
 			writtenTo = writtenTo.read(multindex[i])
 		writtenTo.set(node, array.last(multindex))
@@ -150,10 +147,7 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 		return new this.constructor(this.children.map((x) => x.copy()))
 	}
 
-	insert(
-		node?: INode<Type, Value>,
-		index: number = this.children.length - 1
-	) {
+	insert(node?: INode<Type>, index: number = this.children.length - 1) {
 		inplace.insert(this.children, index, node)
 		return this
 	}
@@ -170,7 +164,7 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
-	constructor(protected children: INode<Type, Value>[] = []) {
+	constructor(protected children: INode<Type>[] = []) {
 		super()
 		for (const child of children) child.parent = this
 	}
@@ -178,12 +172,12 @@ abstract class PreRecursiveNode<Type = any, Value = any>
 
 export const RecursiveNode = new Autocache(
 	new BasicHash(new MapInternal()),
-	function <Type = any, Value = any>(type: Type) {
-		class recursiveNode extends PreRecursiveNode<Type, Value> {
+	function <Type = any>(type: Type) {
+		class recursiveNode extends PreRecursiveNode<Type> {
 			static readonly type = type
 			static is = isType(type)
 		}
 		recursiveNode.prototype.type = type
 		return recursiveNode
 	}
-) as unknown as <Type = any, Value = any>(type: Type) => INodeClass<Type, Value>
+) as unknown as <Type = any>(type: Type) => INodeClass<Type>
