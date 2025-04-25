@@ -21,6 +21,10 @@ export class DelegateStream<Type = any>
 		return this.resource!.isEnd
 	}
 
+	set isStart(newStart: boolean) {
+		this.resource!.isStart = newStart
+	}
+
 	get isStart() {
 		return this.resource!.isStart!
 	}

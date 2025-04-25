@@ -3,12 +3,12 @@ import { WrapperStream } from "./WrapperStream.js"
 export class PosStream<Type = any> extends WrapperStream<Type> {
 	pos: number = 0
 
-	forward() {
-		return ++this.pos
+	forward(n: number = 1) {
+		return this.pos += n
 	}
-	
-	backward() {
-		return --this.pos
+
+	backward(n: number = 1) {
+		return (this.pos -= n)
 	}
 
 	next() {
