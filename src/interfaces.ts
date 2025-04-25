@@ -106,6 +106,8 @@ export interface IReadable<Type = any> {
 	read(i: number): Type
 }
 
+export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
+
 export type * from "./Collection/interfaces.js"
 export type * from "./DynamicParser/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
@@ -116,4 +118,3 @@ export type * from "./Node/interfaces.js"
 export type * from "./Source/interfaces.js"
 export type * from "./Stream/interfaces.js"
 export type * from "./TableMap/interfaces.js"
-

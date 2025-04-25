@@ -20,9 +20,14 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 		return this.pos > 0
 	}
 
+	private lastPos() {
+		return this.buffer.size - 1
+	}
+
 	next() {
 		const curr = super.next()
-		if (this.pos > this.buffer.size - 1) this.buffer.push(curr)
+		if (!this.buffer.isFrozen && this.pos > this.lastPos())
+			this.buffer.push(curr)
 		return curr
 	}
 
@@ -68,8 +73,7 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 
 	finish() {
 		if (this.buffer.isFrozen) {
-			this.pos = this.buffer.size - 1
-			this.isEnd = true
+			this.pos = this.lastPos()
 			this.update()
 		} else this.navigate(T)
 

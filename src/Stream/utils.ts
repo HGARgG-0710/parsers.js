@@ -296,13 +296,6 @@ export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
 }
 
 /**
- * Checks whether the given `StreamClassInstance` is empty
- */
-export function isEmpty<Type = any>(stream: IStream<Type> & IStarted) {
-	return stream.isEnd && stream.isStart
-}
-
-/**
  * Returns a function that returns invocation of `f(stream.buffer.get(), stream.pos)`
  */
 export function byStreamBufferPos<Type = any, PosType = any>(
