@@ -59,6 +59,7 @@ export type IReversibleStream<
 > = IStream<Type, InitSignature> & IBackward<Type>
 
 export type * from "./interfaces/LimitedStream.js"
+export type * from "./interfaces/OwnedStream.js"
 export type * from "./MarkedStream/interfaces.js"
 export type * from "./NestedStream/interfaces.js"
 export type * from "./Position/interfaces.js"

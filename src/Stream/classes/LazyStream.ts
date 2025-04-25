@@ -1,68 +1,76 @@
-import { object, type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 import type { ISource } from "../../interfaces.js"
 import type {
 	IEndableStream,
-	IIsEndCurrable,
 	INavigable,
-	IPosition
+	IPosed,
+	IPosition,
+	IStream
 } from "../interfaces.js"
-import { streamIterator } from "../StreamClass/methods/iter.js"
 
-const { extendPrototype } = object
-const { ConstDescriptor } = object.descriptor
+import { GetterStream } from "./BasicStream.js"
+import { uniNavigate } from "../utils.js"
+import type { IOwnedStream } from "../interfaces/OwnedStream.js"
+
 const { isNumber } = type
 
 export class LazyStream
-	implements IEndableStream<string>, INavigable<string>, IIsEndCurrable
+	extends GetterStream<string>
+	implements
+		IEndableStream<string>,
+		INavigable<string>,
+		IPosed<number>,
+		IOwnedStream<string>
 {
+	isEnd = false
+	
 	curr: string
-	isEnd = false;
+	owner?: IStream<string>;
 
-	["constructor"]: new (source: ISource) => typeof this;
-	[Symbol.iterator]: () => Generator<string>
+	["constructor"]: new (resource: ISource) => typeof this
 
-	private nextDecoded() {
-		this.source.nextChar()
+	get pos() {
+		return this.resource.pos
 	}
 
-	private transferDecoded() {
-		return (this.curr = this.source.decoded)
+	private nextDecoded(n?: number) {
+		this.resource.nextChar(n)
 	}
 
-	private baseNextIter() {
-		this.nextDecoded()
-		this.transferDecoded()
+	protected currGetter() {
+		return this.resource.decoded
+	}
+
+	protected baseNextIter(n?: number) {
+		this.nextDecoded(n)
+	}
+
+	protected end(): void {
+		this.resource.cleanup()
 	}
 
 	isCurrEnd() {
-		return !this.source.hasChars()
-	}
-
-	next() {
-		const { curr } = this
-		if (this.isCurrEnd()) {
-			this.isEnd = true
-			this.source.cleanup()
-		} else this.baseNextIter()
-		return curr
+		return !this.resource.hasChars()
 	}
 
 	navigate(pos: IPosition) {
-		if (isNumber(pos)) this.source.nextChar(pos)
-		else while (!pos(this)) this.nextDecoded()
-		return this.transferDecoded()
+		if (isNumber(pos)) this.resource.nextChar(pos)
+		else uniNavigate(this, pos)
+		this.update()
+		return this.curr
 	}
 
 	copy() {
-		return new this.constructor(this.source.copy())
+		return new this.constructor(this.resource.copy())
 	}
 
-	constructor(private source: ISource) {}
+	claimBy(owner: IStream<string>): void {
+		this.owner = owner
+	}
+
+	constructor(public readonly resource: ISource) {
+		super()
+	}
 }
 
-extendPrototype(LazyStream, {
-	[Symbol.iterator]: ConstDescriptor(streamIterator)
-})
-
 export * as Source from "../../Source/classes.js"
-

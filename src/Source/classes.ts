@@ -42,8 +42,7 @@ abstract class PreSource implements ISource {
 		this.advance(length)
 	}
 
-	protected pos: number = 0
-
+	pos: number = 0
 	protected readonly temp: Buffer
 
 	protected abstract reader(): number

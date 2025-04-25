@@ -5,4 +5,5 @@ export interface ISource extends ICopiable {
 	nextChar(n?: number): void
 	cleanup(): void
 	decoded: string
+	pos: number
 }
