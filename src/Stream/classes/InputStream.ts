@@ -1,21 +1,33 @@
+import { number } from "@hgargg-0710/one"
 import type { IParseable } from "../../interfaces.js"
-import type { IStream } from "../interfaces.js"
-import { SetterStream } from "./BasicStream.js"
+import type { IPosition, IStream } from "../interfaces.js"
+import { isPredicatePosition } from "../Position/utils.js"
+import { uniNavigate } from "../utils.js"
+import { GetterStream } from "./BasicStream.js"
+
+const { max, min } = number
 
 export class InputStream<Type = any>
-	extends SetterStream<Type>
+	extends GetterStream<Type>
 	implements IStream<Type, [IParseable<Type>]>
 {
 	["constructor"]: new (resource?: IParseable<Type>) => this
 
 	pos: number = 0
+	resource?: IParseable<Type>
 
-	protected baseNextIter(): Type {
-		return this.resource!.read(++this.pos)
+	private lastPos: number
+
+	protected currGetter(): Type {
+		return this.resource!.read(this.pos)
 	}
 
-	protected basePrevIter(): Type {
-		return this.resource!.read(--this.pos)
+	protected baseNextIter() {
+		++this.pos
+	}
+
+	protected basePrevIter() {
+		--this.pos
 	}
 
 	isCurrEnd(): boolean {
@@ -28,6 +40,7 @@ export class InputStream<Type = any>
 
 	init(resource: IParseable<Type>) {
 		this.resource = resource
+		this.lastPos = resource.size - 1
 		return this
 	}
 
@@ -35,7 +48,25 @@ export class InputStream<Type = any>
 		return new this.constructor(this.resource?.copy())
 	}
 
-	constructor(public resource?: IParseable<Type>) {
+	navigate(relativePos: IPosition) {
+		if (isPredicatePosition(relativePos))
+			return uniNavigate(this, relativePos)
+
+		this.pos = max(0, min(this.lastPos, this.lastPos + relativePos))
+		this.update()
+		return this.curr
+	}
+
+	rewind() {
+		return this.navigate(0)
+	}
+
+	finish() {
+		return this.navigate(this.lastPos)
+	}
+
+	constructor(resource?: IParseable<Type>) {
 		super()
+		if (resource) this.init(resource)
 	}
 }

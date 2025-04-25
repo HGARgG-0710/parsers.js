@@ -1,11 +1,11 @@
 import type { IStream } from "../interfaces.js"
 
 export abstract class BasicStream<Type = any> implements IStream<Type> {
-	protected abstract baseNextIter(): Type
-	protected abstract update(newCurr?: Type): void
+	protected abstract baseNextIter(): Type | void
+	protected abstract update(newCurr?: Type | void): void
 
 	protected end?(): void
-	protected basePrevIter?(): Type
+	protected basePrevIter?(): Type | void
 	protected start?(): void
 
 	abstract isCurrEnd(): boolean
