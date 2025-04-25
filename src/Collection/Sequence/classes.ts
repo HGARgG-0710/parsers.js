@@ -1,27 +1,38 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IUnfreezableSequence } from "./interfaces.js"
-import { TypicalUnfreezable } from "../../internal/Collection/Sequence/TypicalUnfreezable.js"
+import type { IUnfreezableAccumulator } from "./interfaces.js"
 
 const { isString } = type
 
-export class SourceBuilder
-	extends TypicalUnfreezable<string>
-	implements IUnfreezableSequence<string>
-{
-	protected collection: string
+export class SourceBuilder implements IUnfreezableAccumulator<string> {
+	["constructor"]: new (finalSource?: string) => this
 
-	get() {
-		return super.get() as string
+	isFrozen: boolean = false
+
+	copy() {
+		return new this.constructor(this.finalSource)
 	}
 
-	push(...strings: string[]) {
-		if (!this.isFrozen) this.collection += strings.join("")
+	unfreeze() {
+		this.isFrozen = false
 		return this
 	}
 
-	constructor(value: string = "") {
-		assert(isString(value))
-		super(value)
+	freeze() {
+		this.isFrozen = true
+		return this
+	}
+
+	get() {
+		return this.finalSource
+	}
+
+	push(...strings: string[]) {
+		if (!this.isFrozen) this.finalSource += strings.join("")
+		return this
+	}
+
+	constructor(private finalSource: string = "") {
+		assert(isString(finalSource))
 	}
 }

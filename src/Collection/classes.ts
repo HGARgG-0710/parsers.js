@@ -1,20 +1,14 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { IterableCollection } from "src/internal/Collection/IterableCollection.js"
 import type { ICollection } from "./interfaces.js"
 
 const { isArray } = type
 
-export class ArrayCollection<Type = any>
-	extends IterableCollection<Type>
-	implements ICollection<Type>
-{
-	protected collection: Type[];
-
+export class ArrayCollection<Type = any> implements ICollection<Type> {
 	["constructor"]: new (...x: any[]) => ArrayCollection<Type>
 
 	get() {
-		return super.get() as readonly Type[]
+		return this.collection as readonly Type[]
 	}
 
 	push(...x: Type[]) {
@@ -31,9 +25,12 @@ export class ArrayCollection<Type = any>
 		return new this.constructor(array.copy(this.collection))
 	}
 
-	constructor(value: Type[] = []) {
-		assert(isArray(value))
-		super(value)
+	get size() {
+		return this.collection!.length
+	}
+
+	constructor(protected collection: Type[] = []) {
+		assert(isArray(collection))
 	}
 }
 

@@ -1,12 +1,15 @@
 import type { IGettable } from "src/interfaces.js"
 import type { ICopiable, IIndexed, IInitializable } from "../interfaces.js"
 
-export interface ICollection<Type = any>
-	extends Iterable<Type>,
-		IGettable<IIndexed<Type>>,
-		ICopiable,
-		IInitializable<[IIndexed<Type>?], ICollection<Type>> {
+export interface IPushable<Type = any> {
 	push: (...x: Type[]) => this
+}
+
+export interface ICollection<Type = any>
+	extends IGettable<IIndexed<Type>>,
+		ICopiable,
+		IInitializable<[IIndexed<Type>?], ICollection<Type>>,
+		IPushable<Type> {
 	readonly size: number
 }
 

@@ -1,18 +1,22 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
-	IUnfreezableSequence,
-	IWritableSequence
+	IReadable,
+	ISizeable,
+	IUnfreezableAccumulator
 } from "../../../interfaces.js"
-import { TypicalUnfreezable } from "./TypicalUnfreezable.js"
 
 const { isArray } = type
 
 export class OutputBuffer<Type = any>
-	extends TypicalUnfreezable<Type>
-	implements IUnfreezableSequence<Type>, IWritableSequence<Type>
+	implements
+		IUnfreezableAccumulator<Type, readonly Type[]>,
+		ISizeable,
+		IReadable<Type>
 {
-	protected collection: Type[]
+	["constructor"]: new (collection?: Type[]) => this
+
+	isFrozen: boolean = false
 
 	push(...elements: Type[]) {
 		if (!this.isFrozen) this.collection.push(...elements)
@@ -20,20 +24,32 @@ export class OutputBuffer<Type = any>
 	}
 
 	get() {
-		return super.get() as readonly Type[]
+		return this.collection as readonly Type[]
 	}
 
 	copy() {
 		return new this.constructor(array.copy(this.collection))
 	}
 
-	write(i: number, value: Type) {
-		if (!this.isFrozen) this.collection[i] = value
+	read(i: number) {
+		return this.collection![i] as Type
+	}
+
+	unfreeze() {
+		this.isFrozen = false
 		return this
 	}
 
-	constructor(value: Type[] = []) {
-		assert(isArray(value))
-		super(value)
+	freeze() {
+		this.isFrozen = true
+		return this
+	}
+
+	get size() {
+		return this.collection!.length
+	}
+
+	constructor(private readonly collection: Type[] = []) {
+		assert(isArray(collection))
 	}
 }
