@@ -250,8 +250,8 @@ export function finish<Type = any, PosType = any>(
  * * 3. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
  * @returns `stream.curr`
  */
-export function uniNavigate<Type = any, PosType = any>(
-	stream: IReversibleStream<Type, PosType>,
+export function uniNavigate<Type = any>(
+	stream: IReversibleStream<Type>,
 	position: IPosition<Type>
 ): Type {
 	if (isNumber(position)) {
@@ -259,7 +259,7 @@ export function uniNavigate<Type = any, PosType = any>(
 		else while (position--) stream.next()
 	} else {
 		const change = pickDirection(position)
-		while (!stream.isEnd && !position(stream, stream.pos)) change(stream)
+		while (!stream.isEnd && !position(stream)) change(stream)
 	}
 
 	return stream.curr
@@ -298,9 +298,7 @@ export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
 /**
  * Checks whether the given `StreamClassInstance` is empty
  */
-export function isEmpty<Type = any, PosType = any>(
-	stream: IStream<Type, PosType> & IStarted
-) {
+export function isEmpty<Type = any>(stream: IStream<Type> & IStarted) {
 	return stream.isEnd && stream.isStart
 }
 

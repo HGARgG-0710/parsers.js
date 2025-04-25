@@ -18,4 +18,3 @@ export * as Node from "./Node/classes.js"
 export * as Source from "./Source/classes.js"
 export * as Stream from "./Stream/classes.js"
 export * as TableMap from "./TableMap/classes.js"
-
