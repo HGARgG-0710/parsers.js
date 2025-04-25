@@ -58,5 +58,7 @@ export class DelegateStream<Type = any>
 		return this
 	}
 
-	constructor(public resource?: IStream<Type>) {}
+	constructor(public resource?: IStream<Type>) {
+		if (resource) this.init(resource)
+	}
 }
