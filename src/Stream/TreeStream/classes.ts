@@ -20,8 +20,7 @@ const TreeStreamBase = StreamClass<IWalkable, any>(baseMethods) as new <
 
 export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends TreeStreamBase<TreeLike>
-	implements
-		IStreamClassInstance<TreeLike, TreeLike, MultiIndex, [TreeLike?]>
+	implements IStreamClassInstance<TreeLike, MultiIndex, [TreeLike?]>
 {
 	protected readonly super: Summat
 

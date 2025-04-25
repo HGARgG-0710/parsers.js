@@ -19,16 +19,15 @@ export type IStreamClassSignature<Type = any> =
 		isPattern?: boolean
 	}
 
-export type IStreamClass<Type = any, SubType = any, PosType = any> =
-	| IConstructor<[any?], IStreamClassInstance<Type, SubType, PosType>>
-	| IConstructor<[any?], IReversedStreamClassInstance<Type, SubType, PosType>>
+export type IStreamClass<Type = any, PosType = any> =
+	| IConstructor<[any?], IStreamClassInstance<Type, PosType>>
+	| IConstructor<[any?], IReversedStreamClassInstance<Type, PosType>>
 
 export type IStreamClassInstance<
 	Type = any,
-	SubType = any,
 	PosType = any,
 	InitSignature extends any[] = any[]
-> = IStream<Type, SubType, PosType, InitSignature> &
+> = IStream<Type, PosType, InitSignature> &
 	IStarted &
 	IIsEndCurrable &
 	IFinishable<Type> &
@@ -37,10 +36,9 @@ export type IStreamClassInstance<
 
 export type IReversedStreamClassInstance<
 	Type = any,
-	SubType = any,
 	PosType = any,
 	InitSignature extends any[] = any[]
-> = IStreamClassInstance<Type, SubType, PosType, InitSignature> &
+> = IStreamClassInstance<Type, PosType, InitSignature> &
 	IPrevable<Type> &
 	IIsStartCurrable &
 	IRewindable<Type>

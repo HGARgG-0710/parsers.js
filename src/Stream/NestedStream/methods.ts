@@ -1,7 +1,7 @@
 import { type } from "@hgargg-0710/one"
 import { MissingArgument } from "../../constants.js"
 import type {
-	IFreezableBuffer,
+	IFreezableSequence,
 	IIndexAssignable,
 	ILookupTable,
 	IStreamPredicate
@@ -50,7 +50,7 @@ export namespace methods {
 	export function init<Type = any, IndexType = any>(
 		this: INestedStreamImpl<Type, IndexType>,
 		value?: IUnderNestedStream<Type>,
-		buffer?: IFreezableBuffer<Type>,
+		buffer?: IFreezableSequence<Type>,
 		index?: IndexType
 	) {
 		if (!isUndefined(index)) assignIndex(this, index)
@@ -85,7 +85,7 @@ export interface INestedStreamImpl<Type = any, IndexType = any>
 		IIndexAssignable<IndexType> {
 	["constructor"]: new (
 		value?: IUnderNestedStream<Type>,
-		buffer?: IFreezableBuffer<Type | INestedStreamImpl<Type, IndexType>>,
+		buffer?: IFreezableSequence<Type | INestedStreamImpl<Type, IndexType>>,
 		index?: IndexType
 	) => INestedStreamImpl<Type, IndexType>
 

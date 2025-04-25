@@ -1,4 +1,4 @@
-import type { IFreezableBuffer } from "../../interfaces.js"
+import type { IFreezableSequence } from "../../interfaces.js"
 import type {
 	IEndableStream,
 	IStream,
@@ -7,12 +7,11 @@ import type {
 
 export type IMarkedStreamInitSignature<Type = any> = [
 	IEndableStream<Type>?,
-	IFreezableBuffer<Type>?
+	IFreezableSequence<Type>?
 ]
 
 export type IMarkedStream<Type = any, MarkerType = any> = IStream<
 	Type,
-	IEndableStream<Type>,
 	number,
 	IMarkedStreamInitSignature<Type>
 > & {
@@ -21,16 +20,11 @@ export type IMarkedStream<Type = any, MarkerType = any> = IStream<
 
 export type IMarkedStreamConstructor<Type = any, MarkerType = any> = new (
 	value?: IEndableStream<Type>,
-	buffer?: IFreezableBuffer<Type>
+	buffer?: IFreezableSequence<Type>
 ) => IConcreteMarkedStream<Type, MarkerType>
 
 export type IConcreteMarkedStream<Type = any, MarkerType = any> = IMarkedStream<
 	Type,
 	MarkerType
 > &
-	IStreamClassInstance<
-		Type,
-		IEndableStream<Type>,
-		number,
-		IMarkedStreamInitSignature<Type>
-	>
+	IStreamClassInstance<Type, number, IMarkedStreamInitSignature<Type>>

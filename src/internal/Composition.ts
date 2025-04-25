@@ -1,12 +1,12 @@
 import { functional, type } from "@hgargg-0710/one"
+import assert from "assert"
 import type {
 	IComposition,
 	IFunctionTuple
 } from "../DynamicParser/interfaces.js"
-import type { IDynamicBuffer } from "../interfaces.js"
+import type { IDynamicSequence } from "../interfaces.js"
 import { Callable } from "./Callable.js"
-import { CallbackBuffer } from "./Collection/Buffer/CallbackBuffer.js"
-import assert from "assert"
+import { CallbackBuffer } from "./Collection/Sequence/CallbackBuffer.js"
 
 const { trivialCompose, id } = functional
 const { isArray } = type
@@ -19,7 +19,7 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 
 	protected merged: (...x: ArgType) => OutType = id as any
 
-	protected merge(buffer: IDynamicBuffer<Function>) {
+	protected merge(buffer: IDynamicSequence<Function>) {
 		this.merged = trivialCompose(...buffer)
 	}
 

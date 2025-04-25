@@ -56,9 +56,9 @@ export function positionEqual<Type = any>(
  * 2. If `direction(pos1) === direction(pos2)` and not both of them are a `number`: return `true`
  * 3. If `direction(pos1) === direction(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
  */
-export function directionCompare<Type = any, SubType = any>(
-	pos1: IPosition<Type, SubType>,
-	pos2: IPosition<Type, SubType>
+export function directionCompare<Type = any>(
+	pos1: IPosition<Type>,
+	pos2: IPosition<Type>
 ) {
 	const [fPos1, fPos2] = [pos1, pos2].map(direction)
 	if (fPos2 !== fPos1) return fPos2 > fPos1
@@ -72,18 +72,16 @@ export function directionCompare<Type = any, SubType = any>(
  * 1. If `pos` is a number: `pos >= 0`
  * 2. If `pos` is a `PredicatePosition`: `pos.direction`, or, if absent, `true` by default
  */
-export function direction<Type = any, SubType = any>(
-	pos: IPosition<Type, SubType>
-) {
+export function direction<Type = any>(pos: IPosition<Type>) {
 	return isNumber(pos) ? pos >= 0 : !("direction" in pos) || pos.direction!
 }
 
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export const pickDirection = <Type = any, SubType = any, PosType = any>(
-	pos: IPosition<Type, SubType>
-): IChange<Type, SubType, PosType> => (direction(pos) ? next : previous)
+export const pickDirection = <Type = any, PosType = any>(
+	pos: IPosition<Type>
+): IChange<Type, PosType> => (direction(pos) ? next : previous)
 
 /**
  * Applies a given (supposedly, copying) transform onto the given `PredicatePosition`, whilst preserving the `.direction`

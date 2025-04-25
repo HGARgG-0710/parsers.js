@@ -1,12 +1,9 @@
 import { type } from "@hgargg-0710/one"
 import { uniNavigate } from "src/Stream/utils.js"
-import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { IBufferized } from "../../../Collection/Sequence/interfaces.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
-import type {
-	IPosition,
-	IReversibleStream
-} from "../../interfaces.js"
+import type { IPosition, IReversibleStream } from "../../interfaces.js"
 import type { IPosed } from "../../Position/interfaces.js"
 import { positionDecrement } from "../../Position/refactor.js"
 import { direction } from "../../Position/utils.js"

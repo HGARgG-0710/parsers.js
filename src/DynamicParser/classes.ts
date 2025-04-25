@@ -6,7 +6,7 @@ import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
 import type { ICopiable, IInitializable } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
-import { CallbackBuffer } from "../internal/Collection/Buffer/CallbackBuffer.js"
+import { CallbackBuffer } from "../internal/Collection/Sequence/CallbackBuffer.js"
 import { IndexSet } from "../internal/IndexSet.js"
 import type {
 	IComplexComposition,

@@ -1,5 +1,5 @@
 import type {
-	IFreezableBuffer,
+	IFreezableSequence,
 	IIsEndCurrable,
 	IReversibleStream,
 	IStream,
@@ -11,25 +11,19 @@ export type IUnderPredicateStream<Type = any> = IReversibleStream<Type> &
 
 export type IPredicateStreamConstructor<Type = any> = new (
 	value?: IUnderPredicateStream<Type>,
-	buffer?: IFreezableBuffer<Type>
+	buffer?: IFreezableSequence<Type>
 ) => IConcretePredicateStream<Type>
 
 export type IPredicateStream<Type = any> = IStream<
 	Type,
-	IUnderPredicateStream<Type>,
 	number,
 	IPredicateStreamInitSignature<Type>
 >
 
 export type IPredicateStreamInitSignature<Type = any> = [
 	IUnderPredicateStream<Type>?,
-	IFreezableBuffer<Type>?
+	IFreezableSequence<Type>?
 ]
 
 export type IConcretePredicateStream<Type = any> = IPredicateStream<Type> &
-	IStreamClassInstance<
-		Type,
-		IUnderPredicateStream<Type>,
-		number,
-		IPredicateStreamInitSignature<Type>
-	>
+	IStreamClassInstance<Type, number, IPredicateStreamInitSignature<Type>>

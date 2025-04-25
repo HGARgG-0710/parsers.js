@@ -24,7 +24,7 @@ const { F } = boolean
 
 function makeStreamClass<Type = any, SubType = any, PosType = any>(
 	signature: IStreamClassSignature<Type>
-): IStreamClass<Type, SubType, PosType> {
+): IStreamClass<Type, PosType> {
 	const {
 		isCurrStart,
 		basePrevIter,
@@ -45,7 +45,7 @@ function makeStreamClass<Type = any, SubType = any, PosType = any>(
 		isPattern: value
 	} = signature
 
-	let streamClass: IStreamClass<Type, SubType, PosType>
+	let streamClass: IStreamClass<Type, PosType>
 
 	interface streamClassGuaranteed extends ICopiable {
 		isStart: boolean
@@ -141,9 +141,9 @@ function makeStreamClass<Type = any, SubType = any, PosType = any>(
 export const StreamClass = new Autocache(
 	new ObjectMap(),
 	makeStreamClass
-) as unknown as <Type = any, SubType = any, PosType = any>(
+) as unknown as <Type = any, PosType = any>(
 	signature: IStreamClassSignature<Type>
-) => IStreamClass<Type, SubType, PosType>
+) => IStreamClass<Type, PosType>
 
 const valueIsEnd = valuePropDelegate("isEnd")
 export const DefaultEndStream = <Type = any, SubType = any, PosType = any>(

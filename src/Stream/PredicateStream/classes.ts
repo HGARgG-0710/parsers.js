@@ -1,7 +1,7 @@
 import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import { ArrayMap } from "../../IndexMap/LinearIndexMap/classes.js"
-import type { IFreezableBuffer } from "../../interfaces.js"
+import type { IFreezableSequence } from "../../interfaces.js"
 import { Autocache } from "../../internal/Autocache.js"
 import { withSuper } from "../../refactor.js"
 import type { IPredicatePosition } from "../Position/interfaces.js"
@@ -51,12 +51,12 @@ function makePredicateStream<Type = any>(predicate: IPredicatePosition<Type>) {
 
 			init: (
 				value?: IUnderPredicateStream<Type>,
-				buffer?: IFreezableBuffer<Type>
+				buffer?: IFreezableSequence<Type>
 			) => IPredicateStreamImpl<Type>
 
 			constructor(
 				value?: IUnderPredicateStream<Type>,
-				buffer?: IFreezableBuffer<Type>
+				buffer?: IFreezableSequence<Type>
 			) {
 				super(value)
 				this.init(value, buffer)

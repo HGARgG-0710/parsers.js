@@ -1,9 +1,9 @@
 import { functional, object } from "@hgargg-0710/one"
-import type { IBufferized } from "../../../Collection/Buffer/interfaces.js"
+import type { IBufferized } from "../../../Collection/Sequence/interfaces.js"
 import {
 	bufferFreeze,
 	bufferPush
-} from "../../../Collection/Buffer/refactor.js"
+} from "../../../Collection/Sequence/refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type { IStream } from "../../interfaces.js"

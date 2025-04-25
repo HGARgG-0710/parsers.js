@@ -1,11 +1,9 @@
 import type { IReversibleStream, IStream } from "../interfaces.js"
 
-export type IPosition<Type = any, SubType = any> =
-	| IPredicatePosition<Type, SubType>
-	| number
+export type IPosition<Type = any> = IPredicatePosition<Type> | number
 
-export type IPredicatePosition<Type = any, SubType = any> = ((
-	stream: IStream<Type, SubType>,
+export type IPredicatePosition<Type = any> = ((
+	stream: IStream<Type>,
 	pos?: unknown
 ) => boolean) &
 	Partial<IDirectionHaving>
@@ -14,8 +12,8 @@ export interface IPosed<Type = any> {
 	pos: Type
 }
 
-export type IChange<Type = any, SubType = any, PosType = any> = (
-	input: IReversibleStream<Type, SubType, PosType>
+export type IChange<Type = any, PosType = any> = (
+	input: IReversibleStream<Type, PosType>
 ) => Type
 
 export interface IDirectionHaving {

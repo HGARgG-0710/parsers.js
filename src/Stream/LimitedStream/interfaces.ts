@@ -1,4 +1,4 @@
-import type { IFreezableBuffer } from "src/interfaces.js"
+import type { IFreezableSequence } from "src/interfaces.js"
 import type { ICopiable } from "../../interfaces.js"
 
 import type {
@@ -11,11 +11,7 @@ import type {
 	IStream
 } from "../interfaces.js"
 
-export type IUnderLimitedStream<Type = any> = IStream<
-	Type,
-	any,
-	IPosition
-> &
+export type IUnderLimitedStream<Type = any> = IStream<Type, IPosition> &
 	IIsEndCurrable &
 	IIsStartCurrable &
 	ICopiable &
@@ -23,17 +19,16 @@ export type IUnderLimitedStream<Type = any> = IStream<
 
 export type ILimitedStreamInitSignature<Type = any> = [
 	IUnderLimitedStream<Type>?,
-	IFreezableBuffer<Type>?
+	IFreezableSequence<Type>?
 ]
 
 export type ILimitedStreamConstructor<Type = any> = new (
 	value?: IUnderLimitedStream<Type>,
-	buffer?: IFreezableBuffer<Type>
+	buffer?: IFreezableSequence<Type>
 ) => IConcreteLimitedStream<Type>
 
 export type ILimitedStream<Type = any> = IStream<
 	Type,
-	IUnderLimitedStream<Type>,
 	number,
 	ILimitedStreamInitSignature<Type>
 > &
@@ -42,7 +37,6 @@ export type ILimitedStream<Type = any> = IStream<
 export type IConcreteLimitedStream<Type = any> = ILimitedStream<Type> &
 	IReversedStreamClassInstance<
 		Type,
-		IUnderLimitedStream<Type>,
 		number,
 		ILimitedStreamInitSignature<Type>
 	>

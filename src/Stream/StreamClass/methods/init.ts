@@ -2,9 +2,9 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPattern, IStateful } from "src/interfaces.js"
 import type {
 	IBufferized,
-	IFreezableBuffer
-} from "../../../Collection/Buffer/interfaces.js"
-import { assignBuffer } from "../../../Collection/Buffer/refactor.js"
+	IFreezableSequence
+} from "../../../Collection/Sequence/interfaces.js"
+import { assignBuffer } from "../../../Collection/Sequence/refactor.js"
 import { BitHash } from "../../../HashMap/classes.js"
 import { ArrayInternal } from "../../../HashMap/InternalHash/classes.js"
 import type { IThisMethod } from "../../../refactor.js"
@@ -32,13 +32,13 @@ export type IStreamClassInitSignature<Type = any> =
 export type IBaseStreamClassInitSignature = []
 
 export type IBufferizedStreamClassInitSignature<Type = any> = [
-	IFreezableBuffer<Type>?
+	IFreezableSequence<Type>?
 ]
 
 export type IStatefulStreamClassInitSignature = [Summat?]
 
 export type IBufferizedStatefulStreamClassInitSignature<Type = any> = [
-	IFreezableBuffer<Type>?,
+	IFreezableSequence<Type>?,
 	Summat?
 ]
 
@@ -46,14 +46,14 @@ export type IPatternStreamClassInitSignature = [any?]
 
 export type IBufferizedPatternStreamClassInitSignature<Type = any> = [
 	any?,
-	IFreezableBuffer<Type>?
+	IFreezableSequence<Type>?
 ]
 
 export type IStatefulPatternStreamClassInitSignature = [any?, Summat?]
 
 export type IBufferizedStatefulPatternStreamClassInitSignature<Type = any> = [
 	any?,
-	IFreezableBuffer<Type>?,
+	IFreezableSequence<Type>?,
 	Summat?
 ]
 
@@ -167,7 +167,7 @@ function generateInitMethods<Type = any>(
 
 	function bufferInitialze<Type = any>(
 		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>,
-		buffer: IFreezableBuffer
+		buffer: IFreezableSequence
 	) {
 		assignBuffer(this, buffer)
 		initialize.call(this)
@@ -178,7 +178,7 @@ function generateInitMethods<Type = any>(
 		this: IStreamClassInstanceImpl<Type> &
 			IPosed<number> &
 			IBufferized<Type>,
-		buffer?: IFreezableBuffer
+		buffer?: IFreezableSequence
 	) {
 		assignBuffer(this, buffer)
 		posInitialize.call(this)
@@ -205,7 +205,7 @@ function generateInitMethods<Type = any>(
 
 	function bufferStateInitialize<Type = any>(
 		this: IStreamClassInstanceImpl<Type> & IStateful & IBufferized<Type>,
-		buffer?: IFreezableBuffer,
+		buffer?: IFreezableSequence,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -218,7 +218,7 @@ function generateInitMethods<Type = any>(
 			IStateful &
 			IBufferized<Type> &
 			IPosed<number>,
-		buffer?: IFreezableBuffer,
+		buffer?: IFreezableSequence,
 		state: Summat = {}
 	) {
 		createState(this, state)
@@ -247,7 +247,7 @@ function generateInitMethods<Type = any>(
 	function bufferPatternInitialize<Type = any>(
 		this: IStreamClassInstanceImpl<Type> & IBufferized<Type>,
 		value?: any,
-		buffer?: IFreezableBuffer<Type>
+		buffer?: IFreezableSequence<Type>
 	) {
 		optionalValue(this, value)
 		bufferInitialze.call(this, buffer)
@@ -260,7 +260,7 @@ function generateInitMethods<Type = any>(
 			IBufferized<Type> &
 			IPattern,
 		value?: any,
-		buffer?: IFreezableBuffer<Type>
+		buffer?: IFreezableSequence<Type>
 	) {
 		optionalValue(this, value)
 		posBufferInitialize.call(this, buffer)
@@ -296,7 +296,7 @@ function generateInitMethods<Type = any>(
 			IStateful &
 			IPattern,
 		value?: any,
-		buffer?: IFreezableBuffer<Type>,
+		buffer?: IFreezableSequence<Type>,
 		state: Summat = {}
 	) {
 		optionalValue(this, value)
@@ -311,7 +311,7 @@ function generateInitMethods<Type = any>(
 			IStateful &
 			IPattern,
 		value?: any,
-		buffer?: IFreezableBuffer<Type>,
+		buffer?: IFreezableSequence<Type>,
 		state: Summat = {}
 	) {
 		optionalValue(this, value)

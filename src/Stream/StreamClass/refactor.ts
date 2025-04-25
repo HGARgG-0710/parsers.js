@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IStateful } from "src/interfaces.js"
-import type { IBufferized } from "../../Collection/Buffer/interfaces.js"
+import type { IBufferized } from "../../Collection/Sequence/interfaces.js"
 import { valueDelegate, valuePropDelegate } from "../../refactor.js"
 import type {
 	IFinishable,
@@ -93,22 +93,20 @@ type ICommonStreamClassInstance<Type = any> =
 
 export type IStreamClassInstanceImpl<
 	Type = any,
-	SubType = any,
 	PosType = any,
 	InitSignature extends any[] = any[]
 > = ICommonStreamClassInstance<Type> &
-	IStreamClassInstance<Type, SubType, PosType, InitSignature> &
+	IStreamClassInstance<Type, PosType, InitSignature> &
 	IStreamClassTransferable<Type, PosType> &
 	Partial<IPrevable<Type>> &
 	Partial<IUpdatable<Type>>
 
 export type IReversedStreamClassInstanceImpl<
 	Type = any,
-	SubType = any,
 	PosType = any,
 	InitSignature extends any[] = any[]
 > = ICommonStreamClassInstance<Type> &
-	IReversedStreamClassInstance<Type, SubType, PosType, InitSignature> &
+	IReversedStreamClassInstance<Type, PosType, InitSignature> &
 	IBasePrevIterable<Type>
 
 export { curr }

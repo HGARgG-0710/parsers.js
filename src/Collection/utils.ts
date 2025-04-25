@@ -14,6 +14,3 @@ export const isCollection = structCheck<ICollection>({
 	size: isNumber,
 	[Symbol.iterator]: isFunction
 }) as <Type = any>(x: any) => x is ICollection<Type>
-
-export * as Buffer from "./Buffer/utils.js"
-
