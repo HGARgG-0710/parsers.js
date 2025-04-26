@@ -1,4 +1,4 @@
-import { functional, object, type } from "@hgargg-0710/one"
+import { functional, type } from "@hgargg-0710/one"
 import type { IPointer } from "src/interfaces.js"
 import { BasicHash } from "../HashMap/classes.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
@@ -12,14 +12,11 @@ import type {
 	ISizeable
 } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
-import { makeDelegate } from "../refactor.js"
 import { current } from "../Stream/utils.js"
 import { isGoodPointer, pos } from "../utils.js"
 import type { ILookupTable, ITableConstructor } from "./interfaces.js"
 
 const { id } = functional
-const { extendPrototype } = object
-const { ConstDescriptor } = object.descriptor
 const { isNullary } = type
 
 abstract class DelegateLookupTable<
@@ -64,40 +61,6 @@ abstract class DelegateLookupTable<
 	}
 }
 
-abstract class DelegateHashTable<
-		KeyType = any,
-		ValueType = any,
-		DefaultType = any,
-		OwningType = any
-	>
-	extends DelegateLookupTable<
-		KeyType,
-		ValueType,
-		OwningType,
-		IHashMap<KeyType, ValueType, DefaultType>,
-		KeyType
-	>
-	implements ILookupTable<KeyType, ValueType, OwningType>
-{
-	["constructor"]: new (hash: IHashMap<KeyType, ValueType>) => ILookupTable<
-		KeyType,
-		ValueType,
-		OwningType
-	>
-
-	byOwned(priorOwned: IIndexAssignable<OwningType>) {
-		return this.delegate.index(priorOwned.assignedIndex)
-	}
-
-	copy(): ILookupTable<KeyType, ValueType, OwningType> {
-		return new this.constructor(this.delegate)
-	}
-
-	constructor(hash: IHashMap<KeyType, ValueType>) {
-		super(hash)
-	}
-}
-
 export class PersistentIndexTable<
 		KeyType = any,
 		ValueType = any,
@@ -112,6 +75,10 @@ export class PersistentIndexTable<
 	>
 	implements ILookupTable<KeyType, ValueType, IPointer<number>>
 {
+	["constructor"]: new (
+		delegate: IPersistentIndexMap<KeyType, ValueType, DefaultType>
+	) => this
+
 	claim(x: any) {
 		const pointer = this.delegate.getIndex(x)
 		return isGoodPointer(pointer) ? pointer : null
@@ -128,29 +95,46 @@ export class PersistentIndexTable<
 	}
 
 	copy() {
-		return new PersistentIndexTable<KeyType, ValueType, DefaultType>(
-			this.delegate.copy()
-		)
+		return new this.constructor(this.delegate.copy())
 	}
 }
 
 export const HashTable = new Autocache(
 	new BasicHash(new MapInternal()),
-	function <OwningType = any>(ownership: (x: any) => OwningType) {
-		const hashTable = makeDelegate(DelegateHashTable, ["delegate"], "table")
+	function <OwningType = any>(
+		ownership: (x: any) => OwningType
+	): ITableConstructor<OwningType> {
+		return class<KeyType = any, ValueType = any, DefaultType = any>
+			extends DelegateLookupTable<
+				KeyType,
+				ValueType,
+				OwningType,
+				IHashMap<KeyType, ValueType, DefaultType>,
+				KeyType
+			>
+			implements ILookupTable<KeyType, ValueType, OwningType>
+		{
+			["constructor"]: new (hash: IHashMap<KeyType, ValueType>) => this
 
-		extendPrototype(hashTable, {
-			claim: ConstDescriptor(function (x: any) {
+			byOwned(priorOwned: IIndexAssignable<OwningType>) {
+				return this.delegate.index(priorOwned.assignedIndex)
+			}
+
+			claim(x: any) {
 				const pointer = ownership(x)
 				return isNullary(pointer) ? null : pointer
-			})
-		})
+			}
 
-		return hashTable
+			copy() {
+				return new this.constructor(this.delegate)
+			}
+
+			constructor(hash: IHashMap<KeyType, ValueType>) {
+				super(hash)
+			}
+		}
 	}
-) as unknown as <OwningType = any>(
-	ownership: (x: any) => OwningType
-) => ITableConstructor<OwningType>
+)
 
 export const BasicTable = HashTable(id)
 
