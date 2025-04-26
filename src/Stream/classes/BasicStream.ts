@@ -7,6 +7,7 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	protected end?(): void
 	protected basePrevIter?(): Type | void
 	protected start?(): void
+	protected initGetter?(...args: any[]): Type
 
 	abstract isCurrEnd(): boolean
 	abstract copy(): this
@@ -16,6 +17,11 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	isStart: boolean = true
 	isEnd: boolean = false
 	curr: Type
+
+	private preInit(...args: any[]) {
+		if (this.initGetter) this.curr = this.initGetter(...args)
+		return this
+	}
 
 	next() {
 		const curr = this.curr
@@ -37,13 +43,26 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 		return curr
 	}
 
+	init(...args: any[]) {
+		this.preInit(...args)
+		return this
+	}
+
 	*[Symbol.iterator]() {
 		while (!this.isEnd) yield this.next()
+	}
+
+	constructor() {
+		this.preInit()
 	}
 }
 
 export abstract class GetterStream<Type = any> extends BasicStream<Type> {
 	protected abstract currGetter(): Type
+
+	protected initGetter(...args: any[]): Type {
+		return this.currGetter()
+	}
 
 	protected update(newCurr?: Type) {
 		this.curr = this.currGetter()

@@ -1,7 +1,5 @@
 import { boolean, type } from "@hgargg-0710/one"
-import type {
-	IPosition
-} from "../interfaces.js"
+import type { IPosition } from "../interfaces.js"
 import type { IUnderLimitedStream } from "../interfaces/LimitedStream.js"
 import {
 	directionCompare,
@@ -17,7 +15,7 @@ const { T } = boolean
 export function LimitedStream<Type = any>(
 	from: IPosition,
 	to?: IPosition
-): new () => WrapperStream<Type> {
+): new (resource?: IUnderLimitedStream<Type>) => WrapperStream<Type> {
 	if (isNullary(to)) {
 		to = from
 		from = LimitedStream.NoMovementPredicate
@@ -135,7 +133,7 @@ export function LimitedStream<Type = any>(
 			navigate(resource, from)
 			this.curr = resource.curr
 			this.isEnd = resource.isEnd
-			this.isStart = resource.isStart
+			this.isStart = resource.isStart || true
 			return this
 		}
 

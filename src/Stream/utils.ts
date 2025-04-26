@@ -34,16 +34,13 @@ const { and } = functional
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <Type = any, PosType = any>(
-	input: IStream<Type, PosType>
-) => input.next()
+export const next = <Type = any>(input: IStream<Type>) => input.next()
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any, PosType = any>(
-	input: IReversibleStream<Type, PosType>
-) => input.prev()
+export const previous = <Type = any>(input: IReversibleStream<Type>) =>
+	input.prev()
 
 /**
  * Given a `BasicStream` returns its `.curr` property value
@@ -104,10 +101,9 @@ export function skip(input: IReversibleStream, steps: IPosition = 1) {
  */
 export function consume<
 	Type = any,
-	PosType = any,
 	CollectionType extends ICollection<Type> = ArrayCollection<Type>
 >(
-	stream: IStream<Type, PosType>,
+	stream: IStream<Type>,
 	result: CollectionType = new ArrayCollection<Type>() as any
 ) {
 	while (!stream.isEnd) result.push(stream.next())
@@ -194,7 +190,7 @@ export const isFinishable = structCheck<IFinishable>({
  */
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <Type = any, PosType = any>(x: any) => x is INavigable<Type, PosType>
+}) as <Type = any>(x: any) => x is INavigable<Type>
 
 /**
  * Returns whether the given `x` is a Rewindable
@@ -222,9 +218,7 @@ export const isStateful = structCheck<IStateful>({
 /**
  * Iterates the given `BasicStream` until hitting the end.
  */
-export function uniFinish<Type = any, PosType = any>(
-	stream: IStream<Type, PosType>
-) {
+export function uniFinish<Type = any>(stream: IStream<Type>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
@@ -233,9 +227,7 @@ export function uniFinish<Type = any, PosType = any>(
  * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
  * else - `uniFinish(stream)`
  */
-export function finish<Type = any, PosType = any>(
-	stream: IStream<Type, PosType>
-) {
+export function finish<Type = any>(stream: IStream<Type>) {
 	return isFinishable<Type>(stream) ? stream.finish() : uniFinish(stream)
 }
 
@@ -251,15 +243,16 @@ export function finish<Type = any, PosType = any>(
  * @returns `stream.curr`
  */
 export function uniNavigate<Type = any>(
-	stream: IReversibleStream<Type>,
+	stream: IStream<Type>,
 	position: IPosition<Type>
 ): Type {
 	if (isNumber(position)) {
-		if (position < 0) while (position++) stream.prev()
+		if (position < 0) while (position++) stream.prev!()
 		else while (position--) stream.next()
 	} else {
 		const change = pickDirection(position)
-		while (!stream.isEnd && !position(stream)) change(stream)
+		while (!stream.isEnd && !position(stream))
+			change(stream! as IReversibleStream<Type>)
 	}
 
 	return stream.curr
@@ -269,8 +262,8 @@ export function uniNavigate<Type = any>(
  * If the given `ReversibleStream` is `Navigable`, calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
  */
-export function navigate<Type = any, SubType = any>(
-	stream: IReversibleStream<Type, SubType>,
+export function navigate<Type = any>(
+	stream: IStream<Type>,
 	position: IPosition<Type>
 ) {
 	return isNavigable(stream)
@@ -301,9 +294,8 @@ export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
 export function byStreamBufferPos<Type = any, PosType = any>(
 	f: (buffer: IIndexed, i: PosType) => any
 ) {
-	return (
-		stream: IStream<Type, PosType> & IBufferized<Type> & IPosed<PosType>
-	) => f(stream.buffer.get(), stream.pos)
+	return (stream: IStream<Type> & IBufferized<Type> & IPosed<PosType>) =>
+		f(stream.buffer.get(), stream.pos)
 }
 
 export * as Position from "./Position/utils.js"
