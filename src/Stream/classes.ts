@@ -10,8 +10,8 @@ export * from "./classes/OwnedStream.js"
 export * from "./classes/PosStream.js"
 export * from "./classes/PredicateStream.js"
 export * from "./classes/StreamParser.js"
+export * from "./classes/TreeStream.js"
 export * from "./classes/WrapperStream.js"
 
-export * from "./TreeStream/classes.js"
-
 export * as Position from "./Position/classes.js"
+

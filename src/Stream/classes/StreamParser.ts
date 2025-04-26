@@ -41,7 +41,7 @@ export function StreamParser<InType = any, OutType = any>(
 		}
 
 		constructor(public resource?: IUnderStreamParser<InType>) {
-			super()
+			super(resource)
 		}
 	}
 }

@@ -76,6 +76,11 @@ export abstract class ResourceStream<Type = any>
 			(resource as IOwnedStream<Type>).claimBy(this)
 		return super.init()
 	}
+
+	constructor(resource?: unknown) {
+		super()
+		if (resource) this.init(resource)
+	}
 }
 
 export abstract class GetterStream<Type = any> extends ResourceStream<Type> {

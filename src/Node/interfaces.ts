@@ -1,8 +1,4 @@
-import type {
-	ICopiable,
-	IPointer,
-	ISerializableObject
-} from "../interfaces.js"
+import type { ICopiable, IPointer, ISerializableObject } from "../interfaces.js"
 
 export interface ITyped<Type = any> {
 	readonly type: Type

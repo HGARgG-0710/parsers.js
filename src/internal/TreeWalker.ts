@@ -34,11 +34,11 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.levelUp()
 	}
 
-	isSiblingAfter() {
+	hasSiblingAfter() {
 		return this.level.lastChild > this.pos.last()
 	}
 
-	isSiblingBefore() {
+	hasSiblingBefore() {
 		return this.pos.last() > 0
 	}
 
@@ -58,11 +58,11 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.getCurrChild()
 	}
 
-	isChild() {
+	hasChildren() {
 		return hasChildren(this.curr)
 	}
 
-	isParent() {
+	hasParent() {
 		return this.curr !== this.walkable
 	}
 
@@ -72,6 +72,11 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	currentLastIndex() {
 		return treeEndPath(this.curr)
+	}
+
+	goNextFirst(levelsUp: number) {
+		this.indexCut(levelsUp)
+		this.goSiblingAfter()
 	}
 
 	goPrevLast() {
@@ -96,12 +101,9 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.levelUp()
 	}
 
-	init(walkable?: TreeLike) {
-		if (walkable) {
-			this.multind.clear()
-			this.level = this.walkable = walkable
-		}
-
+	init(walkable: TreeLike) {
+		this.multind.clear()
+		this.level = this.walkable = walkable
 		return this
 	}
 
@@ -110,6 +112,6 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	constructor(walkable?: TreeLike) {
-		this.init(walkable)
+		if (walkable) this.init(walkable)
 	}
 }

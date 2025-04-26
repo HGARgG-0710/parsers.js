@@ -71,7 +71,7 @@ export class LazyStream
 	}
 
 	constructor(public resource: ISource) {
-		super()
+		super(resource)
 	}
 }
 

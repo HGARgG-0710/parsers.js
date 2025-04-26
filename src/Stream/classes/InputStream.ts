@@ -9,12 +9,11 @@ const { max, min } = number
 
 export class InputStream<Type = any>
 	extends GetterStream<Type>
-	implements IStream<Type, [IParseable<Type>]>
+	implements IStream<Type>
 {
 	["constructor"]: new (resource?: IParseable<Type>) => this
 
 	pos: number = 0
-	resource?: IParseable<Type>
 
 	private lastPos: number
 
@@ -65,8 +64,7 @@ export class InputStream<Type = any>
 		return this.navigate(this.lastPos)
 	}
 
-	constructor(resource?: IParseable<Type>) {
-		super()
-		if (resource) this.init(resource)
+	constructor(public resource?: IParseable<Type>) {
+		super(resource)
 	}
 }
