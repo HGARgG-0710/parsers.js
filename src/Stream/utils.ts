@@ -1,15 +1,15 @@
 import { functional, object, type } from "@hgargg-0710/one"
-import { ArrayCollection } from "../Collection/classes.js"
 import type {
 	IStreamPredicate,
 	IStreamTransform
 } from "../TableMap/interfaces.js"
+import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { Stream } from "../constants.js"
 import type {
 	IBufferized,
-	ICollection,
 	IIndexed,
 	IPosition,
+	IPushable,
 	IStateful
 } from "../interfaces.js"
 import { getStopPoint } from "./Position/refactor.js"
@@ -99,12 +99,9 @@ export function skip(input: IReversibleStream, steps: IPosition = 1) {
  * Collects contigiously the items of `stream` into `init`, starting from `stream.curr`,
  * consuming the items added in the process
  */
-export function consume<
-	Type = any,
-	CollectionType extends ICollection<Type> = ArrayCollection<Type>
->(
+export function consume<Type = any>(
 	stream: IStream<Type>,
-	result: CollectionType = new ArrayCollection<Type>() as any
+	result: IPushable<Type> = new ArrayCollection<Type>()
 ) {
 	while (!stream.isEnd) result.push(stream.next())
 	return result
@@ -143,12 +140,9 @@ export function count<Type = any>(pred: IStreamPredicate<Type>) {
  * into `init`, delimiting them by `delimPred`
  */
 export function delimited(delimPred: IPosition) {
-	return function <
-		Type = any,
-		CollectionType extends ICollection<Type> = ArrayCollection<Type>
-	>(
+	return function <Type = any>(
 		input: IReversibleStream<Type>,
-		result: CollectionType = new ArrayCollection<Type>() as any
+		result: IPushable<Type> = new ArrayCollection()
 	) {
 		while (!input.isEnd) {
 			skip(input, delimPred)
@@ -166,11 +160,9 @@ export function delimited(delimPred: IPosition) {
 export function transform<UnderType = any, UpperType = any>(
 	map: IStreamTransform<UnderType, UpperType>
 ) {
-	return function <
-		CollectionType extends ICollection<UpperType> = ArrayCollection<UpperType>
-	>(
+	return function (
 		input: IStream<UnderType>,
-		result: CollectionType = new ArrayCollection<UpperType>() as any
+		result: IPushable<UpperType> = new ArrayCollection()
 	) {
 		let i = 0
 		while (!input.isEnd) result.push(map(input, i++))
@@ -299,3 +291,4 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 }
 
 export * as Position from "./Position/utils.js"
+

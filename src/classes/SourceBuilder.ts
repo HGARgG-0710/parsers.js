@@ -1,10 +1,10 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IUnfreezableAccumulator } from "./interfaces.js"
+import type { IAccumulator } from "src/interfaces/Accumulator.js"
 
 const { isString } = type
 
-export class SourceBuilder implements IUnfreezableAccumulator<string> {
+export class SourceBuilder implements IAccumulator<string> {
 	["constructor"]: new (finalSource?: string) => this
 
 	isFrozen: boolean = false

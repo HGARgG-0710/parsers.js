@@ -1,11 +1,11 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ICollection } from "./interfaces.js"
+import type { ICollection } from "src/interfaces/ArrayCollection.js"
 
 const { isArray } = type
 
 export class ArrayCollection<Type = any> implements ICollection<Type> {
-	["constructor"]: new (...x: any[]) => ArrayCollection<Type>
+	["constructor"]: new (...x: any[]) => this
 
 	get() {
 		return this.collection as readonly Type[]
@@ -33,5 +33,3 @@ export class ArrayCollection<Type = any> implements ICollection<Type> {
 		assert(isArray(collection))
 	}
 }
-
-export * as Sequence from "./Sequence/classes.js"

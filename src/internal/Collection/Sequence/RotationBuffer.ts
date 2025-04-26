@@ -1,13 +1,13 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
 import { TypicalBuffer } from "./TypicalBuffer.js"
-import type { IWritableSequence } from "../../../interfaces.js"
+import type { ISequence } from "../../../interfaces.js"
 
 const { isNumber } = type
 
 export class RotationBuffer<Type = any>
 	extends TypicalBuffer<Type>
-	implements IWritableSequence<Type>
+	implements ISequence<Type>
 {
 	["constructor"]: new (n?: number) => this
 

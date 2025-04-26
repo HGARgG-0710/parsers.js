@@ -2,10 +2,10 @@ import { boolean, object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import { BadIndex } from "./constants.js"
 import type {
-	IAccumulator,
 	IBufferized,
 	IIndexAssignable,
 	IIndexed,
+	IPersistentAccumulator,
 	IPointer,
 	ISizeable,
 	IStateful
@@ -57,7 +57,7 @@ export const state = prop("state") as (x: IStateful) => Summat
  */
 export const buffer = prop("buffer") as <Type = any>(
 	x: IBufferized<Type>
-) => IAccumulator<Type>
+) => IPersistentAccumulator<Type>
 
 /**
  * Returns the `.pos` property of the given `Posed` object
@@ -74,7 +74,6 @@ export const assignIndex = <Type = any>(
 
 export const isLF = eqcurry("\n")
 
-export * as Collection from "./Collection/utils.js"
 export * as EnumSpace from "./EnumSpace/utils.js"
 export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"

@@ -1,6 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IHash } from "./HashMap/interfaces.js"
 import type { IPosition } from "./interfaces.js"
+import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IThisMethod } from "./refactor.js"
 
 export type IMappable<Type = any, Out = any> = (
@@ -100,13 +101,29 @@ export type ISerializable =
 	| String
 	| Boolean
 
+export interface IFreezable {
+	readonly isFrozen: boolean
+	freeze: () => this
+}
+
+export interface IUnfreezable {
+	unfreeze: () => this
+}
+
 export interface IReadable<Type = any> {
 	read(i: number): Type
 }
 
 export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
 
-export type * from "./Collection/interfaces.js"
+export interface IBufferized<Type = any> {
+	buffer: IPersistentAccumulator<Type>
+}
+
+export interface IPushable<Type = any> {
+	push: (...x: Type[]) => this
+}
+
 export type * from "./DynamicParser/interfaces.js"
 export type * from "./EnumSpace/interfaces.js"
 export type * from "./HashMap/interfaces.js"
@@ -116,3 +133,7 @@ export type * from "./Node/interfaces.js"
 export type * from "./Source/interfaces.js"
 export type * from "./Stream/interfaces.js"
 export type * from "./TableMap/interfaces.js"
+
+export type * from "./interfaces/ArrayCollection.js"
+export type * from "./interfaces/Accumulator.js"
+export type * from "./interfaces/Sequence.js"

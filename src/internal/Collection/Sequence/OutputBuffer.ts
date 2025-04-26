@@ -1,19 +1,10 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type {
-	IReadable,
-	ISizeable,
-	IUnfreezableAccumulator
-} from "../../../interfaces.js"
+import type { IPersistentAccumulator } from "../../../interfaces.js"
 
 const { isArray } = type
 
-export class OutputBuffer<Type = any>
-	implements
-		IUnfreezableAccumulator<Type, readonly Type[]>,
-		ISizeable,
-		IReadable<Type>
-{
+export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
 	["constructor"]: new (collection?: Type[]) => this
 
 	isFrozen: boolean = false
