@@ -1,13 +1,11 @@
-import { array, inplace } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import type { IPointer } from "src/interfaces.js"
-import { Pointer } from "../../classes.js"
-import { BadIndex } from "../../constants.js"
 import { DelegateIndexMap } from "../../internal/IndexMap.js"
-import { isGoodIndex, setValue, swapValues } from "../../utils.js"
+import { PointerArray } from "../../internal/PointerArray.js"
+import { isGoodIndex } from "../../utils.js"
 import type { IIndexMap } from "../interfaces.js"
 import type { IPersistentIndexMap } from "./interfaces.js"
-
-const { mutate, swap, insert, out } = inplace
+import { IndexPointer } from "../../classes.js"
 
 export class PersistentIndexMap<
 		KeyType = any,
@@ -17,11 +15,7 @@ export class PersistentIndexMap<
 	extends DelegateIndexMap<KeyType, ValueType, DefaultType, IPointer<number>>
 	implements IPersistentIndexMap<KeyType, ValueType, DefaultType>
 {
-	indexes: IPointer<number>[]
-
-	static invalidatePointer(indexPointer: IPointer<number>) {
-		setValue(indexPointer, BadIndex)
-	}
+	private readonly indexes: PointerArray;
 
 	["constructor"]: new (
 		indexMap: IIndexMap<KeyType, ValueType, DefaultType>
@@ -32,30 +26,19 @@ export class PersistentIndexMap<
 	}
 
 	delete(index: number, count: number = 1) {
-		const size = this.size
-		for (let i = index + count; i < size; ++i)
-			this.indexes[i].value -= count
-		out(this.indexes, index, count)
+		this.indexes.remove(index, count)
 		this.delegate.delete(index, count)
 		return this
 	}
 
 	unique(): number[] {
-		const indexes = this.delegate.unique()
-		const indexSet = new Set(indexes)
-
-		this.indexes = this.indexes.filter((x: IPointer<number>, i: any) => {
-			if (indexSet.has(i)) return true
-			PersistentIndexMap.invalidatePointer(x)
-		})
-
-		this.repairIndexes()
-		return indexes
+		const uniqueIndexes = this.delegate.unique()
+		this.indexes.filterIndexes(uniqueIndexes)
+		return uniqueIndexes
 	}
 
 	swap(i: number, j: number) {
-		swapValues(this.indexes[i], this.indexes[j])
-		swap(this.indexes, i, j)
+		this.indexes.swap(i, j)
 		this.delegate.swap(i, j)
 		return this
 	}
@@ -63,33 +46,24 @@ export class PersistentIndexMap<
 	getIndex(key: any) {
 		const foundIndex = this.delegate.getIndex(key)
 		return isGoodIndex(foundIndex)
-			? this.indexes[foundIndex]
-			: Pointer(BadIndex)
+			? this.indexes.getPointer(foundIndex)
+			: IndexPointer.BadPointer()
 	}
 
 	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
-		const increase = pairs.length
-		const size = this.size
-		for (let i = index; i < size; ++i) this.indexes[i].value += increase
-		insert(this.indexes, index, ...pairs.map((_x, i) => Pointer(i + index)))
+		this.indexes.insert(index, pairs.length)
 		this.delegate.add(index, ...pairs)
 		return this
-	}
-
-	private repairIndexes() {
-		let i = this.size
-		while (i--) setValue(this.indexes[i], i)
 	}
 
 	reverse() {
 		super.reverse()
 		this.indexes.reverse()
-		this.repairIndexes()
 		return this
 	}
 
 	constructor(indexMap: IIndexMap<KeyType, ValueType, DefaultType, number>) {
 		super(indexMap)
-		mutate((this.indexes = new Array(indexMap.size)), (_x, i) => Pointer(i))
+		this.indexes = new PointerArray(indexMap.size)
 	}
 }

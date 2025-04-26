@@ -12,7 +12,7 @@ import type {
 } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
-const { structCheck, prop } = object
+const { prop } = object
 const { eqcurry } = boolean
 
 /**
@@ -71,22 +71,6 @@ export const assignIndex = <Type = any>(
 	x: IIndexAssignable<Type>,
 	assignedIndex: Type
 ) => (x.assignedIndex = assignedIndex)
-
-/**
- * Returns whether the given value is an `IPointer`
- */
-export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
-	x: any
-) => x is IPointer<T>
-
-/**
- * Swaps `.value`s of two given `Pattern`s
- */
-export function swapValues<Type = any>(x: IPointer<Type>, y: IPointer<Type>) {
-	const temp = x.value
-	x.value = y.value
-	y.value = temp
-}
 
 export const isLF = eqcurry("\n")
 
