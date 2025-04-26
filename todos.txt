@@ -24,7 +24,6 @@ Order of TODO-elimination:
 			ALSO - do THE EXACT SAME thing for "finite"/private cases of configurator pattern, 
 				and/or cases that will not use it often: 
 					1. Source
-					2. EnumSpace
 					3. DynamicParser [REMOVE LATER]
 						Remove only when actually fixing it...; 
 					4. HashMap

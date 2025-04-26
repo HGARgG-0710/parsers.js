@@ -71,27 +71,4 @@ export function fromPairs<KeyType = any, ValueType = any>(
 	return [keys, values]
 }
 
-export function range(from: number, length: number) {
-	return Array.from({ length }, (x, j) => j + from)
-}
-
-/**
- * Constructs arrays representing contigious numeric ranges
- * using the provided data.
- *
- * Here, the first respective number in a pair is the
- * initial point, from which each of the ranges is calculated.
- *
- * The second number in a pair is the length for the
- * specific range starting point. All the numbers
- * inside the range will be added contigiously (including
- * the starting point).
- *
- * The result is the concatenation of the ranges that have
- * been obtained in such a fashion.
- */
-export function listRanges(...from: [number, number][]) {
-	return from.map((pair) => range(...pair)).flat()
-}
-
 export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"

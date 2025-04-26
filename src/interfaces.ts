@@ -125,7 +125,6 @@ export interface IPushable<Type = any> {
 }
 
 export type * from "./DynamicParser/interfaces.js"
-export type * from "./EnumSpace/interfaces.js"
 export type * from "./HashMap/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
 export type * from "./LookupTable/interfaces.js"
@@ -134,6 +133,6 @@ export type * from "./Source/interfaces.js"
 export type * from "./Stream/interfaces.js"
 export type * from "./TableMap/interfaces.js"
 
-export type * from "./interfaces/ArrayCollection.js"
 export type * from "./interfaces/Accumulator.js"
+export type * from "./interfaces/ArrayCollection.js"
 export type * from "./interfaces/Sequence.js"
