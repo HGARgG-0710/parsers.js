@@ -2,35 +2,46 @@ import {
 	array,
 	boolean,
 	functional,
+	inplace,
 	object,
 	string,
 	type
 } from "@hgargg-0710/one"
-import { BaseLinearMap } from "src/internal/LinearIndexMap.js"
+import assert from "assert"
+import { BadIndex } from "../../constants.js"
 import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
-import { Autocache } from "../../internal/Autocache.js"
-import type { IMapClass } from "../interfaces.js"
+import { BaseIndexMap } from "../../internal/IndexMap.js"
+import { isGoodIndex } from "../../utils.js"
+import type { IIndexMap, IMapClass } from "../interfaces.js"
+import { inBound } from "../refactor.js"
 import { fromPairs } from "../utils.js"
-import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
+import type { ILinearMapClass } from "./interfaces.js"
 import {
 	extend,
 	extendKey,
 	OptimizedLinearMap as OptimizedLinearMapMethods
 } from "./refactor.js"
-import assert from "assert"
 
 const { isArray } = type
 const { trivialCompose } = functional
 const { equals } = boolean
+const { insert, out } = inplace
 
-function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
+export function LinearMapClass<
+	KeyType = any,
+	ValueType = any,
+	DefaultType = any
+>(
 	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
 ): ILinearMapClass<KeyType, ValueType, DefaultType> {
+	const extension = trivialCompose(...extensions)
+	const keyExtension = trivialCompose(...keyExtensions)
+
 	class linearMapClass
-		extends BaseLinearMap<KeyType, ValueType, DefaultType>
-		implements ILinearIndexMap<KeyType, ValueType, DefaultType>
+		extends BaseIndexMap<KeyType, ValueType, DefaultType>
+		implements IIndexMap<KeyType, ValueType, DefaultType>
 	{
 		static change?: IIndexingFunction<KeyType>
 
@@ -45,18 +56,70 @@ function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 		static keyExtensions: Function[]
 		static extensions: Function[]
 
+		private alteredKeys: any[]
+
+		index(x: any, ...y: any[]) {
+			const valueIndex = this.getIndex(extension(x, ...y))
+			return isGoodIndex(valueIndex)
+				? this.values[valueIndex]
+				: this.default
+		}
+
+		replace(index: number, pair: [KeyType, ValueType]) {
+			if (inBound(index, this)) {
+				const [key, value] = pair
+				this.keys[index] = key
+				this.alteredKeys[index] = keyExtension(key, index, this.keys)
+				this.values[index] = value
+			}
+			return this
+		}
+
+		add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
+			const [keys, values] = fromPairs(pairs)
+			insert(this.keys, index, ...keys)
+			insert(this.alteredKeys, index, ...keys.map(keyExtension))
+			insert(this.values, index, ...values)
+			return this
+		}
+
+		delete(index: number, count: number = 1) {
+			out(this.keys, index, count)
+			out(this.alteredKeys, index, count)
+			out(this.values, index, count)
+			return this
+		}
+
+		rekey(keyFrom: KeyType, keyTo: KeyType) {
+			const replacementIndex = this.keys.indexOf(keyFrom)
+			this.keys[replacementIndex] = keyTo
+			this.alteredKeys[replacementIndex] = keyExtension(keyTo)
+			return this
+		}
+
+		getIndex(sought: any) {
+			const size = this.size
+			for (let i = 0; i < size; ++i)
+				if (change!(this.alteredKeys[i], sought)) return i
+			return BadIndex
+		}
+
+		unique() {
+			const indexes = super.unique()
+			this.alteredKeys = indexes.map((x) => this.alteredKeys[x])
+			return indexes
+		}
+
 		constructor(
 			pairsList: array.Pairs<KeyType, ValueType> = [],
 			_default?: DefaultType
 		) {
 			assert(isArray(pairsList))
-			super(...fromPairs(pairsList), _default)
+			const [keys, values] = fromPairs(pairsList)
+			super(keys, values, _default)
+			this.alteredKeys = this.keys.map(keyExtension)
 		}
 	}
-
-	linearMapClass.prototype.extension = trivialCompose(...extensions)
-	linearMapClass.prototype.keyExtension = trivialCompose(...keyExtensions)
-	linearMapClass.prototype.change = change
 
 	linearMapClass.extensions = extensions
 	linearMapClass.keyExtensions = keyExtensions
@@ -73,27 +136,7 @@ function makeLinearMapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	return linearMapClass
 }
 
-export const ArrayMap = makeLinearMapClass(array.recursiveSame)
-
-const linMapClassCacher = ([change, extensions, keyExtensions]) =>
-	makeLinearMapClass(change, extensions, keyExtensions)
-
-const _LinearMapClass = new Autocache(
-	new ArrayMap([[[array.recursiveSame, [], []], ArrayMap]]),
-	linMapClassCacher
-)
-
-export function LinearMapClass<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any
->(
-	change?: IIndexingFunction<KeyType>,
-	extensions: Function[] = [],
-	keyExtensions: Function[] = []
-): ILinearMapClass<KeyType, ValueType, DefaultType> {
-	return _LinearMapClass([change, extensions, keyExtensions])
-}
+export const ArrayMap = LinearMapClass(array.recursiveSame)
 
 export const OptimizedLinearMap = LinearMapClass()
 
