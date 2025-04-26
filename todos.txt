@@ -19,264 +19,44 @@
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
-	TODO [fixed order]:				
-		List of remaining Stream-s [re-implement]: 	
-			NOTE: *do not* delete these ones. 
-				INSTEAD, just convert the old implementations...
-
-			2. MarkedStream
-			3. NestedStream
-			4. PredicateStream
-			5. StreamParser
-			6. TreeStream
-
-		TODO [code-cleaning]: get rid of the `.value`-convention
-					Now, the ONLY reason for it to exist currently is the `dig` method. 
-					MORE SPECIFICALLY: 
-						1. error-handling usages of `dig + IndexStream/.buffer/something`
-						2. self-modification [digging "inside" the given class instance]
-
-					SOLUTION: 	
-						3. For `Stream`s: 
-							1. For flags: 
-								4. REMOVE the `Configurator` pattern from `Stream`s: 
-									After all, it appears, that composition has come out victorious. 
-
-									Reasons: 
-										1. hard to maintain
-										2. (near) impossible to test
-										3. highly complex (complex code = bad code)
-										4. overly monolithic
-
-									This, however, is, at the same time: 
-										1. maintainable
-										2. testable
-										3. simple
-										4. highly modular
-
-									4.1. ALSO - remove the `Autocache` from them. 
-										It should STILL be present on `StreamClass`, though, since it is so used. 
-
-									4.2. ALSO - about the `.predicate/.handler`, REMOVE THESE as well... 
-										That is to say, they are STILL given via a curried function
-										Instead, do via: 
-											1. closure
-											2. currying
-
-										This way, the "configurator pattern" DOES still remain, one is just no longer as intent on saving memory. 
-										Since, INSTEAD of keeping DISTINCT METHODS, one STILL has to keep distinct ".handler/.predicate" instances on the prototype
-											 (which is, really, NO BETTER; only difference is [maybe], that one is keeping just a reference, instead of a different piece of code). 
-
-								7. IndexStream: 
-									1. Detach from `StreamParser` [its own class]
-									2. Let it be no longer an export of `StreamParser` [its own module]
-
-								8. PROBLEM: with `.state`: 
-									1. keeping it on the `this` object in a typeless object somehow seems like a *BAD* idea
-									2. need self-modifiability
-									3. need `.state` to be modifiable/accessible
-
-									Concluision: need to rethink the `DynamicParser`: 
-										1. it still IS a composition of layers [fundamentals are the same - check]
-										2. DOES each layer have its own state?: 
-											1. keep in a `.state: Summat[]` property? (one for each layer)
-												1. PROBLEM: what about changes to the layers' set? 
-											2. PROBLEM: Why split?
-											3. CONCLUSION: no, there is a SINGLE `.state` for the whole parser
-												1. PROBLEM: `handler`
-													has ONLY got access to the `this` of ITS CURRENT `Stream` 
-												
-													CONCLUSION: need a reference to the "primary" `.state`-keeping object [the composition]
-														Solution: alright, here goes... 
-															1. A function `attachState(x, state)`
-															2. remember that the `IStream`-s are `Partial<IStateful>`
-															3. Finally: 
-																1. require the `DynamicParser` to contain STREAMS-CLASSES (not just functions)
-																	Takes in a sequence of `IWrapperStream`-constructors... [INCLUDING the last one...]; 
-																2. do the "classWrapper"-calls INSIDE of `DynamicParser` [the "layers" are CONSTRUCTED, not given]
-																3. prior to that, do `attachState(stream, dynamicParser)` for EVERY `stream`, 
-																	that is "marked" by a '1' inside a specially provided 'boolean[]'. 
-																		This REPLACES the current `DynamicParser.init()`
-																	
-																	[
-																		note: one passes `dynamicParser` and not `dynamicParser.state` to ALLOW for modifying the layers: 
-																			this.state.layers.init(...)
-																			this.state.layers.push(...)
-																			...
-																	]
-
-											4. DELETE the `ComplexComposition`. It's excessive. 
-
-							2. ALTER `InitSignature` type-stuff [namely - since one has REMOVED certain variables, it will now be much easier to refactor...]
-
-						2. `src/utils.ts` - `value`-related, either: 
-							1. delete
-							2. put into respective `refactor.ts` files; 
-						
-						6. Change the name for `.value` on `TreeStream`
-	
-		TODO: 'Collection/Sequence' module: RE-ORGANIZE!!!
-	
-		TODO: IPosition - fix
-			Having removed the `IPositionObject`, LOTS of things about it broke. 
-			The type-bounds, yada, yada...
-			Anyhow, the objective now is to: 
-				1. remove `SubType` from `IStream` [and the `& IPattern`-bit with it... - see Diggers...]
-				2. INavigable - USE `uknown` for `PosType` instead of a generic...
-				3. REMOVE `PosType` from `IStraem`
-
-		TODO - ABOUT removing `.pos` from various Stream-s - effect on functionality. 
-			This will cause one to need to remove the `pos: number` from certain functions (for instance - `.predicate`, `.handler`). 
-				Solution: ADD a new mini-class `OwnedStream` - with an `.owner` property. 
-					LET: 
-						1. `WrapperStream` ONLY accept `OwnedStream`s
-						2. `OwnedStream` be the PARENT CLASS for `StreamParser`, `PosStream`, LITERALLY every `IStream` in the library...; 
-	
-		TODO [maybe?]: CREATE new interfaces for things [more specifically], 
-			new `IStream`-related implementations. 
-			Since the old ones are going down the drain, and the library now 
-				is (mostly) implementation-oriented, and largely monomorphic; 
-			
-			Although, SINCE we're testing is rather light and not really using mocks (all testing here is state-based), 
-				PERHAPS, one would do without interfaces? 
-			Monomorphic code is simpler, more modular and scales better. 
-
-		TODO: REMOVE `swapValue` util
-			See the `PointerIndex` todo... [PersistentIndexMap-related]; 
-
-		TODO [later]: refactor the new `array.repeat` function out of `one.js`: 
-			See the `StreamDigger`...
-
+	TODO [fixed order]:			
 		TODO: `Source` - REMOVE the `abstract` classes. 
 			ALSO - do THE EXACT SAME thing for "finite"/private cases of configurator pattern, 
 				and/or cases that will not use it often: 
 					1. Source
 					2. EnumSpace
-					3. DynamicParser
+					3. DynamicParser [REMOVE LATER]
+						Remove only when actually fixing it...; 
+					4. HashMap
+					5. LinearMapClass
+					6. HashTable
 
 			REMOVE any kind of `Autocache` from those...
+			(Basically, the only ones remaining are the `TokenNode`- and others...)
+				Reasons for splitting the `.prototype`-s of those are the that 
+					it's not too uncommon for programs to be having >100 different kinds of 
+						them. 
 
+				100 * ~8 ~= 800 methods
+			
 		TODO: about implementing the `.isEnd` in `IStream`
 			Make it `readonly` on the interface level... 
 			Implement internal mutability			
 
-		TODO: separate the `SourceBuilder` and `ArrayCollection` into their own (top-level) modules 
-			(classes/SourceBuilder.ts and classes/ArrayCollection.ts respectively); 
-
-		TODO: PROVIDE a public interface for working withthe HIDDEN `OutputBuffer`; 
-			More specicically - one that corresponds to it PRECISELY. 
-
-		TODO: CLEAN all the `refactor.ts` files. 
-			IN PARTICULAR: remove the `withSuper`. 
-				Since it is only used by the old `IStream`-implementations; 
-
-		TODO: REMOVE any `.buffer` properties. 
-			ANY conventions related to the old "IBuffer" (removing the name now...): 
-
-		TODO: problem (with DynamicParser): 
-			Current usage: 
-				const dynParser = new DynamicParser(S1, ..., SN, InputStream/LazyStream)
-				const parseStream = dynParser(...) // binding `state`, etc
-				...
-				parseStream.next()
-				...
-				parseStream.next() // HERE, we are having an internal "re-creation" of `dynParser`
-
-				const newStream = parseStream.state(...) // .state is the local reference to `dynParser`
-				// ! QUESTION - how to transfer the `parseStream` state to `newStream`???	
-				// 		1. *IS* our input the same? 
-				//		2. Ans: NO. It has changed. 
-				//		3. CONCLUSION [1]: need helper classes for altering the input: 
-				//			1. In-memory (InputStream) - new BufferView(this.buffer, this.pos) // offset the reading operation
-				//				1. CONCLUSION: BufferView becomes public (or - need some equiv. public interface)
-				// 			2. Lazy (LazyStream) - A NEW ABSTRACTION [through 'ByteOrigin', one RETAINS the old file-descriptor for further work with the input]; 
-				//		4. CONCLUSION [2]: need to somehow "switch" one stream for another: 
-				//			1. CONCLUSION: turn the `DynamicParser` into a "controller" of multiple Stream-s
-				//				1. these are stored in an array internally
-				//				2. hence, the DynamicParser NO LONGER has a `Composition` definition. 
-				//				3. More precisely, it: 
-				//					1. stores/alters/manages a `Composition` via the reactive `layers`
-				//					2. has a `private .transition` method, which creates new streams, and alters input
-				//					3. keeps track of original input (changed between transitions)
-				//					4. keeps track of the actual stream-instances (only one is ever "running" at the same time)
-				//					5. KEEPS A `retainer`, TO WHICH the actual `.currStream` (current active stream) IS GIVEN
-				//						1. more precisely, it is provided by the user and can, for instance, be one of: 
-				//							1. bufferizing into a single ICollection (via `consume` + `ArrayCollection`, say)
-				//							2. TRANSFORMING IT [writing to a file, for instance, via `WritingStream`]
-				//						2. the `retainer` is where THE GLOBAL PARSER LOGIC goes
-				//					6. Also, THE MOST important part - SPLIT the `transitioning` and the actual changing of the array
-				//						1. Reason - one (often) needs to PREPARE the array first. Due to this, one must either only use `.init`, or SPLIT 
-				//							the "callback" from the .push(), .write(), etc. [distinct methods]
-				//						2. CONCLUSION: *remove* the `CallbackBuffer` [far too simplistic... user must be able to transition manually]; 
-				//					7. About `LazyTree` (also an IStream) - to facilitate these, one must make THE TREE ITSELF *DYNAMIC*: 
-				//						1. uses a similar setup - changing input + a mutable collection of Stream-instances + a "Stream-Tree"/choosers [equiv. of layers] + a `.transition()` method 
-				//							1. IDEA: BASE the `LazyTree` upon the `DynamicParser` (via composition); 
-				//						2. this will allow one to (basically) also make LAZY SELF-MODIFYING parsers
-				//						3. PROBLEM: how to "split" the `Lazy` functionality of `LazyTree` from self-modifiability? 
-				//							1. SOLUTION[1]: provide AN INTERFACE - the `DynamicParser` will ACTUALLY just serve as a WRAPPER around the `LazyTree` 
-				//								implementation of the "compatibility" interface. Thus, it will be AS-IF ALL IS WELL
-				//							2. SOLUTION[2]: For a NON-LAZY Stream, one will create YET ANOTHER new abstraction, which would have the means of *STORING THE REQUIRED DATA*. 
-				//			2. EACH ONE represents its "transition"
-				//				1. UPON completing one it becomes `.isEnd` (file is closed, etc)
-				//				2. !!! PROBLEM: somehow, need to retain the file-connection - ABSTRACT it away from LazyStream...
-				//				3. New abstraction - 'ByteOrigin' - the file descriptor, allows for transfer of control over file, via dependency-inversion
-				//			3. EACH ONE one can bufferize or not [the "saving" aspect]
-				//			4. from here, one can AUTOMATE the "switching" as: 
-				//				1. lastStream.terminate()  // new method, EARLY termination of a stream
-				//				2. lastStream = this(this.ORIG_INPUT = this.CHANGE_INPUT(this.ORIG_INPUT)) // after change of `this`, new lastStream, new "next input" for next transition
-				//			5. the "switching" works VIA A CALLBACK [CallbackBuffer, which is accessed INSIDE the current Stream that the user is to be switched from]
-		
-		TODO: ALSO - about the `DynamicParser` implementation; 
-			The "classWrapper" step should be REFACTORED OUT, so that the user can create 
-				these compositions THEMSELVES, INDEPENDENTLY (wrapper is 'trivialCompose + classWrapper + Streams-classes (the user-input)'). 
+			ALSO: same thing for `.curr` - it should be `readonly`; 
 			
-			Reason is: the `DynamicParser` should ONLY be needed when working with a dynamic Stream-structure. 
-				However, when it's STATIC, it's rather unwise to be doing this. 
-
-		TODO: 'Source.nextChar(n)' is bugged. 
-			It skips n-1 BYTES, not characters. 
-			It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
-
-		TODO ['Pointer<number>' function]: TURN INTO A (public - WITH A PROPER INTERFACE) CLASS (for PersistentIndexMap). 
-			(First, however, need to get rid of `IPattern`)
-
-			RENAME into `IndexPointer`
-
-			Let it have methods: 
-				1. invalidate(); // = BadIndex
-				2. swap(); // swapValues
-			
-			ALSO: ADD a new class - 'PointerArray' [internal]. 
-				KEEPS TRACK of `Pointer`-s. 
-				Will be used as the new abstraction over the `.indexes` property on `PersistentIndexMap`. 
-				Has methods: 
-					1. private `.repair()` // .repairIndexes()
-					2. .reverse()
-					3. .filterIndexes() // the `.filter()` thing by `indexSet = new Set(...)` in `unique()`
-
-		TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
-			Reason: works FAR better with the `&`-role-composition
-		
-		TODO: 'IStream'-s
-			1. '.navigate()', '.finish()', '.rewind()' [fate - after the IStream-reworking completion...]
-				1. ['.navigate()'] Keep on: 
-					3. TreeStream
-
-				2. ['finish()'] Keep on: 
-					2. TreeStream
-
-				3. ['rewind()'] Keep on: 
-					2. TreeStream
-				
-				Reason: they have generic implementations for all the others, 
-					and these are the only ones for which there exist decent optimizations
-
-			2. LimitedStream, PredicateStream, StreamParser, ...
-				They REMAIN Configurator-Patterns. 
-				However, the `StreamClass` DOES NOT. 
-				So, they lose 1 layer of complexity (simplification of their map-functions); 
-
 		BIG: .peek() CYCLE: 	
+			SOLUTION: 
+				scratch all this, INSTEAD: 
+					1. implement a `PeekableStream`, with a new `.peek()` method
+						Uses `.resource`
+					2. Add a SPECIAL `.peek()` for: 
+						1. InputStream [via BufferView]
+							TODO: rename the `BufferView`
+				
+				Reason - too bothered to be implemenmting a WHOLE SEPARATE `.peek()` for all of them. 
+				
+
 			Plan: 
 				1. create `.peekBuffer: RotationBuffer` property: 	
 					0. NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 		
@@ -395,6 +175,134 @@ Order of TODO-elimination:
 				Or, more precisely, that those variables will have to delegate to a 
 					sinle mandated `.vars` object on the instance. 
 
+		TODO: problem (with DynamicParser): 
+			Current usage: 
+				const dynParser = new DynamicParser(S1, ..., SN, InputStream/LazyStream)
+				const parseStream = dynParser(...) // binding `state`, etc
+				...
+				parseStream.next()
+				...
+				parseStream.next() // HERE, we are having an internal "re-creation" of `dynParser`
+
+				const newStream = parseStream.state(...) // .state is the local reference to `dynParser`
+				// ! QUESTION - how to transfer the `parseStream` state to `newStream`???	
+				// 		1. *IS* our input the same? 
+				//		2. Ans: NO. It has changed. 
+				//		3. CONCLUSION [1]: need helper classes for altering the input: 
+				//			1. In-memory (InputStream) - new BufferView(this.buffer, this.pos) // offset the reading operation
+				//				1. CONCLUSION: BufferView becomes public (or - need some equiv. public interface)
+				// 			2. Lazy (LazyStream) - A NEW ABSTRACTION [through 'ByteOrigin', one RETAINS the old file-descriptor for further work with the input]; 
+				//		4. CONCLUSION [2]: need to somehow "switch" one stream for another: 
+				//			1. CONCLUSION: turn the `DynamicParser` into a "controller" of multiple Stream-s
+				//				1. these are stored in an array internally
+				//				2. hence, the DynamicParser NO LONGER has a `Composition` definition. 
+				//				3. More precisely, it: 
+				//					1. stores/alters/manages a `Composition` via the reactive `layers`
+				//					2. has a `private .transition` method, which creates new streams, and alters input
+				//					3. keeps track of original input (changed between transitions)
+				//					4. keeps track of the actual stream-instances (only one is ever "running" at the same time)
+				//					5. KEEPS A `retainer`, TO WHICH the actual `.currStream` (current active stream) IS GIVEN
+				//						1. more precisely, it is provided by the user and can, for instance, be one of: 
+				//							1. bufferizing into a single ICollection (via `consume` + `ArrayCollection`, say)
+				//							2. TRANSFORMING IT [writing to a file, for instance, via `WritingStream`]
+				//						2. the `retainer` is where THE GLOBAL PARSER LOGIC goes
+				//					6. Also, THE MOST important part - SPLIT the `transitioning` and the actual changing of the array
+				//						1. Reason - one (often) needs to PREPARE the array first. Due to this, one must either only use `.init`, or SPLIT 
+				//							the "callback" from the .push(), .write(), etc. [distinct methods]
+				//						2. CONCLUSION: *remove* the `CallbackBuffer` [far too simplistic... user must be able to transition manually]; 
+				//					7. About `LazyTree` (also an IStream) - to facilitate these, one must make THE TREE ITSELF *DYNAMIC*: 
+				//						1. uses a similar setup - changing input + a mutable collection of Stream-instances + a "Stream-Tree"/choosers [equiv. of layers] + a `.transition()` method 
+				//							1. IDEA: BASE the `LazyTree` upon the `DynamicParser` (via composition); 
+				//						2. this will allow one to (basically) also make LAZY SELF-MODIFYING parsers
+				//						3. PROBLEM: how to "split" the `Lazy` functionality of `LazyTree` from self-modifiability? 
+				//							1. SOLUTION[1]: provide AN INTERFACE - the `DynamicParser` will ACTUALLY just serve as a WRAPPER around the `LazyTree` 
+				//								implementation of the "compatibility" interface. Thus, it will be AS-IF ALL IS WELL
+				//							2. SOLUTION[2]: For a NON-LAZY Stream, one will create YET ANOTHER new abstraction, which would have the means of *STORING THE REQUIRED DATA*. 
+				//			2. EACH ONE represents its "transition"
+				//				1. UPON completing one it becomes `.isEnd` (file is closed, etc)
+				//				2. !!! PROBLEM: somehow, need to retain the file-connection - ABSTRACT it away from LazyStream...
+				//				3. New abstraction - 'ByteOrigin' - the file descriptor, allows for transfer of control over file, via dependency-inversion
+				//			3. EACH ONE one can bufferize or not [the "saving" aspect]
+				//			4. from here, one can AUTOMATE the "switching" as: 
+				//				1. lastStream.terminate()  // new method, EARLY termination of a stream
+				//				2. lastStream = this(this.ORIG_INPUT = this.CHANGE_INPUT(this.ORIG_INPUT)) // after change of `this`, new lastStream, new "next input" for next transition
+				//			5. the "switching" works VIA A CALLBACK [CallbackBuffer, which is accessed INSIDE the current Stream that the user is to be switched from]
+
+		TODO [code-cleaning]: get rid of the `.value`-convention
+			SOLUTION: 	
+				3. For `Stream`s: 
+					1. For flags: 
+						8. PROBLEM: with `.state`: 
+							1. keeping it on the `this` object in a typeless object somehow seems like a *BAD* idea
+							2. need self-modifiability
+							3. need `.state` to be modifiable/accessible
+
+							Concluision: need to rethink the `DynamicParser`: 
+								1. it still IS a composition of layers [fundamentals are the same - check]
+								2. DOES each layer have its own state?: 
+									1. keep in a `.state: Summat[]` property? (one for each layer)
+										1. PROBLEM: what about changes to the layers' set? 
+									2. PROBLEM: Why split?
+									3. CONCLUSION: no, there is a SINGLE `.state` for the whole parser
+										1. PROBLEM: `handler`
+											has ONLY got access to the `this` of ITS CURRENT `Stream` 
+										
+											CONCLUSION: need a reference to the "primary" `.state`-keeping object [the composition]
+												Solution: alright, here goes... 
+													1. A function `attachState(x, state)`
+													2. remember that the `IStream`-s are `Partial<IStateful>`
+													3. Finally: 
+														1. require the `DynamicParser` to contain STREAMS-CLASSES (not just functions)
+															Takes in a sequence of `IWrapperStream`-constructors... [INCLUDING the last one...]; 
+														2. do the "classWrapper"-calls INSIDE of `DynamicParser` [the "layers" are CONSTRUCTED, not given]
+														3. prior to that, do `attachState(stream, dynamicParser)` for EVERY `stream`, 
+															that is "marked" by a '1' inside a specially provided 'boolean[]'. 
+																This REPLACES the current `DynamicParser.init()`
+															
+															[
+																note: one passes `dynamicParser` and not `dynamicParser.state` to ALLOW for modifying the layers: 
+																	this.state.layers.init(...)
+																	this.state.layers.push(...)
+																	...
+															]
+
+									4. DELETE the `ComplexComposition`. It's excessive. 
+
+		[UNORDERED]
+		
+		TODO [one.js]: LATER, when finishing new version:
+			Replace all occurences of `numbers(...).map(...)` with `array.from`; 
+			Do via Search: 'numbers(...)'; 
+
+		TODO: CLEANUP [types, 'refactor.ts']
+			Go around, deleting: 
+				1. obsolete types
+				2. obsolete utils
+				3. obsolete `refactor.ts` files/their-contents; 
+				4. FIXING the generics/IPosed/IPosition-related stuff
+
+		TODO [later]: refactor the new `array.repeat` function out of `one.js`: 
+			See the `StreamDigger`...
+
+		TODO: EXPORTS - *ensure* that none are missed...:
+			1. classes
+			2. interfaces
+			3. utils
+
+		TODO: CLEAN all the `refactor.ts` files. 
+			IN PARTICULAR: remove the `withSuper`. 
+				Since it is only used by the old `IStream`-implementations; 
+
+		TODO: ALSO - about the `DynamicParser` implementation; 
+			The "classWrapper" step should be REFACTORED OUT, so that the user can create 
+				these compositions THEMSELVES, INDEPENDENTLY (wrapper is 'trivialCompose + classWrapper + Streams-classes (the user-input)'). 
+			
+			Reason is: the `DynamicParser` should ONLY be needed when working with a dynamic Stream-structure. 
+				However, when it's STATIC, it's rather unwise to be doing this. 
+
+		TODO: 'Source.nextChar(n)' is bugged. 
+			It skips n-1 BYTES, not characters. 
+			It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
 
 		Fix docs: 
 			0. JSDoc: 
@@ -404,7 +312,6 @@ Order of TODO-elimination:
 
 			1. classes [add docs]: 
 				1. HashMap.InternalHash.ArrayInternal
-				2. HashMap.BitHash
 				3. IndexMap.ObjectMap
 				4. Indexmap.ArrayMap
 				5. MultiIndex [fix]
@@ -467,12 +374,9 @@ Order of TODO-elimination:
 
 			IMPORTANT: walk through new list of exports, VERIFY that all the tests are IN ACCORDANCE with them - nothing is missing, 
 				in other words. 
-		
-		TODO: 
-			walk through the code, FIX redundand `new` type expressions. 
-				More specifically: 
-					1. give them names
-					2. add the missing `.constructor` property where it's required (note: ON THE INTERFACE - where one uses the `Autocache` pattern); 
+	
+		TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
+			Reason: works FAR better with the `&`-role-composition	
 
 		1. Doc-sync
 
@@ -1312,6 +1216,15 @@ Order of TODO-elimination:
 
 				RE2. `Regex` description:
 					[maybe] - create your own flavour for 'RegExp's
+					IMPORTANT NOTE: 
+						1. must have a library-specific feature of targetting the `.type` property. 
+							More specifically, add a '{matched_type}'-Regex-construct for matching a token with a 
+								type `matched_type`. 
+						2. the types here must be either STRINGS or NUMBERS. 
+							More specifically: 
+								1. i{...} - matches a type of number
+								2. s{...} - matches a type of string
+
 					Then: 
 						1. [maybe?] add new convinience functions to `regex` to also handle your flavour...
 						2. create `fromRegExp` util, which would create a `Regex` [library] from `RegExp` [JS builtin]
@@ -1442,7 +1355,6 @@ Order of TODO-elimination:
 			
 				NM1. [DEFINITELY!] Create a 'samples' directory; 
 					Reason for v0.3: 
-						1. 'FlagHash = BitHash + ArrayInternalHash'; 
 						2. TOO many prerequisites
 						3. the "not-so-util-like" utilities
 
@@ -2450,3 +2362,30 @@ FUTURE:
 				3. StreamClass [.value, .buffer, etc]
 				4. all the `protected value` properties [InitializablePattern, etc]; 
 					These are ALSO supposed to only be changeable privately...; 
+
+	6. Optimization [possibly being paranoid/picky... buuuuut!]: 
+		Currently, the library has (mostly) gone away from the `abstract class + Configurator Pattern` stuff, 
+			since its only real ever purpose was performance, and it's horribly ugly, so it 
+				remained only for a handful of classes (which are intended to be used A LOT by the end-user application). 
+		However, one fears that a change may be (a tad) too radical. 
+		Thus: make a real-world application - profile. 
+		Find out which classes are (most likely) to be taking space.
+
+	7. [maybe? later, definitely] A Java rewrite: 
+		the project is a very fine one, a very fine one indeed... 
+		Howeeeverr...
+		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
+		Solution: 
+			1. rewrite in *name-of-THAT-Big-project* [once finished]
+			2. decompile the JS sources [obtained from TypeScript]
+			3. change the sources
+			4. transpile to Java [that is the alternative language of choice]
+				That is without the tests of course. 
+				Those you'll need to write anew (using something like JUnit, maybe?)
+				Also - will be able to scrap the "copiability" aspect of the whole thing 
+					[thank God for good tests...]
+			5. write new tests [Java]
+			6. publish
+		
+		Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
+			better than the current JS code (since it's been transpiled from TypeScrtipt). 
