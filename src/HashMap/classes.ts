@@ -6,7 +6,6 @@ import { length } from "../utils.js"
 import type { IHash, IHashClass, IHashMap } from "./interfaces.js"
 import type { IInternalHash } from "./InternalHash/interfaces.js"
 import { extend } from "./refactor.js"
-import { fromFlags } from "./utils.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -23,7 +22,7 @@ abstract class BaseHashClass<
 {
 	["constructor"]: new (
 		value: IInternalHash<InternalKeyType, ValueType>
-	) => IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
+	) => this
 
 	hash: IHash<KeyType, InternalKeyType>
 
@@ -113,7 +112,4 @@ export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
 
-export const BitHash = HashClass(fromFlags)
-
 export * as InternalHash from "./InternalHash/classes.js"
-

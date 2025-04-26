@@ -26,7 +26,3 @@ export function fromPairs<
 	for (const [key, value] of pairsList) hashTable.set(key, value)
 	return hashTable
 }
-
-export function fromFlags(key: boolean[]) {
-	return key.reduce((last, curr, i) => last | (+curr << i), 0)
-}
