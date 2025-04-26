@@ -1,6 +1,6 @@
 import { boolean, number, type } from "@hgargg-0710/one"
 import { OutputBuffer } from "src/internal/Collection/Sequence/OutputBuffer.js"
-import type { IPosition } from "../interfaces.js"
+import type { IPosition, IPredicatePosition } from "../interfaces.js"
 import { direction } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"
 import { PosStream } from "./PosStream.js"
@@ -24,15 +24,48 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 		return this.buffer.size - 1
 	}
 
+	private isAlivePos() {
+		return !this.isFrozen() || this.pos > this.lastPos()
+	}
+
+	private posGap() {
+		return this.lastPos() - this.pos
+	}
+
+	private navigateNumber(relativePos: number) {
+		const posGap = this.posGap()
+		if (this.isFrozen() || posGap >= relativePos) {
+			this.pos = max(this.pos + relativePos, 0)
+			return this.update()
+		}
+		this.forward(max(0, posGap))
+		uniNavigate(this, relativePos - posGap)
+	}
+
+	private navigatePredicate(relativePos: IPredicatePosition) {
+		if (direction(relativePos)) uniNavigate(this, relativePos)
+		else while (!relativePos(this) && this.posValid()) this.prev()
+	}
+
+	isFrozen() {
+		return this.buffer.isFrozen
+	}
+
 	next() {
-		const curr = super.next()
-		if (!this.buffer.isFrozen && this.pos > this.lastPos())
-			this.buffer.push(curr)
+		const curr = this.curr
+		this.isStart = false
+		if (this.isCurrEnd()) this.freeze()
+		else {
+			if (this.isAlivePos()) this.buffer.push(curr)
+			this.forward()
+			this.update()
+		}
 		return curr
 	}
 
 	prev() {
 		const lastCurr = this.curr
+		this.isEnd = false
 		if (this.posValid()) {
 			this.backward()
 			this.update()
@@ -45,38 +78,16 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 		this.buffer.freeze()
 	}
 
-	isCurrEnd() {
-		const isLast = super.isCurrEnd()
-		if (isLast) this.buffer.freeze()
-		return isLast
-	}
-
 	navigate(relativePos: IPosition<Type>) {
-		if (isNumber(relativePos)) {
-			const { buffer, pos } = this
-			const posGap = buffer.size - pos
-
-			if (buffer.isFrozen || posGap > relativePos) {
-				this.pos = max(pos + relativePos, 0)
-				return this.update()
-			}
-
-			this.forward(max(0, posGap))
-			while (relativePos--) this.next()
-		} else {
-			if (direction(relativePos)) uniNavigate(this, relativePos)
-			else while (!relativePos(this) && this.posValid()) this.prev()
-		}
-
+		if (isNumber(relativePos)) this.navigateNumber(relativePos)
+		else this.navigatePredicate(relativePos)
 		return this.curr
 	}
 
 	finish() {
-		if (this.buffer.isFrozen) {
-			this.pos = this.lastPos()
-			this.update()
-		} else this.navigate(T)
-
+		if (!this.isFrozen()) return this.navigate(T)
+		this.pos = this.lastPos()
+		this.update()
 		return this.curr
 	}
 

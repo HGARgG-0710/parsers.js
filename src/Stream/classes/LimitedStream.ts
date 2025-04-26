@@ -131,6 +131,8 @@ export function LimitedStream<Type = any>(
 		init(resource: IUnderLimitedStream<Type>) {
 			super.init(resource)
 			navigate(resource, from)
+			this.hasLookahead = false
+			this.hasLookbehind = false
 			this.curr = resource.curr
 			this.isEnd = resource.isEnd
 			this.isStart = resource.isStart || true
