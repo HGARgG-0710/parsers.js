@@ -1,7 +1,6 @@
 import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { closeSync, fstatSync, openSync, readSync } from "node:fs"
-import { makeDelegate } from "../refactor.js"
 import type { ISource } from "./interfaces.js"
 
 const { numbers } = array
@@ -155,11 +154,11 @@ function MultSource(
 	encoding: BufferEncoding,
 	defaultSize: number,
 	toPick: (size: number) => boolean = T
-): new (url: string) => _PreMultSource {
+): abstract new (url: string) => _PreMultSource {
 	assert(0 < defaultSize)
 	assert(defaultSize <= maxSize)
 
-	abstract class multSource extends PreMultSource {
+	abstract class multSource extends _PreMultSource {
 		protected readonly charSizes = numbers(maxSize).map((size) =>
 			toPick(size + 1) ? Buffer.alloc(size + 1) : null
 		)
@@ -174,11 +173,7 @@ function MultSource(
 		defaultSize: ConstDescriptor(defaultSize)
 	})
 
-	return makeDelegate(
-		multSource,
-		["tempRead", "currBuffer", "charSizes", "temp"],
-		"delegate"
-	)
+	return multSource
 }
 
 // * important pre-doc: Latin-1 and ASCII

@@ -2,7 +2,6 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IHash } from "./HashMap/interfaces.js"
 import type { IPosition } from "./interfaces.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
-import type { IThisMethod } from "./refactor.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -39,15 +38,15 @@ export interface IIndexAssignable<Type = any> {
 }
 
 export interface ISettable<KeyType = any, ValueType = any> {
-	set: IThisMethod<[KeyType, ValueType], this>
+	set: (key: KeyType, value: ValueType) => this
 }
 
 export interface IDeletable<KeyType = any> {
-	delete: IThisMethod<[KeyType], this>
+	delete: (key: KeyType) => this
 }
 
 export interface IRekeyable<KeyType = any> {
-	rekey: IThisMethod<[KeyType, KeyType], this>
+	rekey: (fromKey: KeyType, toKey: KeyType) => this
 }
 
 export interface IHashable<KeyType, InternalKeyType> {
