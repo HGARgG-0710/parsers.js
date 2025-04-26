@@ -1,5 +1,6 @@
 export * from "./classes/BasicStream.js"
 export * from "./classes/FreezableStream.js"
+export * from "./classes/IndexStream.js"
 export * from "./classes/InputStream.js"
 export * from "./classes/LazyStream.js"
 export * from "./classes/LimitedStream.js"
@@ -7,9 +8,9 @@ export * from "./classes/MarkerStream.js"
 export * from "./classes/NestedStream.js"
 export * from "./classes/OwnedStream.js"
 export * from "./classes/PosStream.js"
+export * from "./classes/PredicateStream.js"
 export * from "./classes/WrapperStream.js"
 
-export * from "./PredicateStream/classes.js"
 export * from "./StreamParser/classes.js"
 export * from "./TreeStream/classes.js"
 

@@ -17,7 +17,7 @@ export function NestedStream<Type = any, IndexType = any>(
 		IndexType
 	>
 ): new (resource: IUnderNestedStream<Type>) => INestedStream<Type, IndexType> {
-	class nestedStream
+	return class
 		extends WrapperStream
 		implements INestedStream<Type, IndexType>
 	{
@@ -111,6 +111,4 @@ export function NestedStream<Type = any, IndexType = any>(
 			super(resource)
 		}
 	}
-
-	return nestedStream
 }

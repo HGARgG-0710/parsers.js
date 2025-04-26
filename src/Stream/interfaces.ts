@@ -58,11 +58,11 @@ export type IReversibleStream<
 	InitSignature extends any[] = any[]
 > = IStream<Type, InitSignature> & IBackward<Type>
 
+export type * from "./interfaces/IndexStream.js"
 export type * from "./interfaces/LimitedStream.js"
 export type * from "./interfaces/MarkerStream.js"
 export type * from "./interfaces/NestedStream.js"
 export type * from "./interfaces/OwnedStream.js"
 
 export type * from "./Position/interfaces.js"
-export type * from "./PredicateStream/interfaces.js"
 export type * from "./StreamParser/interfaces.js"

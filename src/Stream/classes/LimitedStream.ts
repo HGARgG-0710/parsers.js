@@ -24,7 +24,7 @@ export function LimitedStream<Type = any>(
 	const negatedTo = positionNegate(to)
 	const direction = directionCompare(from, negatedTo)
 
-	class limitedStream extends WrapperStream<Type> {
+	return class extends WrapperStream<Type> {
 		private hasLookahead = false
 		private hasLookbehind = false
 
@@ -143,8 +143,6 @@ export function LimitedStream<Type = any>(
 			super(resource)
 		}
 	}
-
-	return limitedStream
 }
 
 export namespace LimitedStream {

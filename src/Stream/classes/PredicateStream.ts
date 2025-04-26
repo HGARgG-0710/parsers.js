@@ -5,7 +5,7 @@ import { WrapperStream } from "./WrapperStream.js"
 export function PredicateStream<Type = any>(
 	predicate: IPredicatePosition<Type>
 ): new (resource?: IOwnedStream<Type>) => WrapperStream<Type> {
-	class predicateStream extends WrapperStream<Type> {
+	return class extends WrapperStream<Type> {
 		private _isEnd: boolean
 		private _curr: Type
 		private hasLookahead: boolean = false
@@ -58,6 +58,4 @@ export function PredicateStream<Type = any>(
 			return this
 		}
 	}
-
-	return predicateStream
 }

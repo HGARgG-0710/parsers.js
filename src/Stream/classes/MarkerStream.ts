@@ -5,7 +5,7 @@ import { WrapperStream } from "./WrapperStream.js"
 export function MarkerStream<Type = any, MarkerType = any>(
 	marker: (stream: IMarkerStream<Type, MarkerType>) => MarkerType
 ): new () => IMarkerStream<Type> {
-	class markerStream
+	return class
 		extends WrapperStream<Type>
 		implements IMarkerStream<Type, MarkerType>
 	{
@@ -33,6 +33,4 @@ export function MarkerStream<Type = any, MarkerType = any>(
 			return this
 		}
 	}
-
-	return markerStream
 }
