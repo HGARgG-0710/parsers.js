@@ -44,7 +44,7 @@ export function NestedStream<Type = any, IndexType = any>(
 			return this._isEnd
 		}
 
-		set curr(newCurr: Type | INestedStream<Type, IndexType>) {
+		protected set curr(newCurr: Type | INestedStream<Type, IndexType>) {
 			this._curr = newCurr
 		}
 

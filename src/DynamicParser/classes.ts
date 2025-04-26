@@ -21,9 +21,7 @@ const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isNumber, isArray } = type
 
-export class Signature
-	implements ICopiable, IInitializable<[any[]], Signature>
-{
+export class Signature implements ICopiable, IInitializable {
 	protected readonly toApplyOn: IndexSet
 	protected readonly preIndexes: IndexSet
 	protected preFill: any[];
@@ -32,7 +30,7 @@ export class Signature
 		arity: number,
 		toApplyOn: number[],
 		preIndexes: number[]
-	) => typeof this
+	) => this
 
 	apply(layers: Function[]) {
 		const { preIndexes, preFill, toApplyOn } = this

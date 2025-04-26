@@ -29,7 +29,7 @@ export interface IReadableSequence<Type = any> extends ICollection<Type> {
 }
 
 export interface ISequence<Type = any> extends IReadableSequence<Type> {
-	emptied: () => typeof this
+	emptied: () => this
 }
 
 export interface IWritableSequence<Type = any>

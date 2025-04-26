@@ -6,9 +6,9 @@ export class OwnedStream<Type = any>
 	extends DelegateStream<Type>
 	implements IOwnedStream<Type>
 {
-	owner?: IStream<Type>
+	owner?: IStream
 
-	claimBy(owner: IStream<Type>) {
+	claimBy(owner: IStream) {
 		this.owner = owner
 	}
 }

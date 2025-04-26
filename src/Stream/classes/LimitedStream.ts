@@ -54,7 +54,7 @@ export function LimitedStream<Type = any>(
 			this._isEnd = newIsEnd
 		}
 
-		set curr(newCurr: Type) {
+		protected set curr(newCurr: Type) {
 			this._curr = newCurr
 		}
 

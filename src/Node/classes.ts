@@ -6,7 +6,7 @@ import type { ICellNode, INode, INodeClass } from "./interfaces.js"
 import { isType } from "./utils.js"
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
-	["constructor"]: new () => typeof this
+	["constructor"]: new () => this
 
 	type: Type
 	parent: INode<Type> | null = null
@@ -80,7 +80,7 @@ abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
 	implements ICellNode<Type, Value>
 {
-	["constructor"]: new (value?: Value) => typeof this
+	["constructor"]: new (value?: Value) => this
 
 	copy() {
 		return new this.constructor(this.value)
@@ -113,7 +113,7 @@ abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
 	implements INode<Type>
 {
-	["constructor"]: new (children?: INode<Type>[]) => typeof this
+	["constructor"]: new (children?: INode<Type>[]) => this
 
 	read(i: number): INode<Type> {
 		return this.children[i]

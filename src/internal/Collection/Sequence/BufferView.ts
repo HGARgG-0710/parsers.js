@@ -5,10 +5,7 @@ import type { ICopiable, ISequence } from "../../../interfaces.js"
 const { isNumber } = type
 
 export class BufferView<Type = any> implements ICopiable {
-	["constructor"]: new (
-		offset: number,
-		buffer: ISequence<Type>
-	) => typeof this
+	["constructor"]: new (offset: number, buffer: ISequence<Type>) => this
 
 	//
 	// * Interface Methods

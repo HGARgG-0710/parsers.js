@@ -94,7 +94,7 @@ export function makeDelegate(
 }
 
 export interface ConstructorHaving {
-	["constructor"]: new (...x: any[]) => typeof this
+	["constructor"]: new (...x: any[]) => this
 }
 
 export type IThisMethod<ArgType extends any[] = any[], OutType = any> = (

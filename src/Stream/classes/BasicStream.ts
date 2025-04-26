@@ -1,4 +1,7 @@
-import type { IStream } from "../interfaces.js"
+import type { IOwnedStream, IStream } from "../interfaces.js"
+import { type } from "@hgargg-0710/one"
+
+const { isObject, isFunction } = type
 
 export abstract class BasicStream<Type = any> implements IStream<Type> {
 	protected abstract baseNextIter(): Type | void
@@ -18,9 +21,8 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	isEnd: boolean = false
 	curr: Type
 
-	private preInit(...args: any[]) {
+	protected preInit(...args: any[]) {
 		if (this.initGetter) this.curr = this.initGetter(...args)
-		return this
 	}
 
 	next() {
@@ -57,7 +59,26 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	}
 }
 
-export abstract class GetterStream<Type = any> extends BasicStream<Type> {
+export abstract class ResourceStream<Type = any>
+	extends BasicStream<Type>
+	implements IOwnedStream<Type>
+{
+	owner?: IStream
+	resource?: unknown
+
+	claimBy(owner: IStream): void {
+		this.owner = owner
+	}
+
+	init(resource: unknown) {
+		this.resource = resource
+		if (isObject(resource) && isFunction((resource as any).claimBy))
+			(resource as IOwnedStream<Type>).claimBy(this)
+		return super.init()
+	}
+}
+
+export abstract class GetterStream<Type = any> extends ResourceStream<Type> {
 	protected abstract currGetter(): Type
 
 	protected initGetter(...args: any[]): Type {
@@ -69,7 +90,7 @@ export abstract class GetterStream<Type = any> extends BasicStream<Type> {
 	}
 }
 
-export abstract class SetterStream<Type = any> extends BasicStream<Type> {
+export abstract class SetterStream<Type = any> extends ResourceStream<Type> {
 	protected update(newCurr: Type) {
 		this.curr = newCurr
 	}

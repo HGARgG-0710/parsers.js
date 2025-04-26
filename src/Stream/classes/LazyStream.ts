@@ -22,12 +22,12 @@ export class LazyStream
 		IPosed<number>,
 		IOwnedStream<string>
 {
-	isEnd = false
-	
-	curr: string
-	owner?: IStream<string>;
+	["constructor"]: new (resource: ISource) => this
 
-	["constructor"]: new (resource: ISource) => typeof this
+	isEnd = false
+
+	curr: string
+	owner?: IStream<string>
 
 	get pos() {
 		return this.resource.pos
@@ -64,11 +64,13 @@ export class LazyStream
 		return new this.constructor(this.resource.copy())
 	}
 
-	claimBy(owner: IStream<string>): void {
-		this.owner = owner
+	init(resource: ISource) {
+		this.resource.cleanup()
+		this.resource = resource
+		return this
 	}
 
-	constructor(public readonly resource: ISource) {
+	constructor(public resource: ISource) {
 		super()
 	}
 }

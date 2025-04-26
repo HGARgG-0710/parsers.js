@@ -34,14 +34,12 @@ export interface INextable<Type = any> {
 	next: () => Type
 }
 
-export type IStream<Type = any, InitSignature extends any[] = any[]> = Partial<
-	IBackward<Type>
-> &
+export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<INavigable<Type>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IStateful> &
-	Partial<IInitializable<InitSignature, IStream<Type, InitSignature>>> &
+	Partial<IInitializable> &
 	Partial<IIsEndCurrable> &
 	Partial<IIsStartCurrable> &
 	Iterable<Type> &
@@ -52,17 +50,13 @@ export type IStream<Type = any, InitSignature extends any[] = any[]> = Partial<
 	}
 
 export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
-
-export type IReversibleStream<
-	Type = any,
-	InitSignature extends any[] = any[]
-> = IStream<Type, InitSignature> & IBackward<Type>
+export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 
 export type * from "./interfaces/IndexStream.js"
 export type * from "./interfaces/LimitedStream.js"
 export type * from "./interfaces/MarkerStream.js"
 export type * from "./interfaces/NestedStream.js"
 export type * from "./interfaces/OwnedStream.js"
+export type * from "./interfaces/StreamParser.js"
 
 export type * from "./Position/interfaces.js"
-export type * from "./StreamParser/interfaces.js"

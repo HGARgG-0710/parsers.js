@@ -25,7 +25,7 @@ export function PredicateStream<Type = any>(
 			this.hasLookahead = this.resource!.isEnd
 		}
 
-		set curr(newCurr: Type) {
+		protected set curr(newCurr: Type) {
 			this._curr = newCurr
 		}
 

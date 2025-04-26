@@ -9,7 +9,7 @@ export type IMappable<Type = any, Out = any> = (
 ) => Out
 
 export interface ICopiable {
-	copy: () => typeof this
+	copy: () => this
 }
 
 export interface IHaving {
@@ -71,8 +71,8 @@ export interface IGettable<Type = any> {
 	get: () => Type
 }
 
-export interface IInitializable<ArgType extends any[] = any[], OutType = any> {
-	init: IThisMethod<ArgType, OutType>
+export interface IInitializable {
+	init: (...x: any[]) => this
 }
 
 export interface IPointer<Type = any> {

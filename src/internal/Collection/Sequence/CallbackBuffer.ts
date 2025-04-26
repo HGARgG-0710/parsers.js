@@ -13,7 +13,7 @@ export class CallbackBuffer<Type = any>
 	["constructor"]: new (
 		callback: (thisArg: IDynamicSequence<Type>) => void,
 		value?: Type[]
-	) => typeof this
+	) => this
 
 	private registerChange() {
 		this.callback(this)

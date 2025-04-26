@@ -39,9 +39,8 @@ export class InputStream<Type = any>
 	}
 
 	init(resource: IParseable<Type>) {
-		this.resource = resource
 		this.lastPos = resource.size - 1
-		super.init()
+		super.init(resource)
 		return this
 	}
 
