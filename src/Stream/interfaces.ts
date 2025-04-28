@@ -22,11 +22,7 @@ export interface IRewindable<Type = any> {
 	rewind: () => Type
 }
 
-export interface IIsEndCurrable {
-	isCurrEnd: () => boolean
-}
-
-export interface IIsStartCurrable {
+export interface IIsCurrStartable {
 	isCurrStart: () => boolean
 }
 
@@ -44,17 +40,16 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IStateful> &
 	Partial<IInitializable> &
-	Partial<IIsEndCurrable> &
-	Partial<IIsStartCurrable> &
+	Partial<IIsCurrStartable> &
 	Partial<IPeekable<Type>> &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> & {
-		curr: Type
-		isEnd: boolean
+		readonly curr: Type
+		readonly isEnd: boolean
+		isCurrEnd: () => boolean
 	}
 
-export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 
@@ -63,6 +58,5 @@ export type * from "./interfaces/LimitedStream.js"
 export type * from "./interfaces/MarkerStream.js"
 export type * from "./interfaces/NestedStream.js"
 export type * from "./interfaces/OwnedStream.js"
-export type * from "./interfaces/StreamParser.js"
 
 export type * from "./Position/interfaces.js"
