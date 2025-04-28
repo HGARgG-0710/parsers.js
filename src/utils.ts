@@ -1,12 +1,13 @@
 import { boolean, object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { Enum } from "./classes.js"
 import { BadIndex } from "./constants.js"
 import type {
 	IBufferized,
 	IIndexAssignable,
 	IIndexed,
+	IMappable,
 	IPersistentAccumulator,
-	IPointer,
 	ISizeable,
 	IStateful
 } from "./interfaces.js"
@@ -19,11 +20,6 @@ const { eqcurry } = boolean
  * Returns whether or not the given `number` is greater than `BadIndex`
  */
 export const isGoodIndex = (x: number) => x > BadIndex
-
-/**
- * Returns whether a certain index-pointer has been invalidated
- */
-export const isGoodPointer = (x: IPointer<number>) => isGoodIndex(x.value)
 
 /**
  * Given a string, returns whether it's a valid hexidecimal number
@@ -72,10 +68,20 @@ export const assignIndex = <Type = any>(
 	assignedIndex: Type
 ) => (x.assignedIndex = assignedIndex)
 
+/**
+ * Returns a function mapping `enums` using `f`
+ */
+export const fromEnum =
+	<T = any, Type = any>(f?: IMappable<T, Type>) =>
+	(enums: Enum<T>) =>
+		enums.map(f)
+
+export const resource = prop("resource")
+
 export const isLF = eqcurry("\n")
 
-export * as EnumSpace from "./EnumSpace/utils.js"
 export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
 export * as Node from "./Node/utils.js"
+
 export * as Stream from "./Stream/utils.js"
