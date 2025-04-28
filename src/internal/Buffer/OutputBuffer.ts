@@ -1,6 +1,6 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IPersistentAccumulator } from "../../../interfaces.js"
+import type { IPersistentAccumulator } from "../../interfaces.js"
 
 const { isArray } = type
 

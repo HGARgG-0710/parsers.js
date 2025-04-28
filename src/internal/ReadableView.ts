@@ -1,14 +1,11 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ICopiable, IPersistentAccumulator } from "../../../interfaces.js"
+import type { ICopiable, IReadable } from "../interfaces.js"
 
 const { isNumber } = type
 
-export class BufferView<Type = any> implements ICopiable {
-	["constructor"]: new (
-		offset: number,
-		buffer: IPersistentAccumulator<Type>
-	) => this
+export class ReadableView<Type = any> implements ICopiable, IReadable<Type> {
+	["constructor"]: new (offset: number, buffer: IReadable<Type>) => this
 
 	//
 	// * Interface Methods
@@ -36,7 +33,7 @@ export class BufferView<Type = any> implements ICopiable {
 
 	constructor(
 		private offset: number,
-		private readonly sequence: IPersistentAccumulator<Type>
+		private readonly sequence: IReadable<Type>
 	) {
 		assert(isNumber(offset))
 		assert(offset > 0)

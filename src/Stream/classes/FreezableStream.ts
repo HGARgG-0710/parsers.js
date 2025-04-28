@@ -1,5 +1,5 @@
 import { boolean, number, type } from "@hgargg-0710/one"
-import { OutputBuffer } from "src/internal/Collection/Sequence/OutputBuffer.js"
+import { OutputBuffer } from "src/internal/Buffer/OutputBuffer.js"
 import type { IPosition, IPredicatePosition } from "../interfaces.js"
 import { direction } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"

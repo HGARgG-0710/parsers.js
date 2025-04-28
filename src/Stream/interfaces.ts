@@ -34,6 +34,10 @@ export interface INextable<Type = any> {
 	next: () => Type
 }
 
+export interface IPeekable<Type = any> {
+	peek: (n: number) => Type
+}
+
 export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<INavigable<Type>> &
 	Partial<IFinishable<Type>> &
@@ -42,6 +46,7 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IInitializable> &
 	Partial<IIsEndCurrable> &
 	Partial<IIsStartCurrable> &
+	Partial<IPeekable<Type>> &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> & {
@@ -51,6 +56,7 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 
 export type IEndableStream<Type = any> = IStream<Type> & IIsEndCurrable
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
+export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 
 export type * from "./interfaces/IndexStream.js"
 export type * from "./interfaces/LimitedStream.js"

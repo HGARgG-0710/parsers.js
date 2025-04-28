@@ -1,4 +1,4 @@
-import { ArrayCollection } from "../../../classes/ArrayCollection.js"
+import { ArrayCollection } from "../../classes/ArrayCollection.js"
 
 export abstract class TypicalBuffer<Type = any> extends ArrayCollection<Type> {
 	read(i: number) {

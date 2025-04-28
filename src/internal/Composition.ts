@@ -6,7 +6,7 @@ import type {
 } from "../DynamicParser/interfaces.js"
 import type { IDynamicSequence } from "../interfaces.js"
 import { Callable } from "./Callable.js"
-import { CallbackBuffer } from "./Collection/Sequence/CallbackBuffer.js"
+import { CallbackBuffer } from "./Buffer/CallbackBuffer.js"
 
 const { trivialCompose, id } = functional
 const { isArray } = type
@@ -15,6 +15,8 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 	extends Callable
 	implements IComposition
 {
+	["constructor"]: new (layers?: Function[]) => this
+
 	readonly layers: IFunctionTuple = new CallbackBuffer(this.merge.bind(this))
 
 	protected merged: (...x: ArgType) => OutType = id as any
@@ -22,8 +24,6 @@ export class Composition<ArgType extends any[] = any[], OutType = any>
 	protected merge(buffer: IDynamicSequence<Function>) {
 		this.merged = trivialCompose(...buffer)
 	}
-
-	["constructor"]: new (layers?: Function[]) => Composition
 
 	protected __call__(...x: ArgType) {
 		return this.merged(...x)

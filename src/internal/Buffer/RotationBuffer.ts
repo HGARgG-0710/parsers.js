@@ -1,10 +1,12 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
 import { TypicalBuffer } from "./TypicalBuffer.js"
-import type { ISequence } from "../../../interfaces.js"
+import type { ISequence } from "../../interfaces.js"
 
 const { isNumber } = type
 
+// TODO: THINK about which methods should this thing actually include; 
+// ! remove the `implements` IF it's not necessary here...; 
 export class RotationBuffer<Type = any>
 	extends TypicalBuffer<Type>
 	implements ISequence<Type>

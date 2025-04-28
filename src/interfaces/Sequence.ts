@@ -1,6 +1,8 @@
 import type { ICollection } from "../interfaces.js"
 
-export interface ISequence<Type = any> extends ICollection<Type> {
+export interface ISequence<Type = any>
+	extends ICollection<Type>,
+		Iterable<Type> {
 	write: (i: number, value: Type) => this
 	emptied: () => this
 	read: (i: number) => Type

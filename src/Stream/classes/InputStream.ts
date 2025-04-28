@@ -1,5 +1,6 @@
 import { number } from "@hgargg-0710/one"
 import type { IParseable } from "../../interfaces.js"
+import { ReadableView } from "../../internal/ReadableView.js"
 import type { IPosition, IStream } from "../interfaces.js"
 import { isPredicatePosition } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"
@@ -16,6 +17,7 @@ export class InputStream<Type = any>
 	pos: number = 0
 
 	private lastPos: number
+	private readonly view: ReadableView
 
 	protected currGetter(): Type {
 		return this.resource!.read(this.pos)
@@ -23,10 +25,12 @@ export class InputStream<Type = any>
 
 	protected baseNextIter() {
 		++this.pos
+		this.view.forward()
 	}
 
 	protected basePrevIter() {
 		--this.pos
+		this.view.backward()
 	}
 
 	isCurrEnd(): boolean {
@@ -64,7 +68,12 @@ export class InputStream<Type = any>
 		return this.navigate(this.lastPos)
 	}
 
+	peek(n: number) {
+		return this.view.read(n)
+	}
+
 	constructor(public resource?: IParseable<Type>) {
 		super(resource)
+		this.view = new ReadableView(0, this.resource!)
 	}
 }
