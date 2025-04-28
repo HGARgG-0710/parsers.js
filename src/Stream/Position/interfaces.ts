@@ -12,9 +12,7 @@ export interface IPosed<Type = any> {
 	pos: Type
 }
 
-export type IChange<Type = any, PosType = any> = (
-	input: IReversibleStream<Type, PosType>
-) => Type
+export type IChange<Type = any> = (input: IReversibleStream<Type>) => Type
 
 export interface IDirectionHaving {
 	direction: boolean

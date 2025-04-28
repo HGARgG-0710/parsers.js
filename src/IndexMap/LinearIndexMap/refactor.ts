@@ -1,9 +1,10 @@
+import type { IIndexMap } from "../interfaces.js"
 import { LinearMapClass } from "./classes.js"
-import type { ILinearIndexMap, ILinearMapClass } from "./interfaces.js"
+import type { ILinearMapClass } from "./interfaces.js"
 
 export namespace OptimizedLinearMap {
 	export function optimize<KeyType = any, ValueType = any>(
-		this: ILinearIndexMap<KeyType, ValueType>,
+		this: IIndexMap<KeyType, ValueType>,
 		key: any
 	) {
 		return (this as any).alteredKeys.indexOf(key)

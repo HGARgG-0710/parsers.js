@@ -1,5 +1,5 @@
 import { functional, type } from "@hgargg-0710/one"
-import type { IPointer } from "src/interfaces.js"
+import type { IndexPointer } from "../classes.js"
 import { BasicHash } from "../HashMap/classes.js"
 import type { IHashMap } from "../HashMap/interfaces.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
@@ -13,7 +13,7 @@ import type {
 } from "../interfaces.js"
 import { Autocache } from "../internal/Autocache.js"
 import { current } from "../Stream/utils.js"
-import { isGoodPointer, pos } from "../utils.js"
+import { pos } from "../utils.js"
 import type { ILookupTable, ITableConstructor } from "./interfaces.js"
 
 const { id } = functional
@@ -69,11 +69,11 @@ export class PersistentIndexTable<
 	extends DelegateLookupTable<
 		KeyType,
 		ValueType,
-		IPointer<number>,
+		IndexPointer,
 		IPersistentIndexMap<KeyType, ValueType, DefaultType>,
 		any
 	>
-	implements ILookupTable<KeyType, ValueType, IPointer<number>>
+	implements ILookupTable<KeyType, ValueType, IndexPointer>
 {
 	["constructor"]: new (
 		delegate: IPersistentIndexMap<KeyType, ValueType, DefaultType>
@@ -81,16 +81,16 @@ export class PersistentIndexTable<
 
 	claim(x: any) {
 		const pointer = this.delegate.getIndex(x)
-		return isGoodPointer(pointer) ? pointer : null
+		return pointer.isGood() ? pointer : null
 	}
 
-	byOwned(priorOwned: IIndexAssignable<IPointer<number>>): ValueType {
-		return this.delegate.byIndex(priorOwned.assignedIndex!.value)[1]
+	byOwned(priorOwned: IIndexAssignable<IndexPointer>): ValueType {
+		return this.delegate.byIndex(priorOwned.assignedIndex!.index)[1]
 	}
 
 	delete(key: KeyType) {
-		const { delegate: value } = this
-		value.delete(value.getIndex(key).value)
+		const { delegate } = this
+		delegate.delete(delegate.getIndex(key).index)
 		return this
 	}
 

@@ -3,14 +3,14 @@ import { type as _type } from "@hgargg-0710/one"
 import { type } from "src/Node/utils.js"
 import { is } from "../Node/utils.js"
 import { current } from "../Stream/utils.js"
-import { value } from "../utils.js"
+import { resource } from "../utils.js"
 import type { ILinearMapClass } from "./interfaces.js"
 
 const { typeOf, isNumber } = _type
 
 export const [TokenMap, ValueMap, CurrentMap, TypeofMap] = [
 	type,
-	value,
+	resource,
 	current,
 	typeOf
 ].map((x) => (mapClass: ILinearMapClass) => mapClass.extend(x))

@@ -2,7 +2,7 @@ import { array, inplace } from "@hgargg-0710/one"
 import { BasicHash } from "../HashMap/classes.js"
 import { MapInternal } from "../HashMap/InternalHash/classes.js"
 import { Autocache } from "../internal/Autocache.js"
-import type { ICellNode, INode, INodeClass } from "./interfaces.js"
+import type { ICellClass, ICellNode, INode, INodeClass } from "./interfaces.js"
 import { isType } from "./utils.js"
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
@@ -107,7 +107,7 @@ export const ContentNode = new Autocache(
 		contentNode.prototype.type = type
 		return contentNode
 	}
-) as unknown as <Type = any>(type: Type) => INodeClass<Type>
+) as unknown as <Type = any, Value = any>(type: Type) => ICellClass<Type, Value>
 
 abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>

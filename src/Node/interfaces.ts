@@ -20,6 +20,12 @@ export interface INodeClass<Type = any> extends ITyped<Type>, ITypeCheckable {
 	new (...x: any[]): INode<Type>
 }
 
+export interface ICellClass<Type = any, Value = any>
+	extends ITyped<Type>,
+		ITypeCheckable {
+	new (value: Value): ICellNode<Type>
+}
+
 export interface INode<Type = any>
 	extends ICopiable,
 		ITyped<Type>,

@@ -19,5 +19,9 @@ export class IndexPointer {
 		this.index = newIndex
 	}
 
+	isGood() {
+		return this.index > BadIndex
+	}
+
 	constructor(public index: number) {}
 }

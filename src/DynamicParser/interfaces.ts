@@ -20,7 +20,7 @@ export type ISignatureCallback<StateType extends Summat = Summat> = (
 export interface IComplexComposition<StateType extends Summat = Summat>
 	extends IComposition,
 		Partial<IStateful<StateType>>,
-		IInitializable<[ISignatureCallback], IComplexComposition<StateType>> {}
+		IInitializable {}
 
 export interface IParserState extends Summat {
 	parser: IDynamicParser

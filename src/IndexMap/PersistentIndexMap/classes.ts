@@ -1,5 +1,4 @@
 import { array } from "@hgargg-0710/one"
-import type { IPointer } from "src/interfaces.js"
 import { DelegateIndexMap } from "../../internal/IndexMap.js"
 import { PointerArray } from "../../internal/PointerArray.js"
 import { isGoodIndex } from "../../utils.js"
@@ -12,14 +11,14 @@ export class PersistentIndexMap<
 		ValueType = any,
 		DefaultType = any
 	>
-	extends DelegateIndexMap<KeyType, ValueType, DefaultType, IPointer<number>>
+	extends DelegateIndexMap<KeyType, ValueType, DefaultType, IndexPointer>
 	implements IPersistentIndexMap<KeyType, ValueType, DefaultType>
 {
 	private readonly indexes: PointerArray;
 
 	["constructor"]: new (
 		indexMap: IIndexMap<KeyType, ValueType, DefaultType>
-	) => PersistentIndexMap<KeyType, ValueType, DefaultType>
+	) => this
 
 	copy() {
 		return new this.constructor(this.delegate.copy())

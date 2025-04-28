@@ -11,7 +11,7 @@ export class IndexSet implements ICopiable, Iterable<number> {
 	private readonly asArray: number[]
 	private readonly asSet: Set<number>;
 
-	["constructor"]: new (arity: number, indexes: number[]) => IndexSet
+	["constructor"]: new (arity: number, indexes: number[]) => this
 
 	keepOut(x: number) {
 		return new IndexSet(

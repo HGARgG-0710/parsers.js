@@ -1,6 +1,5 @@
 import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
-import { fromEnum } from "../EnumSpace/utils.js"
-import { isGoodIndex } from "../utils.js"
+import { fromEnum, isGoodIndex } from "../utils.js"
 import { ContentNode, RecursiveNode, TokenNode } from "./classes.js"
 import type { ITypeCheckable, ITyped, IWalkable } from "./interfaces.js"
 

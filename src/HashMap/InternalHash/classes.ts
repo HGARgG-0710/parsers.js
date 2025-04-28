@@ -10,7 +10,7 @@ export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 	["constructor"]: new (
 		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,
 		_default?: DefaultType
-	) => MapInternal<KeyType, ValueType, DefaultType>
+	) => this
 
 	private readonly map: Map<KeyType, ValueType>
 	readonly default: DefaultType
@@ -65,10 +65,7 @@ export class ObjectInternal<Type = any, DefaultType = any>
 	 */
 	static readonly MissingKey = undefined;
 
-	["constructor"]: new (
-		object?: object,
-		_default?: DefaultType
-	) => ObjectInternal<Type, DefaultType>
+	["constructor"]: new (object?: object, _default?: DefaultType) => this
 
 	size: number
 
@@ -117,10 +114,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 {
 	static readonly MissingKey = undefined;
 
-	["constructor"]: new (
-		array: Type[],
-		_default: DefaultType
-	) => ArrayInternal<Type, DefaultType>
+	["constructor"]: new (array: Type[], _default: DefaultType) => this
 
 	readonly default: DefaultType
 

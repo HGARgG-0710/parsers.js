@@ -133,6 +133,10 @@ export class RotationBuffer<Type = any> extends TypicalBuffer<Type> {
 	// * Non-Interface Methods:
 	//
 
+	first() {
+		return this.read(0)
+	}
+
 	last() {
 		return this.read(this.lastInd)
 	}
@@ -144,6 +148,7 @@ export class RotationBuffer<Type = any> extends TypicalBuffer<Type> {
 	backward() {
 		if (this.isFull()) this.renewElements()
 		else this.rotation = this.shifted(this.maxPos())
+		return this.isEmpty
 	}
 
 	constructor(maxSize: number) {

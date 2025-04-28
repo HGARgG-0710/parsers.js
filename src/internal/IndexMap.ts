@@ -25,7 +25,7 @@ abstract class PreIndexMap<
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract replace(index: number, pair: [KeyType, ValueType]): this
 	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
-	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	abstract copy(): this
 	abstract unique(): number[]
 	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
 	abstract swap(i: number, j: number): this
@@ -120,12 +120,6 @@ export abstract class DelegateIndexMap<
 	DefaultType = any,
 	IndexGetType = any
 > extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
-	abstract getIndex(key: any): IndexGetType
-	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
-	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-	abstract swap(i: number, j: number): this
-	abstract unique(): number[]
-
 	protected delegate: IIndexMap<KeyType, ValueType, any, number>
 
 	rekey(keyFrom: KeyType, keyTo: KeyType) {
