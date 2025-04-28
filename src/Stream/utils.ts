@@ -10,7 +10,9 @@ import type {
 	IIndexed,
 	IPosition,
 	IPushable,
-	IStateful
+	ISizeable,
+	IStateful,
+	IWritable
 } from "../interfaces.js"
 import { getStopPoint } from "./Position/refactor.js"
 import { pickDirection, positionNegate } from "./Position/utils.js"
@@ -104,6 +106,15 @@ export function consume<Type = any>(
 	result: IPushable<Type> = new ArrayCollection<Type>()
 ) {
 	while (!stream.isEnd) result.push(stream.next())
+	return result
+}
+
+export function write<Type = any>(
+	stream: IStream<Type>,
+	result: IWritable<Type> & ISizeable
+) {
+	for (let i = 0; i < result.size && !stream.isEnd; ++i)
+		result.write(i, stream.next())
 	return result
 }
 
@@ -291,4 +302,3 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 }
 
 export * as Position from "./Position/utils.js"
-
