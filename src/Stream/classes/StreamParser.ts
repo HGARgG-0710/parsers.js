@@ -1,21 +1,17 @@
 import { Stream } from "../../constants.js"
 import type { IOwnedStream } from "../interfaces.js"
-import type {
-	IStreamParser,
-	IUnderStreamParser
-} from "../interfaces/StreamParser.js"
 import { SetterStream } from "./BasicStream.js"
 
 const { SkippedItem } = Stream.StreamParser
 
 export function StreamParser<InType = any, OutType = any>(
 	handler: (stream: IOwnedStream<InType>) => OutType
-): new (resource?: IUnderStreamParser<InType>) => IStreamParser<OutType> {
+): new (resource?: IOwnedStream<InType>) => IOwnedStream<OutType> {
 	return class
 		extends SetterStream<OutType>
 		implements IOwnedStream<OutType>
 	{
-		["constructor"]: new (resource?: IUnderStreamParser<InType>) => this
+		["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 		protected baseNextIter(): OutType {
 			let lastReceived: OutType | undefined
@@ -40,7 +36,7 @@ export function StreamParser<InType = any, OutType = any>(
 			return new this.constructor(this.resource?.copy())
 		}
 
-		constructor(public resource?: IUnderStreamParser<InType>) {
+		constructor(public resource?: IOwnedStream<InType>) {
 			super(resource)
 		}
 	}

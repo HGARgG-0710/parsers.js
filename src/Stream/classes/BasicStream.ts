@@ -1,15 +1,15 @@
-import type { IOwnedStream, IStream } from "../interfaces.js"
 import { type } from "@hgargg-0710/one"
+import type { IOwnedStream, IStream } from "../interfaces.js"
 
-const { isObject, isFunction } = type
+const { isStruct, isFunction } = type
 
 export abstract class BasicStream<Type = any> implements IStream<Type> {
 	protected abstract baseNextIter(): Type | void
 	protected abstract update(newCurr?: Type | void): void
 
-	protected end?(): void
+	protected postEnd?(): void
 	protected basePrevIter?(): Type | void
-	protected start?(): void
+	protected postStart?(): void
 	protected initGetter?(...args: any[]): Type
 
 	abstract isCurrEnd(): boolean
@@ -25,12 +25,20 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 		if (this.initGetter) this.curr = this.initGetter(...args)
 	}
 
+	protected endStream() {
+		this.isEnd = true
+	}
+
+	protected startStream() {
+		this.isStart = true
+	}
+
 	next() {
 		const curr = this.curr
 		this.isStart = false
-		if (this.isEnd || this.isCurrEnd()) {
-			this.isEnd = true
-			this.end?.()
+		if (this.isCurrEnd()) {
+			this.endStream()
+			this.postEnd?.()
 		} else this.update(this.baseNextIter())
 		return curr
 	}
@@ -38,9 +46,9 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	prev() {
 		const curr = this.curr
 		this.isEnd = false
-		if (this.isStart || this.isCurrStart!()) {
-			this.isStart = true
-			this.start?.()
+		if (this.isCurrStart!()) {
+			this.startStream()
+			this.postStart?.()
 		} else this.update(this.basePrevIter!())
 		return curr
 	}
@@ -72,7 +80,7 @@ export abstract class ResourceStream<Type = any>
 
 	init(resource: unknown) {
 		this.resource = resource
-		if (isObject(resource) && isFunction((resource as any).claimBy))
+		if (isStruct(resource) && isFunction((resource as any).claimBy))
 			(resource as IOwnedStream<Type>).claimBy(this)
 		return super.init()
 	}

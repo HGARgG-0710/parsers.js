@@ -101,7 +101,7 @@ export class TreeStream<
 	rewind() {
 		this.walker.restart()
 		this.update()
-		this.isStart = true
+		this.startStream()
 		return this.curr
 	}
 
@@ -113,7 +113,7 @@ export class TreeStream<
 
 	finish() {
 		this.navigate(this.endInd)
-		this.isEnd = true
+		this.endStream()
 		return this.curr
 	}
 

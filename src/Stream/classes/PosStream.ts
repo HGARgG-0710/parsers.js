@@ -3,8 +3,12 @@ import { WrapperStream } from "./WrapperStream.js"
 export class PosStream<Type = any> extends WrapperStream<Type> {
 	pos: number = 0
 
+	isCurrStart() {
+		return this.pos === 0
+	}
+
 	forward(n: number = 1) {
-		return this.pos += n
+		return (this.pos += n)
 	}
 
 	backward(n: number = 1) {
