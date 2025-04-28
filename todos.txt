@@ -13,168 +13,36 @@
 			[Post parsers.js v0.3; ADD this as parsers.js v0.4 todo...]; 
 			3. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
 			4. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
-			5. [Stream-specific] see if the '.curr/.next/.prev'  method re-binding optimizations were an overkill [elimination of 'this.isEnd = true/false/whatever-for-each-call']; 
 
 	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
-	TODO [fixed order]:			
-		TODO: `Source` - REMOVE the `abstract` classes. 
-			ALSO - do THE EXACT SAME thing for "finite"/private cases of configurator pattern, 
-				and/or cases that will not use it often: 
-					1. Source
-					3. DynamicParser [REMOVE LATER]
-						Remove only when actually fixing it...; 
-					4. HashMap
-					5. LinearMapClass
-					6. HashTable
-
-			REMOVE any kind of `Autocache` from those...
-			(Basically, the only ones remaining are the `TokenNode`- and others...)
-				Reasons for splitting the `.prototype`-s of those are the that 
-					it's not too uncommon for programs to be having >100 different kinds of 
-						them. 
-
-				100 * ~8 ~= 800 methods
-			
+	TODO [fixed order]:				
 		TODO: about implementing the `.isEnd` in `IStream`
 			Make it `readonly` on the interface level... 
 			Implement internal mutability			
 
 			ALSO: same thing for `.curr` - it should be `readonly`; 
-			
-		BIG: .peek() CYCLE: 	
-			SOLUTION: 
-				scratch all this, INSTEAD: 
-					1. implement a `PeekableStream`, with a new `.peek()` method
-						Uses `.resource`
-					2. Add a SPECIAL `.peek()` for: 
-						1. InputStream [via BufferView]
-							TODO: rename the `BufferView`
-				
-				Reason - too bothered to be implemenmting a WHOLE SEPARATE `.peek()` for all of them. 
-				
-
-			Plan: 
-				1. create `.peekBuffer: RotationBuffer` property: 	
-					0. NOTE [important]: `peekBuffer` is supposed to be a HIDDEN property...; 		
-						Put on `StreamClassInstanceImpl`
-					1. peekSize: number = 0 flag - the SIZE of the `peekBuffer`
-						IF 0, then it's NOT EVEN created (memory saving)
-					2. USE whether it is 0 AS A FLAG: 
-						1. alter flag-based method-definitions: 
-							1. next: 
-							2. prev
-							3. init
-							4. copy: 
-								1. need to set the peekBuffer explicitly
-									note: peekBuffer can be a RotationBuffer or a BufferView
-										Better - keep TWO OF THEM, 
-											and, instead, let `peekBuffer` serve as a GETTER/property 
-												which would point to one of the two other ones (ALSO hidden properties). 
-							5. navigate: 
-								1. IMPORTANT - optimize 'navigate(n)' for case with `.peekBuffer`. 
-									LET it first "drain" the peek-buffer, then - CHECK for values 
-										that are available "before" the `.isEnd`
-				2. create new `.bufferView: BufferView` - alternative to `.peekBuffer`...
-					For the case when one has `.buffer` and `.pos` to get the positions...
-				3. write new methods:
-					1. `.peek`:
-						1. new file - methods/peek.ts
-						2. `chooseMethod` flags: 
-							1. hasBuffer
-							2. hasPosition
-								note: in buffer + position case OPTIMIZES to read from it instead...
-									(maybe???) - CREATE a `BufferView implements IBuffer`, which
-										would be a delegating "portion" of some other buffer, 
-										which would start from a single "moving" position, 
-										up to a FIXED-LENGTH contigious array of values. 
-				4. interfaces: 
-					1. IPeekable<Type> - into src\Stream\interfaces.ts
-						peek: (n: number) => ...
-					2. IPeekableStream<Type = any> = IStream<...> & IPeekable<...>
 	
-			ME5. 'StreamClass' - provide a '.peek(n)' method: 
-				1. For when '.buffer' is '.isFrozen === true', this IS NOT necessary, one can (instead) just 
-					index appropriately [reflect this...]; 
+		TODO: FIX the `.init()` methods on different kinds of `Stream`s [those with their own interfaces/ module - specifically...]; 
+			AND their different `resouce?: ...`-declarations...; 
+			THEY SHOULD mostly be all `IOwnedStream<Type>`...; Remove redundant ones, add missing ones. 
+		
+		TODO: [maybe?] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
+			Reason: many follow common pattern:  
+				if (this.isCurrEnd/Start()) this.end/startStream()
+				else this.baseNextIter/basePrevIter()
 
-				2. Based off new `.peekBuffer: RotationBuffer` hidden property, and `.basePeekFurther`
-				
-				3. Sketch:
-					WORKS LIKE: 
-						1. peek(n): 
-							-1. check if n < 0:
-								1. throw RangeError: look-behind in parsing not supported; 
-								[Reason: there exists backtracking via `.prev()` instead...]; 
-							0. check if: n === 0:
-								1. return this.curr
-							1. check if: n <= this.peekBuffer.size
-							2. if 1.: 
-								1. return this.peekBuffer.read(n - 1)
-							3. else: 
-								1. check if: n <= this.peekBuffer.maxSize
-								2. if 3.1.: 
-									0. let i = n - this.peekBuffer.size
-									1. while (i--):
-										0. const peeked = this.basePeekFurther(1)
-										1. IF peeked === undefined: 
-											1. throw new `ParseError: unexpected IStream end, .peek(...) failed`
-										2. ELSE: 
-											1. this.peekBuffer.push(peeked)
-									2. return this.peekBuffer.read(n - 1)
-
-									3. `basePeekFurther(n)` [hidden method... - not for public consumption] definition:
-									
-								3. else: 
-									1. throw ParseError: lookahead too large
-
-						2. next(): 
-							New operation:
-							1. IF `!this.peekBuffer.isEmpty()`:
-								1. 'this.peekBuffer.forward()' [ONLY if `.peekSize > 0` - `peekSize` is the new parameter for `StreamClass`]; 
-									DOES NOT come as a part of `.init`, instead - makes a new constructor, SIGNATURE IS THE SAME. 
-									There are now 4 'constructor's for `StreamClass`. 
-
-						3. prev(): 
-							New operation [mirrors `.next()`]
-							1. IF `!.peekBuffer.isFull()`: 
-								1. 'this.peekBuffer.rotation.backward()'
-							2. ELSE: 
-								1. this.peekBuffer.renew(this.curr)
-								RE-STARTS the `.peek()`. 
-								Requires ONCE AGAIN the "expansion" of the 
-									`.peekBuffer`. 
-								
-								More conservative than a full-blown manual `.unshift()`-like operation 
-									[which would have made the whole `RotationBuffer` thing pointless]. 
-
-				4. New interface - `IPeekable` [with the `.peek: () => Type` method]
-
-				5. Make `IStream` into `Partial<IPeekable>`
-	
-			ME6. `LazyStream` - add `peek(n)`, with `n <= peekSize`
-				`peekSize` - new parameter [do via the `Configurator` pattern]; 
-				Reason: the user shouldn't need to bother EVERY TIME with choosing the 
-					lookahead. Particularly so if it's *the same*...; 
+			When it's `.currGetter()`, nothing is stopping one from just wrapping `.baseNextIter` around it.
+			This'll allow for better code reuse and simpler codebase...; 
 			
-			PROBLEM: how to make `.peek(n)` work with `currGetter`? 
-				Suppose one has some state-altering logic (example: MarkedStream). 
-				Then, "looking ahead" will EFFECTIVELY ERASE the changes. 
-				Which is *BAD*. 
-
-					CONCLUSION: one *may*, for this specific thing, need to:
-						1. ISOLATE the variables of the given 'Stream'
-						2. provide a special "state-changing function", calls to which could "accumulate" 
-							as we are fetching previously "seen" items from the `.peekBuffer`; 
-					
-				Meaning: that the `Stream` under question NO LONGER gets to have its 
-					own instance-variables. 
-				
-				Or, more precisely, that those variables will have to delegate to a 
-					sinle mandated `.vars` object on the instance. 
+		TODO: [maybe?] remove the `TypicalBuffer` (pretty useless - only one method `.read`)
+			Could just make `ICollection` into an `IReadable`..?
 
 		TODO: problem (with DynamicParser): 
+			IMPORTANT: remove old `DynamicParser` - A NEW ONE is in order...
+
 			Current usage: 
 				const dynParser = new DynamicParser(S1, ..., SN, InputStream/LazyStream)
 				const parseStream = dynParser(...) // binding `state`, etc
