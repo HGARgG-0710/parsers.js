@@ -123,6 +123,10 @@ export interface IPushable<Type = any> {
 	push: (...x: Type[]) => this
 }
 
+export interface IWritable<Type = any> {
+	write: (i: number, value: Type) => this
+}
+
 export type * from "./DynamicParser/interfaces.js"
 export type * from "./HashMap/interfaces.js"
 export type * from "./IndexMap/interfaces.js"

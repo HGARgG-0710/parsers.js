@@ -11,6 +11,11 @@ export class ArrayCollection<Type = any> implements ICollection<Type> {
 		return this.items as readonly Type[]
 	}
 
+	write(i: number, value: Type) {
+		this.items[i] = value
+		return this
+	}
+
 	push(...x: Type[]) {
 		this.items.push(...x)
 		return this
@@ -26,7 +31,7 @@ export class ArrayCollection<Type = any> implements ICollection<Type> {
 	}
 
 	get size() {
-		return this.items!.length
+		return this.items.length
 	}
 
 	constructor(protected items: Type[] = []) {

@@ -3,13 +3,15 @@ import type {
 	IIndexed,
 	ICopiable,
 	IInitializable,
-	IPushable
+	IPushable,
+	IWritable
 } from "../interfaces.js"
 
 export interface ICollection<Type = any>
 	extends IGettable<IIndexed<Type>>,
 		ICopiable,
 		IInitializable,
-		IPushable<Type> {
+		IPushable<Type>,
+		IWritable<Type> {
 	readonly size: number
 }
