@@ -1,10 +1,10 @@
-import type { IStream } from "../interfaces.js"
+import type { IStream } from "../../interfaces.js"
 
-export class DelegateStream<Type = any> implements IStream<Type> {
+export abstract class DelegateStream<Type = any> implements IStream<Type> {
 	["constructor"]: new (resource?: IStream<Type>) => this
 
 	protected set curr(newCurr: Type) {
-		this.resource!.curr = newCurr
+		;(this.resource!.curr as any) = newCurr
 	}
 
 	get curr() {
@@ -12,7 +12,7 @@ export class DelegateStream<Type = any> implements IStream<Type> {
 	}
 
 	protected set isEnd(newEnd: boolean) {
-		this.resource!.isEnd = newEnd
+		;(this.resource!.isEnd as any) = newEnd
 	}
 
 	get isEnd() {
@@ -48,7 +48,7 @@ export class DelegateStream<Type = any> implements IStream<Type> {
 	}
 
 	isCurrEnd() {
-		return this.resource!.isCurrEnd!()
+		return this.resource!.isCurrEnd()
 	}
 
 	init(resource: IStream<Type>) {
