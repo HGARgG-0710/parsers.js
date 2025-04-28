@@ -8,28 +8,28 @@ export class ArrayCollection<Type = any> implements ICollection<Type> {
 	["constructor"]: new (...x: any[]) => this
 
 	get() {
-		return this.collection as readonly Type[]
+		return this.items as readonly Type[]
 	}
 
 	push(...x: Type[]) {
-		this.collection.push(...x)
+		this.items.push(...x)
 		return this
 	}
 
 	init(value: Type[]) {
-		this.collection = value
+		this.items = value
 		return this
 	}
 
 	copy() {
-		return new this.constructor(array.copy(this.collection))
+		return new this.constructor(array.copy(this.items))
 	}
 
 	get size() {
-		return this.collection!.length
+		return this.items!.length
 	}
 
-	constructor(protected collection: Type[] = []) {
-		assert(isArray(collection))
+	constructor(protected items: Type[] = []) {
+		assert(isArray(items))
 	}
 }

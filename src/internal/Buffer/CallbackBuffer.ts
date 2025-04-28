@@ -24,26 +24,26 @@ export class CallbackBuffer<Type = any>
 	}
 
 	truncate(from: number, to: number = this.size) {
-		this.collection = this.collection.slice(from, to)
+		this.items = this.items.slice(from, to)
 		this.registerChange()
 		return this
 	}
 
 	remove(i: number, count = 1) {
-		out(this.collection, i, count)
+		out(this.items, i, count)
 		this.registerChange()
 		return this
 	}
 
 	insert(i: number, ...values: Type[]) {
-		insert(this.collection, i, ...values)
+		insert(this.items, i, ...values)
 		this.registerChange()
 		return this
 	}
 
 	init(value?: Type[] | undefined): this {
 		if (value) {
-			this.collection = value
+			this.items = value
 			this.registerChange()
 		}
 		return this
@@ -62,11 +62,11 @@ export class CallbackBuffer<Type = any>
 	}
 
 	copy() {
-		return new this.constructor(this.callback, array.copy(this.collection))
+		return new this.constructor(this.callback, array.copy(this.items))
 	}
 
 	*[Symbol.iterator]() {
-		yield* this.collection
+		yield* this.items
 	}
 
 	constructor(
