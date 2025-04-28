@@ -1,6 +1,10 @@
 import { boolean, number, type } from "@hgargg-0710/one"
 import { OutputBuffer } from "src/internal/Buffer/OutputBuffer.js"
-import type { IPosition, IPredicatePosition } from "../interfaces.js"
+import type {
+	IOwnedStream,
+	IPosition,
+	IPredicatePosition
+} from "../interfaces.js"
 import { direction } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"
 import { PosStream } from "./PosStream.js"
@@ -10,22 +14,44 @@ const { isNumber } = type
 const { T } = boolean
 
 export class FreezableStream<Type = any> extends PosStream<Type> {
+	resource?: IOwnedStream<Type> | undefined
+
 	readonly buffer = new OutputBuffer()
+
+	private _isEnd: boolean
+	private _isStart: boolean
+	private _curr: Type
+
+	get isStart() {
+		return this._isStart
+	}
+
+	get isEnd() {
+		return this._isEnd
+	}
+
+	get curr() {
+		return this._curr
+	}
+
+	private set isStart(newIsStart: boolean) {
+		this._isStart = newIsStart
+	}
+
+	private set isEnd(newIsEnd: boolean) {
+		this._isEnd = newIsEnd
+	}
+
+	private set curr(newCurr: Type) {
+		this._curr = newCurr
+	}
 
 	private update() {
 		return (this.curr = this.buffer.read(this.pos))
 	}
 
-	private posValid() {
-		return this.pos > 0
-	}
-
 	private lastPos() {
 		return this.buffer.size - 1
-	}
-
-	private isAlivePos() {
-		return !this.isFrozen() || this.pos > this.lastPos()
 	}
 
 	private posGap() {
@@ -44,38 +70,72 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 
 	private navigatePredicate(relativePos: IPredicatePosition) {
 		if (direction(relativePos)) uniNavigate(this, relativePos)
-		else while (!relativePos(this) && this.posValid()) this.prev()
+		else while (!relativePos(this) && this.isCurrStart()) this.prev()
 	}
 
-	isFrozen() {
+	private isFrozen() {
 		return this.buffer.isFrozen
+	}
+
+	private baseNextIter() {
+		this.forward()
+		this.update()
+	}
+
+	private basePrevIter() {
+		this.backward()
+		this.update()
+	}
+
+	private willBeBeyoundBuffer() {
+		return this.pos === this.lastPos()
+	}
+
+	private bufferize(newElem: Type) {
+		this.buffer.push(newElem)
+	}
+
+	private endStream() {
+		this.isEnd = true
+	}
+
+	private startStream() {
+		this.isStart = true
+	}
+
+	private freeze() {
+		this.buffer.freeze()
+		this.endStream()
+	}
+
+	private handleUnbufferizedNext() {
+		this.bufferize(this.curr)
+		this.resource!.next()
+		this.baseNextIter()
+		if (this.resource!.isEnd) this.freeze()
+	}
+
+	isCurrEnd(): boolean {
+		return this.isFrozen()
+			? this.willBeBeyoundBuffer()
+			: this.resource!.isCurrEnd()
 	}
 
 	next() {
 		const curr = this.curr
 		this.isStart = false
-		if (this.isCurrEnd()) this.freeze()
-		else {
-			if (this.isAlivePos()) this.buffer.push(curr)
-			this.forward()
-			this.update()
-		}
+		if (!this.willBeBeyoundBuffer()) this.baseNextIter()
+		else if (this.isFrozen()) this.endStream()
+		else this.handleUnbufferizedNext()
 		return curr
 	}
 
 	prev() {
 		const lastCurr = this.curr
 		this.isEnd = false
-		if (this.posValid()) {
-			this.backward()
-			this.update()
-		}
+		if (this.isCurrStart()) this.startStream()
+		else this.basePrevIter()
 		return lastCurr
-	}
-
-	freeze() {
-		this.isEnd = true
-		this.buffer.freeze()
 	}
 
 	navigate(relativePos: IPosition<Type>) {
@@ -92,9 +152,13 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 	}
 
 	rewind() {
-		this.isStart = true
+		this.startStream()
 		this.pos = 0
 		this.update()
 		return this.curr
+	}
+
+	init(resource: IOwnedStream<Type>): this {
+		return super.init(resource)
 	}
 }
