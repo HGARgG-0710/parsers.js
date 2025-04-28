@@ -1,14 +1,17 @@
 import { type } from "@hgargg-0710/one"
-import type { ILookupTable, IStreamPredicate } from "../../interfaces.js"
-import { finish } from "../utils.js"
-import { WrapperStream } from "./WrapperStream.js"
+import type {
+	ILookupTable,
+	IOwnedStream,
+	IStreamPredicate
+} from "../../interfaces.js"
 import type {
 	INestedElement,
-	IUnderNestedStream,
 	INestedStream
 } from "../interfaces/NestedStream.js"
+import { finish } from "../utils.js"
+import { DyssyncStream } from "./WrapperStream.js"
 
-const { isUndefined, isNull } = type
+const { isNull } = type
 
 export function NestedStream<Type = any, IndexType = any>(
 	typesTable: ILookupTable<
@@ -16,42 +19,13 @@ export function NestedStream<Type = any, IndexType = any>(
 		IStreamPredicate<INestedElement<Type>>,
 		IndexType
 	>
-): new (resource: IUnderNestedStream<Type>) => INestedStream<Type, IndexType> {
+): new (resource: IOwnedStream<Type>) => INestedStream<Type, IndexType> {
 	return class
-		extends WrapperStream
+		extends DyssyncStream<INestedElement<Type, IndexType>>
 		implements INestedStream<Type, IndexType>
 	{
 		currNested: boolean
 		assignedIndex: IndexType
-
-		private _isEnd: boolean
-		private _isStart: boolean
-		private _curr: INestedElement<Type, IndexType>
-
-		set isStart(newIsStart: boolean) {
-			this._isStart = newIsStart
-		}
-
-		get isStart() {
-			return this._isStart
-		}
-
-		set isEnd(newIsEnd: boolean) {
-			this._isEnd = newIsEnd
-		}
-
-		get isEnd() {
-			return this._isEnd
-		}
-
-		protected set curr(newCurr: Type | INestedStream<Type, IndexType>) {
-			this._curr = newCurr
-		}
-
-		get curr() {
-			const localCurr = this._curr
-			return isUndefined(localCurr) ? this.underCurr() : localCurr
-		}
 
 		private underCurr() {
 			return this.resource!.curr
@@ -64,10 +38,6 @@ export function NestedStream<Type = any, IndexType = any>(
 				: this.underCurr()
 		}
 
-		private initGetter() {
-			return this.currGetter()
-		}
-
 		private baseNextIter() {
 			if (this.currNested)
 				finish(this.curr as INestedStream<Type, IndexType>)
@@ -77,7 +47,7 @@ export function NestedStream<Type = any, IndexType = any>(
 
 		isCurrEnd(): boolean {
 			return (
-				this.resource!.isCurrEnd!() ||
+				this.resource!.isCurrEnd() ||
 				(typesTable.isOwned(this) && typesTable.byOwned(this)(this))
 			)
 		}
@@ -85,14 +55,14 @@ export function NestedStream<Type = any, IndexType = any>(
 		next() {
 			const curr = this.curr
 			this.isStart = false
-			if (this.isCurrEnd()) this.isEnd = true
+			if (this.isCurrEnd()) this.endStream()
 			else this.baseNextIter()
 			return curr
 		}
 
-		init(resource: IUnderNestedStream<Type>) {
+		init(resource: IOwnedStream<Type>) {
 			super.init(resource)
-			this.curr = this.initGetter()
+			this.curr = this.currGetter()
 			return this
 		}
 
@@ -105,10 +75,6 @@ export function NestedStream<Type = any, IndexType = any>(
 			const copied = super.copy()
 			copied.setIndex(this.assignedIndex)
 			return copied
-		}
-
-		constructor(resource: IUnderNestedStream<Type>) {
-			super(resource)
 		}
 	}
 }

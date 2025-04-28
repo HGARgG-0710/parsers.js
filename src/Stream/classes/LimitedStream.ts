@@ -7,7 +7,7 @@ import {
 	positionNegate
 } from "../Position/utils.js"
 import { navigate } from "../utils.js"
-import { WrapperStream } from "./WrapperStream.js"
+import { DyssyncStream, WrapperStream } from "./WrapperStream.js"
 
 const { isNullary } = type
 const { T } = boolean
@@ -24,47 +24,14 @@ export function LimitedStream<Type = any>(
 	const negatedTo = positionNegate(to)
 	const direction = directionCompare(from, negatedTo)
 
-	return class extends WrapperStream<Type> {
+	return class extends DyssyncStream<Type> {
 		private hasLookahead = false
 		private hasLookbehind = false
 
 		private lookbehind: Type
 		private lookahead: Type
 
-		private _isStart: boolean = false
-		private _isEnd: boolean = false
-
-		private _curr: Type
-
 		resource?: IUnderLimitedStream<Type>
-
-		get isStart() {
-			return this._isStart
-		}
-
-		set isStart(newIsStart: boolean) {
-			this._isStart = newIsStart
-		}
-
-		get isEnd() {
-			return this._isEnd
-		}
-
-		set isEnd(newIsEnd: boolean) {
-			this._isEnd = newIsEnd
-		}
-
-		protected set curr(newCurr: Type) {
-			this._curr = newCurr
-		}
-
-		get curr() {
-			return this._curr
-		}
-
-		private syncCurr() {
-			this.curr = this.resource!.curr
-		}
 
 		private prodForth() {
 			const { hasLookahead, lookahead } = this
@@ -115,7 +82,7 @@ export function LimitedStream<Type = any>(
 		next() {
 			const curr = this.curr
 			this.isStart = false
-			if (this.isCurrEnd()) this.isEnd = true
+			if (this.isCurrEnd()) this.endStream()
 			else this.baseNextIter(curr)
 			return curr
 		}

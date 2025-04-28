@@ -1,13 +1,11 @@
 import type { IOwnedStream, IPredicatePosition } from "../interfaces.js"
 import { navigate } from "../utils.js"
-import { WrapperStream } from "./WrapperStream.js"
+import { DyssyncForwardStream, WrapperStream } from "./WrapperStream.js"
 
 export function PredicateStream<Type = any>(
 	predicate: IPredicatePosition<Type>
 ): new (resource?: IOwnedStream<Type>) => WrapperStream<Type> {
-	return class extends WrapperStream<Type> {
-		private _isEnd: boolean
-		private _curr: Type
+	return class extends DyssyncForwardStream<Type> {
 		private hasLookahead: boolean = false
 		private lookahead: Type
 
@@ -25,29 +23,13 @@ export function PredicateStream<Type = any>(
 			this.hasLookahead = this.resource!.isEnd
 		}
 
-		protected set curr(newCurr: Type) {
-			this._curr = newCurr
-		}
-
-		get curr() {
-			return this._curr
-		}
-
-		set isEnd(newIsEnd: boolean) {
-			this._isEnd = newIsEnd
-		}
-
-		get isEnd() {
-			return this._isEnd
-		}
-
 		isCurrEnd(): boolean {
 			return !this.hasLookahead
 		}
 
 		next() {
 			const curr = super.next()
-			if (this.isCurrEnd()) this.isEnd = true
+			if (this.isCurrEnd()) this.endStream()
 			else this.currGetter()
 			return curr
 		}
