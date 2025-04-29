@@ -13,9 +13,13 @@ export function StreamParser<InType = any, OutType = any>(
 	{
 		["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
+		private handleCurr() {
+			return handler.call(this, this.resource!)
+		}
+
 		protected baseNextIter(): OutType {
 			let lastReceived: OutType | undefined
-			do lastReceived = handler(this.resource!)
+			do lastReceived = this.handleCurr()
 			while (lastReceived === SkippedItem)
 			return lastReceived
 		}
