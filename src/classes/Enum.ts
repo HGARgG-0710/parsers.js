@@ -1,20 +1,21 @@
-import { array, functional } from "@hgargg-0710/one"
+import { functional } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IMappable } from "../interfaces.js"
 
 const { id } = functional
-const { uniqueArr } = array
 
 export class Enum<Type = any> {
-	["constructor"]: new (value?: Type[]) => this
+	["constructor"]: new (...value: Type[]) => this
 
-	private ensureUnique() {
-		this.enumItems = uniqueArr(this.enumItems!)
+	private readonly enumItems: Type[]
+	private readonly setItems: Set<Type>
+
+	private assertDisjoint(space: Enum<Type>) {
+		assert.strictEqual(space.setItems.intersection(this.setItems).size, 0)
 	}
 
-	private enumItems: Type[] = []
-
 	copy() {
-		return new this.constructor(array.copy(this.enumItems!))
+		return new this.constructor(...this.enumItems)
 	}
 
 	map<Out = any>(mapped: IMappable<Type, Out> = id<Type> as any) {
@@ -26,12 +27,16 @@ export class Enum<Type = any> {
 	}
 
 	join(space: Enum<Type>) {
-		this.enumItems.push(...space.map())
-		this.ensureUnique()
-		return this
+		return new this.constructor(...this.enumItems.concat(space.enumItems))
+	}
+
+	unite(space: Enum<Type>) {
+		this.assertDisjoint(space)
+		return this.join(space)
 	}
 
 	constructor(...enumItems: Type[]) {
-		this.enumItems = enumItems
+		this.setItems = new Set(enumItems)
+		this.enumItems = Array.from(this.setItems)
 	}
 }
