@@ -18,29 +18,251 @@
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
-	TODO [fixed order]:				
-		TODO: about implementing the `.isEnd` in `IStream`
-			Make it `readonly` on the interface level... 
-			Implement internal mutability			
-
-			ALSO: same thing for `.curr` - it should be `readonly`; 
-	
-		TODO: FIX the `.init()` methods on different kinds of `Stream`s [those with their own interfaces/ module - specifically...]; 
-			AND their different `resouce?: ...`-declarations...; 
-			THEY SHOULD mostly be all `IOwnedStream<Type>`...; Remove redundant ones, add missing ones. 
-		
-		TODO: [maybe?] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
-			Reason: many follow common pattern:  
-				if (this.isCurrEnd/Start()) this.end/startStream()
-				else this.baseNextIter/basePrevIter()
-
-			When it's `.currGetter()`, nothing is stopping one from just wrapping `.baseNextIter` around it.
-			This'll allow for better code reuse and simpler codebase...; 
-			
-		TODO: [maybe?] remove the `TypicalBuffer` (pretty useless - only one method `.read`)
-			Could just make `ICollection` into an `IReadable`..?
-
+	TODO [fixed order]:					
 		TODO: problem (with DynamicParser): 
+			ORDER of implementation: 
+				1. 'IChooser' interface
+				2. SingletonStream - stream that applies a function onto a single value [has only ONE element]: 
+					Uses Configurator Pattern; 
+					Problem with this: 
+						1. repeated class calls due to different functions would eat up insane amounts of memory. 
+						2. CONCLUSION: need a WHOLY SEPARATE function [called `SingletonStream`], which: 
+							1. accepts a FUNCTION [callback] to use with THE NEW instance
+							2. return a new function, which: 
+								1. accepts a 'resource'
+								2. create an instance of the PRIVATE `_SingletonStream` class, with given `resource`
+								3. INITIALIZES the second parameter - the `.handler` to be used to initialize the 
+									instance of the `_SingletonStream`
+
+					This way: 
+						1. no longer waste memory on SingletonStream methods every time [big saving, considered in scope]
+				3. ComposedStream: 
+					1. includes a recursively-changing STATIC composition of `chooser`s and `IStream`-returning classes; 
+					2. STORES the composition, allows it to change
+					3. EVALUATES the `composer`s on the way
+					4. WHEN the "next" stream/chooser above is given, it is determined like: 
+						1. if NOT chooser [i.e. - a Stream, call `.next()` - ASSUMED all below is already a Stream]
+						2. IF chooser - chooser based on underlying one; 
+							NOTE 1 [crucial]: choosers here are NOT REMEMBERED. 
+								Instead, they are RETURNED BY THE USER [in array-s]; 
+								QUESTION: is this really *any* different from the approach taken by the `LazyTree`? 
+									How would it differ: 
+										1. LazyTree changes the `.resource` ON-THE-GO, yet it STILL needs to keep track of current 
+											Stream, SO it STILL keeps a `Stream/chooser`-array, BUT it's smaller, since it's CURRENT,
+												that is, it ONLY includes the PRESENTLY WORRIED-ABOUT choosers/items. 
+											UNTIL it is empty, we CANNOT determine the FIRST "downward" iteration trend for the 
+												tree. 
+											As we PROGRESS, the current "downward shtick" of the tree CHANGES. 
+											Thus, no need to keep the whole tree, ONLY the current "shtick". 
+											IMPORTANT part is - we DO NOT build a tree. 
+											That is, the CURRENT `array` of `Stream`s we have IS NOT containing 
+												operations pertaining to UNITING the tree elements. 
+											INSTEAD, we are dealing with STREAMS which have LOW-LEVEL-ELEMENTS/STREAMS
+												RECURSIVELY instead of tree items. 
+												THEY ARE NEVER UNITED. Their *Sole* connection is the "parent stream". 
+												This is the power - you NEVER need more memory than is needed to contain a SINGLE 
+													linked-list inside of the tree. You NEVER need to keep memory for ALL of the children. 
+												The memory saving will be equivalent to the number of CHILDREN that each tree has
+													[which, depending on the grammar/specific-input, can be VERY significant]. 
+
+											QUESTION: can we STILL do self-modifying parsers with this? 
+												Considering everything... Why not? As in, we STILL have to identify a whole "shtick". 
+													Thus, one is IN NO WAY limited, and THUS, a LazyTree version with Self-modification is 
+														ALSO POSSIBLE. 
+										2. With `ComposedStream`, we are... 
+											0. storing the whole of list
+											1. first, evaluating the bottom of the list [KNOWN, pre-all-choosers]
+											2. INSERTING changes [Stream-s/chooser-s] at the "old" locations, where choosers are found
+												1. BUT for this, we need information of '.curr'
+												2. so, we have a MOVING 'Stream' underneath, one that is known
+											3. so... after evaluating THIS portion of the list, we have to... 
+												Change the `.resource`... 
+												Hm-m-m-m-m...
+											4. But... we don't need THE WHOLE of the list... 
+												So, you keep only the... current part. 
+												Like with LazyTree. 
+											5. Build the tree (ah! finally, the difference...)
+									CONCLUSION: the ONLY difference between the two is 
+										that in the "eager" case we are using the `TreeStream` + BUILDING the actual tree 
+											first. 
+
+										In the "lazy" one, we INSTEAD, return Stream-s of Stream-s, which are ITERATED. 
+
+										So, in conclusion; 
+											1. both LAZY and EAGER cases use `CombinedStream`
+											2. LAZY uses: 
+												1. Streams of Streams/Elements
+												2. no tree is built in the end
+												3. the `array` is PERSISTENT throughout the 
+													"walk" over the tree, since it gets to 
+														CHANGE constantly, instead of being 
+															"evaluated" as the parse progresses. 
+											3. EAGER uses: 
+												1. A chooser-sequence that BUILDS UP the tree 
+													using various "to-do-later" abstractions (ex: SingletonStream); 
+												2. The tree is built up AT THE VERY END, when the "array" is finished 
+													(contrast with LazyTree)
+												3. The "array" is PERSISTENT, and gets LARGER, 
+													but is EVALUATED at the very end, YIELDING, a value. 
+							NOTE 2 [problem]: since they are NOT remembered, but given by the user - 
+								HOW can we return back to the "original" one, ONCE we have an "ending" Stream in the middle (example: Singleton Stream); 
+								Depth is impossible to predict prior to parsing, THEREFORE, one *needs* to: 
+									1. remember the original and INTERMEDIATE states
+									2. remember the "ending" places - that can BLOW UP
+								
+								That is to say, to know that the `CombinedStream` is finished [CombinedStream.prototype.isCurrEnd()], one: 
+									1. checks FIRST that the LOWEST POSSIBLE [InputStream/LazyStream] stream IS NOT YET over
+									2. then - decides AT WHICH point to "cut off" [roll-back to a "chooser"]:
+										1. go up the series of Stream-s
+										2. find first 'defunct'
+										3. throw the finished Stream out, REPLACE with the result of the ORIGINAL "chooser" used to "derive it"
+											1. THIS is found out using "chain-lists" of different chooser-results
+												One takes the LAST such obtained list, going UPWARDS, 
+													replacing AS MANY "derivations" from "choosers" (calls to them), 
+														as is needed (depends on how many streams are "defunct"), 
+															and finding out WHICH of the "chooser" invocations now 
+																needs to be performed. 
+										4. derive until STREAM-SEQUENCE IS ONCE AGAIN RESTORED
+										5. RETURN the results
+
+								ALSO, the `.next()` of `CombinedStream` is LITERALLY the 
+									COMPOSITION of items in the current `.compositionArray`. 
+
+								So, we have: 
+									1. ORIGINAL `.compositionArray` that gets to EVOLVE on each `.next()`, and ON EACH `.next()` RESETTING BACK
+									2. The final `.tempArray`, FULLY EVALUATED to produce CURRENT FIRST-CHILD OF THE TREE [via `'trivialCompose()'()`]
+					5. NOT used by `LazyTree` [which has a LAZY alternative - Streams-of-Streams/Elements - see note above...]
+					6. The `ComposedStream` DOES NOT include the "Source/Loaded", other such stuff...
+			ALSO - about `chooser`s: 
+				1. these are functions that can be provided TOGETHER with `IStream`-classes as one of the variadic arguments to `DynamicParser`
+				2. these functions: 
+					1. take in the ELEMENT TYPE of the last IStream
+					2. return the NEXT STREAM CLASS 
+					3. GET CALLED ever time that the Stream created by the IStream-Class that they return GETS TO FINISH!
+				3. IMPORTANT - need a new abstraction `ComposedStream`: 
+					1. it is a stream that is ITSELF a composition of: 
+						1. other Stream-s
+						2. CHOOSERS
+					2. it gets to finish when: 
+						1. ANY one of its streams/choosers gets to finish
+						2. For performance reasons - ONLY the *topmost* stream is actually checked
+							Also - this allows for better functinoality [like - source-replacements, etc]	
+				4. A `ComposedStream`-management system (as described below...) is USED by the `DynamicParser` underneath. 
+					QUESTION: should `ComposedStream`s be made public? 
+					ANSWER: yes, since the user could then THEMSELVES combine their sequences of Stream-s into MORE COMPLEX ones. 
+						This also facilitates better refactoring, and simplification of LONG compositions of Stream-s; 
+
+				5. About `TokenStream` and `Regex`: 
+					1. need an INTERMEDIATE abstraction - a `MatchList`
+					2. a `MatchList` is a "table" of `handler-Regex` to be walked, and USED by the `TokenStream` to MATCH one of avaiable `Regex`-es
+					3. a `MatchList` is an `IndexMap`; Functions in it have access to `this` - THE CURRENT TokenStream, and `input` - first arg, and 'parser.table' - second arg, LIKE with `TableMap`; 
+					4. a `TokenStream` is just a `(matchList: MatchList) => StreamClass(TableMap(matchList))`
+					5. since `TokenStream` is JUST a `StreamParser`, it ALONE cannot provide one with full `laziness` in all cases (ex: recursion)
+					6. FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
+							b + a + (b - (...)), ... # and so forth - only characters are: a, b, +, -, (, ) and ','
+						can be parsed like: 
+
+							# very rough sketch - incomplete, need to solve the issue of DEALING with the `recursive ()`-aspect of it all. 
+							1. ReadableSource
+							2. InputStream
+							3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
+							3. TokenStream(+, -, a, b, (, ), ,) - provides TokenNode abstractions
+							4. chooser0:	
+								1. TRY FINDING a matching pair for '/(/': 
+									input.next() # skipping '('
+									return [
+										SingletonStream(BRACKETED_RecursiveNode_func), # a RecursiveNode, with 1 element - the sum; 
+										chooser1, # "gathering up" all the "+", etc
+										chooser0, # recursion - bracket-expression INSIDE the bracket
+										LimitedStream(EndBracketTokenPred),  # predicate of '.type === EndBracketType'
+									]	
+								2. all else - PASS AS-IS
+							5. chooser1: 
+								1. based off TableMap:
+									1. based off an MatchList:
+									
+										0. MATCHING - Peek(1) (approx, in `.type`s) -- 1/[+-]/: 
+											const elem = input.next() # a | b | (...) - last one hadled by `chooser0`
+											const sign = input.next() # - | +
+
+											# the `Summand_Curried(elem, sign)(elem1) = { type: sign, children: [elem, (elem1.type == sign ? ...elem1.children : elem1)] }`
+											# we are TURNING the `Stream`-s into a SEQUENCE of ONE-ELEMENT LAYERS TO BE EVALUATED LATER; 
+											# which are THEN - flattened to obtain a single `.children` array for the arithmetic expression; 
+											return [
+												SingletonStream(Summand_Curried(elem, sign)), 
+												chooser1,
+											]
+
+										1. MATCHING - .curr 0/[ab]|#[BRACKET_TYPE]/ [with no prev. match of 'peek(1)']
+											const elem = input.next() # skipping; NO +- AFTER the current one; Has to be end on the next [or, an ERROR]; 
+											return [
+												SingletonStream(Summand), # `Summand` - a RecursiveNode with `.children.length === 1`
+												chooser1 # end-recursion - 'IS_END'/Error ahead [NOTE: this needs to be SUBSET - break into `chooser1` and `chooser2` (lesser - without recursion)]
+											]
+
+
+										3. IS_END: 
+											return []
+
+										4. is ',' - return a `SingletonStream(id)` - passing those as-is; 
+
+										5. ERROR/ERROR-RECOVERY - invalid token provided
+
+								2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
+							6. PredicateStream - pick those that are not a ','
+				6. CONCLUSION: 
+					1. add a new `Stream` - SingletonStream - contains only one element. 
+						Performs a given function upon it. 
+
+					2. THIS is the power of `chooser`s - the MISSING PIECE in the library, one 
+						needed to establish RECURSION...; 
+
+					3. PROBLEM - with `NestedStream`: 
+						? Remove it? 
+							Since, the choosers are doing everything that it can, except lazily: 
+								1. easier to work with
+								2. provide proper laziness
+								3. new approach
+						CONCLUSION: yes, remove the `NestedStream`; 
+							QUESTION: what about the `LookupTable`s? 
+								They are ONLY EVER needed by the `NestedStream`... 
+								Remove? 
+								Yes, them as well, since now one has CHOOSERS...; v
+
+					4. PROBLEM: about the `LazyTree`...
+						There still appears to be one single greatest issue - one STILL has to keep track of all the items to be 
+							evaluated for a given piece of `Tree` with `ComposedStream` <- `DynamicParser`. 
+						That is, one STILL requires features of `LazyTree` to be fully lazy: 
+							1. 'choosers' in it function differently in that THEIR RESULTS AREN'T "appended" 
+								to a single list, like they are in "DynamicParser". 
+							2. There is a single overaching "major" stream that happens AFTER all the recursion 
+								(and which, fundamentally, CANNOT change)
+							3. the things returned from `choosers` simply REPLACE the `.resource` of the future 'parent' of 
+								the currently "chosen" stream
+						The DynamicParser, ON THE OTHER HAND, keeps its items IN A SINGLE ARRAY OF Stream-Classes/choosers, 
+							USED to define the current `ComposedStream`, which is then MANAGED by various functions. 
+						Likewise, a DynamicParser *allows* self-modifying parsers, 
+							SINCE, all of the items in these functions
+						whereas `LazyStream` DOES NOT, 
+							since it has some UNDERLYING CONDITIONS about order-of-evaluation required to work correctly.
+					
+					5. IMPORTANT : provide proper demos for: 
+						1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
+						2. SELF-MODIFYING thing [using `DynamicParser`]
+							THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
+						3. ANOTHER ab, +-, () and , arithmetic parser - LAZY, using `LazyTree`
+							Note: in the place where we do 'Summand_Curried(elem, sign)', 
+								it is THE SAME, except: 
+								
+									1. the current "lower" `chooser` is NOT evaluated. 	
+										This way, choosers are ONLY evaluated WHEN REQUESTED FOR (on `.next()` calls)
+										This is due to the fact it's TOP-DOWN iteration [TreeStream-like]; 
+									2. the `.children`-based nodes are REPLACED with `NodeStream`-s - which are 
+										".link(subStream)"-ed to one another so that `subStream` AND its `.children`
+											BE REPRESENTED as the part of `this` (the "first" NodeStream given); 
+							
+						4. A SELF-MODIFYING LazyTree-based parser. 
+
 			IMPORTANT: remove old `DynamicParser` - A NEW ONE is in order...
 
 			Current usage: 
@@ -134,7 +356,24 @@ Order of TODO-elimination:
 															]
 
 									4. DELETE the `ComplexComposition`. It's excessive. 
+	
+		TODO: [maybe?] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
+			Reason: many follow common pattern:  
+				if (this.isCurrEnd/Start()) this.end/startStream()
+				else this.baseNextIter/basePrevIter()
 
+			When it's `.currGetter()`, nothing is stopping one from just wrapping `.baseNextIter` around it.
+			This'll allow for better code reuse and simpler codebase...; 
+			
+		TODO: [maybe?] remove the `TypicalBuffer` (pretty useless - only one method `.read`)
+			Could just make `ICollection` into an `IReadable`..?
+
+		TODO: add `Autocache` to `PeekStream`; 
+
+		TODO: FIX the `.init()` methods on different kinds of `Stream`s [those with their own interfaces/ module - specifically...]; 
+			AND their different `resouce?: ...`-declarations...; 
+			THEY SHOULD mostly be all `IOwnedStream<Type>`...; Remove redundant ones, add missing ones. 
+	
 		[UNORDERED]
 		
 		TODO [one.js]: LATER, when finishing new version:
@@ -286,9 +525,6 @@ Order of TODO-elimination:
 					2. Base contains NO abstract methods [if it does, then it's a PRE-class]; 
 					3. use the `Base/Pre` when there is no better name
 				2. when returning a class instance, use `camelCase`-named classes, WITHOUT the `_`
-		1. refactor `makeDelegate` into one.js [AND MAKE IT LOOK PRETTY! - refactor the function itself]: 
-			1. ALSO - refactor the 'ConstructorHaving' interface into `types`
-			2. ALSO - refactor the `ThisMethod` interface into `types`
 		2. add permalinks for "minor" class-exports
 		3. Add JSDoc for: 
 			1. minor classes/functions ['classes' exports]
@@ -673,57 +909,6 @@ Order of TODO-elimination:
 		
 		TODOS for v0.3: 		
 			Primary: 
-							
-				PO2. [new Position class] Traveller, a point on a Stream [Position/classes.ts]
-						New class for remembering absolute Position on a `Stream`. 
-
-						To be usable with:
-							1. MultiIndex [on TreeStream]
-							2. LineIndex [on any `IStream<string>`, or (if generic), with "newline"/"non-newline" items]; 
-								Generalize to an n-tuple, possibly?
-
-						Fast implementations through: 
-							1. '.rewind + .nagivate' [default - botha re implemented manually on TreeStream]: 
-								note: ACCEPTS 'IPosition'; like `navigate`
-							2. '.navigate(n: number)' [default - fast default implementation for LineIndex]
-
-						CONCLUSION: 
-							THE `.travel` method WILL WORK via internal fast-implementations; 
-
-						Default implementation [sketch]: 
-
-							travelDefault = function (pos: Position) {
-								if (isNumber(pos))
-									return this.navigate((-1) ** (this.pos > pos) * (pos - this.pos)) // final 'this.pos+ = this.pos - (this.pos - pos) == pos'
-								else {
-									// the default WITHOUT this.pos
-									this.rewind()
-									return this.navigate(pos)
-								}
-							}
-						
-						The 'Traveller' class [in 'Position/classes.ts'], 
-							is just a utility class: 
-
-							[sketch]
-							Traveller implements PositionObject<IPosition> {
-								protected value: IPosition
-								protected stream: TravelableStream
-								travel () {
-									return this.stream.travel(this.value)
-								}
-							}
-							
-
-						ALSO - TODO: add a `travel` util (analogous to `navigate`, `rewind`, etc), 
-							and REFACTOR IT into the `LimitedStream.prototype.init`; 
-							It would go like: 
-
-								travel = function (this: IStream, point) {
-									rewind()
-									navigate(stream, point)
-								}
-									
 				UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
 					For a given 'Indexable', it does: 
 
@@ -2160,6 +2345,11 @@ TODO:
 
 			Note: keep this for v0.5 ONLY. *Not* as a part of v0.4
 
+	9. Testing: 
+		1. introduce mocks [use Jest]
+			Reason: complexity. 
+				There's still v0.4 to go (proper BFS implementation - for BOTH TreeStream AND LazyTree alternatives); 
+
 FUTURE: 
 	1. idea for a project - a command-line based tool for parser-creation: 
 		Works thus, it allows the user to set (sequentially, one-by-one): 
@@ -2184,17 +2374,13 @@ FUTURE:
 		1. `callable` package: 
 			1. Callable
 			2. Composition
-			3. ComplexComposition: 
-				NOTE [important]: the `DynamicParser` is STILL here (as a case of application of `ComplexComposition`)
-				TODO: rename this to something more interesting (like 'ReducableComposition', or something...); 
-			4. IndexSet
-			5. Signature 
-			6. `IBuffer`, `IDynamicBuffer`, `CallbackBuffer` 
+			3. IndexSet
+			4. Signature 
 		
 		2. `test` package [already developed]: 
 			1. add the current 'ClassTest', 'MethodTest' 
 			2. make `copiable` a dependency of this
-			3. [unrelated] add serialization
+			3. [unrelated] add serialization of tested items [interfaces for it, etc]
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
 
 		3. `autocache` package [make a dependency of parsers.js]: 
