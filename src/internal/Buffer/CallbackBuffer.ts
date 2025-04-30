@@ -10,7 +10,7 @@ export class CallbackBuffer<Type = any>
 	extends TypicalBuffer<Type>
 	implements IDynamicSequence<Type>
 {
-	["constructor"]: new (
+	declare ["constructor"]: new (
 		callback: (thisArg: IDynamicSequence<Type>) => void,
 		value?: Type[]
 	) => this

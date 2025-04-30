@@ -31,7 +31,7 @@ export function LimitedStream<Type = any>(
 		private lookbehind: Type
 		private lookahead: Type
 
-		resource?: IUnderLimitedStream<Type>
+		declare resource?: IUnderLimitedStream<Type>
 
 		private prodForth() {
 			const { hasLookahead, lookahead } = this

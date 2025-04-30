@@ -70,5 +70,3 @@ export function fromPairs<KeyType = any, ValueType = any>(
 
 	return [keys, values]
 }
-
-export * as PersistentIndexMap from "./PersistentIndexMap/utils.js"

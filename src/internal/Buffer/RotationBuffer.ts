@@ -7,7 +7,7 @@ const { min } = number
 const { isNumber } = type
 
 export class RotationBuffer<Type = any> extends TypicalBuffer<Type> {
-	["constructor"]: new (n?: number) => this
+	declare ["constructor"]: new (n?: number) => this
 
 	// * first-read index
 	private rotation: number = 0

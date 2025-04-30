@@ -6,7 +6,6 @@ export * from "./classes/InputStream.js"
 export * from "./classes/LazyStream.js"
 export * from "./classes/LimitedStream.js"
 export * from "./classes/MarkerStream.js"
-export * from "./classes/NestedStream.js"
 export * from "./classes/OwnedStream.js"
 export * from "./classes/PeekStream.js"
 export * from "./classes/PosStream.js"
@@ -16,4 +15,3 @@ export * from "./classes/TreeStream.js"
 export * from "./classes/WrapperStream.js"
 
 export * as Position from "./Position/classes.js"
-

@@ -2,7 +2,7 @@ import type { IOwnedStream } from "../interfaces.js"
 import { OwnedStream } from "./OwnedStream.js"
 
 export abstract class WrapperStream<Type = any> extends OwnedStream<Type> {
-	resource?: IOwnedStream<Type>
+	declare resource?: IOwnedStream<Type>
 
 	init(resource: IOwnedStream<Type>) {
 		this.resource = resource
@@ -11,8 +11,7 @@ export abstract class WrapperStream<Type = any> extends OwnedStream<Type> {
 	}
 
 	constructor(resource?: IOwnedStream<Type>) {
-		super()
-		if (resource) this.init(resource)
+		super(resource)
 	}
 }
 

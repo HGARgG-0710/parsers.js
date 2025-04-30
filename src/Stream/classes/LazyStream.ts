@@ -14,7 +14,7 @@ export class LazyStream
 {
 	["constructor"]: new (resource: ISource) => this
 
-	owner?: IStream
+	declare owner?: IStream
 
 	get pos() {
 		return this.resource.pos

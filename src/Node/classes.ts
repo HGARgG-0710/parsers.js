@@ -80,7 +80,7 @@ abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
 	implements ICellNode<Type, Value>
 {
-	["constructor"]: new (value?: Value) => this
+	declare ["constructor"]: new (value?: Value) => this
 
 	copy() {
 		return new this.constructor(this.value)
@@ -113,7 +113,7 @@ abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
 	implements INode<Type>
 {
-	["constructor"]: new (children?: INode<Type>[]) => this
+	declare ["constructor"]: new (children?: INode<Type>[]) => this
 
 	read(i: number): INode<Type> {
 		return this.children[i]

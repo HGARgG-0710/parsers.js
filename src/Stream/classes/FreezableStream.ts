@@ -14,7 +14,7 @@ const { isNumber } = type
 const { T } = boolean
 
 export class FreezableStream<Type = any> extends PosStream<Type> {
-	resource?: IOwnedStream<Type> | undefined
+	declare resource?: IOwnedStream<Type> | undefined
 
 	readonly buffer = new OutputBuffer()
 

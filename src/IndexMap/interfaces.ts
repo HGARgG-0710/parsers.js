@@ -43,4 +43,3 @@ export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
 }
 
 export type * from "./LinearIndexMap/interfaces.js"
-export type * from "./PersistentIndexMap/interfaces.js"

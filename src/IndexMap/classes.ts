@@ -27,4 +27,3 @@ export const Pairs = <KeyType = any, ValueType = any>(
 }
 
 export * as LinearIndexMap from "./LinearIndexMap/classes.js"
-export * from "./PersistentIndexMap/classes.js"

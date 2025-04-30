@@ -165,7 +165,7 @@ function MultSource(
 
 		protected readonly temp = this.charSizes[defaultSize - 1]!
 
-		protected decoder: () => string
+		protected declare decoder: () => string
 	}
 
 	extendPrototype(multSource, {
