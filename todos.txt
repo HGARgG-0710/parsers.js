@@ -19,6 +19,55 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:					
+		TO DELETE: 
+			1. NestedStream-related: 
+				1. LookupTable
+				2. PersistentIndexMap: 
+					1. PointerArray
+					2. IndexPointer
+
+					3. CONCLUSION: 
+						1. refactor the `IndexMap` module:
+							0. no more special "ILinearIndexMap" directory. 
+
+							1. names: 
+								1. ILinearMapClass -> IMapClass [interface]
+								2. LinearMapClass -> MapClass [function]
+								3. OptimizedLinearMap -> OptimizedMap
+							
+							2. top-level names: 
+								1. TypeMap -> nodeMap
+								2. ValueMap -> resourceMap
+								3. TypeofMap -> typeofMap
+								4. CurrentMap -> currMap
+							
+							3. Move `Pairs` to `classes/` [in its own file - Pairs.ts]; 
+							
+			[after adding the `TempArray`]
+			2. CallbackBuffer: 
+				1. TypicalBuffer 
+					1. add the relevant `.read` and `.write` ONTO the `ArrayCollection`
+					2. `RotationBuffer` would inherit straight from `ArrayCollection`. 
+
+		TODO: split `ArrayCollection` into 2 classes: 
+			1. TempArray: 
+				1. inherits from `ArrayCollection`, overrides `.push`
+				2. preallocates memory, NEVER actually makes the array it uses smaller, instead managing elements better
+					`.push()` writes to the "free" end
+			2. current `ArrayCollection`: 
+				1. GAINS a `.read()` method from the `TypicalBuffer` [no reason NOT to make it `.read`]able, since: 
+					1. still need functinoality to be inherited from somewhere
+					2. serves as a kind of "thin" delegate-wrapper around the "typical" arrayas to permit the interfaces 
+						of the library to work. 
+
+			ALSO: replace the `tempItems = new ArrayCollection` with `tempItems = new TempArray`; 
+				they're purposed for DIFFERENT things..; 
+				Also - the `TempArray` ALLOWS for NOT freeing/reclaiming new memory constantly; 
+
+		TODO: rename the `TreeStream` into `DepthStream`.
+			Since it implements an `IStream`-version of DFS, and we are going to 
+				be LATER (in v0.4) implementing the `breadth-first` version of it (called `BreadthStream`). 
+
 		TODO: problem (with DynamicParser): 
 			ORDER of implementation: 
 				1. 'IChooser' interface
@@ -133,6 +182,54 @@ Order of TODO-elimination:
 									2. The final `.tempArray`, FULLY EVALUATED to produce CURRENT FIRST-CHILD OF THE TREE [via `'trivialCompose()'()`]
 					5. NOT used by `LazyTree` [which has a LAZY alternative - Streams-of-Streams/Elements - see note above...]
 					6. The `ComposedStream` DOES NOT include the "Source/Loaded", other such stuff...
+			
+				4. NodeStream: 
+					Regarding `LazyTree`
+
+					1. ALSO - implement a `clear` method AND function for `ICollection`. 
+						Deletes all accumulated elements. 
+						ALSO - implement it NOT like `clear(this.collection)` for `ArrayCollection`, NOR like `this.init([])`, 
+							since the latter actually allocates MORE memory, instead of freeing it, while the former STILL requires 
+								reclaiming the memory LATER via `.push()`-es
+
+							SOLUTION: 
+								1. implement a new [public] `TempArray`, which keeps them UNDEFINED [like `RotationBuffer`]
+									Intended to be used for MANY short-term storages, which are more or less of the "same" 
+										size, bounded by only the largest one that had happened. 
+									FASTER, since: 
+										1. no freeing memory
+										2. no reclaiming memory [instead it retains the max. possible, allocates new ONLY when needs it]
+
+						REASON: allows one to do cycles, combined with `SingletonStream`: 
+							// INIT STEP: this.state.tempArrWriter = consumable(new TempArray())
+
+							return [
+								SingletonStream, 
+								this.state.tempArrWriter, 
+								currChoser
+							]
+
+							TODO: create a `consumable` function (util), works like:
+
+								# intended to be used primarily with the `TempArray` class
+								[rough sketch]
+								function consumable(p: IPushable & IClearable) {
+									return function (stream: IStream) {
+										p.clear()
+										while (stream.isEnd) p.push(stream.next())
+										return p
+									}
+								}
+
+				5. LazyTree: 
+					Easy: this is just a WRAPPER around the 
+						`ComposedStream/DynamicParser`, which iterates the NodeStream-s 
+							currently used. Returns a STREAM, employed JUST like the `TreeStream`
+
+					Likewise: choosers, need to "find out the shtick", sole difference BEING 
+						that it requires usage of 'Stream's instead of 'Node' objects, 
+							and, again, NodeStream-s INSTEAD of SingletonStream-s + 'consume'
+
 			ALSO - about `chooser`s: 
 				1. these are functions that can be provided TOGETHER with `IStream`-classes as one of the variadic arguments to `DynamicParser`
 				2. these functions: 
