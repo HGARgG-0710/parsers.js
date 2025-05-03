@@ -1,5 +1,5 @@
 import { boolean, number, type } from "@hgargg-0710/one"
-import { OutputBuffer } from "src/internal/Buffer/OutputBuffer.js"
+import { OutputBuffer } from "src/internal/OutputBuffer.js"
 import type {
 	IOwnedStream,
 	IPosition,

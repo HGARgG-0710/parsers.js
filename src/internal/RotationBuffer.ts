@@ -1,12 +1,12 @@
 import { array, number, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { TypicalBuffer } from "./TypicalBuffer.js"
+import { ArrayCollection } from "../classes.js"
 
 const { copy } = array
 const { min } = number
 const { isNumber } = type
 
-export class RotationBuffer<Type = any> extends TypicalBuffer<Type> {
+export class RotationBuffer<Type = any> extends ArrayCollection<Type> {
 	declare ["constructor"]: new (n?: number) => this
 
 	// * first-read index
@@ -149,6 +149,10 @@ export class RotationBuffer<Type = any> extends TypicalBuffer<Type> {
 		if (this.isFull()) this.renewElements()
 		else this.rotation = this.shifted(this.maxPos())
 		return this.isEmpty
+	}
+
+	*[Symbol.iterator]() {
+		for (let i = 0; i < this.size; ++i) yield this.read(i)
 	}
 
 	constructor(maxSize: number) {
