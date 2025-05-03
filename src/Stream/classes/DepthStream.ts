@@ -23,7 +23,7 @@ const GO_NEXT_FIRST = "goNextFirst"
 const PUSH_FIRST_CHILD = "pushFirstChild"
 const GO_SIBLING_AFTER = "goSiblingAfter"
 
-export class TreeStream<
+export class DepthStream<
 	TreeLike extends IWalkable<TreeLike> = IWalkable
 > extends GetterStream<TreeLike> {
 	["constructor"]: new (resource?: TreeLike) => this
