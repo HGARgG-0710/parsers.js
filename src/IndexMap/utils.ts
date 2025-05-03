@@ -1,5 +1,5 @@
 import type { array } from "@hgargg-0710/one"
-import { Pairs } from "./classes.js"
+import { Pairs } from "src/classes.js"
 import type { IIndexMap } from "./interfaces.js"
 
 /**

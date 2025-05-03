@@ -1,6 +1,7 @@
 export * from "./classes/ArrayCollection.js"
 export * from "./classes/Enum.js"
 export * as Loaded from "./classes/Loaded.js"
+export * from "./classes/Pairs.js"
 export * from "./classes/PropDigger.js"
 export * from "./classes/ReadableSource.js"
 export * from "./classes/SourceBuilder.js"

@@ -13,29 +13,24 @@ import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
 import { BaseIndexMap } from "../../internal/IndexMap.js"
 import { isGoodIndex } from "../../utils.js"
 import type { IIndexMap, IMapClass } from "../interfaces.js"
-import { inBound } from "../refactor.js"
-import { fromPairs } from "../utils.js"
-import type { ILinearMapClass } from "./interfaces.js"
 import {
 	extend,
 	extendKey,
-	OptimizedLinearMap as OptimizedLinearMapMethods
-} from "./refactor.js"
+	inBound,
+	OptimizedMap as OptimizedMapMethods
+} from "../refactor.js"
+import { fromPairs } from "../utils.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
 const { equals } = boolean
 const { insert, out } = inplace
 
-export function LinearMapClass<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any
->(
+export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	change?: IIndexingFunction<KeyType>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
-): ILinearMapClass<KeyType, ValueType, DefaultType> {
+): IMapClass<KeyType, ValueType, DefaultType> {
 	const extension = trivialCompose(...extensions)
 	const keyExtension = trivialCompose(...keyExtensions)
 
@@ -128,7 +123,7 @@ export function LinearMapClass<
 	linearMapClass.extendKey = extendKey
 
 	if (!change)
-		linearMapClass.prototype.getIndex = OptimizedLinearMapMethods.optimize<
+		linearMapClass.prototype.getIndex = OptimizedMapMethods.optimize<
 			KeyType,
 			ValueType
 		>
@@ -136,27 +131,25 @@ export function LinearMapClass<
 	return linearMapClass
 }
 
-export const ArrayMap = LinearMapClass(array.recursiveSame)
+export const ArrayMap = MapClass(array.recursiveSame)
 
-export const OptimizedLinearMap = LinearMapClass()
+export const OptimizedMap = MapClass()
 
 // * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
-export const OptimizedCharMap = OptimizedLinearMap.extend<number>(
-	string.charCodeAt
-)
+export const OptimizedCharMap = OptimizedMap.extend<number>(string.charCodeAt)
 
-export const PredicateMap: IMapClass<Function> = LinearMapClass(
+export const PredicateMap: IMapClass<Function> = MapClass(
 	(curr: Function, x: any) => curr(x)
 )
 
-export const RegExpMap: IMapClass<ITestable> = LinearMapClass(
+export const RegExpMap: IMapClass<ITestable> = MapClass(
 	(curr: ITestable, x: any) => curr.test(x)
 )
 
-export const SetMap: IMapClass<IHaving> = LinearMapClass(
-	(curr: IHaving, x: any) => curr.has(x)
+export const SetMap: IMapClass<IHaving> = MapClass((curr: IHaving, x: any) =>
+	curr.has(x)
 )
 
-export const BasicMap = LinearMapClass(equals)
+export const BasicMap = MapClass(equals)
 
-export const ObjectMap = LinearMapClass(object.same)
+export const ObjectMap = MapClass(object.same)
