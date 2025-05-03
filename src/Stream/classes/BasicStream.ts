@@ -54,6 +54,7 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	}
 
 	init(...args: any[]) {
+		this.startStream()
 		this.preInit(...args)
 		return this
 	}

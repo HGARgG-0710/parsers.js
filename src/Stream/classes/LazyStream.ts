@@ -53,7 +53,7 @@ export class LazyStream
 
 	init(resource: ISource) {
 		this.resource.cleanup()
-		this.resource = resource
+		super.init(resource)
 		return this
 	}
 
