@@ -1,9 +1,10 @@
 import { type } from "@hgargg-0710/one"
 import type { IOwnedStream, IStream } from "../interfaces.js"
+import { IterableStream } from "../../internal/IterableStream.js"
 
 const { isStruct, isFunction } = type
 
-export abstract class BasicStream<Type = any> implements IStream<Type> {
+export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	protected abstract baseNextIter(): Type | void
 	protected abstract update(newCurr?: Type | void): void
 
@@ -11,9 +12,6 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 	protected basePrevIter?(): Type | void
 	protected postStart?(): void
 	protected initGetter?(...args: any[]): Type
-
-	abstract isCurrEnd(): boolean
-	abstract copy(): this
 
 	isCurrStart?(): boolean
 
@@ -59,11 +57,8 @@ export abstract class BasicStream<Type = any> implements IStream<Type> {
 		return this
 	}
 
-	*[Symbol.iterator]() {
-		while (!this.isEnd) yield this.next()
-	}
-
 	constructor() {
+		super()
 		this.preInit()
 	}
 }

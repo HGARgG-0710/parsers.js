@@ -1,6 +1,7 @@
 import type { IStream } from "../../interfaces.js"
+import { IterableStream } from "../../internal/IterableStream.js"
 
-export abstract class DelegateStream<Type = any> implements IStream<Type> {
+export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
 	["constructor"]: new (resource?: IStream<Type>) => this
 
 	protected set curr(newCurr: Type) {
@@ -35,10 +36,6 @@ export abstract class DelegateStream<Type = any> implements IStream<Type> {
 		return this.resource!.next()
 	}
 
-	*[Symbol.iterator]() {
-		yield* this.resource!
-	}
-
 	copy() {
 		return new this.constructor(this.resource?.copy())
 	}
@@ -57,6 +54,7 @@ export abstract class DelegateStream<Type = any> implements IStream<Type> {
 	}
 
 	constructor(public resource?: IStream<Type>) {
+		super()
 		if (resource) this.init(resource)
 	}
 }
