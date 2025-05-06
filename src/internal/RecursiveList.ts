@@ -1,6 +1,6 @@
 import type { IInitializable } from "../interfaces.js"
 
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
 const { first } = array
 
 type IDerivable<
@@ -41,6 +41,8 @@ type ISwitchIdentifiable = {
 	readonly isSwitch?: boolean
 }
 
+type IRedundancyCheck<T = any> = (terminal: T) => boolean
+
 function isSwitch(x: ISwitchIdentifiable): x is Switch {
 	return !!x.isSwitch
 }
@@ -77,7 +79,7 @@ class Switch<
 	constructor(public readonly recursive: Recursive) {}
 }
 
-// ! IMPORTANT note: will need to `assert` that all the things passed are EITHER `.isFunction`;
+// ! IMPORTANT note [StreamList/ComposedStream]: will need to `assert` that all the things passed are EITHER `.isFunction`;
 
 // Arguments:
 // 		! 1. isRecursive = isFunction // SINCE, we are actually passing `.init`-ializiazble *IStream-s*, the 'chooser's are the ONLY functions ever present;
@@ -87,27 +89,38 @@ class Switch<
 // 	^ 		CONCLUSION: `chooser`s will HAVE to return NEW 'Stream'-s/Arrays-of-'Stream's [that is, their CREATION is a part of the actual parsing-function];
 // 		! 5. origItems - the (...x: (IStream | IChooser)[]) FROM the pre-initialization step of the `ComposedStream` [more precisely - the constructor of the `DynamicComposition];
 // Notes:
-// * 0. IChooser-s RETURN IStream objects, and NOT classes for them. This is ESSENTIAL;
+// * 0. IChooser-s RETURN IStream objects OR arrays of IStream-objects, and NOT classes for them. This is ESSENTIAL;
 // * 1. `.evaluate(with)` is called when we want to RE-INITIALIZE the 'IStream' instances present OR create new ones,
 // 		IN OTHER WORDS, cases:
 // 			1. the ComposedStream-iteration has (just) begun, and we are searching the first "shtick"
-// 		ARGUMENT is the `.origResource` of the `ComposedStream` [input that is used to then obtain the REAL `.resource` - the result of `.firstNonRecursive()`]; 
-// * 2. USE '.evaluateWhen(pred, evalWith)' when we strike `.isEnd` on the `.resource`. 
-// 		1. this is the "renewal" method. HERE, `isOld = (x) => x.isEnd`; 
-// 		2. IF returns `false`, then we KNOW that the `ComposedStream` is FINISHED; 
-// 		3. Otherwise, we KNOW that the Stream continues AS-IS, 
+// 		ARGUMENT is the `.origResource` of the `ComposedStream` [input that is used to then obtain the REAL `.resource` - the result of `.firstNonRecursive()`];
+// * 2. USE '.evaluateWhen(pred, evalWith)' when we strike `.isEnd` on the `.resource`.
+// 		1. this is the "renewal" method. HERE, `isOld = (x) => x.isEnd`;
+// 		2. IF returns `false`, then we KNOW that the `ComposedStream` is FINISHED;
+// 		3. Otherwise, we KNOW that the Stream continues AS-IS,
 // 			and then - we just PROCEED to be calling it as desired
 // * 3. USE `.firstNonRecursive()` to get the "final" Stream, FROM WHICH the values will be DIRECTLY channeled! [note: THAT can cange just as well!]
-// * 4. To get new elements (.next()) and check for last element (.isCurrEnd()) from the obtained `.resource`, one just delegates the appropriate methods; 
-export class EvaluableList<
+// * 4. To get new elements (.next()) and check for last element (.isCurrEnd()) from the obtained `.resource`, one just delegates the appropriate methods;
+// ! 5. the '.isOld()' GETS ADDED on a PRIVATE DERIVED class, via a PROTOTYPE. [same thing WITH the `isOld`, `isRecursive`, `evaluator`]:
+// 		1. A way to save space
+// 		2. Cleaner code (no need for the fourth parameter in the `evaluateWhen` refactoring);
+// TODO [6.] : PROBLEM - need to (somehow) change the current `.evaluator` behaviour:
+// 		* 1. It is SUPPOSED to be returning a STREAM or an ARRAY. Yet, currently, it has to either return a STREAM, or a 'StreamList' - the special-case of the `EvaluableList` class-algorithm;
+// 		^ 		solution: LET the user-provided arrays be WRAPPED into `StreamList` within the `.evaluator` on it. THEN, one will not need to export it as a public class.
+export abstract class RevursiveInitList<
 	T extends ISwitchIdentifiable &
 		IEvaluableIdentifiable &
 		IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
 > implements IEvaluableIdentifiable
 {
+	protected abstract isOld: IRedundancyCheck<T>
+	protected abstract isRecursive: type.TypePredicate<Recursive>
+	protected abstract evaluator: IFoldable<T, Recursive>
+
 	private items: IRecursiveItems<T, Recursive>
 	private lastInitialized: T | null = null
+	private hasSwitch: boolean = false
 
 	get isEvaluableList() {
 		return true
@@ -138,6 +151,11 @@ export class EvaluableList<
 		this.lastInitialized = toInitialize
 	}
 
+	private fillSwitch(fillable: IFillableSwitch<T, Recursive>, evaledWith: T) {
+		this.expandEvaluated(fillable, evaledWith)
+		this.evaluateDerivable(fillable.derivable, evaledWith)
+	}
+
 	private expandEvaluated(
 		fillable: IFillableSwitch<T, Recursive>,
 		evaledWith: T
@@ -145,39 +163,113 @@ export class EvaluableList<
 		fillable.expand(this.evaluator, evaledWith)
 	}
 
-	private fillSwitch(fillable: IFillableSwitch<T, Recursive>, evaledWith: T) {
-		this.expandEvaluated(fillable, evaledWith)
-		this.evaluateDerivable(fillable.derivable, evaledWith)
-	}
-
 	private evaluateDerivable(
 		maybeSublist: IDerivable<T, Recursive>,
 		evaledWith: T
 	) {
-		let sublist: EvaluableList<T, Recursive> | null
-		if ((sublist = this.ensureSublist(maybeSublist)))
-			this.evaluateSublist(sublist, evaledWith)
-	}
-
-	private ensureSublist(maybeSublist: IDerivable<T, Recursive>) {
-		return isEvaluableList(maybeSublist) ? maybeSublist : null
+		if (isRecursiveList(maybeSublist))
+			this.evaluateSublist(maybeSublist, evaledWith)
+		else this.linkInitialized(maybeSublist)
 	}
 
 	private evaluateSublist(
-		sublist: EvaluableList<T, Recursive>,
+		sublist: RevursiveInitList<T, Recursive>,
 		evaledWith: T
 	) {
 		sublist.evaluate(evaledWith)
 		this.linkEvaluatedSublist(sublist)
 	}
 
-	private linkEvaluatedSublist(sublist: EvaluableList<T, Recursive>) {
-		this.lastInitialized = sublist.firstNonRecursive()
+	private linkEvaluatedSublist(sublist: RevursiveInitList<T, Recursive>) {
+		this.linkInitialized(sublist.firstNonRecursive())
+	}
+
+	private linkInitialized(toBeLastInitialized: T) {
+		this.lastInitialized = toBeLastInitialized
+	}
+
+	private maybeReInitSwitchable(
+		currItem: IRecursivelySwitchable<T, Recursive>,
+		lastItem: T
+	) {
+		return isSwitch(currItem)
+			? this.maybeReFillSwitch(currItem, lastItem)
+			: this.maybeReInitTerminal(currItem, lastItem)
+	}
+
+	private maybeReFillSwitch(
+		currSwitch: IFillableSwitch<T, Recursive>,
+		lastItem: T
+	) {
+		this.hasSwitch = true
+		this.reFillSwitch(currSwitch, lastItem)
+		return true
+	}
+
+	private reFillSwitch(
+		currSwitch: IFillableSwitch<T, Recursive>,
+		lastItem: T
+	) {
+		const derivable = currSwitch.derivable
+		if (isRecursiveList(derivable))
+			this.reFillSublist(derivable, lastItem, currSwitch)
+		else this.maybeReFillSimpleSwitch(derivable, currSwitch, lastItem)
+	}
+
+	private maybeReFillSimpleSwitch(
+		derivable: T,
+		currSwitch: IFillableSwitch<T, Recursive>,
+		lastItem: T
+	) {
+		if (this.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
+	}
+
+	private reFillSublist(
+		sublist: RevursiveInitList<T, Recursive>,
+		lastItem: T,
+		currSwitch: IFillableSwitch<T, Recursive>
+	) {
+		if (!sublist.reEvaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
+	}
+
+	private maybeReInitTerminal(currTerminal: T, lastTerminal: T) {
+		return this.isOld(currTerminal)
+			? this.reInitTerminal(currTerminal, lastTerminal)
+			: true
+	}
+
+	private reInitTerminal(currTerminal: T, lastTerminal: T) {
+		const reEvalProceed = this.hasSwitch
+		if (reEvalProceed) this.initTerminal(currTerminal, lastTerminal)
+		return reEvalProceed
 	}
 
 	evaluate(origTerm: T) {
 		for (let i = this.size; --i; )
 			this.initSwitchable(this.items[i], this.lastInitialized || origTerm)
+	}
+
+	firstNonRecursive(): T {
+		let firstItem: IRecursivelySwitchable<T, Recursive>
+		let firstDerivable: IDerivable<T, Recursive>
+		return isSwitch((firstItem = this.firstItem()))
+			? isRecursiveList((firstDerivable = firstItem.derivable))
+				? firstDerivable.firstNonRecursive()
+				: firstDerivable
+			: firstItem
+	}
+
+	reEvaluate(evaledWith: T) {
+		this.hasSwitch = false
+		for (let i = this.size; i--; )
+			if (
+				!this.maybeReInitSwitchable(
+					this.items[i],
+					this.lastInitialized || evaledWith
+				)
+			)
+				return false
+		return true
 	}
 
 	init(origItems: (T | Recursive)[]) {
@@ -188,43 +280,7 @@ export class EvaluableList<
 		return this
 	}
 
-	firstNonRecursive(): T {
-		let firstItem: IRecursivelySwitchable<T, Recursive>
-		let firstDerivable: IDerivable<T, Recursive>
-		return isSwitch((firstItem = this.firstItem()))
-			? isEvaluableList((firstDerivable = firstItem.derivable))
-				? firstDerivable.firstNonRecursive()
-				: firstDerivable
-			: firstItem
-	}
-
-	// TODO: refactor!!!
-	evaluateWhen(isOld: (terminal: T) => boolean, evaledWith: T) {
-		let seenSwitch = false
-		for (let i = this.size; i--; ) {
-			const lastItem = this.lastInitialized || evaledWith
-			const currItem = this.items[i]
-			if (isSwitch(currItem)) {
-				seenSwitch = true
-				const currDerivable = currItem.derivable
-				if (isEvaluableList(currDerivable)) {
-					if (!currDerivable.evaluateWhen(isOld, evaledWith))
-						this.fillSwitch(currItem, lastItem)
-				} else if (isOld(currDerivable))
-					this.expandEvaluated(currItem, lastItem)
-			} else if (isOld(currItem)) {
-				if (seenSwitch) this.initTerminal(currItem, lastItem)
-				else return false
-			}
-		}
-		return true
-	}
-
-	constructor(
-		origItems: (T | Recursive)[],
-		private isRecursive: (x: any) => x is Recursive,
-		private evaluator: IFoldable<T, Recursive>
-	) {
+	constructor(origItems: (T | Recursive)[]) {
 		this.init(origItems)
 	}
 }
