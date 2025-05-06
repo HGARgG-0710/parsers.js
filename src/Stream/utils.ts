@@ -7,12 +7,11 @@ import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { Stream } from "../constants.js"
 import type {
 	IBufferized,
+	IFiniteWritable,
 	IIndexed,
 	IPosition,
 	IPushable,
-	ISizeable,
-	IStateful,
-	IWritable
+	IStateful
 } from "../interfaces.js"
 import { getStopPoint } from "./Position/refactor.js"
 import { pickDirection, positionNegate } from "./Position/utils.js"
@@ -111,7 +110,7 @@ export function consume<Type = any>(
 
 export function write<Type = any>(
 	stream: IStream<Type>,
-	result: IWritable<Type> & ISizeable
+	result: IFiniteWritable<Type>
 ) {
 	for (let i = 0; i < result.size && !stream.isEnd; ++i)
 		result.write(i, stream.next())
@@ -302,3 +301,4 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 }
 
 export * as Position from "./Position/utils.js"
+

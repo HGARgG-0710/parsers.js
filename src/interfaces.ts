@@ -26,7 +26,7 @@ export type IIndexingFunction<KeyType = any> = (
 ) => boolean
 
 export interface ISizeable {
-	size: number
+	readonly size: number
 }
 
 export interface IDefaulting<Type = any> {
@@ -126,6 +126,8 @@ export interface IPushable<Type = any> {
 export interface IWritable<Type = any> {
 	write: (i: number, value: Type) => this
 }
+
+export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
 export type * from "./DynamicParser/interfaces.js"
 export type * from "./HashMap/interfaces.js"
