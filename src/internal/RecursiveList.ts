@@ -6,7 +6,7 @@ const { first } = array
 type IDerivable<
 	T extends IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
-> = T | EvaluableList<T, Recursive>
+> = T | RecursiveInitList<T, Recursive>
 
 type IFoldable<
 	T extends IInitializable = any,
@@ -33,8 +33,8 @@ type IPreRecursiveItems<
 	Recursive extends ISwitchIdentifiable = any
 > = (IRecursivelySwitchable<T, Recursive> | Recursive)[]
 
-type IEvaluableIdentifiable = {
-	readonly isEvaluableList?: boolean
+type IRecursiveIdentifiable = {
+	readonly isRecursiveList?: boolean
 }
 
 type ISwitchIdentifiable = {
@@ -47,15 +47,15 @@ function isSwitch(x: ISwitchIdentifiable): x is Switch {
 	return !!x.isSwitch
 }
 
-function isEvaluableList(x: IEvaluableIdentifiable): x is EvaluableList {
-	return !!x.isEvaluableList
+function isRecursiveList(x: IRecursiveIdentifiable): x is RecursiveInitList {
+	return !!x.isRecursiveList
 }
 
 class Switch<
 	T extends IInitializable &
 		ISwitchIdentifiable &
-		IEvaluableIdentifiable = any,
-	Recursive extends ISwitchIdentifiable & IEvaluableIdentifiable = any
+		IRecursiveIdentifiable = any,
+	Recursive extends ISwitchIdentifiable & IRecursiveIdentifiable = any
 > implements ISwitchIdentifiable
 {
 	private _derivable: IDerivable<T, Recursive>
@@ -107,12 +107,12 @@ class Switch<
 // TODO [6.] : PROBLEM - need to (somehow) change the current `.evaluator` behaviour:
 // 		* 1. It is SUPPOSED to be returning a STREAM or an ARRAY. Yet, currently, it has to either return a STREAM, or a 'StreamList' - the special-case of the `EvaluableList` class-algorithm;
 // 		^ 		solution: LET the user-provided arrays be WRAPPED into `StreamList` within the `.evaluator` on it. THEN, one will not need to export it as a public class.
-export abstract class RevursiveInitList<
+export abstract class RecursiveInitList<
 	T extends ISwitchIdentifiable &
-		IEvaluableIdentifiable &
+		IRecursiveIdentifiable &
 		IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
-> implements IEvaluableIdentifiable
+> implements IRecursiveIdentifiable
 {
 	protected abstract isOld: IRedundancyCheck<T>
 	protected abstract isRecursive: type.TypePredicate<Recursive>
@@ -122,7 +122,7 @@ export abstract class RevursiveInitList<
 	private lastInitialized: T | null = null
 	private hasSwitch: boolean = false
 
-	get isEvaluableList() {
+	get isRecursiveList() {
 		return true
 	}
 
@@ -173,14 +173,14 @@ export abstract class RevursiveInitList<
 	}
 
 	private evaluateSublist(
-		sublist: RevursiveInitList<T, Recursive>,
+		sublist: RecursiveInitList<T, Recursive>,
 		evaledWith: T
 	) {
 		sublist.evaluate(evaledWith)
 		this.linkEvaluatedSublist(sublist)
 	}
 
-	private linkEvaluatedSublist(sublist: RevursiveInitList<T, Recursive>) {
+	private linkEvaluatedSublist(sublist: RecursiveInitList<T, Recursive>) {
 		this.linkInitialized(sublist.firstNonRecursive())
 	}
 
@@ -225,7 +225,7 @@ export abstract class RevursiveInitList<
 	}
 
 	private reFillSublist(
-		sublist: RevursiveInitList<T, Recursive>,
+		sublist: RecursiveInitList<T, Recursive>,
 		lastItem: T,
 		currSwitch: IFillableSwitch<T, Recursive>
 	) {
