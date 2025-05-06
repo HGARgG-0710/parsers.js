@@ -44,7 +44,8 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IPeekable<Type>> &
 	Iterable<Type> &
 	ICopiable &
-	INextable<Type> & {
+	INextable<Type> &
+	IInitializable & {
 		readonly curr: Type
 		readonly isEnd: boolean
 		isCurrEnd: () => boolean
