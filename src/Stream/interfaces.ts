@@ -54,6 +54,7 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 
+export type * from "./interfaces/ComposedStream.js"
 export type * from "./interfaces/IndexStream.js"
 export type * from "./interfaces/LimitedStream.js"
 export type * from "./interfaces/MarkerStream.js"
