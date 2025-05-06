@@ -19,72 +19,139 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:					
-		TO DELETE: 
-			1. NestedStream-related: 
-				1. LookupTable
-				2. PersistentIndexMap: 
-					1. PointerArray
-					2. IndexPointer
+		Order: 
+			1. writing first sketch of `ComposedStream`
+			2. improving the 'RecursiveList' implementation: 
+				1. ObjectPool: 
+					[instances]
+					1. switchPool
+					2. streamListPool
+				2. Using `TempArray` instead of `Type[]`
+					1. renaming `TempArray` into `RetainedArray`
+			3. fixing the `DynamicParser`: 
+				1. self-modification for `RecursiveList`: 
+					1. make the `.items` property PUBLIC READONLY, since it will now have to be modifiable: 
+						Replace the current DIRECT-ASSIGNMENT stuff [non-readonly] in `RecursiveList.prototype.init` WITH a use of `.items.init(...)`; 
+					2. provide a SHORT-HAND GETTER for the `.composedStream.recursiveList.items`
+				2. `attachState` util: 
+					0. IMPORTANT: this returns the Stateful target object, and NOT the Summat `state`; 
+					1. PROBLEM: how to do?
+						Since, we are CREATING the `Stream` objects ALL THE TIME, 
+							*how* is it that one would assign `.state` on to them? 
+						CONCLUSION: 
+							1. make `IStreamChooser`s OPTIONALLY STATEFUL
+							2. [other name, same idea] create a new `Stateful(state): (Thing): ... & IStateful function (top-level export): 
+								This ASSIGNS a new property `.state` UPON the given `.chooser`; 
+								Basically, just a curried version of `attachState` for the `DynamicParser`'s `.state`. 
+								MUTATES the object/function, not crates sa new one. 
+								LET IT BE USED with `chooser`s. 
+							3. LET `DynamicParser` CREATE a new such function for each state that is used to initialize it; 
+							4. FINALLY: 
+								1. since the user will NEED to be using the `TableMap` for this...	
+									They WILL be able to have '(input, parser) => attachState(new StreamWhatever(input), parser.state)' 
+										THEMSELVES - thus, NO NEED to be doing this...; 
 
-					3. CONCLUSION: 
-						1. refactor the `IndexMap` module:
-							0. no more special "ILinearIndexMap" directory. 
+									For refactoring of this into a NEW function in `TableMap` module, see `3.2.`
+								2. IN ORDER to permit the user to NOT have to need to use `TableMap`, 
+									create a new FUNCTION [see 3.1.]
+								3. CONCLUSION - 2 new functions in the `TableMap` module: 
+									1. StateHaving - to NOT HAVE TO use `TableMap` for global `.state` access: 
+										StateHaving = function (state) {
+											return function (f) {
+												const T = (...x) => f(...x, T)
+												attachState(T, state)
+												return T	
+											}
+										}
+									2. StateAttacher - refactoring of a common use-case
+										// FOR cases when SOMETHING returns a SINGLE `Stream`; 
+										StateAttacher = function (f) {
+											return function (input, parser) {
+												return attachState(f(input, parser), parser.state)
+											}
+										}
+									3. ArrayStateAttacher - arr-generalization of `StateAttacher`: 
+										ArrayStateAttacher = function (f) {
+											return function (input, parser) {
+												return mutate(f(input, parser), (x) => attachState(x, parser.state))
+											}
+										}
+								4. RENAME `TableMap` module to `StreamHandler` module
+								5. replace `export * as TableMap from TABLE_MAP_DIR` with `export * from TABLE_MAP_DIR`
+				3. an 'IOwnedStream<string> & .init(: IParseable<string>)' - GIVE the type a name...: 
+					1. LET `InputStream` and `LazyStream` BOTH `implement` it (since that will ensure that they are both conformant); 
+				4. 'extends Callable': 
+					1. __call__(parseable: IParseable): 
+						1. `this.ownedStreamString.init(parseable)`
+						2. `return this.composedStream.init(this.ownedStreamString)`
 
-							1. names: 
-								1. ILinearMapClass -> IMapClass [interface]
-								2. LinearMapClass -> MapClass [function]
-								3. OptimizedLinearMap -> OptimizedMap
-							
-							2. top-level names: 
-								1. TypeMap -> nodeMap
-								2. ValueMap -> resourceMap
-								3. TypeofMap -> typeofMap
-								4. CurrentMap -> currMap
-							
-							3. Move `Pairs` to `classes/` [in its own file - Pairs.ts]; 
-							
-			[after adding the `TempArray`]
-			2. CallbackBuffer: 
-				1. TypicalBuffer 
-					1. add the relevant `.read` and `.write` ONTO the `ArrayCollection`
-					2. `RotationBuffer` would inherit straight from `ArrayCollection`. 
+				5. init(state: Summat): 
+					This just: 
+						1. assigns the `.state` property TO BE REFERENCED
 
-		TODO: split `ArrayCollection` into 2 classes: 
-			1. TempArray: 
-				1. inherits from `ArrayCollection`, overrides `.push`
-				2. preallocates memory, NEVER actually makes the array it uses smaller, instead managing elements better
-					`.push()` writes to the "free" end
-			2. current `ArrayCollection`: 
-				1. GAINS a `.read()` method from the `TypicalBuffer` [no reason NOT to make it `.read`]able, since: 
-					1. still need functinoality to be inherited from somewhere
-					2. serves as a kind of "thin" delegate-wrapper around the "typical" arrayas to permit the interfaces 
-						of the library to work. 
+			4. cleanup after old DynamicParser: 
+				1. remove the `Composition` class
+		
+		TODO: CHANGE the general project directory structure:
+			1. Replace `Class/*` with `class/Class.ts` + `interfaces/Class.ts` + `utils/Class.ts`
+				DO IT everywhere. 
+				Reason: 
+					1. less repetition (simpler navigation)
+					2. file-system MIMICKS the project export-system; 
 
-			ALSO: replace the `tempItems = new ArrayCollection` with `tempItems = new TempArray`; 
-				they're purposed for DIFFERENT things..; 
-				Also - the `TempArray` ALLOWS for NOT freeing/reclaiming new memory constantly; 
+		TODO: wrap ALL the `Stream`-classes' constructors out there INTO FUNCTIONS. 
+			Reason - being able to call them WITHOUT needing the `new`; 
+			They have THE SAME signature. 
+			Difference being - they can NOW be employed with "compositions". 
+				[+ the user will NO LONGER need to bear the load of actuaLLY NEEDING to specify "classWrapper", or smth like that]; 
 
-		TODO: rename the `TreeStream` into `DepthStream`.
-			Since it implements an `IStream`-version of DFS, and we are going to 
-				be LATER (in v0.4) implementing the `breadth-first` version of it (called `BreadthStream`). 
+		TODO [later]: WRITE the unit-tests for the `internal/` stuff AS WELL; 
+			Since we now have a (somewhat) more moderate codebase to test, it is much more affordable time-wise to do it. 
+
+		TODOs: ComposedStream: 
+			1. RecursiveList: 
+				2. create a public interface: 
+					1. for future self-modification
+						TODO [later]: add operations to `RecursiveList`: 
+							1. push
+							2. unshift: 
+								HAS TO BE FAST
+							3. shift: 
+								HAS TO BE FAST
+							4. write(i, v)
+							5. read(i): 
+								1. WORKS with recursion - 'T' type returned ONLY
+							6. pop(): 
+							7. insert(i, v)
+							8. remove(i)
+			2. ComposedStream - implement: 
+				1. *do not* need the `DynamicComposition` (since it's just a special case of `RecursiveList`)
+				2. add the property of `public readonly ...: RecursiveList`
+				3. add its own (public) interface	
+
+		TODO: *new* form of `Configuration Pattern` COMBINE with `Factory Pattern` for better semantics + memory: 
+			(Arrived at this when thinking about the `SingletonStream`)
+
+			1. create a SINGLE PRIVATE class
+				1. create SPECIAL `init*(param: TI)`-methods, 
+					which are NOT part of the public interface. 
+			2. export a CURRIED function '(param1: T1, ..., paramn: TN) => (resource/mainParam: T) => ClassInstance'
+				1. the function [literally] does: 
+					1. return new ClassInstance().initA(...).initB(...)...
+			3. [semantics: primary reason] THE FINAL CURRIED FUNCTION is usable BOTH as a function ('const instance = f(mainParam)'), AND 
+				as a class ('const instance = new f(mainParam)'); 
+
+			4. REUSABLE across languages: 
+				1. factory pattern is much better supported than the "raw" Configurator Pattern
+				2. [from 1.] Configurator Pattern
+					1. ergo: a much easier Jasva rewrite in the future
+				
+			Reason to introduce it for `SingletonStream` was TO SAVE MEMORY, since the user will be FORCED to create 
+				`SingletonStream`-s based on CAPTURED (that is, NON-MEMOIZABLE, transient) values/objects [accessible solely within the lower parsers' scopes]. 
 
 		TODO: problem (with DynamicParser): 
 			ORDER of implementation: 
 				1. 'IChooser' interface
-				2. SingletonStream - stream that applies a function onto a single value [has only ONE element]: 
-					Uses Configurator Pattern; 
-					Problem with this: 
-						1. repeated class calls due to different functions would eat up insane amounts of memory. 
-						2. CONCLUSION: need a WHOLY SEPARATE function [called `SingletonStream`], which: 
-							1. accepts a FUNCTION [callback] to use with THE NEW instance
-							2. return a new function, which: 
-								1. accepts a 'resource'
-								2. create an instance of the PRIVATE `_SingletonStream` class, with given `resource`
-								3. INITIALIZES the second parameter - the `.handler` to be used to initialize the 
-									instance of the `_SingletonStream`
-
-					This way: 
-						1. no longer waste memory on SingletonStream methods every time [big saving, considered in scope]
 				3. ComposedStream: 
 					1. includes a recursively-changing STATIC composition of `chooser`s and `IStream`-returning classes; 
 					2. STORES the composition, allows it to change
@@ -308,23 +375,8 @@ Order of TODO-elimination:
 								2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 							6. PredicateStream - pick those that are not a ','
 				6. CONCLUSION: 
-					1. add a new `Stream` - SingletonStream - contains only one element. 
-						Performs a given function upon it. 
-
 					2. THIS is the power of `chooser`s - the MISSING PIECE in the library, one 
 						needed to establish RECURSION...; 
-
-					3. PROBLEM - with `NestedStream`: 
-						? Remove it? 
-							Since, the choosers are doing everything that it can, except lazily: 
-								1. easier to work with
-								2. provide proper laziness
-								3. new approach
-						CONCLUSION: yes, remove the `NestedStream`; 
-							QUESTION: what about the `LookupTable`s? 
-								They are ONLY EVER needed by the `NestedStream`... 
-								Remove? 
-								Yes, them as well, since now one has CHOOSERS...; v
 
 					4. PROBLEM: about the `LazyTree`...
 						There still appears to be one single greatest issue - one STILL has to keep track of all the items to be 
@@ -351,8 +403,12 @@ Order of TODO-elimination:
 							Note: in the place where we do 'Summand_Curried(elem, sign)', 
 								it is THE SAME, except: 
 								
-									1. the current "lower" `chooser` is NOT evaluated. 	
-										This way, choosers are ONLY evaluated WHEN REQUESTED FOR (on `.next()` calls)
+									1. the current "lower" `chooser` IS STILL evaluated
+										This is necessary BECAUSE one needs the WHOLE of "shtick" to iterate; 
+											The "shtick" is actually JUST the array - that is, NO operations on the 
+												actual Streams (like 'consume') are performed; 
+
+										Choosers are ONLY evaluated WHEN REQUESTED FOR (on `.next()` calls)
 										This is due to the fact it's TOP-DOWN iteration [TreeStream-like]; 
 									2. the `.children`-based nodes are REPLACED with `NodeStream`-s - which are 
 										".link(subStream)"-ed to one another so that `subStream` AND its `.children`
@@ -1762,7 +1818,7 @@ TODO:
 
 				[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
 			
-		TS2. Implement a 'level-by-level TreeStream' ('TreeStreamLevel'): 
+		TS2. Implement a 'BreadthStream' class - a BFS-alternative to 'DepthStream': 
 			It would get an initial given 'level' (tree root), walk through all of its '.children', 
 				then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
 			Would do it via calling '.getJointLayer' function (then - caching for later '.prev'); 
@@ -2521,7 +2577,7 @@ FUTURE:
 		Thus: make a real-world application - profile. 
 		Find out which classes are (most likely) to be taking space.
 
-	7. [maybe? later, definitely] A Java rewrite: 
+	7. [maybe? later, definitely] A Kotlin rewrite: 
 		the project is a very fine one, a very fine one indeed... 
 		Howeeeverr...
 		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 

@@ -1,6 +1,6 @@
 import type { IInitializable } from "../interfaces.js"
 
-import { array, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 const { first } = array
 
 type IDerivable<
@@ -41,8 +41,6 @@ type ISwitchIdentifiable = {
 	readonly isSwitch?: boolean
 }
 
-type IRedundancyCheck<T = any> = (terminal: T) => boolean
-
 function isSwitch(x: ISwitchIdentifiable): x is Switch {
 	return !!x.isSwitch
 }
@@ -81,6 +79,19 @@ class Switch<
 
 // ! IMPORTANT note [StreamList/ComposedStream]: will need to `assert` that all the things passed are EITHER `.isFunction`;
 
+// TODO: LATER, provide an EFFICIENT implementation of `RecursiveInitList`:
+// * 	1.  *with* pooling of 'Switch' and 'StreamList' objects:
+// 			1. a new 'ObjectPool' class;
+// 			2. it will have a `.free(x)` method
+// 			3. it will have a `.create(...any: [])` method
+// 			4. it will have a BOUND `.construct(x: ObjType, ...args)` function (*not* method), which will INITIALIZE the newly created objects;
+// 			5. it will have a `.creator: (...args: any[]) => T` function for creating the objects of the kept type. THESE ARE USED for ``
+// 			6. use `SwitchPool` and `StreamPool` LOCAL objects; 
+// 			7. EXPORT IT TO BE PUBLIC, since that would allow the user to be RE-USING their own Stream-objects (immensely useful if there's many of them...); 
+// * 	2. *with* AN UNDERLYING `TempArray` to RETAIN the space:
+// 			1. instead of the current basic 'Type[]'-arrays
+// ?		2. Rename `TempArray` to `RetainedArray`? [YES, PLEASE DO!]
+
 // Arguments:
 // 		! 1. isRecursive = isFunction // SINCE, we are actually passing `.init`-ializiazble *IStream-s*, the 'chooser's are the ONLY functions ever present;
 // 		! 2. T = IStream<Type> [ADD mandatory IInitializable]; NOTE: these are NOT IStreamClass-es, INSTEAD, these are INSTANCES!
@@ -114,9 +125,12 @@ export abstract class RecursiveInitList<
 	Recursive extends ISwitchIdentifiable = any
 > implements IRecursiveIdentifiable
 {
-	protected abstract isOld: IRedundancyCheck<T>
-	protected abstract isRecursive: type.TypePredicate<Recursive>
-	protected abstract evaluator: IFoldable<T, Recursive>
+	protected abstract isOld(terminal: T): boolean
+	protected abstract isRecursive(x: any): x is Recursive
+	protected abstract evaluator(
+		currRec: Recursive,
+		last: T
+	): IDerivable<T, Recursive>
 
 	private items: IRecursiveItems<T, Recursive>
 	private lastInitialized: T | null = null
