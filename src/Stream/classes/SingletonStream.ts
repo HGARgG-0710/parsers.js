@@ -34,12 +34,10 @@ class _SingletonStream<
 	}
 }
 
-const singletonStream = new _SingletonStream()
-
 export function SingletonStream<InType = any, OutType = any>(
 	handler: ISingletonHandler<InType, OutType>
 ) {
 	return function (resource?: IOwnedStream<InType>): IOwnedStream<OutType> {
-		return singletonStream.initHandler(handler).init(resource)
+		return new _SingletonStream(resource).initHandler(handler)
 	}
 }
