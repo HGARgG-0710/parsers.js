@@ -7,10 +7,7 @@ const { SkippedItem } = Stream.StreamParser
 export function StreamParser<InType = any, OutType = any>(
 	handler: (stream: IOwnedStream<InType>) => OutType
 ): new (resource?: IOwnedStream<InType>) => IOwnedStream<OutType> {
-	return class
-		extends SetterStream<OutType>
-		implements IOwnedStream<OutType>
-	{
+	return class extends SetterStream<OutType> {
 		["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 		private handleCurr() {
