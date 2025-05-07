@@ -252,7 +252,7 @@ export abstract class RecursiveInitList<
 
 	evaluate(origTerm: T) {
 		this.unlinkOldInitialized()
-		for (let i = this.size; --i; )
+		for (let i = this.size; i--; )
 			this.initSwitchable(this.items[i], this.lastInitialized || origTerm)
 		return this
 	}
