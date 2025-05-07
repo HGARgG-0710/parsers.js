@@ -54,7 +54,6 @@ export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
 	}
 
 	constructor(public resource?: IStream<Type>) {
-		super()
-		if (resource) this.init(resource)
+		super(resource)
 	}
 }

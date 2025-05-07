@@ -57,8 +57,8 @@ export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 		return this
 	}
 
-	constructor() {
-		super()
+	constructor(resource?: unknown) {
+		super(resource)
 		this.preInit()
 	}
 }
@@ -79,11 +79,6 @@ export abstract class ResourceStream<Type = any>
 		if (isStruct(resource) && isFunction((resource as any).claimBy))
 			(resource as IOwnedStream<Type>).claimBy(this)
 		return super.init()
-	}
-
-	constructor(resource?: unknown) {
-		super()
-		if (resource) this.init(resource)
 	}
 }
 
