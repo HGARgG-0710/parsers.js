@@ -1,7 +1,7 @@
 import { type } from "@hgargg-0710/one"
 import type { IOwnedStream } from "../interfaces.js"
-import { RecursiveInitList } from "./RecursiveList.js"
 import type { IStreamChooser } from "../Stream/interfaces/ComposedStream.js"
+import { RecursiveInitList } from "./RecursiveList.js"
 
 const { isFunction, isArray } = type
 

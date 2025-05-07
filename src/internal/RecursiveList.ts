@@ -86,8 +86,8 @@ class Switch<
 // 			3. it will have a `.create(...any: [])` method
 // 			4. it will have a BOUND `.construct(x: ObjType, ...args)` function (*not* method), which will INITIALIZE the newly created objects;
 // 			5. it will have a `.creator: (...args: any[]) => T` function for creating the objects of the kept type. THESE ARE USED for ``
-// 			6. use `SwitchPool` and `StreamPool` LOCAL objects; 
-// 			7. EXPORT IT TO BE PUBLIC, since that would allow the user to be RE-USING their own Stream-objects (immensely useful if there's many of them...); 
+// 			6. use `SwitchPool` and `StreamPool` LOCAL objects;
+// 			7. EXPORT IT TO BE PUBLIC, since that would allow the user to be RE-USING their own Stream-objects (immensely useful if there's many of them...);
 // * 	2. *with* AN UNDERLYING `TempArray` to RETAIN the space:
 // 			1. instead of the current basic 'Type[]'-arrays
 // ?		2. Rename `TempArray` to `RetainedArray`? [YES, PLEASE DO!]
@@ -261,6 +261,7 @@ export abstract class RecursiveInitList<
 	evaluate(origTerm: T) {
 		for (let i = this.size; --i; )
 			this.initSwitchable(this.items[i], this.lastInitialized || origTerm)
+		return this
 	}
 
 	firstNonRecursive(): T {

@@ -2,15 +2,15 @@ import type { IOwnedStream } from "../interfaces.js"
 import { OwnedStream } from "./OwnedStream.js"
 
 export abstract class WrapperStream<Type = any> extends OwnedStream<Type> {
-	declare resource?: IOwnedStream<Type>
+	declare resource?: IOwnedStream
 
-	init(resource: IOwnedStream<Type>) {
+	init(resource: IOwnedStream) {
 		this.resource = resource
 		resource.claimBy(this)
 		return this
 	}
 
-	constructor(resource?: IOwnedStream<Type>) {
+	constructor(resource?: IOwnedStream) {
 		super(resource)
 	}
 }
