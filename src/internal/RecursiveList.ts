@@ -91,33 +91,6 @@ class Switch<
 // * 	2. *with* AN UNDERLYING `TempArray` to RETAIN the space:
 // 			1. instead of the current basic 'Type[]'-arrays
 // ?		2. Rename `TempArray` to `RetainedArray`? [YES, PLEASE DO!]
-
-// Arguments:
-// 		! 1. isRecursive = isFunction // SINCE, we are actually passing `.init`-ializiazble *IStream-s*, the 'chooser's are the ONLY functions ever present;
-// 		! 2. T = IStream<Type> [ADD mandatory IInitializable]; NOTE: these are NOT IStreamClass-es, INSTEAD, these are INSTANCES!
-// 		! 3. Recursive = IChooser
-// 		! 4. evaluator = (chooser, streamInstance) => chooser(streamInstance)
-// 	^ 		CONCLUSION: `chooser`s will HAVE to return NEW 'Stream'-s/Arrays-of-'Stream's [that is, their CREATION is a part of the actual parsing-function];
-// 		! 5. origItems - the (...x: (IStream | IChooser)[]) FROM the pre-initialization step of the `ComposedStream` [more precisely - the constructor of the `DynamicComposition];
-// Notes:
-// * 0. IChooser-s RETURN IStream objects OR arrays of IStream-objects, and NOT classes for them. This is ESSENTIAL;
-// * 1. `.evaluate(with)` is called when we want to RE-INITIALIZE the 'IStream' instances present OR create new ones,
-// 		IN OTHER WORDS, cases:
-// 			1. the ComposedStream-iteration has (just) begun, and we are searching the first "shtick"
-// 		ARGUMENT is the `.origResource` of the `ComposedStream` [input that is used to then obtain the REAL `.resource` - the result of `.firstNonRecursive()`];
-// * 2. USE '.evaluateWhen(pred, evalWith)' when we strike `.isEnd` on the `.resource`.
-// 		1. this is the "renewal" method. HERE, `isOld = (x) => x.isEnd`;
-// 		2. IF returns `false`, then we KNOW that the `ComposedStream` is FINISHED;
-// 		3. Otherwise, we KNOW that the Stream continues AS-IS,
-// 			and then - we just PROCEED to be calling it as desired
-// * 3. USE `.firstNonRecursive()` to get the "final" Stream, FROM WHICH the values will be DIRECTLY channeled! [note: THAT can cange just as well!]
-// * 4. To get new elements (.next()) and check for last element (.isCurrEnd()) from the obtained `.resource`, one just delegates the appropriate methods;
-// ! 5. the '.isOld()' GETS ADDED on a PRIVATE DERIVED class, via a PROTOTYPE. [same thing WITH the `isOld`, `isRecursive`, `evaluator`]:
-// 		1. A way to save space
-// 		2. Cleaner code (no need for the fourth parameter in the `evaluateWhen` refactoring);
-// TODO [6.] : PROBLEM - need to (somehow) change the current `.evaluator` behaviour:
-// 		* 1. It is SUPPOSED to be returning a STREAM or an ARRAY. Yet, currently, it has to either return a STREAM, or a 'StreamList' - the special-case of the `EvaluableList` class-algorithm;
-// 		^ 		solution: LET the user-provided arrays be WRAPPED into `StreamList` within the `.evaluator` on it. THEN, one will not need to export it as a public class.
 export abstract class RecursiveInitList<
 	T extends ISwitchIdentifiable &
 		IRecursiveIdentifiable &
