@@ -19,7 +19,71 @@
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:					
-		Order: 
+		PROBLEM - about `NodeStream`, current `.resource` and inheritance: 
+			What we need: 
+				1. ability to HAVE or NOT to have an `.isStream` on interfaces for objects that are an `init`-usable
+				2. (nominal) presence of `IStreamIdentifiable` on all relevant interfaces 
+				3. PRESERVATION of inheritance: 
+					Reasons: 
+						1. composition DOES very much "ask" to happen here, but...
+						2. IT JUST DOESN'T LOOK RIGHT...
+							I mean, we'd be losing just so much saved code; 
+						3. HOWEVER, clearly the `.init`
+
+			CONCLUSION: solutions is: 
+				[regarding the 'nominal' IStreamIdentifiable]
+				1. add `IStreamIdentifiable` on ALL interfaces that require it; 
+				2. ADD A NOTE into docs about the NECESSITY of `IStreamIdentifiable` for a given type to be usable within a Stream 
+					that is a `ComposedStream`; 
+
+				[regarding composition vs inheritance]
+				3. SEPARATE the `.init` method from `IStream`s ENTIRELY: 
+					1. delete it from the interface
+					2. delete it from the "parental" implementations [that is, abstract/incomplete classes, DelegateStream, etc]; 
+					3. DELETE the `.claimBy` as a PUBLIC METHOD [it's SUPPOSED to be a "secret" method, only available through an interface]; 
+				4. Use `StreamInitializer`s, 
+					which would: 
+						1. be objects of `StreamInitializer` classes
+						2. encapsulate relevant `.init` logic:
+							THIS would permit to solve: 
+								1. repeated `.init` logic for WrapperStream and ResourceStream
+								2. bizzare runtime-typechecking stuff with `isStruct` in the `ResourceStream` [not to mention it's actually detrimental to performance]; 
+
+						3. FOR THIS TO WORK: 
+							1. create "private" interfaces (made public - as part of the `StreamInitializer` stuff); 
+							2. let they be modifying the `.resource` property ('.setResource' method); 
+							3. SINCE the user will NOT be using their 'IStream's as these "private" interfaceds, they will (in practice) NOT HAVE the access to 
+								the methods in question. 
+
+						4. LET now each and every one IMPLEMENT THEIR OWN local `get initializer(): StreamInitializer { ... }` accessor methods, 
+							[note: it's accessor methods, since one WOULD NOT waste memory per-instance, but rather spend it per-class]; 
+						
+						5. LET 	there be several implementations:
+							1. BasicInitializer: 
+								1. just calls `setResource`
+							2. PairInitializer: 
+								1. calls `claimBy` [rename to `setOwner`]
+									NOTE: the `.claimBy` should be NO LONGER accessible through the `IOwnedStream`: 
+										Instead, it is a more GENERAL interface, containing the `readonly` property `.owner`; 
+								2. calls setResource
+							3. CUSTOM initializers - one for each kind of an `IStream` implementation; 
+								THESE should have their own public "hidden" interfaces
+
+		Order:
+			0. NodeIterator: 
+				This is an object returned by the `handler` passed to `NodeStream`. 
+				It is a separate class. 
+				It is public [user is expected to instantiate it themselves]; 
+					OR, better - don't make public?
+				It is BASED upon the Underlying INode-like object. 
+				'NodeIterator' class takes in a '.type'; 
+
+				Two implementations for INodeIterator: 
+					1. NodeIterator - n items
+					2. NodeWrapper - 1 item
+			
+				This goes in... [either Node or Stream/classes/]
+		
 			1. NodeStream: 
 				1. takes in: 
 					1. a function ['handler']
