@@ -8,7 +8,8 @@ export interface ITypeCheckable {
 	is: (x: any) => boolean
 }
 
-export interface IWalkable<Type extends IWalkable<Type> = any> {
+export interface IWalkable<Type extends IWalkable<Type> = any>
+	extends ICopiable {
 	readonly lastChild: number
 	read: (index: number) => Type
 	index: (multindex: readonly number[]) => Type
@@ -27,8 +28,7 @@ export interface ICellClass<Type = any, Value = any>
 }
 
 export interface INode<Type = any>
-	extends ICopiable,
-		ITyped<Type>,
+	extends ITyped<Type>,
 		IWalkable<INode<Type>>,
 		ISerializableObject {
 	parent: INode<Type> | null
