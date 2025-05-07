@@ -1,9 +1,10 @@
-import { boolean, object } from "@hgargg-0710/one"
+import { boolean, object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { Enum } from "./classes.js"
 import { BadIndex } from "./constants.js"
 import type {
 	IBufferized,
+	ICopiable,
 	IIndexAssignable,
 	IIndexed,
 	IMappable,
@@ -13,8 +14,9 @@ import type {
 } from "./interfaces.js"
 import type { IPosed } from "./Stream/Position/interfaces.js"
 
-const { prop } = object
+const { prop, structCheck } = object
 const { eqcurry } = boolean
+const { isFunction } = type
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -79,6 +81,8 @@ export const fromEnum =
 export const resource = prop("resource")
 
 export const isLF = eqcurry("\n")
+
+export const isCopiable = structCheck<ICopiable>({ copy: isFunction })
 
 export * as HashMap from "./HashMap/utils.js"
 export * as IndexMap from "./IndexMap/utils.js"
