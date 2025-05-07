@@ -34,6 +34,18 @@ export interface IPeekable<Type = any> {
 	peek: (n: number) => Type
 }
 
+export interface IStreamIdentifiable<T extends boolean = boolean> {
+	readonly isStream?: T
+}
+
+export interface ILazyIdentifiable {
+	readonly isLazy?: boolean
+}
+
+export interface IResourceful {
+	readonly resource: Partial<IStreamIdentifiable>
+}
+
 export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<INavigable<Type>> &
 	Partial<IFinishable<Type>> &
@@ -42,6 +54,9 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IInitializable> &
 	Partial<IIsCurrStartable> &
 	Partial<IPeekable<Type>> &
+	Partial<IResourceful> &
+	ILazyIdentifiable &
+	IStreamIdentifiable<true> &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> &
@@ -53,6 +68,7 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
+export type IResourcefulStream<Type = any> = IStream<Type> & IResourceful
 
 export type * from "./interfaces/ComposedStream.js"
 export type * from "./interfaces/IndexStream.js"

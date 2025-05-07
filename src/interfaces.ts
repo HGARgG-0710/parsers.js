@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IHash } from "./HashMap/interfaces.js"
-import type { IPosition } from "./interfaces.js"
+import type { IPosition, IStreamIdentifiable } from "./interfaces.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 
 export type IMappable<Type = any, Out = any> = (
@@ -113,7 +113,10 @@ export interface IReadable<Type = any> {
 	read(i: number): Type
 }
 
-export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
+export type IParseable<Type = any> = IReadable<Type> &
+	ISizeable &
+	ICopiable &
+	IStreamIdentifiable
 
 export interface IBufferized<Type = any> {
 	buffer: IPersistentAccumulator<Type>

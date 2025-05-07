@@ -1,7 +1,11 @@
 import { type } from "@hgargg-0710/one"
 import { IterableStream } from "../../internal/IterableStream.js"
 import { isCopiable } from "../../utils.js"
-import type { IOwnedStream, IStream } from "../interfaces.js"
+import type {
+	IOwnedStream,
+	IStream,
+	IStreamIdentifiable
+} from "../interfaces.js"
 
 const { isStruct, isFunction } = type
 
@@ -71,7 +75,7 @@ export abstract class ResourceStream<Type = any>
 	["constructor"]: new (resource?: unknown) => this
 
 	owner?: IStream
-	resource?: unknown
+	resource?: IStreamIdentifiable
 
 	copy() {
 		return new this.constructor(
@@ -83,7 +87,7 @@ export abstract class ResourceStream<Type = any>
 		this.owner = owner
 	}
 
-	init(resource: unknown) {
+	init(resource: IStreamIdentifiable) {
 		this.resource = resource
 		if (isStruct(resource) && isFunction((resource as any).claimBy))
 			(resource as IOwnedStream<Type>).claimBy(this)

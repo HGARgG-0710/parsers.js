@@ -1,17 +1,14 @@
 import { number } from "@hgargg-0710/one"
 import type { IParseable } from "../../interfaces.js"
 import { ReadableView } from "../../internal/ReadableView.js"
-import type { IPosition, IStream } from "../interfaces.js"
+import type { IPosition } from "../interfaces.js"
 import { isPredicatePosition } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"
 import { GetterStream } from "./BasicStream.js"
 
 const { max, min } = number
 
-export class InputStream<Type = any>
-	extends GetterStream<Type>
-	implements IStream<Type>
-{
+export class InputStream<Type = any> extends GetterStream<Type> {
 	["constructor"]: new (resource?: IParseable<Type>) => this
 
 	pos: number = 0

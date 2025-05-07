@@ -1,6 +1,6 @@
-import type { ICopiable } from "../interfaces.js"
+import type { ICopiable, IStreamIdentifiable } from "../interfaces.js"
 
-export interface ISource extends ICopiable {
+export interface ISource extends ICopiable, IStreamIdentifiable {
 	hasChars(): boolean
 	nextChar(n?: number): void
 	cleanup(): void

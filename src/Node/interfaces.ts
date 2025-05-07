@@ -1,4 +1,9 @@
-import type { ICopiable, IPointer, ISerializableObject } from "../interfaces.js"
+import type {
+	ICopiable,
+	IPointer,
+	ISerializableObject,
+	IStreamIdentifiable
+} from "../interfaces.js"
 
 export interface ITyped<Type = any> {
 	readonly type: Type
@@ -9,7 +14,8 @@ export interface ITypeCheckable {
 }
 
 export interface IWalkable<Type extends IWalkable<Type> = any>
-	extends ICopiable {
+	extends ICopiable,
+		IStreamIdentifiable {
 	readonly lastChild: number
 	read: (index: number) => Type
 	index: (multindex: readonly number[]) => Type

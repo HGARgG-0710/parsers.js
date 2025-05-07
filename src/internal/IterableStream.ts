@@ -10,6 +10,14 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	abstract copy(): this
 	abstract init(...x: any[]): this
 
+	get isStream(): true {
+		return true
+	}
+
+	get isLazy() {
+		return false
+	}
+
 	*[Symbol.iterator]() {
 		while (!this.isEnd) yield this.next()
 	}
@@ -17,5 +25,4 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	constructor(resource?: unknown) {
 		if (resource) this.init(resource)
 	}
-
 }
