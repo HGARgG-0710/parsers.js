@@ -36,10 +36,6 @@ export function StreamParser<InType = any, OutType = any>(
 			return this.resource!.isCurrEnd()
 		}
 
-		copy() {
-			return new this.constructor(this.resource?.copy())
-		}
-
 		constructor(public resource?: IOwnedStream<InType>) {
 			super(resource)
 		}

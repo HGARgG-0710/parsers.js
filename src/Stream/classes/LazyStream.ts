@@ -47,10 +47,6 @@ export class LazyStream
 		return this.curr
 	}
 
-	copy() {
-		return new this.constructor(this.resource.copy())
-	}
-
 	init(resource: ISource) {
 		this.resource.cleanup()
 		super.init(resource)

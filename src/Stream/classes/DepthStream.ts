@@ -94,10 +94,6 @@ export class DepthStream<
 		return this
 	}
 
-	copy() {
-		return new this.constructor(this.resource)
-	}
-
 	rewind() {
 		this.walker.restart()
 		this.update()

@@ -20,10 +20,6 @@ class _SingletonStream<
 		return true
 	}
 
-	copy() {
-		return new this.constructor(this.resource?.copy())
-	}
-
 	initHandler(handler: ISingletonHandler<InType, OutType>) {
 		this.handler = handler
 		return this

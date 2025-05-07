@@ -47,10 +47,6 @@ export class InputStream<Type = any>
 		return this
 	}
 
-	copy() {
-		return new this.constructor(this.resource?.copy())
-	}
-
 	navigate(relativePos: IPosition) {
 		if (isPredicatePosition(relativePos))
 			return uniNavigate(this, relativePos)
