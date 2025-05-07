@@ -87,7 +87,9 @@ abstract class PreContentNode<Type = any, Value = any>
 	declare ["constructor"]: new (value?: Value) => this
 
 	copy() {
-		return new this.constructor(this.value)
+		return new this.constructor(
+			isCopiable(this.value) ? this.value.copy() : this.value
+		)
 	}
 
 	toJSON(): string {
