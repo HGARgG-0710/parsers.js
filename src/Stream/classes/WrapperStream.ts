@@ -1,8 +1,16 @@
-import type { IOwnedStream } from "../interfaces.js"
-import { OwnedStream } from "./OwnedStream.js"
+import type { IOwnedStream, IStream } from "../interfaces.js"
+import { DelegateStream } from "./DelegateStream.js"
 
-export abstract class WrapperStream<Type = any> extends OwnedStream<Type> {
-	declare resource?: IOwnedStream
+export abstract class WrapperStream<Type = any>
+	extends DelegateStream<Type>
+	implements IOwnedStream<Type>
+{
+	resource?: IOwnedStream
+	owner?: IStream
+
+	claimBy(owner: IStream) {
+		this.owner = owner
+	}
 
 	init(resource: IOwnedStream) {
 		this.resource = resource
