@@ -183,7 +183,7 @@ export abstract class RecursiveInitList<
 	) {
 		if (isRecursiveList(maybeSublist))
 			this.evaluateSublist(maybeSublist, evaledWith)
-		else this.linkInitialized(maybeSublist)
+		else this.linkNewInitialized(maybeSublist)
 	}
 
 	private evaluateSublist(
@@ -195,11 +195,30 @@ export abstract class RecursiveInitList<
 	}
 
 	private linkEvaluatedSublist(sublist: RecursiveInitList<T, Recursive>) {
-		this.linkInitialized(sublist.firstNonRecursive())
+		this.linkNewInitialized(sublist.firstNonRecursive())
 	}
 
-	private linkInitialized(toBeLastInitialized: T) {
+	private linkNewInitialized(toBeLastInitialized: T) {
 		this.lastInitialized = toBeLastInitialized
+	}
+
+	private unlinkOldInitialized() {
+		this.lastInitialized = null
+	}
+
+	private forgetMetSwitches() {
+		this.hasSwitch = false
+	}
+
+	private reEvalEach(evalWith: T) {
+		for (let i = this.size; i--; )
+			if (
+				!this.maybeReInitSwitchable(
+					this.items[i],
+					this.lastInitialized || evalWith
+				)
+			)
+				return false
 	}
 
 	private maybeReInitSwitchable(
@@ -259,6 +278,7 @@ export abstract class RecursiveInitList<
 	}
 
 	evaluate(origTerm: T) {
+		this.unlinkOldInitialized()
 		for (let i = this.size; --i; )
 			this.initSwitchable(this.items[i], this.lastInitialized || origTerm)
 		return this
@@ -275,15 +295,9 @@ export abstract class RecursiveInitList<
 	}
 
 	reEvaluate(evaledWith: T) {
-		this.hasSwitch = false
-		for (let i = this.size; i--; )
-			if (
-				!this.maybeReInitSwitchable(
-					this.items[i],
-					this.lastInitialized || evaledWith
-				)
-			)
-				return false
+		this.forgetMetSwitches()
+		this.unlinkOldInitialized()
+		this.reEvalEach(evaledWith)
 		return true
 	}
 
