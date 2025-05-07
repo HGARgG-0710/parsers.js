@@ -4,11 +4,12 @@ import { MapInternal } from "../HashMap/InternalHash/classes.js"
 import { Autocache } from "../internal/Autocache.js"
 import type { ICellClass, ICellNode, INode, INodeClass } from "./interfaces.js"
 import { isType } from "./utils.js"
+import { isCopiable } from "../utils.js"
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
 	["constructor"]: new () => this
 
-	type: Type
+	abstract type: Type
 	parent: INode<Type> | null = null
 
 	get lastChild() {
@@ -70,8 +71,11 @@ export const TokenNode = new Autocache(
 		class tokenNode extends PreTokenNode<Type> implements INode<Type> {
 			static readonly type = type
 			static is = isType(type)
+
+			get type() {
+				return type
+			}
 		}
-		tokenNode.prototype.type = type
 		return tokenNode
 	}
 ) as unknown as <Type = any>(type: Type) => INodeClass<Type>
@@ -103,8 +107,11 @@ export const ContentNode = new Autocache(
 		class contentNode extends PreContentNode<Type, Value> {
 			static readonly type = type
 			static is = isType(type)
+
+			get type() {
+				return type
+			}
 		}
-		contentNode.prototype.type = type
 		return contentNode
 	}
 ) as unknown as <Type = any, Value = any>(type: Type) => ICellClass<Type, Value>
@@ -173,8 +180,11 @@ export const RecursiveNode = new Autocache(
 		class recursiveNode extends PreRecursiveNode<Type> {
 			static readonly type = type
 			static is = isType(type)
+
+			get type() {
+				return type
+			}
 		}
-		recursiveNode.prototype.type = type
 		return recursiveNode
 	}
 ) as unknown as <Type = any>(type: Type) => INodeClass<Type>
