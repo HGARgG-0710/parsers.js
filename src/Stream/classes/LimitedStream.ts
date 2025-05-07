@@ -7,7 +7,7 @@ import {
 	positionNegate
 } from "../Position/utils.js"
 import { navigate } from "../utils.js"
-import { DyssyncStream, WrapperStream } from "./WrapperStream.js"
+import { DyssyncStream } from "./WrapperStream.js"
 
 const { isNullary } = type
 const { T } = boolean
@@ -15,7 +15,7 @@ const { T } = boolean
 export function LimitedStream<Type = any>(
 	from: IPosition,
 	to?: IPosition
-): new (resource?: IUnderLimitedStream<Type>) => WrapperStream<Type> {
+): new (resource?: IUnderLimitedStream<Type>) => DyssyncStream<Type> {
 	if (isNullary(to)) {
 		to = from
 		from = LimitedStream.NoMovementPredicate
@@ -90,7 +90,7 @@ export function LimitedStream<Type = any>(
 		prev() {
 			const curr = this.curr
 			this.isEnd = false
-			if (this.isCurrStart()) this.isStart = true
+			if (this.isCurrStart()) this.startStream()
 			else this.basePrevIter(curr)
 			return curr
 		}
