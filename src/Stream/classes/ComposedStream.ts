@@ -1,3 +1,4 @@
+import { array } from "@hgargg-0710/one"
 import { StreamList } from "../../internal/StreamList.js"
 import type { IOwnedStream, IStreamArray } from "../interfaces.js"
 import { WrapperStream } from "./WrapperStream.js"
@@ -12,12 +13,27 @@ import { WrapperStream } from "./WrapperStream.js"
 // 		1. This is part of the `DynamicParser`; Use util: 'attachState = (x: IStateful, state: Summat) => (x.state = state)'
 
 class _ComposedStream<Type = any> extends WrapperStream<Type> {
-	public readonly streams: StreamList
+	["constructor"]: new (lowStream?: IOwnedStream) => this
+
+	private _streams: StreamList
 	private lowStream: IOwnedStream
 	resource: IOwnedStream
 
+	private set streams(newStreams: StreamList) {
+		this._streams = newStreams
+	}
+
+	get streams() {
+		return this._streams
+	}
+
 	private updateResource() {
 		this.resource = this.streams.firstNonRecursive()
+	}
+
+	private evaluateStreams() {
+		this.streams.evaluate(this.lowStream)
+		this.updateResource()
 	}
 
 	isCurrEnd(): boolean {
@@ -29,20 +45,34 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	init(lowStream: IOwnedStream) {
 		this.lowStream = lowStream
 		lowStream.claimBy(this)
-		this.streams.evaluate(this.lowStream)
-		this.updateResource()
+		if (this.streams) this.evaluateStreams()
 		return this
 	}
 
-	constructor(streams: IStreamArray, lowStream?: IOwnedStream) {
+	initStreams(rawStreams: IStreamArray) {
+		this.streams = new StreamList(rawStreams)
+		if (this.lowStream) this.evaluateStreams()
+		return this
+	}
+
+	copy() {
+		const copied = new this.constructor(this.lowStream)
+		return this.rawStreams
+			? copied.initStreams(array.copy(this.rawStreams))
+			: copied
+	}
+
+	constructor(
+		lowStream?: IOwnedStream,
+		private readonly rawStreams?: IStreamArray
+	) {
 		super()
-		this.streams = new StreamList(streams)
 		if (lowStream) this.init(lowStream)
 	}
 }
 
 export function ComposedStream<Type = any>(...streams: IOwnedStream[]) {
 	return function (resource?: IOwnedStream): IOwnedStream<Type> {
-		return new _ComposedStream<Type>(streams, resource)
+		return new _ComposedStream<Type>(resource).initStreams(streams)
 	}
 }
