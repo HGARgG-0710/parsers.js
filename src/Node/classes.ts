@@ -136,10 +136,7 @@ abstract class PreRecursiveNode<Type = any>
 	}
 
 	write(node: INode<Type>, multindex: number[]) {
-		let writtenTo: INode<Type> = this
-		for (let i = 0; i < multindex.length - 1; ++i)
-			writtenTo = writtenTo.read(multindex[i])
-		writtenTo.set(node, array.last(multindex))
+		this.index(array.lastOut(multindex)).set(node, array.last(multindex))
 		return this
 	}
 
