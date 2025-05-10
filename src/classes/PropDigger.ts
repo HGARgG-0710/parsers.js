@@ -33,3 +33,5 @@ export class PropDigger {
 
 export const ResourceDigger = (n: number) =>
 	new PropDigger(repeat(["resource"], n))
+
+export const OwnerDigger = (n: number) => new PropDigger(repeat(["owner"], n))
