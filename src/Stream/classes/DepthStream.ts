@@ -28,6 +28,8 @@ export class DepthStream<
 > extends GetterStream<TreeLike> {
 	["constructor"]: new (resource?: TreeLike) => this
 
+	resource?: TreeLike
+
 	private endInd: MultiIndex
 	private response: ResponseMethodName
 	private lastLevelWithSiblings = BadIndex
@@ -113,7 +115,7 @@ export class DepthStream<
 		return this.curr
 	}
 
-	constructor(public resource?: TreeLike) {
+	constructor(resource?: TreeLike) {
 		super(resource)
 	}
 }

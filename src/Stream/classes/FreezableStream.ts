@@ -157,8 +157,4 @@ export class FreezableStream<Type = any> extends PosStream<Type> {
 		this.update()
 		return this.curr
 	}
-
-	init(resource: IOwnedStream<Type>): this {
-		return super.init(resource)
-	}
 }

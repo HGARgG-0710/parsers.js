@@ -1,25 +1,29 @@
-import type { IOwnedStream, IStream } from "../interfaces.js"
+import type {
+	IOwnedStream,
+	IOwnerSettable,
+	IResourceSettable,
+	IStream
+} from "../interfaces.js"
+import { ownerInitializer } from "../StreamInitializer/classes.js"
 import { DelegateStream } from "./DelegateStream.js"
 
 export abstract class WrapperStream<Type = any>
 	extends DelegateStream<Type>
-	implements IOwnedStream<Type>
+	implements IOwnedStream<Type>, IResourceSettable, IOwnerSettable
 {
 	resource?: IOwnedStream
 	owner?: IStream
 
-	claimBy(owner: IStream) {
-		this.owner = owner
+	protected get initializer() {
+		return ownerInitializer
 	}
 
-	init(resource: IOwnedStream) {
-		this.resource = resource
-		resource.claimBy(this)
-		return this
+	setResource(newResource: IOwnedStream) {
+		this.resource = newResource
 	}
 
-	constructor(resource?: IOwnedStream) {
-		super(resource)
+	setOwner(newOwner: IStream): void {
+		this.owner = newOwner
 	}
 }
 
@@ -51,6 +55,7 @@ export abstract class DyssyncForwardStream<
 
 	protected endStream() {
 		this.isEnd = true
+		this.isStart = false
 	}
 }
 
@@ -69,5 +74,6 @@ export abstract class DyssyncStream<
 
 	protected startStream() {
 		this.isStart = true
+		this.isEnd = false
 	}
 }

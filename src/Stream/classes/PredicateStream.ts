@@ -9,13 +9,13 @@ export function PredicateStream<Type = any>(
 		private hasLookahead: boolean = false
 		private lookahead: Type
 
+		private updateCurr() {
+			this.curr = this.lookahead
+		}
+
 		private currGetter() {
-			const curr = this.curr
-			if (!this.isEnd) {
-				this.curr = this.lookahead
-				this.prod()
-			}
-			return curr
+			this.updateCurr()
+			this.prod()
 		}
 
 		private prod() {
@@ -36,7 +36,8 @@ export function PredicateStream<Type = any>(
 
 		init(resource: IOwnedStream<Type>) {
 			super.init(resource)
-			this.currGetter()
+			this.prod()
+			this.updateCurr()
 			return this
 		}
 	}

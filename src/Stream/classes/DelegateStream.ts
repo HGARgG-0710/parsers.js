@@ -1,8 +1,15 @@
 import type { IStream } from "../../interfaces.js"
-import { IterableStream } from "../../internal/IterableStream.js"
+import { IterableStream } from "./IterableStream.js"
+import { resourceInitializer } from "../StreamInitializer/classes.js"
 
 export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
 	["constructor"]: new (resource?: IStream<Type>) => this
+
+	resource?: IStream<Type>
+
+	protected get initializer() {
+		return resourceInitializer
+	}
 
 	protected set curr(newCurr: Type) {
 		;(this.resource!.curr as any) = newCurr
@@ -48,12 +55,8 @@ export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
 		return this.resource!.isCurrEnd()
 	}
 
-	init(resource: IStream<Type>) {
-		this.resource = resource
-		return this
-	}
-
-	constructor(public resource?: IStream<Type>) {
-		super(resource)
+	constructor(resource?: IStream<Type>) {
+		super()
+		if (resource) this.init(resource)
 	}
 }

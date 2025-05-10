@@ -1,13 +1,13 @@
-import { type } from "@hgargg-0710/one"
-import { IterableStream } from "../../internal/IterableStream.js"
+import { IterableStream } from "./IterableStream.js"
 import { isCopiable } from "../../utils.js"
 import type {
 	IOwnedStream,
+	IOwnerSettable,
+	IResourceSettable,
 	IStream,
 	IStreamIdentifiable
 } from "../interfaces.js"
-
-const { isStruct, isFunction } = type
+import { resourceInitializer } from "../StreamInitializer/classes.js"
 
 export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	protected abstract baseNextIter(): Type | void
@@ -30,10 +30,12 @@ export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 
 	protected endStream() {
 		this.isEnd = true
+		this.isStart = false
 	}
 
 	protected startStream() {
 		this.isStart = true
+		this.isEnd = false
 	}
 
 	next() {
@@ -63,19 +65,23 @@ export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	}
 
 	constructor(resource?: unknown) {
-		super(resource)
-		this.preInit()
+		super()
+		if (resource) this.init(resource)
 	}
 }
 
 export abstract class ResourceStream<Type = any>
 	extends BasicStream<Type>
-	implements IOwnedStream<Type>
+	implements IOwnedStream<Type>, IResourceSettable, IOwnerSettable
 {
 	["constructor"]: new (resource?: unknown) => this
 
 	owner?: IStream
 	resource?: IStreamIdentifiable
+
+	protected get initializer() {
+		return resourceInitializer
+	}
 
 	copy() {
 		return new this.constructor(
@@ -83,15 +89,12 @@ export abstract class ResourceStream<Type = any>
 		)
 	}
 
-	claimBy(owner: IStream): void {
+	setOwner(owner: IStream): void {
 		this.owner = owner
 	}
 
-	init(resource: IStreamIdentifiable) {
+	setResource(resource: IStreamIdentifiable) {
 		this.resource = resource
-		if (isStruct(resource) && isFunction((resource as any).claimBy))
-			(resource as IOwnedStream<Type>).claimBy(this)
-		return super.init()
 	}
 }
 

@@ -11,7 +11,7 @@ const { max, min } = number
 export class InputStream<Type = any> extends GetterStream<Type> {
 	["constructor"]: new (resource?: IParseable<Type>) => this
 
-	pos: number = 0
+	pos = 0
 
 	private lastPos: number
 	private readonly view: ReadableView

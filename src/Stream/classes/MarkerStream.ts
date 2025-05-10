@@ -4,32 +4,32 @@ import { WrapperStream } from "./WrapperStream.js"
 
 export function MarkerStream<Type = any, MarkerType = any>(
 	marker: (stream: IMarkerStream<Type, MarkerType>) => MarkerType
-): new () => IMarkerStream<Type> {
+): new (resource?: IOwnedStream<Type>) => IMarkerStream<Type, MarkerType> {
 	return class
 		extends WrapperStream<Type>
 		implements IMarkerStream<Type, MarkerType>
 	{
 		currMarked: MarkerType
 
-		private getMarker() {
+		private updateMarker() {
 			this.currMarked = marker(this)
 		}
 
 		next() {
 			const curr = super.next()
-			this.getMarker()
+			this.updateMarker()
 			return curr
 		}
 
 		prev() {
 			const curr = super.next()
-			this.getMarker()
+			this.updateMarker()
 			return curr
 		}
 
 		init(resource: IOwnedStream<Type>) {
 			super.init(resource)
-			this.getMarker()
+			this.updateMarker()
 			return this
 		}
 	}

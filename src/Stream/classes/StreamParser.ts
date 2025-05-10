@@ -10,6 +10,8 @@ export function StreamParser<InType = any, OutType = any>(
 	return class extends SetterStream<OutType> {
 		["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
+		resource?: IOwnedStream<InType>
+
 		private handleCurr() {
 			return handler.call(this, this.resource!)
 		}
@@ -33,7 +35,7 @@ export function StreamParser<InType = any, OutType = any>(
 			return this.resource!.isCurrEnd()
 		}
 
-		constructor(public resource?: IOwnedStream<InType>) {
+		constructor(resource?: IOwnedStream<InType>) {
 			super(resource)
 		}
 	}

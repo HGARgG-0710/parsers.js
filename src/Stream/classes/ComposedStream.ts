@@ -1,6 +1,12 @@
 import { array } from "@hgargg-0710/one"
+import { MissingArgument } from "../../constants.js"
 import { StreamList } from "../../internal/StreamList.js"
-import type { IOwnedStream, IStreamArray } from "../interfaces.js"
+import type {
+	IComposedStream,
+	IOwnedStream,
+	IStreamArray
+} from "../interfaces.js"
+import { ownerInitializer } from "../StreamInitializer/classes.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 // * Design:
@@ -13,10 +19,18 @@ import { WrapperStream } from "./WrapperStream.js"
 // 		1. This is part of the `DynamicParser`; Use util: 'attachState = (x: IStateful, state: Summat) => (x.state = state)'
 
 class _ComposedStream<Type = any> extends WrapperStream<Type> {
-	["constructor"]: new (lowStream?: IOwnedStream) => this
+	["constructor"]: new (
+		lowStream?: IOwnedStream,
+		rawStreams?: IStreamArray
+	) => this
+
+	protected get initializer() {
+		return ownerInitializer
+	}
 
 	private _streams: StreamList
 	private lowStream: IOwnedStream
+
 	resource: IOwnedStream
 
 	private set streams(newStreams: StreamList) {
@@ -28,12 +42,28 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	}
 
 	private updateResource() {
-		this.resource = this.streams.firstNonRecursive()
+		this.resource = this.streams.firstItemDeep()
+	}
+
+	private initStreams(rawStreams: IStreamArray) {
+		this.streams = new StreamList(rawStreams)
+		return this
 	}
 
 	private evaluateStreams() {
 		this.streams.evaluate(this.lowStream)
 		this.updateResource()
+	}
+
+	setResource(lowStream: IOwnedStream) {
+		this.lowStream = lowStream
+	}
+
+	init(lowStream?: IOwnedStream, rawStreams?: IStreamArray) {
+		if (lowStream) this.initializer.init(this, lowStream)
+		if (rawStreams) this.initStreams(rawStreams)
+		if (this.streams && this.lowStream) this.evaluateStreams()
+		return this
 	}
 
 	isCurrEnd(): boolean {
@@ -42,24 +72,11 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 		return !anyMoreItems
 	}
 
-	init(lowStream: IOwnedStream) {
-		this.lowStream = lowStream
-		lowStream.claimBy(this)
-		if (this.streams) this.evaluateStreams()
-		return this
-	}
-
-	initStreams(rawStreams: IStreamArray) {
-		this.streams = new StreamList(rawStreams)
-		if (this.lowStream) this.evaluateStreams()
-		return this
-	}
-
 	copy() {
-		const copied = new this.constructor(this.lowStream)
-		return this.rawStreams
-			? copied.initStreams(array.copy(this.rawStreams))
-			: copied
+		return new this.constructor(
+			this.lowStream.copy(),
+			this.rawStreams ? array.copy(this.rawStreams) : MissingArgument
+		)
 	}
 
 	constructor(
@@ -67,12 +84,12 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 		private readonly rawStreams?: IStreamArray
 	) {
 		super()
-		if (lowStream) this.init(lowStream)
+		this.init(lowStream, rawStreams)
 	}
 }
 
 export function ComposedStream<Type = any>(...streams: IOwnedStream[]) {
 	return function (resource?: IOwnedStream): IOwnedStream<Type> {
-		return new _ComposedStream<Type>(resource).initStreams(streams)
+		return new _ComposedStream<Type>(resource, streams)
 	}
 }

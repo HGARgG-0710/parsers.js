@@ -8,7 +8,8 @@ class _SingletonStream<
 > extends SetterStream<OutType> {
 	["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
-	handler: ISingletonHandler<InType, OutType>
+	resource?: IOwnedStream<InType>
+	private handler: ISingletonHandler<InType, OutType>
 
 	protected baseNextIter(): void | OutType {}
 
@@ -20,13 +21,21 @@ class _SingletonStream<
 		return true
 	}
 
-	initHandler(handler: ISingletonHandler<InType, OutType>) {
-		this.handler = handler
+	init(
+		resource?: IOwnedStream<InType>,
+		handler?: ISingletonHandler<InType, OutType>
+	): this {
+		if (handler) this.handler = handler
+		if (resource) super.init(resource)
 		return this
 	}
 
-	constructor(public resource?: IOwnedStream<InType>) {
-		super(resource)
+	constructor(
+		resource?: IOwnedStream<InType>,
+		handler?: ISingletonHandler<InType, OutType>
+	) {
+		super()
+		this.init(resource, handler)
 	}
 }
 
@@ -34,6 +43,6 @@ export function SingletonStream<InType = any, OutType = any>(
 	handler: ISingletonHandler<InType, OutType>
 ) {
 	return function (resource?: IOwnedStream<InType>): IOwnedStream<OutType> {
-		return new _SingletonStream(resource).initHandler(handler)
+		return new _SingletonStream(resource, handler)
 	}
 }
