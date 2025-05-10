@@ -31,5 +31,5 @@ export class PropDigger {
 	}
 }
 
-export const StreamDigger = (n: number) =>
+export const ResourceDigger = (n: number) =>
 	new PropDigger(repeat(["resource"], n))
