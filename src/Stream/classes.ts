@@ -17,3 +17,4 @@ export * from "./classes/StreamParser.js"
 export * from "./classes/WrapperStream.js"
 
 export * as Position from "./Position/classes.js"
+export * as StreamInitializer from "./StreamInitializer/classes.js"

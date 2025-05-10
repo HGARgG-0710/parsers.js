@@ -77,4 +77,5 @@ export type * from "./interfaces/MarkerStream.js"
 export type * from "./interfaces/OwnedStream.js"
 export type * from "./interfaces/SingletonStream.js"
 
+export type * from "./StreamInitializer/interfaces.js"
 export type * from "./Position/interfaces.js"
