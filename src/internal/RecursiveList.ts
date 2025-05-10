@@ -168,7 +168,7 @@ export abstract class RecursiveInitList<
 	}
 
 	private linkEvaluatedSublist(sublist: RecursiveInitList<T, Recursive>) {
-		this.linkNewInitialized(sublist.firstNonRecursive())
+		this.linkNewInitialized(sublist.firstItemDeep())
 	}
 
 	private linkNewInitialized(toBeLastInitialized: T) {
@@ -257,12 +257,12 @@ export abstract class RecursiveInitList<
 		return this
 	}
 
-	firstNonRecursive(): T {
+	firstItemDeep(): T {
 		let firstItem: IRecursivelySwitchable<T, Recursive>
 		let firstDerivable: IDerivable<T, Recursive>
 		return isSwitch((firstItem = this.firstItem()))
 			? isRecursiveList((firstDerivable = firstItem.derivable))
-				? firstDerivable.firstNonRecursive()
+				? firstDerivable.firstItemDeep()
 				: firstDerivable
 			: firstItem
 	}
