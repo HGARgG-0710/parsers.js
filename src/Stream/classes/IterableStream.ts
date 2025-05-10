@@ -1,4 +1,4 @@
-import type { IStream } from "../interfaces.js"
+import type { IStream, IInitializer } from "../../interfaces.js"
 
 export abstract class IterableStream<Type = any> implements IStream<Type> {
 	abstract isEnd: boolean
@@ -8,7 +8,13 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	abstract isCurrEnd(): boolean
 
 	abstract copy(): this
-	abstract init(...x: any[]): this
+
+	protected abstract readonly initializer?: IInitializer
+
+	init(...x: any[]) {
+		this.initializer?.init(this, ...x)
+		return this
+	}
 
 	get isStream(): true {
 		return true
@@ -20,9 +26,5 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 
 	*[Symbol.iterator]() {
 		while (!this.isEnd) yield this.next()
-	}
-
-	constructor(resource?: unknown) {
-		if (resource) this.init(resource)
 	}
 }
