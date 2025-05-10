@@ -88,8 +88,8 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	}
 }
 
-export function ComposedStream<Type = any>(...streams: IOwnedStream[]) {
-	return function (resource?: IOwnedStream): IOwnedStream<Type> {
+export function ComposedStream<Type = any>(...streams: IStreamArray) {
+	return function (resource?: IOwnedStream): IComposedStream<Type> {
 		return new _ComposedStream<Type>(resource, streams)
 	}
 }
