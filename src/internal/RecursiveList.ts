@@ -10,8 +10,9 @@ type IDerivable<
 
 type IFoldable<
 	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
-> = (currRec: Recursive, last: T) => IDerivable<T, Recursive>
+	Recursive extends ISwitchIdentifiable = any,
+	InitType = any
+> = (currRec: Recursive, last: T | InitType) => IDerivable<T, Recursive>
 
 type IFillableSwitch<
 	T extends IInitializable,
@@ -53,7 +54,8 @@ class Switch<
 	T extends IInitializable &
 		ISwitchIdentifiable &
 		IRecursiveIdentifiable = any,
-	Recursive extends ISwitchIdentifiable & IRecursiveIdentifiable = any
+	Recursive extends ISwitchIdentifiable & IRecursiveIdentifiable = any,
+	InitType = any
 > implements ISwitchIdentifiable
 {
 	private _derivable: IDerivable<T, Recursive>
@@ -70,7 +72,10 @@ class Switch<
 		return this._derivable
 	}
 
-	expand(evaluator: IFoldable<T, Recursive>, appliedUpon: T) {
+	expand(
+		evaluator: IFoldable<T, Recursive, InitType>,
+		appliedUpon: T | InitType
+	) {
 		this.derivable = evaluator(this.recursive, appliedUpon)
 	}
 
@@ -95,7 +100,8 @@ export abstract class RecursiveInitList<
 	T extends ISwitchIdentifiable &
 		IRecursiveIdentifiable &
 		IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
+	Recursive extends ISwitchIdentifiable = any,
+	InitType = any
 > implements IRecursiveIdentifiable
 {
 	protected abstract isOld(terminal: T): boolean
@@ -127,32 +133,35 @@ export abstract class RecursiveInitList<
 
 	private initSwitchable(
 		toInitialize: IRecursivelySwitchable<T, Recursive>,
-		initParam: T
+		initParam: T | InitType
 	) {
 		if (isSwitch(toInitialize)) this.fillSwitch(toInitialize, initParam)
 		else this.initTerminal(toInitialize, initParam)
 	}
 
-	private initTerminal(toInitialize: T, initParam: T) {
+	private initTerminal(toInitialize: T, initParam: T | InitType) {
 		toInitialize.init(initParam)
 		this.lastInitialized = toInitialize
 	}
 
-	private fillSwitch(fillable: IFillableSwitch<T, Recursive>, evaledWith: T) {
+	private fillSwitch(
+		fillable: IFillableSwitch<T, Recursive>,
+		evaledWith: T | InitType
+	) {
 		this.expandEvaluated(fillable, evaledWith)
 		this.evaluateDerivable(fillable.derivable, evaledWith)
 	}
 
 	private expandEvaluated(
 		fillable: IFillableSwitch<T, Recursive>,
-		evaledWith: T
+		evaledWith: T | InitType
 	) {
 		fillable.expand(this.evaluator, evaledWith)
 	}
 
 	private evaluateDerivable(
 		maybeSublist: IDerivable<T, Recursive>,
-		evaledWith: T
+		evaledWith: T | InitType
 	) {
 		if (isRecursiveList(maybeSublist))
 			this.evaluateSublist(maybeSublist, evaledWith)
@@ -161,7 +170,7 @@ export abstract class RecursiveInitList<
 
 	private evaluateSublist(
 		sublist: RecursiveInitList<T, Recursive>,
-		evaledWith: T
+		evaledWith: T | InitType
 	) {
 		sublist.evaluate(evaledWith)
 		this.linkEvaluatedSublist(sublist)
@@ -183,7 +192,7 @@ export abstract class RecursiveInitList<
 		this.hasSwitch = false
 	}
 
-	private reEvalEach(evalWith: T) {
+	private reEvalEach(evalWith: InitType) {
 		for (let i = this.size; i--; )
 			if (
 				!this.maybeReInitSwitchable(
@@ -196,7 +205,7 @@ export abstract class RecursiveInitList<
 
 	private maybeReInitSwitchable(
 		currItem: IRecursivelySwitchable<T, Recursive>,
-		lastItem: T
+		lastItem: T | InitType
 	) {
 		return isSwitch(currItem)
 			? this.maybeReFillSwitch(currItem, lastItem)
@@ -205,7 +214,7 @@ export abstract class RecursiveInitList<
 
 	private maybeReFillSwitch(
 		currSwitch: IFillableSwitch<T, Recursive>,
-		lastItem: T
+		lastItem: T | InitType
 	) {
 		this.hasSwitch = true
 		this.reFillSwitch(currSwitch, lastItem)
@@ -214,7 +223,7 @@ export abstract class RecursiveInitList<
 
 	private reFillSwitch(
 		currSwitch: IFillableSwitch<T, Recursive>,
-		lastItem: T
+		lastItem: T | InitType
 	) {
 		const derivable = currSwitch.derivable
 		if (isRecursiveList(derivable))
@@ -222,35 +231,35 @@ export abstract class RecursiveInitList<
 		else this.maybeReFillSimpleSwitch(derivable, currSwitch, lastItem)
 	}
 
-	private maybeReFillSimpleSwitch(
-		derivable: T,
-		currSwitch: IFillableSwitch<T, Recursive>,
-		lastItem: T
-	) {
-		if (this.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
-	}
-
 	private reFillSublist(
 		sublist: RecursiveInitList<T, Recursive>,
-		lastItem: T,
+		lastItem: T | InitType,
 		currSwitch: IFillableSwitch<T, Recursive>
 	) {
 		if (!sublist.reEvaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
 	}
 
-	private maybeReInitTerminal(currTerminal: T, lastTerminal: T) {
+	private maybeReFillSimpleSwitch(
+		derivable: T,
+		currSwitch: IFillableSwitch<T, Recursive>,
+		lastItem: T | InitType
+	) {
+		if (this.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
+	}
+
+	private maybeReInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
 		return this.isOld(currTerminal)
 			? this.reInitTerminal(currTerminal, lastTerminal)
 			: true
 	}
 
-	private reInitTerminal(currTerminal: T, lastTerminal: T) {
+	private reInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
 		const reEvalProceed = this.hasSwitch
 		if (reEvalProceed) this.initTerminal(currTerminal, lastTerminal)
 		return reEvalProceed
 	}
 
-	evaluate(origTerm: T) {
+	evaluate(origTerm: InitType) {
 		this.unlinkOldInitialized()
 		for (let i = this.size; i--; )
 			this.initSwitchable(this.items[i], this.lastInitialized || origTerm)
@@ -267,7 +276,7 @@ export abstract class RecursiveInitList<
 			: firstItem
 	}
 
-	reEvaluate(evaledWith: T) {
+	reEvaluate(evaledWith: InitType) {
 		this.forgetMetSwitches()
 		this.unlinkOldInitialized()
 		this.reEvalEach(evaledWith)
