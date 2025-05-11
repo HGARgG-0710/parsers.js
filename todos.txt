@@ -4,163 +4,39 @@
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
 
-	2.74. Do research (Chevrotain - source, capabilities, optimizations): 
-		It is *the* fastest JS parsing library out there. See what it can do...:
-
-			1. [basics] http://chevrotain.io/docs/tutorial/step0_introduction.html
-			2. [important!] http://chevrotain.io/docs/guide/introduction.html
-
-			[Post parsers.js v0.3; ADD this as parsers.js v0.4 todo...]; 
-			3. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
-			4. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
-
 	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
-	TODO [fixed order]:					
-		PROBLEM - about `NodeStream`, current `.resource` and inheritance: 
-			What we need: 
-				1. ability to HAVE or NOT to have an `.isStream` on interfaces for objects that are an `init`-usable
-				2. (nominal) presence of `IStreamIdentifiable` on all relevant interfaces 
-				3. PRESERVATION of inheritance: 
-					Reasons: 
-						1. composition DOES very much "ask" to happen here, but...
-						2. IT JUST DOESN'T LOOK RIGHT...
-							I mean, we'd be losing just so much saved code; 
-						3. HOWEVER, clearly the `.init`
+	TODO [fixed order]:						
 
-			CONCLUSION: solutions is: 
-				[regarding the 'nominal' IStreamIdentifiable]
-				1. add `IStreamIdentifiable` on ALL interfaces that require it; 
-				2. ADD A NOTE into docs about the NECESSITY of `IStreamIdentifiable` for a given type to be usable within a Stream 
-					that is a `ComposedStream`; 
+		CURRENT ITEM: 		
+			-1. TODO: *about* the `attachState` on `Stream`s: 
+				1. DO NOT do, instead: 
+					1. provide `.state` readonly property and `.setState` method on: 
+						1. StreamParser
+						2. ComposedStream [because 'chooser's run with it AS A `this`, hence - have access to `.state`]; 
+			0. [DynamicParser prep] Complete the `ComposedStream`: 
+				1. SwitchArray [for `.streams`]; 
+					1. includes WRITING and READING access
+					2. expose `SwitchArray` [public interface ONLY];
+						1. USED by the `RecursiveList`
+						2. contains the internal Switch(recursive)/terminal form
+						3. contains the ARRAYS of `RecursiveList`s; 
+							Since one requires to be ALSO doing work with this class...
 
-				[regarding composition vs inheritance]
-				3. SEPARATE the `.init` method from `IStream`s ENTIRELY: 
-					1. delete it from the interface
-					2. delete it from the "parental" implementations [that is, abstract/incomplete classes, DelegateStream, etc]; 
-					3. DELETE the `.claimBy` as a PUBLIC METHOD [it's SUPPOSED to be a "secret" method, only available through an interface]; 
-				4. Use `StreamInitializer`s, 
-					which would: 
-						1. be objects of `StreamInitializer` classes
-						2. encapsulate relevant `.init` logic:
-							THIS would permit to solve: 
-								1. repeated `.init` logic for WrapperStream and ResourceStream
-								2. bizzare runtime-typechecking stuff with `isStruct` in the `ResourceStream` [not to mention it's actually detrimental to performance]; 
-
-						3. FOR THIS TO WORK: 
-							1. create "private" interfaces (made public - as part of the `StreamInitializer` stuff); 
-							2. let they be modifying the `.resource` property ('.setResource' method); 
-							3. SINCE the user will NOT be using their 'IStream's as these "private" interfaceds, they will (in practice) NOT HAVE the access to 
-								the methods in question. 
-
-						4. LET now each and every one IMPLEMENT THEIR OWN local `get initializer(): StreamInitializer { ... }` accessor methods, 
-							[note: it's accessor methods, since one WOULD NOT waste memory per-instance, but rather spend it per-class]; 
-						
-						5. LET 	there be several implementations:
-							1. BasicInitializer: 
-								1. just calls `setResource`
-							2. PairInitializer: 
-								1. calls `claimBy` [rename to `setOwner`]
-									NOTE: the `.claimBy` should be NO LONGER accessible through the `IOwnedStream`: 
-										Instead, it is a more GENERAL interface, containing the `readonly` property `.owner`; 
-								2. calls setResource
-							3. CUSTOM initializers - one for each kind of an `IStream` implementation; 
-								THESE should have their own public "hidden" interfaces
+						4. provides iteration: 
+							1. [Symbol.iterator] - used by the `RecursiveList`: 
+								1. simple, the backward (i--) thingy + `yield`
+								2. TODO: refactor...; 
+					3. DO NOT IMPLEMENT underneath via the `RetainedArray`: 
+						1. Reason: no significant gains. 
+				2. Expose `Switch` (VIA public interface ALONE)
+				3. ObjectPool 
+				4. DO NOT use the `RetainedArray` there [reason: self-modifications are EXPECTED to be relatively rare...]; 
+			1. DynamicParser
 
 		Order:
-			0. NodeIterator: 
-				This is an object returned by the `handler` passed to `NodeStream`. 
-				It is a separate class. 
-				It is public [user is expected to instantiate it themselves]; 
-					OR, better - don't make public?
-				It is BASED upon the Underlying INode-like object. 
-				'NodeIterator' class takes in a '.type'; 
-
-				Two implementations for INodeIterator: 
-					1. NodeIterator - n items
-					2. NodeWrapper - 1 item
-			
-				This goes in... [either Node or Stream/classes/]
-		
-			1. NodeStream: 
-				1. takes in: 
-					1. a function ['handler']
-						This is the function for returning the FIRST ITEM for the `NodeStream`. 
-						Note that IT DOES NOT get evaluated, UNTIL `.curr` gets first accessed. 
-						NOTE that we STILL need to get the "shtick" (that is, one STILL needs to be "re-initializing" inside the ComposedStream).
-							Only difference being - we NO LONGER need to spend memory on the Node-objects
-								(which are, by and large, THE primary source of memory-spending [in terms of scale, anyway...]), 
-									since they are defined UPON-ACCESS to the `.curr`; 
-								
-						PROBLEM: where are the "Stream-s" in question located? 
-							Since adding a `NodeStream` ABOVE a "layer" causes it to be ANALYZED for deeper NodeStream-s, 
-								it may be JUST that one wants to separate the 2 iteration-algorithms: 
-
-									1. LET the `handler` be forced to return a NEW INTERFACE, 
-										for tree-like recursive-iteration of Stream-s; 
-									2. LET the `NodeStream` (in Stream capacity) serve PURELY as a fully-dependent "WrapperStream"
-									3. LET the result of 'handler' call be activated ON `.curr` [since, a whole SHTICK is still needed], but a SEPARATE function-call; 
-									4. LET the result of 'handler' be saved to, IN THE FUTURE, serve to provide the NEXT value in the Tree-like Stream-iteration algorithm
-									5. WHEN the `handler` is FINISHED, we know that 
-										there are NO MORE sub-tree(s) to be explored. 
-											THIS IS TO MEAN that the Sub-Tree is FINISHED
-									6. The UPPER NodeStream USES the underlying NodeStream's iterator-object [which is saved]
-									7. The "iterator object" returned by `handler` DELEGATES to the `.resource`-iteration [which is just NodeStream-iteration]. 
-										More specifically, it does so in a manner as to OBTAIN the next item...
-
-							PROBLEM: still need to get the "shtick", since otherwise: 
-								1. don't know the depth
-								2. don't know the TYPES of the Stream-s to use
-								3. still have to use Chooser-s; 
-
-							Conclusion: algorithm: 
-
-								1. provide chooser-Stream array [ComposedStream]
-								2. INITIALIZE [via `.evaluate`]; 
-									We receive the schtick! [full, every object in a row, BUT - memory for a LINKED-LIST, not a tree]; 
-								3. Iterate ComposedStream via `.next()`:
-									1. Iterate Underlying `NodeStream`-s:
-										1. Each one LOOKS FOR THE NEXT, progressing down the ComposedStream's items. 
-									2. `.init`-s for 'NodeStream's: 
-										1. IF under-stream changes, THEN, one simply adapts to it - the algorithm REMAINS THE SAME
-									3. NodeStream's tree-like-iteration-object is defined in a fashion as to also END, when the 
-										underlying Stream ends as well; 
-								4. FINALLY, the `LazyTree` is a WRAPPER around `ComposedStream` with `NodeStream/NodeWrapper`-s in it, 
-									which ACCESSES the `.resource` of the `.composedStream` to obtain ITS ITERATION OBJECT, which is (correspondently)
-										used. 
-
-									Thus, it requires an assumption to hold - the ComposedStream has (as the topmost-highest Stream) A *NodeStream/NodeWrapper*; 
-
-					2. a stream [.resource]
-				2. returns [as element of `.next()`]: 
-					0. initial - A NEW object of type INode; 
-					1. after [post first `.next()`] - from its .resource, BUT, in a tree-like fashion: 
-						1. there are "lazy-layers", which are defined by `.isLazy` property (optional, care ONLY IF present and truevA; )
-
-				3. TYPES: 
-					1. NodeStream -  a `Stream` around a SUB-STREAM of elements. 
-						NEED to be walking DOWNWARDS recursively, UNTIL the "cutoff layer" is found out. 
-						Then - walk as-is one-after-another. 
-						THUS, we don't actually get to call THE WHOLE of `.next()` series. 
-							It's a lot simpler than that. This implementation specifically is A LOT easier on the V8 runtime stack. 
-					2. NodeWrapper - a 'Stream' around a single element
-						A "lazy" alternative to `SingletonStream`, + RETURNS an INode object as the first `.curr` [there's exactly 2]; 
-					
-					NOTE: the `Token`-NodeStream(s) are ACTUAL 'TokenNode's RETURNED by the underlying NON-LAZY Stream-s; 
-
-				4. TODO [main]: 
-					1. add `.resource` as a property on `IStream`, BUT Split into: 
-						1. IStream - Partial<IResourceful>	
-							1. IResourceful is '.resource: unknown'
-						2. IResourcefulStream - HAS 'IResourceful'
-						3. ADD an `IStreamIdentifiable` type, with `.isStream?: boolean`, 
-							which ALL Stream-s have set as `true`; [like with `.isLazy` - it's propagated THROUGH IterableStream, BY DEFAULT]. 
-								The `NodeStream` OVERRIDES the `.isLazy` to be '() => true' instead of `() => false`; 
-						4. LET `IStream.resource` BE an `IStreamIdentifiable`; 
-					2. LET the `.resource.isStream` BE USED to provide one with knowledge as to whether or not CHECK for `.isLazy` upon the given object. 
-						[IF it doesn't even have the `.isStream`, the `.isLazy` check will be skipped, ELSE - checked for it, and AFTER - its own `.resource`, and so forth recursively...]; 
 			2. improving the 'RecursiveList' implementation: 
 				1. ObjectPool: 
 					[instances]
@@ -232,8 +108,6 @@ Order of TODO-elimination:
 			4. cleanup after old DynamicParser: 
 				1. remove the `Composition` class
 
-			5. LazyTree
-
 			6. Rest [minor thingies]
 
 			7. Docs
@@ -243,15 +117,15 @@ Order of TODO-elimination:
 			9. Finale: 
 				1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc; 
 		
-		TODO: NEW Stream-Class: EmptyStream
-			This is a Stream that is INTENTINOALLY `.isEnd`. 
-			It is used inside of `ComposedStream` to signify: 
-				1. End of current 'ComposedStream'
-				2. End of current sub-stream [a StreamList must "pop" and be replaced]
-			
-			It is THE ONLY way to "prematurely" exit from a chooser - more precisely, 
-				FOR AS LONG as the "other" ones don't exit - neither will the "top" Stream. 
-					This is a problem. The 'EmptyStream' helps deal with it. 
+		TODO: encapsulation - LET all the `.pos` and OTHER such READONLY public properties
+			be ACCORDINGLY handled via `private` keyword. 
+			Specifically - WALK throught he project (once again, FIXING all the access modifier issues). 
+
+		REMINDER: 
+			1. MAKE all the needed classes SEALED, by providing, INSTEAD of them, 
+				FUNCTIONS that return `new ClassConstructor()`; 
+			2. Let only the ABSTRACT classes of the library be extendable (shared behavioru and all that...)
+			3. This is to mimic Java's "final" and C# "sealed" functionality; 		
 
 		TODO: CHANGE the general project directory structure:
 			1. Replace `Class/*` with `class/Class.ts` + `interfaces/Class.ts` + `utils/Class.ts`
@@ -273,7 +147,15 @@ Order of TODO-elimination:
 		TODO: rename the `StreamParser` into `TransformStream`
 		TODO: rename the `PredicateStream` into `FilterStream`
 
+		TODO [reminder]: delete `IndexSet` - obsolete, no longer necessary
+
 		TODO [later] - clean code from temp comments
+
+		TODO [later]: docs - 'protected abstract' properties...
+			DOCUMENT THOSEAS WELL. 
+			Specifically, for classes. 
+			These are INTENDED to providing the user with ability to customize EXTENDABLE behaviour
+				[example: IterableStream, DelegateStream, WrapperStream]; 
 
 		TODOs: ComposedStream: 
 			1. RecursiveList: 
@@ -314,33 +196,30 @@ Order of TODO-elimination:
 
 		TODO: problem (with DynamicParser): 
 			ORDER of implementation: 	
-				4. NodeStream: 
-					Regarding `LazyTree`
+				1. ALSO - implement a `clear` method AND function for `ICollection`. 
+					Deletes all accumulated elements. 
+					ALSO - implement it NOT like `clear(this.collection)` for `ArrayCollection`, NOR like `this.init([])`, 
+						since the latter actually allocates MORE memory, instead of freeing it, while the former STILL requires 
+							reclaiming the memory LATER via `.push()`-es
 
-					1. ALSO - implement a `clear` method AND function for `ICollection`. 
-						Deletes all accumulated elements. 
-						ALSO - implement it NOT like `clear(this.collection)` for `ArrayCollection`, NOR like `this.init([])`, 
-							since the latter actually allocates MORE memory, instead of freeing it, while the former STILL requires 
-								reclaiming the memory LATER via `.push()`-es
+						SOLUTION: 
+							1. implement a new [public] `TempArray`, which keeps them UNDEFINED [like `RotationBuffer`]
+								Intended to be used for MANY short-term storages, which are more or less of the "same" 
+									size, bounded by only the largest one that had happened. 
+								FASTER, since: 
+									1. no freeing memory
+									2. no reclaiming memory [instead it retains the max. possible, allocates new ONLY when needs it]
 
-							SOLUTION: 
-								1. implement a new [public] `TempArray`, which keeps them UNDEFINED [like `RotationBuffer`]
-									Intended to be used for MANY short-term storages, which are more or less of the "same" 
-										size, bounded by only the largest one that had happened. 
-									FASTER, since: 
-										1. no freeing memory
-										2. no reclaiming memory [instead it retains the max. possible, allocates new ONLY when needs it]
+					REASON: allows one to do cycles, combined with `SingletonStream`: 
+						// INIT STEP: this.state.tempArrWriter = consumable(new TempArray())
 
-						REASON: allows one to do cycles, combined with `SingletonStream`: 
-							// INIT STEP: this.state.tempArrWriter = consumable(new TempArray())
+						return [
+							SingletonStream, 
+							this.state.tempArrWriter, 
+							currChoser
+						]
 
-							return [
-								SingletonStream, 
-								this.state.tempArrWriter, 
-								currChoser
-							]
-
-							TODO: create a `consumable` function (util), works like:
+						TODO: create a `consumable` function (util), works like:
 
 								# intended to be used primarily with the `TempArray` class
 								[rough sketch]
@@ -351,15 +230,6 @@ Order of TODO-elimination:
 										return p
 									}
 								}
-
-				5. LazyTree: 
-					Easy: this is just a WRAPPER around the 
-						`ComposedStream/DynamicParser`, which iterates the NodeStream-s 
-							currently used. Returns a STREAM, employed JUST like the `TreeStream`
-
-					Likewise: choosers, need to "find out the shtick", sole difference BEING 
-						that it requires usage of 'Stream's instead of 'Node' objects, 
-							and, again, NodeStream-s INSTEAD of SingletonStream-s + 'consume'
 
 			ALSO - about `chooser`s: 
 				4. A `ComposedStream`-management system (as described below...) is USED by the `DynamicParser` underneath. 
@@ -425,44 +295,11 @@ Order of TODO-elimination:
 				6. CONCLUSION: 
 					2. THIS is the power of `chooser`s - the MISSING PIECE in the library, one 
 						needed to establish RECURSION...; 
-
-					4. PROBLEM: about the `LazyTree`...
-						There still appears to be one single greatest issue - one STILL has to keep track of all the items to be 
-							evaluated for a given piece of `Tree` with `ComposedStream` <- `DynamicParser`. 
-						That is, one STILL requires features of `LazyTree` to be fully lazy: 
-							1. 'choosers' in it function differently in that THEIR RESULTS AREN'T "appended" 
-								to a single list, like they are in "DynamicParser". 
-							2. There is a single overaching "major" stream that happens AFTER all the recursion 
-								(and which, fundamentally, CANNOT change)
-							3. the things returned from `choosers` simply REPLACE the `.resource` of the future 'parent' of 
-								the currently "chosen" stream
-						The DynamicParser, ON THE OTHER HAND, keeps its items IN A SINGLE ARRAY OF Stream-Classes/choosers, 
-							USED to define the current `ComposedStream`, which is then MANAGED by various functions. 
-						Likewise, a DynamicParser *allows* self-modifying parsers, 
-							SINCE, all of the items in these functions
-						whereas `LazyStream` DOES NOT, 
-							since it has some UNDERLYING CONDITIONS about order-of-evaluation required to work correctly.
 					
 					5. IMPORTANT : provide proper demos for: 
 						1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
 						2. SELF-MODIFYING thing [using `DynamicParser`]
 							THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
-						3. ANOTHER ab, +-, () and , arithmetic parser - LAZY, using `LazyTree`
-							Note: in the place where we do 'Summand_Curried(elem, sign)', 
-								it is THE SAME, except: 
-								
-									1. the current "lower" `chooser` IS STILL evaluated
-										This is necessary BECAUSE one needs the WHOLE of "shtick" to iterate; 
-											The "shtick" is actually JUST the array - that is, NO operations on the 
-												actual Streams (like 'consume') are performed; 
-
-										Choosers are ONLY evaluated WHEN REQUESTED FOR (on `.next()` calls)
-										This is due to the fact it's TOP-DOWN iteration [TreeStream-like]; 
-									2. the `.children`-based nodes are REPLACED with `NodeStream`-s - which are 
-										".link(subStream)"-ed to one another so that `subStream` AND its `.children`
-											BE REPRESENTED as the part of `this` (the "first" NodeStream given); 
-							
-						4. A SELF-MODIFYING LazyTree-based parser. 
 
 			IMPORTANT: remove old `DynamicParser` - A NEW ONE is in order...
 
@@ -500,14 +337,6 @@ Order of TODO-elimination:
 				//						1. Reason - one (often) needs to PREPARE the array first. Due to this, one must either only use `.init`, or SPLIT 
 				//							the "callback" from the .push(), .write(), etc. [distinct methods]
 				//						2. CONCLUSION: *remove* the `CallbackBuffer` [far too simplistic... user must be able to transition manually]; 
-				//					7. About `LazyTree` (also an IStream) - to facilitate these, one must make THE TREE ITSELF *DYNAMIC*: 
-				//						1. uses a similar setup - changing input + a mutable collection of Stream-instances + a "Stream-Tree"/choosers [equiv. of layers] + a `.transition()` method 
-				//							1. IDEA: BASE the `LazyTree` upon the `DynamicParser` (via composition); 
-				//						2. this will allow one to (basically) also make LAZY SELF-MODIFYING parsers
-				//						3. PROBLEM: how to "split" the `Lazy` functionality of `LazyTree` from self-modifiability? 
-				//							1. SOLUTION[1]: provide AN INTERFACE - the `DynamicParser` will ACTUALLY just serve as a WRAPPER around the `LazyTree` 
-				//								implementation of the "compatibility" interface. Thus, it will be AS-IF ALL IS WELL
-				//							2. SOLUTION[2]: For a NON-LAZY Stream, one will create YET ANOTHER new abstraction, which would have the means of *STORING THE REQUIRED DATA*. 
 				//			2. EACH ONE represents its "transition"
 				//				1. UPON completing one it becomes `.isEnd` (file is closed, etc)
 				//				2. !!! PROBLEM: somehow, need to retain the file-connection - ABSTRACT it away from LazyStream...
@@ -558,13 +387,23 @@ Order of TODO-elimination:
 
 									4. DELETE the `ComplexComposition`. It's excessive. 
 	
-		TODO: [maybe?] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
+		TODO: [DEFINITELY!] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
 			Reason: many follow common pattern:  
 				if (this.isCurrEnd/Start()) this.end/startStream()
 				else this.baseNextIter/basePrevIter()
 
 			When it's `.currGetter()`, nothing is stopping one from just wrapping `.baseNextIter` around it.
 			This'll allow for better code reuse and simpler codebase...; 
+
+			Better still - LET the "new" refactored versions REPLACE the `DyssyncForward` and `Dyssync` Stream-s, 
+				BUT IF AND ONLY IF, one manages to "fit" all the classes present within the library into the 
+					"form" in question [id est, let this "special" class be such THAT BOTH the `Dyssync` and `DyssyncForward` would THEN AND ONLY THEN inherit].
+			
+				Otherwise, keep it as another one of the "abstract", classes for user-purposes. 
+					Reason: it's ENTIRELY possible that the user will rquire a class of nature DIFFERENT from the ones that the 
+						library presently provides. Hence, it'll be necessary for them to implement the library interfaces, 
+							but WITHOUT making any mistakes. Solution to that - provide parent-classes with desired framework-style 
+								functionality documented. 
 			
 		TODO: [maybe?] remove the `TypicalBuffer` (pretty useless - only one method `.read`)
 			Could just make `ICollection` into an `IReadable`..?
@@ -1144,125 +983,6 @@ Order of TODO-elimination:
 							2. deal with configuration nonsense in a modular manner (.setEncoding, etc)
 							3. platform-independent ontology (Deno + Bun compatibility)
 
-				PA3. A new class - `LazyTree` [don't be deceived - it's a 'Stream']: 
-					DESIGN: 
-						1. A Bottom-Up parser
-						2. Has fields: 
-							1. .top [protected]: currently used `LazyNode`
-								It gets to be replaced by the topmost `LazyNode`.
-								`LazyNode` is a node which, itself, is a `Stream` of nodes. 
-								Types of `LazyNodes` gets assigned to the current `.top` `LazyNode` instance 
-									via "choosers" (pre-defined in `.tree` on construction). 
-								
-								The moment that one picks a new `top` is the `reduce` operation. 
-								The `shift` operation is done relative to `low` via (either) 
-									one of the current descendants of `.top` (the lowest of which is `.low`), 
-										or the `.low` itself [when one needs to move a higher-level `LazyNode`]
-
-								A `LazyNode` contains: 	
-									1. `children` - a `Stream`, items in which are constructed using internal mechanism using the `.value` items. 
-										Thus, a `.value` stream is transformed using an INTERNAL `Stream`, giving the publicly available lazy children. 
-										The `children` are the items iterated in the `DFS` of the `LazyTree`. 
-
-										COMMON PATTERNS available for construction of `LazyNode` [to add/present]: 
-
-											1. `LimitedStream` - exists
-											2. `FiniteStream` [or `ParentStream`] - ADD: 
-												1. consists of a finite collection of sub-streams, 
-													each of which is (Itself) gets to use parent's `.value`; 
-
-											3. composition [arbitrary, relies on `value`]; 
-											4. `StreamParser`
-											5. ...etc [all the other current ones]
-
-									2. `value` [protected] - internal, for obtaining new tokens in `children`
-							2. .low [protected]: the initially used `IStream` with items of 
-								some `Type`. Usually is a `TokenStream` in practical contexts; 
-							3. .tree [protected readonly]: 
-								This is a collection of "choosers" for each possible ocurring `type`
-									within each of the `.value` streams. 
-
-								Workflow: 
-
-									1. Start with `.low.curr` - first item
-									2. Map it to respective `LazyNode` type, of which an instance is created 
-										1. Done using `.type` and the "choosers" [possibly - as an abstraction over `TableMap`]
-									3. Make the instance new `.top`, assign previous `.top` to its `.value`
-									4. Repeat the process 2.,3. for current `.top`, until no more reductions can be made [Reduce]
-									5. DFS phase: 
-										1. return .top [assigned as first '.curr' of `LazyTree`]
-										2. return .top.children.curr [assigned as second `.curr` of `LazyTree`]
-										3. return .top.children.curr.children.curr
-										...
-										n. [bottom] return low.curr
-									6. 'low.next()'
-									7. DFS: 
-										1. return `low.curr` [second]
-										...
-										n. return `low.curr` [`low.isCurrEnd()`]
-									8. Find next `.value` in the chain that is NOT `.isEnd`
-									9. Call `.next()` on it
-									10. Repeat, until all are exhausted [up until the topmost `LazyNode`]: 
-										1. RULE [important]: topmost `LazyNode` MUST NOT be exhaustible, that is: 
-											if it is EXHAUSTED, then one is finished. 
-
-											That is, one must know the `LazyTree`'s ULTIMATE DEPTH from the very beginning. 
-												This imposes some restrictions on how it can be structured. 
-
-											IMPORTANT NOTE: 
-												when one has various LOOKAHEAD scenarios, such as: 
-
-													x = tz
-													z = y | yz
-													
-												[requires infinite lookahead]
-
-												One gets into a bit of a pickle. 
-												Then, it is NECESSARY TO ENSURE parsing of THE WHOLE 
-													sequence of the infinite lookahead. 
-												Particularly, it is A LOT more complex to build the 
-													`LazyTree` parser than it is a more conventional 
-														persistent `INode`-based one. 
-										2. Hence, one does `.top.next()`. 
-										3. REPEAT for new `.top.curr`: 
-											obtained the same way, BUILT from `low`, UPWARDS, 
-												with a GUARANTEED fixed `.top` [established in the *BEGINNING*]. 
-
-						3. Behaviour: 
-							1. '.top'
-
-					Consider this - one is given a task of transpiling a VERY large file, 
-						and then putting it into another file. 
-					Now, it's possible for one to READ IT (using `LazyBuffer`), and to lazily PARSE IT
-						(using `Stream`s), however, the result of the parsing operation is STILL persistent. 
-						And, likewise, the serialization process is ALSO persistent. 
-
-					Thus, one wants to create a class equivalent to a Stream-transform operation. 
-						Instead of evaluating a sequence of characters, and producing an in-memory AST, 
-							one creates nodes ONE-BY-ONE in a Tree-like fashion. 
-
-					Now, since this is a Recursive Descent parser, we want it to be a Depth-First-iteration 
-						algorithm (the `Breadth-First` does not allow for this unfortunately...). Thus, 
-							we are producing A NEW `Stream`, which provides us with tokens THE SAME WAY 
-								that the `TreeStream` would. 
-
-					The memory savings from this thing (on a scale) would be insane 
-						[the program would use almost no memory at all - everything gets garbage-collected]. 
-					
-					It is a `StreamParser` [put under `StreamParser/classes`]. 
-					Note also that it is RECURSIVELY LAZY, that is, it ONLY JUST holds the 
-						amount of space needed FOR THE CURRENT ITEM. 
-
-					Dev notes: 
-						1. one will want to keep `LazyNode`s for this [lazy equivalent of `RecursiveNode`, since `ContentNode` and `TokenNode` have no children...]; 
-						2. `LazyNode`s will have their children AS AN `IStream` 
-
-					Thus, the complete workflow is: 
-
-						WriterStream((StreamParser(serializerFunction)(LazyTree(...StreamParser(InputStream(LazyBuffer(...)))))))
-					
-					For `WriterStream`, see the note below...
-	
 				TO2. [new IStream] `TokenStream` - based off `Regex`: 
 					IMPORTANT NOTE: 
 						must be CAPABLE of allowing the functions in question to OPERATE upon the `.pos`
@@ -1806,7 +1526,7 @@ TODO:
 					We have long abandoned the "total-modularity" philosphy on this project, so why not this too...
 
 	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
-		TS1. DepthStream: create a new versions; 
+		TS1. DepthStream [BreadthStream]: create a new versions; 
 			The 'DepthStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 			There should be ANOTHER - the 'LR' post-order tree traversal; 
 
@@ -2012,18 +1732,6 @@ TODO:
 			Then, a self-modification for parser vendor could: 
 				
 				this.state.parser.layers.search(...).handler.table = ... // or something...
-
-		SM2. Important issue - see, WHETHER OR NOT, it's feasible to implement a 
-			self-modifying lazy parser. Specifically, whether or not LazyTree CAN BE (in principle)	
-				used with (or as an alternative to) DynamicParser. 
-
-			One KNOWS it's possible to retain writing access to the underlying ComposedStream with a LazyTree, 
-				so the only real issue that remains is whether the ComposedStream-management (inside DynamicParser) CAN be made to be 
-					turned into LazyStream-management, since that would permit JUST PRECISELY this. 
-
-			A fully lazy self-modifying parser would be PRICELESS, since: 
-				1. it would take least memory
-				2. it would have the power of self-modification
 
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]
@@ -2412,7 +2120,15 @@ TODO:
 	9. Testing: 
 		1. introduce mocks [use Jest]
 			Reason: complexity. 
-				There's still v0.4 to go (proper BFS implementation - for BOTH TreeStream AND LazyTree alternatives); 
+				There's still v0.4 to go (proper BFS implementation, for instance...); 
+
+	10. Research (Chevrotain - source, capabilities, optimizations): 
+		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
+			1. *possibly*, if the libraryperformance is really bad, do something about it...
+		2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
+			Supposedly, it (significantly) speeds up property access on classes. 
+			Benchmark...
+		3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
 
 FUTURE: 
 	1. idea for a project - a command-line based tool for parser-creation: 

@@ -111,9 +111,17 @@ export abstract class RecursiveInitList<
 		last: T
 	): IDerivable<T, Recursive>
 
-	private items: IRecursiveItems<T, Recursive>
+	private _items: IRecursiveItems<T, Recursive>
 	private lastInitialized: T | null = null
 	private hasSwitch: boolean = false
+
+	protected set items(newItems: IRecursiveItems<T, Recursive>) {
+		this._items = newItems
+	}
+
+	get items() {
+		return this._items
+	}
 
 	get isRecursiveList() {
 		return true

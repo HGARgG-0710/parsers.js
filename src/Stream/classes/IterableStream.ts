@@ -16,10 +16,6 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 		return this
 	}
 
-	get isLazy() {
-		return false
-	}
-
 	*[Symbol.iterator]() {
 		while (!this.isEnd) yield this.next()
 	}

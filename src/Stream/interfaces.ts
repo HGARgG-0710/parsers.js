@@ -39,10 +39,6 @@ export interface IPeekable<Type = any> {
 	peek: (n: number) => Type
 }
 
-export interface ILazyIdentifiable {
-	readonly isLazy?: boolean
-}
-
 export interface IResourceful {
 	readonly resource?: IOwnedStream
 }
@@ -56,7 +52,6 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IIsCurrStartable> &
 	Partial<IPeekable<Type>> &
 	Partial<IResourceful> &
-	ILazyIdentifiable &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> &
