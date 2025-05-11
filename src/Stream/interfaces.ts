@@ -1,4 +1,9 @@
-import type { ICopiable, IInitializable, IStateful } from "../interfaces.js"
+import type {
+	ICopiable,
+	IInitializable,
+	IOwnedStream,
+	IStateful
+} from "../interfaces.js"
 
 export interface IStarted {
 	isStart: boolean
@@ -34,16 +39,12 @@ export interface IPeekable<Type = any> {
 	peek: (n: number) => Type
 }
 
-export interface IStreamIdentifiable<T extends boolean = boolean> {
-	readonly isStream?: T
-}
-
 export interface ILazyIdentifiable {
 	readonly isLazy?: boolean
 }
 
 export interface IResourceful {
-	readonly resource: Partial<IStreamIdentifiable>
+	readonly resource?: IOwnedStream
 }
 
 export type IStream<Type = any> = Partial<IBackward<Type>> &
@@ -56,7 +57,6 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IPeekable<Type>> &
 	Partial<IResourceful> &
 	ILazyIdentifiable &
-	IStreamIdentifiable<true> &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> &
@@ -77,5 +77,5 @@ export type * from "./interfaces/MarkerStream.js"
 export type * from "./interfaces/OwnedStream.js"
 export type * from "./interfaces/SingletonStream.js"
 
-export type * from "./StreamInitializer/interfaces.js"
 export type * from "./Position/interfaces.js"
+export type * from "./StreamInitializer/interfaces.js"

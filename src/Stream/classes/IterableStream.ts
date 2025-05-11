@@ -16,10 +16,6 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 		return this
 	}
 
-	get isStream(): true {
-		return true
-	}
-
 	get isLazy() {
 		return false
 	}
