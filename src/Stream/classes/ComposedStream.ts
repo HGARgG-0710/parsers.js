@@ -46,7 +46,7 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	}
 
 	private initStreams(rawStreams: IStreamArray) {
-		this.streams = new StreamList(rawStreams)
+		this.streams = new StreamList(rawStreams, this)
 		return this
 	}
 

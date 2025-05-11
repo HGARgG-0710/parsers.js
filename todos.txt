@@ -32,18 +32,10 @@ Order of TODO-elimination:
 					3. DO NOT IMPLEMENT underneath via the `RetainedArray`: 
 						1. Reason: no significant gains. 
 				2. Expose `Switch` (VIA public interface ALONE)
-				3. ObjectPool 
-				4. DO NOT use the `RetainedArray` there [reason: self-modifications are EXPECTED to be relatively rare...]; 
+				3. DO NOT use the `RetainedArray` there [reason: self-modifications are EXPECTED to be relatively rare...]; 
 			1. DynamicParser
 
 		Order:
-			2. improving the 'RecursiveList' implementation: 
-				1. ObjectPool: 
-					[instances]
-					1. switchPool
-					2. streamListPool
-				2. Using `TempArray` instead of `Type[]`
-					1. renaming `TempArray` into `RetainedArray`
 			3. fixing the `DynamicParser`: 
 				1. self-modification for `RecursiveList`: 
 					1. make the `.items` property PUBLIC READONLY, since it will now have to be modifiable: 
@@ -105,9 +97,6 @@ Order of TODO-elimination:
 					This just: 
 						1. assigns the `.state` property TO BE REFERENCED
 
-			4. cleanup after old DynamicParser: 
-				1. remove the `Composition` class
-
 			6. Rest [minor thingies]
 
 			7. Docs
@@ -146,8 +135,6 @@ Order of TODO-elimination:
 
 		TODO: rename the `StreamParser` into `TransformStream`
 		TODO: rename the `PredicateStream` into `FilterStream`
-
-		TODO [reminder]: delete `IndexSet` - obsolete, no longer necessary
 
 		TODO [later] - clean code from temp comments
 

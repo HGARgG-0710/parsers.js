@@ -129,7 +129,6 @@ export interface IWritable<Type = any> {
 
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
-export type * from "./DynamicParser/interfaces.js"
 export type * from "./HashMap/interfaces.js"
 export type * from "./IndexMap/interfaces.js"
 export type * from "./Node/interfaces.js"
@@ -139,4 +138,3 @@ export type * from "./TableMap/interfaces.js"
 
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/ArrayCollection.js"
-export type * from "./interfaces/Sequence.js"
