@@ -1,13 +1,10 @@
 import type { StreamList } from "../../internal/StreamList.js"
-import type { IOwnedStream } from "./OwnedStream.js"
+import type { ILinkedStream, IOwnedStream } from "./OwnedStream.js"
 
-export type IStreamArray<Type = any> = (
-	| IOwnedStream<Type>
-	| IStreamChooser<Type>
-)[]
+export type IStreamArray = (ILinkedStream | IStreamChooser)[]
 
-export interface IStreamChooser<Type = any> {
-	(prevStream?: IOwnedStream<Type>): IOwnedStream<Type> | IStreamArray<Type>
+export interface IStreamChooser {
+	(prevStream?: IOwnedStream): ILinkedStream | IStreamArray
 
 	// * note: this is an OPTIMIZATION-ONLY property
 	// * 	(to permit fast checking whether or not a certain item is a `Switch`)

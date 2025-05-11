@@ -1,18 +1,17 @@
 import type {
 	IOwnedStream,
-	IOwnerSettable,
-	IResourceSettable,
-	IStream
+	IOwningStream,
+	IResourceSettable
 } from "../interfaces.js"
 import { ownerInitializer } from "../StreamInitializer/classes.js"
 import { DelegateStream } from "./DelegateStream.js"
 
 export abstract class WrapperStream<Type = any>
 	extends DelegateStream<Type>
-	implements IOwnedStream<Type>, IResourceSettable, IOwnerSettable
+	implements IOwnedStream<Type>, IResourceSettable
 {
 	resource?: IOwnedStream
-	owner?: IStream
+	owner?: IOwningStream
 
 	protected get initializer() {
 		return ownerInitializer
@@ -22,7 +21,7 @@ export abstract class WrapperStream<Type = any>
 		this.resource = newResource
 	}
 
-	setOwner(newOwner: IStream): void {
+	setOwner(newOwner: IOwningStream): void {
 		this.owner = newOwner
 	}
 }
