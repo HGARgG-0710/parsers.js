@@ -1,31 +1,30 @@
 import { type } from "@hgargg-0710/one"
 import type { ISource } from "../../interfaces.js"
-import type { INavigable, IPosed, IPosition, IStream } from "../interfaces.js"
-
-import { GetterStream } from "./BasicStream.js"
-import { uniNavigate } from "../utils.js"
+import type { INavigable, IPosed, IPosition } from "../interfaces.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
+import { uniNavigate } from "../utils.js"
+import { SourceStream } from "./BasicStream.js"
 
 const { isNumber } = type
 
 export class LazyStream
-	extends GetterStream<string>
+	extends SourceStream<string>
 	implements INavigable<string>, IPosed<number>, IOwnedStream<string>
 {
-	["constructor"]: new (resource: ISource) => this
+	["constructor"]: new (source: ISource) => this
 
-	declare owner?: IStream
+	source?: ISource
 
 	get pos() {
-		return this.resource.pos
+		return this.source!.pos
 	}
 
 	private nextDecoded(n?: number) {
-		this.resource.nextChar(n)
+		this.source!.nextChar(n)
 	}
 
 	protected currGetter() {
-		return this.resource.decoded
+		return this.source!.decoded
 	}
 
 	protected baseNextIter(n?: number) {
@@ -33,28 +32,32 @@ export class LazyStream
 	}
 
 	protected postEnd(): void {
-		this.resource.cleanup()
+		this.source!.cleanup()
 	}
 
 	isCurrEnd() {
-		return !this.resource.hasChars()
+		return !this.source!.hasChars()
 	}
 
 	navigate(pos: IPosition) {
-		if (isNumber(pos)) this.resource.nextChar(pos)
+		if (isNumber(pos)) this.source!.nextChar(pos)
 		else uniNavigate(this, pos)
 		this.update()
 		return this.curr
 	}
 
-	init(resource: ISource) {
-		this.resource.cleanup()
-		super.init(resource)
+	init(source: ISource) {
+		this.source!.cleanup()
+		super.init(source)
 		return this
 	}
 
-	constructor(public resource: ISource) {
-		super(resource)
+	copy(): this {
+		return new this.constructor(this.source!)
+	}
+
+	constructor(source?: ISource) {
+		super(source)
 	}
 }
 

@@ -4,7 +4,7 @@ import { TreeWalker } from "../../internal/TreeWalker.js"
 import { treeEndPath } from "../../Node/utils.js"
 import { isGoodIndex } from "../../utils.js"
 import { MultiIndex } from "../Position/classes.js"
-import { GetterStream } from "./BasicStream.js"
+import { SourceStream } from "./BasicStream.js"
 
 type PrevResponseWorkable = typeof GO_PREV_LAST | typeof POP_CHILD
 type PrevResponse = PrevResponseWorkable | null
@@ -25,10 +25,10 @@ const GO_SIBLING_AFTER = "goSiblingAfter"
 
 export class DepthStream<
 	TreeLike extends IWalkable<TreeLike> = IWalkable
-> extends GetterStream<TreeLike> {
-	["constructor"]: new (resource?: TreeLike) => this
+> extends SourceStream<TreeLike> {
+	["constructor"]: new (source?: TreeLike) => this
 
-	resource?: TreeLike
+	source?: TreeLike
 
 	private endInd: MultiIndex
 	private response: ResponseMethodName
@@ -115,7 +115,7 @@ export class DepthStream<
 		return this.curr
 	}
 
-	constructor(resource?: TreeLike) {
-		super(resource)
+	constructor(source?: TreeLike) {
+		super(source)
 	}
 }

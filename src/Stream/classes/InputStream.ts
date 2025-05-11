@@ -1,23 +1,42 @@
 import { number } from "@hgargg-0710/one"
 import type { IParseable } from "../../interfaces.js"
 import { ReadableView } from "../../internal/ReadableView.js"
-import type { IPosition } from "../interfaces.js"
+import type {
+	IBackward,
+	IFinishable,
+	INavigable,
+	IPeekableStream,
+	IPosition,
+	IResourceSettable,
+	IRewindable
+} from "../interfaces.js"
 import { isPredicatePosition } from "../Position/utils.js"
 import { uniNavigate } from "../utils.js"
-import { GetterStream } from "./BasicStream.js"
+import { SourceStream } from "./BasicStream.js"
 
 const { max, min } = number
 
-export class InputStream<Type = any> extends GetterStream<Type> {
-	["constructor"]: new (resource?: IParseable<Type>) => this
+export class InputStream<Type = any>
+	extends SourceStream<Type>
+	implements
+		IPeekableStream<Type>,
+		INavigable<Type>,
+		IFinishable<Type>,
+		IRewindable<Type>,
+		IBackward<Type>,
+		IResourceSettable
+{
+	["constructor"]: new (source?: IParseable<Type>) => this
 
 	pos = 0
 
 	private lastPos: number
 	private readonly view: ReadableView
 
+	source?: IParseable<Type>
+
 	protected currGetter(): Type {
-		return this.resource!.read(this.pos)
+		return this.source!.read(this.pos)
 	}
 
 	protected baseNextIter() {
@@ -31,7 +50,7 @@ export class InputStream<Type = any> extends GetterStream<Type> {
 	}
 
 	isCurrEnd(): boolean {
-		return this.pos === this.resource!.size
+		return this.pos === this.source!.size
 	}
 
 	isCurrStart(): boolean {
@@ -65,8 +84,8 @@ export class InputStream<Type = any> extends GetterStream<Type> {
 		return this.view.read(n)
 	}
 
-	constructor(public resource?: IParseable<Type>) {
-		super(resource)
-		this.view = new ReadableView(0, this.resource!)
+	constructor(source?: IParseable<Type>) {
+		super(source)
+		this.view = new ReadableView(0, this.source!)
 	}
 }

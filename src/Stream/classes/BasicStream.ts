@@ -1,13 +1,14 @@
-import { IterableStream } from "./IterableStream.js"
 import { isCopiable } from "../../utils.js"
 import type {
 	IOwnedStream,
-	IOwnerSettable,
-	IResourceSettable,
-	IStream,
-	IStreamIdentifiable
+	IOwningStream,
+	IResourceSettable
 } from "../interfaces.js"
-import { resourceInitializer } from "../StreamInitializer/classes.js"
+import {
+	ownerInitializer,
+	resourceInitializer
+} from "../StreamInitializer/classes.js"
+import { IterableStream } from "./IterableStream.js"
 
 export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	protected abstract baseNextIter(): Type | void
@@ -70,43 +71,68 @@ export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	}
 }
 
-export abstract class ResourceStream<Type = any>
+export abstract class OwnableStream<Type = any>
 	extends BasicStream<Type>
-	implements IOwnedStream<Type>, IResourceSettable, IOwnerSettable
+	implements IOwnedStream
 {
-	["constructor"]: new (resource?: unknown) => this
+	owner?: IOwningStream
 
-	owner?: IStream
-	resource?: IStreamIdentifiable
+	setOwner(owner: IOwningStream): void {
+		this.owner = owner
+	}
+}
+
+export abstract class ResourceStream<Type = any>
+	extends OwnableStream<Type>
+	implements IOwnedStream<Type>
+{
+	["constructor"]: new (resource?: IOwnedStream) => this
+
+	resource?: IOwnedStream
+
+	protected get initializer() {
+		return ownerInitializer
+	}
+
+	copy() {
+		return new this.constructor(this.resource?.copy())
+	}
+
+	setResource(resource: IOwnedStream) {
+		this.resource = resource
+	}
+}
+
+export abstract class SourceStream<Type = any>
+	extends OwnableStream<Type>
+	implements IResourceSettable
+{
+	["constructor"]: new (source?: unknown) => this
+
+	source?: unknown
+
+	protected abstract currGetter(): Type
 
 	protected get initializer() {
 		return resourceInitializer
 	}
 
-	copy() {
-		return new this.constructor(
-			isCopiable(this.resource) ? this.resource.copy() : this.resource
-		)
-	}
-
-	setOwner(owner: IStream): void {
-		this.owner = owner
-	}
-
-	setResource(resource: IStreamIdentifiable) {
-		this.resource = resource
-	}
-}
-
-export abstract class GetterStream<Type = any> extends ResourceStream<Type> {
-	protected abstract currGetter(): Type
-
-	protected initGetter(...args: any[]): Type {
+	protected initGetter(): Type {
 		return this.currGetter()
 	}
 
-	protected update(newCurr?: Type) {
+	protected update() {
 		this.curr = this.currGetter()
+	}
+
+	setResource(source?: unknown) {
+		this.source = source
+	}
+
+	copy(): this {
+		return new this.constructor(
+			isCopiable(this.source) ? this.source.copy() : this.source
+		)
 	}
 }
 
