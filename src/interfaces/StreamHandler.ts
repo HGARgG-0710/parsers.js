@@ -1,4 +1,4 @@
-import type { IPosition, IStream } from "../Stream/interfaces.js"
+import type { IPosition, IStream } from "./Stream.js"
 
 export type IParserFunction<InputType = any, OutType = any> = (
 	state?: InputType,
