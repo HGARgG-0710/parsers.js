@@ -1,9 +1,13 @@
 import { number } from "@hgargg-0710/one"
 import { MixinArray } from "../internal/MixinArray.js"
+import type { IClearable, IPushable } from "../interfaces.js"
 
 const { min } = number
 
-export class TempArray<Type = any> extends MixinArray<Type> {
+export class RetainedArray<Type = any>
+	extends MixinArray<Type>
+	implements IPushable, IClearable
+{
 	["constructor"]: new (n?: number) => this
 
 	private realSize: number = 0
@@ -50,8 +54,12 @@ export class TempArray<Type = any> extends MixinArray<Type> {
 		return super.write(i, value)
 	}
 
-	init(newSize: number) {
+	clear() {
 		this.realSize = 0
+	}
+
+	init(newSize: number) {
+		this.clear()
 		this.condAlloc(newSize - this.size)
 		return this
 	}
