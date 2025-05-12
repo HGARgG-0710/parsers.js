@@ -4,34 +4,31 @@ import assert from "assert"
 
 const { isStruct, isArray } = type
 
-function repeat<Type = any>(array: Type[], times: number) {
-	return Array.from(
-		{ length: array.length * times },
-		(_x, i) => array[i % array.length]
-	)
-}
-
 export class PropDigger {
+	private readonly properties: string[]
+
 	dig<In extends object = Summat, Out extends object = any>(
 		x: In,
 		depth: number = 0
 	) {
 		let currentLevel = x
-		for (let i = 0; i < depth && isStruct(currentLevel); ++i)
-			currentLevel = currentLevel[this.properties[i]]
+		outer: for (let i = 0; i < depth; ++i)
+			for (let j = 0; j < this.properties.length; ++j) {
+				if (!isStruct(currentLevel)) break outer
+				currentLevel = currentLevel[this.properties[j]]
+			}
 		return currentLevel as unknown as Out
 	}
 
 	join(digger: PropDigger) {
-		return new PropDigger(this.properties.concat(digger.properties))
+		return new PropDigger(...this.properties, ...digger.properties)
 	}
 
-	constructor(private readonly properties: string[]) {
+	constructor(...properties: string[]) {
 		assert(isArray(properties))
+		this.properties = properties
 	}
 }
 
-export const ResourceDigger = (n: number) =>
-	new PropDigger(repeat(["resource"], n))
-
-export const OwnerDigger = (n: number) => new PropDigger(repeat(["owner"], n))
+export const resourceDigger = new PropDigger("resource")
+export const ownerDigger = new PropDigger("owner")
