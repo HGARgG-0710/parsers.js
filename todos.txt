@@ -2,108 +2,45 @@
 	
 5. Source code TODO-s: 
 	2.73. Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
-		SPECIFICALLY - *inlining*. The library assumes its usage HEAVILY to remain efficient. 
-
-	2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
-		ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 	
 Order of TODO-elimination: 	
 	TODO [fixed order]:						
-
-		CURRENT ITEM: 		
-			-1. TODO: *about* the `attachState` on `Stream`s: 
-				1. DO NOT do, instead: 
-					1. provide `.state` readonly property and `.setState` method on: 
-						1. StreamParser
-						2. ComposedStream [because 'chooser's run with it AS A `this`, hence - have access to `.state`]; 
-			0. [DynamicParser prep] Complete the `ComposedStream`: 
-				1. SwitchArray [for `.streams`]; 
-					1. includes WRITING and READING access
-					2. expose `SwitchArray` [public interface ONLY];
-						1. USED by the `RecursiveList`
-						2. contains the internal Switch(recursive)/terminal form
-						3. contains the ARRAYS of `RecursiveList`s; 
-							Since one requires to be ALSO doing work with this class...
-
-						4. provides iteration: 
-							1. [Symbol.iterator] - used by the `RecursiveList`: 
-								1. simple, the backward (i--) thingy + `yield`
-								2. TODO: refactor...; 
-					3. DO NOT IMPLEMENT underneath via the `RetainedArray`: 
-						1. Reason: no significant gains. 
-				2. Expose `Switch` (VIA public interface ALONE)
-				3. DO NOT use the `RetainedArray` there [reason: self-modifications are EXPECTED to be relatively rare...]; 
-			1. DynamicParser
-
 		Order:
-			3. fixing the `DynamicParser`: 
+			1. reimplementing the `DynamicParser`: 
+				0. uses `.setState` to assign `.state` to: 
+					1. '{ parser: this }'
+					2. that is, the user can access the 'global' data from, say, `StreamParser` or a chooser, via: 
+						
+						this.state // reference to `{ parser: this }`; MUTABLE, allows to share state across multiple streams
+						this.state.parser // self-modification purposes, REFERENCE TO a `DynamicParser`
+						this.state.parser.items // self-modification - how it's done...
+					
+					3. TODO: change the `Summat` to a more *concrete* interface, specifically, it should be: 
+						X extends Summat {
+							parser: DynamicParser
+						}
 				1. self-modification for `RecursiveList`: 
-					1. make the `.items` property PUBLIC READONLY, since it will now have to be modifiable: 
-						Replace the current DIRECT-ASSIGNMENT stuff [non-readonly] in `RecursiveList.prototype.init` WITH a use of `.items.init(...)`; 
-					2. provide a SHORT-HAND GETTER for the `.composedStream.recursiveList.items`
-				2. `attachState` util: 
-					0. IMPORTANT: this returns the Stateful target object, and NOT the Summat `state`; 
-					1. PROBLEM: how to do?
-						Since, we are CREATING the `Stream` objects ALL THE TIME, 
-							*how* is it that one would assign `.state` on to them? 
-						CONCLUSION: 
-							1. make `IStreamChooser`s OPTIONALLY STATEFUL
-							2. [other name, same idea] create a new `Stateful(state): (Thing): ... & IStateful function (top-level export): 
-								This ASSIGNS a new property `.state` UPON the given `.chooser`; 
-								Basically, just a curried version of `attachState` for the `DynamicParser`'s `.state`. 
-								MUTATES the object/function, not crates sa new one. 
-								LET IT BE USED with `chooser`s. 
-							3. LET `DynamicParser` CREATE a new such function for each state that is used to initialize it; 
-							4. FINALLY: 
-								1. since the user will NEED to be using the `TableMap` for this...	
-									They WILL be able to have '(input, parser) => attachState(new StreamWhatever(input), parser.state)' 
-										THEMSELVES - thus, NO NEED to be doing this...; 
-
-									For refactoring of this into a NEW function in `TableMap` module, see `3.2.`
-								2. IN ORDER to permit the user to NOT have to need to use `TableMap`, 
-									create a new FUNCTION [see 3.1.]
-								3. CONCLUSION - 2 new functions in the `TableMap` module: 
-									1. StateHaving - to NOT HAVE TO use `TableMap` for global `.state` access: 
-										StateHaving = function (state) {
-											return function (f) {
-												const T = (...x) => f(...x, T)
-												attachState(T, state)
-												return T	
-											}
-										}
-									2. StateAttacher - refactoring of a common use-case
-										// FOR cases when SOMETHING returns a SINGLE `Stream`; 
-										StateAttacher = function (f) {
-											return function (input, parser) {
-												return attachState(f(input, parser), parser.state)
-											}
-										}
-									3. ArrayStateAttacher - arr-generalization of `StateAttacher`: 
-										ArrayStateAttacher = function (f) {
-											return function (input, parser) {
-												return mutate(f(input, parser), (x) => attachState(x, parser.state))
-											}
-										}
-								4. RENAME `TableMap` module to `StreamHandler` module
-								5. replace `export * as TableMap from TABLE_MAP_DIR` with `export * from TABLE_MAP_DIR`
-				3. an 'IOwnedStream<string> & .init(: IParseable<string>)' - GIVE the type a name...: 
+					1. done on `.items`: 
+						1. DynamicParser must PROVIDE A PUBLIC ACCESSOR TO `.composedStream.items: IStreamArray`!!!
+				2. an 'IOwnedStream<string> & .init(: IParseable<string>)' - GIVE the type a name...: 
 					1. LET `InputStream` and `LazyStream` BOTH `implement` it (since that will ensure that they are both conformant); 
-				4. 'extends Callable': 
+				3. 'extends Callable': 
 					1. __call__(parseable: IParseable): 
 						1. `this.ownedStreamString.init(parseable)`
 						2. `return this.composedStream.init(this.ownedStreamString)`
 
-				5. init(state: Summat): 
+				4. init(state: Summat): 
 					This just: 
 						1. assigns the `.state` property TO BE REFERENCED
 
-			6. Rest [minor thingies]
+			2. Rest [minor thingies]
 
-			7. Docs
+			3. Docs
 
-			8. Tests
+			4. Tests
 
-			9. Finale: 
+			5. Finale: 
+				0. DO TDD [since tests will now be more-or-less established...]; 
 				1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc; 
 		
 		TODO: encapsulation - LET all the `.pos` and OTHER such READONLY public properties
@@ -138,6 +75,8 @@ Order of TODO-elimination:
 
 		TODO [later] - clean code from temp comments
 
+		TODO: rename `ComposedStream` into `CompositeStream`
+
 		TODO [later]: docs - 'protected abstract' properties...
 			DOCUMENT THOSEAS WELL. 
 			Specifically, for classes. 
@@ -161,6 +100,16 @@ Order of TODO-elimination:
 							7. insert(i, v)
 							8. remove(i)
 
+		TODO: STYLE-CHANGE: `Type -> T`. 
+			Reason - simplicity of names...
+
+		NOTE [for future]: the [Symbol.iterator] inside the `SwitchArray` COULD be a minor bottleneck. 
+			Benchmark later...
+			Possibly - replace with a callback-utilizing strategy..; 
+				[Reason this was not done at the beginning is: it's ambigious which should be faster, 
+					since it's hard to control whether or not the passed callback is INLINED or not 
+						(so we may end up spending more time due to needing to create the callback)]; 
+
 		TODO: *new* form of `Configuration Pattern` COMBINE with `Factory Pattern` for better semantics + memory: 
 			(Arrived at this when thinking about the `SingletonStream`)
 
@@ -183,41 +132,6 @@ Order of TODO-elimination:
 
 		TODO: problem (with DynamicParser): 
 			ORDER of implementation: 	
-				1. ALSO - implement a `clear` method AND function for `ICollection`. 
-					Deletes all accumulated elements. 
-					ALSO - implement it NOT like `clear(this.collection)` for `ArrayCollection`, NOR like `this.init([])`, 
-						since the latter actually allocates MORE memory, instead of freeing it, while the former STILL requires 
-							reclaiming the memory LATER via `.push()`-es
-
-						SOLUTION: 
-							1. implement a new [public] `TempArray`, which keeps them UNDEFINED [like `RotationBuffer`]
-								Intended to be used for MANY short-term storages, which are more or less of the "same" 
-									size, bounded by only the largest one that had happened. 
-								FASTER, since: 
-									1. no freeing memory
-									2. no reclaiming memory [instead it retains the max. possible, allocates new ONLY when needs it]
-
-					REASON: allows one to do cycles, combined with `SingletonStream`: 
-						// INIT STEP: this.state.tempArrWriter = consumable(new TempArray())
-
-						return [
-							SingletonStream, 
-							this.state.tempArrWriter, 
-							currChoser
-						]
-
-						TODO: create a `consumable` function (util), works like:
-
-								# intended to be used primarily with the `TempArray` class
-								[rough sketch]
-								function consumable(p: IPushable & IClearable) {
-									return function (stream: IStream) {
-										p.clear()
-										while (stream.isEnd) p.push(stream.next())
-										return p
-									}
-								}
-
 			ALSO - about `chooser`s: 
 				4. A `ComposedStream`-management system (as described below...) is USED by the `DynamicParser` underneath. 
 
@@ -280,15 +194,10 @@ Order of TODO-elimination:
 								2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 							6. PredicateStream - pick those that are not a ','
 				6. CONCLUSION: 
-					2. THIS is the power of `chooser`s - the MISSING PIECE in the library, one 
-						needed to establish RECURSION...; 
-					
 					5. IMPORTANT : provide proper demos for: 
 						1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
 						2. SELF-MODIFYING thing [using `DynamicParser`]
 							THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
-
-			IMPORTANT: remove old `DynamicParser` - A NEW ONE is in order...
 
 			Current usage: 
 				const dynParser = new DynamicParser(S1, ..., SN, InputStream/LazyStream)
@@ -333,46 +242,6 @@ Order of TODO-elimination:
 				//				1. lastStream.terminate()  // new method, EARLY termination of a stream
 				//				2. lastStream = this(this.ORIG_INPUT = this.CHANGE_INPUT(this.ORIG_INPUT)) // after change of `this`, new lastStream, new "next input" for next transition
 				//			5. the "switching" works VIA A CALLBACK [CallbackBuffer, which is accessed INSIDE the current Stream that the user is to be switched from]
-
-		TODO [code-cleaning]: get rid of the `.value`-convention
-			SOLUTION: 	
-				3. For `Stream`s: 
-					1. For flags: 
-						8. PROBLEM: with `.state`: 
-							1. keeping it on the `this` object in a typeless object somehow seems like a *BAD* idea
-							2. need self-modifiability
-							3. need `.state` to be modifiable/accessible
-
-							Concluision: need to rethink the `DynamicParser`: 
-								1. it still IS a composition of layers [fundamentals are the same - check]
-								2. DOES each layer have its own state?: 
-									1. keep in a `.state: Summat[]` property? (one for each layer)
-										1. PROBLEM: what about changes to the layers' set? 
-									2. PROBLEM: Why split?
-									3. CONCLUSION: no, there is a SINGLE `.state` for the whole parser
-										1. PROBLEM: `handler`
-											has ONLY got access to the `this` of ITS CURRENT `Stream` 
-										
-											CONCLUSION: need a reference to the "primary" `.state`-keeping object [the composition]
-												Solution: alright, here goes... 
-													1. A function `attachState(x, state)`
-													2. remember that the `IStream`-s are `Partial<IStateful>`
-													3. Finally: 
-														1. require the `DynamicParser` to contain STREAMS-CLASSES (not just functions)
-															Takes in a sequence of `IWrapperStream`-constructors... [INCLUDING the last one...]; 
-														2. do the "classWrapper"-calls INSIDE of `DynamicParser` [the "layers" are CONSTRUCTED, not given]
-														3. prior to that, do `attachState(stream, dynamicParser)` for EVERY `stream`, 
-															that is "marked" by a '1' inside a specially provided 'boolean[]'. 
-																This REPLACES the current `DynamicParser.init()`
-															
-															[
-																note: one passes `dynamicParser` and not `dynamicParser.state` to ALLOW for modifying the layers: 
-																	this.state.layers.init(...)
-																	this.state.layers.push(...)
-																	...
-															]
-
-									4. DELETE the `ComplexComposition`. It's excessive. 
 	
 		TODO: [DEFINITELY!] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
 			Reason: many follow common pattern:  
@@ -392,9 +261,6 @@ Order of TODO-elimination:
 							but WITHOUT making any mistakes. Solution to that - provide parent-classes with desired framework-style 
 								functionality documented. 
 			
-		TODO: [maybe?] remove the `TypicalBuffer` (pretty useless - only one method `.read`)
-			Could just make `ICollection` into an `IReadable`..?
-
 		TODO: add `Autocache` to `PeekStream`; 
 
 		TODO: FIX the `.init()` methods on different kinds of `Stream`s [those with their own interfaces/ module - specifically...]; 
@@ -407,35 +273,17 @@ Order of TODO-elimination:
 			Replace all occurences of `numbers(...).map(...)` with `array.from`; 
 			Do via Search: 'numbers(...)'; 
 
-		TODO: CLEANUP [types, 'refactor.ts']
-			Go around, deleting: 
-				1. obsolete types
-				2. obsolete utils
-				3. obsolete `refactor.ts` files/their-contents; 
-				4. FIXING the generics/IPosed/IPosition-related stuff
-
-		TODO [later]: refactor the new `array.repeat` function out of `one.js`: 
-			See the `StreamDigger`...
-
 		TODO: EXPORTS - *ensure* that none are missed...:
 			1. classes
 			2. interfaces
 			3. utils
 
-		TODO: CLEAN all the `refactor.ts` files. 
-			IN PARTICULAR: remove the `withSuper`. 
-				Since it is only used by the old `IStream`-implementations; 
-
-		TODO: ALSO - about the `DynamicParser` implementation; 
-			The "classWrapper" step should be REFACTORED OUT, so that the user can create 
-				these compositions THEMSELVES, INDEPENDENTLY (wrapper is 'trivialCompose + classWrapper + Streams-classes (the user-input)'). 
-			
-			Reason is: the `DynamicParser` should ONLY be needed when working with a dynamic Stream-structure. 
-				However, when it's STATIC, it's rather unwise to be doing this. 
-
 		TODO: 'Source.nextChar(n)' is bugged. 
 			It skips n-1 BYTES, not characters. 
 			It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
+			
+		2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
+			ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 
 		Fix docs: 
 			0. JSDoc: 
@@ -521,14 +369,6 @@ Order of TODO-elimination:
 					
 		Docs:
 			1. Position [MultiIndex]		
-
-		TODO [naming issue]: 
-			minor - module `TableMap` has an export `TableMap`, 
-				forcing the user to write `TableMap.TableMap` [not good...]. 
-			Options: 
-				1. [currently preferred, reason - these 2 are (pretty) unique in their own right...] export * from "./TableMap/classes.js" ["pouring out" the 2 exports of the module]
-				2. renaming the module
-				3. renaming the function
 			
 		TODO [docs]: 
 			1. list missing wiki pages [classes]
@@ -2139,10 +1979,10 @@ FUTURE:
 			Make a dependency of this. 
 
 		1. `callable` package: 
-			1. Callable
-			2. Composition
-			3. IndexSet
-			4. Signature 
+			1. 'Callable' internal class. 
+
+			Reason for refactor: too beautiful to stay here. 
+				This thing must be shared...
 		
 		2. `test` package [already developed]: 
 			1. add the current 'ClassTest', 'MethodTest' 
