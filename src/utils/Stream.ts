@@ -2,19 +2,23 @@ import { functional, object, type } from "@hgargg-0710/one"
 import type {
 	IStreamPredicate,
 	IStreamTransform
-} from "../TableMap/interfaces.js"
+} from "../interfaces/StreamHandler.js"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { Stream } from "../constants.js"
 import type {
 	IBufferized,
+	IClearable,
 	IFiniteWritable,
 	IIndexed,
 	IPosition,
 	IPushable,
 	IStateful
 } from "../interfaces.js"
-import { getStopPoint } from "./Position/refactor.js"
-import { pickDirection, positionNegate } from "./Position/utils.js"
+import {
+	direction,
+	pickDirection,
+	positionNegate
+} from "../Stream/utils/Position.js"
 import type {
 	IBackward,
 	IFinishable,
@@ -25,7 +29,7 @@ import type {
 	IRewindable,
 	IStarted,
 	IStream
-} from "./interfaces.js"
+} from "../interfaces/Stream.js"
 
 const { SkippedItem } = Stream.StreamParser
 const { prop, structCheck } = object
@@ -115,6 +119,14 @@ export function write<Type = any>(
 	for (let i = 0; i < result.size && !stream.isEnd; ++i)
 		result.write(i, stream.next())
 	return result
+}
+
+export function consumable<Type = any>(result: IPushable<Type> & IClearable) {
+	return function (stream: IStream<Type>) {
+		result.clear()
+		while (!stream.isEnd) result.push(stream.curr)
+		return result
+	}
 }
 
 /**
@@ -300,5 +312,8 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 		f(stream.buffer.get(), stream.pos)
 }
 
-export * as Position from "./Position/utils.js"
+function getStopPoint(pos: IPosition) {
+	return direction(pos) ? "isEnd" : "isStart"
+}
 
+export * as Position from "../Stream/utils/Position.js"
