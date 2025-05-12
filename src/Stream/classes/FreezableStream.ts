@@ -1,19 +1,23 @@
 import { boolean, number, type } from "@hgargg-0710/one"
 import { OutputBuffer } from "src/internal/OutputBuffer.js"
+import type { IBufferized } from "../../interfaces.js"
 import type {
 	IOwnedStream,
 	IPosition,
 	IPredicatePosition
-} from "../interfaces.js"
-import { direction } from "../Position/utils.js"
-import { uniNavigate } from "../utils.js"
+} from "../../interfaces/Stream.js"
+import { uniNavigate } from "../../utils/Stream.js"
+import { direction } from "../utils/Position.js"
 import { PosStream } from "./PosStream.js"
 
 const { max } = number
 const { isNumber } = type
 const { T } = boolean
 
-export class FreezableStream<Type = any> extends PosStream<Type> {
+export class FreezableStream<Type = any>
+	extends PosStream<Type>
+	implements IBufferized<Type>
+{
 	declare resource?: IOwnedStream<Type> | undefined
 
 	readonly buffer = new OutputBuffer()

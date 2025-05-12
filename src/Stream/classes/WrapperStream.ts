@@ -2,8 +2,8 @@ import type {
 	IOwnedStream,
 	IOwningStream,
 	IResourceSettable
-} from "../interfaces.js"
-import { ownerInitializer } from "../StreamInitializer/classes.js"
+} from "../../interfaces/Stream.js"
+import { ownerInitializer } from "./StreamInitializer.js"
 import { DelegateStream } from "./DelegateStream.js"
 
 export abstract class WrapperStream<Type = any>

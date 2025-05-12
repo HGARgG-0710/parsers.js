@@ -9,9 +9,9 @@ import type {
 	IPosition,
 	IResourceSettable,
 	IRewindable
-} from "../interfaces.js"
-import { isPredicatePosition } from "../Position/utils.js"
-import { uniNavigate } from "../utils.js"
+} from "../../interfaces/Stream.js"
+import { isPredicatePosition } from "../utils/Position.js"
+import { uniNavigate } from "../../utils/Stream.js"
 import { SourceStream } from "./BasicStream.js"
 
 const { max, min } = number

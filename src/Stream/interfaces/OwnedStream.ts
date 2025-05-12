@@ -2,8 +2,9 @@ import type {
 	IOwnerSettable,
 	IResourcefulStream,
 	IResourceSettable,
+	IStatefulStream,
 	IStream
-} from "../interfaces.js"
+} from "../../interfaces/Stream.js"
 
 export type IOwnedStream<Type = any> = IStream<Type> &
 	IOwnerSettable & {
@@ -17,3 +18,6 @@ export interface IOwningStream<Type = any>
 }
 
 export type ILinkedStream<Type = any> = IOwnedStream<Type> & IOwningStream<Type>
+
+export type IControlStream<Type = any> = ILinkedStream<Type> &
+	IStatefulStream<Type>

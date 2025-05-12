@@ -1,9 +1,13 @@
-import type { StreamList } from "../../internal/StreamList.js"
-import type { ILinkedStream, IOwnedStream } from "./OwnedStream.js"
+import type { IArray } from "../../interfaces.js"
+import type {
+	IControlStream,
+	ILinkedStream,
+	IOwnedStream
+} from "./OwnedStream.js"
 
-export type IStreamChoice = ILinkedStream | IStreamArray
+export type IStreamChoice = ILinkedStream | IRawStreamArray
 
-export type IStreamArray = (ILinkedStream | IStreamChooser)[]
+export type IRawStreamArray = (ILinkedStream | IStreamChooser)[]
 
 export interface IStreamChooser {
 	(prevStream?: IOwnedStream): IStreamChoice
@@ -14,6 +18,8 @@ export interface IStreamChooser {
 	readonly isSwitch?: false
 }
 
-export type IComposedStream<Type = any> = IOwnedStream<Type> & {
-	readonly streams: StreamList
+export type IStreamArray = IArray<ILinkedStream | IStreamChooser>
+
+export type IComposedStream<Type = any> = IControlStream<Type> & {
+	readonly streams: IStreamArray
 }

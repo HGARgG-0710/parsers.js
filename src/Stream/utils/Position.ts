@@ -1,7 +1,11 @@
 import { functional, type } from "@hgargg-0710/one"
-import type { IPosition, IStream } from "../interfaces.js"
-import { next, previous } from "../utils.js"
-import type { IChange, IPosed, IPredicatePosition } from "./interfaces.js"
+import type { IPosition, IStream } from "../../interfaces/Stream.js"
+import { next, previous } from "../../utils/Stream.js"
+import type {
+	IChange,
+	IPosed,
+	IPredicatePosition
+} from "../interfaces/Position.js"
 
 const { isFunction, isNumber, isUndefined } = type
 const { or, negate } = functional

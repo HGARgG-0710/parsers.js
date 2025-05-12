@@ -1,6 +1,6 @@
-import type { ILineIndex, IOwnedStream } from "../interfaces.js"
+import type { ILineIndex, IOwnedStream } from "../../interfaces/Stream.js"
 import type { IIndexStream } from "../interfaces/IndexStream.js"
-import { LineIndex } from "../Position/classes.js"
+import { LineIndex } from "./Position.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 export function IndexStream<Type = any>(

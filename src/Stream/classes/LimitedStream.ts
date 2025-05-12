@@ -1,12 +1,12 @@
 import { boolean, type } from "@hgargg-0710/one"
-import type { IPosition } from "../interfaces.js"
+import type { ILinkedStream, IPosition } from "../../interfaces/Stream.js"
 import type { IUnderLimitedStream } from "../interfaces/LimitedStream.js"
 import {
 	directionCompare,
 	positionEqual,
 	positionNegate
-} from "../Position/utils.js"
-import { navigate } from "../utils.js"
+} from "../utils/Position.js"
+import { navigate } from "../../utils/Stream.js"
 import { DyssyncStream } from "./WrapperStream.js"
 
 const { isNullary } = type
@@ -15,7 +15,7 @@ const { T } = boolean
 export function LimitedStream<Type = any>(
 	from: IPosition,
 	to?: IPosition
-): new (resource?: IUnderLimitedStream<Type>) => DyssyncStream<Type> {
+): new (resource?: IUnderLimitedStream<Type>) => ILinkedStream<Type> {
 	if (isNullary(to)) {
 		to = from
 		from = LimitedStream.NoMovementPredicate

@@ -1,4 +1,4 @@
-import type { IIsCurrStartable, IPosed } from "../interfaces.js"
+import type { IIsCurrStartable, IPosed } from "../../interfaces/Stream.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
 export type IUnderLimitedStream<Type = any> = IOwnedStream<Type> &

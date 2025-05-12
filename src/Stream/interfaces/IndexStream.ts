@@ -1,6 +1,6 @@
-import type { ILineIndex } from "../interfaces.js"
-import type { IOwnedStream } from "./OwnedStream.js"
+import type { ILineIndex } from "../../interfaces/Stream.js"
+import type { ILinkedStream } from "./OwnedStream.js"
 
-export type IIndexStream<Type = any> = IOwnedStream<Type> & {
+export type IIndexStream<Type = any> = ILinkedStream<Type> & {
 	readonly lineIndex: ILineIndex
 }

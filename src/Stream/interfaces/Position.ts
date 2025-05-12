@@ -1,4 +1,4 @@
-import type { IReversibleStream, IStream } from "../interfaces.js"
+import type { IReversibleStream, IStream } from "../../interfaces/Stream.js"
 
 export type IPosition<Type = any> = IPredicatePosition<Type> | number
 
@@ -18,4 +18,4 @@ export interface IDirectionHaving {
 	direction: boolean
 }
 
-export type * from "./interfaces/LineIndex.js"
+export type * from "../Position/interfaces/LineIndex.js"

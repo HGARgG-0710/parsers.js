@@ -1,4 +1,4 @@
-import type { IOwnedStream } from "../interfaces.js"
+import type { ILinkedStream, IOwnedStream } from "../../interfaces/Stream.js"
 import type { ISingletonHandler } from "../interfaces/SingletonStream.js"
 import { SetterStream } from "./BasicStream.js"
 
@@ -42,7 +42,7 @@ class _SingletonStream<
 export function SingletonStream<InType = any, OutType = any>(
 	handler: ISingletonHandler<InType, OutType>
 ) {
-	return function (resource?: IOwnedStream<InType>): IOwnedStream<OutType> {
+	return function (resource?: IOwnedStream<InType>): ILinkedStream<OutType> {
 		return new _SingletonStream(resource, handler)
 	}
 }

@@ -1,6 +1,6 @@
 import type { IStream } from "../../interfaces.js"
 import { IterableStream } from "./IterableStream.js"
-import { resourceInitializer } from "../StreamInitializer/classes.js"
+import { resourceInitializer } from "./StreamInitializer.js"
 
 export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
 	["constructor"]: new (resource?: IStream<Type>) => this

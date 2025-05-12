@@ -1,4 +1,4 @@
-import type { ICopiable, IPointer, ISerializableObject } from "../interfaces.js"
+import type { ICopiable, ISerializableObject } from "../interfaces.js"
 
 export interface ITyped<Type = any> {
 	readonly type: Type
@@ -40,6 +40,6 @@ export interface INode<Type = any>
 	remove: (index?: number) => this
 }
 
-export interface ICellNode<Type = any, Value = any>
-	extends INode<Type>,
-		IPointer<Value> {}
+export interface ICellNode<Type = any, Value = any> extends INode<Type> {
+	value: Value
+}

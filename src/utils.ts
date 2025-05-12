@@ -10,12 +10,13 @@ import type {
 	IMappable,
 	IPersistentAccumulator,
 	ISizeable,
-	IStateful
+	IStateful,
+	IStateSettable
 } from "./interfaces.js"
-import type { IPosed } from "./Stream/Position/interfaces.js"
+import type { IPosed } from "./Stream/interfaces/Position.js"
 
 const { prop, structCheck } = object
-const { eqcurry } = boolean
+const { eqcurry, T } = boolean
 const { isFunction } = type
 
 /**
@@ -84,8 +85,12 @@ export const isLF = eqcurry("\n")
 
 export const isCopiable = structCheck<ICopiable>({ copy: isFunction })
 
-export * as HashMap from "./HashMap/utils.js"
-export * as IndexMap from "./IndexMap/utils.js"
-export * as Node from "./Node/utils.js"
+export const isStateful = structCheck<IStateful & IStateSettable>({
+	state: T,
+	setState: isFunction
+})
 
-export * as Stream from "./Stream/utils.js"
+export * as HashMap from "./utils/HashMap.js"
+export * as IndexMap from "./utils/IndexMap.js"
+export * as Node from "./utils/Node.js"
+export * as Stream from "./utils/Stream.js"

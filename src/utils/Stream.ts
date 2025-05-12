@@ -135,7 +135,7 @@ export function consumable<Type = any>(result: IPushable<Type> & IClearable) {
  * has been reached
  */
 export function has(pos: IPosition) {
-	const stopPoint = getStopPoint(pos)
+	const stopPoint = direction(pos) ? "isEnd" : "isStart"
 	return function <Type = any>(input: IReversibleStream<Type>) {
 		uniNavigate(input, pos)
 		return !input[stopPoint]
@@ -310,10 +310,6 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 ) {
 	return (stream: IStream<Type> & IBufferized<Type> & IPosed<PosType>) =>
 		f(stream.buffer.get(), stream.pos)
-}
-
-function getStopPoint(pos: IPosition) {
-	return direction(pos) ? "isEnd" : "isStart"
 }
 
 export * as Position from "../Stream/utils/Position.js"

@@ -1,4 +1,4 @@
-import type { WrapperStream } from "../classes.js"
+import type { WrapperStream } from "../../classes/Stream.js"
 
 export type IMarkerStream<
 	Type = any,

@@ -1,8 +1,8 @@
 import { type } from "@hgargg-0710/one"
 import type { ISource } from "../../interfaces.js"
-import type { INavigable, IPosed, IPosition } from "../interfaces.js"
+import type { INavigable, IPosed, IPosition } from "../../interfaces/Stream.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
-import { uniNavigate } from "../utils.js"
+import { uniNavigate } from "../../utils/Stream.js"
 import { SourceStream } from "./BasicStream.js"
 
 const { isNumber } = type
@@ -61,4 +61,4 @@ export class LazyStream
 	}
 }
 
-export * as Source from "../../Source/classes.js"
+export * as Source from "../../classes/Source.js"

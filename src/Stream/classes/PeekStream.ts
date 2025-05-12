@@ -1,15 +1,19 @@
-import { TempArray } from "../../classes/TempArray.js"
+import { RetainedArray } from "../../classes/RetainedArray.js"
+import type {
+	IOwnedStream,
+	IPeekable,
+	IPeekStream
+} from "../../interfaces/Stream.js"
 import { RotationBuffer } from "../../internal/RotationBuffer.js"
-import type { IOwnedStream, IPeekable, IPeekableStream } from "../interfaces.js"
-import { write } from "../utils.js"
+import { write } from "../../utils/Stream.js"
 import { DyssyncForwardStream } from "./WrapperStream.js"
 
 export function PeekStream<Type = any>(
 	n: number
-): new (resource?: IOwnedStream<Type>) => IPeekableStream<Type> {
+): new (resource?: IOwnedStream<Type>) => IPeekStream<Type> {
 	return class extends DyssyncForwardStream<Type> implements IPeekable<Type> {
 		private readonly peekBuffer = new RotationBuffer<Type>(n)
-		private readonly tempItems = new TempArray<Type>()
+		private readonly tempItems = new RetainedArray<Type>()
 
 		private peekNonEmpty() {
 			return this.peekBuffer.size > 0

@@ -1,4 +1,4 @@
-import type { IOwnerSettable, IResourceSettable } from "../interfaces.js"
+import type { IOwnerSettable, IResourceSettable } from "../../interfaces/StreamInitializer.js"
 
 export const ownerInitializer = {
 	init(owner: IResourceSettable, resource: IOwnerSettable) {

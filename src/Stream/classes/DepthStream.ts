@@ -1,9 +1,9 @@
 import { BadIndex } from "../../constants.js"
 import type { IWalkable } from "../../interfaces.js"
 import { TreeWalker } from "../../internal/TreeWalker.js"
-import { treeEndPath } from "../../Node/utils.js"
+import { treeEndPath } from "../../utils/Node.js"
 import { isGoodIndex } from "../../utils.js"
-import { MultiIndex } from "../Position/classes.js"
+import { MultiIndex } from "./Position.js"
 import { SourceStream } from "./BasicStream.js"
 
 type PrevResponseWorkable = typeof GO_PREV_LAST | typeof POP_CHILD

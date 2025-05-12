@@ -1,7 +1,7 @@
 import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { closeSync, fstatSync, openSync, readSync } from "node:fs"
-import type { ISource } from "./interfaces.js"
+import type { ISource } from "../interfaces/Source.js"
 
 const { numbers } = array
 const { extendPrototype } = object

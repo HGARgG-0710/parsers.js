@@ -1,10 +1,15 @@
 import { array, inplace } from "@hgargg-0710/one"
-import { BasicHash } from "../HashMap/classes.js"
-import { MapInternal } from "../HashMap/InternalHash/classes.js"
+import { MapInternal } from "../HashMap/InternalHash/classes/MapInternal.js"
+import type {
+	ICellClass,
+	ICellNode,
+	INode,
+	INodeClass
+} from "../interfaces/Node.js"
 import { Autocache } from "../internal/Autocache.js"
-import type { ICellClass, ICellNode, INode, INodeClass } from "./interfaces.js"
-import { isType } from "./utils.js"
 import { isCopiable } from "../utils.js"
+import { isType } from "../utils/Node.js"
+import { BasicHash } from "./HashMap.js"
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
 	["constructor"]: new () => this

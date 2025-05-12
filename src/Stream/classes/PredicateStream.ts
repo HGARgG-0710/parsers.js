@@ -1,10 +1,14 @@
-import type { IOwnedStream, IPredicatePosition } from "../interfaces.js"
-import { navigate } from "../utils.js"
-import { DyssyncForwardStream, WrapperStream } from "./WrapperStream.js"
+import type {
+	ILinkedStream,
+	IOwnedStream,
+	IPredicatePosition
+} from "../../interfaces/Stream.js"
+import { navigate } from "../../utils/Stream.js"
+import { DyssyncForwardStream } from "./WrapperStream.js"
 
 export function PredicateStream<Type = any>(
 	predicate: IPredicatePosition<Type>
-): new (resource?: IOwnedStream<Type>) => WrapperStream<Type> {
+): new (resource?: IOwnedStream<Type>) => ILinkedStream<Type> {
 	return class extends DyssyncForwardStream<Type> {
 		private hasLookahead: boolean = false
 		private lookahead: Type

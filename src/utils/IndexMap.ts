@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
 import { Pairs } from "src/classes.js"
-import type { IIndexMap } from "./interfaces.js"
+import type { IIndexMap } from "../interfaces/IndexMap.js"
 
 /**
  * Returns the pair of `indexMap.keys` and `indexMap.values`

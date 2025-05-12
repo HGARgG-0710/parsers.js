@@ -1,13 +1,21 @@
 import { type as _type, functional, string } from "@hgargg-0710/one"
-import { type } from "src/Node/utils.js"
+import { type } from "src/utils/Node.js"
 import { length } from "../utils.js"
-import type { IHash, IHashClass, IHashMap } from "./interfaces.js"
-import type { IInternalHash } from "./InternalHash/interfaces.js"
-import { extend } from "./refactor.js"
+import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
+import type { IInternalHash } from "../HashMap/interfaces/InternalHash.js"
 
 const { id } = functional
 const { typeOf } = _type
 const { charCodeAt } = string
+
+function extend<KeyType = any, ValueType = any, InternalKeyType = any>(
+	this: IHashClass<KeyType, ValueType, InternalKeyType>,
+	f: (...x: any[]) => KeyType
+) {
+	return HashClass<any, ValueType, InternalKeyType>((...x: any[]) =>
+		this.hash(f(...x))
+	)
+}
 
 export function HashClass<
 	KeyType = any,
@@ -17,9 +25,7 @@ export function HashClass<
 >(
 	hash: IHash<KeyType, InternalKeyType>
 ): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
-	class hashClass
-		implements IHashMap<KeyType, ValueType, InternalKeyType, DefaultType>
-	{
+	class hashClass implements IHashMap<KeyType, ValueType, DefaultType> {
 		static hash: IHash<KeyType, InternalKeyType> = hash
 		static extend: (
 			f: (x: any) => KeyType
@@ -86,4 +92,4 @@ export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
 
-export * as InternalHash from "./InternalHash/classes.js"
+export * as InternalHash from "../HashMap/classes/InternalHash.js"

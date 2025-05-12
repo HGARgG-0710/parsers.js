@@ -3,11 +3,11 @@ import type {
 	IOwnedStream,
 	IOwningStream,
 	IResourceSettable
-} from "../interfaces.js"
+} from "../../interfaces/Stream.js"
 import {
 	ownerInitializer,
 	resourceInitializer
-} from "../StreamInitializer/classes.js"
+} from "./StreamInitializer.js"
 import { IterableStream } from "./IterableStream.js"
 
 export abstract class BasicStream<Type = any> extends IterableStream<Type> {

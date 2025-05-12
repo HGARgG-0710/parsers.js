@@ -10,21 +10,44 @@ import {
 import assert from "assert"
 import { BadIndex } from "../../constants.js"
 import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
+import type { IIndexMap, IMapClass } from "../../interfaces/IndexMap.js"
 import { BaseIndexMap } from "../../internal/IndexMap.js"
 import { isGoodIndex } from "../../utils.js"
-import type { IIndexMap, IMapClass } from "../interfaces.js"
-import {
-	extend,
-	extendKey,
-	inBound,
-	OptimizedMap as OptimizedMapMethods
-} from "../refactor.js"
-import { fromPairs } from "../utils.js"
+import { fromPairs } from "../../utils/IndexMap.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
 const { equals } = boolean
 const { insert, out } = inplace
+
+function plainGetIndex<KeyType = any, ValueType = any>(
+	this: IIndexMap<KeyType, ValueType>,
+	key: any
+) {
+	return (this as any).alteredKeys.indexOf(key)
+}
+
+function extend<KeyType = any, ValueType = any>(
+	this: IMapClass<KeyType, ValueType>,
+	...f: ((x: ValueType) => any)[]
+) {
+	return MapClass<KeyType>(
+		this.change,
+		this.extensions.concat(f),
+		this.keyExtensions
+	)
+}
+
+function extendKey<KeyType = any, ValueType = any>(
+	this: IMapClass<KeyType, ValueType>,
+	...f: ((x: any) => KeyType)[]
+) {
+	return MapClass<any, ValueType>(
+		this.change,
+		this.extensions,
+		this.keyExtensions.concat(f)
+	)
+}
 
 export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	change?: IIndexingFunction<KeyType>,
@@ -61,7 +84,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 		}
 
 		replace(index: number, pair: [KeyType, ValueType]) {
-			if (inBound(index, this)) {
+			if (isGoodIndex(index) && index < this.size) {
 				const [key, value] = pair
 				this.keys[index] = key
 				this.alteredKeys[index] = keyExtension(key, index, this.keys)
@@ -123,10 +146,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	linearMapClass.extendKey = extendKey
 
 	if (!change)
-		linearMapClass.prototype.getIndex = OptimizedMapMethods.optimize<
-			KeyType,
-			ValueType
-		>
+		linearMapClass.prototype.getIndex = plainGetIndex<KeyType, ValueType>
 
 	return linearMapClass
 }

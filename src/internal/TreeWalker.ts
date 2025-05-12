@@ -1,6 +1,6 @@
-import type { IWalkable } from "../Node/interfaces.js"
-import { hasChildren, treeEndPath } from "../Node/utils.js"
-import { MultiIndex } from "../Stream/Position/classes.js"
+import type { IWalkable } from "../interfaces/Node.js"
+import { hasChildren, treeEndPath } from "../utils/Node.js"
+import { MultiIndex } from "../Stream/classes/Position.js"
 
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	level: TreeLike

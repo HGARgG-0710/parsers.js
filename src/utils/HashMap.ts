@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
-import type { IHashClass } from "./interfaces.js"
-import type { IInternalHash } from "./InternalHash/interfaces.js"
+import type { IHashClass } from "../interfaces/HashMap.js"
+import type { IInternalHash } from "../HashMap/interfaces/InternalHash.js"
 
 /**
  * Creates and returns a new instance of the given `HashClass` using the underlying `InternalStructure`

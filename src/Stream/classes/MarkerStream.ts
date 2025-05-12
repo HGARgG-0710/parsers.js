@@ -1,4 +1,4 @@
-import type { IOwnedStream } from "../interfaces.js"
+import type { IOwnedStream } from "../../interfaces/Stream.js"
 import type { IMarkerStream } from "../interfaces/MarkerStream.js"
 import { WrapperStream } from "./WrapperStream.js"
 

@@ -2,7 +2,8 @@ import type {
 	ICopiable,
 	IInitializable,
 	IOwnedStream,
-	IStateful
+	IStateful,
+	IStateSettable
 } from "../interfaces.js"
 
 export interface IStarted {
@@ -64,13 +65,16 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 export type IResourcefulStream<Type = any> = IStream<Type> & IResourceful
+export type IStatefulStream<Type = any> = IStream<Type> &
+	IStateful &
+	IStateSettable
 
-export type * from "./interfaces/ComposedStream.js"
-export type * from "./interfaces/IndexStream.js"
-export type * from "./interfaces/LimitedStream.js"
-export type * from "./interfaces/MarkerStream.js"
-export type * from "./interfaces/OwnedStream.js"
-export type * from "./interfaces/SingletonStream.js"
-
-export type * from "./Position/interfaces.js"
-export type * from "./StreamInitializer/interfaces.js"
+export type * from "../Stream/interfaces/ComposedStream.js"
+export type * from "../Stream/interfaces/IndexStream.js"
+export type * from "../Stream/interfaces/LimitedStream.js"
+export type * from "../Stream/interfaces/MarkerStream.js"
+export type * from "../Stream/interfaces/OwnedStream.js"
+export type * from "../Stream/interfaces/PeekStream.js"
+export type * from "../Stream/interfaces/Position.js"
+export type * from "../Stream/interfaces/SingletonStream.js"
+export type * from "../Stream/interfaces/StreamInitializer.js"

@@ -1,6 +1,6 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { table, toPairs } from "../IndexMap/utils.js"
+import { table, toPairs } from "../utils/IndexMap.js"
 import type { IIndexMap } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
 
