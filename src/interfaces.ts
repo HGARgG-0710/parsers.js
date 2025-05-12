@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IHash } from "./HashMap/interfaces.js"
 import type { IPosition } from "./interfaces.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
+import type { IHash } from "./interfaces/HashMap.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -71,12 +71,8 @@ export interface IGettable<Type = any> {
 	get: () => Type
 }
 
-export interface IInitializable {
-	init: (...x: any[]) => this
-}
-
-export interface IPointer<Type = any> {
-	value: Type
+export interface IInitializable<Args extends any[] = any[]> {
+	init: (...x: Args) => this
 }
 
 export interface IReversible {
@@ -127,14 +123,22 @@ export interface IWritable<Type = any> {
 	write: (i: number, value: Type) => this
 }
 
+export interface IStateSettable {
+	setState(state: Summat): void
+}
+
+export interface IClearable {
+	clear(): void
+}
+
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
-export type * from "./HashMap/interfaces.js"
-export type * from "./IndexMap/interfaces.js"
-export type * from "./Node/interfaces.js"
-export type * from "./Source/interfaces.js"
-export type * from "./Stream/interfaces.js"
-export type * from "./TableMap/interfaces.js"
-
 export type * from "./interfaces/Accumulator.js"
-export type * from "./interfaces/ArrayCollection.js"
+export type * from "./interfaces/Array.js"
+export type * from "./interfaces/Collection.js"
+export type * from "./interfaces/HashMap.js"
+export type * from "./interfaces/IndexMap.js"
+export type * from "./interfaces/Node.js"
+export type * from "./interfaces/Source.js"
+export type * from "./interfaces/Stream.js"
+export type * from "./interfaces/StreamHandler.js"

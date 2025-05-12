@@ -1,15 +1,17 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { Stream } from "../../constants.js"
-import type { IOwnedStream } from "../interfaces.js"
+import type { IControlStream, IOwnedStream } from "../../interfaces/Stream.js"
 import { SetterStream } from "./BasicStream.js"
 
 const { SkippedItem } = Stream.StreamParser
 
 export function StreamParser<InType = any, OutType = any>(
 	handler: (stream: IOwnedStream<InType>) => OutType
-): new (resource?: IOwnedStream<InType>) => IOwnedStream<OutType> {
+): new (resource?: IOwnedStream<InType>) => IControlStream<OutType> {
 	return class extends SetterStream<OutType> {
 		["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
+		state: Summat
 		resource?: IOwnedStream<InType>
 
 		private handleCurr() {
@@ -33,6 +35,10 @@ export function StreamParser<InType = any, OutType = any>(
 
 		isCurrEnd() {
 			return this.resource!.isCurrEnd()
+		}
+
+		setState(state: Summat) {
+			this.state = state
 		}
 
 		constructor(resource?: IOwnedStream<InType>) {
