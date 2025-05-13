@@ -1,18 +1,46 @@
-import { array } from "@hgargg-0710/one"
+import { inplace } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { MissingArgument } from "../../constants.js"
+import type { IParseState } from "../../interfaces/DynamicParser.js"
 import type {
 	IComposedStream,
+	ILinkedStream,
 	IOwnedStream,
-	IRawStreamArray
+	IRawStreamArray,
+	IStreamChooser
 } from "../../interfaces/Stream.js"
-import { StreamList } from "../../internal/StreamList.js"
+import {
+	isRecursiveInitList,
+	isSwitch,
+	type IDerivable,
+	type IRecursivelySwitchable
+} from "../../internal/RecursiveInitList.js"
+import { StreamList, streamListPool } from "../../internal/StreamList.js"
+import { isStateful } from "../../utils.js"
+import { rawStreamCopy } from "../../utils/Stream.js"
 import { ownerInitializer } from "./StreamInitializer.js"
 import { WrapperStream } from "./WrapperStream.js"
 
-// ! Design:
-// 3. On `.state` keeping:
-// 		1. This is part of the `DynamicParser`; Use util: 'attachState = (x: IStateful, state: Summat) => (x.state = state)'
+const { mutate } = inplace
+
+function recursiveStateSetter(state: Summat) {
+	function setStateDerivable(
+		maybeList: IDerivable<ILinkedStream, IStreamChooser>
+	) {
+		if (isRecursiveInitList(maybeList))
+			for (const maybeSwitch of maybeList) setStateSwitchable(maybeSwitch)
+		else setStateSwitchable(maybeList)
+	}
+
+	function setStateSwitchable(
+		maybeSwitch: IRecursivelySwitchable<ILinkedStream, IStreamChooser>
+	) {
+		if (isSwitch(maybeSwitch))
+			return setStateDerivable(maybeSwitch.derivable)
+		if (isStateful(maybeSwitch)) maybeSwitch.setState(state)
+	}
+
+	return setStateSwitchable
+}
 
 class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	["constructor"]: new (
@@ -27,6 +55,10 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	private streamList: StreamList
 	private lowStream: IOwnedStream
 
+	private get rawStreams() {
+		return this.streams.raw()
+	}
+
 	get streams() {
 		return this.streamList.items
 	}
@@ -34,18 +66,40 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	resource: IOwnedStream
 	state: Summat
 
+	private renewIfPossible() {
+		return this.streamList.reEvaluate(this.lowStream)
+	}
+
+	private fixRenewed() {
+		this.updateResource()
+		return true
+	}
+
+	private nonRenewable() {
+		return false
+	}
+
 	private updateResource() {
 		this.resource = this.streamList.firstItemDeep()
 	}
 
 	private initStreams(rawStreams: IRawStreamArray) {
-		this.streamList = new StreamList(rawStreams, this)
+		this.streamList = streamListPool.create(rawStreams, this)
 		return this
 	}
 
 	private evaluateStreams() {
 		this.streamList.evaluate(this.lowStream)
 		this.updateResource()
+	}
+
+	private distribute(state: IParseState) {
+		const setStateSwitchable = recursiveStateSetter(state)
+		for (const x of this.streams) setStateSwitchable(x)
+	}
+
+	renewResource() {
+		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
 	}
 
 	setResource(lowStream: IOwnedStream) {
@@ -60,26 +114,25 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	}
 
 	isCurrEnd(): boolean {
-		const anyMoreItems = this.streamList.reEvaluate(this.lowStream)
-		if (anyMoreItems) this.updateResource()
-		return !anyMoreItems
+		return (
+			this.resource.isCurrEnd() ||
+			(this.resource.isEnd && !this.renewResource())
+		)
 	}
 
 	copy() {
 		return new this.constructor(
 			this.lowStream.copy(),
-			this.rawStreams ? array.copy(this.rawStreams) : MissingArgument
+			mutate(this.rawStreams, rawStreamCopy)
 		)
 	}
 
-	setState(state: Summat) {
+	setState(state: IParseState) {
+		this.distribute(state)
 		this.state = state
 	}
 
-	constructor(
-		lowStream?: IOwnedStream,
-		private readonly rawStreams?: IRawStreamArray
-	) {
+	constructor(lowStream?: IOwnedStream, rawStreams?: IRawStreamArray) {
 		super()
 		this.init(lowStream, rawStreams)
 	}

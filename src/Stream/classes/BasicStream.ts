@@ -4,10 +4,7 @@ import type {
 	IOwningStream,
 	IResourceSettable
 } from "../../interfaces/Stream.js"
-import {
-	ownerInitializer,
-	resourceInitializer
-} from "./StreamInitializer.js"
+import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
 import { IterableStream } from "./IterableStream.js"
 
 export abstract class BasicStream<Type = any> extends IterableStream<Type> {
@@ -103,13 +100,13 @@ export abstract class ResourceStream<Type = any>
 	}
 }
 
-export abstract class SourceStream<Type = any>
+export abstract class SourceStream<Type = any, SourceType = unknown>
 	extends OwnableStream<Type>
 	implements IResourceSettable
 {
 	["constructor"]: new (source?: unknown) => this
 
-	source?: unknown
+	source?: SourceType
 
 	protected abstract currGetter(): Type
 
@@ -125,7 +122,7 @@ export abstract class SourceStream<Type = any>
 		this.curr = this.currGetter()
 	}
 
-	setResource(source?: unknown) {
+	setResource(source?: SourceType) {
 		this.source = source
 	}
 
@@ -133,6 +130,10 @@ export abstract class SourceStream<Type = any>
 		return new this.constructor(
 			isCopiable(this.source) ? this.source.copy() : this.source
 		)
+	}
+
+	constructor(source?: SourceType) {
+		super(source)
 	}
 }
 

@@ -2,7 +2,7 @@ import { ObjectPool } from "../classes.js"
 import type { IInitializable } from "../interfaces.js"
 import { SwitchArray } from "./SwitchArray.js"
 
-type IDerivable<
+export type IDerivable<
 	T extends IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
 > = T | RecursiveInitList<T, Recursive>
@@ -36,11 +36,14 @@ export type ISwitchIdentifiable = {
 	readonly isSwitch?: boolean
 }
 
-export function isSwitch(x: ISwitchIdentifiable): x is Switch {
+export function isSwitch<
+	T extends IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any
+>(x: ISwitchIdentifiable): x is Switch<T, Recursive> {
 	return !!x.isSwitch
 }
 
-function isRecursiveInitList(
+export function isRecursiveInitList(
 	x: IRecursiveListIdentifiable
 ): x is RecursiveInitList {
 	return !!x.isRecursiveInitList

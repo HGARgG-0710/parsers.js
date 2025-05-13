@@ -1,19 +1,24 @@
 import { type } from "@hgargg-0710/one"
 import type { ISource } from "../../interfaces.js"
-import type { INavigable, IPosed, IPosition } from "../../interfaces/Stream.js"
-import type { IOwnedStream } from "../interfaces/OwnedStream.js"
+import type {
+	IInputStream,
+	INavigable,
+	IPosed,
+	IPosition
+} from "../../interfaces/Stream.js"
 import { uniNavigate } from "../../utils/Stream.js"
 import { SourceStream } from "./BasicStream.js"
 
 const { isNumber } = type
 
 export class LazyStream
-	extends SourceStream<string>
-	implements INavigable<string>, IPosed<number>, IOwnedStream<string>
+	extends SourceStream<string, ISource>
+	implements
+		INavigable<string>,
+		IPosed<number>,
+		IInputStream<string, ISource>
 {
-	["constructor"]: new (source: ISource) => this
-
-	source?: ISource
+	["constructor"]: new (source?: ISource) => this
 
 	get pos() {
 		return this.source!.pos
@@ -53,7 +58,7 @@ export class LazyStream
 	}
 
 	copy(): this {
-		return new this.constructor(this.source!)
+		return new this.constructor(this.source)
 	}
 
 	constructor(source?: ISource) {

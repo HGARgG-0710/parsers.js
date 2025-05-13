@@ -1,5 +1,6 @@
 import { array, inplace } from "@hgargg-0710/one"
 import type { IInitializable } from "../interfaces.js"
+import type { IArray } from "../interfaces/Array.js"
 import {
 	isSwitch,
 	RecursiveInitList,
@@ -9,10 +10,16 @@ import {
 	type IRecursivelySwitchable,
 	type ISwitchIdentifiable
 } from "./RecursiveInitList.js"
-import type { IArray } from "../interfaces/Array.js"
 
-const { first } = array
+const { first, clear } = array
 const { insert, mutate, out } = inplace
+
+function maybeDeSwitch<
+	T extends IInitializable & ISwitchIdentifiable = any,
+	Recursive extends IRecursiveListIdentifiable & ISwitchIdentifiable = any
+>(raw: IRecursivelySwitchable<T, Recursive>) {
+	return isSwitch(raw) ? raw.recursive : raw
+}
 
 export class SwitchArray<
 	T extends ISwitchIdentifiable &
@@ -39,10 +46,6 @@ export class SwitchArray<
 		return mutate(items, this.maybeWrapSwitch.bind(this))
 	}
 
-	private deSwitch(raw: IRecursivelySwitchable<T, Recursive>) {
-		return isSwitch(raw) ? raw.recursive : raw
-	}
-
 	private isRecursive(item: T | Recursive) {
 		return this.parent.isRecursive(item)
 	}
@@ -59,6 +62,12 @@ export class SwitchArray<
 		for (let i = this.size; i--; ) yield this.items[i]
 	}
 
+	raw() {
+		const collected: (T | Recursive)[] = new Array(this.size)
+		this.each((x, i: number) => (collected[i] = x))
+		return collected
+	}
+
 	init(items: IRecursiveItems<T, Recursive>) {
 		this.items = items
 		return this
@@ -73,7 +82,7 @@ export class SwitchArray<
 	}
 
 	read(i: number) {
-		return this.deSwitch(this.items[i])
+		return maybeDeSwitch(this.items[i])
 	}
 
 	push(...items: (T | Recursive)[]) {
@@ -103,6 +112,22 @@ export class SwitchArray<
 
 	unshift(...values: (T | Recursive)[]) {
 		this.items.unshift(...this.maybeWrapSwitchMult(values))
+		return this
+	}
+
+	each(callback: (x: T | Recursive, i?: number) => void) {
+		for (let i = this.size; i--; ) callback(this.read(i), i)
+		return this
+	}
+
+	clear() {
+		clear(this.items)
+		return this
+	}
+
+	fill(newItems: (T | Recursive)[]) {
+		this.clear()
+		this.items = this.maybeWrapSwitchMult(newItems)
 		return this
 	}
 

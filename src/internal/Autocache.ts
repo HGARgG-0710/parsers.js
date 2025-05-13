@@ -7,17 +7,17 @@ const { isFunction } = type
 
 export class Autocache<KeyType = any, ValueType = any> extends Callable {
 	protected __call__(x: KeyType) {
-		const cached = this.value.index(x)
+		const cached = this.cache.index(x)
 		if (!cached) {
 			const newlyCached = this.callback(x)
-			this.value.set(x, newlyCached)
+			this.cache.set(x, newlyCached)
 			return newlyCached
 		}
 		return cached
 	}
 
 	constructor(
-		readonly value: ISettable<KeyType, ValueType> &
+		private readonly cache: ISettable<KeyType, ValueType> &
 			IIndexable<ValueType | undefined>,
 		private callback: (x: KeyType) => ValueType
 	) {

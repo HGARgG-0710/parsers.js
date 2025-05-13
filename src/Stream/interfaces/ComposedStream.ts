@@ -1,4 +1,4 @@
-import type { IArray } from "../../interfaces.js"
+import type { IArray, IInitializable } from "../../interfaces.js"
 import type {
 	IControlStream,
 	ILinkedStream,
@@ -7,7 +7,11 @@ import type {
 
 export type IStreamChoice = ILinkedStream | IRawStreamArray
 
-export type IRawStreamArray = (ILinkedStream | IStreamChooser)[]
+export type IRawStream = ILinkedStream | IStreamChooser
+
+export type IRawStreamArray = IRawStream[]
+
+export type IRawStreamHandler = (x: IRawStream) => void
 
 export interface IStreamChooser {
 	(prevStream?: IOwnedStream): IStreamChoice
@@ -20,6 +24,8 @@ export interface IStreamChooser {
 
 export type IStreamArray = IArray<ILinkedStream | IStreamChooser>
 
-export type IComposedStream<Type = any> = IControlStream<Type> & {
-	readonly streams: IStreamArray
-}
+export type IComposedStream<Type = any> = IControlStream<Type> &
+	IInitializable<[IOwnedStream?]> & {
+		renewResource: () => void
+		readonly streams: IStreamArray
+	}

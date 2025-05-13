@@ -1,30 +1,32 @@
 import { number } from "@hgargg-0710/one"
 import type { IParseable } from "../../interfaces.js"
-import { ReadableView } from "../../internal/ReadableView.js"
 import type {
 	IBackward,
 	IFinishable,
+	IInputStream,
 	INavigable,
 	IPeekableStream,
 	IPosition,
 	IResourceSettable,
 	IRewindable
 } from "../../interfaces/Stream.js"
-import { isPredicatePosition } from "../utils/Position.js"
+import { ReadableView } from "../../internal/ReadableView.js"
 import { uniNavigate } from "../../utils/Stream.js"
+import { isPredicatePosition } from "../utils/Position.js"
 import { SourceStream } from "./BasicStream.js"
 
 const { max, min } = number
 
 export class InputStream<Type = any>
-	extends SourceStream<Type>
+	extends SourceStream<Type, IParseable<Type>>
 	implements
 		IPeekableStream<Type>,
 		INavigable<Type>,
 		IFinishable<Type>,
 		IRewindable<Type>,
 		IBackward<Type>,
-		IResourceSettable
+		IResourceSettable,
+		IInputStream<Type, IParseable<Type>>
 {
 	["constructor"]: new (source?: IParseable<Type>) => this
 
@@ -32,8 +34,6 @@ export class InputStream<Type = any>
 
 	private lastPos: number
 	private readonly view: ReadableView
-
-	source?: IParseable<Type>
 
 	protected currGetter(): Type {
 		return this.source!.read(this.pos)

@@ -136,9 +136,11 @@ export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/Collection.js"
+export type * from "./interfaces/DynamicParser.js"
 export type * from "./interfaces/HashMap.js"
 export type * from "./interfaces/IndexMap.js"
 export type * from "./interfaces/Node.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
+

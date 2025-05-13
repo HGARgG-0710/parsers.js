@@ -11,8 +11,7 @@ import type {
 	IFiniteWritable,
 	IIndexed,
 	IPosition,
-	IPushable,
-	IStateful
+	IPushable
 } from "../interfaces.js"
 import {
 	direction,
@@ -25,6 +24,7 @@ import type {
 	INavigable,
 	IPosed,
 	IPrevable,
+	IRawStream,
 	IReversibleStream,
 	IRewindable,
 	IStarted,
@@ -33,7 +33,7 @@ import type {
 
 const { SkippedItem } = Stream.StreamParser
 const { prop, structCheck } = object
-const { isFunction, isNumber, isBoolean, isObject } = type
+const { isFunction, isNumber, isBoolean } = type
 const { and } = functional
 
 /**
@@ -225,10 +225,6 @@ export const isBackward = and(isStarted, isPrevable) as <Type = any>(
 	x: any
 ) => x is IBackward<Type>
 
-export const isStateful = structCheck<IStateful>({
-	state: isObject
-})
-
 /**
  * Iterates the given `BasicStream` until hitting the end.
  */
@@ -310,6 +306,11 @@ export function byStreamBufferPos<Type = any, PosType = any>(
 ) {
 	return (stream: IStream<Type> & IBufferized<Type> & IPosed<PosType>) =>
 		f(stream.buffer.get(), stream.pos)
+}
+
+export function rawStreamCopy(rawStream: IRawStream) {
+	if (isFunction(rawStream)) return rawStream
+	return rawStream.copy()
 }
 
 export * as Position from "../Stream/utils/Position.js"
