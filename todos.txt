@@ -6,40 +6,13 @@
 Order of TODO-elimination: 	
 	TODO [fixed order]:						
 		Order:
-			1. reimplementing the `DynamicParser`: 
-				0. uses `.setState` to assign `.state` to: 
-					1. '{ parser: this }'
-					2. that is, the user can access the 'global' data from, say, `StreamParser` or a chooser, via: 
-						
-						this.state // reference to `{ parser: this }`; MUTABLE, allows to share state across multiple streams
-						this.state.parser // self-modification purposes, REFERENCE TO a `DynamicParser`
-						this.state.parser.items // self-modification - how it's done...
-					
-					3. TODO: change the `Summat` to a more *concrete* interface, specifically, it should be: 
-						X extends Summat {
-							parser: DynamicParser
-						}
-				1. self-modification for `RecursiveList`: 
-					1. done on `.items`: 
-						1. DynamicParser must PROVIDE A PUBLIC ACCESSOR TO `.composedStream.items: IStreamArray`!!!
-				2. an 'IOwnedStream<string> & .init(: IParseable<string>)' - GIVE the type a name...: 
-					1. LET `InputStream` and `LazyStream` BOTH `implement` it (since that will ensure that they are both conformant); 
-				3. 'extends Callable': 
-					1. __call__(parseable: IParseable): 
-						1. `this.ownedStreamString.init(parseable)`
-						2. `return this.composedStream.init(this.ownedStreamString)`
+			1. Rest [minor thingies]
 
-				4. init(state: Summat): 
-					This just: 
-						1. assigns the `.state` property TO BE REFERENCED
+			2. Docs
 
-			2. Rest [minor thingies]
+			3. Tests
 
-			3. Docs
-
-			4. Tests
-
-			5. Finale: 
+			4. Finale: 
 				0. DO TDD [since tests will now be more-or-less established...]; 
 				1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc; 
 		
@@ -53,18 +26,24 @@ Order of TODO-elimination:
 			2. Let only the ABSTRACT classes of the library be extendable (shared behavioru and all that...)
 			3. This is to mimic Java's "final" and C# "sealed" functionality; 		
 
-		TODO: CHANGE the general project directory structure:
-			1. Replace `Class/*` with `class/Class.ts` + `interfaces/Class.ts` + `utils/Class.ts`
-				DO IT everywhere. 
-				Reason: 
-					1. less repetition (simpler navigation)
-					2. file-system MIMICKS the project export-system; 
-
 		TODO: wrap ALL the `Stream`-classes' constructors out there INTO FUNCTIONS. 
 			Reason - being able to call them WITHOUT needing the `new`; 
 			They have THE SAME signature. 
 			Difference being - they can NOW be employed with "compositions". 
 				[+ the user will NO LONGER need to bear the load of actuaLLY NEEDING to specify "classWrapper", or smth like that]; 
+
+		TODO: MAKE all the '["constructor"]' fields PRIVATE. 
+			THIS WAY the "type problems" arising from violating ("technically") the Liskov substitution 	
+				will not leak to the user-side... 
+
+		TODO: `Autocache` - make closure-based. 
+			ALSO: 
+				1. REMOVE `Callable`. 
+					As a piece of JavaScript - it's ingenious. 
+					As a piece of TypeScript - it's pointless, difficult  and dangerous. 
+					DO make it into a package (later), BUT, transpile it individually first...; 
+						DO NOT remove it from the package... 
+						Just don't export it out and don't use it anywhere... [since it's really useless...v]
 
 		TODO [later]: WRITE the unit-tests for the `internal/` stuff AS WELL; 
 			Since we now have a (somewhat) more moderate codebase to test, it is much more affordable time-wise to do it. 
@@ -74,6 +53,7 @@ Order of TODO-elimination:
 		TODO: rename the `PredicateStream` into `FilterStream`
 
 		TODO [later] - clean code from temp comments
+			Walk the entire preojct. 
 
 		TODO: rename `ComposedStream` into `CompositeStream`
 
@@ -83,22 +63,11 @@ Order of TODO-elimination:
 			These are INTENDED to providing the user with ability to customize EXTENDABLE behaviour
 				[example: IterableStream, DelegateStream, WrapperStream]; 
 
-		TODOs: ComposedStream: 
-			1. RecursiveList: 
-				2. create a public interface: 
-					1. for future self-modification
-						TODO [later]: add operations to `RecursiveList`: 
-							1. push
-							2. unshift: 
-								HAS TO BE FAST
-							3. shift: 
-								HAS TO BE FAST
-							4. write(i, v)
-							5. read(i): 
-								1. WORKS with recursion - 'T' type returned ONLY
-							6. pop(): 
-							7. insert(i, v)
-							8. remove(i)
+		TODO: TAKE the classes inside Configurator-Pattern Streams OUT OF THEM. 
+			Reason: 
+				1. bad effect on JIT [most likely] - due to SAME METHODS not being refactored
+				2. undesirable effect on memory (typically, the negative difference due to repeated Stream objects is not that - plus, the're poolable...); 
+				3. fat prototypes [same methods - not-refactored]; 
 
 		TODO: STYLE-CHANGE: `Type -> T`. 
 			Reason - simplicity of names...
@@ -130,12 +99,7 @@ Order of TODO-elimination:
 			Reason to introduce it for `SingletonStream` was TO SAVE MEMORY, since the user will be FORCED to create 
 				`SingletonStream`-s based on CAPTURED (that is, NON-MEMOIZABLE, transient) values/objects [accessible solely within the lower parsers' scopes]. 
 
-		TODO: problem (with DynamicParser): 
-			ORDER of implementation: 	
-			ALSO - about `chooser`s: 
-				4. A `ComposedStream`-management system (as described below...) is USED by the `DynamicParser` underneath. 
-
-				5. About `TokenStream` and `Regex`: 
+		TODO [*important*]: About `TokenStream` and `Regex`: 
 					1. need an INTERMEDIATE abstraction - a `MatchList`
 					2. a `MatchList` is a "table" of `handler-Regex` to be walked, and USED by the `TokenStream` to MATCH one of avaiable `Regex`-es
 					3. a `MatchList` is an `IndexMap`; Functions in it have access to `this` - THE CURRENT TokenStream, and `input` - first arg, and 'parser.table' - second arg, LIKE with `TableMap`; 
@@ -193,55 +157,11 @@ Order of TODO-elimination:
 
 								2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 							6. PredicateStream - pick those that are not a ','
-				6. CONCLUSION: 
-					5. IMPORTANT : provide proper demos for: 
-						1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
-						2. SELF-MODIFYING thing [using `DynamicParser`]
-							THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
-
-			Current usage: 
-				const dynParser = new DynamicParser(S1, ..., SN, InputStream/LazyStream)
-				const parseStream = dynParser(...) // binding `state`, etc
-				...
-				parseStream.next()
-				...
-				parseStream.next() // HERE, we are having an internal "re-creation" of `dynParser`
-
-				const newStream = parseStream.state(...) // .state is the local reference to `dynParser`
-				// ! QUESTION - how to transfer the `parseStream` state to `newStream`???	
-				// 		1. *IS* our input the same? 
-				//		2. Ans: NO. It has changed. 
-				//		3. CONCLUSION [1]: need helper classes for altering the input: 
-				//			1. In-memory (InputStream) - new BufferView(this.buffer, this.pos) // offset the reading operation
-				//				1. CONCLUSION: BufferView becomes public (or - need some equiv. public interface)
-				// 			2. Lazy (LazyStream) - A NEW ABSTRACTION [through 'ByteOrigin', one RETAINS the old file-descriptor for further work with the input]; 
-				//		4. CONCLUSION [2]: need to somehow "switch" one stream for another: 
-				//			1. CONCLUSION: turn the `DynamicParser` into a "controller" of multiple Stream-s
-				//				1. these are stored in an array internally
-				//				2. hence, the DynamicParser NO LONGER has a `Composition` definition. 
-				//				3. More precisely, it: 
-				//					1. stores/alters/manages a `Composition` via the reactive `layers`
-				//					2. has a `private .transition` method, which creates new streams, and alters input
-				//					3. keeps track of original input (changed between transitions)
-				//					4. keeps track of the actual stream-instances (only one is ever "running" at the same time)
-				//					5. KEEPS A `retainer`, TO WHICH the actual `.currStream` (current active stream) IS GIVEN
-				//						1. more precisely, it is provided by the user and can, for instance, be one of: 
-				//							1. bufferizing into a single ICollection (via `consume` + `ArrayCollection`, say)
-				//							2. TRANSFORMING IT [writing to a file, for instance, via `WritingStream`]
-				//						2. the `retainer` is where THE GLOBAL PARSER LOGIC goes
-				//					6. Also, THE MOST important part - SPLIT the `transitioning` and the actual changing of the array
-				//						1. Reason - one (often) needs to PREPARE the array first. Due to this, one must either only use `.init`, or SPLIT 
-				//							the "callback" from the .push(), .write(), etc. [distinct methods]
-				//						2. CONCLUSION: *remove* the `CallbackBuffer` [far too simplistic... user must be able to transition manually]; 
-				//			2. EACH ONE represents its "transition"
-				//				1. UPON completing one it becomes `.isEnd` (file is closed, etc)
-				//				2. !!! PROBLEM: somehow, need to retain the file-connection - ABSTRACT it away from LazyStream...
-				//				3. New abstraction - 'ByteOrigin' - the file descriptor, allows for transfer of control over file, via dependency-inversion
-				//			3. EACH ONE one can bufferize or not [the "saving" aspect]
-				//			4. from here, one can AUTOMATE the "switching" as: 
-				//				1. lastStream.terminate()  // new method, EARLY termination of a stream
-				//				2. lastStream = this(this.ORIG_INPUT = this.CHANGE_INPUT(this.ORIG_INPUT)) // after change of `this`, new lastStream, new "next input" for next transition
-				//			5. the "switching" works VIA A CALLBACK [CallbackBuffer, which is accessed INSIDE the current Stream that the user is to be switched from]
+		CONCLUSION: 
+				5. IMPORTANT : provide proper demos for: 
+					1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
+					2. SELF-MODIFYING thing [using `DynamicParser`]
+						THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
 	
 		TODO: [DEFINITELY!] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
 			Reason: many follow common pattern:  
@@ -2031,7 +1951,7 @@ FUTURE:
 		Thus: make a real-world application - profile. 
 		Find out which classes are (most likely) to be taking space.
 
-	7. [maybe? later, definitely] A Kotlin rewrite: 
+	7. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 
 		Howeeeverr...
 		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
@@ -2042,8 +1962,7 @@ FUTURE:
 			4. transpile to Java [that is the alternative language of choice]
 				That is without the tests of course. 
 				Those you'll need to write anew (using something like JUnit, maybe?)
-				Also - will be able to scrap the "copiability" aspect of the whole thing 
-					[thank God for good tests...]
+				THE `.copy()` aspect WILL STILL REMAIN!!!
 			5. write new tests [Java]
 			6. publish
 		
