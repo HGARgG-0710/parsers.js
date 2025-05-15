@@ -1,4 +1,4 @@
-import type { IStream, IInitializer } from "../../interfaces.js"
+import type { IInitializer, IStream } from "../../interfaces.js"
 
 export abstract class IterableStream<Type = any> implements IStream<Type> {
 	abstract isEnd: boolean

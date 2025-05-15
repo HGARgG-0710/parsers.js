@@ -1,11 +1,11 @@
-import { isCopiable } from "../../utils.js"
 import type {
 	IOwnedStream,
 	IOwningStream,
 	IResourceSettable
 } from "../../interfaces/Stream.js"
-import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
+import { isCopiable } from "../../utils.js"
 import { IterableStream } from "./IterableStream.js"
+import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
 
 export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 	protected abstract baseNextIter(): Type | void
@@ -97,6 +97,11 @@ export abstract class ResourceStream<Type = any>
 
 	setResource(resource: IOwnedStream) {
 		this.resource = resource
+	}
+
+	init(resource: IOwnedStream) {
+		this.init(resource)
+		return this
 	}
 }
 

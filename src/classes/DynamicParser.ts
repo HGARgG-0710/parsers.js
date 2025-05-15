@@ -44,8 +44,10 @@ class Parse<FinalType = any, InitType = any>
 		this._state = newState
 	}
 
-	private getState(state: Summat = {}): IParseState<FinalType, InitType> {
-		return { ...state, parse: this }
+	private createState(
+		preState: Summat = {}
+	): IParseState<FinalType, InitType> {
+		return { ...preState, parse: this }
 	}
 
 	private onUpdate() {
@@ -53,8 +55,8 @@ class Parse<FinalType = any, InitType = any>
 		this.didUpdate = false
 	}
 
-	private initState(state: Summat) {
-		this.state = this.getState(state)
+	private setState(preState: Summat) {
+		this.state = this.createState(preState)
 	}
 
 	private resetInput(input: InitType) {
@@ -88,7 +90,7 @@ class Parse<FinalType = any, InitType = any>
 	}
 
 	init(input: InitType, state?: Summat) {
-		if (state) this.initState(state)
+		if (state) this.setState(state)
 		if (input) this.resetInput(input)
 		return this
 	}
