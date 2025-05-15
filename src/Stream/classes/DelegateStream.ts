@@ -1,10 +1,10 @@
-import { InitializableStream } from "../../classes/Stream.js"
+import { InitStream } from "../../classes/Stream.js"
 import type { IStream } from "../../interfaces.js"
 import { resourceInitializer } from "./StreamInitializer.js"
 
 export abstract class DelegateStream<
 	Type = any
-> extends InitializableStream<Type> {
+> extends InitStream<Type> {
 	resource?: IStream<Type>
 
 	protected get initializer() {

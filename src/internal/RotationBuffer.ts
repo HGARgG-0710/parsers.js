@@ -1,12 +1,12 @@
 import { array, number, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { InitializableMixin } from "./MixinArray.js"
+import { InitMixin } from "./MixinArray.js"
 
 const { copy } = array
 const { min } = number
 const { isNumber } = type
 
-export class RotationBuffer<Type = any> extends InitializableMixin<Type> {
+export class RotationBuffer<Type = any> extends InitMixin<Type> {
 	private ["constructor"]: new (n?: number) => this
 
 	// * first-read index

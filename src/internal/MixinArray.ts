@@ -39,7 +39,7 @@ export class MixinArray<Type = any> {
 	}
 }
 
-export class InitializableMixin<Type = any> extends MixinArray<Type> {
+export class InitMixin<Type = any> extends MixinArray<Type> {
 	init(items: Type[]) {
 		this.items = items
 		return this

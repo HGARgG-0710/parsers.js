@@ -4,12 +4,12 @@ import type {
 	IResourceSettable
 } from "../../interfaces/Stream.js"
 import { isCopiable } from "../../utils.js"
-import { InitializableStream } from "./IterableStream.js"
+import { InitStream } from "./IterableStream.js"
 import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
 
 export abstract class BasicStream<
 	Type = any
-> extends InitializableStream<Type> {
+> extends InitStream<Type> {
 	protected abstract baseNextIter(): Type | void
 	protected abstract update(newCurr?: Type | void): void
 

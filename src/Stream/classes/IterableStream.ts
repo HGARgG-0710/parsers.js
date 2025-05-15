@@ -15,9 +15,7 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	}
 }
 
-export abstract class InitializableStream<
-	Type = any
-> extends IterableStream<Type> {
+export abstract class InitStream<Type = any> extends IterableStream<Type> {
 	protected abstract readonly initializer?: IInitializer
 
 	init(...x: any[]) {

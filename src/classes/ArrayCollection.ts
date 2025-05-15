@@ -1,9 +1,9 @@
 import { array } from "@hgargg-0710/one"
-import { InitializableMixin } from "../internal/MixinArray.js"
+import { InitMixin } from "../internal/MixinArray.js"
 import type { ICollection } from "../interfaces.js"
 
 export class ArrayCollection<Type = any>
-	extends InitializableMixin<Type>
+	extends InitMixin<Type>
 	implements ICollection<Type>
 {
 	private ["constructor"]: new (items?: Type[]) => this
