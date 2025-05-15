@@ -8,7 +8,16 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	abstract isCurrEnd(): boolean
 
 	abstract copy(): this
+	abstract init(...x: any[]): this
 
+	*[Symbol.iterator]() {
+		while (!this.isEnd) yield this.next()
+	}
+}
+
+export abstract class InitializableStream<
+	Type = any
+> extends IterableStream<Type> {
 	protected abstract readonly initializer?: IInitializer
 
 	init(...x: any[]) {
@@ -16,11 +25,8 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 		return this
 	}
 
-	*[Symbol.iterator]() {
-		while (!this.isEnd) yield this.next()
-	}
-
 	constructor(...x: any[]) {
+		super()
 		this.init(...x)
 	}
 }
