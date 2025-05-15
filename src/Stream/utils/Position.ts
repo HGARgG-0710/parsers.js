@@ -100,6 +100,15 @@ export function preserveDirection<Type = any>(
 	return transformed
 }
 
+export function positionBind<Type = any, T extends IPosition<Type> = any>(
+	target: any,
+	pos: T
+) {
+	return isPredicatePosition(pos)
+		? preserveDirection(pos, (pos) => pos.bind(target))
+		: pos
+}
+
 /**
  * Adds a `.direction = false` property on a given `PredicatePosition`
  */

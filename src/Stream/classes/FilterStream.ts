@@ -5,6 +5,7 @@ import type {
 } from "../../interfaces/Stream.js"
 import { maybeInit } from "../../utils.js"
 import { navigate } from "../../utils/Stream.js"
+import { positionBind } from "../utils/Position.js"
 import { DyssyncForwardStream } from "./WrapperStream.js"
 
 class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
@@ -38,7 +39,7 @@ class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
 	}
 
 	setPredicate(predicate: IPredicatePosition<Type>) {
-		this.predicate = predicate.bind(this)
+		this.predicate = positionBind(this, predicate)
 		return this
 	}
 
