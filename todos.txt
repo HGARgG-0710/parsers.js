@@ -4,36 +4,10 @@ Order of TODO-elimination:
 	TODO: encapsulation - LET all the `.pos` and OTHER such READONLY public properties
 		be ACCORDINGLY handled via `private` keyword. 
 		Specifically - WALK throught he project (once again, FIXING all the access modifier issues). 
-		
-	TODO: MAKE all the '["constructor"]' fields PRIVATE. 
-		THIS WAY the "type problems" arising from violating ("technically") the Liskov substitution 	
-			will not leak to the user-side... 
 
-	TODO: `Autocache` - make closure-based. 
-		ALSO: 
-			1. REMOVE `Callable`. 
-				As a piece of JavaScript - it's ingenious. 
-				As a piece of TypeScript - it's pointless, difficult  and dangerous. 
-				DO make it into a package (later), BUT, transpile it individually first...; 
-					DO NOT remove it from the package... 
-					Just don't export it out and don't use it anywhere... [since it's really useless...v]
-
-	TODO: wrap ALL the `Stream`-classes' constructors out there INTO FUNCTIONS. 
-		Reason - being able to call them WITHOUT needing the `new`; 
-		They have THE SAME signature. 
-		Difference being - they can NOW be employed with "compositions". 
-			[+ the user will NO LONGER need to bear the load of actuaLLY NEEDING to specify "classWrapper", or smth like that]; 
-
-
-	TODO: make `Node`s POOLABLE [the `Initializer` module]
-		Big change, since, it will ALLOW one to be using `SingletonStream(someNodePool.create.bind(someNodePool))` 
-			inside, say, chooser-s, or other kinds of Stream-s. Finally, it will make the "shtick" memory-improvements 
-				ACTUALLY NOTICEABLE, because now the user can optimize memory to only EVER contain the "largest" "shtick" 
-					+ some minor book-keeping costs (one 4-byte address per each INode object). 
-	
-	TODO: simplify the `MapClass` code. 
-		Specifically, all the excessive `.prototype` manipulations. 
-		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
+		List [incomplete]: 
+			1. .isFrozen
+			2. .default
 
 	TODO: IMPORTANT BUG [pooling]: 
 		1. 'maybeInit' util - scrap this, reason - see below...
@@ -83,6 +57,42 @@ Order of TODO-elimination:
 							3. Let the `private/protected get initializer() {...}` be done by EACH class within the library
 								And each class have THEIR OWN initializer-object (either public, like with `Stream`-s, because the user may want to use them as well), 
 									or PRIVATE, like for other cases (ex: `DynamicParser` - this one has ITS OWN initializer-object...); 
+		3. EXPORT the current "wrapper-functions" around classes as '(...) => T & new (...) => T' via the 'const NAME = OTHER_NAME as any' type-trick 
+			1. In particular - ONLY add "function-wrappers" for: 
+				1. classes that are INTENTIONALLY to remain 'sealed' (like, say, `DynamicParser` and `Enum`)
+				2. classes that are using the Factory pattern 
+				3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
+
+	TODO: REMOVE `Callable` [prepare the `callable` sketch - add `Callable` to package sources...]; 
+		As a piece of JavaScript - it's ingenious. 
+		As a piece of TypeScript - it's pointless, difficult  and dangerous. 
+		DO make it into a package (later), BUT, transpile it individually first...; 
+			DO NOT remove it from the package... 
+			Just don't export it out and don't use it anywhere... [since it's really useless...v]
+			
+	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
+		Reason - simplicity of names...
+			
+	TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
+		Reasons: 
+			1. works FAR better with the `&`-role-composition	
+			2. SAFER GENERIC TYPES!
+
+	TODO: wrap ALL the `Stream`-classes' constructors out there INTO FUNCTIONS. 
+		Reason - being able to call them WITHOUT needing the `new`; 
+		They have THE SAME signature. 
+		Difference being - they can NOW be employed with "compositions". 
+			[+ the user will NO LONGER need to bear the load of actuaLLY NEEDING to specify "classWrapper", or smth like that]; 
+
+	TODO: make `Node`s POOLABLE [the `Initializer` module]
+		Big change, since, it will ALLOW one to be using `SingletonStream(someNodePool.create.bind(someNodePool))` 
+			inside, say, chooser-s, or other kinds of Stream-s. Finally, it will make the "shtick" memory-improvements 
+				ACTUALLY NOTICEABLE, because now the user can optimize memory to only EVER contain the "largest" "shtick" 
+					+ some minor book-keeping costs (one 4-byte address per each INode object). 
+	
+	TODO: simplify the `MapClass` code. 
+		Specifically, all the excessive `.prototype` manipulations. 
+		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
 
 	TODO [fixed order]:						
 		Order:
@@ -115,17 +125,8 @@ Order of TODO-elimination:
 			These are INTENDED to providing the user with ability to customize EXTENDABLE behaviour
 				[example: IterableStream, DelegateStream, WrapperStream]; 
 
-		TODO: TAKE the classes inside Configurator-Pattern Streams OUT OF THEM. 
-			Reason: 
-				1. bad effect on JIT [most likely] - due to SAME METHODS not being refactored
-				2. undesirable effect on memory (typically, the negative difference due to repeated Stream objects is not that - plus, the're poolable...); 
-				3. fat prototypes [same methods - not-refactored]; 
-
 		TODO: new `Stream` for `samples` [DO add in `v0.3`]. 
 			`JSONStream = StreamParser(JSON.stringify)`; 
-
-		TODO: STYLE-CHANGE: `Type -> T`. 
-			Reason - simplicity of names...
 
 		NOTE [for future]: the [Symbol.iterator] inside the `SwitchArray` COULD be a minor bottleneck. 
 			Benchmark later...
@@ -133,26 +134,6 @@ Order of TODO-elimination:
 				[Reason this was not done at the beginning is: it's ambigious which should be faster, 
 					since it's hard to control whether or not the passed callback is INLINED or not 
 						(so we may end up spending more time due to needing to create the callback)]; 
-
-		TODO: *new* form of `Configuration Pattern` COMBINE with `Factory Pattern` for better semantics + memory: 
-			(Arrived at this when thinking about the `SingletonStream`)
-
-			1. create a SINGLE PRIVATE class
-				1. create SPECIAL `init*(param: TI)`-methods, 
-					which are NOT part of the public interface. 
-			2. export a CURRIED function '(param1: T1, ..., paramn: TN) => (resource/mainParam: T) => ClassInstance'
-				1. the function [literally] does: 
-					1. return new ClassInstance().initA(...).initB(...)...
-			3. [semantics: primary reason] THE FINAL CURRIED FUNCTION is usable BOTH as a function ('const instance = f(mainParam)'), AND 
-				as a class ('const instance = new f(mainParam)'); 
-
-			4. REUSABLE across languages: 
-				1. factory pattern is much better supported than the "raw" Configurator Pattern
-				2. [from 1.] Configurator Pattern
-					1. ergo: a much easier Jasva rewrite in the future
-				
-			Reason to introduce it for `SingletonStream` was TO SAVE MEMORY, since the user will be FORCED to create 
-				`SingletonStream`-s based on CAPTURED (that is, NON-MEMOIZABLE, transient) values/objects [accessible solely within the lower parsers' scopes]. 
 
 		TODO: [DEFINITELY!] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
 			Reason: many follow common pattern:  
@@ -302,9 +283,6 @@ Order of TODO-elimination:
 			IMPORTANT: walk through new list of exports, VERIFY that all the tests are IN ACCORDANCE with them - nothing is missing, 
 				in other words. 
 	
-		TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
-			Reason: works FAR better with the `&`-role-composition	
-
 		1. Doc-sync
 
 		Docs: 

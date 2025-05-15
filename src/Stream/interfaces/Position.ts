@@ -4,7 +4,7 @@ export type IPosition<Type = any> = IPredicatePosition<Type> | number
 
 export type IPredicatePosition<Type = any> = ((
 	stream: IStream<Type>,
-	pos?: unknown
+	pos?: IPosition
 ) => boolean) &
 	Partial<IDirectionHaving>
 
