@@ -69,6 +69,9 @@ Order of TODO-elimination:
 				2. undesirable effect on memory (typically, the negative difference due to repeated Stream objects is not that - plus, the're poolable...); 
 				3. fat prototypes [same methods - not-refactored]; 
 
+		TODO: new `Stream` for `samples` [DO add in `v0.3`]. 
+			`JSONStream = StreamParser(JSON.stringify)`; 
+
 		TODO: STYLE-CHANGE: `Type -> T`. 
 			Reason - simplicity of names...
 
