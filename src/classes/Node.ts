@@ -82,7 +82,7 @@ export const TokenNode = Autocache(new BasicHash(new MapInternal()), function <
 		}
 	}
 	return tokenNode
-}) as unknown as <Type = any>(type: Type) => INodeClass<Type>
+}) as <Type = any>(type: Type) => INodeClass<Type>
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -120,7 +120,7 @@ export const ContentNode = Autocache(
 		}
 		return contentNode
 	}
-) as unknown as <Type = any, Value = any>(type: Type) => ICellClass<Type, Value>
+) as <Type = any, Value = any>(type: Type) => ICellClass<Type, Value>
 
 abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
@@ -193,4 +193,4 @@ export const RecursiveNode = Autocache(
 		}
 		return recursiveNode
 	}
-) as unknown as <Type = any>(type: Type) => INodeClass<Type>
+) as <Type = any>(type: Type) => INodeClass<Type>

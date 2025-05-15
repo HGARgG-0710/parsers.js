@@ -5,12 +5,12 @@ import type {
 	IOwnedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
-import { WrapperStream } from "./Stream.js"
+import { ChainStream } from "./Stream.js"
 
 class ParsedStream<
 	FinalType = any,
 	InitType = any
-> extends WrapperStream<FinalType> {
+> extends ChainStream<FinalType> {
 	protected ["constructor"]: new (
 		parseInstance: Parse<FinalType, InitType>
 	) => this

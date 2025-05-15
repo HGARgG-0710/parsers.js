@@ -19,4 +19,8 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 	*[Symbol.iterator]() {
 		while (!this.isEnd) yield this.next()
 	}
+
+	constructor(...x: any[]) {
+		this.init(...x)
+	}
 }

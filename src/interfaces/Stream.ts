@@ -2,12 +2,13 @@ import type {
 	ICopiable,
 	IInitializable,
 	IOwnedStream,
+	IPosition,
 	IStateful,
 	IStateSettable
 } from "../interfaces.js"
 
 export interface IStarted {
-	isStart: boolean
+	readonly isStart: boolean
 }
 
 export interface IPrevable<Type = any> {
@@ -21,7 +22,7 @@ export interface IFinishable<Type = any> {
 }
 
 export interface INavigable<Type = any> {
-	navigate: (position: unknown) => Type
+	navigate: (position: IPosition<Type>) => Type
 }
 
 export interface IRewindable<Type = any> {

@@ -58,6 +58,7 @@ export abstract class BasicStream<Type = any> extends IterableStream<Type> {
 
 	init(...args: any[]) {
 		this.startStream()
+		super.init(...args)
 		this.preInit(...args)
 		return this
 	}
@@ -100,8 +101,7 @@ export abstract class ResourceStream<Type = any>
 	}
 
 	init(resource: IOwnedStream) {
-		this.init(resource)
-		return this
+		return super.init(resource)
 	}
 }
 
@@ -109,7 +109,7 @@ export abstract class SourceStream<Type = any, SourceType = unknown>
 	extends OwnableStream<Type>
 	implements IResourceSettable
 {
-	protected ["constructor"]: new (source?: unknown) => this
+	protected ["constructor"]: new (source?: SourceType) => this
 
 	source?: SourceType
 
