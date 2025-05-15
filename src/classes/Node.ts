@@ -70,20 +70,19 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 	}
 }
 
-export const TokenNode = new Autocache(
-	new BasicHash(new MapInternal()),
-	function <Type = any>(type: Type) {
-		class tokenNode extends PreTokenNode<Type> implements INode<Type> {
-			static readonly type = type
-			static is = isType(type)
+export const TokenNode = Autocache(new BasicHash(new MapInternal()), function <
+	Type = any
+>(type: Type) {
+	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
+		static readonly type = type
+		static is = isType(type)
 
-			get type() {
-				return type
-			}
+		get type() {
+			return type
 		}
-		return tokenNode
 	}
-) as unknown as <Type = any>(type: Type) => INodeClass<Type>
+	return tokenNode
+}) as unknown as <Type = any>(type: Type) => INodeClass<Type>
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
@@ -108,7 +107,7 @@ abstract class PreContentNode<Type = any, Value = any>
 	}
 }
 
-export const ContentNode = new Autocache(
+export const ContentNode = Autocache(
 	new BasicHash(new MapInternal()),
 	function <Type = any, Value = any>(type: Type) {
 		class contentNode extends PreContentNode<Type, Value> {
@@ -181,7 +180,7 @@ abstract class PreRecursiveNode<Type = any>
 	}
 }
 
-export const RecursiveNode = new Autocache(
+export const RecursiveNode = Autocache(
 	new BasicHash(new MapInternal()),
 	function <Type = any>(type: Type) {
 		class recursiveNode extends PreRecursiveNode<Type> {
