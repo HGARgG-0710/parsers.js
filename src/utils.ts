@@ -7,6 +7,7 @@ import type {
 	ICopiable,
 	IIndexAssignable,
 	IIndexed,
+	IInitializable,
 	IMappable,
 	IPersistentAccumulator,
 	ISizeable,
@@ -17,7 +18,7 @@ import type { IPosed } from "./Stream/interfaces/Position.js"
 
 const { prop, structCheck } = object
 const { eqcurry, T } = boolean
-const { isFunction } = type
+const { isFunction, isUndefined } = type
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -89,6 +90,13 @@ export const isStateful = structCheck<IStateful & IStateSettable>({
 	state: T,
 	setState: isFunction
 })
+
+export function maybeInit<T = any, Target extends IInitializable<[T]> = any>(
+	target: Target,
+	resource?: T
+) {
+	return !isUndefined(resource) ? target.init(resource) : target
+}
 
 export * as HashMap from "./utils/HashMap.js"
 export * as IndexMap from "./utils/IndexMap.js"
