@@ -2,7 +2,7 @@ import { inplace } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IParseState } from "../../interfaces/DynamicParser.js"
 import type {
-	IComposedStream,
+	ICompositeStream,
 	ILinkedStream,
 	IOwnedStream,
 	IRawStreamArray,
@@ -42,7 +42,7 @@ function recursiveStateSetter(state: Summat) {
 	return setStateSwitchable
 }
 
-class _ComposedStream<Type = any> extends WrapperStream<Type> {
+class _CompositeStream<Type = any> extends WrapperStream<Type> {
 	["constructor"]: new (
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray
@@ -138,8 +138,8 @@ class _ComposedStream<Type = any> extends WrapperStream<Type> {
 	}
 }
 
-export function ComposedStream<Type = any>(...streams: IRawStreamArray) {
-	return function (resource?: IOwnedStream): IComposedStream<Type> {
-		return new _ComposedStream<Type>(resource, streams)
+export function CompositeStream<Type = any>(...streams: IRawStreamArray) {
+	return function (resource?: IOwnedStream): ICompositeStream<Type> {
+		return new _CompositeStream<Type>(resource, streams)
 	}
 }

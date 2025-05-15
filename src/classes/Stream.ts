@@ -1,5 +1,5 @@
 export * from "../Stream/classes/BasicStream.js"
-export * from "../Stream/classes/ComposedStream.js"
+export * from "../Stream/classes/CompositeStream.js"
 export * from "../Stream/classes/DelegateStream.js"
 export * from "../Stream/classes/DepthStream.js"
 export * from "../Stream/classes/FreezableStream.js"

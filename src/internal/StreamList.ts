@@ -2,11 +2,11 @@ import { type } from "@hgargg-0710/one"
 import { ObjectPool } from "../classes.js"
 import type { ILinkedStream, IOwnedStream } from "../interfaces.js"
 import type {
-	IComposedStream,
+	ICompositeStream,
 	IRawStreamArray,
 	IStreamChoice,
 	IStreamChooser
-} from "../Stream/interfaces/ComposedStream.js"
+} from "../Stream/interfaces/CompositeStream.js"
 import { RecursiveInitList } from "./RecursiveInitList.js"
 
 const { isFunction, isArray } = type
@@ -16,7 +16,7 @@ export class StreamList extends RecursiveInitList<
 	IStreamChooser,
 	IOwnedStream
 > {
-	private topStream: IComposedStream
+	private topStream: ICompositeStream
 
 	private fromStreams(streams: IRawStreamArray) {
 		return streamListPool.create(streams, this.topStream)
@@ -44,12 +44,12 @@ export class StreamList extends RecursiveInitList<
 		return isFunction(x)
 	}
 
-	init(origItems: IRawStreamArray, topStream?: IComposedStream): this {
+	init(origItems: IRawStreamArray, topStream?: ICompositeStream): this {
 		if (topStream) this.topStream = topStream
 		return super.init(origItems)
 	}
 
-	constructor(origItems: IRawStreamArray, topStream: IComposedStream) {
+	constructor(origItems: IRawStreamArray, topStream: ICompositeStream) {
 		super()
 		this.init(origItems, topStream)
 	}

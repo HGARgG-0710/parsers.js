@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	IComposedStream,
+	ICompositeStream,
 	IInputStream,
 	IOwnedStream
 } from "../interfaces.js"
@@ -32,7 +32,7 @@ class Parse<FinalType = any, InitType = any>
 	implements IParse<FinalType, InitType>
 {
 	["constructor"]: new (
-		workStream: IComposedStream<FinalType>,
+		workStream: ICompositeStream<FinalType>,
 		inputStream: IInputStream<string, InitType>
 	) => this
 
@@ -105,13 +105,13 @@ class Parse<FinalType = any, InitType = any>
 	}
 
 	constructor(
-		public readonly workStream: IComposedStream<FinalType>,
+		public readonly workStream: ICompositeStream<FinalType>,
 		private readonly inputStream: IInputStream<string, InitType>
 	) {}
 }
 
 export function DynamicParser<FinalType = any, InitType = any>(
-	workStream: IComposedStream<FinalType>,
+	workStream: ICompositeStream<FinalType>,
 	inputStream: IInputStream<string, InitType>
 ) {
 	const parse = new Parse(workStream, inputStream)
