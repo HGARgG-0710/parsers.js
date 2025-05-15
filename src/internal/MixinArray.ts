@@ -5,7 +5,7 @@ import type { ICollection } from "../interfaces.js"
 const { isArray } = type
 
 export class MixinArray<Type = any> implements ICollection<Type> {
-	["constructor"]: new (...x: any[]) => this
+	protected ["constructor"]: new (items?: unknown) => this
 
 	get() {
 		return this.items as readonly Type[]

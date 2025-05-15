@@ -10,7 +10,7 @@ class _TransformStream<
 	InType = any,
 	OutType = any
 > extends SetterStream<OutType> {
-	["constructor"]: new (resource?: IOwnedStream<InType>) => this
+	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 	private handler: (stream: IOwnedStream<InType>) => OutType
 

@@ -28,7 +28,7 @@ export class InputStream<Type = any>
 		IResourceSettable,
 		IInputStream<Type, IParseable<Type>>
 {
-	["constructor"]: new (source?: IParseable<Type>) => this
+	protected ["constructor"]: new (source?: IParseable<Type>) => this
 
 	pos = 0
 

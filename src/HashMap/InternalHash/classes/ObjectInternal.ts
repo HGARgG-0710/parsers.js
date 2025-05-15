@@ -1,6 +1,6 @@
-import { object, type } from "@hgargg-0710/one";
-import assert from "assert";
-import type { IInternalHash } from "../../interfaces/InternalHash.js";
+import { object, type } from "@hgargg-0710/one"
+import assert from "assert"
+import type { IInternalHash } from "../../interfaces/InternalHash.js"
 
 const { isStruct } = type
 
@@ -11,9 +11,12 @@ export class ObjectInternal<Type = any, DefaultType = any>
 	 * Value used by `ObjectInternalHash` as a way to signal
 	 * that a certain key has been removed/replaced
 	 */
-	static readonly MissingKey = undefined;
+	static readonly MissingKey = undefined
 
-	["constructor"]: new (object?: object, _default?: DefaultType) => this
+	private ["constructor"]: new (
+		object?: object,
+		_default?: DefaultType
+	) => this
 
 	size: number
 

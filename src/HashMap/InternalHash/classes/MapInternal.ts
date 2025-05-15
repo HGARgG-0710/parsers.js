@@ -6,7 +6,7 @@ const { isUndefined } = type
 export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 	implements IInternalHash<KeyType, ValueType, DefaultType>
 {
-	["constructor"]: new (
+	private ["constructor"]: new (
 		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,
 		_default?: DefaultType
 	) => this

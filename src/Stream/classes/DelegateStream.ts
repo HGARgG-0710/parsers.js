@@ -3,7 +3,7 @@ import { IterableStream } from "./IterableStream.js"
 import { resourceInitializer } from "./StreamInitializer.js"
 
 export abstract class DelegateStream<Type = any> extends IterableStream<Type> {
-	["constructor"]: new (resource?: unknown) => this
+	protected ["constructor"]: new (resource?: unknown) => this
 
 	resource?: IStream<Type>
 

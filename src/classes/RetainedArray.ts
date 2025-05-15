@@ -8,7 +8,7 @@ export class RetainedArray<Type = any>
 	extends MixinArray<Type>
 	implements IPushable, IClearable
 {
-	["constructor"]: new (n?: number) => this
+	protected ["constructor"]: new (n?: number) => this
 
 	private realSize: number = 0
 

@@ -5,7 +5,7 @@ import type { IAccumulator } from "src/interfaces/Accumulator.js"
 const { isString } = type
 
 export class SourceBuilder implements IAccumulator<string> {
-	["constructor"]: new (finalSource?: string) => this
+	private ["constructor"]: new (finalSource?: string) => this
 
 	isFrozen: boolean = false
 

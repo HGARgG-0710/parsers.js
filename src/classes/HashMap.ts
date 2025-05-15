@@ -33,9 +33,9 @@ export function HashClass<
 			KeyType,
 			ValueType,
 			InternalKeyType
-		>;
+		>
 
-		["constructor"]: new (
+		private ["constructor"]: new (
 			value: IInternalHash<InternalKeyType, ValueType>
 		) => this
 

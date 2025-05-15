@@ -83,7 +83,7 @@ export abstract class ResourceStream<Type = any>
 	extends OwnableStream<Type>
 	implements IOwnedStream<Type>
 {
-	["constructor"]: new (resource?: IOwnedStream) => this
+	protected ["constructor"]: new (resource?: IOwnedStream) => this
 
 	resource?: IOwnedStream
 
@@ -109,7 +109,7 @@ export abstract class SourceStream<Type = any, SourceType = unknown>
 	extends OwnableStream<Type>
 	implements IResourceSettable
 {
-	["constructor"]: new (source?: unknown) => this
+	protected ["constructor"]: new (source?: unknown) => this
 
 	source?: SourceType
 

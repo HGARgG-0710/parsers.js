@@ -18,7 +18,7 @@ export class LazyStream
 		IPosed<number>,
 		IInputStream<string, ISource>
 {
-	["constructor"]: new (source?: ISource) => this
+	protected ["constructor"]: new (source?: ISource) => this
 
 	get pos() {
 		return this.source!.pos

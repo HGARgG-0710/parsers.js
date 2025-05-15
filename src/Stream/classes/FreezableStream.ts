@@ -18,7 +18,7 @@ export class FreezableStream<Type = any>
 	extends PosStream<Type>
 	implements IBufferized<Type>
 {
-	declare resource?: IOwnedStream<Type> | undefined
+	resource?: IOwnedStream<Type> | undefined
 
 	readonly buffer = new OutputBuffer()
 

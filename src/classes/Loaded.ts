@@ -5,7 +5,7 @@ function DecodedLoaded(
 	encoding: BufferEncoding
 ): new (filename: string) => IParseable<string> {
 	return class implements IParseable<string> {
-		["constructor"]: new (filename?: string) => this
+		private ["constructor"]: new (filename?: string) => this
 
 		private source: string
 

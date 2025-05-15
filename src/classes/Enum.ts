@@ -5,7 +5,7 @@ import type { IMappable } from "../interfaces.js"
 const { id } = functional
 
 export class Enum<Type = any> {
-	["constructor"]: new (...value: Type[]) => this
+	private ["constructor"]: new (...value: Type[]) => this
 
 	private readonly enumItems: Type[]
 	private readonly setItems: Set<Type>

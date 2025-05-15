@@ -11,7 +11,9 @@ class ParsedStream<
 	FinalType = any,
 	InitType = any
 > extends WrapperStream<FinalType> {
-	["constructor"]: new (parseInstance: Parse<FinalType, InitType>) => this
+	protected ["constructor"]: new (
+		parseInstance: Parse<FinalType, InitType>
+	) => this
 
 	next() {
 		const items = super.next()
@@ -31,7 +33,7 @@ class ParsedStream<
 class Parse<FinalType = any, InitType = any>
 	implements IParse<FinalType, InitType>
 {
-	["constructor"]: new (
+	private ["constructor"]: new (
 		workStream: ICompositeStream<FinalType>,
 		inputStream: IInputStream<string, InitType>
 	) => this

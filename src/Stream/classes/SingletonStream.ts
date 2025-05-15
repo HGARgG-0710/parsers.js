@@ -7,9 +7,10 @@ class _SingletonStream<
 	InType = any,
 	OutType = any
 > extends SetterStream<OutType> {
-	["constructor"]: new (resource?: IOwnedStream<InType>) => this
+	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 	resource?: IOwnedStream<InType>
+	
 	private handler: ISingletonHandler<InType, OutType>
 
 	protected baseNextIter(): void | OutType {}

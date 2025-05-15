@@ -60,9 +60,9 @@ export abstract class BaseIndexMap<
 	DefaultType = any,
 	IndexGetType = any
 > extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
-	public default: DefaultType;
+	public default: DefaultType
 
-	["constructor"]: new (
+	protected ["constructor"]: new (
 		pairs: array.Pairs<KeyType, ValueType>,
 		_default?: DefaultType
 	) => IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>

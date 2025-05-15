@@ -7,9 +7,9 @@ const { isArray } = type
 export class ArrayInternal<Type = any, DefaultType = any>
 	implements IInternalHash<number, Type, DefaultType>
 {
-	static readonly MissingKey = undefined;
+	static readonly MissingKey = undefined
 
-	["constructor"]: new (array: Type[], _default: DefaultType) => this
+	private ["constructor"]: new (array: Type[], _default: DefaultType) => this
 
 	readonly default: DefaultType
 

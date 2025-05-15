@@ -26,7 +26,7 @@ const GO_SIBLING_AFTER = "goSiblingAfter"
 export class DepthStream<
 	TreeLike extends IWalkable<TreeLike> = IWalkable
 > extends SourceStream<TreeLike, TreeLike> {
-	["constructor"]: new (source?: TreeLike) => this
+	protected ["constructor"]: new (source?: TreeLike) => this
 
 	private endInd: MultiIndex
 	private response: ResponseMethodName

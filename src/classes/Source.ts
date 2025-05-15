@@ -28,7 +28,7 @@ function getBasicDecoderFor(encoding: BufferEncoding) {
 }
 
 abstract class PreSource implements ISource {
-	["constructor"]: new (url: string) => this
+	private ["constructor"]: new (url: string) => this
 
 	decoded: string
 

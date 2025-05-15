@@ -5,7 +5,10 @@ import type { ICopiable, IReadable } from "../interfaces.js"
 const { isNumber } = type
 
 export class ReadableView<Type = any> implements ICopiable, IReadable<Type> {
-	["constructor"]: new (offset: number, buffer: IReadable<Type>) => this
+	private ["constructor"]: new (
+		offset: number,
+		buffer: IReadable<Type>
+	) => this
 
 	//
 	// * Interface Methods

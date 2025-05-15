@@ -43,7 +43,7 @@ function recursiveStateSetter(state: Summat) {
 }
 
 class _CompositeStream<Type = any> extends WrapperStream<Type> {
-	["constructor"]: new (
+	protected ["constructor"]: new (
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray
 	) => this

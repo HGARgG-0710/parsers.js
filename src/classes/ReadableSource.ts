@@ -1,7 +1,7 @@
 import type { IParseable } from "../interfaces.js"
 
 export class ReadableSource implements IParseable<string> {
-	["constructor"]: new (source: string) => this
+	protected ["constructor"]: new (source: string) => this
 
 	get size() {
 		return this.source.length

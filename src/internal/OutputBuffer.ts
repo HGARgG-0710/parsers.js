@@ -5,7 +5,7 @@ import type { IPersistentAccumulator } from "../interfaces.js"
 const { isArray } = type
 
 export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
-	["constructor"]: new (collection?: Type[]) => this
+	private ["constructor"]: new (collection?: Type[]) => this
 
 	isFrozen: boolean = false
 

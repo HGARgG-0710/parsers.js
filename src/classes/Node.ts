@@ -12,7 +12,7 @@ import { isType } from "../utils/Node.js"
 import { BasicHash } from "./HashMap.js"
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
-	["constructor"]: new () => this
+	protected ["constructor"]: new () => this
 
 	abstract type: Type
 	parent: INode<Type> | null = null
@@ -89,7 +89,7 @@ abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
 	implements ICellNode<Type, Value>
 {
-	declare ["constructor"]: new (value?: Value) => this
+	protected ["constructor"]: new (value?: Value) => this
 
 	copy() {
 		return new this.constructor(
@@ -127,7 +127,7 @@ abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
 	implements INode<Type>
 {
-	declare ["constructor"]: new (children?: INode<Type>[]) => this
+	protected ["constructor"]: new (children?: INode<Type>[]) => this
 
 	read(i: number): INode<Type> {
 		return this.children[i]
