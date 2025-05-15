@@ -1,16 +1,9 @@
 import assert from "assert"
-import { array, type } from "@hgargg-0710/one"
-import type { ICollection } from "../interfaces.js"
+import { type } from "@hgargg-0710/one"
 
 const { isArray } = type
 
-export class MixinArray<Type = any> implements ICollection<Type> {
-	protected ["constructor"]: new (items?: unknown) => this
-
-	get() {
-		return this.items as readonly Type[]
-	}
-
+export class MixinArray<Type = any> {
 	write(i: number, value: Type) {
 		this.items[i] = value
 		return this
@@ -25,19 +18,30 @@ export class MixinArray<Type = any> implements ICollection<Type> {
 		return this.items[i]
 	}
 
-	copy() {
-		return new this.constructor(array.copy(this.items))
+	protected set size(newSize: number) {
+		this.items.length = newSize
 	}
 
 	get size() {
 		return this.items.length
 	}
 
+	get() {
+		return this.items as readonly Type[]
+	}
+
 	*[Symbol.iterator]() {
-		yield* this.items
+		for (let i = 0; i < this.size; ++i) yield this.read(i)
 	}
 
 	constructor(protected items: Type[] = []) {
 		assert(isArray(items))
+	}
+}
+
+export class InitializableMixin<Type = any> extends MixinArray<Type> {
+	init(items: Type[]) {
+		this.items = items
+		return this
 	}
 }

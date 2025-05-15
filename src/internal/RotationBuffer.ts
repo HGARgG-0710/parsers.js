@@ -1,13 +1,13 @@
 import { array, number, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { ArrayCollection } from "../classes.js"
+import { InitializableMixin } from "./MixinArray.js"
 
 const { copy } = array
 const { min } = number
 const { isNumber } = type
 
-export class RotationBuffer<Type = any> extends ArrayCollection<Type> {
-	protected ["constructor"]: new (n?: number) => this
+export class RotationBuffer<Type = any> extends InitializableMixin<Type> {
+	private ["constructor"]: new (n?: number) => this
 
 	// * first-read index
 	private rotation: number = 0
@@ -149,10 +149,6 @@ export class RotationBuffer<Type = any> extends ArrayCollection<Type> {
 		if (this.isFull()) this.renewElements()
 		else this.rotation = this.shifted(this.maxPos())
 		return this.isEmpty
-	}
-
-	*[Symbol.iterator]() {
-		for (let i = 0; i < this.size; ++i) yield this.read(i)
 	}
 
 	constructor(maxSize: number) {

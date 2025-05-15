@@ -8,7 +8,7 @@ export class RetainedArray<Type = any>
 	extends MixinArray<Type>
 	implements IPushable, IClearable
 {
-	protected ["constructor"]: new (n?: number) => this
+	private ["constructor"]: new (n?: number) => this
 
 	private realSize: number = 0
 
@@ -32,7 +32,7 @@ export class RetainedArray<Type = any>
 	}
 
 	private condAlloc(newItems: number) {
-		if (newItems > 0) this.items.length += newItems
+		if (newItems > 0) super.size += newItems
 	}
 
 	get size() {
