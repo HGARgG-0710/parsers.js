@@ -152,8 +152,8 @@ export abstract class DelegateIndexMap<
 		return this.delegate.keys
 	}
 
-	constructor(value: IIndexMap<KeyType, ValueType, any, number>) {
+	constructor(subMap: IIndexMap<KeyType, ValueType, any, number>) {
 		super()
-		this.delegate = value
+		this.delegate = subMap
 	}
 }

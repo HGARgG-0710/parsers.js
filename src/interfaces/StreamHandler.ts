@@ -1,10 +1,10 @@
 import type { IPosition, IStream } from "./Stream.js"
 
-export type IParserFunction<InputType = any, OutType = any> = (
-	state?: InputType,
+export type IParserFunction<In = any, Out = any> = (
+	state?: In,
 	parser?: Function,
 	...x: any[]
-) => OutType
+) => Out
 
 export type IStreamTransform<UnderType = any, UpperType = any> = (
 	input?: IStream<UnderType>,

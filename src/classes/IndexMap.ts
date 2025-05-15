@@ -1,9 +1,9 @@
 import { type as _type } from "@hgargg-0710/one"
 import { type } from "src/utils/Node.js"
+import type { IMapClass } from "../interfaces/IndexMap.js"
+import { resource } from "../utils.js"
 import { is } from "../utils/Node.js"
 import { current } from "../utils/Stream.js"
-import { resource } from "../utils.js"
-import type { IMapClass } from "../interfaces/IndexMap.js"
 
 const { typeOf } = _type
 

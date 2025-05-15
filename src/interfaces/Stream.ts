@@ -72,7 +72,7 @@ export type IStatefulStream<Type = any> = IStream<Type> &
 export type * from "../Stream/interfaces/CompositeStream.js"
 export type * from "../Stream/interfaces/IndexStream.js"
 export type * from "../Stream/interfaces/InputStream.js"
-export type * from "../Stream/interfaces/LimitedStream.js"
+export type * from "../Stream/interfaces/LimitStream.js"
 export type * from "../Stream/interfaces/MarkerStream.js"
 export type * from "../Stream/interfaces/OwnedStream.js"
 export type * from "../Stream/interfaces/PeekStream.js"
