@@ -8,92 +8,122 @@ import { RotationBuffer } from "../../internal/RotationBuffer.js"
 import { write } from "../../utils/Stream.js"
 import { DyssyncForwardStream } from "./WrapperStream.js"
 
-export function PeekStream<Type = any>(
-	n: number
-): new (resource?: IOwnedStream<Type>) => IPeekStream<Type> {
-	return class extends DyssyncForwardStream<Type> implements IPeekable<Type> {
-		private readonly peekBuffer = new RotationBuffer<Type>(n)
-		private readonly tempItems = new RetainedArray<Type>()
+class _PeekStream<Type = any>
+	extends DyssyncForwardStream<Type>
+	implements IPeekable<Type>
+{
+	private readonly tempItems = new RetainedArray<Type>()
+	private readonly peekBuffer: RotationBuffer<Type>
 
-		private peekNonEmpty() {
-			return this.peekBuffer.size > 0
+	private get peekCount() {
+		return this.peekBuffer.size
+	}
+
+	private unseen(totalItems: number) {
+		return totalItems - this.peekCount
+	}
+
+	private isTrivial(n: number) {
+		return n === 0
+	}
+
+	private hasSeen(n: number) {
+		return n <= this.peekCount
+	}
+
+	private peekNonEmpty() {
+		return this.peekCount > 0
+	}
+
+	private baseNextIter() {
+		super.next()
+		this.syncCurr()
+	}
+
+	private basePrevIter() {
+		super.prev()
+		this.syncCurr()
+	}
+
+	private fetchNextPeek() {
+		const nextPeek = this.peekBuffer.read(0)
+		this.peekBuffer.forward()
+		this.curr = nextPeek
+	}
+
+	private trivialPeek() {
+		return this.curr
+	}
+
+	private priorPeek(n: number) {
+		return this.peekBuffer.read(n - 1)
+	}
+
+	private newPeek(count: number) {
+		this.toTemp(count)
+		this.peekBuffer.push(...this.tempItems.get())
+		return this.peekBuffer.last()
+	}
+
+	private toTemp(count: number) {
+		write(this.resource!, this.tempItems.init(count))
+	}
+
+	private fetchPrevPeek() {
+		this.peekBuffer.backward()
+		if (this.peekNonEmpty()) this.basePrevIter()
+		else this.replaceCurrWithNextPeek()
+	}
+
+	private replaceCurrWithNextPeek() {
+		this.curr = this.peekBuffer.first()
+		this.peekBuffer.forward()
+	}
+
+	private remainsNoneSeen() {
+		return this.peekCount === 0
+	}
+
+	peek(n: number) {
+		switch (true) {
+			case this.isTrivial(n):
+				return this.trivialPeek()
+
+			case this.hasSeen(n):
+				return this.priorPeek(n)
+
+			default:
+				return this.newPeek(this.unseen(n))
 		}
+	}
 
-		private baseNextIter() {
-			super.next()
-			this.syncCurr()
-		}
+	isCurrEnd(): boolean {
+		return this.resource!.isCurrEnd() && this.remainsNoneSeen()
+	}
 
-		private basePrevIter() {
-			super.prev()
-			this.syncCurr()
-		}
+	next() {
+		const curr = this.curr
+		if (this.isCurrEnd()) this.endStream()
+		else if (this.peekNonEmpty()) this.fetchNextPeek()
+		else this.baseNextIter()
+		return curr
+	}
 
-		private fetchNextPeek() {
-			const nextPeek = this.peekBuffer.read(0)
-			this.peekBuffer.forward()
-			this.curr = nextPeek
-		}
+	prev() {
+		const curr = this.curr
+		if (this.peekNonEmpty()) this.fetchPrevPeek()
+		else this.basePrevIter()
+		return curr
+	}
 
-		private trivialPeek() {
-			return this.curr
-		}
+	constructor(resource?: IOwnedStream<Type>, n: number = 1) {
+		super(resource)
+		this.peekBuffer = new RotationBuffer(n)
+	}
+}
 
-		private priorPeek(n: number) {
-			return this.peekBuffer.read(n - 1)
-		}
-
-		private newPeek(n: number) {
-			this.readTemp(n - this.peekBuffer.size)
-			this.peekBuffer.push(...this.tempItems.get())
-			return this.peekBuffer.last()
-		}
-
-		private readTemp(n: number) {
-			write(this.resource!, this.tempItems.init(n))
-		}
-
-		private fetchPrevPeek() {
-			this.peekBuffer.backward()
-			if (this.peekNonEmpty()) this.basePrevIter()
-			else this.replaceCurrWithNextPeek()
-		}
-
-		private replaceCurrWithNextPeek() {
-			this.curr = this.peekBuffer.first()
-			this.peekBuffer.forward()
-		}
-
-		peek(n: number) {
-			switch (true) {
-				case n === 0:
-					return this.trivialPeek()
-
-				case n <= this.peekBuffer.size:
-					return this.priorPeek(n)
-
-				default:
-					return this.newPeek(n)
-			}
-		}
-
-		isCurrEnd(): boolean {
-			return this.resource!.isCurrEnd() && this.peekBuffer.size === 0
-		}
-
-		next() {
-			const curr = this.curr
-			if (this.isCurrEnd()) this.endStream()
-			else if (this.peekNonEmpty()) this.fetchNextPeek()
-			else this.baseNextIter()
-			return curr
-		}
-
-		prev() {
-			const curr = this.curr
-			if (this.peekNonEmpty()) this.fetchPrevPeek()
-			else this.basePrevIter()
-			return curr
-		}
+export function PeekStream<Type = any>(n: number) {
+	return function (resource?: IOwnedStream<Type>): IPeekStream<Type> {
+		return new _PeekStream(resource, n)
 	}
 }
