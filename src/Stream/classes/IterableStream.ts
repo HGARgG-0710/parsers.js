@@ -16,10 +16,10 @@ export abstract class IterableStream<Type = any> implements IStream<Type> {
 }
 
 export abstract class InitStream<Type = any> extends IterableStream<Type> {
-	protected abstract readonly initializer?: IInitializer
+	protected abstract readonly initializer: IInitializer
 
 	init(...x: any[]) {
-		this.initializer?.init(this, ...x)
+		this.initializer.init(this, ...x)
 		return this
 	}
 
