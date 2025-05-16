@@ -1,14 +1,19 @@
-import { InitStream } from "../../classes/Stream.js"
+import { IterableStream } from "../../classes/Stream.js"
 import type { IStream } from "../../interfaces.js"
-import { resourceInitializer } from "./StreamInitializer.js"
+import { resourceInitializer } from "../../classes/Initializer.js"
 
 export abstract class DelegateStream<
-	Type = any
-> extends InitStream<Type> {
+	Type = any,
+	Args extends any[] = []
+> extends IterableStream<Type, [IStream, ...(Args | [])]> {
 	resource?: IStream<Type>
 
 	protected get initializer() {
 		return resourceInitializer
+	}
+
+	init(resource?: IStream<Type>): this {
+		return super.init(resource)
 	}
 
 	get curr() {

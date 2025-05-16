@@ -1,17 +1,21 @@
-import type {
-	IOwnedStream,
-	IOwningStream,
-	IResourceSettable
-} from "../../interfaces/Stream.js"
+import { ownerInitializer } from "../../classes/Initializer.js"
+import type { IResourceSettable } from "../../interfaces.js"
+import type { IOwnedStream, IOwningStream } from "../../interfaces/Stream.js"
 import { DelegateStream } from "./DelegateStream.js"
-import { ownerInitializer } from "./StreamInitializer.js"
 
-export abstract class ChainStream<Type> extends DelegateStream<Type> {
+export abstract class ChainStream<
+	Type = any,
+	Args extends any[] = any[]
+> extends DelegateStream<Type, Args> {
 	resource?: IOwnedStream
 	owner?: IOwningStream
 
 	protected get initializer() {
 		return ownerInitializer
+	}
+
+	init(resource?: IOwnedStream) {
+		return super.init(resource)
 	}
 
 	setResource(newResource: IOwnedStream) {
@@ -23,8 +27,8 @@ export abstract class ChainStream<Type> extends DelegateStream<Type> {
 	}
 }
 
-export abstract class WrapperStream<Type = any>
-	extends ChainStream<Type>
+export abstract class WrapperStream<Type = any, Args extends any[] = any[]>
+	extends ChainStream<Type, Args>
 	implements IOwnedStream<Type>, IResourceSettable
 {
 	protected ["constructor"]: new (resource?: IOwnedStream<Type>) => this
@@ -39,8 +43,9 @@ export abstract class WrapperStream<Type = any>
 }
 
 export abstract class DyssyncForwardStream<
-	Type = any
-> extends WrapperStream<Type> {
+	Type = any,
+	Args extends any[] = any[]
+> extends WrapperStream<Type, Args> {
 	protected _isEnd: boolean = false
 	protected _curr: Type
 
@@ -70,8 +75,9 @@ export abstract class DyssyncForwardStream<
 }
 
 export abstract class DyssyncStream<
-	Type = any
-> extends DyssyncForwardStream<Type> {
+	Type = any,
+	Args extends any[] = any[]
+> extends DyssyncForwardStream<Type, Args> {
 	protected _isStart: boolean = true
 
 	protected set isStart(newIsStart: boolean) {

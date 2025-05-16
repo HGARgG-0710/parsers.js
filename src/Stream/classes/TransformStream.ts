@@ -2,7 +2,6 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import { Stream } from "../../constants.js"
 import type { IControlStream, IOwnedStream } from "../../interfaces/Stream.js"
 import { SetterStream } from "./BasicStream.js"
-import { maybeInit } from "../../utils.js"
 
 const { SkippedItem } = Stream.StreamParser
 
@@ -48,16 +47,12 @@ class _TransformStream<
 		this.handler = handler
 		return this
 	}
-
-	constructor(resource?: IOwnedStream<InType>) {
-		super(resource)
-	}
 }
 
 export function TransformStream<InType = any, OutType = any>(
 	handler: (stream: IOwnedStream<InType>) => OutType
 ) {
 	return function (resource?: IOwnedStream<InType>): IControlStream<OutType> {
-		return maybeInit(new _TransformStream().setHandler(handler), resource)
+		return new _TransformStream().setHandler(handler).init(resource)
 	}
 }

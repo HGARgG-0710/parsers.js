@@ -1,4 +1,6 @@
+import { ownerInitializer } from "../../classes/Initializer.js"
 import { RetainedArray } from "../../classes/RetainedArray.js"
+import type { IInitializer } from "../../interfaces.js"
 import type {
 	IOwnedStream,
 	IPeekable,
@@ -8,10 +10,21 @@ import { RotationBuffer } from "../../internal/RotationBuffer.js"
 import { write } from "../../utils/Stream.js"
 import { DyssyncForwardStream } from "./WrapperStream.js"
 
+const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
+	init(target: _PeekStream, resource?: IOwnedStream) {
+		ownerInitializer.init(target, resource)
+		target.resetPeeks()
+	}
+}
+
 class _PeekStream<Type = any>
 	extends DyssyncForwardStream<Type>
 	implements IPeekable<Type>
 {
+	protected get initializer() {
+		return peekStreamInitializer
+	}
+
 	private readonly tempItems = new RetainedArray<Type>()
 	private readonly peekBuffer: RotationBuffer<Type>
 
@@ -114,6 +127,10 @@ class _PeekStream<Type = any>
 		if (this.peekNonEmpty()) this.fetchPrevPeek()
 		else this.basePrevIter()
 		return curr
+	}
+
+	resetPeeks() {
+		this.peekBuffer.clear()
 	}
 
 	constructor(resource?: IOwnedStream<Type>, n: number = 1) {

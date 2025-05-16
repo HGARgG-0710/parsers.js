@@ -29,18 +29,44 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 		return this.maxSize - 1
 	}
 
+	private prepareForInit() {
+		this.resetBounds()
+		this.signalNonEmptiness()
+	}
+
+	private resetBounds() {
+		this.resetStart()
+		this.resetLastInd()
+	}
+
 	private resetStart() {
 		this.rotation = 0
 	}
 
+	private resetLastInd() {
+		this.lastInd = this.maxPos()
+	}
+
 	private renewElements() {
 		this.resetStart()
+		this.unsetLastInd()
+		this.signalEmptiness()
+	}
+
+	private signalNonEmptiness() {
+		this.isEmpty = false
+	}
+
+	private unsetLastInd() {
 		this.lastInd = -1
+	}
+
+	private signalEmptiness() {
 		this.isEmpty = true
 	}
 
 	private freeSpace() {
-		return this.isEmpty ? this.maxSize : this.maxSize - this.size
+		return this.maxSize - this.size
 	}
 
 	private isFull() {
@@ -80,16 +106,19 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 		if (this.rotation > 0 && !this.isEmpty) {
 			const left = this.items.slice(0, this.rotation + 1)
 			const rightSize = this.maxSize - this.rotation
-
-			for (let i = 0; i < rightSize; ++i)
-				this.items[i] = this.items[i + rightSize]
-
-			for (let i = rightSize; i < this.maxSize; ++i)
-				this.items[i] = left[i]
-
-			this.resetStart()
-			this.lastInd = this.maxPos()
+			this.shiftRight(rightSize)
+			this.fill(rightSize, left)
+			this.resetBounds()
 		}
+	}
+
+	private shiftRight(rightSize: number) {
+		for (let i = 0; i < rightSize; ++i)
+			this.items[i] = this.items[i + rightSize]
+	}
+
+	private fill(from: number, items: Type[]) {
+		for (let i = from; i < this.maxSize; ++i) this.items[i] = items[i]
 	}
 
 	//
@@ -120,6 +149,7 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 	}
 
 	init(items: Type[]) {
+		this.prepareForInit()
 		return super.init(
 			items.length > this.maxSize ? items.slice(0, this.maxSize) : items
 		)
@@ -132,6 +162,11 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 	//
 	// * Non-Interface Methods:
 	//
+
+	clear() {
+		this.resetBounds()
+		this.signalEmptiness()
+	}
 
 	first() {
 		return this.read(0)

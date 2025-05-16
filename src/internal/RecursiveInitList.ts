@@ -1,5 +1,6 @@
 import { ObjectPool } from "../classes.js"
-import type { IInitializable } from "../interfaces.js"
+import { Initializable } from "../classes/Initializer.js"
+import type { IInitializable, IInitializer } from "../interfaces.js"
 import { SwitchArray } from "./SwitchArray.js"
 
 export type IDerivable<
@@ -118,13 +119,25 @@ export function wrapSwitch<Recursive extends ISwitchIdentifiable = any>(
 	return switchPool.create(r)
 }
 
+interface IItemSettable<T = any> {
+	setItems(items: T): void
+}
+
+const itemsInitializer: IInitializer<[unknown]> = {
+	init<T = any>(target: IItemSettable<T>, items?: T) {
+		if (items) target.setItems(items)
+	}
+}
+
 export abstract class RecursiveInitList<
-	T extends ISwitchIdentifiable &
-		IRecursiveListIdentifiable &
-		IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
-	InitType = any
-> implements IRecursiveListIdentifiable
+		T extends ISwitchIdentifiable &
+			IRecursiveListIdentifiable &
+			IInitializable = any,
+		Recursive extends ISwitchIdentifiable = any,
+		InitType = any
+	>
+	extends Initializable<[(T | Recursive)[]]>
+	implements IRecursiveListIdentifiable, IItemSettable
 {
 	abstract isRecursive(x: any): x is Recursive
 
@@ -139,6 +152,10 @@ export abstract class RecursiveInitList<
 	private hasSwitch: boolean = false
 
 	public readonly items = new SwitchArray(this)
+
+	protected get initializer() {
+		return itemsInitializer
+	}
 
 	get isRecursiveInitList() {
 		return true
@@ -310,10 +327,10 @@ export abstract class RecursiveInitList<
 		return this.reEvalEach(evaledWith)
 	}
 
-	init(origItems: (T | Recursive)[]) {
-		const mutItems: IPreRecursiveItems<T, Recursive> = origItems
-		for (let i = origItems.length; --i; )
-			mutItems[i] = this.maybeWrapSwitch(origItems[i])
+	setItems(newItems: (T | Recursive)[]) {
+		const mutItems: IPreRecursiveItems<T, Recursive> = newItems
+		for (let i = newItems.length; --i; )
+			mutItems[i] = this.maybeWrapSwitch(newItems[i])
 		this.items.init(mutItems as IRecursiveItems<T, Recursive>)
 		return this
 	}
@@ -336,6 +353,7 @@ export abstract class RecursiveInitList<
 	}
 
 	constructor(origItems?: (T | Recursive)[]) {
-		if (origItems) this.init(origItems)
+		super()
+		this.init(origItems)
 	}
 }

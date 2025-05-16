@@ -72,7 +72,7 @@ export interface IGettable<Type = any> {
 }
 
 export interface IInitializable<Args extends any[] = any[]> {
-	init: (...x: Args) => this
+	init: (...x: Partial<Args>) => this
 }
 
 export interface IReversible {
@@ -143,4 +143,4 @@ export type * from "./interfaces/Node.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
-
+export type * from "./interfaces/Initializer.js"

@@ -1,5 +1,4 @@
 import type { ILinkedStream, IOwnedStream } from "../../interfaces/Stream.js"
-import { maybeInit } from "../../utils.js"
 import type { ISingletonHandler } from "../interfaces/SingletonStream.js"
 import { SetterStream } from "./BasicStream.js"
 
@@ -10,7 +9,7 @@ class _SingletonStream<
 	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 	resource?: IOwnedStream<InType>
-	
+
 	private handler: ISingletonHandler<InType, OutType>
 
 	protected baseNextIter(): void | OutType {}
@@ -27,16 +26,12 @@ class _SingletonStream<
 		this.handler = handler
 		return this
 	}
-
-	constructor(resource?: IOwnedStream<InType>) {
-		super(resource)
-	}
 }
 
 export function SingletonStream<InType = any, OutType = any>(
 	handler: ISingletonHandler<InType, OutType>
 ) {
 	return function (resource?: IOwnedStream<InType>): ILinkedStream<OutType> {
-		return maybeInit(new _SingletonStream().setHandler(handler), resource)
+		return new _SingletonStream().setHandler(handler).init(resource)
 	}
 }

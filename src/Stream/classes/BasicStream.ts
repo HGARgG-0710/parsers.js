@@ -1,20 +1,23 @@
-import type {
-	IOwnedStream,
-	IOwningStream,
-	IResourceSettable
-} from "../../interfaces/Stream.js"
+import {
+	ownerInitializer,
+	resourceInitializer
+} from "../../classes/Initializer.js"
+import type { IResourceSettable } from "../../interfaces.js"
+import type { IOwnedStream, IOwningStream } from "../../interfaces/Stream.js"
 import { isCopiable } from "../../utils.js"
-import { InitStream } from "./IterableStream.js"
-import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
+import { IterableStream } from "./IterableStream.js"
 
-export abstract class BasicStream<Type = any> extends InitStream<Type> {
+export abstract class BasicStream<
+	Type = any,
+	Args extends any[] = any[]
+> extends IterableStream<Type, Args> {
 	protected abstract baseNextIter(): Type | void
 	protected abstract update(newCurr?: Type | void): void
 
 	protected postEnd?(): void
 	protected basePrevIter?(): Type | void
 	protected postStart?(): void
-	protected initGetter?(...args: any[]): Type
+	protected initGetter?(...args: Partial<Args>): Type
 
 	isCurrStart?(): boolean
 
@@ -46,7 +49,7 @@ export abstract class BasicStream<Type = any> extends InitStream<Type> {
 		return this._curr
 	}
 
-	protected preInit(...args: any[]) {
+	protected preInit(...args: Partial<Args>) {
 		if (this.initGetter) this.curr = this.initGetter(...args)
 	}
 
@@ -80,21 +83,16 @@ export abstract class BasicStream<Type = any> extends InitStream<Type> {
 		return curr
 	}
 
-	init(...args: any[]) {
+	init(...args: Partial<Args>) {
 		this.startStream()
 		super.init(...args)
 		this.preInit(...args)
 		return this
 	}
-
-	constructor(resource?: unknown) {
-		super()
-		if (resource) this.init(resource)
-	}
 }
 
-export abstract class OwnableStream<Type = any>
-	extends BasicStream<Type>
+export abstract class OwnableStream<Type = any, Args extends any[] = any[]>
+	extends BasicStream<Type, Args>
 	implements IOwnedStream
 {
 	owner?: IOwningStream
@@ -104,8 +102,8 @@ export abstract class OwnableStream<Type = any>
 	}
 }
 
-export abstract class ResourceStream<Type = any>
-	extends OwnableStream<Type>
+export abstract class ResourceStream<Type = any, MoreArgs extends any[] = []>
+	extends OwnableStream<Type, [IOwnedStream, ...(MoreArgs | [])]>
 	implements IOwnedStream<Type>
 {
 	protected ["constructor"]: new (resource?: IOwnedStream) => this
@@ -124,13 +122,17 @@ export abstract class ResourceStream<Type = any>
 		this.resource = resource
 	}
 
-	init(resource: IOwnedStream) {
+	init(resource?: IOwnedStream) {
 		return super.init(resource)
 	}
 }
 
-export abstract class SourceStream<Type = any, SourceType = unknown>
-	extends OwnableStream<Type>
+export abstract class SourceStream<
+		Type = any,
+		SourceType = unknown,
+		MoreArgs extends any[] = []
+	>
+	extends OwnableStream<Type, [SourceType, ...(MoreArgs | [])]>
 	implements IResourceSettable
 {
 	protected ["constructor"]: new (source?: SourceType) => this

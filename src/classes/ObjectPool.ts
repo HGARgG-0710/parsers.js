@@ -33,7 +33,7 @@ export class ObjectPool<
 > {
 	private readonly freeStack = new RetainedStack<Type>()
 
-	create(...x: TypeArgs) {
+	create(...x: Partial<TypeArgs>) {
 		return this.freeStack.isEmpty()
 			? new this.objectConstructor(...x)
 			: this.freeStack.pop().init(...x)
@@ -44,6 +44,8 @@ export class ObjectPool<
 	}
 
 	constructor(
-		private readonly objectConstructor: new (...x: TypeArgs) => Type
+		private readonly objectConstructor: new (
+			...x: Partial<TypeArgs>
+		) => Type
 	) {}
 }

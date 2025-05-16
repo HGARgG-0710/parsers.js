@@ -17,4 +17,3 @@ export * from "../Stream/classes/TransformStream.js"
 export * from "../Stream/classes/WrapperStream.js"
 
 export * as Position from "../Stream/classes/Position.js"
-export * as StreamInitializer from "../Stream/classes/StreamInitializer.js"

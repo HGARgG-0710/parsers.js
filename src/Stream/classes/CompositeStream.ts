@@ -1,5 +1,6 @@
 import { inplace } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
+import { ownerInitializer } from "../../classes/Initializer.js"
 import type { IParseState } from "../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
@@ -17,7 +18,6 @@ import {
 import { StreamList, streamListPool } from "../../internal/StreamList.js"
 import { isStateful } from "../../utils.js"
 import { rawStreamCopy } from "../../utils/Stream.js"
-import { ownerInitializer } from "./StreamInitializer.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 const { mutate } = inplace

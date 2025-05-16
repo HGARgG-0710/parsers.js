@@ -1,5 +1,5 @@
 import { number } from "@hgargg-0710/one"
-import type { IParseable } from "../../interfaces.js"
+import type { IParseable, IResourceSettable } from "../../interfaces.js"
 import type {
 	IBackward,
 	IFinishable,
@@ -7,7 +7,6 @@ import type {
 	INavigable,
 	IPeekableStream,
 	IPosition,
-	IResourceSettable,
 	IRewindable
 } from "../../interfaces/Stream.js"
 import { ReadableView } from "../../internal/ReadableView.js"

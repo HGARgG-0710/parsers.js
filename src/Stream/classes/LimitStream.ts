@@ -1,8 +1,8 @@
 import { boolean, type } from "@hgargg-0710/one"
+import { ownerInitializer } from "../../classes/Initializer.js"
 import type { ILinkedStream, IPosition } from "../../interfaces/Stream.js"
-import { maybeInit } from "../../utils.js"
 import { navigate } from "../../utils/Stream.js"
-import type { IUnderLimitedStream } from "../interfaces/LimitStream.js"
+import type { ILimitableStream } from "../interfaces/LimitStream.js"
 import {
 	directionCompare,
 	positionBind,
@@ -13,6 +13,14 @@ import { DyssyncStream } from "./WrapperStream.js"
 
 const { isNullary } = type
 const { T } = boolean
+
+const limitedStreamInitializer = {
+	init(target: _LimitStream, resource: ILimitableStream) {
+		target.setupState()
+		ownerInitializer.init(target, resource)
+		if (resource) this.setupUnderStream(target)
+	}
+}
 
 class _LimitStream<Type = any> extends DyssyncStream<Type> {
 	private hasLookahead = false
@@ -25,7 +33,11 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 	private from: IPosition
 	private until: IPosition
 
-	resource?: IUnderLimitedStream<Type>
+	protected get initializer() {
+		return limitedStreamInitializer
+	}
+
+	resource?: ILimitableStream<Type>
 
 	private prodForth() {
 		const { hasLookahead, lookahead } = this
@@ -71,6 +83,28 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		this.syncCurr()
 	}
 
+	private forgetLastLookahead() {
+		this.hasLookahead = false
+	}
+
+	private forgetLastLookbehind() {
+		this.hasLookbehind = false
+	}
+
+	private findStartPos() {
+		navigate(this.resource!, this.from)
+	}
+
+	setupUnderStream() {
+		this.findStartPos()
+		this.syncCurr()
+	}
+
+	setupState() {
+		this.forgetLastLookahead()
+		this.forgetLastLookbehind()
+	}
+
 	isCurrEnd(): boolean {
 		if (this.resource!.isCurrEnd()) return true
 		this.lookahead = this.prodForth()
@@ -99,15 +133,12 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		return curr
 	}
 
-	init(resource: IUnderLimitedStream<Type>) {
-		super.init(resource)
-		navigate(resource, this.from)
-		this.hasLookahead = false
-		this.hasLookbehind = false
-		this.curr = resource.curr
-		this.isEnd = resource.isEnd
-		this.isStart = resource.isStart || true
-		return this
+	syncCurr(): void {
+		super.syncCurr()
+	}
+
+	init(resource?: ILimitableStream<Type>) {
+		return super.init(resource)
 	}
 
 	setFrom(from: IPosition) {
@@ -125,7 +156,7 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		return this
 	}
 
-	constructor(resource?: IUnderLimitedStream<Type>) {
+	constructor(resource?: ILimitableStream<Type>) {
 		super(resource)
 	}
 }
@@ -142,16 +173,12 @@ export function LimitStream<Type = any>(
 	const until = positionNegate(longAs)
 	const direction = directionCompare(from, until)
 
-	return function (
-		resource?: IUnderLimitedStream<Type>
-	): ILinkedStream<Type> {
-		return maybeInit(
-			new _LimitStream()
-				.setDirection(direction)
-				.setFrom(from)
-				.setUntil(until),
-			resource
-		)
+	return function (resource?: ILimitableStream<Type>): ILinkedStream<Type> {
+		return new _LimitStream()
+			.setDirection(direction)
+			.setFrom(from)
+			.setUntil(until)
+			.init(resource)
 	}
 }
 

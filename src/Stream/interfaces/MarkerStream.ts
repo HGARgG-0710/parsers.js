@@ -4,5 +4,5 @@ export type IMarkerStream<
 	Type = any,
 	MarkerType = any
 > = WrapperStream<Type> & {
-	readonly currMarked: MarkerType
+	readonly currMarker: MarkerType
 }

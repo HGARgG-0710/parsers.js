@@ -1,20 +1,27 @@
+import { ownerInitializer } from "../../classes/Initializer.js"
 import type {
 	ILinkedStream,
 	IOwnedStream,
 	IPredicatePosition
 } from "../../interfaces/Stream.js"
-import { maybeInit } from "../../utils.js"
 import { navigate } from "../../utils/Stream.js"
 import { positionBind } from "../utils/Position.js"
 import { DyssyncForwardStream } from "./WrapperStream.js"
+
+const filterStreamInitializer = {
+	init(target: _FilterStream, resource: IOwnedStream) {
+		ownerInitializer.init(target, resource)
+		if (resource) target.setCurr()
+	}
+}
 
 class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
 	private hasLookahead: boolean = false
 	private lookahead: Type
 	private predicate: IPredicatePosition<Type>
 
-	private updateCurr() {
-		this.curr = this.lookahead
+	protected get initializer() {
+		return filterStreamInitializer
 	}
 
 	private currGetter() {
@@ -22,9 +29,18 @@ class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
 		this.prod()
 	}
 
+	private updateCurr() {
+		this.curr = this.lookahead
+	}
+
 	private prod() {
 		this.lookahead = navigate(this.resource!, this.predicate)
 		this.hasLookahead = this.resource!.isEnd
+	}
+
+	setCurr() {
+		this.prod()
+		this.updateCurr()
 	}
 
 	isCurrEnd(): boolean {
@@ -43,16 +59,13 @@ class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
 		return this
 	}
 
-	init(resource: IOwnedStream<Type>) {
-		super.init(resource)
-		this.prod()
-		this.updateCurr()
-		return this
+	init(resource?: IOwnedStream<Type>) {
+		return super.init(resource)
 	}
 }
 
 export function FilterStream<Type = any>(predicate: IPredicatePosition<Type>) {
 	return function (resource?: IOwnedStream<Type>): ILinkedStream<Type> {
-		return maybeInit(new _FilterStream().setPredicate(predicate), resource)
+		return new _FilterStream().setPredicate(predicate).init(resource)
 	}
 }

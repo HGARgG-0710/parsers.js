@@ -1,7 +1,6 @@
+import type { IOwnerSettable, IResourceSettable } from "../../interfaces.js"
 import type {
-	IOwnerSettable,
 	IResourcefulStream,
-	IResourceSettable,
 	IStatefulStream,
 	IStream
 } from "../../interfaces/Stream.js"
@@ -18,7 +17,7 @@ export type IOwnedStream<Type = any> = IStream<Type> &
 export interface IOwningStream<Type = any>
 	extends IResourcefulStream<Type>,
 		IResourceSettable {
-	init(resource: IOwnedStream, ...x: any[]): this
+	init(resource?: IOwnedStream, ...x: any[]): this
 }
 
 export type ILinkedStream<Type = any> = IOwnedStream<Type> &

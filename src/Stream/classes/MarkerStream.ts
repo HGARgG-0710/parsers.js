@@ -1,18 +1,41 @@
+import { ownerInitializer } from "../../classes/Initializer.js"
 import type { IOwnedStream } from "../../interfaces/Stream.js"
-import { maybeInit } from "../../utils.js"
 import type { IMarkerStream } from "../interfaces/MarkerStream.js"
 import { WrapperStream } from "./WrapperStream.js"
+
+const markerInitializer = {
+	init(target: _MarkerStream, resource?: IOwnedStream) {
+		ownerInitializer.init(target, resource)
+		if (resource) target.initMarker()
+	}
+}
 
 class _MarkerStream<Type = any, MarkerType = any>
 	extends WrapperStream<Type>
 	implements IMarkerStream<Type, MarkerType>
 {
+	protected get initializer() {
+		return markerInitializer
+	}
+
 	private marker: () => MarkerType
 
-	currMarked: MarkerType
+	private _currMarker: MarkerType
+
+	private set currMarker(newCurrMarked: MarkerType) {
+		this._currMarker = newCurrMarked
+	}
+
+	get currMarker() {
+		return this._currMarker
+	}
 
 	private updateMarker() {
-		this.currMarked = this.marker()
+		this.currMarker = this.marker()
+	}
+
+	initMarker() {
+		this.updateMarker()
 	}
 
 	next() {
@@ -27,12 +50,6 @@ class _MarkerStream<Type = any, MarkerType = any>
 		return curr
 	}
 
-	init(resource: IOwnedStream<Type>) {
-		super.init(resource)
-		this.updateMarker()
-		return this
-	}
-
 	setMarker(marker: () => MarkerType) {
 		this.marker = marker
 		return this
@@ -45,6 +62,6 @@ export function MarkerStream<Type = any, MarkerType = any>(
 	return function (
 		resource?: IOwnedStream<Type>
 	): IMarkerStream<Type, MarkerType> {
-		return maybeInit(new _MarkerStream().setMarker(marker), resource)
+		return new _MarkerStream().setMarker(marker).init(resource)
 	}
 }

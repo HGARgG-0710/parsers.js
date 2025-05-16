@@ -1,18 +1,27 @@
-import type { ILineIndex, IOwnedStream } from "../../interfaces/Stream.js"
-import { maybeInit } from "../../utils.js"
+import type {
+	ILineIndex,
+	IOwnedStream,
+	IPrevable
+} from "../../interfaces/Stream.js"
 import type { IIndexStream } from "../interfaces/IndexStream.js"
 import { LineIndex } from "./Position.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 class _IndexStream<Type = any>
 	extends WrapperStream<Type>
-	implements IIndexStream<Type>
+	implements IIndexStream<Type>, IPrevable<Type>
 {
 	private isNewline: () => boolean
 
 	next() {
 		const curr = super.next()
 		this.lineIndex[this.isNewline() ? "nextChar" : "nextLine"]()
+		return curr
+	}
+
+	prev(): Type {
+		const curr = super.prev()
+		this.lineIndex.prevChar!()
 		return curr
 	}
 
@@ -31,9 +40,6 @@ class _IndexStream<Type = any>
 
 export function IndexStream<Type = any>(isNewline: () => boolean) {
 	return function (resource?: IOwnedStream<Type>) {
-		return maybeInit(
-			new _IndexStream().setNewlinePredicate(isNewline),
-			resource
-		)
+		return new _IndexStream().setNewlinePredicate(isNewline).init(resource)
 	}
 }
