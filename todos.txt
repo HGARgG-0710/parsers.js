@@ -1,67 +1,35 @@
 [v0.3]
 	
 Order of TODO-elimination: 	
-	TODO: encapsulation - LET all the `.pos` and OTHER such READONLY public properties
-		be ACCORDINGLY handled via `private` keyword. 
-		Specifically - WALK throught he project (once again, FIXING all the access modifier issues). 
-
-		List [incomplete]: 
-			1. .isFrozen
-			2. .default
-
 	TODO: IMPORTANT BUG [pooling]: 
-		1. 'maybeInit' util - scrap this, reason - see below...
-		2. MAKE all the `.init` methods CHECK for their arguments. 
-			Reason: sometimes, inside a `chooser`, the user can do something like: 
+		LIST of files to add initializers for: 
+			1. DynamicParser
+				Reason - because it'd be a VERY good fit, not that it's actually necessary, or anything...
 
-				return [
-					..., 
-					StreamClassName(), 
-					...
-				]
-			
-			Then, later, it could be revealed that this is a "critical" point in application, 
-				so they decide to rewrite using a pool: 
+		1. IN GENERAL - ENSURE that all the `.init`-s ACCEPT the 'undefined' as input - ARGUMENTS MUST BE OPTIONAL!!! 
+			(it's "init(argName?: Type)" and not "init(argName: Type)")
 
-					return [
-						..., 
-						streamClassPool.create(), 
-						...
-					]
+		2. MAKE SURE the constructors are ALSO with the "optional" arguments, and that they are ALL defined appropriately 
+			[constructor calls the `this.init`, THEIR SIGNATURE MATCHES!!!]; 
 
-			Problem then becomes - THEY DON'T KNOW what 'IStream' will be used as a `.resource`. 
-			Therefore, one needs to ALLOW the classes within the library to have this kind of feature. 
-				Note: ALL OF THEM. 
+		3. USE the 'abstract' 'Initializable' class. 
+			It exists PRECISELY to introduce the 'initializer' functionality into the library. 
 
-			Solution [organization]: 
-				1. have minor public methods `setPropertyNameX(nameX: ...) {this.nameX = nameX}`
-					These are largely HIDDEN from the user (safe for specific stuff like `IInitializer`-related...); 
-
-				2. have an `init` method, that would do: 
-					[GENERIC 'Initializable' abstract class - PUBLIC]
-					1. this.initializer.init(this, ...args)
-					2. return this
-
-					[*RESTRICTING USAGE*]
-					3. class ... implements IInitializable<[...TYPE_SIGNATURE]> {...}
-						Or, better - make `Initializable` generic 
-							(though it obviously wouldn't work in some cases - see the cases of `Stream`); 
-						This is done for the purpose of not "swamping" everything with a ``
-
-				3. FOR INITIALIZERS: 
-					1. rewrite the `ownerInitializer` and `resourceInitializer` in this EXACT same fashion; 
-					2. STOP writing the `init` methods
-						INSTEAD
-							1. create *INITIALIZER OBJECTS* [like in `StreamInitializer`]
-							2. LET the `StreamInitializer` module EVOLVE to "bubble up" and be used THROUGHOUT the library [rename to just `Initializer`]; 
-							3. Let the `private/protected get initializer() {...}` be done by EACH class within the library
-								And each class have THEIR OWN initializer-object (either public, like with `Stream`-s, because the user may want to use them as well), 
-									or PRIVATE, like for other cases (ex: `DynamicParser` - this one has ITS OWN initializer-object...); 
-		3. EXPORT the current "wrapper-functions" around classes as '(...) => T & new (...) => T' via the 'const NAME = OTHER_NAME as any' type-trick 
+		4. EXPORT the current "wrapper-functions" around classes as '(...) => T & new (...) => T' via the 'const NAME = OTHER_NAME as any' type-trick 
 			1. In particular - ONLY add "function-wrappers" for: 
 				1. classes that are INTENTIONALLY to remain 'sealed' (like, say, `DynamicParser` and `Enum`)
 				2. classes that are using the Factory pattern 
 				3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
+
+	TODO: make the 'MapClass' and 'HashMap' BOTH operate on a "local class" [instead of an 'inner-function class']
+		Replace Configurator Pattern with 'Generalized Factory-Pattern' [or, weaker form of `Configurator Pattern`]. 
+		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
+			since the user will (likely) want to be using the MapClass for their own goals. 
+
+	TODO: relocate `Pairs` into `samples` from `classes`. 
+		1. It's not a class, it's a function
+		2. It doesn't do any allocation [as a rule], just a semantic wrapper
+		3. It is used frequently with IndexMap. 
 
 	TODO: REMOVE `Callable` [prepare the `callable` sketch - add `Callable` to package sources...]; 
 		As a piece of JavaScript - it's ingenious. 
