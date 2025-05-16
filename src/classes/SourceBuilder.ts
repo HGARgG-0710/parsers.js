@@ -7,7 +7,15 @@ const { isString } = type
 export class SourceBuilder implements IAccumulator<string> {
 	private ["constructor"]: new (finalSource?: string) => this
 
-	isFrozen: boolean = false
+	private _isFrozen: boolean = false
+
+	private set isFrozen(newIsFrozen: boolean) {
+		this._isFrozen = newIsFrozen
+	}
+
+	get isFrozen() {
+		return this._isFrozen
+	}
 
 	copy() {
 		return new this.constructor(this.finalSource)

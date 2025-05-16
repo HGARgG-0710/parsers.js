@@ -3,11 +3,18 @@ import { hasChildren, treeEndPath } from "../utils/Node.js"
 import { MultiIndex } from "../Stream/classes/Position.js"
 
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
-	level: TreeLike
-	curr: TreeLike
-
+	private _curr: TreeLike
+	private level: TreeLike
 	private walkable?: TreeLike
 	private multind: MultiIndex = new MultiIndex()
+
+	private set curr(newCurr: TreeLike) {
+		this._curr = newCurr
+	}
+
+	get curr() {
+		return this._curr
+	}
 
 	get pos() {
 		return this.multind

@@ -41,5 +41,5 @@ export interface INode<Type = any>
 }
 
 export interface ICellNode<Type = any, Value = any> extends INode<Type> {
-	value: Value
+	readonly value: Value
 }

@@ -1,11 +1,11 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IInternalHash } from "../../interfaces/InternalHash.js"
+import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isStruct } = type
 
 export class ObjectInternal<Type = any, DefaultType = any>
-	implements IInternalHash<string, Type, DefaultType>
+	implements IPreMap<string, Type, DefaultType>
 {
 	/**
 	 * Value used by `ObjectInternalHash` as a way to signal
@@ -18,9 +18,16 @@ export class ObjectInternal<Type = any, DefaultType = any>
 		_default?: DefaultType
 	) => this
 
-	size: number
-
+	private _size: number
 	readonly default: DefaultType
+
+	private set size(newSize: number) {
+		this._size = newSize
+	}
+
+	get size() {
+		return this._size
+	}
 
 	get(key: string) {
 		const read = this.object[key]

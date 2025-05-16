@@ -21,8 +21,8 @@ export interface IIndexMap<
 		IDefaulting<DefaultType>,
 		IRekeyable<KeyType>,
 		IReversible {
-	keys: KeyType[]
-	values: ValueType[]
+	readonly keys: KeyType[]
+	readonly values: ValueType[]
 
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]

@@ -1,5 +1,5 @@
 import { array, inplace } from "@hgargg-0710/one"
-import { MapInternal } from "../HashMap/InternalHash/classes/MapInternal.js"
+import { MapInternal } from "../HashMap/PreMap/classes/MapInternal.js"
 import type {
 	ICellClass,
 	ICellNode,
@@ -14,7 +14,7 @@ import { BasicHash } from "./HashMap.js"
 abstract class PreTokenNode<Type = any> implements INode<Type> {
 	protected ["constructor"]: new () => this
 
-	abstract type: Type
+	abstract readonly type: Type
 	parent: INode<Type> | null = null
 
 	get lastChild() {
@@ -174,7 +174,7 @@ abstract class PreRecursiveNode<Type = any>
 		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
-	constructor(protected children: INode<Type>[] = []) {
+	constructor(private children: INode<Type>[] = []) {
 		super()
 		for (const child of children) child.parent = this
 	}

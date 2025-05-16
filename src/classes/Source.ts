@@ -30,7 +30,32 @@ function getBasicDecoderFor(encoding: BufferEncoding) {
 abstract class PreSource implements ISource {
 	private ["constructor"]: new (url: string) => this
 
-	decoded: string
+	private _decoded: string
+
+	private _pos: number = 0
+	protected readonly temp: Buffer
+
+	protected abstract reader(): number
+	protected abstract decoder(buffer?: Buffer): string
+
+	protected readonly source: number
+	protected readonly size: number
+
+	protected set decoded(newDecoded: string) {
+		this._decoded = newDecoded
+	}
+
+	get decoded() {
+		return this._decoded
+	}
+
+	private set pos(newPos: number) {
+		this.pos = newPos
+	}
+
+	get pos() {
+		return this._pos
+	}
 
 	protected advance(n: number) {
 		this.pos += n
@@ -40,15 +65,6 @@ abstract class PreSource implements ISource {
 		readBytes(this.source, this.temp, this.pos, length, offset)
 		this.advance(length)
 	}
-
-	pos: number = 0
-	protected readonly temp: Buffer
-
-	protected abstract reader(): number
-	protected abstract decoder(buffer?: Buffer): string
-
-	protected readonly source: number
-	protected readonly size: number
 
 	hasChars() {
 		return this.size > this.pos

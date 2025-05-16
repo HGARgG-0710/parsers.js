@@ -7,9 +7,7 @@ import { isCopiable } from "../../utils.js"
 import { InitStream } from "./IterableStream.js"
 import { ownerInitializer, resourceInitializer } from "./StreamInitializer.js"
 
-export abstract class BasicStream<
-	Type = any
-> extends InitStream<Type> {
+export abstract class BasicStream<Type = any> extends InitStream<Type> {
 	protected abstract baseNextIter(): Type | void
 	protected abstract update(newCurr?: Type | void): void
 
@@ -20,9 +18,33 @@ export abstract class BasicStream<
 
 	isCurrStart?(): boolean
 
-	isStart: boolean = true
-	isEnd: boolean = false
-	curr: Type
+	private _isStart: boolean = true
+	private _isEnd: boolean = false
+	private _curr: Type
+
+	protected set isStart(newIsStart: boolean) {
+		this._isStart = newIsStart
+	}
+
+	protected set isEnd(newIsEnd: boolean) {
+		this._isEnd = newIsEnd
+	}
+
+	protected set curr(newCurr: Type) {
+		this._curr = newCurr
+	}
+
+	get isStart() {
+		return this._isStart
+	}
+
+	get isEnd() {
+		return this._isEnd
+	}
+
+	get curr() {
+		return this._curr
+	}
 
 	protected preInit(...args: any[]) {
 		if (this.initGetter) this.curr = this.initGetter(...args)

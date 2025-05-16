@@ -1,7 +1,15 @@
 import { WrapperStream } from "./WrapperStream.js"
 
 export class PosStream<Type = any> extends WrapperStream<Type> {
-	pos: number = 0
+	private _pos: number = 0
+
+	protected set pos(newPos: number) {
+		this._pos = newPos
+	}
+
+	get pos() {
+		return this._pos
+	}
 
 	isCurrStart() {
 		return this.pos === 0

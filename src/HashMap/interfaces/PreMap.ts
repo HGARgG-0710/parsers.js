@@ -7,11 +7,8 @@ import type {
 	ISizeable
 } from "../../interfaces.js"
 
-export interface IInternalHash<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any
-> extends ISettable<KeyType, ValueType | DefaultType>,
+export interface IPreMap<KeyType = any, ValueType = any, DefaultType = any>
+	extends ISettable<KeyType, ValueType | DefaultType>,
 		IDeletable<KeyType>,
 		IRekeyable<KeyType>,
 		ISizeable,

@@ -14,9 +14,9 @@ abstract class PreIndexMap<
 	IndexGetType = any
 > implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 {
-	abstract keys: KeyType[]
-	abstract values: ValueType[]
-	abstract default: DefaultType
+	abstract readonly keys: KeyType[]
+	abstract readonly values: ValueType[]
+	abstract readonly default: DefaultType
 
 	abstract index(x: any): ValueType | DefaultType
 
@@ -60,7 +60,26 @@ export abstract class BaseIndexMap<
 	DefaultType = any,
 	IndexGetType = any
 > extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
-	public default: DefaultType
+	readonly default: DefaultType
+
+	private _keys: KeyType[]
+	private _values: ValueType[]
+
+	protected set values(newValues: ValueType[]) {
+		this._values = newValues
+	}
+
+	get values() {
+		return this._values
+	}
+
+	protected set keys(newKeys: KeyType[]) {
+		this._keys = newKeys
+	}
+
+	get keys() {
+		return this._keys
+	}
 
 	protected ["constructor"]: new (
 		pairs: array.Pairs<KeyType, ValueType>,
@@ -101,11 +120,7 @@ export abstract class BaseIndexMap<
 		return this
 	}
 
-	constructor(
-		public keys: KeyType[],
-		public values: ValueType[],
-		_default?: DefaultType
-	) {
+	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
 		assert(isArray(keys))
 		assert(isArray(values))
 

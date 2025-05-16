@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
 import type { IHashClass } from "../interfaces/HashMap.js"
-import type { IInternalHash } from "../HashMap/interfaces/InternalHash.js"
+import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
 
 /**
  * Creates and returns a new instance of the given `HashClass` using the underlying `InternalStructure`
@@ -18,7 +18,7 @@ export function fromPairs<
 	InternalStructure: new (
 		input?: InputType,
 		_default?: DefaultType
-	) => IInternalHash<InternalKeyType, ValueType, DefaultType>,
+	) => IPreMap<InternalKeyType, ValueType, DefaultType>,
 	pairsList: array.Pairs<KeyType, ValueType>,
 	_default?: DefaultType
 ) {

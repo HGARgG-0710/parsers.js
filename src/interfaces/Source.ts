@@ -4,6 +4,6 @@ export interface ISource extends ICopiable {
 	hasChars(): boolean
 	nextChar(n?: number): void
 	cleanup(): void
-	decoded: string
-	pos: number
+	readonly decoded: string
+	readonly pos: number
 }

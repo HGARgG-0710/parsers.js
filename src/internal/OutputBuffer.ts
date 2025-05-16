@@ -7,7 +7,15 @@ const { isArray } = type
 export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
 	private ["constructor"]: new (collection?: Type[]) => this
 
-	isFrozen: boolean = false
+	private _isFrozen: boolean = false
+
+	private set isFrozen(newIsFrozen: boolean) {
+		this._isFrozen = newIsFrozen
+	}
+
+	get isFrozen() {
+		return this._isFrozen
+	}
 
 	push(...elements: Type[]) {
 		if (!this.isFrozen) this.collection.push(...elements)

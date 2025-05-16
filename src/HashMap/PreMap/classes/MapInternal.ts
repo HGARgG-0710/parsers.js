@@ -1,10 +1,10 @@
 import { array, type } from "@hgargg-0710/one"
-import type { IInternalHash } from "../../interfaces/InternalHash.js"
+import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isUndefined } = type
 
 export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
-	implements IInternalHash<KeyType, ValueType, DefaultType>
+	implements IPreMap<KeyType, ValueType, DefaultType>
 {
 	private ["constructor"]: new (
 		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,

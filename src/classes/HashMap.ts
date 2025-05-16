@@ -2,7 +2,7 @@ import { type as _type, functional, string } from "@hgargg-0710/one"
 import { type } from "src/utils/Node.js"
 import { length } from "../utils.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
-import type { IInternalHash } from "../HashMap/interfaces/InternalHash.js"
+import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -36,46 +36,42 @@ export function HashClass<
 		>
 
 		private ["constructor"]: new (
-			value: IInternalHash<InternalKeyType, ValueType>
+			internal: IPreMap<InternalKeyType, ValueType>
 		) => this
 
 		get default() {
-			return this.internal.default
+			return this.pre.default
 		}
 
 		get size() {
-			return this.internal.size
+			return this.pre.size
 		}
 
 		index(x: KeyType, ...y: any[]) {
-			return this.internal.get(hash(x, ...y))
+			return this.pre.get(hash(x, ...y))
 		}
 
 		set(key: KeyType, value: ValueType, ...y: any[]) {
-			this.internal.set(hash(key, ...y), value)
+			this.pre.set(hash(key, ...y), value)
 			return this
 		}
 
 		delete(key: KeyType, ...y: any[]) {
-			this.internal.delete(hash(key, ...y))
+			this.pre.delete(hash(key, ...y))
 			return this
 		}
 
 		rekey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
-			this.internal.rekey(hash(keyFrom, ...y), hash(keyTo, ...y))
+			this.pre.rekey(hash(keyFrom, ...y), hash(keyTo, ...y))
 			return this
 		}
 
 		copy() {
-			return new this.constructor(this.internal.copy())
+			return new this.constructor(this.pre.copy())
 		}
 
 		constructor(
-			private internal: IInternalHash<
-				InternalKeyType,
-				ValueType,
-				DefaultType
-			>
+			private pre: IPreMap<InternalKeyType, ValueType, DefaultType>
 		) {}
 	}
 
@@ -92,4 +88,4 @@ export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
 
-export * as InternalHash from "../HashMap/classes/InternalHash.js"
+export * as PreMap from "../HashMap/classes/PreMap.js"

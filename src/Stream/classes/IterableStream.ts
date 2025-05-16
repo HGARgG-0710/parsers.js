@@ -1,8 +1,8 @@
 import type { IInitializer, IStream } from "../../interfaces.js"
 
 export abstract class IterableStream<Type = any> implements IStream<Type> {
-	abstract isEnd: boolean
-	abstract curr: Type
+	abstract readonly isEnd: boolean
+	abstract readonly curr: Type
 
 	abstract next(): Type
 	abstract isCurrEnd(): boolean

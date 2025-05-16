@@ -1,21 +1,29 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IInternalHash } from "../../interfaces/InternalHash.js"
+import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isArray } = type
 
 export class ArrayInternal<Type = any, DefaultType = any>
-	implements IInternalHash<number, Type, DefaultType>
+	implements IPreMap<number, Type, DefaultType>
 {
 	static readonly MissingKey = undefined
 
 	private ["constructor"]: new (array: Type[], _default: DefaultType) => this
 
 	readonly default: DefaultType
+	private _size: number
 
-	size: number
+	private set size(newSize: number) {
+		this._size = newSize
+	}
+
+	get size() {
+		return this._size
+	}
 
 	set(i: number, value: Type) {
+		if (this.array[i] === ArrayInternal.MissingKey) ++this.size
 		this.array[i] = value
 		return this
 	}

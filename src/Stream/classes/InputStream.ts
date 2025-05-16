@@ -30,10 +30,17 @@ export class InputStream<Type = any>
 {
 	protected ["constructor"]: new (source?: IParseable<Type>) => this
 
-	pos = 0
-
+	private _pos = 0
 	private lastPos: number
 	private readonly view: ReadableView
+
+	private set pos(newPos: number) {
+		this._pos = newPos
+	}
+
+	get pos() {
+		return this._pos
+	}
 
 	protected currGetter(): Type {
 		return this.source!.read(this.pos)
@@ -57,9 +64,10 @@ export class InputStream<Type = any>
 		return this.pos === 0
 	}
 
-	init(resource: IParseable<Type>) {
-		this.lastPos = resource.size - 1
-		super.init(resource)
+	init(source: IParseable<Type>) {
+		this.lastPos = source.size - 1
+		this.view.init(source)
+		super.init(source)
 		return this
 	}
 
@@ -86,6 +94,6 @@ export class InputStream<Type = any>
 
 	constructor(source?: IParseable<Type>) {
 		super(source)
-		this.view = new ReadableView(0, this.source!)
+		this.view = new ReadableView(0, this.source)
 	}
 }

@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICompositeStream,
 	IInputStream,
-	IOwnedStream
+	ILinkedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
 import { ChainStream } from "./Stream.js"
@@ -119,7 +119,10 @@ export function DynamicParser<FinalType = any, InitType = any>(
 	inputStream: IInputStream<string, InitType>
 ) {
 	const parse = new Parse(workStream, inputStream)
-	return function (input: InitType, state?: Summat): IOwnedStream<FinalType> {
+	return function (
+		input: InitType,
+		state?: Summat
+	): ILinkedStream<FinalType> {
 		return new ParsedStream(parse.copy().init(input, state))
 	}
 }
