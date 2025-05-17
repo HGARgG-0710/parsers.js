@@ -1,35 +1,116 @@
 [v0.3]
+
+Due to TODO swamp, one has decided to SPLIT all the tasks into:
+	1. actually relevant (current), which are BEING DONE at the moment
+	2. minor ones that WILL get done, but slightly later
+	3. the "general", which may get removed/deleted/never-get-done/changed, or (maybe) done
+		At worst - they get done later due to being less significant. 
+	4. the "leftovers" for v0.3 - this is definitely getting done, and definitely done last - before the publishing
+	5. the "v0.4"
+	6. the (possibly, not so distant) "future"
+
+CURRENT TODOS:	
+	TODO: 'Source.nextChar(n)' is bugged. 
+		It skips n-1 BYTES, not characters. 
+		It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
+			
+	TC3. Add `fromJSON` [JSON deserialization method] onto `INode`-implementing classes; 
+		NEW NOTE: 
+		Specifically, there is ONE new util just for this:
+			1. fromValidJSON(types: {typeName: ONEOF3_TOKEN_OR_CONTENT_OR_RECURSIVE_CONSTANT}) - reads a given JSON, PROVIDED that all the types
+				This throws an error if an invalid piece of JSON is provided, 
+					else - returns all as intended. 
+
+		OLD NOTE: 
+		Better still, make it a util - to obtain a given `tree` fully...; 
+		It would have: 
+
+		1. A proper class-managing system
+		2. As a return value: 
+			1. BasicHash(new MapInternal()) of classes [by their `type` - an `IndexMap`]: 
+				1. `.copy()` of `typesAutocache.value`, the `Autocache` used 
+					within this specific case [easier to do, since we are in need of knowing if something's been already defined or not...]
+			2. A tree, composed of `INode`-implementing items
+
+	TODO: `samples`: 
+		1. new `Stream` for `samples` [DO add in `v0.3`]. 
+			`JSONStream = StreamParser(JSON.stringify)`; 
+		2. relocate `Pairs` into `samples` from `classes`. 
+			1. It's not a class, it's a function
+			2. It doesn't do any allocation [as a rule], just a semantic wrapper
+			3. It is used frequently with IndexMap. 
+		3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
+		4. Relocate the `DelimitedStream` to `samples.MarkerStream` 
+			1. This is an ".init-composition" (TO BE USED AS A SINGLE STREAM!!!) of: 
+				1. `boolean`-based MarkerStream, which relies upon a user-given predicate to determine the `.currMarked` of the given item; 
+				2. A `FilterPredicate`, ABOVE which provides the 
+			2. ALSO - DelimiterStream
+				0. based off 'DelimitedStream'
+				1. uses a "has"-based predicate created from a list of possible delimiters/items
+		5. ADD NEW ".init-compositions" (old pseudocode)	
+			1. trivialCompose(IndexStream, InputStream)
+			2. trivialCompose(IndexStream, LFStream, InputStream)
+			3. trivialCompose(IndexStream, LFStream, LazyBuffer)	
+			4. trivialCompose(IndexStream, LazyBuffer)
+
+			IMPORTANT NOTE: 
+				after adding `TokenStream`, introduce: 
+					1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
+						Put together with the `isLFSkip` util. 
+						More exactly: 
+							1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
+							2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
+					2. 'isNewlineSkip = or(isLF, isCRLF)'
+						This is for the user to be able to instead of transforming "CRLF -> LF", 
+							just use this as-is [count the newlines]; 
+					3. `LFStream` - a stream returning, for an `isNewline` predicate 
+						[not INewlinePredicate, instead (stream: IStream<string>) => string], 
+							INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
+						
+						Something like: `return isNewline(x)`
+						It's a `StreamParser`
+						Put under 'StreamParser/classes'
+						Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
+							More specifically, to be able to do: 
+								'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
+							MAKE this a proper util.
+
+						Reason to introduce - LF/CRLF-independent parsers...
+		
+		6. scavenge old projects + add common-all-over-the-place type-of patterns: 	
+			1. Tokens (names for INode-classes): 
 	
-Order of TODO-elimination: 	
-	TODO: IMPORTANT BUG [pooling]: 
-		LIST of files to add initializers for: 
-			1. DynamicParser
-				Reason - because it'd be a VERY good fit, not that it's actually necessary, or anything...
-
-		1. IN GENERAL - ENSURE that all the `.init`-s ACCEPT the 'undefined' as input - ARGUMENTS MUST BE OPTIONAL!!! 
-			(it's "init(argName?: Type)" and not "init(argName: Type)")
-
-		2. MAKE SURE the constructors are ALSO with the "optional" arguments, and that they are ALL defined appropriately 
-			[constructor calls the `this.init`, THEIR SIGNATURE MATCHES!!!]; 
-
-		3. USE the 'abstract' 'Initializable' class. 
-			It exists PRECISELY to introduce the 'initializer' functionality into the library. 
-
-		4. EXPORT the current "wrapper-functions" around classes as '(...) => T & new (...) => T' via the 'const NAME = OTHER_NAME as any' type-trick 
-			1. In particular - ONLY add "function-wrappers" for: 
-				1. classes that are INTENTIONALLY to remain 'sealed' (like, say, `DynamicParser` and `Enum`)
-				2. classes that are using the Factory pattern 
-				3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
-
-	TODO: make the 'MapClass' and 'HashMap' BOTH operate on a "local class" [instead of an 'inner-function class']
-		Replace Configurator Pattern with 'Generalized Factory-Pattern' [or, weaker form of `Configurator Pattern`]. 
-		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
-			since the user will (likely) want to be using the MapClass for their own goals. 
-
-	TODO: relocate `Pairs` into `samples` from `classes`. 
-		1. It's not a class, it's a function
-		2. It doesn't do any allocation [as a rule], just a semantic wrapper
-		3. It is used frequently with IndexMap. 
+				1. Take them from various parsing projects of yours already existing: 
+	
+					1. xml
+					2. selector
+					3. regex
+	
+					Unite, choose best string-names; 
+					Create appropriate names for sample-token classes (via TokenInstance) [
+						example: 
+						
+						Opbrack - (, 
+						Clbrack - ), 
+						OpSqBrack - [, 
+						ClSqBrack - ], 
+						OpBrace - {, 
+						ClBrace - }, 
+	
+					...]; 
+	
+			2. arrays with common items (USED throughout...): 
+	
+				'binary = [0, 1]'
+				'decimal = [0, 1, ..., 9]'
+				'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
+				'ascii = [0, 1, ...]'
+				'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
+	
+				Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
+			
+			3. ALSO - join the 'samples' with the 'constants.ts' file 
+				[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
 
 	TODO: REMOVE `Callable` [prepare the `callable` sketch - add `Callable` to package sources...]; 
 		As a piece of JavaScript - it's ingenious. 
@@ -37,64 +118,108 @@ Order of TODO-elimination:
 		DO make it into a package (later), BUT, transpile it individually first...; 
 			DO NOT remove it from the package... 
 			Just don't export it out and don't use it anywhere... [since it's really useless...v]
-			
-	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
-		Reason - simplicity of names...
-			
-	TODO: change all the `<... = any>`s in the code to `<... = unknown>`s. 
-		Reasons: 
-			1. works FAR better with the `&`-role-composition	
-			2. SAFER GENERIC TYPES!
 
-	TODO: wrap ALL the `Stream`-classes' constructors out there INTO FUNCTIONS. 
-		Reason - being able to call them WITHOUT needing the `new`; 
-		They have THE SAME signature. 
-		Difference being - they can NOW be employed with "compositions". 
-			[+ the user will NO LONGER need to bear the load of actuaLLY NEEDING to specify "classWrapper", or smth like that]; 
+	TODO: Docs
+		BEFORE YOU DO THAT: 
+			1. transport `Callable` out
+			2. finish the `samples`
+			3. decide the ultimate fate of `utils`
+		
+		1. Ensure that ALL the exports are AS-DESIRED (relevant)
+			Finalize the library exports, that is
+		2. Ensure NOTHING is missing from the wiki: 
+			1. utils
+			2. interfaces
+			3. classes
+			4. permalinks
+			5. self-referencing: 	
+				1. provide links to interfaces for class pages
+				2. provide links ot implementations for interfaces to interface pages
+		3. finish the JSDoc
+			1. change/update old
+			2. ADD FOR: 
+				1. classes
+				2. ALL public exports
+					IF a 'util' - a proper short function description. 
+					IF a 'class/interface/related' - a brief description + a link ot the wiki
 
-	TODO: make `Node`s POOLABLE [the `Initializer` module]
+	TODO: Tests
+		BEFORE YOU DO THAT: 	
+			1. finish the docs [COMPLETELY!]
+
+		0. Remove old tests
+		1. TEST the internal/ (only what makes sense)
+		2. Test the public exports: 
+			1. ALL classes
+			2. ALL utils
+			3. ALL samples
+		3. Test that the LIST of library exports is correct: 
+			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
+				Ensures that ALL the needed exports are available
+			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+
+		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
+			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
+				treating each class instance as a "test starting point", from which one can test various methods. 
+					Saves A LOT of boilerplate that is (usually) written when doing tests. 
+
+	TODO: make `Node`s POOLABLE [the `Initializer` module, the `Initializer` CLASS]; 
 		Big change, since, it will ALLOW one to be using `SingletonStream(someNodePool.create.bind(someNodePool))` 
 			inside, say, chooser-s, or other kinds of Stream-s. Finally, it will make the "shtick" memory-improvements 
 				ACTUALLY NOTICEABLE, because now the user can optimize memory to only EVER contain the "largest" "shtick" 
 					+ some minor book-keeping costs (one 4-byte address per each INode object). 
-	
+					
+	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
+		Reason - simplicity of names...
+		WALK: 
+			1. through classes/ files
+			2. through internal/ files
+			3. through interfaces/ files
+			4. through utils/ files
+
+MINOR TODOS: 			
+	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
+		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
+		1. In particular - ONLY add "function-wrappers" for the `class _StreamClassName {....}`for: 
+			1. classes that are INTENTIONALLY to remain 'sealed' (like, say, `DynamicParser` and `Enum`)
+			2. classes that are using the Factory pattern 
+			3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
+			
+	TODO: make the 'MapClass' and 'HashMap' BOTH operate on a "local class" [instead of an 'inner-function class']
+		Replace Configurator Pattern with 'Generalized Factory-Pattern' [or, weaker form of `Configurator Pattern`]. 
+		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
+			since the user will (likely) want to be using the MapClass for their own goals. 
+
 	TODO: simplify the `MapClass` code. 
 		Specifically, all the excessive `.prototype` manipulations. 
 		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
+	
+LATER TODOS: 		
+	UT4. [maybe???] REMOVE the `utilities`: 
+		Since we're going to be adding the `samples`, perhaps it's wise to unite the two???
 
-	TODO [fixed order]:						
-		Order:
-			1. Rest [minor thingies]
+	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
+		Reasons: 
+			1. works FAR better with the `&`-role-composition	
+			2. SAFER GENERIC TYPES!
+		NOTE: *do not* do it everywhere. 
+			Reason - may break some code. 	
 
-			2. Docs
+	3. FINALE OF THE V0.3 DEVELOPMENT: 
+		0. DO TDD [since tests will now be more-or-less established...]; 
+		1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc - SEE EXTENSIVE NOTES BELOW
 
-			3. Tests
+	TODO [one.js] - MAYBE...: LATER, when finishing new version:
+		Replace all occurences of `numbers(...).map(...)` with `array.from`; 
+		Do via Search: 'numbers(...)'; 
+		There is at least one example in `Enum`. 
 
-			4. Finale: 
-				0. DO TDD [since tests will now be more-or-less established...]; 
-				1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc; 
-		
-		REMINDER: 
-			1. MAKE all the needed classes SEALED, by providing, INSTEAD of them, 
-				FUNCTIONS that return `new ClassConstructor()`; 
-			2. Let only the ABSTRACT classes of the library be extendable (shared behavioru and all that...)
-			3. This is to mimic Java's "final" and C# "sealed" functionality; 		
-
-		TODO [later]: WRITE the unit-tests for the `internal/` stuff AS WELL; 
-			Since we now have a (somewhat) more moderate codebase to test, it is much more affordable time-wise to do it. 
-			Test EVERYTHING. Even the small stuff, like `ReadableView`. 
-
-		TODO [later] - clean code from temp comments
-			Walk the entire preojct. 
-
-		TODO [later]: docs - 'protected abstract' properties...
+	NOTES:						
+		NOTE [for later]: docs - 'protected abstract' properties...
 			DOCUMENT THOSEAS WELL. 
 			Specifically, for classes. 
 			These are INTENDED to providing the user with ability to customize EXTENDABLE behaviour
 				[example: IterableStream, DelegateStream, WrapperStream]; 
-
-		TODO: new `Stream` for `samples` [DO add in `v0.3`]. 
-			`JSONStream = StreamParser(JSON.stringify)`; 
 
 		NOTE [for future]: the [Symbol.iterator] inside the `SwitchArray` COULD be a minor bottleneck. 
 			Benchmark later...
@@ -102,270 +227,49 @@ Order of TODO-elimination:
 				[Reason this was not done at the beginning is: it's ambigious which should be faster, 
 					since it's hard to control whether or not the passed callback is INLINED or not 
 						(so we may end up spending more time due to needing to create the callback)]; 
-
-		TODO: [DEFINITELY!] Refactor the common `.next()/.prev()` methods for `Dyssync/DyssyncForward`-`Stream`-s; 
-			Reason: many follow common pattern:  
-				if (this.isCurrEnd/Start()) this.end/startStream()
-				else this.baseNextIter/basePrevIter()
-
-			When it's `.currGetter()`, nothing is stopping one from just wrapping `.baseNextIter` around it.
-			This'll allow for better code reuse and simpler codebase...; 
-
-			Better still - LET the "new" refactored versions REPLACE the `DyssyncForward` and `Dyssync` Stream-s, 
-				BUT IF AND ONLY IF, one manages to "fit" all the classes present within the library into the 
-					"form" in question [id est, let this "special" class be such THAT BOTH the `Dyssync` and `DyssyncForward` would THEN AND ONLY THEN inherit].
-			
-				Otherwise, keep it as another one of the "abstract", classes for user-purposes. 
-					Reason: it's ENTIRELY possible that the user will rquire a class of nature DIFFERENT from the ones that the 
-						library presently provides. Hence, it'll be necessary for them to implement the library interfaces, 
-							but WITHOUT making any mistakes. Solution to that - provide parent-classes with desired framework-style 
-								functionality documented. 
-			
-		TC3. Add `fromJSON` [JSON deserialization method] onto `INode`-implementing classes; 
-			NEW NOTE: 
-			Specifically, there is ONE new util just for this:
-				1. fromValidJSON(types: {typeName: ONEOF3_TOKEN_OR_CONTENT_OR_RECURSIVE_CONSTANT}) - reads a given JSON, PROVIDED that all the types
-					This throws an error if an invalid piece of JSON is provided, 
-						else - returns all as intended. 
-
-			OLD NOTE: 
-			Better still, make it a util - to obtain a given `tree` fully...; 
-			It would have: 
-
-			1. A proper class-managing system
-			2. As a return value: 
-				1. BasicHash(new MapInternal()) of classes [by their `type` - an `IndexMap`]: 
-					1. `.copy()` of `typesAutocache.value`, the `Autocache` used 
-						within this specific case [easier to do, since we are in need of knowing if something's been already defined or not...]
-				2. A tree, composed of `INode`-implementing items
-
-		TODO [*important*]: About `TokenStream` and `Regex`: 
-					1. need an INTERMEDIATE abstraction - a `MatchList`
-					2. a `MatchList` is a "table" of `handler-Regex` to be walked, and USED by the `TokenStream` to MATCH one of avaiable `Regex`-es
-					3. a `MatchList` is an `IndexMap`; Functions in it have access to `this` - THE CURRENT TokenStream, and `input` - first arg, and 'parser.table' - second arg, LIKE with `TableMap`; 
-					4. a `TokenStream` is just a `(matchList: MatchList) => StreamClass(TableMap(matchList))`
-					5. since `TokenStream` is JUST a `StreamParser`, it ALONE cannot provide one with full `laziness` in all cases (ex: recursion)
-					6. FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
-							b + a + (b - (...)), ... # and so forth - only characters are: a, b, +, -, (, ) and ','
-						can be parsed like: 
-
-							# very rough sketch - incomplete, need to solve the issue of DEALING with the `recursive ()`-aspect of it all. 
-							1. ReadableSource
-							2. InputStream
-							3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
-							3. TokenStream(+, -, a, b, (, ), ,) - provides TokenNode abstractions
-							4. chooser0:	
-								1. TRY FINDING a matching pair for '/(/': 
-									input.next() # skipping '('
-									return [
-										SingletonStream(BRACKETED_RecursiveNode_func), # a RecursiveNode, with 1 element - the sum; 
-										chooser1, # "gathering up" all the "+", etc
-										chooser0, # recursion - bracket-expression INSIDE the bracket
-										LimitedStream(EndBracketTokenPred),  # predicate of '.type === EndBracketType'
-									]	
-								2. all else - PASS AS-IS
-							5. chooser1: 
-								1. based off TableMap:
-									1. based off an MatchList:
-									
-										0. MATCHING - Peek(1) (approx, in `.type`s) -- 1/[+-]/: 
-											const elem = input.next() # a | b | (...) - last one hadled by `chooser0`
-											const sign = input.next() # - | +
-
-											# the `Summand_Curried(elem, sign)(elem1) = { type: sign, children: [elem, (elem1.type == sign ? ...elem1.children : elem1)] }`
-											# we are TURNING the `Stream`-s into a SEQUENCE of ONE-ELEMENT LAYERS TO BE EVALUATED LATER; 
-											# which are THEN - flattened to obtain a single `.children` array for the arithmetic expression; 
-											return [
-												SingletonStream(Summand_Curried(elem, sign)), 
-												chooser1,
-											]
-
-										1. MATCHING - .curr 0/[ab]|#[BRACKET_TYPE]/ [with no prev. match of 'peek(1)']
-											const elem = input.next() # skipping; NO +- AFTER the current one; Has to be end on the next [or, an ERROR]; 
-											return [
-												SingletonStream(Summand), # `Summand` - a RecursiveNode with `.children.length === 1`
-												chooser1 # end-recursion - 'IS_END'/Error ahead [NOTE: this needs to be SUBSET - break into `chooser1` and `chooser2` (lesser - without recursion)]
-											]
-
-
-										3. IS_END: 
-											return []
-
-										4. is ',' - return a `SingletonStream(id)` - passing those as-is; 
-
-										5. ERROR/ERROR-RECOVERY - invalid token provided
-
-								2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
-							6. PredicateStream - pick those that are not a ','
-		CONCLUSION: 
-				5. IMPORTANT : provide proper demos for: 
-					1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
-					2. SELF-MODIFYING thing [using `DynamicParser`]
-						THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
-		
-		[UNORDERED]
-		
-		TODO [one.js]: LATER, when finishing new version:
-			Replace all occurences of `numbers(...).map(...)` with `array.from`; 
-			Do via Search: 'numbers(...)'; 
-
-		TODO: EXPORTS - *ensure* that none are missed... [in wiki, that is]: 
-			1. classes
-			2. interfaces
-			3. utils
-
-		TODO: 'Source.nextChar(n)' is bugged. 
-			It skips n-1 BYTES, not characters. 
-			It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
 			
 		2.76. [parsers.js] Set up a GitHub Actions -> npm pipeline; ALSO - ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm... + publishing the latest docs [separate]
 			ALSO - create a list of presently maintained projects, for which to add such a pipeline: 
 
-		Fix docs: 
-			0. JSDoc: 
-				1. FINALLY add it for classes
-				2. Add ANY missing JSDoc that there is to be found
-				3. FIX old JSDoc (considering the number of type, util and signature changes - it's MORE than definite some has become obsolete...); 
-
-			1. wiki: 
-				1. add missing classes
-				2. add missing utils
-				3. add missing permalinks
-				4. remove old/redundant stuff
-				5. general re-doing of wiki
-	
-		2. Tests: 
-			0. update prior-written tests: 
-				1. check for missing abstractions
-				2. check for missing methods
-				3. check for missing properties
-				4. check for old tests' validity
-
-			[old]
-			1. HashMap
-			2. IndexMap: 
-				1. LinearIndexMap
-				2. PersistentIndexMap
-			3. LookupTable
-
-			IMPORTANT: walk through new list of exports, VERIFY that all the tests are IN ACCORDANCE with them - nothing is missing, 
-				in other words. 
-	
-		1. Doc-sync
-
-		Docs: 
-			1. Stream
-
-		3. Doc-sync: 
-			IMPORTANT: don't forget about the new `constants.ts` export - MissingArgument; 
-					
-		Docs:
-			1. Position [MultiIndex]		
-			
-		TODO [docs]: 
-			1. list missing wiki pages [classes]
-			2. write those
-			3. work on interface pages
-			4. cleanup: 
-				1. add the `I`- to ALL the pages (some still missing it)
-				2. proper self-referencing
-				3. other remaining todos [order those...]
-
-		TODO [tests]: 
-			1. finish "old" tests
-			2. add the "new" tests
-			3. DO TDD + DOCS [starting with `LineIndex`]
-
-	SA1. Relocate the `DelimitedStream` to `samples.PredicateStream` [YES, THE `samples` SHOULD HAVE THEIR OWN SUBDIVISION AS WELL!]; 
-
-	TODO [any order]: 
-		2. add permalinks for "minor" class-exports
-		3. Add JSDoc for: 
-			1. minor classes/functions ['classes' exports]
-			2. interfaces [those without a page]
-			3. big classes/interfaces
-				Format for jsdoc for "big" exports: 
-					1. brief description
-					2. link to wiki page
-		4. GitHub Workflows
-		5. Special Pages [wiki]: 
-			1. Usage
-			2. Home (finish)
-		6. Tests [ADD NEW, REMOVE OLD - scorched earth... again]: 
-				Micro-behaviour plan: 
-					3. eliminate the old test cases [NOTE: the "model" for them is the NEW ONE - based off the `ICopiable` interface]; 
-					4. add new test cases: 
-						They bear form:
-
-							suite("ClassName (case #1)", () => {
-								ClassTestObject.withInstance(
-									new Class(), 
-									(instance) => {
-										test("ClassName.prototype.methodName1 (case #1), () => 
-											instance.methodName1(...)	
-										)
-										
-										test("ClassName.prototype.methodName1 (case #2), () => 
-											instance.methodName1(...)	
-										)
-
-										...
-										
-										test("ClassName.prototype.methodName2 (case #1), () => 
-											instance.methodName2(...)	
-										)
-
-										...
-									}
+		NOTE: About Tests [ADD NEW, REMOVE OLD - scorched earth... again]: 
+			1. New test cases bear form:
+					suite("ClassName (case #1)", () => {
+						ClassTestObject.withInstance(
+							new Class(), 
+							(instance) => {
+								test("ClassName.prototype.methodName1 (case #1), () => 
+									instance.methodName1(...)	
 								)
-							})
+								
+								test("ClassName.prototype.methodName1 (case #2), () => 
+									instance.methodName1(...)	
+								)
 
-						TODO: create
-							1. `TestCounter` class
-								for *counting* items within the given 
-							2. `TestChain` class, 
-								which has an internal `TestCounter`, 
-									has a `handler` function, and 
-										"inputs: any[][]" arrays of arguments to be 
-											supplied to the `handler`
+								...
+								
+								test("ClassName.prototype.methodName2 (case #1), () => 
+									instance.methodName2(...)	
+								)
 
-							USE the `TestChain` to express the chains of tests thusly. 
+								...
+							}
+						)
+					})
 
-					5. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
+			TODO [maybe?]: create
+				1. `TestCounter` class
+					for *counting* tests-being-run within the given test suite
+				2. `TestChain` class, 
+					which has an internal `TestCounter`, 
+						has a `handler` function, and 
+							"inputs: any[][]" arrays of arguments to be 
+								supplied to the `handler`
+
+				USE the `TestChain` to express the chains of tests thusly. 
+
+			2. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
 				
-				2. FIX testing micro-behaviours: 
-					1. add `handlers` to ENSURE that certain specified properties of test-arguments are met: 
-						IF a property is NOT satisfied, THROW an error...
-							SPECIFICALLY: 
-								1. IF `.value` (or other such injectable property) 
-									CAN be `null/undefined`, it must be checked that it isn't	
-
-									Particular examples: 
-										1. StreamClass (those that are `isPattern` - LimitedStream, ...)
-								2. IF one has a "main type", from which "child types" 
-									inherit, the "main type" MUST CHECK explicitly for
-										properties/methods of a sub-type before calling 
-											them.
-
-									Particular examples: 
-										1. StreamClass (.prev!(), .pos!, ...); 
-											
-				4. Add missing utils tests
-
-				5. Remove redundant code
-
-				7. Add the tests for *THE NEW stuff* [notes moved from v0.4]:
-				 	DO TDD with it (
-						previous functinoality development 
-						took so long due to lack of clear requirements
-					)
-					
-		7. Self-referencing on Wiki: 
-			1. provide links to interfaces for class pages
-			2. provide links ot implementations for interfaces to interface pages
-
-		8. To add Wiki pages [classes - REDO ALL...]:
-		9. OPTIMIZING `TypeScript` property definitions on classes: 
+	TODO: OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
 				class C {
 					prop: P
@@ -381,92 +285,6 @@ Order of TODO-elimination:
 			When one needs a PROTOTYPE PROPERTY, use the first variant (type-level only), 
 				where it's an INSTANCE PROPERTY, use the second, as doing so wil avoid the 
 					necessity for type-transitions in code. 
-
-	JSDoc [on the par with wiki]:
-		These are short and concise, don't get too deep into the implementation details. 
-		[The "big" full GitHub Wiki will be for this...]
-
-		Process: 
-			0. add permalinks to: 
-				1. minor classes interfaces [DEICIDE WHICH!!!]
-
-			1. Walk the wiki/ tree [enumerate, COME FROM /wiki]: 
-				[proper pages, + JSDoc that references them /w brief descriptions]
-				2. interfaces
-				3. classes
-
-			2. for each, add one of either: 
-				1. A full JSDoc
-				2. A brief JSDoc + page
-
-				DECIDE WHICH IS WHICH
-
-			4. Special pages to write: 
-				1. Usage
-				2. Problems
-				3. Lacking: 
-					Make this a brief list (BASED OFF ONE on 'Home' page): 
-						1. detalize the "various" unspecified options [provide sub-lists for those]
-						2. do not expand the lists (it is complete on 'Home')
-						3. write out a paragraph or two for each of the points "missing" or that are "problematic"
-							1. ALSO - note about WHICH of the abstractions ARE to be deleted (like 'TokenizablePattern/ValidatablePattern', for instance...)
-
-			5. VERIFY everthing visually, once the docuementation work is done...; 
-
-	1. Wiki:	
-		3. DOCUMENTATION POLICY: 
-			1. IF `x` is an alias/util, DO NOT add a new page for it: 
-				JSDoc ALONE will suffice. 
-				JSDoc contains ONLY brief description (for now...)
-			2. IF `x` is a class, it has a page + JSDoc with reference instead
-				Page contains: 
-					1. method documentation/signatures, output types
-					2. public variables documentation/types
-					3. *Notes* [those are important...]
-				JSDoc contains
-			3. IF `x` is an interface, it has a page + JSDoc : 	
-				Page contains: 
-					0. general info (purpose, usage, dependencies links, etc)
-					1. (brief) method/property descriptions
-					2. list of places where it's used
-					3. provided implementations' list
-			4. IF `x` is NOT an export, it is: 
-				1. documented, IF it is somehow an important internal detail (ad-hoc decisions)
-				2. otherwise, left without documentation (either a JSDoc, or a Wiki page)
-		
-		4. Wiki preface wording: 
-			Work on the wording for: 
-				1. `classes` pages: 
-					0. low-level: `This module contains implementations for interface ...`
-						Or [when multiple]: `This module contains implementations for interfaces ...`
-					1. high-level: `This module contains items related to ... [process/idea/interface]`
-						Or [when multiple, or contains implementations/utils/interfaces besides]: `... (as before) as well as ...`	
-		
-		5. Wiki page structure: 
-			For structure-pages: 
-				0. # *NAME*
-				1. preface
-				2. ## Exports
-				3. [list of exports]
-			
-			For content pages [classes]: 
-				1. # *NAME* [without the '.'-path]
-				2. Description
-				3. ## Methods
-				4. *use the old ```ts...``` thing + descriptions for each argument
-				5. [optional] per-method notes
-				6. [optional] per-property notes
-				7. [optional] per-class notes
-		6. IMPORTANT - self-references: 
-			EVERY time that a name from the library is mentioned, add: 
-				1. `x` - code-stylization
-				2. [...](...) - references, point to the abstraction's page
-			DO IT SEPARATELY! 
-		
-		7. remove unused wiki-pages: WALK THROUGH THEM.
-			Some capitalized-functions have themselves a separate page, 
-				even though they don't really deserve it. 
-			Delete those. 
 
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
@@ -488,569 +306,395 @@ Order of TODO-elimination:
 			__NOT__ the `test` command. 
 			Reason: too different from project-to-project. 
 			These are the same. []
-
-	TESTS [work all anew... too much has changed]: 
-		1. enumerate the things to test; 
-		2. walk through tests, verify them for being satisfactory; 
-		3. re-do where necessary, add new cases; IMPLEMENT MISSING;
-		4. re-do the 'import' tests as well; 
-		5. log the 'run.ts' thingie into a special temp text file; 
-			1. [make into an npm command - 'test-run' and 'test: test-compile + test-run']
-			2. add to '.vscode/launch.json' [to simplify the debugging process... we'll need it]; 
-			3. WORK on the failed tests from there...; 
-		
-		6. WRITE a single large 'tests/demo' INTEGRATION TEST, which is a JSON/hybrid-parser. 
-			It would utilize: 
-				0. JSON: TableMap + HashMap
-				1. hybrid: TableMap + IndexMap [local mutability]
-				2. StreamParser
-				3. DynamicParser
-				4. switching between "hybrid" and JSON-modes BASED off 'JSON' contents [global mutability]
-
-			Reasons: 
-				1. new DynamicParser is EXTREMELY complex [hence, errorprone]
-				2. to test out the overall interface manageability
-				
-	PROBLEMS: 
-		Understood that the v0.3 IS NOT YET PRODUCTION-READY
-			from feature perspective - there's just too little stuff. 
-		Thus, one TAKES SOME of the features from v0.4 TO IMPLEMENT HERE. 
-		BUT, before then - ONE NEEDS TO *DIVIDE* the library into "condemned (dead)
-			and *LIVING* pieces. 
-		
-		Among specific restrictions:
-			2. WRITE DOCS AND TESTS FOR OLD VERSIONS FIRST, then - 
-			3. implement the (a) missing feature(s) that go into the v0.3
-			4. alter docs 
-			5. return to 3., repeat until done
-		
-		TODOS for v0.3: 		
-			Primary: 
-				UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
-					For a given 'Indexable', it does: 
-
-						// ! PROBLEM: lacks ability to check for MULTIPLE WORDS: 
-						// 		* Solution: replace 'matchWord' with a more complex hand-written 'RegExp'-matching engine for the library... [uses 'Stream's instead of JS 'string's]: 
-						// 			ALSO - use the *same* engine for the 'RegExpTokenizer'; 
-						// rough sketch - requires the '.peek(n)' method; 
-						// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
-						function matchWord(stream, word) {	
-							const positions = word.length
-							for (let i = 0; i < positions; ++i) 
-								if (word[i] !== stream.peek(i)) 
-									return 0
-							return positions
-						}
-
-						// IDIOM: for skipping a word, call it 'function consume(stream, word, wrapper)' - a 'Parser/utils.ts' utility; 
-						const matched = matchWord(stream, word)
-						skip(stream, matched)
-						if (matched) return wrapper(word)
-
-				PA4. A new class - `WriterStream` [a new `Stream`]: 
-					The reverse of a `LazyBuffer`, it WRITES its elements one-by-one into 
-						the given file/other resource. 
-
-					Can be chained, RETURNS ITEMS AS-IS (that is, it STILL has a return value, 
-						even though it's almost totally impure). 
-
-					[Maybe?] provide a wrapper around the basic Node API 'Stream' used here? 
-						Reasons: 
-							1. provide error-handling
-							2. deal with configuration nonsense in a modular manner (.setEncoding, etc)
-							3. platform-independent ontology (Deno + Bun compatibility)
-
-				TO2. [new IStream] `TokenStream` - based off `Regex`: 
-					IMPORTANT NOTE: 
-						must be CAPABLE of allowing the functions in question to OPERATE upon the `.pos`
-							of the stream that is BEING TOKENIZED. 
-						Reason: oftentimes, one will not want the contents of the thing, BUT THE POSITION, instead. 
-							Thus, the functions in question should (additionally, optionally) be given the `.pos` of the match; 
-
-					1. takes in a table of `[Regex, StreamHandler]` 
-					2. iterates the table for each `.curr`
-					3. calls `StreamHandler` on the `.value` [takes in a `.value: IStream`]
-					4. repeat 1.-3. until `.value` is finished [tokens are produced as `this`]
-
-					This is immensely useful for tokenization via regular expressions; 
-						
-					IMPORTANT NOTE: `TokenStream` MUST ALLOW FOR ERROR-HANDLING!!! 
-						More specifically, it takes: 
-							1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
-							2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
-							3. IF none fit, IT PROVIDES AN `error-handling` callback, which the user may employ AS THEY SEE FIT! 
-								More specifically: 
-									1. an instance of an `IErrorHandler`-implementing class, contains a `nextItem()` [optional] and `error()` [mandatory]
-										methods, which work like:
-											1. if `nextItem(stream, info: IErrorInfo)` is present, it passes the respective `tokenStream`
-												to it, and `nextItem` skips the respective nodes until an acceptable one can be 
-													obtained via `stream.curr`. 
-												
-												The return value of `nextItem` is a new interface - `IPositionRange`:
-													it's a pair of positions: [IPosition, IPosition], like [for instance]: 
-														1. [ILineIndex, ILineIndex]
-														2. [MultiIndex, MultiIndex]
-														3. [number, number]
-														4. [IPositionPredicate, IPositionPredicate]
-														...
-
-													TODO: pass an `IPositionRange` to the `LimitedStream`; 
-
-												The returned `IPositionRange` would be correspondently treated 
-													by the interface in question. 
-
-												For the case of `TokenStream` [the "RegexTokenizer"], 
-													it is [basically] a `[ILineIndex, ILineIndex]`. 
-													The `IPositionRange` is then passed to an (optional)
-														`.handleErrRange(this.value.buffer, range: IPositionRange)` method on the 
-														Also, the `this.value.buffer` is the UNDERLYING 
-															buffer on the underlying [used by the 'TokenStream'] `IStream<string>`; 
-															It (basically) allows one to process the given range of positions 
-																"the right way". 
-
-												The `IErrorInfo` is a `number` - error code, 
-													for one of possible errors that can ocurr. 
-													[It's intended that the user will use an `enum` of `number`s for this]
-											2. call error()
-
-									[data access]
-									1. is kept upon a SPECIAL class/interface-instance called `ErrorHandler`: 
-										1. the `handler` has access to various state: 
-											it can be respectively pre-configured  by the user
-										2. `TokenStream` can have the `ErrorHandler` used INJECTABLE
-										3. The "base" `ErrorHandler` would have EXTENSION-CLASSES: 
-											1. [dynamic, via getter] `lineIndex` [use `dig + .value` - would keep the respective "top" Stream, from which to keep counting]
-												Useful for error-throwing inside the `.error()` method; 
-											2. [dynamic, via getter] `errorNode` [use `.value + .curr` - would keep the respective `Stream`, while also SERIALIZING the `Node`, 
-												at which the error has happened and/or use its `.type`/`.value`]; 
-												
-												Useful for error-throwing inside the `.error()` method; 
-											3. [static, via prototype - Configurator pattern] `nextItem()`: 
-												This would be user-defined. 
-												Allows, particularly, to work with
-
-											4. [static, via prototyep - Configurator pattern] `handleErrRange()`: 
-												This is user-defined. 
-
-								ALSO: this behaviour MUST BE INJECTABLE. 
-									Reason: the user may want to keep the tokenizer AS A PROPERTY in their own 
-										`IStream`, which would be responsible for handling errors. 
-							4. add to `samples`: 
-								1. trivialCompose(IndexStream, InputStream)
-								2. trivialCompose(IndexStream, LFStream, InputStream)
-								... [etc, INCLUDING the `LazyBuffer`]; 
-
-							5. generalize the "TokenStream" error-handling mechanism that employs the `ErrorHandler` object, 
-								and employ (generally): 
-									1. uses an `ErrorHandler` with (optional) `handleErrRange`, and (optional) `nextItem`, 
-										and (mandatory, if neither other are present) `error`
-									2. uses an arbitrary `IStream & IBufferized`
-									3. uses an `IErrorDispatcher` - any function that can return a `type IErrorInfo<Type = any> = number | Type`: 
-										more specifically, these (in practice) would be `TableMap`-s, returning either: 
-											1. the `IErrorInfo` (whatever it is)
-											2. the `Type` (on success)
-												There should be a clear `isErrorInfo` predicate to distinct one from the other; 
-												Upon `IErrorInfo`, one has the `ErrorHandler`
-													dealing with it (in the said fashion, working with the `buffer`-ized `Stream`, 
-														which is PROCESSED by the `ErrorDispatcher`, which ITSELF is a 
-															`TableMap` for the current `IStream`; 
-
-															Then, one needs a new kind of `Stream` for this kind of thing. 
-																Call it `ErrorStream(dispatcher)(buffer, pos)` [configurator pattern]
-															
-															Then - one can put it into a `CommonParser`, 
-																and use with a `CommonParser.prototype.init(...)`; 
-																That is where creation of instances of `ErrorHandler`
-																	would occur. 
-													). 
-
-										PROBLEM: with using `IErrorInfo = number`: can't handle `Type = number` then. 
-											Solution: allow generics? Think of something, this is nigh-trivial...
-					
-					IMPORTANT NOTE: 
-						after adding `RegexTokenizer` [`TokenStream`], add: 
-							1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
-								Put together with the `isLFSkip` util. 
-								More exactly: 
-									1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
-									2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
-							2. 'isNewlineSkip = or(isLF, isCRLF)'
-								This is for the user to be able to instead of transforming "CRLF -> LF", 
-									just use this as-is [count the newlines]; 
-							3. `LFStream` - a stream returning, for an `isNewline` predicate 
-								[not INewlinePredicate, instead (stream: IStream<string>) => string], 
-									INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
-								
-								Something like: `return isNewline(x)`
-								It's a `StreamParser`
-								Put under 'StreamParser/classes'
-								Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
-									More specifically, to be able to do: 
-										'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
-									MAKE this a proper util.
-					
-					IMPORTANT NOTE: 
-						1. The `TokenStream` must have a candidate-elimination system. 
-							More specifically, consider the following (failing) implementation strategy: 
-								1. one uses `.peek()` [alone] to determine which token to accept next
-								2. due to that, since `peek()` is *limited* by length of the `RotationBuffer`, 
-									one has a limitation on size for tokens-'.value's
-								3. consider good ol' /[a-zA-Z]/; This has arbitrary length. qed
-						2. Thus, one needs a combination of `.peek()` and `.next() + .prev()`. 
-							Thus, we do: 
-								1. peek(n) for MULTIPLE of them
-								2. keep going, until one of: 
-									1. the set of those that can be acceptable is 1
-										1. switch to `.next()/.prev()` [.prev() ONLY if there's an error, and this (ends up) not being a match either]; 
-									2. we run out of `n` for `.peek(n)`
-										1. switch to `.next()/.prev()`
-										2. `.prev()` ONLY when an error is encountered. 
-							
-							Thus, the candidate elimination system: 
-								1. no backtracking
-								2. max-possible-usage of `.peek()`
-									once out-used, `.next(n)` for max `n` for `.peek(n)`, 
-									and then continue with `.next(1)`
-								3. if no matches are found, backtrack to the beginning using `.prev(k)`, with total chars `k`, 
-									and herald error
-								4. else, continue until there's only 1 viable candidate
-								5. IF there are 2+ viable candidates, and one is fully reachable sooner than others, then IT is chosen
-								6. IF no single viable candidate can be produced as per rules 1-5. (id est, there is 2+), 
-									throw an exception [this is a PARSER error, not the input error, end-user shouldn'e need to worry about it, 
-										the parser-maker (direct library user) DOES
-									]
-
-				RE2. `Regex` description:
-					[maybe] - create your own flavour for 'RegExp's
-					IMPORTANT NOTE: 
-						1. must have a library-specific feature of targetting the `.type` property. 
-							More specifically, add a '{matched_type}'-Regex-construct for matching a token with a 
-								type `matched_type`. 
-						2. the types here must be either STRINGS or NUMBERS. 
-							More specifically: 
-								1. i{...} - matches a type of number
-								2. s{...} - matches a type of string
-
-					Then: 
-						1. [maybe?] add new convinience functions to `regex` to also handle your flavour...
-						2. create `fromRegExp` util, which would create a `Regex` [library] from `RegExp` [JS builtin]
-						3. write proper docs for the class
-
-					It will improve upon the "simple" JS regex in the following ways: 
-						0. replace the first and last items "/^$/" with /:#/
-						1. add a general `^x` for NEGATING a pattern. Thus, elementary [^...] becomes composite ^[...]
-							This way, for instance /^ab+/ matches "bbb", but not "ab". 
-						2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
-							to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
-						3. remove the `\B`, `\D`, `\S`, (?!...), (?<!...), ..., other negative-classes/assertions in favour of the simpler `^x` form
-						4. replace the (?:...) with (:...) [syntax simplification]
-						5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
-						6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
-							Will span the max possible values of the Unicode range
-						7. get rid of the flags: 
-							1. 'g': 
-								replace the different behaviour with METHODS; make it non-exclusive
-
-							2. 'v':
-								remove, provide its functionality by default: 
-									1. `P` not working - it is removed and replaced by `^p{...}`:
-										By default, consumes the max possible string (remaining, if needed). 
-										Limited by (...){n, k}
-
-							3. 'i': 
-								make it a new group type - that matches A GROUP regardless of the case: 
-									Ideas for syntax: 
-										
-										1. /(#i...)/; 
-										2. /(?i...)/; # more traditional...
-								
-								ALSO: make it possible to *inject* custom functionality 
-									(utilizing the fact that `RegExpTokenizer` CAN be generic); 
-
-							4. 's': 
-								make it default
-							
-							5. 'u': 
-								remove, included by default with `v`
-
-							6. 'y' (????): 
-								find out what this even is (and what it's used for)
-								seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
-						
-							7. 'm': 
-								remove - unnecessary
-								possible to achieve the same thing using a slight modification of:
-									/(?<\n)...(?=\n)/
-							
-							8. 'd': 
-								too specific, ugly
-								make these kinds of behaviours GENERIC instead
-								[note: the 'RegExpTokenizer' WILL be generic...
-						8. get rid of form-feed (`\f`): 
-							Reason: not useful for parsing
-						9. ALLOW the space in '{a,b}' (becomes '{a, b}'); 
-						10. Add a possesive quantifier "*+", "?+", "++": 
-							https://www.regular-expressions.info/possessive.html
-						11. Add atomic groups: 
-							https://www.regular-expressions.info/atomic.html
-						12. Double negation inside a class: 
-							^[^\w] is the same as (in JS flavour) [^\W]
-
-							That is, it is COMLEMENT OF A CLASS of items that are NOT A CHARACTER.
-							That is, it's \w. 
-						13. Add relative backreferences: 
-							https://www.regular-expressions.info/backrefrel.html
-						14. Fix the ECMAScript behaviour of empty-matching backreferences: 
-							https://www.regular-expressions.info/backref2.html
-						15. Add the conditionals: 
-							https://www.regular-expressions.info/conditional.html
-						16. Regarding the /(#)/ - modes: 
-							https://www.regular-expressions.info/modifiers.html
-						17. Add subroutines (recursion): 
-							https://www.regular-expressions.info/subroutine.html
-
-						IDEA: use this regex-flavour for the HammockLang implementation later...	
-						
-						IMPORTANT NOTE[1]: 
-							1. `Regex` works with BOTH: 
-								1. string
-								2. IStream<string>: 
-									reason - to allow implementations for faster/lazy algorithms
-
-						IMPORTANT NOTE[2]: 
-							1. .matchAt(x: Indexed<string>, i: number)
-								Checks that AT THE GIVEN `i` IN `x`, 
-									there is AN IMMIDIATE MATCH. 
-								This is important, as it allows the "tabular" 
-									work that the RegexTokenizer and `RegexValidator` do...
-							2. .sub(from: number, to: number) - returns a new Regex that is the result of LIMITING the current one
-								between `from` and `to` indexes for VALID TOKENS. 
-
-								This way, for instance: 
-									(a(bc)+) has 4 tokens, ordered as: 
-										1. (...) - outer bracket
-										2. a 
-										3. (...) - inner bracket
-										4. + [relative to the outer bracket]
-										5. b
-										6. c
-
-								Thus, recursion is handled BY THE FIRST OCCURENCE. 
-
-							ALSO, add the JavaScript string-compatibility methods: 
-								1. [Symbol.match]
-								2. [Symbol.matchAll]
-								3. [Symbol.replace]
-								4. [Symbol.search]
-								5. [Symbol.split]
-
-							ALSO [imporant]: have ALGEBRAIC methods for it. 
-								Meaning: ability to join them via a disjunction '|', 
-									applying the quantifiers '*', '+', '{a, b}', '?', 
-									applying negation '^'. 
-								Each of those CREATES A NEW 'Regex'! 
-								Purpose is to (basically) replace the `regex` module. 
-							
-							ALSO: the `Regex` implements an NFA
-
-				EL1. Eliminator: 
-					Replacement for the old `Eliminator`, based off `Regex`; 
-					Lazy, doesn't need several passes. 
-					Takes in the `Regex` list [walks, for given "character", each of them, matching, eliminating what was matched...]; 
-						Eliminates ONLY the first thing....; 
-			
-				NM1. [DEFINITELY!] Create a 'samples' directory; 
-					Reason for v0.3: 
-						2. TOO many prerequisites
-						3. the "not-so-util-like" utilities
-
-					This is for 'common-case' parsing - generally, walk through the various syntaxes that were 
-						PRESENT within the previous parsers, use them?
-					
-					Or, better, make this into a separate mini-project called 'parsing-samples'; 
-					[EXAMPLE: handling the 'escaped' strings/sequences all the time];
 	
-					Think about it [this particular refactoring is VERY fine and case-specific, though, it can come in useful...]; 
-	
-					No, if one is to do it, the thing should: 
-	
-						1. Work with general parsing patterns, that would be CONFIGURABLE for every case; 
-						2. Provide low-level Token-s with specialized given names; 
-	
-					1. Tokens: 
-	
-						1. Take them from various parsing projects of yours already existing: 
-	
-							1. xml
-							2. selector
-							3. regex
-	
-							Unite, choose best string-names; 
-							Create appropriate names for sample-token classes (via TokenInstance) [
-								example: 
-								
-								Opbrack - (, 
-								Clbrack - ), 
-								OpSqBrack - [, 
-								ClSqBrack - ], 
-								OpBrace - {, 
-								ClBrace - }, 
-	
-							...]; 
-	
-					2. arrays with common items (USED throughout...): 
-	
-						'binary = [0, 1]'
-						'decimal = [0, 1, ..., 9]'
-						'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
-						'ascii = [0, 1, ...]'
-						'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
-	
-						Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
-					
-					3. ALSO - join the 'samples' with the 'constants.ts' file 
-						[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
-					
-					4. MOST IMPORTANT - generation functions, stuff for working with AST-s: 
-						1. Based off ASTAnalyzer, ASTStream-s, ASTHierarchy, etc... Generally, the 'Tree.AST' module
-					
-					5. Stuff for Stream-transforming: 
-						Namely, nested-stuff via the 'StreamParser' [WITH '.buffer']: 
-	
-							// A VERY common pattern...
-							// Generalize to an arbitrary 'X <- LimitedStream() [here]', with 'StreamParser.init(X())'
-							const l = new LimitedStream()()
-							const t = new StreamParser()()
-							const parse = (input) => {
-								l.init(input)
-								t.init(l)
-								t.finish()
-								return t.buffer.move()
-							}
-	
-					6. module-related stuff IS GIVEN ITS OWN MODULE 
-						Example: DelimitedStream goes into the `samples.PredicateStream.*` module
-				
-				UT4. REMOVE the `utilities`: 
-					Put them ALL into `samples`. 
-					THE ONLY 'utils' to keep are: 
+[TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
+	Primary: 
+		UP2. A new utility function (Parser/utils.ts) - match(word, stream): 
+			For a given 'Indexable', it does: 
 
-						1. Parser/utils.ts
-						2. IndexMap/utils.ts (without the `table`)
-						3. Stream/utils.ts (only the 'byStreamBufferPos' and 'isEmpty', namely)
-						4. src/utils.ts (only the `dig`)
-						5. Position/utils.ts (everything, except for `is` functions)
-						6. Node/utils.ts
-						7. DynamicParser/utils.ts
-						[pick which others to keep...]
-
-					Those - MERGE into a single export-file called `utils.ts` (new module -- `utils`); 
-					Split them in a (similar) fashion to how it was before, if you want to, except: 
-						1. `dig` - this one's standalone now
-						2. `Parser/utils.ts` - this combines two types (AT LEAST), hence, it cannot be well-categorized
-
-					The `is` functions are ALL kept inside the special new `types` module.
-				
-			Secondary: 		
-				ME3. [StreamClass] Iterator Helper functions - '.filter', '.take', ...: 
-					Provide them. 
-					Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
-
-					These will (each) require individual internal-class implementations + public interfaces to use.
-						Reason for "internal" nature of these classes: one doesn't want to allow user to create them on their own
-					
-				RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-					Namely: 
-						1. intersection: 	/[[...]&&[...]]/v
-						2. subtraction: 	/[[...]--[...]]/v
-						3. string literals: /[q{...}]/v
-				
-			Minor: 	
-				DE1. Increase the Library's natural debuggability: 
-					ADD names to all the nameless functions. 
-					This is due to the fact that in error logs, they would appear A LOT more clearly if one did do it. 	
-
-				TY2. Type simplification - the `array.Pairs` overuse: 
-					Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
-					THIS INCLUDES: 
-						1. IndexMap[.*]
-						2. utils.IndexMap[.*]
-
-					Reasons: 
-						1. more generic code
-
-					Also - IF one does need to use the `Pairs` IN THE END (due to mutability concerns), 
-						USE THAT 
-				
-	5.2.73.
-	5.2.74.	
-	5.2.76.	
-	5.2.77.
-
-	[fix test compilation errors]
-	[run the tests]
-
-	B. 
-		
-	C.
-
-	IMPORTANT: clean the git history - keep only the commits for each individual version; 
-		Squash all the others + change the respective commit messages; 
-		[do this via `git rebase` + `git push --force`]
-	
-B. documentation (wiki - change/fix it...);
-	Hosted on the project's GitHub Wiki. 
-	WHEN WRITING DOCUMENTATION, 
-		
-		0. make a note that the '.hash' and '.extension' functions SHOULD BE ABLE TO HANDLE null-values!	
-		1. Note in the 'UnfreezableArray' docs that AFTER '.unfreeze()' is called, 
-			the underlying Stream behaviour *DOES NOT CHANGE* (meaning - one has to create a NEW Stream...); 
-
-		2. SPECIFY: that (at the moment) parser's best support is for TOP-DOWN RECURSIVE DESCENT PARSERS! 
-		
-		3.	Ways to do self-modification for DynamicParser [!!! - the Holy Grail...]: 				
-			1. 'this.state.parser.layers = ..." [self-modification, GLOBAL]
-				1. Also: 'this.state.parser.layers[i] = ...'; 
-			2. 'parser.table = ...' [self-modification, LOCAL]
-
-			TODO[1]: add examples for using it to the docs with 'StreamParser' + 'InputStream' [by far - *the* most common case...]; 
-			TODO[2]: use the code for doing so WITHIN THE 'demo' integration test...
-
-		4. ABOUT the '.typesTable' in `NestedStream`: 
-			IT HAS A CONTRACT, of returning `null/undefined` instead of a valid index in `.getIndex`, IF a given item in the present NestedStream is NOT 
-				supposed to be granted an index (and, thus, be made into a SEPARATE NestedStream), 
-					THEN THE RETURNED INDEX is to be `null` or `undefined`. 
-
-	EXAMPLES: 
-		1. Currently, this is the code to take a certain `input` Stream, 
-			then - take its portion and transform it: 
-
-				// TODO: add this code as example for THE DOCS later...! 
-				parserStream = new StreamParser(...)()
-				limStream = new LimitedStream(...)()
-				convertPortion = (input) => {
-					limStream.init(input)
-					parserStream.init(limStream)
-					parserStream.finish()
-					return parserStream.buffer.get()
+				// ! PROBLEM: lacks ability to check for MULTIPLE WORDS: 
+				// 		* Solution: replace 'matchWord' with a more complex hand-written 'RegExp'-matching engine for the library... [uses 'Stream's instead of JS 'string's]: 
+				// 			ALSO - use the *same* engine for the 'RegExpTokenizer'; 
+				// rough sketch - requires the '.peek(n)' method; 
+				// NOTE: the '.peek(0) === .curr' is ALWAYS a requirement...
+				function matchWord(stream, word) {	
+					const positions = word.length
+					for (let i = 0; i < positions; ++i) 
+						if (word[i] !== stream.peek(i)) 
+							return 0
+					return positions
 				}
 
-		2. Faster/more-elegant version of 1.: 
-		
-			parser = transform(...)
-			limStream = new LimitedStream(...)()
-			convertPortion = (input) => {	
-				return parser(limStream.init(input), new CollectionClass()).get()
-			}
-	
-C. write the CHANGELOG [too much has been altered since the "original" v0.3]; 
-	C.1. Walk through the last commit's state of v0.2.1, noting changes and writing them down [destructive]; 
-	C.2. Walk through the v0.3 changes, and write them down [constructive];
+				// IDIOM: for skipping a word, call it 'function consume(stream, word, wrapper)' - a 'Parser/utils.ts' utility; 
+				const matched = matchWord(stream, word)
+				skip(stream, matched)
+				if (matched) return wrapper(word)
 
+		PA4. A new class - `WriterStream` [a new `Stream`]: 
+			The reverse of a `LazyBuffer`, it WRITES its elements one-by-one into 
+				the given file/other resource. 
+
+			Can be chained, RETURNS ITEMS AS-IS (that is, it STILL has a return value, 
+				even though it's almost totally impure). 
+
+		TO2. [new IStream] `TokenStream` - based off `Regex`: 
+			IMPORTANT NOTE: 
+				must be CAPABLE of allowing the functions in question to OPERATE upon the `.pos`
+					of the stream that is BEING TOKENIZED. 
+				Reason: oftentimes, one will not want the contents of the thing, BUT THE POSITION, instead. 
+					Thus, the functions in question should (additionally, optionally) be given the `.pos` of the match; 
+
+			1. takes in a table of `[Regex, StreamHandler]` 
+			2. iterates the table for each `.curr`
+			3. calls `StreamHandler` on the `.value` [takes in a `.value: IStream`]
+			4. repeat 1.-3. until `.value` is finished [tokens are produced as `this`]
+
+			This is immensely useful for tokenization via regular expressions; 
+				
+			IMPORTANT NOTE: `TokenStream` MUST ALLOW FOR ERROR-HANDLING!!! 
+				More specifically, it takes: 
+					1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
+					2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
+					3. IF none fit, IT PROVIDES AN `error-handling` callback, which the user may employ AS THEY SEE FIT! 
+						More specifically: 
+							1. an instance of an `IErrorHandler`-implementing class, contains a `nextItem()` [optional] and `error()` [mandatory]
+								methods, which work like:
+									1. if `nextItem(stream, info: IErrorInfo)` is present, it passes the respective `tokenStream`
+										to it, and `nextItem` skips the respective nodes until an acceptable one can be 
+											obtained via `stream.curr`. 
+										
+										The return value of `nextItem` is a new interface - `IPositionRange`:
+											it's a pair of positions: [IPosition, IPosition], like [for instance]: 
+												1. [ILineIndex, ILineIndex]
+												2. [MultiIndex, MultiIndex]
+												3. [number, number]
+												4. [IPositionPredicate, IPositionPredicate]
+												...
+
+											TODO: pass an `IPositionRange` to the `LimitedStream`; 
+
+										The returned `IPositionRange` would be correspondently treated 
+											by the interface in question. 
+
+										For the case of `TokenStream`, 
+											it is [basically] a `[ILineIndex, ILineIndex]`. 
+											The `IPositionRange` is then passed to an (optional)
+												`.handleErrRange(this.value.buffer, range: IPositionRange)` method on the 
+												Also, the `this.value.buffer` is the UNDERLYING 
+													buffer on the underlying [used by the 'TokenStream'] `IStream<string>`; 
+													It (basically) allows one to process the given range of positions 
+														"the right way". 
+
+										The `IErrorInfo` is a `number` - error code, 
+											for one of possible errors that can ocurr. 
+											[It's intended that the user will use an `enum` of `number`s for this]
+									2. call error()
+
+							[data access]
+							1. is kept upon a SPECIAL class/interface-instance called `ErrorHandler`: 
+								1. the `handler` has access to various state: 
+									it can be respectively pre-configured  by the user
+								2. `TokenStream` can have the `ErrorHandler` used INJECTABLE
+								3. The "base" `ErrorHandler` would have EXTENSION-CLASSES: 
+									1. [dynamic, via getter] `lineIndex` [use `dig + .value` - would keep the respective "top" Stream, from which to keep counting]
+										Useful for error-throwing inside the `.error()` method; 
+									2. [dynamic, via getter] `errorNode` [use `.value + .curr` - would keep the respective `Stream`, while also SERIALIZING the `Node`, 
+										at which the error has happened and/or use its `.type`/`.value`]; 
+										
+										Useful for error-throwing inside the `.error()` method; 
+									3. [static, via prototype - Configurator pattern] `nextItem()`: 
+										This would be user-defined. 
+										Allows, particularly, to work with
+
+									4. [static, via prototyep - Configurator pattern] `handleErrRange()`: 
+										This is user-defined. 
+
+						ALSO: this behaviour MUST BE INJECTABLE. 
+							Reason: the user may want to keep the tokenizer AS A PROPERTY in their own 
+								`IStream`, which would be responsible for handling errors. 
+
+					5. generalize the "TokenStream" error-handling mechanism that employs the `ErrorHandler` object, 
+						and employ (generally): 
+							1. uses an `ErrorHandler` with (optional) `handleErrRange`, and (optional) `nextItem`, 
+								and (mandatory, if neither other are present) `error`
+							2. uses an arbitrary `IStream & IBufferized`
+							3. uses an `IErrorDispatcher` - any function that can return a `type IErrorInfo<Type = any> = number | Type`: 
+								more specifically, these (in practice) would be `TableMap`-s, returning either: 
+									1. the `IErrorInfo` (whatever it is)
+									2. the `Type` (on success)
+										There should be a clear `isErrorInfo` predicate to distinct one from the other; 
+										Upon `IErrorInfo`, one has the `ErrorHandler`
+											dealing with it (in the said fashion, working with the `buffer`-ized `Stream`, 
+												which is PROCESSED by the `ErrorDispatcher`, which ITSELF is a 
+													`TableMap` for the current `IStream`; 
+
+													Then, one needs a new kind of `Stream` for this kind of thing. 
+														Call it `ErrorStream(dispatcher)(buffer, pos)` [configurator pattern]
+													
+													Then - one can put it into a `CommonParser`, 
+														and use with a `CommonParser.prototype.init(...)`; 
+														That is where creation of instances of `ErrorHandler`
+															would occur. 
+											). 
+
+								PROBLEM: with using `IErrorInfo = number`: can't handle `Type = number` then. 
+									Solution: allow generics? Think of something, this is nigh-trivial...
+				
+			IMPORTANT NOTE: 
+				1. The `TokenStream` must have a candidate-elimination system. 
+					More specifically, consider the following (failing) implementation strategy: 
+						1. one uses `.peek()` [alone] to determine which token to accept next
+						2. due to that, since `peek()` is *limited* by length of the `RotationBuffer`, 
+							one has a limitation on size for tokens-'.value's
+						3. consider good ol' /[a-zA-Z]/; This has arbitrary length. qed
+				2. Thus, one needs a combination of `.peek()` and `.next() + .prev()`. 
+					Thus, we do: 
+						1. peek(n) for MULTIPLE of them
+						2. keep going, until one of: 
+							1. the set of those that can be acceptable is 1
+								1. switch to `.next()/.prev()` [.prev() ONLY if there's an error, and this (ends up) not being a match either]; 
+							2. we run out of `n` for `.peek(n)`
+								1. switch to `.next()/.prev()`
+								2. `.prev()` ONLY when an error is encountered. 
+					
+					Thus, the candidate elimination system: 
+						1. no backtracking
+						2. max-possible-usage of `.peek()`
+							once out-used, `.next(n)` for max `n` for `.peek(n)`, 
+							and then continue with `.next(1)`
+						3. if no matches are found, backtrack to the beginning using `.prev(k)`, with total chars `k`, 
+							and herald error
+						4. else, continue until there's only 1 viable candidate
+						5. IF there are 2+ viable candidates, and one is fully reachable sooner than others, then IT is chosen
+						6. IF no single viable candidate can be produced as per rules 1-5. (id est, there is 2+), 
+							throw an exception [this is a PARSER error, not the input error, end-user shouldn'e need to worry about it, 
+								the parser-maker (direct library user) DOES
+							]
+	
+		TODO [*important*]: About `TokenStream` and `Regex`: 
+			1. need an INTERMEDIATE abstraction - a `MatchList`
+			2. a `MatchList` is a "table" of `handler-Regex` to be walked, and USED by the `TokenStream` to MATCH one of avaiable `Regex`-es
+			3. a `MatchList` is an `IndexMap`; Functions in it have access to `this` - THE CURRENT TokenStream, and `input` - first arg, and 'parser.table' - second arg, LIKE with `TableMap`; 
+			4. a `TokenStream` is just a `(matchList: MatchList) => StreamClass(TableMap(matchList))`
+			5. since `TokenStream` is JUST a `StreamParser`, it ALONE cannot provide one with full `laziness` in all cases (ex: recursion)
+			6. FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
+					b + a + (b - (...)), ... # and so forth - only characters are: a, b, +, -, (, ) and ','
+				can be parsed like: 
+
+					# very rough sketch - incomplete, need to solve the issue of DEALING with the `recursive ()`-aspect of it all. 
+					1. ReadableSource
+					2. InputStream
+					3. SkipSpaces [in `samples`]
+					3. TokenStream(+, -, a, b, (, ), ,) - provides TokenNode abstractions
+					4. chooser0:	
+						1. TRY FINDING a matching pair for '/(/': 
+							input.next() # skipping '('
+							return [
+								SingletonStream(BRACKETED_RecursiveNode_func), # a RecursiveNode, with 1 element - the sum; 
+								chooser1, # "gathering up" all the "+", etc
+								chooser0, # recursion - bracket-expression INSIDE the bracket
+								LimitedStream(EndBracketTokenPred),  # predicate of '.type === EndBracketType'
+							]	
+						2. all else - PASS AS-IS
+					5. chooser1: 
+						1. based off TableMap:
+							1. based off an MatchList:
+							
+								0. MATCHING - Peek(1) (approx, in `.type`s) -- 1/[+-]/: 
+									const elem = input.next() # a | b | (...) - last one hadled by `chooser0`
+									const sign = input.next() # - | +
+
+									# the `Summand_Curried(elem, sign)(elem1) = { type: sign, children: [elem, (elem1.type == sign ? ...elem1.children : elem1)] }`
+									# we are TURNING the `Stream`-s into a SEQUENCE of ONE-ELEMENT LAYERS TO BE EVALUATED LATER; 
+									# which are THEN - flattened to obtain a single `.children` array for the arithmetic expression; 
+									return [
+										SingletonStream(Summand_Curried(elem, sign)), 
+										chooser1,
+									]
+
+								1. MATCHING - .curr 0/[ab]|#[BRACKET_TYPE]/ [with no prev. match of 'peek(1)']
+									const elem = input.next() # skipping; NO +- AFTER the current one; Has to be end on the next [or, an ERROR]; 
+									return [
+										SingletonStream(Summand), # `Summand` - a RecursiveNode with `.children.length === 1`
+										chooser1 # end-recursion - 'IS_END'/Error ahead [NOTE: this needs to be SUBSET - break into `chooser1` and `chooser2` (lesser - without recursion)]
+									]
+
+
+								3. IS_END: 
+									return []
+
+								4. is ',' - return a `SingletonStream(id)` - passing those as-is; 
+
+								5. ERROR/ERROR-RECOVERY - invalid token provided
+
+						2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
+					6. PredicateStream - pick those that are not a ','
+					
+		CONCLUSION [about demos]: 
+			5. IMPORTANT : provide proper demos for: 
+				1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
+				2. SELF-MODIFYING thing [using `DynamicParser`]
+					THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
+
+		RE2. `Regex` description:
+			[maybe] - create your own flavour for 'RegExp's
+			IMPORTANT NOTE: 
+				1. must have a library-specific feature of targetting the `.type` property. 
+					More specifically, add a '{matched_type}'-Regex-construct for matching a token with a 
+						type `matched_type`. 
+				2. the types here must be either STRINGS or NUMBERS. 
+					More specifically: 
+						1. i{...} - matches a type of number
+						2. s{...} - matches a type of string
+
+			Then: 
+				1. [maybe?] add new convinience functions to `regex` to also handle your flavour...
+				2. create `fromRegExp` util, which would create a `Regex` [library] from `RegExp` [JS builtin]
+				3. write proper docs for the class
+
+			It will improve upon the "simple" JS regex in the following ways: 
+				0. replace the first and last items "/^$/" with /:#/
+				1. add a general `^x` for NEGATING a pattern. Thus, elementary [^...] becomes composite ^[...]
+					This way, for instance /^ab+/ matches "bbb", but not "ab". 
+				2. add a general `(){n, k}` - limits input from 'n' symbols to 'k' inclusively
+					to NOT grab it, use '(:...){n, k}' [basically, the same as the *ordinary* '{n, k}']; 
+				3. remove the `\B`, `\D`, `\S`, (?!...), (?<!...), ..., other negative-classes/assertions in favour of the simpler `^x` form
+				4. replace the (?:...) with (:...) [syntax simplification]
+				5. provide different '\\x' characters (obviously, due to changed syntax); make the escaping redundant for the rest
+				6. provide A SINGLE '\u{}' instruction instead of that horse**** with \X, \u and \c that JS has
+					Will span the max possible values of the Unicode range
+				7. get rid of the flags: 
+					1. 'g': 
+						replace the different behaviour with METHODS; make it non-exclusive
+
+					2. 'v':
+						remove, provide its functionality by default: 
+							1. `P` not working - it is removed and replaced by `^p{...}`:
+								By default, consumes the max possible string (remaining, if needed). 
+								Limited by (...){n, k}
+
+					3. 'i': 
+						make it a new group type - that matches A GROUP regardless of the case: 
+							Ideas for syntax: 
+								
+								1. /(#i...)/; 
+								2. /(?i...)/; # more traditional...
+						
+						ALSO: make it possible to *inject* custom functionality 
+							(utilizing the fact that `RegExpTokenizer` CAN be generic); 
+
+					4. 's': 
+						make it default
+					
+					5. 'u': 
+						remove, included by default with `v`
+
+					6. 'y' (????): 
+						find out what this even is (and what it's used for)
+						seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
+				
+					7. 'm': 
+						remove - unnecessary
+						possible to achieve the same thing using a slight modification of:
+							/(?<\n)...(?=\n)/
+					
+					8. 'd': 
+						too specific, ugly
+						make these kinds of behaviours GENERIC instead
+						[note: the 'RegExpTokenizer' WILL be generic...
+				8. get rid of form-feed (`\f`): 
+					Reason: not useful for parsing
+				9. ALLOW the space in '{a,b}' (becomes '{a, b}'); 
+				10. Add a possesive quantifier "*+", "?+", "++": 
+					https://www.regular-expressions.info/possessive.html
+				11. Add atomic groups: 
+					https://www.regular-expressions.info/atomic.html
+				12. Double negation inside a class: 
+					^[^\w] is the same as (in JS flavour) [^\W]
+
+					That is, it is COMLEMENT OF A CLASS of items that are NOT A CHARACTER.
+					That is, it's \w. 
+				13. Add relative backreferences: 
+					https://www.regular-expressions.info/backrefrel.html
+				14. Fix the ECMAScript behaviour of empty-matching backreferences: 
+					https://www.regular-expressions.info/backref2.html
+				15. Add the conditionals: 
+					https://www.regular-expressions.info/conditional.html
+				16. Regarding the /(#)/ - modes: 
+					https://www.regular-expressions.info/modifiers.html
+				17. Add subroutines (recursion): 
+					https://www.regular-expressions.info/subroutine.html
+
+				IDEA: use this regex-flavour for the HammockLang implementation later...	
+				
+				IMPORTANT NOTE[1]: 
+					1. `Regex` works with BOTH: 
+						1. string
+						2. IStream<string>: 
+							reason - to allow implementations for faster/lazy algorithms
+
+				IMPORTANT NOTE[2]: 
+					1. .matchAt(x: Indexed<string>, i: number)
+						Checks that AT THE GIVEN `i` IN `x`, 
+							there is AN IMMIDIATE MATCH. 
+						This is important, as it allows the "tabular" work that the TokenStream does
+					2. .sub(from: number, to: number) - returns a new Regex that is the result of LIMITING the current one
+						between `from` and `to` indexes for VALID TOKENS. 
+
+						This way, for instance: 
+							(a(bc)+) has 4 tokens, ordered as: 
+								1. (...) - outer bracket
+								2. a 
+								3. (...) - inner bracket
+								4. + [relative to the outer bracket]
+								5. b
+								6. c
+
+						Thus, recursion is handled BY THE FIRST OCCURENCE. 
+
+					ALSO, add the JavaScript string-compatibility methods: 
+						1. [Symbol.match]
+						2. [Symbol.matchAll]
+						3. [Symbol.replace]
+						4. [Symbol.search]
+						5. [Symbol.split]
+
+					ALSO [imporant]: have ALGEBRAIC methods for it. 
+						Meaning: ability to join them via a disjunction '|', 
+							applying the quantifiers '*', '+', '{a, b}', '?', 
+							applying negation '^'. 
+						Each of those CREATES A NEW 'Regex'! 
+						Purpose is to (basically) replace the `regex` module. 
+					
+					ALSO: the `Regex` implements an NFA
+
+		EL1. Eliminator: 
+			Replacement for the old `Eliminator`, based off `Regex`; 
+			Lazy, doesn't need several passes. 
+			Takes in the `Regex` list [walks, for given "character", each of them, matching, eliminating what was matched...]; 
+				Eliminates ONLY the first thing....; 	
+				
+	Secondary: 			
+		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+			Namely: 
+				1. intersection: 	/[[...]&&[...]]/v
+				2. subtraction: 	/[[...]--[...]]/v
+				3. string literals: /[q{...}]/v
+		
+	Minor: 	
+		TY2. Type simplification - the `array.Pairs` overuse: 
+			Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
+			Specifically - when the [Symbol.iterator] is the only actually needed property.
+				
+	IMPORTANT: clean the git history - keep only the commits for each individual version; 
+		Squash all the others + change the respective commit messages; 
+		[do this via `git rebase -i` + `git push --force`]
+
+	TODO: WRITE the CHANGELOG
+	
 [v0.4]
 
 TODO: 
-
 	0. General notes (see these before anything else): 
 		TE1. Do TDD this time
 		JD1. [IMPORTANT] Expand JSDoc: 	
@@ -1068,7 +712,7 @@ TODO:
 						some little time could have been saved. 
 						
 	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
-		TS1. DepthStream [BreadthStream]: create a new versions; 
+		TS1. DepthStream: create a new version - children-first traversal [call it `ChildrenStream`]; 
 			The 'DepthStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
 			There should be ANOTHER - the 'LR' post-order tree traversal; 
 
@@ -1082,28 +726,7 @@ TODO:
 					whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
 
 				[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
-			
-		TS2. Implement a 'BreadthStream' class - a BFS-alternative to 'DepthStream': 
-			It would get an initial given 'level' (tree root), walk through all of its '.children', 
-				then walk each of the '.children' themselves as levels (one after another...), THEN descending lower...; 
-			Would do it via calling '.getJointLayer' function (then - caching for later '.prev'); 
-			This (basically) takes the nodes from the previous 'joint layer', gets their respective children,
-				CONCATENATES THEM into a new layer, then iterates it; 
 				
-		IM1. Create a new 'IndexMap' implementation: 'SetHash'; 
-			This would be a: 
-				1. HashClass interface implementation; 
-				2. generalized wrapper around a Set (in a way that HashMap is a wrapper around Object and Map); 
-					2.1. Would have its own 'extension'; 
-					2.2. For 'values' would contain true/false; 
-
-			This is useful for working with cases that require the 'or'-predicate; 
-			Example: 'nested' utility; 
-			How it is done [pseudo-code]: 
-
-				const SpecialCaseSetMap = SetHash(...)
-				const processNested = (x) => nested(TableMap(new SpecialCaseSetMap([...])), TableMap(new SpecialCaseSetMap([...])))(new WhateverStream(x))
-									
 		TC1. Create an 'ASTAnalyzer' class [under new 'Node' module]: 
 			1. Takes in an `INode`
 			2. Traverses the tree
@@ -1167,9 +790,7 @@ TODO:
 										return array(InputStream(ast.types.index(type).map(F)), new UnfreezableString()).get()
 									}
 								}
-	
-						IDEA: ADD a set of 'samples' to the library - see above...
-	
+		
 					Also - '.map(F)' OPTIMIZES, so, it expects the given values to be returning FUNCTIONS, for plugging in their children's 'F(x)', 
 						so: 
 	
@@ -1222,6 +843,12 @@ TODO:
 								2. Expects a VALID abstract syntax tree
 	
 				2. For '.type's field values, one uses EITHER an 'ObjectHashInternal' (if strings), or a 'MapHashInternal' (if not strings); 
+		
+		ME3. [IStream] Iterator Helper functions - '.filter', '.take', ...: 
+			Provide them. 
+			Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
+			These will (each) require individual internal-class implementations + public interfaces to use.
+				Reason for "internal" nature of these classes: one doesn't want to allow user to create them on their own
 		
 	2. Secondary [new utils, methods]
 		UT1. bufferize(tree, size) - util [Tree/utils.ts]
@@ -1293,59 +920,8 @@ TODO:
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
-			
-	3. Minor [fixes, optimizations, refactoring, types, naming]
-		IM4. [maybe?] Do some amazing TypeScript jiggery-pokery:
-			Sometimes, the type can be more complex to predict [but STILL might be possible via templates, type-inferences and special functions like 'Parameters'...]: 
-
-				[LinearIndexMap/methods.ts]
-				1. extend
-				2. extendKey
 								
-		VA1. validation-related mini-predicates: 
-			At least: 
-				1. 'input.next() == X'
-				2. 'set.has(input.next())'
-
-			Provide as 'trivialCompose'-compositions of elementary methods...
-	
-	4. Unrelated/separate module/grand refactoring: 
-		DE2. [Idea?] Create an error-handling API for the 'v0.4';
-			Create means of: 
-				1. Stacking different levels of exceptions (the 'try-catch' blocks); 
-				2. Assigning relevant debug information to them;
-
-			This is (primarily) for the development process of the parsers; 
-			
-			Define a Catcher [rough sketch]: 
-
-				function Catcher (info: DebugInfo, logger: Function) {
-					return function (thing: Function, thisArg: any, args: any) {
-						try {
-							thing.call(thisArg, ...args)
-						} catch (e) {
-							logger(info)
-							throw e // NOTE: THIS here is to represent DEPTH [as parsers can be VERY recursive indeed, it may be needed to eliminate the recursive errors on a case-by-case basis]; 
-						}
-					}
-				}
-
-			And a ToplevelCatcher [rough sketch, can use to generalize the above, with 'quit = (e) => throw e']: 
-
-				function ToplevelCatcher (info: DebugInfo, logger: Function, quit: Function) {
-					return function (thing: Function, thisArg: any, args: any) {
-						try {
-							thing.call(thisArg, ...args)
-						} catch (e) {
-							logger(info)
-							quit(e, info) // this is here to represent continuation of a program AFTER the exception
-						} 
-					}
-				}
-
-			Although... This is rather general. Perhaps, better implement as a separate package; 
-			Likewise, there'd be ways to count levels of recursion, and assign types to them [specialized signature]; 	
-		
+	3. Unrelated/separate module/grand refactoring: 		
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
 			1. draw-text [install-npm + prod-to GitHub Pages]
 				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
@@ -1353,7 +929,7 @@ TODO:
 			3. regex [to npm]
 			4. xml [to npm]
 
-	5. Docs: 
+	4. Docs: 
 		WE1. CREATE A proper website with documentation for the library. 
 			Do benchmarks, et cetera...; 
 			After doing GitHub Wiki for v0.3, see if it cuts it (spoiler - it likely won't one STILL wants the ravishing types for the library's docs to be present!)
@@ -1426,12 +1002,12 @@ TODO:
 
 			Add a Guide for that.
 
-	6. Testing: 
+	5. Testing: 
 		1. introduce mocks [use Jest]
 			Reason: complexity. 
 				There's still v0.4 to go (proper BFS implementation, for instance...); 
 
-	7. Research (Chevrotain - source, capabilities, optimizations): 
+	6. Research (Chevrotain - source, capabilities, optimizations): 
 		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
 			1. *possibly*, if the libraryperformance is really bad, do something about it...
 		2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
@@ -1441,21 +1017,7 @@ TODO:
 			Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
 
 FUTURE: 
-	1. idea for a project - a command-line based tool for parser-creation: 
-		Works thus, it allows the user to set (sequentially, one-by-one): 
-			1. Enum-labels for types (uses a lazy FiniteEnum): 
-				1. for acceptable tokens
-				2. for acceptable tree-nodes
-			2. Regular Expressions (in out Regex-flavour) for parsing different token types
-			3. Grammar rules for creation of 'AST' nodes (see 'ASTAnalyzer' for v0.4)
-
-		1. ALSO - allows a non-interactive mode
-
-		2. Output: 
-			1. parser (in JavaScript)
-			2. source-generator (in JavaScript)
-
-	2. REFACTOR [some] of the `internal` APIs into SEPARATE npm PACKAGES: 
+	1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
 		0. `copiable` package: 
 			A TypeScript package. 
 			Contains the `ICopiable` trait. 
@@ -1469,7 +1031,9 @@ FUTURE:
 		
 		2. `test` package [already developed]: 
 			1. add the current 'ClassTest', 'MethodTest' 
-			2. make `copiable` a dependency of this
+			2. make `copiable` a dependency of this: 
+				1. reason - relies upon copiability of a given class for its instances to be 
+					'ITestable' - a new interface to export
 			3. [unrelated] add serialization of tested items [interfaces for it, etc]
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
 
@@ -1482,39 +1046,7 @@ FUTURE:
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
 
-	3. Ensure that this works with: 
-		1. Deno
-		2. Bun
-
-		Rewrite using middleware? 
-		Or just check compabitility details? 
-			[should be relatively simple, since the package doesn't make almost any use of Node specifically...]
-
-	4. [maybe?] try using JSR for this one [https://jsr.io/]
-
-	5. Standard-dependent [https://github.com/tc39/proposal-grouped-and-auto-accessors]: 
-		This specific proposal absolutely rocks. 
-		TODO: make all the properties that are currently "public" for both writing and reading, 
-			but are intended to be `readonly` into `accessor varName { get; #set }`
-
-			This creates a public getter and a private setter (precisely the thing). 
-			Particularly, it touches: 
-
-				1. ILinearIndexMap [.values, .keys, etc]
-				2. ILineIndex [.char, .line]
-				3. StreamClass [.value, .buffer, etc]
-				4. all the `protected value` properties [InitializablePattern, etc]; 
-					These are ALSO supposed to only be changeable privately...; 
-
-	6. Optimization [possibly being paranoid/picky... buuuuut!]: 
-		Currently, the library has (mostly) gone away from the `abstract class + Configurator Pattern` stuff, 
-			since its only real ever purpose was performance, and it's horribly ugly, so it 
-				remained only for a handful of classes (which are intended to be used A LOT by the end-user application). 
-		However, one fears that a change may be (a tad) too radical. 
-		Thus: make a real-world application - profile. 
-		Find out which classes are (most likely) to be taking space.
-
-	7. [maybe? later, definitely] A Java rewrite: 
+	2. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 
 		Howeeeverr...
 		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
@@ -1532,5 +1064,10 @@ FUTURE:
 		Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
 			better than the current JS code (since it's been transpiled from TypeScrtipt). 
 
-	8. Reminder: do you rmember the stack.js? 
+	3. Reminder: do you rmember the stack.js? 
 		Old (partially abandonned) project for using "stackless" code?
+
+	4. (maybe) later - ensure JS-runtime-independence: 
+		Verify that the package has compatibility with: 
+		1. Deno [v2.0+]
+		2. Bun [v1.0+]
