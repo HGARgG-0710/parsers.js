@@ -112,18 +112,10 @@ CURRENT TODOS:
 			3. ALSO - join the 'samples' with the 'constants.ts' file 
 				[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
 
-	TODO: REMOVE `Callable` [prepare the `callable` sketch - add `Callable` to package sources...]; 
-		As a piece of JavaScript - it's ingenious. 
-		As a piece of TypeScript - it's pointless, difficult  and dangerous. 
-		DO make it into a package (later), BUT, transpile it individually first...; 
-			DO NOT remove it from the package... 
-			Just don't export it out and don't use it anywhere... [since it's really useless...v]
-
 	TODO: Docs
 		BEFORE YOU DO THAT: 
-			1. transport `Callable` out
-			2. finish the `samples`
-			3. decide the ultimate fate of `utils`
+			1. finish the `samples`
+			2. decide the ultimate fate of `utils`
 		
 		1. Ensure that ALL the exports are AS-DESIRED (relevant)
 			Finalize the library exports, that is
@@ -1023,13 +1015,7 @@ FUTURE:
 			Contains the `ICopiable` trait. 
 			Make a dependency of this. 
 
-		1. `callable` package: 
-			1. 'Callable' internal class. 
-
-			Reason for refactor: too beautiful to stay here. 
-				This thing must be shared...
-		
-		2. `test` package [already developed]: 
+		1. `test` package [already developed]: 
 			1. add the current 'ClassTest', 'MethodTest' 
 			2. make `copiable` a dependency of this: 
 				1. reason - relies upon copiability of a given class for its instances to be 
@@ -1037,12 +1023,12 @@ FUTURE:
 			3. [unrelated] add serialization of tested items [interfaces for it, etc]
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
 
-		3. `autocache` package [make a dependency of parsers.js]: 
+		2. `autocache` package [make a dependency of parsers.js]: 
 			1. Autocache
 			2. IIndexable
 			3. ISettable
 		
-		4. `serializable`: 
+		3. `serializable`: 
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
 
