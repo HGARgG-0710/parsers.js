@@ -32,8 +32,8 @@ export class LazyStream
 		return this.source!.decoded
 	}
 
-	protected baseNextIter(n?: number) {
-		this.nextDecoded(n)
+	protected baseNextIter() {
+		this.nextDecoded()
 	}
 
 	protected postEnd(): void {
@@ -45,7 +45,7 @@ export class LazyStream
 	}
 
 	navigate(pos: IPosition) {
-		if (isNumber(pos)) this.source!.nextChar(pos)
+		if (isNumber(pos)) this.nextDecoded(pos)
 		else uniNavigate(this, pos)
 		this.update()
 		return this.curr

@@ -66,16 +66,29 @@ abstract class PreSource implements ISource {
 		this.advance(length)
 	}
 
+	protected copySingleChar() {
+		this.reader()
+	}
+
+	protected decodeLastCopied() {
+		this.decoded = this.decoder(this.temp)
+	}
+
+	private copyLastOf(n: number) {
+		while (n-- && this.hasChars()) this.copySingleChar()
+	}
+
+	private readSingleChar(n: number) {
+		this.copyLastOf(n)
+		this.decodeLastCopied()
+	}
+
 	hasChars() {
 		return this.size > this.pos
 	}
 
 	nextChar(n = 1) {
-		if (n > 0) this.advance(n - 1)
-		if (this.hasChars()) {
-			this.reader()
-			this.decoded = this.decoder(this.temp)
-		}
+		if (this.hasChars()) this.readSingleChar(n)
 	}
 
 	cleanup() {
@@ -99,7 +112,7 @@ abstract class PreMultSource extends PreSource {
 		this.tempRead = length
 	}
 
-	protected static transferTemp(instance: PreMultSource) {
+	private static transferTemp(instance: PreMultSource) {
 		instance.temp.copy(instance.currBuffer)
 	}
 
@@ -117,7 +130,7 @@ abstract class PreMultSource extends PreSource {
 
 	protected abstract decoder(buffer: Buffer): string
 
-	protected pickBuffer(size: number) {
+	private pickBuffer(size: number) {
 		const isTemp = size === FROM_TEMP
 		const currSize = isTemp ? this.temp.length : size
 
@@ -129,14 +142,15 @@ abstract class PreMultSource extends PreSource {
 	}
 
 	protected readonly charSizes: (Buffer | null)[]
+	private tempRead: number
+	private currBuffer: Buffer
 
-	protected tempRead: number
-	protected currBuffer: Buffer
+	protected copySingleChar() {
+		this.pickBuffer(this.reader())
+	}
 
-	nextChar(n = 1) {
-		if (n > 0) this.advance(n - 1)
-		if (this.hasChars())
-			this.decoded = this.decoder(this.pickBuffer(this.reader()))
+	protected decodeLastCopied(): void {
+		this.decoded = this.decoder(this.currBuffer)
 	}
 }
 
