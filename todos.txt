@@ -17,6 +17,10 @@ NEXT UP:
 			2. through internal/ files
 			3. through interfaces/ files
 			4. through utils/ files
+
+	TODO [minor]: let the `PreTokenNode` inherit from `Initializer`
+		LET these classes provide the `.initializer` property. 
+		Reason - style. 
 					
 CURRENT TODOS:	
 	TODO: `samples`: 
