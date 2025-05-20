@@ -1,5 +1,6 @@
 import type {
 	ICopiable,
+	IFreeable,
 	IInitializable,
 	ISerializableObject
 } from "../interfaces.js"
@@ -50,7 +51,8 @@ export interface INode<Type = any, Args extends any[] = any[]>
 	extends ITyped<Type>,
 		IWalkable<INode<Type>>,
 		ISerializableObject,
-		IInitializable<Args> {
+		IInitializable<Args>,
+		Partial<IFreeable> {
 	parent: INode<Type> | null
 }
 

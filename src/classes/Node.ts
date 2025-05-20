@@ -1,4 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
+import type { IPoolGetter } from "../interfaces.js"
 import type {
 	ICellNode,
 	INode,
@@ -69,6 +70,10 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 
 	init() {
 		return this
+	}
+
+	free(poolGetter: IPoolGetter<INode<Type>>) {
+		poolGetter.get(this)!.free(this)
 	}
 }
 
@@ -197,6 +202,11 @@ abstract class PreRecursiveNode<Type = any>
 	init(children?: INode<Type>[]) {
 		if (children) this.children = children
 		return this
+	}
+
+	free(poolGetter: IPoolGetter<INode<Type, any[]>>): void {
+		for (const child of this.children) child.free?.(poolGetter)
+		super.free(poolGetter)
 	}
 
 	constructor(children: INode<Type>[] = []) {

@@ -9,6 +9,8 @@ import type {
 	INodeTypesMap,
 	INodeTypeCategories
 } from "../interfaces/Node.js"
+import { TypedPoolKeeper } from "./PoolGetter.js"
+import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 
 export function NodeFactory<T = any>(
 	preFactory: INodeTypeFactory<T>
@@ -19,10 +21,10 @@ export function NodeFactory<T = any>(
 export class NodeSystem<T = any> {
 	private readonly types: INodeTypesMap<T>
 	private readonly typesSet: Set<T>
-	private readonly pools: Map<T, ObjectPool>
+	private readonly pools = new TypedPoolKeeper<T>()
 
 	private getExistingPoolFor(type: T) {
-		return this.pools.get(type)!
+		return this.pools.getByType(type)!
 	}
 
 	private poolExistsFor(type: T) {
@@ -38,6 +40,10 @@ export class NodeSystem<T = any> {
 			type,
 			new ObjectPool(this.getExistingByType(type))
 		)
+	}
+
+	get typePools(): IPoolGetter {
+		return this.pools
 	}
 
 	getByType(type: T) {
