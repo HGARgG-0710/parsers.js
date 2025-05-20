@@ -1,9 +1,10 @@
-import { array, functional, inplace } from "@hgargg-0710/one"
+import { array, functional } from "@hgargg-0710/one"
 import type {
 	ICellNode,
 	INode,
 	INodeClass,
-	INodeDeserializer
+	INodeDeserializer,
+	IRecursiveNode
 } from "../interfaces/Node.js"
 import { isCopiable } from "../utils.js"
 import {
@@ -52,24 +53,7 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 		return result
 	}
 
-	// * Dummy methods [interface conformance]
-	set(node: INode<Type>, i: number) {
-		return this
-	}
-
-	write(node: INode<Type>, multindex: number[]) {
-		return this
-	}
-
-	insert() {
-		return this
-	}
-
 	index(multind: number[]): any {}
-
-	remove() {
-		return this
-	}
 
 	read(i: number): INode<Type> {
 		return this
@@ -164,7 +148,7 @@ export const ContentNode = NodeFactory(function <Type = any, Value = any>(
 
 abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
-	implements INode<Type, [INode<Type>[]]>
+	implements IRecursiveNode<Type>
 {
 	protected ["constructor"]: new (children?: INode<Type>[]) => this
 
@@ -200,24 +184,8 @@ abstract class PreRecursiveNode<Type = any>
 		return result
 	}
 
-	write(node: INode<Type>, multindex: number[]) {
-		this.index(array.lastOut(multindex)).set(node, array.last(multindex))
-		return this
-	}
-
 	copy() {
 		return new this.constructor(this.children.map((x) => x.copy()))
-	}
-
-	insert(node?: INode<Type>, index: number = this.children.length - 1) {
-		inplace.insert(this.children, index, node)
-		return this
-	}
-
-	remove(index: number = this.children.length - 1): this {
-		this.children[index].parent = null
-		inplace.out(this.children, index)
-		return this
 	}
 
 	toJSON(): string {

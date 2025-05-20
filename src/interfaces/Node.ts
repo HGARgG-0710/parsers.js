@@ -36,9 +36,14 @@ export interface INodeClass<Type = any, Args extends any[] = any[]>
 	new (...x: Args): INode<Type, Args>
 }
 
-export interface ICellClass<Type = any, Value = any>
+export interface ICellNodeClass<Type = any, Value = any>
 	extends INodeClass<Type, [Value]> {
 	new (value: Value): ICellNode<Type, Value>
+}
+
+export interface IRecursiveNodeClass<Type = any>
+	extends INodeClass<Type, [INode<Type>]> {
+	new (children: INode<Type>[]): IRecursiveNode<Type>
 }
 
 export interface INode<Type = any, Args extends any[] = any[]>
@@ -47,11 +52,10 @@ export interface INode<Type = any, Args extends any[] = any[]>
 		ISerializableObject,
 		IInitializable<Args> {
 	parent: INode<Type> | null
-	set: (node: INode<Type>, i: number) => this
-	write: (node: INode<Type>, multindex: readonly number[]) => this
-	insert: (node: INode<Type>, index?: number) => this
-	remove: (index?: number) => this
 }
+
+export interface IRecursiveNode<Type = any>
+	extends INode<Type, [INode<Type>[]]> {}
 
 export interface ICellNode<Type = any, Value = any>
 	extends INode<Type>,
