@@ -15,5 +15,6 @@ export * from "../Stream/classes/PosStream.js"
 export * from "../Stream/classes/SingletonStream.js"
 export * from "../Stream/classes/TransformStream.js"
 export * from "../Stream/classes/WrapperStream.js"
+export * from "../Stream/classes/WriterStream.js"
 
 export * as Position from "../Stream/classes/Position.js"

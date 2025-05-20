@@ -1,5 +1,7 @@
 export * from "./classes/ArrayCollection.js"
+export * from "./classes/Destination.js"
 export * from "./classes/DynamicParser.js"
+export * as Encoder from "./classes/Encoder.js"
 export * as HashMap from "./classes/HashMap.js"
 export * as IndexMap from "./classes/IndexMap.js"
 export * as Initializer from "./classes/Initializer.js"

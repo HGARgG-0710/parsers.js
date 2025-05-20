@@ -1,8 +1,4 @@
 import { functional, object, type } from "@hgargg-0710/one"
-import type {
-	IStreamPredicate,
-	IStreamTransform
-} from "../interfaces/StreamHandler.js"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { Stream } from "../constants.js"
 import type {
@@ -13,11 +9,6 @@ import type {
 	IPosition,
 	IPushable
 } from "../interfaces.js"
-import {
-	direction,
-	pickDirection,
-	positionNegate
-} from "../Stream/utils/Position.js"
 import type {
 	IBackward,
 	IFinishable,
@@ -30,6 +21,15 @@ import type {
 	IStarted,
 	IStream
 } from "../interfaces/Stream.js"
+import type {
+	IStreamPredicate,
+	IStreamTransform
+} from "../interfaces/StreamHandler.js"
+import {
+	direction,
+	pickDirection,
+	positionNegate
+} from "../Stream/utils/Position.js"
 
 const { SkippedItem } = Stream.StreamParser
 const { prop, structCheck } = object

@@ -1,6 +1,5 @@
 import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
-import { fromEnum, isGoodIndex } from "../utils.js"
-import { ContentNode, RecursiveNode, TokenNode } from "../classes/Node.js"
+import type { NodeSystem } from "../classes/NodeSystem.js"
 import type {
 	IChildrenHaving,
 	ITypeCheckable,
@@ -8,8 +7,7 @@ import type {
 	IValued,
 	IWalkable
 } from "../interfaces/Node.js"
-import type { Enum } from "../classes.js"
-import type { NodeSystem } from "../classes/NodeSystem.js"
+import { isGoodIndex } from "../utils.js"
 
 const { prop, structCheck } = object
 const { trivialCompose } = functional
@@ -29,24 +27,6 @@ export const isRecursiveNodeSerializable = structCheck<
 	type: T,
 	children: isArray
 })
-
-/**
- * Returns `TokenNode`s with `.type`s defined by the elements of the
- * given `IEnumSpace`
- */
-export const tokenNodes = fromEnum(TokenNode)
-
-/**
- * Returns `ContentNode`s with `.type`s defined by the elements of the
- * given `IEnumSpace`
- */
-export const contentNodes = fromEnum(ContentNode)
-
-/**
- * Returns `RecursiveNode`s with `.type`s defined by the elements of the
- * given `IEnumSpace`
- */
-export const recursiveNodes = fromEnum(RecursiveNode)
 
 /**
  * Returns whether the given `x` has at least 1 child

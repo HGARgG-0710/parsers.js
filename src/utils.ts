@@ -1,13 +1,11 @@
 import { boolean, object, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { Enum } from "./classes.js"
 import { BadIndex } from "./constants.js"
 import type {
 	IBufferized,
 	ICopiable,
 	IIndexAssignable,
 	IIndexed,
-	IMappable,
 	IPersistentAccumulator,
 	ISizeable,
 	IStateful,
@@ -71,14 +69,6 @@ export const assignIndex = <Type = any>(
 	assignedIndex: Type
 ) => (x.assignedIndex = assignedIndex)
 
-/**
- * Returns a function mapping `enums` using `f`
- */
-export const fromEnum =
-	<T = any, Type = any>(f?: IMappable<T, Type>) =>
-	(enums: Enum<T>) =>
-		enums.map(f)
-
 export const resource = prop("resource")
 
 export const isLF = eqcurry("\n")
@@ -94,3 +84,4 @@ export * as HashMap from "./utils/HashMap.js"
 export * as IndexMap from "./utils/IndexMap.js"
 export * as Node from "./utils/Node.js"
 export * as Stream from "./utils/Stream.js"
+
