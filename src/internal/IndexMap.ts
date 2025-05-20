@@ -87,7 +87,7 @@ export abstract class BaseIndexMap<
 	) => IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 
 	copy() {
-		return new this.constructor(toPairs(table(this)), this.default)
+		return new this.constructor(toPairs(...table(this)), this.default)
 	}
 
 	unique() {

@@ -34,9 +34,9 @@ export function linearPairs<KeyType = any, ValueType = any>(
  * Given a pair of arrays of keys and values, returns an array of pairs.
  */
 export function toPairs<KeyType = any, ValueType = any>(
-	keyValues: [KeyType[], ValueType[]]
+	keys: KeyType[],
+	values: ValueType[]
 ) {
-	const [keys, values] = keyValues
 	let size = keys.length
 
 	const result = Pairs<KeyType, ValueType>(size)

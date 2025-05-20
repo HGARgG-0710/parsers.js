@@ -1,11 +1,34 @@
 import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
 import { fromEnum, isGoodIndex } from "../utils.js"
 import { ContentNode, RecursiveNode, TokenNode } from "../classes/Node.js"
-import type { ITypeCheckable, ITyped, IWalkable } from "../interfaces/Node.js"
+import type {
+	IChildrenHaving,
+	ITypeCheckable,
+	ITyped,
+	IValued,
+	IWalkable
+} from "../interfaces/Node.js"
+import type { Enum } from "../classes.js"
+import type { NodeSystem } from "../classes/NodeSystem.js"
 
-const { prop } = object
+const { prop, structCheck } = object
 const { trivialCompose } = functional
-const { eqcurry } = boolean
+const { eqcurry, T } = boolean
+const { isArray } = _type
+
+export const isTyped = structCheck<ITyped>(["type"])
+
+export const isContentNodeSerializable = structCheck<ITyped & IValued>([
+	"type",
+	"value"
+])
+
+export const isRecursiveNodeSerializable = structCheck<
+	ITyped & IChildrenHaving
+>({
+	type: T,
+	children: isArray
+})
 
 /**
  * Returns `TokenNode`s with `.type`s defined by the elements of the
@@ -83,3 +106,17 @@ export const isType = <Type = any>(
 	_type: Type
 ): (<Type = any>(x: ITyped<Type>) => boolean) =>
 	trivialCompose(eqcurry(_type), type)
+
+export function fromObject<Type = any>(allowedTypes: NodeSystem<Type>) {
+	function isValid(type: Type): boolean {
+		return allowedTypes.has(type)
+	}
+
+	return function deserializer(from: any) {
+		if (!isTyped(from)) return false
+		if (!isValid(from.type)) return false
+		return allowedTypes
+			.getByType(from.type)!
+			.deserialize(from, deserializer)
+	}
+}

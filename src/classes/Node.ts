@@ -1,18 +1,32 @@
-import { array, inplace } from "@hgargg-0710/one"
-import { MapInternal } from "../HashMap/PreMap/classes/MapInternal.js"
+import { array, functional, inplace } from "@hgargg-0710/one"
 import type {
-	ICellClass,
 	ICellNode,
 	INode,
-	INodeClass
+	INodeClass,
+	INodeDeserializer
 } from "../interfaces/Node.js"
-import { Autocache } from "../internal/Autocache.js"
 import { isCopiable } from "../utils.js"
-import { isType } from "../utils/Node.js"
-import { BasicHash } from "./HashMap.js"
+import {
+	isContentNodeSerializable,
+	isRecursiveNodeSerializable,
+	isType,
+	isTyped
+} from "../utils/Node.js"
+import { NodeFactory } from "./NodeSystem.js"
+
+const { id } = functional
 
 abstract class PreTokenNode<Type = any> implements INode<Type> {
 	protected ["constructor"]: new () => this
+
+	static deserialize<Type = any>(
+		this: INodeClass<Type, []>,
+		x: any,
+		deserializer: INodeDeserializer<Type>
+	) {
+		if (!isTyped(x)) return false
+		return new this()
+	}
 
 	abstract readonly type: Type
 	parent: INode<Type> | null = null
@@ -68,11 +82,13 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 	toJSON(): string {
 		return `{"type": ${JSON.stringify(this.type)}}`
 	}
+
+	init() {
+		return this
+	}
 }
 
-export const TokenNode = Autocache(new BasicHash(new MapInternal()), function <
-	Type = any
->(type: Type) {
+export const TokenNode = NodeFactory(function <Type = any>(type: Type) {
 	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
 		static readonly type = type
 		static is = isType(type)
@@ -82,13 +98,32 @@ export const TokenNode = Autocache(new BasicHash(new MapInternal()), function <
 		}
 	}
 	return tokenNode
-}) as <Type = any>(type: Type) => INodeClass<Type>
+})
 
 abstract class PreContentNode<Type = any, Value = any>
 	extends PreTokenNode<Type>
 	implements ICellNode<Type, Value>
 {
 	protected ["constructor"]: new (value?: Value) => this
+
+	static deserialize<Type = any, Value = any>(
+		this: INodeClass<Type, [Value]>,
+		x: any,
+		deserializer: INodeDeserializer<Type>
+	) {
+		if (!isContentNodeSerializable(x)) return false
+		return new this(x.value)
+	}
+
+	private _value: Value
+
+	private set value(newValue: Value) {
+		this._value = newValue
+	}
+
+	get value() {
+		return this._value
+	}
 
 	copy() {
 		return new this.constructor(
@@ -102,31 +137,48 @@ abstract class PreContentNode<Type = any, Value = any>
 		)}, "value": ${JSON.stringify(this.value)}}`
 	}
 
-	constructor(public readonly value: Value) {
+	init(value?: Value) {
+		if (value) this.value = value
+		return this
+	}
+
+	constructor(value?: Value) {
 		super()
+		this.init(value)
 	}
 }
 
-export const ContentNode = Autocache(
-	new BasicHash(new MapInternal()),
-	function <Type = any, Value = any>(type: Type) {
-		class contentNode extends PreContentNode<Type, Value> {
-			static readonly type = type
-			static is = isType(type)
+export const ContentNode = NodeFactory(function <Type = any, Value = any>(
+	type: Type
+) {
+	class contentNode extends PreContentNode<Type, Value> {
+		static readonly type = type
+		static is = isType(type)
 
-			get type() {
-				return type
-			}
+		get type() {
+			return type
 		}
-		return contentNode
 	}
-) as <Type = any, Value = any>(type: Type) => ICellClass<Type, Value>
+	return contentNode
+})
 
 abstract class PreRecursiveNode<Type = any>
 	extends PreTokenNode<Type>
-	implements INode<Type>
+	implements INode<Type, [INode<Type>[]]>
 {
 	protected ["constructor"]: new (children?: INode<Type>[]) => this
+
+	static deserialize<Type = any>(
+		this: INodeClass<Type, [INode<Type>[]]>,
+		x: any,
+		deserializer: INodeDeserializer<Type>
+	) {
+		if (!isRecursiveNodeSerializable(x)) return false
+		const maybeNodes = x.children.map(deserializer)
+		return maybeNodes.every(id) && new this(maybeNodes as INode<Type>[])
+	}
+
+	private children: INode<Type>[]
 
 	read(i: number): INode<Type> {
 		return this.children[i]
@@ -174,23 +226,26 @@ abstract class PreRecursiveNode<Type = any>
 		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
-	constructor(private children: INode<Type>[] = []) {
+	init(children?: INode<Type>[]) {
+		if (children) this.children = children
+		return this
+	}
+
+	constructor(children: INode<Type>[] = []) {
 		super()
+		this.init(children)
 		for (const child of children) child.parent = this
 	}
 }
 
-export const RecursiveNode = Autocache(
-	new BasicHash(new MapInternal()),
-	function <Type = any>(type: Type) {
-		class recursiveNode extends PreRecursiveNode<Type> {
-			static readonly type = type
-			static is = isType(type)
+export const RecursiveNode = NodeFactory(function <Type = any>(type: Type) {
+	class recursiveNode extends PreRecursiveNode<Type> {
+		static readonly type = type
+		static is = isType(type)
 
-			get type() {
-				return type
-			}
+		get type() {
+			return type
 		}
-		return recursiveNode
 	}
-) as <Type = any>(type: Type) => INodeClass<Type>
+	return recursiveNode
+})
