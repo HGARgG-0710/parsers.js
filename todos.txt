@@ -9,29 +9,16 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
+NEXT UP:
+	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
+		Reason - simplicity of names...
+		WALK: 
+			1. through classes/ files
+			2. through internal/ files
+			3. through interfaces/ files
+			4. through utils/ files
+					
 CURRENT TODOS:	
-	TODO: 'Source.nextChar(n)' is bugged. 
-		It skips n-1 BYTES, not characters. 
-		It should do the latter... [id est - the skipping is ENCODING-DEPENDENT!!!]
-			
-	TC3. Add `fromJSON` [JSON deserialization method] onto `INode`-implementing classes; 
-		NEW NOTE: 
-		Specifically, there is ONE new util just for this:
-			1. fromValidJSON(types: {typeName: ONEOF3_TOKEN_OR_CONTENT_OR_RECURSIVE_CONSTANT}) - reads a given JSON, PROVIDED that all the types
-				This throws an error if an invalid piece of JSON is provided, 
-					else - returns all as intended. 
-
-		OLD NOTE: 
-		Better still, make it a util - to obtain a given `tree` fully...; 
-		It would have: 
-
-		1. A proper class-managing system
-		2. As a return value: 
-			1. BasicHash(new MapInternal()) of classes [by their `type` - an `IndexMap`]: 
-				1. `.copy()` of `typesAutocache.value`, the `Autocache` used 
-					within this specific case [easier to do, since we are in need of knowing if something's been already defined or not...]
-			2. A tree, composed of `INode`-implementing items
-
 	TODO: `samples`: 
 		1. new `Stream` for `samples` [DO add in `v0.3`]. 
 			`JSONStream = StreamParser(JSON.stringify)`; 
@@ -154,21 +141,7 @@ CURRENT TODOS:
 			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
 				treating each class instance as a "test starting point", from which one can test various methods. 
 					Saves A LOT of boilerplate that is (usually) written when doing tests. 
-
-	TODO: make `Node`s POOLABLE [the `Initializer` module, the `Initializer` CLASS]; 
-		Big change, since, it will ALLOW one to be using `SingletonStream(someNodePool.create.bind(someNodePool))` 
-			inside, say, chooser-s, or other kinds of Stream-s. Finally, it will make the "shtick" memory-improvements 
-				ACTUALLY NOTICEABLE, because now the user can optimize memory to only EVER contain the "largest" "shtick" 
-					+ some minor book-keeping costs (one 4-byte address per each INode object). 
-					
-	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
-		Reason - simplicity of names...
-		WALK: 
-			1. through classes/ files
-			2. through internal/ files
-			3. through interfaces/ files
-			4. through utils/ files
-
+		
 MINOR TODOS: 			
 	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
 		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
