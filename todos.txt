@@ -23,6 +23,17 @@ NEXT UP:
 		Reason - style. 
 					
 CURRENT TODOS:	
+	TODO: `SourceU16`, `LoadedU16`, `EncoderU16`: 
+		Problem: these are LITTLE-ENDIAN, not BIG-ENDIAN. 
+			RENAME these to 'U16LE'
+			
+	TODO [maybe?]: FreeStream
+		IDEA [big change]: [try to] CHAGE the interface of `IStream` to INSTEAD have `.next(): void`
+			THEN, we'll be able to INSTEAD keep memory for JUST TWO Shticks, and not 3!
+
+	TODO: make the `.isStart` MANDATORY on `IStream`
+		1. REMOVE the `IBackward` interface - completely unhelpful. 
+
 	TODO: `samples`: 
 		1. new `Stream` for `samples` [DO add in `v0.3`]. 
 			`JSONStream = StreamParser(JSON.stringify)`; 
@@ -38,7 +49,7 @@ CURRENT TODOS:
 			2. ALSO - DelimiterStream
 				0. based off 'DelimitedStream'
 				1. uses a "has"-based predicate created from a list of possible delimiters/items
-		5. ADD NEW ".init-compositions" (old pseudocode)	
+		5. ADD NEW ".init-compositions" [NOT `CompositeStream`-s, although that is what is indended elsewhere...] (old pseudocode)	
 			1. trivialCompose(IndexStream, InputStream)
 			2. trivialCompose(IndexStream, LFStream, InputStream)
 			3. trivialCompose(IndexStream, LFStream, LazyBuffer)	
@@ -120,6 +131,42 @@ CURRENT TODOS:
 							when they need to: 
 								1. provide multiple kinds of information [flags, etc]
 								2. "flatten" the tree [since greater simplicity leads to greater depth]
+
+		8. WriterStream: 
+			1. JSONWriter - a "composition" of `WriterStream` and `JSONStream`, taking in a IStream
+				for producing JSON-serializable "shticks". 
+				ALSO: it's not a "pure" composition in that it requires: 
+					
+					1. FOUR new Stream-s: 
+						1. FiniteStream(...v): iterates the finite collection 'v[0], v[1], ...'
+							An inline, more "tame" version of `InputStream`
+							Also - no 'navigate/prev/rewindvA on it '
+						2. ConcatStream(...streams): 
+							Concatenates the outputs of given streams sequentially 
+								like 's_11, s_12, ..., s_1n, s_21, ..., s_2n, ...'
+						3. LoopStream(...v): 
+							An infinite stream that loops over the finite list of items 'v': 
+								'v1, v2, ..., vn, v1, v2, ...'
+						4. InterleaveStream(...streams)
+							Combines the streams by "interleaving" their values in the following fashion: 
+								's_11, s_21, ..., s_n1, s_12, s_22, ..., s_n2, ..."
+
+					2. TWO new methods [on IRecursiveNode - A NEW INTERFACE WITH THESE TWO]: 	
+						1. jsonInsertablePre(): 
+							For an IRecursiveNode, returns 
+								[
+									'{type: ..., children: [', 
+									'a1, a2, ...]}'
+								]
+								
+						2. jsonInsertablePost(): 
+							For an IRecursiveNode, returns 
+								[
+									'{type: ..., children: [a1, a2, ...', 
+									']}'
+								]
+
+	TODO: order imports [Shift + Alt + O]
 
 	TODO: Docs
 		BEFORE YOU DO THAT: 
@@ -316,13 +363,6 @@ LATER TODOS:
 				const matched = matchWord(stream, word)
 				skip(stream, matched)
 				if (matched) return wrapper(word)
-
-		PA4. A new class - `WriterStream` [a new `Stream`]: 
-			The reverse of a `LazyBuffer`, it WRITES its elements one-by-one into 
-				the given file/other resource. 
-
-			Can be chained, RETURNS ITEMS AS-IS (that is, it STILL has a return value, 
-				even though it's almost totally impure). 
 
 		TO2. [new IStream] `TokenStream` - based off `Regex`: 
 			IMPORTANT NOTE: 
