@@ -99,6 +99,24 @@ CURRENT TODOS:
 			3. ALSO - join the 'samples' with the 'constants.ts' file 
 				[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
 
+		7. INode: 
+			1. a `default` NodeSystem factory: 
+				Uses THREE CATEGORIES. 
+				These are defined by types provided by THE USER (it's a factory, not a single object), 
+					AND they are [given in that order]: 
+						1. TokenNode
+						2. ContentNode
+						3. RecursiveNode
+				Reasons: 
+					1. These three are sufficient
+					2. As the number of categories becomes lesser, the tree becomes simpler
+					3. These three are minimalistic
+					4. These three are absolutely necessary (always - in one form or another)
+						Most forms (typically) break these three categories on sub-categories, 
+							when they need to: 
+								1. provide multiple kinds of information [flags, etc]
+								2. "flatten" the tree [since greater simplicity leads to greater depth]
+
 	TODO: Docs
 		BEFORE YOU DO THAT: 
 			1. finish the `samples`
