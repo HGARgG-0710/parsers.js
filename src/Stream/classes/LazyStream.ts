@@ -28,6 +28,10 @@ export class LazyStream
 		this.source!.nextChar(n)
 	}
 
+	private cleanupSource() {	
+		this.source!.cleanup()
+	}
+
 	protected currGetter() {
 		return this.source!.decoded
 	}
@@ -37,7 +41,7 @@ export class LazyStream
 	}
 
 	protected postEnd(): void {
-		this.source!.cleanup()
+		this.cleanupSource()
 	}
 
 	isCurrEnd() {
@@ -52,7 +56,7 @@ export class LazyStream
 	}
 
 	init(source: ISource) {
-		this.source!.cleanup()
+		this.cleanupSource()
 		super.init(source)
 		return this
 	}

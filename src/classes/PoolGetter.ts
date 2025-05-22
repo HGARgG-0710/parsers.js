@@ -1,8 +1,7 @@
-import type { ITyped } from "../interfaces.js"
 import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 import type { ObjectPool } from "./ObjectPool.js"
 
-export class TypedPoolKeeper<T = any> implements IPoolGetter<ITyped<T>> {
+export class TypedPoolKeeper<T = any> implements IPoolGetter<T> {
 	private readonly pools = new Map<T, ObjectPool>()
 
 	has(type: T) {
@@ -13,11 +12,7 @@ export class TypedPoolKeeper<T = any> implements IPoolGetter<ITyped<T>> {
 		this.pools.set(key, pool)
 	}
 
-	getByType(key: T) {
+	get(key: T) {
 		return this.pools.get(key)
-	}
-
-	get(key: ITyped<T>) {
-		return this.getByType(key.type)
 	}
 }

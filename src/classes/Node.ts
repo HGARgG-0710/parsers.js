@@ -72,8 +72,8 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 		return this
 	}
 
-	free(poolGetter: IPoolGetter<INode<Type>>) {
-		poolGetter.get(this)!.free(this)
+	free(poolGetter: IPoolGetter<Type>) {
+		poolGetter.get(this.type)!.free(this)
 	}
 }
 
@@ -204,7 +204,7 @@ abstract class PreRecursiveNode<Type = any>
 		return this
 	}
 
-	free(poolGetter: IPoolGetter<INode<Type, any[]>>): void {
+	free(poolGetter: IPoolGetter<Type>): void {
 		for (const child of this.children) child.free?.(poolGetter)
 		super.free(poolGetter)
 	}
