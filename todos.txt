@@ -10,29 +10,95 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	6. the (possibly, not so distant) "future"
 
 NEXT UP:
-	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
-		Reason - simplicity of names...
-		WALK: 
-			1. through classes/ files
-			2. through internal/ files
-			3. through interfaces/ files
-			4. through utils/ files
+	TODO: WriterStream: 
+		0. TODO: REFACTOR the `ISource` into TWO interfaces [via composition] - ISource and IDecoder
+			THIS IS to *mirror* the IDestination + IEncoder dynamic. 
 
-	TODO [minor]: let the `PreTokenNode` inherit from `Initializer`
-		LET these classes provide the `.initializer` property. 
-		Reason - style. 
+			1. ISource manages ONLY: 
+				1. the read-only file connection
+				2. the DECODER property
+			2. IDecoder: 
+				1. takes a certain PORTION of the file's inputs: 
+					the portion is FIXED and is defined by the max number of bytes 
+						needed for a single character
+				2. RETURNS the READ AMOUNT (the amount needed for the next character)
+				3. RETURNS the SINGLE STRING-CHARACTER: 
+					1. will allow one to replace the ungodly procedural interface that is currently employed
+
+				The current ISource classes would become the 'IDecoder'! 
+				And there'd only be ONE 'ReadingSource' class, like there is only one `WritingDestination`. 
+
+		1. About 'IDestination', `Source`: 
+			Create a `ICleanupManager` classes (SourceManager and DestinationManager) for managing connections to open files. 
+				Rules: 
+					1. one connection per file
+					2. filenames are used for indexing
+
+				Available: 
+					1. .get(filename): (... WHATEVER-THE-INSTANCE-TYPE-IS: ISource, IDestination)
+						CREATES a new connection if it doesn't exist. 
+						Otherwise, returns the existing connection object. 
+						This (kind of) works the same way as the pooling logic, except the user does the reuse THEMSELVES. 
+						Plus - (at some point), the resources are INTENDED to be closed up. 
+					2. .closeAll()
+						Just an alias. 
+						Good for end-of-the-program cleanup logic
+
+				ALSO: 
+					1. new interface - IIsOpen: `.isOpen: boolean`: 
+						LET `ISource` and `IDestination` BOTH inherit from it. 
+
+			THEN, the user DOESN'T HAVE TO be worried about "automatic" closing of the files
+				with `ISource` and the COMPLETELY EXPLICIT closing of the files with the `.get(filename)` or `.closeAll`. 
+				It also prevents re-creation of different file-access objects. 
+
+		2. TODO: Source - ADD A `.rewind()` method on it. 
+			This (basically) ensures that a file connection can be REUSED instead of being 
+				necessarily closed down. It (basically) just does `this.pos = 0` + some other re-initialization stuf... 
+		
+	TODO: FreeStream: 
+		1. add the `.init` method, IN WHICH one is adding the FIRST `.curr`, so that the 
+			length of the `.queue` property is ALWAYS >= 1. 
+			Then, we NO LONGER need to check for `if(.isFull())` at the beginning of `.next()` 
+				EVERY TIME we call it. One can JUST free the FIRST ITEM, without need to consult the "last" 
+					one. 
+
+			THEN: 
+				1. one could JUST be using a SINGLE PROPERTY instead of the special "finite queue" class. 
+					THEN - one can MOVE the `.free()` call TO THE END, by: 
+						1. memorizing the `.curr` in `.init`
+						2. FREEING the *saved* previous `.curr` AFTER the `.next()` call
+						3. the `.curr` was updated prior to step 2., we're returning NOTHING
+				2. one ONLY holds the space for A SINGLE '.curr' value. 
+				3. CREATE a new util - `next`, with semantics: 
+
+					function next(stream: IStream) {
+						const curr = stream.curr
+						stream.next()
+						return curr
+					}
+
+					REASON: it's STILL an immensely powerful idiom, 
+						though it DOES prevent one from doing pooling - so the user must 
+							be SURE that there is no pooling hapenning at the lower level. 
+
+					The user could then do: 
+
+						const a = next(stream)
+						const b = next(stream)
+						...
 					
-CURRENT TODOS:	
-	TODO: `SourceU16`, `LoadedU16`, `EncoderU16`: 
-		Problem: these are LITTLE-ENDIAN, not BIG-ENDIAN. 
-			RENAME these to 'U16LE'
-			
-	TODO [maybe?]: FreeStream
-		IDEA [big change]: [try to] CHAGE the interface of `IStream` to INSTEAD have `.next(): void`
-			THEN, we'll be able to INSTEAD keep memory for JUST TWO Shticks, and not 3!
+					Instead of: 
 
-	TODO: make the `.isStart` MANDATORY on `IStream`
-		1. REMOVE the `IBackward` interface - completely unhelpful. 
+						const a = stream.curr
+						stream.next()
+
+						const b = stream.curr
+						stream.next()
+
+						// ...
+
+		2. NOTE: this *must* be in an ENTIRELY SEPARATE commit, because otherwise, one may create a difficult situation to get-out-from.  
 
 	TODO: `samples`: 
 		1. new `Stream` for `samples` [DO add in `v0.3`]. 
@@ -166,6 +232,30 @@ CURRENT TODOS:
 									']}'
 								]
 
+	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
+		Reason - simplicity of names...
+		WALK: 
+			1. through classes/ files
+			2. through internal/ files
+			3. through interfaces/ files
+			4. through utils/ files
+
+	TODO [DEFINITELY!]: FreeStream
+		IDEA [big change]: [try to] CHAGE the interface of `IStream` to INSTEAD have `.next(): void`
+			THEN, we'll be able to INSTEAD keep memory for JUST TWO Shticks, and not 3!
+
+	TODO: make the `.isStart` MANDATORY on `IStream`
+		1. REMOVE the `IBackward` interface - completely unhelpful. 
+
+	TODO [minor]: let the `PreTokenNode` inherit from `Initializer`
+		LET these classes provide the `.initializer` property. 
+		Reason - style. 
+					
+CURRENT TODOS:	
+	TODO: `SourceU16`, `LoadedU16`, `EncoderU16`: 
+		Problem: these are LITTLE-ENDIAN, not BIG-ENDIAN. 
+			RENAME these to 'U16LE'
+			
 	TODO: order imports [Shift + Alt + O]
 
 	TODO: Docs
