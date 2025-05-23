@@ -118,8 +118,8 @@ export class EncoderU8 extends Encoder {
 	}
 }
 
-// * pre-doc note: UTF-16
-export class EncoderU16 extends Encoder {
+// * pre-doc note: UTF-16 little-endian
+export class EncoderU16LE extends Encoder {
 	protected get maxCharBytes() {
 		return 4
 	}

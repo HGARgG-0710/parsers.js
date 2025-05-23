@@ -35,8 +35,8 @@ function DecodedLoaded(
 // * imporant pre-doc: utf8
 export const LoadedU8 = DecodedLoaded("utf8")
 
-// * important pre-doc utf16
-export const LoadedU16 = DecodedLoaded("utf-16le")
+// * important pre-doc utf16 little-endian
+export const LoadedU16LE = DecodedLoaded("utf-16le")
 
 // * important pre-doc latin1
 export const Loaded8 = DecodedLoaded("latin1")
