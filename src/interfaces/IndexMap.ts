@@ -9,6 +9,14 @@ import type {
 	ISizeable
 } from "../interfaces.js"
 
+export interface IKeysHaving<KeyType = any> {
+	readonly keys: KeyType[]
+}
+
+export interface IValuesHaving<ValueType = any> {
+	readonly values: ValueType[]
+}
+
 export interface IIndexMap<
 	KeyType = any,
 	ValueType = any,
@@ -20,10 +28,9 @@ export interface IIndexMap<
 		ISizeable,
 		IDefaulting<DefaultType>,
 		IRekeyable<KeyType>,
-		IReversible {
-	readonly keys: KeyType[]
-	readonly values: ValueType[]
-
+		IReversible,
+		IKeysHaving<KeyType>,
+		IValuesHaving<ValueType> {
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
 	swap: (i: number, j: number) => this

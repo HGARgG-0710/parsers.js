@@ -39,7 +39,11 @@ const { and } = functional
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
  */
-export const next = <Type = any>(input: IStream<Type>) => input.next()
+export function next<Type = any>(input: IStream<Type>) {
+	const curr = input.curr
+	input.next()
+	return curr
+}
 
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result

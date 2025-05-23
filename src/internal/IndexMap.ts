@@ -1,69 +1,50 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { table, toPairs } from "../utils/IndexMap.js"
 import type { IIndexMap } from "../interfaces.js"
 import { isGoodIndex } from "../utils.js"
+import { table, toPairs } from "../utils/IndexMap.js"
 
 const { swap } = inplace
 const { isArray } = type
-
-abstract class PreIndexMap<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any,
-	IndexGetType = any
-> implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-{
-	abstract readonly keys: KeyType[]
-	abstract readonly values: ValueType[]
-	abstract readonly default: DefaultType
-
-	abstract index(x: any): ValueType | DefaultType
-
-	abstract getIndex(key: any): IndexGetType
-	abstract delete(index: number, count?: number): this
-	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
-	abstract replace(index: number, pair: [KeyType, ValueType]): this
-	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
-	abstract copy(): this
-	abstract unique(): number[]
-	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
-	abstract swap(i: number, j: number): this
-
-	get size() {
-		return this.keys.length
-	}
-
-	*[Symbol.iterator]() {
-		const size = this.size
-		for (let i = 0; i < size; ++i)
-			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
-	}
-
-	set(key: KeyType, value: ValueType, index: number = this.size) {
-		const keyIndex = this.keys.indexOf(key)
-		if (isGoodIndex(keyIndex)) this.values[keyIndex] = value
-		else this.add(index, [key, value])
-		return this
-	}
-
-	reverse() {
-		this.keys.reverse()
-		this.values.reverse()
-		return this
-	}
-}
 
 export abstract class BaseIndexMap<
 	KeyType = any,
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = any
-> extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
+> implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+{
+	protected ["constructor"]: new (
+		pairs: array.Pairs<KeyType, ValueType>,
+		_default?: DefaultType
+	) => this
+
 	readonly default: DefaultType
 
 	private _keys: KeyType[]
 	private _values: ValueType[]
+
+	abstract index(x: any): ValueType | DefaultType
+	abstract getIndex(key: any): IndexGetType
+	abstract delete(index: number, count?: number): this
+	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
+	abstract replace(index: number, pair: [KeyType, ValueType]): this
+	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
+
+	private uniqueIndexes() {
+		const uniqueKeys = new Set()
+		const indexes: number[] = []
+
+		for (let i = 0; i < this.size; ++i) {
+			const curr = this.keys[i]
+			if (!uniqueKeys.has(curr)) {
+				uniqueKeys.add(curr)
+				indexes.push(i)
+			}
+		}
+
+		return indexes
+	}
 
 	protected set values(newValues: ValueType[]) {
 		this._values = newValues
@@ -81,30 +62,27 @@ export abstract class BaseIndexMap<
 		return this._keys
 	}
 
-	protected ["constructor"]: new (
-		pairs: array.Pairs<KeyType, ValueType>,
-		_default?: DefaultType
-	) => IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+	get size() {
+		return this.keys.length
+	}
 
-	copy() {
-		return new this.constructor(toPairs(...table(this)), this.default)
+	set(key: KeyType, value: ValueType, index: number = this.size) {
+		const keyIndex = this.keys.indexOf(key)
+		if (isGoodIndex(keyIndex)) this.values[keyIndex] = value
+		else this.add(index, [key, value])
+		return this
+	}
+
+	reverse() {
+		this.keys.reverse()
+		this.values.reverse()
+		return this
 	}
 
 	unique() {
-		const uniqueKeys = new Set()
-		const indexes: number[] = []
-
-		for (let i = 0; i < this.size; ++i) {
-			const curr = this.keys[i]
-			if (!uniqueKeys.has(curr)) {
-				uniqueKeys.add(curr)
-				indexes.push(i)
-			}
-		}
-
+		const indexes = this.uniqueIndexes()
 		this.keys = indexes.map((x) => this.keys[x])
 		this.values = indexes.map((x) => this.values[x])
-
 		return indexes
 	}
 
@@ -120,55 +98,19 @@ export abstract class BaseIndexMap<
 		return this
 	}
 
+	copy() {
+		return new this.constructor(toPairs(...table(this)), this.default)
+	}
+
+	*[Symbol.iterator]() {
+		const size = this.size
+		for (let i = 0; i < size; ++i)
+			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
+	}
+
 	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
 		assert(isArray(keys))
 		assert(isArray(values))
-
-		super()
 		this.default = _default!
-	}
-}
-
-export abstract class DelegateIndexMap<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any,
-	IndexGetType = any
-> extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
-	protected delegate: IIndexMap<KeyType, ValueType, any, number>
-
-	rekey(keyFrom: KeyType, keyTo: KeyType) {
-		this.delegate.rekey(keyFrom, keyTo)
-		return this
-	}
-
-	index(x: any, ...y: any[]) {
-		return this.delegate.index(x, ...y)
-	}
-
-	byIndex(index: number) {
-		return this.delegate.byIndex(index)
-	}
-
-	replace(index: number, pair: [KeyType, ValueType]) {
-		this.delegate.replace(index, pair)
-		return this
-	}
-
-	get default() {
-		return this.delegate.default
-	}
-
-	get values() {
-		return this.delegate.values
-	}
-
-	get keys() {
-		return this.delegate.keys
-	}
-
-	constructor(subMap: IIndexMap<KeyType, ValueType, any, number>) {
-		super()
-		this.delegate = subMap
 	}
 }
