@@ -7,6 +7,7 @@ import type {
 	IIndexAssignable,
 	IIndexed,
 	IPersistentAccumulator,
+	IResource,
 	ISizeable,
 	IStateful,
 	IStateSettable
@@ -79,6 +80,15 @@ export const isStateful = structCheck<IStateful & IStateSettable>({
 	state: T,
 	setState: isFunction
 })
+
+export function withResource<T = any>(
+	resource: IResource,
+	callback: (r: IResource) => T
+) {
+	const retval = callback(resource)
+	resource.cleanup()
+	return retval
+}
 
 export * as HashMap from "./utils/HashMap.js"
 export * as IndexMap from "./utils/IndexMap.js"
