@@ -183,5 +183,13 @@ export function LimitStream<Type = any>(
 }
 
 export namespace LimitStream {
+	/**
+	 * The predicate that has to be used as the argument for the `from`
+	 * argument of `LimitedStream` in order to preserve the current
+	 * position upon call to the `.init` initialization method.
+	 *
+	 * Note: If `to` is not passed, value for `from` is used for it instead,
+	 * and this becomes the value for `from`
+	 */
 	export const NoMovementPredicate = T
 }

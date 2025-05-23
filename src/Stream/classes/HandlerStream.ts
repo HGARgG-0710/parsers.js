@@ -1,11 +1,8 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { Stream } from "../../constants.js"
 import type { IControlStream, IOwnedStream } from "../../interfaces/Stream.js"
 import { SetterStream } from "./BasicStream.js"
 
-const { SkippedItem } = Stream.StreamParser
-
-class _TransformStream<
+class _HandlerStream<
 	InType = any,
 	OutType = any
 > extends SetterStream<OutType> {
@@ -23,7 +20,7 @@ class _TransformStream<
 	protected baseNextIter(): OutType {
 		let lastReceived: OutType | undefined
 		do lastReceived = this.handleCurr()
-		while (lastReceived === SkippedItem)
+		while (lastReceived === HandlerStream.SkippedItem)
 		return lastReceived
 	}
 
@@ -49,10 +46,23 @@ class _TransformStream<
 	}
 }
 
-export function TransformStream<InType = any, OutType = any>(
+export function HandlerStream<InType = any, OutType = any>(
 	handler: (stream: IOwnedStream<InType>) => OutType
 ) {
 	return function (resource?: IOwnedStream<InType>): IControlStream<OutType> {
-		return new _TransformStream().setHandler(handler).init(resource)
+		return new _HandlerStream().setHandler(handler).init(resource)
 	}
+}
+
+export namespace HandlerStream {
+	/**
+	 * The value to be returned from the `.handler` on
+	 * `StreamParser`, if the current item of the underlying
+	 * `.value`-`Stream` is to be skipped
+	 *
+	 * When encountered during the `.next()` call, `StreamParser`
+	 * will continue calling `.handler` until the return value of
+	 * it differs from `SkippedItem`.
+	 */
+	export const SkippedItem = undefined
 }

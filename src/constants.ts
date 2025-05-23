@@ -1,7 +1,3 @@
-import { boolean } from "@hgargg-0710/one"
-
-const { T } = boolean
-
 export namespace regex {
 	/**
 	 * The regular expression flag for `RegExp.prototype.global`
@@ -42,33 +38,6 @@ export namespace regex {
 	 * The regular expression flag for `RegExp.prototype.sticky`
 	 */
 	export const StickyFlag = "y"
-}
-
-export namespace Stream {
-	export namespace LimitedStream {
-		/**
-		 * The predicate that has to be used as the argument for the `from`
-		 * argument of `LimitedStream` in order to preserve the current
-		 * position upon call to the `.init` initialization method.
-		 *
-		 * Note: If `to` is not passed, value for `from` is used for it instead,
-		 * and this becomes the value for `from`
-		 */
-		export const NoMovementPredicate = T
-	}
-
-	export namespace StreamParser {
-		/**
-		 * The value to be returned from the `.handler` on
-		 * `StreamParser`, if the current item of the underlying
-		 * `.value`-`Stream` is to be skipped
-		 *
-		 * When encountered during the `.next()` call, `StreamParser`
-		 * will continue calling `.handler` until the return value of
-		 * it differs from `SkippedItem`.
-		 */
-		export const SkippedItem = undefined
-	}
 }
 
 /**

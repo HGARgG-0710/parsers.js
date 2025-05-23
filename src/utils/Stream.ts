@@ -1,6 +1,6 @@
 import { functional, object, type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
-import { Stream } from "../constants.js"
+import { HandlerStream } from "../classes/Stream.js"
 import type {
 	IBufferized,
 	IClearable,
@@ -31,7 +31,6 @@ import {
 	positionNegate
 } from "../Stream/utils/Position.js"
 
-const { SkippedItem } = Stream.StreamParser
 const { prop, structCheck } = object
 const { isFunction, isNumber, isBoolean } = type
 const { and } = functional
@@ -91,9 +90,11 @@ export const isStart = prop("isStart") as <Type = any>(
  * as it allows one to take specific elements of the stream out
  * from the final input
  */
-export function destroy<Type = any>(input: IStream<Type>): typeof SkippedItem {
+export function destroy<Type = any>(
+	input: IStream<Type>
+): typeof HandlerStream.SkippedItem {
 	input.next()
-	return SkippedItem
+	return HandlerStream.SkippedItem
 }
 
 /**
