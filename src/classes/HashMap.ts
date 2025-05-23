@@ -1,8 +1,9 @@
 import { type as _type, functional, string } from "@hgargg-0710/one"
+import type { Pairs } from "@hgargg-0710/one/dist/src/array/array.js"
 import { type } from "src/utils/Node.js"
-import { length } from "../utils.js"
-import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
 import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
+import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
+import { length } from "../utils.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -68,6 +69,11 @@ export function HashClass<
 
 		copy() {
 			return new this.constructor(this.pre.copy())
+		}
+
+		fromPairs(pairsList: Pairs<KeyType, ValueType>): this {
+			for (const [key, value] of pairsList) this.set(key, value)
+			return this
 		}
 
 		constructor(

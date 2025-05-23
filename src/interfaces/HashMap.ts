@@ -9,6 +9,7 @@ import type {
 	ISizeable
 } from "../interfaces.js"
 import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
+import type { array } from "@hgargg-0710/one"
 
 export type IHash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
@@ -21,9 +22,11 @@ export interface IHashClass<
 	InternalKeyType = any,
 	DefaultType = any
 > extends IHashable<KeyType, InternalKeyType> {
-	new (
-		structure: IPreMap<InternalKeyType, ValueType, DefaultType>
-	): IHashMap<KeyType, ValueType, DefaultType>
+	new (structure: IPreMap<InternalKeyType, ValueType, DefaultType>): IHashMap<
+		KeyType,
+		ValueType,
+		DefaultType
+	>
 
 	extend: (
 		f: (x: any) => KeyType
@@ -37,6 +40,8 @@ export interface IHashMap<KeyType = any, ValueType = any, DefaultType = any>
 		IRekeyable<KeyType>,
 		ISizeable,
 		IDefaulting,
-		ICopiable {}
+		ICopiable {
+	fromPairs(pairsList: array.Pairs<KeyType, ValueType>): this
+}
 
 export type * from "../HashMap/interfaces/PreMap.js"

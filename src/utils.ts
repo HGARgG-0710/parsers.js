@@ -90,8 +90,6 @@ export function withResource<T = any>(
 	return retval
 }
 
-export * as HashMap from "./utils/HashMap.js"
 export * as IndexMap from "./utils/IndexMap.js"
 export * as Node from "./utils/Node.js"
 export * as Stream from "./utils/Stream.js"
-
