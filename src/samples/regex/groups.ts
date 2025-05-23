@@ -1,5 +1,5 @@
 import { functional } from "@hgargg-0710/one"
-import regex, { regex_contents } from "../regex.js"
+import { regex } from "../regex.js"
 import { non_bracket } from "./refactor.js"
 
 const { trivialCompose } = functional
@@ -8,7 +8,7 @@ const { trivialCompose } = functional
  * Creates a regular expression defined by putting
  * `regexp` inside a capture group
  */
-export const capture = (regexp: RegExp) => regex(`(${regex_contents(regexp)})`)
+export const capture = (regexp: RegExp) => regex(`(${regex.contents(regexp)})`)
 
 /**
  * Creates a regular expression defined by putting `regexp` inside a

@@ -1,4 +1,4 @@
-import regex, { regex_contents } from "../regex.js"
+import { regex } from "../regex.js"
 import { non_bracket } from "./refactor.js"
 
 /**
@@ -28,7 +28,8 @@ export const indefinite = (times: number) => (regexp: RegExp) =>
  *
  * Returns a non-greedy version of `regexp`
  */
-export const non_greedy = (regexp: RegExp) => regex(`${regex_contents(regexp)}?`)
+export const non_greedy = (regexp: RegExp) =>
+	regex(`${regex.contents(regexp)}?`)
 
 /**
  * Returns a regular expression that matches `regexp`

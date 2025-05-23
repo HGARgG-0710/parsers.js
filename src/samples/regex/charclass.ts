@@ -1,4 +1,4 @@
-import regex from "../regex.js"
+import { regex } from "../regex.js"
 import { non_bracket } from "./refactor.js"
 
 const char_ranges = (...ranges: (string | [string, string])[]) =>
@@ -132,7 +132,8 @@ export const caret = (letter: string) => () => regex(`\\c${letter}`)
  * Note: Expects `codepoint` to be precisely 2 hex digits long, and to be
  * either a number, or be a string, written in hex
  */
-export const uni_hex_2 = (codepoint: string | number) => () => regex(`\\x${codepoint}`)
+export const uni_hex_2 = (codepoint: string | number) => () =>
+	regex(`\\x${codepoint}`)
 
 /**
  * Returns a function for creating a regular expression that
@@ -142,7 +143,8 @@ export const uni_hex_2 = (codepoint: string | number) => () => regex(`\\x${codep
  * Note: Expects `codepoint` to be precisely 4 hex digits long, and to be
  * either a number, or be a string, written in hex
  */
-export const uni_hex_4 = (codepoint: string | number) => () => regex(`\\u${codepoint}`)
+export const uni_hex_4 = (codepoint: string | number) => () =>
+	regex(`\\u${codepoint}`)
 
 /**
  * (Unicode-aware mode only)
@@ -159,4 +161,5 @@ export const uni_hex = (code: string | number) => () => regex(`\\u{${code}}`)
 /**
  * Creates a regular expression defined as the disjunction of `regexes`
  */
-export const or = (...regexes: RegExp[]) => regex(regexes.map(non_bracket).join("|"))
+export const or = (...regexes: RegExp[]) =>
+	regex(regexes.map(non_bracket).join("|"))
