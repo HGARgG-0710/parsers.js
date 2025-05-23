@@ -12,8 +12,8 @@ import { BadIndex } from "../../constants.js"
 import type { IHaving, IIndexingFunction, ITestable } from "../../interfaces.js"
 import type { IIndexMap, IMapClass } from "../../interfaces/IndexMap.js"
 import { BaseIndexMap } from "../../internal/IndexMap.js"
+import { Pairs } from "../../samples.js"
 import { isGoodIndex } from "../../utils.js"
-import { fromPairs } from "../../utils/IndexMap.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
@@ -94,7 +94,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 		}
 
 		add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
-			const [keys, values] = fromPairs(pairs)
+			const [keys, values] = Pairs.from(pairs)
 			insert(this.keys, index, ...keys)
 			insert(this.alteredKeys, index, ...keys.map(keyExtension))
 			insert(this.values, index, ...values)
@@ -133,7 +133,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			_default?: DefaultType
 		) {
 			assert(isArray(pairsList))
-			const [keys, values] = fromPairs(pairsList)
+			const [keys, values] = Pairs.from(pairsList)
 			super(keys, values, _default)
 			this.alteredKeys = this.keys.map(keyExtension)
 		}

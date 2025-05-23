@@ -1,8 +1,8 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type { IIndexMap } from "../interfaces.js"
-import { isGoodIndex } from "../utils.js"
-import { table, toPairs } from "../utils/IndexMap.js"
+import { isGoodIndex, table } from "../utils.js"
+import { Pairs } from "../samples.js"
 
 const { swap } = inplace
 const { isArray } = type
@@ -99,7 +99,7 @@ export abstract class BaseIndexMap<
 	}
 
 	copy() {
-		return new this.constructor(toPairs(...table(this)), this.default)
+		return new this.constructor(Pairs.to(...table(this)), this.default)
 	}
 
 	*[Symbol.iterator]() {

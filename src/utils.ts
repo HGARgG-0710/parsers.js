@@ -6,11 +6,13 @@ import type {
 	ICopiable,
 	IIndexAssignable,
 	IIndexed,
+	IKeysHaving,
 	IPersistentAccumulator,
 	IResource,
 	ISizeable,
 	IStateful,
-	IStateSettable
+	IStateSettable,
+	IValuesHaving
 } from "./interfaces.js"
 import type { IPosed } from "./Stream/interfaces/Position.js"
 
@@ -90,6 +92,14 @@ export function withResource<T = any>(
 	return retval
 }
 
-export * as IndexMap from "./utils/IndexMap.js"
+/**
+ * Returns the pair of `indexMap.keys` and `indexMap.values`
+ */
+export function table<KeyType = any, ValueType = any>(
+	kv: IKeysHaving<KeyType> & IValuesHaving<ValueType>
+): [KeyType[], ValueType[]] {
+	return [kv.keys, kv.values]
+}
+
 export * as Node from "./utils/Node.js"
 export * as Stream from "./utils/Stream.js"

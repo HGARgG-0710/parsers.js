@@ -1,7 +1,7 @@
-import { functional, array } from "@hgargg-0710/one"
+import { array, functional } from "@hgargg-0710/one"
 import assert from "assert"
 import type { IMappable } from "../interfaces.js"
-import { toPairs } from "../utils/IndexMap.js"
+import { Pairs } from "../samples.js"
 
 const { id } = functional
 const { first, firstOut } = array
@@ -28,7 +28,9 @@ export class Enum<Type = any> {
 	}
 
 	toMap<Out = any>(mapped: IMappable<Type, Out> = id<Type> as any) {
-		return new Map(toPairs(this.enumItems, this.enumItems.map(mapped)))
+		return new Map(
+			Pairs.to(this.enumItems, this.enumItems.map(mapped))
+		)
 	}
 
 	constructor(enumItems: Type[]) {
@@ -42,7 +44,7 @@ export class MapConcatenator {
 		return new Map(
 			maps
 				.map((m) =>
-					toPairs(Array.from(m.keys()), Array.from(m.values()))
+					Pairs.to(Array.from(m.keys()), Array.from(m.values()))
 				)
 				.flat(1)
 		)
