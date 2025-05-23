@@ -11,23 +11,6 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 
 NEXT UP:
 	TODO: WriterStream: 
-		0. TODO: REFACTOR the `ISource` into TWO interfaces [via composition] - ISource and IDecoder
-			THIS IS to *mirror* the IDestination + IEncoder dynamic. 
-
-			1. ISource manages ONLY: 
-				1. the read-only file connection
-				2. the DECODER property
-			2. IDecoder: 
-				1. takes a certain PORTION of the file's inputs: 
-					the portion is FIXED and is defined by the max number of bytes 
-						needed for a single character
-				2. RETURNS the READ AMOUNT (the amount needed for the next character)
-				3. RETURNS the SINGLE STRING-CHARACTER: 
-					1. will allow one to replace the ungodly procedural interface that is currently employed
-
-				The current ISource classes would become the 'IDecoder'! 
-				And there'd only be ONE 'ReadingSource' class, like there is only one `WritingDestination`. 
-
 		1. About 'IDestination', `Source`: 
 			Create a `ICleanupManager` classes (SourceManager and DestinationManager) for managing connections to open files. 
 				Rules: 
@@ -47,14 +30,69 @@ NEXT UP:
 				ALSO: 
 					1. new interface - IIsOpen: `.isOpen: boolean`: 
 						LET `ISource` and `IDestination` BOTH inherit from it. 
+						AND - let the MULTIPLE `.cleanup()` calls be SAFE because of it. 
+						Then - the "double free" error, though still present, is, effectively, harmless. 
 
 			THEN, the user DOESN'T HAVE TO be worried about "automatic" closing of the files
 				with `ISource` and the COMPLETELY EXPLICIT closing of the files with the `.get(filename)` or `.closeAll`. 
 				It also prevents re-creation of different file-access objects. 
 
-		2. TODO: Source - ADD A `.rewind()` method on it. 
+		2. TODO: IDecoder [and ISource - as a delegate...] - ADD A `.rewind()` method on it. 
 			This (basically) ensures that a file connection can be REUSED instead of being 
 				necessarily closed down. It (basically) just does `this.pos = 0` + some other re-initialization stuf... 
+
+			1. THEN: add the `.rewind()` call to the `LazyStream` to ENSURE that 
+				file connections ARE reusable. ALSO - make a check that the provided `.source` is, indeed, `.isOpen`. 
+					For otherwise, it is of no interest to the `LazyStream` objects. 
+		
+		3. TODO: create a new util [global...]: 
+			1. withResource(resource, (r) => ...): 
+				1. calls the given callback with the given resource
+				2. calls `.cleanup()` upon it afterwards
+
+			This is intended to simplify the user's handling of the `ISource` and `IDestination` 
+				classes. 
+
+		4. TODO: about the `utils.HashMap.fromPairs`:
+			MAKE this into a `.static` method on the anonymous classes. 
+			This allows one: 
+				1. to REMOVE one of the util's arguments. 
+				2. REMOVE need for specifying the constructor logic (since one can NOW just do it via `IInternal...`); 
+
+		5. REGARDING `samples.Pairs`: 
+			1. move the `Pairs` function OUT from classes/ [doesn't belong there]
+			2. take the utils from `IndexMap` and...: 
+				1. table - move to `src/utils.ts`
+				2. all the rest - ADD TO the `samples.Pairs.*`	
+					namespace, WHICH itself IS the `Pairs` function 
+			3. REMOVE the `utils.IndexMap` file
+
+		6. SPLIT the `prop`	calls to an `aliases` object: 
+			1. in `utils.Stream`
+			2. in `utils.Node`
+		
+		7. SPLIT the `is`-functions to an `typechecks` object:
+			1. in `utils.Stream`
+			2. in `utils.Node`
+		
+		8. `constants`: 
+			1. StreamParser [RENAME to `TransformStream`]: 
+				1. MAKE a part of the `StreamParser` function-namespace export. 
+			
+			2. LimitedStream [RENAME to `LimitStream`]: 
+				1. MAKE a part of the `LimitStream` function-namespace export.
+
+			3. regex: make part of `samples.regex`
+
+			ONLY `BadIndex` and `MissingArgument` are to remain; 
+				1. TODO: replace all explicit appearences of `undefined` with `MissingArgument`
+
+		9. re-make `regex` into `samples.regex`
+			This way, the user will have a more "focused" view of the library, 
+				with the more "day-to-day" tasks being pushed "further back". 
+					Reason being - doing otherwise trivializes the library 
+						and makes common functionality too easy to access
+							(example of this very tendency: numpy). 
 		
 	TODO: FreeStream: 
 		1. add the `.init` method, IN WHICH one is adding the FIRST `.curr`, so that the 
@@ -251,11 +289,7 @@ NEXT UP:
 		LET these classes provide the `.initializer` property. 
 		Reason - style. 
 					
-CURRENT TODOS:	
-	TODO: `SourceU16`, `LoadedU16`, `EncoderU16`: 
-		Problem: these are LITTLE-ENDIAN, not BIG-ENDIAN. 
-			RENAME these to 'U16LE'
-			
+CURRENT TODOS:		
 	TODO: order imports [Shift + Alt + O]
 
 	TODO: Docs
