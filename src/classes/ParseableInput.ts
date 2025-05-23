@@ -1,6 +1,6 @@
 import type { IParseable } from "../interfaces.js"
 
-export class ReadableSource implements IParseable<string> {
+export class ParseableInput implements IParseable<string> {
 	protected ["constructor"]: new (source: string) => this
 
 	get size() {
