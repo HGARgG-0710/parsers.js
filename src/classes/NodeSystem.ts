@@ -24,7 +24,7 @@ export class NodeSystem<T = any> {
 	private readonly pools = new TypedPoolKeeper<T>()
 
 	private getExistingPoolFor(type: T) {
-		return this.pools.getByType(type)!
+		return this.pools.get(type)!
 	}
 
 	private poolExistsFor(type: T) {

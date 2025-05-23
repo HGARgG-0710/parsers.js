@@ -131,11 +131,16 @@ export interface IClearable {
 	clear(): void
 }
 
+export interface IResource {
+	cleanup(): void
+}
+
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/Collection.js"
+export type * from "./interfaces/Decoder.js"
 export type * from "./interfaces/Destination.js"
 export type * from "./interfaces/DynamicParser.js"
 export type * from "./interfaces/Encoder.js"
@@ -147,3 +152,4 @@ export type * from "./interfaces/PoolGetter.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
+

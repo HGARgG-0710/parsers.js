@@ -3,7 +3,7 @@ import type { IEncoder } from "../interfaces/Encoder.js"
 
 const { max } = number
 
-abstract class Encoder implements IEncoder {
+abstract class PreEncoder implements IEncoder {
 	["constructor"]: new (charCount: number) => this
 
 	private _buffer: Buffer
@@ -85,46 +85,29 @@ abstract class Encoder implements IEncoder {
 	}
 }
 
-// * pre-doc note: Latin-1
-export class Encoder8 extends Encoder {
-	protected get maxCharBytes() {
-		return 1
-	}
+function Encoder(
+	maxChars: number,
+	encoding: BufferEncoding
+): new (charCount: number) => IEncoder {
+	return class extends PreEncoder {
+		protected get maxCharBytes() {
+			return maxChars
+		}
 
-	protected get encoding(): BufferEncoding {
-		return "latin1"
+		protected get encoding() {
+			return encoding
+		}
 	}
 }
+
+// * pre-doc note: Latin-1
+export const Encoder8 = Encoder(1, "latin1")
 
 // * pre-doc note: UCS2
-export class Encoder16 extends Encoder {
-	protected get maxCharBytes() {
-		return 2
-	}
-
-	protected get encoding(): BufferEncoding {
-		return "ucs2"
-	}
-}
+export const Encoder16 = Encoder(2, "ucs2")
 
 // * pre-doc note: UTF-8
-export class EncoderU8 extends Encoder {
-	protected get maxCharBytes() {
-		return 4
-	}
-
-	protected get encoding(): BufferEncoding {
-		return "utf-8"
-	}
-}
+export const EncoderU8 = Encoder(4, "utf-8")
 
 // * pre-doc note: UTF-16 little-endian
-export class EncoderU16LE extends Encoder {
-	protected get maxCharBytes() {
-		return 4
-	}
-
-	protected get encoding(): BufferEncoding {
-		return "utf-16le"
-	}
-}
+export const EncoderU16LE = Encoder(4, "utf-16le")

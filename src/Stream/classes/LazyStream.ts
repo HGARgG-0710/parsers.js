@@ -20,6 +20,8 @@ export class LazyStream
 {
 	protected ["constructor"]: new (source?: ISource) => this
 
+	readonly source?: ISource
+
 	get pos() {
 		return this.source!.pos
 	}
@@ -28,20 +30,12 @@ export class LazyStream
 		this.source!.nextChar(n)
 	}
 
-	private cleanupSource() {	
-		this.source!.cleanup()
-	}
-
 	protected currGetter() {
 		return this.source!.decoded
 	}
 
 	protected baseNextIter() {
 		this.nextDecoded()
-	}
-
-	protected postEnd(): void {
-		this.cleanupSource()
 	}
 
 	isCurrEnd() {
@@ -56,7 +50,6 @@ export class LazyStream
 	}
 
 	init(source: ISource) {
-		this.cleanupSource()
 		super.init(source)
 		return this
 	}
@@ -70,4 +63,5 @@ export class LazyStream
 	}
 }
 
-export * as Source from "../../classes/Source.js"
+export * as Source from "../../classes/Decoder.js"
+

@@ -1,6 +1,5 @@
-import type { ICopiable } from "../interfaces.js"
+import type { ICopiable, IResource } from "../interfaces.js"
 
-export interface IDestination extends ICopiable {
+export interface IDestination extends ICopiable, IResource {
 	write(input: string): void
-	cleanup(): void
 }

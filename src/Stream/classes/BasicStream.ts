@@ -137,7 +137,7 @@ export abstract class SourceStream<
 {
 	protected ["constructor"]: new (source?: SourceType) => this
 
-	source?: SourceType
+	protected source?: SourceType
 
 	protected abstract currGetter(): Type
 
