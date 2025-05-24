@@ -10,6 +10,7 @@ export abstract class IterableStream<Type = any, Args extends any[] = any[]>
 	implements IStream<Type>
 {
 	abstract readonly isEnd: boolean
+	abstract readonly isStart: boolean
 	abstract readonly curr: Type
 
 	abstract next(): Type

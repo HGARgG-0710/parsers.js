@@ -4,13 +4,12 @@ import type {
 	INavigable,
 	IPrevable,
 	IRewindable,
-	IStarted,
 	IStateful,
 	IStateSettable
 } from "../interfaces.js"
 
 const { structCheck } = object
-const { isFunction, isBoolean } = type
+const { isFunction } = type
 const { T } = boolean
 
 /**
@@ -34,10 +33,6 @@ export const isNavigable = structCheck<INavigable>({
 export const isRewindable = structCheck<IRewindable>({
 	rewind: isFunction
 }) as <Type = any>(x: any) => x is IRewindable<Type>
-
-export const isStarted = structCheck<IStarted>({
-	isStart: isBoolean
-})
 
 export const isPrevable = structCheck<IPrevable>({
 	prev: isFunction

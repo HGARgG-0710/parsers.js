@@ -1,12 +1,12 @@
 import { number } from "@hgargg-0710/one"
 import type { IParseable, IResourceSettable } from "../../../interfaces.js"
 import type {
-	IBackward,
 	IFinishable,
 	IInputStream,
 	INavigable,
 	IPeekableStream,
 	IPosition,
+	IPrevable,
 	IRewindable
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
@@ -23,7 +23,7 @@ export class InputStream<Type = any>
 		INavigable<Type>,
 		IFinishable<Type>,
 		IRewindable<Type>,
-		IBackward<Type>,
+		IPrevable<Type>,
 		IResourceSettable,
 		IInputStream<Type, IParseable<Type>>
 {

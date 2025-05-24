@@ -1,8 +1,7 @@
 import type {
 	IFreeable,
 	IOwnedStream,
-	IPoolGetter,
-	IStarted
+	IPoolGetter
 } from "../../../interfaces.js"
 import { ThreeQueue } from "../../../internal/ThreeQueue.js"
 import { WrapperStream } from "./WrapperStream.js"
@@ -13,7 +12,7 @@ export class FreeStream<
 	private poolGetter: IPoolGetter
 	private freeablesQueue = new ThreeQueue<Type>()
 
-	resource?: IOwnedStream & IStarted
+	resource?: IOwnedStream
 
 	private enqueueCurrForFreeing() {
 		this.freeablesQueue.push(this.curr)

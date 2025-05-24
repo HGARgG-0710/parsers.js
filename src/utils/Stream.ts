@@ -2,18 +2,14 @@ import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { HandlerStream } from "../classes/Stream.js"
 import type {
-	IBufferized,
 	IClearable,
 	IFiniteWritable,
-	IIndexed,
 	IPosition,
 	IPushable
 } from "../interfaces.js"
 import type {
-	IPosed,
 	IPrevableStream,
 	IRawStream,
-	IReversibleStream,
 	IStream
 } from "../interfaces/Stream.js"
 import type {
@@ -81,7 +77,10 @@ export function destroy<Type = any>(
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip(input: IReversibleStream, steps: IPosition = 1) {
+export function skip<Type = any>(
+	input: IPrevableStream<Type>,
+	steps: IPosition = 1
+) {
 	return uniNavigate(input, positionNegate(steps))
 }
 
@@ -121,7 +120,7 @@ export function consumable<Type = any>(result: IPushable<Type> & IClearable) {
  */
 export function has(pos: IPosition) {
 	const stopPoint = direction(pos) ? "isEnd" : "isStart"
-	return function <Type = any>(input: IReversibleStream<Type>) {
+	return function <Type = any>(input: IPrevableStream<Type>) {
 		uniNavigate(input, pos)
 		return !input[stopPoint]
 	}
@@ -148,7 +147,7 @@ export function count<Type = any>(pred: IStreamPredicate<Type>) {
  */
 export function delimited(delimPred: IPosition) {
 	return function <Type = any>(
-		input: IReversibleStream<Type>,
+		input: IPrevableStream<Type>,
 		result: IPushable<Type> = new ArrayCollection()
 	) {
 		while (!input.isEnd) {
@@ -214,7 +213,7 @@ export function uniNavigate<Type = any>(
 	} else {
 		const change = pickDirection(position)
 		while (!stream.isEnd && !position(stream))
-			change(stream! as IReversibleStream<Type>)
+			change(stream! as IPrevableStream<Type>)
 	}
 
 	return stream.curr
@@ -238,7 +237,7 @@ export function navigate<Type = any>(
  * Continues to call '.prev()' on the given `Stream`, until `stream.isStart` is true;
  * @returns `stream.curr`
  */
-export function uniRewind<Type = any>(stream: IReversibleStream<Type>) {
+export function uniRewind<Type = any>(stream: IPrevableStream<Type>) {
 	while (!stream.isStart) stream.prev()
 	return stream.curr
 }
@@ -246,18 +245,10 @@ export function uniRewind<Type = any>(stream: IReversibleStream<Type>) {
 /**
  * Calls and returns `stream.rewind()` if `isRewindable(stream)`, else - `uniRewind(stream)`
  */
-export function rewind<Type = any>(stream: IReversibleStream<Type>): Type {
-	return isRewindable<Type>(stream) ? stream.rewind() : uniRewind(stream)
-}
-
-/**
- * Returns a function that returns invocation of `f(stream.buffer.get(), stream.pos)`
- */
-export function byStreamBufferPos<Type = any, PosType = any>(
-	f: (buffer: IIndexed, i: PosType) => any
-) {
-	return (stream: IStream<Type> & IBufferized<Type> & IPosed<PosType>) =>
-		f(stream.buffer.get(), stream.pos)
+export function rewind<Type = any>(stream: IStream<Type>): Type {
+	return isRewindable<Type>(stream)
+		? stream.rewind()
+		: uniRewind(stream as IPrevableStream<Type>)
 }
 
 export function rawStreamCopy(rawStream: IRawStream) {

@@ -159,7 +159,6 @@ export const ArrayMap = MapClass(array.recursiveSame)
 
 export const OptimizedMap = MapClass()
 
-// * predoc note: ORIGINALLYS INTENDED to be used with 'InputStream' + 'byStreamBufferPos'; ADD THE SAME NOTE to the 'CharHash' [HashMap]
 export const OptimizedCharMap = OptimizedMap.extend<number>(string.charCodeAt)
 
 export const PredicateMap: IMapClass<Function> = MapClass(

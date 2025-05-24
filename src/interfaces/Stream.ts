@@ -7,15 +7,9 @@ import type {
 	IStateSettable
 } from "../interfaces.js"
 
-export interface IStarted {
-	readonly isStart: boolean
-}
-
 export interface IPrevable<Type = any> {
 	prev: () => Type
 }
-
-export type IBackward<Type = any> = IStarted & IPrevable<Type>
 
 export interface IFinishable<Type = any> {
 	finish: () => Type
@@ -45,8 +39,7 @@ export interface IResourceful {
 	readonly resource?: IOwnedStream
 }
 
-export type IStream<Type = any> = Partial<IBackward<Type>> &
-	Partial<INavigable<Type>> &
+export type IStream<Type = any> = Partial<INavigable<Type>> &
 	Partial<IFinishable<Type>> &
 	Partial<IRewindable<Type>> &
 	Partial<IStateful> &
@@ -54,17 +47,18 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 	Partial<IIsCurrStartable> &
 	Partial<IPeekable<Type>> &
 	Partial<IResourceful> &
+	Partial<IPrevable> &
 	Iterable<Type> &
 	ICopiable &
 	INextable<Type> &
 	IInitializable & {
 		readonly curr: Type
 		readonly isEnd: boolean
+		readonly isStart: boolean
 		isCurrEnd: () => boolean
 	}
 
 export type IPrevableStream<Type = any> = IStream<Type> & IPrevable<Type>
-export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 export type IResourcefulStream<Type = any> = IStream<Type> & IResourceful
 export type IStatefulStream<Type = any> = IStream<Type> &

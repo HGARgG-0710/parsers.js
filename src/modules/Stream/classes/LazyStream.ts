@@ -4,7 +4,8 @@ import type {
 	IInputStream,
 	INavigable,
 	IPosed,
-	IPosition
+	IPosition,
+	ISourcedStream
 } from "../../../interfaces/Stream.js"
 import { uniNavigate } from "../../../utils/Stream.js"
 import { SourceStream } from "./BasicStream.js"
@@ -16,7 +17,8 @@ export class LazyStream
 	implements
 		INavigable<string>,
 		IPosed<number>,
-		IInputStream<string, ISource>
+		IInputStream<string, ISource>,
+		ISourcedStream<string, ISource>
 {
 	protected ["constructor"]: new (source?: ISource) => this
 

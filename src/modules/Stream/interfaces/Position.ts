@@ -1,4 +1,4 @@
-import type { IReversibleStream, IStream } from "../../../interfaces/Stream.js"
+import type { IPrevableStream, IStream } from "../../../interfaces/Stream.js"
 
 export type IPosition<Type = any> = IPredicatePosition<Type> | number
 
@@ -12,7 +12,7 @@ export interface IPosed<Type = any> {
 	pos: Type
 }
 
-export type IChange<Type = any> = (input: IReversibleStream<Type>) => Type
+export type IChange<Type = any> = (input: IPrevableStream<Type>) => Type
 
 export interface IDirectionHaving {
 	direction: boolean
