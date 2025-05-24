@@ -1,9 +1,8 @@
 import { type as _type, functional, string } from "@hgargg-0710/one"
 import type { Pairs } from "@hgargg-0710/one/dist/src/array/array.js"
 import { type } from "src/aliases/Node.js"
-import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
-import { length } from "../utils.js"
+import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -86,7 +85,7 @@ export function HashClass<
 
 export const BasicHash = HashClass(id)
 
-export const LengthHash = HashClass(length)
+export const LengthHash = HashClass((x) => x.length)
 
 export const TokenHash = HashClass(type)
 
@@ -94,4 +93,4 @@ export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
 
-export * as PreMap from "../HashMap/classes/PreMap.js"
+export * as PreMap from "../modules/HashMap/classes/PreMap.js"

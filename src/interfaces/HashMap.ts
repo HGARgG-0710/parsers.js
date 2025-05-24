@@ -1,3 +1,4 @@
+import type { array } from "@hgargg-0710/one"
 import type { IIndexable } from "src/interfaces.js"
 import type {
 	ICopiable,
@@ -8,8 +9,7 @@ import type {
 	ISettable,
 	ISizeable
 } from "../interfaces.js"
-import type { IPreMap } from "../HashMap/interfaces/PreMap.js"
-import type { array } from "@hgargg-0710/one"
+import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
 
 export type IHash<KeyType = any, InternalKeyType = any> = (
 	x: KeyType,
@@ -44,4 +44,4 @@ export interface IHashMap<KeyType = any, ValueType = any, DefaultType = any>
 	fromPairs(pairsList: array.Pairs<KeyType, ValueType>): this
 }
 
-export type * from "../HashMap/interfaces/PreMap.js"
+export type * from "../modules/HashMap/interfaces/PreMap.js"

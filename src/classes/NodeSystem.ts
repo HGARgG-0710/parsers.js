@@ -1,5 +1,5 @@
 import assert from "assert"
-import { MapInternal } from "../HashMap/classes/PreMap.js"
+import { MapInternal } from "../modules/HashMap/classes/PreMap.js"
 import { Autocache } from "../internal/Autocache.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { BasicHash } from "./HashMap.js"

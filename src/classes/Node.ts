@@ -7,7 +7,7 @@ import type {
 	INodeDeserializer,
 	IRecursiveNode
 } from "../interfaces/Node.js"
-import { isCopiable } from "../utils.js"
+import { isCopiable } from "src/is.js"
 import {
 	isType} from "../utils/Node.js"
 import { isRecursiveNodeSerializable } from "src/is/Node.js"

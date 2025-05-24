@@ -25,7 +25,7 @@ import {
 	direction,
 	pickDirection,
 	positionNegate
-} from "../Stream/utils/Position.js"
+} from "../modules/Stream/utils/Position.js"
 
 const { isFunction, isNumber } = type
 
@@ -265,4 +265,4 @@ export function rawStreamCopy(rawStream: IRawStream) {
 	return rawStream.copy()
 }
 
-export * as Position from "../Stream/utils/Position.js"
+export * as Position from "../modules/Stream/utils/Position.js"

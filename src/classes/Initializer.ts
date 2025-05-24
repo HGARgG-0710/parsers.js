@@ -11,5 +11,5 @@ export abstract class Initializable<Args extends any[] = any[]>
 	}
 }
 
-export * from "../Initializer/classes/OwnerInitializer.js"
-export * from "../Initializer/classes/ResourceInitializer.js"
+export * from "../modules/Initializer/classes/OwnerInitializer.js"
+export * from "../modules/Initializer/classes/ResourceInitializer.js"

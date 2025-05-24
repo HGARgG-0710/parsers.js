@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPosition } from "./interfaces.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
+import type { IPosition } from "./modules/Stream/interfaces/Position.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -31,10 +31,6 @@ export interface ISizeable {
 
 export interface IDefaulting<Type = any> {
 	readonly default: Type
-}
-
-export interface IIndexAssignable<Type = any> {
-	assignedIndex?: Type
 }
 
 export interface ISettable<KeyType = any, ValueType = any> {
@@ -112,7 +108,7 @@ export interface IReadable<Type = any> {
 export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
 
 export interface IBufferized<Type = any> {
-	buffer: IPersistentAccumulator<Type>
+	readonly buffer: IPersistentAccumulator<Type>
 }
 
 export interface IPushable<Type = any> {
@@ -152,4 +148,3 @@ export type * from "./interfaces/PoolGetter.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
-

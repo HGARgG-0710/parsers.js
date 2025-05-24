@@ -71,12 +71,12 @@ export type IStatefulStream<Type = any> = IStream<Type> &
 	IStateful &
 	IStateSettable
 
-export type * from "../Stream/interfaces/CompositeStream.js"
-export type * from "../Stream/interfaces/IndexStream.js"
-export type * from "../Stream/interfaces/InputStream.js"
-export type * from "../Stream/interfaces/LimitStream.js"
-export type * from "../Stream/interfaces/MarkerStream.js"
-export type * from "../Stream/interfaces/OwnedStream.js"
-export type * from "../Stream/interfaces/PeekStream.js"
-export type * from "../Stream/interfaces/Position.js"
-export type * from "../Stream/interfaces/SingletonStream.js"
+export type * from "../modules/Stream/interfaces/CompositeStream.js"
+export type * from "../modules/Stream/interfaces/IndexStream.js"
+export type * from "../modules/Stream/interfaces/InputStream.js"
+export type * from "../modules/Stream/interfaces/LimitStream.js"
+export type * from "../modules/Stream/interfaces/MarkerStream.js"
+export type * from "../modules/Stream/interfaces/OwnedStream.js"
+export type * from "../modules/Stream/interfaces/PeekStream.js"
+export type * from "../modules/Stream/interfaces/Position.js"
+export type * from "../modules/Stream/interfaces/SingletonStream.js"

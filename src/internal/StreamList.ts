@@ -6,7 +6,7 @@ import type {
 	IRawStreamArray,
 	IStreamChoice,
 	IStreamChooser
-} from "../Stream/interfaces/CompositeStream.js"
+} from "../modules/Stream/interfaces/CompositeStream.js"
 import { RecursiveInitList } from "./RecursiveInitList.js"
 
 const { isFunction, isArray } = type
