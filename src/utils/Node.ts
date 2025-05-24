@@ -65,6 +65,6 @@ export function fromObject<Type = any>(allowedTypes: NodeSystem<Type>) {
 		if (!isValid(from.type)) return false
 		return allowedTypes
 			.getByType(from.type)!
-			.deserialize(from, deserializer)
+			.fromPlain(from, deserializer)
 	}
 }

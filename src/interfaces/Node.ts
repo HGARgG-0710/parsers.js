@@ -57,20 +57,21 @@ export interface INode<Type = any, Args extends any[] = any[]>
 }
 
 export interface IRecursiveNode<Type = any>
-	extends INode<Type, [INode<Type>[]]> {}
+	extends INode<Type, [INode<Type>[]]> {
+	jsonInsertablePre(): [string, string]
+	jsonInsertableEmpty(): [string, string]
+	jsonInsertablePost(): [string, string]
+}
 
 export interface ICellNode<Type = any, Value = any>
 	extends INode<Type>,
 		IValued<Value> {}
 
-export type INodeDeserializer<Type = any> = (x: any) => INode<Type> | false
+export type INodeMaker<Type = any> = (x: any) => INode<Type> | false
 
 export interface INodeType<Type = any, Args extends any[] = any[]> {
 	new (...args: Args): INode<Type>
-	deserialize(
-		x: any,
-		deserializer: INodeDeserializer<Type>
-	): INode<Type> | false
+	fromPlain(x: any, maker: INodeMaker<Type>): INode<Type> | false
 }
 
 export type INodeTypeFactory<Type = any, Args extends any[] = any[]> = (

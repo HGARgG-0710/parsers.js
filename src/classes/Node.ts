@@ -4,12 +4,11 @@ import type {
 	ICellNode,
 	INode,
 	INodeClass,
-	INodeDeserializer,
+	INodeMaker,
 	IRecursiveNode
 } from "../interfaces/Node.js"
 import { isCopiable } from "src/is.js"
-import {
-	isType} from "../utils/Node.js"
+import { isType } from "../utils/Node.js"
 import { isRecursiveNodeSerializable } from "src/is/Node.js"
 import { isContentNodeSerializable } from "src/is/Node.js"
 import { isTyped } from "src/is/Node.js"
@@ -20,10 +19,10 @@ const { id } = functional
 abstract class PreTokenNode<Type = any> implements INode<Type> {
 	protected ["constructor"]: new () => this
 
-	static deserialize<Type = any>(
+	static fromPlain<Type = any>(
 		this: INodeClass<Type, []>,
 		x: any,
-		deserializer: INodeDeserializer<Type>
+		nodeMaker: INodeMaker<Type>
 	) {
 		if (!isTyped(x)) return false
 		return new this()
@@ -94,10 +93,10 @@ abstract class PreContentNode<Type = any, Value = any>
 {
 	protected ["constructor"]: new (value?: Value) => this
 
-	static deserialize<Type = any, Value = any>(
+	static fromPlain<Type = any, Value = any>(
 		this: INodeClass<Type, [Value]>,
 		x: any,
-		deserializer: INodeDeserializer<Type>
+		nodeMaker: INodeMaker<Type>
 	) {
 		if (!isContentNodeSerializable(x)) return false
 		return new this(x.value)
@@ -156,13 +155,13 @@ abstract class PreRecursiveNode<Type = any>
 {
 	protected ["constructor"]: new (children?: INode<Type>[]) => this
 
-	static deserialize<Type = any>(
+	static fromPlain<Type = any>(
 		this: INodeClass<Type, [INode<Type>[]]>,
 		x: any,
-		deserializer: INodeDeserializer<Type>
+		nodeMaker: INodeMaker<Type>
 	) {
 		if (!isRecursiveNodeSerializable(x)) return false
-		const maybeNodes = x.children.map(deserializer)
+		const maybeNodes = x.children.map(nodeMaker)
 		return maybeNodes.every(id) && new this(maybeNodes as INode<Type>[])
 	}
 
@@ -206,6 +205,26 @@ abstract class PreRecursiveNode<Type = any>
 	free(poolGetter: IPoolGetter<Type>): void {
 		for (const child of this.children) child.free?.(poolGetter)
 		super.free(poolGetter)
+	}
+
+	jsonInsertablePre(): [string, string] {
+		return [
+			`{"type": ${JSON.stringify(this.type)}, "children": [`,
+			`${this.children.map((x) => JSON.stringify(x)).join(",")}]}`
+		]
+	}
+
+	jsonInsertablePost(): [string, string] {
+		return [
+			`{"type": ${JSON.stringify(this.type)}, "children": [${this.children
+				.map((x) => JSON.stringify(x))
+				.join(",")}`,
+			`]}`
+		]
+	}
+
+	jsonInsertableEmpty(): [string, string] {
+		return [`{"type": ${JSON.stringify(this.type)}, "children": [`, "]}"]
 	}
 
 	constructor(children: INode<Type>[] = []) {
