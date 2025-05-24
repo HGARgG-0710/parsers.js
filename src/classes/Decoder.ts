@@ -19,7 +19,7 @@ function readBytes(
 	readSync(source, target, offset, length, pos)
 }
 
-function getBasicDecoderFor(encoding: BufferEncoding) {
+function getBasicDecodingMethodFor(encoding: BufferEncoding) {
 	return function (this: PreDecoder) {
 		return this.temp.toString(encoding)
 	}
@@ -204,7 +204,7 @@ function Decoder(
 			this.readBytes(maxSize)
 			return maxSize
 		}),
-		decode: ConstDescriptor(getBasicDecoderFor(encoding))
+		decode: ConstDescriptor(getBasicDecodingMethodFor(encoding))
 	})
 
 	return decoder
@@ -230,7 +230,7 @@ function MultiByteDecoder(
 	}
 
 	extendPrototype(multiByteDecoder, {
-		decode: ConstDescriptor(getBasicDecoderFor(encoding)),
+		decode: ConstDescriptor(getBasicDecodingMethodFor(encoding)),
 		defaultSize: ConstDescriptor(defaultSize)
 	})
 
