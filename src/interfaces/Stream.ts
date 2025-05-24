@@ -63,6 +63,7 @@ export type IStream<Type = any> = Partial<IBackward<Type>> &
 		isCurrEnd: () => boolean
 	}
 
+export type IPrevableStream<Type = any> = IStream<Type> & IPrevable<Type>
 export type IReversibleStream<Type = any> = IStream<Type> & IBackward<Type>
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 export type IResourcefulStream<Type = any> = IStream<Type> & IResourceful

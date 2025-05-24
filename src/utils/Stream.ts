@@ -1,4 +1,4 @@
-import { functional, object, type } from "@hgargg-0710/one"
+import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { HandlerStream } from "../classes/Stream.js"
 import type {
@@ -10,30 +10,24 @@ import type {
 	IPushable
 } from "../interfaces.js"
 import type {
-	IBackward,
-	IFinishable,
-	INavigable,
 	IPosed,
-	IPrevable,
+	IPrevableStream,
 	IRawStream,
 	IReversibleStream,
-	IRewindable,
-	IStarted,
 	IStream
 } from "../interfaces/Stream.js"
 import type {
 	IStreamPredicate,
 	IStreamTransform
 } from "../interfaces/StreamHandler.js"
+import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
 import {
 	direction,
 	pickDirection,
 	positionNegate
 } from "../Stream/utils/Position.js"
 
-const { prop, structCheck } = object
-const { isFunction, isNumber, isBoolean } = type
-const { and } = functional
+const { isFunction, isNumber } = type
 
 /**
  * Given a `BasicStream`, calls `.next()` on it and returns the result
@@ -47,13 +41,11 @@ export function next<Type = any>(input: IStream<Type>) {
 /**
  * Given a `ReversibleStream`, calls its `.prev()` and returns the result
  */
-export const previous = <Type = any>(input: IReversibleStream<Type>) =>
+export function prev<Type = any>(input: IPrevableStream<Type>) {
+	const curr = input.curr
 	input.prev()
-
-/**
- * Given a `BasicStream` returns its `.curr` property value
- */
-export const current = prop("curr") as <Type = any>(x: IStream<Type>) => Type
+	return curr
+}
 
 /**
  * Given a `handler` function, returns a function of `input: BasicStream` that
@@ -70,18 +62,6 @@ export function wrapped<Type = any, OutType = any>(
 		return result
 	}
 }
-
-/**
- * Returns the value of `.isEnd` property of the given `BasicStream`
- */
-export const isEnd = prop("isEnd") as <Type = any>(x: IStream<Type>) => boolean
-
-/**
- * Returns the value of the `.isStart` property of the given `BasicStream`
- */
-export const isStart = prop("isStart") as <Type = any>(
-	x: IStream<Type>
-) => boolean
 
 /**
  * Calls `input.next()`, and returns `SkippedItem`.
@@ -196,39 +176,6 @@ export function transform<UnderType = any, UpperType = any>(
 		return result
 	}
 }
-
-/**
- * Returns whether the given `x` is a `Finishable`
- */
-export const isFinishable = structCheck<IFinishable>({
-	finish: isFunction
-}) as <Type = any>(x: any) => x is IFinishable<Type>
-
-/**
- * Returns whether the given `x` is a Navigable
- */
-export const isNavigable = structCheck<INavigable>({
-	navigate: isFunction
-}) as <Type = any>(x: any) => x is INavigable<Type>
-
-/**
- * Returns whether the given `x` is a Rewindable
- */
-export const isRewindable = structCheck<IRewindable>({
-	rewind: isFunction
-}) as <Type = any>(x: any) => x is IRewindable<Type>
-
-export const isStarted = structCheck<IStarted>({
-	isStart: isBoolean
-})
-
-export const isPrevable = structCheck<IPrevable>({
-	prev: isFunction
-}) as <Type = any>(x: any) => x is IPrevable<Type>
-
-export const isBackward = and(isStarted, isPrevable) as <Type = any>(
-	x: any
-) => x is IBackward<Type>
 
 /**
  * Iterates the given `BasicStream` until hitting the end.

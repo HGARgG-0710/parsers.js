@@ -1,6 +1,6 @@
 import { functional, type } from "@hgargg-0710/one"
 import type { IPosition, IStream } from "../../interfaces/Stream.js"
-import { next, previous } from "../../utils/Stream.js"
+import { next, prev } from "../../utils/Stream.js"
 import type {
 	IChange,
 	IPosed,
@@ -85,7 +85,7 @@ export function direction<Type = any>(pos: IPosition<Type>) {
  */
 export const pickDirection = <Type = any>(
 	pos: IPosition<Type>
-): IChange<Type> => (direction(pos) ? next : previous)
+): IChange<Type> => (direction(pos) ? next : prev)
 
 /**
  * Applies a given (supposedly, copying) transform onto the given `PredicatePosition`, whilst preserving the `.direction`

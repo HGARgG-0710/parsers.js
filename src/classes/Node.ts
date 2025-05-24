@@ -9,11 +9,10 @@ import type {
 } from "../interfaces/Node.js"
 import { isCopiable } from "../utils.js"
 import {
-	isContentNodeSerializable,
-	isRecursiveNodeSerializable,
-	isType,
-	isTyped
-} from "../utils/Node.js"
+	isType} from "../utils/Node.js"
+import { isRecursiveNodeSerializable } from "src/is/Node.js"
+import { isContentNodeSerializable } from "src/is/Node.js"
+import { isTyped } from "src/is/Node.js"
 import { NodeFactory } from "./NodeSystem.js"
 
 const { id } = functional

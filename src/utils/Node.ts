@@ -1,32 +1,12 @@
-import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
+import { boolean, functional } from "@hgargg-0710/one"
+import { type } from "../aliases/Node.js"
 import type { NodeSystem } from "../classes/NodeSystem.js"
-import type {
-	IChildrenHaving,
-	ITypeCheckable,
-	ITyped,
-	IValued,
-	IWalkable
-} from "../interfaces/Node.js"
+import type { ITyped, IWalkable } from "../interfaces/Node.js"
+import { isTyped } from "../is/Node.js"
 import { isGoodIndex } from "../utils.js"
 
-const { prop, structCheck } = object
 const { trivialCompose } = functional
-const { eqcurry, T } = boolean
-const { isArray } = _type
-
-export const isTyped = structCheck<ITyped>(["type"])
-
-export const isContentNodeSerializable = structCheck<ITyped & IValued>([
-	"type",
-	"value"
-])
-
-export const isRecursiveNodeSerializable = structCheck<
-	ITyped & IChildrenHaving
->({
-	type: T,
-	children: isArray
-})
+const { eqcurry } = boolean
 
 /**
  * Returns whether the given `x` has at least 1 child
@@ -65,18 +45,6 @@ export function treeEndPath<Type extends IWalkable<Type> = any>(
 	}
 	return lastIndex
 }
-
-/**
- * Returns the value of the `x.type` for the given `ITyped`
- */
-export const type = prop("type") as <Type = any>(x: ITyped<Type>) => Type
-
-/**
- * Returns the value of the `.is` property for the given `TypeCheckable`
- */
-export const is = prop("is") as <Type = any>(
-	t: ITypeCheckable
-) => _type.TypePredicate<Type>
 
 /**
  * Returns the predicate for checking that the `.type` property of the given
