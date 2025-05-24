@@ -11,32 +11,6 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 
 NEXT UP:
 	TODO: WriterStream: 
-		1. About 'IDestination', `Source`: 
-			Create a `ICleanupManager` classes (SourceManager and DestinationManager) for managing connections to open files. 
-				Rules: 
-					1. one connection per file
-					2. filenames are used for indexing
-
-				Available: 
-					1. .get(filename): (... WHATEVER-THE-INSTANCE-TYPE-IS: ISource, IDestination)
-						CREATES a new connection if it doesn't exist. 
-						Otherwise, returns the existing connection object. 
-						This (kind of) works the same way as the pooling logic, except the user does the reuse THEMSELVES. 
-						Plus - (at some point), the resources are INTENDED to be closed up. 
-					2. .closeAll()
-						Just an alias. 
-						Good for end-of-the-program cleanup logic
-
-				ALSO: 
-					1. new interface - IIsOpen: `.isOpen: boolean`: 
-						LET `ISource` and `IDestination` BOTH inherit from it. 
-						AND - let the MULTIPLE `.cleanup()` calls be SAFE because of it. 
-						Then - the "double free" error, though still present, is, effectively, harmless. 
-
-			THEN, the user DOESN'T HAVE TO be worried about "automatic" closing of the files
-				with `ISource` and the COMPLETELY EXPLICIT closing of the files with the `.get(filename)` or `.closeAll`. 
-				It also prevents re-creation of different file-access objects. 
-
 		2. TODO: IDecoder [and ISource - as a delegate...] - ADD A `.rewind()` method on it. 
 			This (basically) ensures that a file connection can be REUSED instead of being 
 				necessarily closed down. It (basically) just does `this.pos = 0` + some other re-initialization stuf... 
@@ -44,55 +18,6 @@ NEXT UP:
 			1. THEN: add the `.rewind()` call to the `LazyStream` to ENSURE that 
 				file connections ARE reusable. ALSO - make a check that the provided `.source` is, indeed, `.isOpen`. 
 					For otherwise, it is of no interest to the `LazyStream` objects. 
-		
-		3. TODO: create a new util [global...]: 
-			1. withResource(resource, (r) => ...): 
-				1. calls the given callback with the given resource
-				2. calls `.cleanup()` upon it afterwards
-
-			This is intended to simplify the user's handling of the `ISource` and `IDestination` 
-				classes. 
-
-		4. TODO: about the `utils.HashMap.fromPairs`:
-			MAKE this into a `.static` method on the anonymous classes. 
-			This allows one: 
-				1. to REMOVE one of the util's arguments. 
-				2. REMOVE need for specifying the constructor logic (since one can NOW just do it via `IInternal...`); 
-
-		5. REGARDING `samples.Pairs`: 
-			1. move the `Pairs` function OUT from classes/ [doesn't belong there]
-			2. take the utils from `IndexMap` and...: 
-				1. table - move to `src/utils.ts`
-				2. all the rest - ADD TO the `samples.Pairs.*`	
-					namespace, WHICH itself IS the `Pairs` function 
-			3. REMOVE the `utils.IndexMap` file
-
-		6. SPLIT the `prop`	calls to an `aliases` object: 
-			1. in `utils.Stream`
-			2. in `utils.Node`
-		
-		7. SPLIT the `is`-functions to an `typechecks` object:
-			1. in `utils.Stream`
-			2. in `utils.Node`
-		
-		8. `constants`: 
-			1. StreamParser [RENAME to `TransformStream`]: 
-				1. MAKE a part of the `StreamParser` function-namespace export. 
-			
-			2. LimitedStream [RENAME to `LimitStream`]: 
-				1. MAKE a part of the `LimitStream` function-namespace export.
-
-			3. regex: make part of `samples.regex`
-
-			ONLY `BadIndex` and `MissingArgument` are to remain; 
-				1. TODO: replace all explicit appearences of `undefined` with `MissingArgument`
-
-		9. re-make `regex` into `samples.regex`
-			This way, the user will have a more "focused" view of the library, 
-				with the more "day-to-day" tasks being pushed "further back". 
-					Reason being - doing otherwise trivializes the library 
-						and makes common functionality too easy to access
-							(example of this very tendency: numpy). 
 		
 	TODO: FreeStream: 
 		1. add the `.init` method, IN WHICH one is adding the FIRST `.curr`, so that the 
