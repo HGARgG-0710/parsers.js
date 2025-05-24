@@ -63,11 +63,13 @@ export class DepthStream<
 	protected baseNextIter() {
 		const { walker, response } = this
 		walker[response as NextResponse](this.lastLevelWithSiblings + 1)
+		return this.currGetter()
 	}
 
-	protected basePrevIter(): void | TreeLike {
+	protected basePrevIter(): TreeLike {
 		const { walker, response } = this
 		walker[response as PrevResponseWorkable]()
+		return this.currGetter()
 	}
 
 	get index() {
@@ -96,14 +98,14 @@ export class DepthStream<
 
 	rewind() {
 		this.walker.restart()
-		this.update()
+		this.updateCurr()
 		this.startStream()
 		return this.curr
 	}
 
 	navigate(index: MultiIndex) {
 		this.walker.goIndex(index)
-		this.update()
+		this.updateCurr()
 		return this.curr
 	}
 

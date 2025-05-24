@@ -1,21 +1,20 @@
+import { isCopiable } from "src/is.js"
 import {
 	ownerInitializer,
 	resourceInitializer
 } from "../../../classes/Initializer.js"
 import type { IResourceSettable } from "../../../interfaces.js"
-import type { IOwnedStream, IOwningStream } from "../../../interfaces/Stream.js"
-import { isCopiable } from "src/is.js"
-import { IterableStream } from "./IterableStream.js"
+import type { IOwnedStream } from "../../../interfaces/Stream.js"
+import { OwnableStream } from "./IterableStream.js"
 
 export abstract class BasicStream<
 	Type = any,
 	Args extends any[] = any[]
-> extends IterableStream<Type, Args> {
-	protected abstract baseNextIter(): Type | void
-	protected abstract update(newCurr?: Type | void): void
+> extends OwnableStream<Type, Args> {
+	protected abstract baseNextIter(): Type
 
 	protected postEnd?(): void
-	protected basePrevIter?(): Type | void
+	protected basePrevIter?(): Type
 	protected postStart?(): void
 	protected initGetter?(...args: Partial<Args>): Type
 
@@ -24,6 +23,10 @@ export abstract class BasicStream<
 	private _isStart: boolean = true
 	private _isEnd: boolean = false
 	private _curr: Type
+
+	protected update(newCurr: Type) {
+		this.curr = newCurr
+	}
 
 	protected set isStart(newIsStart: boolean) {
 		this._isStart = newIsStart
@@ -91,24 +94,21 @@ export abstract class BasicStream<
 	}
 }
 
-export abstract class OwnableStream<Type = any, Args extends any[] = any[]>
-	extends BasicStream<Type, Args>
-	implements IOwnedStream
-{
-	owner?: IOwningStream
-
-	setOwner(owner: IOwningStream): void {
-		this.owner = owner
-	}
-}
-
 export abstract class ResourceStream<Type = any, MoreArgs extends any[] = []>
-	extends OwnableStream<Type, [IOwnedStream, ...(MoreArgs | [])]>
+	extends BasicStream<Type, [IOwnedStream, ...(MoreArgs | [])]>
 	implements IOwnedStream<Type>
 {
 	protected ["constructor"]: new (resource?: IOwnedStream) => this
 
-	resource?: IOwnedStream
+	protected _resource?: IOwnedStream
+
+	protected set resource(newResource: IOwnedStream | undefined) {
+		this._resource = newResource
+	}
+
+	get resource() {
+		return this._resource
+	}
 
 	protected get initializer() {
 		return ownerInitializer
@@ -132,7 +132,7 @@ export abstract class SourceStream<
 		SourceType = unknown,
 		MoreArgs extends any[] = []
 	>
-	extends OwnableStream<Type, [SourceType, ...(MoreArgs | [])]>
+	extends BasicStream<Type, [SourceType, ...(MoreArgs | [])]>
 	implements IResourceSettable
 {
 	protected ["constructor"]: new (source?: SourceType) => this
@@ -141,16 +141,16 @@ export abstract class SourceStream<
 
 	protected abstract currGetter(): Type
 
+	protected updateCurr() {
+		this.update(this.currGetter())
+	}
+
 	protected get initializer() {
 		return resourceInitializer
 	}
 
 	protected initGetter(): Type {
 		return this.currGetter()
-	}
-
-	protected update() {
-		this.curr = this.currGetter()
 	}
 
 	setResource(source?: SourceType) {
@@ -165,11 +165,5 @@ export abstract class SourceStream<
 
 	constructor(source?: SourceType) {
 		super(source)
-	}
-}
-
-export abstract class SetterStream<Type = any> extends ResourceStream<Type> {
-	protected update(newCurr: Type) {
-		this.curr = newCurr
 	}
 }

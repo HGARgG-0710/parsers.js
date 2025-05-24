@@ -36,6 +36,7 @@ export class LazyStream
 
 	protected baseNextIter() {
 		this.nextDecoded()
+		return this.currGetter()
 	}
 
 	isCurrEnd() {
@@ -45,7 +46,7 @@ export class LazyStream
 	navigate(pos: IPosition) {
 		if (isNumber(pos)) this.nextDecoded(pos)
 		else uniNavigate(this, pos)
-		this.update()
+		this.updateCurr()
 		return this.curr
 	}
 

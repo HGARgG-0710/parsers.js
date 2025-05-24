@@ -1,17 +1,19 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IControlStream, IOwnedStream } from "../../../interfaces/Stream.js"
-import { SetterStream } from "./BasicStream.js"
+import type {
+	IControlStream,
+	IOwnedStream
+} from "../../../interfaces/Stream.js"
+import { ResourceStream } from "./BasicStream.js"
 
 class _HandlerStream<
 	InType = any,
 	OutType = any
-> extends SetterStream<OutType> {
+> extends ResourceStream<OutType> {
 	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
 	private handler: (stream: IOwnedStream<InType>) => OutType
 
 	state: Summat
-	resource?: IOwnedStream<InType>
 
 	private handleCurr() {
 		return this.handler(this.resource!)

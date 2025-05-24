@@ -1,25 +1,36 @@
 import type { ILinkedStream, IOwnedStream } from "../../../interfaces/Stream.js"
+import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import type { ISingletonHandler } from "../interfaces/SingletonStream.js"
-import { SetterStream } from "./BasicStream.js"
+import { TrivialStream } from "./TrivialStream.js"
 
 class _SingletonStream<
 	InType = any,
 	OutType = any
-> extends SetterStream<OutType> {
+> extends TrivialStream<OutType> {
 	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
 
-	resource?: IOwnedStream<InType>
-
-	private handler: ISingletonHandler<InType, OutType>
-
-	protected baseNextIter(): void | OutType {}
-
-	protected initGetter(): OutType {
-		return this.handler(this.resource!)
+	protected get initializer() {
+		return ownerInitializer
 	}
 
-	isCurrEnd(): boolean {
-		return true
+	private _resource?: IOwnedStream<InType>
+	private handler: ISingletonHandler<InType, OutType>
+
+	private set resource(newResource: IOwnedStream<InType> | undefined) {
+		this._resource = newResource
+	}
+
+	get resource() {
+		return this._resource
+	}
+
+	setResource(resource: IOwnedStream) {
+		this.resource = resource
+		this.curr = this.handler(resource)
+	}
+
+	copy() {
+		return new this.constructor(this.resource?.copy())
 	}
 
 	setHandler(handler: ISingletonHandler<InType, OutType>) {

@@ -48,11 +48,13 @@ export class InputStream<Type = any>
 	protected baseNextIter() {
 		++this.pos
 		this.view.forward()
+		return this.currGetter()
 	}
 
 	protected basePrevIter() {
 		--this.pos
 		this.view.backward()
+		return this.currGetter()
 	}
 
 	isCurrEnd(): boolean {
@@ -75,7 +77,7 @@ export class InputStream<Type = any>
 			return uniNavigate(this, relativePos)
 
 		this.pos = max(0, min(this.lastPos, this.lastPos + relativePos))
-		this.update()
+		this.updateCurr()
 		return this.curr
 	}
 
