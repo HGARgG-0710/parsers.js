@@ -64,12 +64,6 @@ NEXT UP:
 		2. NOTE: this *must* be in an ENTIRELY SEPARATE commit, because otherwise, one may create a difficult situation to get-out-from.  
 
 	TODO: `samples`: 
-		1. new `Stream` for `samples` [DO add in `v0.3`]. 
-			`JSONStream = StreamParser(JSON.stringify)`; 
-		2. relocate `Pairs` into `samples` from `classes`. 
-			1. It's not a class, it's a function
-			2. It doesn't do any allocation [as a rule], just a semantic wrapper
-			3. It is used frequently with IndexMap. 
 		3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
 		4. Relocate the `DelimitedStream` to `samples.MarkerStream` 
 			1. This is an ".init-composition" (TO BE USED AS A SINGLE STREAM!!!) of: 
@@ -161,40 +155,6 @@ NEXT UP:
 								1. provide multiple kinds of information [flags, etc]
 								2. "flatten" the tree [since greater simplicity leads to greater depth]
 
-		8. WriterStream: 
-			1. JSONWriter - a "composition" of `WriterStream` and `JSONStream`, taking in a IStream
-				for producing JSON-serializable "shticks". 
-				ALSO: it's not a "pure" composition in that it requires: 
-					
-					1. FOUR new Stream-s: 
-						1. FiniteStream(...v): iterates the finite collection 'v[0], v[1], ...'
-							An inline, more "tame" version of `InputStream`
-							Also - no 'navigate/prev/rewindvA on it '
-						2. ConcatStream(...streams): 
-							Concatenates the outputs of given streams sequentially 
-								like 's_11, s_12, ..., s_1n, s_21, ..., s_2n, ...'
-						3. LoopStream(...v): 
-							An infinite stream that loops over the finite list of items 'v': 
-								'v1, v2, ..., vn, v1, v2, ...'
-						4. InterleaveStream(...streams)
-							Combines the streams by "interleaving" their values in the following fashion: 
-								's_11, s_21, ..., s_n1, s_12, s_22, ..., s_n2, ..."
-
-					2. TWO new methods [on IRecursiveNode - A NEW INTERFACE WITH THESE TWO]: 	
-						1. jsonInsertablePre(): 
-							For an IRecursiveNode, returns 
-								[
-									'{type: ..., children: [', 
-									'a1, a2, ...]}'
-								]
-								
-						2. jsonInsertablePost(): 
-							For an IRecursiveNode, returns 
-								[
-									'{type: ..., children: [a1, a2, ...', 
-									']}'
-								]
-
 	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
 		Reason - simplicity of names...
 		WALK: 
@@ -264,7 +224,7 @@ MINOR TODOS:
 	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
 		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
 		1. In particular - ONLY add "function-wrappers" for the `class _StreamClassName {....}`for: 
-			1. classes that are INTENTIONALLY to remain 'sealed' (like, say, `DynamicParser` and `Enum`)
+			1. classes that are INTENTIONALLY to remain 'sealed'
 			2. classes that are using the Factory pattern 
 			3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
 			
@@ -278,9 +238,6 @@ MINOR TODOS:
 		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
 	
 LATER TODOS: 		
-	UT4. [maybe???] REMOVE the `utilities`: 
-		Since we're going to be adding the `samples`, perhaps it's wise to unite the two???
-
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
 		Reasons: 
 			1. works FAR better with the `&`-role-composition	
