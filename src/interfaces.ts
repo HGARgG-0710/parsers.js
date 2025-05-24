@@ -131,6 +131,10 @@ export interface IResource {
 	cleanup(): void
 }
 
+export interface IIsOpen {
+	readonly isOpen: boolean
+}
+
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
 export type * from "./interfaces/Accumulator.js"
