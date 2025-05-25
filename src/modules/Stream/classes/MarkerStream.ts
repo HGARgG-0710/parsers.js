@@ -11,13 +11,9 @@ const markerInitializer = {
 }
 
 class _MarkerStream<Type = any, MarkerType = any>
-	extends WrapperStream<Type>
+	extends WrapperStream<Type, []>
 	implements IMarkerStream<Type, MarkerType>
 {
-	protected get initializer() {
-		return markerInitializer
-	}
-
 	private marker: () => MarkerType
 
 	private _currMarker: MarkerType
@@ -28,6 +24,10 @@ class _MarkerStream<Type = any, MarkerType = any>
 
 	get currMarker() {
 		return this._currMarker
+	}
+
+	protected get initializer() {
+		return markerInitializer
 	}
 
 	private updateMarker() {
@@ -51,6 +51,10 @@ class _MarkerStream<Type = any, MarkerType = any>
 	setMarker(marker: () => MarkerType) {
 		this.marker = marker
 		return this
+	}
+
+	copy() {
+		return new this.constructor().setMarker(this.marker).init(this.resource)
 	}
 }
 
