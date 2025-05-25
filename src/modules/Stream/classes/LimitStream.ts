@@ -118,19 +118,15 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 	}
 
 	next() {
-		const curr = this.curr
 		this.isStart = false
 		if (this.isCurrEnd()) this.endStream()
-		else this.baseNextIter(curr)
-		return curr
+		else this.baseNextIter(this.curr)
 	}
 
 	prev() {
-		const curr = this.curr
 		this.isEnd = false
 		if (this.isCurrStart()) this.startStream()
-		else this.basePrevIter(curr)
-		return curr
+		else this.basePrevIter(this.curr)
 	}
 
 	syncCurr(): void {

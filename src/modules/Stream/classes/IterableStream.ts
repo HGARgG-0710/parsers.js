@@ -13,7 +13,7 @@ export abstract class IterableStream<Type = any, Args extends any[] = any[]>
 	abstract readonly isStart: boolean
 	abstract readonly curr: Type
 
-	abstract next(): Type
+	abstract next(): void
 	abstract isCurrEnd(): boolean
 	abstract copy(): this
 

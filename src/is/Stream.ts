@@ -36,7 +36,7 @@ export const isRewindable = structCheck<IRewindable>({
 
 export const isPrevable = structCheck<IPrevable>({
 	prev: isFunction
-}) as <Type = any>(x: any) => x is IPrevable<Type>
+})
 
 export const isStateful = structCheck<IStateful & IStateSettable>({
 	state: T,

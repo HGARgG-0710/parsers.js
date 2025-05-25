@@ -23,7 +23,7 @@ export class InputStream<Type = any>
 		INavigable<Type>,
 		IFinishable<Type>,
 		IRewindable<Type>,
-		IPrevable<Type>,
+		IPrevable,
 		IResourceSettable,
 		IInputStream<Type, IParseable<Type>>
 {

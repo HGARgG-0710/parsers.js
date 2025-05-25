@@ -26,13 +26,6 @@ export class FiniteStream<Type = any>
 		return this.pos === lastIndex(this.items)
 	}
 
-	next() {
-		const curr = this.curr
-		if (this.isCurrEnd()) this.isEnd = true
-		else this.baseNextIter()
-		return curr
-	}
-
 	*[Symbol.iterator]() {
 		yield* this.items
 	}

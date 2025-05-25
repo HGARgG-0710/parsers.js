@@ -31,10 +31,9 @@ export class FreeStream<
 		return this
 	}
 
-	next(): Type {
+	next() {
 		this.enqueueCurrForFreeing()
-		const curr = super.next()
+		super.next()
 		if (this.isQueueFull()) this.freeFirstEnqueued()
-		return curr
 	}
 }

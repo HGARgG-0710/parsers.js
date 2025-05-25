@@ -24,14 +24,12 @@ export class PosStream<Type = any> extends WrapperStream<Type> {
 	}
 
 	next() {
-		const lastCurr = super.next()
+		super.next()
 		this.forward()
-		return lastCurr
 	}
 
 	prev() {
-		const lastCurr = super.prev()
+		super.prev()
 		this.backward()
-		return lastCurr
 	}
 }

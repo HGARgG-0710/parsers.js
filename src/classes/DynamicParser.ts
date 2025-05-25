@@ -16,9 +16,8 @@ class ParsedStream<
 	) => this
 
 	next() {
-		const items = super.next()
+		super.next()
 		this.parseInstance.maybeUpdate()
-		return items
 	}
 
 	copy(): this {

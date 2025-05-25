@@ -126,20 +126,16 @@ export class FreezableStream<Type = any>
 	}
 
 	next() {
-		const curr = this.curr
 		this.isStart = false
 		if (!this.willBeBeyoundBuffer()) this.baseNextIter()
 		else if (this.isFrozen()) this.endStream()
 		else this.handleUnbufferizedNext()
-		return curr
 	}
 
 	prev() {
-		const lastCurr = this.curr
 		this.isEnd = false
 		if (this.isCurrStart()) this.startStream()
 		else this.basePrevIter()
-		return lastCurr
 	}
 
 	navigate(relativePos: IPosition<Type>) {

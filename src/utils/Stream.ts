@@ -92,7 +92,7 @@ export function consume<Type = any>(
 	stream: IStream<Type>,
 	result: IPushable<Type> = new ArrayCollection<Type>()
 ) {
-	while (!stream.isEnd) result.push(stream.next())
+	while (!stream.isEnd) result.push(next(stream))
 	return result
 }
 
@@ -101,7 +101,7 @@ export function write<Type = any>(
 	result: IFiniteWritable<Type>
 ) {
 	for (let i = 0; i < result.size && !stream.isEnd; ++i)
-		result.write(i, stream.next())
+		result.write(i, next(stream))
 	return result
 }
 
@@ -152,7 +152,7 @@ export function delimited(delimPred: IPosition) {
 	) {
 		while (!input.isEnd) {
 			skip(input, delimPred)
-			result.push(input.next())
+			result.push(next(input))
 		}
 		return result
 	}

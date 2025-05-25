@@ -14,8 +14,7 @@ export class WriterStream extends WrapperStream<string> {
 	}
 
 	next() {
-		const curr = super.next()
-		this.write(curr)
-		return curr
+		this.write(this.curr)
+		super.next()
 	}
 }

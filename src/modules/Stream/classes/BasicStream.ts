@@ -67,23 +67,19 @@ export abstract class BasicStream<
 	}
 
 	next() {
-		const curr = this.curr
 		this.isStart = false
 		if (this.isCurrEnd()) {
 			this.endStream()
 			this.postEnd?.()
 		} else this.update(this.baseNextIter())
-		return curr
 	}
 
 	prev() {
-		const curr = this.curr
 		this.isEnd = false
 		if (this.isCurrStart!()) {
 			this.startStream()
 			this.postStart?.()
 		} else this.update(this.basePrevIter!())
-		return curr
 	}
 
 	init(...args: Partial<Args>) {

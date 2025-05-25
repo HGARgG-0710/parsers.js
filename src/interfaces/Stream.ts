@@ -7,8 +7,8 @@ import type {
 	IStateSettable
 } from "../interfaces.js"
 
-export interface IPrevable<Type = any> {
-	prev: () => Type
+export interface IPrevable {
+	prev: () => void
 }
 
 export interface IFinishable<Type = any> {
@@ -25,10 +25,6 @@ export interface IRewindable<Type = any> {
 
 export interface IIsCurrStartable {
 	isCurrStart: () => boolean
-}
-
-export interface INextable<Type = any> {
-	next: () => Type
 }
 
 export interface IPeekable<Type = any> {
@@ -50,15 +46,15 @@ export type IStream<Type = any> = Partial<INavigable<Type>> &
 	Partial<IPrevable> &
 	Iterable<Type> &
 	ICopiable &
-	INextable<Type> &
 	IInitializable & {
 		readonly curr: Type
 		readonly isEnd: boolean
 		readonly isStart: boolean
 		isCurrEnd: () => boolean
+		next: () => void
 	}
 
-export type IPrevableStream<Type = any> = IStream<Type> & IPrevable<Type>
+export type IPrevableStream<Type = any> = IStream<Type> & IPrevable
 export type IPeekableStream<Type = any> = IStream<Type> & IPeekable<Type>
 export type IResourcefulStream<Type = any> = IStream<Type> & IResourceful
 export type IStatefulStream<Type = any> = IStream<Type> &

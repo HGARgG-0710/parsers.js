@@ -39,15 +39,13 @@ class _MarkerStream<Type = any, MarkerType = any>
 	}
 
 	next() {
-		const curr = super.next()
+		super.next()
 		this.updateMarker()
-		return curr
 	}
 
 	prev() {
-		const curr = super.next()
+		super.prev()
 		this.updateMarker()
-		return curr
 	}
 
 	setMarker(marker: () => MarkerType) {

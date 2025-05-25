@@ -9,20 +9,18 @@ import { WrapperStream } from "./WrapperStream.js"
 
 class _IndexStream<Type = any>
 	extends WrapperStream<Type>
-	implements IIndexStream<Type>, IPrevable<Type>
+	implements IIndexStream<Type>, IPrevable
 {
 	private isNewline: () => boolean
 
 	next() {
-		const curr = super.next()
+		super.next()
 		this.lineIndex[this.isNewline() ? "nextChar" : "nextLine"]()
-		return curr
 	}
 
-	prev(): Type {
-		const curr = super.prev()
+	prev() {
+		super.prev()
 		this.lineIndex.prevChar!()
-		return curr
 	}
 
 	setNewlinePredicate(isNewline: () => boolean) {

@@ -8,7 +8,7 @@ import type {
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
 import { write } from "../../../utils/Stream.js"
-import { DyssyncForwardStream } from "./WrapperStream.js"
+import { DyssyncStream } from "./WrapperStream.js"
 
 const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 	init(target: _PeekStream, resource?: IOwnedStream) {
@@ -18,7 +18,7 @@ const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 }
 
 class _PeekStream<Type = any>
-	extends DyssyncForwardStream<Type>
+	extends DyssyncStream<Type>
 	implements IPeekable<Type>
 {
 	protected get initializer() {
@@ -32,8 +32,8 @@ class _PeekStream<Type = any>
 		return this.peekBuffer.size
 	}
 
-	private unseen(totalItems: number) {
-		return totalItems - this.peekCount
+	private unseenItems(total: number) {
+		return total - this.peekCount
 	}
 
 	private isTrivial(n: number) {
@@ -106,27 +106,26 @@ class _PeekStream<Type = any>
 				return this.priorPeek(n)
 
 			default:
-				return this.newPeek(this.unseen(n))
+				return this.newPeek(this.unseenItems(n))
 		}
 	}
 
 	isCurrEnd(): boolean {
-		return this.resource!.isCurrEnd() && this.remainsNoneSeen()
+		return super.isCurrEnd() && this.remainsNoneSeen()
 	}
 
 	next() {
-		const curr = this.curr
+		this.isStart = false
 		if (this.isCurrEnd()) this.endStream()
 		else if (this.peekNonEmpty()) this.fetchNextPeek()
 		else this.baseNextIter()
-		return curr
 	}
 
 	prev() {
-		const curr = this.curr
-		if (this.peekNonEmpty()) this.fetchPrevPeek()
+		this.isEnd = false
+		if (this.isCurrStart()) this.startStream()
+		else if (this.peekNonEmpty()) this.fetchPrevPeek()
 		else this.basePrevIter()
-		return curr
 	}
 
 	resetPeeks() {

@@ -33,9 +33,8 @@ export abstract class TrivialStream<Type = any> extends OwnableStream<Type> {
 		return true
 	}
 
-	next(): Type {
+	next() {
 		this.isStart = false
 		this.isEnd = true
-		return this.curr
 	}
 }

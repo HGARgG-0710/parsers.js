@@ -48,10 +48,9 @@ class _FilterStream<Type = any> extends DyssyncForwardStream<Type> {
 	}
 
 	next() {
-		const curr = super.next()
+		super.next()
 		if (this.isCurrEnd()) this.endStream()
 		else this.currGetter()
-		return curr
 	}
 
 	setPredicate(predicate: IPredicatePosition<Type>) {

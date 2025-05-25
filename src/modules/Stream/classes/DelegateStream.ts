@@ -29,11 +29,11 @@ export abstract class DelegateStream<
 	}
 
 	prev() {
-		return this.resource!.prev!()
+		this.resource!.prev!()
 	}
 
 	next() {
-		return this.resource!.next()
+		this.resource!.next()
 	}
 
 	isCurrStart() {
