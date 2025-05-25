@@ -9,20 +9,96 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-NEXT UP:		
-	TODO: WriterStream: 
-		2. TODO: IDecoder [and ISource - as a delegate...] - ADD A `.rewind()` method on it. 
-			This (basically) ensures that a file connection can be REUSED instead of being 
-				necessarily closed down. It (basically) just does `this.pos = 0` + some other re-initialization stuf... 
+NEXT UP:
+	TODO: remove the `DyssyncStream`, `DyssyncForwardStream` and `ResourceStream`:
+		REASON: 
+			These serve as mixins. 
+			TypeScript DOESN'T SUPPORT mixins (not properly). 
 
-			1. THEN: add the `.rewind()` call to the `LazyStream` to ENSURE that 
-				file connections ARE reusable. ALSO - make a check that the provided `.source` is, indeed, `.isOpen`. 
-					For otherwise, it is of no interest to the `LazyStream` objects. 
-	
+		CONCLUSION: 
+			Replace them with (appropriate) delegates. 
+			To PROPERLY implement mixins for these children classes, see the note below...
+
+		ALSO; 
+			0. LET the `isStream/isEnd/curr` "properties" BE SPLIT into a new class [call it 'MaskStream'], 
+				FROM WHICH the `TrivialStream` and `BasicStream` will inherit. 
+			
+			1. about 'DyssyncStream' mixin-class [parent for `PeekStream` and `FilterStream`]: 
+				SPLIT the `DelegateStream` and `DyssyncStream` [old] onto 3 classes: 
+					1. DelegateStream [NEW] - contains ONLY method-delegates, parent to other 2
+					2. SyncStream - delegates to PROPERTIES as well, parent of `ChainStream`, `WrapperStream`, etc
+					3. DyssyncStream - no delegates, contains "live" no-accessor properties
+						THIS ONE is a 'mixin' of `DelegateStream` and `MaskStream`. 
+						Built same way as the below example of a 'mixin-class'; 
+						Treated as a `DyssyncStream` 
+						NOTE[1]: the `syncCurr` is RETAINED upon the `DyssyncStream`
+						NOTE[2]: *try* to implement this WITHOUT needing a delegate class, 
+							that is - `extend` FROM `DelegateStream`, return WITHOUT casting [important - this way, `protected` properties can remain], 
+								and use the `MaskStream` via `mixin(...)`; 
+
+			2. about [new] ResourceStream - [new] 'DyssyncStream' & 'BasicStream' mixin-class [parent for LimitStream]: 
+				REPLACE the `DyssyncForwardStream`, `DyssyncForwardStream` and `ResourceStream` with THIS 
+					NEW 'mixin'-based class
+
+				create a new `mixin`-class [called `ResourceStream`], for creating abstract classes 
+					that inherit from BOTH `DelegateStream` AND `BasicStream` 
+						[in that order - that is, BasicStream OVERRIDES the thing in question]. 
+
+				ALSO, let `HandlerStream` inherit from it as well
+				
+				Created like:
+					1. exopted class [NO EXPLICIT CAST]
+					2. inherit from `BasicStream` via `extend`
+						1. CRUCIAL: add a declarations: 
+							
+							1. `protected syncCurr: (...) => ...`
+							2. `resource?: IOwnedStream`...
+
+							This, fundamentally, allows one to retain all the type-stuff of `DyssyncStream`
+								AS WELL!
+					3. use `mixin(DyssyncStream)`
+				
+				Likewise, the 'BasicStream' "framework" methods WILL BE AVAILABLE!
+				The most important part is that it shall have the: 
+					1. methods [BasicStream]: 
+						1. endStream (protected)
+						2. startStream (protected)
+				
+				3. REMOVE `ChainStream` class: 
+					1. LET the `ownerInitializer`, and `.setResource` be a part of the `OwningStream` [new]
+						PARENT CLASS of `DelegateStream`, that is a CHILD CLASS of `OwnableStream`, 
+							which is, however, NOT the parent of `BasicStream`
+
 	TODO: `.copy()`-fixing [IStream-implementations]: 
 		1. fix the `.copy()` methods' implementations that employ the 
 			`.set*`-methods/custom initializers
-
+			
+			2. BasicStream
+			3. CompositeStream
+			4. ConcatStream
+			5. DelegateStream
+			6. DepthStream
+			7. FilterStream
+			8. FiniteStream
+			9. FreeStream
+			10. FreezableStream
+			11. HandlerStream
+			12. IndexStream
+			13. InputStream
+			14. InterleaveStream
+			15. IterableStream
+			16. LazyStream
+			17. LimitStream
+			18. LoopStream
+			19. MarkerStream
+			20. PeekStream
+			21. Position
+			22. PosStream
+			23. SingletonStream
+			24. TrivialStream
+			25. WrapperStream
+			26. WriterStream
+			
 	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
 		Reason - simplicity of names...
 		WALK: 
@@ -30,6 +106,19 @@ NEXT UP:
 			2. through internal/ files
 			3. through interfaces/ files
 			4. through utils/ files
+
+	TODO: about the `PropDigger` - useless for most "real" scenarios:
+		1. it's pretty good for fixed sizes, but is (ultimately) useless when it comes to dynamic ones 
+			(such as with `chooser`s), since we never know just how deep the desired item lies 
+				[could be 5 levels, could be a 100 - depends on the input]. 
+			To become useful (say, finding the first underlying "MarkedStream" via `.resource/owner`), 
+				one must allow PREDICATES as well as numbers with it. 
+			
+		2. SOLUTION: 
+			1. LET `IPosition` become a PROJECT-LEVEL module, 
+				with `IPosition` becoming more general (allows non-`IStream`-arguments now for predicates),
+					and the `IStreamPosition` becoming what the OLD `IPosition` once was
+			2. ACCEPT an `IPosition<T>` for a `PropDigger<T>`
 					
 CURRENT TODOS:		
 	TODO: order imports [Shift + Alt + O]
