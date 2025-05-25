@@ -3,37 +3,52 @@ import type {
 	IOwnedStream,
 	IPoolGetter
 } from "../../../interfaces.js"
-import { ThreeQueue } from "../../../internal/ThreeQueue.js"
+import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import { WrapperStream } from "./WrapperStream.js"
 
-export class FreeStream<
-	Type extends IFreeable = any
-> extends WrapperStream<Type> {
-	private poolGetter: IPoolGetter
-	private freeablesQueue = new ThreeQueue<Type>()
+const freeStreamInitializer = {
+	init(
+		target: FreeStream,
+		resource?: IOwnedStream,
+		poolGetter?: IPoolGetter
+	) {
+		ownerInitializer.init(target, resource)
+		if (resource) target.setCurr()
+		if (poolGetter) target.setPoolGetter(poolGetter)
+	}
+}
 
-	resource?: IOwnedStream
+export class FreeStream<Type extends IFreeable = any> extends WrapperStream<
+	Type,
+	[]
+> {
+	private poolGetter: IPoolGetter
+	private freeable: Type | null = null
 
 	private enqueueCurrForFreeing() {
-		this.freeablesQueue.push(this.curr)
+		this.freeable = this.curr
 	}
 
-	private freeFirstEnqueued() {
-		this.freeablesQueue.shift()!.free(this.poolGetter)
+	private freeEnqueued() {
+		this.freeable!.free(this.poolGetter)
+		this.freeable = null
 	}
 
-	private isQueueFull() {
-		return this.freeablesQueue.isFull()
+	protected get initializer() {
+		return freeStreamInitializer
 	}
 
-	withPoolGetter(poolGetter: IPoolGetter) {
+	setCurr() {
+		this.enqueueCurrForFreeing()
+	}
+
+	setPoolGetter(poolGetter: IPoolGetter) {
 		this.poolGetter = poolGetter
-		return this
 	}
 
 	next() {
-		this.enqueueCurrForFreeing()
+		this.freeEnqueued()
 		super.next()
-		if (this.isQueueFull()) this.freeFirstEnqueued()
+		this.enqueueCurrForFreeing()
 	}
 }
