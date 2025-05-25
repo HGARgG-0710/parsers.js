@@ -8,7 +8,7 @@ import { LineIndex } from "./Position.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 class _IndexStream<Type = any>
-	extends WrapperStream<Type>
+	extends WrapperStream<Type, []>
 	implements IIndexStream<Type>, IPrevable
 {
 	private isNewline: () => boolean
