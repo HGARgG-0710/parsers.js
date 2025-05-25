@@ -13,7 +13,6 @@ const freeStreamInitializer = {
 		poolGetter?: IPoolGetter
 	) {
 		ownerInitializer.init(target, resource)
-		if (resource) target.setCurr()
 		if (poolGetter) target.setPoolGetter(poolGetter)
 	}
 }
@@ -38,7 +37,8 @@ export class FreeStream<Type extends IFreeable = any> extends WrapperStream<
 		return freeStreamInitializer
 	}
 
-	setCurr() {
+	setResource(resource: IOwnedStream) {
+		super.setResource(resource)
 		this.enqueueCurrForFreeing()
 	}
 

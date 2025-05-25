@@ -65,11 +65,10 @@ export class InputStream<Type = any>
 		return this.pos === 0
 	}
 
-	init(source: IParseable<Type>) {
+	setResource(source: IParseable<Type>): void {
+		super.setResource(source)
 		this.lastPos = source.size - 1
 		this.view.init(source)
-		super.init(source)
-		return this
 	}
 
 	navigate(relativePos: IPosition) {

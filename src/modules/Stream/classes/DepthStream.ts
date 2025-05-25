@@ -1,10 +1,10 @@
 import { BadIndex } from "../../../constants.js"
 import type { IWalkable } from "../../../interfaces.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
-import { treeEndPath } from "../../../utils/Node.js"
 import { isGoodIndex } from "../../../utils.js"
-import { MultiIndex } from "./Position.js"
+import { treeEndPath } from "../../../utils/Node.js"
 import { SourceStream } from "./BasicStream.js"
+import { MultiIndex } from "./Position.js"
 
 type PrevResponseWorkable = typeof GO_PREV_LAST | typeof POP_CHILD
 type PrevResponse = PrevResponseWorkable | null
@@ -72,6 +72,12 @@ export class DepthStream<
 		return this.currGetter()
 	}
 
+	setResource(tree: TreeLike): void {
+		super.setResource(tree)
+		this.walker.init(tree)
+		this.endInd = new MultiIndex(treeEndPath(tree))
+	}
+
 	get index() {
 		return this.walker.pos
 	}
@@ -87,13 +93,6 @@ export class DepthStream<
 	isCurrStart(): boolean {
 		this.pickResponsePrev()
 		return this.response === null
-	}
-
-	init(tree: TreeLike) {
-		super.init(tree)
-		this.walker.init(tree)
-		this.endInd = new MultiIndex(treeEndPath(tree))
-		return this
 	}
 
 	rewind() {

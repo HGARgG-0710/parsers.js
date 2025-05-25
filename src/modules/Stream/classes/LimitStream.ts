@@ -14,11 +14,10 @@ import { DyssyncStream } from "./WrapperStream.js"
 const { isNullary } = type
 const { T } = boolean
 
-const limitedStreamInitializer = {
-	init(target: _LimitStream, resource: ILimitableStream) {
+const limitStreamInitializer = {
+	init(target: _LimitStream, resource?: ILimitableStream) {
 		target.setupState()
 		ownerInitializer.init(target, resource)
-		if (resource) this.setupUnderStream(target)
 	}
 }
 
@@ -34,7 +33,7 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 	private until: IPosition
 
 	protected get initializer() {
-		return limitedStreamInitializer
+		return limitStreamInitializer
 	}
 
 	protected set resource(newResource: ILimitableStream<Type>) {
@@ -101,7 +100,8 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		navigate(this.resource!, this.from)
 	}
 
-	setupUnderStream() {
+	setResource(resource: ILimitableStream<Type>) {
+		super.setResource(resource)
 		this.findStartPos()
 		this.syncCurr()
 	}

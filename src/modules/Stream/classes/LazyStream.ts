@@ -52,12 +52,9 @@ export class LazyStream
 		return this.curr
 	}
 
-	init(source: ISource) {
-		if (source) {
-			source.rewind()
-			super.init(source)
-		}
-		return this
+	setResource(source: ISource): void {
+		source.rewind()
+		super.setResource(source)
 	}
 
 	copy(): this {
