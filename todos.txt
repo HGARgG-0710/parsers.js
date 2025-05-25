@@ -9,7 +9,7 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-NEXT UP:
+NEXT UP:		
 	TODO: WriterStream: 
 		2. TODO: IDecoder [and ISource - as a delegate...] - ADD A `.rewind()` method on it. 
 			This (basically) ensures that a file connection can be REUSED instead of being 
@@ -18,142 +18,10 @@ NEXT UP:
 			1. THEN: add the `.rewind()` call to the `LazyStream` to ENSURE that 
 				file connections ARE reusable. ALSO - make a check that the provided `.source` is, indeed, `.isOpen`. 
 					For otherwise, it is of no interest to the `LazyStream` objects. 
-		
-	TODO: FreeStream: 
-		1. add the `.init` method, IN WHICH one is adding the FIRST `.curr`, so that the 
-			length of the `.queue` property is ALWAYS >= 1. 
-			Then, we NO LONGER need to check for `if(.isFull())` at the beginning of `.next()` 
-				EVERY TIME we call it. One can JUST free the FIRST ITEM, without need to consult the "last" 
-					one. 
-
-			THEN: 
-				1. one could JUST be using a SINGLE PROPERTY instead of the special "finite queue" class. 
-					THEN - one can MOVE the `.free()` call TO THE END, by: 
-						1. memorizing the `.curr` in `.init`
-						2. FREEING the *saved* previous `.curr` AFTER the `.next()` call
-						3. the `.curr` was updated prior to step 2., we're returning NOTHING
-				2. one ONLY holds the space for A SINGLE '.curr' value. 
-				3. CREATE a new util - `next`, with semantics: 
-
-					function next(stream: IStream) {
-						const curr = stream.curr
-						stream.next()
-						return curr
-					}
-
-					REASON: it's STILL an immensely powerful idiom, 
-						though it DOES prevent one from doing pooling - so the user must 
-							be SURE that there is no pooling hapenning at the lower level. 
-
-					The user could then do: 
-
-						const a = next(stream)
-						const b = next(stream)
-						...
-					
-					Instead of: 
-
-						const a = stream.curr
-						stream.next()
-
-						const b = stream.curr
-						stream.next()
-
-						// ...
-
-		2. NOTE: this *must* be in an ENTIRELY SEPARATE commit, because otherwise, one may create a difficult situation to get-out-from.  
-
-	TODO: `samples`: 
-		3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
-		4. Relocate the `DelimitedStream` to `samples.MarkerStream` 
-			1. This is an ".init-composition" (TO BE USED AS A SINGLE STREAM!!!) of: 
-				1. `boolean`-based MarkerStream, which relies upon a user-given predicate to determine the `.currMarked` of the given item; 
-				2. A `FilterPredicate`, ABOVE which provides the 
-			2. ALSO - DelimiterStream
-				0. based off 'DelimitedStream'
-				1. uses a "has"-based predicate created from a list of possible delimiters/items
-		5. ADD NEW ".init-compositions" [NOT `CompositeStream`-s, although that is what is indended elsewhere...] (old pseudocode)	
-			1. trivialCompose(IndexStream, InputStream)
-			2. trivialCompose(IndexStream, LFStream, InputStream)
-			3. trivialCompose(IndexStream, LFStream, LazyBuffer)	
-			4. trivialCompose(IndexStream, LazyBuffer)
-
-			IMPORTANT NOTE: 
-				after adding `TokenStream`, introduce: 
-					1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
-						Put together with the `isLFSkip` util. 
-						More exactly: 
-							1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
-							2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
-					2. 'isNewlineSkip = or(isLF, isCRLF)'
-						This is for the user to be able to instead of transforming "CRLF -> LF", 
-							just use this as-is [count the newlines]; 
-					3. `LFStream` - a stream returning, for an `isNewline` predicate 
-						[not INewlinePredicate, instead (stream: IStream<string>) => string], 
-							INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
-						
-						Something like: `return isNewline(x)`
-						It's a `StreamParser`
-						Put under 'StreamParser/classes'
-						Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
-							More specifically, to be able to do: 
-								'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
-							MAKE this a proper util.
-
-						Reason to introduce - LF/CRLF-independent parsers...
-		
-		6. scavenge old projects + add common-all-over-the-place type-of patterns: 	
-			1. Tokens (names for INode-classes): 
 	
-				1. Take them from various parsing projects of yours already existing: 
-	
-					1. xml
-					2. selector
-					3. regex
-	
-					Unite, choose best string-names; 
-					Create appropriate names for sample-token classes (via TokenInstance) [
-						example: 
-						
-						Opbrack - (, 
-						Clbrack - ), 
-						OpSqBrack - [, 
-						ClSqBrack - ], 
-						OpBrace - {, 
-						ClBrace - }, 
-	
-					...]; 
-	
-			2. arrays with common items (USED throughout...): 
-	
-				'binary = [0, 1]'
-				'decimal = [0, 1, ..., 9]'
-				'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
-				'ascii = [0, 1, ...]'
-				'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
-	
-				Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
-			
-			3. ALSO - join the 'samples' with the 'constants.ts' file 
-				[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
-
-		7. INode: 
-			1. a `default` NodeSystem factory: 
-				Uses THREE CATEGORIES. 
-				These are defined by types provided by THE USER (it's a factory, not a single object), 
-					AND they are [given in that order]: 
-						1. TokenNode
-						2. ContentNode
-						3. RecursiveNode
-				Reasons: 
-					1. These three are sufficient
-					2. As the number of categories becomes lesser, the tree becomes simpler
-					3. These three are minimalistic
-					4. These three are absolutely necessary (always - in one form or another)
-						Most forms (typically) break these three categories on sub-categories, 
-							when they need to: 
-								1. provide multiple kinds of information [flags, etc]
-								2. "flatten" the tree [since greater simplicity leads to greater depth]
+	TODO: `.copy()`-fixing [IStream-implementations]: 
+		1. fix the `.copy()` methods' implementations that employ the 
+			`.set*`-methods/custom initializers
 
 	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
 		Reason - simplicity of names...
@@ -162,17 +30,6 @@ NEXT UP:
 			2. through internal/ files
 			3. through interfaces/ files
 			4. through utils/ files
-
-	TODO [DEFINITELY!]: FreeStream
-		IDEA [big change]: [try to] CHAGE the interface of `IStream` to INSTEAD have `.next(): void`
-			THEN, we'll be able to INSTEAD keep memory for JUST TWO Shticks, and not 3!
-
-	TODO: make the `.isStart` MANDATORY on `IStream`
-		1. REMOVE the `IBackward` interface - completely unhelpful. 
-
-	TODO [minor]: let the `PreTokenNode` inherit from `Initializer`
-		LET these classes provide the `.initializer` property. 
-		Reason - style. 
 					
 CURRENT TODOS:		
 	TODO: order imports [Shift + Alt + O]
@@ -706,7 +563,81 @@ LATER TODOS:
 			Lazy, doesn't need several passes. 
 			Takes in the `Regex` list [walks, for given "character", each of them, matching, eliminating what was matched...]; 
 				Eliminates ONLY the first thing....; 	
+							
+		TODO: `samples`: 
+			3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
+			4. Relocate the `DelimitedStream` to `samples.MarkerStream` 
+				1. This is an ".init-composition" (TO BE USED AS A SINGLE STREAM!!!) of: 
+					1. `boolean`-based MarkerStream, which relies upon a user-given predicate to determine the `.currMarked` of the given item; 
+					2. A `FilterPredicate`, ABOVE which provides the 
+				2. ALSO - DelimiterStream
+					0. based off 'DelimitedStream'
+					1. uses a "has"-based predicate created from a list of possible delimiters/items
+			5. ADD NEW ".init-compositions" [NOT `CompositeStream`-s, although that is what is indended elsewhere...] (old pseudocode)	
+				1. trivialCompose(IndexStream, InputStream)
+				2. trivialCompose(IndexStream, LFStream, InputStream)
+				3. trivialCompose(IndexStream, LFStream, LazyBuffer)	
+				4. trivialCompose(IndexStream, LazyBuffer)
+
+				IMPORTANT NOTE: 
+					after adding `TokenStream`, introduce: 
+						1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
+							Put together with the `isLFSkip` util. 
+							More exactly: 
+								1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
+								2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
+						2. 'isNewlineSkip = or(isLF, isCRLF)'
+							This is for the user to be able to instead of transforming "CRLF -> LF", 
+								just use this as-is [count the newlines]; 
+						3. `LFStream` - a stream returning, for an `isNewline` predicate 
+							[not INewlinePredicate, instead (stream: IStream<string>) => string], 
+								INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
+							
+							Something like: `return isNewline(x)`
+							It's a `StreamParser`
+							Put under 'StreamParser/classes'
+							Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
+								More specifically, to be able to do: 
+									'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
+								MAKE this a proper util.
+
+							Reason to introduce - LF/CRLF-independent parsers...
+			
+			6. scavenge old projects + add common-all-over-the-place type-of patterns: 	
+				1. Tokens (names for INode-classes): 
+		
+					1. Take them from various parsing projects of yours already existing: 
+		
+						1. xml
+						2. selector
+						3. regex
+		
+						Unite, choose best string-names; 
+						Create appropriate names for sample-token classes (via TokenInstance) [
+							example: 
+							
+							Opbrack - (, 
+							Clbrack - ), 
+							OpSqBrack - [, 
+							ClSqBrack - ], 
+							OpBrace - {, 
+							ClBrace - }, 
+		
+						...]; 
+		
+				2. arrays with common items (USED throughout...): 
+		
+					'binary = [0, 1]'
+					'decimal = [0, 1, ..., 9]'
+					'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
+					'ascii = [0, 1, ...]'
+					'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
+		
+					Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
 				
+				3. ALSO - join the 'samples' with the 'constants.ts' file 
+					[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
+
 	Secondary: 			
 		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
 			Namely: 
