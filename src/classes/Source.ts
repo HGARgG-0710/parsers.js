@@ -57,6 +57,10 @@ export class ReadingSource implements ISource {
 		return this
 	}
 
+	rewind() {
+		this.decoder.rewind()
+	}
+
 	copy() {
 		return new this.constructor(this.filename)
 	}

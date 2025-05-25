@@ -24,10 +24,6 @@ export class LazyStream
 
 	readonly source?: ISource
 
-	get pos() {
-		return this.source!.pos
-	}
-
 	private nextDecoded(n?: number) {
 		this.source!.nextChar(n)
 	}
@@ -39,6 +35,10 @@ export class LazyStream
 	protected baseNextIter() {
 		this.nextDecoded()
 		return this.currGetter()
+	}
+
+	get pos() {
+		return this.source!.pos
 	}
 
 	isCurrEnd() {
@@ -53,7 +53,10 @@ export class LazyStream
 	}
 
 	init(source: ISource) {
-		super.init(source)
+		if (source) {
+			source.rewind()
+			super.init(source)
+		}
 		return this
 	}
 

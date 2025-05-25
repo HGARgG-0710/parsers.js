@@ -99,6 +99,10 @@ abstract class PreDecoder implements IDecoder {
 		return new this.constructor()
 	}
 
+	rewind() {
+		this.pos = 0
+	}
+
 	init(source?: number, size?: number) {
 		if (source) this.descriptor = source
 		if (size) this.size = size

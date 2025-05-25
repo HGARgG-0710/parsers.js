@@ -7,5 +7,6 @@ export type ISize = number
 export interface IDecoder extends IInitializable<[ISourceDescriptor, ISize]> {
 	furtherAwayAt(i: number): string
 	hasChars(): boolean
+	rewind(): void
 	readonly pos: number
 }
