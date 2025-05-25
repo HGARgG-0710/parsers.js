@@ -112,13 +112,13 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 	}
 
 	isCurrEnd(): boolean {
-		if (this.resource!.isCurrEnd()) return true
+		if (super.isCurrEnd()) return true
 		this.lookahead = this.prodForth()
 		return positionEqual(this.resource!, this.until)
 	}
 
 	isCurrStart(): boolean {
-		if (this.resource!.isCurrStart()) return true
+		if (super.isCurrStart()) return true
 		this.lookbehind = this.prodBack()
 		return positionEqual(this.resource!, this.from)
 	}
@@ -133,10 +133,6 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		this.isEnd = false
 		if (this.isCurrStart()) this.startStream()
 		else this.basePrevIter(this.curr)
-	}
-
-	syncCurr(): void {
-		super.syncCurr()
 	}
 
 	init(resource?: ILimitableStream<Type>) {
