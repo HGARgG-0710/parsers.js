@@ -8,7 +8,7 @@ export interface IParseState<FinalType = any, InitType = any> extends Summat {
 
 export interface IParse<FinalType = any, InitType = any>
 	extends ICopiable,
-		IInitializable<[InitType, Summat?]> {
+		IInitializable<[InitType?, Summat?]> {
 	readonly state: IParseState<FinalType, InitType>
 	readonly streams: IStreamArray
 	update(): void

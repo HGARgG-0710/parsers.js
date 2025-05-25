@@ -5,6 +5,7 @@ import type {
 	ILinkedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
+import { Initializable } from "./Initializer.js"
 import { ChainStream } from "./Stream.js"
 
 class ParsedStream<
@@ -29,7 +30,15 @@ class ParsedStream<
 	}
 }
 
+const parseInitializer = {
+	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
+		if (state) target.setState(state)
+		if (input) target.setInput(input)
+	}
+}
+
 class Parse<FinalType = any, InitType = any>
+	extends Initializable<[InitType, Summat]>
 	implements IParse<FinalType, InitType>
 {
 	private ["constructor"]: new (
@@ -45,6 +54,10 @@ class Parse<FinalType = any, InitType = any>
 		this._state = newState
 	}
 
+	get state() {
+		return this._state
+	}
+
 	private createState(
 		preState: Summat = {}
 	): IParseState<FinalType, InitType> {
@@ -54,16 +67,6 @@ class Parse<FinalType = any, InitType = any>
 	private onUpdate() {
 		this.workStream.renewResource()
 		this.didUpdate = false
-	}
-
-	private setState(preState: Summat) {
-		this.state = this.createState(preState)
-	}
-
-	private resetInput(input: InitType) {
-		this.initInputStream(input)
-		this.initWorkStream()
-		this.shareState()
 	}
 
 	private initInputStream(input: InitType) {
@@ -78,22 +81,26 @@ class Parse<FinalType = any, InitType = any>
 		this.workStream.setState(this.state)
 	}
 
-	get state() {
-		return this._state
+	protected get initializer() {
+		return parseInitializer
 	}
 
 	get streams() {
 		return this.workStream.streams
 	}
 
-	update() {
-		this.didUpdate = true
+	setState(preState: Summat) {
+		this.state = this.createState(preState)
 	}
 
-	init(input: InitType, state?: Summat) {
-		if (state) this.setState(state)
-		if (input) this.resetInput(input)
-		return this
+	setInput(input: InitType) {
+		this.initInputStream(input)
+		this.initWorkStream()
+		this.shareState()
+	}
+
+	update() {
+		this.didUpdate = true
 	}
 
 	maybeUpdate() {
@@ -110,7 +117,9 @@ class Parse<FinalType = any, InitType = any>
 	constructor(
 		public readonly workStream: ICompositeStream<FinalType>,
 		private readonly inputStream: IInputStream<string, InitType>
-	) {}
+	) {
+		super()
+	}
 }
 
 export function DynamicParser<FinalType = any, InitType = any>(
