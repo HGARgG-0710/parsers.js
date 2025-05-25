@@ -42,32 +42,42 @@ function recursiveStateSetter(state: Summat) {
 	return setStateSwitchable
 }
 
-class _CompositeStream<Type = any> extends WrapperStream<Type> {
+const compositeStreamInitializers = {
+	init(
+		target: _CompositeStream,
+		lowStream?: IOwnedStream,
+		rawStreams?: IRawStreamArray
+	) {
+		ownerInitializer.init(target, lowStream)
+		if (rawStreams) target.setRawStreams(rawStreams)
+		if (target.isEvaluationReady()) target.evaluateStreams()
+	}
+}
+
+class _CompositeStream<Type = any> extends WrapperStream<
+	Type,
+	[IRawStreamArray]
+> {
 	protected ["constructor"]: new (
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray
 	) => this
 
-	protected get initializer() {
-		return ownerInitializer
-	}
-
-	private streamList: StreamList
-	private lowStream: IOwnedStream
+	private streamList?: StreamList
+	private lowStream?: IOwnedStream
 
 	private get rawStreams() {
 		return this.streams.raw()
 	}
 
 	get streams() {
-		return this.streamList.items
+		return this.streamList!.items
 	}
 
-	resource: IOwnedStream
 	state: Summat
 
 	private renewIfPossible() {
-		return this.streamList.reEvaluate(this.lowStream)
+		return this.streamList!.reEvaluate(this.lowStream!)
 	}
 
 	private fixRenewed() {
@@ -80,17 +90,7 @@ class _CompositeStream<Type = any> extends WrapperStream<Type> {
 	}
 
 	private updateResource() {
-		this.resource = this.streamList.firstItemDeep()
-	}
-
-	private initStreams(rawStreams: IRawStreamArray) {
-		this.streamList = streamListPool.create(rawStreams, this)
-		return this
-	}
-
-	private evaluateStreams() {
-		this.streamList.evaluate(this.lowStream)
-		this.updateResource()
+		this.resource = this.streamList!.firstItemDeep()
 	}
 
 	private distribute(state: IParseState) {
@@ -98,31 +98,47 @@ class _CompositeStream<Type = any> extends WrapperStream<Type> {
 		for (const x of this.streams) setStateSwitchable(x)
 	}
 
-	renewResource() {
-		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
+	protected get initializer() {
+		return compositeStreamInitializers
 	}
 
 	setResource(lowStream: IOwnedStream) {
 		this.lowStream = lowStream
 	}
 
+	setRawStreams(rawStreams: IRawStreamArray) {
+		this.streamList = streamListPool.create(rawStreams, this)
+		return this
+	}
+
+	isEvaluationReady() {
+		return !!this.streamList && !!this.lowStream
+	}
+
+	evaluateStreams() {
+		this.streamList!.evaluate(this.lowStream!)
+		this.updateResource()
+	}
+
+	renewResource() {
+		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
+	}
+
 	init(lowStream?: IOwnedStream, rawStreams?: IRawStreamArray) {
-		if (lowStream) this.initializer.init(this, lowStream)
-		if (rawStreams) this.initStreams(rawStreams)
-		if (this.streamList && this.lowStream) this.evaluateStreams()
+		super.init(lowStream, rawStreams)
 		return this
 	}
 
 	isCurrEnd(): boolean {
 		return (
-			this.resource.isCurrEnd() ||
-			(this.resource.isEnd && !this.renewResource())
+			this.resource!.isCurrEnd() ||
+			(this.resource!.isEnd && !this.renewResource())
 		)
 	}
 
 	copy() {
 		return new this.constructor(
-			this.lowStream.copy(),
+			this.lowStream!.copy(),
 			mutate(this.rawStreams, rawStreamCopy)
 		)
 	}
