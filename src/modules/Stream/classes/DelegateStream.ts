@@ -6,14 +6,22 @@ export abstract class DelegateStream<
 	Type = any,
 	Args extends any[] = []
 > extends OwnableStream<Type, [IStream, ...(Args | [])]> {
-	resource?: IStream<Type>
+	private _resource?: IStream<Type>
+
+	protected set resource(newResource: IStream<Type> | undefined) {
+		this._resource = newResource
+	}
+
+	get resource() {
+		return this._resource
+	}
 
 	protected get initializer() {
 		return resourceInitializer
 	}
 
-	init(resource?: IStream<Type>): this {
-		return super.init(resource)
+	init(resource?: IStream<Type>, ...args: Partial<Args>): this {
+		return super.init(resource, ...args)
 	}
 
 	get curr() {

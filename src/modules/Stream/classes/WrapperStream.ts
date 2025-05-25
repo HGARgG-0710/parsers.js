@@ -7,14 +7,20 @@ export abstract class ChainStream<Type = any, Args extends any[] = any[]>
 	extends DelegateStream<Type, Args>
 	implements IResourceSettable
 {
-	resource?: IOwnedStream
+	protected set resource(newResource: IOwnedStream | undefined) {
+		super.resource = newResource
+	}
+
+	get resource() {
+		return super.resource as IOwnedStream | undefined
+	}
 
 	protected get initializer() {
 		return ownerInitializer
 	}
 
-	init(resource?: IOwnedStream) {
-		return super.init(resource)
+	init(resource?: IOwnedStream, ...args: Partial<Args>) {
+		return super.init(resource, ...args)
 	}
 
 	setResource(newResource: IOwnedStream) {

@@ -37,7 +37,13 @@ class _LimitStream<Type = any> extends DyssyncStream<Type> {
 		return limitedStreamInitializer
 	}
 
-	resource?: ILimitableStream<Type>
+	protected set resource(newResource: ILimitableStream<Type>) {
+		super.resource = newResource
+	}
+
+	get resource() {
+		return super.resource as ILimitableStream<Type>
+	}
 
 	private prodForth() {
 		const { hasLookahead, lookahead } = this

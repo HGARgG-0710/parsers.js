@@ -2,7 +2,6 @@ import { boolean, number, type } from "@hgargg-0710/one"
 import { OutputBuffer } from "src/internal/OutputBuffer.js"
 import type { IBufferized } from "../../../interfaces.js"
 import type {
-	IOwnedStream,
 	IPosition,
 	IPredicatePosition
 } from "../../../interfaces/Stream.js"
@@ -18,8 +17,6 @@ export class FreezableStream<Type = any>
 	extends PosStream<Type>
 	implements IBufferized<Type>
 {
-	resource?: IOwnedStream<Type> | undefined
-
 	readonly buffer = new OutputBuffer()
 
 	private _isEnd: boolean
