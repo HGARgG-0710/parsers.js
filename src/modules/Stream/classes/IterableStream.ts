@@ -48,3 +48,36 @@ export abstract class OwnableStream<Type = any, Args extends any[] = any[]>
 		this.owner = newOwner
 	}
 }
+
+export abstract class SolidStream<
+	Type = any,
+	Args extends any[] = any[]
+> extends OwnableStream<Type, Args> {
+	private _curr: Type
+	private _isEnd: boolean = false
+	private _isStart: boolean = true
+
+	protected set curr(newCurr: Type) {
+		this._curr = newCurr
+	}
+
+	get curr() {
+		return this._curr
+	}
+
+	protected set isEnd(newIsEnd: boolean) {
+		this._isEnd = newIsEnd
+	}
+
+	get isEnd() {
+		return this._isEnd
+	}
+
+	protected set isStart(newIsStart: boolean) {
+		this._isStart = newIsStart
+	}
+
+	get isStart() {
+		return this._isStart
+	}
+}

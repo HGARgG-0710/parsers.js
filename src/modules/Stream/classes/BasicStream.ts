@@ -5,12 +5,12 @@ import {
 } from "../../../classes/Initializer.js"
 import type { IResourceSettable } from "../../../interfaces.js"
 import type { IOwnedStream } from "../../../interfaces/Stream.js"
-import { OwnableStream } from "./IterableStream.js"
+import { SolidStream } from "./IterableStream.js"
 
 export abstract class BasicStream<
 	Type = any,
 	Args extends any[] = any[]
-> extends OwnableStream<Type, Args> {
+> extends SolidStream<Type, Args> {
 	protected abstract baseNextIter(): Type
 
 	protected postEnd?(): void
@@ -20,36 +20,8 @@ export abstract class BasicStream<
 
 	isCurrStart?(): boolean
 
-	private _isStart: boolean = true
-	private _isEnd: boolean = false
-	private _curr: Type
-
 	protected update(newCurr: Type) {
 		this.curr = newCurr
-	}
-
-	protected set isStart(newIsStart: boolean) {
-		this._isStart = newIsStart
-	}
-
-	protected set isEnd(newIsEnd: boolean) {
-		this._isEnd = newIsEnd
-	}
-
-	protected set curr(newCurr: Type) {
-		this._curr = newCurr
-	}
-
-	get isStart() {
-		return this._isStart
-	}
-
-	get isEnd() {
-		return this._isEnd
-	}
-
-	get curr() {
-		return this._curr
 	}
 
 	protected preInit(...args: Partial<Args>) {
