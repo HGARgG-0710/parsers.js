@@ -10,6 +10,58 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	6. the (possibly, not so distant) "future"
 
 NEXT UP:
+	PROBLEM: the library's system for employing classes has... 
+		Become unwieldy and problematic.
+		Gone through the roof. 
+		Failed.
+		Reason being - this solution REALLY calls for mixins, and the place that screams about it 
+			the most is the intersection of `DyssyncStream` (which requires, not to duplicate the `copy` method), 
+				for `WrapperStream` to come BEFORE `SyncStream`, whereas the `ParseStream` requires THE OPPOSITE
+					(since `copy` methods are CONTRACT-BINDING [the `['constructor']` property] whereas `SyncStream` IS NOT). 
+
+		CONCLUSION: we need to reimplement the way that `IStream` impelementations are structured... 
+			One needs to (manually) implement mixins. 
+			And NOT through the `mixin` function (which is supposed to work primarily of off prototypes). 
+			
+		SOLUTION: 
+			1. let there be a new library entity `IMixin` - it's an interface, of a given `Type` [basically, an alias for `Partial`]
+				1. It'll be used for semantic typing. 
+				2. reason to not use something like https://www.npmjs.com/package/mixin
+					is - these "JS-native" solutions don't appear to be particularly TypeScript-friendly
+
+			2. create `IMixin<IStream>` objects, with METHODS on them
+				Directly created from the current `abstract class`es
+				Let they remain UNTYPED in terms of generic arguments.
+
+			3. create a `mixin.merge` function
+				1. for a given `n` "mixin objects" (prototypes), one (literally) "combines" them 
+					via `protoMixin`: 
+						1. ADD `protoMixin` to `one.js`; It is (almost) like a call to `mixin` except it DOESN'T 
+							operate on `class`es. Instead, it works on bare objects [prototype]. 
+
+							That is, like in `mixin`, but it: 
+								1. doesn't access `Extended.prototype`
+								2. uses `propsDefine` instead of `extendPrototype`
+						2. it SHOULD originate as a simple LOCAL function, BASED off `one.js`
+
+			4. create a `mixin.from` function, which creates a CLASS, using the given object as a prototype
+				1. This is (basically) a solution to "pre-process" classes before actually using them in their "ultimate form". 
+				2. LET `fromMixin` be called ONLY on the "sealed class"es
+
+			5. RELOCATE the `IMixin`, `mixin.merge` and `mixin.from` into a new `npm` project - `mixin.ts`: 
+				1. reason - it's outside the library's scope
+				2. relocate it WHILE WORKING ON THE v0.3
+
+				3. this means: 
+					1. one has to have tests for it INSIDE the `parsers.js` library
+					2. THEN - one refactors it OUT OF IT, having the tests pass as needed...
+					3. make it a dependency of `parsers.js`
+
+				4. FINALLY, the functions/interfaces of `mixin.ts` should ACTUALLY be exported from `parsers.js` [in a `mixin` submodule]
+					Reason - the library USES IT to provide the user with the ability to extend itself, 
+						and THEREFORE, it isn't (particularly) fair for such usage to have to occurr...
+			
+
 	TODO: remove the `DyssyncStream`, `DyssyncForwardStream` and `ResourceStream`:
 		REASON: 
 			These serve as mixins. 
@@ -20,15 +72,10 @@ NEXT UP:
 			To PROPERLY implement mixins for these children classes, see the note below...
 
 		ALSO; 
-			0. LET the `isStream/isEnd/curr` "properties" BE SPLIT into a new class [call it 'MaskStream'], 
-				FROM WHICH the `TrivialStream` and `BasicStream` will inherit. 
-			
 			1. about 'DyssyncStream' mixin-class [parent for `PeekStream` and `FilterStream`]: 
 				SPLIT the `DelegateStream` and `DyssyncStream` [old] onto 3 classes: 
-					1. DelegateStream [NEW] - contains ONLY method-delegates, parent to other 2
-					2. SyncStream - delegates to PROPERTIES as well, parent of `ChainStream`, `WrapperStream`, etc
 					3. DyssyncStream - no delegates, contains "live" no-accessor properties
-						THIS ONE is a 'mixin' of `DelegateStream` and `MaskStream`. 
+						THIS ONE is a 'mixin' of `DelegateStream` and `SolidStream`. 
 						Built same way as the below example of a 'mixin-class'; 
 						Treated as a `DyssyncStream` 
 						NOTE[1]: the `syncCurr` is RETAINED upon the `DyssyncStream`
@@ -36,7 +83,7 @@ NEXT UP:
 							that is - `extend` FROM `DelegateStream`, return WITHOUT casting [important - this way, `protected` properties can remain], 
 								and use the `MaskStream` via `mixin(...)`; 
 
-			2. about [new] ResourceStream - [new] 'DyssyncStream' & 'BasicStream' mixin-class [parent for LimitStream]: 
+			2. about [new] ResourceStream - [new] 'DyssyncStream' & 'BasicStream' mixin-class [parent for LimitStream and HandlerStream]: 
 				REPLACE the `DyssyncForwardStream`, `DyssyncForwardStream` and `ResourceStream` with THIS 
 					NEW 'mixin'-based class
 
@@ -64,11 +111,6 @@ NEXT UP:
 						1. endStream (protected)
 						2. startStream (protected)
 				
-				3. REMOVE `ChainStream` class: 
-					1. LET the `ownerInitializer`, and `.setResource` be a part of the `OwningStream` [new]
-						PARENT CLASS of `DelegateStream`, that is a CHILD CLASS of `OwnableStream`, 
-							which is, however, NOT the parent of `BasicStream`
-
 	TODO: `.copy()`-fixing [IStream-implementations]: 
 		1. fix the `.copy()` methods' implementations that employ the 
 			`.set*`-methods/custom initializers
@@ -1110,6 +1152,10 @@ FUTURE:
 		
 		Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
 			better than the current JS code (since it's been transpiled from TypeScrtipt). 
+		
+		NOTE [VITAL]: remember that the complex `IStream` hierarchy was (actually)
+			supposed to have been done entirely using 'mixins' 
+				(which are absent from TypeScript, and, in a formalized variant, from JS)...
 
 	3. Reminder: do you rmember the stack.js? 
 		Old (partially abandonned) project for using "stackless" code?
