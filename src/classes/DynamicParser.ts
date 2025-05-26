@@ -6,12 +6,12 @@ import type {
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
 import { Initializable } from "./Initializer.js"
-import { ChainStream } from "./Stream.js"
+import { SyncStream } from "./Stream.js"
 
-class ParsedStream<
-	FinalType = any,
-	InitType = any
-> extends ChainStream<FinalType> {
+class ParsedStream<FinalType = any, InitType = any> extends SyncStream<
+	FinalType,
+	[]
+> {
 	protected ["constructor"]: new (
 		parseInstance: Parse<FinalType, InitType>
 	) => this

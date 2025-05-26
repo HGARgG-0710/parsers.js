@@ -1,7 +1,11 @@
-import { Initializable } from "../../../classes/Initializer.js"
+import {
+	Initializable,
+	ownerInitializer
+} from "../../../classes/Initializer.js"
 import type {
 	IOwnedStream,
 	IOwningStream,
+	IResourceSettable,
 	IStream
 } from "../../../interfaces.js"
 
@@ -79,5 +83,32 @@ export abstract class SolidStream<
 
 	get isStart() {
 		return this._isStart
+	}
+}
+
+export abstract class OwningStream<Type = any, Args extends any[] = []>
+	extends OwnableStream<Type, [IOwnedStream<Type>, ...(Args | [])]>
+	implements IResourceSettable
+{
+	private _resource?: IOwnedStream<Type>
+
+	protected set resource(newResource: IOwnedStream<Type> | undefined) {
+		this._resource = newResource
+	}
+
+	get resource() {
+		return this._resource
+	}
+
+	protected get initializer() {
+		return ownerInitializer
+	}
+
+	init(resource?: IOwnedStream<Type>, ...args: Partial<Args>): this {
+		return super.init(resource, ...args)
+	}
+
+	setResource(newResource: IOwnedStream) {
+		this.resource = newResource
 	}
 }

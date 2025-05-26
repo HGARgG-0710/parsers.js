@@ -1,29 +1,9 @@
-import { resourceInitializer } from "../../../classes/Initializer.js"
-import { OwnableStream } from "../../../classes/Stream.js"
-import type { IStream } from "../../../interfaces.js"
+import { OwningStream } from "../../../classes/Stream.js"
 
 export abstract class DelegateStream<
 	Type = any,
-	Args extends any[] = []
-> extends OwnableStream<Type, [IStream, ...(Args | [])]> {
-	private _resource?: IStream<Type>
-
-	protected set resource(newResource: IStream<Type> | undefined) {
-		this._resource = newResource
-	}
-
-	get resource() {
-		return this._resource
-	}
-
-	protected get initializer() {
-		return resourceInitializer
-	}
-
-	init(resource?: IStream<Type>, ...args: Partial<Args>): this {
-		return super.init(resource, ...args)
-	}
-
+	Args extends any[] = any[]
+> extends OwningStream<Type, Args> {
 	prev() {
 		this.resource!.prev!()
 	}
@@ -43,7 +23,7 @@ export abstract class DelegateStream<
 
 export abstract class SyncStream<
 	Type = any,
-	Args extends any[] = []
+	Args extends any[] = any[]
 > extends DelegateStream<Type, Args> {
 	get curr() {
 		return this.resource!.curr

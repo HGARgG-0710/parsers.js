@@ -1,35 +1,8 @@
-import { ownerInitializer } from "../../../classes/Initializer.js"
-import type { IResourceSettable } from "../../../interfaces.js"
 import type { IOwnedStream } from "../../../interfaces/Stream.js"
 import { SyncStream } from "./DelegateStream.js"
 
-export abstract class ChainStream<Type = any, Args extends any[] = any[]>
-	extends SyncStream<Type, Args>
-	implements IResourceSettable
-{
-	protected set resource(newResource: IOwnedStream | undefined) {
-		super.resource = newResource
-	}
-
-	get resource() {
-		return super.resource as IOwnedStream | undefined
-	}
-
-	protected get initializer() {
-		return ownerInitializer
-	}
-
-	init(resource?: IOwnedStream, ...args: Partial<Args>) {
-		return super.init(resource, ...args)
-	}
-
-	setResource(newResource: IOwnedStream) {
-		this.resource = newResource
-	}
-}
-
 export abstract class WrapperStream<Type = any, Args extends any[] = any[]>
-	extends ChainStream<Type, Args>
+	extends SyncStream<Type, Args>
 	implements IOwnedStream<Type>
 {
 	protected ["constructor"]: new (resource?: IOwnedStream<Type>) => this
