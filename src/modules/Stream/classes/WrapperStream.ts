@@ -1,10 +1,10 @@
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import type { IResourceSettable } from "../../../interfaces.js"
 import type { IOwnedStream } from "../../../interfaces/Stream.js"
-import { DelegateStream } from "./DelegateStream.js"
+import { SyncStream } from "./DelegateStream.js"
 
 export abstract class ChainStream<Type = any, Args extends any[] = any[]>
-	extends DelegateStream<Type, Args>
+	extends SyncStream<Type, Args>
 	implements IResourceSettable
 {
 	protected set resource(newResource: IOwnedStream | undefined) {

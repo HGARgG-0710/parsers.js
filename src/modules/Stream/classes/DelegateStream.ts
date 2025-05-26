@@ -24,18 +24,6 @@ export abstract class DelegateStream<
 		return super.init(resource, ...args)
 	}
 
-	get curr() {
-		return this.resource!.curr
-	}
-
-	get isEnd() {
-		return this.resource!.isEnd
-	}
-
-	get isStart() {
-		return this.resource!.isStart!
-	}
-
 	prev() {
 		this.resource!.prev!()
 	}
@@ -50,5 +38,22 @@ export abstract class DelegateStream<
 
 	isCurrEnd() {
 		return this.resource!.isCurrEnd()
+	}
+}
+
+export abstract class SyncStream<
+	Type = any,
+	Args extends any[] = []
+> extends DelegateStream<Type, Args> {
+	get curr() {
+		return this.resource!.curr
+	}
+
+	get isEnd() {
+		return this.resource!.isEnd
+	}
+
+	get isStart() {
+		return this.resource!.isStart
 	}
 }
