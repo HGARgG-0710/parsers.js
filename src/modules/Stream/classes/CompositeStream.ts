@@ -66,7 +66,7 @@ class _CompositeStream<Type = any> extends WrapperStream<
 	private streamList?: StreamList
 	private lowStream?: IOwnedStream
 
-	private get rawStreams() {
+	private rawStreams() {
 		return this.streams.raw()
 	}
 
@@ -139,7 +139,7 @@ class _CompositeStream<Type = any> extends WrapperStream<
 	copy() {
 		return new this.constructor(
 			this.lowStream!.copy(),
-			mutate(this.rawStreams, rawStreamCopy)
+			mutate(this.rawStreams(), rawStreamCopy)
 		)
 	}
 

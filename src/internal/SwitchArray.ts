@@ -58,10 +58,6 @@ export class SwitchArray<
 		return this.renewer.maybeWrapSwitch(r)
 	}
 
-	*[Symbol.iterator]() {
-		for (let i = this.size; i--; ) yield this.items[i]
-	}
-
 	raw() {
 		const collected: (T | Recursive)[] = new Array(this.size)
 		this.each((x, i: number) => (collected[i] = x))
@@ -133,6 +129,10 @@ export class SwitchArray<
 
 	first() {
 		return first(this.items)
+	}
+
+	*[Symbol.iterator]() {
+		for (let i = this.size; i--; ) yield this.items[i]
 	}
 
 	constructor(private readonly renewer: RecursiveRenewer<T, Recursive>) {}
