@@ -10,6 +10,12 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	6. the (possibly, not so distant) "future"
 
 NEXT UP:
+	1. [FIXED ORDER - prior to all else] re-thinking `IStream`:
+		1. Test `mixin` submodule [BEFORE ALL ELSE - a basic sanity check]
+		2. create the appropriate library `mixin` objects for representing different types of IStream-s
+			1. MAKE those PUBLIC [the `mixin` objects, NOT their `.toClass()` call results]
+			2. Let there be classes based off them [the ACTUAL `.toClass()` calls - THOSE aren't supposed to be extended]
+
 	PROBLEM: the library's system for employing classes has... 
 		Become unwieldy and problematic.
 		Gone through the roof. 
@@ -141,6 +147,16 @@ NEXT UP:
 			25. WrapperStream
 			26. WriterStream
 			
+	TODO: about `.resource`
+		1. LET the "default" value be NOT 'undefined', but 'null'
+		2. IN GENERAL, for all the "optional" properties, LET their properties' default 
+			value be `null`. 
+			Reasons: 
+				1. performance [jit] - property existing on-creation
+				2. code simplicity/predictability [only ONE type of "missing property"]
+				3. CREATE a new constant - `EmptyProperty = null`
+					Let it be employed as the default for OBJECT-VALUED [nullable] fields
+
 	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
 		Reason - simplicity of names...
 		WALK: 
