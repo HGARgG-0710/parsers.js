@@ -1,13 +1,23 @@
 import { type } from "@hgargg-0710/one"
 import { ObjectPool } from "../classes.js"
-import type { ILinkedStream, IOwnedStream } from "../interfaces.js"
+import { MissingArgument } from "../constants.js"
+import type {
+	IInitializer,
+	ILinkedStream,
+	IOwnedStream
+} from "../interfaces.js"
 import type {
 	ICompositeStream,
 	IRawStreamArray,
 	IStreamChoice,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
-import { RecursiveInitList, RecursiveRenewer } from "./RecursiveInitList.js"
+import {
+	itemsInitializer,
+	RecursiveInitList,
+	RecursiveRenewer,
+	renewerInitializer
+} from "./RecursiveInitList.js"
 
 const { isFunction, isArray } = type
 
@@ -16,7 +26,7 @@ class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	readonly evaluator = this.evaluate.bind(this)
 
 	private fromStreams(streams: IRawStreamArray) {
-		return streamListPool.create(streams, this.topStream)
+		return streamListPool.create(MissingArgument, streams, this.topStream)
 	}
 
 	private fromChoice(choice: IStreamChoice) {
@@ -42,30 +52,58 @@ class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	}
 }
 
+const topStreamInitializer: IInitializer<[ICompositeStream]> = {
+	init(target: StreamList, topStream?: ICompositeStream) {
+		if (topStream) target.setTopStream(topStream)
+	}
+}
+
+const streamListInitializer: IInitializer<
+	[RecursiveRenewer, any[], ICompositeStream]
+> = {
+	init(
+		target: StreamList,
+		renewer?: RecursiveRenewer,
+		items?: any[],
+		topStream?: ICompositeStream
+	) {
+		renewerInitializer.init(target, renewer)
+		topStreamInitializer.init(target, topStream)
+		itemsInitializer.init(target, items)
+	}
+}
+
+const globalStreamRenewer = new StreamRenewer()
+
 export class StreamList extends RecursiveInitList<
 	ILinkedStream,
 	IStreamChooser,
-	IOwnedStream
+	IOwnedStream,
+	[ICompositeStream]
 > {
-	private readonly _renewer = new StreamRenewer()
+	protected renewer: StreamRenewer
 
-	protected renewer() {
-		return this._renewer
+	protected get initializer(): IInitializer<
+		[RecursiveRenewer<any, any>, any[]]
+	> {
+		return streamListInitializer
 	}
 
 	protected reclaim(): void {
 		streamListPool.free(this)
 	}
 
-	init(origItems?: IRawStreamArray, topStream?: ICompositeStream): this {
-		this.renewer().init(topStream)
-		super.init(origItems)
-		return this
+	setTopStream(topStream: ICompositeStream) {
+		this.renewer.init(topStream)
 	}
 
-	constructor(origItems?: IRawStreamArray, topStream?: ICompositeStream) {
+	constructor(
+		renewer: StreamRenewer = globalStreamRenewer,
+		origItems?: IRawStreamArray,
+		topStream?: ICompositeStream
+	) {
 		super()
-		this.init(origItems, topStream)
+		this.init(renewer, origItems, topStream)
 	}
 }
 

@@ -19,6 +19,7 @@ import { StreamList, streamListPool } from "../../../internal/StreamList.js"
 import { isStateful } from "src/is/Stream.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { WrapperStream } from "./WrapperStream.js"
+import { MissingArgument } from "../../../constants.js"
 
 const { mutate } = inplace
 
@@ -107,7 +108,11 @@ class _CompositeStream<Type = any> extends WrapperStream<
 	}
 
 	setRawStreams(rawStreams: IRawStreamArray) {
-		this.streamList = streamListPool.create(rawStreams, this)
+		this.streamList = streamListPool.create(
+			MissingArgument,
+			rawStreams,
+			this
+		)
 		return this
 	}
 

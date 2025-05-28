@@ -3,13 +3,16 @@ import type { IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import {
 	isSwitch,
+	itemsInitializer,
 	RecursiveRenewer,
+	renewerInitializer,
 	wrapSwitch,
 	type IRecursiveItems,
 	type IRecursiveListIdentifiable,
 	type IRecursivelySwitchable,
 	type ISwitchIdentifiable
 } from "./RecursiveInitList.js"
+import { Initializable } from "../classes/Initializer.js"
 
 const { first, clear } = array
 const { insert, mutate, out } = inplace
@@ -21,14 +24,26 @@ function maybeDeSwitch<
 	return isSwitch(raw) ? raw.recursive : raw
 }
 
+const switchArrayInitializer = {
+	init(target: SwitchArray, items?: any[], renewer?: RecursiveRenewer) {
+		renewerInitializer.init(target, renewer)
+		itemsInitializer.init(target, items)
+	}
+}
+
 export class SwitchArray<
-	T extends ISwitchIdentifiable &
-		IRecursiveListIdentifiable &
-		IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
-> implements IInitializable, IArray<T | Recursive>
+		T extends ISwitchIdentifiable &
+			IRecursiveListIdentifiable &
+			IInitializable = any,
+		Recursive extends ISwitchIdentifiable = any
+	>
+	extends Initializable<
+		[IRecursiveItems<T, Recursive>, RecursiveRenewer<T, Recursive>]
+	>
+	implements IArray<T | Recursive>
 {
 	private _items: IRecursiveItems<T, Recursive>
+	private renewer: RecursiveRenewer<T, Recursive>
 
 	private set items(newItems: IRecursiveItems<T, Recursive>) {
 		this._items = newItems
@@ -46,10 +61,6 @@ export class SwitchArray<
 		return mutate(items, this.maybeWrapSwitch.bind(this))
 	}
 
-	private isRecursive(item: T | Recursive) {
-		return this.renewer.isRecursive(item)
-	}
-
 	private baseWrite(i: number, value: IRecursivelySwitchable<T, Recursive>) {
 		this.items[i] = value
 	}
@@ -58,20 +69,27 @@ export class SwitchArray<
 		return this.renewer.maybeWrapSwitch(r)
 	}
 
+	setRenewer(renewer: RecursiveRenewer<T, Recursive>) {
+		this.renewer = renewer
+	}
+
+	setItems(items: IRecursiveItems<T, Recursive>) {
+		this.items = items
+	}
+
+	protected get initializer() {
+		return switchArrayInitializer
+	}
+
 	raw() {
 		const collected: (T | Recursive)[] = new Array(this.size)
 		this.each((x, i: number) => (collected[i] = x))
 		return collected
 	}
 
-	init(items: IRecursiveItems<T, Recursive>) {
-		this.items = items
-		return this
-	}
-
 	write(i: number, value: T | Recursive) {
 		const currItem = this.items[i]
-		if (!this.isRecursive(value)) this.baseWrite(i, value)
+		if (!this.renewer.isRecursive(value)) this.baseWrite(i, value)
 		else if (isSwitch(currItem)) currItem.init(value)
 		else this.baseWrite(i, wrapSwitch(value))
 		return this
@@ -135,5 +153,11 @@ export class SwitchArray<
 		for (let i = this.size; i--; ) yield this.items[i]
 	}
 
-	constructor(private readonly renewer: RecursiveRenewer<T, Recursive>) {}
+	constructor(
+		items?: IRecursiveItems<T, Recursive>,
+		renewer?: RecursiveRenewer<T, Recursive>
+	) {
+		super()
+		this.init(items, renewer)
+	}
 }
