@@ -7,16 +7,13 @@ import type {
 	IStreamChoice,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
-import { RecursiveInitList } from "./RecursiveInitList.js"
+import { RecursiveInitList, RecursiveRenewer } from "./RecursiveInitList.js"
 
 const { isFunction, isArray } = type
 
-export class StreamList extends RecursiveInitList<
-	ILinkedStream,
-	IStreamChooser,
-	IOwnedStream
-> {
+class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	private topStream: ICompositeStream
+	readonly evaluator = this.evaluate.bind(this)
 
 	private fromStreams(streams: IRawStreamArray) {
 		return streamListPool.create(streams, this.topStream)
@@ -26,30 +23,47 @@ export class StreamList extends RecursiveInitList<
 		return isArray(choice) ? this.fromStreams(choice) : choice
 	}
 
-	protected isOld(terminal: ILinkedStream): boolean {
-		return terminal.isEnd
-	}
-
-	protected evaluator(currRec: IStreamChooser, last: IOwnedStream) {
+	private evaluate(currRec: IStreamChooser, last: IOwnedStream) {
 		return this.fromChoice(
 			currRec.call(this.topStream, last) as IStreamChoice
 		)
+	}
+
+	isOld(terminal: ILinkedStream): boolean {
+		return terminal.isEnd
+	}
+
+	init(topStream?: ICompositeStream) {
+		if (topStream) this.topStream = topStream
+	}
+
+	isRecursive(x: any): x is IStreamChooser {
+		return isFunction(x)
+	}
+}
+
+export class StreamList extends RecursiveInitList<
+	ILinkedStream,
+	IStreamChooser,
+	IOwnedStream
+> {
+	private readonly _renewer = new StreamRenewer()
+
+	protected renewer() {
+		return this._renewer
 	}
 
 	protected reclaim(): void {
 		streamListPool.free(this)
 	}
 
-	isRecursive(x: any): x is IStreamChooser {
-		return isFunction(x)
+	init(origItems?: IRawStreamArray, topStream?: ICompositeStream): this {
+		this.renewer().init(topStream)
+		super.init(origItems)
+		return this
 	}
 
-	init(origItems: IRawStreamArray, topStream?: ICompositeStream): this {
-		if (topStream) this.topStream = topStream
-		return super.init(origItems)
-	}
-
-	constructor(origItems: IRawStreamArray, topStream: ICompositeStream) {
+	constructor(origItems?: IRawStreamArray, topStream?: ICompositeStream) {
 		super()
 		this.init(origItems, topStream)
 	}

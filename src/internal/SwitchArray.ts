@@ -3,7 +3,7 @@ import type { IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import {
 	isSwitch,
-	RecursiveInitList,
+	RecursiveRenewer,
 	wrapSwitch,
 	type IRecursiveItems,
 	type IRecursiveListIdentifiable,
@@ -47,7 +47,7 @@ export class SwitchArray<
 	}
 
 	private isRecursive(item: T | Recursive) {
-		return this.parent.isRecursive(item)
+		return this.renewer.isRecursive(item)
 	}
 
 	private baseWrite(i: number, value: IRecursivelySwitchable<T, Recursive>) {
@@ -55,7 +55,7 @@ export class SwitchArray<
 	}
 
 	private maybeWrapSwitch(r: T | Recursive) {
-		return this.parent.maybeWrapSwitch(r)
+		return this.renewer.maybeWrapSwitch(r)
 	}
 
 	*[Symbol.iterator]() {
@@ -135,5 +135,5 @@ export class SwitchArray<
 		return first(this.items)
 	}
 
-	constructor(private readonly parent: RecursiveInitList<T, Recursive>) {}
+	constructor(private readonly renewer: RecursiveRenewer<T, Recursive>) {}
 }

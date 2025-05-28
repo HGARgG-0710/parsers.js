@@ -65,20 +65,20 @@ class Switch<
 		if (isRecursiveInitList(derivable)) derivable.recycle()
 	}
 
-	get isSwitch() {
-		return true
-	}
-
 	private set recursive(newRecursive: Recursive) {
 		this._recursive = newRecursive
 	}
 
-	get recursive() {
-		return this._recursive
-	}
-
 	private set derivable(x: IDerivable<T, Recursive>) {
 		this._derivable = x
+	}
+
+	get isSwitch() {
+		return true
+	}
+
+	get recursive() {
+		return this._recursive
 	}
 
 	get derivable() {
@@ -119,13 +119,29 @@ export function wrapSwitch<Recursive extends ISwitchIdentifiable = any>(
 	return switchPool.create(r)
 }
 
-interface IItemSettable<T = any> {
-	setItems(items: T): void
+const itemsInitializer: IInitializer<[unknown]> = {
+	init(target: RecursiveInitList, items?: any) {
+		if (items) target.setItems(items)
+	}
 }
 
-const itemsInitializer: IInitializer<[unknown]> = {
-	init<T = any>(target: IItemSettable<T>, items?: T) {
-		if (items) target.setItems(items)
+export abstract class RecursiveRenewer<
+	T extends ISwitchIdentifiable &
+		IRecursiveListIdentifiable &
+		IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any
+> {
+	abstract isRecursive(x: any): x is Recursive
+
+	abstract isOld(terminal: T): boolean
+
+	abstract evaluator: (
+		currRec: Recursive,
+		last: T
+	) => IDerivable<T, Recursive>
+
+	maybeWrapSwitch(r: T | Recursive) {
+		return this.isRecursive(r) ? wrapSwitch(r) : r
 	}
 }
 
@@ -137,21 +153,14 @@ export abstract class RecursiveInitList<
 		InitType = any
 	>
 	extends Initializable<[(T | Recursive)[]]>
-	implements IRecursiveListIdentifiable, IItemSettable
+	implements IRecursiveListIdentifiable
 {
-	abstract isRecursive(x: any): x is Recursive
+	protected abstract renewer(): RecursiveRenewer<T, Recursive>
+	protected abstract reclaim(list: RecursiveInitList<T, Recursive>): void
 
-	protected abstract reclaim(): void
-	protected abstract isOld(terminal: T): boolean
-	protected abstract evaluator(
-		currRec: Recursive,
-		last: T
-	): IDerivable<T, Recursive>
-
+	public readonly items: SwitchArray<T, Recursive>
 	private lastInitialized: T | null = null
 	private hasSwitch: boolean = false
-
-	public readonly items = new SwitchArray(this)
 
 	protected get initializer() {
 		return itemsInitializer
@@ -159,6 +168,10 @@ export abstract class RecursiveInitList<
 
 	get isRecursiveInitList() {
 		return true
+	}
+
+	private isOld(terminal: T) {
+		return this.renewer().isOld(terminal)
 	}
 
 	private firstItem() {
@@ -196,7 +209,7 @@ export abstract class RecursiveInitList<
 		evaledWith: T | InitType
 	) {
 		fillable.recycleSubs()
-		fillable.expand(this.evaluator, evaledWith)
+		fillable.expand(this.renewer().evaluator, evaledWith)
 	}
 
 	private evaluateDerivable(
@@ -330,7 +343,7 @@ export abstract class RecursiveInitList<
 	setItems(newItems: (T | Recursive)[]) {
 		const mutItems: IPreRecursiveItems<T, Recursive> = newItems
 		for (let i = newItems.length; --i; )
-			mutItems[i] = this.maybeWrapSwitch(newItems[i])
+			mutItems[i] = this.renewer().maybeWrapSwitch(newItems[i])
 		this.items.init(mutItems as IRecursiveItems<T, Recursive>)
 		return this
 	}
@@ -341,11 +354,7 @@ export abstract class RecursiveInitList<
 
 	recycle() {
 		this.recycleSubs()
-		this.reclaim()
-	}
-
-	maybeWrapSwitch(r: T | Recursive) {
-		return this.isRecursive(r) ? wrapSwitch(r) : r
+		this.reclaim(this)
 	}
 
 	*[Symbol.iterator]() {
@@ -354,6 +363,7 @@ export abstract class RecursiveInitList<
 
 	constructor(origItems?: (T | Recursive)[]) {
 		super()
+		this.items = new SwitchArray(this.renewer())
 		this.init(origItems)
 	}
 }
