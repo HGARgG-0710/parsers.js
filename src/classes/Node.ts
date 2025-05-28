@@ -1,4 +1,6 @@
 import { array, functional } from "@hgargg-0710/one"
+import { isCopiable } from "src/is.js"
+import { isContentNodeSerializable, isRecursiveNodeSerializable, isTyped } from "src/is/Node.js"
 import type { IPoolGetter } from "../interfaces.js"
 import type {
 	ICellNode,
@@ -7,33 +9,23 @@ import type {
 	INodeMaker,
 	IRecursiveNode
 } from "../interfaces/Node.js"
-import { isCopiable } from "src/is.js"
 import { isType } from "../utils/Node.js"
-import { isRecursiveNodeSerializable } from "src/is/Node.js"
-import { isContentNodeSerializable } from "src/is/Node.js"
-import { isTyped } from "src/is/Node.js"
 import { NodeFactory } from "./NodeSystem.js"
 
 const { id } = functional
 
-abstract class PreTokenNode<Type = any> implements INode<Type> {
-	protected ["constructor"]: new () => this
-
-	static fromPlain<Type = any>(
-		this: INodeClass<Type, []>,
-		x: any,
-		nodeMaker: INodeMaker<Type>
-	) {
-		if (!isTyped(x)) return false
-		return new this()
-	}
-
+abstract class BaseNode<Type = any, Args extends any[] = any[]>
+	implements INode<Type>
+{
 	abstract readonly type: Type
+
+	abstract init(...x: Args): this
+	abstract toJSON(): string
+	abstract copy(): this
+
 	parent: INode<Type> | null = null
 
-	get lastChild() {
-		return -1
-	}
+	index(multind: number[]): any {}
 
 	backtrack(positions: number) {
 		let curr: INode<Type> = this
@@ -52,10 +44,32 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 		return result
 	}
 
-	index(multind: number[]): any {}
-
 	read(i: number): INode<Type> {
 		return this
+	}
+
+	get lastChild() {
+		return -1
+	}
+
+	free(poolGetter: IPoolGetter<Type>) {
+		poolGetter.get(this.type)!.free(this)
+	}
+}
+
+abstract class PreTokenNode<Type = any>
+	extends BaseNode<Type, []>
+	implements INode<Type>
+{
+	protected ["constructor"]: new () => this
+
+	static fromPlain<Type = any>(
+		this: INodeClass<Type, []>,
+		x: any,
+		nodeMaker: INodeMaker<Type>
+	) {
+		if (!isTyped(x)) return false
+		return new this()
 	}
 
 	copy() {
@@ -68,10 +82,6 @@ abstract class PreTokenNode<Type = any> implements INode<Type> {
 
 	init() {
 		return this
-	}
-
-	free(poolGetter: IPoolGetter<Type>) {
-		poolGetter.get(this.type)!.free(this)
 	}
 }
 
@@ -88,7 +98,7 @@ export const TokenNode = NodeFactory(function <Type = any>(type: Type) {
 })
 
 abstract class PreContentNode<Type = any, Value = any>
-	extends PreTokenNode<Type>
+	extends BaseNode<Type, [Value]>
 	implements ICellNode<Type, Value>
 {
 	protected ["constructor"]: new (value?: Value) => this
@@ -150,7 +160,7 @@ export const ContentNode = NodeFactory(function <Type = any, Value = any>(
 })
 
 abstract class PreRecursiveNode<Type = any>
-	extends PreTokenNode<Type>
+	extends BaseNode<Type>
 	implements IRecursiveNode<Type>
 {
 	protected ["constructor"]: new (children?: INode<Type>[]) => this
