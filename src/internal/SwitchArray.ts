@@ -70,7 +70,7 @@ export class SwitchArray<
 	}
 
 	write(i: number, value: T | Recursive) {
-		const currItem = this.read(i)
+		const currItem = this.items[i]
 		if (!this.isRecursive(value)) this.baseWrite(i, value)
 		else if (isSwitch(currItem)) currItem.init(value)
 		else this.baseWrite(i, wrapSwitch(value))
