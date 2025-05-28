@@ -1,43 +1,69 @@
-import type { array } from "@hgargg-0710/one"
+import { array, inplace, type } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IIndexMap } from "../interfaces.js"
+import { isGoodIndex, table } from "../utils.js"
+import { Pairs } from "../samples.js"
 
-import { isGoodIndex } from "../utils.js"
-import { toPairs, table } from "../IndexMap/utils.js"
-
-import { inplace } from "@hgargg-0710/one"
 const { swap } = inplace
+const { isArray } = type
 
-export abstract class PreIndexMap<
+export abstract class BaseIndexMap<
 	KeyType = any,
 	ValueType = any,
 	DefaultType = any,
 	IndexGetType = any
 > implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
 {
-	keys: KeyType[]
-	values: ValueType[]
-	default: DefaultType
+	protected ["constructor"]: new (
+		pairs: array.Pairs<KeyType, ValueType>,
+		_default?: DefaultType
+	) => this
+
+	readonly default: DefaultType
+
+	private _keys: KeyType[]
+	private _values: ValueType[]
 
 	abstract index(x: any): ValueType | DefaultType
-
 	abstract getIndex(key: any): IndexGetType
 	abstract delete(index: number, count?: number): this
 	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract replace(index: number, pair: [KeyType, ValueType]): this
 	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
-	abstract copy(): IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-	abstract unique(): number[]
-	abstract byIndex(index: number): DefaultType | [KeyType, ValueType]
-	abstract swap(i: number, j: number): this
+
+	private uniqueIndexes() {
+		const uniqueKeys = new Set()
+		const indexes: number[] = []
+
+		for (let i = 0; i < this.size; ++i) {
+			const curr = this.keys[i]
+			if (!uniqueKeys.has(curr)) {
+				uniqueKeys.add(curr)
+				indexes.push(i)
+			}
+		}
+
+		return indexes
+	}
+
+	protected set values(newValues: ValueType[]) {
+		this._values = newValues
+	}
+
+	get values() {
+		return this._values
+	}
+
+	protected set keys(newKeys: KeyType[]) {
+		this._keys = newKeys
+	}
+
+	get keys() {
+		return this._keys
+	}
 
 	get size() {
 		return this.keys.length
-	}
-
-	*[Symbol.iterator]() {
-		const size = this.size
-		for (let i = 0; i < size; ++i)
-			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
 	}
 
 	set(key: KeyType, value: ValueType, index: number = this.size) {
@@ -52,40 +78,11 @@ export abstract class PreIndexMap<
 		this.values.reverse()
 		return this
 	}
-}
-
-export abstract class BaseIndexMap<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any,
-	IndexGetType = any
-> extends PreIndexMap<KeyType, ValueType, DefaultType, IndexGetType> {
-	public default: DefaultType;
-
-	["constructor"]: new (
-		pairs: array.Pairs<KeyType, ValueType>,
-		_default?: DefaultType
-	) => IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
-
-	copy() {
-		return new this.constructor(toPairs(table(this)), this.default)
-	}
 
 	unique() {
-		const uniqueKeys = new Set()
-		const indexes: number[] = []
-
-		for (let i = 0; i < this.size; ++i) {
-			const curr = this.keys[i]
-			if (!uniqueKeys.has(curr)) {
-				uniqueKeys.add(curr)
-				indexes.push(i)
-			}
-		}
-
+		const indexes = this.uniqueIndexes()
 		this.keys = indexes.map((x) => this.keys[x])
 		this.values = indexes.map((x) => this.values[x])
-
 		return indexes
 	}
 
@@ -101,12 +98,19 @@ export abstract class BaseIndexMap<
 		return this
 	}
 
-	constructor(
-		public keys: KeyType[],
-		public values: ValueType[],
-		_default?: DefaultType
-	) {
-		super()
+	copy() {
+		return new this.constructor(Pairs.to(...table(this)), this.default)
+	}
+
+	*[Symbol.iterator]() {
+		const size = this.size
+		for (let i = 0; i < size; ++i)
+			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
+	}
+
+	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
+		assert(isArray(keys))
+		assert(isArray(values))
 		this.default = _default!
 	}
 }

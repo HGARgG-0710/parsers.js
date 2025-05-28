@@ -1,20 +1,23 @@
-import type { IWalkable } from "../Node/interfaces.js"
-import type { MultiIndex } from "../Stream/Position/classes.js"
-import { MultiIndexModifier } from "./MultiIndexModifier.js"
+import type { IWalkable } from "../interfaces/Node.js"
+import { MultiIndex } from "../modules/Stream/classes/Position.js"
+import { hasChildren, treeEndPath } from "../utils/Node.js"
 
-import { InitializablePattern } from "./Pattern.js"
-import { hasChildren, treeEndPath } from "../Node/utils.js"
+export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
+	private _curr: TreeLike
+	private level: TreeLike
+	private walkable?: TreeLike
+	private multind: MultiIndex = new MultiIndex()
 
-export class TreeWalker<
-	TreeLike extends IWalkable<TreeLike> = IWalkable
-> extends InitializablePattern<TreeLike> {
-	level: TreeLike
-	curr: TreeLike
+	private set curr(newCurr: TreeLike) {
+		this._curr = newCurr
+	}
 
-	protected modifier: MultiIndexModifier = new MultiIndexModifier()
+	get curr() {
+		return this._curr
+	}
 
 	get pos() {
-		return this.modifier.get()
+		return this.multind
 	}
 
 	getCurrChild() {
@@ -23,67 +26,70 @@ export class TreeWalker<
 	}
 
 	levelUp(positions: number = 1) {
-		const { value } = this
-		return (this.level = value!.backtrack(positions)!)
+		return (this.level = this.walkable!.backtrack(positions)!)
 	}
 
 	pushFirstChild() {
-		this.modifier.nextLevel()
+		this.multind.nextLevel()
 		this.level = this.curr
 		this.getCurrChild()
 	}
 
 	popChild() {
-		this.modifier.prevLevel()
+		this.multind.prevLevel()
 		this.curr = this.level
 		this.levelUp()
 	}
 
-	isSiblingAfter() {
+	hasSiblingAfter() {
 		return this.level.lastChild > this.pos.last()
 	}
 
-	isSiblingBefore() {
+	hasSiblingBefore() {
 		return this.pos.last() > 0
 	}
 
 	goSiblingAfter() {
-		this.modifier.incLast()
+		this.multind.incLast()
 		this.getCurrChild()
 	}
 
 	goSiblingBefore() {
-		this.modifier.decLast()
+		this.multind.decLast()
 		this.getCurrChild()
 	}
 
 	indexCut(length: number) {
-		this.modifier.resize(length)
+		this.multind.resize(length)
 		this.levelUp()
 		this.getCurrChild()
 	}
 
-	isChild() {
+	hasChildren() {
 		return hasChildren(this.curr)
 	}
 
-	isParent() {
-		return this.curr !== this.value
+	hasParent() {
+		return this.curr !== this.walkable
 	}
 
 	lastLevelWithSiblings() {
-		const { value, pos } = this
-		return value!.findUnwalkedChildren(pos.get())
+		return this.walkable!.findUnwalkedChildren(this.pos.get())
 	}
 
 	currentLastIndex() {
 		return treeEndPath(this.curr)
 	}
 
+	goNextFirst(levelsUp: number) {
+		this.indexCut(levelsUp)
+		this.goSiblingAfter()
+	}
+
 	goPrevLast() {
 		this.goSiblingBefore()
 		const initLength = this.pos.levels
-		this.modifier.extend(this.currentLastIndex())
+		this.multind.extend(this.currentLastIndex())
 		this.renewLevel(this.curr, initLength)
 	}
 
@@ -92,27 +98,27 @@ export class TreeWalker<
 	}
 
 	restart() {
-		this.curr = this.level = this.value!
-		this.modifier.clear()
+		this.curr = this.level = this.walkable!
+		this.multind.clear()
 	}
 
 	goIndex(pos?: MultiIndex) {
-		if (pos) this.modifier.init(pos)
-		this.curr = this.value!.index(this.pos.get()!)
+		if (pos) this.multind.from(pos)
+		this.curr = this.walkable!.index(this.pos.get())
 		this.levelUp()
 	}
 
-	init(walkable?: TreeLike) {
-		if (walkable) {
-			this.modifier.clear()
-			this.level = this.value = walkable
-		}
-
+	init(walkable: TreeLike) {
+		this.multind.clear()
+		this.level = this.walkable = walkable
 		return this
 	}
 
+	get() {
+		return this.walkable
+	}
+
 	constructor(walkable?: TreeLike) {
-		super(walkable)
-		this.init(walkable)
+		if (walkable) this.init(walkable)
 	}
 }

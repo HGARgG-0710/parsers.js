@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IHash } from "./HashMap/interfaces.js"
-import type { IThisMethod } from "./refactor.js"
-import type { IPosition } from "./interfaces.js"
+import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
+import type { IHash } from "./interfaces/HashMap.js"
+import type { IPosition } from "./modules/Stream/interfaces/Position.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -9,7 +9,7 @@ export type IMappable<Type = any, Out = any> = (
 ) => Out
 
 export interface ICopiable {
-	copy: () => typeof this
+	copy: () => this
 }
 
 export interface IHaving {
@@ -26,27 +26,23 @@ export type IIndexingFunction<KeyType = any> = (
 ) => boolean
 
 export interface ISizeable {
-	size: number
+	readonly size: number
 }
 
 export interface IDefaulting<Type = any> {
 	readonly default: Type
 }
 
-export interface IIndexAssignable<Type = any> {
-	assignedIndex?: Type
-}
-
 export interface ISettable<KeyType = any, ValueType = any> {
-	set: IThisMethod<[KeyType, ValueType], this>
+	set: (key: KeyType, value: ValueType) => this
 }
 
 export interface IDeletable<KeyType = any> {
-	delete: IThisMethod<[KeyType], this>
+	delete: (key: KeyType) => this
 }
 
 export interface IRekeyable<KeyType = any> {
-	rekey: IThisMethod<[KeyType, KeyType], this>
+	rekey: (fromKey: KeyType, toKey: KeyType) => this
 }
 
 export interface IHashable<KeyType, InternalKeyType> {
@@ -58,10 +54,6 @@ export type IIndexed<Type = any> =
 			[x: number]: Type
 			length: number
 	  } & Iterable<Type>
-
-export interface ISupered {
-	readonly super: Summat
-}
 
 export type IInvalidEntries<Type = any> = [IPosition, Type][]
 
@@ -75,21 +67,13 @@ export interface IGettable<Type = any> {
 	get: () => Type
 }
 
-export interface IInitializable<ArgType extends any[] = any[], OutType = any> {
-	init: IThisMethod<ArgType, OutType>
+export interface IInitializable<Args extends any[] = any[]> {
+	init: (...x: Partial<Args>) => this
 }
-
-export interface IPointer<Type = any> {
-	value: Type
-}
-
-export type IPattern<Type = any> = Partial<IPointer<Type>>
 
 export interface IReversible {
 	reverse: () => this
 }
-
-export type IRecursivePointer<T = any> = IPointer<T | IRecursivePointer<T>>
 
 export interface IIndexable<ValueType = any> {
 	index: (x: any, ...y: any[]) => ValueType
@@ -108,12 +92,63 @@ export type ISerializable =
 	| String
 	| Boolean
 
-export type * from "./Collection/interfaces.js"
-export type * from "./DynamicParser/interfaces.js"
-export type * from "./EnumSpace/interfaces.js"
-export type * from "./HashMap/interfaces.js"
-export type * from "./IndexMap/interfaces.js"
-export type * from "./LookupTable/interfaces.js"
-export type * from "./Node/interfaces.js"
-export type * from "./Stream/interfaces.js"
-export type * from "./TableMap/interfaces.js"
+export interface IFreezable {
+	readonly isFrozen: boolean
+	freeze: () => this
+}
+
+export interface IUnfreezable {
+	unfreeze: () => this
+}
+
+export interface IReadable<Type = any> {
+	read(i: number): Type
+}
+
+export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
+
+export interface IBufferized<Type = any> {
+	readonly buffer: IPersistentAccumulator<Type>
+}
+
+export interface IPushable<Type = any> {
+	push: (...x: Type[]) => this
+}
+
+export interface IWritable<Type = any> {
+	write: (i: number, value: Type) => this
+}
+
+export interface IStateSettable {
+	setState(state: Summat): void
+}
+
+export interface IClearable {
+	clear(): void
+}
+
+export interface IResource {
+	cleanup(): void
+}
+
+export interface IIsOpen {
+	readonly isOpen: boolean
+}
+
+export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
+
+export type * from "./interfaces/Accumulator.js"
+export type * from "./interfaces/Array.js"
+export type * from "./interfaces/Collection.js"
+export type * from "./interfaces/Decoder.js"
+export type * from "./interfaces/Destination.js"
+export type * from "./interfaces/DynamicParser.js"
+export type * from "./interfaces/Encoder.js"
+export type * from "./interfaces/HashMap.js"
+export type * from "./interfaces/IndexMap.js"
+export type * from "./interfaces/Initializer.js"
+export type * from "./interfaces/Node.js"
+export type * from "./interfaces/PoolGetter.js"
+export type * from "./interfaces/Source.js"
+export type * from "./interfaces/Stream.js"
+export type * from "./interfaces/StreamHandler.js"

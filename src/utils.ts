@@ -1,36 +1,13 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-
-import type { IPattern } from "src/interfaces.js"
-import type { IRecursivePointer } from "src/interfaces.js"
-
-import { type, object, boolean } from "@hgargg-0710/one"
-const { isUndefined } = type
-const { structCheck, prop } = object
-const { eqcurry } = boolean
-
-import type {
-	IBufferized,
-	IFreezableBuffer,
-	IIndexAssignable,
-	IIndexed,
-	IPointer,
-	ISizeable
-} from "./interfaces.js"
-
-import type { IStateful } from "./interfaces.js"
-import type { IPosed } from "./Stream/Position/interfaces.js"
-
+import { boolean } from "@hgargg-0710/one"
 import { BadIndex } from "./constants.js"
+import type { IKeysHaving, IResource, IValuesHaving } from "./interfaces.js"
+
+const { eqcurry } = boolean
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
  */
 export const isGoodIndex = (x: number) => x > BadIndex
-
-/**
- * Returns whether a certain index-pointer has been invalidated
- */
-export const isGoodPointer = (x: IPointer<number>) => isGoodIndex(x.value)
 
 /**
  * Given a string, returns whether it's a valid hexidecimal number
@@ -42,103 +19,25 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
  */
 export const isDecimal = (x: string) => /^[0-9]+$/.test(x)
 
-/**
- * Returns the `.length` of the given `Indexed` object
- */
-export const length = prop("length") as <Type = any>(
-	x: IIndexed<Type>
-) => number
-
-/**
- * Returns the `.size` of the given `Sizeable` object
- */
-export const size = prop("size") as (x: ISizeable) => number
-
-/**
- * Returns the `.state` of the given `Stateful`
- */
-export const state = prop("state") as (x: IStateful) => Summat
-
-/**
- * Returns the `.buffer` property of the given `Bufferized`
- */
-export const buffer = prop("buffer") as <Type = any>(
-	x: IBufferized<Type>
-) => IFreezableBuffer<Type>
-
-/**
- * Returns the `.pos` property of the given `Posed` object
- */
-export const pos = prop("pos") as <Type = any>(x: IPosed<Type>) => Type
-
-/**
- * Sets the value of the `x.assignedIndex` property to `assignedIndex`
- */
-export const assignIndex = <Type = any>(
-	x: IIndexAssignable<Type>,
-	assignedIndex: Type
-) => (x.assignedIndex = assignedIndex)
-
-/**
- * Returns whether the given value is an `IPointer`
- */
-export const isPoiner = structCheck<IPointer>(["value"]) as <T = any>(
-	x: any
-) => x is IPointer<T>
-
-/**
- * Returns the `.value` property of the given `Pattern`
- */
-export const value = prop("value") as <Type = any>(
-	x: IPattern<Type>
-) => Type | undefined
-
-/**
- * Sets the `.value` property of a given `Pattern`
- */
-export const setValue = <Type = any>(x: IPattern<Type>, value?: Type) =>
-	(x.value = value)
-
-/**
- * Unless given `value` is `undefined`, calls `setValue(pattern, value)`
- */
-export function optionalValue(pattern: IPattern, value?: any) {
-	if (!isUndefined(value)) setValue(pattern, value)
-}
-
-/**
- * Swaps `.value`s of two given `Pattern`s
- */
-export function swapValues<Type = any>(x: IPattern<Type>, y: IPattern<Type>) {
-	const temp = x.value
-	x.value = y.value
-	y.value = temp
-}
-
-/**
- * Recursively walks down a given `depth` (`Infinity`, by default),
- * getting the `.value` of the next `RecursivePointer`.
- *
- * Returns the last obtainable non-`IPointer` value.
- *
- * Note: `isPointer` is used for checking whether the given object is an `IPointer`
- */
-export function dig<Type = any>(
-	pointer: IRecursivePointer<Type>,
-	depth: number = Infinity
-): Type | IRecursivePointer<Type> {
-	let curr = pointer
-	let currDepth = 0
-	while (isPoiner(curr.value) && currDepth++ <= depth)
-		curr = value(curr) as IRecursivePointer<Type>
-	return curr
-}
-
 export const isLF = eqcurry("\n")
 
-export * as Collection from "./Collection/utils.js"
-export * as EnumSpace from "./EnumSpace/utils.js"
-export * as HashMap from "./HashMap/utils.js"
-export * as IndexMap from "./IndexMap/utils.js"
-export * as Node from "./Node/utils.js"
-export * as Stream from "./Stream/utils.js"
+export function withResource<T = any>(
+	resource: IResource,
+	callback: (r: IResource) => T
+) {
+	const retval = callback(resource)
+	resource.cleanup()
+	return retval
+}
+
+/**
+ * Returns the pair of `indexMap.keys` and `indexMap.values`
+ */
+export function table<KeyType = any, ValueType = any>(
+	kv: IKeysHaving<KeyType> & IValuesHaving<ValueType>
+): [KeyType[], ValueType[]] {
+	return [kv.keys, kv.values]
+}
+
+export * as Node from "./utils/Node.js"
+export * as Stream from "./utils/Stream.js"

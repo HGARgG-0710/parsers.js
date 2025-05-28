@@ -1,17 +1,21 @@
-import type { IPointer } from "./interfaces.js"
-
-// * Explanation: objects are passed by reference, ergo, it's possible to keep the
-// * 	index of a 'PersistentIndexMap' consistent across multiple sources,
-// * 	via wrapping it into a one-property object;
-
-export const Pointer = <Type = any>(value: Type): IPointer<Type> => ({ value })
-
-export * as Collection from "./Collection/classes.js"
-export * as Parser from "./DynamicParser/classes.js"
-export * as EnumSpace from "./EnumSpace/classes.js"
-export * as HashMap from "./HashMap/classes.js"
-export * as IndexMap from "./IndexMap/classes.js"
-export * as LookupTable from "./LookupTable/classes.js"
-export * as Node from "./Node/classes.js"
-export * as Stream from "./Stream/classes.js"
-export * as TableMap from "./TableMap/classes.js"
+export * from "./classes/ArrayCollection.js"
+export * as Decoder from "./classes/Decoder.js"
+export * from "./classes/Destination.js"
+export * from "./classes/DynamicParser.js"
+export * as Encoder from "./classes/Encoder.js"
+export * as HashMap from "./classes/HashMap.js"
+export * as IndexMap from "./classes/IndexMap.js"
+export * as Initializer from "./classes/Initializer.js"
+export * as Loaded from "./classes/Loaded.js"
+export * as Node from "./classes/Node.js"
+export * from "./classes/NodeSystem.js"
+export * from "./classes/ObjectPool.js"
+export * from "./classes/ParseableInput.js"
+export * from "./classes/PoolGetter.js"
+export * from "./classes/PropDigger.js"
+export * from "./classes/ResourceManager.js"
+export * from "./classes/RetainedArray.js"
+export * from "./classes/Source.js"
+export * from "./classes/SourceBuilder.js"
+export * as Stream from "./classes/Stream.js"
+export * from "./classes/StreamHandler.js"
