@@ -11,8 +11,7 @@
 		"parsing",
 		"tokenizing",
 		"validation",
-		"generation",
-		"maps"
+		"generation"
 	],
 	"dependencies": {
 		"@hgargg-0710/flow": "0.0.1",
