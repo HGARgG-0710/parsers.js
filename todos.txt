@@ -177,6 +177,22 @@ NEXT UP:
 				with `IPosition` becoming more general (allows non-`IStream`-arguments now for predicates),
 					and the `IStreamPosition` becoming what the OLD `IPosition` once was
 			2. ACCEPT an `IPosition<T>` for a `PropDigger<T>`
+
+	Tests [todo]: 
+		1. SOMEHOW automate the whole ".map file generation" procedure: 
+			1. create test-SPECIFIC commands and files: 
+				1. TEST-SPECIFIC `tsconfig.json` [for src/]
+					1. distinct from the current one 
+				2. CHANGE the `sourceMap` to `true` PERMANENTLY on the `tests` directory's `tsconfig.json` 
+				3. a `test_all_compile.cmd` command [run by the npm script]: 
+					0. kept inside scripts/ directory
+					1. clears away the out/ directory for `tests/`
+					2. clears away the dist/ directory for `src/`
+					3. runs the `npm run test-build`
+						1. new command - for using the `sourceMap`-positive config with the `src/` build 
+					4. runs the `npm run test`
+
+		2. replace the old "npm run all" command with this instead ... [`scripts/test_all_compile.cmd`]
 					
 CURRENT TODOS:		
 	TODO: order imports [Shift + Alt + O]
