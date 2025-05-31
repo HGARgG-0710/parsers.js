@@ -15,7 +15,8 @@
 				"../node_modules/@hgargg-0710/*"
 			]
 		},
-		"noUnusedLocals": true
+		"noUnusedLocals": true, 
+		"sourceMap": true
 	},
 	"exclude": [
 		"../node_modules",

@@ -9,7 +9,8 @@
 		"module": "node16",
 		"moduleResolution": "node16",
 		"verbatimModuleSyntax": true,
-		"strictNullChecks": true
+		"strictNullChecks": true, 
+		"sourceMap": true
 	},
 	"include": [
 		"./**/*.ts"
