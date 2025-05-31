@@ -1,4 +1,4 @@
-import type { IIndexable } from "src/interfaces.js"
+import type { IIndexable } from "../interfaces.js"
 import type { IParserFunction } from "../interfaces/StreamHandler.js"
 
 export function TableMap<In = any, Out = any>(

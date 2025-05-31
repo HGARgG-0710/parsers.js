@@ -16,7 +16,7 @@ import {
 	type IRecursivelySwitchable
 } from "../../../internal/RecursiveInitList.js"
 import { StreamList, streamListPool } from "../../../internal/StreamList.js"
-import { isStateful } from "src/is/Stream.js"
+import { isStateful } from "../../../is/Stream.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { WrapperStream } from "./WrapperStream.js"
 import { MissingArgument } from "../../../constants.js"

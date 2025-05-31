@@ -1,4 +1,4 @@
-import { isCopiable } from "src/is.js"
+import { isCopiable } from "../../../is.js"
 import {
 	ownerInitializer,
 	resourceInitializer

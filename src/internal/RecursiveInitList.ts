@@ -1,4 +1,4 @@
-import { ObjectPool } from "../classes.js"
+import { ObjectPool } from "../classes/ObjectPool.js"
 import { Initializable } from "../classes/Initializer.js"
 import type { IInitializable, IInitializer } from "../interfaces.js"
 import { SwitchArray } from "./SwitchArray.js"

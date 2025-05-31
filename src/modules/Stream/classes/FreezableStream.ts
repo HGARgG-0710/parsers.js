@@ -1,5 +1,5 @@
 import { boolean, number, type } from "@hgargg-0710/one"
-import { OutputBuffer } from "src/internal/OutputBuffer.js"
+import { OutputBuffer } from "../../../internal/OutputBuffer.js"
 import type { IBufferized } from "../../../interfaces.js"
 import type {
 	IPosition,

@@ -1,6 +1,10 @@
 import { array, functional } from "@hgargg-0710/one"
-import { isCopiable } from "src/is.js"
-import { isContentNodeSerializable, isRecursiveNodeSerializable, isTyped } from "src/is/Node.js"
+import { isCopiable } from "../is.js"
+import {
+	isContentNodeSerializable,
+	isRecursiveNodeSerializable,
+	isTyped
+} from "../is/Node.js"
 import type { IPoolGetter } from "../interfaces.js"
 import type {
 	ICellNode,

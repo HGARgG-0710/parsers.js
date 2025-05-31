@@ -5,7 +5,7 @@ const { extendPrototype, propertyDescriptors } = object
 
 export interface IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly properties?: object
-	readonly constructor?: (...args: Args) => T | void
+	readonly constructor: (...args: Args) => T | void
 }
 
 export class mixin<T = any, Args extends any[] = any[]> {
