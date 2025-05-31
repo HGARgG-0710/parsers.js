@@ -1,5 +1,5 @@
 import type { array } from "@hgargg-0710/one"
-import type { IIndexable } from "src/interfaces.js"
+import type { IIndexable } from "../interfaces.js"
 import type {
 	ICopiable,
 	IDefaulting,

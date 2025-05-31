@@ -3,16 +3,36 @@ import { object } from "@hgargg-0710/one"
 const { mixin: _mixin, withoutConstructor } = object.classes
 const { extendPrototype, propertyDescriptors } = object
 
+export type IConstructorType<T = any, Args extends any[] = any[]> =
+	| IVoidConstructor<T, Args>
+	| INonVoidConstructor<T, Args>
+
+export type IVoidConstructor<T = any, Args extends any[] = any[]> =
+	| undefined
+	| Function
+
+export type INonVoidConstructor<T = any, Args extends any[] = any[]> = (
+	...args: Args
+) => T | void
+
 export interface IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly properties?: object
-	readonly constructor?: (...args: Args) => T | void
+	readonly constructor?: ((...args: Args) => T | void) | Function
 }
 
 export class mixin<T = any, Args extends any[] = any[]> {
+	private _class: new (...args: Args) => T
+
+	private get defaultConstructor(): IConstructorType<T, Args> {
+		return this.mixinShape.constructor
+	}
+
+	private set class(newClass: new (...args: Args) => T) {
+		this._class = newClass
+	}
+
 	private get class() {
-		return this.mixinShape.constructor as unknown as new (
-			...args: Args
-		) => T
+		return this._class
 	}
 
 	private get proto() {
@@ -57,6 +77,19 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		if (this.properties) this.fromObject(this.properties)
 	}
 
+	private isNonVoid(
+		constructor: IConstructorType<T, Args>
+	): constructor is INonVoidConstructor<T, Args> {
+		return !!constructor && constructor !== Object
+	}
+
+	private defineClass() {
+		const preConstructor = this.defaultConstructor
+		this.class = (this.isNonVoid(preConstructor)
+			? preConstructor
+			: function () {}) as unknown as new (...args: Args) => T
+	}
+
 	toClass() {
 		return this.class
 	}
@@ -66,6 +99,8 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		mixins: mixin[] = [],
 		classes: (new (...args: any[]) => any)[] = []
 	) {
+		this.defineClass()
+
 		this.super = {}
 		this.fromClasses(classes)
 		this.fromMixins(mixins)

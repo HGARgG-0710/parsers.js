@@ -1,6 +1,6 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IAccumulator } from "src/interfaces/Accumulator.js"
+import type { IAccumulator } from "../interfaces/Accumulator.js"
 
 const { isString } = type
 
