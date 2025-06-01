@@ -1,22 +1,22 @@
 import { object } from "@hgargg-0710/one"
 
 const { mixin: _mixin, withoutConstructor } = object.classes
-const { extendPrototype, propertyDescriptors } = object
+const { ConstDescriptor } = object.descriptor
+const { extendPrototype, propertyDescriptors, propDefine } = object
 
 export type IConstructorType<T = any, Args extends any[] = any[]> =
-	| IVoidConstructor<T, Args>
+	| IVoidConstructor
 	| INonVoidConstructor<T, Args>
 
-export type IVoidConstructor<T = any, Args extends any[] = any[]> =
-	| undefined
-	| Function
+export type IVoidConstructor = undefined | Function
 
 export type INonVoidConstructor<T = any, Args extends any[] = any[]> = (
 	...args: Args
 ) => T | void
 
 export interface IMixinShape<T = any, Args extends any[] = any[]> {
-	readonly properties?: object
+	readonly name: string
+	readonly properties: object
 	readonly constructor?: ((...args: Args) => T | void) | Function
 }
 
@@ -83,11 +83,38 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		return !!constructor && constructor !== Object
 	}
 
+	private ensureConstructorNonVoid(constructor: IConstructorType<T, Args>) {
+		return this.isNonVoid(constructor) ? constructor : function () {}
+	}
+
+	private assignName(constructor: INonVoidConstructor<T, Args>) {
+		propDefine(constructor, "name", ConstDescriptor(this.name))
+	}
+
+	private setConstructor(constructor: INonVoidConstructor<T, Args>) {
+		this.class = constructor as unknown as new (...args: Args) => T
+	}
+
+	private initSuper() {
+		this.super = {}
+	}
+
+	private defineNonVoidConstructor(
+		constructor: INonVoidConstructor<T, Args>
+	) {
+		this.assignName(constructor)
+		this.setConstructor(constructor)
+		this.initSuper()
+	}
+
 	private defineClass() {
-		const preConstructor = this.defaultConstructor
-		this.class = (this.isNonVoid(preConstructor)
-			? preConstructor
-			: function () {}) as unknown as new (...args: Args) => T
+		this.defineNonVoidConstructor(
+			this.ensureConstructorNonVoid(this.defaultConstructor)
+		)
+	}
+
+	get name() {
+		return this.class.name
 	}
 
 	toClass() {
@@ -100,8 +127,6 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		classes: (new (...args: any[]) => any)[] = []
 	) {
 		this.defineClass()
-
-		this.super = {}
 		this.fromClasses(classes)
 		this.fromMixins(mixins)
 		this.fromProperties()
