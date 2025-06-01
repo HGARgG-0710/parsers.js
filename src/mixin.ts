@@ -2,7 +2,7 @@ import { object } from "@hgargg-0710/one"
 
 const { mixin: _mixin, withoutConstructor } = object.classes
 const { ConstDescriptor } = object.descriptor
-const { extendPrototype, propertyDescriptors, propDefine } = object
+const { propsDefine, propertyDescriptors, propDefine } = object
 
 export type IConstructorType<T = any, Args extends any[] = any[]> =
 	| IVoidConstructor
@@ -61,7 +61,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private fromObject(properties: object) {
-		extendPrototype(
+		propsDefine(
 			this.proto,
 			withoutConstructor(
 				propertyDescriptors(properties)
@@ -88,7 +88,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private assignName(constructor: INonVoidConstructor<T, Args>) {
-		propDefine(constructor, "name", ConstDescriptor(this.name))
+		propDefine(constructor, "name", ConstDescriptor(this.mixinShape.name))
 	}
 
 	private setConstructor(constructor: INonVoidConstructor<T, Args>) {
