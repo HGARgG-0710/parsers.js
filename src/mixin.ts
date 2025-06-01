@@ -14,20 +14,24 @@ export type INonVoidConstructor<T = any, Args extends any[] = any[]> = (
 	...args: Args
 ) => T | void
 
+export type IOutClass<T = any, Args extends any[] = any[]> = new (
+	...args: Args
+) => T
+
 export interface IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly name: string
 	readonly properties: object
-	readonly constructor?: ((...args: Args) => T | void) | Function
+	readonly constructor?: IConstructorType<T, Args>
 }
 
 export class mixin<T = any, Args extends any[] = any[]> {
-	private _class: new (...args: Args) => T
+	private _class: IOutClass<T, Args>
 
 	private get defaultConstructor(): IConstructorType<T, Args> {
 		return this.mixinShape.constructor
 	}
 
-	private set class(newClass: new (...args: Args) => T) {
+	private set class(newClass: IOutClass<T, Args>) {
 		this._class = newClass
 	}
 
@@ -92,7 +96,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private setConstructor(constructor: INonVoidConstructor<T, Args>) {
-		this.class = constructor as unknown as new (...args: Args) => T
+		this.class = constructor as unknown as IOutClass<T, Args>
 	}
 
 	private initSuper() {
