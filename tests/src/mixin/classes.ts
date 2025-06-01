@@ -24,10 +24,33 @@ test("mixin (#1)", () => {
 // 		^ USE IT with the `mixin` tests. Each `mixinTested = new mixin(...)` call also should
 // 		^ spawn a `anonTest = new AnonymousClassTest(...)` call.
 // 		^ And `anonTest` will run against an INSTANCE of `mixinTested.toClass()`
-// ! -1. - NEW TEST: one that DOES NOT use a `.constructor` [PureMixinTest]:
-// 		* 1. assigns the `.constructor` to be THE SAME on the resulting `expectedPrototypeDescriptors` [ignores it for that check, basically]
-// 		* 2. SAME algorithm as with `MixinTest`
-// 		* 3. CHECKING that the "String(.constructor)" is THE SAME as "function () {}" [hard-coding the verification, since it's supposed to hold for all];
+// ! -1. ADD the TESTS for `mixin`s WITHOUT constructors: 
+// 		* 1. with .properties: 
+// 			1. getters-only
+// 			2. setters-only
+// 			3. methods-only
+// 			4. state-variables-only
+// 			5. getters + setters + methods + state-variables
+// 		* 2. with parents: 
+// 			* 1. with classes: 
+// 				1. getters-only
+// 				2. setters-only
+// 				3. methods-only
+// 				4. state-variables-only
+// 				5. getters + setters + methods + state-variables
+// 			* 2. with other mixins: 
+// 				1. getters-only
+// 				2. setters-only
+// 				3. methods-only
+// 				4. state-variables-only
+// 				5. getters + setters + methods + state-variables
+// 				6. with classes [also]: 
+// 					1. getters-only
+// 					2. setters-only
+// 					3. methods-only
+// 					4. state-variables-only
+// 					5. getters + setters + methods + state-variables
+// [MixinTest]
 // * 0 non-empty .constructor [no .properties]
 // * 1. [.properties] getter + setter test
 // * 2. [.properties] getter-only test
