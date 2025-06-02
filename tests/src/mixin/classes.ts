@@ -29,6 +29,13 @@ test("mixin (#1)", () => {
 	})
 })
 
+// ! enumeration order of tests [for TestCounter]: 
+// * a.b.c
+// a = has constructor [0] vs. no-constructor [1]
+// b = no no parents [0] vs. has class-parents [1] vs. has mixin-parents [2] vs. has both mixin- and class-parents [3]
+// c = just the test number in the given category
+// ! CREATE constants for this [in mixin/lib/classes.ts]
+
 // TODO [any order]:
 // ! -2. - NEW TEST: for `mixin.toClass()`-results' instances. A new class - AnonymousClassTest - accepts an anonymous class and some (basic) formats for testing behaviours.
 // 		^ USE IT with the `mixin` tests. Each `mixinTested = new mixin(...)` call also should
