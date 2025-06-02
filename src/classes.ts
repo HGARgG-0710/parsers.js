@@ -1,4 +1,5 @@
 export * from "./classes/ArrayCollection.js"
+export * from "./classes/Autocache.js"
 export * as Decoder from "./classes/Decoder.js"
 export * from "./classes/Destination.js"
 export * from "./classes/DynamicParser.js"

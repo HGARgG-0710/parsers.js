@@ -1,20 +1,19 @@
-import assert from "assert"
-import type { IIndexable, ISettable } from "../interfaces.js"
 import { type } from "@hgargg-0710/one"
+import assert from "assert"
+import { NotCached } from "../constants.js"
+import type { IIndexable, ISettable } from "../interfaces.js"
 
 const { isFunction } = type
 
-const NOT_CACHED = undefined
-
 export function Autocache<KeyType = any, ValueType = any>(
 	cache: ISettable<KeyType, ValueType> &
-		IIndexable<ValueType | typeof NOT_CACHED>,
+		IIndexable<ValueType | typeof NotCached>,
 	callback: (x: KeyType) => ValueType
 ) {
 	assert(isFunction(callback))
 	return function (x: KeyType) {
 		const cached = cache.index(x)
-		if (cached === NOT_CACHED) {
+		if (cached === NotCached) {
 			const newlyCached = callback(x)
 			cache.set(x, newlyCached)
 			return newlyCached
