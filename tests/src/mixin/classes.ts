@@ -1,5 +1,15 @@
 import test from "node:test"
-import { MixinTest } from "./lib/classes.js"
+import { MixinTest, PureMixinTest } from "./lib/classes.js"
+
+test("mixin (#0)", () =>
+	new PureMixinTest({ name: "Test0", properties: {} }).toClass({
+		super: {
+			value: {},
+			writable: true,
+			enumerable: true,
+			configurable: true
+		}
+	}))
 
 test("mixin (#1)", () => {
 	const constructor = function () {}
@@ -24,27 +34,27 @@ test("mixin (#1)", () => {
 // 		^ USE IT with the `mixin` tests. Each `mixinTested = new mixin(...)` call also should
 // 		^ spawn a `anonTest = new AnonymousClassTest(...)` call.
 // 		^ And `anonTest` will run against an INSTANCE of `mixinTested.toClass()`
-// ! -1. ADD the TESTS for `mixin`s WITHOUT constructors: 
-// 		* 1. with .properties: 
+// ! -1. ADD the TESTS for `mixin`s WITHOUT constructors:
+// 		* 1. with .properties:
 // 			1. getters-only
 // 			2. setters-only
 // 			3. methods-only
 // 			4. state-variables-only
 // 			5. getters + setters + methods + state-variables
-// 		* 2. with parents: 
-// 			* 1. with classes: 
+// 		* 2. with parents:
+// 			* 1. with classes:
 // 				1. getters-only
 // 				2. setters-only
 // 				3. methods-only
 // 				4. state-variables-only
 // 				5. getters + setters + methods + state-variables
-// 			* 2. with other mixins: 
+// 			* 2. with other mixins:
 // 				1. getters-only
 // 				2. setters-only
 // 				3. methods-only
 // 				4. state-variables-only
 // 				5. getters + setters + methods + state-variables
-// 				6. with classes [also]: 
+// 				6. with classes [also]:
 // 					1. getters-only
 // 					2. setters-only
 // 					3. methods-only

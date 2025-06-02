@@ -71,7 +71,10 @@ export class PureMixinTest<
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void {
 		super.testedConditions(mixinClass, expectedPrototypeDescriptors)
-		assert.strictEqual(String(mixinClass), "function () {}")
+		assert.strictEqual(
+			String(mixinClass),
+			String(function () {})
+		)
 	}
 }
 
