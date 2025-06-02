@@ -11,3 +11,5 @@
 export const BadIndex = -1
 
 export const MissingArgument = undefined
+
+export const NotCached = undefined
