@@ -111,6 +111,8 @@ export abstract class BaseIndexMap<
 	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
 		assert(isArray(keys))
 		assert(isArray(values))
+		this.keys = keys
+		this.values = values
 		this.default = _default!
 	}
 }
