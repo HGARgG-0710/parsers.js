@@ -6,12 +6,22 @@ import {
 	type INonVoidConstructor,
 	type IOutClass
 } from "../../../../dist/main.js"
+import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
 
 const { withoutConstructor } = object.classes
 const { propertyDescriptors } = object
 
 abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	protected readonly mixinInstance: mixin<T, Args>
+	constructor(mixinShape: IMixinShape<T, Args>) {
+		this.mixinInstance = new mixin(mixinShape)
+	}
+}
+
+abstract class BaseMixinPrototypeTest<
+	T = any,
+	Args extends any[] = any[]
+> extends BaseMixinTest<T, Args> {
 	protected readonly mixinName: string
 
 	protected abstract testedConditions(
@@ -27,15 +37,15 @@ abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	}
 
 	constructor(mixinShape: IMixinShape<T, Args>) {
+		super(mixinShape)
 		this.mixinName = mixinShape.name
-		this.mixinInstance = new mixin(mixinShape)
 	}
 }
 
-abstract class DefaultMixinTest<
+abstract class DefaultMixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
-> extends BaseMixinTest<T, Args> {
+> extends BaseMixinPrototypeTest<T, Args> {
 	protected abstract mixinPrototypeDescriptors(
 		x: object
 	): PropertyDescriptorMap
@@ -59,7 +69,7 @@ abstract class DefaultMixinTest<
 export class PureMixinPrototypeTest<
 	T = any,
 	Args extends any[] = any
-> extends DefaultMixinTest<T, Args> {
+> extends DefaultMixinPrototypeTest<T, Args> {
 	protected mixinPrototypeDescriptors(x: object) {
 		return withoutConstructor(
 			propertyDescriptors(x)
@@ -81,7 +91,7 @@ export class PureMixinPrototypeTest<
 export class MixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
-> extends DefaultMixinTest<T, Args> {
+> extends DefaultMixinPrototypeTest<T, Args> {
 	private readonly origConstructor: INonVoidConstructor<T, Args>
 
 	protected mixinPrototypeDescriptors(x: object): PropertyDescriptorMap {
@@ -102,5 +112,16 @@ export class MixinPrototypeTest<
 			T,
 			Args
 		>
+	}
+}
+
+export class MixinInstanceTest<
+	T = any,
+	Args extends any[] = any[]
+> extends BaseMixinTest<T, Args> {
+	withInstance(expected: InterfaceShape) {
+		return new InterfaceTest(expected).withClass(
+			this.mixinInstance.toClass()
+		)
 	}
 }
