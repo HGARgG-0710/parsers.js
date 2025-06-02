@@ -1,4 +1,4 @@
-import type { IOwnedStream } from "../../../interfaces/Stream.js"
+import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 import { SyncStream } from "./DelegateStream.js"
 
 export abstract class WrapperStream<Type = any, Args extends any[] = any[]>

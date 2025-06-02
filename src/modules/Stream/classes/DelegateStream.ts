@@ -1,4 +1,4 @@
-import { OwningStream } from "../../../classes/Stream.js"
+import { OwningStream } from "./IterableStream.js"
 
 export abstract class DelegateStream<
 	Type = any,

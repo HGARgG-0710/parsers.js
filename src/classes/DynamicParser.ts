@@ -5,8 +5,8 @@ import type {
 	ILinkedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
+import { SyncStream } from "../modules/Stream/classes/DelegateStream.js"
 import { Initializable } from "./Initializer.js"
-import { SyncStream } from "./Stream.js"
 
 class ParsedStream<FinalType = any, InitType = any> extends SyncStream<
 	FinalType,
