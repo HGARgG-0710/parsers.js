@@ -1,8 +1,8 @@
 import test from "node:test"
-import { MixinTest, PureMixinTest } from "./lib/classes.js"
+import { MixinPrototypeTest, PureMixinPrototypeTest } from "./lib/classes.js"
 
 test("mixin (#0)", () =>
-	new PureMixinTest({ name: "Test0", properties: {} }).toClass({
+	new PureMixinPrototypeTest({ name: "Test0", properties: {} }).toClass({
 		super: {
 			value: {},
 			writable: true,
@@ -13,7 +13,11 @@ test("mixin (#0)", () =>
 
 test("mixin (#1)", () => {
 	const constructor = function () {}
-	new MixinTest({ name: "Test1", properties: {}, constructor }).toClass({
+	new MixinPrototypeTest({
+		name: "Test1",
+		properties: {},
+		constructor
+	}).toClass({
 		constructor: {
 			value: constructor,
 			writable: true,
@@ -29,7 +33,7 @@ test("mixin (#1)", () => {
 	})
 })
 
-// ! enumeration order of tests [for TestCounter]: 
+// ! enumeration order of tests [for TestCounter]:
 // * a.b.c
 // a = has constructor [0] vs. no-constructor [1]
 // b = no no parents [0] vs. has class-parents [1] vs. has mixin-parents [2] vs. has both mixin- and class-parents [3]

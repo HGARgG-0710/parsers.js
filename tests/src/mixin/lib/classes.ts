@@ -56,7 +56,7 @@ abstract class DefaultMixinTest<
 	}
 }
 
-export class PureMixinTest<
+export class PureMixinPrototypeTest<
 	T = any,
 	Args extends any[] = any
 > extends DefaultMixinTest<T, Args> {
@@ -78,7 +78,7 @@ export class PureMixinTest<
 	}
 }
 
-export class MixinTest<
+export class MixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
 > extends DefaultMixinTest<T, Args> {
