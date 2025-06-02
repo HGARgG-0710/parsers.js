@@ -1,7 +1,18 @@
-import test from "node:test"
-import { MixinPrototypeTest, PureMixinPrototypeTest } from "./lib/classes.js"
+import { TestCounter } from "../lib/lib.js"
+import {
+	HAS_CONSTRUCTOR,
+	MixinPrototypeTest,
+	NO_CONSTRUCTOR,
+	NO_PARENTS,
+	PureMixinPrototypeTest
+} from "./lib/classes.js"
 
-test("mixin (#0)", () =>
+const mixinTestCounter = new TestCounter(
+	([hasConstructor, parentCode, categoryCount]: [number, number, number]) =>
+		`mixin (#${hasConstructor}.${parentCode}.${categoryCount})`
+)
+
+mixinTestCounter.test([NO_CONSTRUCTOR, NO_PARENTS], () =>
 	new PureMixinPrototypeTest({ name: "Test0", properties: {} }).toClass({
 		super: {
 			value: {},
@@ -9,9 +20,10 @@ test("mixin (#0)", () =>
 			enumerable: true,
 			configurable: true
 		}
-	}))
+	})
+)
 
-test("mixin (#1)", () => {
+mixinTestCounter.test([HAS_CONSTRUCTOR, NO_PARENTS], () => {
 	const constructor = function () {}
 	new MixinPrototypeTest({
 		name: "Test1",
@@ -33,19 +45,13 @@ test("mixin (#1)", () => {
 	})
 })
 
-// ! enumeration order of tests [for TestCounter]:
-// * a.b.c
-// a = has constructor [0] vs. no-constructor [1]
-// b = no no parents [0] vs. has class-parents [1] vs. has mixin-parents [2] vs. has both mixin- and class-parents [3]
-// c = just the test number in the given category
-// ! CREATE constants for this [in mixin/lib/classes.ts]
-
 // TODO [any order]:
-// ! -2. - NEW TEST: for `mixin.toClass()`-results' instances. A new class - AnonymousClassTest - accepts an anonymous class and some (basic) formats for testing behaviours.
-// 		^ USE IT with the `mixin` tests. Each `mixinTested = new mixin(...)` call also should
-// 		^ spawn a `anonTest = new AnonymousClassTest(...)` call.
-// 		^ And `anonTest` will run against an INSTANCE of `mixinTested.toClass()`
-// ! -1. ADD the TESTS for `mixin`s WITHOUT constructors:
+// ! VITAL: add the 'MixinInstanceTest's TOGETHER with the `MixinPureTest`-s [ALWAYS - even when there are NO ]
+// 		% reason: 
+// 			1. [when no '.constructor'] mildly "tighter" tests - eliminates certain (less elaborate) cases of 'Proxy' usage for implementation [like when '.prototype' is being substituted by a Mock of sorts]; 
+// 			2. [when IS '.consructor'] to test the behaviour of the '.constructor'
+// TODO: shorten the list of tests - to be less tautological [currently - a bit too much...]; 
+// ! -1. ADD the TESTS for `mixin`s WITHOUT constructors [MixinPureTest-s + MixinInstanceTest-s]:
 // 		* 1. with .properties:
 // 			1. getters-only
 // 			2. setters-only
@@ -71,8 +77,8 @@ test("mixin (#1)", () => {
 // 					3. methods-only
 // 					4. state-variables-only
 // 					5. getters + setters + methods + state-variables
-// [MixinTest]
-// * 0 non-empty .constructor [no .properties]
+// [MixinPrototypeTest + MixinInstanceTest]
+// * 0 non-empty .constructor [still no .properties]
 // * 1. [.properties] getter + setter test
 // * 2. [.properties] getter-only test
 // * 3. [.properties] setter-only test

@@ -1,5 +1,8 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
+import test from "node:test"
+import { Autocache } from "../../../dist/src/classes.js"
+import { ArrayMap } from "../../../dist/src/classes/IndexMap.js"
 import type { ICopiable } from "../../../dist/src/interfaces.js"
 
 const { keys } = object
@@ -72,4 +75,32 @@ export class InterfaceTest<T = any, Args extends any[] = any[]> {
 	}
 
 	constructor(private readonly shape: InterfaceShape) {}
+}
+
+export class PrefixCounter {
+	private _counter: number = 0
+
+	get counter() {
+		return this._counter
+	}
+
+	inc() {
+		++this._counter
+	}
+
+	fromPrefix(prefix: number[]) {
+		return [...prefix, this.counter]
+	}
+}
+
+export class TestCounter {
+	private prefixes = Autocache(new ArrayMap([]), () => new PrefixCounter())
+
+	test(testPrefix: number[], callback: () => void) {
+		const prefixCounter: PrefixCounter = this.prefixes(testPrefix)
+		prefixCounter.inc()
+		return test(this.label(prefixCounter.fromPrefix(testPrefix)), callback)
+	}
+
+	constructor(private readonly label: (count: readonly number[]) => string) {}
 }

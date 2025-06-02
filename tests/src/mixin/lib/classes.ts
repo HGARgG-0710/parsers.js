@@ -11,6 +11,29 @@ import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
 const { withoutConstructor } = object.classes
 const { propertyDescriptors } = object
 
+/**
+ * * Format documentation for 'mixin' tests' semver
+ *
+ * format: a.b.c, where
+ * 		a - one of: 0/1, being
+ * 			0 - 'constructor' property not explicitly specified
+ * 			1 - '.constructor' property explicitly specified
+ * 		b - one of: 0/1/2/3, being
+ * 			0 - niether 'mixins' nor 'classes' parents-parameters has been given values in the 'mixin' constructor
+ * 			1 - 'classes' parameter has been given a value, but not 'mixins'
+ * 			2 - 'mixins' parameter has been given a value, but not 'classes'
+ * 			3 - both 'mixins' and 'classes' parameters have been given values
+ * 		c - current test count [amongst tests with the same 'a.b' sub-version]
+ */
+
+export const NO_CONSTRUCTOR = 0
+export const HAS_CONSTRUCTOR = 1
+
+export const NO_PARENTS = 0
+export const CLASS_PARENTS = 1
+export const MIXIN_PARENTS = 2
+export const CLASS_AND_MIXIN_PARENTS = 3
+
 abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	protected readonly mixinInstance: mixin<T, Args>
 	constructor(mixinShape: IMixinShape<T, Args>) {
