@@ -78,7 +78,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private fromProperties() {
-		if (this.properties) this.fromObject(this.properties)
+		this.fromObject(this.properties)
 	}
 
 	private isNonVoid(
