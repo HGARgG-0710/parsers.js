@@ -1,11 +1,6 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
-import {
-	mixin,
-	type IMixinShape,
-	type INonVoidConstructor,
-	type IOutClass
-} from "../../../../dist/main.js"
+import { mixin } from "../../../../dist/main.js"
 import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
 
 const { withoutConstructor } = object.classes
@@ -38,7 +33,7 @@ export const CLASS_AND_MIXIN_PARENTS = 3
 
 abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	protected readonly mixinInstance: mixin<T, Args>
-	constructor(mixinShape: IMixinShape<T, Args>) {
+	constructor(mixinShape: mixin.IMixinShape<T, Args>) {
 		this.mixinInstance = new mixin(mixinShape)
 	}
 }
@@ -63,7 +58,7 @@ abstract class BaseMixinPrototypeTest<
 	}
 
 	constructor(
-		mixinShape: IMixinShape<T, Args>,
+		mixinShape: mixin.IMixinShape<T, Args>,
 		superMixins: mixin[] = [],
 		superClasses: (new (...args: any) => any)[] = []
 	) {
@@ -130,7 +125,7 @@ export class PureMixinPrototypeTest<
 	}
 
 	protected testedConditions(
-		mixinClass: IOutClass<T, Args>,
+		mixinClass: mixin.IOutClass<T, Args>,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void {
 		super.testedConditions(mixinClass, expectedPrototypeDescriptors)
@@ -145,14 +140,14 @@ export class MixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
 > extends DefaultMixinPrototypeTest<T, Args> {
-	private readonly origConstructor: INonVoidConstructor<T, Args>
+	private readonly origConstructor: mixin.INonVoidConstructor<T, Args>
 
 	protected mixinPrototypeDescriptors(x: object): PropertyDescriptorMap {
 		return propertyDescriptors(x)
 	}
 
 	protected testedConditions(
-		mixinClass: IOutClass<T, Args>,
+		mixinClass: mixin.IOutClass<T, Args>,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	) {
 		super.testedConditions(mixinClass, expectedPrototypeDescriptors)
@@ -160,15 +155,13 @@ export class MixinPrototypeTest<
 	}
 
 	constructor(
-		mixinShape: IMixinShape<T, Args>,
+		mixinShape: mixin.IMixinShape<T, Args>,
 		superMixins?: mixin[],
 		superClasses?: (new (...args: Args) => T)[]
 	) {
 		super(mixinShape, superMixins, superClasses)
-		this.origConstructor = mixinShape.constructor as INonVoidConstructor<
-			T,
-			Args
-		>
+		this.origConstructor =
+			mixinShape.constructor as mixin.INonVoidConstructor<T, Args>
 	}
 }
 
