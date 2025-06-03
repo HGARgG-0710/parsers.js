@@ -4,38 +4,36 @@ const { mixin: _mixin, withoutConstructor } = object.classes
 const { ConstDescriptor } = object.descriptor
 const { propsDefine, propertyDescriptors, propDefine } = object
 
-export type IConstructorType<T = any, Args extends any[] = any[]> =
-	| IVoidConstructor
-	| INonVoidConstructor<T, Args>
+type _IConstructorType<T = any, Args extends any[] = any[]> =
+	| _IVoidConstructor
+	| _INonVoidConstructor<T, Args>
 
-export type IVoidConstructor = undefined | Function
+type _IVoidConstructor = undefined | Function
 
-export type INonVoidConstructor<T = any, Args extends any[] = any[]> = (
+type _INonVoidConstructor<T = any, Args extends any[] = any[]> = (
 	...args: Args
 ) => T | void
 
-export type IOutClass<T = any, Args extends any[] = any[]> = new (
-	...args: Args
-) => T
+type _IOutClass<T = any, Args extends any[] = any[]> = new (...args: Args) => T
 
-export interface IMixinShape<T = any, Args extends any[] = any[]> {
+interface _IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly name: string
 	readonly properties: object
-	readonly constructor?: IConstructorType<T, Args>
+	readonly constructor?: _IConstructorType<T, Args>
 }
 
-export class mixin<T = any, Args extends any[] = any[]> {
-	private _class: IOutClass<T, Args>
+class sealed_mixin<T = any, Args extends any[] = any[]> {
+	private _class: _IOutClass<T, Args>
 
-	private get defaultConstructor(): IConstructorType<T, Args> {
+	private get defaultConstructor(): _IConstructorType<T, Args> {
 		return this.mixinShape.constructor
 	}
 
-	private set class(newClass: IOutClass<T, Args>) {
+	private set class(newClass: _IOutClass<T, Args>) {
 		this._class = newClass
 	}
 
-	private get class() {
+	protected get class() {
 		return this._class
 	}
 
@@ -82,21 +80,21 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private isNonVoid(
-		constructor: IConstructorType<T, Args>
-	): constructor is INonVoidConstructor<T, Args> {
+		constructor: _IConstructorType<T, Args>
+	): constructor is _INonVoidConstructor<T, Args> {
 		return !!constructor && constructor !== Object
 	}
 
-	private ensureConstructorNonVoid(constructor: IConstructorType<T, Args>) {
+	private ensureConstructorNonVoid(constructor: _IConstructorType<T, Args>) {
 		return this.isNonVoid(constructor) ? constructor : function () {}
 	}
 
-	private assignName(constructor: INonVoidConstructor<T, Args>) {
+	private assignName(constructor: _INonVoidConstructor<T, Args>) {
 		propDefine(constructor, "name", ConstDescriptor(this.mixinShape.name))
 	}
 
-	private setConstructor(constructor: INonVoidConstructor<T, Args>) {
-		this.class = constructor as unknown as IOutClass<T, Args>
+	private setConstructor(constructor: _INonVoidConstructor<T, Args>) {
+		this.class = constructor as unknown as _IOutClass<T, Args>
 	}
 
 	private initSuper() {
@@ -104,7 +102,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private defineNonVoidConstructor(
-		constructor: INonVoidConstructor<T, Args>
+		constructor: _INonVoidConstructor<T, Args>
 	) {
 		this.assignName(constructor)
 		this.setConstructor(constructor)
@@ -121,12 +119,8 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		return this.class.name
 	}
 
-	toClass() {
-		return this.class
-	}
-
 	constructor(
-		private readonly mixinShape: IMixinShape<T, Args>,
+		private readonly mixinShape: _IMixinShape<T, Args>,
 		mixins: mixin[] = [],
 		classes: (new (...args: any[]) => any)[] = []
 	) {
@@ -135,4 +129,39 @@ export class mixin<T = any, Args extends any[] = any[]> {
 		this.fromMixins(mixins)
 		this.fromProperties()
 	}
+}
+
+export class mixin<T = any, Args extends any[] = any[]> extends sealed_mixin<
+	T,
+	Args
+> {
+	toClass() {
+		return this.class
+	}
+}
+
+export namespace mixin {
+	export const sealed = sealed_mixin
+
+	export type IMixinShape<T = any, Args extends any[] = any[]> = _IMixinShape<
+		T,
+		Args
+	>
+
+	export type IOutClass<T = any, Args extends any[] = any[]> = _IOutClass<
+		T,
+		Args
+	>
+
+	export type INonVoidConstructor<
+		T = any,
+		Args extends any[] = any[]
+	> = _INonVoidConstructor<T, Args>
+
+	export type IVoidConstructor = _IVoidConstructor
+
+	export type IConstructorType<
+		T = any,
+		Args extends any[] = any[]
+	> = _IConstructorType<T, Args>
 }
