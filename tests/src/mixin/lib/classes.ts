@@ -159,8 +159,12 @@ export class MixinPrototypeTest<
 		assert.strictEqual(mixinClass, this.origConstructor)
 	}
 
-	constructor(mixinShape: IMixinShape<T, Args>) {
-		super(mixinShape)
+	constructor(
+		mixinShape: IMixinShape<T, Args>,
+		superMixins?: mixin[],
+		superClasses?: (new (...args: Args) => T)[]
+	) {
+		super(mixinShape, superMixins, superClasses)
 		this.origConstructor = mixinShape.constructor as INonVoidConstructor<
 			T,
 			Args
@@ -173,7 +177,7 @@ export class MixinInstanceTest<
 	Args extends any[] = any[]
 > extends BaseMixinTest<T, Args> {
 	withInstance(expected: InterfaceShape) {
-		return new InterfaceTest(expected).withClass(
+		return new InterfaceTest<T, Args>(expected).withClass(
 			this.mixinInstance.toClass()
 		)
 	}

@@ -1,3 +1,4 @@
+import { type, object } from "@hgargg-0710/one"
 import { TestCounter } from "../lib/lib.js"
 import {
 	HAS_CONSTRUCTOR,
@@ -8,7 +9,7 @@ import {
 	PureMixinPrototypeTest
 } from "./lib/classes.js"
 
-import { type } from "@hgargg-0710/one"
+const { prototype } = object
 const { isFunction } = type
 
 const mixinTestCounter = new TestCounter(
@@ -116,28 +117,90 @@ mixinTestCounter.test([NO_CONSTRUCTOR, NO_PARENTS], () => {
 		R: (x: any) => {
 			return x.R === 17
 		}
+	})()
+})
+
+mixinTestCounter.test([HAS_CONSTRUCTOR, NO_PARENTS], () => {
+	function constructor(a: number, b: string) {
+		this.a = a === this.a ? a + 1 : a
+		this.b = b + "b"
+	}
+
+	const mixinShape = {
+		name: "Test3",
+		properties: {
+			a: 3,
+			k() {
+				return this.b + "m"
+			},
+			m(b: string) {
+				this.b = b
+			}
+		},
+		constructor
+	}
+
+	new MixinPrototypeTest(mixinShape).toClass({
+		constructor: {
+			value: constructor,
+			writable: true,
+			enumerable: false,
+			configurable: true
+		},
+		a: {
+			value: 3,
+			writable: true,
+			enumerable: true,
+			configurable: true
+		},
+		k: {
+			value: mixinShape.properties.k,
+			writable: true,
+			enumerable: true,
+			configurable: true
+		},
+		m: {
+			value: mixinShape.properties.m,
+			writable: true,
+			enumerable: true,
+			configurable: true
+		}
 	})
+
+	const instanceTest = new MixinInstanceTest(mixinShape).withInstance({
+		a: (x: any) => {
+			const initDiff = x.a !== prototype(x).a
+			x.a = prototype(x).a + 1
+			return initDiff && x.a !== prototype(x).a
+		},
+		m: (x: any) => {
+			const hasB = !!x.b
+			const newB = x.b + "a"
+			x.m(newB)
+			return hasB && x.b === newB && x.k() === newB + "m"
+		}
+	})
+
+	instanceTest(10, "mer")
+	instanceTest(-11, "70")
 })
 
 // ! TESTS are intended to verify TWO behaviours:
-// 	1. [in 'constructor'-tests only...] OVERRIDING [of ALL kinds of properties - methods/state/getters/setters/etc]
-// 	2. [in 'parent'-tests only...] the '.super' stuff...
+// 	1. [in 'parent'-tests only...] the '.super' stuff: 
+// 		1. [.constructor-tests only] presence of `super.SomeParentName.constructor`
+// 		2. ability to store MULTIPLE parents
+// 		3. ORDER of property inheritance [overriding - when a CLASS and a MIXIN, or MULTIPLE classes/mixins are added - THERE MUST be a specific property-addition order present]: 
+// 			1. FIRST - copy from `class`es
+// 			2. THEN - copy from `mixin`s
+//			3. COPY in each of the arrays - from FIRST to LAST [that is - properties in the LATER parents have HIGHER precedence - are less likely to be overriden]: 
 
 // TODO: tests left to do:
 // * 1. with .constructor [MixinPrototypeTest + MixinInstanceTest]:
-// 		1. no parents:
-// 			1. getters + setters + methods + prototype-vars
-// 2. parents:
+// 		2. parents:
 // 			1. 2 classes +  getters + setters + methods + prototype-vars
 // 			2. 2 mixins +  getters + setters + methods + prototype-vars
 // 			3. 1 class + 2 mixins +  getters + setters + methods + prototype-vars
 // * 2. without .constructor [PureMixinPrototypeTest + MixinInstanceTest]:
-// 		2. with 'class' parents:
-// 			1. 1 parent + getters + setters + methods + prototype-vars
-// 			2. 3 parents + getters + setters + methods + prototype-vars
-// 		3. with 'mixin' parents:
-// 			1. 1 parent + getters + setters + methods + prototype-vars
-// 			2. 3 parents + gettesr + setters + methods + prototype-vars
-// 		4. with both 'class' and 'mixin' parents
+// 		1. with both 'class' and 'mixin' parents
 // 			1. 1 'class' parent + 1 'mixin' parent + getters + setters + methods + prototype-vars
 // 			2. 2 'class' parents + 3 'mixin' parents + gettesr + setters + methods + prototype-vars
