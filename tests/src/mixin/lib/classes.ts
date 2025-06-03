@@ -9,7 +9,9 @@ import {
 import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
 
 const { withoutConstructor } = object.classes
-const { propertyDescriptors } = object
+const { propertyDescriptors, withoutProperties } = object
+
+const withoutSuper = withoutProperties("super")
 
 /**
  * * Format documentation for 'mixin' tests' semver
@@ -46,6 +48,7 @@ abstract class BaseMixinPrototypeTest<
 	Args extends any[] = any[]
 > extends BaseMixinTest<T, Args> {
 	protected readonly mixinName: string
+	protected readonly mixinSuper: (new (...args: any) => any)[]
 
 	protected abstract testedConditions(
 		mixinClass: new (...args: Args) => T | void,
@@ -59,9 +62,17 @@ abstract class BaseMixinPrototypeTest<
 		)
 	}
 
-	constructor(mixinShape: IMixinShape<T, Args>) {
+	constructor(
+		mixinShape: IMixinShape<T, Args>,
+		superMixins: mixin[] = [],
+		superClasses: (new (...args: any) => any)[] = []
+	) {
 		super(mixinShape)
 		this.mixinName = mixinShape.name
+		this.mixinSuper = [
+			...superMixins.map((x) => x.toClass()),
+			...superClasses
+		]
 	}
 }
 
@@ -73,19 +84,38 @@ abstract class DefaultMixinPrototypeTest<
 		x: object
 	): PropertyDescriptorMap
 
-	protected testedConditions(
-		mixinClass: new (...args: Args) => void | T,
+	private verifyPrototype(
+		mixinClass: new (...args: Args) => T,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
-	): void {
+	) {
 		assert(
 			object.recursiveSame(
 				expectedPrototypeDescriptors,
-				this.mixinPrototypeDescriptors(mixinClass.prototype)
+				withoutSuper(
+					this.mixinPrototypeDescriptors(mixinClass.prototype)
+				)
 			)
 		)
+	}
 
+	private verifyName(mixinClass: new (...args: Args) => T) {
 		assert.strictEqual(this.mixinName, mixinClass.name)
 		assert.strictEqual(this.mixinName, this.mixinInstance.name)
+	}
+
+	private verifySuper(mixinClass: new (...args: Args) => T) {
+		const mixinSuper = mixinClass.prototype.super
+		for (const x of this.mixinSuper)
+			assert.strictEqual(mixinSuper[x.name], x.prototype)
+	}
+
+	protected testedConditions(
+		mixinClass: new (...args: Args) => T,
+		expectedPrototypeDescriptors: PropertyDescriptorMap
+	): void {
+		this.verifyPrototype(mixinClass, expectedPrototypeDescriptors)
+		this.verifyName(mixinClass)
+		this.verifySuper(mixinClass)
 	}
 }
 

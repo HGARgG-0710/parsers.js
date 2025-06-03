@@ -60,17 +60,15 @@ export class MethodTest<InstanceType = any> {
 	constructor(readonly name: string, protected handler: Function) {}
 }
 
-export interface InterfaceShape {
-	properties: object
-}
+export type InterfaceShape = object
 
 export class InterfaceTest<T = any, Args extends any[] = any[]> {
 	withClass(tested: new (...args: Args) => T) {
-		const interfacePredicates = this.shape.properties
+		const interfacePredicates = this.shape
 		return function (...args: Args) {
 			const instance = new tested(...args)
 			for (const key of keys(interfacePredicates))
-				assert(interfacePredicates[key](instance[key]))
+				assert(interfacePredicates[key](instance))
 		}
 	}
 
