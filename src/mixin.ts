@@ -56,7 +56,7 @@ export class mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	private provideSuper(forClass: new (...args: any[]) => any) {
-		this.super[forClass.name] = forClass
+		this.super[forClass.name] = forClass.prototype
 	}
 
 	private fromClasses(classes: (new (...args: any[]) => any)[]) {
