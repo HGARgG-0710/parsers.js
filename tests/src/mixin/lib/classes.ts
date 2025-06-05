@@ -33,8 +33,20 @@ export const CLASS_AND_MIXIN_PARENTS = 3
 
 abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	protected readonly mixinInstance: mixin<T, Args>
-	constructor(mixinShape: mixin.IMixinShape<T, Args>) {
-		this.mixinInstance = new mixin(mixinShape)
+	protected readonly mixinSuper: ((...args: any) => any)[]
+
+	constructor(
+		mixinShape: mixin.IMixinShape<T, Args>,
+		superMixins: mixin[] = [],
+		superClasses: ((...args: any) => any)[] = []
+	) {
+		this.mixinInstance = new mixin(mixinShape, superMixins, superClasses)
+		this.mixinSuper = [
+			...superMixins.map(
+				(x) => x.toClass() as unknown as (...args: any) => any
+			),
+			...superClasses
+		]
 	}
 }
 
@@ -43,7 +55,6 @@ abstract class BaseMixinPrototypeTest<
 	Args extends any[] = any[]
 > extends BaseMixinTest<T, Args> {
 	protected readonly mixinName: string
-	protected readonly mixinSuper: (new (...args: any) => any)[]
 
 	protected abstract testedConditions(
 		mixinClass: new (...args: Args) => T | void,
@@ -59,15 +70,11 @@ abstract class BaseMixinPrototypeTest<
 
 	constructor(
 		mixinShape: mixin.IMixinShape<T, Args>,
-		superMixins: mixin[] = [],
-		superClasses: (new (...args: any) => any)[] = []
+		superMixins?: mixin[],
+		superClasses?: ((...args: any) => any)[]
 	) {
-		super(mixinShape)
+		super(mixinShape, superMixins, superClasses)
 		this.mixinName = mixinShape.name
-		this.mixinSuper = [
-			...superMixins.map((x) => x.toClass()),
-			...superClasses
-		]
 	}
 }
 
@@ -157,7 +164,7 @@ export class MixinPrototypeTest<
 	constructor(
 		mixinShape: mixin.IMixinShape<T, Args>,
 		superMixins?: mixin[],
-		superClasses?: (new (...args: Args) => T)[]
+		superClasses?: ((...args: any[]) => any)[]
 	) {
 		super(mixinShape, superMixins, superClasses)
 		this.origConstructor =
