@@ -57,6 +57,12 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		this.super[forClass.name] = forClass.prototype
 	}
 
+	private fromConstructors(constructors: ((...args: any[]) => any)[]) {
+		this.fromClasses(
+			constructors as unknown as (new (...args: any[]) => any)[]
+		)
+	}
+
 	private fromClasses(classes: (new (...args: any[]) => any)[]) {
 		_mixin(this.class, classes)
 		classes.forEach((currClass) => this.provideSuper(currClass))
@@ -71,7 +77,7 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		)
 	}
 
-	private fromMixins(mixins: mixin[]) {
+	private fromMixins(mixins: sealed_mixin[]) {
 		this.fromClasses(mixins.map((x) => x.class))
 	}
 
@@ -121,11 +127,11 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 
 	constructor(
 		private readonly mixinShape: _IMixinShape<T, Args>,
-		mixins: mixin[] = [],
-		classes: (new (...args: any[]) => any)[] = []
+		mixins: sealed_mixin[] = [],
+		classes: ((...args: any[]) => any)[] = []
 	) {
 		this.defineClass()
-		this.fromClasses(classes)
+		this.fromConstructors(classes)
 		this.fromMixins(mixins)
 		this.fromProperties()
 	}
