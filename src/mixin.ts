@@ -2,7 +2,7 @@ import { object } from "@hgargg-0710/one"
 
 const { mixin: _mixin, withoutConstructor } = object.classes
 const { ConstDescriptor } = object.descriptor
-const { propsDefine, propertyDescriptors, propDefine } = object
+const { propsDefine, propertyDescriptors, propDefine, keys } = object
 
 type _IConstructorType<T = any, Args extends any[] = any[]> =
 	| _IVoidConstructor
@@ -22,8 +22,86 @@ interface _IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly constructor?: _IConstructorType<T, Args>
 }
 
+class ConstructorCreator<T = any, Args extends any[] = any[]> {
+	private isNonVoid(
+		constructor: _IConstructorType<T, Args>
+	): constructor is _INonVoidConstructor<T, Args> {
+		return !!constructor && constructor !== Object
+	}
+
+	assignName(constructor: _INonVoidConstructor<T, Args>, name: string) {
+		propDefine(constructor, "name", ConstDescriptor(name))
+	}
+
+	ensureConstructorNonVoid(constructor: _IConstructorType<T, Args>) {
+		return this.isNonVoid(constructor) ? constructor : function () {}
+	}
+}
+
+class SuperCreator {
+	toSuper(prototype: object) {
+		const superProto = {}
+		for (const key of keys(prototype))
+			this.defineSuperProperty(superProto, key, prototype[key])
+		return superProto
+	}
+
+	private defineSuperProperty(
+		superProto: object,
+		key: object.ObjectKey,
+		descriptor: PropertyDescriptor
+	) {
+		if (this.hasGetterSetter(descriptor))
+			this.defineSuperProtoGetSet(superProto, key, descriptor)
+		else this.copyToSuper(superProto, key, descriptor)
+	}
+
+	private hasGetterSetter(descriptor: PropertyDescriptor) {
+		return "get" in descriptor || "set" in descriptor
+	}
+
+	private defineSuperProtoGetSet(
+		superProto: object,
+		key: object.ObjectKey,
+		descriptor: PropertyDescriptor
+	) {
+		superProto[key] = {}
+		superProto[key].get = descriptor.get
+		superProto[key].set = descriptor.set
+	}
+
+	private copyToSuper(
+		superProto: object,
+		key: object.ObjectKey,
+		descriptor: PropertyDescriptor
+	) {
+		superProto[key] = descriptor.value
+	}
+}
+
+class PrototypeFiller {
+	fromClasses(
+		targetClass: object.Constructor,
+		classes: (new (...args: any[]) => any)[]
+	) {
+		_mixin(targetClass, classes)
+	}
+
+	fromObject(targetPrototype: object, properties: object) {
+		propsDefine(
+			targetPrototype,
+			withoutConstructor(
+				propertyDescriptors(properties)
+			) as PropertyDescriptorMap
+		)
+	}
+}
+
 class sealed_mixin<T = any, Args extends any[] = any[]> {
 	private _class: _IOutClass<T, Args>
+	private readonly superCreator = new SuperCreator()
+	private readonly prototypeFiller = new PrototypeFiller()
+	private readonly constructorCreator = new ConstructorCreator<T, Args>()
 
 	private get defaultConstructor(): _IConstructorType<T, Args> {
 		return this.mixinShape.constructor
@@ -41,7 +119,7 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		return this.class.prototype
 	}
 
-	private set super(newSuper) {
+	private set super(newSuper: object) {
 		this.proto.super = newSuper
 	}
 
@@ -53,8 +131,16 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		return this.mixinShape.properties
 	}
 
-	private provideSuper(forClass: new (...args: any[]) => any) {
-		this.super[forClass.name] = forClass.prototype
+	private defineClass() {
+		this.defineNonVoidConstructor(
+			this.constructorCreator.ensureConstructorNonVoid(
+				this.defaultConstructor
+			)
+		)
+	}
+
+	private initSuper() {
+		this.super = {}
 	}
 
 	private fromConstructors(constructors: ((...args: any[]) => any)[]) {
@@ -63,66 +149,42 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		)
 	}
 
-	private fromClasses(classes: (new (...args: any[]) => any)[]) {
-		_mixin(this.class, classes)
-		classes.forEach((currClass) => this.provideSuper(currClass))
-	}
-
-	private fromObject(properties: object) {
-		propsDefine(
-			this.proto,
-			withoutConstructor(
-				propertyDescriptors(properties)
-			) as PropertyDescriptorMap
-		)
-	}
-
 	private fromMixins(mixins: sealed_mixin[]) {
 		this.fromClasses(mixins.map((x) => x.class))
 	}
 
 	private fromProperties() {
-		this.fromObject(this.properties)
+		this.prototypeFiller.fromObject(this.proto, this.properties)
 	}
 
-	private isNonVoid(
-		constructor: _IConstructorType<T, Args>
-	): constructor is _INonVoidConstructor<T, Args> {
-		return !!constructor && constructor !== Object
+	private fromClasses(classes: (new (...args: any[]) => any)[]) {
+		this.prototypeFiller.fromClasses(this.class, classes)
+		this.superFromClasses(classes)
 	}
 
-	private ensureConstructorNonVoid(constructor: _IConstructorType<T, Args>) {
-		return this.isNonVoid(constructor) ? constructor : function () {}
+	private superFromClasses(classes: (new (...args: any[]) => any)[]) {
+		classes.forEach((currClass) => this.provideSuper(currClass))
 	}
 
-	private assignName(constructor: _INonVoidConstructor<T, Args>) {
-		propDefine(constructor, "name", ConstDescriptor(this.mixinShape.name))
+	private provideSuper(forClass: new (...args: any[]) => any) {
+		this.super[forClass.name] = this.superCreator.toSuper(
+			propertyDescriptors(forClass.prototype)
+		)
+	}
+
+	private defineNonVoidConstructor(
+		constructor: _INonVoidConstructor<T, Args>
+	) {
+		this.constructorCreator.assignName(constructor, this.name)
+		this.setConstructor(constructor)
 	}
 
 	private setConstructor(constructor: _INonVoidConstructor<T, Args>) {
 		this.class = constructor as unknown as _IOutClass<T, Args>
 	}
 
-	private initSuper() {
-		this.super = {}
-	}
-
-	private defineNonVoidConstructor(
-		constructor: _INonVoidConstructor<T, Args>
-	) {
-		this.assignName(constructor)
-		this.setConstructor(constructor)
-		this.initSuper()
-	}
-
-	private defineClass() {
-		this.defineNonVoidConstructor(
-			this.ensureConstructorNonVoid(this.defaultConstructor)
-		)
-	}
-
 	get name() {
-		return this.class.name
+		return this.mixinShape.name
 	}
 
 	constructor(
@@ -131,6 +193,7 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		classes: ((...args: any[]) => any)[] = []
 	) {
 		this.defineClass()
+		this.initSuper()
 		this.fromConstructors(classes)
 		this.fromMixins(mixins)
 		this.fromProperties()
