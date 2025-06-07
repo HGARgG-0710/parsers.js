@@ -1,10 +1,11 @@
-import { object } from "@hgargg-0710/one"
+import { object, type } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { mixin } from "../../../../dist/main.js"
 import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
 
 const { withoutConstructor } = object.classes
-const { propertyDescriptors, withoutProperties } = object
+const { propertyDescriptors, withoutProperties, keys } = object
+const { isStruct } = type
 
 const withoutSuper = withoutProperties("super")
 
@@ -107,8 +108,23 @@ abstract class DefaultMixinPrototypeTest<
 
 	private verifySuper(mixinClass: new (...args: Args) => T) {
 		const mixinSuper = mixinClass.prototype.super
-		for (const x of this.mixinSuper)
-			assert.strictEqual(mixinSuper[x.name], x.prototype)
+		for (const x of this.mixinSuper) {
+			const currSuper = mixinSuper[x.name]
+			const prototypeMap = propertyDescriptors(x.prototype)
+			for (const k of keys(prototypeMap)) {
+				const currDescriptor = prototypeMap[k as string]
+				const currSuperProp = currSuper[k]
+
+				if (!!currDescriptor.get || !!currDescriptor.set) {
+					assert(isStruct(currSuperProp))
+					assert.strictEqual(currSuperProp.set, currDescriptor.set)
+					assert.strictEqual(currSuperProp.get, currDescriptor.get)
+					continue
+				}
+
+				assert.strictEqual(currSuperProp, currDescriptor.value)
+			}
+		}
 	}
 
 	protected testedConditions(
