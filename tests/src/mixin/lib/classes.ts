@@ -43,10 +43,10 @@ abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	) {
 		this.mixinInstance = new mixin(mixinShape, superMixins, superClasses)
 		this.mixinSuper = [
+			...superClasses,
 			...superMixins.map(
 				(x) => x.toClass() as unknown as (...args: any) => any
-			),
-			...superClasses
+			)
 		]
 	}
 }
@@ -110,7 +110,9 @@ abstract class DefaultMixinPrototypeTest<
 		const mixinSuper = mixinClass.prototype.super
 		for (const x of this.mixinSuper) {
 			const currSuper = mixinSuper[x.name]
-			const prototypeMap = propertyDescriptors(x.prototype)
+			assert(!!currSuper)
+
+			const prototypeMap = withoutSuper(propertyDescriptors(x.prototype))
 			for (const k of keys(prototypeMap)) {
 				const currDescriptor = prototypeMap[k as string]
 				const currSuperProp = currSuper[k]

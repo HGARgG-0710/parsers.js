@@ -2,6 +2,7 @@ import { array, object, type } from "@hgargg-0710/one"
 import { mixin } from "../../../dist/main.js"
 import { TestCounter } from "../lib/lib.js"
 import {
+	CLASS_AND_MIXIN_PARENTS,
 	CLASS_PARENTS,
 	HAS_CONSTRUCTOR,
 	MIXIN_PARENTS,
@@ -480,43 +481,117 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, MIXIN_PARENTS], () => {
 	})(11, 29)
 })
 
-// ! REMINDER[1]: this is supposed to be a bunch of CLASSIC function-based JavaScript constructors, INSTEAD of TypeScript-style classes.
-// ! REMINDER[2]: STILL haven't tried out the "parent methods" on:
-// 		* 1. function-classes
-// 		* 2. 'mixin' objects
+mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
+	function ClassParent1() {}
 
-// * [MixinPrototypeTest + MixinInstanceTest]
-// 1 class + 2 mixins +  getters + setters + methods + prototype-vars
-// TODO: finish
-// !!! ADD [Symbol.iterator] - to make sure it does work after all...
-// !!! ADD 'this.super[methodName]' CALLS! [for both `mixin` AND `classes` - FOR ALL parents...];
-// mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
-// 	class ClassParent1 {}
+	extendPrototype(
+		ClassParent1,
+		Object.getOwnPropertyDescriptors({
+			get m() {
+				return 19
+			},
 
-// 	const parent1 = new mixin({ name: "MixinParent1", properties: {} })
-// 	const parent2 = new mixin({ name: "MixinParent2", properties: {} })
+			*[Symbol.iterator]() {
+				yield 11
+				yield 95
+				yield 17
+				yield 49
+			}
+		})
+	)
 
-// 	function constructor() {}
+	const parent1 = new mixin({
+		name: "MixinParent1",
+		properties: {
+			get m() {
+				return 20
+			}
+		}
+	})
 
-// 	const mixinShape = { name: "Test6", properties: {}, constructor }
+	const parent2Shape = {
+		name: "MixinParent2",
+		properties: {
+			get m() {
+				return 5
+			}
+		}
+	}
 
-// 	new MixinPrototypeTest(
-// 		mixinShape,
-// 		[parent1, parent2],
-// 		[ClassParent1]
-// 	).toClass({})
+	const parent2 = new mixin(parent2Shape)
 
-// 	const instanceTest = new MixinInstanceTest(
-// 		mixinShape,
-// 		[parent1, parent2],
-// 		[ClassParent1]
-// 	).withInstance({})
-// })
+	function constructor() {}
+
+	const mixinShape = {
+		name: "Test6",
+		properties: {
+			get s() {
+				return (
+					this.super.MixinParent1.m.get.call(this) +
+					this.super.MixinParent2.m.get.call(this) -
+					this.super.ClassParent1.m.get.call(this)
+				)
+			}
+		},
+		constructor
+	}
+
+	new MixinPrototypeTest(
+		mixinShape,
+		[parent1, parent2],
+		[ClassParent1]
+	).toClass({
+		constructor: {
+			value: constructor,
+			writable: true,
+			enumerable: false,
+			configurable: true
+		},
+		m: {
+			get: Object.getOwnPropertyDescriptor(parent2Shape.properties, "m")!
+				.get,
+			set: undefined,
+			enumerable: true,
+			configurable: true
+		},
+		s: {
+			get: Object.getOwnPropertyDescriptor(mixinShape.properties, "s")!
+				.get,
+			set: undefined,
+			enumerable: true,
+			configurable: true
+		},
+		[Symbol.iterator]: {
+			value: Object.getOwnPropertyDescriptor(
+				ClassParent1.prototype,
+				Symbol.iterator
+			)!.value,
+			writable: true,
+			enumerable: true,
+			configurable: true
+		}
+	})
+
+	new MixinInstanceTest(
+		mixinShape,
+		[parent1, parent2],
+		[ClassParent1]
+	).withInstance({
+		s: (x: any) => x.s === 6,
+		m: (x: any) => x.m === 5,
+		iter: (x: any) => array.same([11, 95, 17, 49], [...x])
+	})()
+})
 
 // * [PureMixinPrototypeTest + MixinInstanceTest]
 // 2 'class' parents + 3 'mixin' parents + gettesr + setters + methods + prototype-vars
+// !!! ADD [Symbol.iterator] - to make sure it does work after all...
+// 		* 1. two of them - one overriding the other [a `mixin` overriding a `class`]; 
+// !!! ADD - this.super[methodName] FOR: 
+// 		* 1. a method [BOTH `mixin`s and `class`es]
+// 		* 2. a setter [BOTH `mixin`s and `class`es]
 // TODO: finish
-// ! this is just a precautionary sanity check - no need to go all out...
+// ! this is just a precautionary sanity check - otherwise : no need to go all out...
 // mixinTestCounter.test([NO_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
 // 	class ClassParent1 {}
 // 	class ClassParent2 {}
