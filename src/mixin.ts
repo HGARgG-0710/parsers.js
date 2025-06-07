@@ -1,8 +1,15 @@
 import { object } from "@hgargg-0710/one"
 
-const { mixin: _mixin, withoutConstructor } = object.classes
+const { withoutConstructor } = object.classes
 const { ConstDescriptor } = object.descriptor
-const { propsDefine, propertyDescriptors, propDefine, keys } = object
+const {
+	propsDefine,
+	propertyDescriptors,
+	propDefine,
+	keys,
+	withoutProperties,
+	extendPrototype
+} = object
 
 type _IConstructorType<T = any, Args extends any[] = any[]> =
 	| _IVoidConstructor
@@ -21,6 +28,8 @@ interface _IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly properties: object
 	readonly constructor?: _IConstructorType<T, Args>
 }
+
+const withoutSuper = withoutProperties("super")
 
 class ConstructorCreator<T = any, Args extends any[] = any[]> {
 	private isNonVoid(
@@ -84,7 +93,14 @@ class PrototypeFiller {
 		targetClass: object.Constructor,
 		classes: (new (...args: any[]) => any)[]
 	) {
-		_mixin(targetClass, classes)
+		classes.forEach((currClass) =>
+			extendPrototype(
+				targetClass,
+				withoutSuper(
+					withoutConstructor(propertyDescriptors(currClass.prototype))
+				) as PropertyDescriptorMap
+			)
+		)
 	}
 
 	fromObject(targetPrototype: object, properties: object) {
