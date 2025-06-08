@@ -271,8 +271,7 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_PARENTS], () => {
 			configurable: true
 		},
 		m: {
-			value: Object.getOwnPropertyDescriptor(Parent2.prototype, "m")!
-				.value,
+			value: Parent2.prototype.m,
 			writable: true,
 			enumerable: true,
 			configurable: true
@@ -312,8 +311,7 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_PARENTS], () => {
 			configurable: true
 		},
 		m: {
-			value: Object.getOwnPropertyDescriptor(Parent2.prototype, "m")!
-				.value,
+			value: Parent2.prototype.m,
 			writable: true,
 			enumerable: true,
 			configurable: true
@@ -325,8 +323,7 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_PARENTS], () => {
 			configurable: true
 		},
 		d: {
-			value: Object.getOwnPropertyDescriptor(mixinShape2.properties, "d")!
-				.value,
+			value: mixinShape2.properties.d,
 			writable: true,
 			enumerable: true,
 			configurable: true
@@ -562,10 +559,7 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
 			configurable: true
 		},
 		[Symbol.iterator]: {
-			value: Object.getOwnPropertyDescriptor(
-				ClassParent1.prototype,
-				Symbol.iterator
-			)!.value,
+			value: ClassParent1.prototype[Symbol.iterator],
 			writable: true,
 			enumerable: true,
 			configurable: true
@@ -583,43 +577,145 @@ mixinTestCounter.test([HAS_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
 	})()
 })
 
-// * [PureMixinPrototypeTest + MixinInstanceTest]
-// 2 'class' parents + 3 'mixin' parents + gettesr + setters + methods + prototype-vars
-// !!! ADD [Symbol.iterator] - to make sure it does work after all...
-// 		* 1. two of them - one overriding the other [a `mixin` overriding a `class`]; 
-// !!! ADD - this.super[methodName] FOR: 
-// 		* 1. a method [BOTH `mixin`s and `class`es]
-// 		* 2. a setter [BOTH `mixin`s and `class`es]
-// TODO: finish
-// ! this is just a precautionary sanity check - otherwise : no need to go all out...
-// mixinTestCounter.test([NO_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS], () => {
-// 	class ClassParent1 {}
-// 	class ClassParent2 {}
+mixinTestCounter.test(
+	[NO_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS],
+	() => {
+		function ClassParent1() {}
 
-// 	const parent1 = new mixin({ name: "MixinParent1", properties: {} })
-// 	const parent2 = new mixin({ name: "MixinParent2", properties: {} })
-// 	const parent3 = new mixin({ name: "MixinParent3", properties: {} })
+		extendPrototype(
+			ClassParent1,
+			Object.getOwnPropertyDescriptors({
+				set d(newD: number) {
+					this._s = newD
+				},
 
-// 	function constructor() {}
+				m() {
+					return 11
+				}
+			})
+		)
 
-// 	const mixinShape = { name: "Test7", properties: {}, constructor }
+		function ClassParent2() {}
 
-// 	new MixinPrototypeTest(
-// 		mixinShape,
-// 		[parent1, parent2, parent3],
-// 		[ClassParent1, ClassParent2]
-// 	).toClass({})
+		extendPrototype(
+			ClassParent2,
+			Object.getOwnPropertyDescriptors({
+				set d(newD: number) {
+					this.k = newD
+				},
 
-// 	const instanceTest = new MixinInstanceTest(
-// 		mixinShape,
-// 		[parent1, parent2, parent3],
-// 		[ClassParent1, ClassParent2]
-// 	)
-// })
+				m() {
+					return 20
+				},
 
-// ! TESTS are intended to verify TWO behaviours:
-// 	1. [in 'parent'-tests only...] the '.super' stuff:
-// 		3. ORDER of property inheritance [overriding - when a CLASS and a MIXIN, or MULTIPLE classes/mixins are added - THERE MUST be a specific property-addition order present]:
-// 			1. FIRST - copy from `class`es
-// 			2. THEN - copy from `mixin`s
-//			3. COPY in each of the arrays - from FIRST to LAST [that is - properties in the LATER parents have HIGHER precedence - are less likely to be overriden]:
+				*[Symbol.iterator]() {
+					yield 17
+				}
+			})
+		)
+
+		const parent1 = new mixin({
+			name: "MixinParent1",
+			properties: {
+				m() {
+					return 31
+				}
+			}
+		})
+		const parent2 = new mixin({
+			name: "MixinParent2",
+			properties: {
+				m() {
+					return -3
+				}
+			}
+		})
+
+		const parent3Shape = {
+			name: "MixinParent3",
+			properties: {
+				set d(newD: number) {
+					this.r = newD
+				},
+
+				m() {
+					return -13
+				}
+			}
+		}
+
+		const parent3 = new mixin(parent3Shape)
+
+		const mixinShape = {
+			name: "Test7",
+			properties: {
+				set d(newD: number) {
+					this.super.ClassParent1.d.set.call(this, newD)
+					this.super.ClassParent2.d.set.call(this, newD)
+					this.super.MixinParent3.d.set.call(this, newD)
+				},
+
+				*[Symbol.iterator]() {
+					yield this.super.ClassParent1.m()
+					yield this.super.ClassParent2.m()
+					yield this.super.MixinParent1.m()
+					yield this.super.MixinParent2.m()
+					yield this.super.MixinParent3.m()
+				}
+			}
+		}
+
+		new PureMixinPrototypeTest(
+			mixinShape,
+			[parent1, parent2, parent3],
+			[ClassParent1, ClassParent2]
+		).toClass({
+			d: {
+				get: undefined,
+				set: Object.getOwnPropertyDescriptor(
+					mixinShape.properties,
+					"d"
+				)!.set,
+				enumerable: true,
+				configurable: true
+			},
+			m: {
+				value: parent3Shape.properties.m,
+				writable: true,
+				enumerable: true,
+				configurable: true
+			},
+			[Symbol.iterator]: {
+				value: mixinShape.properties[Symbol.iterator],
+				writable: true,
+				enumerable: true,
+				configurable: true
+			}
+		})
+
+		new MixinInstanceTest(
+			mixinShape,
+			[parent1, parent2, parent3],
+			[ClassParent1, ClassParent2]
+		).withInstance({
+			m: (x: any) => x.m() === -13,
+			t: (x: any) => array.same([11, 20, 31, -3, -13], [...x]),
+			d: (x: any) => {
+				x.d = 20
+				const initD1 = x._s === 20
+				const initD2 = x.k === 20
+				const initD3 = x.r === 20
+				x.d = 11
+				return (
+					initD1 &&
+					initD2 &&
+					initD3 &&
+					x._s === 11 &&
+					x.k === 11 &&
+					x.r === 11
+				)
+			}
+		})()
+	},
+	true
+)
