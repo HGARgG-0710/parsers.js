@@ -224,12 +224,20 @@ export class mixin<T = any, Args extends any[] = any[]> extends sealed_mixin<
 }
 
 export namespace mixin {
-	export const sealed = sealed_mixin
+	export class sealed<
+		T = any,
+		Args extends any[] = any[]
+	> extends sealed_mixin<T, Args> {}
 
 	export type IMixinShape<T = any, Args extends any[] = any[]> = _IMixinShape<
 		T,
 		Args
 	>
+
+	export type IAbstractClass<
+		T = any,
+		Args extends any[] = any[]
+	> = abstract new (...args: Args) => T
 
 	export type IOutClass<T = any, Args extends any[] = any[]> = _IOutClass<
 		T,

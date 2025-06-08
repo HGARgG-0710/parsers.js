@@ -1,6 +1,11 @@
 import { boolean } from "@hgargg-0710/one"
 import { BadIndex } from "./constants.js"
-import type { IKeysHaving, IResource, IValuesHaving } from "./interfaces.js"
+import type {
+	IGettable,
+	IKeysHaving,
+	IResource,
+	IValuesHaving
+} from "./interfaces.js"
 
 const { eqcurry } = boolean
 
@@ -28,6 +33,10 @@ export function withResource<T = any>(
 	const retval = callback(resource)
 	resource.cleanup()
 	return retval
+}
+
+export function get<T = any>(x: IGettable<T>) {
+	return x.get()
 }
 
 /**

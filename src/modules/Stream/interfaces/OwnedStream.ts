@@ -7,7 +7,7 @@ import type {
 import type {
 	IRecursiveListIdentifiable,
 	ISwitchIdentifiable
-} from "../../../internal/RecursiveInitList.js"
+} from "src/interfaces.js"
 
 export type IOwnedStream<Type = any> = IStream<Type> &
 	IOwnerSettable & {

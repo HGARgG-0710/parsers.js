@@ -8,10 +8,8 @@ import {
 	renewerInitializer,
 	wrapSwitch,
 	type IRecursiveItems,
-	type IRecursiveListIdentifiable,
-	type IRecursivelySwitchable,
-	type ISwitchIdentifiable
-} from "./RecursiveInitList.js"
+	type IRecursivelySwitchable} from "./RecursiveInitList.js"
+import { type IRecursiveListIdentifiable, type ISwitchIdentifiable } from "src/interfaces.js"
 import { Initializable } from "../classes/Initializer.js"
 
 const { first, clear } = array
@@ -79,12 +77,6 @@ export class SwitchArray<
 
 	protected get initializer() {
 		return switchArrayInitializer
-	}
-
-	raw() {
-		const collected: (T | Recursive)[] = new Array(this.size)
-		this.each((x, i: number) => (collected[i] = x))
-		return collected
 	}
 
 	write(i: number, value: T | Recursive) {

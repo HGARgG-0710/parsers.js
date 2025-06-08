@@ -252,8 +252,7 @@ export function rewind<Type = any>(stream: IStream<Type>): Type {
 }
 
 export function rawStreamCopy(rawStream: IRawStream) {
-	if (isFunction(rawStream)) return rawStream
-	return rawStream.copy()
+	return isFunction(rawStream) ? rawStream : rawStream.copy()
 }
 
 export * as Position from "../modules/Stream/utils/Position.js"

@@ -1,39 +1,57 @@
-import { OwningStream } from "./IterableStream.js"
+import type { IResourcefulStream } from "../../../interfaces.js"
+import { mixin } from "../../../mixin.js"
+import { OwningStream, OwningStreamAnnotation } from "./OwningStream.js"
 
-export abstract class DelegateStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends OwningStream<Type, Args> {
-	prev() {
-		this.resource!.prev!()
+export abstract class DelegateStreamAnnotation<T = any, Args extends any[] = []>
+	extends OwningStreamAnnotation<T, Args>
+	implements IResourcefulStream<T>
+{
+	next(): void {}
+	prev(): void {}
+
+	isCurrEnd(): boolean {
+		return false
 	}
 
-	next() {
-		this.resource!.next()
-	}
-
-	isCurrStart() {
-		return this.resource!.isCurrStart!()
-	}
-
-	isCurrEnd() {
-		return this.resource!.isCurrEnd()
+	isCurrStart(): boolean {
+		return true
 	}
 }
 
-export abstract class SyncStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends DelegateStream<Type, Args> {
-	get curr() {
-		return this.resource!.curr
-	}
+const DelegateStreamMixin = new mixin<IResourcefulStream>(
+	{
+		name: "DelegateStream",
+		properties: {
+			prev() {
+				this.resource.prev!()
+			},
 
-	get isEnd() {
-		return this.resource!.isEnd
-	}
+			next() {
+				this.resource.next()
+			},
 
-	get isStart() {
-		return this.resource!.isStart
-	}
+			isCurrStart() {
+				return this.resource.isCurrStart!()
+			},
+
+			isCurrEnd() {
+				return this.resource.isCurrEnd()
+			}
+		}
+	},
+	[],
+	[OwningStream]
+)
+
+function PreDelegateStream<T = any, Args extends any[] = any[]>() {
+	return DelegateStreamMixin.toClass() as typeof DelegateStreamAnnotation<
+		T,
+		Args
+	>
 }
+
+export const DelegateStream: ReturnType<typeof PreDelegateStream> & {
+	generics?: typeof PreDelegateStream
+} = PreDelegateStream()
+
+DelegateStream.generics = PreDelegateStream

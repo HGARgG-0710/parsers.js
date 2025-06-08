@@ -1,7 +1,7 @@
 import type { IStream } from "../../../interfaces.js"
 import { ArrayStream } from "./ArrayStream.js"
 
-export class InterleaveStream extends ArrayStream<any, IStream> {
+export class InterleaveStream extends ArrayStream.generic!<any, IStream>() {
 	private index: number = 0
 
 	private get currStream() {

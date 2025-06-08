@@ -9,120 +9,37 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-NEXT UP:
-	1. [FIXED ORDER - prior to all else] re-thinking `IStream`:
-		1. Test `mixin` submodule [BEFORE ALL ELSE - a basic sanity check]
-		2. create the appropriate library `mixin` objects for representing different types of IStream-s
-			1. MAKE those PUBLIC [the `mixin` objects, NOT their `.toClass()` call results]
-			2. Let there be classes based off them [the ACTUAL `.toClass()` calls - THOSE aren't supposed to be extended]
-
-	PROBLEM: the library's system for employing classes has... 
-		Become unwieldy and problematic.
-		Gone through the roof. 
-		Failed.
-		Reason being - this solution REALLY calls for mixins, and the place that screams about it 
-			the most is the intersection of `DyssyncStream` (which requires, not to duplicate the `copy` method), 
-				for `WrapperStream` to come BEFORE `SyncStream`, whereas the `ParseStream` requires THE OPPOSITE
-					(since `copy` methods are CONTRACT-BINDING [the `['constructor']` property] whereas `SyncStream` IS NOT). 
-
-		CONCLUSION: we need to reimplement the way that `IStream` impelementations are structured... 
-			One needs to (manually) implement mixins. 
-			And NOT through the `mixin` function (which is supposed to work primarily of off prototypes). 
-			
-		SOLUTION: 
-			1. let there be a new library entity `IMixin` - it's an interface, of a given `Type` [basically, an alias for `Partial`]
-				1. It'll be used for semantic typing. 
-				2. reason to not use something like https://www.npmjs.com/package/mixin
-					is - these "JS-native" solutions don't appear to be particularly TypeScript-friendly
-
-			2. create `IMixin<IStream>` objects, with METHODS on them
-				Directly created from the current `abstract class`es
-				Let they remain UNTYPED in terms of generic arguments.
-
-			3. create a `mixin.merge` function
-				1. for a given `n` "mixin objects" (prototypes), one (literally) "combines" them 
-					via `protoMixin`: 
-						1. ADD `protoMixin` to `one.js`; It is (almost) like a call to `mixin` except it DOESN'T 
-							operate on `class`es. Instead, it works on bare objects [prototype]. 
-
-							That is, like in `mixin`, but it: 
-								1. doesn't access `Extended.prototype`
-								2. uses `propsDefine` instead of `extendPrototype`
-						2. it SHOULD originate as a simple LOCAL function, BASED off `one.js`
-
-			4. create a `mixin.from` function, which creates a CLASS, using the given object as a prototype
-				1. This is (basically) a solution to "pre-process" classes before actually using them in their "ultimate form". 
-				2. LET `fromMixin` be called ONLY on the "sealed class"es
-
-			5. RELOCATE the `IMixin`, `mixin.merge` and `mixin.from` into a new `npm` project - `mixin.ts`: 
-				1. reason - it's outside the library's scope
-				2. relocate it WHILE WORKING ON THE v0.3
-
-				3. this means: 
-					1. one has to have tests for it INSIDE the `parsers.js` library
-					2. THEN - one refactors it OUT OF IT, having the tests pass as needed...
-					3. make it a dependency of `parsers.js`
-
-				4. FINALLY, the functions/interfaces of `mixin.ts` should ACTUALLY be exported from `parsers.js` [in a `mixin` submodule]
-					Reason - the library USES IT to provide the user with the ability to extend itself, 
-						and THEREFORE, it isn't (particularly) fair for such usage to have to occurr...
-			
-
-	TODO: remove the `DyssyncStream`, `DyssyncForwardStream` and `ResourceStream`:
-		REASON: 
-			These serve as mixins. 
-			TypeScript DOESN'T SUPPORT mixins (not properly). 
-
-		CONCLUSION: 
-			Replace them with (appropriate) delegates. 
-			To PROPERLY implement mixins for these children classes, see the note below...
-
-		ALSO; 
-			1. about 'DyssyncStream' mixin-class [parent for `PeekStream` and `FilterStream`]: 
-				SPLIT the `DelegateStream` and `DyssyncStream` [old] onto 3 classes: 
-					3. DyssyncStream - no delegates, contains "live" no-accessor properties
-						THIS ONE is a 'mixin' of `DelegateStream` and `SolidStream`. 
-						Built same way as the below example of a 'mixin-class'; 
-						Treated as a `DyssyncStream` 
-						NOTE[1]: the `syncCurr` is RETAINED upon the `DyssyncStream`
-						NOTE[2]: *try* to implement this WITHOUT needing a delegate class, 
-							that is - `extend` FROM `DelegateStream`, return WITHOUT casting [important - this way, `protected` properties can remain], 
-								and use the `MaskStream` via `mixin(...)`; 
-
-			2. about [new] ResourceStream - [new] 'DyssyncStream' & 'BasicStream' mixin-class [parent for LimitStream and HandlerStream]: 
-				REPLACE the `DyssyncForwardStream`, `DyssyncForwardStream` and `ResourceStream` with THIS 
-					NEW 'mixin'-based class
-
-				create a new `mixin`-class [called `ResourceStream`], for creating abstract classes 
-					that inherit from BOTH `DelegateStream` AND `BasicStream` 
-						[in that order - that is, BasicStream OVERRIDES the thing in question]. 
-
-				ALSO, let `HandlerStream` inherit from it as well
-				
-				Created like:
-					1. exopted class [NO EXPLICIT CAST]
-					2. inherit from `BasicStream` via `extend`
-						1. CRUCIAL: add a declarations: 
-							
-							1. `protected syncCurr: (...) => ...`
-							2. `resource?: IOwnedStream`...
-
-							This, fundamentally, allows one to retain all the type-stuff of `DyssyncStream`
-								AS WELL!
-					3. use `mixin(DyssyncStream)`
-				
-				Likewise, the 'BasicStream' "framework" methods WILL BE AVAILABLE!
-				The most important part is that it shall have the: 
-					1. methods [BasicStream]: 
-						1. endStream (protected)
-						2. startStream (protected)
-				
+NEXT UP:				
 	TODO: `.copy()`-fixing [IStream-implementations]: 
 		1. fix the `.copy()` methods' implementations that employ the 
 			`.set*`-methods/custom initializers
 			
 			2. BasicStream
 			3. CompositeStream
+				BIIIG "maybe???". 
+				Reasons to implement: 
+					1. would open FAR more complex tests to one
+						Although... technically...
+							one could solve it more simply by: 
+								1. providing the "basic" and "extended" (for CompositeStream, with user-predicate) `[Symbol.iterator]` tests
+								2. [more generally] provide custom '.inState(assertionPred)' tests with custom user-assertions [for a given state???]
+									This could be a very good idea
+									One STILL isolates the state, BUT, ALSO - allows to *PRESERVE IT* like:
+
+										someClassTest.withInstance(instance, (test) => {
+											test.methodName(...).inState((test) => {
+												test.methodName1(...) // asserts
+												test.methodName2(...) // asserts
+												...
+												assert(...)
+											})
+										})
+					2. cleaner
+
+				Reasons NOT to implement: 
+					1. insanely complex
+					2. could negatively affect performance
+
 			4. ConcatStream
 			5. DelegateStream
 			6. DepthStream
@@ -177,23 +94,130 @@ NEXT UP:
 				with `IPosition` becoming more general (allows non-`IStream`-arguments now for predicates),
 					and the `IStreamPosition` becoming what the OLD `IPosition` once was
 			2. ACCEPT an `IPosition<T>` for a `PropDigger<T>`
+			
+	TODO: FIX the 'IStream' types lost from usage of `mixin`: 
+		Previously, the class-based system served one in some absolutely amazing fashions. 
+		In particular - it created a "safe" and framework-like feel around the library, 
+			by permitting the user to implement the 'abstract' methods on library classes. 
+	
+		Now, however, this is (partially) gone, since TypeScript can NO LONGER warn against 
+			a BAD case of instantiation (since there is NO WAY to know if the user is making 
+				YET ANOTHER "no-instances mixin", or a "proper" one). 
+		
+		This stands PARTICULARLY in regarding 'BasicStream'. 
 
-	Tests [todo]: 
-		1. SOMEHOW automate the whole ".map file generation" procedure: 
-			1. create test-SPECIFIC commands and files: 
-				1. TEST-SPECIFIC `tsconfig.json` [for src/]
-					1. distinct from the current one 
-				2. CHANGE the `sourceMap` to `true` PERMANENTLY on the `tests` directory's `tsconfig.json` 
-				3. a `test_all_compile.cmd` command [run by the npm script]: 
-					0. kept inside scripts/ directory
-					1. clears away the out/ directory for `tests/`
-					2. clears away the dist/ directory for `src/`
-					3. runs the `npm run test-build`
-						1. new command - for using the `sourceMap`-positive config with the `src/` build 
-					4. runs the `npm run test`
+		Fix this, like so: 
+			1. create "fake" `abstract/non-abstract` declaration-classes with NO runtime properties/methods
+			2. ASSIGN the type of `.toClass()` calls TO `typeof FakeClass`, for a given FakeClass: 
+				1. via '... as unknown as typeof FakeClass'
+			3. Ta-da! fixed...
 
-		2. replace the old "npm run all" command with this instead ... [`scripts/test_all_compile.cmd`]
-					
+			4. [generics?] Maybe - for the sake of making generics safe: 
+				1. create FUNCTIONS that call the `.toClass()` of a given 'mixin'
+				2. add relevant generics to them (<T, InitArgs>)
+				3. do the 'as unknown as typeof FakeClass<T, InitArgs>', WITH GENERICS
+					Then, one may retain ALL of type-features at the cost of a single 
+						function call. Pretty neat, overall.
+
+			5. [maybe???] This seems to works, but...
+				It's pretty damn ugly. Replace with proper .d.ts files with source .js files? 
+				Would make an awful lot more sense...
+
+	TODO: [about `mixin`-types replacement in `IStream`]: 
+		CHANGE THE `propName: (...) => ...` to `propName(...): ...`!
+		Namely - PROVIDE dummy implementations!
+		Reason - then one can use the methods in question with `super.`
+	
+	TODO: [`mixin-IStream`] MAKE the `Annotation` classes *INTO EXPORTS*
+		Also - MAKE them part of the NAMESPACES that are the "main" export-functions. 
+		[Let they be available under `.annotation`, SAME WAY as `.generic`]
+		Reasons: 
+			1. the user MIGHT want to use them for their own (technically legal) TypeScript-machination purposes
+			2. some annotations are REQUIRED by other annotations...
+			3. [main reason] too much work moving them to /internal
+
+	TODO: for BYPASSING the issues of a "natural" `new` and `generics` - see `ParsedStream`, `SyncStream`; 
+		REPEAT across all the IStream-classes in the library...
+
+		REMOVE the `ClassName()` thing - it's UGLY and UNGODLY. 
+		Also - unnecessary...
+
+	TODO: regarding the `.generic!`...
+		REMOVE, replace with just `.generic` [i.e. A NON-NULL PROPERTY is what is must be...]; 
+
+	TODO: don't forget - MOVE the `StreamAnnotation` OUT from the `/internal`
+
+	TODO: ENSURE that the `Args` generic arg [in `Stream` module] IS NOT 'any[]', but '[]' BY DEFAULT!!!
+
+	TODO [docs]:
+		ADD a GUIDE on how to CORRECTLY inherit the `Stream` classes [TS-only].
+
+		Reason: 
+			1. the library is written in TypeScript, so PROPER inheritance [with generics] must work well!
+			2. JavaScript-usage has no use for this insanity
+			3. TS-support is good!
+
+	TODO: ENSURE the 'Args | []' THING in ALL the `IStream`-implementing classes...
+
+	TODO: [IStream 'mixin's] FIX the `mixin`s that INHERIT other mixins/classes, to USE 'this.super.constructor' MANUALLY!!!
+		One cannot stress this enough. 
+		Some don't need it. 
+		Some do. 
+		Either way, WHENEVER this is necessary - one MUST make this explicit...
+
+	TODO: in alll the `mixin`s - FIX THE `super` calls!!! 
+		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
+
+	TODO: LET `LimitStream` ALSO inherit from the `BasicResourceStream`!
+
+	TODO: [IStream] in cases of `Args | []`, RENAME `Args` to `MoreArgs`
+
+	TODO: refactor the `ParsedStream` onto TWO functions - one responsible for the local variable, 
+		and another - for the building of the current `ParsedStream` class. 
+
+		For an example - see `SourceStream`
+
+	TODO: make a NOTE that the library is a PRIMARILY JavaScript API!
+		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
+			for being JS-native [id est - being "natural", without forcing patterns
+				from "conservative" OOP languages, such as Java]
+
+	TODO: ENSURE that ALL THE EXPORTS ARE ON THE SPOT [this particualrly applies to IStream - LOTS of new classes has been added...]; 
+
+	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
+		and NOT `function () {}`
+
+		OR: 
+			TODO: 'mixin' module: 
+				1. ALLOW setting `constructor` WITHOUT needing a prototype. 
+					In such cases, CREATE a prototype, via the `constructor = {}` INSIDE the `sealed_mixin`
+						class...
+
+				AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
+
+	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
+
+	TODO: CONVERT the "unnecessary" 'new mixin's into CLASSES [namely, those that use ONLY 1 PARENT-CLASS]:
+		List [incomplete]: 
+			1. ArrayStream
+			...
+
+	TODO: '.postEnd', and other "optional" [non-abstract] framework-methods: 
+		REPLACE THOSE with OVERRIDABLE 'protected' dummy-methods (empty)
+		'.isCurrStart' is the exception
+
+	TODO: TRANSFORM "excessive" 'mixin's INTO `abstract class`es
+		[do later - when you're SURE that these won't change... AND have exported `StreamAnnotation` as public] 	
+
+		These are the ones with either 1 parent, or NONE AT ALL.
+		As to the "Annotation" classes of theirs - they ARE their own 'annotation' classes. 
+		List [incomplete - FIND THEM ALL]: 
+			1. IterableStream
+			2. OwningStream
+			3. OwnableStream
+			4. DelegateStream
+			....
+
 CURRENT TODOS:		
 	TODO: order imports [Shift + Alt + O]
 
@@ -1166,6 +1190,12 @@ FUTURE:
 		3. `serializable`: 
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
+		
+		4. 'mixin.ts': 
+			1. a new package - the 'mixin' module here
+				It should be USED IN `parsers.js` as BOTH: 
+					1. a dependency
+					2. a re-export [since there are mixins CURRENTLY exported]
 
 	2. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 

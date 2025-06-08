@@ -1,8 +1,8 @@
-import type { WrapperStream } from "../../../classes/Stream.js"
+import type { WrapperStreamAnnotation } from "../../../classes/Stream.js"
 
 export type IMarkerStream<
 	Type = any,
 	MarkerType = any
-> = WrapperStream<Type> & {
+> = WrapperStreamAnnotation<Type> & {
 	readonly currMarker: MarkerType
 }

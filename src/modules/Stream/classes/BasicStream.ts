@@ -1,137 +1,101 @@
-import { isCopiable } from "../../../is.js"
-import {
-	ownerInitializer,
-	resourceInitializer
-} from "../../../classes/Initializer.js"
-import type { IResourceSettable } from "../../../interfaces.js"
-import type { IOwnedStream } from "../../../interfaces/Stream.js"
-import { SolidStream } from "./IterableStream.js"
+import { Initializable } from "../../../classes/Initializer.js"
+import type { IInitializer } from "../../../interfaces.js"
+import type { IOwnedStream, IOwningStream } from "../../../interfaces/Stream.js"
+import { mixin } from "../../../mixin.js"
+import { DyssyncStream, DyssyncStreamAnnotation } from "./DyssyncStream.js"
+import { IterableStream } from "./IterableStream.js"
+import { OwnableStream } from "./OwnableStream.js"
 
-export abstract class BasicStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends SolidStream<Type, Args> {
-	protected abstract baseNextIter(): Type
+export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
+	extends DyssyncStreamAnnotation<T, Args>
+	implements IOwnedStream<T>
+{
+	protected abstract initializer: IInitializer<Args>
+	protected abstract baseNextIter(curr?: T): T
+
+	readonly owner?: IOwningStream
 
 	protected postEnd?(): void
-	protected basePrevIter?(): Type
+	protected basePrevIter?(curr?: T): T
 	protected postStart?(): void
-	protected initGetter?(...args: Partial<Args>): Type
+	protected initGetter?(...args: Partial<Args>): T
 
 	isCurrStart?(): boolean
 
-	protected update(newCurr: Type) {
-		this.curr = newCurr
-	}
+	protected update(newCurr: T) {}
+	protected preInit(...args: Partial<Args>) {}
 
-	protected preInit(...args: Partial<Args>) {
-		if (this.initGetter) this.curr = this.initGetter(...args)
-	}
+	next(): void {}
+	prev(): void {}
 
-	protected endStream() {
-		this.isEnd = true
-		this.isStart = false
-	}
+	setOwner(newOwner?: unknown): void {}
 
-	protected startStream() {
-		this.isStart = true
-		this.isEnd = false
-	}
-
-	next() {
-		this.isStart = false
-		if (this.isCurrEnd()) {
-			this.endStream()
-			this.postEnd?.()
-		} else this.update(this.baseNextIter())
-	}
-
-	prev() {
-		this.isEnd = false
-		if (this.isCurrStart!()) {
-			this.startStream()
-			this.postStart?.()
-		} else this.update(this.basePrevIter!())
-	}
-
-	init(...args: Partial<Args>) {
-		this.startStream()
-		super.init(...args)
-		this.preInit(...args)
-		return this
+	*[Symbol.iterator]() {
+		yield null as T
 	}
 }
 
-export abstract class ResourceStream<Type = any, MoreArgs extends any[] = []>
-	extends BasicStream<Type, [IOwnedStream, ...(MoreArgs | [])]>
-	implements IOwnedStream<Type>
-{
-	protected ["constructor"]: new (resource?: IOwnedStream) => this
+const BasicStreamMixin = new mixin<IOwnedStream>(
+	{
+		name: "BasicStream",
+		properties: {
+			update(newCurr: any) {
+				this.curr = newCurr
+			},
 
-	protected _resource?: IOwnedStream
+			preInit(...args: any[]) {
+				if (this.initGetter) this.curr = this.initGetter(...args)
+			},
 
-	protected set resource(newResource: IOwnedStream | undefined) {
-		this._resource = newResource
-	}
+			endStream() {
+				this.isEnd = true
+				this.isStart = false
+			},
 
-	get resource() {
-		return this._resource
-	}
+			startStream() {
+				this.isStart = true
+				this.isEnd = false
+			},
 
-	protected get initializer() {
-		return ownerInitializer
-	}
+			next() {
+				const curr = this.curr
+				this.isStart = false
+				if (this.isCurrEnd()) {
+					this.endStream()
+					this.postEnd?.()
+				} else this.update(this.baseNextIter(curr))
+			},
 
-	copy() {
-		return new this.constructor(this.resource?.copy())
-	}
+			prev() {
+				const curr = this.curr
+				this.isEnd = false
+				if (this.isCurrStart!()) {
+					this.startStream()
+					this.postStart?.()
+				} else this.update(this.basePrevIter!(curr))
+			},
 
-	setResource(resource: IOwnedStream) {
-		this.resource = resource
-	}
+			init(...args: any[]) {
+				this.startStream()
+				this.super.Initializable.init.call(this, ...args)
+				this.preInit(...args)
+				return this
+			}
+		},
+		constructor: function (...args: any[]) {
+			this.super.Initializable.constructor.call(this, ...args)
+		}
+	},
+	[],
+	[Initializable, DyssyncStream, OwnableStream, IterableStream]
+)
 
-	init(resource?: IOwnedStream) {
-		return super.init(resource)
-	}
+function PreBasicStream<T = any, Args extends any[] = any[]>() {
+	return BasicStreamMixin.toClass() as typeof BasicStreamAnnotation<T, Args>
 }
 
-export abstract class SourceStream<
-		Type = any,
-		SourceType = unknown,
-		MoreArgs extends any[] = []
-	>
-	extends BasicStream<Type, [SourceType, ...(MoreArgs | [])]>
-	implements IResourceSettable
-{
-	protected ["constructor"]: new (source?: SourceType) => this
+export const BasicStream: ReturnType<typeof PreBasicStream> & {
+	generic?: typeof PreBasicStream
+} = PreBasicStream()
 
-	protected source?: SourceType
-
-	protected abstract currGetter(): Type
-
-	protected updateCurr() {
-		this.update(this.currGetter())
-	}
-
-	protected get initializer() {
-		return resourceInitializer
-	}
-
-	protected initGetter(): Type {
-		return this.currGetter()
-	}
-
-	setResource(source?: SourceType) {
-		this.source = source
-	}
-
-	copy(): this {
-		return new this.constructor(
-			isCopiable(this.source) ? this.source.copy() : this.source
-		)
-	}
-
-	constructor(source?: SourceType) {
-		super(source)
-	}
-}
+BasicStream.generic = PreBasicStream

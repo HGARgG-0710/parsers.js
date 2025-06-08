@@ -4,7 +4,7 @@ import { ArrayStream } from "./ArrayStream.js"
 import { array } from "@hgargg-0710/one"
 const { lastIndex } = array
 
-export class ConcatStream extends ArrayStream<any, IStream> {
+export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
 	private index: number = 0
 
 	private get currStream() {

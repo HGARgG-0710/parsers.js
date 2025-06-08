@@ -8,12 +8,12 @@ import type {
 	ISourcedStream
 } from "../../../interfaces/Stream.js"
 import { uniNavigate } from "../../../utils/Stream.js"
-import { SourceStream } from "./BasicStream.js"
+import { SourceStream } from "./SourceStream.js"
 
 const { isNumber } = type
 
 export class LazyStream
-	extends SourceStream<string, ISource>
+	extends SourceStream.generic!<string, ISource>()
 	implements
 		INavigable<string>,
 		IPosed<number>,

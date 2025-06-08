@@ -5,29 +5,47 @@ import type {
 	ILinkedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
-import { SyncStream } from "../modules/Stream/classes/DelegateStream.js"
+import { AttachedStream } from "../modules/Stream/classes/AttachedStream.js"
 import { Initializable } from "./Initializer.js"
 
-class ParsedStream<FinalType = any, InitType = any> extends SyncStream<
+type IParsedStreamConstructor<FinalType = any, InitType = any> = new <
 	FinalType,
-	[]
-> {
-	protected ["constructor"]: new (
-		parseInstance: Parse<FinalType, InitType>
-	) => this
+	InitType
+>(
+	parseInstance: Parse<FinalType, InitType>
+) => ILinkedStream<FinalType>
 
-	next() {
-		super.next()
-		this.parseInstance.maybeUpdate()
-	}
+let parsedStreamClass: IParsedStreamConstructor | null = null
 
-	copy(): this {
-		return new this.constructor(this.parseInstance.copy())
-	}
+function ParsedStream<
+	FinalType = any,
+	InitType = any
+>(): IParsedStreamConstructor<FinalType, InitType> {
+	return parsedStreamClass
+		? parsedStreamClass
+		: (parsedStreamClass = class
+				extends AttachedStream.generic!<FinalType, []>()
+				implements ILinkedStream<FinalType>
+		  {
+				protected ["constructor"]: new (
+					parseInstance: Parse<FinalType, InitType>
+				) => this
 
-	constructor(private readonly parseInstance: Parse<FinalType, InitType>) {
-		super(parseInstance.workStream)
-	}
+				next() {
+					super.next()
+					this.parseInstance.maybeUpdate()
+				}
+
+				copy(): this {
+					return new this.constructor(this.parseInstance.copy())
+				}
+
+				constructor(
+					private readonly parseInstance: Parse<FinalType, InitType>
+				) {
+					super(parseInstance.workStream)
+				}
+		  } as IParsedStreamConstructor<FinalType, InitType>)
 }
 
 const parseInitializer = {
@@ -127,10 +145,12 @@ export function DynamicParser<FinalType = any, InitType = any>(
 	inputStream: IInputStream<string, InitType>
 ) {
 	const parse = new Parse(workStream, inputStream)
+	const parsedStream = ParsedStream<FinalType, InitType>()
+
 	return function (
 		input: InitType,
 		state?: Summat
 	): ILinkedStream<FinalType> {
-		return new ParsedStream(parse.copy().init(input, state))
+		return new parsedStream(parse.copy().init(input, state))
 	}
 }

@@ -9,159 +9,184 @@ import {
 	positionEqual,
 	positionNegate
 } from "../utils/Position.js"
-import { DyssyncStream } from "./WrapperStream.js"
+import { BasicResourceStream } from "./BasicResourceStream.js"
 
 const { isNullary } = type
 const { T } = boolean
 
+interface IStateSettupable {
+	setupState(): void
+}
+
+interface ILimitSetterMethods<T = any> {
+	setDirection(direction: boolean): this
+	setFrom(from: IPosition<T>): this
+	setUntil(until: IPosition<T>): this
+}
+
+type ILimitStreamConsructor<T = any> = new (
+	resource?: ILimitableStream<T>
+) => ILinkedStream<T> & IStateSettupable & ILimitSetterMethods<T>
+
 const limitStreamInitializer = {
-	init(target: _LimitStream, resource?: ILimitableStream) {
+	init(
+		target: ILinkedStream & IStateSettupable,
+		resource?: ILimitableStream
+	) {
 		target.setupState()
 		ownerInitializer.init(target, resource)
 	}
 }
 
-class _LimitStream<Type = any> extends DyssyncStream<Type> {
-	private hasLookahead = false
-	private hasLookbehind = false
+function BuildLimitStream<T = any>() {
+	return class extends BasicResourceStream.generic!<T>() {
+		private hasLookahead = false
+		private hasLookbehind = false
 
-	private lookbehind: Type
-	private lookahead: Type
+		private lookbehind: T
+		private lookahead: T
 
-	private direction: boolean
-	private from: IPosition
-	private until: IPosition
+		private direction: boolean
+		private from: IPosition
+		private until: IPosition
 
-	protected get initializer() {
-		return limitStreamInitializer
-	}
+		protected get initializer() {
+			return limitStreamInitializer
+		}
 
-	protected set resource(newResource: ILimitableStream<Type>) {
-		super.resource = newResource
-	}
+		protected set resource(newResource: ILimitableStream<T>) {
+			super.resource = newResource
+		}
 
-	get resource() {
-		return super.resource as ILimitableStream<Type>
-	}
+		get resource() {
+			return super.resource as ILimitableStream<T>
+		}
 
-	private prodForth() {
-		const { hasLookahead, lookahead } = this
-		return hasLookahead ? lookahead : this.prodForthWithoutLookahead()
-	}
+		private prodForth() {
+			const { hasLookahead, lookahead } = this
+			return hasLookahead ? lookahead : this.prodForthWithoutLookahead()
+		}
 
-	private prodForthWithoutLookahead() {
-		this.hasLookahead = true
-		super[this.pickForwardDirection()]()
-		return this.curr
-	}
+		private prodForthWithoutLookahead() {
+			this.hasLookahead = true
+			super[this.pickForwardDirection()]()
+			return this.curr
+		}
 
-	private pickForwardDirection() {
-		return this.direction ? "next" : "prev"
-	}
+		private pickForwardDirection() {
+			return this.direction ? "next" : "prev"
+		}
 
-	private prodBack() {
-		const { hasLookbehind, lookbehind } = this
-		return hasLookbehind ? lookbehind : this.prodBackWithoutLookbehind()
-	}
+		private prodBack() {
+			const { hasLookbehind, lookbehind } = this
+			return hasLookbehind ? lookbehind : this.prodBackWithoutLookbehind()
+		}
 
-	private prodBackWithoutLookbehind() {
-		this.hasLookbehind = true
-		super[this.pickBackwardDirection()]()
-		return this.curr
-	}
+		private prodBackWithoutLookbehind() {
+			this.hasLookbehind = true
+			super[this.pickBackwardDirection()]()
+			return this.curr
+		}
 
-	private pickBackwardDirection() {
-		return this.direction ? "prev" : "next"
-	}
+		private pickBackwardDirection() {
+			return this.direction ? "prev" : "next"
+		}
 
-	private baseNextIter(curr: Type) {
-		this.lookbehind = curr
-		this.hasLookbehind = true
-		this.hasLookahead = false
-		this.syncCurr()
-	}
+		protected baseNextIter(curr: T) {
+			this.lookbehind = curr
+			this.hasLookbehind = true
+			this.hasLookahead = false
+			return this.resource.curr
+		}
 
-	private basePrevIter(curr: Type) {
-		this.lookahead = curr
-		this.hasLookahead = true
-		this.hasLookbehind = false
-		this.syncCurr()
-	}
+		protected basePrevIter(curr: T) {
+			this.lookahead = curr
+			this.hasLookahead = true
+			this.hasLookbehind = false
+			return this.resource.curr
+		}
 
-	private forgetLastLookahead() {
-		this.hasLookahead = false
-	}
+		private forgetLastLookahead() {
+			this.hasLookahead = false
+		}
 
-	private forgetLastLookbehind() {
-		this.hasLookbehind = false
-	}
+		private forgetLastLookbehind() {
+			this.hasLookbehind = false
+		}
 
-	private findStartPos() {
-		navigate(this.resource!, this.from)
-	}
+		private findStartPos() {
+			navigate(this.resource!, this.from)
+		}
 
-	setResource(resource: ILimitableStream<Type>) {
-		super.setResource(resource)
-		this.findStartPos()
-		this.syncCurr()
-	}
+		setResource(resource: ILimitableStream<T>) {
+			super.setResource(resource)
+			this.findStartPos()
+			this.syncCurr()
+		}
 
-	setupState() {
-		this.forgetLastLookahead()
-		this.forgetLastLookbehind()
-	}
+		setupState() {
+			this.forgetLastLookahead()
+			this.forgetLastLookbehind()
+		}
 
-	isCurrEnd(): boolean {
-		if (super.isCurrEnd()) return true
-		this.lookahead = this.prodForth()
-		return positionEqual(this.resource!, this.until)
-	}
+		isCurrEnd(): boolean {
+			if (this.resource.isCurrEnd()) return true
+			this.lookahead = this.prodForth()
+			return positionEqual(this.resource!, this.until)
+		}
 
-	isCurrStart(): boolean {
-		if (super.isCurrStart()) return true
-		this.lookbehind = this.prodBack()
-		return positionEqual(this.resource!, this.from)
-	}
+		isCurrStart(): boolean {
+			if (this.resource.isCurrStart()) return true
+			this.lookbehind = this.prodBack()
+			return positionEqual(this.resource!, this.from)
+		}
 
-	next() {
-		this.isStart = false
-		if (this.isCurrEnd()) this.endStream()
-		else this.baseNextIter(this.curr)
-	}
+		next() {
+			this.isStart = false
+			if (this.isCurrEnd()) this.endStream()
+			else this.baseNextIter(this.curr)
+		}
 
-	prev() {
-		this.isEnd = false
-		if (this.isCurrStart()) this.startStream()
-		else this.basePrevIter(this.curr)
-	}
+		prev() {
+			this.isEnd = false
+			if (this.isCurrStart()) this.startStream()
+			else this.basePrevIter(this.curr)
+		}
 
-	init(resource?: ILimitableStream<Type>) {
-		return super.init(resource)
-	}
+		init(resource?: ILimitableStream<T>) {
+			return super.init(resource)
+		}
 
-	setFrom(from: IPosition) {
-		this.from = positionBind(this, from)
-		return this
-	}
+		setFrom(from: IPosition) {
+			this.from = positionBind(this, from)
+			return this
+		}
 
-	setUntil(until: IPosition) {
-		this.until = positionBind(this, until)
-		return this
-	}
+		setUntil(until: IPosition) {
+			this.until = positionBind(this, until)
+			return this
+		}
 
-	setDirection(direction: boolean) {
-		this.direction = direction
-		return this
-	}
+		setDirection(direction: boolean) {
+			this.direction = direction
+			return this
+		}
 
-	constructor(resource?: ILimitableStream<Type>) {
-		super(resource)
+		constructor(resource?: ILimitableStream<T>) {
+			super(resource)
+		}
 	}
 }
 
-export function LimitStream<Type = any>(
-	from: IPosition<Type>,
-	longAs?: IPosition<Type>
+let limitStream: ILimitStreamConsructor | null = null
+
+function PreLimitStream<T = any>(): ILimitStreamConsructor<T> {
+	return limitStream ? limitStream : (limitStream = BuildLimitStream<T>())
+}
+
+export function LimitStream<T = any>(
+	from: IPosition<T>,
+	longAs?: IPosition<T>
 ) {
 	if (isNullary(longAs)) {
 		longAs = from
@@ -171,12 +196,14 @@ export function LimitStream<Type = any>(
 	const until = positionNegate(longAs)
 	const direction = directionCompare(from, until)
 
-	return function (resource?: ILimitableStream<Type>): ILinkedStream<Type> {
-		return new _LimitStream()
+	const limitStream = PreLimitStream<T>()
+
+	return function (resource?: ILimitableStream<T>) {
+		return new limitStream()
 			.setDirection(direction)
 			.setFrom(from)
 			.setUntil(until)
-			.init(resource)
+			.init(resource) as ILinkedStream<T>
 	}
 }
 
