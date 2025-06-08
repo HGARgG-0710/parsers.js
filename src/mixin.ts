@@ -21,7 +21,10 @@ type _INonVoidConstructor<T = any, Args extends any[] = any[]> = (
 	...args: Args
 ) => T | void
 
-type _IOutClass<T = any, Args extends any[] = any[]> = new (...args: Args) => T
+type _IOutClass<T = any, Args extends any[] = any[]> =
+	| (new (...args: Args) => T)
+	| (abstract new (...args: Args) => T)
+	| ((...args: Args) => T & { prototype: T })
 
 interface _IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly name: string
@@ -89,10 +92,7 @@ class SuperCreator {
 }
 
 class PrototypeFiller {
-	fromClasses(
-		targetClass: object.Constructor,
-		classes: (new (...args: any[]) => any)[]
-	) {
+	fromClasses(targetClass: object.Constructor, classes: _IOutClass[]) {
 		classes.forEach((currClass) =>
 			extendPrototype(
 				targetClass,
@@ -123,6 +123,18 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		return this.mixinShape.constructor
 	}
 
+	private get defaultName() {
+		return this.mixinShape.name
+	}
+
+	private get properties() {
+		return this.mixinShape.properties
+	}
+
+	private get proto() {
+		return this.class.prototype
+	}
+
 	private set class(newClass: _IOutClass<T, Args>) {
 		this._class = newClass
 	}
@@ -131,20 +143,12 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		return this._class
 	}
 
-	private get proto() {
-		return this.class.prototype
-	}
-
 	private set super(newSuper: object) {
 		this.proto.super = newSuper
 	}
 
 	private get super() {
 		return this.proto.super
-	}
-
-	private get properties() {
-		return this.mixinShape.properties
 	}
 
 	private defineClass() {
@@ -159,12 +163,6 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		this.super = {}
 	}
 
-	private fromConstructors(constructors: ((...args: any[]) => any)[]) {
-		this.fromClasses(
-			constructors as unknown as (new (...args: any[]) => any)[]
-		)
-	}
-
 	private fromMixins(mixins: sealed_mixin[]) {
 		this.fromClasses(mixins.map((x) => x.class))
 	}
@@ -173,16 +171,16 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		this.prototypeFiller.fromObject(this.proto, this.properties)
 	}
 
-	private fromClasses(classes: (new (...args: any[]) => any)[]) {
+	private fromClasses(classes: _IOutClass[]) {
 		this.prototypeFiller.fromClasses(this.class, classes)
 		this.superFromClasses(classes)
 	}
 
-	private superFromClasses(classes: (new (...args: any[]) => any)[]) {
+	private superFromClasses(classes: _IOutClass[]) {
 		classes.forEach((currClass) => this.provideSuper(currClass))
 	}
 
-	private provideSuper(forClass: new (...args: any[]) => any) {
+	private provideSuper(forClass: _IOutClass) {
 		this.super[forClass.name] = this.superCreator.toSuper(
 			propertyDescriptors(forClass.prototype)
 		)
@@ -191,7 +189,7 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 	private defineNonVoidConstructor(
 		constructor: _INonVoidConstructor<T, Args>
 	) {
-		this.constructorCreator.assignName(constructor, this.name)
+		this.constructorCreator.assignName(constructor, this.defaultName)
 		this.setConstructor(constructor)
 	}
 
@@ -200,17 +198,17 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 	}
 
 	get name() {
-		return this.mixinShape.name
+		return this.class.name
 	}
 
 	constructor(
 		private readonly mixinShape: _IMixinShape<T, Args>,
 		mixins: sealed_mixin[] = [],
-		classes: ((...args: any[]) => any)[] = []
+		classes: _IOutClass[] = []
 	) {
 		this.defineClass()
 		this.initSuper()
-		this.fromConstructors(classes)
+		this.fromClasses(classes)
 		this.fromMixins(mixins)
 		this.fromProperties()
 	}
