@@ -94,10 +94,14 @@ export class PrefixCounter {
 export class TestCounter {
 	private prefixes = Autocache(new ArrayMap([]), () => new PrefixCounter())
 
-	test(testPrefix: number[], callback: () => void) {
+	test(testPrefix: number[], callback: () => void, toTest: boolean = false) {
 		const prefixCounter: PrefixCounter = this.prefixes(testPrefix)
 		prefixCounter.inc()
-		return test(this.label(prefixCounter.fromPrefix(testPrefix)), callback)
+		return test(
+			this.label(prefixCounter.fromPrefix(testPrefix)),
+			{ only: toTest },
+			callback
+		)
 	}
 
 	constructor(private readonly label: (count: readonly number[]) => string) {}

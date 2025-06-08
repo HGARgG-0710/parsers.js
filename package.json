@@ -24,10 +24,11 @@
 	"scripts": {
 		"build-js": "tsc --project ts/tsconfig.json",
 		"build-types": "tsc --project ts/types.json",
-		"test-build": "tsc --project ts/test-build.json", 
+		"test-build": "tsc --project ts/test-build.json",
 		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
 		"build": "npm run build-js && npm run build-types",
 		"test-build-all": "npm run test-build && npm run build-types && npm run test-compile",
+		"test-all": "cd tests/out && node run.js",
 		"unused": "ts-unused-exports ./tsconfig.json"
 	},
 	"devDependencies": {

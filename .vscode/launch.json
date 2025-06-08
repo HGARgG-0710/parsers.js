@@ -19,11 +19,28 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Run Current Test",
+			"name": "Run Current Test (All)",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
 			"program": "${file}",
+			"args": [],
+			"outFiles": [
+				"${workspaceFolder}/**/*.js"
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Run Current Test (Selective)",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"program": "",
+			"args": [
+				"--test-only",
+				"${workspaceFolder}/tests/out/${fileDirnameBasename}/${fileBasenameNoExtension}.js"
+			],
 			"outFiles": [
 				"${workspaceFolder}/**/*.js"
 			]
