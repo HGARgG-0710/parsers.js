@@ -41,13 +41,13 @@ export function isSwitch<
 	T extends IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
 >(x: ISwitchIdentifiable): x is Switch<T, Recursive> {
-	return !!x.isSwitch
+	return x.isSwitch === true
 }
 
 export function isRecursiveInitList(
 	x: IRecursiveListIdentifiable
 ): x is RecursiveInitList {
-	return !!x.isRecursiveInitList
+	return x.isRecursiveInitList === true
 }
 
 class Switch<
