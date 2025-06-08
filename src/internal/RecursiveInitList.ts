@@ -1,6 +1,6 @@
 import { ObjectPool } from "../classes/ObjectPool.js"
 import { Initializable } from "../classes/Initializer.js"
-import type { IInitializable, IInitializer } from "../interfaces.js"
+import type { IInitializable, IInitializer, IRecursiveListIdentifiable, ISwitchIdentifiable } from "../interfaces.js"
 import { SwitchArray } from "./SwitchArray.js"
 
 export type IDerivable<
@@ -28,14 +28,6 @@ type IPreRecursiveItems<
 	T extends IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any
 > = (IRecursivelySwitchable<T, Recursive> | Recursive)[]
-
-export type IRecursiveListIdentifiable = {
-	readonly isRecursiveInitList?: boolean
-}
-
-export type ISwitchIdentifiable = {
-	readonly isSwitch?: boolean
-}
 
 export function isSwitch<
 	T extends IInitializable = any,

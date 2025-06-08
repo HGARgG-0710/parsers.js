@@ -137,6 +137,14 @@ export interface IIsOpen {
 
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
+export type IRecursiveListIdentifiable = {
+	readonly isRecursiveInitList?: boolean
+}
+
+export type ISwitchIdentifiable = {
+	readonly isSwitch?: boolean
+}
+
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/Collection.js"
