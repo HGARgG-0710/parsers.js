@@ -5,12 +5,12 @@ import type {
 	IResourcefulStream
 } from "../../../interfaces.js"
 import { mixin } from "../../../mixin.js"
-import { DelegateStreamAnnotation } from "./DelegateStream.js"
+import { DelegateStream } from "./DelegateStream.js"
 import { PipeStream } from "./PipeStream.js"
 import { SyncStream } from "./SyncStream.js"
 
 export abstract class AttachedStreamAnnotation<T = any, Args extends any[] = []>
-	extends DelegateStreamAnnotation<T, Args>
+	extends DelegateStream<T, Args>
 	implements ILinkedStream<T>
 {
 	readonly isEnd: boolean
@@ -21,7 +21,7 @@ export abstract class AttachedStreamAnnotation<T = any, Args extends any[] = []>
 
 	setOwner(newOwner: IOwningStream): void {}
 
-	constructor(resource?: IOwnedStream) {
+	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {
 		super()
 	}
 }

@@ -4,14 +4,14 @@ import type {
 	IOwnedStream,
 	IOwningStream
 } from "../interfaces/OwnedStream.js"
-import { DelegateStreamAnnotation } from "./DelegateStream.js"
+import { DelegateStream } from "./DelegateStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PipeStream } from "./PipeStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
 abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
-	extends DelegateStreamAnnotation<T, Args>
+	extends DelegateStream<T, Args>
 	implements ILinkedStream<T>
 {
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this

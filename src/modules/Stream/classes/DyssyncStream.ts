@@ -1,83 +1,53 @@
-import { annotation } from "src/classes/Stream.js"
-import type { IStream } from "../../../interfaces.js"
-import { mixin } from "../../../mixin.js"
+import type { IInitializable, IStream } from "../../../interfaces.js"
 
-export abstract class DyssyncStreamAnnotation<
-	T = any,
-	Args extends any[] = any[]
-> extends annotation<T, Args> {
-	protected set isEnd(isEnd: boolean) {}
-	protected set isStart(isEnd: boolean) {}
-	protected set curr(curr: T) {}
+export abstract class DyssyncStream<T = any, Args extends any[] = []>
+	implements IStream<T>, IInitializable<Args>
+{
+	private _curr: T
+	private _isEnd: boolean = false
+	private _isStart: boolean = true
 
-	protected endStream(): void {}
-	protected startStream(): void {}
-
-	get isEnd() {
-		return false
+	protected endStream() {
+		this.isEnd = true
+		this.isStart = false
 	}
 
-	get isStart() {
-		return true
+	protected startStream() {
+		this.isStart = true
+		this.isEnd = false
+	}
+
+	protected set curr(newCurr) {
+		this._curr = newCurr
+	}
+
+	protected set isEnd(newIsEnd: boolean) {
+		this._isEnd = newIsEnd
+	}
+
+	protected set isStart(newIsStart: boolean) {
+		this._isStart = newIsStart
 	}
 
 	get curr() {
-		return null as any
+		return this._curr
 	}
-}
 
-const DyssyncStreamMixin = new mixin<IStream>({
-	name: "DyssyncStream",
-	properties: {
-		_curr: null,
-		_isEnd: false,
-		_isStart: true,
-
-		endStream() {
-			this.isEnd = true
-			this.isStart = false
-		},
-
-		startStream() {
-			this.isStart = true
-			this.isEnd = false
-		},
-
-		set curr(newCurr) {
-			this._curr = newCurr
-		},
-
-		get curr() {
-			return this._curr
-		},
-
-		set isEnd(newIsEnd: boolean) {
-			this._isEnd = newIsEnd
-		},
-
-		get isEnd() {
-			return this._isEnd
-		},
-
-		set isStart(newIsStart: boolean) {
-			this._isStart = newIsStart
-		},
-
-		get isStart() {
-			return this._isStart
-		}
+	get isEnd() {
+		return this._isEnd
 	}
-})
 
-function PreDyssyncStream<T = any, Args extends any[] = any[]>() {
-	return DyssyncStreamMixin.toClass() as typeof DyssyncStreamAnnotation<
-		T,
-		Args
-	>
+	get isStart() {
+		return this._isStart
+	}
+
+	abstract isCurrEnd(): boolean
+
+	abstract next(): void
+
+	abstract init(...args: Partial<Args>): this
+
+	abstract copy(): this
+
+	abstract [Symbol.iterator](): Generator<T>
 }
-
-export const DyssyncStream: ReturnType<typeof PreDyssyncStream> & {
-	generic?: typeof PreDyssyncStream
-} = PreDyssyncStream()
-
-DyssyncStream.generic = PreDyssyncStream

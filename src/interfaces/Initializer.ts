@@ -1,5 +1,5 @@
 export interface IInitializer<Args extends any[] = any[]> {
-	init(target: unknown, ...args: Partial<Args>): void
+	init(target: unknown, ...args: Partial<Args> | []): void
 }
 
 export interface IResourceSettable {

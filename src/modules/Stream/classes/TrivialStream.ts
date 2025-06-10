@@ -2,12 +2,12 @@ import { mixin } from "../../../mixin.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { IterableStream } from "./IterableStream.js"
-import { OwnableStream, OwnableStreamAnnotation } from "./OwnableStream.js"
+import { OwnableStream } from "./OwnableStream.js"
 
 export abstract class TrivialStreamAnnotation<
 	T = any,
 	Args extends any[] = []
-> extends OwnableStreamAnnotation<T, Args> {
+> extends OwnableStream<T, Args> {
 	protected set isEnd(isEnd: boolean) {}
 	protected set isStart(isEnd: boolean) {}
 	protected set curr(curr: T) {}

@@ -2,12 +2,12 @@ import { Initializable } from "../../../classes/Initializer.js"
 import type { IInitializer } from "../../../interfaces.js"
 import type { IOwnedStream, IOwningStream } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
-import { DyssyncStream, DyssyncStreamAnnotation } from "./DyssyncStream.js"
+import { DyssyncStream } from "./DyssyncStream.js"
 import { IterableStream } from "./IterableStream.js"
 import { OwnableStream } from "./OwnableStream.js"
 
 export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
-	extends DyssyncStreamAnnotation<T, Args>
+	extends DyssyncStream<T, Args>
 	implements IOwnedStream<T>
 {
 	protected abstract initializer: IInitializer<Args>
@@ -20,8 +20,6 @@ export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
 	protected postStart?(): void
 	protected initGetter?(...args: Partial<Args>): T
 
-	isCurrStart?(): boolean
-
 	protected update(newCurr: T) {}
 	protected preInit(...args: Partial<Args>) {}
 
@@ -30,8 +28,16 @@ export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
 
 	setOwner(newOwner?: unknown): void {}
 
+	init(...args: Partial<Args>) {
+		return this
+	}
+
 	*[Symbol.iterator]() {
 		yield null as T
+	}
+
+	constructor(...args: Partial<Args>) {
+		super()
 	}
 }
 

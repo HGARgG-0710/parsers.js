@@ -36,6 +36,10 @@ class SingletonStreamAnnotation<InType = any, OutType = any>
 	setHandler(handler: ISingletonHandler<InType, OutType>): this {
 		return this
 	}
+
+	init(resource?: IOwnedStream | undefined): this {
+		return this
+	}
 }
 
 const SingletonStreamMixin = new mixin<ILinkedStream>(

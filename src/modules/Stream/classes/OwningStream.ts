@@ -1,60 +1,43 @@
 import { Initializable } from "../../../classes/Initializer.js"
-import type { IInitializer } from "../../../interfaces.js"
-import { annotation } from "src/classes/Stream.js"
-import { mixin } from "../../../mixin.js"
+import type { IResourcefulStream } from "../../../interfaces.js"
 import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
-import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
+import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 
-export abstract class OwningStreamAnnotation<T = any, Args extends any[] = []>
-	extends annotation<T, [IOwnedStream, ...(Args | [])]>
-	implements IOwningStream<T>
+export abstract class OwningStream<T = any, Args extends any[] = []>
+	extends Initializable<[IOwnedStream, ...(Args | [])]>
+	implements IResourcefulStream<T>
 {
-	protected get initializer() {
-		return null as unknown as IInitializer<[IOwnedStream, ...(Args | [])]>
+	private _resource?: IOwnedStream
+
+	protected set resource(newResource: IOwnedStream | undefined) {
+		this._resource = newResource
 	}
 
-	protected set resource(resource: IOwnedStream | undefined) {}
+	protected get initializer() {
+		return ownerInitializer
+	}
 
 	get resource() {
-		return null as any
+		return this._resource
 	}
 
-	setResource(resource?: IOwnedStream): void {}
+	setResource(newResource: IOwnedStream) {
+		this.resource = newResource
+	}
+
+	abstract isEnd: boolean
+	abstract isStart: boolean
+	abstract curr: T
+
+	abstract isCurrEnd(): boolean
+
+	abstract next(): void
+
+	abstract copy(): this
+
+	abstract [Symbol.iterator](): Generator<T>
+
+	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {
+		super(resource, ...args)
+	}
 }
-
-const OwningStreamMixin = new mixin<IOwningStream>(
-	{
-		name: "OwningStream",
-		properties: {
-			_resource: null,
-
-			set resource(newResource: IOwnedStream | undefined) {
-				this._resource = newResource
-			},
-
-			get resource() {
-				return this._resource
-			},
-
-			setResource(newResource: IOwnedStream) {
-				this.resource = newResource
-			},
-
-			get initializer() {
-				return ownerInitializer
-			}
-		}
-	},
-	[],
-	[Initializable]
-)
-
-function PreOwningStream<T = any, Args extends any[] = any[]>() {
-	return OwningStreamMixin.toClass() as typeof OwningStreamAnnotation<T, Args>
-}
-
-export const OwningStream: ReturnType<typeof PreOwningStream> & {
-	generic?: typeof PreOwningStream
-} = PreOwningStream()
-
-OwningStream.generic = PreOwningStream

@@ -5,15 +5,15 @@ import type {
 	IOwningStream
 } from "../interfaces/OwnedStream.js"
 import { BasicStream } from "./BasicStream.js"
-import { OwningStream, OwningStreamAnnotation } from "./OwningStream.js"
+import { OwningStream } from "./OwningStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
 export abstract class BasicResourceStreamAnnotation<
 		T = any,
-		Args extends any[] = any[]
+		Args extends any[] = []
 	>
-	extends OwningStreamAnnotation<T, Args>
+	extends OwningStream<T, Args>
 	implements IOwnedStream
 {
 	protected ["constructor"]: new (
@@ -60,7 +60,7 @@ export abstract class BasicResourceStreamAnnotation<
 
 	protected syncCurr(): void {}
 
-	next(): void {}	
+	next(): void {}
 	prev(): void {}
 
 	*[Symbol.iterator]() {}
@@ -69,7 +69,10 @@ export abstract class BasicResourceStreamAnnotation<
 const BasicResourceStreamMixin = new mixin<ILinkedStream>(
 	{
 		name: "BasicResourceStream",
-		properties: {}
+		properties: {},
+		constructor: function (...items: any[]) {
+			this.super.BasicStream.constructor.call(this, ...items)
+		}
 	},
 	[ResourceCopyingStream, SyncCurrStream],
 	[BasicStream, OwningStream]

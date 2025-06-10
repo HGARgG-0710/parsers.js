@@ -5,9 +5,13 @@ export abstract class Initializable<Args extends any[] = any[]>
 {
 	protected abstract readonly initializer: IInitializer<Args>
 
-	init(...x: Partial<Args>) {
+	init(...x: Partial<Args> | []) {
 		this.initializer.init(this, ...x)
 		return this
+	}
+
+	constructor(...args: Partial<Args> | []) {
+		this.init(...args)
 	}
 }
 
