@@ -1,5 +1,3 @@
-import { mixin } from "../../../mixin.js"
-import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 import { BasicStream, BasicStreamAnnotation } from "./BasicStream.js"
 
 const arrayStreamInitializer = {
@@ -31,37 +29,44 @@ export abstract class ArrayStreamAnnotation<
 	}
 }
 
-const ArrayStreamMixin = new mixin<IOwnedStream>(
-	{
-		name: "ArrayStream",
-		properties: {
-			items: [],
+function BuildArrayStream<T = any, ElemType = any>() {
+	abstract class _ArrayStream extends BasicStream.generic!<T, ElemType[]>() {
+		protected ["constructor"]: new (...items: ElemType[]) => this
 
-			get initializer() {
-				return arrayStreamInitializer
-			},
+		protected items: ElemType[]
 
-			setItems(items: any[]) {
-				this.items = items
-			},
-
-			copy() {
-				return new this.constructor(...this.items)
-			}
-		},
-		constructor: function (...items: any[]) {
-			this.super.BasicStream.constructor.call(this, ...items)
+		get initializer() {
+			return arrayStreamInitializer
 		}
-	},
-	[],
-	[BasicStream]
-)
 
-function PreArrayStream<T = any, ElemType = any>() {
-	return ArrayStreamMixin.toClass() as typeof ArrayStreamAnnotation<
-		T,
-		ElemType
-	>
+		setItems(items: any[]) {
+			this.items = items
+		}
+
+		copy() {
+			return new this.constructor(...this.items)
+		}
+
+		constructor(...items: ElemType[]) {
+			super(...items)
+		}
+	}
+
+	return _ArrayStream as unknown as typeof ArrayStreamAnnotation<T, ElemType>
+}
+
+let arrayStream: typeof ArrayStreamAnnotation | null = null
+
+function PreArrayStream<
+	T = any,
+	ElemType = any
+>(): typeof ArrayStreamAnnotation<T, ElemType> {
+	return arrayStream
+		? arrayStream
+		: (arrayStream = BuildArrayStream<
+				T,
+				ElemType
+		  >() as typeof ArrayStreamAnnotation)
 }
 
 export const ArrayStream: ReturnType<typeof PreArrayStream> & {
