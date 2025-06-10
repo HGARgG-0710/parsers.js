@@ -132,12 +132,16 @@ export interface IIsOpen {
 
 export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
 
-export type IRecursiveListIdentifiable = {
+export interface IRecursiveListIdentifiable {
 	readonly isRecursiveInitList?: boolean
 }
 
-export type ISwitchIdentifiable = {
+export interface ISwitchIdentifiable {
 	readonly isSwitch?: boolean
+}
+
+export interface IConcattable<In = any, Out = any> {
+	concat: (x: In) => Out
 }
 
 export type * from "./interfaces/Accumulator.js"

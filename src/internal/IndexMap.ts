@@ -1,10 +1,10 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type { IIndexMap } from "../interfaces.js"
-import { isGoodIndex, table } from "../utils.js"
 import { Pairs } from "../samples.js"
+import { isGoodIndex, table } from "../utils.js"
 
-const { swap } = inplace
+const { swap, out, insert } = inplace
 const { isArray } = type
 
 export abstract class BaseIndexMap<
@@ -26,8 +26,6 @@ export abstract class BaseIndexMap<
 
 	abstract index(x: any): ValueType | DefaultType
 	abstract getIndex(key: any): IndexGetType
-	abstract delete(index: number, count?: number): this
-	abstract add(index: number, ...pairs: array.Pairs<KeyType, ValueType>): this
 	abstract replace(index: number, pair: [KeyType, ValueType]): this
 	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
 
@@ -50,12 +48,12 @@ export abstract class BaseIndexMap<
 		this._values = newValues
 	}
 
-	get values() {
-		return this._values
-	}
-
 	protected set keys(newKeys: KeyType[]) {
 		this._keys = newKeys
+	}
+
+	get values() {
+		return this._values
 	}
 
 	get keys() {
@@ -95,6 +93,28 @@ export abstract class BaseIndexMap<
 	swap(i: number, j: number) {
 		swap(this.keys, i, j)
 		swap(this.values, i, j)
+		return this
+	}
+
+	concat(x: Iterable<[KeyType, ValueType]>) {
+		const kv = Pairs.from(x)
+		const [newKeys, newValues] = kv
+		this.keys.push(...newKeys)
+		this.values.push(...newValues)
+		return kv
+	}
+
+	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
+		const kv = Pairs.from(pairs)
+		const [keys, values] = kv
+		insert(this.keys, index, ...keys)
+		insert(this.values, index, ...values)
+		return kv
+	}
+
+	delete(index: number, count: number = 1) {
+		out(this.keys, index, count)
+		out(this.values, index, count)
 		return this
 	}
 

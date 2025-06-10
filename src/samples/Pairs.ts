@@ -16,16 +16,21 @@ export namespace Pairs {
 	 * Given an array of linearized pairs `KeyType, ValueType`, returns the equivalent array of pairs
 	 */
 	export function fromLinear<KeyType = any, ValueType = any>(
-		linear: (KeyType | ValueType)[]
+		linear: Iterable<KeyType | ValueType>
 	) {
-		let size = (linear.length >> 1) + (linear.length % 2)
-		const result = Pairs<KeyType, ValueType>(size)
+		const result = Pairs<KeyType, ValueType>()
 
-		while (--size) {
-			const curr = result[size]
-			const index = size << 1
-			curr[0] = linear[index] as KeyType
-			curr[1] = linear[index + 1] as ValueType
+		let i = 0
+		for (const x of linear) {
+			const mod = i % 2
+			const pair = Math.floor(i / 2)
+			++i
+			if (mod === 0)
+				result.push([x as KeyType, null] as array.Pair<
+					KeyType,
+					ValueType
+				>)
+			else result[pair][mod] = x
 		}
 
 		return result
@@ -35,17 +40,15 @@ export namespace Pairs {
 	 * Given a pair of arrays of keys and values, returns an array of pairs.
 	 */
 	export function to<KeyType = any, ValueType = any>(
-		keys: KeyType[],
-		values: ValueType[]
+		keys: Iterable<KeyType>,
+		values: Iterable<ValueType>
 	) {
-		let size = keys.length
+		const result = Pairs<KeyType, ValueType>()
+		const valueIterator = values[Symbol.iterator]()
 
-		const result = Pairs<KeyType, ValueType>(size)
-
-		while (size--) {
-			const curr = result[size]
-			curr[0] = keys[size]
-			curr[1] = values[size]
+		for (const currKey of keys) {
+			const currValue = valueIterator.next().value
+			result.push([currKey, currValue])
 		}
 
 		return result
@@ -55,18 +58,14 @@ export namespace Pairs {
 	 * Returns a pair of keys and values, based off an array of pairs
 	 */
 	export function from<KeyType = any, ValueType = any>(
-		mapPairs: array.Pairs<KeyType, ValueType>
+		mapPairs: Iterable<[KeyType, ValueType]>
 	): [KeyType[], ValueType[]] {
-		let size = mapPairs.length
-		const [keys, values]: [KeyType[], ValueType[]] = [
-			new Array(size),
-			new Array(size)
-		]
+		const keys: KeyType[] = []
+		const values: ValueType[] = []
 
-		while (size--) {
-			const [key, value] = mapPairs[size]
-			keys[size] = key
-			values[size] = value
+		for (const [key, value] of mapPairs) {
+			keys.push(key)
+			values.push(value)
 		}
 
 		return [keys, values]

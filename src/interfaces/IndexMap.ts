@@ -1,5 +1,6 @@
 import type { array } from "@hgargg-0710/one"
 import type {
+	IConcattable,
 	ICopiable,
 	IDefaulting,
 	IIndexable,
@@ -30,14 +31,19 @@ export interface IIndexMap<
 		IRekeyable<KeyType>,
 		IReversible,
 		IKeysHaving<KeyType>,
-		IValuesHaving<ValueType> {
+		IValuesHaving<ValueType>,
+		IConcattable<Iterable<[KeyType, ValueType]>, [KeyType[], ValueType[]]> {
 	unique: () => number[]
 	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
 	swap: (i: number, j: number) => this
 
 	getIndex: (key: any) => IndexGetType
 
-	add: (index: number, ...pairs: array.Pairs<KeyType, ValueType>) => this
+	add: (
+		index: number,
+		...pairs: array.Pairs<KeyType, ValueType>
+	) => [KeyType[], ValueType[]]
+
 	delete: (index: number, count?: number) => this
 	replace: (index: number, pair: [KeyType, ValueType]) => this
 	set: (key: KeyType, value: ValueType, index?: number) => this

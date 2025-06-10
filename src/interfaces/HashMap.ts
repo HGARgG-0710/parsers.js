@@ -1,10 +1,10 @@
-import type { array } from "@hgargg-0710/one"
-import type { IIndexable } from "../interfaces.js"
 import type {
+	IConcattable,
 	ICopiable,
 	IDefaulting,
 	IDeletable,
 	IHashable,
+	IIndexable,
 	IRekeyable,
 	ISettable,
 	ISizeable
@@ -40,8 +40,10 @@ export interface IHashMap<KeyType = any, ValueType = any, DefaultType = any>
 		IRekeyable<KeyType>,
 		ISizeable,
 		IDefaulting,
-		ICopiable {
-	fromPairs(pairsList: array.Pairs<KeyType, ValueType>): this
-}
+		IConcattable<
+			Iterable<[KeyType, ValueType]>,
+			IHashMap<KeyType, ValueType, DefaultType>
+		>,
+		ICopiable {}
 
 export type * from "../modules/HashMap/interfaces/PreMap.js"

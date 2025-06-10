@@ -97,18 +97,23 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			return this
 		}
 
+		concat(x: Iterable<[KeyType, ValueType]>): [KeyType[], ValueType[]] {
+			const kv = super.concat(x)
+			const [keys] = kv
+			this.alteredKeys.push(...keys.map(keyExtension))
+			return kv
+		}
+
 		add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
-			const [keys, values] = Pairs.from(pairs)
-			insert(this.keys, index, ...keys)
+			const kv = super.add(index, ...pairs)
+			const [keys] = kv
 			insert(this.alteredKeys, index, ...keys.map(keyExtension))
-			insert(this.values, index, ...values)
-			return this
+			return kv
 		}
 
 		delete(index: number, count: number = 1) {
-			out(this.keys, index, count)
+			super.delete(index, count)
 			out(this.alteredKeys, index, count)
-			out(this.values, index, count)
 			return this
 		}
 
