@@ -11,13 +11,11 @@ export abstract class annotation<T = any, Args extends any[] = any[]>
 	abstract isCurrEnd(): boolean
 	abstract copy(): this
 
-	init(...x: Partial<Args>): this {
-		return this
-	}
+	abstract init(...args: Partial<Args> | []): this
 
 	abstract [Symbol.iterator](): Generator<T>
 
-	constructor(...x: Partial<Args>) {}
+	constructor(...x: [] | Partial<Args>) {}
 }
 
 export * from "../modules/Stream/classes/ArrayStream.js"

@@ -63,7 +63,7 @@ export interface IGettable<Type = any> {
 }
 
 export interface IInitializable<Args extends any[] = any[]> {
-	init: (...x: Partial<Args>) => this
+	init: (...x: [] | Partial<Args>) => this
 }
 
 export interface IReversible {
