@@ -1,8 +1,8 @@
 import type { IPosed, IStream } from "../../../interfaces.js"
-import { StreamAnnotation } from "../../../internal/StreamAnnotation.js"
+import { annotation } from "src/classes/Stream.js"
 
 export abstract class PosHavingStream<T = any>
-	extends StreamAnnotation<T>
+	extends annotation<T>
 	implements IStream<T>, IPosed
 {
 	private _pos: number = 0

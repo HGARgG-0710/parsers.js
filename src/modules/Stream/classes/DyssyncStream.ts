@@ -1,11 +1,11 @@
-import { StreamAnnotation } from "src/internal/StreamAnnotation.js"
+import { annotation } from "src/classes/Stream.js"
 import type { IStream } from "../../../interfaces.js"
 import { mixin } from "../../../mixin.js"
 
 export abstract class DyssyncStreamAnnotation<
 	T = any,
 	Args extends any[] = any[]
-> extends StreamAnnotation<T, Args> {
+> extends annotation<T, Args> {
 	protected set isEnd(isEnd: boolean) {}
 	protected set isStart(isEnd: boolean) {}
 	protected set curr(curr: T) {}

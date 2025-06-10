@@ -1,11 +1,11 @@
 import type { IStream } from "../../../interfaces.js"
-import { StreamAnnotation } from "../../../internal/StreamAnnotation.js"
+import { annotation } from "src/classes/Stream.js"
 import { mixin } from "../../../mixin.js"
 
 abstract class IterableStreamAnnotation<
 	Type = any,
 	Args extends any[] = any[]
-> extends StreamAnnotation<Type, Args> {
+> extends annotation<Type, Args> {
 	[Symbol.iterator]: () => Generator<Type>
 }
 

@@ -1,12 +1,12 @@
 import { Initializable } from "../../../classes/Initializer.js"
 import type { IInitializer } from "../../../interfaces.js"
-import { StreamAnnotation } from "../../../internal/StreamAnnotation.js"
+import { annotation } from "src/classes/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
 
 export abstract class OwningStreamAnnotation<T = any, Args extends any[] = []>
-	extends StreamAnnotation<T, [IOwnedStream, ...(Args | [])]>
+	extends annotation<T, [IOwnedStream, ...(Args | [])]>
 	implements IOwningStream<T>
 {
 	protected get initializer() {

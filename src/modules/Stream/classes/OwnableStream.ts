@@ -1,9 +1,9 @@
-import { StreamAnnotation } from "../../../internal/StreamAnnotation.js"
+import { annotation } from "src/classes/Stream.js"
 import { mixin } from "../../../mixin.js"
 import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
 
 export abstract class OwnableStreamAnnotation<T = any, Args extends any[] = any[]>
-	extends StreamAnnotation<T, Args>
+	extends annotation<T, Args>
 	implements IOwnedStream<T>
 {
 	readonly owner: IOwningStream
