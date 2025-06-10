@@ -17,35 +17,39 @@ type IParsedStreamConstructor<FinalType = any, InitType = any> = new <
 
 let parsedStreamClass: IParsedStreamConstructor | null = null
 
+function BuildParsedStream<FinalType = any, InitType = any>() {
+	return class
+		extends AttachedStream.generic!<FinalType, []>()
+		implements ILinkedStream<FinalType>
+	{
+		protected ["constructor"]: new (
+			parseInstance: Parse<FinalType, InitType>
+		) => this
+
+		next() {
+			super.next()
+			this.parseInstance.maybeUpdate()
+		}
+
+		copy(): this {
+			return new this.constructor(this.parseInstance.copy())
+		}
+
+		constructor(
+			private readonly parseInstance: Parse<FinalType, InitType>
+		) {
+			super(parseInstance.workStream)
+		}
+	} as IParsedStreamConstructor<FinalType, InitType>
+}
+
 function ParsedStream<
 	FinalType = any,
 	InitType = any
 >(): IParsedStreamConstructor<FinalType, InitType> {
 	return parsedStreamClass
 		? parsedStreamClass
-		: (parsedStreamClass = class
-				extends AttachedStream.generic!<FinalType, []>()
-				implements ILinkedStream<FinalType>
-		  {
-				protected ["constructor"]: new (
-					parseInstance: Parse<FinalType, InitType>
-				) => this
-
-				next() {
-					super.next()
-					this.parseInstance.maybeUpdate()
-				}
-
-				copy(): this {
-					return new this.constructor(this.parseInstance.copy())
-				}
-
-				constructor(
-					private readonly parseInstance: Parse<FinalType, InitType>
-				) {
-					super(parseInstance.workStream)
-				}
-		  } as IParsedStreamConstructor<FinalType, InitType>)
+		: (parsedStreamClass = BuildParsedStream<FinalType, InitType>())
 }
 
 const parseInitializer = {
