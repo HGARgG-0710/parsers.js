@@ -1,14 +1,14 @@
 import type {
 	ILinkedStream,
 	IOwnedStream,
-	IPredicatePosition
+	IStreamPosition
 } from "../../../interfaces/Stream.js"
 import { navigate } from "../../../utils/Stream.js"
-import { positionBind } from "../utils/Position.js"
+import { bind } from "../utils/StreamPosition.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 
 interface IPredicateSettable<T = any> {
-	setPredicate(predicate: IPredicatePosition<T>): this
+	setPredicate(predicate: IStreamPosition<T>): this
 }
 
 type IFilterStreamConstructor<T = any> = new (
@@ -19,7 +19,7 @@ function BuildFilterStream<T = any>() {
 	return class extends DyssyncOwningStream.generic!<T, []>() {
 		private hasLookahead: boolean = false
 		private lookahead: T
-		private predicate: IPredicatePosition<T>
+		private filter: IStreamPosition<T>
 
 		private currGetter() {
 			this.updateCurr()
@@ -31,7 +31,7 @@ function BuildFilterStream<T = any>() {
 		}
 
 		private prod() {
-			this.lookahead = navigate(this.resource!, this.predicate)
+			this.lookahead = navigate(this.resource!, this.filter)
 			this.hasLookahead = this.resource!.isEnd
 		}
 
@@ -51,8 +51,8 @@ function BuildFilterStream<T = any>() {
 			else this.currGetter()
 		}
 
-		setPredicate(predicate: IPredicatePosition<T>) {
-			this.predicate = positionBind(this, predicate)
+		setPredicate(predicate: IStreamPosition<T>) {
+			this.filter = bind(this, predicate)
 			return this
 		}
 
@@ -68,7 +68,7 @@ function PreFilterStream<T = any>(): IFilterStreamConstructor<T> {
 	return filterStream ? filterStream : (filterStream = BuildFilterStream<T>())
 }
 
-export function FilterStream<T = any>(predicate: IPredicatePosition<T>) {
+export function FilterStream<T = any>(predicate: IStreamPosition<T>) {
 	const filterStream = PreFilterStream<T>()
 	return function (resource?: IOwnedStream<T>) {
 		return new filterStream()

@@ -5,13 +5,13 @@ import type {
 	IInputStream,
 	INavigable,
 	IPeekableStream,
-	IPosition,
 	IPrevable,
 	IRewindable
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
 import { uniNavigate } from "../../../utils/Stream.js"
-import { isPredicatePosition } from "../utils/Position.js"
+import type { IStreamPosition } from "../interfaces/StreamPosition.js"
+import { isPredicatePosition } from "src/utils/Position.js"
 import { SourceStream, SourceStreamAnnotation } from "./SourceStream.js"
 
 const { max, min } = number
@@ -42,7 +42,7 @@ class InputStreamAnnotation<T = any>
 		return null as T
 	}
 
-	navigate(position: IPosition<T>) {
+	navigate(position: IStreamPosition<T>) {
 		return null as T
 	}
 
@@ -110,7 +110,7 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 			this.view.init(source)
 		}
 
-		navigate(relativePos: IPosition) {
+		navigate(relativePos: IStreamPosition) {
 			if (isPredicatePosition(relativePos))
 				return uniNavigate(this, relativePos)
 

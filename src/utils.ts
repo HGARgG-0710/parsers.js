@@ -49,4 +49,5 @@ export function table<KeyType = any, ValueType = any>(
 }
 
 export * as Node from "./utils/Node.js"
+export * as Position from "./utils/Position.js"
 export * as Stream from "./utils/Stream.js"

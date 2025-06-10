@@ -4,14 +4,16 @@ import type {
 	ILinkedStream,
 	INavigable,
 	IOwnedStream,
-	IPosition,
-	IPredicatePosition,
 	IRewindable
 } from "../../../interfaces/Stream.js"
 import { OutputBuffer } from "../../../internal/OutputBuffer.js"
 import { mixin } from "../../../mixin.js"
 import { uniNavigate } from "../../../utils/Stream.js"
-import { direction } from "../utils/Position.js"
+import type {
+	IStreamPosition,
+	IStreamPositionPredicate
+} from "../interfaces/StreamPosition.js"
+import { direction } from "../utils/StreamPosition.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PipeStream } from "./PipeStream.js"
 import { PosHavingStream } from "./PosHavingStream.js"
@@ -28,7 +30,7 @@ class FreezableStreamAnnotation<T = any>
 {
 	readonly buffer: OutputBuffer
 
-	navigate(relativePos: IPosition<T>): T {
+	navigate(relativePos: IStreamPosition<T>): T {
 		return null as T
 	}
 
@@ -69,7 +71,7 @@ const FreezableStreamMixin = new mixin<
 				uniNavigate(this, relativePos - posGap)
 			},
 
-			navigatePredicate(relativePos: IPredicatePosition) {
+			navigatePredicate(relativePos: IStreamPositionPredicate) {
 				if (direction(relativePos)) uniNavigate(this, relativePos)
 				else
 					while (!relativePos(this) && this.isCurrStart()) this.prev()
@@ -128,7 +130,7 @@ const FreezableStreamMixin = new mixin<
 				else this.basePrevIter()
 			},
 
-			navigate(relativePos: IPosition) {
+			navigate(relativePos: IStreamPosition) {
 				if (isNumber(relativePos)) this.navigateNumber(relativePos)
 				else this.navigatePredicate(relativePos)
 				return this.curr

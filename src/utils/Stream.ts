@@ -1,12 +1,7 @@
 import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { HandlerStream } from "../classes/Stream.js"
-import type {
-	IClearable,
-	IFiniteWritable,
-	IPosition,
-	IPushable
-} from "../interfaces.js"
+import type { IClearable, IFiniteWritable, IPushable } from "../interfaces.js"
 import type {
 	IPrevableStream,
 	IRawStream,
@@ -17,11 +12,12 @@ import type {
 	IStreamTransform
 } from "../interfaces/StreamHandler.js"
 import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
+import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import {
 	direction,
-	pickDirection,
-	positionNegate
-} from "../modules/Stream/utils/Position.js"
+	pick,
+	negate
+} from "../modules/Stream/utils/StreamPosition.js"
 
 const { isFunction, isNumber } = type
 
@@ -79,9 +75,9 @@ export function destroy<Type = any>(
  */
 export function skip<Type = any>(
 	input: IPrevableStream<Type>,
-	steps: IPosition = 1
+	steps: IStreamPosition = 1
 ) {
-	return uniNavigate(input, positionNegate(steps))
+	return uniNavigate(input, negate(steps))
 }
 
 /**
@@ -118,7 +114,7 @@ export function consumable<Type = any>(result: IPushable<Type> & IClearable) {
  * returns whether the bound corresponding to the direction of iteration
  * has been reached
  */
-export function has(pos: IPosition) {
+export function has(pos: IStreamPosition) {
 	const stopPoint = direction(pos) ? "isEnd" : "isStart"
 	return function <Type = any>(input: IPrevableStream<Type>) {
 		uniNavigate(input, pos)
@@ -145,7 +141,7 @@ export function count<Type = any>(pred: IStreamPredicate<Type>) {
  * Returns a function that collects the items of `input`
  * into `init`, delimiting them by `delimPred`
  */
-export function delimited(delimPred: IPosition) {
+export function delimited(delimPred: IStreamPosition) {
 	return function <Type = any>(
 		input: IPrevableStream<Type>,
 		result: IPushable<Type> = new ArrayCollection()
@@ -205,13 +201,13 @@ export function finish<Type = any>(stream: IStream<Type>) {
  */
 export function uniNavigate<Type = any>(
 	stream: IStream<Type>,
-	position: IPosition<Type>
+	position: IStreamPosition<Type>
 ): Type {
 	if (isNumber(position)) {
 		if (position < 0) while (position++) stream.prev!()
 		else while (position--) stream.next()
 	} else {
-		const change = pickDirection(position)
+		const change = pick(position)
 		while (!stream.isEnd && !position(stream))
 			change(stream! as IPrevableStream<Type>)
 	}
@@ -225,7 +221,7 @@ export function uniNavigate<Type = any>(
  */
 export function navigate<Type = any>(
 	stream: IStream<Type>,
-	position: IPosition<Type>
+	position: IStreamPosition<Type>
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)
@@ -255,4 +251,4 @@ export function rawStreamCopy(rawStream: IRawStream) {
 	return isFunction(rawStream) ? rawStream : rawStream.copy()
 }
 
-export * as Position from "../modules/Stream/utils/Position.js"
+export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

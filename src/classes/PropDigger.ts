@@ -1,23 +1,51 @@
 import { type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import assert from "assert"
+import type { IPosition, IPredicatePosition } from "../interfaces.js"
 
-const { isStruct, isArray } = type
+const { isStruct, isArray, isNumber } = type
 
 export class PropDigger {
 	private readonly properties: string[]
 
-	dig<In extends object = Summat, Out extends object = any>(
+	private readPropertyAt<In extends object = Summat>(x: In, index: number) {
+		return x[this.properties[index]]
+	}
+
+	private loopProps<In extends object = Summat>(orig: In) {
+		let currentLevel = orig
+		for (let j = 0; j < this.properties.length; ++j)
+			currentLevel = this.readPropertyAt(currentLevel, j)
+		return currentLevel
+	}
+
+	private digFinite<In extends object = Summat, Out = any>(
 		x: In,
 		depth: number = 0
 	) {
 		let currentLevel = x
-		outer: for (let i = 0; i < depth; ++i)
-			for (let j = 0; j < this.properties.length; ++j) {
-				if (!isStruct(currentLevel)) break outer
-				currentLevel = currentLevel[this.properties[j]]
-			}
+		for (let i = 0; i < depth && isStruct(currentLevel); ++i)
+			currentLevel = this.loopProps(currentLevel)
 		return currentLevel as unknown as Out
+	}
+
+	private digPredicate<In extends object = Summat, Out = any>(
+		x: In,
+		pred: IPredicatePosition<In>
+	) {
+		let currentLevel = x
+		while (pred(x) && isStruct(currentLevel))
+			currentLevel = this.loopProps(currentLevel)
+		return currentLevel
+	}
+
+	dig<In extends object = Summat, Out extends object = any>(
+		x: In,
+		depth: IPosition<In>
+	) {
+		return isNumber(depth)
+			? this.digFinite<In, Out>(x, depth)
+			: this.digPredicate<In, Out>(x, depth)
 	}
 
 	join(digger: PropDigger) {

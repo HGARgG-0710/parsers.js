@@ -1,3 +1,4 @@
+export * as Position from "./classes/Position.js"
 export * from "./classes/ArrayCollection.js"
 export * from "./classes/Autocache.js"
 export * as Decoder from "./classes/Decoder.js"

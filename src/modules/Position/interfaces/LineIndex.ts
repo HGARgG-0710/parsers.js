@@ -1,4 +1,4 @@
-import type { ICopiable } from "../../../../interfaces.js"
+import type { ICopiable } from "../../../interfaces.js"
 
 export interface ILineIndex extends ICopiable {
 	readonly char: number

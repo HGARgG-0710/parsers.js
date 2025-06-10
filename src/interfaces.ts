@@ -1,7 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
-import type { IPosition } from "./modules/Stream/interfaces/Position.js"
 
 export type IMappable<Type = any, Out = any> = (
 	value: Type,
@@ -54,10 +53,6 @@ export type IIndexed<Type = any> =
 			[x: number]: Type
 			length: number
 	  } & Iterable<Type>
-
-export type IInvalidEntries<Type = any> = [IPosition, Type][]
-
-export type IValidationResult = true | [false, IPosition]
 
 export interface IStateful<Type extends Summat = Summat> {
 	readonly state: Type
@@ -157,6 +152,7 @@ export type * from "./interfaces/IndexMap.js"
 export type * from "./interfaces/Initializer.js"
 export type * from "./interfaces/Node.js"
 export type * from "./interfaces/PoolGetter.js"
+export type * from "./interfaces/Position.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"

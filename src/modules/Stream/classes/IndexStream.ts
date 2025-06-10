@@ -1,10 +1,7 @@
-import type {
-	ILineIndex,
-	IOwnedStream,
-	IPrevable
-} from "../../../interfaces/Stream.js"
+import { LineIndex } from "../../../classes/Position.js"
+import type { ILineIndex } from "../../../interfaces.js"
+import type { IOwnedStream, IPrevable } from "../../../interfaces/Stream.js"
 import type { IIndexStream } from "../interfaces/IndexStream.js"
-import { LineIndex } from "./Position.js"
 import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
 
 class IndexStreamAnnotation<T = any>

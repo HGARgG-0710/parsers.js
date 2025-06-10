@@ -35,5 +35,3 @@ export * from "../modules/Stream/classes/SyncStream.js"
 export * from "../modules/Stream/classes/TrivialStream.js"
 export * from "../modules/Stream/classes/WrapperStream.js"
 export * from "../modules/Stream/classes/WriterStream.js"
-
-export * as Position from "../modules/Stream/classes/Position.js"

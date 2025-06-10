@@ -1,14 +1,10 @@
 import { boolean, type } from "@hgargg-0710/one"
 import { ownerInitializer } from "../../../classes/Initializer.js"
-import type { ILinkedStream, IPosition } from "../../../interfaces/Stream.js"
+import type { ILinkedStream } from "../../../interfaces/Stream.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ILimitableStream } from "../interfaces/LimitStream.js"
-import {
-	directionCompare,
-	positionBind,
-	positionEqual,
-	positionNegate
-} from "../utils/Position.js"
+import type { IStreamPosition } from "../interfaces/StreamPosition.js"
+import { bind, compare, equals, negate } from "../utils/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 
 const { isNullary } = type
@@ -20,8 +16,8 @@ interface IStateSettupable {
 
 interface ILimitSetterMethods<T = any> {
 	setDirection(direction: boolean): this
-	setFrom(from: IPosition<T>): this
-	setUntil(until: IPosition<T>): this
+	setFrom(from: IStreamPosition<T>): this
+	setUntil(until: IStreamPosition<T>): this
 }
 
 type ILimitStreamConsructor<T = any> = new (
@@ -47,8 +43,8 @@ function BuildLimitStream<T = any>() {
 		private lookahead: T
 
 		private direction: boolean
-		private from: IPosition
-		private until: IPosition
+		private from: IStreamPosition<T>
+		private until: IStreamPosition<T>
 
 		protected get initializer() {
 			return limitStreamInitializer
@@ -132,13 +128,13 @@ function BuildLimitStream<T = any>() {
 		isCurrEnd(): boolean {
 			if (this.resource.isCurrEnd()) return true
 			this.lookahead = this.prodForth()
-			return positionEqual(this.resource!, this.until)
+			return equals(this.resource!, this.until)
 		}
 
 		isCurrStart(): boolean {
 			if (this.resource.isCurrStart()) return true
 			this.lookbehind = this.prodBack()
-			return positionEqual(this.resource!, this.from)
+			return equals(this.resource!, this.from)
 		}
 
 		next() {
@@ -157,13 +153,13 @@ function BuildLimitStream<T = any>() {
 			return super.init(resource)
 		}
 
-		setFrom(from: IPosition) {
-			this.from = positionBind(this, from)
+		setFrom(from: IStreamPosition<T>) {
+			this.from = bind(this, from)
 			return this
 		}
 
-		setUntil(until: IPosition) {
-			this.until = positionBind(this, until)
+		setUntil(until: IStreamPosition<T>) {
+			this.until = bind(this, until)
 			return this
 		}
 
@@ -185,16 +181,16 @@ function PreLimitStream<T = any>(): ILimitStreamConsructor<T> {
 }
 
 export function LimitStream<T = any>(
-	from: IPosition<T>,
-	longAs?: IPosition<T>
+	from: IStreamPosition<T>,
+	longAs?: IStreamPosition<T>
 ) {
 	if (isNullary(longAs)) {
 		longAs = from
 		from = LimitStream.NoMovementPredicate
 	}
 
-	const until = positionNegate(longAs)
-	const direction = directionCompare(from, until)
+	const until = negate(longAs)
+	const direction = compare(from, until)
 
 	const limitStream = PreLimitStream<T>()
 

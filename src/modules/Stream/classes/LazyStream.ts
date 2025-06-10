@@ -1,13 +1,12 @@
 import { type } from "@hgargg-0710/one"
-import type { ISource } from "../../../interfaces.js"
+import type { IPosed, ISource } from "../../../interfaces.js"
 import type {
 	IInputStream,
 	INavigable,
-	IPosed,
-	IPosition,
 	ISourcedStream
 } from "../../../interfaces/Stream.js"
 import { uniNavigate } from "../../../utils/Stream.js"
+import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
 
 const { isNumber } = type
@@ -45,7 +44,7 @@ export class LazyStream
 		return !this.source!.hasChars()
 	}
 
-	navigate(pos: IPosition) {
+	navigate(pos: IStreamPosition) {
 		if (isNumber(pos)) this.nextDecoded(pos)
 		else uniNavigate(this, pos)
 		this.updateCurr()

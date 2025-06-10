@@ -3,7 +3,7 @@ import type { IWalkable } from "../../../interfaces.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
 import { isGoodIndex } from "../../../utils.js"
 import { treeEndPath } from "../../../utils/Node.js"
-import { MultiIndex } from "./Position.js"
+import { MultiIndex } from "../../../classes/Position.js"
 import { SourceStream, SourceStreamAnnotation } from "./SourceStream.js"
 
 type PrevResponseWorkable = typeof GO_PREV_LAST | typeof POP_CHILD

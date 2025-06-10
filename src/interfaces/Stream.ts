@@ -2,10 +2,10 @@ import type {
 	ICopiable,
 	IInitializable,
 	IOwnedStream,
-	IPosition,
 	IStateful,
 	IStateSettable
 } from "../interfaces.js"
+import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 
 export interface IPrevable {
 	prev: () => void
@@ -16,7 +16,7 @@ export interface IFinishable<Type = any> {
 }
 
 export interface INavigable<Type = any> {
-	navigate: (position: IPosition<Type>) => Type
+	navigate: (position: IStreamPosition<Type>) => Type
 }
 
 export interface IRewindable<Type = any> {
@@ -61,6 +61,8 @@ export type IStatefulStream<Type = any> = IStream<Type> &
 	IStateful &
 	IStateSettable
 
+export type IChange<Type = any> = (input: IPrevableStream<Type>) => Type
+
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"
 export type * from "../modules/Stream/interfaces/InputStream.js"
@@ -68,5 +70,5 @@ export type * from "../modules/Stream/interfaces/LimitStream.js"
 export type * from "../modules/Stream/interfaces/MarkerStream.js"
 export type * from "../modules/Stream/interfaces/OwnedStream.js"
 export type * from "../modules/Stream/interfaces/PeekStream.js"
-export type * from "../modules/Stream/interfaces/Position.js"
 export type * from "../modules/Stream/interfaces/SingletonStream.js"
+export type * from "../modules/Stream/interfaces/StreamPosition.js"
