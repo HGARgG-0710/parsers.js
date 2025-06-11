@@ -22,7 +22,7 @@ export interface IStreamChooser {
 	readonly isSwitch?: false
 }
 
-export type IStreamArray = IArray<ILinkedStream | IStreamChooser>
+export type IStreamArray = IArray<IRawStream>
 
 export type ICompositeStream<T = any> = IControlStream<T> &
 	IInitializable<[IOwnedStream?]> & {
