@@ -1,6 +1,6 @@
 import { array } from "@hgargg-0710/one"
-import { InitMixin } from "../internal/MixinArray.js"
 import type { ICollection } from "../interfaces.js"
+import { InitMixin } from "../internal/MixinArray.js"
 
 export class ArrayCollection<T = any>
 	extends InitMixin<T>

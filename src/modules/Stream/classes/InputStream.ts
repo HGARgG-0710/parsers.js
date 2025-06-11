@@ -1,4 +1,5 @@
 import { number } from "@hgargg-0710/one"
+import { isPredicatePosition } from "src/utils/Position.js"
 import type { IParseable } from "../../../interfaces.js"
 import type {
 	IFinishable,
@@ -11,7 +12,6 @@ import type {
 import { ReadableView } from "../../../internal/ReadableView.js"
 import { uniNavigate } from "../../../utils/Stream.js"
 import type { IStreamPosition } from "../interfaces/StreamPosition.js"
-import { isPredicatePosition } from "src/utils/Position.js"
 import { SourceStream, SourceStreamAnnotation } from "./SourceStream.js"
 
 const { max, min } = number

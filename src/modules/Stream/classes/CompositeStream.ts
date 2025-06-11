@@ -1,6 +1,7 @@
 import { array, inplace } from "@hgargg-0710/one"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import { MissingArgument } from "../../../constants.js"
+import type { IStateSettable } from "../../../interfaces.js"
 import type { IParseState } from "../../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
@@ -11,7 +12,6 @@ import { StreamList, streamListPool } from "../../../internal/StreamList.js"
 import { isStateful } from "../../../is/Stream.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { WrapperStream } from "./WrapperStream.js"
-import type { IStateSettable } from "../../../interfaces.js"
 
 const { mutate } = inplace
 

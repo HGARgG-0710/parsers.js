@@ -1,6 +1,6 @@
 import { number } from "@hgargg-0710/one"
-import { MixinArray } from "../internal/MixinArray.js"
 import type { IClearable, IPushable } from "../interfaces.js"
+import { MixinArray } from "../internal/MixinArray.js"
 
 const { min } = number
 

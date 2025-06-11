@@ -1,13 +1,13 @@
+import type {
+	IRecursiveListIdentifiable,
+	ISwitchIdentifiable
+} from "src/interfaces.js"
 import type { IOwnerSettable, IResourceSettable } from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
 	IStatefulStream,
 	IStream
 } from "../../../interfaces/Stream.js"
-import type {
-	IRecursiveListIdentifiable,
-	ISwitchIdentifiable
-} from "src/interfaces.js"
 
 export type IOwnedStream<T = any> = IStream<T> &
 	IOwnerSettable & {

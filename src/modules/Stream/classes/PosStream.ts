@@ -1,6 +1,6 @@
+import type { IPosed } from "../../../interfaces/Position.js"
 import { mixin } from "../../../mixin.js"
 import type { ILinkedStream } from "../interfaces/OwnedStream.js"
-import type { IPosed } from "../../../interfaces/Position.js"
 import { PosHavingStream } from "./PosHavingStream.js"
 import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
 

@@ -1,4 +1,6 @@
 import { array, inplace } from "@hgargg-0710/one"
+import { type IRecursiveListIdentifiable, type ISwitchIdentifiable } from "src/interfaces.js"
+import { Initializable } from "../classes/Initializer.js"
 import type { IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import {
@@ -8,9 +10,8 @@ import {
 	renewerInitializer,
 	wrapSwitch,
 	type IRecursiveItems,
-	type IRecursivelySwitchable} from "./RecursiveInitList.js"
-import { type IRecursiveListIdentifiable, type ISwitchIdentifiable } from "src/interfaces.js"
-import { Initializable } from "../classes/Initializer.js"
+	type IRecursivelySwitchable
+} from "./RecursiveInitList.js"
 
 const { first, clear } = array
 const { insert, mutate, out } = inplace

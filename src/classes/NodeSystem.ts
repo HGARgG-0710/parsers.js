@@ -1,16 +1,16 @@
 import assert from "assert"
+import type {
+	INodeTypeCategories,
+	INodeTypeFactory,
+	INodeTypesMap
+} from "../interfaces/Node.js"
+import type { IPoolGetter } from "../interfaces/PoolGetter.js"
+import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { MapInternal } from "../modules/HashMap/classes/PreMap.js"
 import { Autocache } from "./Autocache.js"
-import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { BasicHash } from "./HashMap.js"
 import { ObjectPool } from "./ObjectPool.js"
-import type {
-	INodeTypeFactory,
-	INodeTypesMap,
-	INodeTypeCategories
-} from "../interfaces/Node.js"
 import { TypedPoolKeeper } from "./PoolGetter.js"
-import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 
 export function NodeFactory<T = any>(
 	preFactory: INodeTypeFactory<T>
