@@ -5,13 +5,12 @@ import type { IIndexable, ISettable } from "../interfaces.js"
 
 const { isFunction } = type
 
-export function Autocache<KeyType = any, ValueType = any>(
-	cache: ISettable<KeyType, ValueType> &
-		IIndexable<ValueType | typeof NotCached>,
-	callback: (x: KeyType) => ValueType
+export function Autocache<K = any, V = any>(
+	cache: ISettable<K, V> & IIndexable<V | typeof NotCached>,
+	callback: (x: K) => V
 ) {
 	assert(isFunction(callback))
-	return function (x: KeyType) {
+	return function (x: K) {
 		const cached = cache.index(x)
 		if (cached === NotCached) {
 			const newlyCached = callback(x)

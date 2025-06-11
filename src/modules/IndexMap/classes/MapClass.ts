@@ -24,48 +24,45 @@ const { trivialCompose } = functional
 const { equals } = boolean
 const { insert, out } = inplace
 
-function plainGetIndex<KeyType = any, ValueType = any>(
-	this: IIndexMap<KeyType, ValueType>,
-	key: any
-) {
+function plainGetIndex<K = any, V = any>(this: IIndexMap<K, V>, key: any) {
 	return (this as any).alteredKeys.indexOf(key)
 }
 
-function extend<KeyType = any, ValueType = any>(
-	this: IMapClass<KeyType, ValueType>,
-	...f: ((x: ValueType) => any)[]
+function extend<K = any, V = any>(
+	this: IMapClass<K, V>,
+	...f: ((x: V) => any)[]
 ) {
-	return MapClass<KeyType>(
+	return MapClass<K>(
 		this.change,
 		this.extensions.concat(f),
 		this.keyExtensions
 	)
 }
 
-function extendKey<KeyType = any, ValueType = any>(
-	this: IMapClass<KeyType, ValueType>,
-	...f: ((x: any) => KeyType)[]
+function extendKey<K = any, V = any>(
+	this: IMapClass<K, V>,
+	...f: ((x: any) => K)[]
 ) {
-	return MapClass<any, ValueType>(
+	return MapClass<any, V>(
 		this.change,
 		this.extensions,
 		this.keyExtensions.concat(f)
 	)
 }
 
-export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
-	change?: IIndexingFunction<KeyType>,
+export function MapClass<K = any, V = any, Default = any>(
+	change?: IIndexingFunction<K>,
 	extensions: Function[] = [],
 	keyExtensions: Function[] = []
-): IMapClass<KeyType, ValueType, DefaultType> {
+): IMapClass<K, V, Default> {
 	const extension = trivialCompose(...extensions)
 	const keyExtension = trivialCompose(...keyExtensions)
 
 	class linearMapClass
-		extends BaseIndexMap<KeyType, ValueType, DefaultType>
-		implements IIndexMap<KeyType, ValueType, DefaultType>
+		extends BaseIndexMap<K, V, Default>
+		implements IIndexMap<K, V, Default>
 	{
-		static change?: IIndexingFunction<KeyType>
+		static change?: IIndexingFunction<K>
 
 		static extend: <KeyType = any>(
 			...f: ((...x: any[]) => any)[]
@@ -87,7 +84,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 				: this.default
 		}
 
-		replace(index: number, pair: [KeyType, ValueType]) {
+		replace(index: number, pair: [K, V]) {
 			if (isGoodIndex(index) && index < this.size) {
 				const [key, value] = pair
 				this.keys[index] = key
@@ -97,14 +94,14 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			return this
 		}
 
-		concat(x: Iterable<[KeyType, ValueType]>): [KeyType[], ValueType[]] {
+		concat(x: Iterable<[K, V]>): [K[], V[]] {
 			const kv = super.concat(x)
 			const [keys] = kv
 			this.alteredKeys.push(...keys.map(keyExtension))
 			return kv
 		}
 
-		add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
+		add(index: number, ...pairs: array.Pairs<K, V>) {
 			const kv = super.add(index, ...pairs)
 			const [keys] = kv
 			insert(this.alteredKeys, index, ...keys.map(keyExtension))
@@ -117,7 +114,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			return this
 		}
 
-		rekey(keyFrom: KeyType, keyTo: KeyType) {
+		rekey(keyFrom: K, keyTo: K) {
 			const replacementIndex = this.keys.indexOf(keyFrom)
 			this.keys[replacementIndex] = keyTo
 			this.alteredKeys[replacementIndex] = keyExtension(keyTo)
@@ -137,10 +134,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 			return indexes
 		}
 
-		constructor(
-			pairsList: array.Pairs<KeyType, ValueType> = [],
-			_default?: DefaultType
-		) {
+		constructor(pairsList: array.Pairs<K, V> = [], _default?: Default) {
 			assert(isArray(pairsList))
 			const [keys, values] = Pairs.from(pairsList)
 			super(keys, values, _default)
@@ -154,8 +148,7 @@ export function MapClass<KeyType = any, ValueType = any, DefaultType = any>(
 	linearMapClass.extend = extend
 	linearMapClass.extendKey = extendKey
 
-	if (!change)
-		linearMapClass.prototype.getIndex = plainGetIndex<KeyType, ValueType>
+	if (!change) linearMapClass.prototype.getIndex = plainGetIndex<K, V>
 
 	return linearMapClass
 }

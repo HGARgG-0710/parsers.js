@@ -42,9 +42,9 @@ export function get<T = any>(x: IGettable<T>) {
 /**
  * Returns the pair of `indexMap.keys` and `indexMap.values`
  */
-export function table<KeyType = any, ValueType = any>(
-	kv: IKeysHaving<KeyType> & IValuesHaving<ValueType>
-): [KeyType[], ValueType[]] {
+export function table<K = any, V = any>(
+	kv: IKeysHaving<K> & IValuesHaving<V>
+): [K[], V[]] {
 	return [kv.keys, kv.values]
 }
 

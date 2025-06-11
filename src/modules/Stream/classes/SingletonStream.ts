@@ -5,17 +5,17 @@ import type { ISingletonHandler } from "../interfaces/SingletonStream.js"
 import { OwningStream } from "./OwningStream.js"
 import { TrivialStream, TrivialStreamAnnotation } from "./TrivialStream.js"
 
-class SingletonStreamAnnotation<InType = any, OutType = any>
-	extends TrivialStreamAnnotation<OutType, [IOwnedStream]>
-	implements ILinkedStream<OutType>
+class SingletonStreamAnnotation<In = any, Out = any>
+	extends TrivialStreamAnnotation<Out, [IOwnedStream]>
+	implements ILinkedStream<Out>
 {
-	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
+	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
 	protected get initializer() {
 		return ownerInitializer
 	}
 
-	protected set resource(newResource: IOwnedStream<InType> | undefined) {}
+	protected set resource(newResource: IOwnedStream<In> | undefined) {}
 
 	get resource() {
 		return null as any
@@ -33,7 +33,7 @@ class SingletonStreamAnnotation<InType = any, OutType = any>
 		return this
 	}
 
-	setHandler(handler: ISingletonHandler<InType, OutType>): this {
+	setHandler(handler: ISingletonHandler<In, Out>): this {
 		return this
 	}
 
@@ -76,10 +76,10 @@ function PreSingletonStream<T = any>() {
 
 const _SingletonStream = PreSingletonStream()
 
-export function SingletonStream<InType = any, OutType = any>(
-	handler: ISingletonHandler<InType, OutType>
+export function SingletonStream<In = any, Out = any>(
+	handler: ISingletonHandler<In, Out>
 ) {
-	return function (resource?: IOwnedStream<InType>): ILinkedStream<OutType> {
+	return function (resource?: IOwnedStream<In>): ILinkedStream<Out> {
 		return new _SingletonStream().setHandler(handler).init(resource)
 	}
 }

@@ -18,9 +18,9 @@ const { negate: _negate } = functional
  * 1. The original position, If it is a `number`
  * 2. The result of preserving the original `.direction` on `(x) => !position(x)` If it is a `PositionPredicate`
  */
-export function negate<Type = any>(
-	position: IStreamPosition<Type>
-): IStreamPosition<Type> {
+export function negate<T = any>(
+	position: IStreamPosition<T>
+): IStreamPosition<T> {
 	return isPredicatePosition(position)
 		? preserve(position, _negate)
 		: position
@@ -32,9 +32,9 @@ export function negate<Type = any>(
  * 1. `position(stream)`, if `position` is a `PredicatePosition`
  * 2. `positionSame(stream.pos, position, stream)` otherwise
  */
-export function equals<Type = any>(
-	stream: IStream<Type> & IPosed<IStreamPosition<Type>>,
-	position: IStreamPosition<Type>
+export function equals<T = any>(
+	stream: IStream<T> & IPosed<IStreamPosition<T>>,
+	position: IStreamPosition<T>
 ): boolean {
 	return isPredicatePosition(position)
 		? position(stream)
@@ -48,9 +48,9 @@ export function equals<Type = any>(
  * 2. If `direction(pos1) === direction(pos2)` and not both of them are a `number`: return `true`
  * 3. If `direction(pos1) === direction(pos2) && isNumber(pos1) && isNumber(pos2)`: return `pos1 < pos2`
  */
-export function compare<Type = any>(
-	pos1: IStreamPosition<Type>,
-	pos2: IStreamPosition<Type>
+export function compare<T = any>(
+	pos1: IStreamPosition<T>,
+	pos2: IStreamPosition<T>
 ) {
 	const [fPos1, fPos2] = [pos1, pos2].map(direction)
 	if (fPos2 !== fPos1) return fPos2 > fPos1
@@ -64,15 +64,16 @@ export function compare<Type = any>(
  * 1. If `pos` is a number: `pos >= 0`
  * 2. If `pos` is a `PredicatePosition`: `pos.direction`, or, if absent, `true` by default
  */
-export function direction<Type = any>(pos: IStreamPosition<Type>) {
+export function direction<T = any>(pos: IStreamPosition<T>) {
 	return isNumber(pos) ? pos >= 0 : !("direction" in pos) || pos.direction!
 }
 
 /**
  * Returns `next`, when `direction(pos)` and `previous` otherwise
  */
-export const pick = <Type = any>(pos: IStreamPosition<Type>): IChange<Type> =>
-	direction(pos) ? next : prev
+export function pick<T = any>(pos: IStreamPosition<T>): IChange<T> {
+	return direction(pos) ? next : prev
+}
 
 /**
  * Applies a given (supposedly, copying) transform onto the given `PredicatePosition`, whilst preserving the `.direction`
@@ -96,9 +97,7 @@ export function bind<T = any>(target: any, pos: IStreamPosition<T>) {
 /**
  * Adds a `.direction = false` property on a given `PredicatePosition`
  */
-export function backtrack<Type = any>(
-	predicate: IStreamPositionPredicate<Type>
-) {
+export function backtrack<T = any>(predicate: IStreamPositionPredicate<T>) {
 	predicate.direction = false
 	return predicate
 }

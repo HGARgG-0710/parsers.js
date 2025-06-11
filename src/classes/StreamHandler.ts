@@ -11,9 +11,9 @@ export function TableMap<In = any, Out = any>(
 	return T
 }
 
-export function MapWrap<OutType = any>(
-	indexMap: IIndexable<OutType>
-): (x?: any, ...y: any[]) => OutType {
+export function MapWrap<Out = any>(
+	indexMap: IIndexable<Out>
+): (x?: any, ...y: any[]) => Out {
 	const T = (x: any, ...y: any[]) => T.table.index(x, ...y)
 	T.table = indexMap
 	return T

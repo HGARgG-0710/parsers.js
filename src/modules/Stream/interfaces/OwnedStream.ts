@@ -9,22 +9,22 @@ import type {
 	ISwitchIdentifiable
 } from "src/interfaces.js"
 
-export type IOwnedStream<Type = any> = IStream<Type> &
+export type IOwnedStream<T = any> = IStream<T> &
 	IOwnerSettable & {
 		readonly owner?: IOwningStream
 	}
 
-export interface IOwningStream<Type = any>
-	extends IResourcefulStream<Type>,
+export interface IOwningStream<T = any>
+	extends IResourcefulStream<T>,
 		IResourceSettable {
 	init(resource?: IOwnedStream, ...x: any[]): this
 }
 
-export type ILinkedStream<Type = any> = IOwnedStream<Type> &
-	IOwningStream<Type> &
+export type ILinkedStream<T = any> = IOwnedStream<T> &
+	IOwningStream<T> &
 	// * Note: these two exist "UNOFFICIALLY"...
 	ISwitchIdentifiable &
 	IRecursiveListIdentifiable
 
-export type IControlStream<Type = any> = ILinkedStream<Type> &
-	IStatefulStream<Type>
+export type IControlStream<T = any> = ILinkedStream<T> &
+	IStatefulStream<T>

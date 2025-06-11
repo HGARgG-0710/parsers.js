@@ -6,7 +6,7 @@ const { copy } = array
 const { min } = number
 const { isNumber } = type
 
-export class RotationBuffer<Type = any> extends InitMixin<Type> {
+export class RotationBuffer<T = any> extends InitMixin<T> {
 	private ["constructor"]: new (n?: number) => this
 
 	// * first-read index
@@ -117,7 +117,7 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 			this.items[i] = this.items[i + rightSize]
 	}
 
-	private fill(from: number, items: Type[]) {
+	private fill(from: number, items: T[]) {
 		for (let i = from; i < this.maxSize; ++i) this.items[i] = items[i]
 	}
 
@@ -131,7 +131,7 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 		return baseSize <= 0 ? baseSize + this.maxSize : baseSize
 	}
 
-	write(i: number, item: Type) {
+	write(i: number, item: T) {
 		return super.write(this.shifted(i), item)
 	}
 
@@ -139,7 +139,7 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 		return super.read(this.shifted(i))
 	}
 
-	push(...items: Type[]) {
+	push(...items: T[]) {
 		this.extendSize(items.length)
 		const writeAfter = this.size
 		for (let i = 0; i < items.length; ++i)
@@ -148,7 +148,7 @@ export class RotationBuffer<Type = any> extends InitMixin<Type> {
 		return this
 	}
 
-	init(items: Type[]) {
+	init(items: T[]) {
 		this.prepareForInit()
 		return super.init(
 			items.length > this.maxSize ? items.slice(0, this.maxSize) : items

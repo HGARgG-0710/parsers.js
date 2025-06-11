@@ -1,10 +1,10 @@
-import type { IInitializable } from "../interfaces.js"
 import { number } from "@hgargg-0710/one"
+import type { IInitializable } from "../interfaces.js"
 
 const { max } = number
 
-class RetainedStack<Type = any> {
-	private readonly stack: Type[] = []
+class RetainedStack<T = any> {
+	private readonly stack: T[] = []
 	private usedSize: number = 0
 
 	private set maxSize(newMaxSize: number) {
@@ -31,7 +31,7 @@ class RetainedStack<Type = any> {
 		return this.stack[this.usedSize--]
 	}
 
-	push(item: Type) {
+	push(item: T) {
 		if (this.isFull()) this.stack.push(item)
 		else this.stack[this.usedSize] = item
 		++this.usedSize
@@ -44,9 +44,9 @@ class RetainedStack<Type = any> {
 
 export class ObjectPool<
 	TypeArgs extends any[] = any[],
-	Type extends IInitializable<TypeArgs> = any
+	T extends IInitializable<TypeArgs> = any
 > {
-	private readonly freeStack = new RetainedStack<Type>()
+	private readonly freeStack = new RetainedStack<T>()
 
 	private allocNew(...x: Partial<TypeArgs> | []) {
 		return new this.objectConstructor(...x)
@@ -57,19 +57,19 @@ export class ObjectPool<
 		for (let i = 0; i < n; ++i) this.freeStack.push(this.allocNew())
 	}
 
-	create(...x: Partial<TypeArgs>) {
+	create(...x: [] | Partial<TypeArgs>) {
 		return this.freeStack.isEmpty()
 			? this.allocNew(...x)
 			: this.freeStack.pop().init(...x)
 	}
 
-	free(item: Type) {
+	free(item: T) {
 		this.freeStack.push(item)
 	}
 
 	constructor(
 		private readonly objectConstructor: new (
 			...x: Partial<TypeArgs> | []
-		) => Type
+		) => T
 	) {}
 }

@@ -4,8 +4,8 @@ import type { IClearable, IPushable } from "../interfaces.js"
 
 const { min } = number
 
-export class RetainedArray<Type = any>
-	extends MixinArray<Type>
+export class RetainedArray<T = any>
+	extends MixinArray<T>
 	implements IPushable, IClearable
 {
 	private ["constructor"]: new (n?: number) => this
@@ -20,14 +20,14 @@ export class RetainedArray<Type = any>
 		return this.allocSize - this.realSize
 	}
 
-	private pushFree(...x: Type[]) {
+	private pushFree(...x: T[]) {
 		const totalIncrease = x.length
 		const fastIncrease = min(this.freeSpace(), totalIncrease)
 		for (let i = 0; i < fastIncrease; ++i) this.write(i, x[i])
 		return [fastIncrease, totalIncrease]
 	}
 
-	private rawPush(...x: Type[]) {
+	private rawPush(...x: T[]) {
 		super.push(...x)
 	}
 
@@ -43,13 +43,13 @@ export class RetainedArray<Type = any>
 		return new this.constructor(this.size)
 	}
 
-	push(...x: Type[]): this {
+	push(...x: T[]): this {
 		this.rawPush(...x.slice(...this.pushFree(...x)))
 		this.realSize += x.length
 		return this
 	}
 
-	write(i: number, value: Type): this {
+	write(i: number, value: T): this {
 		if (i > this.realSize) this.realSize = i + 1
 		return super.write(i, value)
 	}

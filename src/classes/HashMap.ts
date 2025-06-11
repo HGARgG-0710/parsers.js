@@ -16,27 +16,15 @@ function extend<KeyType = any, ValueType = any, InternalKeyType = any>(
 	)
 }
 
-export function HashClass<
-	KeyType = any,
-	ValueType = any,
-	InternalKeyType = any,
-	DefaultType = any
->(
-	hash: IHash<KeyType, InternalKeyType>
-): IHashClass<KeyType, ValueType, InternalKeyType, DefaultType> {
-	class hashClass implements IHashMap<KeyType, ValueType, DefaultType> {
-		static hash: IHash<KeyType, InternalKeyType> = hash
-		static extend: (
-			f: (x: any) => KeyType
-		) => IHashClass<KeyType, ValueType, InternalKeyType> = extend<
-			KeyType,
-			ValueType,
-			InternalKeyType
-		>
+export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
+	hash: IHash<K, InternalKey>
+): IHashClass<K, V, InternalKey, Default> {
+	class hashClass implements IHashMap<K, V, Default> {
+		static hash: IHash<K, InternalKey> = hash
+		static extend: (f: (x: any) => K) => IHashClass<K, V, InternalKey> =
+			extend<K, V, InternalKey>
 
-		private ["constructor"]: new (
-			internal: IPreMap<InternalKeyType, ValueType>
-		) => this
+		private ["constructor"]: new (internal: IPreMap<InternalKey, V>) => this
 
 		get default() {
 			return this.pre.default
@@ -46,21 +34,21 @@ export function HashClass<
 			return this.pre.size
 		}
 
-		index(x: KeyType, ...y: any[]) {
+		index(x: K, ...y: any[]) {
 			return this.pre.get(hash(x, ...y))
 		}
 
-		set(key: KeyType, value: ValueType, ...y: any[]) {
+		set(key: K, value: V, ...y: any[]) {
 			this.pre.set(hash(key, ...y), value)
 			return this
 		}
 
-		delete(key: KeyType, ...y: any[]) {
+		delete(key: K, ...y: any[]) {
 			this.pre.delete(hash(key, ...y))
 			return this
 		}
 
-		rekey(keyFrom: KeyType, keyTo: KeyType, ...y: any[]) {
+		rekey(keyFrom: K, keyTo: K, ...y: any[]) {
 			this.pre.rekey(hash(keyFrom, ...y), hash(keyTo, ...y))
 			return this
 		}
@@ -69,14 +57,12 @@ export function HashClass<
 			return new this.constructor(this.pre.copy())
 		}
 
-		concat(pairsList: Iterable<[KeyType, ValueType]>): this {
+		concat(pairsList: Iterable<[K, V]>): this {
 			for (const [key, value] of pairsList) this.set(key, value)
 			return this
 		}
 
-		constructor(
-			private pre: IPreMap<InternalKeyType, ValueType, DefaultType>
-		) {}
+		constructor(private pre: IPreMap<InternalKey, V, Default>) {}
 	}
 
 	return hashClass

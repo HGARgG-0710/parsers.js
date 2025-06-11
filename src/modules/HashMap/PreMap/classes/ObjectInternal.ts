@@ -4,8 +4,8 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isStruct } = type
 
-export class ObjectInternal<Type = any, DefaultType = any>
-	implements IPreMap<string, Type, DefaultType>
+export class ObjectInternal<T = any, Default = any>
+	implements IPreMap<string, T, Default>
 {
 	/**
 	 * Value used by `ObjectInternalHash` as a way to signal
@@ -13,13 +13,10 @@ export class ObjectInternal<Type = any, DefaultType = any>
 	 */
 	static readonly MissingKey = undefined
 
-	private ["constructor"]: new (
-		object?: object,
-		_default?: DefaultType
-	) => this
+	private ["constructor"]: new (object?: object, _default?: Default) => this
 
 	private _size: number
-	readonly default: DefaultType
+	readonly default: Default
 
 	private set size(newSize: number) {
 		this._size = newSize
@@ -34,7 +31,7 @@ export class ObjectInternal<Type = any, DefaultType = any>
 		return read === ObjectInternal.MissingKey ? this.default : read
 	}
 
-	set(key: string, value: Type) {
+	set(key: string, value: T) {
 		if (this.object[key] === ObjectInternal.MissingKey) ++this.size
 		this.object[key] = value
 		return this
@@ -58,7 +55,7 @@ export class ObjectInternal<Type = any, DefaultType = any>
 		return new this.constructor(object.copy(this.object), this.default)
 	}
 
-	constructor(private object: object = {}, _default?: DefaultType) {
+	constructor(private object: object = {}, _default?: Default) {
 		assert(isStruct(object))
 		this.default = _default!
 		this.size = Object.keys(object).filter(

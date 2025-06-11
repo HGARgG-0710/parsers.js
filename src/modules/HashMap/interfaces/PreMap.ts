@@ -7,12 +7,12 @@ import type {
 	ISizeable
 } from "../../../interfaces.js"
 
-export interface IPreMap<KeyType = any, ValueType = any, DefaultType = any>
-	extends ISettable<KeyType, ValueType | DefaultType>,
-		IDeletable<KeyType>,
-		IRekeyable<KeyType>,
+export interface IPreMap<K = any, V = any, Default = any>
+	extends ISettable<K, V | Default>,
+		IDeletable<K>,
+		IRekeyable<K>,
 		ISizeable,
-		IDefaulting<DefaultType>,
+		IDefaulting<Default>,
 		ICopiable {
-	get: (key: KeyType) => ValueType | DefaultType
+	get: (key: K) => V | Default
 }

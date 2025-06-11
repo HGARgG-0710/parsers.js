@@ -13,4 +13,4 @@ export type IStreamTransform<UnderType = any, UpperType = any> = (
 	...x: any[]
 ) => UpperType
 
-export type IStreamPredicate<Type = any> = IStreamTransform<Type, boolean>
+export type IStreamPredicate<T = any> = IStreamTransform<T, boolean>

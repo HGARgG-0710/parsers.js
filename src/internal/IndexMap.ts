@@ -8,26 +8,26 @@ const { swap, out, insert } = inplace
 const { isArray } = type
 
 export abstract class BaseIndexMap<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any,
+	K = any,
+	V = any,
+	Default = any,
 	IndexGetType = any
-> implements IIndexMap<KeyType, ValueType, DefaultType, IndexGetType>
+> implements IIndexMap<K, V, Default, IndexGetType>
 {
 	protected ["constructor"]: new (
-		pairs: array.Pairs<KeyType, ValueType>,
-		_default?: DefaultType
+		pairs: array.Pairs<K, V>,
+		_default?: Default
 	) => this
 
-	readonly default: DefaultType
+	readonly default: Default
 
-	private _keys: KeyType[]
-	private _values: ValueType[]
+	private _keys: K[]
+	private _values: V[]
 
-	abstract index(x: any): ValueType | DefaultType
+	abstract index(x: any): V | Default
 	abstract getIndex(key: any): IndexGetType
-	abstract replace(index: number, pair: [KeyType, ValueType]): this
-	abstract rekey(keyFrom: KeyType, keyTo: KeyType): this
+	abstract replace(index: number, pair: [K, V]): this
+	abstract rekey(keyFrom: K, keyTo: K): this
 
 	private uniqueIndexes() {
 		const uniqueKeys = new Set()
@@ -44,11 +44,11 @@ export abstract class BaseIndexMap<
 		return indexes
 	}
 
-	protected set values(newValues: ValueType[]) {
+	protected set values(newValues: V[]) {
 		this._values = newValues
 	}
 
-	protected set keys(newKeys: KeyType[]) {
+	protected set keys(newKeys: K[]) {
 		this._keys = newKeys
 	}
 
@@ -64,7 +64,7 @@ export abstract class BaseIndexMap<
 		return this.keys.length
 	}
 
-	set(key: KeyType, value: ValueType, index: number = this.size) {
+	set(key: K, value: V, index: number = this.size) {
 		const keyIndex = this.keys.indexOf(key)
 		if (isGoodIndex(keyIndex)) this.values[keyIndex] = value
 		else this.add(index, [key, value])
@@ -86,7 +86,7 @@ export abstract class BaseIndexMap<
 
 	byIndex(index: number) {
 		return isGoodIndex(index) && this.size > index
-			? ([this.keys[index], this.values[index]] as [KeyType, ValueType])
+			? ([this.keys[index], this.values[index]] as [K, V])
 			: this.default
 	}
 
@@ -96,7 +96,7 @@ export abstract class BaseIndexMap<
 		return this
 	}
 
-	concat(x: Iterable<[KeyType, ValueType]>) {
+	concat(x: Iterable<[K, V]>) {
 		const kv = Pairs.from(x)
 		const [newKeys, newValues] = kv
 		this.keys.push(...newKeys)
@@ -104,7 +104,7 @@ export abstract class BaseIndexMap<
 		return kv
 	}
 
-	add(index: number, ...pairs: array.Pairs<KeyType, ValueType>) {
+	add(index: number, ...pairs: array.Pairs<K, V>) {
 		const kv = Pairs.from(pairs)
 		const [keys, values] = kv
 		insert(this.keys, index, ...keys)
@@ -125,10 +125,10 @@ export abstract class BaseIndexMap<
 	*[Symbol.iterator]() {
 		const size = this.size
 		for (let i = 0; i < size; ++i)
-			yield [this.keys[i], this.values[i]] as [KeyType, ValueType]
+			yield [this.keys[i], this.values[i]] as [K, V]
 	}
 
-	constructor(keys: KeyType[], values: ValueType[], _default?: DefaultType) {
+	constructor(keys: K[], values: V[], _default?: Default) {
 		assert(isArray(keys))
 		assert(isArray(values))
 		this.keys = keys

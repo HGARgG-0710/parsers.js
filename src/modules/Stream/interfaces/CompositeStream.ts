@@ -24,7 +24,7 @@ export interface IStreamChooser {
 
 export type IStreamArray = IArray<ILinkedStream | IStreamChooser>
 
-export type ICompositeStream<Type = any> = IControlStream<Type> &
+export type ICompositeStream<T = any> = IControlStream<T> &
 	IInitializable<[IOwnedStream?]> & {
 		renewResource: () => void
 		readonly streams: IStreamArray

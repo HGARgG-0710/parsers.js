@@ -8,10 +8,7 @@ import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
 import { AttachedStream } from "../modules/Stream/classes/AttachedStream.js"
 import { Initializable } from "./Initializer.js"
 
-type IParsedStreamConstructor<FinalType = any, InitType = any> = new <
-	FinalType,
-	InitType
->(
+type IParsedStreamConstructor<FinalType = any, InitType = any> = new (
 	parseInstance: Parse<FinalType, InitType>
 ) => ILinkedStream<FinalType>
 

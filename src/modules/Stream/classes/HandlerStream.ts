@@ -9,15 +9,15 @@ import {
 } from "./BasicResourceStream.js"
 
 class HandlerStreamAnnotation<
-	InType = any,
-	OutType = any
-> extends BasicResourceStreamAnnotation<OutType, []> {
-	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
+	In = any,
+	Out = any
+> extends BasicResourceStreamAnnotation<Out, []> {
+	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
 	state: Summat
 
-	protected baseNextIter(): OutType {
-		return null as OutType
+	protected baseNextIter(): Out {
+		return null as Out
 	}
 
 	protected initGetter() {
@@ -26,7 +26,7 @@ class HandlerStreamAnnotation<
 
 	protected preInit() {}
 
-	get resource(): IOwnedStream<InType> {
+	get resource(): IOwnedStream<In> {
 		return null as any
 	}
 
@@ -36,16 +36,16 @@ class HandlerStreamAnnotation<
 
 	setState(state: Summat) {}
 
-	setHandler(handler: (stream: IOwnedStream<InType>) => OutType) {
+	setHandler(handler: (stream: IOwnedStream<In>) => Out) {
 		return this
 	}
 }
 
-function BuildHandlerStream<InType = any, OutType = any>() {
-	return class extends BasicResourceStream.generic!<OutType>() {
-		protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
+function BuildHandlerStream<In = any, Out = any>() {
+	return class extends BasicResourceStream.generic!<Out>() {
+		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
-		private handler: (stream: IOwnedStream<InType>) => OutType
+		private handler: (stream: IOwnedStream<In>) => Out
 
 		state: Summat
 
@@ -53,8 +53,8 @@ function BuildHandlerStream<InType = any, OutType = any>() {
 			return this.handler(this.resource!)
 		}
 
-		protected baseNextIter(): OutType {
-			let lastReceived: OutType | undefined
+		protected baseNextIter(): Out {
+			let lastReceived: Out | undefined
 			do lastReceived = this.handleCurr()
 			while (lastReceived === HandlerStream.SkippedItem)
 			return lastReceived
@@ -69,7 +69,7 @@ function BuildHandlerStream<InType = any, OutType = any>() {
 		}
 
 		get resource() {
-			return super.resource as IOwnedStream<InType>
+			return super.resource as IOwnedStream<In>
 		}
 
 		isCurrEnd() {
@@ -80,11 +80,11 @@ function BuildHandlerStream<InType = any, OutType = any>() {
 			this.state = state
 		}
 
-		setHandler(handler: (stream: IOwnedStream<InType>) => OutType) {
+		setHandler(handler: (stream: IOwnedStream<In>) => Out) {
 			this.handler = handler
 			return this
 		}
-	} as unknown as typeof HandlerStreamAnnotation<InType, OutType>
+	} as unknown as typeof HandlerStreamAnnotation<In, Out>
 }
 
 const _HandlerStream = BuildHandlerStream()

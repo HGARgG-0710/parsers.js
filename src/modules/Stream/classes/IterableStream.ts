@@ -1,9 +1,9 @@
 import { annotation } from "src/classes/Stream.js"
 
 export abstract class IterableStream<
-	Type = any,
+	T = any,
 	Args extends any[] = any[]
-> extends annotation<Type, Args> {
+> extends annotation<T, Args> {
 	*[Symbol.iterator]() {
 		while (!this.isEnd) {
 			yield this.curr

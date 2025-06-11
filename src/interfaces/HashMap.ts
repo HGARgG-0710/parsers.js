@@ -11,39 +11,25 @@ import type {
 } from "../interfaces.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
 
-export type IHash<KeyType = any, InternalKeyType = any> = (
-	x: KeyType,
+export type IHash<K = any, InternalKey = any> = (
+	x: K,
 	...y: any[]
-) => InternalKeyType
+) => InternalKey
 
-export interface IHashClass<
-	KeyType = any,
-	ValueType = any,
-	InternalKeyType = any,
-	DefaultType = any
-> extends IHashable<KeyType, InternalKeyType> {
-	new (structure: IPreMap<InternalKeyType, ValueType, DefaultType>): IHashMap<
-		KeyType,
-		ValueType,
-		DefaultType
-	>
-
-	extend: (
-		f: (x: any) => KeyType
-	) => IHashClass<any, ValueType, InternalKeyType>
+export interface IHashClass<K = any, V = any, InternalKey = any, Default = any>
+	extends IHashable<K, InternalKey> {
+	new (structure: IPreMap<InternalKey, V, Default>): IHashMap<K, V, Default>
+	extend: (f: (x: any) => K) => IHashClass<any, V, InternalKey>
 }
 
-export interface IHashMap<KeyType = any, ValueType = any, DefaultType = any>
-	extends IIndexable<ValueType | DefaultType>,
-		ISettable<KeyType, ValueType | DefaultType>,
-		IDeletable<KeyType>,
-		IRekeyable<KeyType>,
+export interface IHashMap<K = any, V = any, Default = any>
+	extends IIndexable<V | Default>,
+		ISettable<K, V | Default>,
+		IDeletable<K>,
+		IRekeyable<K>,
 		ISizeable,
 		IDefaulting,
-		IConcattable<
-			Iterable<[KeyType, ValueType]>,
-			IHashMap<KeyType, ValueType, DefaultType>
-		>,
+		IConcattable<Iterable<[K, V]>, IHashMap<K, V, Default>>,
 		ICopiable {}
 
 export type * from "../modules/HashMap/interfaces/PreMap.js"

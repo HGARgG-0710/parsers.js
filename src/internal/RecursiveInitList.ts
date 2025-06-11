@@ -174,7 +174,9 @@ export abstract class RecursiveInitList<
 	protected abstract reclaim(list: RecursiveInitList<T, Recursive>): void
 
 	public readonly items = new SwitchArray<T, Recursive>()
+
 	protected renewer: RecursiveRenewer<T, Recursive>
+	
 	private lastInitialized: T | null = null
 	private hasSwitch: boolean = false
 

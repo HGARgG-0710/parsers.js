@@ -2,6 +2,6 @@ import type { IPosed } from "../../../interfaces.js"
 import type { IIsCurrStartable } from "../../../interfaces/Stream.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
-export type ILimitableStream<Type = any> = IOwnedStream<Type> &
+export type ILimitableStream<T = any> = IOwnedStream<T> &
 	IIsCurrStartable &
 	IPosed<number>

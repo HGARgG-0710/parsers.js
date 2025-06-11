@@ -15,24 +15,23 @@ const { T } = boolean
 /**
  * Returns whether the given `x` is a `Finishable`
  */
-
 export const isFinishable = structCheck<IFinishable>({
 	finish: isFunction
-}) as <Type = any>(x: any) => x is IFinishable<Type>
+}) as <T = any>(x: any) => x is IFinishable<T>
+
 /**
  * Returns whether the given `x` is a Navigable
  */
-
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <Type = any>(x: any) => x is INavigable<Type>
+}) as <T = any>(x: any) => x is INavigable<T>
+
 /**
  * Returns whether the given `x` is a Rewindable
  */
-
 export const isRewindable = structCheck<IRewindable>({
 	rewind: isFunction
-}) as <Type = any>(x: any) => x is IRewindable<Type>
+}) as <T = any>(x: any) => x is IRewindable<T>
 
 export const isPrevable = structCheck<IPrevable>({
 	prev: isFunction

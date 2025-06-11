@@ -6,16 +6,16 @@ import type {
 	IReadable,
 	ISizeable,
 	IUnfreezable
-} from "../interfaces.js";
+} from "../interfaces.js"
 
-export interface IAccumulator<Type = any, AccumulatedType = any>
+export interface IAccumulator<T = any, Accumulated = any>
 	extends ICopiable,
 		IFreezable,
-		IPushable<Type>,
-		IGettable<AccumulatedType>,
+		IPushable<T>,
+		IGettable<Accumulated>,
 		IUnfreezable {}
 
-export interface IPersistentAccumulator<Type = any>
-	extends IAccumulator<Type, readonly Type[]>,
+export interface IPersistentAccumulator<T = any>
+	extends IAccumulator<T, readonly T[]>,
 		ISizeable,
-		IReadable<Type> {}
+		IReadable<T> {}

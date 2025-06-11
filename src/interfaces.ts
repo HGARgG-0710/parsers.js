@@ -2,10 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
 
-export type IMappable<Type = any, Out = any> = (
-	value: Type,
-	index?: number
-) => Out
+export type IMappable<T = any, Out = any> = (value: T, index?: number) => Out
 
 export interface ICopiable {
 	copy: () => this
@@ -19,47 +16,44 @@ export interface ITestable {
 	test: (x: any) => boolean
 }
 
-export type IIndexingFunction<KeyType = any> = (
-	curr: KeyType,
-	x: any
-) => boolean
+export type IIndexingFunction<Key = any> = (curr: Key, x: any) => boolean
 
 export interface ISizeable {
 	readonly size: number
 }
 
-export interface IDefaulting<Type = any> {
-	readonly default: Type
+export interface IDefaulting<T = any> {
+	readonly default: T
 }
 
-export interface ISettable<KeyType = any, ValueType = any> {
-	set: (key: KeyType, value: ValueType) => this
+export interface ISettable<K = any, V = any> {
+	set: (key: K, value: V) => this
 }
 
-export interface IDeletable<KeyType = any> {
-	delete: (key: KeyType) => this
+export interface IDeletable<K = any> {
+	delete: (key: K) => this
 }
 
 export interface IRekeyable<KeyType = any> {
 	rekey: (fromKey: KeyType, toKey: KeyType) => this
 }
 
-export interface IHashable<KeyType, InternalKeyType> {
-	hash: IHash<KeyType, InternalKeyType>
+export interface IHashable<K, InternalKey> {
+	hash: IHash<K, InternalKey>
 }
 
-export type IIndexed<Type = any> =
+export type IIndexed<T = any> =
 	| {
-			[x: number]: Type
+			[x: number]: T
 			length: number
-	  } & Iterable<Type>
+	  } & Iterable<T>
 
-export interface IStateful<Type extends Summat = Summat> {
-	readonly state: Type
+export interface IStateful<T extends Summat = Summat> {
+	readonly state: T
 }
 
-export interface IGettable<Type = any> {
-	get: () => Type
+export interface IGettable<T = any> {
+	get: () => T
 }
 
 export interface IInitializable<Args extends any[] = any[]> {
@@ -70,8 +64,8 @@ export interface IReversible {
 	reverse: () => this
 }
 
-export interface IIndexable<ValueType = any> {
-	index: (x: any, ...y: any[]) => ValueType
+export interface IIndexable<V = any> {
+	index: (x: any, ...y: any[]) => V
 }
 
 export type ISerializableObject = { toJSON: () => string }
@@ -96,22 +90,22 @@ export interface IUnfreezable {
 	unfreeze: () => this
 }
 
-export interface IReadable<Type = any> {
-	read(i: number): Type
+export interface IReadable<T = any> {
+	read(i: number): T
 }
 
-export type IParseable<Type = any> = IReadable<Type> & ISizeable & ICopiable
+export type IParseable<T = any> = IReadable<T> & ISizeable & ICopiable
 
-export interface IBufferized<Type = any> {
-	readonly buffer: IPersistentAccumulator<Type>
+export interface IBufferized<T = any> {
+	readonly buffer: IPersistentAccumulator<T>
 }
 
-export interface IPushable<Type = any> {
-	push: (...x: Type[]) => this
+export interface IPushable<T = any> {
+	push: (...x: T[]) => this
 }
 
-export interface IWritable<Type = any> {
-	write: (i: number, value: Type) => this
+export interface IWritable<T = any> {
+	write: (i: number, value: T) => this
 }
 
 export interface IStateSettable {
@@ -130,7 +124,7 @@ export interface IIsOpen {
 	readonly isOpen: boolean
 }
 
-export type IFiniteWritable<Type = any> = ISizeable & IWritable<Type>
+export type IFiniteWritable<T = any> = ISizeable & IWritable<T>
 
 export interface IRecursiveListIdentifiable {
 	readonly isRecursiveInitList?: boolean

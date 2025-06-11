@@ -5,78 +5,77 @@ import type {
 	ISerializableObject
 } from "../interfaces.js"
 
-export interface ITyped<Type = any> {
-	readonly type: Type
+export interface ITyped<T = any> {
+	readonly type: T
 }
 
-export interface IValued<Value = any> {
-	readonly value: Value
+export interface IValued<V = any> {
+	readonly value: V
 }
 
-export interface IChildrenHaving<Type = any> {
-	readonly children: Type[]
+export interface IChildrenHaving<T = any> {
+	readonly children: T[]
 }
 
 export interface ITypeCheckable {
 	is: (x: any) => boolean
 }
 
-export interface IWalkable<Type extends IWalkable<Type> = any>
-	extends ICopiable {
+export interface IWalkable<T extends IWalkable<T> = any> extends ICopiable {
 	readonly lastChild: number
-	read: (index: number) => Type
-	index: (multindex: readonly number[]) => Type
-	backtrack: (positions: number) => Type | null
+	read: (index: number) => T
+	index: (multindex: readonly number[]) => T
+	backtrack: (positions: number) => T | null
 	findUnwalkedChildren: (startIndex: readonly number[]) => number
 }
 
-export interface INodeClass<Type = any, Args extends any[] = any[]>
-	extends ITyped<Type>,
+export interface INodeClass<T = any, Args extends any[] = any[]>
+	extends ITyped<T>,
 		ITypeCheckable,
-		INodeType<Type, Args> {
-	new (...x: Args): INode<Type, Args>
+		INodeType<T, Args> {
+	new (...x: Args): INode<T, Args>
 }
 
-export interface ICellNodeClass<Type = any, Value = any>
-	extends INodeClass<Type, [Value]> {
-	new (value: Value): ICellNode<Type, Value>
+export interface ICellNodeClass<T = any, V = any>
+	extends INodeClass<T, [V]> {
+	new (value: V): ICellNode<T, V>
 }
 
-export interface IRecursiveNodeClass<Type = any>
-	extends INodeClass<Type, [INode<Type>]> {
-	new (children: INode<Type>[]): IRecursiveNode<Type>
+export interface IRecursiveNodeClass<T = any>
+	extends INodeClass<T, [INode<T>]> {
+	new (children: INode<T>[]): IRecursiveNode<T>
 }
 
-export interface INode<Type = any, Args extends any[] = any[]>
-	extends ITyped<Type>,
-		IWalkable<INode<Type>>,
+export interface INode<T = any, Args extends any[] = any[]>
+	extends ITyped<T>,
+		IWalkable<INode<T>>,
 		ISerializableObject,
 		IInitializable<Args>,
 		Partial<IFreeable> {
-	parent: INode<Type> | null
+	parent: INode<T> | null
 }
 
-export interface IRecursiveNode<Type = any>
-	extends INode<Type, [INode<Type>[]]> {
+export interface IRecursiveNode<T = any>
+	extends INode<T, [INode<T>[]]> {
 	jsonInsertablePre(): [string, string]
 	jsonInsertableEmpty(): [string, string]
 	jsonInsertablePost(): [string, string]
 }
 
-export interface ICellNode<Type = any, Value = any>
-	extends INode<Type>,
-		IValued<Value> {}
+export interface ICellNode<T = any, V = any>
+	extends INode<T>,
+		IValued<V> {}
 
-export type INodeMaker<Type = any> = (x: any) => INode<Type> | false
+export type INodeMaker<T = any> = (x: any) => INode<T> | false
 
-export interface INodeType<Type = any, Args extends any[] = any[]> {
-	new (...args: Args): INode<Type>
-	fromPlain(x: any, maker: INodeMaker<Type>): INode<Type> | false
+export interface INodeType<T = any, Args extends any[] = any[]> {
+	new (...args: Args): INode<T>
+	fromPlain(x: any, maker: INodeMaker<T>): INode<T> | false
 }
 
-export type INodeTypeFactory<Type = any, Args extends any[] = any[]> = (
-	type: Type
-) => INodeType<Type, Args>
+export type INodeTypeFactory<T = any, Args extends any[] = any[]> = (
+	type: T
+) => INodeType<T, Args>
 
 export type INodeTypeCategories<T = any> = [INodeTypeFactory, T[]][]
 

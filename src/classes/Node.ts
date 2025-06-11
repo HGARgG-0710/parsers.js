@@ -18,27 +18,27 @@ import { NodeFactory } from "./NodeSystem.js"
 
 const { id } = functional
 
-abstract class BaseNode<Type = any, Args extends any[] = any[]>
-	implements INode<Type>
+abstract class BaseNode<T = any, Args extends any[] = any[]>
+	implements INode<T>
 {
-	abstract readonly type: Type
+	abstract readonly type: T
 
 	abstract init(...x: Args): this
 	abstract toJSON(): string
 	abstract copy(): this
 
-	parent: INode<Type> | null = null
+	parent: INode<T> | null = null
 
 	index(multind: number[]): any {}
 
 	backtrack(positions: number) {
-		let curr: INode<Type> = this
+		let curr: INode<T> = this
 		while (--positions) curr = curr.parent!
 		return curr
 	}
 
 	findUnwalkedChildren(endInd: number[]) {
-		let currTree: INode<Type> = this
+		let currTree: INode<T> = this
 		let result = array.lastIndex(endInd)
 		while (
 			(currTree = currTree.parent!) &&
@@ -48,7 +48,7 @@ abstract class BaseNode<Type = any, Args extends any[] = any[]>
 		return result
 	}
 
-	read(i: number): INode<Type> {
+	read(i: number): INode<T> {
 		return this
 	}
 
@@ -56,21 +56,21 @@ abstract class BaseNode<Type = any, Args extends any[] = any[]>
 		return -1
 	}
 
-	free(poolGetter: IPoolGetter<Type>) {
+	free(poolGetter: IPoolGetter<T>) {
 		poolGetter.get(this.type)!.free(this)
 	}
 }
 
-abstract class PreTokenNode<Type = any>
-	extends BaseNode<Type, []>
-	implements INode<Type>
+abstract class PreTokenNode<T = any>
+	extends BaseNode<T, []>
+	implements INode<T>
 {
 	protected ["constructor"]: new () => this
 
-	static fromPlain<Type = any>(
-		this: INodeClass<Type, []>,
+	static fromPlain<T = any>(
+		this: INodeClass<T, []>,
 		x: any,
-		nodeMaker: INodeMaker<Type>
+		nodeMaker: INodeMaker<T>
 	) {
 		if (!isTyped(x)) return false
 		return new this()
@@ -89,8 +89,8 @@ abstract class PreTokenNode<Type = any>
 	}
 }
 
-export const TokenNode = NodeFactory(function <Type = any>(type: Type) {
-	class tokenNode extends PreTokenNode<Type> implements INode<Type> {
+export const TokenNode = NodeFactory(function <T = any>(type: T) {
+	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
 		static is = isType(type)
 
@@ -101,16 +101,16 @@ export const TokenNode = NodeFactory(function <Type = any>(type: Type) {
 	return tokenNode
 })
 
-abstract class PreContentNode<Type = any, Value = any>
-	extends BaseNode<Type, [Value]>
-	implements ICellNode<Type, Value>
+abstract class PreContentNode<T = any, Value = any>
+	extends BaseNode<T, [Value]>
+	implements ICellNode<T, Value>
 {
 	protected ["constructor"]: new (value?: Value) => this
 
-	static fromPlain<Type = any, Value = any>(
-		this: INodeClass<Type, [Value]>,
+	static fromPlain<T = any, Value = any>(
+		this: INodeClass<T, [Value]>,
 		x: any,
-		nodeMaker: INodeMaker<Type>
+		nodeMaker: INodeMaker<T>
 	) {
 		if (!isContentNodeSerializable(x)) return false
 		return new this(x.value)
@@ -149,10 +149,10 @@ abstract class PreContentNode<Type = any, Value = any>
 	}
 }
 
-export const ContentNode = NodeFactory(function <Type = any, Value = any>(
-	type: Type
+export const ContentNode = NodeFactory(function <T = any, Value = any>(
+	type: T
 ) {
-	class contentNode extends PreContentNode<Type, Value> {
+	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static is = isType(type)
 
@@ -163,29 +163,29 @@ export const ContentNode = NodeFactory(function <Type = any, Value = any>(
 	return contentNode
 })
 
-abstract class PreRecursiveNode<Type = any>
-	extends BaseNode<Type>
-	implements IRecursiveNode<Type>
+abstract class PreRecursiveNode<T = any>
+	extends BaseNode<T>
+	implements IRecursiveNode<T>
 {
-	protected ["constructor"]: new (children?: INode<Type>[]) => this
+	protected ["constructor"]: new (children?: INode<T>[]) => this
 
-	static fromPlain<Type = any>(
-		this: INodeClass<Type, [INode<Type>[]]>,
+	static fromPlain<T = any>(
+		this: INodeClass<T, [INode<T>[]]>,
 		x: any,
-		nodeMaker: INodeMaker<Type>
+		nodeMaker: INodeMaker<T>
 	) {
 		if (!isRecursiveNodeSerializable(x)) return false
 		const maybeNodes = x.children.map(nodeMaker)
-		return maybeNodes.every(id) && new this(maybeNodes as INode<Type>[])
+		return maybeNodes.every(id) && new this(maybeNodes as INode<T>[])
 	}
 
-	private children: INode<Type>[]
+	private children: INode<T>[]
 
-	read(i: number): INode<Type> {
+	read(i: number): INode<T> {
 		return this.children[i]
 	}
 
-	set(node: INode<Type>, i: number): this {
+	set(node: INode<T>, i: number): this {
 		this.children[i] = node
 		return this
 	}
@@ -194,8 +194,8 @@ abstract class PreRecursiveNode<Type = any>
 		return this.children.length - 1
 	}
 
-	index(multindex: number[]): INode<Type> {
-		let result: INode<Type> = this
+	index(multindex: number[]): INode<T> {
+		let result: INode<T> = this
 		for (let i = 0; i < multindex.length; ++i)
 			result = result.read(multindex[i])
 		return result
@@ -211,12 +211,12 @@ abstract class PreRecursiveNode<Type = any>
 		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
-	init(children?: INode<Type>[]) {
+	init(children?: INode<T>[]) {
 		if (children) this.children = children
 		return this
 	}
 
-	free(poolGetter: IPoolGetter<Type>): void {
+	free(poolGetter: IPoolGetter<T>): void {
 		for (const child of this.children) child.free?.(poolGetter)
 		super.free(poolGetter)
 	}
@@ -241,15 +241,15 @@ abstract class PreRecursiveNode<Type = any>
 		return [`{"type": ${JSON.stringify(this.type)}, "children": [`, "]}"]
 	}
 
-	constructor(children: INode<Type>[] = []) {
+	constructor(children: INode<T>[] = []) {
 		super()
 		this.init(children)
 		for (const child of children) child.parent = this
 	}
 }
 
-export const RecursiveNode = NodeFactory(function <Type = any>(type: Type) {
-	class recursiveNode extends PreRecursiveNode<Type> {
+export const RecursiveNode = NodeFactory(function <T = any>(type: T) {
+	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static is = isType(type)
 

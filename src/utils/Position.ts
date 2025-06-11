@@ -7,13 +7,13 @@ const { or } = functional
 /**
  * Returns whether given `x` is a `PredicatePosition`
  */
-export const isPredicatePosition = isFunction as <Type = any>(
+export const isPredicatePosition = isFunction as <T = any>(
 	x: any
-) => x is IPredicatePosition<Type>
+) => x is IPredicatePosition<T>
 
 /**
  * Returns whether given `x` is a `Position`
  */
-export const isPosition = or(isNumber, isPredicatePosition) as <Type = any>(
+export const isPosition = or(isNumber, isPredicatePosition) as <T = any>(
 	x: any
-) => x is IPosition<Type>
+) => x is IPosition<T>

@@ -5,8 +5,8 @@ export type IPredicatePosition<In = any> = (
 	pos?: IPosition
 ) => boolean
 
-export interface IPosed<Type = any> {
-	pos: Type
+export interface IPosed<T = any> {
+	pos: T
 }
 
 export type * from "../modules/Position/interfaces/LineIndex.js"

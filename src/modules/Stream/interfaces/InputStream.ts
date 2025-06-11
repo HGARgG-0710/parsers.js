@@ -1,12 +1,12 @@
 import type { IInitializable } from "../../../interfaces.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
-export type IInputStream<Type = any, InitType = any> = IOwnedStream<Type> &
+export type IInputStream<T = any, InitType = any> = IOwnedStream<T> &
 	IInitializable<[InitType]>
 
 export type ISourcedStream<
-	Type = any,
+	T = any,
 	SourceType = any
-> = IOwnedStream<Type> & {
+> = IOwnedStream<T> & {
 	readonly source?: SourceType
 }

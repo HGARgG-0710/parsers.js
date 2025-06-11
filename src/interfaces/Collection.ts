@@ -7,10 +7,10 @@ import type {
 	IReadable
 } from "../interfaces.js"
 
-export interface ICollection<Type = any>
-	extends IGettable<IIndexed<Type>>,
+export interface ICollection<T = any>
+	extends IGettable<IIndexed<T>>,
 		ICopiable,
-		IPushable<Type>,
-		IFiniteWritable<Type>,
-		Iterable<Type>,
-		IReadable<Type> {}
+		IPushable<T>,
+		IFiniteWritable<T>,
+		Iterable<T>,
+		IReadable<T> {}

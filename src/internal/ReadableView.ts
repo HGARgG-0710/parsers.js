@@ -4,17 +4,15 @@ import type { ICopiable, IInitializable, IReadable } from "../interfaces.js"
 
 const { isNumber } = type
 
-type IView<Type = any> = ICopiable &
-	IReadable<Type> &
-	IInitializable<[IReadable<Type>]>
+type IView<T = any> = ICopiable & IReadable<T> & IInitializable<[IReadable<T>]>
 
-export class ReadableView<Type = any> implements IView<Type> {
+export class ReadableView<T = any> implements IView<T> {
 	private ["constructor"]: new (
 		offset: number,
-		sequence: IReadable<Type>
+		sequence: IReadable<T>
 	) => this
 
-	private readable: IReadable<Type>
+	private readable: IReadable<T>
 
 	//
 	// * Interface Methods
@@ -28,7 +26,7 @@ export class ReadableView<Type = any> implements IView<Type> {
 		return this.readable.read(this.offset + i)
 	}
 
-	init(readable?: IReadable<Type>) {
+	init(readable?: IReadable<T>) {
 		if (readable) this.readable = readable
 		return this
 	}
@@ -45,7 +43,7 @@ export class ReadableView<Type = any> implements IView<Type> {
 		++this.offset
 	}
 
-	constructor(private offset: number, readable?: IReadable<Type>) {
+	constructor(private offset: number, readable?: IReadable<T>) {
 		assert(isNumber(offset))
 		assert(offset > 0)
 		this.init(readable)
