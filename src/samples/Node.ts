@@ -6,7 +6,7 @@ export function PlainNodes<Type = any>(
 	content: Type[],
 	recursive: Type[]
 ) {
-	new NodeSystem([
+	return new NodeSystem([
 		[TokenNode, token],
 		[ContentNode, content],
 		[RecursiveNode, recursive]
