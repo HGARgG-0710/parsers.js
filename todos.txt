@@ -9,10 +9,31 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-NEXT UP:				
+IMMIDIATE [first - patch up "bad" classes; then - public '.annotation's]: 		
+	TODO: order ALL the imports [Shift + Alt + O]
+	
+	TODO: Docs [initial, new, final]
+		1. Ensure that ALL the exports are AS-DESIRED (relevant)
+			Finalize the library exports, that is
+		2. Ensure NOTHING is missing from the wiki: 
+			1. utils
+			2. interfaces
+			3. classes
+			4. permalinks
+			5. self-referencing: 	
+				1. provide links to interfaces for class pages
+				2. provide links ot implementations for interfaces to interface pages
+		3. finish the JSDoc
+			1. change/update old
+			2. ADD FOR: 
+				1. classes
+				2. ALL public exports
+					IF a 'util' - a proper short function description. 
+					IF a 'class/interface/related' - a brief description + a link ot the wiki
+
+NEXT UP:
 	TODO: `.copy()`-fixing [IStream-implementations]: 
-		1. fix the `.copy()` methods' implementations that employ the 
-			`.set*`-methods/custom initializers
+		1. fix the `.copy()` methods' implementations that employ the `.set*`-methods/custom initializers
 			
 			2. BasicStream
 			3. CompositeStream
@@ -63,132 +84,21 @@ NEXT UP:
 			24. TrivialStream
 			25. WrapperStream
 			26. WriterStream
-			
-	TODO: about `.resource`
-		1. LET the "default" value be NOT 'undefined', but 'null'
-		2. IN GENERAL, for all the "optional" properties, LET their properties' default 
-			value be `null`. 
-			Reasons: 
-				1. performance [jit] - property existing on-creation
-				2. code simplicity/predictability [only ONE type of "missing property"]
-				3. CREATE a new constant - `EmptyProperty = null`
-					Let it be employed as the default for OBJECT-VALUED [nullable] fields
-
-	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
-		Reason - simplicity of names...
-		WALK: 
-			1. through classes/ files
-			2. through internal/ files
-			3. through interfaces/ files
-			4. through utils/ files
-
-	TODO: about the `PropDigger` - useless for most "real" scenarios:
-		1. it's pretty good for fixed sizes, but is (ultimately) useless when it comes to dynamic ones 
-			(such as with `chooser`s), since we never know just how deep the desired item lies 
-				[could be 5 levels, could be a 100 - depends on the input]. 
-			To become useful (say, finding the first underlying "MarkedStream" via `.resource/owner`), 
-				one must allow PREDICATES as well as numbers with it. 
-			
-		2. SOLUTION: 
-			1. LET `IPosition` become a PROJECT-LEVEL module, 
-				with `IPosition` becoming more general (allows non-`IStream`-arguments now for predicates),
-					and the `IStreamPosition` becoming what the OLD `IPosition` once was
-			2. ACCEPT an `IPosition<T>` for a `PropDigger<T>`
-			
-	TODO: FIX the 'IStream' types lost from usage of `mixin`: 
-		Previously, the class-based system served one in some absolutely amazing fashions. 
-		In particular - it created a "safe" and framework-like feel around the library, 
-			by permitting the user to implement the 'abstract' methods on library classes. 
-	
-		Now, however, this is (partially) gone, since TypeScript can NO LONGER warn against 
-			a BAD case of instantiation (since there is NO WAY to know if the user is making 
-				YET ANOTHER "no-instances mixin", or a "proper" one). 
-		
-		This stands PARTICULARLY in regarding 'BasicStream'. 
-
-		Fix this, like so: 
-			1. create "fake" `abstract/non-abstract` declaration-classes with NO runtime properties/methods
-			2. ASSIGN the type of `.toClass()` calls TO `typeof FakeClass`, for a given FakeClass: 
-				1. via '... as unknown as typeof FakeClass'
-			3. Ta-da! fixed...
-
-			4. [generics?] Maybe - for the sake of making generics safe: 
-				1. create FUNCTIONS that call the `.toClass()` of a given 'mixin'
-				2. add relevant generics to them (<T, InitArgs>)
-				3. do the 'as unknown as typeof FakeClass<T, InitArgs>', WITH GENERICS
-					Then, one may retain ALL of type-features at the cost of a single 
-						function call. Pretty neat, overall.
-
-			5. [maybe???] This seems to works, but...
-				It's pretty damn ugly. Replace with proper .d.ts files with source .js files? 
-				Would make an awful lot more sense...
-
-	TODO: [about `mixin`-types replacement in `IStream`]: 
-		CHANGE THE `propName: (...) => ...` to `propName(...): ...`!
-		Namely - PROVIDE dummy implementations!
-		Reason - then one can use the methods in question with `super.`
-	
-	TODO: [`mixin-IStream`] MAKE the `Annotation` classes *INTO EXPORTS*
-		Also - MAKE them part of the NAMESPACES that are the "main" export-functions. 
-		[Let they be available under `.annotation`, SAME WAY as `.generic`]
-		Reasons: 
-			1. the user MIGHT want to use them for their own (technically legal) TypeScript-machination purposes
-			2. some annotations are REQUIRED by other annotations...
-			3. [main reason] too much work moving them to /internal
-
-	TODO: for BYPASSING the issues of a "natural" `new` and `generics` - see `ParsedStream`, `SyncStream`; 
-		REPEAT across all the IStream-classes in the library...
-
-		REMOVE the `ClassName()` thing - it's UGLY and UNGODLY. 
-		Also - unnecessary...
-
-	TODO: regarding the `.generic!`...
-		REMOVE, replace with just `.generic` [i.e. A NON-NULL PROPERTY is what is must be...]; 
-
-	TODO: don't forget - MOVE the `StreamAnnotation` OUT from the `/internal`
-
-	TODO: ENSURE that the `Args` generic arg [in `Stream` module] IS NOT 'any[]', but '[]' BY DEFAULT!!!
-
-	TODO [docs]:
-		ADD a GUIDE on how to CORRECTLY inherit the `Stream` classes [TS-only].
-
-		Reason: 
-			1. the library is written in TypeScript, so PROPER inheritance [with generics] must work well!
-			2. JavaScript-usage has no use for this insanity
-			3. TS-support is good!
-
-	TODO: ENSURE the 'Args | []' THING in ALL the `IStream`-implementing classes...
-
+				
 	TODO: [IStream 'mixin's] FIX the `mixin`s that INHERIT other mixins/classes, to USE 'this.super.constructor' MANUALLY!!!
 		One cannot stress this enough. 
 		Some don't need it. 
 		Some do. 
 		Either way, WHENEVER this is necessary - one MUST make this explicit...
 
-	TODO: in alll the `mixin`s - FIX THE `super` calls!!! 
+	TODO: in alll the `mixin`s - FIX THE (old) `super` calls!!! 
 		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
-
-	TODO: LET `LimitStream` ALSO inherit from the `BasicResourceStream`!
-
-	TODO: [IStream] in cases of `Args | []`, RENAME `Args` to `MoreArgs`
-
-	TODO: refactor the `ParsedStream` onto TWO functions - one responsible for the local variable, 
-		and another - for the building of the current `ParsedStream` class. 
-
-		For an example - see `SourceStream`
-
-	TODO: make a NOTE that the library is a PRIMARILY JavaScript API!
-		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
-			for being JS-native [id est - being "natural", without forcing patterns
-				from "conservative" OOP languages, such as Java]
-
-	TODO: ENSURE that ALL THE EXPORTS ARE ON THE SPOT [this particualrly applies to IStream - LOTS of new classes has been added...]; 
 
 	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
 		and NOT `function () {}`
 
-		OR: 
-			TODO: 'mixin' module: 
+		OR [yes - do that instead...]: 
+			TODO: 'mixin' module (`sealed` class): 
 				1. ALLOW setting `constructor` WITHOUT needing a prototype. 
 					In such cases, CREATE a prototype, via the `constructor = {}` INSIDE the `sealed_mixin`
 						class...
@@ -197,53 +107,7 @@ NEXT UP:
 
 	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
 
-	TODO: CONVERT the "unnecessary" 'new mixin's into CLASSES [namely, those that use ONLY 1 PARENT-CLASS]:
-		List [incomplete]: 
-			1. ArrayStream
-			...
-
-	TODO: '.postEnd', and other "optional" [non-abstract] framework-methods: 
-		REPLACE THOSE with OVERRIDABLE 'protected' dummy-methods (empty)
-		'.isCurrStart' is the exception
-
-	TODO: TRANSFORM "excessive" 'mixin's INTO `abstract class`es
-		[do later - when you're SURE that these won't change... AND have exported `StreamAnnotation` as public] 	
-
-		These are the ones with either 1 parent, or NONE AT ALL.
-		As to the "Annotation" classes of theirs - they ARE their own 'annotation' classes. 
-		List [incomplete - FIND THEM ALL]: 
-			1. IterableStream
-			2. OwningStream
-			3. OwnableStream
-			4. DelegateStream
-			....
-
-CURRENT TODOS:		
-	TODO: order imports [Shift + Alt + O]
-
-	TODO: Docs
-		BEFORE YOU DO THAT: 
-			1. finish the `samples`
-			2. decide the ultimate fate of `utils`
-		
-		1. Ensure that ALL the exports are AS-DESIRED (relevant)
-			Finalize the library exports, that is
-		2. Ensure NOTHING is missing from the wiki: 
-			1. utils
-			2. interfaces
-			3. classes
-			4. permalinks
-			5. self-referencing: 	
-				1. provide links to interfaces for class pages
-				2. provide links ot implementations for interfaces to interface pages
-		3. finish the JSDoc
-			1. change/update old
-			2. ADD FOR: 
-				1. classes
-				2. ALL public exports
-					IF a 'util' - a proper short function description. 
-					IF a 'class/interface/related' - a brief description + a link ot the wiki
-
+CURRENT TODOS [top-down order...]:		
 	TODO: Tests
 		BEFORE YOU DO THAT: 	
 			1. finish the docs [COMPLETELY!]
@@ -277,9 +141,39 @@ MINOR TODOS:
 		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
 			since the user will (likely) want to be using the MapClass for their own goals. 
 
+	TODO: [`mixin-IStream`] MAKE the (remaining) `Annotation` classes *INTO EXPORTS*
+		Also - MAKE them part of the NAMESPACES that are the "main" export-functions. 
+		[Let they be available under `.annotation`, SAME WAY as `.generic`]
+		Reasons: 
+			1. the user MIGHT want to use them for their own (technically legal) TypeScript-machination purposes
+			2. some annotations are REQUIRED by other annotations...
+			3. [main reason] too much work moving them to /internal
+
 	TODO: simplify the `MapClass` code. 
 		Specifically, all the excessive `.prototype` manipulations. 
 		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
+		
+	TODO: ENSURE that ALL THE EXPORTS ARE ON THE SPOT [this particualrly applies to IStream - LOTS of new classes has been added...]; 
+	
+	TODO: [IStream] regarding the `.generic!`...
+		REMOVE, replace with just `.generic` [i.e. A NON-NULL PROPERTY is what is must be...]; 
+
+	TODO: [IStream] ENSURE that the `Args` generic arg [in `Stream` module] IS NOT 'any[]', but '[]' BY DEFAULT!!!
+
+	TODO [docs]:
+		ADD a GUIDE on how to CORRECTLY inherit the `Stream` classes [TS-only].
+
+		Reason: 
+			1. the library is written in TypeScript, so PROPER inheritance [with generics] must work well!
+			2. JavaScript-usage has no use for this insanity
+			3. TS-support is good!
+
+	TODO: ENSURE the 'Args | []' THING in ALL the `IStream`-implementing classes...
+
+	TODO [docs]: make a NOTE that the library is a PRIMARILY JavaScript API!
+		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
+			for being JS-native [id est - being "natural", without forcing patterns
+				from "conservative" OOP languages, such as Java]
 	
 LATER TODOS: 		
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
@@ -288,6 +182,14 @@ LATER TODOS:
 			2. SAFER GENERIC TYPES!
 		NOTE: *do not* do it everywhere. 
 			Reason - may break some code. 	
+			
+	TODO: TRANSFORM "excessive" 'mixin's INTO `abstract class`es
+		These: 
+			1. are convertible to ordinary/abstract classes
+			2. have 0-1 parents
+			3. very unlikely to change
+
+		POST-TODO: later - FIND NEW ONES... [if any]
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
 		0. DO TDD [since tests will now be more-or-less established...]; 
