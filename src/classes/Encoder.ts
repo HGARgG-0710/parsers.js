@@ -100,14 +100,26 @@ function Encoder(
 	}
 }
 
-// * pre-doc note: Latin-1
+/**
+ * A class implementing the `IEncoder` interface, working 
+ * with the Latin1 encoding
+*/
 export const Encoder8 = Encoder(1, "latin1")
 
-// * pre-doc note: UCS2
+/**
+ * A class implementing the `IEncoder` interface, working 
+ * with the UCS2 encoding
+*/
 export const Encoder16 = Encoder(2, "ucs2")
 
-// * pre-doc note: UTF-8
+/**
+ * A class implementing the `IEncoder` interface, working 
+ * with the UTF-8 encoding
+*/
 export const EncoderU8 = Encoder(4, "utf-8")
 
-// * pre-doc note: UTF-16 little-endian
+/**
+ * A class implementing the `IEncoder` interface, working 
+ * with the little-endian UTF-16 encoding 
+ */ 
 export const EncoderU16LE = Encoder(4, "utf-16le")
