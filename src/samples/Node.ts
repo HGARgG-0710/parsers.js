@@ -1,11 +1,7 @@
 import { NodeSystem } from "../classes.js"
 import { ContentNode, RecursiveNode, TokenNode } from "../classes/Node.js"
 
-export function PlainNodes<Type = any>(
-	token: Type[],
-	content: Type[],
-	recursive: Type[]
-) {
+export function PlainNodes<T = any>(token: T[], content: T[], recursive: T[]) {
 	return new NodeSystem([
 		[TokenNode, token],
 		[ContentNode, content],
