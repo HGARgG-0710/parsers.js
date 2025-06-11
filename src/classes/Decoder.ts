@@ -65,6 +65,11 @@ abstract class PreDecoder implements IDecoder {
 		while (n-- && this.hasChars()) this.copySingleChar()
 	}
 
+	private furtherAwayAt(n: number) {
+		this.copyLastOf(n)
+		return this.decodeLastCopied()
+	}
+
 	protected advance(n: number) {
 		this.pos += n
 	}
@@ -82,17 +87,12 @@ abstract class PreDecoder implements IDecoder {
 		return this.decode(this.temp)
 	}
 
-	furtherAwayAt(n: number) {
-		this.copyLastOf(n)
-		return this.decodeLastCopied()
-	}
-
 	hasChars() {
 		return this.size > this.pos
 	}
 
 	nextChar(n = 1) {
-		if (this.hasChars()) this.furtherAwayAt(n)
+		return this.hasChars() && this.furtherAwayAt(n)
 	}
 
 	copy() {

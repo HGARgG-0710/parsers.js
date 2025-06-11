@@ -13,8 +13,12 @@ export class ReadingSource implements ISource {
 	private _isOpen: boolean
 	private decoder: IDecoder
 
-	private fetchDecoded(i: number) {
-		this.decoded = this.decoder.furtherAwayAt(i)
+	private maybeAssignDecoded(maybeDecoded: string | false) {
+		if (maybeDecoded) this.assignDecoded(maybeDecoded)
+	}
+
+	private assignDecoded(decoded: string) {
+		this.decoded = decoded
 	}
 
 	private set isOpen(newIsOpen: boolean) {
@@ -38,7 +42,7 @@ export class ReadingSource implements ISource {
 	}
 
 	nextChar(i: number = 1): void {
-		if (this.hasChars()) this.fetchDecoded(i)
+		this.maybeAssignDecoded(this.decoder.nextChar(i))
 	}
 
 	hasChars() {
