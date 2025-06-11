@@ -5,6 +5,10 @@ import { ResourceManager } from "./ResourceManager.js"
 
 const pickTruncationWriteFlag = (truncate: boolean) => (truncate ? "w" : "a")
 
+/**
+ * A class implementing `IDestination` and `IInitializable<[IEncoder]>`. 
+ * Purposed for safe managed writing access to files. 
+*/
 export class WritingDestination
 	implements IDestination, IInitializable<[IEncoder]>
 {
@@ -61,5 +65,8 @@ export class WritingDestination
 }
 
 export namespace WritingDestination {
+	/**
+	 * The `ResourceManager` instance for the `WritingDestination` class. 
+	*/
 	export const manager = new ResourceManager(WritingDestination)
 }

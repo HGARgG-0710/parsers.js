@@ -9,10 +9,39 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-IMMIDIATE [first - patch up "bad" classes; then - public '.annotation's]: 		
-	TODO: order ALL the imports [Shift + Alt + O]
-	
+IMMIDIATE [first - order 'import's, then - do 'docs']: 			
+	TODO: modify the tests: 
+		1. add a `constructor() {...}` test now...
+		2. fix the `constructor: function` thingies... [not as readable...]; 
+
+	TODO: Final Task Order
+		1. finish jsdoc
+		2. tests [possibly - with finalization, if new redundancies are found]
+			1. also - some minor todo completion [those that cause bugs, more specifically...]; 
+		3. wiki
+		4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+
 	TODO: Docs [initial, new, final]
+		Documentation order: 
+			1. write jsdoc [reason - faster this way...]: 
+				Brief descriptions. 
+				Present for all `export`ed abstractions [including types and classes]. 
+				
+				16. utils.ts
+			2. fix wiki [add new stuff, delete old]
+				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
+					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
+					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
+						and 
+				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
+					ONLY on public classes [exports]
+					
+				3. add SPECIAL pages for `IStream`: 
+					1. on mixins and "annotation" classes
+						1. on differences between the JS and TS APIs, specifically
+					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
+					3. on the HIERARCHY [make an image via 'Excalidraw']
+
 		1. Ensure that ALL the exports are AS-DESIRED (relevant)
 			Finalize the library exports, that is
 		2. Ensure NOTHING is missing from the wiki: 
@@ -30,6 +59,13 @@ IMMIDIATE [first - patch up "bad" classes; then - public '.annotation's]:
 				2. ALL public exports
 					IF a 'util' - a proper short function description. 
 					IF a 'class/interface/related' - a brief description + a link ot the wiki
+
+		[later]
+		4. Finalization: 
+			1. piece-by-piece DOCUMENT any new exports: 
+				1. finished `samples` 
+				2. the `.annotation`s [leave them undocumented for the moment...]
+				3. Regex, TokenizerStream, ...
 
 NEXT UP:
 	TODO: `.copy()`-fixing [IStream-implementations]: 
@@ -94,6 +130,11 @@ NEXT UP:
 	TODO: in alll the `mixin`s - FIX THE (old) `super` calls!!! 
 		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
 
+	TODO: about `annotation`s. 
+		CHANGE them so that boilerplate due to mixins is MINIMIZED. 
+		Let *most* influential ones be inherited INSTEAD, and others be copied. 
+		[Walk through all of them - fix this...]; 
+
 	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
 		and NOT `function () {}`
 
@@ -106,6 +147,16 @@ NEXT UP:
 				AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
 
 	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
+
+	TODO: on `let smallCaseStream: ... = PreStreamName(...); .generic = ...`; 
+		REPLACE THESE in places where you use the FACTORIES instead with `const localSmallCaseName = BuildSomeStreamName<T>(...)`
+		Reasons:
+			1. less boilerplate [ergo - simpler code]
+			2. same typing
+
+		THIS GOES FOR '_SomeName' AS WELL: 
+			1. HandlerStream
+			... OTHERS [walk through the project - FIND ITHEM...]
 
 CURRENT TODOS [top-down order...]:		
 	TODO: Tests
@@ -243,8 +294,6 @@ LATER TODOS:
 					})
 
 			TODO [maybe?]: create
-				1. `TestCounter` class
-					for *counting* tests-being-run within the given test suite
 				2. `TestChain` class, 
 					which has an internal `TestCounter`, 
 						has a `handler` function, and 
@@ -252,8 +301,6 @@ LATER TODOS:
 								supplied to the `handler`
 
 				USE the `TestChain` to express the chains of tests thusly. 
-
-			2. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
 				
 	TODO: OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
@@ -743,6 +790,17 @@ LATER TODOS:
 		Squash all the others + change the respective commit messages; 
 		[do this via `git rebase -i` + `git push --force`]
 
+	BEFORE WE LEAVE [vital]: 		
+		TODO: JIRA for v0.4
+			WHEN you do the FINAL 'git rebase -i' of the thing, 
+				remove all the *old* `todos.txt` files (to make the repo seem presentable). 
+		
+			Let the *new* notes for v0.4 now be inside of:
+				1. JIRA 
+				2. `GitHub Projects` [as a backup only...]
+		
+	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
+
 	TODO: WRITE the CHANGELOG
 	
 [v0.4]
@@ -973,6 +1031,12 @@ TODO:
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+		MC1. MapClass: fix types
+			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
+			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
+			The inner key type matters during construction, but the outer key type matters during other usage. 
+			Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
 								
 	3. Unrelated/separate module/grand refactoring: 		
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
@@ -1055,6 +1119,20 @@ TODO:
 
 			Add a Guide for that.
 
+		WTJD1. Combined note on self-references
+			1. add wiki references: 
+				1. to jsdoc
+					Now, the wiki (which is still just a glorified version of jsdoc), 
+						will also be given references to by the JSDoc [user no longer has to search for it themselves]. 
+				2. into wiki [self-references]
+			2. complete jsdoc: 
+				1. for classes: 
+					1. add documentation ON A PER-METHOD basis
+						[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
+					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+						Must be synced with `wiki`. 
+						LET the `public/protected` docs for these methods be THE SAME. 
+
 	5. Testing: 
 		1. introduce mocks [use Jest]
 			Reason: complexity. 
@@ -1098,6 +1176,16 @@ FUTURE:
 				It should be USED IN `parsers.js` as BOTH: 
 					1. a dependency
 					2. a re-export [since there are mixins CURRENTLY exported]
+
+		5. `object_pool`: 
+			This is the `ObjectPool` (and `IInitializable` interface) class. 
+			It is far too independent to be just left here. 
+			Far too useful to be allowed to be "herded" together with the domain-specific 
+			stuff. 
+
+			'FreeStream' REMAINS PART OF `parsers.js`
+
+			Export this from here as a dependency. 
 
 	2. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 

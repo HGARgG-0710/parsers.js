@@ -17,10 +17,15 @@ import {
 	PoolableRecursiveList,
 	RecursiveRenewer,
 	renewerInitializer
-} from "./RecursiveInitList.js"
+} from "./RecursiveList.js"
 
 const { isFunction, isArray } = type
 
+/**
+ * This is the `StreamRenewer` employed by the library's `CompositeStream` 
+ * implementation. It is the sole definition that makes the `StreamList` 
+ * operate the way it actually does. 
+*/
 class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	private topStream: ICompositeStream
 	readonly evaluator = this.evaluate.bind(this)
@@ -75,6 +80,12 @@ const streamListInitializer: IInitializer<
 
 const globalStreamRenewer = new StreamRenewer()
 
+/**
+ * This is the `PoolableRecursiveList` actually employed 
+ * by the `CompositeStream` implementation. It uses the 
+ * `globalStreamRenewer` as the default renewer (which is 
+ * referenced across all the `StreamList`s)
+*/
 export class StreamList extends PoolableRecursiveList<
 	ILinkedStream,
 	IStreamChooser,

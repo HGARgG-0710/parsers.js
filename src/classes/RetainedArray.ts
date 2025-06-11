@@ -1,12 +1,28 @@
 import { number } from "@hgargg-0710/one"
-import type { IClearable, IPushable } from "../interfaces.js"
+import type { IClearable, ICollection } from "../interfaces.js"
 import { MixinArray } from "../internal/MixinArray.js"
 
 const { min } = number
 
+/**
+ * This class serves as an optimized wrapper for
+ * various array operations. It is guaranteed
+ * to never free the space taken up by the array
+ * and instead retain its size, increasing it
+ * whenever necessary.
+ *
+ * It is best employed as a termporary
+ * buffer of a fixed (or mostly fixed) size,
+ * for frequent read-write operations.
+ *
+ * Implements:
+ *
+ * 1. `ICollection`
+ * 2. `IClearable`
+ */
 export class RetainedArray<T = any>
 	extends MixinArray<T>
-	implements IPushable, IClearable
+	implements ICollection<T, readonly T[]>, IClearable
 {
 	private ["constructor"]: new (n?: number) => this
 

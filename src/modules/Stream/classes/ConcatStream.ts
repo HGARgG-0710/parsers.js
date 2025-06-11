@@ -4,6 +4,13 @@ import { ArrayStream } from "./ArrayStream.js"
 import { array } from "@hgargg-0710/one"
 const { lastIndex } = array
 
+/**
+ * This is a class that extends `ArrayStream<any, IStream>`. 
+ * It contains elements of unknown type, which are obtained from 
+ * the `.items: IStream[]`. More specifically, the stream sequentially 
+ * concatenates outputs from each one of the given `IStream`s,
+ * taking their precise combined time to finish. 
+*/
 export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
 	private index: number = 0
 

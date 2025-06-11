@@ -1,5 +1,13 @@
 import type { IInitializable, IStream } from "../../../interfaces.js"
 
+/**
+ * This is an abstract class implementing `IStream<T>` and `IInitializable<Args>`.
+ * It defines a set of separate variables of `.curr`, `.isEnd`, `.isStart`.
+ * It is to be used whenever an `IStream` needs to have its own state,
+ * independent of that of its resource (if it has one). It also defines
+ * `protected` methods `.endStream()` [sets `.isEnd = true` and `.isStart = false`],
+ * and `.startStream` [sets `.isStart = true` and `.isEnd = false`]
+ */
 export abstract class DyssyncStream<T = any, Args extends any[] = []>
 	implements IStream<T>, IInitializable<Args>
 {

@@ -2,8 +2,14 @@ import { MultiIndex } from "../classes/Position.js"
 import type { IWalkable } from "../interfaces/Node.js"
 import { hasChildren, treeEndPath } from "../utils/Node.js"
 
+/**
+ * This is the class responsible for providing the `DepthStream`
+ * tree-iteration algorithm with its elementary operations. It 
+ * is used as an internal implementation detail, and can be used 
+ * to implement other tree-iteration algorithms.  
+*/
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
-	public readonly pos: MultiIndex = new MultiIndex()
+	public readonly pos = new MultiIndex()
 
 	private _curr: TreeLike
 	private level: TreeLike

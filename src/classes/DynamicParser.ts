@@ -84,8 +84,8 @@ class Parse<FinalType = any, InitType = any>
 	}
 
 	private onUpdate() {
-		this.workStream.renewResource()
 		this.didUpdate = false
+		this.workStream.renewResource()
 	}
 
 	private initInputStream(input: InitType) {
@@ -141,6 +141,47 @@ class Parse<FinalType = any, InitType = any>
 	}
 }
 
+/**
+ * A function for creation of self-modifying parsers. 
+ * They are based upon the provided `workStream: ICompositeStream<FinalType>`
+ * to serve as the "body" of the parser, and the `inputStream`, as its input. 
+ * 
+ * The `inputStream` is being "fed" to the `workStream` via the `.init(inputStream)`
+ * method call upon call to the inner function. The `state` is optional to the working
+ * of the resulting parser, while the `input` is (depending on the implementation for `inputStream`)
+ * is essential. The `input` argument represents (typically) some form of resource/string-wrapper, 
+ * or another user-provided source of parsing data. 
+ * 
+ * Note that when a file connection 
+ * (such a `ReadingSource`, or, in general, an `IResource`), it is the USER'S responsibility 
+ * to conduct the cleanup. 
+ * 
+ * Note that it is also possible to run the result of `DynamicParser` on multiple different 
+ * `input` objects without requiring to re-create it all anew.
+ * 
+ * The resulting self-modifying parser calls the underlying (initialized) `workStream`
+ * until finished, while also permitting the user: 
+ * 
+ * 1. access to the global `.state` from within the `ICompositeStream`'s execution 
+ * 		via the `workStream.setState(state)` method call
+ * 2. (modifying) internal access to the underlying `.streams: IStreamArray` 
+ * 		property of the (global) `ICompositeStream`, containing the 'IRawStream's 
+ * 		composing the `ICompositeStream` in question, 
+ * 		via the `this.state.parser.streams`
+ * 3. to register the accumulated changes to the `.streams` via the 
+ * 		internal call to `this.state.parser.update()`
+ * 
+ * Thus, these three capabilities permit the user to modify the parser
+ * by means of preserving the information received by parsing appropriate 
+ * input. 
+ * 
+ * The sole rule of the calls to `.update()` is that it can ONLY occurr
+ * after the last call to `.next()` HAS been finished. That is to say, 
+ * the user must plan their grammar in such a fashion so as to ensure 
+ * that the call to `.update()` is ALWAYS harmonious with the remainder 
+ * of their last '.next()' call to the `ICompositeStream` as it had been 
+ * before the `.update()` call in question.
+*/
 export function DynamicParser<FinalType = any, InitType = any>(
 	workStream: ICompositeStream<FinalType>,
 	inputStream: IInputStream<string, InitType>

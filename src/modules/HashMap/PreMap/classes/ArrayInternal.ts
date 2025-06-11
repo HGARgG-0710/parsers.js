@@ -4,6 +4,12 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isArray } = type
 
+/**
+ * This is a class implementing the `IPreMap<number, T, Default>`.
+ * It is a thin wrapper around `Array`.
+ * It is intended to be used by the `HashClass` for the purposes
+ * of defining the hash-operations.
+ */
 export class ArrayInternal<T = any, Default = any>
 	implements IPreMap<number, T, Default>
 {

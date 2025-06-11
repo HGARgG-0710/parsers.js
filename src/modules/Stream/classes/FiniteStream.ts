@@ -1,11 +1,20 @@
 import { array } from "@hgargg-0710/one"
-import type { IOwnedStream, IPosed } from "../../../interfaces.js"
+import type { IOwnedStream, IPosed, IPrevable } from "../../../interfaces.js"
 import { ArrayStream, ArrayStreamAnnotation } from "./ArrayStream.js"
 
 const { lastIndex } = array
 
-class FiniteStreamAnnotation<T = any> extends ArrayStreamAnnotation<T> {
+class FiniteStreamAnnotation<T = any>
+	extends ArrayStreamAnnotation<T>
+	implements IPosed<number>, IPrevable
+{
+	readonly pos: number
+
 	protected baseNextIter(curr?: T | undefined): T {
+		return null as T
+	}
+
+	protected basePrevIter(curr?: T | undefined): T {
 		return null as T
 	}
 
@@ -17,7 +26,7 @@ class FiniteStreamAnnotation<T = any> extends ArrayStreamAnnotation<T> {
 function BuildFiniteStream<T = any>() {
 	return class FiniteStream
 		extends ArrayStream.generic!<T, T>()
-		implements IOwnedStream<T>, IPosed
+		implements IOwnedStream<T>, IPosed<number>
 	{
 		private _pos: number = 0
 
@@ -31,6 +40,10 @@ function BuildFiniteStream<T = any>() {
 
 		protected baseNextIter() {
 			return this.items[++this.pos]
+		}
+
+		protected basePrevIter(curr?: T | undefined): T {
+			return this.items[--this.pos]
 		}
 
 		isCurrEnd() {
@@ -56,6 +69,12 @@ function PreFiniteStream<T = any>(): typeof FiniteStreamAnnotation<T> {
 				BuildFiniteStream<T>() as typeof FiniteStreamAnnotation)
 }
 
+/**
+ * This is a class implementing `IOwnedStream<T>` and `IPosed`.
+ * It is an extension of `ArrayStream`.
+ * It is defined via iteration through the provided finite list
+ * of `.items`. Likewise, it is also capable of backward iteration.
+ */
 export const FiniteStream: ReturnType<typeof PreFiniteStream> & {
 	generic?: typeof PreFiniteStream
 } = PreFiniteStream()

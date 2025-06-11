@@ -16,7 +16,8 @@ export const hasChildren = <T extends IWalkable<T> = any>(x: IWalkable<T>) =>
 
 /**
  * Sequentially indexes a given `node` using `multind` for indicies array.
- * Provided correctness, results are stored in an array of `multind.length` length and then returned.
+ * Provided correctness of the indexation path, results are stored in an
+ * array of `1 + multind.length` length and then returned (including the `node`)
  */
 export function sequentialIndex<T extends IWalkable<T> = any>(
 	node: IWalkable<T>,
@@ -30,7 +31,7 @@ export function sequentialIndex<T extends IWalkable<T> = any>(
 
 /**
  * Returns the multi-index (`number[]`) for the deep-rightmost (recursive-last)
- * element of the given `IWalkable`
+ * element of the given `IWalkable<T>`
  */
 export function treeEndPath<T extends IWalkable<T> = any>(node: IWalkable<T>) {
 	const lastIndex: number[] = []
@@ -45,11 +46,25 @@ export function treeEndPath<T extends IWalkable<T> = any>(node: IWalkable<T>) {
 
 /**
  * Returns the predicate for checking that the `.type` property of the given
- * `ITyped` is equal to `type`
+ * `ITyped` is equal to `_type`
  */
 export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
 	trivialCompose(eqcurry(_type), type)
 
+/**
+ * Returns a function `deserializer` that returns either:
+ *
+ * 1. `INode<T>` by calling `allowedTypes.getByType(from.type).fromPlain(from, deserializer)`,
+ * which (basically) converts an object (which can be a result of deserialization) into
+ * a valid tree within the given `NodeSystem`. Thus, it would, for instance, allow
+ * deserializing strings with JSON objects into valid `INode<T>` objects, and therefore -
+ * enable snapshot testing techniques for parsers developed using the library.
+ * 2. `false`, if deserialization is impossible due to invalid object,
+ * i.e. an object with no respective entry in `allowedType` for its `.type`,
+ * or, better still, one without any type at all. Also, the `false` value may
+ * actually be returned by the `.fromPlain` method itself (which is, in general,
+ * expected to be recursive here - hence the passing of `deserializer`).
+ */
 export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
 	function isValid(type: T): boolean {
 		return allowedTypes.has(type)

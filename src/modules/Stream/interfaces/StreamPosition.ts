@@ -4,11 +4,17 @@ import type {
 	IStream
 } from "../../../interfaces.js"
 
+/**
+ * This is `IPosition<IStream<T>>`, specific to library's stream objects.
+ */
 export type IStreamPosition<T = any> = IPosition<IStream<T>>
 
-export type IStreamPositionPredicate<T = any> = IPredicatePosition<IStream<T>> &
-	Partial<IDirectionHaving>
-
-export interface IDirectionHaving {
-	direction: boolean
+/**
+ * This is `IPredicatePosition<IStream<T>>` - a specifica case with an (optional)
+ * `direction?: boolean` property.
+ */
+export type IStreamPositionPredicate<T = any> = IPredicatePosition<
+	IStream<T>
+> & {
+	direction?: boolean
 }

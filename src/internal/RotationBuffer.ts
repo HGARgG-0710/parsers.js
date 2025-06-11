@@ -6,6 +6,16 @@ const { copy } = array
 const { min } = number
 const { isNumber } = type
 
+/**
+ * This is a buffer-like object employed by the `PeekStream`
+ * for the purpose of efficiently keeping track of a finite 
+ * number of items of type `T`, while shifting-unshifting 
+ * new items from it, *without* the need to actually reallocate 
+ * the object itself (as is the case with `Array.prototype.shift/unshift`). 
+ * 
+ * This way, the `RotationBuffer` is allocated ONCE and is reallocated 
+ * never. Its usgae gives birth to less GC-intensive code. 
+*/
 export class RotationBuffer<T = any> extends InitMixin<T> {
 	private ["constructor"]: new (n?: number) => this
 

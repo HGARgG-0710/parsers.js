@@ -76,6 +76,14 @@ function PreSingletonStream<T = any>() {
 
 const _SingletonStream = PreSingletonStream()
 
+/**
+ * This is a function for creating factories for instances
+ * of `ILinkedStream<Out>` interface. They represent streams
+ * that have a single element, provided by their underlying 
+ * `.resource: IOwnedStream<In>`, upon which the given `handler` 
+ * is applied, and from which the sole element of type `Out` 
+ * is returned. 
+ */
 export function SingletonStream<In = any, Out = any>(
 	handler: ISingletonHandler<In, Out>
 ) {

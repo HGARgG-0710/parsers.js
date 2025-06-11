@@ -4,6 +4,12 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isStruct } = type
 
+/**
+ * This is a class implementing the `IPreMap<string, T, Default>`.
+ * It is a thin `object` wrapper.
+ * It is intended to be used by the `HashClass` for the purposes
+ * of defining the hash-operations.
+ */
 export class ObjectInternal<T = any, Default = any>
 	implements IPreMap<string, T, Default>
 {

@@ -6,17 +6,34 @@ import type { IMapClass } from "../interfaces/MapClass.js"
 
 const { typeOf } = _type
 
-export const typeMap = (mapClass: IMapClass) => mapClass.extend<ITyped>(type)
+/**
+ * Calls and returns `mapClass.extend((x: ITyped<T>) => x.type)`
+ */
+export const typeMap = <T = any>(mapClass: IMapClass<T>) =>
+	mapClass.extend<ITyped<T>>(type)
 
+/**
+ * Calls and returns `mapClass.extend((x: IResourcefulStream) => x.resource)`
+ */
 export const resourceMap = (mapClass: IMapClass) =>
 	mapClass.extend<IResourcefulStream>(resource)
 
-export const currMap = (mapClass: IMapClass) => mapClass.extend<IStream>(curr)
+/**
+ * Calls and returns `mapClass.extend((x: IStream) => x.curr)`
+ */
+export const currMap = <T = any>(mapClass: IMapClass<T>) =>
+	mapClass.extend<IStream<T>>(curr)
 
-export const typeofMap = (mapClass: IMapClass) => mapClass.extend(typeOf)
+/**
+ * Calls and returns `mapClass.extend((x) => typeof x)`
+ */
+export const typeofMap = (mapClass: IMapClass<ReturnType<typeof typeOf>>) =>
+	mapClass.extend(typeOf)
 
+/**
+ * Calls and returns `mapClass.extendKey((x) => x.is)`
+ */
 export const nodeMap = (mapClass: IMapClass) => mapClass.extendKey(is)
 
 export * from "../modules/IndexMap/classes/MapClass.js"
 export * from "../modules/IndexMap/classes/ModifiableMap.js"
-export * from "../modules/IndexMap/classes/TableMap.js"

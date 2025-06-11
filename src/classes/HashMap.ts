@@ -66,6 +66,20 @@ abstract class PreHashClass<K = any, V = any, InternalKey = any, Default = any>
 	constructor(private pre: IPreMap<InternalKey, V, Default>) {}
 }
 
+/**
+ * This is a factory for producing `IHashClass<K, V, InternalKey, Default` objects. 
+ * These are, essentially, classes/constructors for the creation of `IHashMap` objects, 
+ * via the underlying `structure: IPreMap<InternalKey, V, Default>` objects. 
+ * 
+ * This function creates a new class on each call, its results are NOT cached automatically, 
+ * so caution is advised when using it. The classes WILL be disjoint whenever using 
+ * `instanceof`, although they do share a common-functionality ancestor.
+ * 
+ * The `IHashClass` implementation specific to this factory is such that (internally)
+ * it redirects all of its calls to the `IPreMap`, by putting all the 
+ * methods' arguments of type `K` through the provided `hash` argument of the respective 
+ * `HashClass` call. 
+*/
 export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 	hash: IHash<K, InternalKey>
 ): IHashClass<K, V, InternalKey, Default> {

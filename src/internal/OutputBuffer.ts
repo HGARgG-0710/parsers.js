@@ -4,6 +4,10 @@ import type { IPersistentAccumulator } from "../interfaces.js"
 
 const { isArray } = type
 
+/**
+ * A buffer-like class serving as the output for the `FreezableStream<T>`.
+ * The user can work with it via a public `IPersistenAccumulator<T>` interface.
+ */
 export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
 	private ["constructor"]: new (collection?: T[]) => this
 

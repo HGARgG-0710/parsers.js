@@ -35,19 +35,19 @@ export abstract class SourceStreamAnnotation<
 }
 
 function BuildSourceStream<
-	Type = any,
+	T = any,
 	SourceType = unknown,
 	MoreArgs extends any[] = []
 >() {
 	abstract class _SourceStream
-		extends BasicStream.generic!<Type, [SourceType, ...(MoreArgs | [])]>()
+		extends BasicStream.generic!<T, [SourceType, ...(MoreArgs | [])]>()
 		implements IResourceSettable
 	{
 		protected ["constructor"]: new (source?: SourceType) => this
 
 		protected source?: SourceType
 
-		protected abstract currGetter(): Type
+		protected abstract currGetter(): T
 
 		protected updateCurr() {
 			this.update(this.currGetter())
@@ -57,7 +57,7 @@ function BuildSourceStream<
 			return resourceInitializer
 		}
 
-		protected initGetter(): Type {
+		protected initGetter(): T {
 			return this.currGetter()
 		}
 
@@ -86,18 +86,18 @@ function BuildSourceStream<
 				return false
 			}
 
-			protected baseNextIter(): Type {
+			protected baseNextIter(): T {
 				throw new TypeError(
 					"abstract method `baseNextIter` of `SourceStream` not implemented"
 				)
 			}
 
-			protected currGetter(): Type {
+			protected currGetter(): T {
 				throw new TypeError(
 					"abstract method `currGetter` of `SourceStream` not implemented"
 				)
 			}
-		} as unknown as typeof SourceStreamAnnotation<Type, SourceType>
+		} as unknown as typeof SourceStreamAnnotation<T, SourceType>
 	})()
 }
 
@@ -117,6 +117,17 @@ function PreSourceStream<
 		  >() as typeof SourceStreamAnnotation)
 }
 
+/**
+ * This is an abstract class extending `BasicStream<T, [SourceType, ...Args]>`.
+ * It sets the underlying `protected source: SourceType`, as well as `.copy`
+ * method that (if possible) calls the `.copy()` method on the `.source`, and
+ * then calls the constructor with it. It uses `resourceInitializer` as its
+ * initializer, and provides `protected .initGetter`, which calls the
+ * `protected abstract .currGetter(): T`. 
+ * 
+ * It also provides a `protected .updateCurr(): T` method, 
+ * which calls `this.update(this.currGetter())`. 
+ */
 export const SourceStream: ReturnType<typeof PreSourceStream> & {
 	generic?: typeof PreSourceStream
 } = PreSourceStream()

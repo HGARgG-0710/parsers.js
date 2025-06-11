@@ -1,7 +1,11 @@
 import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { readSync } from "node:fs"
-import type { IDecoder } from "../interfaces/Decoder.js"
+import type {
+	IDecoder,
+	ISize,
+	ISourceDescriptor
+} from "../interfaces/Decoder.js"
 
 const { numbers } = array
 const { extendPrototype } = object
@@ -29,8 +33,8 @@ abstract class PreDecoder implements IDecoder {
 	private ["constructor"]: new () => this
 
 	private _pos: number = 0
-	private _descriptor: number
-	private _size: number
+	private _descriptor: ISourceDescriptor
+	private _size: ISize
 
 	protected readonly temp: Buffer
 
@@ -241,13 +245,22 @@ function MultiByteDecoder(
 	return multiByteDecoder
 }
 
-// * important pre-doc: Latin-1 and ASCII
+/**
+ * A class implementing the `IDecoder` interface that works with
+ * the Latin-1 encoding.
+ */
 export const Decoder8 = Decoder(1, "latin1")
 
-// * important pre-doc: UCS2
+/**
+ * A class implementing the `IDecoder` interface that works with
+ * the UCS2 encoding.
+ */
 export const Decoder16 = Decoder(2, "ucs2")
 
-// * important pre-doc: UTF8
+/**
+ * A class implementing the `IDecoder` interface that works with
+ * the UTF-8 encoding.
+ */
 export class DecoderU8 extends MultiByteDecoder(4, "utf8", 1) {
 	protected read(): number {
 		this.fillFirstDefault(1)
@@ -271,7 +284,10 @@ export class DecoderU8 extends MultiByteDecoder(4, "utf8", 1) {
 	}
 }
 
-// * important pre-doc: UTF16 - little endian
+/**
+ * A class implementing the `IDecoder` interface that works with
+ * the little-endian UTF-16 encoding.
+ */
 export class DecoderU16LE extends MultiByteDecoder(4, "utf16le", 2, isEven) {
 	protected read(): number {
 		this.fillFirstDefault(2)

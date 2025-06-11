@@ -2,6 +2,10 @@ import { array, type } from "@hgargg-0710/one"
 
 const { isNumber } = type
 
+/**
+ * This is a (largely) semantic function, whose purpose is
+ * to give a nice representation to the `[K, V][]`-literals
+ */
 export function Pairs<K = any, V = any>(
 	...pairs: array.Pairs<K, V> | [number]
 ) {
@@ -13,7 +17,11 @@ export function Pairs<K = any, V = any>(
 
 export namespace Pairs {
 	/**
-	 * Given an array of linearized pairs `KeyType, ValueType`, returns the equivalent array of pairs
+	 * Given `Iterable<K | V>`, which starts with a `K`,
+	 * and in which `K` always immidiately followed by a `V`,
+	 * returns a [K, V][], which is broken down onto pairs
+	 * by walking from start to end, and taking the
+	 * corresponding `K` and `V`.
 	 */
 	export function fromLinear<K = any, V = any>(linear: Iterable<K | V>) {
 		const result = Pairs<K, V>()
@@ -31,7 +39,8 @@ export namespace Pairs {
 	}
 
 	/**
-	 * Given a pair of arrays of keys and values, returns an array of pairs.
+	 * Given a pair of `Iterable<K>` and `Iterable<V>` of keys and values,
+	 * returns a `[K, V][]`
 	 */
 	export function to<K = any, V = any>(
 		keys: Iterable<K>,
@@ -49,7 +58,9 @@ export namespace Pairs {
 	}
 
 	/**
-	 * Returns a pair of keys and values, based off an array of pairs
+	 * Given an `Iterable<[K, V]>`, returns a `[K[], V[]]`,
+	 * with respective keys having the same index as their
+	 * values.
 	 */
 	export function from<K = any, V = any>(
 		mapPairs: Iterable<[K, V]>

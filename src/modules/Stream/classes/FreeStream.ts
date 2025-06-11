@@ -3,26 +3,16 @@ import type {
 	IOwnedStream,
 	IPoolGetter
 } from "../../../interfaces.js"
-import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
 
-const freeStreamInitializer = {
-	init(
-		target: FreeStreamAnnotation,
-		resource?: IOwnedStream,
-		poolGetter?: IPoolGetter
-	) {
-		ownerInitializer.init(target, resource)
-		if (poolGetter) target.setPoolGetter(poolGetter)
+class FreeStreamAnnotation<T = any> extends WrapperStreamAnnotation<T> {
+	setPoolGetter(poolGetter: IPoolGetter): this {
+		return this
 	}
 }
 
-class FreeStreamAnnotation<T = any> extends WrapperStreamAnnotation<T> {
-	setPoolGetter(poolGetter: IPoolGetter): void {}
-}
-
 function BuildFreeStream<T extends IFreeable = any>() {
-	return class extends WrapperStream.generic!<T, [IPoolGetter]>() {
+	return class extends WrapperStream.generic!<T, []>() {
 		private poolGetter: IPoolGetter
 		private freeable: T | null = null
 
@@ -35,10 +25,6 @@ function BuildFreeStream<T extends IFreeable = any>() {
 			this.freeable = null
 		}
 
-		protected get initializer() {
-			return freeStreamInitializer
-		}
-
 		setResource(resource: IOwnedStream) {
 			super.setResource(resource)
 			this.enqueueCurrForFreeing()
@@ -46,6 +32,7 @@ function BuildFreeStream<T extends IFreeable = any>() {
 
 		setPoolGetter(poolGetter: IPoolGetter) {
 			this.poolGetter = poolGetter
+			return this
 		}
 
 		next() {
@@ -66,8 +53,22 @@ function PreFreeStream<
 		: (freeStream = BuildFreeStream<T>() as typeof FreeStreamAnnotation)
 }
 
-export const FreeStream: ReturnType<typeof PreFreeStream> & {
-	generic?: typeof PreFreeStream
-} = PreFreeStream()
-
-FreeStream.generic = PreFreeStream
+/**
+ * This is a function for creation of factories for creation
+ * of `ILinkedStream<T>` instances.
+ * It is an extension of `WrapperStream<T, [IPoolGetter]>`.
+ * It expects the underlying `resource` to return values of a
+ * type `T extends IFreeable`. The stream in question returns
+ * each and every item from the underlying stream,
+ * calling `.free()` on it once the following `.next()` call
+ * is made. Thus, it is intended for maximizing usage of
+ * poolable objects. It is extremely useful when working
+ * with "pure" (stateless) operations over a given `IOwnedStream<T>`
+ * [id est - no state storage].
+ */
+export function FreeStream<T extends IFreeable = any>(poolGetter: IPoolGetter) {
+	const freeStream = PreFreeStream<T>()
+	return function (resource?: IOwnedStream<T>) {
+		return new freeStream().setPoolGetter(poolGetter).init(resource)
+	}
+}

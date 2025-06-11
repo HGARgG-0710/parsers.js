@@ -41,6 +41,9 @@ const TrivialStreamMixin = new mixin<IOwnedStream>(
 			next() {
 				this.endStream()
 			}
+		},
+		constructor: function () {
+			this.super.DyssyncStream.constructor.call(this)
 		}
 	},
 	[],
@@ -54,6 +57,18 @@ function PreTrivialStream<T = any, Args extends any[] = []>() {
 	>
 }
 
+/**
+ * This is a mixin that combines:
+ *
+ * 1. `OwnableStream`
+ * 2. `IterableStream`
+ * 3. `DyssyncStream`
+ *
+ * It is, in effect, the simplest possible `IOwnedStream` class.
+ * Note that it is incomplete (there is no code for initializing `.curr`).
+ * It has only one element, and ends the moment the user calls `.next()`.
+ * It also always has `.isCurrEnd() === true`.
+ */
 export const TrivialStream: ReturnType<typeof PreTrivialStream> & {
 	generic?: typeof PreTrivialStream
 } = PreTrivialStream()

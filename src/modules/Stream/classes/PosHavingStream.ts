@@ -1,9 +1,14 @@
-import type { IPosed, IStream } from "../../../interfaces.js"
 import { annotation } from "src/classes/Stream.js"
+import type { IPositionStream } from "../../../interfaces.js"
 
+/**
+ * This is an abstract class that implements `IPositionStream<T>`.
+ * It contains no concrete properties, save for those that pertain to
+ * `.pos` manipulation.
+ */
 export abstract class PosHavingStream<T = any>
 	extends annotation<T>
-	implements IStream<T>, IPosed
+	implements IPositionStream<T>
 {
 	private _pos: number = 0
 
@@ -12,11 +17,11 @@ export abstract class PosHavingStream<T = any>
 	}
 
 	protected forward(n: number = 1) {
-		return (this.pos += n)
+		this.pos += n
 	}
 
 	protected backward(n: number = 1) {
-		return (this.pos -= n)
+		this.pos -= n
 	}
 
 	get pos() {

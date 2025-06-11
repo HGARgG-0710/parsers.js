@@ -6,6 +6,10 @@ const { isNumber } = type
 
 type IView<T = any> = ICopiable & IReadable<T> & IInitializable<[IReadable<T>]>
 
+/**
+ * This is a class representing an offset to an `IReadable`.
+ * Serves to implement the `.peek(n: number)` method of the `InputStream`.
+ */
 export class ReadableView<T = any> implements IView<T> {
 	private ["constructor"]: new (
 		offset: number,

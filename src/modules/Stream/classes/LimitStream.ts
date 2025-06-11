@@ -1,10 +1,11 @@
 import { boolean, type } from "@hgargg-0710/one"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import type { ILinkedStream } from "../../../interfaces/Stream.js"
+import { isPredicatePosition } from "../../../utils/Position.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ILimitableStream } from "../interfaces/LimitStream.js"
 import type { IStreamPosition } from "../interfaces/StreamPosition.js"
-import { bind, compare, equals, negate } from "../utils/StreamPosition.js"
+import { bind, direction, equals, negate } from "../utils/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 
 const { isNullary } = type
@@ -45,6 +46,8 @@ function BuildLimitStream<T = any>() {
 		private direction: boolean
 		private from: IStreamPosition<T>
 		private until: IStreamPosition<T>
+
+		private startPos: IStreamPosition<T>
 
 		protected get initializer() {
 			return limitStreamInitializer
@@ -111,7 +114,11 @@ function BuildLimitStream<T = any>() {
 		}
 
 		private findStartPos() {
+			const initPos = this.resource.pos
 			navigate(this.resource!, this.from)
+			this.startPos = isPredicatePosition(this.from)
+				? this.from
+				: this.from + initPos
 		}
 
 		setResource(resource: ILimitableStream<T>) {
@@ -134,7 +141,7 @@ function BuildLimitStream<T = any>() {
 		isCurrStart(): boolean {
 			if (this.resource.isCurrStart()) return true
 			this.lookbehind = this.prodBack()
-			return equals(this.resource!, this.from)
+			return equals(this.resource!, this.startPos)
 		}
 
 		next() {
@@ -180,6 +187,22 @@ function PreLimitStream<T = any>(): ILimitStreamConsructor<T> {
 	return limitStream ? limitStream : (limitStream = BuildLimitStream<T>())
 }
 
+/**
+ * This is a function for creation of factories for instances
+ * of `ILinkedStream<T>` interface. These instances accept a
+ * `ILimitableStream<T>`, and return items that fall in between `from`
+ * and `longAs`. They are `IStreamPosition<T>`s, with `from` defining
+ * the "starting point" of the resulting `ILinkedStream<T>`
+ * [more specifically, how-many-steps-before/until-what-condition-is-true],
+ * and `longAs` defining the predicate/number-of-steps to use as an ending.
+ *
+ * By default, if `longAs` is not provided, it has the
+ * value of `from`.
+ *
+ * Important note: if `from` is a negative number - the `.pos` of the
+ * given `ILimitableStream<T>` must (itself) be greater than `from` in its absolute
+ * value.
+ */
 export function LimitStream<T = any>(
 	from: IStreamPosition<T>,
 	longAs?: IStreamPosition<T>
@@ -190,13 +213,13 @@ export function LimitStream<T = any>(
 	}
 
 	const until = negate(longAs)
-	const direction = compare(from, until)
+	const goDirection = direction(until)
 
 	const limitStream = PreLimitStream<T>()
 
 	return function (resource?: ILimitableStream<T>) {
 		return new limitStream()
-			.setDirection(direction)
+			.setDirection(goDirection)
 			.setFrom(from)
 			.setUntil(until)
 			.init(resource) as ILinkedStream<T>

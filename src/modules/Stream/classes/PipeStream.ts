@@ -4,6 +4,11 @@ import { DelegateStream } from "./DelegateStream.js"
 import { IterableStream } from "./IterableStream.js"
 import { OwnableStream } from "./OwnableStream.js"
 
+/**
+ * This is a (sealed) mixin that combines `IterableStream`,
+ * `DelegateStream` and `OwnableStream` abstract classes.
+ * It uses the constructor of `DelegateStream`.
+ */
 export const PipeStream = new mixin.sealed(
 	{
 		name: "PipeStream",

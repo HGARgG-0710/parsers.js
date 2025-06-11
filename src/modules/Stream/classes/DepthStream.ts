@@ -168,6 +168,25 @@ function PreDepthStream<
 				BuildDepthStream<TreeLike>() as typeof DepthStreamAnnotation)
 }
 
+/**
+ * This is a tree-iteration stream, extending `SourceStream`.
+ * It accepts a `TreeLike extends IWalkable<TreeLike> = IWalkable` type,
+ * which is then walked, with a parent being prioritized over a child,
+ * and for all 'i >= 0', 'i'th child being prioritized over 'i + 1'st.
+ *
+ * Thus, it is an `IStream`-implementation of a DFS algorithm.
+ *
+ * Every time that the user calls `.next()`, the next node in order is
+ * visited. By anticipating the types of nodes (with `.type` of `INode`,
+ * for instance), one can predict the structure of the node, and, thus,
+ * utilize the `DepthStream` correctly - processing just the right
+ * number of items before "falling outside" of a given parent node.
+ *
+ * It also supports backing up (via `.prev()`), and gettin the
+ * multi-index of the current node in the tree via `.index: MultiIndex`,
+ * as well as navigating to it directly via `.navigate(ind: MultiIndex)`.
+ * Similarly, there are `.rewind()` and `.finish()` methods present.
+ */
 export const DepthStream: ReturnType<typeof PreDepthStream> & {
 	generic?: typeof PreDepthStream
 } = PreDepthStream()

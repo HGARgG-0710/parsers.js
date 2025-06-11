@@ -1,6 +1,15 @@
 import type { IStream } from "../../../interfaces.js"
 import { ArrayStream } from "./ArrayStream.js"
 
+/**
+ * This is a class extending `ArrayStream<any, IStream>`.
+ *
+ * It operates by means of combining the output from multiple
+ * streams inside of `.items: IStream`, and returning them in
+ * a the fashion of: `(n11)(n21)(n31)...(nm1)(n12)(22)...`,
+ * where `1-m` are the indexes of values in `.items: IStream`.
+ * It stops after the shortest of present streams runs out.
+ */
 export class InterleaveStream extends ArrayStream.generic!<any, IStream>() {
 	private index: number = 0
 

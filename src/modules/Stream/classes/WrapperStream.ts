@@ -33,6 +33,14 @@ function PreWrapperStream<T = any, Args extends any[] = any[]>() {
 	>
 }
 
+/**
+ * This is a mixin of:
+ *
+ * 1. `ResourceCopyingStream`
+ * 2. `AttachedStream`
+ *
+ * It uses the constructor of `AttachedStream`.
+ */
 export const WrapperStream: ReturnType<typeof PreWrapperStream> & {
 	generic?: typeof PreWrapperStream
 } = PreWrapperStream()

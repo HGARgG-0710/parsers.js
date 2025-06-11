@@ -8,7 +8,7 @@ const char_ranges = (...ranges: (string | [string, string])[]) =>
  * Creates a regular expression containing the character class
  * defined by `ranges` in the following manner:
  *
- * 1. if `ranges[i]` is a string, it is taken to be a single character
+ * 1. if `ranges[i]` is a string, it is taken to be an uninterrupted sequence of characters
  * 2. if `ranges[i]` is a pair of strings, it is taken to be a character range of `ranges[i][0]-ranges[i][1]`
  */
 export const charclass = (...ranges: (string | [string, string])[]) =>
@@ -18,7 +18,7 @@ export const charclass = (...ranges: (string | [string, string])[]) =>
  * Creates a regular expression containing the complement
  * of the character class defined by `ranges` in the following manner:
  *
- * 1. if `ranges[i]` is a string, it is taken to be a single character
+ * 1. if `ranges[i]` is a string, it is taken to be an uninterrupted sequence of characters
  * 2. if `ranges[i]` is a pair of strings, it is taken to be a character range of `ranges[i][0]-ranges[i][1]`
  */
 export const neg_charclass = (...ranges: (string | [string, string])[]) =>

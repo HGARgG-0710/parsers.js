@@ -78,6 +78,14 @@ function PreMarkerStream<
 		  >() as typeof MarkerStreamAnnotation)
 }
 
+/**
+ * This is a function for creation of factories for `IMarkerStream<T, Marker>` 
+ * interface. The instances will call `marker`, with `this` being the instance 
+ * itself, and accept a `.resource: IOwnedStream<T>`. Based on the `.resource`, 
+ * it is intended that the `marker` shall return the new value for the 
+ * `readonly currMarker: Marker` property of the  `IMarkerStream<T, Marker>`
+ * instance, upon each call to the `.next()` method. 
+*/
 export function MarkerStream<T = any, Marker = any>(marker: () => Marker) {
 	const markerStream = PreMarkerStream<T, Marker>()
 	return function (resource?: IOwnedStream<T>): IMarkerStream<T, Marker> {

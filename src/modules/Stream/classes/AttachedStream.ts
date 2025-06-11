@@ -41,6 +41,22 @@ function PreAttachedStream<T = any, Args extends any[] = any[]>() {
 	>
 }
 
+/**
+ * This is an abstract class, implementing `ILinkedStream<T>`.
+ * It is a mixin of `PipeStream` and `SyncStream`, which is
+ * to say, it completely and utterly delegates itself onto its
+ * `.resource: IOwnedStream`. The purpose of such a class is
+ * to allow for easy creation of `ILinkedStream`-classes with
+ * very little unique functionality of their own, and which are
+ * (however) independent enough to need their own constructor
+ * (and, therefore, the copying method).
+ * 
+ * It shares the constructor of `PipeStream`. 
+ *
+ * For an example of an even less autonomous derivative of 
+ * `DelegateStream`, see `WrapperStream` [with a generic `.copy` 
+ * method implemented]. 
+ */
 export const AttachedStream: ReturnType<typeof PreAttachedStream> & {
 	generic?: typeof PreAttachedStream
 } = PreAttachedStream()
