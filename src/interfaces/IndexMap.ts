@@ -10,52 +10,46 @@ import type {
 	ISizeable
 } from "../interfaces.js"
 
-export interface IKeysHaving<KeyType = any> {
-	readonly keys: KeyType[]
+export interface IKeysHaving<K = any> {
+	readonly keys: K[]
 }
 
-export interface IValuesHaving<ValueType = any> {
-	readonly values: ValueType[]
+export interface IValuesHaving<V = any> {
+	readonly values: V[]
 }
 
 export interface IIndexMap<
-	KeyType = any,
-	ValueType = any,
-	DefaultType = any,
+	K = any,
+	V = any,
+	Default = any,
 	IndexGetType = number
-> extends IIndexable<ValueType | DefaultType>,
-		Iterable<[KeyType, ValueType]>,
+> extends IIndexable<V | Default>,
+		Iterable<[K, V]>,
 		ICopiable,
 		ISizeable,
-		IDefaulting<DefaultType>,
-		IRekeyable<KeyType>,
+		IDefaulting<Default>,
+		IRekeyable<K>,
 		IReversible,
-		IKeysHaving<KeyType>,
-		IValuesHaving<ValueType>,
-		IConcattable<Iterable<[KeyType, ValueType]>, [KeyType[], ValueType[]]> {
+		IKeysHaving<K>,
+		IValuesHaving<V>,
+		IConcattable<Iterable<[K, V]>, [K[], V[]]> {
 	unique: () => number[]
-	byIndex: (index: number) => DefaultType | [KeyType, ValueType]
+	byIndex: (index: number) => Default | [K, V]
 	swap: (i: number, j: number) => this
 
 	getIndex: (key: any) => IndexGetType
 
-	add: (
-		index: number,
-		...pairs: array.Pairs<KeyType, ValueType>
-	) => [KeyType[], ValueType[]]
+	add: (index: number, ...pairs: array.Pairs<K, V>) => [K[], V[]]
 
 	delete: (index: number, count?: number) => this
-	replace: (index: number, pair: [KeyType, ValueType]) => this
-	set: (key: KeyType, value: ValueType, index?: number) => this
+	replace: (index: number, pair: [K, V]) => this
+	set: (key: K, value: V, index?: number) => this
 }
 
-export interface IMapClass<KeyType = any, ValueType = any, DefaultType = any> {
-	new (
-		map?: array.Pairs<KeyType, ValueType>,
-		_default?: DefaultType
-	): IIndexMap<KeyType, ValueType, DefaultType>
+export interface IMapClass<K = any, V = any, Default = any> {
+	new (map?: array.Pairs<K, V>, _default?: Default): IIndexMap<K, V, Default>
 
-	change?: IIndexingFunction<KeyType>
+	change?: IIndexingFunction<K>
 
 	extend: <KeyType = any>(
 		...f: ((...x: any[]) => any)[]
