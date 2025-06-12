@@ -36,7 +36,7 @@ export class PropDigger {
 		let currentLevel = x
 		while (pred(x) && isStruct(currentLevel))
 			currentLevel = this.loopProps(currentLevel)
-		return currentLevel
+		return currentLevel as unknown as Out
 	}
 
 	dig<In extends object = Summat, Out extends object = any>(
