@@ -18,7 +18,7 @@ import { NodeFactory } from "./NodeSystem.js"
 
 const { id } = functional
 
-abstract class BaseNode<T = any, Args extends any[] = any[]>
+export abstract class BaseNode<T = any, Args extends any[] = any[]>
 	implements INode<T>
 {
 	abstract readonly type: T

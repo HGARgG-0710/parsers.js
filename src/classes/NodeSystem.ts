@@ -2,7 +2,8 @@ import assert from "assert"
 import type {
 	INodeTypeCategories,
 	INodeTypeFactory,
-	INodeTypesMap
+	INodeTypesMap,
+	IRecursiveNodeTypeFactory
 } from "../interfaces/Node.js"
 import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
@@ -16,6 +17,12 @@ export function NodeFactory<T = any, Args extends any[] = []>(
 	preFactory: INodeTypeFactory<T, Args>
 ): INodeTypeFactory<T, Args> {
 	return Autocache(new BasicHash(new MapInternal()), preFactory)
+}
+
+export function RecursiveNodeFactory<T = any, Args extends any[] = []>(
+	preFactory: IRecursiveNodeTypeFactory<T, Args>
+): IRecursiveNodeTypeFactory<T, Args> {
+	return NodeFactory(preFactory) as IRecursiveNodeTypeFactory<T, Args>
 }
 
 export class NodeSystem<T = any> {

@@ -36,8 +36,7 @@ export interface INodeClass<T = any, Args extends any[] = any[]>
 	new (...x: Args): INode<T, Args>
 }
 
-export interface ICellNodeClass<T = any, V = any>
-	extends INodeClass<T, [V]> {
+export interface ICellNodeClass<T = any, V = any> extends INodeClass<T, [V]> {
 	new (value: V): ICellNode<T, V>
 }
 
@@ -55,16 +54,13 @@ export interface INode<T = any, Args extends any[] = any[]>
 	parent: INode<T> | null
 }
 
-export interface IRecursiveNode<T = any>
-	extends INode<T, [INode<T>[]]> {
+export interface IRecursiveNode<T = any> extends INode<T, [INode<T>[]]> {
 	jsonInsertablePre(): [string, string]
 	jsonInsertableEmpty(): [string, string]
 	jsonInsertablePost(): [string, string]
 }
 
-export interface ICellNode<T = any, V = any>
-	extends INode<T>,
-		IValued<V> {}
+export interface ICellNode<T = any, V = any> extends INode<T>, IValued<V> {}
 
 export type INodeMaker<T = any> = (x: any) => INode<T> | false
 
@@ -73,9 +69,19 @@ export interface INodeType<T = any, Args extends any[] = any[]> {
 	fromPlain(x: any, maker: INodeMaker<T>): INode<T> | false
 }
 
+export interface IRecursiveNodeType<T = any, Args extends any[] = any[]>
+	extends INodeType<T, Args> {
+	new (...args: Args): IRecursiveNode<T>
+	fromPlain(x: any, maker: INodeMaker<T>): INode<T> | false
+}
+
 export type INodeTypeFactory<T = any, Args extends any[] = any[]> = (
 	type: T
 ) => INodeType<T, Args>
+
+export type IRecursiveNodeTypeFactory<T = any, Args extends any[] = any[]> = (
+	type: T
+) => IRecursiveNodeType<T, Args>
 
 export type INodeTypeCategories<T = any> = [INodeTypeFactory, T[]][]
 
