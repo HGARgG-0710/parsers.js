@@ -4,6 +4,6 @@ export interface IPoolGetter<T = any> {
 	get(key: T): ObjectPool | undefined
 }
 
-export interface IFreeable {
-	free(poolGetter: IPoolGetter): void
+export interface IFreeable<T = any> {
+	free(poolGetter: IPoolGetter<T>): void
 }
