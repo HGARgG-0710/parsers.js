@@ -2,7 +2,7 @@ import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type { ITableMap } from "../../../interfaces/TableMap.js"
 import { Pairs } from "../../../samples.js"
-import { isGoodIndex, table } from "../../../utils.js"
+import { isGoodIndex } from "../../../utils.js"
 
 const { isArray } = type
 const { insert, out, swap } = inplace
@@ -11,7 +11,8 @@ export class TableMap<K = any, V = any, Default = any>
 	implements ITableMap<K, V, Default>
 {
 	protected ["constructor"]: new (
-		pairs: array.Pairs<K, V>,
+		keys: K[],
+		values: V[],
 		_default?: Default
 	) => this
 
@@ -127,7 +128,7 @@ export class TableMap<K = any, V = any, Default = any>
 	}
 
 	copy() {
-		return new this.constructor(Pairs.to(...table(this)), this.default)
+		return new this.constructor(this.keys, this.values, this.default)
 	}
 
 	*[Symbol.iterator]() {

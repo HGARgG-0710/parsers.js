@@ -63,6 +63,10 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 	private extension: (x: any, ...y: any[]) => any
 	private keyExtension: (key: K, index?: number, keys?: K[]) => any
 
+	private get size() {
+		return this.keys.length
+	}
+
 	private getIndexWithChange(sought: any) {
 		const size = this.size
 		for (let i = 0; i < size; ++i)
@@ -96,10 +100,6 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 		keyExtension: (key: K, index?: number, keys?: K[]) => any
 	) {
 		this.keyExtension = keyExtension
-	}
-
-	get size() {
-		return this.keys.length
 	}
 
 	index(x: any, ...y: any[]) {

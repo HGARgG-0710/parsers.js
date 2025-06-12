@@ -7,18 +7,27 @@ import type {
 	IReversible,
 	ISizeable
 } from "../interfaces.js"
-import type { IKeysHaving, IValuesHaving } from "./MapClass.js"
 
+/**
+ * An interface representing a highly versatile
+ * modifiable table-collection with a
+ * default-value type `Default`, primary value type `V`,
+ * key type `K`, and capability of treating this
+ * collection-typeas one with the ability for random
+ * access (through numeric indexes), as well
+ * as addition/removal of the to-be-searched-through items.
+ */
 export interface ITableMap<K = any, V = any, Default = any>
-	extends IKeysHaving<K>,
-		IValuesHaving<V>,
-		ISizeable,
+	extends ISizeable,
 		IDefaulting<Default>,
 		IRekeyable<K>,
 		IConcattable<Iterable<[K, V]>, [K[], V[]]>,
 		IReversible,
 		ICopiable,
 		Iterable<[K, V]> {
+	readonly keys: K[]
+	readonly values: V[]
+
 	unique: () => number[]
 	read: (index: number) => Default | [K, V]
 	swap: (i: number, j: number) => this

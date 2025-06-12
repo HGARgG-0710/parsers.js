@@ -2,9 +2,7 @@ import { boolean } from "@hgargg-0710/one"
 import { BadIndex } from "./constants.js"
 import type {
 	IGettable,
-	IKeysHaving,
-	IResource,
-	IValuesHaving
+	IResource
 } from "./interfaces.js"
 
 const { eqcurry } = boolean
@@ -39,15 +37,7 @@ export function get<T = any>(x: IGettable<T>) {
 	return x.get()
 }
 
-/**
- * Returns the pair of `indexMap.keys` and `indexMap.values`
- */
-export function table<K = any, V = any>(
-	kv: IKeysHaving<K> & IValuesHaving<V>
-): [K[], V[]] {
-	return [kv.keys, kv.values]
-}
-
 export * as Node from "./utils/Node.js"
 export * as Position from "./utils/Position.js"
 export * as Stream from "./utils/Stream.js"
+
