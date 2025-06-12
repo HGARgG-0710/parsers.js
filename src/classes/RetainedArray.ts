@@ -22,7 +22,7 @@ const { min } = number
  */
 export class RetainedArray<T = any>
 	extends MixinArray<T>
-	implements ICollection<T>, IClearable
+	implements ICollection<T, readonly T[]>, IClearable
 {
 	private ["constructor"]: new (n?: number) => this
 
