@@ -9,7 +9,7 @@ const { prop } = object
 export const type = prop("type") as <T = any>(x: ITyped<T>) => T
 
 /**
- * Returns the value of the `.is` property for the given `TypeCheckable`
+ * Returns the value of the `.is` property for the given `ITypeCheckable`
  */
 export const is = prop("is") as <T = any>(
 	t: ITypeCheckable
