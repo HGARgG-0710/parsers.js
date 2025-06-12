@@ -12,9 +12,9 @@ import { BasicHash } from "./HashMap.js"
 import { ObjectPool } from "./ObjectPool.js"
 import { TypedPoolKeeper } from "./PoolGetter.js"
 
-export function NodeFactory<T = any>(
-	preFactory: INodeTypeFactory<T>
-): INodeTypeFactory<T> {
+export function NodeFactory<T = any, Args extends any[] = []>(
+	preFactory: INodeTypeFactory<T, Args>
+): INodeTypeFactory<T, Args> {
 	return Autocache(new BasicHash(new MapInternal()), preFactory)
 }
 
