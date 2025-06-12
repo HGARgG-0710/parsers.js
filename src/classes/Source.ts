@@ -3,6 +3,12 @@ import type { ISource } from "../interfaces.js"
 import type { IDecoder } from "../interfaces/Decoder.js"
 import { ResourceManager } from "./ResourceManager.js"
 
+/**
+ * This is a class implementing `ISource`. 
+ * It utilizes a user-provided `IDecoder` using 
+ * dependency-injection, and provides one with a 
+ * read access to a given `filename: string`. 
+*/
 export class ReadingSource implements ISource {
 	["constructor"]: new (filename: string) => this
 
@@ -77,5 +83,8 @@ export class ReadingSource implements ISource {
 }
 
 export namespace ReadingSource {
+	/**
+	 * The `ResourceManager` for the `ReadingSource` class. 
+	*/
 	export const manager = new ResourceManager(ReadingSource)
 }
