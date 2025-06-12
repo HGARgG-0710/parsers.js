@@ -16,7 +16,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				Brief descriptions. 
 				Present for all `export`ed abstractions [including types and classes]. 
 				
-				2. classes/
 				3. interfaces/
 				4. internal/ 
 					Note: this DOESN'T appear on wiki, but the JSDoc is STILL necessary
