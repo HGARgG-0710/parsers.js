@@ -1,7 +1,11 @@
 import { array, boolean, number, object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { readSync } from "node:fs"
-import type { IDecoder } from "../interfaces/Decoder.js"
+import type {
+	IDecoder,
+	ISize,
+	ISourceDescriptor
+} from "../interfaces/Decoder.js"
 
 const { numbers } = array
 const { extendPrototype } = object
@@ -29,8 +33,8 @@ abstract class PreDecoder implements IDecoder {
 	private ["constructor"]: new () => this
 
 	private _pos: number = 0
-	private _descriptor: number
-	private _size: number
+	private _descriptor: ISourceDescriptor
+	private _size: ISize
 
 	protected readonly temp: Buffer
 
