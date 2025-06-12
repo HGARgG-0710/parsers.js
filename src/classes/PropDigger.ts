@@ -5,6 +5,22 @@ import type { IPosition, IPredicatePosition } from "../interfaces.js"
 
 const { isStruct, isArray, isNumber } = type
 
+/**
+ * This is a class for performing (repeatedly)
+ * a pattern of property-access on given objects. 
+ * 
+ * More specifically, it accepts a vararg list of 
+ * `properties[]: string` representing a sequence 
+ * of properties to be accessed one after another
+ * on the original object a given number of times
+ * (depth: IPosition<In>). 
+ * 
+ * It, thus, allows passing a predicate or a finite 
+ * access depth. Likewise, if it is detected that the 
+ * access is being done no a non-`object` entity 
+ * (excluding `null`), then the continuous access 
+ * halts and this entity is returned as a result instead. 
+*/
 export class PropDigger {
 	private readonly properties: string[]
 
@@ -58,5 +74,12 @@ export class PropDigger {
 	}
 }
 
+/**
+ * A `PropDigger` over the `.resource` property. 
+*/
 export const resourceDigger = new PropDigger("resource")
+
+/**
+ * A `PropDigger` over the `.owner` property. 
+*/
 export const ownerDigger = new PropDigger("owner")
