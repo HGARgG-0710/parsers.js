@@ -83,6 +83,6 @@ export type IRecursiveNodeTypeFactory<T = any, Args extends any[] = any[]> = (
 	type: T
 ) => IRecursiveNodeType<T, Args>
 
-export type INodeTypeCategories<T = any> = [INodeTypeFactory, T[]][]
+export type INodeTypeCategories<T = any> = [INodeTypeFactory<T>, T[]][]
 
 export type INodeTypesMap<T = any> = Map<T, INodeType<T>>
