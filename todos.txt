@@ -9,10 +9,40 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
-IMMIDIATE [first - patch up "bad" classes; then - public '.annotation's]: 		
-	TODO: order ALL the imports [Shift + Alt + O]
-	
+IMMIDIATE [first - order 'import's, then - do 'docs']: 			
 	TODO: Docs [initial, new, final]
+		Documentation order: 
+			1. write jsdoc [reason - faster this way...]: 
+				Brief descriptions. 
+				Present for all `export`ed abstractions [including types and classes]. 
+				
+				2. classes/
+				3. interfaces/
+				4. internal/ 
+					Note: this DOESN'T appear on wiki, but the JSDoc is STILL necessary
+				5. is/
+				6. modules/
+				7. samples/
+				8. utils/
+				9. aliases.ts
+				10. classes.ts
+				11. constants.ts
+				12. interfaces.ts
+				13. is.ts
+				14. mixin.ts
+				15. samples.ts
+				16. utils.ts
+				17. main.ts
+			2. fix wiki [add new stuff, delete old]
+			3. add wiki references: 
+				1. to jsdoc
+				2. into wiki [self-references]
+			4. complete jsdoc: 
+				1. for classes: 
+					1. add documentation ON A PER-METHOD basis
+						[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
+					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+
 		1. Ensure that ALL the exports are AS-DESIRED (relevant)
 			Finalize the library exports, that is
 		2. Ensure NOTHING is missing from the wiki: 
@@ -30,6 +60,13 @@ IMMIDIATE [first - patch up "bad" classes; then - public '.annotation's]:
 				2. ALL public exports
 					IF a 'util' - a proper short function description. 
 					IF a 'class/interface/related' - a brief description + a link ot the wiki
+
+		[later]
+		4. Finalization: 
+			1. piece-by-piece DOCUMENT any new exports: 
+				1. finished `samples` 
+				2. the `.annotation`s [leave them undocumented for the moment...]
+				3. Regex, TokenizerStream, ...
 
 NEXT UP:
 	TODO: `.copy()`-fixing [IStream-implementations]: 
@@ -243,8 +280,6 @@ LATER TODOS:
 					})
 
 			TODO [maybe?]: create
-				1. `TestCounter` class
-					for *counting* tests-being-run within the given test suite
 				2. `TestChain` class, 
 					which has an internal `TestCounter`, 
 						has a `handler` function, and 
@@ -252,8 +287,6 @@ LATER TODOS:
 								supplied to the `handler`
 
 				USE the `TestChain` to express the chains of tests thusly. 
-
-			2. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
 				
 	TODO: OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
