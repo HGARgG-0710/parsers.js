@@ -7,12 +7,8 @@ import { isGoodIndex, table } from "../utils.js"
 const { swap, out, insert } = inplace
 const { isArray } = type
 
-export abstract class BaseIndexMap<
-	K = any,
-	V = any,
-	Default = any,
-	IndexGetType = any
-> implements IIndexMap<K, V, Default, IndexGetType>
+export abstract class BaseIndexMap<K = any, V = any, Default = any>
+	implements IIndexMap<K, V, Default>
 {
 	protected ["constructor"]: new (
 		pairs: array.Pairs<K, V>,
@@ -25,7 +21,7 @@ export abstract class BaseIndexMap<
 	private _values: V[]
 
 	abstract index(x: any): V | Default
-	abstract getIndex(key: any): IndexGetType
+	abstract getIndex(key: any): number
 	abstract replace(index: number, pair: [K, V]): this
 	abstract rekey(keyFrom: K, keyTo: K): this
 

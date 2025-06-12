@@ -72,8 +72,8 @@ export function MapClass<K = any, V = any, Default = any>(
 			...f: ((x: any) => any)[]
 		) => IMapClass<any, ValueType>
 
-		static keyExtensions: Function[]
-		static extensions: Function[]
+		static readonly keyExtensions: Function[] = keyExtensions
+		static readonly extensions: Function[] = extensions
 
 		private alteredKeys: any[]
 
@@ -142,8 +142,6 @@ export function MapClass<K = any, V = any, Default = any>(
 		}
 	}
 
-	linearMapClass.extensions = extensions
-	linearMapClass.keyExtensions = keyExtensions
 	linearMapClass.change = change
 	linearMapClass.extend = extend
 	linearMapClass.extendKey = extendKey
