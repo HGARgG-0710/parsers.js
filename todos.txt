@@ -41,7 +41,13 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				1. for classes: 
 					1. add documentation ON A PER-METHOD basis
 						[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
-					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+					2. add [jsdoc- AND wiki-] documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+			5. complete wiki: 
+				1. add SPECIAL pages for `IStream`: 
+					1. on mixins and "annotation" classes
+						1. on differences between the JS and TS APIs, specifically
+					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
+					3. on the HIERARCHY [make an image via 'Excalidraw']
 
 		1. Ensure that ALL the exports are AS-DESIRED (relevant)
 			Finalize the library exports, that is
