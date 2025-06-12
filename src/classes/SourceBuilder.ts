@@ -4,6 +4,10 @@ import type { IAccumulator } from "../interfaces/Accumulator.js"
 
 const { isString } = type
 
+/**
+ * This is a class for a piece-wise construction 
+ * of a string primitive. Implements `IAccumulator<string>`.
+*/
 export class SourceBuilder implements IAccumulator<string> {
 	private ["constructor"]: new (finalSource?: string) => this
 
