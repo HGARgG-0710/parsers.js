@@ -1,5 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
-import type { IPoolGetter } from "../interfaces.js"
+import type { IFreeable, IPoolGetter } from "../interfaces.js"
 import type {
 	ICellNode,
 	INode,
@@ -14,16 +14,27 @@ import {
 	isTyped
 } from "../is/Node.js"
 import { isType } from "../utils/Node.js"
-import { NodeFactory } from "./NodeSystem.js"
+import { NodeFactory, RecursiveNodeFactory } from "./NodeSystem.js"
 
 const { id } = functional
 
+/**
+ * An abstract class implementing the `INode<T>` type.
+ * Recommended way to create `INode<T>` implementations.
+ *
+ * Provides:
+ *
+ * 1. required `readonly type: T`
+ * 2. various boilerplate methods
+ * 3. default behaviour for the future classes [.free, .backtrack]
+ * 4. guarantee of (otherwise optional) `IFreeable<T>` conformance
+ */
 export abstract class BaseNode<T = any, Args extends any[] = any[]>
-	implements INode<T>
+	implements INode<T>, IFreeable<T>
 {
 	abstract readonly type: T
 
-	abstract init(...x: Args): this
+	abstract init(...x: [] | Partial<Args>): this
 	abstract toJSON(): string
 	abstract copy(): this
 
@@ -91,6 +102,16 @@ abstract class PreTokenNode<T = any>
 	}
 }
 
+/**
+ * This is an `INodeTypeFactory<T, []>` for creation of simplest possible
+ * `INode` instances. They contain no data, and have minimal memory
+ * footprint. Their only useful property is `.type`, which is
+ * added to the prototype of the respective `INodeType<T, []>`,
+ * and has the value of `type: T`.
+ *
+ * Note: the `INode<T>` instances of `INodeType<T, []>`s created
+ * using `TokenNode` are poolable via `ObjectPool`
+ */
 export const TokenNode = NodeFactory(function <T = any>(type: T) {
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
@@ -151,6 +172,15 @@ abstract class PreContentNode<T = any, Value = any>
 	}
 }
 
+/**
+ * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of `INode`
+ * instances with `.type` field (on prototype; defined by `type: T`)
+ * and `.value: Value`, which is provided by the user within the
+ * resulting class's constructor.
+ *
+ * Note: the instances of `INodeType<T, [Value | undefined]>`s
+ * returned by `ContentNode` are poolable using the `ObjectPool`
+ */
 export const ContentNode = NodeFactory(function <T = any, Value = any>(
 	type: T
 ) {
@@ -258,7 +288,22 @@ abstract class PreRecursiveNode<T = any>
 	}
 }
 
-export const RecursiveNode = NodeFactory(function <T = any>(type: T) {
+/**
+ * This is an `IRecursiveNodeFactory<T, [INode<T>[] | undefined]` for
+ * creation of `IRecursiveNode`s with `.type: T` properties,
+ * to which the give-value of `type: T` is given [prototype property],
+ * as well as a variety of methods for working with `children: INode<T>[]`,
+ * which are specified on construction [upon omission, empty array is assumed].
+ *
+ * It also has other common `IRecursiveNodeFactory` methods, such as those
+ * for providing "wrapping" JSON for separate serialization of internal
+ * items [`.jsonInsertablePre(): string`, `.jsonInsertablePost(): string`,
+ * `.jsonInsertableEmpty(): string`]
+ *
+ * Note: The resulting `IRecursiveNodeType<T, [INode<T>[] | undefined]` create
+ * `IRecursiveNode<T, [INode<T>[] | undefined]` that are poolable via `ObjectPool`
+ */
+export const RecursiveNode = RecursiveNodeFactory(function <T = any>(type: T) {
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static is = isType(type)
