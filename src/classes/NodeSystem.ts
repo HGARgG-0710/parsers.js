@@ -1,8 +1,8 @@
 import assert from "assert"
 import type {
+	INodeType,
 	INodeTypeCategories,
 	INodeTypeFactory,
-	INodeTypesMap,
 	IRecursiveNodeTypeFactory
 } from "../interfaces/Node.js"
 import type { IPoolGetter } from "../interfaces/PoolGetter.js"
@@ -12,6 +12,8 @@ import { Autocache } from "./Autocache.js"
 import { BasicHash } from "./HashMap.js"
 import { ObjectPool } from "./ObjectPool.js"
 import { TypedPoolKeeper } from "./PoolGetter.js"
+
+type INodeTypesMap<T = any> = Map<T, INodeType<T>>
 
 /**
  * This is a function for wrapping an `INodeTypeFactory<T, Args>`
