@@ -11,7 +11,7 @@ import {
 	wrapSwitch,
 	type IRecursiveItems,
 	type IRecursivelySwitchable
-} from "./RecursiveInitList.js"
+} from "./RecursiveList.js"
 
 const { first, clear } = array
 const { insert, mutate, out } = inplace
