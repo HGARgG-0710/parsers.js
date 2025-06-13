@@ -6,6 +6,11 @@ import { Pairs } from "../samples.js"
 const { id } = functional
 const { first, firstOut } = array
 
+/**
+ * A class for representing a unique set of elements.
+ * Intended to serve as a 'mappable' `Set`, with the ability
+ * to assert disjointedness of its instances.
+ */
 export class Enum<T = any> {
 	private ["constructor"]: new (value: T[]) => this
 
@@ -28,9 +33,7 @@ export class Enum<T = any> {
 	}
 
 	toMap<Out = any>(mapped: IMappable<T, Out> = id<T> as any) {
-		return new Map(
-			Pairs.to(this.enumItems, this.enumItems.map(mapped))
-		)
+		return new Map(Pairs.to(this.enumItems, this.enumItems.map(mapped)))
 	}
 
 	constructor(enumItems: T[]) {
@@ -39,6 +42,10 @@ export class Enum<T = any> {
 	}
 }
 
+/**
+ * Concatenates the given `...maps: Map<K, V>[]` using transformation to `Pairs`.
+ * Overrides later repetitions with newer.
+ */
 export class MapConcatenator {
 	static concat<K = any, V = any>(...maps: Map<K, V>[]) {
 		return new Map(
