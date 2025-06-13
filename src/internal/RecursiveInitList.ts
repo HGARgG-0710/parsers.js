@@ -181,8 +181,11 @@ class RecursiveList<
 		IRecursiveListIdentifiable &
 		IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any,
-	InitType = any
-> extends Initializable<[RecursiveRenewer<T, Recursive>, (T | Recursive)[]]> {
+	InitType = any,
+	InitArgs extends any[] = []
+> extends Initializable<
+	[RecursiveRenewer<T, Recursive>, (T | Recursive)[], ...(InitArgs | [])]
+> {
 	public readonly items = new SwitchArray<T, Recursive>()
 
 	protected renewer: RecursiveRenewer<T, Recursive>
@@ -380,45 +383,17 @@ export abstract class PoolableRecursiveList<
 		InitType = any,
 		InitArgs extends any[] = []
 	>
-	extends Initializable<
-		[RecursiveRenewer<T, Recursive>, (T | Recursive)[], ...(InitArgs | [])]
-	>
+	extends RecursiveList<T, Recursive, InitType, InitArgs>
 	implements IRecursiveListIdentifiable
 {
 	protected abstract reclaim(list: PoolableRecursiveList<T, Recursive>): void
-
-	private readonly list = new RecursiveList<T, Recursive, InitType>()
 
 	protected get initializer() {
 		return recursiveInitListInitializer
 	}
 
-	get items() {
-		return this.list.items
-	}
-
 	get isRecursiveInitList() {
 		return true
-	}
-
-	setRenewer(renewer: RecursiveRenewer<T, Recursive>) {
-		this.list.setRenewer(renewer)
-	}
-
-	setItems(newItems: (T | Recursive)[]) {
-		this.list.setItems(newItems)
-	}
-
-	evaluate(origTerm: InitType) {
-		return this.list.evaluate(origTerm)
-	}
-
-	reEvaluate(origItem: InitType) {
-		return this.list.reEvaluate(origItem)
-	}
-
-	firstItemDeep(): T {
-		return this.list.firstItemDeep()
 	}
 
 	recycleSubs() {
