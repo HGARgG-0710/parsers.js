@@ -17,7 +17,7 @@ import {
 	PoolableRecursiveList,
 	RecursiveRenewer,
 	renewerInitializer
-} from "./RecursiveInitList.js"
+} from "./RecursiveList.js"
 
 const { isFunction, isArray } = type
 
