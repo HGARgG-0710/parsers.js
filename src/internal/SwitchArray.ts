@@ -30,6 +30,12 @@ const switchArrayInitializer = {
 	}
 }
 
+/**
+ * This is a class that encapsulates the `IRecursiveItems`
+ * of the `RecursiveList`, and which is used by the user 
+ * via the `IStreamArray` whenever modifying the internal 
+ * structure of a `DynamicParser`. 
+*/
 export class SwitchArray<
 		T extends ISwitchIdentifiable &
 			IRecursiveListIdentifiable &
