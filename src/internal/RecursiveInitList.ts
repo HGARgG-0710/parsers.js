@@ -47,6 +47,10 @@ export function isRecursiveInitList(
 	return x.isRecursiveInitList === true
 }
 
+/**
+ * This is a class for keeping track of recursion points.
+ * More specifically, a 'Switch' is an "optional" recursion point.
+ */
 class Switch<
 	T extends IInitializable &
 		ISwitchIdentifiable &
@@ -156,6 +160,14 @@ const recursiveInitListInitializer: IInitializer<[RecursiveRenewer, any[]]> = {
 	}
 }
 
+/**
+ * Responsible for keeping access to joint-access methods
+ * essential for the functioning of the `RecursiveInitList` and `SwitchArray`.
+ * Has the purpose of identifying "old" [those to be renewed] and "recursive"
+ * [those to be turned into `Switch`es] elements of the `RecursiveInitList`.
+ * Also contains the `evaluator` method, which spits out a new `IDerivable<T, Recursive>`,
+ * based on the current `Recursive` element, and the last evaluated `T`.
+ */
 export abstract class RecursiveRenewer<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -176,6 +188,13 @@ export abstract class RecursiveRenewer<
 	}
 }
 
+/**
+ * The class for encapsulating the shared state of 
+ * `.lastInitialized: T | null`. The purpose is to 
+ * ensure that the three different "List" classes 
+ * all have the same version of the variable, 
+ * and can modify/access it as-necessary.
+*/
 class LastInitialized<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -201,6 +220,9 @@ class LastInitialized<
 	}
 }
 
+/**
+ * The base class for `ReevaluableList` and `EvaluableList`
+*/
 abstract class BaseEvaluableList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -264,6 +286,10 @@ abstract class BaseEvaluableList<
 	}
 }
 
+/**
+ * This is an object for encapsulating the `foundSwitch: boolean` flag
+ * of `ReevaluableList`. 
+*/
 class FoundSwitchFlag {
 	private foundSwitch: boolean = false
 
@@ -280,6 +306,15 @@ class FoundSwitchFlag {
 	}
 }
 
+/**
+ * The `.reevaluate` method is the one where the `CompositeStream`
+ * spends most of its time in. More specifically, it is the place 
+ * where the given `.items: SwitchArray` gets re-checked for being 
+ * no longer acceptable [i.e. that there is, now, a "terminal" which `.isOld`].
+ * In such an eventuality, the further attempts to re-evalute the 
+ * `.items` are no longer pursued, at which point, one simply 
+ * quits and returns `false`. 
+*/
 class ReevaluableList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -294,7 +329,7 @@ class ReevaluableList<
 		lastItem: T | InitType,
 		currSwitch: Switch<T, Recursive>
 	) {
-		if (!sublist.reEvaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
+		if (!sublist.reevaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
 	}
 
 	private maybeRefillSimpleSwitch(
@@ -348,20 +383,27 @@ class ReevaluableList<
 			: this.reInitTerminal(currItem, lastItem)
 	}
 
-	private reEvalEach(evalWith: InitType) {
+	private reevalEach(evalWith: InitType) {
 		for (const curr of this.items)
 			if (!this.maybeReinitSwitchable(curr, this.pickLastItem(evalWith)))
 				return false
 		return true
 	}
 
-	reEvaluate(evaledWith: InitType) {
+	reevaluate(evaledWith: InitType) {
 		this.foundSwitch.forget()
 		this.lastInitialized.unlinkOld()
-		return this.reEvalEach(evaledWith)
+		return this.reevalEach(evaledWith)
 	}
 }
 
+/**
+ * The `.evaluate()` is the first call that
+ * properly evaluates the `.items: SwitchArray`.
+ * However, it is only called on re-initialization
+ * of `CompositeStream`. Any further work on the
+ * internal `.items` is handled by the `.reevaluate`
+ */
 class EvaluableList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -388,6 +430,12 @@ class EvaluableList<
 	}
 }
 
+/**
+ * This is the primary data structure for implementing the
+ * library's self-modifying parser. Particularly, it is responsible
+ * for keeping track of the list of items that may or may not
+ * be leading to recursion within the structure of the list.
+ */
 class RecursiveList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -406,7 +454,7 @@ class RecursiveList<
 		this.items
 	)
 
-	private readonly reEvaluableList = new ReevaluableList(
+	private readonly reevaluableList = new ReevaluableList(
 		this.lastInitialized,
 		this.items
 	)
@@ -421,7 +469,7 @@ class RecursiveList<
 		this.renewer = renewer
 		this.items.setRenewer(renewer)
 		this.evaluableList.init(renewer)
-		this.reEvaluableList.init(renewer)
+		this.reevaluableList.init(renewer)
 	}
 
 	setItems(newItems: (T | Recursive)[]) {
@@ -442,8 +490,8 @@ class RecursiveList<
 			: firstItem
 	}
 
-	reEvaluate(evaledWith: InitType) {
-		return this.reEvaluableList.reEvaluate(evaledWith)
+	reevaluate(evaledWith: InitType) {
+		return this.reevaluableList.reevaluate(evaledWith)
 	}
 
 	firstItem() {
@@ -456,6 +504,11 @@ class RecursiveList<
 	}
 }
 
+/**
+ * A public wrapper around the `RecursiveList`.
+ * It contains the iteration order and methods needed
+ * for correct recursive pool reclamation routine.
+ */
 export abstract class PoolableRecursiveList<
 		T extends ISwitchIdentifiable &
 			IRecursiveListIdentifiable &

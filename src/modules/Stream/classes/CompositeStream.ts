@@ -62,7 +62,7 @@ function BuildCompositeStream<T = any>() {
 		}
 
 		private renewIfPossible() {
-			return this.streamList!.reEvaluate(this.lowStream!)
+			return this.streamList!.reevaluate(this.lowStream!)
 		}
 
 		private fixRenewed() {
