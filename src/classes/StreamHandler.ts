@@ -1,5 +1,9 @@
 import type { IIndexable } from "../interfaces.js"
-import type { IParserFunction } from "../interfaces/StreamHandler.js"
+import type {
+	IParserFunction,
+	ITableHandler,
+	IWrapHandler
+} from "../interfaces/StreamHandler.js"
 
 /**
  * This is a function for the creation of functions `T` which:
@@ -16,7 +20,7 @@ import type { IParserFunction } from "../interfaces/StreamHandler.js"
  */
 export function TableHandler<In = any, Out = any>(
 	indexMap: IIndexable<IParserFunction<In, Out>>
-): (x?: In, ...y: any[]) => Out {
+): ITableHandler<In, Out> {
 	const T = function (x?: In, ...y: any[]) {
 		return T.table.index(x, ...y).call(this, x, T, ...y)
 	}
@@ -36,7 +40,7 @@ export function TableHandler<In = any, Out = any>(
  */
 export function WrapHandler<Out = any>(
 	indexMap: IIndexable<Out>
-): (x?: any, ...y: any[]) => Out {
+): IWrapHandler<Out> {
 	const T = (x: any, ...y: any[]) => T.table.index(x, ...y)
 	T.table = indexMap
 	return T
