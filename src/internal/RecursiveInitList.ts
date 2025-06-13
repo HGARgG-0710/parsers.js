@@ -176,6 +176,218 @@ export abstract class RecursiveRenewer<
 	}
 }
 
+class LastInitialized<
+	T extends ISwitchIdentifiable &
+		IRecursiveListIdentifiable &
+		IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any
+> {
+	private lastInitialized: T | null = null
+
+	get() {
+		return this.lastInitialized
+	}
+
+	linkEvaluatedSublist(sublist: RecursiveList<T, Recursive>) {
+		this.linkNew(sublist.firstItemDeep())
+	}
+
+	linkNew(toBeLastInitialized: T) {
+		this.lastInitialized = toBeLastInitialized
+	}
+
+	unlinkOld() {
+		this.lastInitialized = null
+	}
+}
+
+abstract class BaseEvaluableList<
+	T extends ISwitchIdentifiable &
+		IRecursiveListIdentifiable &
+		IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any,
+	InitType = any
+> extends Initializable<[RecursiveRenewer<T, Recursive>]> {
+	protected renewer: RecursiveRenewer<T, Recursive>
+
+	protected pickLastItem(evalWith: InitType) {
+		return this.lastInitialized.get() || evalWith
+	}
+
+	protected get initializer() {
+		return renewerInitializer
+	}
+
+	private evaluateSublist(
+		sublist: RecursiveList<T, Recursive>,
+		evaledWith: T | InitType
+	) {
+		sublist.evaluate(evaledWith)
+		this.lastInitialized.linkEvaluatedSublist(sublist)
+	}
+
+	private evaluateDerivable(
+		maybeSublist: IDerivable<T, Recursive>,
+		evaledWith: T | InitType
+	) {
+		if (isRecursiveInitList(maybeSublist))
+			this.evaluateSublist(maybeSublist, evaledWith)
+		else this.lastInitialized.linkNew(maybeSublist)
+	}
+
+	private expandEvaluated(
+		fillable: Switch<T, Recursive>,
+		evaledWith: T | InitType
+	) {
+		fillable.recycleSubs()
+		fillable.expand(this.renewer.evaluator, evaledWith)
+	}
+
+	protected initTerminal(toInitialize: T, initParam: T | InitType) {
+		toInitialize.init(initParam)
+		this.lastInitialized.linkNew(toInitialize)
+	}
+
+	protected fillSwitch(
+		fillable: Switch<T, Recursive>,
+		evaledWith: T | InitType
+	) {
+		this.expandEvaluated(fillable, evaledWith)
+		this.evaluateDerivable(fillable.derivable, evaledWith)
+	}
+
+	constructor(
+		protected readonly lastInitialized: LastInitialized,
+		protected readonly items: SwitchArray<T, Recursive>
+	) {
+		super()
+	}
+}
+
+class FoundSwitchFlag {
+	private foundSwitch: boolean = false
+
+	get() {
+		return this.foundSwitch
+	}
+
+	found() {
+		this.foundSwitch = true
+	}
+
+	forget() {
+		this.foundSwitch = false
+	}
+}
+
+class ReevaluableList<
+	T extends ISwitchIdentifiable &
+		IRecursiveListIdentifiable &
+		IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any,
+	InitType = any
+> extends BaseEvaluableList<T, Recursive, InitType> {
+	private foundSwitch = new FoundSwitchFlag()
+
+	private refillSublist(
+		sublist: RecursiveList<T, Recursive>,
+		lastItem: T | InitType,
+		currSwitch: Switch<T, Recursive>
+	) {
+		if (!sublist.reEvaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
+	}
+
+	private maybeRefillSimpleSwitch(
+		derivable: T,
+		currSwitch: Switch<T, Recursive>,
+		lastItem: T | InitType
+	) {
+		if (this.renewer.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
+	}
+
+	private refillEitherSwitch(
+		currSwitch: Switch<T, Recursive>,
+		lastItem: T | InitType
+	) {
+		const { derivable } = currSwitch
+		if (isRecursiveInitList(derivable))
+			this.refillSublist(derivable, lastItem, currSwitch)
+		else this.maybeRefillSimpleSwitch(derivable, currSwitch, lastItem)
+	}
+
+	private maybeReinitOldTerminal(
+		currTerminal: T,
+		lastTerminal: T | InitType
+	) {
+		if (!this.foundSwitch.get()) return false
+		this.initTerminal(currTerminal, lastTerminal)
+		return this.renewer.isOld(currTerminal)
+	}
+
+	private refillSwitch(
+		currSwitch: Switch<T, Recursive>,
+		lastItem: T | InitType
+	) {
+		this.foundSwitch.found()
+		this.refillEitherSwitch(currSwitch, lastItem)
+		return true
+	}
+
+	private reInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
+		return this.renewer.isOld(currTerminal)
+			? this.maybeReinitOldTerminal(currTerminal, lastTerminal)
+			: true
+	}
+
+	private maybeReinitSwitchable(
+		currItem: IRecursivelySwitchable<T, Recursive>,
+		lastItem: T | InitType
+	) {
+		return isSwitch(currItem)
+			? this.refillSwitch(currItem, lastItem)
+			: this.reInitTerminal(currItem, lastItem)
+	}
+
+	private reEvalEach(evalWith: InitType) {
+		for (const curr of this.items)
+			if (!this.maybeReinitSwitchable(curr, this.pickLastItem(evalWith)))
+				return false
+		return true
+	}
+
+	reEvaluate(evaledWith: InitType) {
+		this.foundSwitch.forget()
+		this.lastInitialized.unlinkOld()
+		return this.reEvalEach(evaledWith)
+	}
+}
+
+class EvaluableList<
+	T extends ISwitchIdentifiable &
+		IRecursiveListIdentifiable &
+		IInitializable = any,
+	Recursive extends ISwitchIdentifiable = any,
+	InitType = any
+> extends BaseEvaluableList<T, Recursive, InitType> {
+	private initSwitchable(
+		toInitialize: IRecursivelySwitchable<T, Recursive>,
+		initParam: T | InitType
+	) {
+		if (isSwitch(toInitialize)) this.fillSwitch(toInitialize, initParam)
+		else this.initTerminal(toInitialize, initParam)
+	}
+
+	private evaluateEach(origTerm: InitType) {
+		for (const curr of this.items)
+			this.initSwitchable(curr, this.pickLastItem(origTerm))
+	}
+
+	evaluate(origTerm: InitType) {
+		this.lastInitialized.unlinkOld()
+		this.evaluateEach(origTerm)
+	}
+}
+
 class RecursiveList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -187,157 +399,29 @@ class RecursiveList<
 	[RecursiveRenewer<T, Recursive>, (T | Recursive)[], ...(InitArgs | [])]
 > {
 	public readonly items = new SwitchArray<T, Recursive>()
+	private readonly lastInitialized = new LastInitialized()
+
+	private readonly evaluableList = new EvaluableList(
+		this.lastInitialized,
+		this.items
+	)
+
+	private readonly reEvaluableList = new ReevaluableList(
+		this.lastInitialized,
+		this.items
+	)
 
 	protected renewer: RecursiveRenewer<T, Recursive>
-
-	private lastInitialized: T | null = null
-	private hasSwitch: boolean = false
 
 	protected get initializer() {
 		return recursiveInitListInitializer
 	}
 
-	private isOld(terminal: T) {
-		return this.renewer.isOld(terminal)
-	}
-
-	private evaluateEach(origTerm: InitType) {
-		for (const curr of this.items)
-			this.initSwitchable(curr, this.pickLastItem(origTerm))
-	}
-
-	private initSwitchable(
-		toInitialize: IRecursivelySwitchable<T, Recursive>,
-		initParam: T | InitType
-	) {
-		if (isSwitch(toInitialize)) this.fillSwitch(toInitialize, initParam)
-		else this.initTerminal(toInitialize, initParam)
-	}
-
-	private initTerminal(toInitialize: T, initParam: T | InitType) {
-		toInitialize.init(initParam)
-		this.linkNewInitialized(toInitialize)
-	}
-
-	private fillSwitch(
-		fillable: Switch<T, Recursive>,
-		evaledWith: T | InitType
-	) {
-		this.expandEvaluated(fillable, evaledWith)
-		this.evaluateDerivable(fillable.derivable, evaledWith)
-	}
-
-	private expandEvaluated(
-		fillable: Switch<T, Recursive>,
-		evaledWith: T | InitType
-	) {
-		fillable.recycleSubs()
-		fillable.expand(this.renewer.evaluator, evaledWith)
-	}
-
-	private evaluateDerivable(
-		maybeSublist: IDerivable<T, Recursive>,
-		evaledWith: T | InitType
-	) {
-		if (isRecursiveInitList(maybeSublist))
-			this.evaluateSublist(maybeSublist, evaledWith)
-		else this.linkNewInitialized(maybeSublist)
-	}
-
-	private evaluateSublist(
-		sublist: PoolableRecursiveList<T, Recursive>,
-		evaledWith: T | InitType
-	) {
-		sublist.evaluate(evaledWith)
-		this.linkEvaluatedSublist(sublist)
-	}
-
-	private linkEvaluatedSublist(sublist: PoolableRecursiveList<T, Recursive>) {
-		this.linkNewInitialized(sublist.firstItemDeep())
-	}
-
-	private linkNewInitialized(toBeLastInitialized: T) {
-		this.lastInitialized = toBeLastInitialized
-	}
-
-	private unlinkOldInitialized() {
-		this.lastInitialized = null
-	}
-
-	private pickLastItem(evalWith: InitType) {
-		return this.lastInitialized || evalWith
-	}
-
-	private forgetMetSwitches() {
-		this.hasSwitch = false
-	}
-
-	private reEvalEach(evalWith: InitType) {
-		for (const curr of this.items)
-			if (!this.maybeReInitSwitchable(curr, this.pickLastItem(evalWith)))
-				return false
-		return true
-	}
-
-	private maybeReInitSwitchable(
-		currItem: IRecursivelySwitchable<T, Recursive>,
-		lastItem: T | InitType
-	) {
-		return isSwitch(currItem)
-			? this.maybeReFillSwitch(currItem, lastItem)
-			: this.maybeReInitTerminal(currItem, lastItem)
-	}
-
-	private maybeReFillSwitch(
-		currSwitch: Switch<T, Recursive>,
-		lastItem: T | InitType
-	) {
-		this.hasSwitch = true
-		this.reFillSwitch(currSwitch, lastItem)
-		return true
-	}
-
-	private reFillSwitch(
-		currSwitch: Switch<T, Recursive>,
-		lastItem: T | InitType
-	) {
-		const derivable = currSwitch.derivable
-		if (isRecursiveInitList(derivable))
-			this.reFillSublist(derivable, lastItem, currSwitch)
-		else this.maybeReFillSimpleSwitch(derivable, currSwitch, lastItem)
-	}
-
-	private reFillSublist(
-		sublist: PoolableRecursiveList<T, Recursive>,
-		lastItem: T | InitType,
-		currSwitch: Switch<T, Recursive>
-	) {
-		if (!sublist.reEvaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
-	}
-
-	private maybeReFillSimpleSwitch(
-		derivable: T,
-		currSwitch: Switch<T, Recursive>,
-		lastItem: T | InitType
-	) {
-		if (this.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
-	}
-
-	private maybeReInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
-		return this.isOld(currTerminal)
-			? this.reInitTerminal(currTerminal, lastTerminal)
-			: true
-	}
-
-	private reInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
-		if (!this.hasSwitch) return false
-		this.initTerminal(currTerminal, lastTerminal)
-		return this.isOld(currTerminal)
-	}
-
 	setRenewer(renewer: RecursiveRenewer<T, Recursive>) {
 		this.renewer = renewer
 		this.items.setRenewer(renewer)
+		this.evaluableList.init(renewer)
+		this.reEvaluableList.init(renewer)
 	}
 
 	setItems(newItems: (T | Recursive)[]) {
@@ -359,9 +443,7 @@ class RecursiveList<
 	}
 
 	reEvaluate(evaledWith: InitType) {
-		this.forgetMetSwitches()
-		this.unlinkOldInitialized()
-		return this.reEvalEach(evaledWith)
+		return this.reEvaluableList.reEvaluate(evaledWith)
 	}
 
 	firstItem() {
@@ -369,8 +451,7 @@ class RecursiveList<
 	}
 
 	evaluate(origTerm: InitType) {
-		this.unlinkOldInitialized()
-		this.evaluateEach(origTerm)
+		this.evaluableList.evaluate(origTerm)
 		return this
 	}
 }
