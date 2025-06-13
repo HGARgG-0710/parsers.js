@@ -14,7 +14,7 @@ import type {
 } from "../modules/Stream/interfaces/CompositeStream.js"
 import {
 	itemsInitializer,
-	RecursiveInitList,
+	PoolableRecursiveList,
 	RecursiveRenewer,
 	renewerInitializer
 } from "./RecursiveInitList.js"
@@ -75,7 +75,7 @@ const streamListInitializer: IInitializer<
 
 const globalStreamRenewer = new StreamRenewer()
 
-export class StreamList extends RecursiveInitList<
+export class StreamList extends PoolableRecursiveList<
 	ILinkedStream,
 	IStreamChooser,
 	IOwnedStream,
