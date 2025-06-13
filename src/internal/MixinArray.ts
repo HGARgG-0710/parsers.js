@@ -3,6 +3,10 @@ import assert from "assert"
 
 const { isArray } = type
 
+/**
+ * Common simple `Array`-wrapper.
+ * Does not contain an `init` method [type-level encapsulation is in place].
+ */
 export class MixinArray<T = any> {
 	write(i: number, value: T) {
 		this.items[i] = value
@@ -39,6 +43,10 @@ export class MixinArray<T = any> {
 	}
 }
 
+/**
+ * An extension of `MixinArray` with `.init`.
+ * (Does not respect encapsulation)
+*/
 export class InitMixin<T = any> extends MixinArray<T> {
 	init(items: T[]) {
 		this.items = items
