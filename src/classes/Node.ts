@@ -29,7 +29,9 @@ export abstract class BaseNode<T = any, Args extends any[] = any[]>
 
 	parent: INode<T> | null = null
 
-	index(multind: number[]): any {}
+	index(multind: number[]): INode<T> {
+		return this
+	}
 
 	backtrack(positions: number) {
 		let curr: INode<T> = this
@@ -116,14 +118,14 @@ abstract class PreContentNode<T = any, Value = any>
 		return new this(x.value)
 	}
 
-	private _value: Value
+	private _value: Value | undefined
 
-	private set value(newValue: Value) {
+	private setValue(newValue: Value | undefined) {
 		this._value = newValue
 	}
 
 	get value() {
-		return this._value
+		return this._value!
 	}
 
 	copy() {
@@ -138,8 +140,8 @@ abstract class PreContentNode<T = any, Value = any>
 		)}, "value": ${JSON.stringify(this.value)}}`
 	}
 
-	init(value?: Value) {
-		if (value) this.value = value
+	init(value?: Value | undefined) {
+		this.setValue(value)
 		return this
 	}
 
@@ -181,6 +183,14 @@ abstract class PreRecursiveNode<T = any>
 
 	private children: INode<T>[]
 
+	private setChildren(children: INode<T>[]) {
+		this.children = children
+	}
+
+	private assignSelfParent() {
+		for (const child of this.children) child.parent = this
+	}
+
 	read(i: number): INode<T> {
 		return this.children[i]
 	}
@@ -211,8 +221,9 @@ abstract class PreRecursiveNode<T = any>
 		)}, "children": ${JSON.stringify(this.children)}}`
 	}
 
-	init(children?: INode<T>[]) {
-		if (children) this.children = children
+	init(children: INode<T>[] = []) {
+		this.setChildren(children)
+		this.assignSelfParent()
 		return this
 	}
 
@@ -241,10 +252,9 @@ abstract class PreRecursiveNode<T = any>
 		return [`{"type": ${JSON.stringify(this.type)}, "children": [`, "]}"]
 	}
 
-	constructor(children: INode<T>[] = []) {
+	constructor(children?: INode<T>[]) {
 		super()
 		this.init(children)
-		for (const child of children) child.parent = this
 	}
 }
 
