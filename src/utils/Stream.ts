@@ -7,10 +7,7 @@ import type {
 	IRawStream,
 	IStream
 } from "../interfaces/Stream.js"
-import type {
-	IStreamPredicate,
-	IStreamTransform
-} from "../interfaces/StreamHandler.js"
+import type { IStreamTransform } from "../interfaces/StreamHandler.js"
 import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import {
@@ -123,15 +120,10 @@ export function has(pos: IStreamPosition) {
  * Counts the number of items (starting from `stream.curr`),
  * obeying `pred`
  */
-export function count<T = any>(pred: IStreamPredicate<T>) {
-	return function (input: IStream<T>) {
-		let count = 0
-		while (!input.isEnd && pred(input, count)) {
-			++count
-			input.next()
-		}
-		return count
-	}
+export function count<T = any>(input: IStream<T>) {
+	let count = 0
+	while (!input.isEnd) ++count
+	return count
 }
 
 /**
