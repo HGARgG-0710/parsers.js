@@ -7,6 +7,14 @@ import { isGoodIndex, table } from "../utils.js"
 const { swap, out, insert } = inplace
 const { isArray } = type
 
+/**
+ * The base class for `IndexMap`s. 
+ * Handes `.keys`, `.values` and basic operations. 
+ * Provides extendible default implementations. 
+ * Exists as an architectural decision, just in case 
+ * an `IIndexMap` other than `MapClass` shall ever appear
+ * (it likely won't). 
+*/
 export abstract class BaseIndexMap<K = any, V = any, Default = any>
 	implements IIndexMap<K, V, Default>
 {
