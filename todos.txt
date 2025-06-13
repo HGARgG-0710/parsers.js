@@ -778,6 +778,17 @@ LATER TODOS:
 		Squash all the others + change the respective commit messages; 
 		[do this via `git rebase -i` + `git push --force`]
 
+	BEFORE WE LEAVE [vital]: 		
+		TODO: JIRA for v0.4
+			WHEN you do the FINAL 'git rebase -i' of the thing, 
+				remove all the *old* `todos.txt` files (to make the repo seem presentable). 
+		
+			Let the *new* notes for v0.4 now be inside of:
+				1. JIRA 
+				2. `GitHub Projects` [as a backup only...]
+		
+	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
+
 	TODO: WRITE the CHANGELOG
 	
 [v0.4]
