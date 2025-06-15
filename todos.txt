@@ -1017,6 +1017,12 @@ TODO:
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+		MC1. MapClass: fix types
+			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
+			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
+			The inner key type matters during construction, but the outer key type matters during other usage. 
+			Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
 								
 	3. Unrelated/separate module/grand refactoring: 		
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
