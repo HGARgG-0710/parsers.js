@@ -1,6 +1,6 @@
 import { number } from "@hgargg-0710/one"
 import { isPredicatePosition } from "src/utils/Position.js"
-import type { IParseable } from "../../../interfaces.js"
+import type { IParseable, IPosed } from "../../../interfaces.js"
 import type {
 	IFinishable,
 	IInputStream,
@@ -24,8 +24,11 @@ class InputStreamAnnotation<T = any>
 		IFinishable<T>,
 		IRewindable<T>,
 		IPrevable,
-		IInputStream<T, IParseable<T>>
+		IInputStream<T, IParseable<T>>,
+		IPosed<number>
 {
+	readonly pos: number
+
 	isCurrEnd(): boolean {
 		return true
 	}
@@ -64,7 +67,8 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 			IFinishable<T>,
 			IRewindable<T>,
 			IPrevable,
-			IInputStream<T, IParseable<T>>
+			IInputStream<T, IParseable<T>>,
+			IPosed<number>
 	{
 		protected ["constructor"]: new (source?: IParseable<T>) => this
 
@@ -140,6 +144,17 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 
 let inputStream: typeof InputStreamAnnotation | null = null
 
+/**
+ * This is a class implementing `IPeekableStream<T>`, `INavigable<T>`,
+ * `IFinishable<T>`, `IRewindable<T>`, `IPrevable`, `IInputStream<T, IParseable<T>>`
+ * and `IPosed<number>`. 
+ * 
+ * It extends `SourceStream`.
+ * 
+ * It uses the `IParseable<T>`'s natural interface as a
+ * structure with contigious read-access, thus permitting 
+ * an array-like model of iteration. 
+ */
 function PreInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 	return inputStream
 		? inputStream
