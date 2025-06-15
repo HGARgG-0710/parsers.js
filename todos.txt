@@ -16,10 +16,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				Brief descriptions. 
 				Present for all `export`ed abstractions [including types and classes]. 
 				
-				4. internal/ 
-					Note: this DOESN'T appear on wiki, but the JSDoc is STILL necessary
-				5. is/
 				6. modules/
+					1. modules/IndexMap + ...
 				7. samples/
 				8. utils/
 				9. aliases.ts
