@@ -8,7 +8,7 @@ import { bind } from "../utils/StreamPosition.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 
 interface IPredicateSettable<T = any> {
-	setPredicate(predicate: IStreamPosition<T>): this
+	setFilter(predicate: IStreamPosition<T>): this
 }
 
 type IFilterStreamConstructor<T = any> = new (
@@ -51,8 +51,8 @@ function BuildFilterStream<T = any>() {
 			else this.currGetter()
 		}
 
-		setPredicate(predicate: IStreamPosition<T>) {
-			this.filter = bind(this, predicate)
+		setFilter(filter: IStreamPosition<T>) {
+			this.filter = bind(this, filter)
 			return this
 		}
 
@@ -68,11 +68,18 @@ function PreFilterStream<T = any>(): IFilterStreamConstructor<T> {
 	return filterStream ? filterStream : (filterStream = BuildFilterStream<T>())
 }
 
-export function FilterStream<T = any>(predicate: IStreamPosition<T>) {
+/**
+ * This is a function for creation of `ILinkedStream<T>` factories.
+ * These streams are characterized by filtering their input through
+ * the `condition: IStreamPosition<T>`, and only allowing the items,
+ * for which the filter returns true [when predicate]. When it's a
+ * numeric filter, only every `n`th item is returned (where `n = condition`).
+ */
+export function FilterStream<T = any>(condition: IStreamPosition<T>) {
 	const filterStream = PreFilterStream<T>()
 	return function (resource?: IOwnedStream<T>) {
 		return new filterStream()
-			.setPredicate(predicate)
+			.setFilter(condition)
 			.init(resource) as ILinkedStream<T>
 	}
 }
