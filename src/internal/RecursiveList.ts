@@ -478,7 +478,7 @@ class RecursiveList<
 
 	setItems(newItems: (T | Recursive)[]) {
 		const mutItems: IPreRecursiveItems<T, Recursive> = newItems
-		for (let i = newItems.length; --i; )
+		for (let i = newItems.length; i--; )
 			mutItems[i] = this.renewer.maybeWrapSwitch(newItems[i])
 		this.items.init(mutItems as IRecursiveItems<T, Recursive>)
 		return this
