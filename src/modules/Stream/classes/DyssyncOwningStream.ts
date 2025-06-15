@@ -67,6 +67,17 @@ function PreDyssyncOwningStream<T = any, Args extends any[] = []>() {
 	>
 }
 
+/**
+ * This is a class implementing `ILinkedStream<T>`.
+ * It is a mixin of:
+ *
+ * 1. DyssyncStream
+ * 2. PipeStream
+ * 3. ResourceCopyingStream
+ * 4. SyncCurrStream
+ * 
+ * It has the constructor of `PipeStream`
+ */
 export const DyssyncOwningStream: ReturnType<typeof PreDyssyncOwningStream> & {
 	generic?: typeof PreDyssyncOwningStream
 } = PreDyssyncOwningStream()
