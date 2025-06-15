@@ -189,12 +189,12 @@ export abstract class RecursiveRenewer<
 }
 
 /**
- * The class for encapsulating the shared state of 
- * `.lastInitialized: T | null`. The purpose is to 
- * ensure that the three different "List" classes 
- * all have the same version of the variable, 
+ * The class for encapsulating the shared state of
+ * `.lastInitialized: T | null`. The purpose is to
+ * ensure that the three different "List" classes
+ * all have the same version of the variable,
  * and can modify/access it as-necessary.
-*/
+ */
 class LastInitialized<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -222,7 +222,7 @@ class LastInitialized<
 
 /**
  * The base class for `ReevaluableList` and `EvaluableList`
-*/
+ */
 abstract class BaseEvaluableList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
@@ -288,8 +288,8 @@ abstract class BaseEvaluableList<
 
 /**
  * This is an object for encapsulating the `foundSwitch: boolean` flag
- * of `ReevaluableList`. 
-*/
+ * of `ReevaluableList`.
+ */
 class FoundSwitchFlag {
 	private foundSwitch: boolean = false
 
@@ -308,13 +308,13 @@ class FoundSwitchFlag {
 
 /**
  * The `.reevaluate` method is the one where the `CompositeStream`
- * spends most of its time in. More specifically, it is the place 
- * where the given `.items: SwitchArray` gets re-checked for being 
+ * spends most of its time in. More specifically, it is the place
+ * where the given `.items: SwitchArray` gets re-checked for being
  * no longer acceptable [i.e. that there is, now, a "terminal" which `.isOld`].
- * In such an eventuality, the further attempts to re-evalute the 
- * `.items` are no longer pursued, at which point, one simply 
- * quits and returns `false`. 
-*/
+ * In such an eventuality, the further attempts to re-evalute the
+ * `.items` are no longer pursued, at which point, one simply
+ * quits and returns `false`.
+ */
 class ReevaluableList<
 	T extends ISwitchIdentifiable &
 		IRecursiveListIdentifiable &
