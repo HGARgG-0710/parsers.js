@@ -50,6 +50,92 @@ function extendKey<K = any, V = any>(
 	)
 }
 
+abstract class PreMapClass<K = any, V = any, Default = any>
+	extends BaseIndexMap<K, V, Default>
+	implements IIndexMap<K, V, Default>
+{
+	private alteredKeys: any[]
+	private change?: IIndexingFunction<K>
+	private extension: (x: any, ...y: any[]) => any
+	private keyExtension: (key: K, index?: number, keys?: K[]) => any
+
+	protected setExtension(extension: (x: any, ...y: any[]) => any) {
+		this.extension = extension
+	}
+
+	protected setChange(change?: IIndexingFunction<K>) {
+		this.change = change
+	}
+
+	protected setKeyExtension(
+		keyExtension: (key: K, index?: number, keys?: K[]) => any
+	) {
+		this.keyExtension = keyExtension
+	}
+
+	index(x: any, ...y: any[]) {
+		const valueIndex = this.getIndex(this.extension(x, ...y))
+		return isGoodIndex(valueIndex) ? this.values[valueIndex] : this.default
+	}
+
+	replace(index: number, pair: [K, V]) {
+		if (isGoodIndex(index) && index < this.size) {
+			const [key, value] = pair
+			this.keys[index] = key
+			this.alteredKeys[index] = this.keyExtension(key, index, this.keys)
+			this.values[index] = value
+		}
+		return this
+	}
+
+	concat(x: Iterable<[K, V]>): [K[], V[]] {
+		const kv = super.concat(x)
+		const [keys] = kv
+		this.alteredKeys.push(...keys.map(this.keyExtension))
+		return kv
+	}
+
+	add(index: number, ...pairs: array.Pairs<K, V>) {
+		const kv = super.add(index, ...pairs)
+		const [keys] = kv
+		insert(this.alteredKeys, index, ...keys.map(this.keyExtension))
+		return kv
+	}
+
+	delete(index: number, count: number = 1) {
+		super.delete(index, count)
+		out(this.alteredKeys, index, count)
+		return this
+	}
+
+	rekey(keyFrom: K, keyTo: K) {
+		const replacementIndex = this.keys.indexOf(keyFrom)
+		this.keys[replacementIndex] = keyTo
+		this.alteredKeys[replacementIndex] = this.keyExtension(keyTo)
+		return this
+	}
+
+	getIndex(sought: any) {
+		const size = this.size
+		for (let i = 0; i < size; ++i)
+			if (this.change!(this.alteredKeys[i], sought)) return i
+		return BadIndex
+	}
+
+	unique() {
+		const indexes = super.unique()
+		this.alteredKeys = indexes.map((x) => this.alteredKeys[x])
+		return indexes
+	}
+
+	constructor(pairsList: array.Pairs<K, V> = [], _default?: Default) {
+		assert(isArray(pairsList))
+		const [keys, values] = Pairs.from(pairsList)
+		super(keys, values, _default)
+		this.alteredKeys = this.keys.map(this.keyExtension)
+	}
+}
+
 export function MapClass<K = any, V = any, Default = any>(
 	change?: IIndexingFunction<K>,
 	extensions: Function[] = [],
@@ -58,97 +144,25 @@ export function MapClass<K = any, V = any, Default = any>(
 	const extension = trivialCompose(...extensions)
 	const keyExtension = trivialCompose(...keyExtensions)
 
-	class linearMapClass
-		extends BaseIndexMap<K, V, Default>
-		implements IIndexMap<K, V, Default>
-	{
-		static change?: IIndexingFunction<K>
-
-		static extend: <KeyType = any>(
-			...f: ((...x: any[]) => any)[]
-		) => IMapClass<KeyType, any>
-
-		static extendKey: <ValueType = any>(
-			...f: ((x: any) => any)[]
-		) => IMapClass<any, ValueType>
+	class mapClass extends PreMapClass<K, V, Default> {
+		static change?: IIndexingFunction<K> = change
+		static extend = extend
+		static extendKey = extendKey
 
 		static readonly keyExtensions: Function[] = keyExtensions
 		static readonly extensions: Function[] = extensions
 
-		private alteredKeys: any[]
-
-		index(x: any, ...y: any[]) {
-			const valueIndex = this.getIndex(extension(x, ...y))
-			return isGoodIndex(valueIndex)
-				? this.values[valueIndex]
-				: this.default
-		}
-
-		replace(index: number, pair: [K, V]) {
-			if (isGoodIndex(index) && index < this.size) {
-				const [key, value] = pair
-				this.keys[index] = key
-				this.alteredKeys[index] = keyExtension(key, index, this.keys)
-				this.values[index] = value
-			}
-			return this
-		}
-
-		concat(x: Iterable<[K, V]>): [K[], V[]] {
-			const kv = super.concat(x)
-			const [keys] = kv
-			this.alteredKeys.push(...keys.map(keyExtension))
-			return kv
-		}
-
-		add(index: number, ...pairs: array.Pairs<K, V>) {
-			const kv = super.add(index, ...pairs)
-			const [keys] = kv
-			insert(this.alteredKeys, index, ...keys.map(keyExtension))
-			return kv
-		}
-
-		delete(index: number, count: number = 1) {
-			super.delete(index, count)
-			out(this.alteredKeys, index, count)
-			return this
-		}
-
-		rekey(keyFrom: K, keyTo: K) {
-			const replacementIndex = this.keys.indexOf(keyFrom)
-			this.keys[replacementIndex] = keyTo
-			this.alteredKeys[replacementIndex] = keyExtension(keyTo)
-			return this
-		}
-
-		getIndex(sought: any) {
-			const size = this.size
-			for (let i = 0; i < size; ++i)
-				if (change!(this.alteredKeys[i], sought)) return i
-			return BadIndex
-		}
-
-		unique() {
-			const indexes = super.unique()
-			this.alteredKeys = indexes.map((x) => this.alteredKeys[x])
-			return indexes
-		}
-
 		constructor(pairsList: array.Pairs<K, V> = [], _default?: Default) {
-			assert(isArray(pairsList))
-			const [keys, values] = Pairs.from(pairsList)
-			super(keys, values, _default)
-			this.alteredKeys = this.keys.map(keyExtension)
+			super(pairsList, _default)
+			this.setChange(change)
+			this.setExtension(extension)
+			this.setKeyExtension(keyExtension)
 		}
 	}
 
-	linearMapClass.change = change
-	linearMapClass.extend = extend
-	linearMapClass.extendKey = extendKey
+	if (!change) mapClass.prototype.getIndex = plainGetIndex<K, V>
 
-	if (!change) linearMapClass.prototype.getIndex = plainGetIndex<K, V>
-
-	return linearMapClass
+	return mapClass
 }
 
 export const ArrayMap = MapClass(array.recursiveSame)
