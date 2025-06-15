@@ -14,7 +14,7 @@ export abstract class BasicResourceStreamAnnotation<
 		Args extends any[] = []
 	>
 	extends OwningStream<T, Args>
-	implements IOwnedStream
+	implements ILinkedStream<T>
 {
 	protected ["constructor"]: new (
 		resource?: IOwnedStream,
@@ -85,6 +85,17 @@ function PreBasicResourceStream<T = any, Args extends any[] = any[]>() {
 	>
 }
 
+/**
+ * This is an abstract class that implements `ILinkedStream<T>`.
+ * It is a mixin of:
+ *
+ * 1. `BasicStream`
+ * 2. `OwningStream`
+ * 3. `ResourceCopyingStream`
+ * 4. `SyncCurrStream`
+ * 
+ * It inherits the constructor of `BasicStream`. 
+ */
 export const BasicResourceStream: ReturnType<typeof PreBasicResourceStream> & {
 	generic?: typeof PreBasicResourceStream
 } = PreBasicResourceStream()
