@@ -123,12 +123,12 @@ function PreBasicStream<T = any, Args extends any[] = any[]>() {
  * It also possesses a set of other methods that encapsulate
  * (default) behaviour and can be overriden. They are:
  *
- * 1. `protected .startStream()` - code called upon `.isCurrStart()` inside `.prev`
- * 	* (By default, sets `.isStart = true`)
+ * 1. [from `DyssyncStream`] `protected .startStream()` - code called upon `.isCurrStart()` inside `.prev`
+ * 	* (By default, sets `.isStart = true` and `.isEnd = false`)
  * 	* (Called as first action inside of initialization code)
  *
- * 2. `protected .endStream()` - code called upon `.isCurrEnd()` inside `.next`
- * 	* (By default, sets `.isEnd = true`)
+ * 2. [from `DyssyncStream`] `protected .endStream()` - code called upon `.isCurrEnd()` inside `.next`
+ * 	* (By default, sets `.isEnd = true` and `.isStart = false`)
  *
  * 3. `.update(newCurr: T)` - code called inside `.next` and `.prev`
  * with results of `.baseNextIter()` and `.basePrevIter()` (respectively)
