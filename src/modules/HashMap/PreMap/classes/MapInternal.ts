@@ -3,6 +3,12 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isUndefined } = type
 
+/**
+ * This is a class implementing the `IPreMap<K, V, Default>` interface.
+ * It is a thin wrapper around `Map<K, V>`.
+ * It is intended to be used by the `HashClass` for the purposes
+ * of defining the hash-operations.
+ */
 export class MapInternal<K = any, V = any, Default = any>
 	implements IPreMap<K, V, Default>
 {
@@ -46,10 +52,7 @@ export class MapInternal<K = any, V = any, Default = any>
 		return new this.constructor(this.map, this.default)
 	}
 
-	constructor(
-		mapIterable: Iterable<[K, V]> = new Map(),
-		_default?: Default
-	) {
+	constructor(mapIterable: Iterable<[K, V]> = new Map(), _default?: Default) {
 		this.map = new Map(mapIterable)
 		this.default = _default!
 	}
