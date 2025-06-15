@@ -4,7 +4,20 @@ import assert from "assert"
 const { isArray } = type
 const { last, first, copy, clear } = array
 
+/**
+ * This class represents a multi-index position 
+ * inside a tree. It is employed by the library's 
+ * Tree-Iteration algorithms to track the progress 
+ * across the tree and find the next node to be 
+ * visited. 
+ * 
+ * It can also be employed to quickly navigate 
+ * across `DepthStream` via the `.navigate(multind: MultiIndesx)`
+ * method. 
+ */
 export class MultiIndex {
+	private ["constructor"]: new (index: number[]) => this
+
 	private set levels(length: number) {
 		this.index.length = length
 	}
@@ -30,7 +43,7 @@ export class MultiIndex {
 	}
 
 	copy() {
-		return new MultiIndex(copy(this.index))
+		return new this.constructor(copy(this.index))
 	}
 
 	nextLevel() {

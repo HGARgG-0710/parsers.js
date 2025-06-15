@@ -3,6 +3,13 @@ import type { ILineIndex } from "../interfaces/LineIndex.js"
 
 const { sum } = number
 
+/**
+ * This is a class implementing the `ILineIndex` interface.
+ * It represents a pair of indexes, by which characters inside
+ * a string can be located - character number and line number.
+ *
+ * It does not allow for backward iteration.
+ */
 export class LineIndex implements ILineIndex {
 	["constructor"]: new () => this
 
@@ -42,6 +49,15 @@ export class LineIndex implements ILineIndex {
 	}
 }
 
+/**
+ * This is a class implementing the `ILineIndex` interface.
+ * It represents a pair of indexes, by which characters inside
+ * a string can be located - character number and line number.
+ *
+ * It allows for backward iteration. It also allows one to
+ * convert the index in question to `number` via the
+ * `toNumber()` method.
+ */
 export class BackupIndex extends LineIndex {
 	private lengths: number[] = []
 
@@ -53,16 +69,25 @@ export class BackupIndex extends LineIndex {
 		return this.char === 0
 	}
 
+	private lastLineEndChar() {
+		return this.lengths[--this.line]
+	}
+
+	private prevCharNonStart() {
+		return this.char - 1
+	}
+
 	nextLine(): void {
 		const { char, lengths, line } = this
 		if (lengths.length === line) lengths.push(char)
 		super.nextLine()
 	}
 
-	prevLine() {
-		const { char, lengths } = this
+	prevChar() {
 		if (!this.isLineStart() || !this.isFirstLine())
-			this.char = this.isLineStart() ? lengths[--this.line] : char - 1
+			this.char = this.isLineStart()
+				? this.lastLineEndChar()
+				: this.prevCharNonStart()
 	}
 
 	toNumber() {
