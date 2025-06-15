@@ -1,7 +1,7 @@
 import type { IIndexable } from "../interfaces.js"
 import type { IParserFunction } from "../interfaces/StreamHandler.js"
 
-export function TableMap<In = any, Out = any>(
+export function TableHandler<In = any, Out = any>(
 	indexMap: IIndexable<IParserFunction<In, Out>>
 ): (x?: In, ...y: any[]) => Out {
 	const T = function (x?: In, ...y: any[]) {
@@ -11,7 +11,7 @@ export function TableMap<In = any, Out = any>(
 	return T
 }
 
-export function MapWrap<Out = any>(
+export function WrapHandler<Out = any>(
 	indexMap: IIndexable<Out>
 ): (x?: any, ...y: any[]) => Out {
 	const T = (x: any, ...y: any[]) => T.table.index(x, ...y)
