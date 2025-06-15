@@ -24,7 +24,7 @@ class HandlerStreamAnnotation<
 		return null as any
 	}
 
-	protected preInit() {}
+	protected postInit() {}
 
 	get resource(): IOwnedStream<In> {
 		return null as any
@@ -64,8 +64,8 @@ function BuildHandlerStream<In = any, Out = any>() {
 			return this.baseNextIter()
 		}
 
-		protected preInit() {
-			if (this.resource) super.preInit()
+		protected postInit() {
+			if (this.resource) super.postInit()
 		}
 
 		get resource() {

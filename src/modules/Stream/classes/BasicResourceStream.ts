@@ -51,7 +51,7 @@ export abstract class BasicResourceStreamAnnotation<
 	protected initGetter?(...args: Partial<Args>): T
 
 	protected update(newCurr: T) {}
-	protected preInit(...args: Partial<Args>) {}
+	protected postInit(...args: Partial<Args>) {}
 
 	setOwner(newOwner?: unknown): void {}
 
@@ -93,8 +93,8 @@ function PreBasicResourceStream<T = any, Args extends any[] = any[]>() {
  * 2. `OwningStream`
  * 3. `ResourceCopyingStream`
  * 4. `SyncCurrStream`
- * 
- * It inherits the constructor of `BasicStream`. 
+ *
+ * It inherits the constructor of `BasicStream`.
  */
 export const BasicResourceStream: ReturnType<typeof PreBasicResourceStream> & {
 	generic?: typeof PreBasicResourceStream
