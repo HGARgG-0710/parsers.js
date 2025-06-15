@@ -1,14 +1,14 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IIndexMap } from "../interfaces.js"
-import { Pairs } from "../samples.js"
-import { isGoodIndex, table } from "../utils.js"
+import type { ITableMap } from "../../../interfaces/TableMap.js"
+import { Pairs } from "../../../samples.js"
+import { isGoodIndex, table } from "../../../utils.js"
 
-const { swap, out, insert } = inplace
 const { isArray } = type
+const { insert, out, swap } = inplace
 
-export abstract class BaseIndexMap<K = any, V = any, Default = any>
-	implements IIndexMap<K, V, Default>
+export class TableMap<K = any, V = any, Default = any>
+	implements ITableMap<K, V, Default>
 {
 	protected ["constructor"]: new (
 		pairs: array.Pairs<K, V>,
@@ -16,14 +16,8 @@ export abstract class BaseIndexMap<K = any, V = any, Default = any>
 	) => this
 
 	readonly default: Default
-
 	private _keys: K[]
 	private _values: V[]
-
-	abstract index(x: any): V | Default
-	abstract getIndex(key: any): number
-	abstract replace(index: number, pair: [K, V]): this
-	abstract rekey(keyFrom: K, keyTo: K): this
 
 	private uniqueIndexes() {
 		const uniqueKeys = new Set()
@@ -40,11 +34,15 @@ export abstract class BaseIndexMap<K = any, V = any, Default = any>
 		return indexes
 	}
 
-	protected set values(newValues: V[]) {
+	private rekeyIfGoodIndex(index: number, to: K) {
+		if (isGoodIndex(index)) this.keys[index] = to
+	}
+
+	private set values(newValues: V[]) {
 		this._values = newValues
 	}
 
-	protected set keys(newKeys: K[]) {
+	private set keys(newKeys: K[]) {
 		this._keys = newKeys
 	}
 
@@ -64,7 +62,7 @@ export abstract class BaseIndexMap<K = any, V = any, Default = any>
 		const keyIndex = this.keys.indexOf(key)
 		if (isGoodIndex(keyIndex)) this.values[keyIndex] = value
 		else this.add(index, [key, value])
-		return this
+		return keyIndex
 	}
 
 	reverse() {
@@ -80,7 +78,7 @@ export abstract class BaseIndexMap<K = any, V = any, Default = any>
 		return indexes
 	}
 
-	byIndex(index: number) {
+	read(index: number) {
 		return isGoodIndex(index) && this.size > index
 			? ([this.keys[index], this.values[index]] as [K, V])
 			: this.default
@@ -111,6 +109,20 @@ export abstract class BaseIndexMap<K = any, V = any, Default = any>
 	delete(index: number, count: number = 1) {
 		out(this.keys, index, count)
 		out(this.values, index, count)
+		return this
+	}
+
+	replace(index: number, pair: [K, V]) {
+		if (isGoodIndex(index) && index < this.size) {
+			const [key, value] = pair
+			this.keys[index] = key
+			this.values[index] = value
+		}
+		return this
+	}
+
+	rekey(from: K, to: K) {
+		this.rekeyIfGoodIndex(this.keys.indexOf(from), to)
 		return this
 	}
 

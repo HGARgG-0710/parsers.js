@@ -2,7 +2,6 @@ import {
 	array,
 	boolean,
 	functional,
-	inplace,
 	object,
 	string,
 	type
@@ -12,21 +11,17 @@ import { BadIndex } from "../../../constants.js"
 import type {
 	IHaving,
 	IIndexingFunction,
+	ITableMap,
 	ITestable
 } from "../../../interfaces.js"
-import type { IIndexMap, IMapClass } from "../../../interfaces/IndexMap.js"
-import { BaseIndexMap } from "../../../internal/IndexMap.js"
-import { Pairs } from "../../../samples.js"
+import type { IIndexMap, IMapClass } from "../../../interfaces/MapClass.js"
 import { isGoodIndex } from "../../../utils.js"
+import { TableMap } from "./TableMap.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
 const { equals } = boolean
-const { insert, out } = inplace
-
-function plainGetIndex<K = any, V = any>(this: IIndexMap<K, V>, key: any) {
-	return (this as any).alteredKeys.indexOf(key)
-}
+const { copy } = array
 
 function extend<K = any, V = any>(
 	this: IMapClass<K, V>,
@@ -51,13 +46,43 @@ function extendKey<K = any, V = any>(
 }
 
 abstract class PreMapClass<K = any, V = any, Default = any>
-	extends BaseIndexMap<K, V, Default>
 	implements IIndexMap<K, V, Default>
 {
-	private alteredKeys: any[]
+	protected ["constructor"]: new (
+		keys: K[],
+		values: V[],
+		_default?: Default
+	) => this
+
+	readonly default: Default
+	private readonly keys: K[]
+	private readonly values: V[]
+	private readonly alteredKeys: any[]
+
 	private change?: IIndexingFunction<K>
 	private extension: (x: any, ...y: any[]) => any
 	private keyExtension: (key: K, index?: number, keys?: K[]) => any
+
+	private getIndexWithChange(sought: any) {
+		const size = this.size
+		for (let i = 0; i < size; ++i)
+			if (this.change!(this.alteredKeys[i], sought)) return i
+		return BadIndex
+	}
+
+	private getIndexWithoutChange(sought: any) {
+		return this.alteredKeys.indexOf(sought)
+	}
+
+	private indexOf(sought: any) {
+		return this.change
+			? this.getIndexWithChange(sought)
+			: this.getIndexWithoutChange(sought)
+	}
+
+	private getValueIfGood(index: number) {
+		return isGoodIndex(index) ? this.values[index] : this.default
+	}
 
 	protected setExtension(extension: (x: any, ...y: any[]) => any) {
 		this.extension = extension
@@ -73,65 +98,32 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 		this.keyExtension = keyExtension
 	}
 
+	get size() {
+		return this.keys.length
+	}
+
 	index(x: any, ...y: any[]) {
-		const valueIndex = this.getIndex(this.extension(x, ...y))
-		return isGoodIndex(valueIndex) ? this.values[valueIndex] : this.default
+		return this.getValueIfGood(this.indexOf(this.extension(x, ...y)))
 	}
 
-	replace(index: number, pair: [K, V]) {
-		if (isGoodIndex(index) && index < this.size) {
-			const [key, value] = pair
-			this.keys[index] = key
-			this.alteredKeys[index] = this.keyExtension(key, index, this.keys)
-			this.values[index] = value
-		}
-		return this
+	toModifiable() {
+		return new TableMap(copy(this.keys), copy(this.values), this.default)
 	}
 
-	concat(x: Iterable<[K, V]>): [K[], V[]] {
-		const kv = super.concat(x)
-		const [keys] = kv
-		this.alteredKeys.push(...keys.map(this.keyExtension))
-		return kv
+	fromModifiable(table: ITableMap<K, V, Default>) {
+		return new this.constructor(table.keys, table.values, table.default)
 	}
 
-	add(index: number, ...pairs: array.Pairs<K, V>) {
-		const kv = super.add(index, ...pairs)
-		const [keys] = kv
-		insert(this.alteredKeys, index, ...keys.map(this.keyExtension))
-		return kv
+	copy() {
+		return new this.constructor(this.keys, this.values, this.default)
 	}
 
-	delete(index: number, count: number = 1) {
-		super.delete(index, count)
-		out(this.alteredKeys, index, count)
-		return this
-	}
-
-	rekey(keyFrom: K, keyTo: K) {
-		const replacementIndex = this.keys.indexOf(keyFrom)
-		this.keys[replacementIndex] = keyTo
-		this.alteredKeys[replacementIndex] = this.keyExtension(keyTo)
-		return this
-	}
-
-	getIndex(sought: any) {
-		const size = this.size
-		for (let i = 0; i < size; ++i)
-			if (this.change!(this.alteredKeys[i], sought)) return i
-		return BadIndex
-	}
-
-	unique() {
-		const indexes = super.unique()
-		this.alteredKeys = indexes.map((x) => this.alteredKeys[x])
-		return indexes
-	}
-
-	constructor(pairsList: array.Pairs<K, V> = [], _default?: Default) {
-		assert(isArray(pairsList))
-		const [keys, values] = Pairs.from(pairsList)
-		super(keys, values, _default)
+	constructor(keys: K[] = [], values: V[] = [], _default?: Default) {
+		assert(isArray(keys))
+		assert(isArray(values))
+		this.keys = keys
+		this.values = values
+		this.default = _default!
 		this.alteredKeys = this.keys.map(this.keyExtension)
 	}
 }
@@ -152,15 +144,13 @@ export function MapClass<K = any, V = any, Default = any>(
 		static readonly keyExtensions: Function[] = keyExtensions
 		static readonly extensions: Function[] = extensions
 
-		constructor(pairsList: array.Pairs<K, V> = [], _default?: Default) {
-			super(pairsList, _default)
+		constructor(keys?: K[], values?: V[], _default?: Default) {
+			super(keys, values, _default)
 			this.setChange(change)
 			this.setExtension(extension)
 			this.setKeyExtension(keyExtension)
 		}
 	}
-
-	if (!change) mapClass.prototype.getIndex = plainGetIndex<K, V>
 
 	return mapClass
 }

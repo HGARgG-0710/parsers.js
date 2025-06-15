@@ -2,7 +2,7 @@ import { type as _type } from "@hgargg-0710/one"
 import { is, type } from "../aliases/Node.js"
 import { curr, resource } from "../aliases/Stream.js"
 import type { IResourcefulStream, IStream, ITyped } from "../interfaces.js"
-import type { IMapClass } from "../interfaces/IndexMap.js"
+import type { IMapClass } from "../interfaces/MapClass.js"
 
 const { typeOf } = _type
 
@@ -18,3 +18,5 @@ export const typeofMap = (mapClass: IMapClass) => mapClass.extend(typeOf)
 export const nodeMap = (mapClass: IMapClass) => mapClass.extendKey(is)
 
 export * from "../modules/IndexMap/classes/MapClass.js"
+export * from "../modules/IndexMap/classes/ModifiableMap.js"
+export * from "../modules/IndexMap/classes/TableMap.js"
