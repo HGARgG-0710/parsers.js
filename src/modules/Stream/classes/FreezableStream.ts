@@ -26,7 +26,7 @@ const { T } = boolean
 
 class FreezableStreamAnnotation<T = any>
 	extends PosStreamAnnotation<T>
-	implements IBufferized<T>, INavigable<T>, IFinishable, IRewindable
+	implements IBufferized<T>, INavigable<T>, IFinishable<T>, IRewindable<T>
 {
 	readonly buffer: OutputBuffer
 
@@ -61,23 +61,29 @@ const FreezableStreamMixin = new mixin<
 				return this.lastPos() - this.pos
 			},
 
+			navigateSafeDistance(relativePos: number) {
+				this.pos = max(this.pos + relativePos, 0)
+				return this.update()
+			},
+
 			navigateNumber(relativePos: number) {
 				const posGap = this.posGap()
-				if (this.isFrozen() || posGap >= relativePos) {
-					this.pos = max(this.pos + relativePos, 0)
-					return this.update()
-				}
+				if (this.isFrozen || posGap >= relativePos)
+					return this.navigateSafeDistance(relativePos)
 				this.forward(max(0, posGap))
 				uniNavigate(this, relativePos - posGap)
 			},
 
-			navigatePredicate(relativePos: IStreamPositionPredicate) {
-				if (direction(relativePos)) uniNavigate(this, relativePos)
-				else
-					while (!relativePos(this) && this.isCurrStart()) this.prev()
+			navigateBackwards(relativePos: IStreamPositionPredicate) {
+				while (!relativePos(this) && !this.isCurrStart()) this.prev()
 			},
 
-			isFrozen() {
+			navigatePredicate(relativePos: IStreamPositionPredicate) {
+				if (direction(relativePos)) uniNavigate(this, relativePos)
+				else this.navigateBackwards(relativePos)
+			},
+
+			get isFrozen() {
 				return this.buffer.isFrozen
 			},
 
@@ -163,6 +169,25 @@ function PreFreezableStream<T = any>() {
 	return FreezableStreamMixin.toClass() as typeof FreezableStreamAnnotation<T>
 }
 
+/**
+ * This is a class implementing the `ILinkedStream<T>`, `IBufferized<T>`,
+ * `IPrevable`, `IRewindable<T>`, `IFinishable<T>` and `INavigable<T>`.
+ * 
+ * It is a mixin of: 
+ * 
+ * 1. DyssyncStream
+ * 2. PosHavingStream
+ * 3. PipeStream
+ * 4. ResourceCopyingStream
+ *
+ * It "freezes" the incoming `IOwnedStream<T>` by storing it in an
+ * `IPersistentAccumulator<T>`, available via `.buffer`. This happens
+ * solely past the point of the underlying Stream's end, allowing
+ * one persistent access to the saved elements.
+ *
+ * `FreezableStream` is the only generic way to actually make a
+ * given `resource: IOwnedStream` `IPrevable`.
+ */
 export const FreezableStream: ReturnType<typeof PreFreezableStream> & {
 	generic?: typeof PreFreezableStream
 } = PreFreezableStream()
