@@ -330,6 +330,7 @@ class ReevaluableList<
 		currSwitch: Switch<T, Recursive>
 	) {
 		if (!sublist.reevaluate(lastItem)) this.fillSwitch(currSwitch, lastItem)
+		else this.lastInitialized.linkEvaluatedSublist(sublist)
 	}
 
 	private maybeRefillSimpleSwitch(
@@ -338,6 +339,7 @@ class ReevaluableList<
 		lastItem: T | InitType
 	) {
 		if (this.renewer.isOld(derivable)) this.fillSwitch(currSwitch, lastItem)
+		else this.lastInitialized.linkNew(derivable)
 	}
 
 	private refillEitherSwitch(
@@ -350,13 +352,10 @@ class ReevaluableList<
 		else this.maybeRefillSimpleSwitch(derivable, currSwitch, lastItem)
 	}
 
-	private maybeReinitOldTerminal(
-		currTerminal: T,
-		lastTerminal: T | InitType
-	) {
+	private reinitOldTerminalIfPossible(old: T, last: T | InitType) {
 		if (!this.foundSwitch.get()) return false
-		this.initTerminal(currTerminal, lastTerminal)
-		return this.renewer.isOld(currTerminal)
+		this.initTerminal(old, last)
+		return this.renewer.isOld(old)
 	}
 
 	private refillSwitch(
@@ -368,10 +367,15 @@ class ReevaluableList<
 		return true
 	}
 
-	private reInitTerminal(currTerminal: T, lastTerminal: T | InitType) {
+	private linkNonOldTerminal(currTerminal: T) {
+		this.lastInitialized.linkNew(currTerminal)
+		return true
+	}
+
+	private maybeReinitTerminal(currTerminal: T, lastTerminal: T | InitType) {
 		return this.renewer.isOld(currTerminal)
-			? this.maybeReinitOldTerminal(currTerminal, lastTerminal)
-			: true
+			? this.reinitOldTerminalIfPossible(currTerminal, lastTerminal)
+			: this.linkNonOldTerminal(currTerminal)
 	}
 
 	private maybeReinitSwitchable(
@@ -380,7 +384,7 @@ class ReevaluableList<
 	) {
 		return isSwitch(currItem)
 			? this.refillSwitch(currItem, lastItem)
-			: this.reInitTerminal(currItem, lastItem)
+			: this.maybeReinitTerminal(currItem, lastItem)
 	}
 
 	private reevalEach(evalWith: InitType) {
