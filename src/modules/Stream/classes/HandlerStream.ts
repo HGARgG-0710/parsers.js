@@ -14,7 +14,7 @@ class HandlerStreamAnnotation<
 > extends BasicResourceStreamAnnotation<Out, []> {
 	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
-	state: Summat
+	readonly state: Summat
 
 	protected baseNextIter(): Out {
 		return null as Out
@@ -89,10 +89,20 @@ function BuildHandlerStream<In = any, Out = any>() {
 
 const _HandlerStream = BuildHandlerStream()
 
-export function HandlerStream<InType = any, OutType = any>(
-	handler: (stream: IOwnedStream<InType>) => OutType
+/**
+ * This is a function for creation of factories of objects implementing `IControlStream<Out>`.
+ * It extends `BasicResourceStream`. 
+ *
+ * It uses the `handler` to define its output by means of calling it on the
+ * underlying `.resource: IOwnedStream<In>`, like `this.handler(this.resource)`.
+ * Whenever the return value is equal to `Handler.SkippedItem`, one skips the
+ * call, and proceeds to the next one. The underlying `handler` is intended
+ * to change the state of the `.resource` and/or `this.state`.
+ */
+export function HandlerStream<In = any, Out = any>(
+	handler: (stream: IOwnedStream<In>) => Out
 ) {
-	return function (resource?: IOwnedStream<InType>): IControlStream<OutType> {
+	return function (resource?: IOwnedStream<In>): IControlStream<Out> {
 		return new _HandlerStream().setHandler(handler).init(resource)
 	}
 }
