@@ -14,8 +14,12 @@ function BuildLoopStream<T = any>() {
 	return class LoopStream extends ArrayStream.generic!<T, T>() {
 		private index: number = 0
 
+		private get itemCount() {
+			return this.items.length
+		}
+
 		private wrapped(index: number) {
-			return (this.index = index % this.items.length)
+			return (this.index = index % this.itemCount)
 		}
 
 		protected baseNextIter(): T {
@@ -36,6 +40,13 @@ function PreLoopStream<T = any>(): typeof LoopStreamAnnotation<T> {
 		: (loopStream = BuildLoopStream<T>() as typeof LoopStreamAnnotation)
 }
 
+/**
+ * This is a class that extends `ArrayStream<T, T>`. 
+ * It represents an infinite `IStream<T>`, formed out of 
+ * items of type `T`. Useful for some cases when one doesn't 
+ * know in advance when an associated `IStream` is going 
+ * to finish. 
+ */
 export const LoopStream: ReturnType<typeof PreLoopStream> & {
 	generic?: typeof PreLoopStream
 } = PreLoopStream()
