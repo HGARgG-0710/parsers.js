@@ -5,7 +5,8 @@ import type {
 	ILinkedStream,
 	IOwnedStream,
 	IPeekable,
-	IPeekStream
+	IPeekStream,
+	IPrevable
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
 import { write } from "../../../utils/Stream.js"
@@ -18,7 +19,7 @@ interface IPeekResettable {
 type IPeekStreamConstructor<T = any> = new (
 	resource?: IOwnedStream,
 	n?: number
-) => ILinkedStream<T> & IPeekable<T> & IPeekResettable
+) => ILinkedStream<T> & IPeekable<T> & IPeekResettable & IPrevable
 
 const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 	init(
@@ -159,9 +160,30 @@ function PrePeekStream<T = any>(): IPeekStreamConstructor<T> {
 	return peekStream ? peekStream : (peekStream = BuildPeekStream<T>())
 }
 
-export function PeekStream<Type = any>(n: number) {
+/**
+ * This is a function for creation of factories for the `IPeekStream<T>`
+ * interface instances. It accepts an `IOwnedStream` as a `.resource`,
+ * and allows the user to call `.peek(count: number): T`, which returns a
+ * lookahead `count >= 0` items forward, with:
+ *
+ * 1. `.peek(0) == .curr`
+ * 2. `.peek(n); n >= 1` comes directly after `.peek(n - 1)`
+ *
+ * Note that `.peek` doesn't actually change the current position,
+ * so it's possible to call `.peek(n)` several times without `.next/.prev()`
+ * in between, and expect the same results.
+ *
+ * Also note that the `IPeekStream<T>` in question is also
+ * `IPrevable`, so if underlying `resource` supports `.prev()` calls,
+ * then so should the returned `IPeekStream<T> & IPrevable` instance.
+ *
+ * The provided `n` is the initial (expected) lookahead. Making
+ * a good guess for `n` can enable one to free oneself from needing
+ * purposeless re-sizing of the lookahead-array.
+ */
+export function PeekStream<T = any>(n: number) {
 	const peekStream = PrePeekStream()
-	return function (resource?: IOwnedStream<Type>): IPeekStream<Type> {
+	return function (resource?: IOwnedStream<T>): IPeekStream<T> & IPrevable {
 		return new peekStream(resource, n)
 	}
 }
