@@ -16,8 +16,9 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				Brief descriptions. 
 				Present for all `export`ed abstractions [including types and classes]. 
 				
-				6. modules/
-					1. modules/IndexMap + ...
+				6. modules/Stream: 
+					1. /interfaces
+					2. /utils
 				7. samples/
 				8. utils/
 				9. aliases.ts
@@ -131,6 +132,11 @@ NEXT UP:
 	TODO: in alll the `mixin`s - FIX THE (old) `super` calls!!! 
 		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
 
+	TODO: about `annotation`s. 
+		CHANGE them so that boilerplate due to mixins is MINIMIZED. 
+		Let *most* influential ones be inherited INSTEAD, and others be copied. 
+		[Walk through all of them - fix this...]; 
+
 	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
 		and NOT `function () {}`
 
@@ -143,6 +149,16 @@ NEXT UP:
 				AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
 
 	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
+
+	TODO: on `let smallCaseStream: ... = PreStreamName(...); .generic = ...`; 
+		REPLACE THESE in places where you use the FACTORIES instead with `const localSmallCaseName = BuildSomeStreamName<T>(...)`
+		Reasons:
+			1. less boilerplate [ergo - simpler code]
+			2. same typing
+
+		THIS GOES FOR '_SomeName' AS WELL: 
+			1. HandlerStream
+			... OTHERS [walk through the project - FIND ITHEM...]
 
 CURRENT TODOS [top-down order...]:		
 	TODO: Tests
@@ -1162,6 +1178,16 @@ FUTURE:
 				It should be USED IN `parsers.js` as BOTH: 
 					1. a dependency
 					2. a re-export [since there are mixins CURRENTLY exported]
+
+		5. `object_pool`: 
+			This is the `ObjectPool` (and `IInitializable` interface) class. 
+			It is far too independent to be just left here. 
+			Far too useful to be allowed to be "herded" together with the domain-specific 
+			stuff. 
+
+			'FreeStream' REMAINS PART OF `parsers.js`
+
+			Export this from here as a dependency. 
 
 	2. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 
