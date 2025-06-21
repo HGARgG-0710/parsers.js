@@ -2,6 +2,7 @@ import type {
 	ICopiable,
 	IInitializable,
 	IOwnedStream,
+	IPosed,
 	IStateful,
 	IStateSettable
 } from "../interfaces.js"
@@ -97,8 +98,8 @@ export interface IResourceful {
  *
  * (Note that `.isEnd == true` REQUIRES that the last call to `.isCurrEnd()`
  * to have been `true` as well, the same, however, does not always hold.
- * Iterating through the __very last__ element for the first time 
- * [or, after a successful `.rewind()`] requires that `.isCurrEnd() == true` 
+ * Iterating through the __very last__ element for the first time
+ * [or, after a successful `.rewind()`] requires that `.isCurrEnd() == true`
  * and `.isEnd == false`).
  */
 export type IStream<T = any> = Partial<INavigable<T>> &
@@ -110,6 +111,7 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IPeekable<T>> &
 	Partial<IResourceful> &
 	Partial<IPrevable> &
+	Partial<IPosed<number>> &
 	Iterable<T> &
 	ICopiable &
 	IInitializable & {
@@ -122,29 +124,37 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 
 /**
  * This is an `IStream<T>` that is iterable backwards (`IPrevable`)
-*/
+ */
 export type IPrevableStream<T = any> = IStream<T> & IPrevable
 
 /**
  * This is an `IStream<T>` that is `IPeekable<T>`
-*/
+ */
 export type IPeekableStream<T = any> = IStream<T> & IPeekable<T>
 
 /**
  * This is an `IStream<T>` that is also `IResourceful`
-*/
+ */
 export type IResourcefulStream<T = any> = IStream<T> & IResourceful
 
 /**
  * This is an `IStream<T>` that is also `IStateful`, as well as `IStateSettable`
-*/
+ */
 export type IStatefulStream<T = any> = IStream<T> & IStateful & IStateSettable
 
 /**
- * This is a function representing a change in the `.curr: T` 
- * [one that calls `.prev()/next()` underneath].
+ * This is an `IStream<T>`, that is also `IPosed<numer>`. 
+ * Here `.pos: number` is used to track current item's numerical 
+* position.
 */
+export type IPositionStream<T = any> = IPosed<number> & IStream<T>
+
+/**
+ * This is a function representing a change in the `.curr: T`
+ * [one that calls `.prev()/next()` underneath].
+ */
 export type IChange<T = any> = (input: IPrevableStream<T>) => T
+
 
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"
