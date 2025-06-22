@@ -1,7 +1,8 @@
-import { object } from "@hgargg-0710/one"
+import { object, type } from "@hgargg-0710/one"
 
 const { withoutConstructor } = object.classes
 const { ConstDescriptor } = object.descriptor
+const { isNullary } = type
 const {
 	propsDefine,
 	propertyDescriptors,
@@ -47,6 +48,14 @@ class ConstructorCreator<T = any, Args extends any[] = any[]> {
 
 	ensureConstructorNonVoid(constructor: _IConstructorType<T, Args>) {
 		return this.isNonVoid(constructor) ? constructor : function () {}
+	}
+
+	ensureNonNullPrototype(constructor: _INonVoidConstructor<T, Args>) {
+		if (isNullary(constructor.prototype))
+			return function (...args: Args) {
+				return constructor.call(this, ...args)
+			}
+		return constructor
 	}
 }
 
@@ -153,8 +162,10 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 
 	private defineClass() {
 		this.defineNonVoidConstructor(
-			this.constructorCreator.ensureConstructorNonVoid(
-				this.defaultConstructor
+			this.constructorCreator.ensureNonNullPrototype(
+				this.constructorCreator.ensureConstructorNonVoid(
+					this.defaultConstructor
+				)
 			)
 		)
 	}
