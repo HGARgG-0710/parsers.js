@@ -1,8 +1,9 @@
 import type {
+	IOwnerSettable,
 	IRecursiveListIdentifiable,
+	IResourceSettable,
 	ISwitchIdentifiable
-} from "src/interfaces.js"
-import type { IOwnerSettable, IResourceSettable } from "../../../interfaces.js"
+} from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
 	IStatefulStream,

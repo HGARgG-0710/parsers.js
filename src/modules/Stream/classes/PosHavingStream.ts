@@ -1,4 +1,4 @@
-import { annotation } from "src/classes/Stream.js"
+import { annotation } from "./annotation.js"
 import type { IPositionStream } from "../../../interfaces.js"
 
 /**

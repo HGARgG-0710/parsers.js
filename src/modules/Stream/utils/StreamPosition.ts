@@ -1,5 +1,5 @@
 import { functional, type } from "@hgargg-0710/one"
-import type { IChange, IPositionStream } from "src/interfaces/Stream.js"
+import type { IChange, IPositionStream } from "../../../interfaces/Stream.js"
 import { isPredicatePosition } from "../../../utils/Position.js"
 import { next, prev } from "../../../utils/Stream.js"
 import type {

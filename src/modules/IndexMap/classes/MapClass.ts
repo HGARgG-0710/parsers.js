@@ -8,8 +8,8 @@ import type {
 	ITestable
 } from "../../../interfaces.js"
 import type { IIndexMap, IMapClass } from "../../../interfaces/MapClass.js"
-import { isGoodIndex } from "../../../utils.js"
 import { TableMap } from "../../../internal/TableMap.js"
+import { isGoodIndex } from "../../../utils.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
@@ -55,11 +55,10 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 	readonly default: Default
 	private readonly keys: K[]
 	private readonly values: V[]
-	private readonly alteredKeys: any[]
+	private alteredKeys: any[]
 
 	private change?: IIndexingFunction<K>
 	private extension: (x: any, ...y: any[]) => any
-	private keyExtension: (key: K, index?: number, keys?: K[]) => any
 
 	private get size() {
 		return this.keys.length
@@ -97,7 +96,7 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 	protected setKeyExtension(
 		keyExtension: (key: K, index?: number, keys?: K[]) => any
 	) {
-		this.keyExtension = keyExtension
+		this.alteredKeys = this.keys.map(keyExtension)
 	}
 
 	index(x: any, ...y: any[]) {
@@ -126,7 +125,6 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 		this.keys = keys
 		this.values = values
 		this.default = _default!
-		this.alteredKeys = this.keys.map(this.keyExtension)
 	}
 }
 
@@ -158,15 +156,15 @@ abstract class PreMapClass<K = any, V = any, Default = any>
  * that the user could more flexibly compose the different types of inputs
  * from already existing `IMapClass`es.
  *
- * Also note, that the `.fromModifiable(table: ITable<K, V, Default>)` method 
- * DOES NOT copy the `.keys` and `.values`, instead TRANSFERING read-only access 
- * to them to the respective `IIndexMap<K, V, Default>`. The same DOES NOT 
- * hold regarding `.toModifiable()` [meaning - the copying operation does take 
- * place during its call]. This is done because the user is supposed to be using 
- * `ITableMap`s constructed via `.toModifiable` together with instances of the 
- * same class. It is ALSO intended that these `ITableMap` instances either be 
- * temporary [and created/freed ad-hoc], or be employed for a long period of time 
- * with the exact same objects. 
+ * Also note, that the `.fromModifiable(table: ITable<K, V, Default>)` method
+ * DOES NOT copy the `.keys` and `.values`, instead TRANSFERING read-only access
+ * to them to the respective `IIndexMap<K, V, Default>`. The same DOES NOT
+ * hold regarding `.toModifiable()` [meaning - the copying operation does take
+ * place during its call]. This is done because the user is supposed to be using
+ * `ITableMap`s constructed via `.toModifiable` together with instances of the
+ * same class. It is ALSO intended that these `ITableMap` instances either be
+ * temporary [and created/freed ad-hoc], or be employed for a long period of time
+ * with the exact same objects.
  */
 export function MapClass<K = any, V = any, Default = any>(
 	change?: IIndexingFunction<K>,

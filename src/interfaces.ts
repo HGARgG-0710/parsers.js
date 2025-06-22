@@ -57,7 +57,7 @@ export interface IDefaulting<T = any> {
  * method is reponsible for this.
  */
 export interface ISettable<K = any, V = any> {
-	set: (key: K, value: V) => this
+	set: (key: K, value: V) => any
 }
 
 /**

@@ -1,5 +1,5 @@
-import { annotation } from "../../../classes/Stream.js"
 import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
+import { annotation } from "./annotation.js"
 
 /**
  * This is an abstract class that implements `IOwnedStream<T>` and `IInitializable<Args>`.

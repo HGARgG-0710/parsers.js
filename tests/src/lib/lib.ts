@@ -2,7 +2,7 @@ import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import test from "node:test"
 import { Autocache } from "../../../dist/src/classes.js"
-import { ArrayMap } from "../../../dist/src/classes/IndexMap.js"
+import { ArrayMap, ModifiableMap } from "../../../dist/src/classes/IndexMap.js"
 import type { ICopiable } from "../../../dist/src/interfaces.js"
 
 const { keys } = object
@@ -92,7 +92,10 @@ export class PrefixCounter {
 }
 
 export class TestCounter {
-	private prefixes = Autocache(new ArrayMap([]), () => new PrefixCounter())
+	private prefixes = Autocache(
+		new ModifiableMap(new ArrayMap([])),
+		() => new PrefixCounter()
+	)
 
 	test(testPrefix: number[], callback: () => void, toTest: boolean = false) {
 		const prefixCounter: PrefixCounter = this.prefixes(testPrefix)

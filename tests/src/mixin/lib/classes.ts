@@ -58,7 +58,7 @@ abstract class BaseMixinPrototypeTest<
 	protected readonly mixinName: string
 
 	protected abstract testedConditions(
-		mixinClass: new (...args: Args) => T | void,
+		mixinClass: mixin.IOutClass<T, Args>,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void
 
@@ -88,7 +88,7 @@ abstract class DefaultMixinPrototypeTest<
 	): PropertyDescriptorMap
 
 	private verifyPrototype(
-		mixinClass: new (...args: Args) => T,
+		mixinClass: mixin.IOutClass<T, Args>,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	) {
 		assert(
@@ -101,12 +101,12 @@ abstract class DefaultMixinPrototypeTest<
 		)
 	}
 
-	private verifyName(mixinClass: new (...args: Args) => T) {
+	private verifyName(mixinClass: mixin.IOutClass<T, Args>) {
 		assert.strictEqual(this.mixinName, mixinClass.name)
 		assert.strictEqual(this.mixinName, this.mixinInstance.name)
 	}
 
-	private verifySuper(mixinClass: new (...args: Args) => T) {
+	private verifySuper(mixinClass: mixin.IOutClass<T, Args>) {
 		const mixinSuper = mixinClass.prototype.super
 		for (const x of this.mixinSuper) {
 			const currSuper = mixinSuper[x.name]
@@ -130,7 +130,7 @@ abstract class DefaultMixinPrototypeTest<
 	}
 
 	protected testedConditions(
-		mixinClass: new (...args: Args) => T,
+		mixinClass: mixin.IOutClass<T, Args>,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void {
 		this.verifyPrototype(mixinClass, expectedPrototypeDescriptors)
@@ -196,7 +196,7 @@ export class MixinInstanceTest<
 > extends BaseMixinTest<T, Args> {
 	withInstance(expected: InterfaceShape) {
 		return new InterfaceTest<T, Args>(expected).withClass(
-			this.mixinInstance.toClass()
+			this.mixinInstance.toClass() as new (...args: Args) => T
 		)
 	}
 }
