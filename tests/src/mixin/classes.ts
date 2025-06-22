@@ -719,3 +719,17 @@ mixinTestCounter.test(
 	},
 	true
 )
+
+mixinTestCounter.test([HAS_CONSTRUCTOR, NO_PARENTS], () => {
+	const mixinShape = {
+		name: "Test8",
+		properties: {},
+		constructor(x: number) {
+			this.x = x + 1
+		}
+	}
+
+	new MixinInstanceTest(mixinShape).withInstance({
+		x: (exp: any) => exp.x === 11
+	})(10)
+})
