@@ -4,8 +4,12 @@ import type { IPersistentAccumulator } from "../interfaces.js"
 
 const { isArray } = type
 
-export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
-	private ["constructor"]: new (collection?: Type[]) => this
+/**
+ * A buffer-like class serving as the output for the `FreezableStream<T>`.
+ * The user can work with it via a public `IPersistenAccumulator<T>` interface.
+ */
+export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
+	private ["constructor"]: new (collection?: T[]) => this
 
 	private _isFrozen: boolean = false
 
@@ -17,13 +21,13 @@ export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
 		return this._isFrozen
 	}
 
-	push(...elements: Type[]) {
+	push(...elements: T[]) {
 		if (!this.isFrozen) this.collection.push(...elements)
 		return this
 	}
 
 	get() {
-		return this.collection as readonly Type[]
+		return this.collection as readonly T[]
 	}
 
 	copy() {
@@ -31,7 +35,7 @@ export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
 	}
 
 	read(i: number) {
-		return this.collection![i] as Type
+		return this.collection![i] as T
 	}
 
 	unfreeze() {
@@ -48,7 +52,7 @@ export class OutputBuffer<Type = any> implements IPersistentAccumulator<Type> {
 		return this.collection!.length
 	}
 
-	constructor(private readonly collection: Type[] = []) {
+	constructor(private readonly collection: T[] = []) {
 		assert(isArray(collection))
 	}
 }

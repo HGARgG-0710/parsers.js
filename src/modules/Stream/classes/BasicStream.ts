@@ -1,137 +1,146 @@
-import { isCopiable } from "../../../is.js"
-import {
-	ownerInitializer,
-	resourceInitializer
-} from "../../../classes/Initializer.js"
-import type { IResourceSettable } from "../../../interfaces.js"
-import type { IOwnedStream } from "../../../interfaces/Stream.js"
-import { SolidStream } from "./IterableStream.js"
+import { Initializable } from "../../../classes/Initializer.js"
+import type { IInitializer } from "../../../interfaces.js"
+import type { IOwnedStream, IOwningStream } from "../../../interfaces/Stream.js"
+import { mixin } from "../../../mixin.js"
+import { DyssyncStream } from "./DyssyncStream.js"
+import { IterableStream } from "./IterableStream.js"
+import { OwnableStream } from "./OwnableStream.js"
 
-export abstract class BasicStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends SolidStream<Type, Args> {
-	protected abstract baseNextIter(): Type
+export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
+	extends DyssyncStream<T, Args>
+	implements IOwnedStream<T>
+{
+	protected abstract readonly initializer: IInitializer<Args>
+	protected abstract baseNextIter(curr?: T): T
+
+	readonly owner?: IOwningStream
 
 	protected postEnd?(): void
-	protected basePrevIter?(): Type
+	protected basePrevIter?(curr?: T): T
 	protected postStart?(): void
-	protected initGetter?(...args: Partial<Args>): Type
+	protected initGetter?(...args: Partial<Args>): T
 
-	isCurrStart?(): boolean
+	protected update(newCurr: T) {}
+	protected postInit(...args: Partial<Args>) {}
 
-	protected update(newCurr: Type) {
-		this.curr = newCurr
-	}
+	next(): void {}
+	prev(): void {}
 
-	protected preInit(...args: Partial<Args>) {
-		if (this.initGetter) this.curr = this.initGetter(...args)
-	}
-
-	protected endStream() {
-		this.isEnd = true
-		this.isStart = false
-	}
-
-	protected startStream() {
-		this.isStart = true
-		this.isEnd = false
-	}
-
-	next() {
-		this.isStart = false
-		if (this.isCurrEnd()) {
-			this.endStream()
-			this.postEnd?.()
-		} else this.update(this.baseNextIter())
-	}
-
-	prev() {
-		this.isEnd = false
-		if (this.isCurrStart!()) {
-			this.startStream()
-			this.postStart?.()
-		} else this.update(this.basePrevIter!())
-	}
+	setOwner(newOwner?: unknown): void {}
 
 	init(...args: Partial<Args>) {
-		this.startStream()
-		super.init(...args)
-		this.preInit(...args)
 		return this
 	}
-}
 
-export abstract class ResourceStream<Type = any, MoreArgs extends any[] = []>
-	extends BasicStream<Type, [IOwnedStream, ...(MoreArgs | [])]>
-	implements IOwnedStream<Type>
-{
-	protected ["constructor"]: new (resource?: IOwnedStream) => this
-
-	protected _resource?: IOwnedStream
-
-	protected set resource(newResource: IOwnedStream | undefined) {
-		this._resource = newResource
+	*[Symbol.iterator]() {
+		yield null as T
 	}
 
-	get resource() {
-		return this._resource
-	}
-
-	protected get initializer() {
-		return ownerInitializer
-	}
-
-	copy() {
-		return new this.constructor(this.resource?.copy())
-	}
-
-	setResource(resource: IOwnedStream) {
-		this.resource = resource
-	}
-
-	init(resource?: IOwnedStream) {
-		return super.init(resource)
+	constructor(...args: Partial<Args>) {
+		super()
 	}
 }
 
-export abstract class SourceStream<
-		Type = any,
-		SourceType = unknown,
-		MoreArgs extends any[] = []
-	>
-	extends BasicStream<Type, [SourceType, ...(MoreArgs | [])]>
-	implements IResourceSettable
-{
-	protected ["constructor"]: new (source?: SourceType) => this
+const BasicStreamMixin = new mixin<IOwnedStream>(
+	{
+		name: "BasicStream",
+		properties: {
+			update(newCurr: any) {
+				this.curr = newCurr
+			},
 
-	protected source?: SourceType
+			postInit(...args: any[]) {
+				if (this.initGetter) this.curr = this.initGetter(...args)
+			},
 
-	protected abstract currGetter(): Type
+			endStream() {
+				this.isEnd = true
+				this.isStart = false
+			},
 
-	protected updateCurr() {
-		this.update(this.currGetter())
-	}
+			startStream() {
+				this.isStart = true
+				this.isEnd = false
+			},
 
-	protected get initializer() {
-		return resourceInitializer
-	}
+			next() {
+				const curr = this.curr
+				this.isStart = false
+				if (this.isCurrEnd()) {
+					this.endStream()
+					this.postEnd?.()
+				} else this.update(this.baseNextIter(curr))
+			},
 
-	protected initGetter(): Type {
-		return this.currGetter()
-	}
+			prev() {
+				const curr = this.curr
+				this.isEnd = false
+				if (this.isCurrStart!()) {
+					this.startStream()
+					this.postStart?.()
+				} else this.update(this.basePrevIter!(curr))
+			},
 
-	setResource(source?: SourceType) {
-		this.source = source
-	}
+			init(...args: any[]) {
+				this.startStream()
+				this.super.Initializable.init.call(this, ...args)
+				this.postInit(...args)
+				return this
+			}
+		},
+		constructor: function (...args: any[]) {
+			this.super.Initializable.constructor.call(this, ...args)
+		}
+	},
+	[],
+	[Initializable, DyssyncStream, OwnableStream, IterableStream]
+)
 
-	copy(): this {
-		return new this.constructor(
-			isCopiable(this.source) ? this.source.copy() : this.source
-		)
-	}
-
-	constructor(source?: SourceType) {
-		super(source)
-	}
+function PreBasicStream<T = any, Args extends any[] = any[]>() {
+	return BasicStreamMixin.toClass() as typeof BasicStreamAnnotation<T, Args>
 }
+
+/**
+ * This is an abstract class implementing `IOwnedStream<T>`.
+ * It is a mixin of:
+ *
+ * 1. Initializable
+ * 2. DyssyncStream
+ * 3. OwnableStream
+ * 4. IterableStream
+ *
+ * It is also in possession of common patterns for `.next()`,
+ * `.prev()` and `.init()` methods, which are implemented in
+ * the extending code of the user through methods and properties:
+ *
+ * 1. protected .baseNextIter(curr?: T): T [mandatory]
+ * 2. protected .basePrevIter(curr?: T): T [optional]
+ * 3. protected .initGetter(...args: Partial<InitArgs>): T [optional]
+ * 4. protected .posStart(): void [optional]
+ * 5. protected .postEnd(): void [optional]
+ * 6. protected readonly abstract initializer: IInitializer<Args> [mandatory]
+ *
+ * It also possesses a set of other methods that encapsulate
+ * (default) behaviour and can be overriden. They are:
+ *
+ * 1. [from `DyssyncStream`] `protected .startStream()` - code called upon `.isCurrStart()` inside `.prev`
+ * 	* (By default, sets `.isStart = true` and `.isEnd = false`)
+ * 	* (Called as first action inside of initialization code)
+ *
+ * 2. [from `DyssyncStream`] `protected .endStream()` - code called upon `.isCurrEnd()` inside `.next`
+ * 	* (By default, sets `.isEnd = true` and `.isStart = false`)
+ *
+ * 3. `.update(newCurr: T)` - code called inside `.next` and `.prev`
+ * with results of `.baseNextIter()` and `.basePrevIter()` (respectively)
+ * as the argument, whenver `!this.isCurrEnd/isCurrStart()`.
+ * 	* (By default, just assigns `this.curr = newCurr`
+ *
+ * 4. `protected postInit(...args: Partial<Args>): void` - gets called after
+ * the initializer's `.init` method.
+ * 	* (By default, assigns `this.curr` to the result of `this.initGetter(...args)`, if `this.initGetter` is present)
+ */
+export const BasicStream: ReturnType<typeof PreBasicStream> & {
+	generic?: typeof PreBasicStream
+} = PreBasicStream()
+
+BasicStream.generic = PreBasicStream

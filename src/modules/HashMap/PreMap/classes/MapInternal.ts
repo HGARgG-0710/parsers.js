@@ -3,18 +3,24 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isUndefined } = type
 
-export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
-	implements IPreMap<KeyType, ValueType, DefaultType>
+/**
+ * This is a class implementing the `IPreMap<K, V, Default>` interface.
+ * It is a thin wrapper around `Map<K, V>`.
+ * It is intended to be used by the `HashClass` for the purposes
+ * of defining the hash-operations.
+ */
+export class MapInternal<K = any, V = any, Default = any>
+	implements IPreMap<K, V, Default>
 {
 	private ["constructor"]: new (
-		map?: array.Pairs<KeyType, ValueType> | Map<KeyType, ValueType>,
-		_default?: DefaultType
+		map?: array.Pairs<K, V> | Map<K, V>,
+		_default?: Default
 	) => this
 
-	private readonly map: Map<KeyType, ValueType>
-	readonly default: DefaultType
+	private readonly map: Map<K, V>
+	readonly default: Default
 
-	get(x: KeyType) {
+	get(x: K) {
 		const gotten = this.map.get(x)
 		return isUndefined(gotten) ? this.default : gotten
 	}
@@ -23,21 +29,21 @@ export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 		return this.map.size
 	}
 
-	set(key: KeyType, value: ValueType) {
+	set(key: K, value: V) {
 		this.map.set(key, value)
 		return this
 	}
 
-	delete(key: KeyType) {
+	delete(key: K) {
 		this.map.delete(key)
 		return this
 	}
 
-	rekey(fromKey: KeyType, toKey: KeyType) {
+	rekey(fromKey: K, toKey: K) {
 		const value = this.get(fromKey)
 		if (value !== this.default) {
 			this.delete(fromKey)
-			this.set(toKey, value as ValueType)
+			this.set(toKey, value as V)
 		}
 		return this
 	}
@@ -46,10 +52,7 @@ export class MapInternal<KeyType = any, ValueType = any, DefaultType = any>
 		return new this.constructor(this.map, this.default)
 	}
 
-	constructor(
-		mapIterable: Iterable<[KeyType, ValueType]> = new Map(),
-		_default?: DefaultType
-	) {
+	constructor(mapIterable: Iterable<[K, V]> = new Map(), _default?: Default) {
 		this.map = new Map(mapIterable)
 		this.default = _default!
 	}

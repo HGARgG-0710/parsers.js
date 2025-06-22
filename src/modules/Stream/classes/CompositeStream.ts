@@ -1,166 +1,215 @@
-import { inplace } from "@hgargg-0710/one"
-import type { Summat } from "@hgargg-0710/summat.ts"
+import { array, inplace } from "@hgargg-0710/one"
 import { ownerInitializer } from "../../../classes/Initializer.js"
+import { MissingArgument } from "../../../constants.js"
+import type { IStateSettable } from "../../../interfaces.js"
 import type { IParseState } from "../../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
-	ILinkedStream,
 	IOwnedStream,
-	IRawStreamArray,
-	IStreamChooser
+	IRawStreamArray
 } from "../../../interfaces/Stream.js"
-import {
-	isRecursiveInitList,
-	isSwitch,
-	type IDerivable,
-	type IRecursivelySwitchable
-} from "../../../internal/RecursiveInitList.js"
 import { StreamList, streamListPool } from "../../../internal/StreamList.js"
 import { isStateful } from "../../../is/Stream.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { WrapperStream } from "./WrapperStream.js"
-import { MissingArgument } from "../../../constants.js"
 
 const { mutate } = inplace
 
-function recursiveStateSetter(state: Summat) {
-	function setStateDerivable(
-		maybeList: IDerivable<ILinkedStream, IStreamChooser>
-	) {
-		if (isRecursiveInitList(maybeList))
-			for (const maybeSwitch of maybeList) setStateSwitchable(maybeSwitch)
-		else setStateSwitchable(maybeList)
-	}
+type ICompositeStreamConstructor<T = any> = new (
+	lowStream?: IOwnedStream,
+	rawStreams?: IRawStreamArray,
+	state?: IParseState
+) => ICompositeStream<T>
 
-	function setStateSwitchable(
-		maybeSwitch: IRecursivelySwitchable<ILinkedStream, IStreamChooser>
-	) {
-		if (isSwitch(maybeSwitch))
-			return setStateDerivable(maybeSwitch.derivable)
-		if (isStateful(maybeSwitch)) maybeSwitch.setState(state)
-	}
-
-	return setStateSwitchable
+interface ICompositeStreamLike extends IStateSettable {
+	setRawStreams(rawStreams: IRawStreamArray): void
+	isEvaluationReady(): boolean
+	evaluateStreams(): void
 }
 
 const compositeStreamInitializers = {
 	init(
-		target: _CompositeStream,
+		target: ICompositeStreamLike,
 		lowStream?: IOwnedStream,
-		rawStreams?: IRawStreamArray
+		rawStreams?: IRawStreamArray,
+		state?: IParseState
 	) {
 		ownerInitializer.init(target, lowStream)
 		if (rawStreams) target.setRawStreams(rawStreams)
+		if (state) target.setState(state)
 		if (target.isEvaluationReady()) target.evaluateStreams()
 	}
 }
 
-class _CompositeStream<Type = any> extends WrapperStream<
-	Type,
-	[IRawStreamArray]
-> {
-	protected ["constructor"]: new (
-		lowStream?: IOwnedStream,
-		rawStreams?: IRawStreamArray
-	) => this
+function BuildCompositeStream<T = any>() {
+	return class extends WrapperStream.generic!<
+		T,
+		[IRawStreamArray, IParseState]
+	>() {
+		protected ["constructor"]: new (
+			lowStream?: IOwnedStream,
+			rawStreams?: IRawStreamArray,
+			state?: IParseState
+		) => this
 
-	private streamList?: StreamList
-	private lowStream?: IOwnedStream
+		private rawStreams?: IRawStreamArray
+		private streamList?: StreamList
+		private lowStream?: IOwnedStream
+		private _state: IParseState
 
-	private rawStreams() {
-		return this.streams.raw()
-	}
+		private set state(newState: IParseState) {
+			this._state = newState
+		}
 
-	get streams() {
-		return this.streamList!.items
-	}
+		private renewIfPossible() {
+			return this.streamList!.reevaluate(this.lowStream!)
+		}
 
-	state: Summat
+		private fixRenewed() {
+			this.updateResource()
+			return true
+		}
 
-	private renewIfPossible() {
-		return this.streamList!.reEvaluate(this.lowStream!)
-	}
+		private nonRenewable() {
+			return false
+		}
 
-	private fixRenewed() {
-		this.updateResource()
-		return true
-	}
+		private updateResource() {
+			this.resource = this.streamList!.firstItemDeep()
+		}
 
-	private nonRenewable() {
-		return false
-	}
+		private distributeState() {
+			for (const x of this.rawStreams!)
+				if (isStateful(x)) x.setState(this.state)
+		}
 
-	private updateResource() {
-		this.resource = this.streamList!.firstItemDeep()
-	}
+		protected get initializer() {
+			return compositeStreamInitializers
+		}
 
-	private distribute(state: IParseState) {
-		const setStateSwitchable = recursiveStateSetter(state)
-		for (const x of this.streams) setStateSwitchable(x)
-	}
+		get streams() {
+			return this.streamList!.items
+		}
 
-	protected get initializer() {
-		return compositeStreamInitializers
-	}
+		get state() {
+			return this._state
+		}
 
-	setResource(lowStream: IOwnedStream) {
-		this.lowStream = lowStream
-	}
+		setResource(lowStream: IOwnedStream) {
+			this.lowStream = lowStream
+		}
 
-	setRawStreams(rawStreams: IRawStreamArray) {
-		this.streamList = streamListPool.create(
-			MissingArgument,
-			rawStreams,
-			this
-		)
-		return this
-	}
+		setRawStreams(rawStreams: IRawStreamArray) {
+			this.rawStreams = rawStreams
+			this.streamList = streamListPool.create(
+				MissingArgument,
+				rawStreams,
+				this
+			)
+			return this
+		}
 
-	isEvaluationReady() {
-		return !!this.streamList && !!this.lowStream
-	}
+		isEvaluationReady() {
+			return !!this.streamList && !!this.lowStream
+		}
 
-	evaluateStreams() {
-		this.streamList!.evaluate(this.lowStream!)
-		this.updateResource()
-	}
+		evaluateStreams() {
+			this.streamList!.evaluate(this.lowStream!)
+			this.updateResource()
+		}
 
-	renewResource() {
-		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
-	}
+		renewResource() {
+			return this.renewIfPossible()
+				? this.fixRenewed()
+				: this.nonRenewable()
+		}
 
-	init(lowStream?: IOwnedStream, rawStreams?: IRawStreamArray) {
-		super.init(lowStream, rawStreams)
-		return this
-	}
+		init(
+			lowStream?: IOwnedStream,
+			rawStreams?: IRawStreamArray,
+			state?: IParseState
+		) {
+			super.init(lowStream, rawStreams, state)
+			return this
+		}
 
-	isCurrEnd(): boolean {
-		return (
-			this.resource!.isCurrEnd() ||
-			(this.resource!.isEnd && !this.renewResource())
-		)
-	}
+		isCurrEnd(): boolean {
+			return (
+				this.resource!.isCurrEnd() ||
+				(this.resource!.isEnd && !this.renewResource())
+			)
+		}
 
-	copy() {
-		return new this.constructor(
-			this.lowStream!.copy(),
-			mutate(this.rawStreams(), rawStreamCopy)
-		)
-	}
+		// ! [pre-doc]: WARNING - this thing, unlike other IStream-implementing classes' '.copy()' methods, DOESN'T "copy dynamically" [with preservation of parsing properties]
+		// * Reasons:
+		// 		1. [minor turnoff] that would require [somewhat] complex recursion [the 'StateDistributor', previously - a poorly written closure that ought to have been a class instead]
+		//		2. [justification] it's a rare feature [the user is highly unlikely to ever want to use that at all in any "normal" parsing scenario]
+		// 		3. [deal-breaker] would require altering the `.constuctor` signature:
+		// 			* 1. the format REQUIRED to perform the "post-initialization" '.setState' calls DEMANDS that we INITIALIZE the thing first
+		// 			* 2. problem is - we MAY require the state IN ORDER to initialize them; This becomes INCREASINGLY tangled
+		copy() {
+			return new this.constructor(
+				this.lowStream?.copy(),
+				this.rawStreams
+					? mutate(array.copy(this.rawStreams), rawStreamCopy)
+					: MissingArgument,
+				this.state
+			)
+		}
 
-	setState(state: IParseState) {
-		this.distribute(state)
-		this.state = state
-	}
+		setState(state: IParseState) {
+			this.state = state
+			this.distributeState()
+		}
 
-	constructor(lowStream?: IOwnedStream, rawStreams?: IRawStreamArray) {
-		super()
-		this.init(lowStream, rawStreams)
+		constructor(
+			lowStream?: IOwnedStream,
+			rawStreams?: IRawStreamArray,
+			state?: IParseState
+		) {
+			super()
+			this.init(lowStream, rawStreams, state)
+		}
 	}
 }
 
-export function CompositeStream<Type = any>(...streams: IRawStreamArray) {
-	return function (resource?: IOwnedStream): ICompositeStream<Type> {
-		return new _CompositeStream<Type>(resource, streams)
+let compositeStream: ICompositeStreamConstructor | null = null
+
+function PreCompositeStream<T = any>(): ICompositeStreamConstructor<T> {
+	return compositeStream
+		? compositeStream
+		: (compositeStream = BuildCompositeStream<T>())
+}
+
+/**
+ * This is a factory for creation of `ICompositeStream<T>` implementations
+ * using the given `IRawStreamArray` input to define their composition
+ * [which is being attached element-by-element via `.init()`
+ * from the *last* index towards 0].
+ *
+ * After initialization, it will call the topmost of its streams on each `.next()`
+ * call, and (after every step) verify it being non-over. In the event that
+ * it is, however, a "re-evaluation procedure" will be used. This procedure
+ * walks (backwards) through the structure of the `CompositeStream`,
+ * re-initializing the necessary `ILinkedStream`s, and re-running the
+ * "obsolete" `IStreamChooser`-s. If an obsolete non-`IStreamChooser`
+ * element is met before any `IStreamChooser`, the `CompositeStream`
+ * is considered over, since, there is no more work to be accomplished
+ * in lower streams. Thus, the stream successfully returns the
+ * composition of the user-provided 'stream's.
+ *
+ * It can also store state (as can all `ICompositeStream`s),
+ * which can be set at the beginning via `.setState`, and then
+ * used inside of `IStreamChooser`s via `this.state` [with `this` being
+ * the current owning `ICompositeStream`], and other "static" 'IControlStream's
+ * also sharing the `.state` of their parent `ICompositeStream`.
+ */
+export function CompositeStream<T = any>(...streams: IRawStreamArray) {
+	const compositeStream = PreCompositeStream<T>()
+	return function (
+		resource?: IOwnedStream,
+		state?: IParseState
+	): ICompositeStream<T> {
+		return new compositeStream(resource, streams, state)
 	}
 }

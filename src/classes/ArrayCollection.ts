@@ -1,12 +1,15 @@
 import { array } from "@hgargg-0710/one"
-import { InitMixin } from "../internal/MixinArray.js"
 import type { ICollection } from "../interfaces.js"
+import { InitMixin } from "../internal/MixinArray.js"
 
-export class ArrayCollection<Type = any>
-	extends InitMixin<Type>
-	implements ICollection<Type>
+/**
+ * A thin wrapper around `T[]`, satisfying the `ICollection<T>` interface.
+ */
+export class ArrayCollection<T = any>
+	extends InitMixin<T>
+	implements ICollection<T, readonly T[]>
 {
-	private ["constructor"]: new (items?: Type[]) => this
+	private ["constructor"]: new (items?: T[]) => this
 
 	copy() {
 		return new this.constructor(array.copy(this.items))

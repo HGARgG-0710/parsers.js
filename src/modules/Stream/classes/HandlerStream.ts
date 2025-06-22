@@ -3,55 +3,106 @@ import type {
 	IControlStream,
 	IOwnedStream
 } from "../../../interfaces/Stream.js"
-import { ResourceStream } from "./BasicStream.js"
+import {
+	BasicResourceStream,
+	BasicResourceStreamAnnotation
+} from "./BasicResourceStream.js"
 
-class _HandlerStream<
-	InType = any,
-	OutType = any
-> extends ResourceStream<OutType> {
-	protected ["constructor"]: new (resource?: IOwnedStream<InType>) => this
+class HandlerStreamAnnotation<
+	In = any,
+	Out = any
+> extends BasicResourceStreamAnnotation<Out, []> {
+	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
-	private handler: (stream: IOwnedStream<InType>) => OutType
+	readonly state: Summat
 
-	state: Summat
-
-	private handleCurr() {
-		return this.handler(this.resource!)
-	}
-
-	protected baseNextIter(): OutType {
-		let lastReceived: OutType | undefined
-		do lastReceived = this.handleCurr()
-		while (lastReceived === HandlerStream.SkippedItem)
-		return lastReceived
+	protected baseNextIter(): Out {
+		return null as Out
 	}
 
 	protected initGetter() {
-		return this.baseNextIter()
+		return null as any
 	}
 
-	protected preInit() {
-		if (this.resource) super.preInit()
+	protected postInit() {}
+
+	get resource(): IOwnedStream<In> {
+		return null as any
 	}
 
 	isCurrEnd() {
-		return this.resource!.isCurrEnd()
+		return false
 	}
 
-	setState(state: Summat) {
-		this.state = state
-	}
+	setState(state: Summat) {}
 
-	setHandler(handler: (stream: IOwnedStream<InType>) => OutType) {
-		this.handler = handler
+	setHandler(handler: (stream: IOwnedStream<In>) => Out) {
 		return this
 	}
 }
 
-export function HandlerStream<InType = any, OutType = any>(
-	handler: (stream: IOwnedStream<InType>) => OutType
+function BuildHandlerStream<In = any, Out = any>() {
+	return class extends BasicResourceStream.generic!<Out>() {
+		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
+
+		private handler: (stream: IOwnedStream<In>) => Out
+
+		state: Summat
+
+		private handleCurr() {
+			return this.handler(this.resource!)
+		}
+
+		protected baseNextIter(): Out {
+			let lastReceived: Out | undefined
+			do lastReceived = this.handleCurr()
+			while (lastReceived === HandlerStream.SkippedItem)
+			return lastReceived
+		}
+
+		protected initGetter() {
+			return this.baseNextIter()
+		}
+
+		protected postInit() {
+			if (this.resource) super.postInit()
+		}
+
+		get resource() {
+			return super.resource as IOwnedStream<In>
+		}
+
+		isCurrEnd() {
+			return this.resource!.isCurrEnd()
+		}
+
+		setState(state: Summat) {
+			this.state = state
+		}
+
+		setHandler(handler: (stream: IOwnedStream<In>) => Out) {
+			this.handler = handler
+			return this
+		}
+	} as unknown as typeof HandlerStreamAnnotation<In, Out>
+}
+
+const _HandlerStream = BuildHandlerStream()
+
+/**
+ * This is a function for creation of factories of objects implementing `IControlStream<Out>`.
+ * It extends `BasicResourceStream`. 
+ *
+ * It uses the `handler` to define its output by means of calling it on the
+ * underlying `.resource: IOwnedStream<In>`, like `this.handler(this.resource)`.
+ * Whenever the return value is equal to `Handler.SkippedItem`, one skips the
+ * call, and proceeds to the next one. The underlying `handler` is intended
+ * to change the state of the `.resource` and/or `this.state`.
+ */
+export function HandlerStream<In = any, Out = any>(
+	handler: (stream: IOwnedStream<In>) => Out
 ) {
-	return function (resource?: IOwnedStream<InType>): IControlStream<OutType> {
+	return function (resource?: IOwnedStream<In>): IControlStream<Out> {
 		return new _HandlerStream().setHandler(handler).init(resource)
 	}
 }
@@ -59,10 +110,10 @@ export function HandlerStream<InType = any, OutType = any>(
 export namespace HandlerStream {
 	/**
 	 * The value to be returned from the `.handler` on
-	 * `StreamParser`, if the current item of the underlying
+	 * `HandlerStream`, if the current item of the underlying
 	 * `.value`-`Stream` is to be skipped
 	 *
-	 * When encountered during the `.next()` call, `StreamParser`
+	 * When encountered during the `.next()` call, `HandlerStream`
 	 * will continue calling `.handler` until the return value of
 	 * it differs from `SkippedItem`.
 	 */

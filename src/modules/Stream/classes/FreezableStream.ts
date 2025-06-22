@@ -1,157 +1,195 @@
 import { boolean, number, type } from "@hgargg-0710/one"
-import { OutputBuffer } from "../../../internal/OutputBuffer.js"
-import type { IBufferized } from "../../../interfaces.js"
+import type { IBufferized, IFinishable } from "../../../interfaces.js"
 import type {
-	IPosition,
-	IPredicatePosition
+	ILinkedStream,
+	INavigable,
+	IOwnedStream,
+	IRewindable
 } from "../../../interfaces/Stream.js"
+import { OutputBuffer } from "../../../internal/OutputBuffer.js"
+import { mixin } from "../../../mixin.js"
 import { uniNavigate } from "../../../utils/Stream.js"
-import { direction } from "../utils/Position.js"
-import { PosStream } from "./PosStream.js"
+import type {
+	IStreamPosition,
+	IStreamPositionPredicate
+} from "../interfaces/StreamPosition.js"
+import { direction } from "../utils/StreamPosition.js"
+import { DyssyncStream } from "./DyssyncStream.js"
+import { PipeStream } from "./PipeStream.js"
+import { PosHavingStream } from "./PosHavingStream.js"
+import { PosStreamAnnotation } from "./PosStream.js"
+import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 
 const { max } = number
 const { isNumber } = type
 const { T } = boolean
 
-export class FreezableStream<Type = any>
-	extends PosStream<Type>
-	implements IBufferized<Type>
+class FreezableStreamAnnotation<T = any>
+	extends PosStreamAnnotation<T>
+	implements IBufferized<T>, INavigable<T>, IFinishable<T>, IRewindable<T>
 {
-	readonly buffer = new OutputBuffer()
+	readonly buffer: OutputBuffer
 
-	private _isEnd: boolean
-	private _isStart: boolean
-	private _curr: Type
-
-	get isStart() {
-		return this._isStart
+	navigate(relativePos: IStreamPosition<T>): T {
+		return null as T
 	}
 
-	get isEnd() {
-		return this._isEnd
-	}
-
-	get curr() {
-		return this._curr
-	}
-
-	private set isStart(newIsStart: boolean) {
-		this._isStart = newIsStart
-	}
-
-	private set isEnd(newIsEnd: boolean) {
-		this._isEnd = newIsEnd
-	}
-
-	private set curr(newCurr: Type) {
-		this._curr = newCurr
-	}
-
-	private update() {
-		return (this.curr = this.buffer.read(this.pos))
-	}
-
-	private lastPos() {
-		return this.buffer.size - 1
-	}
-
-	private posGap() {
-		return this.lastPos() - this.pos
-	}
-
-	private navigateNumber(relativePos: number) {
-		const posGap = this.posGap()
-		if (this.isFrozen() || posGap >= relativePos) {
-			this.pos = max(this.pos + relativePos, 0)
-			return this.update()
-		}
-		this.forward(max(0, posGap))
-		uniNavigate(this, relativePos - posGap)
-	}
-
-	private navigatePredicate(relativePos: IPredicatePosition) {
-		if (direction(relativePos)) uniNavigate(this, relativePos)
-		else while (!relativePos(this) && this.isCurrStart()) this.prev()
-	}
-
-	private isFrozen() {
-		return this.buffer.isFrozen
-	}
-
-	private baseNextIter() {
-		this.forward()
-		this.update()
-	}
-
-	private basePrevIter() {
-		this.backward()
-		this.update()
-	}
-
-	private willBeBeyoundBuffer() {
-		return this.pos === this.lastPos()
-	}
-
-	private bufferize(newElem: Type) {
-		this.buffer.push(newElem)
-	}
-
-	private endStream() {
-		this.isEnd = true
-	}
-
-	private startStream() {
-		this.isStart = true
-	}
-
-	private freeze() {
-		this.buffer.freeze()
-		this.endStream()
-	}
-
-	private handleUnbufferizedNext() {
-		this.bufferize(this.curr)
-		this.resource!.next()
-		this.baseNextIter()
-		if (this.resource!.isEnd) this.freeze()
-	}
-
-	isCurrEnd(): boolean {
-		return this.isFrozen()
-			? this.willBeBeyoundBuffer()
-			: this.resource!.isCurrEnd()
-	}
-
-	next() {
-		this.isStart = false
-		if (!this.willBeBeyoundBuffer()) this.baseNextIter()
-		else if (this.isFrozen()) this.endStream()
-		else this.handleUnbufferizedNext()
-	}
-
-	prev() {
-		this.isEnd = false
-		if (this.isCurrStart()) this.startStream()
-		else this.basePrevIter()
-	}
-
-	navigate(relativePos: IPosition<Type>) {
-		if (isNumber(relativePos)) this.navigateNumber(relativePos)
-		else this.navigatePredicate(relativePos)
-		return this.curr
-	}
-
-	finish() {
-		if (!this.isFrozen()) return this.navigate(T)
-		this.pos = this.lastPos()
-		this.update()
-		return this.curr
+	finish(): T {
+		return null as T
 	}
 
 	rewind() {
-		this.startStream()
-		this.pos = 0
-		this.update()
-		return this.curr
+		return null as T
 	}
 }
+
+const FreezableStreamMixin = new mixin<
+	ILinkedStream & IFinishable & IBufferized & INavigable & IRewindable
+>(
+	{
+		name: "FreezableStream",
+		properties: {
+			update() {
+				return (this.curr = this.buffer.read(this.pos))
+			},
+
+			lastPos() {
+				return this.buffer.size - 1
+			},
+
+			posGap() {
+				return this.lastPos() - this.pos
+			},
+
+			navigateSafeDistance(relativePos: number) {
+				this.pos = max(this.pos + relativePos, 0)
+				return this.update()
+			},
+
+			navigateNumber(relativePos: number) {
+				const posGap = this.posGap()
+				if (this.isFrozen || posGap >= relativePos)
+					return this.navigateSafeDistance(relativePos)
+				this.forward(max(0, posGap))
+				uniNavigate(this, relativePos - posGap)
+			},
+
+			navigateBackwards(relativePos: IStreamPositionPredicate) {
+				while (!relativePos(this) && !this.isCurrStart()) this.prev()
+			},
+
+			navigatePredicate(relativePos: IStreamPositionPredicate) {
+				if (direction(relativePos)) uniNavigate(this, relativePos)
+				else this.navigateBackwards(relativePos)
+			},
+
+			get isFrozen() {
+				return this.buffer.isFrozen
+			},
+
+			baseNextIter() {
+				this.forward()
+				this.update()
+			},
+
+			basePrevIter() {
+				this.backward()
+				this.update()
+			},
+
+			willBeBeyoundBuffer() {
+				return this.pos === this.lastPos()
+			},
+
+			bufferize(newElem: any) {
+				this.buffer.push(newElem)
+			},
+
+			freeze() {
+				this.buffer.freeze()
+				this.endStream()
+			},
+
+			handleUnbufferizedNext() {
+				this.bufferize(this.curr)
+				this.resource!.next()
+				this.baseNextIter()
+				if (this.resource!.isEnd) this.freeze()
+			},
+
+			isCurrEnd(): boolean {
+				return this.isFrozen()
+					? this.willBeBeyoundBuffer()
+					: this.resource!.isCurrEnd()
+			},
+
+			next() {
+				this.isStart = false
+				if (!this.willBeBeyoundBuffer()) this.baseNextIter()
+				else if (this.isFrozen()) this.endStream()
+				else this.handleUnbufferizedNext()
+			},
+
+			prev() {
+				this.isEnd = false
+				if (this.isCurrStart()) this.startStream()
+				else this.basePrevIter()
+			},
+
+			navigate(relativePos: IStreamPosition) {
+				if (isNumber(relativePos)) this.navigateNumber(relativePos)
+				else this.navigatePredicate(relativePos)
+				return this.curr
+			},
+
+			finish() {
+				if (!this.isFrozen()) return this.navigate(T)
+				this.pos = this.lastPos()
+				this.update()
+				return this.curr
+			},
+
+			rewind() {
+				this.startStream()
+				this.pos = 0
+				this.update()
+				return this.curr
+			}
+		},
+		constructor: function (resource?: IOwnedStream) {
+			this.buffer = new OutputBuffer()
+			this.super.PipeStream.constructor.call(this, resource)
+		}
+	},
+	[PipeStream, ResourceCopyingStream],
+	[DyssyncStream, PosHavingStream]
+)
+
+function PreFreezableStream<T = any>() {
+	return FreezableStreamMixin.toClass() as typeof FreezableStreamAnnotation<T>
+}
+
+/**
+ * This is a class implementing the `ILinkedStream<T>`, `IBufferized<T>`,
+ * `IPrevable`, `IRewindable<T>`, `IFinishable<T>` and `INavigable<T>`.
+ * 
+ * It is a mixin of: 
+ * 
+ * 1. DyssyncStream
+ * 2. PosHavingStream
+ * 3. PipeStream
+ * 4. ResourceCopyingStream
+ *
+ * It "freezes" the incoming `IOwnedStream<T>` by storing it in an
+ * `IPersistentAccumulator<T>`, available via `.buffer`. This happens
+ * solely past the point of the underlying Stream's end, allowing
+ * one persistent access to the saved elements.
+ *
+ * `FreezableStream` is the only generic way to actually make a
+ * given `resource: IOwnedStream` `IPrevable`.
+ */
+export const FreezableStream: ReturnType<typeof PreFreezableStream> & {
+	generic?: typeof PreFreezableStream
+} = PreFreezableStream()
+
+FreezableStream.generic = PreFreezableStream

@@ -1,47 +1,48 @@
-import type { array } from "@hgargg-0710/one"
-import type { IIndexable } from "../interfaces.js"
 import type {
+	IConcattable,
 	ICopiable,
 	IDefaulting,
 	IDeletable,
 	IHashable,
+	IIndexable,
 	IRekeyable,
 	ISettable,
 	ISizeable
 } from "../interfaces.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
 
-export type IHash<KeyType = any, InternalKeyType = any> = (
-	x: KeyType,
+/**
+ * Represents a hash function.
+ */
+export type IHash<K = any, InternalKey = any> = (
+	x: K,
 	...y: any[]
-) => InternalKeyType
+) => InternalKey
 
-export interface IHashClass<
-	KeyType = any,
-	ValueType = any,
-	InternalKeyType = any,
-	DefaultType = any
-> extends IHashable<KeyType, InternalKeyType> {
-	new (structure: IPreMap<InternalKeyType, ValueType, DefaultType>): IHashMap<
-		KeyType,
-		ValueType,
-		DefaultType
-	>
-
-	extend: (
-		f: (x: any) => KeyType
-	) => IHashClass<any, ValueType, InternalKeyType>
+/**
+ * Represents an extendable factory of `IHashMap`
+ * instances based off `IPreMap` instances.
+ */
+export interface IHashClass<K = any, V = any, InternalKey = any, Default = any>
+	extends IHashable<K, InternalKey> {
+	new (structure: IPreMap<InternalKey, V, Default>): IHashMap<K, V, Default>
+	extend: (f: (x: any) => K) => IHashClass<any, V, InternalKey>
 }
 
-export interface IHashMap<KeyType = any, ValueType = any, DefaultType = any>
-	extends IIndexable<ValueType | DefaultType>,
-		ISettable<KeyType, ValueType | DefaultType>,
-		IDeletable<KeyType>,
-		IRekeyable<KeyType>,
+/**
+ * Represents an `IIndexable<V | Default>` structure with a
+ * default-value type `Default`, primary value type `V`,
+ * key type `K` and capability of being modified in a large variety of
+ * ways.
+ */
+export interface IHashMap<K = any, V = any, Default = any>
+	extends IIndexable<V | Default>,
+		ISettable<K, V | Default>,
+		IDeletable<K>,
+		IRekeyable<K>,
 		ISizeable,
 		IDefaulting,
-		ICopiable {
-	fromPairs(pairsList: array.Pairs<KeyType, ValueType>): this
-}
+		IConcattable<Iterable<[K, V]>, IHashMap<K, V, Default>>,
+		ICopiable {}
 
 export type * from "../modules/HashMap/interfaces/PreMap.js"

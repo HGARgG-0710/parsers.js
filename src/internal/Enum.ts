@@ -1,16 +1,22 @@
 import { array, functional } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IMappable } from "../interfaces.js"
 import { Pairs } from "../samples.js"
 
 const { id } = functional
 const { first, firstOut } = array
 
-export class Enum<Type = any> {
-	private ["constructor"]: new (value: Type[]) => this
+type IMappable<T = any, Out = any> = (value: T, index?: number) => Out
 
-	private readonly enumItems: Type[]
-	private readonly setItems: Set<Type>
+/**
+ * A class for representing a unique set of elements.
+ * Intended to serve as a 'mappable' `Set`, with the ability
+ * to assert disjointedness of its instances.
+ */
+export class Enum<T = any> {
+	private ["constructor"]: new (value: T[]) => this
+
+	private readonly enumItems: T[]
+	private readonly setItems: Set<T>
 
 	private static combinedItems(...spaces: Enum[]) {
 		return first(spaces).enumItems.concat(
@@ -27,18 +33,20 @@ export class Enum<Type = any> {
 		return new this.constructor(this.enumItems)
 	}
 
-	toMap<Out = any>(mapped: IMappable<Type, Out> = id<Type> as any) {
-		return new Map(
-			Pairs.to(this.enumItems, this.enumItems.map(mapped))
-		)
+	toMap<Out = any>(mapped: IMappable<T, Out> = id<T> as any) {
+		return new Map(Pairs.to(this.enumItems, this.enumItems.map(mapped)))
 	}
 
-	constructor(enumItems: Type[]) {
+	constructor(enumItems: T[]) {
 		this.setItems = new Set(enumItems)
 		this.enumItems = Array.from(this.setItems)
 	}
 }
 
+/**
+ * Concatenates the given `...maps: Map<K, V>[]` using transformation to `Pairs`.
+ * Overrides later repetitions with newer.
+ */
 export class MapConcatenator {
 	static concat<K = any, V = any>(...maps: Map<K, V>[]) {
 		return new Map(

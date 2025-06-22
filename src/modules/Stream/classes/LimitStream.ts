@@ -1,182 +1,228 @@
 import { boolean, type } from "@hgargg-0710/one"
 import { ownerInitializer } from "../../../classes/Initializer.js"
-import type { ILinkedStream, IPosition } from "../../../interfaces/Stream.js"
+import type { ILinkedStream } from "../../../interfaces/Stream.js"
+import { isPredicatePosition } from "../../../utils/Position.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ILimitableStream } from "../interfaces/LimitStream.js"
-import {
-	directionCompare,
-	positionBind,
-	positionEqual,
-	positionNegate
-} from "../utils/Position.js"
-import { DyssyncStream } from "./WrapperStream.js"
+import type { IStreamPosition } from "../interfaces/StreamPosition.js"
+import { bind, direction, equals, negate } from "../utils/StreamPosition.js"
+import { BasicResourceStream } from "./BasicResourceStream.js"
 
 const { isNullary } = type
 const { T } = boolean
 
+interface IStateSettupable {
+	setupState(): void
+}
+
+interface ILimitSetterMethods<T = any> {
+	setDirection(direction: boolean): this
+	setFrom(from: IStreamPosition<T>): this
+	setUntil(until: IStreamPosition<T>): this
+}
+
+type ILimitStreamConsructor<T = any> = new (
+	resource?: ILimitableStream<T>
+) => ILinkedStream<T> & IStateSettupable & ILimitSetterMethods<T>
+
 const limitStreamInitializer = {
-	init(target: _LimitStream, resource?: ILimitableStream) {
+	init(
+		target: ILinkedStream & IStateSettupable,
+		resource?: ILimitableStream
+	) {
 		target.setupState()
 		ownerInitializer.init(target, resource)
 	}
 }
 
-class _LimitStream<Type = any> extends DyssyncStream<Type> {
-	private hasLookahead = false
-	private hasLookbehind = false
+function BuildLimitStream<T = any>() {
+	return class extends BasicResourceStream.generic!<T>() {
+		private hasLookahead = false
+		private hasLookbehind = false
 
-	private lookbehind: Type
-	private lookahead: Type
+		private lookbehind: T
+		private lookahead: T
 
-	private direction: boolean
-	private from: IPosition
-	private until: IPosition
+		private direction: boolean
+		private from: IStreamPosition<T>
+		private until: IStreamPosition<T>
 
-	protected get initializer() {
-		return limitStreamInitializer
-	}
+		private startPos: IStreamPosition<T>
 
-	protected set resource(newResource: ILimitableStream<Type>) {
-		super.resource = newResource
-	}
+		protected get initializer() {
+			return limitStreamInitializer
+		}
 
-	get resource() {
-		return super.resource as ILimitableStream<Type>
-	}
+		protected set resource(newResource: ILimitableStream<T>) {
+			super.resource = newResource
+		}
 
-	private prodForth() {
-		const { hasLookahead, lookahead } = this
-		return hasLookahead ? lookahead : this.prodForthWithoutLookahead()
-	}
+		get resource() {
+			return super.resource as ILimitableStream<T>
+		}
 
-	private prodForthWithoutLookahead() {
-		this.hasLookahead = true
-		super[this.pickForwardDirection()]()
-		return this.curr
-	}
+		private prodForth() {
+			const { hasLookahead, lookahead } = this
+			return hasLookahead ? lookahead : this.prodForthWithoutLookahead()
+		}
 
-	private pickForwardDirection() {
-		return this.direction ? "next" : "prev"
-	}
+		private prodForthWithoutLookahead() {
+			this.hasLookahead = true
+			super[this.pickForwardDirection()]()
+			return this.curr
+		}
 
-	private prodBack() {
-		const { hasLookbehind, lookbehind } = this
-		return hasLookbehind ? lookbehind : this.prodBackWithoutLookbehind()
-	}
+		private pickForwardDirection() {
+			return this.direction ? "next" : "prev"
+		}
 
-	private prodBackWithoutLookbehind() {
-		this.hasLookbehind = true
-		super[this.pickBackwardDirection()]()
-		return this.curr
-	}
+		private prodBack() {
+			const { hasLookbehind, lookbehind } = this
+			return hasLookbehind ? lookbehind : this.prodBackWithoutLookbehind()
+		}
 
-	private pickBackwardDirection() {
-		return this.direction ? "prev" : "next"
-	}
+		private prodBackWithoutLookbehind() {
+			this.hasLookbehind = true
+			super[this.pickBackwardDirection()]()
+			return this.curr
+		}
 
-	private baseNextIter(curr: Type) {
-		this.lookbehind = curr
-		this.hasLookbehind = true
-		this.hasLookahead = false
-		this.syncCurr()
-	}
+		private pickBackwardDirection() {
+			return this.direction ? "prev" : "next"
+		}
 
-	private basePrevIter(curr: Type) {
-		this.lookahead = curr
-		this.hasLookahead = true
-		this.hasLookbehind = false
-		this.syncCurr()
-	}
+		protected baseNextIter(curr: T) {
+			this.lookbehind = curr
+			this.hasLookbehind = true
+			this.hasLookahead = false
+			return this.resource.curr
+		}
 
-	private forgetLastLookahead() {
-		this.hasLookahead = false
-	}
+		protected basePrevIter(curr: T) {
+			this.lookahead = curr
+			this.hasLookahead = true
+			this.hasLookbehind = false
+			return this.resource.curr
+		}
 
-	private forgetLastLookbehind() {
-		this.hasLookbehind = false
-	}
+		private forgetLastLookahead() {
+			this.hasLookahead = false
+		}
 
-	private findStartPos() {
-		navigate(this.resource!, this.from)
-	}
+		private forgetLastLookbehind() {
+			this.hasLookbehind = false
+		}
 
-	setResource(resource: ILimitableStream<Type>) {
-		super.setResource(resource)
-		this.findStartPos()
-		this.syncCurr()
-	}
+		private findStartPos() {
+			const initPos = this.resource.pos
+			navigate(this.resource!, this.from)
+			this.startPos = isPredicatePosition(this.from)
+				? this.from
+				: this.from + initPos
+		}
 
-	setupState() {
-		this.forgetLastLookahead()
-		this.forgetLastLookbehind()
-	}
+		setResource(resource: ILimitableStream<T>) {
+			super.setResource(resource)
+			this.findStartPos()
+			this.syncCurr()
+		}
 
-	isCurrEnd(): boolean {
-		if (super.isCurrEnd()) return true
-		this.lookahead = this.prodForth()
-		return positionEqual(this.resource!, this.until)
-	}
+		setupState() {
+			this.forgetLastLookahead()
+			this.forgetLastLookbehind()
+		}
 
-	isCurrStart(): boolean {
-		if (super.isCurrStart()) return true
-		this.lookbehind = this.prodBack()
-		return positionEqual(this.resource!, this.from)
-	}
+		isCurrEnd(): boolean {
+			if (this.resource.isCurrEnd()) return true
+			this.lookahead = this.prodForth()
+			return equals(this.resource!, this.until)
+		}
 
-	next() {
-		this.isStart = false
-		if (this.isCurrEnd()) this.endStream()
-		else this.baseNextIter(this.curr)
-	}
+		isCurrStart(): boolean {
+			if (this.resource.isCurrStart()) return true
+			this.lookbehind = this.prodBack()
+			return equals(this.resource!, this.startPos)
+		}
 
-	prev() {
-		this.isEnd = false
-		if (this.isCurrStart()) this.startStream()
-		else this.basePrevIter(this.curr)
-	}
+		next() {
+			this.isStart = false
+			if (this.isCurrEnd()) this.endStream()
+			else this.baseNextIter(this.curr)
+		}
 
-	init(resource?: ILimitableStream<Type>) {
-		return super.init(resource)
-	}
+		prev() {
+			this.isEnd = false
+			if (this.isCurrStart()) this.startStream()
+			else this.basePrevIter(this.curr)
+		}
 
-	setFrom(from: IPosition) {
-		this.from = positionBind(this, from)
-		return this
-	}
+		init(resource?: ILimitableStream<T>) {
+			return super.init(resource)
+		}
 
-	setUntil(until: IPosition) {
-		this.until = positionBind(this, until)
-		return this
-	}
+		setFrom(from: IStreamPosition<T>) {
+			this.from = bind(this, from)
+			return this
+		}
 
-	setDirection(direction: boolean) {
-		this.direction = direction
-		return this
-	}
+		setUntil(until: IStreamPosition<T>) {
+			this.until = bind(this, until)
+			return this
+		}
 
-	constructor(resource?: ILimitableStream<Type>) {
-		super(resource)
+		setDirection(direction: boolean) {
+			this.direction = direction
+			return this
+		}
+
+		constructor(resource?: ILimitableStream<T>) {
+			super(resource)
+		}
 	}
 }
 
-export function LimitStream<Type = any>(
-	from: IPosition<Type>,
-	longAs?: IPosition<Type>
+let limitStream: ILimitStreamConsructor | null = null
+
+function PreLimitStream<T = any>(): ILimitStreamConsructor<T> {
+	return limitStream ? limitStream : (limitStream = BuildLimitStream<T>())
+}
+
+/**
+ * This is a function for creation of factories for instances
+ * of `ILinkedStream<T>` interface. These instances accept a
+ * `ILimitableStream<T>`, and return items that fall in between `from`
+ * and `longAs`. They are `IStreamPosition<T>`s, with `from` defining
+ * the "starting point" of the resulting `ILinkedStream<T>`
+ * [more specifically, how-many-steps-before/until-what-condition-is-true],
+ * and `longAs` defining the predicate/number-of-steps to use as an ending.
+ *
+ * By default, if `longAs` is not provided, it has the
+ * value of `from`.
+ *
+ * Important note: if `from` is a negative number - the `.pos` of the
+ * given `ILimitableStream<T>` must (itself) be greater than `from` in its absolute
+ * value.
+ */
+export function LimitStream<T = any>(
+	from: IStreamPosition<T>,
+	longAs?: IStreamPosition<T>
 ) {
 	if (isNullary(longAs)) {
 		longAs = from
 		from = LimitStream.NoMovementPredicate
 	}
 
-	const until = positionNegate(longAs)
-	const direction = directionCompare(from, until)
+	const until = negate(longAs)
+	const goDirection = direction(until)
 
-	return function (resource?: ILimitableStream<Type>): ILinkedStream<Type> {
-		return new _LimitStream()
-			.setDirection(direction)
+	const limitStream = PreLimitStream<T>()
+
+	return function (resource?: ILimitableStream<T>) {
+		return new limitStream()
+			.setDirection(goDirection)
 			.setFrom(from)
 			.setUntil(until)
-			.init(resource)
+			.init(resource) as ILinkedStream<T>
 	}
 }
 

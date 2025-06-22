@@ -8,7 +8,7 @@ export const lookahead = (regexp: RegExp) =>
 	regex(`(?=${regex.contents(regexp)})`)
 
 /**
- * Creates a regular expression containing the `regex_contents`
+ * Creates a regular expression containing the `regexp`
  * inside a negative lookahead
  */
 export const neg_lookahead = (regexp: RegExp) =>

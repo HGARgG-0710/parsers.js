@@ -4,14 +4,20 @@ import type { IPreMap } from "../../interfaces/PreMap.js"
 
 const { isArray } = type
 
-export class ArrayInternal<Type = any, DefaultType = any>
-	implements IPreMap<number, Type, DefaultType>
+/**
+ * This is a class implementing the `IPreMap<number, T, Default>`.
+ * It is a thin wrapper around `Array`.
+ * It is intended to be used by the `HashClass` for the purposes
+ * of defining the hash-operations.
+ */
+export class ArrayInternal<T = any, Default = any>
+	implements IPreMap<number, T, Default>
 {
 	static readonly MissingKey = undefined
 
-	private ["constructor"]: new (array: Type[], _default: DefaultType) => this
+	private ["constructor"]: new (array: T[], _default: Default) => this
 
-	readonly default: DefaultType
+	readonly default: Default
 	private _size: number
 
 	private set size(newSize: number) {
@@ -22,7 +28,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 		return this._size
 	}
 
-	set(i: number, value: Type) {
+	set(i: number, value: T) {
 		if (this.array[i] === ArrayInternal.MissingKey) ++this.size
 		this.array[i] = value
 		return this
@@ -34,7 +40,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 
 	delete(i: number) {
 		if (this.array[i] !== ArrayInternal.MissingKey) {
-			this.array[i] = ArrayInternal.MissingKey as Type
+			this.array[i] = ArrayInternal.MissingKey as T
 			--this.size
 		}
 		return this
@@ -42,7 +48,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 
 	rekey(fromKey: number, toKey: number) {
 		this.array[toKey] = this.array[fromKey]
-		this.array[fromKey] = ArrayInternal.MissingKey as Type
+		this.array[fromKey] = ArrayInternal.MissingKey as T
 		return this
 	}
 
@@ -50,7 +56,7 @@ export class ArrayInternal<Type = any, DefaultType = any>
 		return new this.constructor(array.copy(this.array), this.default)
 	}
 
-	constructor(private array: Type[] = [], _default?: DefaultType) {
+	constructor(private array: T[] = [], _default?: Default) {
 		assert(isArray(array))
 
 		this.default = _default!

@@ -1,57 +1,50 @@
 import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import { HandlerStream } from "../classes/Stream.js"
-import type {
-	IClearable,
-	IFiniteWritable,
-	IPosition,
-	IPushable
-} from "../interfaces.js"
+import type { IClearable, IFiniteWritable, IPushable } from "../interfaces.js"
 import type {
 	IPrevableStream,
 	IRawStream,
 	IStream
 } from "../interfaces/Stream.js"
-import type {
-	IStreamPredicate,
-	IStreamTransform
-} from "../interfaces/StreamHandler.js"
+import type { IStreamTransform } from "../interfaces/StreamHandler.js"
 import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
+import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import {
 	direction,
-	pickDirection,
-	positionNegate
-} from "../modules/Stream/utils/Position.js"
+	negate,
+	pick
+} from "../modules/Stream/utils/StreamPosition.js"
 
 const { isFunction, isNumber } = type
 
 /**
- * Given a `BasicStream`, calls `.next()` on it and returns the result
+ * Given an `IStream<T>`, stores and returns its `.curr`, while calls `.next()` on it.
  */
-export function next<Type = any>(input: IStream<Type>) {
+export function next<T = any>(input: IStream<T>) {
 	const curr = input.curr
 	input.next()
 	return curr
 }
 
 /**
- * Given a `ReversibleStream`, calls its `.prev()` and returns the result
+ * Given an `IPrevableStream<T>`, stores and returns its `.curr`, while calls `.prev()` on it.
  */
-export function prev<Type = any>(input: IPrevableStream<Type>) {
+export function prev<T = any>(input: IPrevableStream<T>) {
 	const curr = input.curr
 	input.prev()
 	return curr
 }
 
 /**
- * Given a `handler` function, returns a function of `input: BasicStream` that
+ * Given a `handler` function, returns a function of `input: IStream<T>` that
  * skips a single stream-element before and after calling the handler.
  * It then proceeds to returns the result of the handler
  */
-export function wrapped<Type = any, OutType = any>(
-	handler: (input: IStream<Type>) => OutType
+export function wrapped<T = any, Out = any>(
+	handler: (input: IStream<T>) => Out
 ) {
-	return function (input: IStream<Type>) {
+	return function (input: IStream<T>) {
 		input.next()
 		const result = handler(input)
 		input.next()
@@ -62,12 +55,12 @@ export function wrapped<Type = any, OutType = any>(
 /**
  * Calls `input.next()`, and returns `SkippedItem`.
  *
- * * Note: particularly useful in combination with `StreamParser`,
+ * * Note: particularly useful in combination with `HandlerStream`,
  * as it allows one to take specific elements of the stream out
  * from the final input
  */
-export function destroy<Type = any>(
-	input: IStream<Type>
+export function destroy<T = any>(
+	input: IStream<T>
 ): typeof HandlerStream.SkippedItem {
 	input.next()
 	return HandlerStream.SkippedItem
@@ -77,78 +70,94 @@ export function destroy<Type = any>(
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip<Type = any>(
-	input: IPrevableStream<Type>,
-	steps: IPosition = 1
+export function skip<T = any>(
+	input: IPrevableStream<T>,
+	steps: IStreamPosition<T> = 1
 ) {
-	return uniNavigate(input, positionNegate(steps))
+	return uniNavigate(input, negate(steps))
 }
 
 /**
- * Collects contigiously the items of `stream` into `init`, starting from `stream.curr`,
- * consuming the items added in the process
+ * Collects the items of `stream` into `result` (via Symbol.iterator),
+ * starting from `stream.curr`, consuming the items added in
+ * the process.
+ *
+ * By default, `result` is an `ArrayCollection<T>`
  */
-export function consume<Type = any>(
-	stream: IStream<Type>,
-	result: IPushable<Type> = new ArrayCollection<Type>()
+export function consume<T = any>(
+	stream: IStream<T>,
+	result: IPushable<T> = new ArrayCollection<T>()
 ) {
-	while (!stream.isEnd) result.push(next(stream))
+	for (const curr of stream) result.push(curr)
 	return result
 }
 
-export function write<Type = any>(
-	stream: IStream<Type>,
-	result: IFiniteWritable<Type>
-) {
+/**
+ * Writes items from `stream` (in order of appearance) into `result`, until either:
+ *
+ * 1. one runs out of `result.size` to write to, or
+ * 2. the `stream` ends
+ *
+ * @returns the `result`
+ */
+export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
 	for (let i = 0; i < result.size && !stream.isEnd; ++i)
 		result.write(i, next(stream))
 	return result
 }
 
-export function consumable<Type = any>(result: IPushable<Type> & IClearable) {
-	return function (stream: IStream<Type>) {
+/**
+ * Returns a function that:
+ *
+ * 1. calls `result.clear()`
+ * 2. returns `consume(stream, result)`
+ *
+ * In other words, it is a way to reuse the exact same
+ * `result` for multiple distinct calls to `consume`.
+ */
+export function consumable<T = any>(result: IPushable<T> & IClearable) {
+	return function (stream: IStream<T>) {
 		result.clear()
-		while (!stream.isEnd) result.push(stream.curr)
-		return result
+		return consume(stream, result)
 	}
 }
 
 /**
- * Navigates up to the desired position on the given `Stream`,
+ * Navigates up to the desired position on the given `IStream<T>`,
  * returns whether the bound corresponding to the direction of iteration
- * has been reached
+ * (`.isStart` or `.isEnd` accordingly) has been reached.
  */
-export function has(pos: IPosition) {
+export function has<T = any>(pos: IStreamPosition<T>) {
 	const stopPoint = direction(pos) ? "isEnd" : "isStart"
-	return function <Type = any>(input: IPrevableStream<Type>) {
+	return function (input: IPrevableStream<T>) {
 		uniNavigate(input, pos)
-		return !input[stopPoint]
+		return input[stopPoint]
 	}
 }
 
 /**
  * Counts the number of items (starting from `stream.curr`),
- * obeying `pred`
+ * obeying `pred`.
  */
-export function count<Type = any>(pred: IStreamPredicate<Type>) {
-	return function (input: IStream<Type>) {
-		let count = 0
-		while (!input.isEnd && pred(input, count)) {
-			++count
-			input.next()
-		}
-		return count
+export function count<T = any>(input: IStream<T>) {
+	let count = 0
+	while (!input.isEnd) {
+		++count
+		input.next()
 	}
+	return count
 }
 
 /**
  * Returns a function that collects the items of `input`
- * into `init`, delimiting them by `delimPred`
+ * into `result`, delimiting them by `delimPred`.
+ *
+ * By default, `result` is an `ArrayCollection<T>`
  */
-export function delimited(delimPred: IPosition) {
-	return function <Type = any>(
-		input: IPrevableStream<Type>,
-		result: IPushable<Type> = new ArrayCollection()
+export function delimited<T = any>(delimPred: IStreamPosition<T>) {
+	return function (
+		input: IPrevableStream<T>,
+		result: IPushable<T> = new ArrayCollection<T>()
 	) {
 		while (!input.isEnd) {
 			skip(input, delimPred)
@@ -161,14 +170,17 @@ export function delimited(delimPred: IPosition) {
 /**
  * Returns a function that collects the results of `map(input, i++)`
  * with running index `i = 0`, starting from `input.curr`, until
- * the moment that `input.isEnd`
+ * the moment that `input.isEnd`.
+ *
+ * Note that the function expects `map` to do the calling of the `.next()`
+ * method, i.e. the function returned is prone to creating infinite loops.
  */
-export function transform<UnderType = any, UpperType = any>(
-	map: IStreamTransform<UnderType, UpperType>
+export function transform<Under = any, Upper = any>(
+	map: IStreamTransform<Under, Upper>
 ) {
 	return function (
-		input: IStream<UnderType>,
-		result: IPushable<UpperType> = new ArrayCollection()
+		input: IStream<Under>,
+		result: IPushable<Upper> = new ArrayCollection()
 	) {
 		let i = 0
 		while (!input.isEnd) result.push(map(input, i++))
@@ -177,9 +189,9 @@ export function transform<UnderType = any, UpperType = any>(
 }
 
 /**
- * Iterates the given `BasicStream` until hitting the end.
+ * Manually iterates the given `IStream<T>` via `.next()` until hitting the end
  */
-export function uniFinish<Type = any>(stream: IStream<Type>) {
+export function uniFinish<T = any>(stream: IStream<T>) {
 	while (!stream.isEnd) stream.next()
 	return stream.curr
 }
@@ -188,44 +200,47 @@ export function uniFinish<Type = any>(stream: IStream<Type>) {
  * Calls and returns `stream.finish()`  if `isFinishable(stream)`,
  * else - `uniFinish(stream)`
  */
-export function finish<Type = any>(stream: IStream<Type>) {
-	return isFinishable<Type>(stream) ? stream.finish() : uniFinish(stream)
+export function finish<T = any>(stream: IStream<T>) {
+	return isFinishable<T>(stream) ? stream.finish() : uniFinish(stream)
 }
 
 /**
  * General implementation of the 'navigate' operation for a given `stream`
- * (note: when available, calling `stream.navigate()` is typically faster);
+ * (note: when available, calling `stream.navigate()` is typically much faster);
  *
- * Provided with a `Stream` and a `Position`, it:
+ * Provided with a `IStream<T>` and an `IStreamPosition<T>`, it:
  *
- * * 1. if the result of the conversion is `number` and it is negative, calls the `stream.prev()` this many times;
- * * 2. if the result of the conversion is `number` and it is positive, calls the `stream.next()` this many times;
- * * 3. if the result of the conversion is `PredicatePosition`, continues to walk the stream until either it is over, or the condition given is met;
+ * 1. if the result is a `number` and it is negative, calls the `stream.prev()` this many times;
+ * 2. if the result is a `number` and it is positive, calls the `stream.next()` this many times;
+ * 3. if the result is an `IStreamPositionPredicate`, continues to walk the stream until either 
+ * it is over, or the condition given is met;
+ *
  * @returns `stream.curr`
  */
-export function uniNavigate<Type = any>(
-	stream: IStream<Type>,
-	position: IPosition<Type>
-): Type {
+export function uniNavigate<T = any>(
+	stream: IStream<T>,
+	position: IStreamPosition<T>
+): T {
 	if (isNumber(position)) {
 		if (position < 0) while (position++) stream.prev!()
 		else while (position--) stream.next()
 	} else {
-		const change = pickDirection(position)
+		const change = pick(position)
 		while (!stream.isEnd && !position(stream))
-			change(stream! as IPrevableStream<Type>)
+			change(stream! as IPrevableStream<T>)
 	}
 
 	return stream.curr
 }
 
 /**
- * If the given `ReversibleStream` is `Navigable`, calls and returns `stream.navigate(position)`,
+ * If the given `IStream<T>` is `INavigable<T>`, 
+ * calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
  */
-export function navigate<Type = any>(
-	stream: IStream<Type>,
-	position: IPosition<Type>
+export function navigate<T = any>(
+	stream: IStream<T>,
+	position: IStreamPosition<T>
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)
@@ -233,11 +248,13 @@ export function navigate<Type = any>(
 }
 
 /**
- * Performs a universal `rewind`ing operaion on the given `ReversibleStream`.
- * Continues to call '.prev()' on the given `Stream`, until `stream.isStart` is true;
+ * Performs a universal `rewind`ing operaion on 
+ * the given `IPrevableStream<T>`.
+ * Continues to call '.prev()' on the given stream, 
+ * until `stream.isStart` is true;
  * @returns `stream.curr`
  */
-export function uniRewind<Type = any>(stream: IPrevableStream<Type>) {
+export function uniRewind<T = any>(stream: IPrevableStream<T>) {
 	while (!stream.isStart) stream.prev()
 	return stream.curr
 }
@@ -245,15 +262,20 @@ export function uniRewind<Type = any>(stream: IPrevableStream<Type>) {
 /**
  * Calls and returns `stream.rewind()` if `isRewindable(stream)`, else - `uniRewind(stream)`
  */
-export function rewind<Type = any>(stream: IStream<Type>): Type {
-	return isRewindable<Type>(stream)
+export function rewind<T = any>(stream: IStream<T>): T {
+	return isRewindable<T>(stream)
 		? stream.rewind()
-		: uniRewind(stream as IPrevableStream<Type>)
+		: uniRewind(stream as IPrevableStream<T>)
 }
 
+/**
+ * Makes a copy of a `rawStream`:
+ * 
+ * 1. if a chooser - returns as-is (copying operation is meaningless)
+ * 2. if an `ILinkedStream` - `rawStream.copy()`
+*/
 export function rawStreamCopy(rawStream: IRawStream) {
-	if (isFunction(rawStream)) return rawStream
-	return rawStream.copy()
+	return isFunction(rawStream) ? rawStream : rawStream.copy()
 }
 
-export * as Position from "../modules/Stream/utils/Position.js"
+export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

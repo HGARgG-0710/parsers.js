@@ -1,9 +1,14 @@
-import { OwningStream } from "./IterableStream.js"
+import { OwningStream } from "./OwningStream.js"
 
+/**
+ * This is an abstract class extending `OwningStream<T, Args>`.
+ * It delegates methods of `.prev()`, `.next()`, `.isCurrStart()`
+ * and `.isCurrEnd()` to `this.resource: IOwnedStream`.
+ */
 export abstract class DelegateStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends OwningStream<Type, Args> {
+	T = any,
+	Args extends any[] = []
+> extends OwningStream<T, Args> {
 	prev() {
 		this.resource!.prev!()
 	}
@@ -18,22 +23,5 @@ export abstract class DelegateStream<
 
 	isCurrEnd() {
 		return this.resource!.isCurrEnd()
-	}
-}
-
-export abstract class SyncStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends DelegateStream<Type, Args> {
-	get curr() {
-		return this.resource!.curr
-	}
-
-	get isEnd() {
-		return this.resource!.isEnd
-	}
-
-	get isStart() {
-		return this.resource!.isStart
 	}
 }

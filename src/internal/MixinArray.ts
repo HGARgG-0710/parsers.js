@@ -1,15 +1,19 @@
-import assert from "assert"
 import { type } from "@hgargg-0710/one"
+import assert from "assert"
 
 const { isArray } = type
 
-export class MixinArray<Type = any> {
-	write(i: number, value: Type) {
+/**
+ * Common simple `Array`-wrapper.
+ * Does not contain an `init` method [type-level encapsulation is in place].
+ */
+export class MixinArray<T = any> {
+	write(i: number, value: T) {
 		this.items[i] = value
 		return this
 	}
 
-	push(...x: Type[]) {
+	push(...x: T[]) {
 		this.items.push(...x)
 		return this
 	}
@@ -27,20 +31,24 @@ export class MixinArray<Type = any> {
 	}
 
 	get() {
-		return this.items as readonly Type[]
+		return this.items as readonly T[]
 	}
 
 	*[Symbol.iterator]() {
 		for (let i = 0; i < this.size; ++i) yield this.read(i)
 	}
 
-	constructor(protected items: Type[] = []) {
+	constructor(protected items: T[] = []) {
 		assert(isArray(items))
 	}
 }
 
-export class InitMixin<Type = any> extends MixinArray<Type> {
-	init(items: Type[]) {
+/**
+ * An extension of `MixinArray` with `.init`.
+ * (Does not respect encapsulation)
+*/
+export class InitMixin<T = any> extends MixinArray<T> {
+	init(items: T[]) {
 		this.items = items
 		return this
 	}

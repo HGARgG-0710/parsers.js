@@ -1,5 +1,9 @@
 import type { IOwnedStream } from "./OwnedStream.js"
 
-export type ISingletonHandler<InType = any, OutType = any> = (
-	resource: IOwnedStream<InType>
-) => OutType
+/**
+ * This is an interface for representing a handler employed 
+ * by the `SingletonStream`. 
+*/
+export type ISingletonHandler<In = any, Out = any> = (
+	resource: IOwnedStream<In>
+) => Out

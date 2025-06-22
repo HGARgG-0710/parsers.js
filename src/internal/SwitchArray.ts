@@ -1,4 +1,6 @@
 import { array, inplace } from "@hgargg-0710/one"
+import { type IRecursiveListIdentifiable, type ISwitchIdentifiable } from "src/interfaces.js"
+import { Initializable } from "../classes/Initializer.js"
 import type { IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import {
@@ -8,11 +10,8 @@ import {
 	renewerInitializer,
 	wrapSwitch,
 	type IRecursiveItems,
-	type IRecursiveListIdentifiable,
-	type IRecursivelySwitchable,
-	type ISwitchIdentifiable
-} from "./RecursiveInitList.js"
-import { Initializable } from "../classes/Initializer.js"
+	type IRecursivelySwitchable
+} from "./RecursiveList.js"
 
 const { first, clear } = array
 const { insert, mutate, out } = inplace
@@ -31,6 +30,12 @@ const switchArrayInitializer = {
 	}
 }
 
+/**
+ * This is a class that encapsulates the `IRecursiveItems`
+ * of the `RecursiveList`, and which is used by the user 
+ * via the `IStreamArray` whenever modifying the internal 
+ * structure of a `DynamicParser`. 
+*/
 export class SwitchArray<
 		T extends ISwitchIdentifiable &
 			IRecursiveListIdentifiable &
@@ -79,12 +84,6 @@ export class SwitchArray<
 
 	protected get initializer() {
 		return switchArrayInitializer
-	}
-
-	raw() {
-		const collected: (T | Recursive)[] = new Array(this.size)
-		this.each((x, i: number) => (collected[i] = x))
-		return collected
 	}
 
 	write(i: number, value: T | Recursive) {

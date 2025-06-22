@@ -1,6 +1,6 @@
 import { boolean } from "@hgargg-0710/one"
 import { BadIndex } from "./constants.js"
-import type { IKeysHaving, IResource, IValuesHaving } from "./interfaces.js"
+import type { IGettable, IResource } from "./interfaces.js"
 
 const { eqcurry } = boolean
 
@@ -19,8 +19,15 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
  */
 export const isDecimal = (x: string) => /^[0-9]+$/.test(x)
 
+/**
+ * Returns whether or not the given `y === "\n"`
+ */
 export const isLF = eqcurry("\n")
 
+/**
+ * Executes and returns `callback(resource)`,
+ * calling `resource.cleanup()` right after.
+ */
 export function withResource<T = any>(
 	resource: IResource,
 	callback: (r: IResource) => T
@@ -31,13 +38,12 @@ export function withResource<T = any>(
 }
 
 /**
- * Returns the pair of `indexMap.keys` and `indexMap.values`
+ * Returns `x.get()`
  */
-export function table<KeyType = any, ValueType = any>(
-	kv: IKeysHaving<KeyType> & IValuesHaving<ValueType>
-): [KeyType[], ValueType[]] {
-	return [kv.keys, kv.values]
+export function get<T = any>(x: IGettable<T>) {
+	return x.get()
 }
 
 export * as Node from "./utils/Node.js"
+export * as Position from "./utils/Position.js"
 export * as Stream from "./utils/Stream.js"

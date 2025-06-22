@@ -9,120 +9,94 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
 
+IMMIDIATE [first - order 'import's, then - do 'docs']: 			
+	TODO: modify the tests: 
+		1. add a `constructor() {...}` test now...
+		2. fix the `constructor: function` thingies... [not as readable...]; 
+
+	TODO: Final Task Order
+		1. finish jsdoc
+		2. tests [possibly - with finalization, if new redundancies are found]
+			1. also - some minor todo completion [those that cause bugs, more specifically...]; 
+		3. wiki
+		4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+
+	TODO: Docs [initial, new, final]
+		Documentation order: 
+			1. write jsdoc [reason - faster this way...]: 
+				Brief descriptions. 
+				Present for all `export`ed abstractions [including types and classes]. 
+				
+				16. utils.ts
+			2. fix wiki [add new stuff, delete old]
+				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
+					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
+					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
+						and 
+				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
+					ONLY on public classes [exports]
+					
+				3. add SPECIAL pages for `IStream`: 
+					1. on mixins and "annotation" classes
+						1. on differences between the JS and TS APIs, specifically
+					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
+					3. on the HIERARCHY [make an image via 'Excalidraw']
+
+		1. Ensure that ALL the exports are AS-DESIRED (relevant)
+			Finalize the library exports, that is
+		2. Ensure NOTHING is missing from the wiki: 
+			1. utils
+			2. interfaces
+			3. classes
+			4. permalinks
+			5. self-referencing: 	
+				1. provide links to interfaces for class pages
+				2. provide links ot implementations for interfaces to interface pages
+		3. finish the JSDoc
+			1. change/update old
+			2. ADD FOR: 
+				1. classes
+				2. ALL public exports
+					IF a 'util' - a proper short function description. 
+					IF a 'class/interface/related' - a brief description + a link ot the wiki
+
+		[later]
+		4. Finalization: 
+			1. piece-by-piece DOCUMENT any new exports: 
+				1. finished `samples` 
+				2. the `.annotation`s [leave them undocumented for the moment...]
+				3. Regex, TokenizerStream, ...
+
 NEXT UP:
-	1. [FIXED ORDER - prior to all else] re-thinking `IStream`:
-		1. Test `mixin` submodule [BEFORE ALL ELSE - a basic sanity check]
-		2. create the appropriate library `mixin` objects for representing different types of IStream-s
-			1. MAKE those PUBLIC [the `mixin` objects, NOT their `.toClass()` call results]
-			2. Let there be classes based off them [the ACTUAL `.toClass()` calls - THOSE aren't supposed to be extended]
-
-	PROBLEM: the library's system for employing classes has... 
-		Become unwieldy and problematic.
-		Gone through the roof. 
-		Failed.
-		Reason being - this solution REALLY calls for mixins, and the place that screams about it 
-			the most is the intersection of `DyssyncStream` (which requires, not to duplicate the `copy` method), 
-				for `WrapperStream` to come BEFORE `SyncStream`, whereas the `ParseStream` requires THE OPPOSITE
-					(since `copy` methods are CONTRACT-BINDING [the `['constructor']` property] whereas `SyncStream` IS NOT). 
-
-		CONCLUSION: we need to reimplement the way that `IStream` impelementations are structured... 
-			One needs to (manually) implement mixins. 
-			And NOT through the `mixin` function (which is supposed to work primarily of off prototypes). 
-			
-		SOLUTION: 
-			1. let there be a new library entity `IMixin` - it's an interface, of a given `Type` [basically, an alias for `Partial`]
-				1. It'll be used for semantic typing. 
-				2. reason to not use something like https://www.npmjs.com/package/mixin
-					is - these "JS-native" solutions don't appear to be particularly TypeScript-friendly
-
-			2. create `IMixin<IStream>` objects, with METHODS on them
-				Directly created from the current `abstract class`es
-				Let they remain UNTYPED in terms of generic arguments.
-
-			3. create a `mixin.merge` function
-				1. for a given `n` "mixin objects" (prototypes), one (literally) "combines" them 
-					via `protoMixin`: 
-						1. ADD `protoMixin` to `one.js`; It is (almost) like a call to `mixin` except it DOESN'T 
-							operate on `class`es. Instead, it works on bare objects [prototype]. 
-
-							That is, like in `mixin`, but it: 
-								1. doesn't access `Extended.prototype`
-								2. uses `propsDefine` instead of `extendPrototype`
-						2. it SHOULD originate as a simple LOCAL function, BASED off `one.js`
-
-			4. create a `mixin.from` function, which creates a CLASS, using the given object as a prototype
-				1. This is (basically) a solution to "pre-process" classes before actually using them in their "ultimate form". 
-				2. LET `fromMixin` be called ONLY on the "sealed class"es
-
-			5. RELOCATE the `IMixin`, `mixin.merge` and `mixin.from` into a new `npm` project - `mixin.ts`: 
-				1. reason - it's outside the library's scope
-				2. relocate it WHILE WORKING ON THE v0.3
-
-				3. this means: 
-					1. one has to have tests for it INSIDE the `parsers.js` library
-					2. THEN - one refactors it OUT OF IT, having the tests pass as needed...
-					3. make it a dependency of `parsers.js`
-
-				4. FINALLY, the functions/interfaces of `mixin.ts` should ACTUALLY be exported from `parsers.js` [in a `mixin` submodule]
-					Reason - the library USES IT to provide the user with the ability to extend itself, 
-						and THEREFORE, it isn't (particularly) fair for such usage to have to occurr...
-			
-
-	TODO: remove the `DyssyncStream`, `DyssyncForwardStream` and `ResourceStream`:
-		REASON: 
-			These serve as mixins. 
-			TypeScript DOESN'T SUPPORT mixins (not properly). 
-
-		CONCLUSION: 
-			Replace them with (appropriate) delegates. 
-			To PROPERLY implement mixins for these children classes, see the note below...
-
-		ALSO; 
-			1. about 'DyssyncStream' mixin-class [parent for `PeekStream` and `FilterStream`]: 
-				SPLIT the `DelegateStream` and `DyssyncStream` [old] onto 3 classes: 
-					3. DyssyncStream - no delegates, contains "live" no-accessor properties
-						THIS ONE is a 'mixin' of `DelegateStream` and `SolidStream`. 
-						Built same way as the below example of a 'mixin-class'; 
-						Treated as a `DyssyncStream` 
-						NOTE[1]: the `syncCurr` is RETAINED upon the `DyssyncStream`
-						NOTE[2]: *try* to implement this WITHOUT needing a delegate class, 
-							that is - `extend` FROM `DelegateStream`, return WITHOUT casting [important - this way, `protected` properties can remain], 
-								and use the `MaskStream` via `mixin(...)`; 
-
-			2. about [new] ResourceStream - [new] 'DyssyncStream' & 'BasicStream' mixin-class [parent for LimitStream and HandlerStream]: 
-				REPLACE the `DyssyncForwardStream`, `DyssyncForwardStream` and `ResourceStream` with THIS 
-					NEW 'mixin'-based class
-
-				create a new `mixin`-class [called `ResourceStream`], for creating abstract classes 
-					that inherit from BOTH `DelegateStream` AND `BasicStream` 
-						[in that order - that is, BasicStream OVERRIDES the thing in question]. 
-
-				ALSO, let `HandlerStream` inherit from it as well
-				
-				Created like:
-					1. exopted class [NO EXPLICIT CAST]
-					2. inherit from `BasicStream` via `extend`
-						1. CRUCIAL: add a declarations: 
-							
-							1. `protected syncCurr: (...) => ...`
-							2. `resource?: IOwnedStream`...
-
-							This, fundamentally, allows one to retain all the type-stuff of `DyssyncStream`
-								AS WELL!
-					3. use `mixin(DyssyncStream)`
-				
-				Likewise, the 'BasicStream' "framework" methods WILL BE AVAILABLE!
-				The most important part is that it shall have the: 
-					1. methods [BasicStream]: 
-						1. endStream (protected)
-						2. startStream (protected)
-				
 	TODO: `.copy()`-fixing [IStream-implementations]: 
-		1. fix the `.copy()` methods' implementations that employ the 
-			`.set*`-methods/custom initializers
+		1. fix the `.copy()` methods' implementations that employ the `.set*`-methods/custom initializers
 			
 			2. BasicStream
 			3. CompositeStream
+				BIIIG "maybe???". 
+				Reasons to implement: 
+					1. would open FAR more complex tests to one
+						Although... technically...
+							one could solve it more simply by: 
+								1. providing the "basic" and "extended" (for CompositeStream, with user-predicate) `[Symbol.iterator]` tests
+								2. [more generally] provide custom '.inState(assertionPred)' tests with custom user-assertions [for a given state???]
+									This could be a very good idea
+									One STILL isolates the state, BUT, ALSO - allows to *PRESERVE IT* like:
+
+										someClassTest.withInstance(instance, (test) => {
+											test.methodName(...).inState((test) => {
+												test.methodName1(...) // asserts
+												test.methodName2(...) // asserts
+												...
+												assert(...)
+											})
+										})
+					2. cleaner
+
+				Reasons NOT to implement: 
+					1. insanely complex
+					2. could negatively affect performance
+
 			4. ConcatStream
 			5. DelegateStream
 			6. DepthStream
@@ -146,80 +120,45 @@ NEXT UP:
 			24. TrivialStream
 			25. WrapperStream
 			26. WriterStream
-			
-	TODO: about `.resource`
-		1. LET the "default" value be NOT 'undefined', but 'null'
-		2. IN GENERAL, for all the "optional" properties, LET their properties' default 
-			value be `null`. 
-			Reasons: 
-				1. performance [jit] - property existing on-creation
-				2. code simplicity/predictability [only ONE type of "missing property"]
-				3. CREATE a new constant - `EmptyProperty = null`
-					Let it be employed as the default for OBJECT-VALUED [nullable] fields
+				
+	TODO: [IStream 'mixin's] FIX the `mixin`s that INHERIT other mixins/classes, to USE 'this.super.constructor' MANUALLY!!!
+		One cannot stress this enough. 
+		Some don't need it. 
+		Some do. 
+		Either way, WHENEVER this is necessary - one MUST make this explicit...
 
-	TODO: Generic-parameters - STYLE-CHANGE: `Type -> T`. 
-		Reason - simplicity of names...
-		WALK: 
-			1. through classes/ files
-			2. through internal/ files
-			3. through interfaces/ files
-			4. through utils/ files
+	TODO: in alll the `mixin`s - FIX THE (old) `super` calls!!! 
+		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
 
-	TODO: about the `PropDigger` - useless for most "real" scenarios:
-		1. it's pretty good for fixed sizes, but is (ultimately) useless when it comes to dynamic ones 
-			(such as with `chooser`s), since we never know just how deep the desired item lies 
-				[could be 5 levels, could be a 100 - depends on the input]. 
-			To become useful (say, finding the first underlying "MarkedStream" via `.resource/owner`), 
-				one must allow PREDICATES as well as numbers with it. 
-			
-		2. SOLUTION: 
-			1. LET `IPosition` become a PROJECT-LEVEL module, 
-				with `IPosition` becoming more general (allows non-`IStream`-arguments now for predicates),
-					and the `IStreamPosition` becoming what the OLD `IPosition` once was
-			2. ACCEPT an `IPosition<T>` for a `PropDigger<T>`
+	TODO: about `annotation`s. 
+		CHANGE them so that boilerplate due to mixins is MINIMIZED. 
+		Let *most* influential ones be inherited INSTEAD, and others be copied. 
+		[Walk through all of them - fix this...]; 
 
-	Tests [todo]: 
-		1. SOMEHOW automate the whole ".map file generation" procedure: 
-			1. create test-SPECIFIC commands and files: 
-				1. TEST-SPECIFIC `tsconfig.json` [for src/]
-					1. distinct from the current one 
-				2. CHANGE the `sourceMap` to `true` PERMANENTLY on the `tests` directory's `tsconfig.json` 
-				3. a `test_all_compile.cmd` command [run by the npm script]: 
-					0. kept inside scripts/ directory
-					1. clears away the out/ directory for `tests/`
-					2. clears away the dist/ directory for `src/`
-					3. runs the `npm run test-build`
-						1. new command - for using the `sourceMap`-positive config with the `src/` build 
-					4. runs the `npm run test`
+	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
+		and NOT `function () {}`
 
-		2. replace the old "npm run all" command with this instead ... [`scripts/test_all_compile.cmd`]
-					
-CURRENT TODOS:		
-	TODO: order imports [Shift + Alt + O]
+		OR [yes - do that instead...]: 
+			TODO: 'mixin' module (`sealed` class): 
+				1. ALLOW setting `constructor` WITHOUT needing a prototype. 
+					In such cases, CREATE a prototype, via the `constructor = {}` INSIDE the `sealed_mixin`
+						class...
 
-	TODO: Docs
-		BEFORE YOU DO THAT: 
-			1. finish the `samples`
-			2. decide the ultimate fate of `utils`
-		
-		1. Ensure that ALL the exports are AS-DESIRED (relevant)
-			Finalize the library exports, that is
-		2. Ensure NOTHING is missing from the wiki: 
-			1. utils
-			2. interfaces
-			3. classes
-			4. permalinks
-			5. self-referencing: 	
-				1. provide links to interfaces for class pages
-				2. provide links ot implementations for interfaces to interface pages
-		3. finish the JSDoc
-			1. change/update old
-			2. ADD FOR: 
-				1. classes
-				2. ALL public exports
-					IF a 'util' - a proper short function description. 
-					IF a 'class/interface/related' - a brief description + a link ot the wiki
+				AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
 
+	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
+
+	TODO: on `let smallCaseStream: ... = PreStreamName(...); .generic = ...`; 
+		REPLACE THESE in places where you use the FACTORIES instead with `const localSmallCaseName = BuildSomeStreamName<T>(...)`
+		Reasons:
+			1. less boilerplate [ergo - simpler code]
+			2. same typing
+
+		THIS GOES FOR '_SomeName' AS WELL: 
+			1. HandlerStream
+			... OTHERS [walk through the project - FIND ITHEM...]
+
+CURRENT TODOS [top-down order...]:		
 	TODO: Tests
 		BEFORE YOU DO THAT: 	
 			1. finish the docs [COMPLETELY!]
@@ -253,9 +192,39 @@ MINOR TODOS:
 		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
 			since the user will (likely) want to be using the MapClass for their own goals. 
 
+	TODO: [`mixin-IStream`] MAKE the (remaining) `Annotation` classes *INTO EXPORTS*
+		Also - MAKE them part of the NAMESPACES that are the "main" export-functions. 
+		[Let they be available under `.annotation`, SAME WAY as `.generic`]
+		Reasons: 
+			1. the user MIGHT want to use them for their own (technically legal) TypeScript-machination purposes
+			2. some annotations are REQUIRED by other annotations...
+			3. [main reason] too much work moving them to /internal
+
 	TODO: simplify the `MapClass` code. 
 		Specifically, all the excessive `.prototype` manipulations. 
 		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
+		
+	TODO: ENSURE that ALL THE EXPORTS ARE ON THE SPOT [this particualrly applies to IStream - LOTS of new classes has been added...]; 
+	
+	TODO: [IStream] regarding the `.generic!`...
+		REMOVE, replace with just `.generic` [i.e. A NON-NULL PROPERTY is what is must be...]; 
+
+	TODO: [IStream] ENSURE that the `Args` generic arg [in `Stream` module] IS NOT 'any[]', but '[]' BY DEFAULT!!!
+
+	TODO [docs]:
+		ADD a GUIDE on how to CORRECTLY inherit the `Stream` classes [TS-only].
+
+		Reason: 
+			1. the library is written in TypeScript, so PROPER inheritance [with generics] must work well!
+			2. JavaScript-usage has no use for this insanity
+			3. TS-support is good!
+
+	TODO: ENSURE the 'Args | []' THING in ALL the `IStream`-implementing classes...
+
+	TODO [docs]: make a NOTE that the library is a PRIMARILY JavaScript API!
+		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
+			for being JS-native [id est - being "natural", without forcing patterns
+				from "conservative" OOP languages, such as Java]
 	
 LATER TODOS: 		
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
@@ -264,6 +233,14 @@ LATER TODOS:
 			2. SAFER GENERIC TYPES!
 		NOTE: *do not* do it everywhere. 
 			Reason - may break some code. 	
+			
+	TODO: TRANSFORM "excessive" 'mixin's INTO `abstract class`es
+		These: 
+			1. are convertible to ordinary/abstract classes
+			2. have 0-1 parents
+			3. very unlikely to change
+
+		POST-TODO: later - FIND NEW ONES... [if any]
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
 		0. DO TDD [since tests will now be more-or-less established...]; 
@@ -317,8 +294,6 @@ LATER TODOS:
 					})
 
 			TODO [maybe?]: create
-				1. `TestCounter` class
-					for *counting* tests-being-run within the given test suite
 				2. `TestChain` class, 
 					which has an internal `TestCounter`, 
 						has a `handler` function, and 
@@ -326,8 +301,6 @@ LATER TODOS:
 								supplied to the `handler`
 
 				USE the `TestChain` to express the chains of tests thusly. 
-
-			2. remove the old `lib.ts` (make current `_lib.ts` into the new `lib.ts`); 
 				
 	TODO: OPTIMIZING `TypeScript` property definitions on classes: 
 			When [in TypeScript], one does: 
@@ -817,6 +790,17 @@ LATER TODOS:
 		Squash all the others + change the respective commit messages; 
 		[do this via `git rebase -i` + `git push --force`]
 
+	BEFORE WE LEAVE [vital]: 		
+		TODO: JIRA for v0.4
+			WHEN you do the FINAL 'git rebase -i' of the thing, 
+				remove all the *old* `todos.txt` files (to make the repo seem presentable). 
+		
+			Let the *new* notes for v0.4 now be inside of:
+				1. JIRA 
+				2. `GitHub Projects` [as a backup only...]
+		
+	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
+
 	TODO: WRITE the CHANGELOG
 	
 [v0.4]
@@ -1047,6 +1031,12 @@ TODO:
 		CU1. Add a 'binarySearch' utility: 
 			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
 			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+		MC1. MapClass: fix types
+			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
+			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
+			The inner key type matters during construction, but the outer key type matters during other usage. 
+			Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
 								
 	3. Unrelated/separate module/grand refactoring: 		
 		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
@@ -1129,6 +1119,20 @@ TODO:
 
 			Add a Guide for that.
 
+		WTJD1. Combined note on self-references
+			1. add wiki references: 
+				1. to jsdoc
+					Now, the wiki (which is still just a glorified version of jsdoc), 
+						will also be given references to by the JSDoc [user no longer has to search for it themselves]. 
+				2. into wiki [self-references]
+			2. complete jsdoc: 
+				1. for classes: 
+					1. add documentation ON A PER-METHOD basis
+						[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
+					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+						Must be synced with `wiki`. 
+						LET the `public/protected` docs for these methods be THE SAME. 
+
 	5. Testing: 
 		1. introduce mocks [use Jest]
 			Reason: complexity. 
@@ -1166,6 +1170,22 @@ FUTURE:
 		3. `serializable`: 
 			1. `ISerializable` interface
 			2. `ISerializableObject` interface
+		
+		4. 'mixin.ts': 
+			1. a new package - the 'mixin' module here
+				It should be USED IN `parsers.js` as BOTH: 
+					1. a dependency
+					2. a re-export [since there are mixins CURRENTLY exported]
+
+		5. `object_pool`: 
+			This is the `ObjectPool` (and `IInitializable` interface) class. 
+			It is far too independent to be just left here. 
+			Far too useful to be allowed to be "herded" together with the domain-specific 
+			stuff. 
+
+			'FreeStream' REMAINS PART OF `parsers.js`
+
+			Export this from here as a dependency. 
 
 	2. [maybe? later, definitely] A Java rewrite: 
 		the project is a very fine one, a very fine one indeed... 

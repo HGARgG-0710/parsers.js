@@ -1,74 +1,48 @@
+import { mixin } from "../../../mixin.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
-import { SyncStream } from "./DelegateStream.js"
+import { AttachedStream, AttachedStreamAnnotation } from "./AttachedStream.js"
+import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 
-export abstract class WrapperStream<Type = any, Args extends any[] = any[]>
-	extends SyncStream<Type, Args>
-	implements IOwnedStream<Type>
-{
-	protected ["constructor"]: new (resource?: IOwnedStream<Type>) => this
+export abstract class WrapperStreamAnnotation<
+	T = any,
+	Args extends any[] = []
+> extends AttachedStreamAnnotation<T, Args> {
+	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
-	copy() {
-		return new this.constructor(this.resource?.copy())
-	}
-
-	constructor(resource?: IOwnedStream<Type>) {
-		super(resource)
+	copy(): this {
+		return this
 	}
 }
 
-export abstract class DyssyncForwardStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends WrapperStream<Type, Args> {
-	protected _isEnd: boolean = false
-	protected _curr: Type
+const WrapperStreamMixin = new mixin<IOwnedStream>(
+	{
+		name: "WrapperStream",
+		properties: {},
+		constructor: function (resource?: IOwnedStream) {
+			this.super.AttachedStream.constructor.call(this, resource)
+		}
+	},
+	[ResourceCopyingStream],
+	[AttachedStream]
+)
 
-	protected syncCurr() {
-		this.curr = this.resource!.curr
-	}
-
-	protected set isEnd(newIsEnd: boolean) {
-		this._isEnd = newIsEnd
-	}
-
-	protected set curr(newCurr: Type) {
-		this._curr = newCurr
-	}
-
-	get isEnd() {
-		return this._isEnd
-	}
-
-	get curr() {
-		return this._curr
-	}
-
-	protected endStream() {
-		this.isEnd = true
-	}
+function PreWrapperStream<T = any, Args extends any[] = any[]>() {
+	return WrapperStreamMixin.toClass() as typeof WrapperStreamAnnotation<
+		T,
+		Args
+	>
 }
 
-export abstract class DyssyncStream<
-	Type = any,
-	Args extends any[] = any[]
-> extends DyssyncForwardStream<Type, Args> {
-	protected _isStart: boolean = true
+/**
+ * This is a mixin of:
+ *
+ * 1. `ResourceCopyingStream`
+ * 2. `AttachedStream`
+ *
+ * It uses the constructor of `AttachedStream`.
+ */
+export const WrapperStream: ReturnType<typeof PreWrapperStream> & {
+	generic?: typeof PreWrapperStream
+} = PreWrapperStream()
 
-	protected set isStart(newIsStart: boolean) {
-		this._isStart = newIsStart
-	}
-
-	get isStart() {
-		return this._isStart
-	}
-
-	protected startStream() {
-		this.isStart = true
-		this.isEnd = false
-	}
-
-	protected endStream(): void {
-		super.endStream()
-		this.isStart = false
-	}
-}
+WrapperStream.generic = PreWrapperStream

@@ -1,12 +1,19 @@
+import { MultiIndex } from "../classes/Position.js"
 import type { IWalkable } from "../interfaces/Node.js"
-import { MultiIndex } from "../modules/Stream/classes/Position.js"
 import { hasChildren, treeEndPath } from "../utils/Node.js"
 
+/**
+ * This is the class responsible for providing the `DepthStream`
+ * tree-iteration algorithm with its elementary operations. It 
+ * is used as an internal implementation detail, and can be used 
+ * to implement other tree-iteration algorithms.  
+*/
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
+	public readonly pos = new MultiIndex()
+
 	private _curr: TreeLike
 	private level: TreeLike
 	private walkable?: TreeLike
-	private multind: MultiIndex = new MultiIndex()
 
 	private set curr(newCurr: TreeLike) {
 		this._curr = newCurr
@@ -14,10 +21,6 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	get curr() {
 		return this._curr
-	}
-
-	get pos() {
-		return this.multind
 	}
 
 	getCurrChild() {
@@ -30,13 +33,13 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	pushFirstChild() {
-		this.multind.nextLevel()
+		this.pos.nextLevel()
 		this.level = this.curr
 		this.getCurrChild()
 	}
 
 	popChild() {
-		this.multind.prevLevel()
+		this.pos.prevLevel()
 		this.curr = this.level
 		this.levelUp()
 	}
@@ -50,17 +53,17 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	goSiblingAfter() {
-		this.multind.incLast()
+		this.pos.incLast()
 		this.getCurrChild()
 	}
 
 	goSiblingBefore() {
-		this.multind.decLast()
+		this.pos.decLast()
 		this.getCurrChild()
 	}
 
 	indexCut(length: number) {
-		this.multind.resize(length)
+		this.pos.resize(length)
 		this.levelUp()
 		this.getCurrChild()
 	}
@@ -89,7 +92,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	goPrevLast() {
 		this.goSiblingBefore()
 		const initLength = this.pos.levels
-		this.multind.extend(this.currentLastIndex())
+		this.pos.extend(this.currentLastIndex())
 		this.renewLevel(this.curr, initLength)
 	}
 
@@ -99,17 +102,17 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	restart() {
 		this.curr = this.level = this.walkable!
-		this.multind.clear()
+		this.pos.clear()
 	}
 
 	goIndex(pos?: MultiIndex) {
-		if (pos) this.multind.from(pos)
+		if (pos) this.pos.from(pos)
 		this.curr = this.walkable!.index(this.pos.get())
 		this.levelUp()
 	}
 
 	init(walkable: TreeLike) {
-		this.multind.clear()
+		this.pos.clear()
 		this.level = this.walkable = walkable
 		return this
 	}

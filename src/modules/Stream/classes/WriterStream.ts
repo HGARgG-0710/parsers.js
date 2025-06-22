@@ -1,8 +1,15 @@
 import type { IDestination } from "../../../interfaces.js"
 import { WrapperStream } from "./WrapperStream.js"
 
-// * IMPORTANT NOTE [pre-doc]: the `.writeTo` MUST BE made BEFORE any other calls to the object [immidiately after the constructor]
-export class WriterStream extends WrapperStream<string> {
+/**
+ * This is a class extending `WrapperStream<T>`.
+ * In particular, it is a class that expects to write whatever comes
+ * out of its `.resource: IOwnedStream<string>` into its
+ * `.private desination: IDestination`, settable via the public
+ * `.writeTo(destination: IDestination): this` method, which
+ * __must__ be called before any future attempts to call `.next()`.
+ */
+export class WriterStream extends WrapperStream.generic!<string>() {
 	private destination: IDestination
 
 	private write(input: string) {
@@ -11,6 +18,7 @@ export class WriterStream extends WrapperStream<string> {
 
 	writeTo(destination: IDestination) {
 		this.destination = destination
+		return this
 	}
 
 	next() {
