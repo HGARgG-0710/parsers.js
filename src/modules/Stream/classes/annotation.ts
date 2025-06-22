@@ -14,7 +14,6 @@ import type { IInitializable, IStream } from "../../../interfaces.js"
  * deriving annotation class will implement the `IStream<T>`
  * and `IInitializable<Args>` interfaces
  */
-
 export abstract class annotation<T = any, Args extends any[] = any[]>
 	implements IStream<T>, IInitializable<Args>
 {

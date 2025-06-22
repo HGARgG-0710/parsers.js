@@ -1,8 +1,5 @@
-import { array, type } from "@hgargg-0710/one"
-import assert from "assert"
+import { array } from "@hgargg-0710/one"
 import type { IPersistentAccumulator } from "../interfaces.js"
-
-const { isArray } = type
 
 /**
  * A buffer-like class serving as the output for the `FreezableStream<T>`.
@@ -10,6 +7,8 @@ const { isArray } = type
  */
 export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
 	private ["constructor"]: new (collection?: T[]) => this
+
+	private readonly collection: T[] = []
 
 	private _isFrozen: boolean = false
 
@@ -50,9 +49,5 @@ export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
 
 	get size() {
 		return this.collection!.length
-	}
-
-	constructor(private readonly collection: T[] = []) {
-		assert(isArray(collection))
 	}
 }

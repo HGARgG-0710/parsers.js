@@ -8,64 +8,179 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	4. the "leftovers" for v0.3 - this is definitely getting done, and definitely done last - before the publishing
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
+	
+REMINDER: Final Task Order
+	2. tests [possibly - with finalization, if new redundancies are found]
+		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
+	3. wiki
+	4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+
+Testing order: 
+	1. /internal
+	2. all else
 
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
-	TODO: modify the tests: 
-		1. add a `constructor() {...}` test now...
-		2. fix the `constructor: function` thingies... [not as readable...]; 
 
-	TODO: Final Task Order
-		1. finish jsdoc
-		2. tests [possibly - with finalization, if new redundancies are found]
-			1. also - some minor todo completion [those that cause bugs, more specifically...]; 
-		3. wiki
-		4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+	TODO: classes from /internal to test: 
+		1. Enum
+		2. OutputBuffer
+		3. ReadableView: 
+			1. USE A MOCK HERE (`IReadable`)
+		4. StreamList
+		5. Switch [from RecursiveList.ts]
+		6. SwitchArray: 
+			1. USE A MOCK HERE (`RecursiveRenewer`)
+		7. TableMap
+		8. TreeWalker: 
+			1. USE A MOCK HERE (`TreeLike`)
 
-	TODO: Docs [initial, new, final]
-		Documentation order: 
-			1. write jsdoc [reason - faster this way...]: 
-				Brief descriptions. 
-				Present for all `export`ed abstractions [including types and classes]. 
-				
-				16. utils.ts
-			2. fix wiki [add new stuff, delete old]
-				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
-					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
-					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
-						and 
-				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
-					ONLY on public classes [exports]
-					
-				3. add SPECIAL pages for `IStream`: 
-					1. on mixins and "annotation" classes
-						1. on differences between the JS and TS APIs, specifically
-					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
-					3. on the HIERARCHY [make an image via 'Excalidraw']
+	TODO: public classes/functions/utils/etc to be tested: 
+		1. `ArrayCollection`
+		2. `Autocache`: 
+			1. USE A MOCK HERE! [ISettable & IIndexable]
+		3. `Decoder8`, `Decoder16`, `DecoderU8`, `DecoderU16LE`: 
+			1. DO NOT use mocks - instead, create REAL FILES [encoded appropriately]
+		4. `WritingDestination`: 
+			1. DO NOT use mocks - instead, utilize ACTUAL `IEncoder` classes from the library. 
+			2. Use only 2 different classes' implementations - assume that this is equivalent 
+				to it being sufficient. REASON not to use mocks - very hard to do here, since 
+					that would (in essence) demand one to actually re-implement one of the 
+						already present `IEncoder`-implementing classes of the library (since
+							the encoder must be A WORKING ENCODER). 
+			3. TEST `IEncoder` classes BEFORE TESTING THIS
+		5. `WritingDestination.manager`: 
+			1. This is tested DESPITE `ResourceManager` being tested as well
+			2. Use REAL-LIFE files with this thing
+		6. `DynamicParser`: 
+			0. Do ONLY once `TokenStream` and `Regex` has been finished and tested
+			1. Test ONLY as a part of "demo"-testing: 
+				1. +/-, () and [a-zA-Z]-variables (no self-modification)
+				2. A Self-mofidying parser
+			2. This is an *INTEGRATION TEST*
+		7. `Encoder8`, `Encoder16`, `EncoderU8`, `EncoderU16`
+		8. `BasicHash`, 
+			`LengthHash`, 
+			`TokenHash`, 
+			`TypeofHash`, 
+			`CharHash`: 
+				1. Test each independently
+				2. Test ONLY AFTER `IPreMap`s
+				3. Use DIFFERENT `IPreMap`s for each case
+				4. DO NOT MOCK! [use real `IPreMap`s instead]: 
+					reason - as always, too simple
+					this would require re-implementing A LOT of stuff for no good reason...
+		9. `IndexMap.ts` stuff: 
+			1. The functions - test each one
+			2. Each one should be given a SINGLE case of an `IMapClass/whatever` to work on
+			3. Each one given SHOULD BE REAL!!! [no mocks]
+		10. `LoadedU8`, `LoadedU16`, `Loaded8`, `Loaded16`: 
+			1. Use real files
+			2. NO MOCKS
+		11. `TokenNode`, `ContentNode`, `RecursiveNode`: 
+			1. Use each one with a 'string/number/boolean' '.type': 
+				1. create several instances for each one created class
+				2. they should handle edge (if any) cases and generic behaviour
+			2. type `T` of '.type: T' should be different each time
+			3. CHECK FOR MEMORY-SAVINGS [`.prototype.type` and NOT `this.type`!!!]
+		12. `NodeSystem`:
+			1. Use `samples.Nodes.PlainNodes` for this test
+			2. NO MOCKS
+			3. Test ONLY after the `TokenNode`, `ContentNode`, `RecursiveNode` have already been
+		13. `ObjectPool`: 
+			1. Create a mock class
+			2. Use `ObjectPool(MockClass)` on it
+			3. Create some instances - test it...
+		14. `ParseableInput`
+		15. `TypedPoolKeeper`
+		16. `PropDigger`: 
+			1. `ownerDigger`: 
+				1. on an `IStream`
+				2. ONLY AFTER an `ILinkedStream` has been tested
+			2. `resourceDigger`: 
+				1. on an `IStream`
+				2. ONLY AFTER an `ILinkedStream` has been tested
+			3. The class itself - TEST IT ALSO
+		17. `ResourceManager`: 
+			1. USE MOCKS FOR THIS ONE!
+		18. `RetainedArray`
+		19. `ReadingSource`: 
+			1. Use real files
+			2. DO NOT use mocks for `IDecoder` - use real ones: 
+				1. 2 classes, specifically
+		20. `ReadingSource.manager`: 
+			1. Test this also, DESPITE `ResourceManager` tests
+		21. `SourceBuilder`
+		22. `TableHandler`, `WrapHandler`: 
+			1. Test this NO SOONER than the respective `indexable`s
+			2. Use REAL `IIndexable`s of the library: 
+				1. MapClass-based
+				2. ModifiableMap
+		23. `aliases/`	- test everything
+		24. `utils/` - test everything
+		25. `is/` - test everything
+		26. `aliases.ts` - test everything
+		27. `constants.ts`: 
+				1. THESE HAVE SEMANTIC MEANING!
+					1. `MissingArgument` is supposed to be behaving like `undefined` ALWAYS
+					2. `isGoodIndex(BadIndex) === false`, `isGoodIndex(BadIndex + 1) === true`
+					3. Test NOTHING MORE HERE
+		28. `is.ts` - test everything
+		29. `utils.ts` - test everything
+		30. `samples/` - test everything (except for `samples/regex/refactor.ts`)
+		31. `modules/Stream/utils/StreamPosition.ts` - test everything
+		32. `ArrayInternal`
+		33. `MapInternal`
+		34. `ObjectInternal`
+		35. `LineIndex`
+		36. `BackupIndex`
+		37. `MultiIndex`
+		38. `ArrayMap`, 
+			`BasicMap`, 
+			`CharCodeMap`, 
+			`PredicateMap`, 
+			`RegExpMap`, 
+			`SetMap`, 
+			`ObjectMap`
+		39. CompositeStream
+		40. ConcatStream
+		41. DepthStream
+		42. FilterStream
+		43. FiniteStream
+		44. FreeStream: 
+			1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
+		45. FreezableStream
+		46. HandlerStream
+		47. IndexStream
+		48. InputStream
+		49. InterleaveStream
+		50. LazyStream
+		51. LimitStream
+		52. LoopStream
+		53. MarkserStream
+		54. PeekStream
+		55. PosStream
+		56. SingletonStream
+		57. WriterStream
 
-		1. Ensure that ALL the exports are AS-DESIRED (relevant)
-			Finalize the library exports, that is
-		2. Ensure NOTHING is missing from the wiki: 
-			1. utils
-			2. interfaces
-			3. classes
-			4. permalinks
-			5. self-referencing: 	
-				1. provide links to interfaces for class pages
-				2. provide links ot implementations for interfaces to interface pages
-		3. finish the JSDoc
-			1. change/update old
-			2. ADD FOR: 
-				1. classes
-				2. ALL public exports
-					IF a 'util' - a proper short function description. 
-					IF a 'class/interface/related' - a brief description + a link ot the wiki
+	TODO: test each (public) export: 
+		AUTOMATICALLY - let they be imported via the "."-path notation. 
+		Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`
 
-		[later]
-		4. Finalization: 
-			1. piece-by-piece DOCUMENT any new exports: 
-				1. finished `samples` 
-				2. the `.annotation`s [leave them undocumented for the moment...]
-				3. Regex, TokenizerStream, ...
+	TODO: Tests
+		1. TEST the internal/ (only what makes sense)
+		2. Test the public exports: 
+			1. ALL classes
+			2. ALL utils
+			3. ALL samples
+		3. Test that the LIST of library exports is correct: 
+			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
+				Ensures that ALL the needed exports are available
+			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+
+		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
+			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
+				treating each class instance as a "test starting point", from which one can test various methods. 
+					Saves A LOT of boilerplate that is (usually) written when doing tests. 
 
 NEXT UP:
 	TODO: `.copy()`-fixing [IStream-implementations]: 
@@ -159,26 +274,40 @@ NEXT UP:
 			... OTHERS [walk through the project - FIND ITHEM...]
 
 CURRENT TODOS [top-down order...]:		
-	TODO: Tests
-		BEFORE YOU DO THAT: 	
-			1. finish the docs [COMPLETELY!]
+	TODO: Docs [initial, new, final]
+		Documentation order: 
+			2. fix wiki [add new stuff, delete old]
+				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
+					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
+					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
+						and 
+				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
+					ONLY on public classes [exports]
+					
+				3. add SPECIAL pages for `IStream`: 
+					1. on mixins and "annotation" classes
+						1. on differences between the JS and TS APIs, specifically
+					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
+					3. on the HIERARCHY [make an image via 'Excalidraw']
 
-		0. Remove old tests
-		1. TEST the internal/ (only what makes sense)
-		2. Test the public exports: 
-			1. ALL classes
-			2. ALL utils
-			3. ALL samples
-		3. Test that the LIST of library exports is correct: 
-			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
-				Ensures that ALL the needed exports are available
-			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+		2. Ensure NOTHING is missing from the wiki: 
+			1. utils
+			2. interfaces
+			3. classes
+			4. permalinks
+			5. self-referencing: 	
+				1. provide links to interfaces for class pages
+				2. provide links ot implementations for interfaces to interface pages
 
-		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
-			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
-				treating each class instance as a "test starting point", from which one can test various methods. 
-					Saves A LOT of boilerplate that is (usually) written when doing tests. 
-		
+		[later]
+		4. Finalization: 
+			1. piece-by-piece DOCUMENT any new exports: 
+				1. finished `samples` 
+				2. the `.annotation`s [leave them undocumented for the moment...]: 
+					1. NO JSDOC [reason: pointless]
+					2. wiki [brief explanation what these things are even]
+				3. Regex, TokenizerStream, ...
+
 MINOR TODOS: 			
 	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
 		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
