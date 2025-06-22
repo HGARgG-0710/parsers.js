@@ -1,181 +1,386 @@
-import { array, number, type } from "@hgargg-0710/one"
+import { number, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { InitMixin } from "./MixinArray.js"
 
-const { copy } = array
 const { min } = number
-const { isNumber } = type
+const { isNumber, isArray } = type
 
 /**
- * This is a buffer-like object employed by the `PeekStream`
- * for the purpose of efficiently keeping track of a finite 
- * number of items of type `T`, while shifting-unshifting 
- * new items from it, *without* the need to actually reallocate 
- * the object itself (as is the case with `Array.prototype.shift/unshift`). 
- * 
- * This way, the `RotationBuffer` is allocated ONCE and is reallocated 
- * never. Its usgae gives birth to less GC-intensive code. 
-*/
-export class RotationBuffer<T = any> extends InitMixin<T> {
-	private ["constructor"]: new (n?: number) => this
-
-	// * first-read index
-	private rotation: number = 0
-
-	// * last-read index
-	private lastInd: number = -1
-
-	private isEmpty: boolean = true
-
-	private set maxSize(newSize: number) {
-		this.items.length = newSize
+ * A class encapsulating the ability
+ * to dynamically increase the length
+ * of a given `T[]` array.
+ */
+class DynamicSize<T = any> {
+	incBy(elements: number) {
+		this.items.length += elements
 	}
 
-	private get maxSize() {
+	get() {
 		return this.items.length
 	}
 
-	private maxPos() {
-		return this.maxSize - 1
+	constructor(private readonly items: T[]) {}
+}
+
+/**
+ * Represents the class for handling
+ * the size-related data/methods of
+ * `RotationBuffer`.
+ */
+class BufferSize<T = any> {
+	private readonly dynamicSize: DynamicSize<T>
+
+	private get size() {
+		return this.dynamicSize.get()
 	}
 
-	private prepareForInit() {
-		this.resetBounds()
-		this.signalNonEmptiness()
+	incBy(elements: number) {
+		this.dynamicSize.incBy(elements)
 	}
 
-	private resetBounds() {
-		this.resetStart()
-		this.resetLastInd()
+	get() {
+		return this.size
 	}
 
-	private resetStart() {
+	lastPos() {
+		return this.size - 1
+	}
+
+	wrapped(n: number) {
+		return n % this.size
+	}
+
+	constructor(items: T[]) {
+		this.dynamicSize = new DynamicSize(items)
+	}
+}
+
+/**
+ * A class representing the last-read index inside a
+ * `RotationBuffer` instance.
+ */
+class LastIndex<T = any> {
+	private lastIndex: number = -1
+
+	private endShift(i: number) {
+		return this.sizeObj.wrapped(i + this.lastIndex)
+	}
+
+	move(by: number) {
+		this.lastIndex = this.endShift(by)
+	}
+
+	reset() {
+		this.lastIndex = this.sizeObj.lastPos()
+	}
+
+	unset() {
+		this.lastIndex = -1
+	}
+
+	get() {
+		return this.lastIndex
+	}
+
+	constructor(private readonly sizeObj: BufferSize<T>) {}
+}
+
+/**
+ * A class encapsulating operations on `RotationBuffer`
+ * related to keeping track of its state of (supposed)
+ * "emptiness/fullness". It is employed as an optimization
+ * to avoid spending time on getting rid of items, and
+ * instead storing a flag to not do it.
+ */
+class EmptinessTracker {
+	private isKnowablyEmpty: boolean = true
+
+	markNot() {
+		this.isKnowablyEmpty = false
+	}
+
+	markIs() {
+		this.isKnowablyEmpty = true
+	}
+
+	is() {
+		return this.isKnowablyEmpty
+	}
+}
+
+/**
+ * A class keeping track of index-rotation-related
+ * data and operations on `RotationBuffer`. The
+ * first-read index of the `RotationBuffer` is
+ * offset by a certain (continuously manipulated)
+ * number, which this class encapsulates.
+ */
+class IndexRotation<T = any> {
+	private rotation: number = 0
+
+	reset() {
 		this.rotation = 0
 	}
 
-	private resetLastInd() {
-		this.lastInd = this.maxPos()
+	isPresent() {
+		return this.rotation > 0
 	}
 
-	private renewElements() {
-		this.resetStart()
-		this.unsetLastInd()
-		this.signalEmptiness()
+	shifted(index: number) {
+		return this.size.wrapped(index + this.rotation)
 	}
 
-	private signalNonEmptiness() {
-		this.isEmpty = false
+	forward(n: number) {
+		this.rotation = this.shifted(n)
 	}
 
-	private unsetLastInd() {
-		this.lastInd = -1
+	backward() {
+		this.forward(this.size.lastPos())
 	}
 
-	private signalEmptiness() {
-		this.isEmpty = true
+	get() {
+		return this.rotation
 	}
 
-	private freeSpace() {
-		return this.maxSize - this.size
+	constructor(private readonly size: BufferSize<T>) {}
+}
+
+/**
+ * This is a class for calculating the "filled size" of the
+ * `RotationBuffer` - the (non-negative) difference between
+ * its last read-index and its rotation index (used to avoid
+ * repeatedly calling `.unshift()`).
+ */
+class FilledSpaceCalculator<T = any> {
+	private baseSize() {
+		return this.lastIndex.get() - this.rotation.get()
 	}
 
-	private isFull() {
-		return this.freeSpace() === 0
+	private ensureNonNegative(offsetSize: number) {
+		return offsetSize <= 0 ? offsetSize + this.sizeObj.get() : offsetSize
 	}
 
-	private wrapped(n: number) {
-		return n % this.maxSize
+	get() {
+		return this.ensureNonNegative(this.baseSize())
 	}
 
-	private shifted(i: number) {
-		return this.wrapped(i + this.rotation)
+	constructor(
+		public readonly sizeObj: BufferSize<T>,
+		private readonly lastIndex: LastIndex<T>,
+		private readonly rotation: IndexRotation<T>
+	) {}
+}
+
+/**
+ * Class for keeping track of filled and free space inside of
+ * `RotationBuffer` instances. Takes account of the `EmptinessTracker`
+ * flag instance employed.
+ */
+class SpaceData<T = any> {
+	private readonly filledCalc: FilledSpaceCalculator<T>
+
+	static builder<T = any>() {
+		return new SpaceDataBuilder<T>()
 	}
 
-	private endShift(i: number) {
-		return this.wrapped(i + this.lastInd)
+	free() {
+		return this.sizeObj.get() - this.filled()
 	}
 
-	private extendSize(n: number) {
-		this.allocSpace(n - this.moveEnd(n))
+	filled() {
+		return this.empty.is() ? 0 : this.filledCalc.get()
+	}
+
+	isFull() {
+		return this.free() === 0
+	}
+
+	constructor(
+		private readonly sizeObj: BufferSize<T>,
+		lastIndex: LastIndex<T>,
+		rotation: IndexRotation<T>,
+		readonly empty: EmptinessTracker
+	) {
+		this.filledCalc = new FilledSpaceCalculator(
+			sizeObj,
+			lastIndex,
+			rotation
+		)
+	}
+}
+
+/**
+ * A Builder class for the `SpaceData`,
+ * configured with the given
+ * `lastIndex: LastIndex<T>` and
+ * `rotation: IndexRotation<T>`
+ */
+class SpaceDataBuilder<T = any> {
+	private _lastIndex: LastIndex<T>
+	private _rotation: IndexRotation<T>
+
+	lastIndex(lastIndex: LastIndex<T>) {
+		this._lastIndex = lastIndex
+		return this
+	}
+
+	rotation(rotation: IndexRotation<T>) {
+		this._rotation = rotation
+		return this
+	}
+
+	build(sizeObj: BufferSize<T>, empty: EmptinessTracker) {
+		assert(this._lastIndex)
+		assert(this._rotation)
+		return new SpaceData(sizeObj, this._lastIndex, this._rotation, empty)
+	}
+}
+
+/**
+ * A class representing the boundries
+ * of space used by the `Space` sub-object
+ * of `RotationBuffer`.
+ */
+class Space<T = any> {
+	private get sizeObj() {
+		return this.rawItems.sizeObj
+	}
+
+	private get rotation() {
+		return this.rawItems.rotation
+	}
+
+	private get empty() {
+		return this.space.empty
+	}
+
+	private alloc(space: number) {
+		if (space > 0) {
+			this.reOrder()
+			this.sizeObj.incBy(space)
+		}
 	}
 
 	private moveEnd(n: number) {
-		const lastIncrease = min(this.freeSpace(), n)
-		this.lastInd = this.endShift(lastIncrease)
+		const lastIncrease = min(this.space.free(), n)
+		this.lastIndex.move(lastIncrease)
 		return lastIncrease
 	}
 
-	private allocSpace(space: number) {
-		if (space > 0) {
-			this.reOrder()
-			this.maxSize += space
-		}
-	}
-
 	private reOrder() {
-		if (this.rotation > 0 && !this.isEmpty) {
-			const left = this.items.slice(0, this.rotation + 1)
-			const rightSize = this.maxSize - this.rotation
-			this.shiftRight(rightSize)
-			this.fill(rightSize, left)
-			this.resetBounds()
+		if (this.rotation.isPresent() && !this.empty.is()) {
+			const left = this.rawItems.left()
+			const rightSize = this.rawItems.rightSize()
+			this.rawItems.shiftRight(rightSize)
+			this.rawItems.fill(rightSize, left)
+			this.reset()
 		}
 	}
 
-	private shiftRight(rightSize: number) {
+	reset() {
+		this.rotation.reset()
+		this.lastIndex.reset()
+	}
+
+	renew() {
+		this.rotation.reset()
+		this.lastIndex.unset()
+		this.empty.markIs()
+	}
+
+	increase(by: number) {
+		this.alloc(by - this.moveEnd(by))
+	}
+
+	constructor(
+		private readonly rawItems: RawItems<T>,
+		private readonly space: SpaceData<T>,
+		private readonly lastIndex: LastIndex<T>
+	) {}
+}
+
+/**
+ * Represents a class responsible for the
+ * low-level manipulation of the `items` of
+ * the `RotationBuffer` instance.
+ */
+class RawItems<T = any> {
+	shiftRight(rightSize: number) {
 		for (let i = 0; i < rightSize; ++i)
 			this.items[i] = this.items[i + rightSize]
 	}
 
-	private fill(from: number, items: T[]) {
-		for (let i = from; i < this.maxSize; ++i) this.items[i] = items[i]
+	rightSize() {
+		return this.sizeObj.get() - this.rotation.get()
 	}
 
-	//
-	// * Inherited Methods:
-	//
-
-	get size() {
-		if (this.isEmpty) return 0
-		const baseSize = this.lastInd - this.rotation
-		return baseSize <= 0 ? baseSize + this.maxSize : baseSize
+	left() {
+		return this.items.slice(0, this.rotation.get() + 1)
 	}
 
-	write(i: number, item: T) {
-		return super.write(this.shifted(i), item)
+	fill(from: number, items: T[]) {
+		const size = this.sizeObj.get()
+		for (let i = from; i < size; ++i) this.items[i] = items[i]
 	}
 
 	read(i: number) {
-		return super.read(this.shifted(i))
+		return this.items[this.rotation.shifted(i)]
 	}
 
-	push(...items: T[]) {
-		this.extendSize(items.length)
-		const writeAfter = this.size
-		for (let i = 0; i < items.length; ++i)
-			this.write(writeAfter + i, items[i])
-		if (this.isEmpty) this.isEmpty = false
-		return this
+	write(i: number, item: T) {
+		this.items[this.rotation.shifted(i)] = item
 	}
 
-	init(items: T[]) {
-		this.prepareForInit()
-		return super.init(
-			items.length > this.maxSize ? items.slice(0, this.maxSize) : items
-		)
+	readAll() {
+		return [...this]
 	}
 
-	copy() {
-		return new this.constructor(this.maxSize).init(copy(this.items))
+	writeAll(after: number, items: readonly T[]) {
+		for (let i = 0; i < items.length; ++i) this.write(after + i, items[i])
 	}
 
-	//
-	// * Non-Interface Methods:
-	//
+	*[Symbol.iterator]() {
+		const size = this.sizeObj.get()
+		for (let i = 0; i < size; ++i) yield this.read(i)
+	}
 
-	clear() {
-		this.resetBounds()
-		this.signalEmptiness()
+	constructor(
+		private readonly items: T[],
+		readonly sizeObj: BufferSize<T>,
+		readonly rotation: IndexRotation<T>
+	) {}
+}
+
+function isItemsConvertible<T = any>(maxSize: any): maxSize is number | T[] {
+	return (isNumber(maxSize) && maxSize > 0) || isArray(maxSize)
+}
+
+function toItems<T = any>(maxSize: number | T[]) {
+	return isNumber(maxSize) ? new Array(maxSize) : maxSize
+}
+
+/**
+ * This is a buffer-like object employed by the `PeekStream`
+ * for the purpose of efficiently keeping track of a finite
+ * number of items of type `T`, while shifting-unshifting
+ * new items from it, *without* the need to actually reallocate
+ * the object itself (as is the case with `Array.prototype.shift/unshift`).
+ *
+ * This way, the `RotationBuffer` is allocated ONCE and is reallocated
+ * never. Its usgae gives birth to less GC-intensive code.
+ */
+export class RotationBuffer<T = any> {
+	private ["constructor"]: new (n: number | T[]) => this
+
+	private readonly empty = new EmptinessTracker()
+
+	private readonly lastIndex: LastIndex<T>
+	private readonly rotation: IndexRotation<T>
+	private readonly spaceData: SpaceData<T>
+	private readonly rawItems: RawItems<T>
+	private readonly space: Space<T>
+
+	get size() {
+		return this.spaceData.filled()
 	}
 
 	first() {
@@ -183,22 +388,53 @@ export class RotationBuffer<T = any> extends InitMixin<T> {
 	}
 
 	last() {
-		return this.read(this.lastInd)
+		return this.read(this.lastIndex.get())
 	}
 
 	forward(n: number = 1) {
-		this.rotation = this.shifted(n)
+		this.rotation.forward(n)
 	}
 
 	backward() {
-		if (this.isFull()) this.renewElements()
-		else this.rotation = this.shifted(this.maxPos())
-		return this.isEmpty
+		if (this.spaceData.isFull()) this.space.renew()
+		else this.rotation.backward()
+		return this.empty.is()
 	}
 
-	constructor(maxSize: number) {
-		assert(isNumber(maxSize))
-		assert(maxSize > 0)
-		super(new Array(maxSize))
+	read(i: number) {
+		return this.rawItems.read(i)
+	}
+
+	push(items: readonly T[]) {
+		this.space.increase(items.length)
+		this.rawItems.writeAll(this.size, items)
+		if (this.empty.is()) this.empty.markNot()
+		return this
+	}
+
+	clear() {
+		this.space.reset()
+		this.empty.markIs()
+	}
+
+	copy() {
+		return new this.constructor(this.rawItems.readAll())
+	}
+
+	constructor(maxSize: number | T[]) {
+		assert(isItemsConvertible(maxSize))
+		const items = toItems(maxSize)
+		const sizeObj = new BufferSize(items)
+
+		this.lastIndex = new LastIndex(sizeObj)
+		this.rotation = new IndexRotation(sizeObj)
+		this.rawItems = new RawItems(items, sizeObj, this.rotation)
+
+		this.spaceData = SpaceData.builder<T>()
+			.lastIndex(this.lastIndex)
+			.rotation(this.rotation)
+			.build(sizeObj, this.empty)
+
+		this.space = new Space(this.rawItems, this.spaceData, this.lastIndex)
 	}
 }

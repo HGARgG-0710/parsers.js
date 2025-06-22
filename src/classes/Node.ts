@@ -2,10 +2,12 @@ import { array, functional } from "@hgargg-0710/one"
 import type { IFreeable, IPoolGetter } from "../interfaces.js"
 import type {
 	ICellNode,
+	ICellNodeType,
+	ICollectionNode,
+	ICollectionNodeType,
 	INode,
-	INodeClass,
 	INodeMaker,
-	IRecursiveNode,
+	INodeType,
 	ITyped
 } from "../interfaces/Node.js"
 import { isCopiable } from "../is.js"
@@ -15,7 +17,7 @@ import {
 	isTyped
 } from "../is/Node.js"
 import { isType } from "../utils/Node.js"
-import { NodeFactory, RecursiveNodeFactory } from "./NodeSystem.js"
+import { NodeFactory } from "./NodeSystem.js"
 
 const { id } = functional
 
@@ -83,7 +85,7 @@ abstract class PreTokenNode<T = any>
 	protected ["constructor"]: new () => this
 
 	static fromPlain<T = any>(
-		this: INodeClass<T, []>,
+		this: INodeType<T, []>,
 		x: any,
 		nodeMaker: INodeMaker<T>
 	) {
@@ -110,7 +112,9 @@ abstract class PreTokenNode<T = any>
  * Note: the `INode<T>` instances of `INodeType<T, []>`s created
  * using `TokenNode` are poolable via `ObjectPool`
  */
-export const TokenNode = NodeFactory(function <T = any>(type: T) {
+export const TokenNode = NodeFactory(function <T = any>(
+	type: T
+): INodeType<T, []> {
 	const jsonObject = { type }
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
@@ -134,9 +138,9 @@ abstract class PreContentNode<T = any, Value = any>
 	protected ["constructor"]: new (value?: Value) => this
 
 	static fromPlain<T = any, Value = any>(
-		this: INodeClass<T, [Value]>,
+		this: ICellNodeType<T, Value>,
 		x: any,
-		nodeMaker: INodeMaker<T>
+		nodeMaker: INodeMaker<T, ICellNode<T, Value>>
 	) {
 		if (!isContentNodeSerializable(x)) return false
 		return new this(x.value)
@@ -180,7 +184,7 @@ abstract class PreContentNode<T = any, Value = any>
  */
 export const ContentNode = NodeFactory(function <T = any, Value = any>(
 	type: T
-) {
+): ICellNodeType<T, Value> {
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static is = isType(type)
@@ -196,19 +200,20 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 			return type
 		}
 	}
+
 	return contentNode
 })
 
 abstract class PreRecursiveNode<T = any>
 	extends BaseNode<T>
-	implements IRecursiveNode<T>
+	implements ICollectionNode<T>
 {
 	protected ["constructor"]: new (children?: INode<T>[]) => this
 
 	static fromPlain<T = any>(
-		this: INodeClass<T, [INode<T>[]]>,
+		this: ICollectionNodeType<T, [INode<T>[]]>,
 		x: any,
-		nodeMaker: INodeMaker<T>
+		nodeMaker: INodeMaker<T, ICollectionNode<T>>
 	) {
 		if (!isRecursiveNodeSerializable(x)) return false
 		const maybeNodes = x.children.map(nodeMaker)
@@ -229,8 +234,8 @@ abstract class PreRecursiveNode<T = any>
 		return this.children[i]
 	}
 
-	set(node: INode<T>, i: number): this {
-		this.children[i] = node
+	push(...children: INode<T>[]) {
+		this.children.push(...children)
 		return this
 	}
 
@@ -294,13 +299,13 @@ abstract class PreRecursiveNode<T = any>
 }
 
 /**
- * This is an `IRecursiveNodeFactory<T, [INode<T>[] | undefined]` for
- * creation of `IRecursiveNode`s with `.type: T` properties,
+ * This is an `<T = any> (type: T) => IRecursiveNodeType<T, [INode<T>?, ICollectionNode<T>]>` for
+ * creation of `ICollectionNode`s with `.type: T` properties,
  * to which the give-value of `type: T` is given [prototype property],
  * as well as a variety of methods for working with `children: INode<T>[]`,
  * which are specified on construction [upon omission, empty array is assumed].
  *
- * It also has other common `IRecursiveNodeFactory` methods, such as those
+ * It also has other common `IRecursiveNodeTypeFactory` methods, such as those
  * for providing "wrapping" JSON for separate serialization of internal
  * items [`.jsonInsertablePre(): string`, `.jsonInsertablePost(): string`,
  * `.jsonInsertableEmpty(): string`]
@@ -308,7 +313,9 @@ abstract class PreRecursiveNode<T = any>
  * Note: The resulting `IRecursiveNodeType<T, [INode<T>[] | undefined]` create
  * `IRecursiveNode<T, [INode<T>[] | undefined]` that are poolable via `ObjectPool`
  */
-export const RecursiveNode = RecursiveNodeFactory(function <T = any>(type: T) {
+export const RecursiveNode = NodeFactory(function <T = any>(
+	type: T
+): ICollectionNodeType<T, [INode[]?]> {
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static is = isType(type)

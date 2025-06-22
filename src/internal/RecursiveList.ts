@@ -51,7 +51,7 @@ export function isRecursiveInitList(
  * This is a class for keeping track of recursion points.
  * More specifically, a 'Switch' is an "optional" recursion point.
  */
-class Switch<
+export class Switch<
 	T extends IInitializable &
 		ISwitchIdentifiable &
 		IRecursiveListIdentifiable = any,

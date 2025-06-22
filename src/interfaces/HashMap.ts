@@ -1,15 +1,5 @@
-import type {
-	IConcattable,
-	ICopiable,
-	IDefaulting,
-	IDeletable,
-	IHashable,
-	IIndexable,
-	IRekeyable,
-	ISettable,
-	ISizeable
-} from "../interfaces.js"
-import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
+import type { IConcattable, IHashable, IIndexable } from "../interfaces.js"
+import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
 
 /**
  * Represents a hash function.
@@ -32,17 +22,11 @@ export interface IHashClass<K = any, V = any, InternalKey = any, Default = any>
 /**
  * Represents an `IIndexable<V | Default>` structure with a
  * default-value type `Default`, primary value type `V`,
- * key type `K` and capability of being modified in a large variety of
- * ways.
+ * key type `K` and conformance to `IPreMap<K, V, Default>`.
  */
 export interface IHashMap<K = any, V = any, Default = any>
-	extends IIndexable<V | Default>,
-		ISettable<K, V | Default>,
-		IDeletable<K>,
-		IRekeyable<K>,
-		ISizeable,
-		IDefaulting,
-		IConcattable<Iterable<[K, V]>, IHashMap<K, V, Default>>,
-		ICopiable {}
+	extends IPreMap<K, V, Default>,
+		IIndexable<V | Default>,
+		IConcattable<Iterable<[K, V]>, IHashMap<K, V, Default>> {}
 
-export type * from "../modules/HashMap/interfaces/PreMap.js"
+export type * from "../modules/HashMap/interfaces/PlainMap.js"

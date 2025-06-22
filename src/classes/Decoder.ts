@@ -1,4 +1,4 @@
-import { array, boolean, number, object } from "@hgargg-0710/one"
+import { array, boolean, number, object, type } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { readSync } from "node:fs"
 import type {
@@ -6,12 +6,14 @@ import type {
 	ISize,
 	ISourceDescriptor
 } from "../interfaces/Decoder.js"
+import { Initializable } from "./Initializer.js"
 
 const { numbers } = array
 const { extendPrototype } = object
 const { ConstDescriptor } = object.descriptor
 const { isEven } = number
 const { T } = boolean
+const { isUndefined } = type
 
 function readBytes(
 	source: number,
@@ -29,8 +31,18 @@ function getBasicDecodingMethodFor(encoding: BufferEncoding) {
 	}
 }
 
-abstract class PreDecoder implements IDecoder {
-	private ["constructor"]: new () => this
+const preDecoderInitializer = {
+	init(target: PreDecoder, source?: number, size?: number) {
+		if (!isUndefined(source)) target.setDescriptor(source)
+		if (!isUndefined(size)) target.setSize(size)
+	}
+}
+
+abstract class PreDecoder
+	extends Initializable<[number, number]>
+	implements IDecoder
+{
+	private ["constructor"]: new (source?: number, size?: number) => this
 
 	private _pos: number = 0
 	private _descriptor: ISourceDescriptor
@@ -59,6 +71,10 @@ abstract class PreDecoder implements IDecoder {
 
 	private set pos(newPos: number) {
 		this._pos = newPos
+	}
+
+	protected get initializer() {
+		return preDecoderInitializer
 	}
 
 	get pos() {
@@ -91,6 +107,14 @@ abstract class PreDecoder implements IDecoder {
 		return this.decode(this.temp)
 	}
 
+	setDescriptor(source: number) {
+		this.descriptor = source
+	}
+
+	setSize(size: number) {
+		this.size = size
+	}
+
 	hasChars() {
 		return this.size > this.pos
 	}
@@ -100,17 +124,11 @@ abstract class PreDecoder implements IDecoder {
 	}
 
 	copy() {
-		return new this.constructor()
+		return new this.constructor(this.descriptor, this.size)
 	}
 
 	rewind() {
 		this.pos = 0
-	}
-
-	init(source?: number, size?: number) {
-		if (source) this.descriptor = source
-		if (size) this.size = size
-		return this
 	}
 }
 

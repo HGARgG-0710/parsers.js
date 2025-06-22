@@ -1,27 +1,145 @@
-import { MultiIndex } from "../../../classes/Position.js"
 import { BadIndex } from "../../../constants.js"
 import type { IWalkable } from "../../../interfaces.js"
+import type { MultiIndex } from "../../../internal/MultiIndex.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
 import { isGoodIndex } from "../../../utils.js"
 import { treeEndPath } from "../../../utils/Node.js"
 import { SourceStream, SourceStreamAnnotation } from "./SourceStream.js"
 
-type PrevResponseWorkable = typeof GO_PREV_LAST | typeof POP_CHILD
-type PrevResponse = PrevResponseWorkable | null
+enum NextResponse {
+	GoFirstNext,
+	PushFirstChild,
+	GoSiblingAfter
+}
 
-type NextResponse =
-	| typeof GO_NEXT_FIRST
-	| typeof PUSH_FIRST_CHILD
-	| typeof GO_SIBLING_AFTER
+enum PrevResponse {
+	GoLastPrev,
+	PopChild,
+	Nil
+}
 
-type ResponseMethodName = PrevResponse | NextResponse
+interface IWalkerResponse {
+	pick(): void
+	respond(): void
+}
 
-const GO_PREV_LAST = "goPrevLast"
-const POP_CHILD = "popChild"
+/**
+ * Represents the last level with siblings from a
+ * given position inside a tree, during the course
+ * of the `.walker` sub-object's work.
+ *
+ * Can be updated and extracted, intended to be
+ * used as shared state.
+ */
+class LastLevelWithSiblings<TreeLike extends IWalkable<TreeLike> = IWalkable> {
+	private level = BadIndex
 
-const GO_NEXT_FIRST = "goNextFirst"
-const PUSH_FIRST_CHILD = "pushFirstChild"
-const GO_SIBLING_AFTER = "goSiblingAfter"
+	get() {
+		return this.level
+	}
+
+	update() {
+		return (this.level = this.walker.lastLevelWithSiblings())
+	}
+
+	constructor(private readonly walker: TreeWalker<TreeLike>) {}
+}
+
+/**
+ * Represents a "response" for a `.next()` operation, sent
+ * to the `.walker` sub-object.
+ */
+class NextWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
+	implements IWalkerResponse
+{
+	private response: NextResponse
+	private readonly lastLevel: LastLevelWithSiblings<TreeLike>
+
+	pick(): void {
+		this.response = this.walker.hasChildren()
+			? NextResponse.PushFirstChild
+			: this.walker.hasSiblingAfter()
+			? NextResponse.GoSiblingAfter
+			: NextResponse.GoFirstNext
+	}
+
+	respond() {
+		switch (this.response) {
+			case NextResponse.GoFirstNext:
+				this.walker.goFirstNext(this.lastLevel.get() + 1)
+				break
+
+			case NextResponse.PushFirstChild:
+				this.walker.pushFirstChild()
+				break
+
+			case NextResponse.GoSiblingAfter:
+				this.walker.goSiblingAfter()
+		}
+	}
+
+	shallGoFirstNext() {
+		return this.response === NextResponse.GoFirstNext
+	}
+
+	constructor(private readonly walker: TreeWalker<TreeLike>) {
+		this.lastLevel = new LastLevelWithSiblings(this.walker)
+	}
+}
+
+/**
+ * Represents a "response" for a `.prev()` operation, sent
+ * to the `.walker` sub-object.
+ */
+class PrevWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
+	implements IWalkerResponse
+{
+	private response: PrevResponse = PrevResponse.Nil
+
+	pick(): void {
+		this.response = this.walker.hasSiblingBefore()
+			? PrevResponse.GoLastPrev
+			: this.walker.hasParent()
+			? PrevResponse.PopChild
+			: PrevResponse.Nil
+	}
+
+	respond(): void {
+		switch (this.response) {
+			case PrevResponse.GoLastPrev:
+				this.walker.goLastPrev()
+				break
+
+			case PrevResponse.PopChild:
+				this.walker.popChild()
+		}
+	}
+
+	isNil() {
+		return this.response === PrevResponse.Nil
+	}
+
+	constructor(private readonly walker: TreeWalker<TreeLike>) {}
+}
+
+/**
+ * Represents the end-index of a given tree,
+ * obtained via `treeEndPath`, and capable of
+ * changing the `.curr` of the `.walker` subobject.
+ */
+class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
+	private endIndex: number[]
+
+	for(tree: TreeLike) {
+		this.endIndex = treeEndPath(tree)
+	}
+
+	go() {
+		this.walker.goIndex(this.endIndex)
+	}
+
+	constructor(private readonly walker: TreeWalker<TreeLike>) {}
+}
 
 class DepthStreamAnnotation<
 	TreeLike extends IWalkable<TreeLike> = IWalkable
@@ -58,7 +176,7 @@ class DepthStreamAnnotation<
 		return null as any
 	}
 
-	navigate(index: MultiIndex) {
+	goTo(index: MultiIndex) {
 		return null as any
 	}
 
@@ -69,71 +187,47 @@ class DepthStreamAnnotation<
 
 function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 	return class extends SourceStream.generic!<TreeLike, TreeLike>() {
-		private endInd: MultiIndex
-		private response: ResponseMethodName
-		private lastLevelWithSiblings = BadIndex
-		private walker = new TreeWalker<TreeLike>()
-
-		private pickResponseNext() {
-			const { walker } = this
-			this.response = walker.hasChildren()
-				? PUSH_FIRST_CHILD
-				: walker.hasSiblingAfter()
-				? GO_SIBLING_AFTER
-				: GO_NEXT_FIRST
-		}
-
-		private pickResponsePrev() {
-			const { walker } = this
-			this.response = walker.hasSiblingBefore()
-				? GO_PREV_LAST
-				: walker.hasParent()
-				? POP_CHILD
-				: null
-		}
-
-		private getLastLevelWithSiblings() {
-			return (this.lastLevelWithSiblings =
-				this.walker.lastLevelWithSiblings())
-		}
+		private readonly walker = new TreeWalker<TreeLike>()
+		private readonly lastLevel = new LastLevelWithSiblings(this.walker)
+		private readonly nextResponse = new NextWalkerResponse(this.walker)
+		private readonly prevResponse = new PrevWalkerResponse(this.walker)
+		private readonly endIndex = new TreeEndIndex(this.walker)
 
 		protected currGetter(): TreeLike {
 			return this.walker.curr
 		}
 
 		protected baseNextIter() {
-			const { walker, response } = this
-			walker[response as NextResponse](this.lastLevelWithSiblings + 1)
+			this.nextResponse.respond()
 			return this.currGetter()
 		}
 
 		protected basePrevIter(): TreeLike {
-			const { walker, response } = this
-			walker[response as PrevResponseWorkable]()
+			this.prevResponse.respond()
 			return this.currGetter()
 		}
 
 		setResource(tree: TreeLike): void {
 			super.setResource(tree)
 			this.walker.init(tree)
-			this.endInd = new MultiIndex(treeEndPath(tree))
+			this.endIndex.for(tree)
 		}
 
 		get index() {
-			return this.walker.pos
+			return this.walker.pos.get()
 		}
 
 		isCurrEnd(): boolean {
-			this.pickResponseNext()
+			this.nextResponse.pick()
 			return (
-				this.response === GO_NEXT_FIRST &&
-				!isGoodIndex(this.getLastLevelWithSiblings())
+				this.nextResponse.shallGoFirstNext() &&
+				!isGoodIndex(this.lastLevel.update())
 			)
 		}
 
 		isCurrStart(): boolean {
-			this.pickResponsePrev()
-			return this.response === null
+			this.prevResponse.pick()
+			return this.prevResponse.isNil()
 		}
 
 		rewind() {
@@ -143,14 +237,15 @@ function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 			return this.curr
 		}
 
-		navigate(index: MultiIndex) {
+		goTo(index: number[]) {
 			this.walker.goIndex(index)
 			this.updateCurr()
 			return this.curr
 		}
 
 		finish() {
-			this.navigate(this.endInd)
+			this.endIndex.go()
+			this.updateCurr()
 			this.endStream()
 			return this.curr
 		}
@@ -184,7 +279,7 @@ function PreDepthStream<
  *
  * It also supports backing up (via `.prev()`), and gettin the
  * multi-index of the current node in the tree via `.index: MultiIndex`,
- * as well as navigating to it directly via `.navigate(ind: MultiIndex)`.
+ * as well as navigating to it directly via `.goTo(ind: MultiIndex)`.
  * Similarly, there are `.rewind()` and `.finish()` methods present.
  */
 export const DepthStream: ReturnType<typeof PreDepthStream> & {

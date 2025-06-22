@@ -8,95 +8,323 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	4. the "leftovers" for v0.3 - this is definitely getting done, and definitely done last - before the publishing
 	5. the "v0.4"
 	6. the (possibly, not so distant) "future"
+	
+REMINDER: Final Task Order
+	2. tests [possibly - with finalization, if new redundancies are found]
+		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
+	3. wiki
+	4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
 
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
-	TODO: modify the tests: 
-		1. add a `constructor() {...}` test now...
-		2. fix the `constructor: function` thingies... [not as readable...]; 
+	CURRENT AGENDA: 			
+		P1:
+		[this is just an array-like strucutre, nothing unusual to see here]
+		1. LiquidMap
+		1. RetainedArray
+			TODO: refactor this [ugly]: 
+				1. NO MORE 'MixinArray'
+				2. add sub-objects [composition] to represent respective business logic. 
+		2. `RotationBuffer` - test it
 
-	TODO: Final Task Order
-		1. finish jsdoc
-		2. tests [possibly - with finalization, if new redundancies are found]
-			1. also - some minor todo completion [those that cause bugs, more specifically...]; 
-		3. wiki
-		4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+		P2:
+		[Single 'ClassTest']
+		38. `ArrayMap`, 
+			`BasicMap`, 
+			`CharCodeMap`, 
+			`PredicateMap`, 
+			`RegExpMap`, 
+			`SetMap`, 
+			`ObjectMap`
+		[Single `ClassTest`]
+		8. `BasicHash`, 
+			`LengthHash`, 
+			`TokenHash`, 
+			`TypeofHash`, 
+			`CharHash`: 
+				1. DO NOT MOCK! [real dependencies are far too simple for that]
+		6. WrapHandler, TableHandler
 
-	TODO: Docs [initial, new, final]
-		Documentation order: 
-			1. write jsdoc [reason - faster this way...]: 
-				Brief descriptions. 
-				Present for all `export`ed abstractions [including types and classes]. 
+		P3: 
+		17. `ResourceManager`: 
+			1. USE MOCKS FOR THIS ONE!
+			2. ALSO - the `.manager` properties of `WritingDestination` and `ReadableSource`
+		2. ReadableSource
+		3. WritingDestination
+		4. Encoder[8, 16, U8, U16]
+		5. Loaded[8, 16, U8, U16]
+
+		P4. STREAMS - none of the "hard" stuff yet... Just data manipulation
+
+	TODO: classes from /internal to test: 		
+		[easy, but longer]
+		6. SwitchArray: 
+			1. USE A MOCK HERE (`RecursiveRenewer`)
+			2. Do only after `Switch` has been thoroughly tested
+		
+		[not easy, but not too hard - do (slightly) later]
+		5. Switch [from RecursiveList.ts]
+		
+		[HARD - do later]
+		4. StreamList
+		8. TreeWalker: 
+			1. USE A MOCK HERE (`TreeLike`)
+
+	TODO: public classes/functions/utils/etc to be tested: 
+		-1. ParseError [abstract]: 
+			Test will use a descendant to check that: 
+				1. '.name' is correct
+				2. '.message' is correct [for various inputs]
+
+		[easy]
+		0. TableMap
+		2. `Autocache`: 
+			1. USE A MOCK HERE! [ISettable & IIndexable]
+		
+		[hard]
+		3. `Decoder8`, `Decoder16`, `DecoderU8`, `DecoderU16LE`: 
+			1. DO NOT use mocks - instead, create REAL FILES [encoded appropriately]
+		4. `WritingDestination`: 
+			1. DO NOT use mocks - instead, utilize ACTUAL `IEncoder` classes from the library. 
+			2. Use only 2 different classes' implementations - assume that this is equivalent 
+				to it being sufficient. REASON not to use mocks - very hard to do here, since 
+					that would (in essence) demand one to actually re-implement one of the 
+						already present `IEncoder`-implementing classes of the library (since
+							the encoder must be A WORKING ENCODER). 
+			3. TEST `IEncoder` classes BEFORE TESTING THIS
+		5. `WritingDestination.manager`: 
+			1. This is tested DESPITE `ResourceManager` being tested as well
+			2. Use REAL-LIFE files with this thing
+		7. `Encoder8`, `Encoder16`, `EncoderU8`, `EncoderU16`
+
+		[very hard]
+		6. `DynamicParser`: 
+			0. Do ONLY once `TokenStream` and `Regex` has been finished and tested
+			1. Test ONLY as a part of "demo"-testing: 
+				1. +/-, () and [a-zA-Z]-variables (no self-modification)
+				2. A Self-mofidying parser
+			2. This is an *INTEGRATION TEST*
+			3. VITAL: besides this, ADD a "demo"-style integration test 
+				for `SourceBuilder + IndexMap + DepthStream + INode + NodeSystem` for 
+				GENERATION of the "+/-, (), [a-zA-Z]-vars (no-self-mod)"
+				grammar sources BASED OFF a Node-based AST. 
+		
+		[easy, but tedious]
+		8. `BasicHash`, 
+			`LengthHash`, 
+			`TokenHash`, 
+			`TypeofHash`, 
+			`CharHash`: 
+				1. Test each independently
+				2. Use DIFFERENT `IPreMap`s for each case
+				3. DO NOT MOCK! [use real `IPreMap`s instead]: 
+					reason - as always, too simple
+					this would require re-implementing A LOT of stuff for no good reason...
+		
+		[easy, but tedious]
+		9. `IndexMap.ts` stuff: 
+			1. The functions - test each one
+			2. Each one should be given a SINGLE case of an `IMapClass/whatever` to work on
+			3. Each one given SHOULD BE REAL!!! [no mocks]
+
+		[semi-easy]
+		10. `LoadedU8`, `LoadedU16`, `Loaded8`, `Loaded16`: 
+			1. Use real files
+			2. NO MOCKS
+
+		[medium - no sooner than 'ObjectPool']
+		11. `TokenNode`, `ContentNode`, `RecursiveNode`: 
+			1. Use each one with a 'string/number/boolean' '.type': 
+				1. create several instances for each one created class
+				2. they should handle edge (if any) cases and generic behaviour
+			2. type `T` of '.type: T' should be different each time
+			3. CHECK FOR MEMORY-SAVINGS [`.prototype.type` and NOT `this.type`!!!]
+
+		[semi-easy - no sooner than `Node`]
+		12. `NodeSystem`:
+			1. Use `samples.Nodes.PlainNodes` for this test
+			2. NO MOCKS
+			3. Test ONLY after the `TokenNode`, `ContentNode`, `RecursiveNode` have already been
+
+		[easy]
+		13. `ObjectPool`: 
+			1. Create a mock class
+			2. Use `ObjectPool(MockClass)` on it
+			3. Create some instances - test it...
+
+		[easy - no sooner than `ObjectPool`]
+		15. `TypedPoolKeeper`
+
+		[easy]
+		16. `PropDigger`: 
+			[VITAL: add these as TEST CASES in `PropDigger/cases.ts`!!!]
+			1. `ownerDigger`: 
+				1. on an `IStream`
+				2. ONLY AFTER an `ILinkedStream` has been tested
+			2. `resourceDigger`: 
+				1. on an `IStream`
+				2. ONLY AFTER an `ILinkedStream` has been tested
+
+		[easy]
+		17. `ResourceManager`: 
+			1. USE MOCKS FOR THIS ONE!
+		18. `RetainedArray`
+
+		[above-medium]
+		19. `ReadingSource`: 
+			1. Use real files
+			2. DO NOT use mocks for `IDecoder` - use real ones: 
+				1. 2 classes, specifically
+		
+		[above-medium]
+		20. `ReadingSource.manager`: 
+			1. Test this also, DESPITE `ResourceManager` tests
+
+		[easy]
+		22. `TableHandler`, `WrapHandler`: 
+			1. Test this NO SOONER than the respective `indexable`s
+			2. Use REAL `IIndexable`s of the library: 
+				1. MapClass-based
+				2. ModifiableMap
+
+		[medium-hardish]
+		23. ModifiableMap: 
+			1. plain index test
+			2. modify + index tests: 
+				1. one for *EACH* of the methods of `TableMap`.
+			3. DO NOT test with mocks - use REAL objects: 
+				1. `TableMap`
+				2. One `MapClass`
+				3. REMINDER: per `MapClass` - only ONE suite!
+		
+		[easy, tedious]
+		23. `aliases/`	- test everything
+		24. `utils/` - test everything
+		25. `is/` - test everything
+		26. `aliases.ts` - test everything
+		27. `constants.ts`: 
+				1. THESE HAVE SEMANTIC MEANING!
+					1. `MissingArgument` is supposed to be behaving like `undefined` ALWAYS
+					2. `isGoodIndex(BadIndex) === false`, `isGoodIndex(BadIndex + 1) === true`
+					3. Test NOTHING MORE HERE
+		28. `is.ts` - test everything
+		29. `utils.ts` - test everything
+		30. `samples/` - test everything (except for `samples/regex/refactor.ts`)
+
+		[easy]
+		31. `modules/Stream/utils/StreamPosition.ts` - test everything
+
+		[easy, tedious]
+		38. `ArrayMap`, 
+			`BasicMap`, 
+			`CharCodeMap`, 
+			`PredicateMap`, 
+			`RegExpMap`, 
+			`SetMap`, 
+			`ObjectMap`
+		
+		[hard-ish]
+		39. CompositeStream
+			1. cases: 
+				1. many diverse streams [fewer; for greater confidence] 
+					1. This one would be simple and include only data-manipulation Stream-s
+				2. many diverse streams [more]	
+					1. This one would include a `FreeStream`
+					2. This one would include a `WriteStream`
+				2. one stream only 
+				3. no streams 
+
+		[easy-ish; varies wildly]
+		40. ConcatStream
+		41. DepthStream
+		42. FilterStream
+		43. FiniteStream
+		44. FreeStream: 
+			0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
+			1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
+			2. [maybe???] Add a framework for 'spying' on methods of objects here?
+				Reason: one needs to ENSURE that the `.free` method *GETS CALLED*, 
+					no matter what. Reason being: if we DON'T know that, we DON'T 
+						know if the thing is actually *effective*. 
+
+				Thus, possible solutions to the dilemma: 
+					1. add a library [with existing like 'Jest' - good for resume]
+						This'll additionally require: 
+							1. accessing of `ObjectPool.prototype`, saving reference
+								To save the '.freeMethodObservable = jest.spyOn(ObjectPool.prototype, "free")'
+							2. checking the presence of the call on each iteration inside 
+								a test of `FreeStream`, via the `.freeMethodObservable.mock.calls[i]`
+					2. creating a fake `ObjectPool`-like object, which would register the `.free/.create` calls, 
+						which would be then employed as-desired
+						Then, one would need to: 
+
+							1. create an interface for `IObjectPool`
+							2. use it EVERYWHERE instead of the "ordinary" 'ObjectPool' classs objects: 
+								1. That includes `FreeStream`
+							3. write a dummy-mock-class for a specific type of "poolable" objects, create-d/free-d inside the `FreeStream`
+							4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
 				
-				16. utils.ts
-			2. fix wiki [add new stuff, delete old]
-				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
-					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
-					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
-						and 
-				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
-					ONLY on public classes [exports]
-					
-				3. add SPECIAL pages for `IStream`: 
-					1. on mixins and "annotation" classes
-						1. on differences between the JS and TS APIs, specifically
-					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
-					3. on the HIERARCHY [make an image via 'Excalidraw']
+				CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
+		45. FreezableStream
+		46. HandlerStream
+		47. IndexStream
+		48. InputStream
+		49. InterleaveStream
+		50. LazyStream
+		51. LimitStream
+		52. LoopStream
+		53. MarkserStream
+		54. PeekStream
+		55. PosStream
+		56. SingletonStream
+		57. WriterStream
+		58. BasicErrorStream [abstract]: 
+			1. will define a child-class
+			2. will check that it works as-intended:
+				1. sample 1 - with a case-specific `ParseError`-descendant
+				2. sample 2 - a (simple) fault-resistant parser
+		59. DefaultErrorStream: 
+			1. with bare ErrorStream
+			2. with `BasicErrorStream`
 
-		1. Ensure that ALL the exports are AS-DESIRED (relevant)
-			Finalize the library exports, that is
-		2. Ensure NOTHING is missing from the wiki: 
-			1. utils
-			2. interfaces
-			3. classes
-			4. permalinks
-			5. self-referencing: 	
-				1. provide links to interfaces for class pages
-				2. provide links ot implementations for interfaces to interface pages
-		3. finish the JSDoc
-			1. change/update old
-			2. ADD FOR: 
-				1. classes
-				2. ALL public exports
-					IF a 'util' - a proper short function description. 
-					IF a 'class/interface/related' - a brief description + a link ot the wiki
+	TODO: BENCHMARK: 
+		1. RotationBuffer vs 'shift/unshift'-based solution: 
+			0. Generalize the `PeekStream` to a common "abstract" ancestor
+				1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
+			1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]
+			2. Compare the two on a large [and relatively simple] input that utilizes `TokenStream`, with : 
+				0. benchmark 0 - 0-1 lookaheads [not very ambigious at all]
+				1. benchmark 1 - 0-3 lookaheads [somewhat intensive/ambigious - many times - doesn't require any lookaheads]
+				2. benchmark 2 - 3-12 lookaheads [IS intensive/ambigious - many times - DOES reuqire lookaheads]
 
-		[later]
-		4. Finalization: 
-			1. piece-by-piece DOCUMENT any new exports: 
-				1. finished `samples` 
-				2. the `.annotation`s [leave them undocumented for the moment...]
-				3. Regex, TokenizerStream, ...
+				IF there is *any* performance benefit, either: 
+					1. replace the 'RotationBuffer'-based version with 'shift/unshift'-based
+					2. make it so that the `PeekStream` uses appropriate 
+
+	TODO: test each (public) export: 
+		AUTOMATICALLY - let they be imported via the "."-path notation. 
+		Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`
+
+	TODO: Tests
+		1. TEST the internal/ (only what makes sense)
+		2. Test the public exports: 
+			1. ALL classes
+			2. ALL utils
+			3. ALL samples
+		3. Test that the LIST of library exports is correct: 
+			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
+				Ensures that ALL the needed exports are available
+			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+
+		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
+			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
+				treating each class instance as a "test starting point", from which one can test various methods. 
+					Saves A LOT of boilerplate that is (usually) written when doing tests. 
 
 NEXT UP:
 	TODO: `.copy()`-fixing [IStream-implementations]: 
 		1. fix the `.copy()` methods' implementations that employ the `.set*`-methods/custom initializers
 			
 			2. BasicStream
-			3. CompositeStream
-				BIIIG "maybe???". 
-				Reasons to implement: 
-					1. would open FAR more complex tests to one
-						Although... technically...
-							one could solve it more simply by: 
-								1. providing the "basic" and "extended" (for CompositeStream, with user-predicate) `[Symbol.iterator]` tests
-								2. [more generally] provide custom '.inState(assertionPred)' tests with custom user-assertions [for a given state???]
-									This could be a very good idea
-									One STILL isolates the state, BUT, ALSO - allows to *PRESERVE IT* like:
-
-										someClassTest.withInstance(instance, (test) => {
-											test.methodName(...).inState((test) => {
-												test.methodName1(...) // asserts
-												test.methodName2(...) // asserts
-												...
-												assert(...)
-											})
-										})
-					2. cleaner
-
-				Reasons NOT to implement: 
-					1. insanely complex
-					2. could negatively affect performance
-
 			4. ConcatStream
 			5. DelegateStream
 			6. DepthStream
@@ -120,6 +348,9 @@ NEXT UP:
 			24. TrivialStream
 			25. WrapperStream
 			26. WriterStream
+
+			Reminder: for `CompositeStream` - DO NOT IMPLEMENT!!!
+				Reason: *unbelievably* complex...
 				
 	TODO: [IStream 'mixin's] FIX the `mixin`s that INHERIT other mixins/classes, to USE 'this.super.constructor' MANUALLY!!!
 		One cannot stress this enough. 
@@ -159,26 +390,62 @@ NEXT UP:
 			... OTHERS [walk through the project - FIND ITHEM...]
 
 CURRENT TODOS [top-down order...]:		
-	TODO: Tests
-		BEFORE YOU DO THAT: 	
-			1. finish the docs [COMPLETELY!]
+	TODO: Docs [initial, new, final]
+		Documentation order: 
+			2. fix wiki [add new stuff, delete old]
+				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
+					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
+					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
+						and 
+				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
+					ONLY on public classes [exports]
+					
+				3. add SPECIAL pages for `IStream`: 
+					1. on mixins and "annotation" classes
+						1. on differences between the JS and TS APIs, specifically
+						2. vital: make sure it's *ABUNDANTLY CLEAR* that this is PRIMARILY a JS-API
+							Reasons: 
+								1. TypeScript is a horrible language
+								2. TypeScript is a HORRIBLE language
+								3. Just look at all the nonsense we had to invent to make this work. 
+									TypeScript is a horrible language! 
+								4. Too much work to get this working...
+								5. Not cutting it out entirely due to how beautiful the TypeScript's API is otherwise...
 
-		0. Remove old tests
-		1. TEST the internal/ (only what makes sense)
-		2. Test the public exports: 
-			1. ALL classes
-			2. ALL utils
-			3. ALL samples
-		3. Test that the LIST of library exports is correct: 
-			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
-				Ensures that ALL the needed exports are available
-			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+						3. CONCLUSION: 
+							1. do the '.annotation/.generic'-related changes in `v0.3`: 
+								DO NOT move to v0.4; 
+								Reason - purity of exports. 
+								The `.annotation`s ARE necessary, however, they are also: 
+									1. an implementation detail
+									2. necessary only to avoid exposing annotations to the user via `export`-keyword
+							2. DO NOT add the TypeScript-specific docs: 
+								Too much of a mess. 
+								Not worth it. 
+								Treat the `IStream`-classes in the docs as if they were the "real thing". 
+							3. REWRITE the projectr later in your TypeScript-replacement 
+								[it will share qauite a lot of the syntax, so very likely, one will not need to change all that much of the code]; 
+					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
+					3. on the HIERARCHY [make an image via 'Excalidraw']
 
-		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
-			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
-				treating each class instance as a "test starting point", from which one can test various methods. 
-					Saves A LOT of boilerplate that is (usually) written when doing tests. 
-		
+		2. Ensure NOTHING is missing from the wiki: 
+			1. utils
+			2. interfaces
+			3. classes
+			4. permalinks
+			5. self-referencing: 	
+				1. provide links to interfaces for class pages
+				2. provide links ot implementations for interfaces to interface pages
+
+		[later]
+		4. Finalization: 
+			1. piece-by-piece DOCUMENT any new exports: 
+				1. finished `samples` 
+				2. the `.annotation`s [leave them undocumented for the moment...]: 
+					1. NO JSDOC [reason: pointless]
+					2. wiki [brief explanation what these things are even]
+				3. Regex, TokenizerStream, ...
+
 MINOR TODOS: 			
 	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
 		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
@@ -225,8 +492,43 @@ MINOR TODOS:
 		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
 			for being JS-native [id est - being "natural", without forcing patterns
 				from "conservative" OOP languages, such as Java]
+
+	TODO: replace the `x: (...args: ...) => ...` with `x(...args: ...): ...`; 
+		Where relevant only [most places]. 
+		Reasons: 
+			1. better typing...
+			2. less confusion between the two 
+				[former is ONLY necessary for function-properties, 
+					whilst the latter is ONLY used for methods, 
+						so marking methods with the former, while possible, 
+							is neither sensible nor recommended most of the time]
+
+	TODO: find *THE* largest class in the library 
+		Use it as a sort of a: 
+			1. quality check [that all the classes "fit" within a certain size bound]
+				And that there are NO MORE "big" classes that need refactoring. 
+			2. for-fun statistics thing [knowing what is the largest library's class currently is]
+
+		TRY to have everything in under 140-150 lines [rare], 
+			and most classes in under 80-90 lines [ideal], 
+				with them being as small as possible - encapsulation 
+					of even ONE (independent) variable is enough cause for 
+						a separate class. 
 	
-LATER TODOS: 		
+LATER TODOS:
+	TODO [VITAL]: FIX the `ICopiable` presence in interfaces! 
+		It is EXCESSIVE, and is only required within SPECIFIC cases, when the user 
+			THEMSELVES may want to copy the class in question. Otherwise put: 
+
+				1. test CLASS IMPLEMENTATIONS, not interfaces
+				2. the user SHOULDN'T HAVE TO IMPLEMENT THE `.copy` METHOD!!!
+
+		This specifically touches on the `IStream`. 
+		DO NOT add the `ICopiable` on ANYTHING that isn't supposed to be 
+			ACTUALLY COPIED by the user [which it might]. 
+		Instead, let the [MUTABLE] TEST-CLASSES demand `ICopiable` 
+		from specific class-cases. 
+
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
 		Reasons: 
 			1. works FAR better with the `&`-role-composition	
@@ -244,7 +546,7 @@ LATER TODOS:
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
 		0. DO TDD [since tests will now be more-or-less established...]; 
-		1. Regex, TokenStream, ErrorHandler, Eliminator, WriterStream, etc - SEE EXTENSIVE NOTES BELOW
+		1. Regex, TokenStream, Eliminator, etc - SEE EXTENSIVE NOTES BELOW
 
 	TODO [one.js] - MAYBE...: LATER, when finishing new version:
 		Replace all occurences of `numbers(...).map(...)` with `array.from`; 
@@ -376,95 +678,13 @@ LATER TODOS:
 			4. repeat 1.-3. until `.value` is finished [tokens are produced as `this`]
 
 			This is immensely useful for tokenization via regular expressions; 
-				
-			IMPORTANT NOTE: `TokenStream` MUST ALLOW FOR ERROR-HANDLING!!! 
-				More specifically, it takes: 
-					1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
-					2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
-					3. IF none fit, IT PROVIDES AN `error-handling` callback, which the user may employ AS THEY SEE FIT! 
-						More specifically: 
-							1. an instance of an `IErrorHandler`-implementing class, contains a `nextItem()` [optional] and `error()` [mandatory]
-								methods, which work like:
-									1. if `nextItem(stream, info: IErrorInfo)` is present, it passes the respective `tokenStream`
-										to it, and `nextItem` skips the respective nodes until an acceptable one can be 
-											obtained via `stream.curr`. 
-										
-										The return value of `nextItem` is a new interface - `IPositionRange`:
-											it's a pair of positions: [IPosition, IPosition], like [for instance]: 
-												1. [ILineIndex, ILineIndex]
-												2. [MultiIndex, MultiIndex]
-												3. [number, number]
-												4. [IPositionPredicate, IPositionPredicate]
-												...
 
-											TODO: pass an `IPositionRange` to the `LimitedStream`; 
-
-										The returned `IPositionRange` would be correspondently treated 
-											by the interface in question. 
-
-										For the case of `TokenStream`, 
-											it is [basically] a `[ILineIndex, ILineIndex]`. 
-											The `IPositionRange` is then passed to an (optional)
-												`.handleErrRange(this.value.buffer, range: IPositionRange)` method on the 
-												Also, the `this.value.buffer` is the UNDERLYING 
-													buffer on the underlying [used by the 'TokenStream'] `IStream<string>`; 
-													It (basically) allows one to process the given range of positions 
-														"the right way". 
-
-										The `IErrorInfo` is a `number` - error code, 
-											for one of possible errors that can ocurr. 
-											[It's intended that the user will use an `enum` of `number`s for this]
-									2. call error()
-
-							[data access]
-							1. is kept upon a SPECIAL class/interface-instance called `ErrorHandler`: 
-								1. the `handler` has access to various state: 
-									it can be respectively pre-configured  by the user
-								2. `TokenStream` can have the `ErrorHandler` used INJECTABLE
-								3. The "base" `ErrorHandler` would have EXTENSION-CLASSES: 
-									1. [dynamic, via getter] `lineIndex` [use `dig + .value` - would keep the respective "top" Stream, from which to keep counting]
-										Useful for error-throwing inside the `.error()` method; 
-									2. [dynamic, via getter] `errorNode` [use `.value + .curr` - would keep the respective `Stream`, while also SERIALIZING the `Node`, 
-										at which the error has happened and/or use its `.type`/`.value`]; 
-										
-										Useful for error-throwing inside the `.error()` method; 
-									3. [static, via prototype - Configurator pattern] `nextItem()`: 
-										This would be user-defined. 
-										Allows, particularly, to work with
-
-									4. [static, via prototyep - Configurator pattern] `handleErrRange()`: 
-										This is user-defined. 
-
-						ALSO: this behaviour MUST BE INJECTABLE. 
-							Reason: the user may want to keep the tokenizer AS A PROPERTY in their own 
-								`IStream`, which would be responsible for handling errors. 
-
-					5. generalize the "TokenStream" error-handling mechanism that employs the `ErrorHandler` object, 
-						and employ (generally): 
-							1. uses an `ErrorHandler` with (optional) `handleErrRange`, and (optional) `nextItem`, 
-								and (mandatory, if neither other are present) `error`
-							2. uses an arbitrary `IStream & IBufferized`
-							3. uses an `IErrorDispatcher` - any function that can return a `type IErrorInfo<Type = any> = number | Type`: 
-								more specifically, these (in practice) would be `TableMap`-s, returning either: 
-									1. the `IErrorInfo` (whatever it is)
-									2. the `Type` (on success)
-										There should be a clear `isErrorInfo` predicate to distinct one from the other; 
-										Upon `IErrorInfo`, one has the `ErrorHandler`
-											dealing with it (in the said fashion, working with the `buffer`-ized `Stream`, 
-												which is PROCESSED by the `ErrorDispatcher`, which ITSELF is a 
-													`TableMap` for the current `IStream`; 
-
-													Then, one needs a new kind of `Stream` for this kind of thing. 
-														Call it `ErrorStream(dispatcher)(buffer, pos)` [configurator pattern]
-													
-													Then - one can put it into a `CommonParser`, 
-														and use with a `CommonParser.prototype.init(...)`; 
-														That is where creation of instances of `ErrorHandler`
-															would occur. 
-											). 
-
-								PROBLEM: with using `IErrorInfo = number`: can't handle `Type = number` then. 
-									Solution: allow generics? Think of something, this is nigh-trivial...
+			More specifically, it takes: 
+				1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
+					1. VITAL: as `DefaultType` has an "elseFunc"  handler (useful for providing error-messages, etc)
+						The "elseFunc" is MANDATORY, since it dictates what is to be done if an item cannot 
+						be satisfactorily mapped [clearly, SOMETHING has to be done, `undefined/null` are non-options here]. 
+				2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
 				
 			IMPORTANT NOTE: 
 				1. The `TokenStream` must have a candidate-elimination system. 
@@ -556,12 +776,6 @@ LATER TODOS:
 						2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 					6. PredicateStream - pick those that are not a ','
 					
-		CONCLUSION [about demos]: 
-			5. IMPORTANT : provide proper demos for: 
-				1. ab, +-, () and , arithmetic (like the one above) - USING `DynamicParser`
-				2. SELF-MODIFYING thing [using `DynamicParser`]
-					THIS should be made into a *test* [demo, more precisely, an INTEGRATION test]; 
-
 		RE2. `Regex` description:
 			[maybe] - create your own flavour for 'RegExp's
 			IMPORTANT NOTE: 
@@ -699,23 +913,14 @@ LATER TODOS:
 			Lazy, doesn't need several passes. 
 			Takes in the `Regex` list [walks, for given "character", each of them, matching, eliminating what was matched...]; 
 				Eliminates ONLY the first thing....; 	
-							
+													
 		TODO: `samples`: 
-			3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters];
-			4. Relocate the `DelimitedStream` to `samples.MarkerStream` 
-				1. This is an ".init-composition" (TO BE USED AS A SINGLE STREAM!!!) of: 
-					1. `boolean`-based MarkerStream, which relies upon a user-given predicate to determine the `.currMarked` of the given item; 
-					2. A `FilterPredicate`, ABOVE which provides the 
-				2. ALSO - DelimiterStream
-					0. based off 'DelimitedStream'
-					1. uses a "has"-based predicate created from a list of possible delimiters/items
-			5. ADD NEW ".init-compositions" [NOT `CompositeStream`-s, although that is what is indended elsewhere...] (old pseudocode)	
-				1. trivialCompose(IndexStream, InputStream)
-				2. trivialCompose(IndexStream, LFStream, InputStream)
-				3. trivialCompose(IndexStream, LFStream, LazyBuffer)	
-				4. trivialCompose(IndexStream, LazyBuffer)
-
-				IMPORTANT NOTE: 
+			3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters]: 
+				1. Based off `FilterStream`
+			4. ALSO - DelimiterStream
+					0. based off 'FilterStream'
+					1. uses a "has"-based predicate created from a list of possible delimiters/items, THAT ARE SKIPPED
+			5. IMPORTANT NOTE: 
 					after adding `TokenStream`, introduce: 
 						1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
 							Put together with the `isLFSkip` util. 
@@ -738,6 +943,7 @@ LATER TODOS:
 								MAKE this a proper util.
 
 							Reason to introduce - LF/CRLF-independent parsers...
+								Immensely useful for negelecting platform-specific LF/CRLF differences. 
 			
 			6. scavenge old projects + add common-all-over-the-place type-of patterns: 	
 				1. Tokens (names for INode-classes): 
@@ -807,6 +1013,11 @@ LATER TODOS:
 
 TODO: 
 	0. General notes (see these before anything else): 
+		PR1. Move all this to GitHub Issues: 
+			1. The library's issue-tracking IS A MESS
+				It ought to be organized...
+			2. Put each of these pieces into a seaprate Issue
+			3. Remove 'todos.txt'; 
 		TE1. Do TDD this time
 		JD1. [IMPORTANT] Expand JSDoc: 	
 				Read more about `JSDoc` in TypeScript at:
@@ -824,8 +1035,8 @@ TODO:
 						
 	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
 		TS1. DepthStream: create a new version - children-first traversal [call it `ChildrenStream`]; 
-			The 'DepthStream' (currently) is the 'LL' pre-order tree traversal algorithm Stream-implementation; 
-			There should be ANOTHER - the 'LR' post-order tree traversal; 
+			The 'DepthStream' (currently) is the pre-order tree traversal algorithm Stream-implementation; 
+			There should be ANOTHER - the post-order tree traversal; 
 
 			1. Create a new 'IStream' implementaiton for this - 'PostStream'; 
 				This is (particularly) useful for some types of interpreters; 
@@ -960,259 +1171,265 @@ TODO:
 			Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
 			These will (each) require individual internal-class implementations + public interfaces to use.
 				Reason for "internal" nature of these classes: one doesn't want to allow user to create them on their own
-		
-	2. Secondary [new utils, methods]
-		UT1. bufferize(tree, size) - util [Tree/utils.ts]
-			Given a 'Tree', returns an array of values of size `size`: 
-
-				{
-					childNumber: number,
-					value: any
-				}
-
-			The `size` is a fixed number >= 0, 'childNumber' is the number of children, ahead of current node in the array.
-			To be used for creating a persistent linear data structure for working with the given AST. 
-			Good for cases, when the number of items is known, and is large (part of the the "big input" optimizations); 
-
-			Would permit user to store a '.state.size: Pattern<number>' property (Pointer(number)) on the ParserState-s, 
-				for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
-					and use the tree for evaluation; 
-
-			If the 'size' is unknown, implements a simple DFS (namely - conversion of a given 'Tree' into an 'Array')
 			
-		UT2. util - enumerateTree [Tree/utils.ts]
-			Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
-				to single-array-siblings form (the current ChildrenTree); 	
+		2. Secondary [new utils, methods]
+			UT1. bufferize(tree, size) - util [Tree/utils.ts]
+				Given a 'Tree', returns an array of values of size `size`: 
 
-			This would permit a more "variable" set of trees (those that have properties with fixed names), 
-				to be enumerated accordingly...; 
+					{
+						childNumber: number,
+						value: any
+					}
 
-			Example [1]: 
+				The `size` is a fixed number >= 0, 'childNumber' is the number of children, ahead of current node in the array.
+				To be used for creating a persistent linear data structure for working with the given AST. 
+				Good for cases, when the number of items is known, and is large (part of the the "big input" optimizations); 
 
-				{
-					type: any, 
-					a: any
-					b: any
-					c: any
-				}
+				Would permit user to store a '.state.size: Pattern<number>' property (Pointer(number)) on the ParserState-s, 
+					for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
+						and use the tree for evaluation; 
 
-			Becomes [1]: 
+				If the 'size' is unknown, implements a simple DFS (namely - conversion of a given 'Tree' into an 'Array')
+				
+			UT2. util - enumerateTree [Tree/utils.ts]
+				Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
+					to single-array-siblings form (the current ChildrenTree); 	
 
-				{
-					type: any, 
-					value: [
-						// ... a, b, c
-						// ... or b, a, c
-						// ... or any other order
-					]
-				}
+				This would permit a more "variable" set of trees (those that have properties with fixed names), 
+					to be enumerated accordingly...; 
 
-			Example [2]: 
+				Example [1]: 
 
-				{ type: any }; remains the same
+					{
+						type: any, 
+						a: any
+						b: any
+						c: any
+					}
+
+				Becomes [1]: 
+
+					{
+						type: any, 
+						value: [
+							// ... a, b, c
+							// ... or b, a, c
+							// ... or any other order
+						]
+					}
+
+				Example [2]: 
+
+					{ type: any }; remains the same
+				
+				Example [3]: 
+
+					{ type: any, namedProp: any }; becomes { type: any, value: any }; by changing the property name to 'value'
+
+				For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used/transformed; 
+				More specifically, it creates a tree of `Node`s, from a tree with a given shape. 
+				
+			UT3. Add more complex 'Node' utilities. Based off previous 'one.js' v0.3.1 [the removed methods], add: 
+
+				1. deepSearch - searching inside the given Tree for a value with a given 'prop'
+				2. depth - calculating the depth of the given Tree
+				3. treeCount - counts the values of a given predicate for all items in the tree
+
+				ALSO: Add new methods to 'RecursiveNode': 
+
+					1. .reverse() - recursively reverses the given tree
+												
+			CU1. Add a 'binarySearch' utility: 
+				1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
+				2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+
+			MC1. MapClass: fix types
+				More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
+				These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
+				The inner key type matters during construction, but the outer key type matters during other usage. 
+				Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
+									
+		3. Unrelated/separate module/grand refactoring: 		
+			DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
+				1. draw-text [install-npm + prod-to GitHub Pages]
+					Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
+				2. selector [to npm]
+				3. regex [to npm]
+				4. xml [to npm]
+
+		4. Docs: 
+			WE1. CREATE A proper website with documentation for the library. 
+				Do benchmarks, et cetera...; 
+				After doing GitHub Wiki for v0.3, see if it cuts it (spoiler - it likely won't one STILL wants the ravishing types for the library's docs to be present!)
+					For this: 
+
+						1. Learn a new CSS-based tool (either for generating/hosting docs/docs-css-styles like TypeDoc/readthedocs , 
+							OR a new library to create one's own doc-styles like 'Tailwind CSS'); 
+						2. Create a JSON parser in parsers.js and COMPARE it against the [https://chevrotain.io/performance/], with ops/sec. 
+							See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
+							2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
+								The memory usage should be noticeably better than speed...; 
+
+			JD1. JSDoc-s: add references
+				Particularly - add the links to documentation website INSIDE the JSDoc (currently, lacks, the user has to look up themselves). 
+				Reason (that it lacks currently, as of v0.3): time concerns
+
+			JD2. Use a more complex (high-quality) JSDoc
+				Current one is primitive (time concerns). 
+				Add tags: 
+					1. @returns
+					2. @type [JSDoc-level self-reference for types]
+					3. ...
+
+			IN2. REMINDER: about the `init` method output type: 
+				After it is generalized to a SINGLE interface, make FOR ALL `.init`-having method
+				so that `init` returns `this`. 
+		
+			WI1. Add usage examples: 
+				Current API is quite complex considering the need for generic functions (in many cases). 
+
+			WI2. Add proper Guides: 
+				Currently, the API code is pretty brutal. 
+				Doesn't explain stuff, only contains crucial-to-be-used notes, 
+					and general explanations. 
+				The API *IS* simple (ultimately), but it is better to be explained,
+					because otherwise quite a lot of things may seem cryptical and/or 
+						unnecessary
+
+				1. Separate the API documentation from Guides
+				2. Guides would include: 
+					1. Examples of code for mini-projects: 
+						It's going to be one of:
+
+						1. A JSON parser [using 'DynamicParser' - non-self-modifying]: 
+							Reasons: 
+								1. simple to implement
+								2. simple to test
+								3. can unify the code
+								4. not really useful (as builtin JSON.parse exists; e.g. no reason to refactor to another repo, besides tidyness...)
+					2. Terminology pages: 
+						Originally intended to be part of v0.3, these have gotten way out of 
+							hand, and no longer feasible without some considerable effort (for which there really isn't much time...); 
+					3. Samples page: 
+						This is a Guide to the `samples` module. 
+						Will list the "out-of-the-box" cases for usage 
+							and link to respective `samples` module 
+								exported definitions. 
+
+			WI3. Remove links to old docs (v0.3 and prior...): 
+				It's good, but it's old, and... 
+					well, the library wasn't quite formed yet. 
+				Constant compatibility breakages, no firm direction of development, 
+					constant change of idioms employed, 
+						it's basically (almost) like a whole new project now
+							(difference being - now it's got a lot more types, and good swe practices: tests, SOLID, etc...)
+
+			WI4. about `fault tolerance`, 
+				the user can (themselves) create special "Error" types, 
+					which are respectively handled by HashMap/IndexMap-based TableMap-functions; 
+
+				Add a Guide for that.
+
+			WTJD1. Combined note on self-references
+				1. add wiki references: 
+					1. to jsdoc
+						Now, the wiki (which is still just a glorified version of jsdoc), 
+							will also be given references to by the JSDoc [user no longer has to search for it themselves]. 
+					2. into wiki [self-references]
+				2. complete jsdoc: 
+					1. for classes: 
+						1. add documentation ON A PER-METHOD basis
+							[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
+						2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
+							Must be synced with `wiki`. 
+							LET the `public/protected` docs for these methods be THE SAME. 
+
+		5. Testing: 
+			1. introduce mocks [use Jest]
+				Reason: complexity. 
+					There's still v0.4 to go (proper BFS implementation, for instance...); 
+
+		6. Research (Chevrotain - source, capabilities, optimizations): 
+			1. Compare performance with Chevrotain benchmark (the JSON parser example): 
+				1. *possibly*, if the libraryperformance is really bad, do something about it...
+			2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
+				Supposedly, it (significantly) speeds up property access on classes. 
+				Benchmark...
+			3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
+				Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
+
+	FUTURE: 
+		1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
+			0. `copiable` package: 
+				A TypeScript package. 
+				Contains the `ICopiable` trait. 
+				Make a dependency of this. 
+
+			1. `test` package [already developed]: 
+				1. add the current 'ClassTest', 'MethodTest' 
+				2. make `copiable` a dependency of this: 
+					1. reason - relies upon copiability of a given class for its instances to be 
+						'ITestable' - a new interface to export
+				3. [unrelated] add serialization of tested items [interfaces for it, etc]
+				4. [unrelated] add 'Snapshot' API (similar to `Jest`)
+
+			2. `autocache` package [make a dependency of parsers.js]: 
+				1. Autocache
+				2. IIndexable
+				3. ISettable
 			
-			Example [3]: 
-
-				{ type: any, namedProp: any }; becomes { type: any, value: any }; by changing the property name to 'value'
-
-			For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used/transformed; 
-			More specifically, it creates a tree of `Node`s, from a tree with a given shape. 
+			3. `serializable`: 
+				1. `ISerializable` interface
+				2. `ISerializableObject` interface
 			
-		UT3. Add more complex 'Node' utilities. Based off previous 'one.js' v0.3.1 [the removed methods], add: 
+			4. 'mixin.ts': 
+				1. a new package - the 'mixin' module here
+					It should be USED IN `parsers.js` as BOTH: 
+						1. a dependency
+						2. a re-export [since there are mixins CURRENTLY exported]
 
-			1. deepSearch - searching inside the given Tree for a value with a given 'prop'
-			2. depth - calculating the depth of the given Tree
-			3. treeCount - counts the values of a given predicate for all items in the tree
+			5. `object_pool`: 
+				This is the `ObjectPool` (and `IInitializable` interface) class. 
+				It is far too independent to be just left here. 
+				Far too useful to be allowed to be "herded" together with the domain-specific 
+				stuff. 
 
-			ALSO: Add new methods to 'RecursiveNode': 
+				'FreeStream' REMAINS PART OF `parsers.js`
 
-				1. .reverse() - recursively reverses the given tree
-											
-		CU1. Add a 'binarySearch' utility: 
-			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
-			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
+				Export this from here as a dependency. 
 
-		MC1. MapClass: fix types
-			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
-			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
-			The inner key type matters during construction, but the outer key type matters during other usage. 
-			Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
-								
-	3. Unrelated/separate module/grand refactoring: 		
-		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
-			1. draw-text [install-npm + prod-to GitHub Pages]
-				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
-			2. selector [to npm]
-			3. regex [to npm]
-			4. xml [to npm]
+		2. [maybe? later, definitely] A Java rewrite: 
+			the project is a very fine one, a very fine one indeed... 
+			Howeeeverr...
+			One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
+			Solution: 
+				1. rewrite in *name-of-THAT-Big-project* [once finished]
+				2. decompile the JS sources [obtained from TypeScript]
+				3. change the sources
+				4. transpile to Java [that is the alternative language of choice]
+					That is without the tests of course. 
+					Those you'll need to write anew (using something like JUnit, maybe?)
+					THE `.copy()` aspect WILL STILL REMAIN!!!
+				5. write new tests [Java]
+				6. publish
+			
+			Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
+				better than the current JS code (since it's been transpiled from TypeScrtipt). 
+			
+			NOTE [VITAL]: remember that the complex `IStream` hierarchy was (actually)
+				supposed to have been done entirely using 'mixins' 
+					(which are absent from TypeScript, and, in a formalized variant, from JS)...
 
-	4. Docs: 
-		WE1. CREATE A proper website with documentation for the library. 
-			Do benchmarks, et cetera...; 
-			After doing GitHub Wiki for v0.3, see if it cuts it (spoiler - it likely won't one STILL wants the ravishing types for the library's docs to be present!)
-				For this: 
+		3. Reminder: do you rmember the stack.js? 
+			Old (partially abandonned) project for using "stackless" code?
 
-					1. Learn a new CSS-based tool (either for generating/hosting docs/docs-css-styles like TypeDoc/readthedocs , 
-						OR a new library to create one's own doc-styles like 'Tailwind CSS'); 
-					2. Create a JSON parser in parsers.js and COMPARE it against the [https://chevrotain.io/performance/], with ops/sec. 
-						See, WHICH libraries have managed to beat parsers.js v0.4., and WHAT can one do about it (see their optimizations, specifically...); 
-						2.1. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
-							The memory usage should be noticeably better than speed...; 
+		4. (maybe) later - ensure JS-runtime-independence: 
+			Verify that the package has compatibility with: 
+			1. Deno [v2.0+]
+			2. Bun [v1.0+]
 
-		JD1. JSDoc-s: add references
-			Particularly - add the links to documentation website INSIDE the JSDoc (currently, lacks, the user has to look up themselves). 
-			Reason (that it lacks currently, as of v0.3): time concerns
-
-		JD2. Use a more complex (high-quality) JSDoc
-			Current one is primitive (time concerns). 
-			Add tags: 
-				1. @returns
-				2. @type [JSDoc-level self-reference for types]
-				3. ...
-
-		IN2. REMINDER: about the `init` method output type: 
-			After it is generalized to a SINGLE interface, make FOR ALL `.init`-having method
-			so that `init` returns `this`. 
-	
-		WI1. Add usage examples: 
-			Current API is quite complex considering the need for generic functions (in many cases). 
-
-		WI2. Add proper Guides: 
-			Currently, the API code is pretty brutal. 
-			Doesn't explain stuff, only contains crucial-to-be-used notes, 
-				and general explanations. 
-			The API *IS* simple (ultimately), but it is better to be explained,
-				because otherwise quite a lot of things may seem cryptical and/or 
-					unnecessary
-
-			1. Separate the API documentation from Guides
-			2. Guides would include: 
-				1. Examples of code for mini-projects: 
-					It's going to be one of:
-
-					1. A JSON parser [using 'DynamicParser' - non-self-modifying]: 
-						Reasons: 
-							1. simple to implement
-							2. simple to test
-							3. can unify the code
-							4. not really useful (as builtin JSON.parse exists; e.g. no reason to refactor to another repo, besides tidyness...)
-				2. Terminology pages: 
-					Originally intended to be part of v0.3, these have gotten way out of 
-						hand, and no longer feasible without some considerable effort (for which there really isn't much time...); 
-				3. Samples page: 
-					This is a Guide to the `samples` module. 
-					Will list the "out-of-the-box" cases for usage 
-						and link to respective `samples` module 
-							exported definitions. 
-
-		WI3. Remove links to old docs (v0.3 and prior...): 
-			It's good, but it's old, and... 
-				well, the library wasn't quite formed yet. 
-			Constant compatibility breakages, no firm direction of development, 
-				constant change of idioms employed, 
-					it's basically (almost) like a whole new project now
-						(difference being - now it's got a lot more types, and good swe practices: tests, SOLID, etc...)
-
-		WI4. about `fault tolerance`, 
-			the user can (themselves) create special "Error" types, 
-				which are respectively handled by HashMap/IndexMap-based TableMap-functions; 
-
-			Add a Guide for that.
-
-		WTJD1. Combined note on self-references
-			1. add wiki references: 
-				1. to jsdoc
-					Now, the wiki (which is still just a glorified version of jsdoc), 
-						will also be given references to by the JSDoc [user no longer has to search for it themselves]. 
-				2. into wiki [self-references]
-			2. complete jsdoc: 
-				1. for classes: 
-					1. add documentation ON A PER-METHOD basis
-						[note: for 'annotated' classes - add docs to the FAKE METHODS, not the real ones]; 
-					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
-						Must be synced with `wiki`. 
-						LET the `public/protected` docs for these methods be THE SAME. 
-
-	5. Testing: 
-		1. introduce mocks [use Jest]
-			Reason: complexity. 
-				There's still v0.4 to go (proper BFS implementation, for instance...); 
-
-	6. Research (Chevrotain - source, capabilities, optimizations): 
-		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
-			1. *possibly*, if the libraryperformance is really bad, do something about it...
-		2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
-			Supposedly, it (significantly) speeds up property access on classes. 
-			Benchmark...
-		3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
-			Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
-
-FUTURE: 
-	1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
-		0. `copiable` package: 
-			A TypeScript package. 
-			Contains the `ICopiable` trait. 
-			Make a dependency of this. 
-
-		1. `test` package [already developed]: 
-			1. add the current 'ClassTest', 'MethodTest' 
-			2. make `copiable` a dependency of this: 
-				1. reason - relies upon copiability of a given class for its instances to be 
-					'ITestable' - a new interface to export
-			3. [unrelated] add serialization of tested items [interfaces for it, etc]
-			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
-
-		2. `autocache` package [make a dependency of parsers.js]: 
-			1. Autocache
-			2. IIndexable
-			3. ISettable
-		
-		3. `serializable`: 
-			1. `ISerializable` interface
-			2. `ISerializableObject` interface
-		
-		4. 'mixin.ts': 
-			1. a new package - the 'mixin' module here
-				It should be USED IN `parsers.js` as BOTH: 
-					1. a dependency
-					2. a re-export [since there are mixins CURRENTLY exported]
-
-		5. `object_pool`: 
-			This is the `ObjectPool` (and `IInitializable` interface) class. 
-			It is far too independent to be just left here. 
-			Far too useful to be allowed to be "herded" together with the domain-specific 
-			stuff. 
-
-			'FreeStream' REMAINS PART OF `parsers.js`
-
-			Export this from here as a dependency. 
-
-	2. [maybe? later, definitely] A Java rewrite: 
-		the project is a very fine one, a very fine one indeed... 
-		Howeeeverr...
-		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
-		Solution: 
-			1. rewrite in *name-of-THAT-Big-project* [once finished]
-			2. decompile the JS sources [obtained from TypeScript]
-			3. change the sources
-			4. transpile to Java [that is the alternative language of choice]
-				That is without the tests of course. 
-				Those you'll need to write anew (using something like JUnit, maybe?)
-				THE `.copy()` aspect WILL STILL REMAIN!!!
-			5. write new tests [Java]
-			6. publish
-		
-		Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
-			better than the current JS code (since it's been transpiled from TypeScrtipt). 
-		
-		NOTE [VITAL]: remember that the complex `IStream` hierarchy was (actually)
-			supposed to have been done entirely using 'mixins' 
-				(which are absent from TypeScript, and, in a formalized variant, from JS)...
-
-	3. Reminder: do you rmember the stack.js? 
-		Old (partially abandonned) project for using "stackless" code?
-
-	4. (maybe) later - ensure JS-runtime-independence: 
-		Verify that the package has compatibility with: 
-		1. Deno [v2.0+]
-		2. Bun [v1.0+]
+		5. Rewrite this using your NEW language [later the "TS Replacement"]. 
+			Reasons: 
+				1. natural runtime-static-time combination
+				2. better + simpler type-system
+				3. [big one] natural support for mixins

@@ -6,7 +6,8 @@ import type {
 	IOwnedStream,
 	IPeekable,
 	IPeekStream,
-	IPrevable
+	IPrevable,
+	IStream
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
 import { write } from "../../../utils/Stream.js"
@@ -16,10 +17,108 @@ interface IPeekResettable {
 	resetPeeks(): void
 }
 
+interface IPeekProvidableFor<T = any> {
+	trivialPeek(): T
+	newPeek(n: number): T
+}
+
 type IPeekStreamConstructor<T = any> = new (
 	resource?: IOwnedStream,
 	n?: number
 ) => ILinkedStream<T> & IPeekable<T> & IPeekResettable & IPrevable
+
+/**
+ * This is a class for providing lookaheads
+ * to the `PeekStream` by encapsulating the
+ * underlying `RotationBuffer<T>` used for keeping
+ * track of them.
+ */
+class PeekProvider<T = any> {
+	private readonly peekBuffer: RotationBuffer<T>
+
+	private get peekCount() {
+		return this.peekBuffer.size
+	}
+
+	private unseenItems(total: number) {
+		return total - this.peekCount
+	}
+
+	private isTrivial(n: number) {
+		return n === 0
+	}
+
+	private hasSeen(n: number) {
+		return n <= this.peekCount
+	}
+
+	private priorPeek(n: number) {
+		return this.peekBuffer.read(n - 1)
+	}
+
+	isNone() {
+		return this.peekCount === 0
+	}
+
+	provide(n: number, providableFor: IPeekProvidableFor<T>) {
+		switch (true) {
+			case this.isTrivial(n):
+				return providableFor.trivialPeek()
+
+			case this.hasSeen(n):
+				return this.priorPeek(n)
+
+			default:
+				return providableFor.newPeek(this.unseenItems(n))
+		}
+	}
+
+	hasAny() {
+		return this.peekCount > 0
+	}
+
+	backward() {
+		this.peekBuffer.backward()
+	}
+
+	fetchNext() {
+		const nextPeek = this.peekBuffer.first()
+		this.peekBuffer.forward()
+		return nextPeek
+	}
+
+	last() {
+		return this.peekBuffer.last()
+	}
+
+	push(items: readonly T[]) {
+		this.peekBuffer.push(items)
+	}
+
+	reset() {
+		this.peekBuffer.clear()
+	}
+
+	constructor(n: number = 1) {
+		this.peekBuffer = new RotationBuffer(n)
+	}
+}
+
+/**
+ * A class for encapsulating read-writing
+ * operation to a temporary `RetainedArray<T>`.
+ */
+class TempWriter<T = any> {
+	private readonly tempItems = new RetainedArray<T>()
+
+	toTemp(from: IStream<T>, count: number) {
+		write(from, this.tempItems.init(count))
+	}
+
+	get() {
+		return this.tempItems.get()
+	}
+}
 
 const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 	init(
@@ -40,28 +139,8 @@ function BuildPeekStream<T = any>() {
 			return peekStreamInitializer
 		}
 
-		private readonly tempItems = new RetainedArray<T>()
-		private readonly peekBuffer: RotationBuffer<T>
-
-		private get peekCount() {
-			return this.peekBuffer.size
-		}
-
-		private unseenItems(total: number) {
-			return total - this.peekCount
-		}
-
-		private isTrivial(n: number) {
-			return n === 0
-		}
-
-		private hasSeen(n: number) {
-			return n <= this.peekCount
-		}
-
-		private peekNonEmpty() {
-			return this.peekCount > 0
-		}
+		private readonly peekProvider: PeekProvider<T>
+		private readonly tempWriter = new TempWriter<T>()
 
 		private baseNextIter() {
 			super.next()
@@ -74,82 +153,58 @@ function BuildPeekStream<T = any>() {
 		}
 
 		private fetchNextPeek() {
-			const nextPeek = this.peekBuffer.read(0)
-			this.peekBuffer.forward()
-			this.curr = nextPeek
-		}
-
-		private trivialPeek() {
-			return this.curr
-		}
-
-		private priorPeek(n: number) {
-			return this.peekBuffer.read(n - 1)
-		}
-
-		private newPeek(count: number) {
-			this.toTemp(count)
-			this.peekBuffer.push(...this.tempItems.get())
-			return this.peekBuffer.last()
+			this.curr = this.peekProvider.fetchNext()
 		}
 
 		private toTemp(count: number) {
-			write(this.resource!, this.tempItems.init(count))
+			this.tempWriter.toTemp(this.resource!, count)
 		}
 
 		private fetchPrevPeek() {
-			this.peekBuffer.backward()
-			if (this.peekNonEmpty()) this.basePrevIter()
-			else this.replaceCurrWithNextPeek()
+			this.peekProvider.backward()
+			if (this.peekProvider.hasAny()) this.basePrevIter()
+			else this.fetchNextPeek()
 		}
 
-		private replaceCurrWithNextPeek() {
-			this.curr = this.peekBuffer.first()
-			this.peekBuffer.forward()
+		trivialPeek() {
+			return this.curr
 		}
 
-		private remainsNoneSeen() {
-			return this.peekCount === 0
+		newPeek(count: number) {
+			this.toTemp(count)
+			this.peekProvider.push(this.tempWriter.get())
+			return this.peekProvider.last()
 		}
 
 		peek(n: number) {
-			switch (true) {
-				case this.isTrivial(n):
-					return this.trivialPeek()
-
-				case this.hasSeen(n):
-					return this.priorPeek(n)
-
-				default:
-					return this.newPeek(this.unseenItems(n))
-			}
+			return this.peekProvider.provide(n, this)
 		}
 
 		isCurrEnd(): boolean {
-			return super.isCurrEnd() && this.remainsNoneSeen()
+			return super.isCurrEnd() && this.peekProvider.isNone()
 		}
 
 		next() {
 			this.isStart = false
 			if (this.isCurrEnd()) this.endStream()
-			else if (this.peekNonEmpty()) this.fetchNextPeek()
+			else if (this.peekProvider.hasAny()) this.fetchNextPeek()
 			else this.baseNextIter()
 		}
 
 		prev() {
 			this.isEnd = false
 			if (this.isCurrStart()) this.startStream()
-			else if (this.peekNonEmpty()) this.fetchPrevPeek()
+			else if (this.peekProvider.hasAny()) this.fetchPrevPeek()
 			else this.basePrevIter()
 		}
 
 		resetPeeks() {
-			this.peekBuffer.clear()
+			this.peekProvider.reset()
 		}
 
 		constructor(resource?: IOwnedStream<T>, n: number = 1) {
 			super(resource)
-			this.peekBuffer = new RotationBuffer(n)
+			this.peekProvider = new PeekProvider(n)
 		}
 	}
 }

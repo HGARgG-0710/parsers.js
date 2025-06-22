@@ -1,9 +1,11 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICopiable,
 	IInitializable,
 	IOwnedStream,
+	IParseState,
 	IPosed,
-	IStateful,
+	IStateHaving,
 	IStateSettable
 } from "../interfaces.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
@@ -75,6 +77,13 @@ export interface IResourceful {
 }
 
 /**
+ * This is a type for representing entities that are
+ * `IStateHaving<T>`, as well as `IStateSettable`
+ */
+export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
+	IStateSettable
+
+/**
  * An interface for representing the library's primary data structure - a Stream.
  * `IStream`s are used throughout to represent lazy element-by-element
  * transformations of input data. Compositions of `IStream`s (via `ICompositeStream`s
@@ -105,7 +114,7 @@ export interface IResourceful {
 export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IFinishable<T>> &
 	Partial<IRewindable<T>> &
-	Partial<IStateful> &
+	Partial<IStateHaving> &
 	Partial<IInitializable> &
 	Partial<IIsCurrStartable> &
 	Partial<IPeekable<T>> &
@@ -140,13 +149,13 @@ export type IResourcefulStream<T = any> = IStream<T> & IResourceful
 /**
  * This is an `IStream<T>` that is also `IStateful`, as well as `IStateSettable`
  */
-export type IStatefulStream<T = any> = IStream<T> & IStateful & IStateSettable
+export type IStatefulStream<T = any> = IStream<T> & IStateful<IParseState>
 
 /**
- * This is an `IStream<T>`, that is also `IPosed<numer>`. 
- * Here `.pos: number` is used to track current item's numerical 
-* position.
-*/
+ * This is an `IStream<T>`, that is also `IPosed<numer>`.
+ * Here `.pos: number` is used to track current item's numerical
+ * position.
+ */
 export type IPositionStream<T = any> = IPosed<number> & IStream<T>
 
 /**
@@ -155,8 +164,8 @@ export type IPositionStream<T = any> = IPosed<number> & IStream<T>
  */
 export type IChange<T = any> = (input: IPrevableStream<T>) => T
 
-
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
+export type * from "../modules/Stream/interfaces/HandlerStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"
 export type * from "../modules/Stream/interfaces/InputStream.js"
 export type * from "../modules/Stream/interfaces/LimitStream.js"

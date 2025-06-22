@@ -4,11 +4,7 @@ import type { IHash } from "./interfaces/HashMap.js"
 
 /**
  * This is an interface for representing objects that
- * are copiable. Copying is a default mechanism by which
- * object state is inherited in the course of testing
- * (since the library, primarily, employs state testing,
- * not behaviour testing, and most objects are highly
- * stateful).
+ * are copiable.
  */
 export interface ICopiable {
 	copy: () => this
@@ -18,23 +14,23 @@ export interface ICopiable {
  * This is a granularization of the `Set` class's interface.
  * Has `has(x: any): boolean` method.
  */
-export interface IHaving {
-	has: (x: any) => boolean
+export interface IHaving<T = any> {
+	has: (x: T) => boolean
 }
 
 /**
  * This is a granularization of the `RegExp` class's interface.
  * Has `test(x: any): boolean` method.
  */
-export interface ITestable {
-	test: (x: any) => boolean
+export interface ITestable<T = any> {
+	test: (x: T) => boolean
 }
 
 /**
- * This is a type for functions used by the `MapClass`
- * for representation of elementary searching operations.
+ * This is a type representing a predicate of a single
+ * variable of type `T`. 
  */
-export type IIndexingFunction<Key = any> = (curr: Key, x: any) => boolean
+export type IPredicate<T = any> = (x: T) => boolean
 
 /**
  * Represents an entity with a numerical `readonly size`.
@@ -57,7 +53,7 @@ export interface IDefaulting<T = any> {
  * method is reponsible for this.
  */
 export interface ISettable<K = any, V = any> {
-	set: (key: K, value: V) => this
+	set: (key: K, value: V) => any
 }
 
 /**
@@ -101,7 +97,7 @@ export type IIndexed<T = any> = {
 /**
  * Represents an entity with some sort of `readonly state: T`
  */
-export interface IStateful<T extends Summat = Summat> {
+export interface IStateHaving<T extends Summat = Summat> {
 	readonly state: T
 }
 
@@ -178,7 +174,7 @@ export interface IFreezable {
  * This is an interface for representing entities that
  * can be "unfrozen", and have a method `unfreeze(): this`
  */
-export interface IUnfreezable {
+export interface IUnfreezable extends IFreezable {
 	unfreeze: () => this
 }
 
@@ -299,12 +295,11 @@ export type * from "./interfaces/Destination.js"
 export type * from "./interfaces/DynamicParser.js"
 export type * from "./interfaces/Encoder.js"
 export type * from "./interfaces/HashMap.js"
+export type * from "./interfaces/IndexMap.js"
 export type * from "./interfaces/Initializer.js"
-export type * from "./interfaces/MapClass.js"
 export type * from "./interfaces/Node.js"
 export type * from "./interfaces/PoolGetter.js"
 export type * from "./interfaces/Position.js"
 export type * from "./interfaces/Source.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
-export type * from "./interfaces/TableMap.js"

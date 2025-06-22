@@ -2,12 +2,11 @@ import assert from "assert"
 import type {
 	INodeType,
 	INodeTypeCategories,
-	INodeTypeFactory,
-	IRecursiveNodeTypeFactory
+	INodeTypeFactory
 } from "../interfaces/Node.js"
 import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
-import { MapInternal } from "../modules/HashMap/classes/PreMap.js"
+import { BasicMap } from "../samples/TerminalMap.js"
 import { Autocache } from "./Autocache.js"
 import { BasicHash } from "./HashMap.js"
 import { ObjectPool } from "./ObjectPool.js"
@@ -17,7 +16,7 @@ type INodeTypesMap<T = any> = Map<T, INodeType<T>>
 
 /**
  * This is a function for wrapping an `INodeTypeFactory<T, Args>`
- * into an `Autocache` using `new BasicHash(new MapInternal())`.
+ * into an `Autocache` using `new BasicHash(samples.TerminalMap.BasicMap())`.
  * It allows the user to ensure that is a relatively "nice"/simple
  * `T` (number, string, etc) is used, then it will be possible
  * to recover existing `INodeType`s instead of completely
@@ -25,22 +24,12 @@ type INodeTypesMap<T = any> = Map<T, INodeType<T>>
  * as an alternative to `.is` IF `NodeFactory` [or an equivalent
  * class-caching technique] is utilized.
  */
-export function NodeFactory<T = any, Args extends any[] = []>(
-	preFactory: INodeTypeFactory<T, Args>
-): INodeTypeFactory<T, Args> {
-	return Autocache(new BasicHash(new MapInternal()), preFactory)
-}
-
-/**
- * This is a wrapper around the `NodeFactory` for producing `IRecursiveNodeTypeFactory`
- * specifically. Sometimes, the user will want the access to the
- * `IRecursiveNode` methods, and then the type granularity of the `NodeFactory`
- * will not be enough.
- */
-export function RecursiveNodeFactory<T = any, Args extends any[] = []>(
-	preFactory: IRecursiveNodeTypeFactory<T, Args>
-): IRecursiveNodeTypeFactory<T, Args> {
-	return NodeFactory(preFactory) as IRecursiveNodeTypeFactory<T, Args>
+export function NodeFactory<
+	T = any,
+	Args extends any[] = any[],
+	K extends INodeTypeFactory<T, Args> = INodeTypeFactory<T, Args>
+>(preFactory: K): K {
+	return Autocache(new BasicHash(BasicMap()), preFactory) as K
 }
 
 /**

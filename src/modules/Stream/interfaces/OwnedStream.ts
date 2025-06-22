@@ -1,8 +1,9 @@
 import type {
+	IOwnerSettable,
 	IRecursiveListIdentifiable,
+	IResourceSettable,
 	ISwitchIdentifiable
-} from "src/interfaces.js"
-import type { IOwnerSettable, IResourceSettable } from "../../../interfaces.js"
+} from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
 	IStatefulStream,
@@ -14,9 +15,12 @@ import type {
  * has a `readonly owner?: IOwningStream` property. It represents a stream,
  * which can be taken ownership of.
  */
-export type IOwnedStream<T = any> = IStream<T> &
+export type IOwnedStream<
+	T = any,
+	OwnerType extends IOwningStream = IOwningStream
+> = IStream<T> &
 	IOwnerSettable<IOwningStream> & {
-		readonly owner?: IOwningStream
+		readonly owner?: OwnerType
 	}
 
 /**

@@ -1,7 +1,7 @@
 import { type as _type, functional, string } from "@hgargg-0710/one"
 import { type } from "../aliases/Node.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
-import type { IPreMap } from "../modules/HashMap/interfaces/PreMap.js"
+import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -58,28 +58,32 @@ abstract class PreHashClass<K = any, V = any, InternalKey = any, Default = any>
 		return new this.constructor(this.pre.copy())
 	}
 
+	get(key: K): V | Default {
+		return this.pre.get(this.hash(key))
+	}
+
 	concat(pairsList: Iterable<[K, V]>): this {
 		for (const [key, value] of pairsList) this.set(key, value)
 		return this
 	}
 
-	constructor(private pre: IPreMap<InternalKey, V, Default>) {}
+	constructor(private readonly pre: IPreMap<InternalKey, V, Default>) {}
 }
 
 /**
- * This is a factory for producing `IHashClass<K, V, InternalKey, Default` objects. 
- * These are, essentially, classes/constructors for the creation of `IHashMap` objects, 
- * via the underlying `structure: IPreMap<InternalKey, V, Default>` objects. 
- * 
- * This function creates a new class on each call, its results are NOT cached automatically, 
- * so caution is advised when using it. The classes WILL be disjoint whenever using 
+ * This is a factory for producing `IHashClass<K, V, InternalKey, Default` objects.
+ * These are, essentially, classes/constructors for the creation of `IHashMap` objects,
+ * via the underlying `structure: IPreMap<InternalKey, V, Default>` objects.
+ *
+ * This function creates a new class on each call, its results are NOT cached automatically,
+ * so caution is advised when using it. The classes WILL be disjoint whenever using
  * `instanceof`, although they do share a common-functionality ancestor.
- * 
+ *
  * The `IHashClass` implementation specific to this factory is such that (internally)
- * it redirects all of its calls to the `IPreMap`, by putting all the 
- * methods' arguments of type `K` through the provided `hash` argument of the respective 
- * `HashClass` call. 
-*/
+ * it redirects all of its calls to the `IPreMap`, by putting all the
+ * methods' arguments of type `K` through the provided `hash` argument of the respective
+ * `HashClass` call.
+ */
 export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 	hash: IHash<K, InternalKey>
 ): IHashClass<K, V, InternalKey, Default> {
@@ -106,4 +110,5 @@ export const TypeofHash = HashClass(typeOf)
 
 export const CharHash = HashClass(charCodeAt)
 
-export * as PreMap from "../modules/HashMap/classes/PreMap.js"
+export * as PlainMap from "../modules/HashMap/classes/PlainMap.js"
+export * from "../modules/HashMap/classes/TerminalMap.js"
