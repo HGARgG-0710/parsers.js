@@ -74,7 +74,7 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 
 		private _pos = 0
 		private lastPos: number
-		private readonly view: ReadableView
+		private readonly view: ReadableView<T>
 
 		private set pos(newPos: number) {
 			this._pos = newPos
