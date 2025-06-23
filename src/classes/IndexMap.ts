@@ -37,3 +37,4 @@ export const nodeMap = (mapClass: IMapClass) => mapClass.extendKey(is)
 
 export * from "../modules/IndexMap/classes/MapClass.js"
 export * from "../modules/IndexMap/classes/ModifiableMap.js"
+export * from "../modules/IndexMap/classes/TableMap.js"

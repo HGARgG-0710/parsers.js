@@ -8,8 +8,8 @@ import type {
 	ITestable
 } from "../../../interfaces.js"
 import type { IIndexMap, IMapClass } from "../../../interfaces/MapClass.js"
-import { TableMap } from "../../../internal/TableMap.js"
 import { isGoodIndex } from "../../../utils.js"
+import { TableMap } from "./TableMap.js"
 
 const { isArray } = type
 const { trivialCompose } = functional
