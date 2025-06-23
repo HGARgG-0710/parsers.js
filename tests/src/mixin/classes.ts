@@ -1,6 +1,6 @@
 import { array, object, type } from "@hgargg-0710/one"
 import { mixin } from "../../../dist/main.js"
-import { TestCounter } from "../lib/lib.js"
+import { TestCounter } from "../lib.js"
 import {
 	CLASS_AND_MIXIN_PARENTS,
 	CLASS_PARENTS,
@@ -11,7 +11,7 @@ import {
 	NO_CONSTRUCTOR,
 	NO_PARENTS,
 	PureMixinPrototypeTest
-} from "./lib/classes.js"
+} from "./lib.js"
 
 const { prototype, extendPrototype } = object
 const { isFunction } = type

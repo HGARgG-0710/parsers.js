@@ -1,7 +1,7 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "node:assert"
-import { mixin } from "../../../../dist/main.js"
-import { InterfaceTest, type InterfaceShape } from "../../lib/lib.js"
+import { mixin } from "../../../dist/main.js"
+import { InterfaceTest, type InterfaceShape } from "../lib.js"
 
 const { withoutConstructor } = object.classes
 const { propertyDescriptors, withoutProperties, keys } = object
