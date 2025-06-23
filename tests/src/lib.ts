@@ -1,9 +1,9 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import test from "node:test"
-import { Autocache } from "../../../dist/src/classes.js"
-import { ArrayMap, ModifiableMap } from "../../../dist/src/classes/IndexMap.js"
-import type { ICopiable } from "../../../dist/src/interfaces.js"
+import { Autocache } from "../../dist/src/classes.js"
+import { ArrayMap, ModifiableMap } from "../../dist/src/classes/IndexMap.js"
+import type { ICopiable } from "../../dist/src/interfaces.js"
 
 const { keys } = object
 
@@ -13,6 +13,16 @@ export interface Interface {
 }
 
 export class ClassTest<InstanceType extends ICopiable = any> {
+	private instance: InstanceType | null
+
+	private typeCheck() {
+		for (const _interface of this.interfaces)
+			if (!_interface.conformance(this.instance))
+				throw new TypeError(
+					`Tested instance failed to conform to interface: ${_interface.interfaceName}`
+				)
+	}
+
 	protected testMethod(name: string, ...args: any[]) {
 		const { methods } = this
 		const names = this.methods.map((x) => x.name)
@@ -26,20 +36,7 @@ export class ClassTest<InstanceType extends ICopiable = any> {
 		return methods[index].withInstance(this.instance!.copy(), ...args)
 	}
 
-	protected instance: InstanceType | null
-
-	protected typeCheck() {
-		for (const _interface of this.interfaces)
-			if (!_interface.conformance(this.instance))
-				throw new TypeError(
-					`Tested instance failed to conform to interface: ${_interface.interfaceName}`
-				)
-	}
-
-	withInstance(
-		instance: InstanceType,
-		callback: (test: ClassTest<InstanceType>) => void
-	) {
+	withInstance(instance: InstanceType, callback: (test: this) => void) {
 		this.instance = instance
 		this.typeCheck()
 		callback(this)
@@ -47,17 +44,20 @@ export class ClassTest<InstanceType extends ICopiable = any> {
 	}
 
 	constructor(
-		protected interfaces: Interface[],
-		protected methods: MethodTest<InstanceType>[]
+		private readonly interfaces: Interface[],
+		private readonly methods: MethodTest<InstanceType>[]
 	) {}
 }
 
-export class MethodTest<InstanceType = any> {
-	withInstance(instance: InstanceType, ...x: any[]) {
+export class MethodTest<InstanceType = any, Args extends any[] = any[]> {
+	withInstance(instance: InstanceType, ...x: Args) {
 		return this.handler.call(instance, ...x)
 	}
 
-	constructor(readonly name: string, protected handler: Function) {}
+	constructor(
+		readonly name: string,
+		protected handler: (...args: Args) => void
+	) {}
 }
 
 export type InterfaceShape = object
