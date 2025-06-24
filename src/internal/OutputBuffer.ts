@@ -1,4 +1,3 @@
-import { array } from "@hgargg-0710/one"
 import type { IPersistentAccumulator } from "../interfaces.js"
 
 /**
@@ -6,7 +5,7 @@ import type { IPersistentAccumulator } from "../interfaces.js"
  * The user can work with it via a public `IPersistenAccumulator<T>` interface.
  */
 export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
-	private ["constructor"]: new (collection?: T[]) => this
+	private ["constructor"]: new () => this
 
 	private readonly collection: T[] = []
 
@@ -30,7 +29,9 @@ export class OutputBuffer<T = any> implements IPersistentAccumulator<T> {
 	}
 
 	copy() {
-		return new this.constructor(array.copy(this.collection))
+		const copy = new this.constructor().push(...this.collection)
+		if (this.isFrozen) copy.freeze()
+		return copy
 	}
 
 	read(i: number) {

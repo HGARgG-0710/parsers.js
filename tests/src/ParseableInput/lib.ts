@@ -1,8 +1,8 @@
-import assert from "assert"
 import type { ParseableInput } from "../../../dist/src/classes.js"
 import type { IIndexed, IParseable } from "../../../dist/src/interfaces.js"
-import { ClassTest, MethodTest } from "../lib.js"
+import { ClassTest } from "../lib.js"
 import { read } from "../Readable/lib.js"
+import { size } from "../Sizeable/lib.js"
 
 import { object, type } from "@hgargg-0710/one"
 
@@ -20,13 +20,6 @@ const ParseableInterface = {
 		copy: isFunction
 	})
 }
-
-const size = new MethodTest("size", function (
-	this: ParseableInput,
-	size: number
-) {
-	assert.strictEqual(this.size, size)
-})
 
 class ParseableInputTest extends ClassTest<ParseableInput> {
 	read(from: number, to: number, expected: IIndexed<string>) {
