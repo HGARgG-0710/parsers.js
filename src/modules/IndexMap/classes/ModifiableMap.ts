@@ -25,7 +25,8 @@ export class ModifiableMap<K = any, V = any, Default = any>
 	}
 
 	set(key: K, value: V, index?: number) {
-		return this.modifiable.set(key, value, index)
+		this.modifiable.set(key, value, index)
+		this.update()
 	}
 
 	copy() {
