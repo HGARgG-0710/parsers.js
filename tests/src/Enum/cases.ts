@@ -13,6 +13,7 @@ enumTestCounter.test(
 		enumTest<number>().withInstance(
 			new Enum([1, 2, 3, 4, 2, 1, 5]),
 			function (test) {
+				test.copy()
 				test.toMap((x) => x + 3, [1, 2, 3, 4, 5], [4, 5, 6, 7, 8])
 				test.toMap((x) => x ** 2, [1, 2, 3, 4, 5], [1, 4, 9, 16, 25])
 			}
@@ -26,6 +27,7 @@ enumTestCounter.test(
 		enumTest<string>().withInstance(
 			new Enum(["a", "b", "c", "d", "e", "f"]),
 			function (test) {
+				test.copy()
 				test.toMap(
 					(x, i) => x + i,
 					["a", "b", "c", "d", "e", "f"],
@@ -40,7 +42,7 @@ enumTestCounter.test(
 	[STATIC_TEST],
 	() => {
 		assertThrowing(() => Enum.assertDisjoint(new Enum([]), new Enum([])))
-		
+
 		assertThrowing(() =>
 			Enum.assertDisjoint(
 				new Enum(["1", "2", "3"]),
