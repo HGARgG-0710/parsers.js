@@ -40,7 +40,7 @@ export class ReadableView<T = any> implements IView<T> {
 	//
 
 	backward() {
-		--this.offset
+		if (this.offset > 0) --this.offset
 	}
 
 	forward() {
@@ -49,7 +49,7 @@ export class ReadableView<T = any> implements IView<T> {
 
 	constructor(private offset: number, readable?: IReadable<T>) {
 		assert(isNumber(offset))
-		assert(offset > 0)
+		assert(offset >= 0)
 		this.init(readable)
 	}
 }
