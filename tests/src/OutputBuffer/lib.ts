@@ -2,10 +2,11 @@ import { array, object, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type { IIndexed } from "../../../dist/src/interfaces.js"
 import type { OutputBuffer } from "../../../dist/src/internal/OutputBuffer.js"
+import { freeze, isFrozen, unfreeze } from "../Freezable/lib.js"
 import { ClassTest, MethodTest } from "../lib.js"
+import { readWhole } from "../ParseableInput/lib.js"
 import { read } from "../Readable/lib.js"
 import { size } from "../Sizeable/lib.js"
-import { readWhole } from "../ParseableInput/lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber, isBoolean } = type
@@ -27,13 +28,6 @@ const PersistentAccumulatorInterface = {
 	})
 }
 
-function baseIsFrozenAssert<T = any>(
-	buffer: OutputBuffer<T>,
-	expected: boolean
-) {
-	assert.strictEqual(buffer.isFrozen, expected)
-}
-
 function assertOldItemsUnchanged<T = any>(
 	instance: OutputBuffer<T>,
 	oldSize: number,
@@ -41,27 +35,6 @@ function assertOldItemsUnchanged<T = any>(
 ) {
 	read.withInstance(instance, 0, oldSize, oldItems)
 }
-
-const isFrozen = new MethodTest("isFrozen", function <T = any>(
-	this: OutputBuffer<T>,
-	expected: boolean
-) {
-	baseIsFrozenAssert(this, expected)
-})
-
-const freeze = new MethodTest("freeze", function <T = any>(
-	this: OutputBuffer<T>
-) {
-	this.freeze()
-	baseIsFrozenAssert(this, true)
-})
-
-const unfreeze = new MethodTest("unfreeze", function <T = any>(
-	this: OutputBuffer<T>
-) {
-	this.unfreeze()
-	baseIsFrozenAssert(this, false)
-})
 
 const get = new MethodTest("get", function <T = any>(
 	this: OutputBuffer<T>,

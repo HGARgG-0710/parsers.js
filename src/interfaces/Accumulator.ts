@@ -1,6 +1,5 @@
 import type {
 	ICopiable,
-	IFreezable,
 	IGettable,
 	IPushable,
 	IReadable,
@@ -19,7 +18,6 @@ import type {
  */
 export interface IAccumulator<T = any, Accumulated = T>
 	extends ICopiable,
-		IFreezable,
 		IPushable<T>,
 		IGettable<Accumulated>,
 		IUnfreezable {}

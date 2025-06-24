@@ -23,7 +23,9 @@ export class SourceBuilder implements IAccumulator<string>, IClearable {
 	}
 
 	copy() {
-		return new this.constructor(this.finalSource)
+		const copy = new this.constructor(this.finalSource)
+		if (this.isFrozen) copy.freeze()
+		return copy
 	}
 
 	unfreeze() {

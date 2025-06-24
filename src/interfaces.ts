@@ -178,7 +178,7 @@ export interface IFreezable {
  * This is an interface for representing entities that
  * can be "unfrozen", and have a method `unfreeze(): this`
  */
-export interface IUnfreezable {
+export interface IUnfreezable extends IFreezable {
 	unfreeze: () => this
 }
 
