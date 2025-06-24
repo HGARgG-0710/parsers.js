@@ -11,10 +11,10 @@ const { sum } = number
  * It does not allow for backward iteration.
  */
 export class LineIndex implements ILineIndex {
-	["constructor"]: new () => this
+	protected ["constructor"]: new (line?: number, char?: number) => this
 
-	private _char = 0
-	private _line = 0
+	private _char: number
+	private _line: number
 
 	protected set char(newChar: number) {
 		this._char = newChar
@@ -42,10 +42,12 @@ export class LineIndex implements ILineIndex {
 	}
 
 	copy() {
-		const lineIndex = new this.constructor()
-		lineIndex.char = this.char
-		lineIndex.line = this.line
-		return lineIndex
+		return new this.constructor(this.line, this.char)
+	}
+
+	constructor(line: number = 0, char: number = 0) {
+		this.line = line
+		this.char = char
 	}
 }
 
