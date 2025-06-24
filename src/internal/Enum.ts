@@ -5,7 +5,7 @@ import { Pairs } from "../samples.js"
 const { id } = functional
 const { first, firstOut } = array
 
-type IMappable<T = any, Out = any> = (value: T, index?: number) => Out
+export type IMappable<T = any, Out = any> = (value: T, index?: number) => Out
 
 /**
  * A class for representing a unique set of elements.

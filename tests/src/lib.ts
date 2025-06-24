@@ -109,3 +109,21 @@ export class TestCounter {
 
 	constructor(private readonly label: (count: readonly number[]) => string) {}
 }
+
+export function assertThrowing(callback: () => void) {
+	try {
+		callback()
+	} catch {
+		assert(false)
+	}
+}
+
+export function assertThrowingFails(callback: () => void) {
+	let hasThrown = false
+	try {
+		callback()
+	} catch {
+		hasThrown = true
+	}
+	assert(hasThrown)
+}
