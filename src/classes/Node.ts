@@ -1,5 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
-import type { IFreeable, IPoolGetter } from "../interfaces.js"
+import type { IFreeable, IPoolGetter, ISettable } from "../interfaces.js"
 import type {
 	ICellNode,
 	INode,
@@ -201,7 +201,7 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 
 abstract class PreRecursiveNode<T = any>
 	extends BaseNode<T>
-	implements IRecursiveNode<T>
+	implements IRecursiveNode<T>, ISettable<number, INode<T>>
 {
 	protected ["constructor"]: new (children?: INode<T>[]) => this
 
@@ -229,7 +229,7 @@ abstract class PreRecursiveNode<T = any>
 		return this.children[i]
 	}
 
-	set(node: INode<T>, i: number): this {
+	set(i: number, node: INode<T>): this {
 		this.children[i] = node
 		return this
 	}
