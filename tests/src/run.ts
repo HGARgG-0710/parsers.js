@@ -11,7 +11,7 @@ function recursiveTest(dir: string) {
 	const tested = readdirSync(inCurrDir(dir), {
 		recursive: true
 	})
-		.filter((x) => !x.includes("lib/"))
+		.filter((x) => !x.includes("lib."))
 		.filter((x) => !x.includes(".map"))
 		.filter((x) => x.includes(".js")) as string[]
 

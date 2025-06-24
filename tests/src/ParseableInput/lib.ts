@@ -1,13 +1,18 @@
+import assert from "assert"
 import type { ParseableInput } from "../../../dist/src/classes.js"
 import type { IIndexed, IParseable } from "../../../dist/src/interfaces.js"
-import { ClassTest } from "../lib.js"
+import { ClassTest, MethodTest } from "../lib.js"
 import { read } from "../Readable/lib.js"
 import { size } from "../Sizeable/lib.js"
 
-import { object, type } from "@hgargg-0710/one"
+import { array, object, type } from "@hgargg-0710/one"
 
 const { structCheck } = object
 const { isFunction, isNumber } = type
+
+export function readWhole<T = any>(instance: IParseable<T>) {
+	return array.numbers(instance.size).map((i) => instance.read(i))
+}
 
 export const EMPTY = 0
 export const NON_EMPTY = 1
@@ -21,6 +26,12 @@ const ParseableInterface = {
 	})
 }
 
+const copy = new MethodTest("copy", function (this: ParseableInput) {
+	const copied = this.copy()
+	assert.strictEqual(this.size, copied.size)
+	read.withInstance(copied, 0, this.size, readWhole(this))
+})
+
 class ParseableInputTest extends ClassTest<ParseableInput> {
 	read(from: number, to: number, expected: IIndexed<string>) {
 		this.testMethod("read", from, to, expected)
@@ -30,8 +41,12 @@ class ParseableInputTest extends ClassTest<ParseableInput> {
 		this.testMethod("size", expectedSize)
 	}
 
+	copy() {
+		this.testMethod("copy")
+	}
+
 	constructor() {
-		super([ParseableInterface], [read, size])
+		super([ParseableInterface], [read, size, copy])
 	}
 }
 

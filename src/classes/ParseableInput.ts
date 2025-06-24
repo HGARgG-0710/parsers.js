@@ -7,7 +7,7 @@ import type { IParseable } from "../interfaces.js"
  * primitives. 
 */
 export class ParseableInput implements IParseable<string> {
-	protected ["constructor"]: new (source: string) => this
+	private ["constructor"]: new (source: string) => this
 
 	get size() {
 		return this.source.length

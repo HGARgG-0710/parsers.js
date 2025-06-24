@@ -5,6 +5,7 @@ import type { OutputBuffer } from "../../../dist/src/internal/OutputBuffer.js"
 import { ClassTest, MethodTest } from "../lib.js"
 import { read } from "../Readable/lib.js"
 import { size } from "../Sizeable/lib.js"
+import { readWhole } from "../ParseableInput/lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber, isBoolean } = type
@@ -31,10 +32,6 @@ function baseIsFrozenAssert<T = any>(
 	expected: boolean
 ) {
 	assert.strictEqual(buffer.isFrozen, expected)
-}
-
-function readWhole<T = any>(instance: OutputBuffer<T>) {
-	return array.numbers(instance.size).map((i) => instance.read(i))
 }
 
 function assertOldItemsUnchanged<T = any>(

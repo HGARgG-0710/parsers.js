@@ -13,6 +13,7 @@ parseableInputTestCounter.test(
 		parseableInputTest.withInstance(
 			new ParseableInput(""),
 			function (test) {
+				test.copy()
 				test.read(0, 0, "")
 				test.size(0)
 			}
@@ -26,6 +27,7 @@ parseableInputTestCounter.test(
 		parseableInputTest.withInstance(
 			new ParseableInput("abcdef"),
 			function (test) {
+				test.copy()
 				test.read(0, 2, "ab")
 				test.read(2, 6, "cdef")
 				test.read(0, 6, "abcdef")
