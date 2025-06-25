@@ -185,7 +185,31 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		42. FilterStream
 		43. FiniteStream
 		44. FreeStream: 
+			0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
 			1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
+			2. [maybe???] Add a framework for 'spying' on methods of objects here?
+				Reason: one needs to ENSURE that the `.free` method *GETS CALLED*, 
+					no matter what. Reason being: if we DON'T know that, we DON'T 
+						know if the thing is actually *effective*. 
+
+				Thus, possible solutions to the dilemma: 
+					1. add a library [with existing like 'Jest' - good for resume]
+						This'll additionally require: 
+							1. accessing of `ObjectPool.prototype`, saving reference
+								To save the '.freeMethodObservable = jest.spyOn(ObjectPool.prototype, "free")'
+							2. checking the presence of the call on each iteration inside 
+								a test of `FreeStream`, via the `.freeMethodObservable.mock.calls[i]`
+					2. creating a fake `ObjectPool`-like object, which would register the `.free/.create` calls, 
+						which would be then employed as-desired
+						Then, one would need to: 
+
+							1. create an interface for `IObjectPool`
+							2. use it EVERYWHERE instead of the "ordinary" 'ObjectPool' classs objects: 
+								1. That includes `FreeStream`
+							3. write a dummy-mock-class for a specific type of "poolable" objects, create-d/free-d inside the `FreeStream`
+							4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
+				
+				CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
 		45. FreezableStream
 		46. HandlerStream
 		47. IndexStream
