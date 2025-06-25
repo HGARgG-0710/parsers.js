@@ -20,13 +20,8 @@ Testing order:
 	2. all else
 
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
-
-	TODO: classes from /internal to test: 
-		[easy - do now]
-		1. Enum
-		2. OutputBuffer
-		
-		[easy, but longer - do now]
+	TODO: classes from /internal to test: 		
+		[easy, but longer]
 		6. SwitchArray: 
 			1. USE A MOCK HERE (`RecursiveRenewer`)
 		
@@ -122,13 +117,13 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 
 		[easy]
 		16. `PropDigger`: 
+			[VITAL: add these as TEST CASES in `PropDigger/cases.ts`!!!]
 			1. `ownerDigger`: 
 				1. on an `IStream`
 				2. ONLY AFTER an `ILinkedStream` has been tested
 			2. `resourceDigger`: 
 				1. on an `IStream`
 				2. ONLY AFTER an `ILinkedStream` has been tested
-			3. The class itself - TEST IT ALSO
 
 		[easy]
 		17. `ResourceManager`: 
@@ -146,7 +141,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. Test this also, DESPITE `ResourceManager` tests
 
 		[easy]
-		21. `SourceBuilder`
 		22. `TableHandler`, `WrapHandler`: 
 			1. Test this NO SOONER than the respective `indexable`s
 			2. Use REAL `IIndexable`s of the library: 
@@ -172,7 +166,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		32. `ArrayInternal`
 		33. `MapInternal`
 		34. `ObjectInternal`
-		35. `LineIndex`
 		36. `BackupIndex`
 		37. `MultiIndex`
 
