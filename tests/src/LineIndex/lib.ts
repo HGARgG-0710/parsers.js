@@ -1,11 +1,35 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { LineIndex } from "../../../dist/src/classes/Position.js"
 import type { ILineIndex } from "../../../dist/src/interfaces.js"
-import { ClassTest, MethodTest } from "../lib.js"
+import { ClassTest, MethodTest, type Interface } from "../lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber } = type
+
+function nextLineAssert(instance: ILineIndex, origLine: number) {
+	lineAssert(instance, origLine + 1)
+}
+
+function nextCharAssert(instance: ILineIndex, origChar: number) {
+	charAssert(instance, origChar + 1)
+}
+
+export function nextLineStartAssert(instance: ILineIndex, origLine: number) {
+	lineStartAssert(instance)
+	nextLineAssert(instance, origLine)
+}
+
+export function lineStartAssert(instance: ILineIndex) {
+	charAssert(instance, 0)
+}
+
+export function charAssert(instance: ILineIndex, char: number) {
+	assert.strictEqual(instance.char, char)
+}
+
+export function lineAssert(instance: ILineIndex, line: number) {
+	assert.strictEqual(instance.line, line)
+}
 
 const LineIndexInterface = {
 	interfaceName: "LineIndex",
@@ -22,36 +46,42 @@ const char = new MethodTest("char", function (
 	this: ILineIndex,
 	expected: number
 ) {
-	assert.strictEqual(this.char, expected)
+	charAssert(this, expected)
 })
 
 const line = new MethodTest("line", function (
 	this: ILineIndex,
 	expected: number
 ) {
-	assert.strictEqual(this.line, expected)
+	lineAssert(this, expected)
 })
 
 const nextChar = new MethodTest("nextChar", function (this: ILineIndex) {
+	const origLine = this.line
 	const origChar = this.char
 	this.nextChar()
-	assert.strictEqual(this.char, origChar + 1)
+	lineAssert(this, origLine)
+	nextCharAssert(this, origChar)
 })
 
-const nextLine = new MethodTest("nextLine", function (this: ILineIndex) {
+export const nextLine = new MethodTest("nextLine", function (this: ILineIndex) {
 	const origLine = this.line
 	this.nextLine()
-	assert.strictEqual(this.char, 0)
-	assert.strictEqual(this.line, origLine + 1)
+	nextLineStartAssert(this, origLine)
 })
 
-const copy = new MethodTest("copy", function (this: ILineIndex) {
+export const copy = new MethodTest("copy", function (this: ILineIndex) {
 	const copied = this.copy()
-	assert.strictEqual(copied.char, this.char)
-	assert.strictEqual(copied.line, this.line)
+	charAssert(copied, this.char)
+	lineAssert(copied, this.line)
+	
+	const oldChar = this.char
+	this.nextChar()
+	charAssert(copied, oldChar)
+	assert.notStrictEqual(this.char, oldChar)
 })
 
-class LineIndexTest extends ClassTest<LineIndex> {
+export class LineIndexTest extends ClassTest<ILineIndex> {
 	line(expected: number) {
 		this.testMethod("line", expected)
 	}
@@ -68,12 +98,15 @@ class LineIndexTest extends ClassTest<LineIndex> {
 		this.testMethod("nextLine")
 	}
 
-	copy() {
+	copy(...args: any[]) {
 		this.testMethod("copy")
 	}
 
-	constructor() {
-		super([LineIndexInterface], [char, line, nextChar, nextLine, copy])
+	constructor(interfaces: Interface[] = [], methods: MethodTest[] = []) {
+		super(
+			[LineIndexInterface, ...interfaces],
+			[...methods, char, line, nextChar, nextLine, copy]
+		)
 	}
 }
 

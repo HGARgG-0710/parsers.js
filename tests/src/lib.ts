@@ -14,6 +14,7 @@ export interface Interface {
 
 export class ClassTest<InstanceType extends ICopiable = any> {
 	private instance: InstanceType | null
+	private readonly names: string[]
 
 	private typeCheck() {
 		for (const _interface of this.interfaces)
@@ -25,12 +26,11 @@ export class ClassTest<InstanceType extends ICopiable = any> {
 
 	protected testMethod(name: string, ...args: any[]) {
 		const { methods } = this
-		const names = this.methods.map((x) => x.name)
-		const index = names.indexOf(name)
+		const index = this.names.indexOf(name)
 
 		if (index === -1)
 			throw new TypeError(
-				`Test for method \`${name}\` not found in ${names}`
+				`Test for method \`${name}\` not found in ${this.names}`
 			)
 
 		return methods[index].withInstance(this.instance!.copy(), ...args)
@@ -46,7 +46,9 @@ export class ClassTest<InstanceType extends ICopiable = any> {
 	constructor(
 		private readonly interfaces: Interface[],
 		private readonly methods: MethodTest<InstanceType>[]
-	) {}
+	) {
+		this.names = methods.map((x) => x.name)
+	}
 }
 
 export class MethodTest<InstanceType = any, Args extends any[] = any[]> {
