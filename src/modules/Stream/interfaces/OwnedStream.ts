@@ -15,9 +15,12 @@ import type {
  * has a `readonly owner?: IOwningStream` property. It represents a stream,
  * which can be taken ownership of.
  */
-export type IOwnedStream<T = any> = IStream<T> &
+export type IOwnedStream<
+	T = any,
+	OwnerType extends IOwningStream = IOwningStream
+> = IStream<T> &
 	IOwnerSettable<IOwningStream> & {
-		readonly owner?: IOwningStream
+		readonly owner?: OwnerType
 	}
 
 /**
