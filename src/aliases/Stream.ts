@@ -5,8 +5,8 @@ import type {
 	IOwnedStream,
 	IPersistentAccumulator,
 	IPosed,
-	IResourcefulStream,
-	IStateful,
+	IResourceful,
+	IStateHaving,
 	IStream
 } from "../interfaces.js"
 
@@ -40,15 +40,13 @@ export const buffer = prop("buffer") as <T = any>(
 export const pos = prop("pos") as <T = any>(x: IPosed<T>) => T
 
 /**
- * Returns the `.state` property of the given `IStateful` object
+ * Returns the `.state` property of the given `IStateHaving<T>` object
  */
 export const state = prop("state") as <T extends Summat = Summat>(
-	x: IStateful<T>
+	x: IStateHaving<T>
 ) => T
 
 /**
- * Returns the `.resource` property of the given `IResourcefulStream` object
-*/
-export const resource = prop("resource") as (
-	x: IResourcefulStream
-) => IOwnedStream
+ * Returns the `.resource` property of the given `IResourceful` object
+ */
+export const resource = prop("resource") as (x: IResourceful) => IOwnedStream
