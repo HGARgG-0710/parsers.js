@@ -101,7 +101,7 @@ export type IIndexed<T = any> = {
 /**
  * Represents an entity with some sort of `readonly state: T`
  */
-export interface IStateful<T extends Summat = Summat> {
+export interface IStateHaving<T extends Summat = Summat> {
 	readonly state: T
 }
 

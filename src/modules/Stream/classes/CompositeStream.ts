@@ -1,4 +1,5 @@
 import { array, inplace } from "@hgargg-0710/one"
+import type { Summat } from "@hgargg-0710/summat.ts"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import { MissingArgument } from "../../../constants.js"
 import type { IStateSettable } from "../../../interfaces.js"
@@ -10,7 +11,9 @@ import type {
 } from "../../../interfaces/Stream.js"
 import { StreamList, streamListPool } from "../../../internal/StreamList.js"
 import { isStateful } from "../../../is/Stream.js"
+import { mixin } from "../../../mixin.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
+import { StatefulStream } from "./StatefulStream.js"
 import { WrapperStream } from "./WrapperStream.js"
 
 const { mutate } = inplace
@@ -27,7 +30,7 @@ interface ICompositeStreamLike extends IStateSettable {
 	evaluateStreams(): void
 }
 
-const compositeStreamInitializers = {
+const compositeStreamInitializer = {
 	init(
 		target: ICompositeStreamLike,
 		lowStream?: IOwnedStream,
@@ -41,25 +44,23 @@ const compositeStreamInitializers = {
 	}
 }
 
-function BuildCompositeStream<T = any>() {
-	return class extends WrapperStream.generic!<
-		T,
-		[IRawStreamArray, IParseState]
-	>() {
+function BuildBeforeCompositeStream<T = any>() {
+	abstract class BeforeCompositeStream
+		extends WrapperStream.generic!<T, [IRawStreamArray, IParseState]>()
+		implements ICompositeStream<T>
+	{
 		protected ["constructor"]: new (
 			lowStream?: IOwnedStream,
 			rawStreams?: IRawStreamArray,
 			state?: IParseState
 		) => this
 
-		private rawStreams?: IRawStreamArray
+		protected rawStreams?: IRawStreamArray
 		private streamList?: StreamList
 		private lowStream?: IOwnedStream
-		private _state: IParseState
 
-		private set state(newState: IParseState) {
-			this._state = newState
-		}
+		abstract state: IParseState
+		abstract setState(state: Summat): void
 
 		private renewIfPossible() {
 			return this.streamList!.reevaluate(this.lowStream!)
@@ -78,21 +79,12 @@ function BuildCompositeStream<T = any>() {
 			this.resource = this.streamList!.firstItemDeep()
 		}
 
-		private distributeState() {
-			for (const x of this.rawStreams!)
-				if (isStateful(x)) x.setState(this.state)
-		}
-
 		protected get initializer() {
-			return compositeStreamInitializers
+			return compositeStreamInitializer
 		}
 
 		get streams() {
 			return this.streamList!.items
-		}
-
-		get state() {
-			return this._state
 		}
 
 		setResource(lowStream: IOwnedStream) {
@@ -157,11 +149,6 @@ function BuildCompositeStream<T = any>() {
 			)
 		}
 
-		setState(state: IParseState) {
-			this.state = state
-			this.distributeState()
-		}
-
 		constructor(
 			lowStream?: IOwnedStream,
 			rawStreams?: IRawStreamArray,
@@ -171,6 +158,52 @@ function BuildCompositeStream<T = any>() {
 			this.init(lowStream, rawStreams, state)
 		}
 	}
+
+	return BeforeCompositeStream
+}
+
+function BuildCompositeStream<T = any>() {
+	return new mixin<
+		ICompositeStream<T>,
+		[
+			lowStream?: IOwnedStream,
+			rawStreams?: IRawStreamArray,
+			state?: IParseState
+		]
+	>(
+		{
+			name: "CompositeStream",
+			properties: {
+				distributeState() {
+					for (const x of this.rawStreams!)
+						if (isStateful(x)) x.setState(this.state)
+				},
+
+				get initializer() {
+					return compositeStreamInitializer
+				},
+
+				setState(state: IParseState) {
+					this.super.StatefulStream.setState(state)
+					this.distributeState()
+				}
+			},
+			constructor(
+				lowStream?: IOwnedStream,
+				rawStreams?: IRawStreamArray,
+				state?: IParseState
+			) {
+				this.super.BeforeCompositeStream.constructor.call(
+					this,
+					lowStream,
+					rawStreams,
+					state
+				)
+			}
+		},
+		[],
+		[BuildBeforeCompositeStream<T>(), StatefulStream]
+	).toClass() as ICompositeStreamConstructor<T>
 }
 
 let compositeStream: ICompositeStreamConstructor | null = null

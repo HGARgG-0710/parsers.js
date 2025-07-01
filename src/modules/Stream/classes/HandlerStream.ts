@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { IParseState } from "../../../interfaces.js"
 import type {
 	IControlStream,
 	IOwnedStream
@@ -14,7 +15,7 @@ class HandlerStreamAnnotation<
 > extends BasicResourceStreamAnnotation<Out, []> {
 	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
-	readonly state: Summat
+	readonly state: IParseState
 
 	protected baseNextIter(): Out {
 		return null as Out
@@ -91,7 +92,7 @@ const _HandlerStream = BuildHandlerStream()
 
 /**
  * This is a function for creation of factories of objects implementing `IControlStream<Out>`.
- * It extends `BasicResourceStream`. 
+ * It extends `BasicResourceStream`.
  *
  * It uses the `handler` to define its output by means of calling it on the
  * underlying `.resource: IOwnedStream<In>`, like `this.handler(this.resource)`.
