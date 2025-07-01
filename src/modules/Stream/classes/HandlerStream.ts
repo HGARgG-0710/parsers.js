@@ -4,10 +4,12 @@ import type {
 	IControlStream,
 	IOwnedStream
 } from "../../../interfaces/Stream.js"
+import { mixin } from "../../../mixin.js"
 import {
 	BasicResourceStream,
 	BasicResourceStreamAnnotation
 } from "./BasicResourceStream.js"
+import { StatefulStream } from "./StatefulStream.js"
 
 class HandlerStreamAnnotation<
 	In = any,
@@ -42,13 +44,11 @@ class HandlerStreamAnnotation<
 	}
 }
 
-function BuildHandlerStream<In = any, Out = any>() {
-	return class extends BasicResourceStream.generic!<Out>() {
+function BuildBeforeHandlerStream<In = any, Out = any>() {
+	abstract class BeforeHandlerStream extends BasicResourceStream.generic!<Out>() {
 		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
 		private handler: (stream: IOwnedStream<In>) => Out
-
-		state: Summat
 
 		private handleCurr() {
 			return this.handler(this.resource!)
@@ -69,23 +69,31 @@ function BuildHandlerStream<In = any, Out = any>() {
 			if (this.resource) super.postInit()
 		}
 
-		get resource() {
-			return super.resource as IOwnedStream<In>
-		}
-
 		isCurrEnd() {
 			return this.resource!.isCurrEnd()
-		}
-
-		setState(state: Summat) {
-			this.state = state
 		}
 
 		setHandler(handler: (stream: IOwnedStream<In>) => Out) {
 			this.handler = handler
 			return this
 		}
-	} as unknown as typeof HandlerStreamAnnotation<In, Out>
+	}
+
+	return BeforeHandlerStream
+}
+
+function BuildHandlerStream<In = any, Out = any>() {
+	return new mixin(
+		{
+			name: "HandlerStream",
+			properties: {},
+			constructor(...args: any[]) {
+				this.super.BeforeHandlerStream.constructor.call(this, ...args)
+			}
+		},
+		[],
+		[BuildBeforeHandlerStream(), StatefulStream]
+	).toClass() as unknown as typeof HandlerStreamAnnotation<In, Out>
 }
 
 const _HandlerStream = BuildHandlerStream()
