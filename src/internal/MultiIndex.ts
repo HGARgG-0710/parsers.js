@@ -2,7 +2,7 @@ import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
 
 const { isArray } = type
-const { last, first, copy, clear } = array
+const { last, copy, clear } = array
 
 /**
  * This class represents a multi-index position
@@ -28,10 +28,6 @@ export class MultiIndex {
 
 	get(): readonly number[] {
 		return this.index
-	}
-
-	first() {
-		return first(this.index)
 	}
 
 	last() {
