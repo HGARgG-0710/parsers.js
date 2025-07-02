@@ -120,8 +120,8 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	init(walkable: TreeLike) {
-		this.pos.clear()
-		this.level = this.walkable = walkable
+		this.walkable = walkable
+		this.restart()
 		return this
 	}
 
