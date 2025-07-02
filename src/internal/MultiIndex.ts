@@ -18,6 +18,8 @@ const { last, copy, clear } = array
 export class MultiIndex {
 	private ["constructor"]: new (index: number[]) => this
 
+	private index: number[]
+
 	private set levels(length: number) {
 		this.index.length = length
 	}
@@ -73,11 +75,12 @@ export class MultiIndex {
 	}
 
 	from(index: number[]) {
+		assert(isArray(index))
 		this.index = copy(index)
 		return this
 	}
 
-	constructor(private index: number[] = []) {
-		assert(isArray(index))
+	constructor(index: number[] = []) {
+		this.from(index)
 	}
 }
