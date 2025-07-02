@@ -1,6 +1,6 @@
-import { MultiIndex } from "../../../classes/Position.js"
 import { BadIndex } from "../../../constants.js"
 import type { IWalkable } from "../../../interfaces.js"
+import type { MultiIndex } from "../../../internal/MultiIndex.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
 import { isGoodIndex } from "../../../utils.js"
 import { treeEndPath } from "../../../utils/Node.js"
@@ -69,7 +69,7 @@ class DepthStreamAnnotation<
 
 function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 	return class extends SourceStream.generic!<TreeLike, TreeLike>() {
-		private endInd: MultiIndex
+		private endInd: number[]
 		private response: ResponseMethodName
 		private lastLevelWithSiblings = BadIndex
 		private walker = new TreeWalker<TreeLike>()
@@ -116,11 +116,11 @@ function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 		setResource(tree: TreeLike): void {
 			super.setResource(tree)
 			this.walker.init(tree)
-			this.endInd = new MultiIndex(treeEndPath(tree))
+			this.endInd = treeEndPath(tree)
 		}
 
 		get index() {
-			return this.walker.pos
+			return this.walker.pos.get()
 		}
 
 		isCurrEnd(): boolean {
@@ -143,7 +143,7 @@ function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 			return this.curr
 		}
 
-		navigate(index: MultiIndex) {
+		navigate(index: number[]) {
 			this.walker.goIndex(index)
 			this.updateCurr()
 			return this.curr

@@ -1,13 +1,13 @@
-import { MultiIndex } from "../classes/Position.js"
 import type { IWalkable } from "../interfaces/Node.js"
 import { hasChildren, treeEndPath } from "../utils/Node.js"
+import { MultiIndex } from "./MultiIndex.js"
 
 /**
  * This is the class responsible for providing the `DepthStream`
- * tree-iteration algorithm with its elementary operations. It 
- * is used as an internal implementation detail, and can be used 
- * to implement other tree-iteration algorithms.  
-*/
+ * tree-iteration algorithm with its elementary operations. It
+ * is used as an internal implementation detail, and can be used
+ * to implement other tree-iteration algorithms.
+ */
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	public readonly pos = new MultiIndex()
 
@@ -23,13 +23,41 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		return this._curr
 	}
 
-	getCurrChild() {
+	private levelUp(positions: number = 1) {
+		return (this.level = this.walkable!.backtrack(positions)!)
+	}
+
+	private syncWithPos() {
+		this.curr = this.walkable!.index(this.pos.get())
+		this.levelUp()
+	}
+
+	private updatePos(withNew: number[]) {
+		this.pos.from(withNew)
+	}
+
+	private getCurrChild() {
 		const { level, pos } = this
 		return (this.curr = level.read(pos.last()))
 	}
 
-	levelUp(positions: number = 1) {
-		return (this.level = this.walkable!.backtrack(positions)!)
+	private goSiblingBefore() {
+		this.pos.decLast()
+		this.getCurrChild()
+	}
+
+	private indexCut(length: number) {
+		this.pos.resize(length)
+		this.levelUp()
+		this.getCurrChild()
+	}
+
+	private currentLastIndex() {
+		return treeEndPath(this.curr)
+	}
+
+	private renewLevel(init: IWalkable<TreeLike>, from: number) {
+		return (this.level = init.index(this.pos.slice(from, -1)))
 	}
 
 	pushFirstChild() {
@@ -57,17 +85,6 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.getCurrChild()
 	}
 
-	goSiblingBefore() {
-		this.pos.decLast()
-		this.getCurrChild()
-	}
-
-	indexCut(length: number) {
-		this.pos.resize(length)
-		this.levelUp()
-		this.getCurrChild()
-	}
-
 	hasChildren() {
 		return hasChildren(this.curr)
 	}
@@ -78,10 +95,6 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	lastLevelWithSiblings() {
 		return this.walkable!.findUnwalkedChildren(this.pos.get())
-	}
-
-	currentLastIndex() {
-		return treeEndPath(this.curr)
 	}
 
 	goNextFirst(levelsUp: number) {
@@ -96,29 +109,20 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.renewLevel(this.curr, initLength)
 	}
 
-	renewLevel(init: IWalkable<TreeLike>, from: number) {
-		return (this.level = init.index(this.pos.slice(from, -1)))
-	}
-
 	restart() {
 		this.curr = this.level = this.walkable!
 		this.pos.clear()
 	}
 
-	goIndex(pos?: MultiIndex) {
-		if (pos) this.pos.from(pos)
-		this.curr = this.walkable!.index(this.pos.get())
-		this.levelUp()
+	goIndex(pos?: number[]) {
+		if (pos) this.updatePos(pos)
+		this.syncWithPos()
 	}
 
 	init(walkable: TreeLike) {
 		this.pos.clear()
 		this.level = this.walkable = walkable
 		return this
-	}
-
-	get() {
-		return this.walkable
 	}
 
 	constructor(walkable?: TreeLike) {

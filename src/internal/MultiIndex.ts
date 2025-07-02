@@ -5,15 +5,15 @@ const { isArray } = type
 const { last, first, copy, clear } = array
 
 /**
- * This class represents a multi-index position 
- * inside a tree. It is employed by the library's 
- * Tree-Iteration algorithms to track the progress 
- * across the tree and find the next node to be 
- * visited. 
- * 
- * It can also be employed to quickly navigate 
+ * This class represents a multi-index position
+ * inside a tree. It is employed by the library's
+ * Tree-Iteration algorithms to track the progress
+ * across the tree and find the next node to be
+ * visited.
+ *
+ * It can also be employed to quickly navigate
  * across `DepthStream` via the `.navigate(multind: MultiIndesx)`
- * method. 
+ * method.
  */
 export class MultiIndex {
 	private ["constructor"]: new (index: number[]) => this
@@ -76,8 +76,8 @@ export class MultiIndex {
 		this.index.push(...subIndex)
 	}
 
-	from(multind: MultiIndex) {
-		this.index = copy(multind.index)
+	from(index: number[]) {
+		this.index = copy(index)
 		return this
 	}
 
