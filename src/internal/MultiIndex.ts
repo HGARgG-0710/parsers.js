@@ -28,12 +28,12 @@ export class MultiIndex {
 		return this.index.length
 	}
 
-	get(): readonly number[] {
-		return this.index
+	get last() {
+		return last(this.index)
 	}
 
-	last() {
-		return last(this.index)
+	get(): readonly number[] {
+		return this.index
 	}
 
 	slice(from: number = 0, to: number = this.levels) {
