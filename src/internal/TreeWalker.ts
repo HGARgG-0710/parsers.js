@@ -38,7 +38,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	private getCurrChild() {
 		const { level, pos } = this
-		return (this.curr = level.read(pos.last))
+		return (this.curr = level.read(pos.last!))
 	}
 
 	private goSiblingBefore() {
@@ -73,11 +73,11 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	hasSiblingAfter() {
-		return this.level.lastChild > this.pos.last
+		return this.level.lastChild > this.pos.last!
 	}
 
 	hasSiblingBefore() {
-		return this.pos.last > 0
+		return this.pos.last! > 0
 	}
 
 	goSiblingAfter() {

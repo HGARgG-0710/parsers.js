@@ -32,7 +32,7 @@ export class MultiIndex {
 		return this.index.length
 	}
 
-	get last() {
+	get last(): number | undefined {
 		return last(this.index)
 	}
 
@@ -53,7 +53,7 @@ export class MultiIndex {
 	}
 
 	prevLevel() {
-		return this.index.pop()
+		this.index.pop()
 	}
 
 	resize(length: number = 0) {
