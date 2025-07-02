@@ -24,6 +24,10 @@ export class MultiIndex {
 		this.index.length = length
 	}
 
+	private fillZerosUntil(length: number) {
+		for (let i = this.levels; i < length; ++i) this.index.push(0)
+	}
+
 	get levels() {
 		return this.index.length
 	}
@@ -53,7 +57,8 @@ export class MultiIndex {
 	}
 
 	resize(length: number = 0) {
-		this.levels = length
+		if (length <= this.levels) this.levels = length
+		else this.fillZerosUntil(length)
 		return this
 	}
 
