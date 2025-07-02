@@ -10,7 +10,7 @@ const { isStruct } = type
  * It is intended to be used by the `HashClass` for the purposes
  * of defining the hash-operations.
  */
-export class ObjectInternal<T = any, Default = any>
+export class ObjectInternal<T = any, Default = undefined>
 	implements IPreMap<string, T, Default>
 {
 	/**
@@ -24,6 +24,20 @@ export class ObjectInternal<T = any, Default = any>
 	private _size: number
 	readonly default: Default
 
+	private isMissing(
+		item: T | typeof ObjectInternal.MissingKey
+	): item is typeof ObjectInternal.MissingKey {
+		return item === ObjectInternal.MissingKey
+	}
+
+	private isMissingKey(key: string) {
+		return this.isMissing(this.object[key])
+	}
+
+	private ensureDefault(read: T | typeof ObjectInternal.MissingKey) {
+		return this.isMissing(read) ? this.default : read
+	}
+
 	private set size(newSize: number) {
 		this._size = newSize
 	}
@@ -33,18 +47,17 @@ export class ObjectInternal<T = any, Default = any>
 	}
 
 	get(key: string) {
-		const read = this.object[key]
-		return read === ObjectInternal.MissingKey ? this.default : read
+		return this.ensureDefault(this.object[key])
 	}
 
 	set(key: string, value: T) {
-		if (this.object[key] === ObjectInternal.MissingKey) ++this.size
+		if (this.isMissingKey(key)) ++this.size
 		this.object[key] = value
 		return this
 	}
 
 	delete(key: string) {
-		if (this.object[key] !== ObjectInternal.MissingKey) {
+		if (!this.isMissingKey(key)) {
 			--this.size
 			this.object[key] = ObjectInternal.MissingKey
 		}
@@ -52,8 +65,10 @@ export class ObjectInternal<T = any, Default = any>
 	}
 
 	rekey(keyFrom: string, keyTo: string) {
-		this.object[keyTo] = this.object[keyFrom]
-		this.object[keyFrom] = ObjectInternal.MissingKey
+		if (keyFrom !== keyTo) {
+			this.object[keyTo] = this.object[keyFrom]
+			this.object[keyFrom] = ObjectInternal.MissingKey
+		}
 		return this
 	}
 
@@ -61,7 +76,7 @@ export class ObjectInternal<T = any, Default = any>
 		return new this.constructor(object.copy(this.object), this.default)
 	}
 
-	constructor(private object: object = {}, _default?: Default) {
+	constructor(private readonly object: object = {}, _default?: Default) {
 		assert(isStruct(object))
 		this.default = _default!
 		this.size = Object.keys(object).filter(

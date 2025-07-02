@@ -56,7 +56,7 @@ export class ArrayInternal<T = any, Default = any>
 		return new this.constructor(array.copy(this.array), this.default)
 	}
 
-	constructor(private array: T[] = [], _default?: Default) {
+	constructor(private readonly array: T[] = [], _default?: Default) {
 		assert(isArray(array))
 
 		this.default = _default!
