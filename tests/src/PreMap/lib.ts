@@ -8,8 +8,6 @@ const { T } = boolean
 const { structCheck } = object
 const { isFunction, isNumber } = type
 
-// TODO: LET `ObjectInternal` INHERIT from the `PreMapClassTest`;
-
 function baseGetTest<K = any, V = any, Default = any>(
 	tested: IPreMap<K, V, Default>,
 	at: K,
@@ -32,7 +30,7 @@ function keyExistenceCheck<K = any, V = any, Default = any>(
 	assert.notStrictEqual(tested.get(key), tested.default)
 }
 
-export const PreMapInterface = {
+const PreMapInterface = {
 	interfaceName: "IPreMap",
 	conformance: structCheck({
 		set: isFunction,
@@ -215,7 +213,7 @@ export abstract class PreMapTest<
 		this.testMethod("copy", keys)
 	}
 
-	constructor(interfaces: Interface[], methods: MethodTest[]) {
+	constructor(interfaces: Interface[] = [], methods: MethodTest[] = []) {
 		super(
 			[PreMapInterface, ...interfaces],
 			[
