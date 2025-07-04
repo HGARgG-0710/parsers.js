@@ -162,7 +162,7 @@ const copy = new MethodTest("copy", function <K = any, V = any, Default = any>(
 	for (const key of keys) assert.strictEqual(this.get(key), copied.get(key))
 })
 
-export abstract class PreMapClassTest<
+export abstract class PreMapTest<
 	K = any,
 	V = any,
 	Default = any
