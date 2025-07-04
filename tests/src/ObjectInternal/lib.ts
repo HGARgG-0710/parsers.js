@@ -1,6 +1,6 @@
-import { PreMapClassTest } from "../PreMap/lib.js"
+import { PreMapTest } from "../PreMap/lib.js"
 
-class ObjectInternalTest<T = any, Default = any> extends PreMapClassTest<
+class ObjectInternalTest<T = any, Default = any> extends PreMapTest<
 	string,
 	T,
 	Default

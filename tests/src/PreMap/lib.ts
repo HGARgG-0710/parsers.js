@@ -209,7 +209,7 @@ export abstract class PreMapTest<
 		this.testMethod("size", expected)
 	}
 
-	copy(keys: IIndexed<string>) {
+	copy(keys: IIndexed<K>) {
 		this.testMethod("copy", keys)
 	}
 

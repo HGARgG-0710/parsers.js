@@ -31,19 +31,27 @@ objectInternalTestCounter.test(
 
 objectInternalTestCounter.test(
 	[],
-	() =>
-		objectInternalTest<number, undefined>().withInstance(
-			new ObjectInternal({
-				A: 2,
-				B: 10,
-				C: 60,
-				D: 15,
-				E: 7,
-				F: 5
-			}),
+	() => {
+		const Default = false
+		objectInternalTest<number, typeof Default>().withInstance(
+			new ObjectInternal(
+				{
+					A: 2,
+					B: 10,
+					C: 60,
+					D: 15,
+					E: 7,
+					F: 5
+				},
+				Default
+			),
 			function (test) {
 				test.copy(["A", "B", "C", "D", "E", "F"])
 				test.size(6)
+
+				test.default(Default)
+				test.getDefault("S")
+				test.getDefault("G")
 
 				test.get("F", 5)
 				test.get("E", 7)
@@ -51,10 +59,6 @@ objectInternalTestCounter.test(
 				test.get("C", 60)
 				test.get("B", 10)
 				test.get("A", 2)
-
-				test.default(undefined)
-				test.getDefault("S")
-				test.getDefault("G")
 
 				test.delete("A")
 				test.delete("C")
@@ -69,6 +73,7 @@ objectInternalTestCounter.test(
 				test.rekeySame("A")
 				test.rekey("A", "B")
 			}
-		),
+		)
+	},
 	true
 )
