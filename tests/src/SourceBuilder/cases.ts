@@ -1,6 +1,6 @@
 import { SourceBuilder } from "../../../dist/src/classes.js"
 import { TestCounter } from "../lib.js"
-import { FROZEN, NON_FROZEN, sourceBuilderTest } from "./lib.js"
+import { TestTypes, sourceBuilderTest } from "./lib.js"
 
 const sourceBuilderTestCounter = new TestCounter(
 	([isFrozen, categoryCounter]: [number, number]) =>
@@ -8,7 +8,7 @@ const sourceBuilderTestCounter = new TestCounter(
 )
 
 sourceBuilderTestCounter.test(
-	[NON_FROZEN],
+	[TestTypes.NON_FROZEN],
 	() =>
 		sourceBuilderTest.withInstance(new SourceBuilder(), function (test) {
 			test.copy()
@@ -22,7 +22,7 @@ sourceBuilderTestCounter.test(
 )
 
 sourceBuilderTestCounter.test(
-	[NON_FROZEN],
+	[TestTypes.NON_FROZEN],
 	() =>
 		sourceBuilderTest.withInstance(
 			new SourceBuilder("abcd"),
@@ -37,7 +37,7 @@ sourceBuilderTestCounter.test(
 )
 
 sourceBuilderTestCounter.test(
-	[FROZEN],
+	[TestTypes.FROZEN],
 	() =>
 		sourceBuilderTest.withInstance(
 			new SourceBuilder("abcde").freeze(),

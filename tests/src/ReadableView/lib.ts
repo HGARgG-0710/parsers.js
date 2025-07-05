@@ -9,8 +9,10 @@ import { read } from "../Readable/lib.js"
 const { structCheck } = object
 const { isFunction } = type
 
-export const ZERO_OFFSET = 0
-export const NON_ZERO_OFFSET = 1
+export enum TestTypes {
+	ZERO_OFFSET = 0,
+	NON_ZERO_OFFSET = 1
+}
 
 const ViewInterface = {
 	interfaceName: "IView",

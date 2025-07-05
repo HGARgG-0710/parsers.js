@@ -2,7 +2,7 @@ import { ParseableInput } from "../../../dist/src/classes.js"
 import type { IReadable } from "../../../dist/src/interfaces.js"
 import { ReadableView } from "../../../dist/src/internal/ReadableView.js"
 import { TestCounter } from "../lib.js"
-import { NON_ZERO_OFFSET, readableViewTest, ZERO_OFFSET } from "./lib.js"
+import { TestTypes, readableViewTest } from "./lib.js"
 
 const readableViewTestCounter = new TestCounter(
 	([isNonZeroOffset, categoryCount]: [number, number]) =>
@@ -16,7 +16,7 @@ class StringMockReadable implements IReadable<string> {
 }
 
 readableViewTestCounter.test(
-	[ZERO_OFFSET],
+	[TestTypes.ZERO_OFFSET],
 	() =>
 		readableViewTest<string>().withInstance(
 			new ReadableView(0, new ParseableInput("abcdefghi")),
@@ -59,7 +59,7 @@ class NumberMockReadable3 implements IReadable<number> {
 }
 
 readableViewTestCounter.test(
-	[NON_ZERO_OFFSET],
+	[TestTypes.NON_ZERO_OFFSET],
 	function () {
 		readableViewTest<number>().withInstance(
 			new ReadableView<number>(3, new NumberMockReadable2()),

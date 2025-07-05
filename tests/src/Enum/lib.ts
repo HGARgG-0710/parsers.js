@@ -6,8 +6,10 @@ import { ClassTest, MethodTest } from "../lib.js"
 const { structCheck } = object
 const { isFunction } = type
 
-export const INSTANCE_TEST = 0
-export const STATIC_TEST = 1
+export enum TestTypes {
+	INSTANCE_TEST = 0,
+	STATIC_TEST = 1
+}
 
 const EnumInterface = {
 	interfaceName: "IEnum",

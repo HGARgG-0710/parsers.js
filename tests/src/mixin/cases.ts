@@ -2,14 +2,10 @@ import { array, object, type } from "@hgargg-0710/one"
 import { mixin } from "../../../dist/main.js"
 import { TestCounter } from "../lib.js"
 import {
-	CLASS_AND_MIXIN_PARENTS,
-	CLASS_PARENTS,
-	HAS_CONSTRUCTOR,
-	MIXIN_PARENTS,
+	ConstructorTestTypes,
 	MixinInstanceTest,
 	MixinPrototypeTest,
-	NO_CONSTRUCTOR,
-	NO_PARENTS,
+	ParentTestTypes,
 	PureMixinPrototypeTest
 } from "./lib.js"
 
@@ -22,7 +18,7 @@ const mixinTestCounter = new TestCounter(
 )
 
 mixinTestCounter.test(
-	[NO_CONSTRUCTOR, NO_PARENTS],
+	[ConstructorTestTypes.NO_CONSTRUCTOR, ParentTestTypes.NO_PARENTS],
 	() =>
 		new PureMixinPrototypeTest({ name: "Test0", properties: {} }).toClass(
 			{}
@@ -31,7 +27,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, NO_PARENTS],
+	[ConstructorTestTypes.HAS_CONSTRUCTOR, ParentTestTypes.NO_PARENTS],
 	() => {
 		const constructor = function () {}
 		new MixinPrototypeTest({
@@ -51,7 +47,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[NO_CONSTRUCTOR, NO_PARENTS],
+	[ConstructorTestTypes.NO_CONSTRUCTOR, ParentTestTypes.NO_PARENTS],
 	() => {
 		const b = function (c: number) {
 			return c + 5
@@ -144,7 +140,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, NO_PARENTS],
+	[ConstructorTestTypes.HAS_CONSTRUCTOR, ParentTestTypes.NO_PARENTS],
 	() => {
 		function constructor(a: number, b: string) {
 			this.a = a === this.a ? a + 1 : a
@@ -213,7 +209,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, CLASS_PARENTS],
+	[ConstructorTestTypes.HAS_CONSTRUCTOR, ParentTestTypes.CLASS_PARENTS],
 	() => {
 		function T() {
 			if (!this.b) this.b = 11
@@ -392,7 +388,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, MIXIN_PARENTS],
+	[ConstructorTestTypes.HAS_CONSTRUCTOR, ParentTestTypes.MIXIN_PARENTS],
 	() => {
 		function parent1Constructor(x: number) {
 			this.S = x
@@ -540,7 +536,10 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS],
+	[
+		ConstructorTestTypes.HAS_CONSTRUCTOR,
+		ParentTestTypes.CLASS_AND_MIXIN_PARENTS
+	],
 	() => {
 		function ClassParent1() {}
 
@@ -647,7 +646,10 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[NO_CONSTRUCTOR, CLASS_AND_MIXIN_PARENTS],
+	[
+		ConstructorTestTypes.NO_CONSTRUCTOR,
+		ParentTestTypes.CLASS_AND_MIXIN_PARENTS
+	],
 	() => {
 		function ClassParent1() {}
 
@@ -790,7 +792,7 @@ mixinTestCounter.test(
 )
 
 mixinTestCounter.test(
-	[HAS_CONSTRUCTOR, NO_PARENTS],
+	[ConstructorTestTypes.HAS_CONSTRUCTOR, ParentTestTypes.NO_PARENTS],
 	() => {
 		const mixinShape = {
 			name: "Test8",

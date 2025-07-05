@@ -7,8 +7,10 @@ import { ClassTest, MethodTest } from "../lib.js"
 const { structCheck } = object
 const { isFunction, isBoolean } = type
 
-export const NON_FROZEN = 0
-export const FROZEN = 1
+export enum TestTypes {
+	NON_FROZEN = 0,
+	FROZEN = 1
+}
 
 const ClearableInterface = {
 	interfaceName: "IClearable",

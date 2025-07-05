@@ -11,8 +11,10 @@ import { size } from "../Sizeable/lib.js"
 const { structCheck } = object
 const { isFunction, isNumber, isBoolean } = type
 
-export const UNFROZEN = 0
-export const FROZEN = 1
+export enum TestTypes {
+	UNFROZEN = 0,
+	FROZEN = 1
+}
 
 const PersistentAccumulatorInterface = {
 	interfaceName: "IPersistentAccumulator",

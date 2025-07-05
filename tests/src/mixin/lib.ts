@@ -24,13 +24,17 @@ const withoutSuper = withoutProperties("super")
  * 		c - current test count [amongst tests with the same 'a.b' sub-version]
  */
 
-export const NO_CONSTRUCTOR = 0
-export const HAS_CONSTRUCTOR = 1
+export enum ConstructorTestTypes {
+	NO_CONSTRUCTOR = 0,
+	HAS_CONSTRUCTOR = 1
+}
 
-export const NO_PARENTS = 0
-export const CLASS_PARENTS = 1
-export const MIXIN_PARENTS = 2
-export const CLASS_AND_MIXIN_PARENTS = 3
+export enum ParentTestTypes {
+	NO_PARENTS = 0,
+	CLASS_PARENTS = 1,
+	MIXIN_PARENTS = 2,
+	CLASS_AND_MIXIN_PARENTS = 3
+}
 
 abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
 	protected readonly mixinInstance: mixin<T, Args>

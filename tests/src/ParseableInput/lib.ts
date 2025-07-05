@@ -14,8 +14,10 @@ export function readWhole<T = any>(instance: IParseable<T>) {
 	return array.numbers(instance.size).map((i) => instance.read(i))
 }
 
-export const EMPTY = 0
-export const NON_EMPTY = 1
+export enum TestTypes {
+	EMPTY = 0,
+	NON_EMPTY = 1
+}
 
 const ParseableInterface = {
 	interfaceName: "IParseable",

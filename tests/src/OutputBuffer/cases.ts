@@ -1,6 +1,6 @@
 import { OutputBuffer } from "../../../dist/src/internal/OutputBuffer.js"
 import { TestCounter } from "../lib.js"
-import { FROZEN, outputBufferTest, UNFROZEN } from "./lib.js"
+import { TestTypes, outputBufferTest } from "./lib.js"
 
 const outputBufferTestCounter = new TestCounter(
 	([isFrozen, categoryCount]: [number, number]) =>
@@ -8,7 +8,7 @@ const outputBufferTestCounter = new TestCounter(
 )
 
 outputBufferTestCounter.test(
-	[UNFROZEN],
+	[TestTypes.UNFROZEN],
 	() =>
 		outputBufferTest<number>().withInstance(
 			new OutputBuffer().push(1, 2, 3, 4),
@@ -27,7 +27,7 @@ outputBufferTestCounter.test(
 )
 
 outputBufferTestCounter.test(
-	[FROZEN],
+	[TestTypes.FROZEN],
 	function () {
 		outputBufferTest<string>().withInstance(
 			new OutputBuffer().push("a", "b", "c", "d", "e").freeze(),

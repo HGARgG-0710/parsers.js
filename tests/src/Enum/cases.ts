@@ -1,6 +1,6 @@
 import { Enum } from "../../../dist/src/internal/Enum.js"
 import { assertThrowing, assertThrowingFails, TestCounter } from "../lib.js"
-import { enumTest, INSTANCE_TEST, STATIC_TEST } from "./lib.js"
+import { enumTest, TestTypes } from "./lib.js"
 
 const enumTestCounter = new TestCounter(
 	([isStatic, categoryCount]: [number, number]) =>
@@ -8,7 +8,7 @@ const enumTestCounter = new TestCounter(
 )
 
 enumTestCounter.test(
-	[INSTANCE_TEST],
+	[TestTypes.INSTANCE_TEST],
 	() =>
 		enumTest<number>().withInstance(
 			new Enum([1, 2, 3, 4, 2, 1, 5]),
@@ -22,7 +22,7 @@ enumTestCounter.test(
 )
 
 enumTestCounter.test(
-	[INSTANCE_TEST],
+	[TestTypes.INSTANCE_TEST],
 	() =>
 		enumTest<string>().withInstance(
 			new Enum(["a", "b", "c", "d", "e", "f"]),
@@ -39,7 +39,7 @@ enumTestCounter.test(
 )
 
 enumTestCounter.test(
-	[STATIC_TEST],
+	[TestTypes.STATIC_TEST],
 	() => {
 		assertThrowing(() => Enum.assertDisjoint(new Enum([]), new Enum([])))
 

@@ -1,6 +1,6 @@
 import { ParseableInput } from "../../../dist/src/classes.js"
 import { TestCounter } from "../lib.js"
-import { EMPTY, NON_EMPTY, parseableInputTest } from "./lib.js"
+import { TestTypes, parseableInputTest } from "./lib.js"
 
 const parseableInputTestCounter = new TestCounter(
 	([isEmptyCount, categoryCount]: [number, number]) =>
@@ -8,7 +8,7 @@ const parseableInputTestCounter = new TestCounter(
 )
 
 parseableInputTestCounter.test(
-	[EMPTY],
+	[TestTypes.EMPTY],
 	() =>
 		parseableInputTest.withInstance(
 			new ParseableInput(""),
@@ -22,7 +22,7 @@ parseableInputTestCounter.test(
 )
 
 parseableInputTestCounter.test(
-	[NON_EMPTY],
+	[TestTypes.NON_EMPTY],
 	() =>
 		parseableInputTest.withInstance(
 			new ParseableInput("abcdef"),
