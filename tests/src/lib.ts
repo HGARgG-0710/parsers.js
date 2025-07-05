@@ -13,7 +13,7 @@ export interface Interface {
 }
 
 export class ClassTest<InstanceType extends ICopiable = any> {
-	private instance: InstanceType | null
+	private instance: InstanceType | null = null
 	private readonly names: string[]
 
 	private typeCheck() {
@@ -30,17 +30,18 @@ export class ClassTest<InstanceType extends ICopiable = any> {
 
 		if (index === -1)
 			throw new TypeError(
-				`Test for method \`${name}\` not found in ${this.names}`
+				`Test for method \`${name}\` not found in ${this.names.join(", ")}`
 			)
 
 		return methods[index].withInstance(this.instance!.copy(), ...args)
 	}
 
 	withInstance(instance: InstanceType, callback: (test: this) => void) {
+		const prevInstance = this.instance
 		this.instance = instance
 		this.typeCheck()
 		callback(this)
-		this.instance = null
+		this.instance = prevInstance
 	}
 
 	constructor(
