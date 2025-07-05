@@ -97,12 +97,12 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		return this.walkable!.findUnwalkedChildren(this.pos.get())
 	}
 
-	goNextFirst(levelsUp: number) {
+	goFirstNext(levelsUp: number) {
 		this.indexCut(levelsUp)
 		this.goSiblingAfter()
 	}
 
-	goPrevLast() {
+	goLastPrev() {
 		this.goSiblingBefore()
 		const initLength = this.pos.levels
 		this.pos.extend(this.currentLastIndex())
