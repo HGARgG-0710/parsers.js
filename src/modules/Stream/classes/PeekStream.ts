@@ -74,7 +74,7 @@ function BuildPeekStream<T = any>() {
 		}
 
 		private fetchNextPeek() {
-			const nextPeek = this.peekBuffer.read(0)
+			const nextPeek = this.peekBuffer.first()
 			this.peekBuffer.forward()
 			this.curr = nextPeek
 		}
