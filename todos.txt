@@ -20,13 +20,11 @@ Testing order:
 	2. all else
 
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
-	CURRENT AGENDA: 
+	CURRENT AGENDA: 			
 		P1:
-		[THESE TWO - base them on `ObjectInternal` - GENERALIZE, refactor to `PreMap`, and INSTANTIATE the tested methods with *appropriate generics*!]
-			32. `ArrayInternal`
-			33. `MapInternal`
 		[this is just an array-like strucutre, nothing unusual to see here]
 		1. `ArrayCollection`
+		2. `samples.Pairs`: 
 
 		P2:
 		1. TableMap
@@ -37,6 +35,23 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			`RegExpMap`, 
 			`SetMap`, 
 			`ObjectMap`
+		8. `BasicHash`, 
+			`LengthHash`, 
+			`TokenHash`, 
+			`TypeofHash`, 
+			`CharHash`: 
+				1. DO NOT MOCK! [real dependencies are far too simple for that]
+		6. WrapHandler, TableHandler
+
+		P3: 
+		17. `ResourceManager`: 
+			1. USE MOCKS FOR THIS ONE!
+			2. ALSO - the `.manager` properties of `WritingDestination` and `ReadableSource`
+		1. RetainedArray
+		2. ReadableSource
+		3. WritingDestination
+		4. Encoder[8, 16, U8, U16]
+		5. Loaded[8, 16, U8, U16]
 
 	TODO: classes from /internal to test: 		
 		[easy, but longer]
@@ -99,9 +114,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			`TypeofHash`, 
 			`CharHash`: 
 				1. Test each independently
-				2. Test ONLY AFTER `IPreMap`s
-				3. Use DIFFERENT `IPreMap`s for each case
-				4. DO NOT MOCK! [use real `IPreMap`s instead]: 
+				2. Use DIFFERENT `IPreMap`s for each case
+				3. DO NOT MOCK! [use real `IPreMap`s instead]: 
 					reason - as always, too simple
 					this would require re-implementing A LOT of stuff for no good reason...
 		
@@ -187,9 +201,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 
 		[easy]
 		31. `modules/Stream/utils/StreamPosition.ts` - test everything
-		32. `ArrayInternal`
-		33. `MapInternal`
-		34. `ObjectInternal`
 
 		[easy, tedious]
 		38. `ArrayMap`, 
