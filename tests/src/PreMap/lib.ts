@@ -8,6 +8,18 @@ const { T } = boolean
 const { structCheck } = object
 const { isFunction, isNumber } = type
 
+const PreMapInterface = {
+	interfaceName: "IPreMap",
+	conformance: structCheck({
+		set: isFunction,
+		delete: isFunction,
+		rekey: isFunction,
+		size: isNumber,
+		default: T,
+		copy: isFunction
+	})
+}
+
 function baseGetTest<K = any, V = any, Default = any>(
 	tested: IPreMap<K, V, Default>,
 	at: K,
@@ -30,16 +42,78 @@ function keyExistenceCheck<K = any, V = any, Default = any>(
 	assert.notStrictEqual(tested.get(key), tested.default)
 }
 
-const PreMapInterface = {
-	interfaceName: "IPreMap",
-	conformance: structCheck({
-		set: isFunction,
-		delete: isFunction,
-		rekey: isFunction,
-		size: isNumber,
-		default: T,
-		copy: isFunction
-	})
+function sameSizeVerify<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	callback: (t: IPreMap<K, V, Default>) => void
+) {
+	const oldSize = tested.size
+	callback(tested)
+	assert.strictEqual(tested.size, oldSize)
+}
+
+function sizeOneMore<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	callback: (t: IPreMap<K, V, Default>) => void
+) {
+	const oldSize = tested.size
+	callback(tested)
+	assert.strictEqual(tested.size, oldSize + 1)
+}
+
+function sizeOneLess<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	callback: (t: IPreMap<K, V, Default>) => void
+) {
+	const oldSize = tested.size
+	callback(tested)
+	assert.strictEqual(tested.size, oldSize - 1)
+}
+
+function keyVanishedCheck<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	key: K,
+	callback: (tested: IPreMap<K, V, Default>, key: K) => void
+) {
+	keyExistenceCheck(tested, key)
+	callback(tested, key)
+	nonExistenceCheck(tested, key)
+}
+
+function keyAppeared<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	key: K,
+	callback: (tested: IPreMap<K, V, Default>, key: K) => void
+) {
+	nonExistenceCheck(tested, key)
+	callback(tested, key)
+	keyExistenceCheck(tested, key)
+}
+
+function stillNonExistentCheck<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	key: K,
+	callback: (tested: IPreMap<K, V, Default>, key: K) => void
+) {
+	nonExistenceCheck(tested, key)
+	callback(tested, key)
+	nonExistenceCheck(tested, key)
+}
+
+function stillExistsCheck<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	key: K,
+	callback: (tested: IPreMap<K, V, Default>, key: K) => void
+) {
+	keyExistenceCheck(tested, key)
+	callback(tested, key)
+	keyExistenceCheck(tested, key)
+}
+
+function baseDelete<K = any, V = any, Default = any>(
+	tested: IPreMap<K, V, Default>,
+	key: K
+) {
+	tested.delete(key)
 }
 
 const _delete = new MethodTest("delete", function <
@@ -47,9 +121,7 @@ const _delete = new MethodTest("delete", function <
 	V = any,
 	Default = any
 >(this: IPreMap<K, V, Default>, key: K) {
-	keyExistenceCheck(this, key)
-	this.delete(key)
-	nonExistenceCheck(this, key)
+	sizeOneLess(this, (tested) => keyVanishedCheck(tested, key, baseDelete))
 })
 
 const deleteNonExistent = new MethodTest("deleteNonExistent", function <
@@ -57,9 +129,9 @@ const deleteNonExistent = new MethodTest("deleteNonExistent", function <
 	V = any,
 	Default = any
 >(this: IPreMap<K, V, Default>, key: K) {
-	nonExistenceCheck(this, key)
-	this.delete(key)
-	nonExistenceCheck(this, key)
+	sameSizeVerify(this, (tested) =>
+		stillNonExistentCheck(tested, key, baseDelete)
+	)
 })
 
 const rekeyToUndefined = new MethodTest("rekeyToUndefined", function <
@@ -67,15 +139,15 @@ const rekeyToUndefined = new MethodTest("rekeyToUndefined", function <
 	V = any,
 	Default = any
 >(this: IPreMap<K, V, Default>, from: K, to: K) {
-	const oldFrom = this.get(from)
-	const oldTo = this.get(to)
-
-	assert.strictEqual(oldTo, this.default)
-	assert.notStrictEqual(oldFrom, this.default)
-
-	this.rekey(from, to)
-	assert.strictEqual(oldFrom, this.get(to))
-	nonExistenceCheck(this, from)
+	sameSizeVerify(this, (tested) =>
+		keyVanishedCheck(tested, from, (tested, from) =>
+			keyAppeared(tested, to, (tested, to) => {
+				const oldFrom = tested.get(from)
+				tested.rekey(from, to)
+				baseGetTest(tested, to, oldFrom)
+			})
+		)
+	)
 })
 
 const rekey = new MethodTest("rekey", function <
@@ -83,16 +155,16 @@ const rekey = new MethodTest("rekey", function <
 	V = any,
 	Default = any
 >(this: IPreMap<K, V, Default>, from: K, to: K) {
-	const oldFrom = this.get(from)
-	const oldTo = this.get(to)
-
-	assert.notStrictEqual(oldTo, this.default)
-	assert.notStrictEqual(oldFrom, this.default)
 	assert.notStrictEqual(from, to)
-
-	this.rekey(from, to)
-	assert.strictEqual(oldFrom, this.get(to))
-	nonExistenceCheck(this, from)
+	sizeOneLess(this, (tested) =>
+		keyVanishedCheck(tested, from, (tested, from) =>
+			stillExistsCheck(tested, to, () => {
+				const oldFrom = tested.get(from)
+				this.rekey(from, to)
+				assert.strictEqual(oldFrom, tested.get(to))
+			})
+		)
+	)
 })
 
 const rekeySame = new MethodTest("rekeySame", function <
@@ -145,9 +217,11 @@ const setNonExistent = new MethodTest("setNonExistent", function <
 	V = any,
 	Default = any
 >(this: IPreMap<K, V, Default>, key: K, value: V) {
-	nonExistenceCheck(this, key)
-	this.set(key, value)
-	baseGetTest(this, key, value)
+	sizeOneMore(this, (tested) => {
+		nonExistenceCheck(tested, key)
+		this.set(key, value)
+		baseGetTest(tested, key, value)
+	})
 })
 
 const copy = new MethodTest("copy", function <K = any, V = any, Default = any>(

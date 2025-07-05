@@ -75,4 +75,16 @@ export namespace Pairs {
 
 		return [keys, values]
 	}
+
+	/**
+	 * Creates an array with index-value pairs
+	 * as-defined in the `indexValues` argument.
+	 *
+	 * Array returned can be "holey".
+	 */
+	export function toArray<T = any>(indexValues: Iterable<[number, T]>) {
+		const arr: (T | undefined)[] = []
+		for (const [i, v] of indexValues) arr[i] = v
+		return arr
+	}
 }
