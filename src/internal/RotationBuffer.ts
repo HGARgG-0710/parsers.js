@@ -332,7 +332,7 @@ class RawItems<T = any> {
 		return [...this]
 	}
 
-	writeAll(after: number, items: T[]) {
+	writeAll(after: number, items: readonly T[]) {
 		for (let i = 0; i < items.length; ++i) this.write(after + i, items[i])
 	}
 
@@ -403,7 +403,7 @@ export class RotationBuffer<T = any> {
 		return this.rawItems.read(i)
 	}
 
-	push(...items: T[]) {
+	push(items: readonly T[]) {
 		this.space.increase(items.length)
 		this.rawItems.writeAll(this.size, items)
 		if (this.empty.is()) this.empty.markNot()
