@@ -42,14 +42,3 @@ export abstract class MixinArray<T = any> {
 		assert(isArray(items))
 	}
 }
-
-/**
- * An extension of `MixinArray` with `.init`.
- * (Does not respect encapsulation)
- */
-export abstract class InitMixin<T = any> extends MixinArray<T> {
-	init(items: T[]) {
-		this.items = items
-		return this
-	}
-}
