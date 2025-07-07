@@ -4,9 +4,9 @@ export class Size {
 	}
 
 	dec() {
-		--this.size
+		if (this.size > 0) --this.size
 	}
-	
+
 	get() {
 		return this.size
 	}
