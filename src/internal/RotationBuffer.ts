@@ -5,11 +5,11 @@ const { min } = number
 const { isNumber, isArray } = type
 
 /**
- * Represents the class for handling
- * the size-related data/methods of
- * `RotationBuffer`.
+ * A class encapsulating the ability
+ * to dynamically increase the length
+ * of a given `T[]` array.
  */
-class Size<T = any> {
+class DynamicSize<T = any> {
 	incBy(elements: number) {
 		this.items.length += elements
 	}
@@ -18,15 +18,40 @@ class Size<T = any> {
 		return this.items.length
 	}
 
+	constructor(private readonly items: T[]) {}
+}
+
+/**
+ * Represents the class for handling
+ * the size-related data/methods of
+ * `RotationBuffer`.
+ */
+class BufferSize<T = any> {
+	private readonly dynamicSize: DynamicSize<T>
+
+	private get size() {
+		return this.dynamicSize.get()
+	}
+
+	incBy(elements: number) {
+		this.dynamicSize.incBy(elements)
+	}
+
+	get() {
+		return this.size
+	}
+
 	lastPos() {
-		return this.get() - 1
+		return this.size - 1
 	}
 
 	wrapped(n: number) {
-		return n % this.get()
+		return n % this.size
 	}
 
-	constructor(private readonly items: T[]) {}
+	constructor(items: T[]) {
+		this.dynamicSize = new DynamicSize(items)
+	}
 }
 
 /**
@@ -56,7 +81,7 @@ class LastIndex<T = any> {
 		return this.lastIndex
 	}
 
-	constructor(private readonly sizeObj: Size<T>) {}
+	constructor(private readonly sizeObj: BufferSize<T>) {}
 }
 
 /**
@@ -116,7 +141,7 @@ class IndexRotation<T = any> {
 		return this.rotation
 	}
 
-	constructor(private readonly size: Size<T>) {}
+	constructor(private readonly size: BufferSize<T>) {}
 }
 
 /**
@@ -139,7 +164,7 @@ class FilledSpaceCalculator<T = any> {
 	}
 
 	constructor(
-		public readonly sizeObj: Size<T>,
+		public readonly sizeObj: BufferSize<T>,
 		private readonly lastIndex: LastIndex<T>,
 		private readonly rotation: IndexRotation<T>
 	) {}
@@ -170,7 +195,7 @@ class SpaceData<T = any> {
 	}
 
 	constructor(
-		private readonly sizeObj: Size<T>,
+		private readonly sizeObj: BufferSize<T>,
 		lastIndex: LastIndex<T>,
 		rotation: IndexRotation<T>,
 		readonly empty: EmptinessTracker
@@ -203,7 +228,7 @@ class SpaceDataBuilder<T = any> {
 		return this
 	}
 
-	build(sizeObj: Size<T>, empty: EmptinessTracker) {
+	build(sizeObj: BufferSize<T>, empty: EmptinessTracker) {
 		return new SpaceData(sizeObj, this._lastIndex, this._rotation, empty)
 	}
 }
@@ -318,7 +343,7 @@ class RawItems<T = any> {
 
 	constructor(
 		private readonly items: T[],
-		readonly sizeObj: Size<T>,
+		readonly sizeObj: BufferSize<T>,
 		readonly rotation: IndexRotation<T>
 	) {}
 }
@@ -328,7 +353,7 @@ function isItemsConvertible<T = any>(maxSize: any): maxSize is number | T[] {
 }
 
 function toItems<T = any>(maxSize: number | T[]) {
-	return isNumber(maxSize) ? new Array(maxSize).fill(null) : maxSize
+	return isNumber(maxSize) ? new Array(maxSize) : maxSize
 }
 
 /**
@@ -397,7 +422,7 @@ export class RotationBuffer<T = any> {
 	constructor(maxSize: number | T[]) {
 		assert(isItemsConvertible(maxSize))
 		const items = toItems(maxSize)
-		const sizeObj = new Size(items)
+		const sizeObj = new BufferSize(items)
 
 		this.lastIndex = new LastIndex(sizeObj)
 		this.rotation = new IndexRotation(sizeObj)
