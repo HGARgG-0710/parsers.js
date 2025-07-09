@@ -22,16 +22,19 @@ export namespace Pairs {
 	 * returns a [K, V][], which is broken down onto pairs
 	 * by walking from start to end, and taking the
 	 * corresponding `K` and `V`.
+	 * 
+	 * Keys without a value are given the default value 
+	 * of `undefined`. 
 	 */
 	export function fromLinear<K = any, V = any>(linear: Iterable<K | V>) {
-		const result = Pairs<K, V>()
+		const result = Pairs<K, V | undefined>()
 
 		let i = 0
 		for (const x of linear) {
 			const mod = i % 2
 			const pair = Math.floor(i / 2)
 			++i
-			if (mod === 0) result.push([x as K, null] as array.Pair<K, V>)
+			if (mod === 0) result.push([x as K, undefined])
 			else result[pair][mod] = x
 		}
 
