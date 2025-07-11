@@ -7,6 +7,12 @@ import { TableMap } from "./TableMap.js"
 const { isArray } = type
 const { copy } = array
 
+/**
+ * This is a class that implements the `ILiquidMap` interface, 
+ * utilizing (as its implementations) `TableMap` and `TableCarrier`
+ * default implementations. This is considered to be a default 
+ * implementation of the `ILiquidMap`. 
+*/
 export class LiquidMap<K = any, V = any, Default = any>
 	implements ILiquidMap<K, V, Default>
 {
@@ -29,7 +35,11 @@ export class LiquidMap<K = any, V = any, Default = any>
 		this.values = copy(carrier.values as V[])
 	}
 
-	constructor(private keys: K[], private values: V[], _default?: Default) {
+	constructor(
+		private keys: K[] = [],
+		private values: V[] = [],
+		_default?: Default
+	) {
 		this.default = _default as Default
 	}
 }
