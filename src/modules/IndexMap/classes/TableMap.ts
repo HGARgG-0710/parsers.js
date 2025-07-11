@@ -1,9 +1,14 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ICopiable, IDefaulting } from "../../../interfaces.js"
-import type { ITableMap } from "../../../interfaces/TableMap.js"
+import type {
+	ICopiable,
+	IDefaulting,
+	ITableCarrier
+} from "../../../interfaces.js"
 import { Pairs } from "../../../samples.js"
 import { isGoodIndex } from "../../../utils.js"
+import type { ITableMap } from "../interfaces/TableMap.js"
+import { TableCarrier } from "./LiquidMap.js"
 
 const { isArray } = type
 const { insert, out, swap } = inplace
@@ -56,6 +61,10 @@ export class TableColumn<T = any> implements ICopiable {
 		return this.items.indexOf(someItem)
 	}
 
+	reset(items: T[]) {
+		this.items = items
+	}
+
 	get(): readonly T[] {
 		return this.items
 	}
@@ -75,6 +84,11 @@ class ColumnPair<K = any, V = any> {
 	readonly keys: TableColumn<K>
 	readonly values: TableColumn<V>
 
+	reset(keys: K[], values: V[]) {
+		this.keys.reset(keys)
+		this.values.reset(values)
+	}
+
 	constructor(keys: K[], values: V[]) {
 		this.keys = new TableColumn(keys)
 		this.values = new TableColumn(values)
@@ -88,8 +102,13 @@ class ColumnPair<K = any, V = any> {
  * sizes.
  */
 class ImmutableMap<K = any, V = any> {
-	private readonly keyColumn: TableColumn<K>
-	private readonly valueColumn: TableColumn<V>
+	private get keyColumn() {
+		return this.columns.keys
+	}
+
+	private get valueColumn() {
+		return this.columns.values
+	}
 
 	get size() {
 		return this.keyColumn.size
@@ -115,10 +134,7 @@ class ImmutableMap<K = any, V = any> {
 		return this.valueColumn.read(i)
 	}
 
-	constructor(columns: ColumnPair<K, V>) {
-		this.keyColumn = columns.keys
-		this.valueColumn = columns.values
-	}
+	constructor(private readonly columns: ColumnPair<K, V>) {}
 }
 
 /**
@@ -198,8 +214,13 @@ class UniqueEnsurer<K = any, V = any> {
  * arrays.
  */
 class MutableMap<K = any, V = any> {
-	private readonly keys: TableColumn<K>
-	private readonly values: TableColumn<V>
+	private get keys() {
+		return this.columns.keys
+	}
+
+	private get values() {
+		return this.columns.values
+	}
 
 	setKey(index: number, key: K) {
 		this.keys.set(index, key)
@@ -244,10 +265,7 @@ class MutableMap<K = any, V = any> {
 		this.values.delete(index, count)
 	}
 
-	constructor(columns: ColumnPair<K, V>) {
-		this.keys = columns.keys
-		this.values = columns.values
-	}
+	constructor(private readonly columns: ColumnPair<K, V>) {}
 }
 
 /**
@@ -353,7 +371,19 @@ class DefaultingTable<K = any, V = any, Default = any>
 	implements IDefaulting<Default>
 {
 	private readonly keyVerifier: KeyVerifier<K, V>
-	readonly default: Default
+	private _default: Default
+
+	private set default(newDefault: Default) {
+		this._default = newDefault
+	}
+
+	get default() {
+		return this._default
+	}
+
+	setDefault(newDefault: Default) {
+		this.default = newDefault
+	}
 
 	by(key: K) {
 		return this.keyVerifier.isKnown(key) ? this.dual.by(key)! : this.default
@@ -393,6 +423,7 @@ export class TableMap<K = any, V = any, Default = any>
 		_default?: Default
 	) => this
 
+	private readonly asColumns: ColumnPair<K, V>
 	private readonly asImmutable: ImmutableMap<K, V>
 	private readonly asMutable: MutableMap<K, V>
 	private readonly asPairs: PairIterator<K, V>
@@ -476,20 +507,36 @@ export class TableMap<K = any, V = any, Default = any>
 		yield* this.asPairs
 	}
 
+	fromCarrier(carrier: ITableCarrier<K, V, Default>): void {
+		this.asDefaulting.setDefault(carrier.default)
+		this.asColumns.reset(
+			array.copy(carrier.keys as K[]),
+			array.copy(carrier.values as V[])
+		)
+	}
+
+	toCarrier() {
+		return new TableCarrier(
+			array.copy(this.asImmutable.keys as K[]),
+			array.copy(this.asImmutable.values as V[]),
+			this.default
+		)
+	}
+
 	constructor(keys: K[], values: V[], _default?: Default) {
 		assert(isArray(keys))
 		assert(isArray(values))
 		assert.strictEqual(keys.length, values.length)
 
-		const columns = new ColumnPair(keys, values)
-		this.asImmutable = new ImmutableMap(columns)
+		this.asColumns = new ColumnPair(keys, values)
+		this.asImmutable = new ImmutableMap(this.asColumns)
 		this.asPairs = new PairIterator(this.asImmutable)
 		this.ensurer = new UniqueEnsurer(this.asImmutable)
 
 		const verifier = new IndexVerifier(this.asImmutable)
-		this.asMutable = new MutableMap(columns)
+		this.asMutable = new MutableMap(this.asColumns)
 		this.asRecord = new IndexedRecord(this.asMutable, verifier)
-		
+
 		this.asDual = new DualTable(
 			this.asImmutable,
 			this.asMutable,

@@ -1,17 +1,14 @@
-import { array, functional, object, string, type } from "@hgargg-0710/one"
-import assert from "assert"
+import { array, functional, object, string } from "@hgargg-0710/one"
 import { BadIndex, MissingArgument } from "../../../constants.js"
 import type {
 	IHaving,
 	IIndexingFunction,
-	ITableMap,
 	ITestable
 } from "../../../interfaces.js"
-import type { IIndexMap, IMapClass } from "../../../interfaces/MapClass.js"
-import { isGoodIndex } from "../../../utils.js"
-import { TableMap } from "./TableMap.js"
+import type { IIndexMap, IMapClass } from "../interfaces/MapClass.js"
+import type { ITableCarrier } from "../interfaces/LiquidMap.js"
+import type { ILiquidMap } from "../interfaces/LiquidMap.js"
 
-const { isArray } = type
 const { trivialCompose } = functional
 const { copy } = array
 
@@ -52,16 +49,22 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 		_default?: Default
 	) => this
 
-	readonly default: Default
-	private readonly keys: K[]
-	private readonly values: V[]
-	private alteredKeys: any[]
+	private readonly carrier: ITableCarrier<K, V, Default>
 
+	private alteredKeys: any[]
 	private change?: IIndexingFunction<K>
 	private extension: (x: any, ...y: any[]) => any
 
 	private get size() {
 		return this.keys.length
+	}
+
+	private get keys() {
+		return this.carrier.keys
+	}
+
+	private get values() {
+		return this.carrier.values
 	}
 
 	private getIndexWithChange(sought: any) {
@@ -81,10 +84,6 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 			: this.getIndexWithoutChange(sought)
 	}
 
-	private getValueIfGood(index: number) {
-		return isGoodIndex(index) ? this.values[index] : this.default
-	}
-
 	protected setExtension(extension: (x: any, ...y: any[]) => any) {
 		this.extension = extension
 	}
@@ -94,37 +93,37 @@ abstract class PreMapClass<K = any, V = any, Default = any>
 	}
 
 	protected setKeyExtension(
-		keyExtension: (key: K, index?: number, keys?: K[]) => any
+		keyExtension: (key: K, index?: number, keys?: readonly K[]) => any
 	) {
 		this.alteredKeys = this.keys.map(keyExtension)
 	}
 
+	get default() {
+		return this.carrier.default
+	}
+
 	index(x: any, ...y: any[]) {
-		return this.getValueIfGood(this.indexOf(this.extension(x, ...y)))
+		return this.carrier.read(this.indexOf(this.extension(x, ...y)))
 	}
 
 	toModifiable() {
-		return new TableMap(copy(this.keys), copy(this.values), this.default)
+		return this.liquid.toModifiable()
 	}
 
-	fromModifiable(table: ITableMap<K, V, Default>) {
-		return new this.constructor(table.keys, table.values, table.default)
+	fromCarrier(carrier: ITableCarrier<K, V, Default>): void {
+		this.liquid.fromCarrier(carrier)
 	}
 
 	copy() {
 		return new this.constructor(
-			copy(this.keys),
-			copy(this.values),
+			copy(this.keys as K[]),
+			copy(this.values as V[]),
 			this.default
 		)
 	}
 
-	constructor(keys: K[] = [], values: V[] = [], _default?: Default) {
-		assert(isArray(keys))
-		assert(isArray(values))
-		this.keys = keys
-		this.values = values
-		this.default = _default!
+	constructor(private readonly liquid: ILiquidMap<K, V, Default>) {
+		this.carrier = this.liquid.toCarrier()
 	}
 }
 
@@ -168,8 +167,8 @@ abstract class PreMapClass<K = any, V = any, Default = any>
  */
 export function MapClass<K = any, V = any, Default = any>(
 	change?: IIndexingFunction<K>,
-	extensions: Function[] = [],
-	keyExtensions: Function[] = []
+	extensions: readonly Function[] = [],
+	keyExtensions: readonly Function[] = []
 ): IMapClass<K, V, Default> {
 	const extension = trivialCompose(...extensions)
 	const keyExtension = trivialCompose(...keyExtensions)
@@ -178,11 +177,11 @@ export function MapClass<K = any, V = any, Default = any>(
 		static readonly change?: IIndexingFunction<K> = change
 		static readonly extend = extend
 		static readonly extendKey = extendKey
-		static readonly keyExtensions: Function[] = keyExtensions
-		static readonly extensions: Function[] = extensions
+		static readonly keyExtensions = keyExtensions
+		static readonly extensions = extensions
 
-		constructor(keys?: K[], values?: V[], _default?: Default) {
-			super(keys, values, _default)
+		constructor(liquid: ILiquidMap<K, V, Default>) {
+			super(liquid)
 			this.setChange(change)
 			this.setExtension(extension)
 			this.setKeyExtension(keyExtension)

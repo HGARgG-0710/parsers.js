@@ -1,24 +1,21 @@
-import type {
-	IIndexMap,
-	IPreIndexMap,
-	ISettable,
-	ITableMap
-} from "../../../interfaces.js"
+import type { IIndexMap, ISettable, ITableMap } from "../../../interfaces.js"
+import type { ITableCarrier } from "../interfaces/LiquidMap.js"
 
 /**
  * This is a class for enabling modifiability of a given
- * `IIndexMap<K, V, Default>`. It does so via providing
- * the user with the `.modifiable: ITableMap<K, V, Default>` property,
- * which contains the needed methods of `ITableMap`, and the `.update`
- * method, which registers the change (allowing the user far greater
- * freedom of control over how and when the underlying table is changed).
+ * `IIndexMap<K, V, Default>`. It does so by pairing it
+ * with an `ITableMap`, utilizing the `ITableCarrier`
+ * and `ILiquidMap` interfaces. The underyling immutable
+ * representation, which is `.index()`able, can be
+ * replaced with a new one created from the modified
+ * version via the ``
  */
 export class ModifiableMap<K = any, V = any, Default = any>
-	implements IPreIndexMap<V, Default>, ISettable<K, V>
+	implements IIndexMap<K, V, Default>, ISettable<K, V>
 {
 	private ["constructor"]: new (indexable: IIndexMap<K, V, Default>) => this
 
-	private table?: ITableMap<K, V, Default>
+	private readonly modifiable: ITableMap<K, V, Default>
 
 	index(x: any, ...y: any) {
 		return this.indexable.index(x, ...y)
@@ -34,13 +31,19 @@ export class ModifiableMap<K = any, V = any, Default = any>
 	}
 
 	update() {
-		this.indexable = this.indexable.fromModifiable(this.table!)
+		this.indexable.fromCarrier(this.modifiable.toCarrier())
 	}
 
-	get modifiable() {
-		if (!this.table) this.table = this.indexable.toModifiable()
-		return this.table
+	toModifiable(): ITableMap<K, V, Default> {
+		return this.modifiable.copy()
 	}
 
-	constructor(private indexable: IIndexMap<K, V, Default>) {}
+	fromCarrier(carrier: ITableCarrier<K, V, Default>): void {
+		this.modifiable.fromCarrier(carrier)
+		this.update()
+	}
+
+	constructor(private readonly indexable: IIndexMap<K, V, Default>) {
+		this.modifiable = this.indexable.toModifiable()
+	}
 }

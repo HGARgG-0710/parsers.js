@@ -2,7 +2,7 @@ import { type as _type } from "@hgargg-0710/one"
 import { is, type } from "../aliases/Node.js"
 import { curr, resource } from "../aliases/Stream.js"
 import type { IResourcefulStream, IStream, ITyped } from "../interfaces.js"
-import type { IMapClass } from "../interfaces/MapClass.js"
+import type { IMapClass } from "../modules/IndexMap/interfaces/MapClass.js"
 
 const { typeOf } = _type
 

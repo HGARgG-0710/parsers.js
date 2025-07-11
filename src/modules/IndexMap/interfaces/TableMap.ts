@@ -6,7 +6,8 @@ import type {
 	IRekeyable,
 	IReversible,
 	ISizeable
-} from "../interfaces.js"
+} from "../../../interfaces.js"
+import type { ITableCarrier } from "./LiquidMap.js"
 
 /**
  * An interface representing a highly versatile
@@ -33,4 +34,7 @@ export interface ITableMap<K = any, V = any, Default = any>
 	replace: (index: number, pair: [K, V]) => this
 	set: (key: K, value: V, index?: number) => number
 	by: (key: K) => V | Default
+	
+	toCarrier: () => ITableCarrier<K, V, Default>
+	fromCarrier(carrier: ITableCarrier<K, V, Default>): void
 }
