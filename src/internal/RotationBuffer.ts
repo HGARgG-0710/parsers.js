@@ -229,6 +229,8 @@ class SpaceDataBuilder<T = any> {
 	}
 
 	build(sizeObj: BufferSize<T>, empty: EmptinessTracker) {
+		assert(this._lastIndex)
+		assert(this._rotation)
 		return new SpaceData(sizeObj, this._lastIndex, this._rotation, empty)
 	}
 }
