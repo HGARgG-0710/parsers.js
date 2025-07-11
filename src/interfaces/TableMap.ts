@@ -25,9 +25,6 @@ export interface ITableMap<K = any, V = any, Default = any>
 		IReversible,
 		ICopiable,
 		Iterable<[K, V]> {
-	readonly keys: K[]
-	readonly values: V[]
-
 	unique: () => number[]
 	read: (index: number) => Default | [K, V]
 	swap: (i: number, j: number) => this
@@ -35,4 +32,5 @@ export interface ITableMap<K = any, V = any, Default = any>
 	delete: (index: number, count?: number) => this
 	replace: (index: number, pair: [K, V]) => this
 	set: (key: K, value: V, index?: number) => number
+	by: (key: K) => V | Default
 }
