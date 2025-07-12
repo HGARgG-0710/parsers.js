@@ -33,8 +33,9 @@ export interface ITableMap<K = any, V = any, Default = any>
 	delete: (index: number, count?: number) => this
 	replace: (index: number, pair: [K, V]) => this
 	set: (key: K, value: V, index?: number) => number
+	keyIndex: (key: K) => number
 	by: (key: K) => V | Default
-	
+
 	toCarrier: () => ITableCarrier<K, V, Default>
 	fromCarrier(carrier: ITableCarrier<K, V, Default>): void
 }

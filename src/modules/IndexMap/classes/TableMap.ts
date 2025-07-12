@@ -523,6 +523,10 @@ export class TableMap<K = any, V = any, Default = any>
 		)
 	}
 
+	keyIndex(key: K) {
+		return this.asImmutable.find(key)
+	}
+
 	constructor(keys: K[], values: V[], _default?: Default) {
 		assert(isArray(keys))
 		assert(isArray(values))
