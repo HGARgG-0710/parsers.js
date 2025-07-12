@@ -7,7 +7,7 @@ import type {
 	IReversible,
 	ISizeable
 } from "../../../interfaces.js"
-import type { ITableCarrier } from "./LiquidMap.js"
+import type { ITableCarrierConvertible } from "./LiquidMap.js"
 
 /**
  * An interface representing a highly versatile
@@ -25,7 +25,8 @@ export interface ITableMap<K = any, V = any, Default = any>
 		IConcattable<Iterable<[K, V]>, [K[], V[]]>,
 		IReversible,
 		ICopiable,
-		Iterable<[K, V]> {
+		Iterable<[K, V]>,
+		ITableCarrierConvertible<K, V, Default> {
 	unique: () => number[]
 	read: (index: number) => Default | [K, V]
 	swap: (i: number, j: number) => this
@@ -35,7 +36,4 @@ export interface ITableMap<K = any, V = any, Default = any>
 	set: (key: K, value: V, index?: number) => number
 	keyIndex: (key: K) => number
 	by: (key: K) => V | Default
-
-	toCarrier: () => ITableCarrier<K, V, Default>
-	fromCarrier(carrier: ITableCarrier<K, V, Default>): void
 }
