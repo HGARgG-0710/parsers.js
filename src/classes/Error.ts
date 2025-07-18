@@ -28,10 +28,14 @@ export abstract class ConstructorError extends Error {
  * Can be easily used with `ErrorStream` descendant.
  */
 export abstract class ParseError extends ConstructorError {
-	protected abstract makeMessage(atIndex: BackupIndex, atPath: string): string
+	protected abstract makeMessage(
+		atIndex: BackupIndex,
+		atPath: string,
+		options?: ErrorOptions
+	): string
 
-	constructor(at: BackupIndex, source: string) {
+	constructor(at: BackupIndex, source: string = "", options?: ErrorOptions) {
 		super()
-		this.message = this.makeMessage(at, source)
+		this.message = this.makeMessage(at, source, options)
 	}
 }

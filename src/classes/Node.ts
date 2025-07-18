@@ -131,10 +131,10 @@ export const TokenNode = NodeFactory(function <T = any>(
 	return tokenNode
 })
 
-abstract class PreContentNode<T = any, Value = any>
-	extends BaseNode<T, [Value]>
-	implements ICellNode<T, Value>
-{
+abstract class SingleItemNode<T = any, Value = any> extends BaseNode<
+	T,
+	[Value]
+> {
 	protected ["constructor"]: new (value?: Value) => this
 
 	static fromPlain<T = any, Value = any>(
@@ -145,7 +145,12 @@ abstract class PreContentNode<T = any, Value = any>
 		if (!isContentNodeSerializable(x)) return false
 		return new this(x.value)
 	}
+}
 
+abstract class PreContentNode<T = any, Value = any>
+	extends SingleItemNode<T, Value>
+	implements ICellNode<T, Value>
+{
 	private _value: Value | undefined
 
 	private setValue(newValue: Value | undefined) {
@@ -167,15 +172,60 @@ abstract class PreContentNode<T = any, Value = any>
 		return this
 	}
 
+	toJSON() {
+		return {
+			type: this.type,
+			value: this.value
+		}
+	}
+
 	constructor(value?: Value) {
 		super()
 		this.init(value)
 	}
 }
 
+abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
+	private child?: INode<T>
+
+	copy(): this {
+		return this.child
+			? new this.constructor(this.child.copy())
+			: new this.constructor()
+	}
+
+	init(newChild?: INode<T>): this {
+		this.child = newChild
+		return this
+	}
+
+	get lastChild() {
+		return this.child ? 0 : -1
+	}
+}
+
+/**
+ * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of
+ * `INode` instances with `.type` field (on prototype) defined by `type: T`
+ * and a single child-node, which is reflected in tree-iteration algorithms. 
+ * In cases when a child is guaranteed to be the same preferable over 
+ * `RecursiveNode`. 
+ */
+export const SingleChildNode = NodeFactory(function <T = any>(
+	type: T
+): INodeType<T, [INode<T>]> {
+	class singleChildNode extends PreSingleChildNode<T> {
+		get type() {
+			return type
+		}
+	}
+
+	return singleChildNode
+})
+
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of `INode`
- * instances with `.type` field (on prototype; defined by `type: T`)
+ * instances with `.type` field (on prototype) defined by `type: T`
  * and `.value: Value`, which is provided by the user within the
  * resulting class's constructor.
  *
@@ -188,13 +238,6 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static is = isType(type)
-
-		toJSON() {
-			return {
-				type,
-				value: this.value
-			}
-		}
 
 		get type() {
 			return type
@@ -211,7 +254,7 @@ abstract class PreRecursiveNode<T = any>
 	protected ["constructor"]: new (children?: INode<T>[]) => this
 
 	static fromPlain<T = any>(
-		this: ICollectionNodeType<T, [INode<T>[]]>,
+		this: ICollectionNodeType<T>,
 		x: any,
 		nodeMaker: INodeMaker<T, ICollectionNode<T>>
 	) {
@@ -315,7 +358,7 @@ abstract class PreRecursiveNode<T = any>
  */
 export const RecursiveNode = NodeFactory(function <T = any>(
 	type: T
-): ICollectionNodeType<T, [INode[]?]> {
+): ICollectionNodeType<T> {
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static is = isType(type)

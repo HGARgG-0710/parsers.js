@@ -1,8 +1,11 @@
 import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
+import type { Regex } from "../classes/Regex.js"
 import { HandlerStream } from "../classes/Stream.js"
 import type { IClearable, IFiniteWritable, IPushable } from "../interfaces.js"
 import type {
+	IIterableStream,
+	IPeekableStream,
 	IPrevableStream,
 	IRawStream,
 	IStream
@@ -84,9 +87,12 @@ export function skip<T = any>(
  *
  * By default, `result` is an `ArrayCollection<T>`
  */
-export function consume<T = any>(
-	stream: IStream<T>,
-	result: IPushable<T> = new ArrayCollection<T>()
+export function consume<
+	T = any,
+	Collection extends IPushable<T> = IPushable<T>
+>(
+	stream: IIterableStream<T>,
+	result: Collection = new ArrayCollection<T>() as any
 ) {
 	for (const curr of stream) result.push(curr)
 	return result
@@ -116,7 +122,7 @@ export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
  * `result` for multiple distinct calls to `consume`.
  */
 export function consumable<T = any>(result: IPushable<T> & IClearable) {
-	return function (stream: IStream<T>) {
+	return function (stream: IIterableStream<T>) {
 		result.clear()
 		return consume(stream, result)
 	}
@@ -212,7 +218,7 @@ export function finish<T = any>(stream: IStream<T>) {
  *
  * 1. if the result is a `number` and it is negative, calls the `stream.prev()` this many times;
  * 2. if the result is a `number` and it is positive, calls the `stream.next()` this many times;
- * 3. if the result is an `IStreamPositionPredicate`, continues to walk the stream until either 
+ * 3. if the result is an `IStreamPositionPredicate`, continues to walk the stream until either
  * it is over, or the condition given is met;
  *
  * @returns `stream.curr`
@@ -234,7 +240,7 @@ export function uniNavigate<T = any>(
 }
 
 /**
- * If the given `IStream<T>` is `INavigable<T>`, 
+ * If the given `IStream<T>` is `INavigable<T>`,
  * calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
  */
@@ -248,9 +254,9 @@ export function navigate<T = any>(
 }
 
 /**
- * Performs a universal `rewind`ing operaion on 
+ * Performs a universal `rewind`ing operaion on
  * the given `IPrevableStream<T>`.
- * Continues to call '.prev()' on the given stream, 
+ * Continues to call '.prev()' on the given stream,
  * until `stream.isStart` is true;
  * @returns `stream.curr`
  */
@@ -270,12 +276,30 @@ export function rewind<T = any>(stream: IStream<T>): T {
 
 /**
  * Makes a copy of a `rawStream`:
- * 
+ *
  * 1. if a chooser - returns as-is (copying operation is meaningless)
  * 2. if an `ILinkedStream` - `rawStream.copy()`
-*/
+ */
 export function rawStreamCopy(rawStream: IRawStream) {
 	return isFunction(rawStream) ? rawStream : rawStream.copy()
+}
+
+/**
+ * This is a curried functional utility-version of `word.match(stream)`
+ */
+export function match(word: Regex) {
+	return function (stream: IPeekableStream) {
+		return word.matchAt(stream)
+	}
+}
+
+/**
+ * This is a curried functional version of `input.peek(n)`.
+ */
+export function peek(n: number) {
+	return function <T = any>(input: IPeekableStream<T>) {
+		return input.peek(n)
+	}
 }
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

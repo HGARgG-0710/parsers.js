@@ -107,9 +107,8 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  *
  * (Note that `.isEnd == true` REQUIRES that the last call to `.isCurrEnd()`
  * to have been `true` as well, the same, however, does not always hold.
- * Iterating through the __very last__ element for the first time
- * [or, after a successful `.rewind()`] requires that `.isCurrEnd() == true`
- * and `.isEnd == false`).
+ * Iterating through the __very last__ element from the very first 
+ * requires that `.isCurrEnd() == true` and `.isEnd == false`).
  */
 export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IFinishable<T>> &
@@ -121,7 +120,7 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IResourceful> &
 	Partial<IPrevable> &
 	Partial<IPosed<number>> &
-	Iterable<T> &
+	Partial<Iterable<T>> &
 	ICopiable &
 	IInitializable & {
 		readonly curr: T
@@ -163,6 +162,11 @@ export type IPositionStream<T = any> = IPosed<number> & IStream<T>
  * [one that calls `.prev()/next()` underneath].
  */
 export type IChange<T = any> = (input: IPrevableStream<T>) => T
+
+/**
+ * This is an `IStream<T>` that is also `Iterable<T>`
+*/
+export type IIterableStream<T = any> = IStream<T> & Iterable<T>
 
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
 export type * from "../modules/Stream/interfaces/HandlerStream.js"
