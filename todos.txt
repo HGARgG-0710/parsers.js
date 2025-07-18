@@ -15,6 +15,83 @@ REMINDER: Final Task Order
 	3. wiki
 	4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
 
+IMMIDIATE NOTES: 
+	0. reminder: the tables inside the parser [maybe some] DO NOT WORK: 
+		1. need the `HashMap.currMap`, or something like this...
+			The one that takes `input.curr`, anyway...
+		2. refactor: 
+			1. the 'if (input.curr !== X) bail(ErrorCode.MissingCharacter); input.next()': 
+				Turn this into a `consumeExpected` function. 
+				IT IS INTERNAL, and SPECIFIC TO `RegexParser`. 
+				Reason: 
+					1. improves clarity [introduction]
+					2. too specific [isolation]
+
+	1. Need a NEW PATTERN [not export/abstraction, etc]: 
+		1. A user-defined `ILinkedStream`-class that is capable of: 
+			1. outliving its under-source *MULITIPLE TIMES* [i.e. - a class of MULTIPLE different inputs]
+
+	2. PROBLEM: the new pattern is impossible [but still needed]. 
+		The library has a CRITICAL design flaw. 
+		It is as such: 
+
+			Provided an underlying `IStream<A>` and an upper `IStream<B>`, 
+				a single iteration of `IStream<B>` must finish BEFORE `IStream<A>`
+					is finished at least once. 
+
+		This means that cross-ending operations that "combine" several 
+		finished 'IStream's are FORBIDDEN! [which means that an entire 
+		class of parsers (quite a lot of them immensely popular) just 
+		flies out the window]. 
+
+		The root of the problem is highly non-trivial. 
+		In order for one to update the status of the underlying stream's, 
+		the INVOCATION of the "checking method" of the RecursiveList 
+		[or StreamList, or CompositeStream, or whatever...] must be made 
+		FROM WITHIN the 'IStream<B>' in question.  
+
+		(Proposed) Solution: 
+			1. make the 'IStream' in question 'IStateful' 
+				(i.e. - add `readonly state` property 
+					and a `setState` method). 
+
+					This way, we'll be able to access the 
+					'this.state.parser' inside of the "chooser"s 
+					with `this` being the `CompositeStream` already 
+					"in the know" to the parser's Global State. 
+
+			2. (If inside the chooser, and not standalone), 
+				Provide the state to the underlying `IStream`
+				inside the chooser via the respective `.setState` call. 
+			
+			3. Provide a new (public) method for `RecursiveList/StreamList/CompositeStream/whatever`, 
+				for renewing a SPECIFIC `IStream`: 
+					0. name it `renewItem(item: T, ...)`
+					1. used as `this.state.parser.renewItem(this)`, 
+						from inside [say] `NamedGroupStream`, with `this`
+						being a `NamedGroupStream`. This'll allow one to 
+						actually change 'this.resource' CORRECTLY, while 
+						preserving encapsulation, AND without violating any 
+						of the previously outlined design. 
+					2. Algorithm: 
+						1. Start at `item`
+						2. Walk downwards [WITHIN THE BOUNDRIES OF THE SAME `Switch`-contained COLLECTION!]
+							until an (updatable) `x: Recursive` which `.isOld(x) === true`; 
+						2.1. If such an item CANNOT BE FOUND, then one THROWS AN EXCEPTION of misuse 
+							of `renewItem` (id est - item CANNOT be explicitly renewed)
+							
+						3. If such an item CAN be found [i.e. BOTH `x: Recursive`, AND `.isOld(x) == true`], 
+							then - we trace to THE LAST non-`.isOld` item [STILL inside the current `Switch`-collection], 
+							and update all the remaining ones ACCORDINGLY, up to the current item [`this`, the thing 
+							we called the `.renewItem(this)` on]. 
+
+						3.1. IF we cannot find a single non-`isOld` item within the current group, then it is deemed 
+							FINISHED, and we throw the error - because the item in question *cannot* be renewed, and 
+							is, therefore, since it's a part of its definition, malformed as a Stream. 
+
+			4. Provide a respecitve shortcut (a delegate method)
+				for `DynamicParser`, like, say, `DynamicParser.renewItem(item: ILinkedStream)`.
+
 notes on `RegexParser` development: 
 	-1. About 'v' flag's "special" features: 
 		1. let they be present BY DEFAULT [develop them properly... read through the docs, design, implement, etc]
@@ -29,23 +106,45 @@ notes on `RegexParser` development:
 			LET IT REACT TO THEM! 
 			Particularly - it must *EXPECT* a character [vital, since doing otherwise would completely change the meaning of ' ' symbol in some contexts
 				Example: 's {name}' - VALID SIMPLE MULTI-CHAR REGEX; whereas - 's{name}' - a single type-match]; 
+
+		5. VITAL: 
+			1. Add a `PosStream` at the beginning [reason: for a better error-message]
+			2. See `RegexParser.ts` file regarding the need for a whole separate
 	1. Based off `IStream`-s
 	2. Input: 'InputStream' (since it's supposed to be used by the user in-program, and the strings are (supposed to be) relatively small)
 	3. To replace the `TokenizerStream` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
 
 	4. Syntax: 
-		1. [for .type]: 
-			1. i{...} - type: 'int-typed'
-			2. s{...} - type: 'string-typed'
-
-			[Note: these match a token with a string/int types of `...` respectively]
-		2. '^...' - negation of '...'
-			NO ELEMENTARY [^...], replaced by composite ^[...]. 
-			In /^ab+/, same as /(:^a)b+/
-		3. (:...) - same as (?:...) in JavaScript [replacement]
+		24. [abc-z...] - non-negative character classes - same as JavaScript + allows for ^-negation inside	: 
+			1. THIS is a LOW-LEVEL one, *before* the quantifiers
+			2. Needs a separate file - `CharClass.ts`; 
+				No recursion, couple of patterns. 
+				Ought to be relatively simple. 
+			3. DO NOT FINISH (yet)
+				Just do the general sketching-out, 
+				Add 'TODO's in places we are yet to add stuff...
+		21. Backreferences: 
+			1. \r{a}, and \r{-a} (relative)
+			2. \1-\N (absolute)
+			3. \n{name_to_reference} (named)
+		23. |, *, +, ?, {n} - operate the same as JavaScript
+			quantifiers COME NEXT, as a SEPARATE LAYER...
 		4. ...{n, k}
 			Limits pattern '...' from 'n' to 'k' inclusively. 
 			THE (single/multiple) SPACE HERE IS OPTIONAL!
+
+		9. /:...#/, same as /^...$/ in JavaScript [replacement]
+			0. come (sometime) after quantifiers. 
+				DO THIS THE VERY LAST whilst working on the sketch. 
+			1. Need the very-end: #: 
+				1. new error code - symbols after '#': 
+					Not allowed. The '#' is supposed to be THE LAST 
+					item inside the given Regex. 
+					Allowing it just doesn't make sense. 
+
+		13. `\P{...}` not working - it is removed and replaced by `^\p{...}`:
+			By default, consumes the max possible string (remaining, if needed). 	
+			
 		5. \b, \d, \s, etc [from JavaScript RegExp]
 			But NOT the negative forms, which are supposed to be replaced by: 
 				1. \B == ^\b
@@ -54,15 +153,7 @@ notes on `RegexParser` development:
 				...
 				4. (?!...) == ^(=...)
 				5. (?<!) == ^(<...)
-		6. (=...) - same as '(?=...)' in JavaScript [replacement]
-		7. Backslashing AS-IS-NECESSARY [like a simple '(\=...)', or, generally, `\^` for instance...]
-		8. (<...) - same as '(?<=...)' in JavaScript [replacement]
-		9. /:...#/, same as /^...$/ in JavaScript [replacement]
-		10. \u{HHHHHH} (1-6 digits, REPLACES the \c, \x and multitudes of \u in JavaScript RegExp); 
-		11. (#i...) - match regardless of the case [replacement for the 'i' flag]
-		12. '.' - same as in JavaScript, but can match newline characters by default (replaces the 's' flag)
-		13. `\P{...}` not working - it is removed and replaced by `^\p{...}`:
-			By default, consumes the max possible string (remaining, if needed). 
+			
 		14. Add the possesive quantifier "*+", "?+", "++": 
 				https://www.regular-expressions.info/possessive.html	
 		15. Add atomic groups: 
@@ -80,16 +171,29 @@ notes on `RegexParser` development:
 			https://www.regular-expressions.info/conditional.html
 		20. Regarding the /(#)/ - modes: 
 			https://www.regular-expressions.info/modifiers.html
-		21. Backreferences: 
-			1. \r{a}, and \r{-a} (relative)
-			2. \1-\N (absolute)
-			3. \n{name_to_reference} (named)
-		22. Capturing groups [besides (:...)]: 
-			1. unnamed [regular]: (...)
-			2. named: (<name>...)
-		23. |, *, +, ?, {n} - operate the same as JavaScript
-		24. [abc-z] - non-negative character classes - same as JavaScript + allows for ^-negation inside
 		25. New escaped characters (naturally): LIST THESE! [vital]
+
+		KIND-OF DONE [see notes]: 
+			2.  [kind-of done, put it on hold for now...] '^...' - negation of '...'
+				NO ELEMENTARY [^...], replaced by composite ^[...]. 
+				In /^ab+/, same as /(:^a)b+/
+			7. [kind-of-done, put on hold for now...] Backslashing AS-IS-NECESSARY [like a simple '(\=...)', or, generally, `\^` for instance...]
+			22. [kind-of-finished; leave alone for now - first need general structure of the parser] Capturing groups [besides (:...)]: 
+				1. unnamed [regular]: (...)
+				2. named: ({name}...)
+				3. non-capturing: (:...) - same as (?:...) in JavaScript [replacement]
+				4. lookahead: (=...) - same as '(?=...)' in JavaScript [replacement]	
+				5. lookbehind: (<...) - same as '(?<=...)' in JavaScript [replacement]	
+
+			10. [kind of done - finish the errors later]\u{HHHHHH} (1-6 digits, REPLACES the \c, \x and multitudes of \u in JavaScript RegExp); 
+				1. NEW ERROR - must verify that the resulting 6-digit value IS HEXIDECIMAL! 
+				2. NEW ERROR - must verify that there is STRICTLY between 1 and 6 values! 
+				3. REMINDER: a new stream [general - for the library] - `AssertionStream`: 
+					1. Takes a given underlying-stream
+					2. Runs a predicate on it
+					3. Puts the predicate in question through `assert(...)`
+					4. [Expected] The resulting error (if there is any) gets picked up by a higher-level `ErrorStream`
+		
 
 CURRENTLY BEING DONE [screw the previously chosen order - going after the `TokenizerStream`]: 
 	TO2. [new IStream] `TokenStream` - based off `Regex`: 
@@ -249,6 +353,11 @@ CURRENTLY BEING DONE [screw the previously chosen order - going after the `Token
 
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
 	CURRENT AGENDA: 			
+		P0: 
+			0. Document `HashMap` mini-classes: 
+				Those are COMPLETELY UNDESCRIBED [no JSDOC at all; bad]
+			1. Refactor `LimitStream`
+
 		P1:
 		[this is just an array-like strucutre, nothing unusual to see here]
 		1. LiquidMap
