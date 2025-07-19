@@ -10,7 +10,7 @@ import type {
 	IStreamChooser
 } from "../../interfaces.js"
 import { consume } from "../../utils/Stream.js"
-import { SingleCharStream } from "./SingleChar.js"
+import { HandleSingleChar } from "./SingleChar.js"
 
 const TypeMatch = ContentNode<string, string>("type-match")
 const AsString = ContentNode<string, INode<string>>("as-string")
@@ -36,14 +36,16 @@ function isTypeMatchStart(stream: IPeekableStream<string>) {
 }
 
 function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
-	if (!isTypeMatchStart(input)) return SingleCharStream()
+	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // i
 	input.next() // {
 	return [AsIntStream(), TypeMatchStream(), TypeMatchLimitsStream()]
 }
 
-function HandleStringTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
-	if (!isTypeMatchStart(input)) return SingleCharStream()
+function HandleStringTypeMatch(
+	input: IOwnedStream<string> & IPeekable<string>
+) {
+	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // s
 	input.next() // {
 	return [AsStringStream(), TypeMatchStream(), TypeMatchLimitsStream()]

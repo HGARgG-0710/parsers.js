@@ -1,4 +1,5 @@
 import { type } from "@hgargg-0710/one"
+import type { IOwnedStream } from "../../interfaces.js"
 
 const { isNumber } = type
 
@@ -33,3 +34,13 @@ function pickMessage(code: ErrorCode, pos: number, info: any): string {
 function invalidEscapedChar(pos: number, info: any): string {}
 
 function missingCharacter(pos: number, char: string): string {}
+
+export function expect(char: string) {
+	return function (input: IOwnedStream<string>) {
+		if (input.curr !== char) bail(ErrorCode.MissingCharacter)
+	}
+}
+
+export function checkMaybeError(maybeError: any) {
+	if (isError(maybeError)) bail(maybeError)
+}

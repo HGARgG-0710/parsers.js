@@ -1,6 +1,5 @@
 import type { array } from "@hgargg-0710/one"
 import { RetainedArray, TableHandler } from "../../classes.js"
-import { BasicHash } from "../../classes/HashMap.js"
 import { RecursiveNode } from "../../classes/Node.js"
 import { LimitStream, SingletonStream } from "../../classes/Stream.js"
 import type {
@@ -9,14 +8,10 @@ import type {
 	IStreamChooser
 } from "../../interfaces.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
-import { currMap } from "../../utils/HashMap.js"
 import { consume } from "../../utils/Stream.js"
-import { HandleCaptureGroup } from "./Group/Capture.js"
+import { BasicCurrMap } from "../RegexParser.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
-import { HandleLookaheadGroup } from "./Group/Lookahead.js"
-import { HandleLookbehindGroup } from "./Group/Lookbehind.js"
-import { HandleNamedGroup } from "./Group/Named.js"
-import { HandleNonCaptureGroup } from "./Group/NonCapture.js"
+import { HandlePlainGroup } from "./Group/Plain.js"
 
 const bodyBuilder = new RetainedArray()
 
@@ -32,16 +27,12 @@ export const GroupBodyStream = SingletonStream(
 )
 
 const GroupHandler = TableHandler(
-	new (currMap(BasicHash))(
+	new BasicCurrMap(
 		ObjectMap(
 			{
-				":": HandleNonCaptureGroup,
-				"{": HandleNamedGroup,
-				"=": HandleLookaheadGroup,
-				"<": HandleLookbehindGroup,
 				"#": HandleExtensionGroup
 			},
-			HandleCaptureGroup
+			HandlePlainGroup
 		)
 	)
 )

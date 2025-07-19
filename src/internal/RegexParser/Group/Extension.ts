@@ -6,7 +6,7 @@ import type { INode, IOwnedStream } from "../../../interfaces.js"
 import { ObjectMap } from "../../../samples/TerminalMap.js"
 import { peek } from "../../../utils/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
-import { SingleCharStream } from "../SingleChar.js"
+import { HandleSingleChar } from "../SingleChar.js"
 
 const IgnoreCaseGroup = SingleChildNode("ignore-case-group")
 const IgnoreCaseGroupStream = SingletonStream(
@@ -28,7 +28,7 @@ export const HandleExtensionGroup = TableHandler(
 					]
 				}
 			},
-			SingleCharStream
+			HandleSingleChar
 		)
 	)
 )
