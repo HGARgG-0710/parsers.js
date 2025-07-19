@@ -126,16 +126,12 @@ notes on `RegexParser` development:
 	2. Input: 'InputStream' (since it's supposed to be used by the user in-program, and the strings are (supposed to be) relatively small)
 	3. To replace the `TokenizerStream` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
 
-	4. Syntax: 		
-		23. |, *, +, ?, {n} - operate the same as JavaScript
-			1. quantifiers COME NEXT, as a SEPARATE LAYER...
-			2. DON'T FORGET NON-GREEDY STUFF: 
-				1. *?, +?, ??, {n, k}?
-		4. ...{n, k}
-			Limits pattern '...' from 'n' to 'k' inclusively. 
-			THE (single/multiple) SPACE HERE IS OPTIONAL!
-	
-		25. New escaped characters (naturally): LIST THESE! [vital]
+	4. Syntax: 			
+		1. Disjunction [a | b]
+		2. Root Node [.type: "regex-tree"]
+		3. DISCLAIMER: [important] `Regex` assumes matching the given `IStream` 
+			FROM ITS CURRENT POSITION. Id est, it really doesn't make sense to have, say, 
+			#, or :, because it matches AS MUCH AS IS NEEDED, and FROM THE POINT THAT IT STARTS. 	
 
 		DECISIONS [hard]: 
 			0. IMPORTANT: for performance reasons - USE THOMPSON'S REGEX ALGORITHM!
@@ -176,13 +172,12 @@ notes on `RegexParser` development:
 					2. poor support from Thompson's Construction - would have to add one's own extension
 					3. [key reason] Limited practical usefulness
 
-			6. No lookaheads/lookbehinds!
-				Reasons: 
-					1. too complex, `Regex` is intended to be a SIMPLE regular expression engine...
-					2. 95% of the cases won't need them
-						This is (primarily) a *tabular* abstraction, intended in 
-						elimination of *the simplest* string-patterns, and their replacement 
-						with simplified expressions. 
+			6. About Lookahead/Lookbehind-s: 
+				1. Those aren't supported by the Thompson's Construction by default
+				2. They enable one to do some (fairly) useful (*high-level*, on the 's/i{type}'-level) things 
+					with regular expressions. Most notably - emulate partial capture based off `LimitStream`s. 
+				3. Implement them as an extension of sorts: 
+					1. They USE `PeekableStream`s to work [without `.next()/.prev()`-based backtracking]; 
 
 			7. no unicode properties (\p, \P) from JavaScript [unneeded]
 				[\u{....}-\u{....}] is sufficient
@@ -190,6 +185,8 @@ notes on `RegexParser` development:
 			8. no 'v' functionality [unneeded, too much complexity]
 
 		KIND-OF DONE [see notes]: 	
+			23. [sort of - 'Range' incomplete, sketch] *, +, ?, {n}, {n, k} - operate the same as JavaScript
+		
 			5. [kind of done - NEEDS IMPLEMENTATION OF NEGATION!] \b, \d, \s, etc [from JavaScript RegExp]
 				But NOT the negative forms [excepting `\B` here...], which are supposed to be replaced by: 
 					1. \S == ^[\s]
@@ -739,6 +736,12 @@ NEXT UP:
 			... OTHERS [walk through the project - FIND ITHEM...]
 
 CURRENT TODOS [top-down order...]:		
+	TODO: *remove* the `prev()` as method! [on IStream *and* implementations, *and* annotations!]
+		1. Just a useless piece of functionality. 
+		2. Adds more things to test 
+		3. Not used in practice (due to expensiveness of backtracking)
+		4. [Key Reason] All benefits are Replaceable by `.peek(n)`
+
 	TODO: Docs [initial, new, final]
 		Documentation order: 
 			2. fix wiki [add new stuff, delete old]
