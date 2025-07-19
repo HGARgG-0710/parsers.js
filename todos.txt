@@ -92,6 +92,18 @@ IMMIDIATE NOTES:
 			4. Provide a respecitve shortcut (a delegate method)
 				for `DynamicParser`, like, say, `DynamicParser.renewItem(item: ILinkedStream)`.
 
+	3. REMINDER: about inheritance. 
+		Some of the derived IStream-classes employed in the `RegexParser`
+		violate LSP. Specifically, the ones that OUTLIVE their sub-streams. 
+		They mustn't inherit from `DyssyncOwningStream`. 
+
+		Instead:
+
+			1. Let they inherit from ALL of the stuff that `DyssyncOwningStream` 
+				does, EXCEPT for `DelegateStream` [from `PipeStream`]. 
+			2. MAKE this *new* combination into a new `mixin`-export 
+				inside the `Stream` submodule...
+
 notes on `RegexParser` development: 
 	-1. About 'v' flag's "special" features: 
 		1. let they be present BY DEFAULT [develop them properly... read through the docs, design, implement, etc]
@@ -114,66 +126,76 @@ notes on `RegexParser` development:
 	2. Input: 'InputStream' (since it's supposed to be used by the user in-program, and the strings are (supposed to be) relatively small)
 	3. To replace the `TokenizerStream` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
 
-	4. Syntax: 
-		24. [abc-z...] - non-negative character classes - same as JavaScript + allows for ^-negation inside	: 
-			1. THIS is a LOW-LEVEL one, *before* the quantifiers
-			2. Needs a separate file - `CharClass.ts`; 
-				No recursion, couple of patterns. 
-				Ought to be relatively simple. 
-			3. DO NOT FINISH (yet)
-				Just do the general sketching-out, 
-				Add 'TODO's in places we are yet to add stuff...
-		21. Backreferences: 
-			1. \r{a}, and \r{-a} (relative)
-			2. \1-\N (absolute)
-			3. \n{name_to_reference} (named)
+	4. Syntax: 		
 		23. |, *, +, ?, {n} - operate the same as JavaScript
-			quantifiers COME NEXT, as a SEPARATE LAYER...
+			1. quantifiers COME NEXT, as a SEPARATE LAYER...
+			2. DON'T FORGET NON-GREEDY STUFF: 
+				1. *?, +?, ??, {n, k}?
 		4. ...{n, k}
 			Limits pattern '...' from 'n' to 'k' inclusively. 
 			THE (single/multiple) SPACE HERE IS OPTIONAL!
-
-		9. /:...#/, same as /^...$/ in JavaScript [replacement]
-			0. come (sometime) after quantifiers. 
-				DO THIS THE VERY LAST whilst working on the sketch. 
-			1. Need the very-end: #: 
-				1. new error code - symbols after '#': 
-					Not allowed. The '#' is supposed to be THE LAST 
-					item inside the given Regex. 
-					Allowing it just doesn't make sense. 
-
-		13. `\P{...}` not working - it is removed and replaced by `^\p{...}`:
-			By default, consumes the max possible string (remaining, if needed). 	
-			
-		5. \b, \d, \s, etc [from JavaScript RegExp]
-			But NOT the negative forms, which are supposed to be replaced by: 
-				1. \B == ^\b
-				2. \S == ^\s
-				3. \D == ^\d
-				...
-				4. (?!...) == ^(=...)
-				5. (?<!) == ^(<...)
-			
-		14. Add the possesive quantifier "*+", "?+", "++": 
-				https://www.regular-expressions.info/possessive.html	
-		15. Add atomic groups: 
-			https://www.regular-expressions.info/atomic.html
-		16. Double negation inside a class: 
-			^[^\w] is the same as (in JS flavour) [^\W]
-
-			That is, it is COMLEMENT OF A CLASS of items that are NOT A CHARACTER.
-			That is, it's \w.
-		17. Add relative backreferences: 
-			https://www.regular-expressions.info/backrefrel.html
-		18. Fix the ECMAScript behaviour of empty-matching backreferences: 
-			https://www.regular-expressions.info/backref2.html
-		19. Add the conditionals: 
-			https://www.regular-expressions.info/conditional.html
-		20. Regarding the /(#)/ - modes: 
-			https://www.regular-expressions.info/modifiers.html
+	
 		25. New escaped characters (naturally): LIST THESE! [vital]
 
-		KIND-OF DONE [see notes]: 
+		DECISIONS [hard]: 
+			0. IMPORTANT: for performance reasons - USE THOMPSON'S REGEX ALGORITHM!
+				Read this: 
+					1. https://swtch.com/~rsc/regexp/regexp1.html
+					2. https://cs.stackexchange.com/questions/138275/worst-case-complexity-of-quantifiers-in-thompsons-construction
+					3. https://en.wikipedia.org/wiki/Thompson%27s_construction#Use_in_string_pattern_matching
+
+				Don't worry, it's an NFA, there won't be memory reprecussions...
+
+				Also [reason for stable performance] - this thing has NO BACKTRACKING [at all]. 
+				Bad news are: features are somewhat more limited, 
+					as for those that ARE still present, but aren't supported 
+						by the construction, one will have to extend it to support: 
+
+						1. Lookahead/Lookbehinds ((=...) and (<...))
+
+				To make sure that what you have is implementable with the Thompson's NFS, 
+				use a modification of 'awk' Regexp syntax: 
+					https://www.gnu.org/software/gawk/manual/html_node/Regexp.html
+			1. no backreferences
+				Reason: https://swtch.com/~rsc/regexp/regexp1.html
+				That means NO NAMED GROUPS!
+			2. no capture groups
+				Reason: pointless. 
+				Currently, let there be JUST the no-capture groups.
+				[REMAKE the '(:...)' into just '(...)' then...]
+			3. LET 'linefeed' '\n' match be a NEWLINE-MATCH, that is - WITH CR (carriage return - \r) on Windows!
+				Reason: 
+					1. simplicity
+					2. 99% of all applications will benefit from this [easier crossplatform support, etc...]: 
+			4. No ':#' (or, in JS flavour, '^$')
+			5. Negation ONLY exists for character classes: 
+				Replacing the '[^...]' with '^[...]' [more readable]
+				This means, among other things - NO negative lookahead/lookbehind! 
+				The other things are just: 
+					1. too much work
+					2. poor support from Thompson's Construction - would have to add one's own extension
+					3. [key reason] Limited practical usefulness
+
+			6. No lookaheads/lookbehinds!
+				Reasons: 
+					1. too complex, `Regex` is intended to be a SIMPLE regular expression engine...
+					2. 95% of the cases won't need them
+						This is (primarily) a *tabular* abstraction, intended in 
+						elimination of *the simplest* string-patterns, and their replacement 
+						with simplified expressions. 
+
+			7. no unicode properties (\p, \P) from JavaScript [unneeded]
+				[\u{....}-\u{....}] is sufficient
+
+			8. no 'v' functionality [unneeded, too much complexity]
+
+		KIND-OF DONE [see notes]: 	
+			5. [kind of done - NEEDS IMPLEMENTATION OF NEGATION!] \b, \d, \s, etc [from JavaScript RegExp]
+				But NOT the negative forms [excepting `\B` here...], which are supposed to be replaced by: 
+					1. \S == ^[\s]
+					2. \D == ^[\d]
+					...
+			24. [kind-of done - sketched out, to be finished] [abc-z...] - non-negative character classes - same as JavaScript + allows for ^-negation inside	: 
 			2.  [kind-of done, put it on hold for now...] '^...' - negation of '...'
 				NO ELEMENTARY [^...], replaced by composite ^[...]. 
 				In /^ab+/, same as /(:^a)b+/
@@ -334,20 +356,6 @@ CURRENTLY BEING DONE [screw the previously chosen order - going after the `Token
 				
 				2. .toString(): 
 					Returns the original 'source' that was given for parsing...
-
-				ALSO, add the JavaScript string-compatibility methods: 
-					1. [Symbol.match]
-					2. [Symbol.matchAll]
-					3. [Symbol.replace]
-					4. [Symbol.search]
-					5. [Symbol.split]
-
-				ALSO [imporant]: have ALGEBRAIC methods for it. 
-					Meaning: ability to join them via a disjunction '|', 
-						applying the quantifiers '*', '+', '{a, b}', '?', 
-						applying negation '^'. 
-					Each of those CREATES A NEW 'Regex'! 
-					Purpose is to (basically) replace the `regex` module. 
 				
 				ALSO: the `Regex` implements an NFA
 
