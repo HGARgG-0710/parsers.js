@@ -118,7 +118,8 @@ export interface INodeType<
 	T = any,
 	Args extends any[] = any[],
 	K extends INode<T, Args> = INode<T, Args>
-> {
+> extends ITypeCheckable,
+		ITyped<T> {
 	new (...args: Args): K
 	fromPlain(x: any, maker: INodeMaker<T>): K | false
 }

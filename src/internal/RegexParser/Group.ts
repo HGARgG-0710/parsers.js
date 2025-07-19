@@ -11,6 +11,8 @@ import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consume } from "../../utils/Stream.js"
 import { BasicCurrMap } from "../RegexParser.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
+import { HandleLookaheadGroup } from "./Group/Lookahead.js"
+import { HandleLookbehindGroup } from "./Group/Lookbehind.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 
 const bodyBuilder = new RetainedArray()
@@ -30,7 +32,9 @@ const GroupHandler = TableHandler(
 	new BasicCurrMap(
 		ObjectMap(
 			{
-				"#": HandleExtensionGroup
+				"#": HandleExtensionGroup,
+				"=": HandleLookaheadGroup,
+				"<": HandleLookbehindGroup
 			},
 			HandlePlainGroup
 		)

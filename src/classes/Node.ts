@@ -118,7 +118,7 @@ export const TokenNode = NodeFactory(function <T = any>(
 	const jsonObject = { type }
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
-		static is = isType(type)
+		static readonly is = isType(type)
 
 		toJSON() {
 			return jsonObject
@@ -207,14 +207,17 @@ abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of
  * `INode` instances with `.type` field (on prototype) defined by `type: T`
- * and a single child-node, which is reflected in tree-iteration algorithms. 
- * In cases when a child is guaranteed to be the same preferable over 
- * `RecursiveNode`. 
+ * and a single child-node, which is reflected in tree-iteration algorithms.
+ * In cases when a child is guaranteed to be the same preferable over
+ * `RecursiveNode`.
  */
 export const SingleChildNode = NodeFactory(function <T = any>(
 	type: T
 ): INodeType<T, [INode<T>]> {
 	class singleChildNode extends PreSingleChildNode<T> {
+		static readonly type = type
+		static readonly is = isType(type)
+
 		get type() {
 			return type
 		}
@@ -237,7 +240,7 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 ): ICellNodeType<T, Value> {
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
-		static is = isType(type)
+		static readonly is = isType(type)
 
 		get type() {
 			return type
@@ -361,7 +364,7 @@ export const RecursiveNode = NodeFactory(function <T = any>(
 ): ICollectionNodeType<T> {
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
-		static is = isType(type)
+		static readonly is = isType(type)
 
 		get type() {
 			return type
