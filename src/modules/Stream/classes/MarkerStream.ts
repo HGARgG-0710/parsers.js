@@ -1,11 +1,11 @@
 import type { IOwnedStream } from "../../../interfaces/Stream.js"
 import type { IMarkerStream } from "../interfaces/MarkerStream.js"
-import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
+import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 class MarkerStreamAnnotation<
 	T = any,
 	Marker = any
-> extends WrapperStreamAnnotation<T> {
+> extends IdentityStreamAnnotation<T> {
 	get currMarker(): Marker {
 		return null as Marker
 	}
@@ -17,7 +17,7 @@ class MarkerStreamAnnotation<
 
 function BuildMarkerStream<T = any, Marker = any>() {
 	return class
-		extends WrapperStream.generic!<T, []>()
+		extends IdentityStream.generic!<T, []>()
 		implements IMarkerStream<T, Marker>
 	{
 		private marker: () => Marker

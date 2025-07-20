@@ -14,7 +14,7 @@ import { isStateful } from "../../../is/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { StatefulStream } from "./StatefulStream.js"
-import { WrapperStream } from "./WrapperStream.js"
+import { IdentityStream } from "./IdentityStream.js"
 
 const { mutate } = inplace
 
@@ -46,7 +46,7 @@ const compositeStreamInitializer = {
 
 function BuildBeforeCompositeStream<T = any>() {
 	abstract class BeforeCompositeStream
-		extends WrapperStream.generic!<T, [IRawStreamArray, IParseState]>()
+		extends IdentityStream.generic!<T, [IRawStreamArray, IParseState]>()
 		implements ICompositeStream<T>
 	{
 		protected ["constructor"]: new (

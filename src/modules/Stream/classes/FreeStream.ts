@@ -3,16 +3,16 @@ import type {
 	IOwnedStream,
 	IPoolGetter
 } from "../../../interfaces.js"
-import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
+import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
-class FreeStreamAnnotation<T = any> extends WrapperStreamAnnotation<T> {
+class FreeStreamAnnotation<T = any> extends IdentityStreamAnnotation<T> {
 	setPoolGetter(poolGetter: IPoolGetter): this {
 		return this
 	}
 }
 
 function BuildFreeStream<T extends IFreeable = any>() {
-	return class extends WrapperStream.generic!<T, []>() {
+	return class extends IdentityStream.generic!<T, []>() {
 		private poolGetter: IPoolGetter
 		private freeable: T | null = null
 
@@ -56,7 +56,7 @@ function PreFreeStream<
 /**
  * This is a function for creation of factories for creation
  * of `ILinkedStream<T>` instances.
- * It is an extension of `WrapperStream<T, [IPoolGetter]>`.
+ * It is an extension of `IdentityStream<T, [IPoolGetter]>`.
  * It expects the underlying `resource` to return values of a
  * type `T extends IFreeable`. The stream in question returns
  * each and every item from the underlying stream,

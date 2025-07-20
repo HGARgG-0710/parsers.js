@@ -2,10 +2,10 @@ import { LineIndex } from "../../../classes/Position.js"
 import type { ILineIndex } from "../../../interfaces.js"
 import type { IOwnedStream, IPrevable } from "../../../interfaces/Stream.js"
 import type { IIndexStream } from "../interfaces/IndexStream.js"
-import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
+import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 class IndexStreamAnnotation<T = any>
-	extends WrapperStreamAnnotation<T>
+	extends IdentityStreamAnnotation<T>
 	implements IIndexStream<T>, IPrevable
 {
 	readonly lineIndex: ILineIndex
@@ -17,7 +17,7 @@ class IndexStreamAnnotation<T = any>
 
 function BuildIndexStream<T = any>() {
 	return class
-		extends WrapperStream.generic!<T, []>()
+		extends IdentityStream.generic!<T, []>()
 		implements IIndexStream<T>, IPrevable
 	{
 		private isNewline: () => boolean
@@ -55,20 +55,20 @@ function PreIndexStream<T = any>(): typeof IndexStreamAnnotation<T> {
 }
 
 /**
- * This is a class implementing `IIndexStream<T>` and `IPrevable`. 
- * It extends `WrapperStream<T>`. 
- * 
- * The stream keeps track of a `public readonly .lineIndex: ILineIndex`, 
- * which can be used to track the "character-newline" position inside 
- * the underlying `IOwnedStream`. 
- * It uses the given predicate `isNewline` [which is intended to use `this`], 
+ * This is a class implementing `IIndexStream<T>` and `IPrevable`.
+ * It extends `IdentityStream<T>`.
+ *
+ * The stream keeps track of a `public readonly .lineIndex: ILineIndex`,
+ * which can be used to track the "character-newline" position inside
+ * the underlying `IOwnedStream`.
+ * It uses the given predicate `isNewline` [which is intended to use `this`],
  * to analyze whether or not to consider the current element `T` of `.resource`
- * to be a "newline" or not. In case that the predicate returns `true`, 
- * it calls `this.lineIndex.nextLine()`, otherwise - `this.lineIndex.nextChar()`. 
- * 
- * The Stream is useful for error diagnostics in `IStream`-based input validators, 
- * and/or robust parsers. 
-*/
+ * to be a "newline" or not. In case that the predicate returns `true`,
+ * it calls `this.lineIndex.nextLine()`, otherwise - `this.lineIndex.nextChar()`.
+ *
+ * The Stream is useful for error diagnostics in `IStream`-based input validators,
+ * and/or robust parsers.
+ */
 export function IndexStream<T = any>(isNewline: () => boolean) {
 	const indexStream = PreIndexStream<T>()
 	return function (resource?: IOwnedStream<T>) {

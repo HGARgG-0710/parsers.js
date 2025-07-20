@@ -54,7 +54,7 @@ function PreAttachedStream<T = any, Args extends any[] = any[]>() {
  * It shares the constructor of `PipeStream`. 
  *
  * For an example of an even less autonomous derivative of 
- * `DelegateStream`, see `WrapperStream` [with a `.copy` 
+ * `DelegateStream`, see `IdentityStream` [with a `.copy` 
  * method implemented]. 
  */
 export const AttachedStream: ReturnType<typeof PreAttachedStream> & {

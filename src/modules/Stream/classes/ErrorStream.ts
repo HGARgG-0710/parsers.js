@@ -7,18 +7,18 @@ import type {
 } from "../../../interfaces.js"
 import { isIndexCarrying } from "../../../is/Stream.js"
 import { negate } from "../utils/StreamPosition.js"
-import { WrapperStream, WrapperStreamAnnotation } from "./WrapperStream.js"
+import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 abstract class ErrorStreamAnnotation<
 	T = any
-> extends WrapperStreamAnnotation<T> {
+> extends IdentityStreamAnnotation<T> {
 	protected abstract errHandler(err: any): void
 }
 
 let errorStream: typeof ErrorStreamAnnotation | null = null
 
 function BuildErrorStream<T = any>() {
-	abstract class ErrorStream extends WrapperStream.generic!<T>() {
+	abstract class ErrorStream extends IdentityStream.generic!<T>() {
 		protected abstract errHandler(err: any): void
 
 		next() {
@@ -103,7 +103,7 @@ function PreBasicErrorStream<
 }
 
 /**
- * This is an abstract stream class, extending `WrapperStream`,
+ * This is an abstract stream class, extending `IdentityStream`,
  * and intended for creation of Error-handling Stream-s.
  *
  * It enables configuration of elementary error-handling
