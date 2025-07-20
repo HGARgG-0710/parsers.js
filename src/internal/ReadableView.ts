@@ -18,10 +18,6 @@ export class ReadableView<T = any> implements IView<T> {
 
 	private readable: IReadable<T>
 
-	//
-	// * Interface Methods
-	//
-
 	copy() {
 		return new this.constructor(this.offset, this.readable)
 	}
@@ -34,10 +30,6 @@ export class ReadableView<T = any> implements IView<T> {
 		if (readable) this.readable = readable
 		return this
 	}
-
-	//
-	// * Non-interface Methods
-	//
 
 	backward() {
 		if (this.offset > 0) --this.offset
