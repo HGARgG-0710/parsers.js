@@ -1,12 +1,12 @@
-import { type as _type, functional, string } from "@hgargg-0710/one"
+import { type as _type, functional } from "@hgargg-0710/one"
 import { type } from "../aliases/Node.js"
 import { curr } from "../aliases/Stream.js"
+import type { IStream } from "../interfaces.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
 
 const { id } = functional
 const { typeOf } = _type
-const { charCodeAt } = string
 
 function extend<KeyType = any, ValueType = any, InternalKeyType = any>(
 	this: IHashClass<KeyType, ValueType, InternalKeyType>,
@@ -101,17 +101,31 @@ export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 	return hashClass
 }
 
+/**
+ * This is an `HashClass((x) => x)`.
+ * The most basic kind of `IHashClass` that there can be.
+ */
 export const BasicHash = HashClass(id)
 
-export const CurrentHash = HashClass(curr)
+/**
+ * This is a `HashClass((x: IStream) => x.curr)`
+ */
+export const CurrentHash = HashClass<IStream>(curr)
 
+/**
+ * This is a  `HashClass((x) => x.length)`
+ */
 export const LengthHash = HashClass((x) => x.length)
 
+/**
+ * This is a `HashClass((x) => x.type)`
+ */
 export const TokenHash = HashClass(type)
 
+/**
+ * This is a `HashClass((x) => typeof x)`
+ */
 export const TypeofHash = HashClass(typeOf)
-
-export const CharHash = HashClass(charCodeAt)
 
 export * as PlainMap from "../modules/HashMap/classes/PlainMap.js"
 export * from "../modules/HashMap/classes/TerminalMap.js"
