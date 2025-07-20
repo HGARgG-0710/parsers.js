@@ -25,6 +25,8 @@ type ILimitStreamConsructor<T = any> = new (
 	resource?: ILimitableStream<T>
 ) => ILinkedStream<T> & IStateSettupable & ILimitSetterMethods<T>
 
+type IIterationDirectionChoice = ["next" | "prev", "next" | "prev"]
+
 const limitStreamInitializer = {
 	init(
 		target: ILinkedStream & IStateSettupable,
@@ -35,15 +37,61 @@ const limitStreamInitializer = {
 	}
 }
 
+/**
+ * A class encapsulating a lookaround of a `LimitStream`,
+ * which may be present or absent.
+ */
+class Lookaround<T = any> {
+	private hasLookaround = false
+	private lookaround?: T
+
+	has() {
+		return this.hasLookaround
+	}
+
+	set(lookbehind: T) {
+		this.lookaround = lookbehind
+		this.hasLookaround = true
+	}
+
+	reset() {
+		this.hasLookaround = false
+	}
+
+	get() {
+		return this.lookaround!
+	}
+}
+
+/**
+ * A class encapsulating the process of picking iteration direction for a
+ * `LimitStream` based off a given `direction: boolean`. 
+ */
+class DirectionPicker {
+	private readonly backwards: IIterationDirectionChoice = ["next", "prev"]
+	private readonly forwards: IIterationDirectionChoice = ["prev", "next"]
+
+	private currentIteration: IIterationDirectionChoice
+
+	forwardIteration() {
+		return this.currentIteration[1]
+	}
+
+	backwardIteration() {
+		return this.currentIteration[0]
+	}
+
+	from(direction: boolean) {
+		this.currentIteration = direction ? this.forwards : this.backwards
+	}
+}
+
 function BuildLimitStream<T = any>() {
 	return class extends BasicResourceStream.generic!<T>() {
-		private hasLookahead = false
-		private hasLookbehind = false
+		private lookbehind = new Lookaround<T>()
+		private lookahead = new Lookaround<T>()
+		private directionPicker = new DirectionPicker()
 
-		private lookbehind: T
-		private lookahead: T
-
-		private direction: boolean
 		private from: IStreamPosition<T>
 		private until: IStreamPosition<T>
 
@@ -62,55 +110,35 @@ function BuildLimitStream<T = any>() {
 		}
 
 		private prodForth() {
-			const { hasLookahead, lookahead } = this
-			return hasLookahead ? lookahead : this.prodForthWithoutLookahead()
+			if (!this.lookahead.has())
+				this.lookahead.set(this.prodForthWithoutLookahead())
 		}
 
 		private prodForthWithoutLookahead() {
-			this.hasLookahead = true
-			super[this.pickForwardDirection()]()
+			super[this.directionPicker.forwardIteration()]()
 			return this.curr
-		}
-
-		private pickForwardDirection() {
-			return this.direction ? "next" : "prev"
 		}
 
 		private prodBack() {
-			const { hasLookbehind, lookbehind } = this
-			return hasLookbehind ? lookbehind : this.prodBackWithoutLookbehind()
+			if (!this.lookbehind.has())
+				this.lookbehind.set(this.prodBackWithoutLookbehind())
 		}
 
 		private prodBackWithoutLookbehind() {
-			this.hasLookbehind = true
-			super[this.pickBackwardDirection()]()
+			super[this.directionPicker.backwardIteration()]()
 			return this.curr
 		}
 
-		private pickBackwardDirection() {
-			return this.direction ? "prev" : "next"
-		}
-
 		protected baseNextIter(curr: T) {
-			this.lookbehind = curr
-			this.hasLookbehind = true
-			this.hasLookahead = false
+			this.lookbehind.set(curr)
+			this.lookahead.reset()
 			return this.resource.curr
 		}
 
 		protected basePrevIter(curr: T) {
-			this.lookahead = curr
-			this.hasLookahead = true
-			this.hasLookbehind = false
+			this.lookahead.set(curr)
+			this.lookbehind.reset()
 			return this.resource.curr
-		}
-
-		private forgetLastLookahead() {
-			this.hasLookahead = false
-		}
-
-		private forgetLastLookbehind() {
-			this.hasLookbehind = false
 		}
 
 		private findStartPos() {
@@ -128,19 +156,19 @@ function BuildLimitStream<T = any>() {
 		}
 
 		setupState() {
-			this.forgetLastLookahead()
-			this.forgetLastLookbehind()
+			this.lookahead.reset()
+			this.lookbehind.reset()
 		}
 
 		isCurrEnd(): boolean {
 			if (this.resource.isCurrEnd()) return true
-			this.lookahead = this.prodForth()
+			this.prodForth()
 			return equals(this.resource!, this.until)
 		}
 
 		isCurrStart(): boolean {
 			if (this.resource.isCurrStart()) return true
-			this.lookbehind = this.prodBack()
+			this.prodBack()
 			return equals(this.resource!, this.startPos)
 		}
 
@@ -171,7 +199,7 @@ function BuildLimitStream<T = any>() {
 		}
 
 		setDirection(direction: boolean) {
-			this.direction = direction
+			this.directionPicker.from(direction)
 			return this
 		}
 
