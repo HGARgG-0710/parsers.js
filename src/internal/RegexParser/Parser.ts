@@ -1,37 +1,39 @@
-import { functional, type array } from "@hgargg-0710/one"
-import { DynamicParser, IndexMap, TableHandler } from "../classes.js"
-import { BasicHash } from "../classes/HashMap.js"
-import { CompositeStream, InputStream, PeekStream } from "../classes/Stream.js"
+import type { array } from "@hgargg-0710/one"
+import { DynamicParser, IndexMap, TableHandler } from "../../classes.js"
+import { CurrentHash } from "../../classes/HashMap.js"
+import {
+	CompositeStream,
+	IdentityStream,
+	InputStream,
+	PeekStream
+} from "../../classes/Stream.js"
 import type {
 	IIndexMap,
 	INodeType,
 	IParserFunction,
 	ITypeCheckable
-} from "../interfaces.js"
+} from "../../interfaces.js"
 import {
 	LiquidMap,
 	TableCarrier
-} from "../modules/IndexMap/classes/LiquidMap.js"
-import { Pairs } from "../samples.js"
-import { BasicMap } from "../samples/TerminalMap.js"
-import { currMap } from "../utils/HashMap.js"
-import { nodeMap } from "../utils/IndexMap.js"
-import { maybeCharClass } from "./RegexParser/CharClass.js"
-import { maybeDot } from "./RegexParser/Dot.js"
-import { maybeEscaped } from "./RegexParser/Escaped.js"
-import { maybeGroup } from "./RegexParser/Group.js"
-import { maybeNegation } from "./RegexParser/Negation.js"
-import { maybePlus } from "./RegexParser/Quantifiers/Plus.js"
-import { maybePreQuantifier } from "./RegexParser/Quantifiers/Pre.js"
-import { maybeQMark } from "./RegexParser/Quantifiers/QMark.js"
-import { maybeRange } from "./RegexParser/Quantifiers/Range.js"
-import { maybeStar } from "./RegexParser/Quantifiers/Star.js"
-import { HandleSingleChar } from "./RegexParser/SingleChar.js"
-import { maybeTypeMatch } from "./RegexParser/TypeMatch.js"
-
-const { id } = functional
-
-export const BasicCurrMap = currMap(BasicHash)
+} from "../../modules/IndexMap/classes/LiquidMap.js"
+import { Pairs } from "../../samples.js"
+import { BasicMap } from "../../samples/TerminalMap.js"
+import { nodeMap } from "../../utils/IndexMap.js"
+import { maybeCharClass } from "./CharClass.js"
+import { ProduceDisjunction } from "./Disjunction.js"
+import { maybeDot } from "./Dot.js"
+import { maybeEscaped } from "./Escaped.js"
+import { maybeGroup } from "./Group.js"
+import { maybeNegation } from "./Negation.js"
+import { maybePipe } from "./Pipe.js"
+import { maybePlus } from "./Quantifiers/Plus.js"
+import { maybePreQuantifier } from "./Quantifiers/Pre.js"
+import { maybeQMark } from "./Quantifiers/QMark.js"
+import { maybeRange } from "./Quantifiers/Range.js"
+import { maybeStar } from "./Quantifiers/Star.js"
+import { HandleSingleChar } from "./SingleChar.js"
+import { maybeTypeMatch } from "./TypeMatch.js"
 
 export function LookaheadMap(
 	map: array.Pairs<INodeType<string>, IParserFunction>,
@@ -49,6 +51,8 @@ export function LookaheadMap(
 	).fromCarrier(new TableCarrier(keys, values, _default))
 }
 
+export const PreserveLowerStream = () => new IdentityStream()
+
 export class RegexParser {
 	parse(source: string) {}
 }
@@ -61,7 +65,7 @@ export class RegexParser {
 // * [done - sketch] 5. input
 
 const RegexTokenizer = TableHandler(
-	new BasicCurrMap(
+	new CurrentHash(
 		BasicMap(
 			[
 				...maybeEscaped,
@@ -70,7 +74,8 @@ const RegexTokenizer = TableHandler(
 				...maybeGroup,
 				...maybeCharClass,
 				...maybeDot,
-				...maybePreQuantifier
+				...maybePreQuantifier,
+				...maybePipe
 			],
 			HandleSingleChar
 		)
@@ -78,7 +83,10 @@ const RegexTokenizer = TableHandler(
 )
 
 const QuantifierProcessor = TableHandler(
-	LookaheadMap([...maybePlus, ...maybeQMark, ...maybeStar, ...maybeRange], id)
+	LookaheadMap(
+		[...maybePlus, ...maybeQMark, ...maybeStar, ...maybeRange],
+		PreserveLowerStream
+	)
 )
 
 // ! THIS is the error-throwing code - put it at the spot where we KNOW there are NO MORE valid string-cases left...
@@ -90,6 +98,11 @@ const QuantifierProcessor = TableHandler(
 // 		2. inputs that fit very well inside the RAM [i.e. - DELIBERATELY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
 // }
 const regexParser = DynamicParser(
-	CompositeStream(QuantifierProcessor, PeekStream(2)(), RegexTokenizer)(),
+	CompositeStream(
+		ProduceDisjunction,
+		QuantifierProcessor,
+		PeekStream(2)(),
+		RegexTokenizer
+	)(),
 	new InputStream()
 )

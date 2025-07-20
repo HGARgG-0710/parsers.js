@@ -1,5 +1,5 @@
 import type { IPeekableStream } from "../interfaces.js"
-import { RegexParser } from "../internal/RegexParser.js"
+import { RegexParser } from "../internal/RegexParser/Parser.js"
 
 class RegexCompiler {
 	private readonly parser = new RegexParser()

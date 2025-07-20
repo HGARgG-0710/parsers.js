@@ -1,9 +1,9 @@
 import { TableHandler } from "../../../classes.js"
+import { CurrentHash } from "../../../classes/HashMap.js"
 import { ContentNode } from "../../../classes/Node.js"
 import { SingletonStream } from "../../../classes/Stream.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import { ObjectMap } from "../../../samples/TerminalMap.js"
-import { BasicCurrMap } from "../../RegexParser.js"
 import { ErrorCode } from "../Errors.js"
 
 const EscapedLiteral = ContentNode<string, string>("escaped-literal")
@@ -16,7 +16,7 @@ function EscapedLiteralHandler() {
 }
 
 export const HandleEscapedLiteral = TableHandler(
-	new BasicCurrMap(
+	new CurrentHash(
 		ObjectMap(
 			{
 				"^": EscapedLiteralHandler,

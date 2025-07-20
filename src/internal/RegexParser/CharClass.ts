@@ -14,7 +14,7 @@ import type {
 	IStreamChooser
 } from "../../interfaces.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
-import { BaseEscapedHandler } from "./Escaped.js"
+import { HandleEscaped } from "./Escaped.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
 // TODO: THIS IS ANOTHER ONE OF *THOSE* nodes/Streams pairs... - it must survive SEVERAL DIFFERENT UNDER-STREAM BIRTHS- AND DEATHS-!
@@ -44,7 +44,7 @@ const ClassUnitHandler = TableHandler(
 	new BasicHash(
 		ObjectMap(
 			{
-				"\\": BaseEscapedHandler
+				"\\": HandleEscaped
 			},
 			HandleSingleChar
 		)
@@ -68,7 +68,9 @@ function ClassElementHandler(input: IOwnedStream<string> & IPeekable<string>) {
 	return (isRangeAhead(input) ? HandleRange : HandleUnit)(input)
 }
 
-export function HandleCharClass(input: IOwnedStream<string> & IPeekable<string>) {
+export function HandleCharClass(
+	input: IOwnedStream<string> & IPeekable<string>
+) {
 	input.next() // [
 	return [new CharClassStream(), ClassElementHandler, CharClassLimitStream()]
 }

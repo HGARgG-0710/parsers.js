@@ -1,5 +1,6 @@
 import type { array } from "@hgargg-0710/one"
 import { RetainedArray, TableHandler } from "../../classes.js"
+import { CurrentHash } from "../../classes/HashMap.js"
 import { RecursiveNode } from "../../classes/Node.js"
 import { LimitStream, SingletonStream } from "../../classes/Stream.js"
 import type {
@@ -9,7 +10,6 @@ import type {
 } from "../../interfaces.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consume } from "../../utils/Stream.js"
-import { BasicCurrMap } from "../RegexParser.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandleLookaheadGroup } from "./Group/Lookahead.js"
 import { HandleLookbehindGroup } from "./Group/Lookbehind.js"
@@ -29,7 +29,7 @@ export const GroupBodyStream = SingletonStream(
 )
 
 const GroupHandler = TableHandler(
-	new BasicCurrMap(
+	new CurrentHash(
 		ObjectMap(
 			{
 				"#": HandleExtensionGroup,

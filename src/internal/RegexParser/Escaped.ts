@@ -1,8 +1,8 @@
 import type { array } from "@hgargg-0710/one"
 import { TableHandler } from "../../classes.js"
+import { CurrentHash } from "../../classes/HashMap.js"
 import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
-import { BasicCurrMap } from "../RegexParser.js"
 import { checkMaybeError } from "./Errors.js"
 import { HandleDigit } from "./Escaped/Digit.js"
 import { HandleEscapedLiteral } from "./Escaped/Literal.js"
@@ -13,8 +13,8 @@ import { HandleUnicode } from "./Escaped/Unicode.js"
 import { HandleVerticalTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 
-export const BaseEscapedHandler = TableHandler(
-	new BasicCurrMap(
+const BaseEscapedHandler = TableHandler(
+	new CurrentHash(
 		ObjectMap(
 			{
 				w: HandleWord,
@@ -30,7 +30,7 @@ export const BaseEscapedHandler = TableHandler(
 	)
 )
 
-function handleEscaped(input: IOwnedStream<string>) {
+export function HandleEscaped(input: IOwnedStream<string>) {
 	input.next() // \
 	const result = BaseEscapedHandler(input)
 	checkMaybeError(result)
@@ -38,5 +38,5 @@ function handleEscaped(input: IOwnedStream<string>) {
 }
 
 export const maybeEscaped: array.Pairs<string, IStreamChooser> = [
-	["\\", handleEscaped]
+	["\\", HandleEscaped]
 ]
