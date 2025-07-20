@@ -1,7 +1,7 @@
 import { number, type } from "@hgargg-0710/one"
 import assert from "assert"
 
-const { min } = number
+const { min, max } = number
 const { isNumber, isArray } = type
 
 /**
@@ -22,11 +22,44 @@ class DynamicSize<T = any> {
 }
 
 /**
+ * This class represents a heuristic for expansion of the
+ * size of the `T[]` array. Intended to encapsulate the
+ * logic for said increase, and isolate it from the
+ * remainder of the code for working with the said
+ * array.
+ *
+ * Instead of using the actual number of elements by which
+ * it is asked to increase the array size, one uses the
+ * maximum of the said amount and the current size (i.e.
+ * doubling). This enables exponential growth of the
+ * buffer, specifically, 'n'th increase will cause it
+ * to be `2 ** n * x` elements, where `x` is their original
+ * number.
+ *
+ * This, in particular, is intended to serve as a safeguard
+ * against excessive resizing by small amounts (such as 1),
+ * which is a fairly common danger when it comes to
+ * lookaheads.
+ */
+class SizeAllocationHeuristic<T = any> {
+	private heuristic(n: number) {
+		return max(n, this.dynamicSize.get())
+	}
+
+	incBy(elements: number) {
+		this.dynamicSize.incBy(this.heuristic(elements))
+	}
+
+	constructor(private readonly dynamicSize: DynamicSize<T>) {}
+}
+
+/**
  * Represents the class for handling
  * the size-related data/methods of
  * `RotationBuffer`.
  */
 class BufferSize<T = any> {
+	private readonly heuristic: SizeAllocationHeuristic<T>
 	private readonly dynamicSize: DynamicSize<T>
 
 	private get size() {
@@ -34,7 +67,7 @@ class BufferSize<T = any> {
 	}
 
 	incBy(elements: number) {
-		this.dynamicSize.incBy(elements)
+		this.heuristic.incBy(elements)
 	}
 
 	get() {
@@ -51,6 +84,7 @@ class BufferSize<T = any> {
 
 	constructor(items: T[]) {
 		this.dynamicSize = new DynamicSize(items)
+		this.heuristic = new SizeAllocationHeuristic(this.dynamicSize)
 	}
 }
 
@@ -65,7 +99,7 @@ class LastIndex<T = any> {
 		return this.sizeObj.wrapped(i + this.lastIndex)
 	}
 
-	move(by: number) {
+	moveForward(by: number) {
 		this.lastIndex = this.endShift(by)
 	}
 
@@ -126,7 +160,7 @@ class IndexRotation<T = any> {
 	}
 
 	shifted(index: number) {
-		return this.size.wrapped(index + this.rotation)
+		return this.sizeObj.wrapped(index + this.rotation)
 	}
 
 	forward(n: number) {
@@ -134,14 +168,14 @@ class IndexRotation<T = any> {
 	}
 
 	backward() {
-		this.forward(this.size.lastPos())
+		this.forward(this.sizeObj.lastPos())
 	}
 
 	get() {
 		return this.rotation
 	}
 
-	constructor(private readonly size: BufferSize<T>) {}
+	constructor(private readonly sizeObj: BufferSize<T>) {}
 }
 
 /**
@@ -215,8 +249,8 @@ class SpaceData<T = any> {
  * `rotation: IndexRotation<T>`
  */
 class SpaceDataBuilder<T = any> {
-	private _lastIndex: LastIndex<T>
-	private _rotation: IndexRotation<T>
+	private _lastIndex?: LastIndex<T>
+	private _rotation?: IndexRotation<T>
 
 	lastIndex(lastIndex: LastIndex<T>) {
 		this._lastIndex = lastIndex
@@ -236,11 +270,12 @@ class SpaceDataBuilder<T = any> {
 }
 
 /**
- * A class representing the boundries
- * of space used by the `Space` sub-object
- * of `RotationBuffer`.
+ * This is a class encapsulating methods necessary to perform
+ * space allocation operations on `RotationBuffer` data, signaling,
+ * in the process, necessary changes to the other responsible objects
+ * (most notably - one responsible for the keeping of the buffer's size).
  */
-class Space<T = any> {
+class SpaceAllocator<T = any> {
 	private get sizeObj() {
 		return this.rawItems.sizeObj
 	}
@@ -253,32 +288,104 @@ class Space<T = any> {
 		return this.space.empty
 	}
 
-	private alloc(space: number) {
+	/**
+	 * Performs a re-ordering of items of the owning `RotationBuffer` (if necessary).
+	 * Accomplishes this by removing all rotation (if present), shifing items on the
+	 * right to the left, and the items on the left to the right, to produce traditional
+	 * layout of the underlying array's elements.
+	 */
+	private reOrder() {
+		if (this.rotation.isPresent() && !this.empty.is()) {
+			const left = this.rawItems.left()
+			const rightSize = this.rawItems.rightSize()
+			this.rawItems.shiftLeftward(rightSize)
+			this.rawItems.fill(rightSize, left)
+			this.reset()
+		}
+	}
+
+	/**
+	 * Makes sure that the internal array of the `RotationBuffer` is
+	 * no longer rotated (includes both its offset and max-read index).
+	 * Does not, however, render present items invalid (expects re-ordering of
+	 * items to be handled elsewhere).
+	 */
+	reset() {
+		this.rotation.reset()
+		this.lastIndex.reset()
+	}
+
+	/**
+	 * Allocates `space` new items, by reordering (internally) the data of `RotationBuffer`,
+	 * and signaling an increased in size across all the composite objects that permit it to
+	 * function.
+	 */
+	alloc(space: number) {
 		if (space > 0) {
 			this.reOrder()
 			this.sizeObj.incBy(space)
 		}
 	}
 
-	private moveEnd(n: number) {
-		const lastIncrease = min(this.space.free(), n)
-		this.lastIndex.move(lastIncrease)
-		return lastIncrease
+	constructor(
+		public readonly rawItems: RawItems<T>,
+		public readonly space: SpaceData<T>,
+		public readonly lastIndex: LastIndex<T>
+	) {}
+}
+
+/**
+ * A class representing the boundries
+ * of space used by the `Space` sub-object
+ * of `RotationBuffer`.
+ */
+class Space<T = any> {
+	private get rotation() {
+		return this.rawItems.rotation
 	}
 
-	private reOrder() {
-		if (this.rotation.isPresent() && !this.empty.is()) {
-			const left = this.rawItems.left()
-			const rightSize = this.rawItems.rightSize()
-			this.rawItems.shiftRight(rightSize)
-			this.rawItems.fill(rightSize, left)
-			this.reset()
-		}
+	private get empty() {
+		return this.space.empty
+	}
+
+	private get rawItems() {
+		return this.allocator.rawItems
+	}
+
+	private get space() {
+		return this.allocator.space
+	}
+
+	private get lastIndex() {
+		return this.allocator.lastIndex
+	}
+
+	/**
+	 * Maximum presently allowed movement-space for
+	 * the last-index relative to `n`.
+	 */
+	private maxLastIndexIncrease(n: number) {
+		return min(this.space.free(), n)
+	}
+
+	/**
+	 * Moves the last index the maximum possible number of
+	 * positions in respect to `n`, before returning that
+	 * number back to the caller.
+	 */
+	private moveEnd(n: number) {
+		const maxIncrease = this.maxLastIndexIncrease(n)
+		this.lastIndex.moveForward(maxIncrease)
+		return maxIncrease
+	}
+
+	private newItemsAllocated(maxAlloc: number) {
+		const maxLastIndexInc = this.moveEnd(maxAlloc)
+		return maxAlloc - maxLastIndexInc
 	}
 
 	reset() {
-		this.rotation.reset()
-		this.lastIndex.reset()
+		this.allocator.reset()
 	}
 
 	renew() {
@@ -287,15 +394,16 @@ class Space<T = any> {
 		this.empty.markIs()
 	}
 
-	increase(by: number) {
-		this.alloc(by - this.moveEnd(by))
+	/**
+	 * Ensure that there is at least `by` positions free
+	 * for writing (i.e. unreserved by existing elements)
+	 * inside the internal array.
+	 */
+	reserveNew(positions: number) {
+		this.allocator.alloc(this.newItemsAllocated(positions))
 	}
 
-	constructor(
-		private readonly rawItems: RawItems<T>,
-		private readonly space: SpaceData<T>,
-		private readonly lastIndex: LastIndex<T>
-	) {}
+	constructor(private readonly allocator: SpaceAllocator<T>) {}
 }
 
 /**
@@ -304,7 +412,7 @@ class Space<T = any> {
  * the `RotationBuffer` instance.
  */
 class RawItems<T = any> {
-	shiftRight(rightSize: number) {
+	shiftLeftward(rightSize: number) {
 		for (let i = 0; i < rightSize; ++i)
 			this.items[i] = this.items[i + rightSize]
 	}
@@ -406,7 +514,7 @@ export class RotationBuffer<T = any> {
 	}
 
 	push(items: readonly T[]) {
-		this.space.increase(items.length)
+		this.space.reserveNew(items.length)
 		this.rawItems.writeAll(this.size, items)
 		if (this.empty.is()) this.empty.markNot()
 		return this
@@ -435,6 +543,8 @@ export class RotationBuffer<T = any> {
 			.rotation(this.rotation)
 			.build(sizeObj, this.empty)
 
-		this.space = new Space(this.rawItems, this.spaceData, this.lastIndex)
+		this.space = new Space(
+			new SpaceAllocator(this.rawItems, this.spaceData, this.lastIndex)
+		)
 	}
 }
