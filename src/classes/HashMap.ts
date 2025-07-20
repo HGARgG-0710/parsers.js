@@ -1,5 +1,6 @@
 import { type as _type, functional, string } from "@hgargg-0710/one"
 import { type } from "../aliases/Node.js"
+import { curr } from "../aliases/Stream.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
 
@@ -101,6 +102,8 @@ export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 }
 
 export const BasicHash = HashClass(id)
+
+export const CurrentHash = HashClass(curr)
 
 export const LengthHash = HashClass((x) => x.length)
 
