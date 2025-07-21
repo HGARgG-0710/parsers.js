@@ -105,9 +105,17 @@ IMMIDIATE NOTES:
 				inside the `Stream` submodule...
 
 notes on `RegexParser` development: 
-	-1. About 'v' flag's "special" features: 
-		1. let they be present BY DEFAULT [develop them properly... read through the docs, design, implement, etc]
-		2. no 'v' flag (or, any flags, for that matter) in the syntax
+	-2. About empty expressions: they aren't allowed (always false). 
+		This is why "|a+b?" doesn't match empty string. 
+
+		Reason: 
+			1. makes no sense, this is an ad-hoc-match regex-engine, not a fulltext one
+				Allowing matches for an empty string can only produce infinite loops 
+				in the usage context in question. Forbidding it makes for simpler parser code. 
+
+	-1. About Pooling: 
+		1. Add 'ObjectPool's to this. ESPECIALLY for `IStream` objects created. 
+			1. NOT THE tree-objects, though. Those are intended to be persistent and distinct
 
 	0. About Error-Handling: 
 		1. Non-error-resistant
@@ -359,9 +367,25 @@ CURRENTLY BEING DONE [screw the previously chosen order - going after the `Token
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
 	CURRENT AGENDA: 			
 		P0: 
-			0. Document `HashMap` mini-classes: 
-				Those are COMPLETELY UNDESCRIBED [no JSDOC at all; bad]
-			1. Refactor `LimitStream`
+			2. Types: 
+				1. Since we have made it that `IStream` contain the `Iterable` [and `IInitializable`] properties OPTIONALLY: 
+					1. Take it further, and REMOVE the mention of ALL the "Partial" properties (that includes `ICopiable`). 
+						The 'ICopiable' stretches across THE WHOLE of the library...
+						This way, one would have: 
+
+							// THE PERFECT SOLUTION [~1yr worth of suffering around that bloody thing...]
+							export interface IStream<T> {
+								readonly isEnd: boolean
+								readonly curr: T
+								next(): void
+								isCurrEnd(): boolean
+							}
+							
+					2. Remove the `.prev()` method and all related functionality. 
+						Backing up is NEVER NECESSARY when parsing. It is much simpler
+						and more efficient to use a `.peek(n)`-based lookahead. 
+					3. Make the presence of desired properties on specific implementations EXPLICIT via interfaces. 
+						Introduce LOTS 
 
 		P1:
 		[this is just an array-like strucutre, nothing unusual to see here]
@@ -385,8 +409,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		8. `BasicHash`, 
 			`LengthHash`, 
 			`TokenHash`, 
-			`TypeofHash`, 
-			`CharHash`: 
+			`TypeofHash`:
 				1. DO NOT MOCK! [real dependencies are far too simple for that]
 		6. WrapHandler, TableHandler
 
@@ -458,8 +481,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		8. `BasicHash`, 
 			`LengthHash`, 
 			`TokenHash`, 
-			`TypeofHash`, 
-			`CharHash`: 
+			`TypeofHash`:
 				1. Test each independently
 				2. Use DIFFERENT `IPreMap`s for each case
 				3. DO NOT MOCK! [use real `IPreMap`s instead]: 
@@ -897,20 +919,16 @@ LATER TODOS:
 		POST-TODO: later - FIND NEW ONES... [if any]
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
-		0. DO TDD [since tests will now be more-or-less established...]; 
-		1. Regex, TokenStream, Eliminator, etc - SEE EXTENSIVE NOTES BELOW
-
-	TODO [one.js] - MAYBE...: LATER, when finishing new version:
-		Replace all occurences of `numbers(...).map(...)` with `array.from`; 
-		Do via Search: 'numbers(...)'; 
-		There is at least one example in `Enum`. 
+		1. Regex
+		2. TokenStream
+		3. finish 'samples'
 
 	NOTES:						
 		NOTE [for later]: docs - 'protected abstract' properties...
 			DOCUMENT THOSEAS WELL. 
 			Specifically, for classes. 
 			These are INTENDED to providing the user with ability to customize EXTENDABLE behaviour
-				[example: IterableStream, DelegateStream, WrapperStream]; 
+				[example: IterableStream, DelegateStream, IdentityStream]; 
 
 		NOTE [for future]: the [Symbol.iterator] inside the `SwitchArray` COULD be a minor bottleneck. 
 			Benchmark later...
