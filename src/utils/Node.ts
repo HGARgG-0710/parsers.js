@@ -1,6 +1,11 @@
 import { boolean, functional } from "@hgargg-0710/one"
 import { type } from "../aliases/Node.js"
 import type { NodeSystem } from "../classes/NodeSystem.js"
+import type {
+	IIterableStream,
+	IParserFunction,
+	ITableHandler
+} from "../interfaces.js"
 import type { ITyped, IWalkable } from "../interfaces/Node.js"
 import { isTyped } from "../is/Node.js"
 import { isGoodIndex } from "../utils.js"
@@ -74,5 +79,29 @@ export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
 		if (!isTyped(from)) return false
 		if (!isValid(from.type)) return false
 		return allowedTypes.getByType(from.type)!.fromPlain(from, deserializer)
+	}
+}
+
+/**
+ * This maps a given `nodeStream` [it is assumed to have
+ * an `IRecursiveNode`, or other collection-based node as
+ * `nodeStream.curr`] with `mapWith(x, parentMap)`, for
+ * every `x` in `nodeStream` after the immidiate
+ * `nodeStream.curr` [which is skipped, since it is
+ * assumed that it has been used for mapping to the function
+ * in question].
+ */
+export function treeMap<T extends IWalkable<T> = IWalkable>(
+	mapWith: ITableHandler<IIterableStream<T>>
+): IParserFunction<IIterableStream<T>> {
+	return function (
+		nodeStream: IIterableStream<T>,
+		parentMap?: ITableHandler<IIterableStream<T>>
+	) {
+		nodeStream.next()
+		while (!nodeStream.isEnd) {
+			mapWith(nodeStream, parentMap)
+			nodeStream.next()
+		}
 	}
 }

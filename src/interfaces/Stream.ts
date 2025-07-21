@@ -121,8 +121,7 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IPrevable> &
 	Partial<IPosed<number>> &
 	Partial<Iterable<T>> &
-	ICopiable &
-	IInitializable & {
+	ICopiable & {
 		readonly curr: T
 		readonly isEnd: boolean
 		readonly isStart: boolean
@@ -178,3 +177,4 @@ export type * from "../modules/Stream/interfaces/OwnedStream.js"
 export type * from "../modules/Stream/interfaces/PeekStream.js"
 export type * from "../modules/Stream/interfaces/SingletonStream.js"
 export type * from "../modules/Stream/interfaces/StreamPosition.js"
+

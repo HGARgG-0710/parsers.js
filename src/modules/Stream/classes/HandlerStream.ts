@@ -112,7 +112,9 @@ const _HandlerStream = BuildHandlerStream()
 export function HandlerStream<In = any, Out = any>(
 	handler: (stream: IOwnedStream<In>) => Out
 ) {
-	return function (resource?: IOwnedStream<In>): IControlStream<Out> {
+	return function (
+		resource?: IOwnedStream<In>
+	): IControlStream<Out> & Iterable<Out> {
 		return new _HandlerStream().setHandler(handler).init(resource)
 	}
 }
