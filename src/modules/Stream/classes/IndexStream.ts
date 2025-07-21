@@ -10,7 +10,7 @@ class IndexStreamAnnotation<T = any>
 {
 	readonly lineIndex: ILineIndex
 
-	setNewlinePredicate(isNewline: () => boolean) {
+	setNewlinePredicate(isNewline: (resource: IOwnedStream<T>) => boolean) {
 		return this
 	}
 }
@@ -20,11 +20,16 @@ function BuildIndexStream<T = any>() {
 		extends IdentityStream.generic!<T, []>()
 		implements IIndexStream<T>, IPrevable
 	{
-		private isNewline: () => boolean
+		private isNewline: (resource: IOwnedStream<T>) => boolean
+
+		private lineIndexTransition() {
+			if (this.isNewline(this.resource!)) this.lineIndex.nextLine()
+			else this.lineIndex.nextChar()
+		}
 
 		next() {
 			super.next()
-			this.lineIndex[this.isNewline() ? "nextChar" : "nextLine"]()
+			this.lineIndexTransition()
 		}
 
 		prev() {
@@ -32,7 +37,7 @@ function BuildIndexStream<T = any>() {
 			this.lineIndex.prevChar!()
 		}
 
-		setNewlinePredicate(isNewline: () => boolean) {
+		setNewlinePredicate(isNewline: (stream: IOwnedStream<T>) => boolean) {
 			this.isNewline = isNewline
 			return this
 		}
@@ -69,7 +74,9 @@ function PreIndexStream<T = any>(): typeof IndexStreamAnnotation<T> {
  * The Stream is useful for error diagnostics in `IStream`-based input validators,
  * and/or robust parsers.
  */
-export function IndexStream<T = any>(isNewline: () => boolean) {
+export function IndexStream<T = any>(
+	isNewline: (resource: IOwnedStream<T>) => boolean
+) {
 	const indexStream = PreIndexStream<T>()
 	return function (resource?: IOwnedStream<T>) {
 		return new indexStream().setNewlinePredicate(isNewline).init(resource)

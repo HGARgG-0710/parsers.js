@@ -1013,81 +1013,8 @@ LATER TODOS:
 			These are the same. []
 	
 [TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
-	Primary: 
-		EL1. Eliminator: 
-			Replacement for the old `Eliminator`, based off `Regex`; 
-			Lazy, doesn't need several passes. 
-			Takes in the `Regex` list [walks, for given "character", each of them, matching, eliminating what was matched...]; 
-				Eliminates ONLY the first thing....; 	
-													
-		TODO: `samples`: 
-			3. SkipSpaces - TODO: *add* into `samples.Stream` ['Stream' for skipping space characters]: 
-				1. Based off `FilterStream`
-			4. ALSO - DelimiterStream
-					0. based off 'FilterStream'
-					1. uses a "has"-based predicate created from a list of possible delimiters/items, THAT ARE SKIPPED
-			5. IMPORTANT NOTE: 
-					after adding `TokenStream`, introduce: 
-						1. 'isCRLF' utils - returns if `new Regex("\r\n")` matches AT CURRENT `stream` POSITION (this should be easy to do...)
-							Put together with the `isLFSkip` util. 
-							More exactly: 
-								1. add the `isCRLF = (x: IStream<string>) => new RegexStream("\r\n").matchCurr(x)` [or something...]; 
-								2. add the `isCRLFReplace = (x: IStream<string>) => isCRLF(x) ? "\n" : x.curr`
-						2. 'isNewlineSkip = or(isLF, isCRLF)'
-							This is for the user to be able to instead of transforming "CRLF -> LF", 
-								just use this as-is [count the newlines]; 
-						3. `LFStream` - a stream returning, for an `isNewline` predicate 
-							[not INewlinePredicate, instead (stream: IStream<string>) => string], 
-								INSTEAD of items that fit the `isNewline`, the result of the `isNewline`. 
-							
-							Something like: `return isNewline(x)`
-							It's a `StreamParser`
-							Put under 'StreamParser/classes'
-							Purpose: to use with `Regex("\r\n")` [isCRLF], and `isLF`
-								More specifically, to be able to do: 
-									'toLF = (x: IStream<string>) => return isNewline(x) ? "\n" : x'
-								MAKE this a proper util.
-
-							Reason to introduce - LF/CRLF-independent parsers...
-								Immensely useful for negelecting platform-specific LF/CRLF differences. 
-			
-			6. scavenge old projects + add common-all-over-the-place type-of patterns: 	
-				1. Tokens (names for INode-classes): 
-		
-					1. Take them from various parsing projects of yours already existing: 
-		
-						1. xml
-						2. selector
-						3. regex
-		
-						Unite, choose best string-names; 
-						Create appropriate names for sample-token classes (via TokenInstance) [
-							example: 
-							
-							Opbrack - (, 
-							Clbrack - ), 
-							OpSqBrack - [, 
-							ClSqBrack - ], 
-							OpBrace - {, 
-							ClBrace - }, 
-		
-						...]; 
-		
-				2. arrays with common items (USED throughout...): 
-		
-					'binary = [0, 1]'
-					'decimal = [0, 1, ..., 9]'
-					'hex = [0, 1, ..., F]' - TAKE OUT of the global '/utils.ts'
-					'ascii = [0, 1, ...]'
-					'alphanumeric = [0, 1, ..., 9, a, ..., Z]'
-		
-					Also - the sets in question should be provided AS-ARE (without the 'inSet'...); 
-				
-				3. ALSO - join the 'samples' with the 'constants.ts' file 
-					[they are pretty similar in that they BOTH provide frequently recurring ambigious constant entities with meaningful "static" names and uses]; 
-
 	Secondary: 			
-		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+		RE1. [???] 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
 			Namely: 
 				1. intersection: 	/[[...]&&[...]]/v
 				2. subtraction: 	/[[...]--[...]]/v
