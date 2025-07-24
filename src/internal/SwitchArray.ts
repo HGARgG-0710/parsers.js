@@ -1,14 +1,11 @@
 import { array, inplace } from "@hgargg-0710/one"
 import { Initializable } from "../classes/Initializer.js"
-import type {
-	IInitializable,
-	IRecursiveListIdentifiable,
-	ISwitchIdentifiable
-} from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
+import type { ISwitchIdentifiable, ITerminal } from "./RecursiveList.js"
 import {
 	isSwitch,
 	itemsInitializer,
+	maybeDeSwitch,
 	RecursiveRenewer,
 	renewerInitializer,
 	wrapSwitch,
@@ -18,13 +15,6 @@ import {
 
 const { first, clear } = array
 const { insert, mutate, out } = inplace
-
-function maybeDeSwitch<
-	T extends IInitializable & ISwitchIdentifiable = any,
-	Recursive extends IRecursiveListIdentifiable & ISwitchIdentifiable = any
->(raw: IRecursivelySwitchable<T, Recursive>) {
-	return isSwitch(raw) ? raw.recursive : raw
-}
 
 const switchArrayInitializer = {
 	init(target: SwitchArray, items?: any[], renewer?: RecursiveRenewer) {
@@ -40,9 +30,7 @@ const switchArrayInitializer = {
  * structure of a `DynamicParser`.
  */
 export class SwitchArray<
-		T extends ISwitchIdentifiable &
-			IRecursiveListIdentifiable &
-			IInitializable = any,
+		T extends ITerminal<Recursive> = any,
 		Recursive extends ISwitchIdentifiable = any
 	>
 	extends Initializable<
@@ -95,6 +83,10 @@ export class SwitchArray<
 		else if (isSwitch(currItem)) currItem.init(value)
 		else this.baseWrite(i, wrapSwitch(value))
 		return this
+	}
+
+	get(i: number) {
+		return this.items[i]
 	}
 
 	read(i: number) {

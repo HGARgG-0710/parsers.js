@@ -63,7 +63,7 @@ function BuildBeforeCompositeStream<T = any>() {
 		abstract setState(state: Summat): void
 
 		private renewIfPossible() {
-			return this.streamList!.reevaluate(this.lowStream!)
+			return this.streamList!.renewAll(this.lowStream!)
 		}
 
 		private fixRenewed() {

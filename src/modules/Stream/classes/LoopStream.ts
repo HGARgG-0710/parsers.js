@@ -12,18 +12,18 @@ class LoopStreamAnnotation<T = any> extends ArrayStreamAnnotation<T, T> {
 
 function BuildLoopStream<T = any>() {
 	return class LoopStream extends ArrayStream.generic!<T, T>() {
-		private index: number = 0
+		private streamIndex: number = 0
 
 		private get itemCount() {
 			return this.items.length
 		}
 
 		private wrapped(index: number) {
-			return (this.index = index % this.itemCount)
+			return (this.streamIndex = index % this.itemCount)
 		}
 
 		protected baseNextIter(): T {
-			return this.items[this.wrapped(this.index + 1)]
+			return this.items[this.wrapped(this.streamIndex + 1)]
 		}
 
 		isCurrEnd(): boolean {

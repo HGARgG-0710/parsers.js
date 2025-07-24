@@ -1,14 +1,11 @@
-import type {
-	IOwnerSettable,
-	IRecursiveListIdentifiable,
-	IResourceSettable,
-	ISwitchIdentifiable
-} from "../../../interfaces.js"
+import type { IOwnerSettable, IResourceSettable } from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
 	IStatefulStream,
-	IStream
+	IStream,
+	IStreamChooser
 } from "../../../interfaces/Stream.js"
+import type { ITerminal } from "../../../internal/RecursiveList.js"
 
 /**
  * This is an `IStream<T>`, which is also `IOwnerSettable<IOwningStream>`, and
@@ -42,9 +39,7 @@ export interface IOwningStream<T = any>
  */
 export type ILinkedStream<T = any> = IOwnedStream<T> &
 	IOwningStream<T> &
-	// * Note: these two exist "UNOFFICIALLY"...
-	ISwitchIdentifiable &
-	IRecursiveListIdentifiable
+	ITerminal<IStreamChooser>
 
 /**
  * This is an `ILinkedStream<T>`, which is also an `IStatefulStream<T>`.

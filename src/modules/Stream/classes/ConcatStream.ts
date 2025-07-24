@@ -5,21 +5,21 @@ import { array } from "@hgargg-0710/one"
 const { lastIndex } = array
 
 /**
- * This is a class that extends `ArrayStream<any, IStream>`. 
- * It contains elements of unknown type, which are obtained from 
- * the `.items: IStream[]`. More specifically, the stream sequentially 
+ * This is a class that extends `ArrayStream<any, IStream>`.
+ * It contains elements of unknown type, which are obtained from
+ * the `.items: IStream[]`. More specifically, the stream sequentially
  * concatenates outputs from each one of the given `IStream`s,
- * taking their precise combined time to finish. 
-*/
+ * taking their precise combined time to finish.
+ */
 export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
-	private index: number = 0
+	private streamIndex: number = 0
 
 	private get currStream() {
-		return this.items[this.index]
+		return this.items[this.streamIndex]
 	}
 
 	private noMoreStreamsLeft() {
-		return lastIndex(this.items) === this.index
+		return lastIndex(this.items) === this.streamIndex
 	}
 
 	private currStreamDone() {
@@ -27,7 +27,7 @@ export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
 	}
 
 	private nextStream() {
-		++this.index
+		++this.streamIndex
 	}
 
 	private nextItem() {

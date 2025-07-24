@@ -213,7 +213,7 @@ function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 			this.endIndex.for(tree)
 		}
 
-		get index() {
+		get treeIndex() {
 			return this.walker.pos.get()
 		}
 
@@ -278,7 +278,7 @@ function PreDepthStream<
  * number of items before "falling outside" of a given parent node.
  *
  * It also supports backing up (via `.prev()`), and gettin the
- * multi-index of the current node in the tree via `.index: MultiIndex`,
+ * multi-index of the current node in the tree via `.treeIndex: MultiIndex`,
  * as well as navigating to it directly via `.goTo(ind: MultiIndex)`.
  * Similarly, there are `.rewind()` and `.finish()` methods present.
  */

@@ -28,7 +28,7 @@ export interface ITestable<T = any> {
 
 /**
  * This is a type representing a predicate of a single
- * variable of type `T`. 
+ * variable of type `T`.
  */
 export type IPredicate<T = any> = (x: T) => boolean
 
@@ -266,16 +266,6 @@ export interface IIsOpen {
  * are both `ISizeable` and `IWritable<T>`.
  */
 export type IFiniteWritable<T = any> = ISizeable & IWritable<T>
-
-// ignore this
-export interface IRecursiveListIdentifiable {
-	readonly isRecursiveInitList?: boolean
-}
-
-// and this also
-export interface ISwitchIdentifiable {
-	readonly isSwitch?: boolean
-}
 
 /**
  * This is an interface for representing entities that

@@ -11,14 +11,18 @@ import { ArrayStream } from "./ArrayStream.js"
  * It stops after the shortest of present streams runs out.
  */
 export class InterleaveStream extends ArrayStream.generic!<any, IStream>() {
-	private index: number = 0
+	private streamIndex: number = 0
 
 	private get currStream() {
-		return this.items[this.index]
+		return this.items[this.streamIndex]
+	}
+
+	private get size() {
+		return this.items.length
 	}
 
 	private nextStream() {
-		this.index = (this.index + 1) % this.items.length
+		this.streamIndex = (this.streamIndex + 1) % this.size
 	}
 
 	protected baseNextIter() {

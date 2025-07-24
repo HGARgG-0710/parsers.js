@@ -22,10 +22,10 @@ import {
 const { isFunction, isArray } = type
 
 /**
- * This is the `StreamRenewer` employed by the library's `CompositeStream` 
- * implementation. It is the sole definition that makes the `StreamList` 
- * operate the way it actually does. 
-*/
+ * This is the `StreamRenewer` employed by the library's `CompositeStream`
+ * implementation. It is the sole definition that makes the `StreamList`
+ * operate the way it actually does.
+ */
 class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	private topStream: ICompositeStream
 	readonly evaluator = this.evaluate.bind(this)
@@ -55,6 +55,14 @@ class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 	isRecursive(x: any): x is IStreamChooser {
 		return isFunction(x)
 	}
+
+	nextItem(after: ILinkedStream): ILinkedStream {
+		return after.resource! as ILinkedStream
+	}
+
+	prevItem(to: ILinkedStream): ILinkedStream {
+		return to.owner! as ILinkedStream
+	}
 }
 
 const topStreamInitializer: IInitializer<[ICompositeStream]> = {
@@ -81,11 +89,11 @@ const streamListInitializer: IInitializer<
 const globalStreamRenewer = new StreamRenewer()
 
 /**
- * This is the `PoolableRecursiveList` actually employed 
- * by the `CompositeStream` implementation. It uses the 
- * `globalStreamRenewer` as the default renewer (which is 
+ * This is the `PoolableRecursiveList` actually employed
+ * by the `CompositeStream` implementation. It uses the
+ * `globalStreamRenewer` as the default renewer (which is
  * referenced across all the `StreamList`s)
-*/
+ */
 export class StreamList extends PoolableRecursiveList<
 	ILinkedStream,
 	IStreamChooser,
