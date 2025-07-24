@@ -6,7 +6,8 @@ import type {
 	IParseState,
 	IPosed,
 	IStateHaving,
-	IStateSettable
+	IStateSettable,
+	ITableHandler
 } from "../interfaces.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 
@@ -107,7 +108,7 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  *
  * (Note that `.isEnd == true` REQUIRES that the last call to `.isCurrEnd()`
  * to have been `true` as well, the same, however, does not always hold.
- * Iterating through the __very last__ element from the very first 
+ * Iterating through the __very last__ element from the very first
  * requires that `.isCurrEnd() == true` and `.isEnd == false`).
  */
 export type IStream<T = any> = Partial<INavigable<T>> &
@@ -164,8 +165,18 @@ export type IChange<T = any> = (input: IPrevableStream<T>) => T
 
 /**
  * This is an `IStream<T>` that is also `Iterable<T>`
-*/
+ */
 export type IIterableStream<T = any> = IStream<T> & Iterable<T>
+
+/**
+ * This is a type for representing functions returning `IStream`-based generators,
+ * and supporting (optional) `ITableHandler`-passing (intended to be used in
+ * the same contexts as them).
+ */
+export type IStreamGenerator<T = any, Out = any> = (
+	stream: IIterableStream<T>,
+	parentMap?: ITableHandler<IIterableStream<T>>
+) => Generator<Out>
 
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
 export type * from "../modules/Stream/interfaces/HandlerStream.js"
@@ -177,4 +188,3 @@ export type * from "../modules/Stream/interfaces/OwnedStream.js"
 export type * from "../modules/Stream/interfaces/PeekStream.js"
 export type * from "../modules/Stream/interfaces/SingletonStream.js"
 export type * from "../modules/Stream/interfaces/StreamPosition.js"
-

@@ -83,7 +83,8 @@ export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
 }
 
 /**
- * This maps a given `nodeStream` [it is assumed to have
+ * This returns a generator that yields the result of
+ * mapping a given `nodeStream` [it is assumed to have
  * an `IRecursiveNode`, or other collection-based node as
  * `nodeStream.curr`] with `mapWith(x, parentMap)`, for
  * every `x` in `nodeStream` after the immidiate
@@ -94,14 +95,11 @@ export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
 export function treeMap<T extends IWalkable<T> = IWalkable>(
 	mapWith: ITableHandler<IIterableStream<T>>
 ): IParserFunction<IIterableStream<T>> {
-	return function (
+	return function* (
 		nodeStream: IIterableStream<T>,
 		parentMap?: ITableHandler<IIterableStream<T>>
 	) {
 		nodeStream.next()
-		while (!nodeStream.isEnd) {
-			mapWith(nodeStream, parentMap)
-			nodeStream.next()
-		}
+		for (const _ of nodeStream) yield* mapWith(nodeStream, parentMap)
 	}
 }

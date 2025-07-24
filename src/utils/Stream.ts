@@ -2,15 +2,19 @@ import { type } from "@hgargg-0710/one"
 import { ArrayCollection } from "../classes/ArrayCollection.js"
 import type { Regex } from "../classes/Regex.js"
 import { HandlerStream } from "../classes/Stream.js"
-import type { IClearable, IFiniteWritable, IPushable } from "../interfaces.js"
+import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,
 	IPeekableStream,
 	IPrevableStream,
 	IRawStream,
-	IStream
+	IStream,
+	IStreamGenerator
 } from "../interfaces/Stream.js"
-import type { IStreamTransform } from "../interfaces/StreamHandler.js"
+import type {
+	IStreamTransform,
+	ITableHandler
+} from "../interfaces/StreamHandler.js"
 import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import {
@@ -81,20 +85,15 @@ export function skip<T = any>(
 }
 
 /**
- * Collects the items of `stream` into `result` (via Symbol.iterator),
- * starting from `stream.curr`, consuming the items added in
- * the process.
+ * Collects the items of `source` into `result`.
  *
  * By default, `result` is an `ArrayCollection<T>`
  */
-export function consume<
-	T = any,
-	Collection extends IPushable<T> = IPushable<T>
->(
-	stream: IIterableStream<T>,
-	result: Collection = new ArrayCollection<T>() as any
+export function consume<T = any, K extends IPushable<T> = IPushable<T>>(
+	source: Iterable<T>,
+	result: K = new ArrayCollection<T>() as any
 ) {
-	for (const curr of stream) result.push(curr)
+	for (const curr of source) result.push(curr)
 	return result
 }
 
@@ -121,10 +120,32 @@ export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
  * In other words, it is a way to reuse the exact same
  * `result` for multiple distinct calls to `consume`.
  */
-export function consumable<T = any>(result: IPushable<T> & IClearable) {
-	return function (stream: IIterableStream<T>) {
+export function consumable<T = any, K extends IRefillable<T> = IRefillable<T>>(
+	result: K
+) {
+	return function (stream: Iterable<T>) {
 		result.clear()
 		return consume(stream, result)
+	}
+}
+
+/**
+ * Returns a function that returns a function that
+ * iterates the `generator(stream, parentMap)`,
+ * filling the `result` with its output, and then
+ * - returning it.
+ */
+export function consumeIterable<T = any, Out = any>(
+	generator: IStreamGenerator<T>
+) {
+	return function <K extends IPushable<Out> = IPushable<Out>>(result: K) {
+		return function (
+			stream: IIterableStream<T>,
+			parentMap?: ITableHandler<IIterableStream<T>>
+		) {
+			for (const x of generator(stream, parentMap)) result.push(x)
+			return result
+		}
 	}
 }
 
@@ -161,9 +182,9 @@ export function count<T = any>(input: IStream<T>) {
  * By default, `result` is an `ArrayCollection<T>`
  */
 export function delimited<T = any>(delimPred: IStreamPosition<T>) {
-	return function (
+	return function <K extends IPushable<T> = IPushable<T>>(
 		input: IPrevableStream<T>,
-		result: IPushable<T> = new ArrayCollection<T>()
+		result: K = new ArrayCollection<T>() as any
 	) {
 		while (!input.isEnd) {
 			skip(input, delimPred)
@@ -184,9 +205,9 @@ export function delimited<T = any>(delimPred: IStreamPosition<T>) {
 export function transform<Under = any, Upper = any>(
 	map: IStreamTransform<Under, Upper>
 ) {
-	return function (
+	return function <K extends IPushable<Upper> = IPushable<Upper>>(
 		input: IStream<Under>,
-		result: IPushable<Upper> = new ArrayCollection()
+		result: K = new ArrayCollection() as any
 	) {
 		let i = 0
 		while (!input.isEnd) result.push(map(input, i++))
