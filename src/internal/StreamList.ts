@@ -1,6 +1,5 @@
 import { type } from "@hgargg-0710/one"
 import { ObjectPool } from "../classes.js"
-import { MissingArgument } from "../constants.js"
 import type {
 	IInitializer,
 	ILinkedStream,
@@ -16,7 +15,8 @@ import {
 	itemsInitializer,
 	PoolableRecursiveList,
 	RecursiveRenewer,
-	renewerInitializer
+	renewerInitializer,
+	wrapTerminal
 } from "./RecursiveList.js"
 
 const { isFunction, isArray } = type
@@ -26,19 +26,26 @@ const { isFunction, isArray } = type
  * implementation. It is the sole definition that makes the `StreamList`
  * operate the way it actually does.
  */
-class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
+class StreamRenewer extends RecursiveRenewer<
+	ILinkedStream,
+	IStreamChooser,
+	IOwnedStream
+> {
 	private topStream: ICompositeStream
-	readonly evaluator = this.evaluate.bind(this)
 
 	private fromStreams(streams: IRawStreamArray) {
-		return streamListPool.create(MissingArgument, streams, this.topStream)
+		return streamListPool.create(
+			new StreamRenewer(),
+			streams,
+			this.topStream
+		)
 	}
 
 	private fromChoice(choice: IStreamChoice) {
-		return isArray(choice) ? this.fromStreams(choice) : choice
+		return isArray(choice) ? this.fromStreams(choice) : wrapTerminal(choice)
 	}
 
-	private evaluate(currRec: IStreamChooser, last: IOwnedStream) {
+	evaluate(currRec: IStreamChooser, last: IOwnedStream) {
 		return this.fromChoice(
 			currRec.call(this.topStream, last) as IStreamChoice
 		)
@@ -50,6 +57,7 @@ class StreamRenewer extends RecursiveRenewer<ILinkedStream, IStreamChooser> {
 
 	init(topStream?: ICompositeStream) {
 		if (topStream) this.topStream = topStream
+		return this
 	}
 
 	isRecursive(x: any): x is IStreamChooser {
@@ -86,8 +94,6 @@ const streamListInitializer: IInitializer<
 	}
 }
 
-const globalStreamRenewer = new StreamRenewer()
-
 /**
  * This is the `PoolableRecursiveList` actually employed
  * by the `CompositeStream` implementation. It uses the
@@ -117,7 +123,7 @@ export class StreamList extends PoolableRecursiveList<
 	}
 
 	constructor(
-		renewer: StreamRenewer = globalStreamRenewer,
+		renewer?: StreamRenewer,
 		origItems?: IRawStreamArray,
 		topStream?: ICompositeStream
 	) {
