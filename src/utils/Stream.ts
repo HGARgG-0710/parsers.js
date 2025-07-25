@@ -135,7 +135,7 @@ export function consumable<T = any, K extends IRefillable<T> = IRefillable<T>>(
  * filling the `result` with its output, and then
  * - returning it.
  */
-export function consumeIterable<T = any, Out = any>(
+export function consumeGenerator<T = any, Out = any>(
 	generator: IStreamGenerator<T>
 ) {
 	return function <K extends IPushable<Out> = IPushable<Out>>(result: K) {
@@ -143,8 +143,7 @@ export function consumeIterable<T = any, Out = any>(
 			stream: IIterableStream<T>,
 			parentMap?: ITableHandler<IIterableStream<T>>
 		) {
-			for (const x of generator(stream, parentMap)) result.push(x)
-			return result
+			return consume(generator(stream, parentMap), result)
 		}
 	}
 }
@@ -324,3 +323,4 @@ export function peek(n: number) {
 }
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"
+
