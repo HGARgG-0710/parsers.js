@@ -11,79 +11,28 @@ import type {
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
 import {
+	DeepList,
+	deepListInitializer,
 	itemsInitializer,
-	PoolableRecursiveList,
-	RecursiveRenewer,
+	RecursiveList,
 	renewerInitializer
 } from "./RecursiveList.js"
 
 const { isFunction } = type
 
-/**
- * This is the `StreamRenewer` employed by the library's `CompositeStream`
- * implementation. It is the sole definition that makes the `StreamList`
- * operate the way it actually does.
- */
-class StreamRenewer extends RecursiveRenewer<
-	ILinkedStream,
-	IStreamChooser,
-	IOwnedStream
-> {
-	private topStream: ICompositeStream
-
-	private fromStreams(streams: IRawStreamArray) {
-		return streamListPool.create(
-			new StreamRenewer(),
-			streams,
-			this.topStream
-		)
-	}
-
-	evaluate(currRec: IStreamChooser, last: IOwnedStream) {
-		return this.fromStreams(
-			currRec.call(this.topStream, last) as IRawStreamArray
-		)
-	}
-
-	isOld(terminal: ILinkedStream): boolean {
-		return terminal.isEnd
-	}
-
-	init(topStream?: ICompositeStream) {
-		if (topStream) this.topStream = topStream
-		return this
-	}
-
-	isRecursive(x: any): x is IStreamChooser {
-		return isFunction(x)
-	}
-
-	nextItem(after: ILinkedStream): ILinkedStream {
-		return after.resource! as ILinkedStream
-	}
-
-	prevItem(to: ILinkedStream): ILinkedStream {
-		return to.owner! as ILinkedStream
-	}
-}
-
-const topStreamInitializer: IInitializer<[ICompositeStream]> = {
-	init(target: StreamList, topStream?: ICompositeStream) {
-		if (topStream) target.setTopStream(topStream)
-	}
-}
+type StreamDeepList = DeepList<ILinkedStream, IStreamChooser>
 
 const streamListInitializer: IInitializer<
-	[RecursiveRenewer, any[], ICompositeStream]
+	[RecursiveList.Renewer, any[], StreamDeepList]
 > = {
 	init(
 		target: StreamList,
-		renewer?: RecursiveRenewer,
+		renewer?: RecursiveList.Renewer,
 		items?: any[],
-		topStream?: ICompositeStream
+		deepList?: StreamDeepList
 	) {
+		deepListInitializer.init(target, deepList)
 		renewerInitializer.init(target, renewer)
-		topStreamInitializer.init(target, topStream)
 		itemsInitializer.init(target, items)
 	}
 }
@@ -94,17 +43,14 @@ const streamListInitializer: IInitializer<
  * `globalStreamRenewer` as the default renewer (which is
  * referenced across all the `StreamList`s)
  */
-export class StreamList extends PoolableRecursiveList<
+export class StreamList extends RecursiveList.Poolable<
 	ILinkedStream,
 	IStreamChooser,
-	IOwnedStream,
-	[ICompositeStream]
+	IOwnedStream
 > {
-	protected renewer: StreamRenewer
+	protected renewer: StreamList.StreamRenewer
 
-	protected get initializer(): IInitializer<
-		[RecursiveRenewer<any, any>, any[]]
-	> {
+	protected get initializer() {
 		return streamListInitializer
 	}
 
@@ -112,17 +58,99 @@ export class StreamList extends PoolableRecursiveList<
 		streamListPool.free(this)
 	}
 
-	setTopStream(topStream: ICompositeStream) {
-		this.renewer.init(topStream)
+	constructor(
+		renewer?: StreamList.StreamRenewer,
+		origItems?: IRawStreamArray,
+		deepList?: StreamDeepList
+	) {
+		super(renewer, origItems, deepList)
+	}
+}
+
+export namespace StreamList {
+	export class StreamRootList extends RecursiveList.RootList<
+		ILinkedStream,
+		IStreamChooser,
+		IOwnedStream,
+		[ICompositeStream]
+	> {
+		protected renewer: StreamRenewer
+
+		createList(streams: IRawStreamArray) {
+			return streamListPool.create(this.renewer, streams, this.asDeep)
+		}
+
+		protected getList(): RecursiveList<
+			ILinkedStream,
+			IStreamChooser,
+			IOwnedStream,
+			[ICompositeStream]
+		> {
+			return streamListPool.create()
+		}
+
+		protected getRenewer(): RecursiveList.Renewer<
+			ILinkedStream,
+			IStreamChooser,
+			IOwnedStream
+		> {
+			return new StreamRenewer(this)
+		}
+
+		constructor(
+			streams: IRawStreamArray,
+			public readonly topStream: ICompositeStream
+		) {
+			super(streams, topStream)
+		}
 	}
 
-	constructor(
-		renewer?: StreamRenewer,
-		origItems?: IRawStreamArray,
-		topStream?: ICompositeStream
-	) {
-		super()
-		this.init(renewer, origItems, topStream)
+	/**
+	 * This is the `Renewer` employed by the library's `CompositeStream`
+	 * implementation. It is the sole definition that makes the `StreamList`
+	 * operate the way it actually does.
+	 */
+	export class StreamRenewer extends RecursiveList.Renewer<
+		ILinkedStream,
+		IStreamChooser,
+		IOwnedStream
+	> {
+		private topStream: ICompositeStream
+
+		private fromStreams(streams: IRawStreamArray) {
+			return this.parent.createList(streams)
+		}
+
+		evaluate(currRec: IStreamChooser, last: IOwnedStream) {
+			return this.fromStreams(
+				currRec.call(this.topStream, last) as IRawStreamArray
+			)
+		}
+
+		isOld(terminal: ILinkedStream): boolean {
+			return terminal.isEnd
+		}
+
+		init(topStream?: ICompositeStream) {
+			if (topStream) this.topStream = topStream
+			return this
+		}
+
+		isRecursive(x: any): x is IStreamChooser {
+			return isFunction(x)
+		}
+
+		nextItem(after: ILinkedStream): ILinkedStream {
+			return after.resource! as ILinkedStream
+		}
+
+		prevItem(to: ILinkedStream): ILinkedStream {
+			return to.owner! as ILinkedStream
+		}
+
+		constructor(private readonly parent: StreamList.StreamRootList) {
+			super()
+		}
 	}
 }
 

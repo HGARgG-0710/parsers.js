@@ -9,12 +9,12 @@ import type {
 	IOwnedStream,
 	IRawStreamArray
 } from "../../../interfaces/Stream.js"
-import { StreamList, streamListPool } from "../../../internal/StreamList.js"
+import { StreamList } from "../../../internal/StreamList.js"
 import { isStateful } from "../../../is/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
-import { StatefulStream } from "./StatefulStream.js"
 import { IdentityStream } from "./IdentityStream.js"
+import { StatefulStream } from "./StatefulStream.js"
 
 const { mutate } = inplace
 
@@ -56,7 +56,7 @@ function BuildBeforeCompositeStream<T = any>() {
 		) => this
 
 		protected rawStreams?: IRawStreamArray
-		private streamList?: StreamList
+		private streamList?: StreamList.StreamRootList
 		private lowStream?: IOwnedStream
 
 		abstract state: IParseState
@@ -93,11 +93,7 @@ function BuildBeforeCompositeStream<T = any>() {
 
 		setRawStreams(rawStreams: IRawStreamArray) {
 			this.rawStreams = rawStreams
-			this.streamList = streamListPool.create(
-				MissingArgument,
-				rawStreams,
-				this
-			)
+			this.streamList = new StreamList.StreamRootList(rawStreams, this)
 			return this
 		}
 
