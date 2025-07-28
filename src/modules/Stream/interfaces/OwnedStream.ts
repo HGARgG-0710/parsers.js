@@ -41,7 +41,7 @@ export type ILinkedStream<T = any> = IOwnedStream<T> & IOwningStream<T>
  * This is an `ILinkedStream<T>`, which is also an `IStatefulStream<T>`.
  * It makes sense for a stream to be a `IControlStream<T>` only if the user
  * has the ability to actually access and manipulate/read the said `.state`
- * inside of it. Which is to say, these are the `IStreamChoice`s, where the
+ * inside of it. Which is to say, these are the `ILinkedStream`s, where the
  * user actually has direct __control__  over the parser's future developments.
  */
 export type IControlStream<T = any> = ILinkedStream<T> & IStatefulStream<T>

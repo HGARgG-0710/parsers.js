@@ -8,18 +8,16 @@ import type {
 import type {
 	ICompositeStream,
 	IRawStreamArray,
-	IStreamChoice,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
 import {
 	itemsInitializer,
 	PoolableRecursiveList,
 	RecursiveRenewer,
-	renewerInitializer,
-	wrapTerminal
+	renewerInitializer
 } from "./RecursiveList.js"
 
-const { isFunction, isArray } = type
+const { isFunction } = type
 
 /**
  * This is the `StreamRenewer` employed by the library's `CompositeStream`
@@ -41,13 +39,9 @@ class StreamRenewer extends RecursiveRenewer<
 		)
 	}
 
-	private fromChoice(choice: IStreamChoice) {
-		return isArray(choice) ? this.fromStreams(choice) : wrapTerminal(choice)
-	}
-
 	evaluate(currRec: IStreamChooser, last: IOwnedStream) {
-		return this.fromChoice(
-			currRec.call(this.topStream, last) as IStreamChoice
+		return this.fromStreams(
+			currRec.call(this.topStream, last) as IRawStreamArray
 		)
 	}
 
