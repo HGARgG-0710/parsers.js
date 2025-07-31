@@ -13,19 +13,47 @@ REMINDER: Final Task Order
 	2. tests [possibly - with finalization, if new redundancies are found]
 		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
 	3. wiki
-	4. FINALE [Regex, TokenizerStream, etc - FINAL NOTES]
+	4. FINALE [Regex, etc - FINAL NOTES]
 
-IMMIDIATE NOTES: 
-	0. reminder: the tables inside the parser [maybe some] DO NOT WORK: 
-		1. need the `HashMap.currMap`, or something like this...
-			The one that takes `input.curr`, anyway...
-		2. refactor: 
-			1. the 'if (input.curr !== X) bail(ErrorCode.MissingCharacter); input.next()': 
-				Turn this into a `consumeExpected` function. 
-				IT IS INTERNAL, and SPECIFIC TO `RegexParser`. 
-				Reason: 
-					1. improves clarity [introduction]
-					2. too specific [isolation]
+IMMIDIATE NOTES:
+	-4. About `DynamicParser`: add a new generic parameter that would generalize 
+		the `string` thing. REASON: 
+			1. Will enable one with NEW EXTENSIBILITY of `DynamicParser` output. 
+
+			SPECIFICALLY: 
+
+				1. add a new `samples.DynamicParser` submodule. 
+					It would contain exports:
+						1. ParseExtension [rough sketch]: 
+							function ParseExtension<A, B>(childStream: IInputStream<A, B>) {
+								return function (workerStream: ICompositeStream) {
+									return function (someSource: B) {	
+										return DynamicParser(
+											workerStream, 
+											new IdentityStream()
+										).init(childStream.init(someSource))
+									}
+								}
+							}
+
+					The idea is: one uses the `IdentityStream` as "inputStream", for it is 
+					(technically) an `IInputStream<A, B>`. However, with the "string" hardcoded, 
+					this becomes limited to chaining of generators (which is still pretty not bad, 
+					but nowhere near as good as what one may have otherwise achieved). 
+
+	-3. Fix the missing `InitType` generics in the `RecursiveList.ts` file. 
+
+	-2. Add missing jsdoc to the `RecursiveList.ts` classes.
+	
+	-1. [Fixing library critical flaw - found whilst working on Regex Parser]: 
+		0. PROVIDE the `.renewItem` for `DynamicParser` and `ICompositeStream`; 
+
+		// * About implementing on `Regex`-parser classes [and - generally, user classes...]; 
+		// 		^ 		5. CONCLUSION:
+		// 					# Usage:
+		// * 					# make the using class 'IStateful'!!!...
+		// !!! REMINDER: usage - this.state.parser.renewItem(this.resource)
+		// !!! 				   - # VIA the `...parser.renewItem = ...parser.streams.renewItem = ...parser.streams.pinpointList.renewItem`
 
 	1. Need a NEW PATTERN [not export/abstraction, etc]: 
 		1. A user-defined `ILinkedStream`-class that is capable of: 
@@ -132,7 +160,7 @@ notes on `RegexParser` development:
 			2. See `RegexParser.ts` file regarding the need for a whole separate
 	1. Based off `IStream`-s
 	2. Input: 'InputStream' (since it's supposed to be used by the user in-program, and the strings are (supposed to be) relatively small)
-	3. To replace the `TokenizerStream` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
+	3. To replace the `TokenChooser` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
 
 	4. Syntax: 			
 		1. Disjunction [a | b]
@@ -222,66 +250,9 @@ notes on `RegexParser` development:
 					4. [Expected] The resulting error (if there is any) gets picked up by a higher-level `ErrorStream`
 		
 
-CURRENTLY BEING DONE [screw the previously chosen order - going after the `TokenizerStream`]: 
-	TO2. [new IStream] `TokenStream` - based off `Regex`: 
-		IMPORTANT NOTE: 
-			must be CAPABLE of allowing the functions in question to OPERATE upon the `.pos`
-				of the stream that is BEING TOKENIZED. 
-			Reason: oftentimes, one will not want the contents of the thing, BUT THE POSITION, instead. 
-				Thus, the functions in question should (additionally, optionally) be given the `.pos` of the match; 
-
-		1. takes in a table of `[Regex, StreamHandler]` 
-		2. iterates the table for each `.curr`
-		3. calls `StreamHandler` on the `.value` [takes in a `.value: IStream`]
-		4. repeat 1.-3. until `.value` is finished [tokens are produced as `this`]
-
-		This is immensely useful for tokenization via regular expressions; 
-
-		More specifically, it takes: 
-			1. an `IndexMap` [or another kind of table... maybe just a `Pairs`] of tokens
-				1. VITAL: as `DefaultType` has an "elseFunc"  handler (useful for providing error-messages, etc)
-					The "elseFunc" is MANDATORY, since it dictates what is to be done if an item cannot 
-					be satisfactorily mapped [clearly, SOMETHING has to be done, `undefined/null` are non-options here]. 
-			2. then - it walks through its items for a given index, trying to `.match` the respective `Regex` object
-			
-		IMPORTANT NOTE: 
-			1. The `TokenStream` must have a candidate-elimination system. 
-				More specifically, consider the following (failing) implementation strategy: 
-					1. one uses `.peek()` [alone] to determine which token to accept next
-					2. due to that, since `peek()` is *limited* by length of the `RotationBuffer`, 
-						one has a limitation on size for tokens-'.value's
-					3. consider good ol' /[a-zA-Z]/; This has arbitrary length. qed
-			2. Thus, one needs a combination of `.peek()` and `.next() + .prev()`. 
-				Thus, we do: 
-					1. peek(n) for MULTIPLE of them
-					2. keep going, until one of: 
-						1. the set of those that can be acceptable is 1
-							1. switch to `.next()/.prev()` [.prev() ONLY if there's an error, and this (ends up) not being a match either]; 
-						2. we run out of `n` for `.peek(n)`
-							1. switch to `.next()/.prev()`
-							2. `.prev()` ONLY when an error is encountered. 
-				
-				Thus, the candidate elimination system: 
-					1. no backtracking
-					2. max-possible-usage of `.peek()`
-						once out-used, `.next(n)` for max `n` for `.peek(n)`, 
-						and then continue with `.next(1)`
-					3. if no matches are found, backtrack to the beginning using `.prev(k)`, with total chars `k`, 
-						and herald error
-					4. else, continue until there's only 1 viable candidate
-					5. IF there are 2+ viable candidates, and one is fully reachable sooner than others, then IT is chosen
-					6. IF no single viable candidate can be produced as per rules 1-5. (id est, there is 2+), 
-						throw an exception [this is a PARSER error, not the input error, end-user shouldn'e need to worry about it, 
-							the parser-maker (direct library user) DOES
-						]
-	
-	TODO [*important*]: About `TokenStream` and `Regex`: 
-		1. need an INTERMEDIATE abstraction - a `MatchList`
-		2. a `MatchList` is a "table" of `handler-Regex` to be walked, and USED by the `TokenStream` to MATCH one of avaiable `Regex`-es
-		3. a `MatchList` is an `IndexMap`; Functions in it have access to `this` - THE CURRENT TokenStream, and `input` - first arg, and 'parser.table' - second arg, LIKE with `TableMap`; 
-		4. a `TokenStream` is just a `(matchList: MatchList) => StreamClass(TableMap(matchList))`
-		5. since `TokenStream` is JUST a `StreamParser`, it ALONE cannot provide one with full `laziness` in all cases (ex: recursion)
-		6. FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
+CURRENTLY BEING DONE: 	
+	NOTE: on `a + (b - ...) ...` demo implementation: 
+		FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
 				b + a + (b - (...)), ... # and so forth - only characters are: a, b, +, -, (, ) and ','
 			can be parsed like: 
 
@@ -289,7 +260,7 @@ CURRENTLY BEING DONE [screw the previously chosen order - going after the `Token
 				1. ReadableSource
 				2. InputStream
 				3. SkipSpaces [in `samples`]
-				3. TokenStream(+, -, a, b, (, ), ,) - provides TokenNode abstractions
+				3. TokenChooser (+, -, a, b, (, ), ,) - provides TokenNode abstractions
 				4. chooser0:	
 					1. TRY FINDING a matching pair for '/(/': 
 						input.next() # skipping '('
@@ -347,19 +318,8 @@ CURRENTLY BEING DONE [screw the previously chosen order - going after the `Token
 					find out what this even is (and what it's used for)
 					seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
 				 
-			IMPORTANT NOTE[1]: 
-				1. `Regex` works with BOTH: 
-					1. string
-					2. IStream<string>: 
-						reason - to allow implementations for faster/lazy algorithms
-
-			IMPORTANT NOTE[2]: 
-				1. .matchAt(x: Indexed<string>, i: number)
-					Checks that AT THE GIVEN `i` IN `x`, 
-						there is AN IMMIDIATE MATCH. 
-					This is important, as it allows the "tabular" work that the TokenStream does
-				
-				2. .toString(): 
+			IMPORTANT NOTE[2] - missing methods: 
+				1. .toString(): 
 					Returns the original 'source' that was given for parsing...
 				
 				ALSO: the `Regex` implements an NFA
@@ -467,7 +427,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 
 		[very hard]
 		6. `DynamicParser`: 
-			0. Do ONLY once `TokenStream` and `Regex` has been finished and tested
+			0. Do ONLY once `TokenChooser` and `Regex` has been finished and tested
 			1. Test ONLY as a part of "demo"-testing: 
 				1. +/-, () and [a-zA-Z]-variables (no self-modification)
 				2. A Self-mofidying parser
@@ -576,7 +536,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 					3. Test NOTHING MORE HERE
 		28. `is.ts` - test everything
 		29. `utils.ts` - test everything
-		30. `samples/` - test everything (except for `samples/regex/refactor.ts`)
+		30. `samples/` - test everything (except for `samples/regex/refactor.ts` - that is just implementation details...)
 
 		[easy]
 		31. `modules/Stream/utils/StreamPosition.ts` - test everything
@@ -659,7 +619,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			0. Generalize the `PeekStream` to a common "abstract" ancestor
 				1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
 			1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]
-			2. Compare the two on a large [and relatively simple] input that utilizes `TokenStream`, with : 
+			2. Compare the two on a large [and relatively simple] input that utilizes `TokenChooser`, with : 
 				0. benchmark 0 - 0-1 lookaheads [not very ambigious at all]
 				1. benchmark 1 - 0-3 lookaheads [somewhat intensive/ambigious - many times - doesn't require any lookaheads]
 				2. benchmark 2 - 3-12 lookaheads [IS intensive/ambigious - many times - DOES reuqire lookaheads]
@@ -764,6 +724,27 @@ CURRENT TODOS [top-down order...]:
 		3. Not used in practice (due to expensiveness of backtracking)
 		4. [Key Reason] All benefits are Replaceable by `.peek(n)`
 
+	TODO: make the `ITerminal` type [from `RecursiveList.ts` file] PUBLIC. 
+		More specifically - let it be possible for the user to *see* what is the 
+		type that is supposed to be implemented. EVEN MORE SPECIFICALLY: 
+
+			1. Let `.isSwitch` be ALWAYS false on `ITerminal` [move out from the `ILinkedStream`]
+			2. Let `.isRecursiveList` be ALWAYS false on `ITerminal` [move out from the `ILinkedStream`]
+			3. Let `ILinkedStream` OPENLY be `... & ITerminal`; 
+
+	TODO: about exceptions: 
+		Some of those thrown by the library are far too generic (id est - need `internal/` special-purposed error-classes)
+		1. Walk through the library
+		2. Find those
+		3. Create specialized classes
+
+		Known cases: 
+			1. `throwSiblingsUnrenewable` method [PinpointRenewableList]
+
+	TODO: about `utils.Stream.consumable`: 
+		1. Add it EVERYWHERE around the `Regex` parser [lots of places... anywhere we use `consume`, for instance...]
+		2. Use it by importing the WHOLE `utils.Stream.consumable`. 
+
 	TODO: Docs [initial, new, final]
 		Documentation order: 
 			2. fix wiki [add new stuff, delete old]
@@ -818,7 +799,7 @@ CURRENT TODOS [top-down order...]:
 				2. the `.annotation`s [leave them undocumented for the moment...]: 
 					1. NO JSDOC [reason: pointless]
 					2. wiki [brief explanation what these things are even]
-				3. Regex, TokenizerStream, ...
+				3. Regex ...
 
 MINOR TODOS: 			
 	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
@@ -920,8 +901,7 @@ LATER TODOS:
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
 		1. Regex
-		2. TokenStream
-		3. finish 'samples'
+		2. finish 'samples' [the `ParseExtension`]
 
 	NOTES:						
 		NOTE [for later]: docs - 'protected abstract' properties...

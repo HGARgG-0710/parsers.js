@@ -556,14 +556,6 @@ class EvaluableList<
 	}
 }
 
-// TODO:
-// ! 1. Add `RecursiveList.Renewer` as `Renewer` to the `RecursiveList` namespace...
-// * 3. Add the `StreamList` and `RecursiveList` namespaces [former is private, latter is exported];
-// *	1. They would (both) include:
-// ! 		1. Renewer (current: `RecursiveList.Renewer` and `StreamRenewer` - NAME BOTH WITH THE SAME WORD...)
-// ! 		2. RootList [the `StreamList` one would: inherit from `RecursiveList.RootList` and provide the implementation for `RecursiveList` (the `StreamList` itself)];
-// ?[maybe not] 3. InitParams (with `StreamList`, they would ALSO contain the `.topStream` property);
-// ! 4. REPLACE the `streamListPool.create` in `CompositeStream` with just a `new StreamList.RootList(items)` - this is THE simplest way to create it, anyhow...
 /**
  * This is a list-like view of the `items: SwitchArray<T, Recursive>`
  * intended to provide one with a way to obtain the current
