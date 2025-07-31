@@ -13,7 +13,7 @@ class RegexCompiler {
 export class Regex {
 	private readonly compiler = new RegexCompiler()
 
-	matchAt(stream: IPeekableStream) {}
+	matchAt(stream: IPeekableStream): boolean {}
 
 	constructor(source: string) {
 		this.compiler.compile(source)
