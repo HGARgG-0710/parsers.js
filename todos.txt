@@ -16,31 +16,6 @@ REMINDER: Final Task Order
 	4. FINALE [Regex, etc - FINAL NOTES]
 
 IMMIDIATE NOTES:
-	-4. About `DynamicParser`: add a new generic parameter that would generalize 
-		the `string` thing. REASON: 
-			1. Will enable one with NEW EXTENSIBILITY of `DynamicParser` output. 
-
-			SPECIFICALLY: 
-
-				1. add a new `samples.DynamicParser` submodule. 
-					It would contain exports:
-						1. ParseExtension [rough sketch]: 
-							function ParseExtension<A, B>(childStream: IInputStream<A, B>) {
-								return function (workerStream: ICompositeStream) {
-									return function (someSource: B) {	
-										return DynamicParser(
-											workerStream, 
-											new IdentityStream()
-										).init(childStream.init(someSource))
-									}
-								}
-							}
-
-					The idea is: one uses the `IdentityStream` as "inputStream", for it is 
-					(technically) an `IInputStream<A, B>`. However, with the "string" hardcoded, 
-					this becomes limited to chaining of generators (which is still pretty not bad, 
-					but nowhere near as good as what one may have otherwise achieved). 
-
 	-3. Fix the missing `InitType` generics in the `RecursiveList.ts` file. 
 
 	-2. Add missing jsdoc to the `RecursiveList.ts` classes.
@@ -901,7 +876,6 @@ LATER TODOS:
 
 	3. FINALE OF THE V0.3 DEVELOPMENT: 
 		1. Regex
-		2. finish 'samples' [the `ParseExtension`]
 
 	NOTES:						
 		NOTE [for later]: docs - 'protected abstract' properties...

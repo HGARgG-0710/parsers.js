@@ -8,19 +8,23 @@ import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
 import { AttachedStream } from "../modules/Stream/classes/AttachedStream.js"
 import { Initializable } from "./Initializer.js"
 
-type IParsedStreamConstructor<FinalType = any, InitType = any> = new (
-	parseInstance: Parse<FinalType, InitType>
+type IParsedStreamConstructor<
+	InType = any,
+	FinalType = any,
+	InitType = any
+> = new (
+	parseInstance: Parse<InType, FinalType, InitType>
 ) => ILinkedStream<FinalType>
 
 let parsedStreamClass: IParsedStreamConstructor | null = null
 
-function BuildParsedStream<FinalType = any, InitType = any>() {
+function BuildParsedStream<InType = any, FinalType = any, InitType = any>() {
 	return class
 		extends AttachedStream.generic!<FinalType, []>()
 		implements ILinkedStream<FinalType>
 	{
 		protected ["constructor"]: new (
-			parseInstance: Parse<FinalType, InitType>
+			parseInstance: Parse<InType, FinalType, InitType>
 		) => this
 
 		next() {
@@ -33,20 +37,21 @@ function BuildParsedStream<FinalType = any, InitType = any>() {
 		}
 
 		constructor(
-			private readonly parseInstance: Parse<FinalType, InitType>
+			private readonly parseInstance: Parse<InType, FinalType, InitType>
 		) {
 			super(parseInstance.workStream)
 		}
-	} as IParsedStreamConstructor<FinalType, InitType>
+	} as IParsedStreamConstructor<InType, FinalType, InitType>
 }
 
 function ParsedStream<
+	InType = any,
 	FinalType = any,
 	InitType = any
->(): IParsedStreamConstructor<FinalType, InitType> {
+>(): IParsedStreamConstructor<InType, FinalType, InitType> {
 	return parsedStreamClass
 		? parsedStreamClass
-		: (parsedStreamClass = BuildParsedStream<FinalType, InitType>())
+		: (parsedStreamClass = BuildParsedStream<InType, FinalType, InitType>())
 }
 
 const parseInitializer = {
@@ -56,13 +61,13 @@ const parseInitializer = {
 	}
 }
 
-class Parse<FinalType = any, InitType = any>
+class Parse<InType = any, FinalType = any, InitType = any>
 	extends Initializable<[InitType, Summat]>
 	implements IParse<FinalType, InitType>
 {
 	private ["constructor"]: new (
 		workStream: ICompositeStream<FinalType>,
-		inputStream: IInputStream<string, InitType>
+		inputStream: IInputStream<InType, InitType>
 	) => this
 
 	private didUpdate = false
@@ -135,59 +140,64 @@ class Parse<FinalType = any, InitType = any>
 
 	constructor(
 		public readonly workStream: ICompositeStream<FinalType>,
-		private readonly inputStream: IInputStream<string, InitType>
+		private readonly inputStream: IInputStream<InType, InitType>
 	) {
 		super()
 	}
 }
 
 /**
- * A function for creation of self-modifying parsers. 
+ * A function for creation of self-modifying parsers.
  * They are based upon the provided `workStream: ICompositeStream<FinalType>`
- * to serve as the "body" of the parser, and the `inputStream`, as its input. 
- * 
+ * to serve as the "body" of the parser, and the `inputStream`, as its input.
+ *
  * The `inputStream` is being "fed" to the `workStream` via the `.init(inputStream)`
  * method call upon call to the inner function. The `state` is optional to the working
  * of the resulting parser, while the `input` is (depending on the implementation for `inputStream`)
- * is essential. The `input` argument represents (typically) some form of resource/string-wrapper, 
- * or another user-provided source of parsing data. 
- * 
- * Note that when a file connection 
- * (such a `ReadingSource`, or, in general, an `IResource`), it is the USER'S responsibility 
- * to conduct the cleanup. 
- * 
- * Note that it is also possible to run the result of `DynamicParser` on multiple different 
+ * is essential.
+ *
+ * The `input` argument typically represents some form of resource/string-wrapper,
+ * or another user-provided source of parsing data (although chaining different
+ * parsers is not at all uncommon, and can, in fact, provide great reusability
+ * benefits, quite unique to the library's modular approach to treating of
+ * parsers and their structure).
+ *
+ * Note that when a file connection
+ * (such a `ReadingSource`, or, in general, an `IResource`), it is the USER'S responsibility
+ * to conduct the cleanup.
+ *
+ * Note that it is also possible to run the result of `DynamicParser` on multiple different
  * `input` objects without requiring to re-create it all anew.
- * 
+ *
  * The resulting self-modifying parser calls the underlying (initialized) `workStream`
- * until finished, while also permitting the user: 
- * 
- * 1. access to the global `.state` from within the `ICompositeStream`'s execution 
+ * until finished, while also permitting the user:
+ *
+ * 1. access to the global `.state` from within the `ICompositeStream`'s execution
  * 		via the `workStream.setState(state)` method call
- * 2. (modifying) internal access to the underlying `.streams: IStreamArray` 
- * 		property of the (global) `ICompositeStream`, containing the 'IRawStream's 
- * 		composing the `ICompositeStream` in question, 
+ * 2. (modifying) internal access to the underlying `.streams: IStreamArray`
+ * 		property of the (global) `ICompositeStream`, containing the 'IRawStream's
+ * 		composing the `ICompositeStream` in question,
  * 		via the `this.state.parser.streams`
- * 3. to register the accumulated changes to the `.streams` via the 
+ * 3. to register the accumulated changes to the `.streams` via the
  * 		internal call to `this.state.parser.update()`
- * 
+ *
  * Thus, these three capabilities permit the user to modify the parser
- * by means of preserving the information received by parsing appropriate 
- * input. 
- * 
+ * by means of preserving the information received by parsing appropriate
+ * input.
+ *
  * The sole rule of the calls to `.update()` is that it can ONLY occurr
- * after the last call to `.next()` HAS been finished. That is to say, 
- * the user must plan their grammar in such a fashion so as to ensure 
- * that the call to `.update()` is ALWAYS harmonious with the remainder 
- * of their last '.next()' call to the `ICompositeStream` as it had been 
+ * after the last call to `.next()` HAS been finished. That is to say,
+ * the user must plan their grammar in such a fashion so as to ensure
+ * that the call to `.update()` is ALWAYS harmonious with the remainder
+ * of their last '.next()' call to the `ICompositeStream` as it had been
  * before the `.update()` call in question.
-*/
-export function DynamicParser<FinalType = any, InitType = any>(
+ */
+export function DynamicParser<InType = any, FinalType = any, InitType = any>(
 	workStream: ICompositeStream<FinalType>,
-	inputStream: IInputStream<string, InitType>
+	inputStream: IInputStream<InType, InitType>
 ) {
 	const parse = new Parse(workStream, inputStream)
-	const parsedStream = ParsedStream<FinalType, InitType>()
+	const parsedStream = ParsedStream<InType, FinalType, InitType>()
 
 	return function (
 		input: InitType,
