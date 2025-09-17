@@ -1,31 +1,39 @@
 import type { IResource } from "../interfaces.js"
 
+type KeyArg<Args extends any[]> = Args[0]
+
+type KeyArgExtractible<Args extends any[]> = [Args[0]] | Args
+
 /**
- * This is a class for managing objects of type `T extends IResource`. 
- * More specifically, it is an object enabling one to: 
- * 
+ * This is a class for managing objects of type `T extends IResource`.
+ * More specifically, it is an object enabling one to:
+ *
  * 1. get/create the needed resource using the "primary key"
  * `Args[0]` (ex: typically, when working with files - a filename)
  * 2. cleanup a resource at a given "primary key"
  * 3. cleanup all the currently used resources
- * 
- * The reason for the object's existence is that it may 
- * (often) in multi-file workflows be desireable to have a 
+ *
+ * The reason for the object's existence is that it may
+ * (often) in multi-file workflows be desireable to have a
  * centralized storage for the various `IResource` objects.
- * Likewise, it may be highly inopportune to store 
- * (and have to keep track of) several global variables 
- * of connections. Instead, one can maintain a single 
- * container that interacts organically with the 
- * `IResource` interface. 
+ * Likewise, it may be highly inopportune to store
+ * (and have to keep track of) several global variables
+ * of connections. Instead, one can maintain a single
+ * container that interacts organically with the
+ * `IResource` interface.
  */
 export class ResourceManager<
 	T extends IResource = any,
 	Args extends any[] = any[]
 > {
-	private readonly resources = new Map<Args[0], T>()
+	private readonly resources = new Map<KeyArg<Args>, T>()
+
+	private keyArg(args: KeyArgExtractible<Args>): KeyArg<Args> {
+		return args[0]
+	}
 
 	get(...args: [Args[0]] | Args) {
-		const key: Args[0] = args[0]
+		const key = this.keyArg(args)
 		if (!this.resources.has(key))
 			this.resources.set(
 				key,
@@ -34,7 +42,7 @@ export class ResourceManager<
 		return this.resources.get(key)!
 	}
 
-	cleanup(key: Args[0]) {
+	cleanup(key: KeyArg<Args>) {
 		const resource = this.resources.get(key)
 		if (resource) {
 			resource.cleanup()
