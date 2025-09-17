@@ -45,11 +45,15 @@ export type IStreamArray = IArray<IRawStream>
  * can be initialized via an `IOwnedStream`,
  * and is also in possession of:
  *
- * 1. `.renewResource(): void` method, which
+ * 1. `.renewResource(): boolean` method, which
  * verifies possibility of restructuring of
  * current recursive-`ILinkedStream` structure,
  * and, if possible, does so. Also used for
- * submitting changes to `.streams`
+ * submitting changes to `.streams`. Returns 
+ * `true` if the renewal was successful (more 
+ * items for the underlying `IStream` structure
+ * to handle), and `false` on failure (no more 
+ * items to handle). 
  *
  * 2. `readonly .streams: IStreamArray` property,
  * which permits the user to modify the internals
@@ -68,6 +72,7 @@ export type IStreamArray = IArray<IRawStream>
  */
 export type ICompositeStream<T = any> = IControlStream<T> &
 	IInitializable<[IOwnedStream?]> & {
-		renewResource: () => void
+		renewResource: () => boolean
+		renewStream: (stream: ILinkedStream) => void
 		readonly streams: IStreamArray
 	}

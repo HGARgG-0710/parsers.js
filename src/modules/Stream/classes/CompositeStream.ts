@@ -6,6 +6,7 @@ import type { IStateSettable } from "../../../interfaces.js"
 import type { IParseState } from "../../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
+	ILinkedStream,
 	IOwnedStream,
 	IRawStreamArray
 } from "../../../interfaces/Stream.js"
@@ -126,6 +127,10 @@ function BuildBeforeCompositeStream<T = any>() {
 				this.resource!.isCurrEnd() ||
 				(this.resource!.isEnd && !this.renewResource())
 			)
+		}
+
+		renewStream(stream: ILinkedStream) {
+			this.streamList!.renewItem(stream)
 		}
 
 		// ! [pre-doc]: WARNING - this thing, unlike other IStream-implementing classes' '.copy()' methods, DOESN'T "copy dynamically" [with preservation of parsing properties]

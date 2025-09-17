@@ -123,6 +123,10 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		this.shareState()
 	}
 
+	renewStream(stream: ILinkedStream): void {
+		this.workStream.renewStream(stream)
+	}
+
 	update() {
 		this.didUpdate = true
 	}

@@ -21,14 +21,11 @@ IMMIDIATE NOTES:
 	-2. Add missing jsdoc to the `RecursiveList.ts` classes.
 	
 	-1. [Fixing library critical flaw - found whilst working on Regex Parser]: 
-		0. PROVIDE the `.renewItem` for `DynamicParser` and `ICompositeStream`; 
-
 		// * About implementing on `Regex`-parser classes [and - generally, user classes...]; 
 		// 		^ 		5. CONCLUSION:
 		// 					# Usage:
-		// * 					# make the using class 'IStateful'!!!...
-		// !!! REMINDER: usage - this.state.parser.renewItem(this.resource)
-		// !!! 				   - # VIA the `...parser.renewItem = ...parser.streams.renewItem = ...parser.streams.pinpointList.renewItem`
+		// * 					# 1. make the using class 'IStateful'!!!...
+		// !!! REMINDER: usage  # 2. this.state.parse.renewStream(this.resource) - AFTER first exhausting `this.resource`; 
 
 	2. [old - solved; to remove...] PROBLEM: the new pattern is impossible [but still needed]. 
 		The library has a CRITICAL design flaw. 
