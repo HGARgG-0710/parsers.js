@@ -121,6 +121,10 @@ function PreSourceStream<
  *
  * It also provides a `protected .updateCurr(): T` method,
  * which calls `this.update(this.currGetter())`.
+ * 
+ * It is intended to be extended when one needs definitions for 
+ * `IInputStream`-classes, representing access to resources, 
+ * such as files, or open network connections.
  */
 export const SourceStream: ReturnType<typeof PreSourceStream> & {
 	generic?: typeof PreSourceStream
