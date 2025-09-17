@@ -1,5 +1,5 @@
 import { type } from "@hgargg-0710/one"
-import type { IPosed, ISource } from "../../../interfaces.js"
+import type { IPosed, ICharacterSource } from "../../../interfaces.js"
 import type {
 	IInputStream,
 	INavigable,
@@ -24,14 +24,14 @@ const { isNumber } = type
  * Immensely useful when needing to process a large amount of data.
  */
 export class LazyStream
-	extends SourceStream.generic!<string, ISource>()
+	extends SourceStream.generic!<string, ICharacterSource>()
 	implements
 		INavigable<string>,
 		IPosed<number>,
-		IInputStream<string, ISource>,
-		ISourcedStream<string, ISource>
+		IInputStream<string, ICharacterSource>,
+		ISourcedStream<string, ICharacterSource>
 {
-	readonly source?: ISource
+	readonly source?: ICharacterSource
 
 	private nextDecoded(n?: number) {
 		this.source!.nextChar(n)
@@ -61,7 +61,7 @@ export class LazyStream
 		return this.curr
 	}
 
-	setResource(source: ISource): void {
+	setResource(source: ICharacterSource): void {
 		source.rewind()
 		super.setResource(source)
 	}

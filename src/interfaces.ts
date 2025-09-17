@@ -262,7 +262,7 @@ export interface IResource {
  * property indicating some kind of openness.
  * Typically applied to resources.
  */
-export interface IIsOpen {
+export interface IVisiblyOpen {
 	readonly isOpen: boolean
 }
 
@@ -295,6 +295,6 @@ export type * from "./interfaces/Initializer.js"
 export type * from "./interfaces/Node.js"
 export type * from "./interfaces/PoolGetter.js"
 export type * from "./interfaces/Position.js"
-export type * from "./interfaces/Source.js"
+export type * from "./interfaces/CharacterSource.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"

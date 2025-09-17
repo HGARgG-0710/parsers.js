@@ -1,4 +1,4 @@
-import type { ICopiable, IIsOpen, IResource } from "../interfaces.js"
+import type { ICopiable, IVisiblyOpen, IResource } from "../interfaces.js"
 
 /**
  * This is an interface intended to represent a
@@ -8,6 +8,6 @@ import type { ICopiable, IIsOpen, IResource } from "../interfaces.js"
  * 
  * The writing is performed to the end of the file. 
  */
-export interface IDestination extends ICopiable, IResource, IIsOpen {
+export interface IDestination extends ICopiable, IResource, IVisiblyOpen {
 	write(input: string): void
 }

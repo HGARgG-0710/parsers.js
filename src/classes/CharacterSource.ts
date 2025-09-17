@@ -1,5 +1,5 @@
 import { closeSync, fstatSync, openSync } from "fs"
-import type { ISource } from "../interfaces.js"
+import type { ICharacterSource } from "../interfaces.js"
 import type { IDecoder } from "../interfaces/Decoder.js"
 import { ResourceManager } from "./ResourceManager.js"
 
@@ -9,7 +9,7 @@ import { ResourceManager } from "./ResourceManager.js"
  * dependency-injection, and provides one with a 
  * read access to a given `filename: string`. 
 */
-export class ReadingSource implements ISource {
+export class ReadingSource implements ICharacterSource {
 	["constructor"]: new (filename: string) => this
 
 	private readonly descriptor: number
