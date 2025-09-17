@@ -53,10 +53,6 @@ function BuildFiniteStream<T = any>() {
 		*[Symbol.iterator]() {
 			yield* this.items
 		}
-
-		constructor(...items: T[]) {
-			super(...items)
-		}
 	} as unknown as typeof FiniteStreamAnnotation<T>
 }
 

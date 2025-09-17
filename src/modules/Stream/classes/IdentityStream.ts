@@ -18,7 +18,7 @@ const IdentityStreamMixin = new mixin<IOwnedStream>(
 	{
 		name: "IdentityStream",
 		properties: {},
-		constructor: function (resource?: IOwnedStream) {
+		constructor(resource?: IOwnedStream) {
 			this.super.AttachedStream.constructor.call(this, resource)
 		}
 	},
@@ -40,12 +40,12 @@ function PreIdentityStream<T = any, Args extends any[] = any[]>() {
  * 2. `AttachedStream`
  *
  * It uses the constructor of `AttachedStream`.
- * 
- * Extremely useful for usage as a default in 
+ *
+ * Extremely useful for usage as a default in
  * `TableHandler`s defining `IStreamChooser`s
- * (since that would just mean to reference the 
- * elements from the underlying `IStream` instead 
- * of transforming them); 
+ * (since that would just mean to reference the
+ * elements from the underlying `IStream` instead
+ * of transforming them);
  */
 export const IdentityStream: ReturnType<typeof PreIdentityStream> & {
 	generic?: typeof PreIdentityStream

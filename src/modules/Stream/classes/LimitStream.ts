@@ -65,11 +65,18 @@ class Lookaround<T = any> {
 
 /**
  * A class encapsulating the process of picking iteration direction for a
- * `LimitStream` based off a given `direction: boolean`. 
+ * `LimitStream` based off a given `direction: boolean`.
  */
 class DirectionPicker {
-	private readonly backwards: IIterationDirectionChoice = ["next", "prev"]
-	private readonly forwards: IIterationDirectionChoice = ["prev", "next"]
+	private static readonly backwards: IIterationDirectionChoice = [
+		"next",
+		"prev"
+	]
+	
+	private static readonly forwards: IIterationDirectionChoice = [
+		"prev",
+		"next"
+	]
 
 	private currentIteration: IIterationDirectionChoice
 
@@ -82,7 +89,9 @@ class DirectionPicker {
 	}
 
 	from(direction: boolean) {
-		this.currentIteration = direction ? this.forwards : this.backwards
+		this.currentIteration = direction
+			? DirectionPicker.forwards
+			: DirectionPicker.backwards
 	}
 }
 
@@ -94,7 +103,6 @@ function BuildLimitStream<T = any>() {
 
 		private from: IStreamPosition<T>
 		private until: IStreamPosition<T>
-
 		private startPos: IStreamPosition<T>
 
 		protected get initializer() {

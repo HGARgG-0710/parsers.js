@@ -34,18 +34,6 @@ type IPreRecursiveItems<
 	Recursive extends ISwitchIdentifiable = any
 > = (IRecursivelySwitchable<T, Recursive> | T | Recursive)[]
 
-interface ITerminal<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
-> extends IInitializable,
-		ISwitchIdentifiable {
-	readonly parentList: SwitchArray<T, Recursive>
-	readonly listIndex: number
-
-	setParentList(parentList: SwitchArray<T, Recursive>): void
-	setListIndex(listIndex: number): void
-}
-
 function isSwitch<
 	T extends IInitializable = any,
 	Recursive extends ISwitchIdentifiable = any,
@@ -139,7 +127,6 @@ class Terminal<
 		Recursive extends ISwitchIdentifiable = any
 	>
 	extends ListIndexHaving
-	implements ITerminal<T, Recursive>
 {
 	private _terminal: T
 	private _parentList: SwitchArray<T, Recursive>
@@ -158,10 +145,6 @@ class Terminal<
 
 	get parentList() {
 		return this._parentList
-	}
-
-	set(terminal: T) {
-		this.terminal = terminal
 	}
 
 	setParentList(parentList: SwitchArray<T, Recursive>): void {
@@ -579,6 +562,9 @@ export class DeepList<
 	 * given `parent`
 	 */
 	private getAt(parent: SwitchArray<T, Recursive>, index: number) {
+		// The reasoning here is - since one follows encapsulation, 
+		// and only ever puts `Terminal<T, Recursive>`, it is obvious 
+		// that this will be the type we'll get, and not a `Switch`
 		return parent.get(index) as Terminal<T, Recursive>
 	}
 
@@ -1008,9 +994,7 @@ export namespace RecursiveList {
 		}
 
 		renewItem(item: T) {
-			this.asPinpointRenewable.renewItem(
-				this.asDeep.getBy(item) as Terminal<T, Recursive>
-			)
+			this.asPinpointRenewable.renewItem(this.asDeep.getBy(item))
 		}
 
 		renewAll(lastItem: InitType) {

@@ -28,7 +28,7 @@ const PosStreamMixin = new mixin<ILinkedStream & IPosed>(
 				this.super.PosHavingStream.prev.call(this)
 			}
 		},
-		constructor: function (resource: IOwnedStream) {
+		constructor(resource: IOwnedStream) {
 			this.super.PosHavingStream.constructor.call(this)
 			this.super.IdentityStream.constructor.call(this, resource)
 		}
@@ -52,7 +52,7 @@ function PrePosStream<T = any>() {
  * correspondently.
  *
  * It calls both the constructors from `PosHavingStream` and `IdentityStream`
- * [in that order]. 
+ * [in that order].
  */
 export const PosStream: ReturnType<typeof PrePosStream> & {
 	generic?: typeof PrePosStream

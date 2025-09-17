@@ -7,7 +7,7 @@ const { isArray } = type
  * Common simple `Array`-wrapper.
  * Does not contain an `init` method [type-level encapsulation is in place].
  */
-export abstract class MixinArray<T = any> {
+export abstract class BasicArray<T = any> {
 	write(i: number, value: T) {
 		this.items[i] = value
 		return this

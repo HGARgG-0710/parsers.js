@@ -34,13 +34,9 @@ export abstract class SourceStreamAnnotation<
 	}
 }
 
-function BuildSourceStream<
-	T = any,
-	SourceType = unknown,
-	MoreArgs extends any[] = []
->() {
+function BuildSourceStream<T = any, SourceType = unknown>() {
 	abstract class _SourceStream
-		extends BasicStream.generic!<T, [SourceType, ...(MoreArgs | [])]>()
+		extends BasicStream.generic!<T, [SourceType]>()
 		implements IResourceSettable
 	{
 		protected ["constructor"]: new (source?: SourceType) => this
@@ -83,7 +79,7 @@ function BuildSourceStream<
 					"abstract method `isCurrEnd` of `SourceStream` not implemented"
 				)
 
-				return false
+				return false // to shut TypeScript up
 			}
 
 			protected baseNextIter(): T {
@@ -105,28 +101,26 @@ let sourceStream: typeof SourceStreamAnnotation | null = null
 
 function PreSourceStream<
 	Type = any,
-	SourceType = unknown,
-	MoreArgs extends any[] = []
+	SourceType = unknown
 >(): typeof SourceStreamAnnotation<Type, SourceType> {
 	return sourceStream
 		? sourceStream
 		: (sourceStream = BuildSourceStream<
 				Type,
-				SourceType,
-				MoreArgs
+				SourceType
 		  >() as typeof SourceStreamAnnotation)
 }
 
 /**
- * This is an abstract class extending `BasicStream<T, [SourceType, ...Args]>`.
+ * This is an abstract class extending `BasicStream<T, [SourceType]>`.
  * It sets the underlying `protected source: SourceType`, as well as `.copy`
  * method that (if possible) calls the `.copy()` method on the `.source`, and
  * then calls the constructor with it. It uses `resourceInitializer` as its
  * initializer, and provides `protected .initGetter`, which calls the
- * `protected abstract .currGetter(): T`. 
- * 
- * It also provides a `protected .updateCurr(): T` method, 
- * which calls `this.update(this.currGetter())`. 
+ * `protected abstract .currGetter(): T`.
+ *
+ * It also provides a `protected .updateCurr(): T` method,
+ * which calls `this.update(this.currGetter())`.
  */
 export const SourceStream: ReturnType<typeof PreSourceStream> & {
 	generic?: typeof PreSourceStream

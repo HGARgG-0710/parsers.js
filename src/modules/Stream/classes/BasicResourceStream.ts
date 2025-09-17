@@ -70,7 +70,7 @@ const BasicResourceStreamMixin = new mixin<ILinkedStream>(
 	{
 		name: "BasicResourceStream",
 		properties: {},
-		constructor: function (...items: any[]) {
+		constructor(...items: any[]) {
 			this.super.BasicStream.constructor.call(this, ...items)
 		}
 	},
@@ -78,7 +78,7 @@ const BasicResourceStreamMixin = new mixin<ILinkedStream>(
 	[BasicStream, OwningStream]
 )
 
-function PreBasicResourceStream<T = any, Args extends any[] = any[]>() {
+function PreBasicResourceStream<T = any, Args extends any[] = []>() {
 	return BasicResourceStreamMixin.toClass() as typeof BasicResourceStreamAnnotation<
 		T,
 		Args

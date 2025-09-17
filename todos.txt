@@ -30,11 +30,7 @@ IMMIDIATE NOTES:
 		// !!! REMINDER: usage - this.state.parser.renewItem(this.resource)
 		// !!! 				   - # VIA the `...parser.renewItem = ...parser.streams.renewItem = ...parser.streams.pinpointList.renewItem`
 
-	1. Need a NEW PATTERN [not export/abstraction, etc]: 
-		1. A user-defined `ILinkedStream`-class that is capable of: 
-			1. outliving its under-source *MULITIPLE TIMES* [i.e. - a class of MULTIPLE different inputs]
-
-	2. PROBLEM: the new pattern is impossible [but still needed]. 
+	2. [old - solved; to remove...] PROBLEM: the new pattern is impossible [but still needed]. 
 		The library has a CRITICAL design flaw. 
 		It is as such: 
 
@@ -655,22 +651,16 @@ NEXT UP:
 			Reminder: for `CompositeStream` - DO NOT IMPLEMENT!!!
 				Reason: *unbelievably* complex...
 				
-	TODO: [IStream 'mixin's] FIX the `mixin`s that INHERIT other mixins/classes, to USE 'this.super.constructor' MANUALLY!!!
-		One cannot stress this enough. 
-		Some don't need it. 
-		Some do. 
-		Either way, WHENEVER this is necessary - one MUST make this explicit...
-
-	TODO: in alll the `mixin`s - FIX THE (old) `super` calls!!! 
-		They MUST become 'this.super[ParentName][propName][?...].call(this, ...args)'; 
-
 	TODO: about `annotation`s. 
 		CHANGE them so that boilerplate due to mixins is MINIMIZED. 
 		Let *most* influential ones be inherited INSTEAD, and others be copied. 
 		[Walk through all of them - fix this...]; 
 
-	TODO: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
-		and NOT `function () {}`
+		Let they get their own directory, from which they'd be imported to be re-exported via the '.annotation' properties [use namespaces?]: 
+			'src/annotations/Stream/', etc
+
+	TODO [old - just do the test case...]: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
+		and NOT `constructor () {}`
 
 		OR [yes - do that instead...]: 
 			TODO: 'mixin' module (`sealed` class): 
@@ -678,19 +668,20 @@ NEXT UP:
 					In such cases, CREATE a prototype, via the `constructor = {}` INSIDE the `sealed_mixin`
 						class...
 
-				AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
+				2. Explanation: the difference between `constructor() {}` and `constructor: function () {}` is: 
+					> const a = { constructor () {} }
+					> const b = { constructor: function () {} }
+					> a.constructor.prototype
+					undefined
+					> b.constructor.prototype
+					{}
 
-	TODO: REMOVE unnecessary 'Args' generic type parameters [sometimes they are just better replaced with '[]']; 
+					This is why it's possible to do `new b.constructor(...)`, but not `new a.constructor(...)`
 
-	TODO: on `let smallCaseStream: ... = PreStreamName(...); .generic = ...`; 
-		REPLACE THESE in places where you use the FACTORIES instead with `const localSmallCaseName = BuildSomeStreamName<T>(...)`
-		Reasons:
-			1. less boilerplate [ergo - simpler code]
-			2. same typing
+				3. AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
 
-		THIS GOES FOR '_SomeName' AS WELL: 
-			1. HandlerStream
-			... OTHERS [walk through the project - FIND ITHEM...]
+				4. ADD A RESPECTIVE TEST CASE
+					This is how oen will know that the bug is fixed. 
 
 CURRENT TODOS [top-down order...]:		
 	TODO: *remove* the `prev()` as method! [on IStream *and* implementations, *and* annotations!]
@@ -698,14 +689,6 @@ CURRENT TODOS [top-down order...]:
 		2. Adds more things to test 
 		3. Not used in practice (due to expensiveness of backtracking)
 		4. [Key Reason] All benefits are Replaceable by `.peek(n)`
-
-	TODO: make the `ITerminal` type [from `RecursiveList.ts` file] PUBLIC. 
-		More specifically - let it be possible for the user to *see* what is the 
-		type that is supposed to be implemented. EVEN MORE SPECIFICALLY: 
-
-			1. Let `.isSwitch` be ALWAYS false on `ITerminal` [move out from the `ILinkedStream`]
-			2. Let `.isRecursiveList` be ALWAYS false on `ITerminal` [move out from the `ILinkedStream`]
-			3. Let `ILinkedStream` OPENLY be `... & ITerminal`; 
 
 	TODO: about exceptions: 
 		Some of those thrown by the library are far too generic (id est - need `internal/` special-purposed error-classes)

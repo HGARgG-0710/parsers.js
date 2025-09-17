@@ -42,7 +42,7 @@ const TrivialStreamMixin = new mixin<IOwnedStream>(
 				this.endStream()
 			}
 		},
-		constructor: function () {
+		constructor() {
 			this.super.DyssyncStream.constructor.call(this)
 		}
 	},

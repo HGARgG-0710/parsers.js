@@ -97,7 +97,7 @@ function BuildHandlerStream<In = any, Out = any>() {
 	).toClass() as unknown as typeof HandlerStreamAnnotation<In, Out>
 }
 
-const _HandlerStream = BuildHandlerStream()
+const handlerStream = BuildHandlerStream()
 
 /**
  * This is a function for creation of factories of objects implementing `IControlStream<Out>`.
@@ -115,7 +115,7 @@ export function HandlerStream<In = any, Out = any>(
 	return function (
 		resource?: IOwnedStream<In>
 	): IControlStream<Out> & Iterable<Out> {
-		return new _HandlerStream().setHandler(handler).init(resource)
+		return new handlerStream().setHandler(handler).init(resource)
 	}
 }
 

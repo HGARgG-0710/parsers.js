@@ -156,7 +156,7 @@ const FreezableStreamMixin = new mixin<
 				return this.curr
 			}
 		},
-		constructor: function (resource?: IOwnedStream) {
+		constructor(resource?: IOwnedStream) {
 			this.buffer = new OutputBuffer()
 			this.super.PipeStream.constructor.call(this, resource)
 		}
@@ -172,9 +172,9 @@ function PreFreezableStream<T = any>() {
 /**
  * This is a class implementing the `ILinkedStream<T>`, `IBufferized<T>`,
  * `IPrevable`, `IRewindable<T>`, `IFinishable<T>` and `INavigable<T>`.
- * 
- * It is a mixin of: 
- * 
+ *
+ * It is a mixin of:
+ *
  * 1. DyssyncStream
  * 2. PosHavingStream
  * 3. PipeStream

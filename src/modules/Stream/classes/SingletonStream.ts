@@ -49,7 +49,7 @@ const SingletonStreamMixin = new mixin<ILinkedStream>(
 			handler: null,
 
 			setResource(resource: IOwnedStream) {
-				!this.super.OwningStream.setResource.call(this, resource)
+				this.super.OwningStream.setResource.call(this, resource)
 				this.curr = this.handler(resource)
 			},
 
@@ -62,7 +62,7 @@ const SingletonStreamMixin = new mixin<ILinkedStream>(
 				return this
 			}
 		},
-		constructor: function (resource?: IOwnedStream) {
+		constructor(resource?: IOwnedStream) {
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
@@ -79,10 +79,10 @@ const _SingletonStream = PreSingletonStream()
 /**
  * This is a function for creating factories for instances
  * of `ILinkedStream<Out>` interface. They represent streams
- * that have a single element, provided by their underlying 
- * `.resource: IOwnedStream<In>`, upon which the given `handler` 
- * is applied, and from which the sole element of type `Out` 
- * is returned. 
+ * that have a single element, provided by their underlying
+ * `.resource: IOwnedStream<In>`, upon which the given `handler`
+ * is applied, and from which the sole element of type `Out`
+ * is returned.
  */
 export function SingletonStream<In = any, Out = any>(
 	handler: ISingletonHandler<In, Out>

@@ -29,7 +29,10 @@ export abstract class AttachedStreamAnnotation<T = any, Args extends any[] = []>
 const AttachedStreamMixin = new mixin<IResourcefulStream>(
 	{
 		name: "AttachedStream",
-		properties: {}
+		properties: {},
+		constructor(resource?: IOwnedStream) {
+			this.super.PipeStream.constructor.call(this, resource)
+		}
 	},
 	[PipeStream, SyncStream]
 )
@@ -50,12 +53,12 @@ function PreAttachedStream<T = any, Args extends any[] = any[]>() {
  * very little unique functionality of their own, and which are
  * (however) independent enough to need their own constructor
  * (and, therefore, the copying method).
- * 
- * It shares the constructor of `PipeStream`. 
  *
- * For an example of an even less autonomous derivative of 
- * `DelegateStream`, see `IdentityStream` [with a `.copy` 
- * method implemented]. 
+ * It shares the constructor of `PipeStream`.
+ *
+ * For an example of an even less autonomous derivative of
+ * `DelegateStream`, see `IdentityStream` [with a `.copy`
+ * method implemented].
  */
 export const AttachedStream: ReturnType<typeof PreAttachedStream> & {
 	generic?: typeof PreAttachedStream

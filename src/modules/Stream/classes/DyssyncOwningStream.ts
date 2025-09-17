@@ -52,7 +52,7 @@ const DyssyncOwningStreamMixin = new mixin<ILinkedStream>(
 	{
 		name: "DyssyncOwningMixin",
 		properties: {},
-		constructor: function (resource?: IOwnedStream) {
+		constructor(resource?: IOwnedStream) {
 			this.super.PipeStream.call(this, resource)
 		}
 	},
@@ -75,7 +75,7 @@ function PreDyssyncOwningStream<T = any, Args extends any[] = []>() {
  * 2. PipeStream
  * 3. ResourceCopyingStream
  * 4. SyncCurrStream
- * 
+ *
  * It has the constructor of `PipeStream`
  */
 export const DyssyncOwningStream: ReturnType<typeof PreDyssyncOwningStream> & {

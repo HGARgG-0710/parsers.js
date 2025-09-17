@@ -13,7 +13,7 @@ export const PipeStream = new mixin.sealed(
 	{
 		name: "PipeStream",
 		properties: {},
-		constructor: function (resource?: IOwnedStream) {
+		constructor(resource?: IOwnedStream) {
 			this.super.DelegateStream.constructor.call(this, resource)
 		}
 	},

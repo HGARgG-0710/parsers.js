@@ -251,7 +251,7 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 })
 
 abstract class PreRecursiveNode<T = any>
-	extends BaseNode<T>
+	extends BaseNode<T, [INode<T>[]]>
 	implements ICollectionNode<T>
 {
 	protected ["constructor"]: new (children?: INode<T>[]) => this

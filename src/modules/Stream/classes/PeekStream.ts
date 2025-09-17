@@ -56,7 +56,7 @@ class PeekProvider<T = any> {
 		return this.peekBuffer.read(n - 1)
 	}
 
-	isNone() {
+	hasNone() {
 		return this.peekCount === 0
 	}
 
@@ -181,7 +181,7 @@ function BuildPeekStream<T = any>() {
 		}
 
 		isCurrEnd(): boolean {
-			return super.isCurrEnd() && this.peekProvider.isNone()
+			return super.isCurrEnd() && this.peekProvider.hasNone()
 		}
 
 		next() {

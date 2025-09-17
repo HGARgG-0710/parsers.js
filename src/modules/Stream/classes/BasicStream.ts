@@ -88,7 +88,7 @@ const BasicStreamMixin = new mixin<IOwnedStream>(
 				return this
 			}
 		},
-		constructor: function (...args: any[]) {
+		constructor(...args: any[]) {
 			this.super.Initializable.constructor.call(this, ...args)
 		}
 	},

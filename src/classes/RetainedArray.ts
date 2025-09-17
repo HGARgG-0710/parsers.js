@@ -1,6 +1,6 @@
 import { number } from "@hgargg-0710/one"
 import type { IClearable, ICollection } from "../interfaces.js"
-import { MixinArray } from "../internal/MixinArray.js"
+import { BasicArray } from "../internal/BasicArray.js"
 
 const { min } = number
 
@@ -21,7 +21,7 @@ const { min } = number
  * 2. `IClearable`
  */
 export class RetainedArray<T = any>
-	extends MixinArray<T>
+	extends BasicArray<T>
 	implements ICollection<T, readonly T[]>, IClearable
 {
 	private ["constructor"]: new (n?: number) => this
@@ -36,7 +36,7 @@ export class RetainedArray<T = any>
 		return this.allocSize - this.realSize
 	}
 
-	private pushFree(...x: T[]) {
+	private pushFree(...x: T[]): [number, number] {
 		const totalIncrease = x.length
 		const fastIncrease = min(this.freeSpace(), totalIncrease)
 		for (let i = 0; i < fastIncrease; ++i) this.write(i, x[i])

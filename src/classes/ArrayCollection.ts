@@ -1,12 +1,12 @@
 import { array } from "@hgargg-0710/one"
 import type { ICollection } from "../interfaces.js"
-import { MixinArray } from "../internal/MixinArray.js"
+import { BasicArray } from "../internal/BasicArray.js"
 
 /**
  * A thin wrapper around `T[]`, satisfying the `ICollection<T, readonly T[]\>` interface.
  */
 export class ArrayCollection<T = any>
-	extends MixinArray<T>
+	extends BasicArray<T>
 	implements ICollection<T, readonly T[]>
 {
 	private ["constructor"]: new (items?: T[]) => this
