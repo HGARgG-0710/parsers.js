@@ -16,10 +16,10 @@ REMINDER: Final Task Order
 	4. FINALE [Regex, etc - FINAL NOTES]
 
 IMMIDIATE NOTES:
-	-3. Fix the missing `InitType` generics in the `RecursiveList.ts` file. 
+	-3 [chore - later]. Fix the missing `InitType` generics in the `RecursiveList.ts` file. 
 
-	-2. Add missing jsdoc to the `RecursiveList.ts` classes.
-	
+	-2 [chore - later]. Add missing jsdoc to the `RecursiveList.ts` classes.
+
 	-1. [Fixing library critical flaw - found whilst working on Regex Parser]: 
 		// * About implementing on `Regex`-parser classes [and - generally, user classes...]; 
 		// 		^ 		5. CONCLUSION:
@@ -367,6 +367,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. USE A MOCK HERE (`TreeLike`)
 
 	TODO: public classes/functions/utils/etc to be tested: 
+		-3. FileDescriptor
+		-2. InvalidFileReadPositionError
 		-1. ParseError [abstract]: 
 			Test will use a descendant to check that: 
 				1. '.name' is correct
@@ -582,6 +584,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. with bare ErrorStream
 			2. with `BasicErrorStream`
 		60. AccumulatorStream
+		61. ByteStream
 
 	TODO: BENCHMARK: 
 		1. RotationBuffer vs 'shift/unshift'-based solution: 

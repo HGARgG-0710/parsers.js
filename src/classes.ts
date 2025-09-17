@@ -1,5 +1,6 @@
 export * from "./classes/ArrayCollection.js"
 export * from "./classes/Autocache.js"
+export * as ByteSource from "./classes/ByteSource.js"
 export * from "./classes/CharacterSource.js"
 export * as Decoder from "./classes/Decoder.js"
 export * from "./classes/Destination.js"

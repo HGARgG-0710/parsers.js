@@ -39,3 +39,17 @@ export abstract class ParseError extends ConstructorError {
 		this.message = this.makeMessage(at, source, options)
 	}
 }
+
+/**
+ * This is an error thrown in the case of an invalid 
+ * read potision inside a given file. Expects a position
+ * `pos` (in bytes), `size` of a file (in bytes), and its 
+ * name. 
+ */
+export class InvalidFileReadPositionError extends ConstructorError {
+	constructor(fileName: string, pos: number, size: number) {
+		super(
+			`Error reading a file ${fileName} at pos ${pos}, with size in bytes - ${size}`
+		)
+	}
+}

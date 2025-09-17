@@ -16,7 +16,7 @@ const { T } = boolean
 const { isUndefined } = type
 
 function readBytes(
-	source: number,
+	source: ISourceDescriptor,
 	target: Buffer,
 	pos: number,
 	length: number = 1,
