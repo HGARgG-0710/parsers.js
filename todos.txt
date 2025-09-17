@@ -568,7 +568,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		50. LazyStream
 		51. LimitStream
 		52. LoopStream
-		53. MarkserStream
+		53. StorageStream
 		54. PeekStream
 		55. PosStream
 		56. SingletonStream
@@ -581,6 +581,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		59. DefaultErrorStream: 
 			1. with bare ErrorStream
 			2. with `BasicErrorStream`
+		60. AccumulatorStream
 
 	TODO: BENCHMARK: 
 		1. RotationBuffer vs 'shift/unshift'-based solution: 
