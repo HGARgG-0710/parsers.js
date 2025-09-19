@@ -52,7 +52,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.getCurrChild()
 	}
 
-	private currentLastIndex() {
+	private currLastIndex() {
 		return treeEndPath(this.curr)
 	}
 
@@ -105,8 +105,9 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	goLastPrev() {
 		this.goSiblingBefore()
 		const initLength = this.pos.levels
-		this.pos.extend(this.currentLastIndex())
+		this.pos.extend(this.currLastIndex())
 		this.renewLevel(this.curr, initLength)
+		this.getCurrChild()
 	}
 
 	restart() {
