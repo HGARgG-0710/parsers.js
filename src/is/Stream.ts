@@ -4,8 +4,6 @@ import type {
 	IIndexCarrying,
 	ILineIndex,
 	INavigable,
-	IPrevable,
-	IRewindable,
 	IStateHaving,
 	IStateSettable
 } from "../interfaces.js"
@@ -29,22 +27,6 @@ export const isFinishable = structCheck<IFinishable>({
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
 }) as <T = any>(x: any) => x is INavigable<T>
-
-/**
- * Returns whether the given `x` is a non-`null` object that has a `.rewind` property,
- * which is a function.
- */
-export const isRewindable = structCheck<IRewindable>({
-	rewind: isFunction
-}) as <T = any>(x: any) => x is IRewindable<T>
-
-/**
- * Returns whether the given input has a `.prev` property,
- * which is a function
- */
-export const isPrevable = structCheck<IPrevable>({
-	prev: isFunction
-})
 
 /**
  * Returns whether the given input has `.state` and `.setState`

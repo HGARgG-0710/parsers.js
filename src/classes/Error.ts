@@ -1,4 +1,4 @@
-import type { BackupIndex } from "./Position.js"
+import type { StringLineIndex } from "./Position.js"
 
 /**
  * This is an abstract class for representing
@@ -16,11 +16,11 @@ export abstract class ConstructorError extends Error {
  * This is an abstract class for representing a generic parsing error,
  * which takes in the `source: string` [intended as a string
  * indicative of the filepath or other parsing source, where
- * error took place] and `at: BackupIndex` [index at which
+ * error took place] and `at: StringLineIndex` [index at which
  * error took place inside of the specified source].
  *
  * Expects a `makeMessage` method, which creates a message
- * based off `atIndex: BackupIndex` and `.atPath: string`,
+ * based off `atIndex: StringLineIndex` and `.atPath: string`,
  * and returns a `string`. The `makeMessage` method is
  * used inside the constructor to produce the `.message: string`
  * property of the error object in question.
@@ -29,22 +29,26 @@ export abstract class ConstructorError extends Error {
  */
 export abstract class ParseError extends ConstructorError {
 	protected abstract makeMessage(
-		atIndex: BackupIndex,
+		atIndex: StringLineIndex,
 		atPath: string,
 		options?: ErrorOptions
 	): string
 
-	constructor(at: BackupIndex, source: string = "", options?: ErrorOptions) {
+	constructor(
+		at: StringLineIndex,
+		source: string = "",
+		options?: ErrorOptions
+	) {
 		super()
 		this.message = this.makeMessage(at, source, options)
 	}
 }
 
 /**
- * This is an error thrown in the case of an invalid 
+ * This is an error thrown in the case of an invalid
  * read potision inside a given file. Expects a position
- * `pos` (in bytes), `size` of a file (in bytes), and its 
- * name. 
+ * `pos` (in bytes), `size` of a file (in bytes), and its
+ * name.
  */
 export class InvalidFileReadPositionError extends ConstructorError {
 	constructor(fileName: string, pos: number, size: number) {

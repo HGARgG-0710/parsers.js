@@ -23,8 +23,8 @@ function BuildStorageStream<T = any, Stored = any>() {
 		private handler: IHandler<T, Stored>
 		private _currStored: Stored
 
-		private set currStored(newCurrMarked: Stored) {
-			this._currStored = newCurrMarked
+		private set currStored(newCurrStored: Stored) {
+			this._currStored = newCurrStored
 		}
 
 		get currStored() {
@@ -45,11 +45,6 @@ function BuildStorageStream<T = any, Stored = any>() {
 			this.updateStored()
 		}
 
-		prev() {
-			super.prev()
-			this.updateStored()
-		}
-
 		setHandler(handler: (stream?: IOwnedStream) => Stored) {
 			this.handler = handler
 			return this
@@ -63,32 +58,32 @@ function BuildStorageStream<T = any, Stored = any>() {
 	} as unknown as typeof StorageStreamAnnotation<T, Stored>
 }
 
-let markerStream: typeof StorageStreamAnnotation | null = null
+let storageStream: typeof StorageStreamAnnotation | null = null
 
-function PreMarkerStream<
+function PreStorageStream<
 	T = any,
-	Marker = any
->(): typeof StorageStreamAnnotation<T, Marker> {
-	return markerStream
-		? markerStream
-		: (markerStream = BuildStorageStream<
+	Stored = any
+>(): typeof StorageStreamAnnotation<T, Stored> {
+	return storageStream
+		? storageStream
+		: (storageStream = BuildStorageStream<
 				T,
-				Marker
+				Stored
 		  >() as typeof StorageStreamAnnotation)
 }
 
 /**
- * This is a function for creation of factories for `IMarkerStream<T, Marker>`
- * interface. The instances will call `marker`, with `this` being the instance
+ * This is a function for creation of factories for `IStorageStream<T, Storage>`
+ * interface. The instances will call `handler`, with `this` being the instance
  * itself, and accept a `.resource: IOwnedStream<T>`. Based on the `.resource`,
- * it is intended that the `marker` shall return the new value for the
- * `readonly currMarker: Marker` property of the  `IMarkerStream<T, Marker>`
+ * it is intended that the `handler` shall return the new value for the
+ * `readonly currStored: Stored` property of the  `IStorageStream<T, Stored>`
  * instance, upon each call to the `.next()` method.
  */
 export function StorageStream<T = any, Stored = any>(
-	handler: (stream?: IOwnedStream) => Stored
+	handler: IHandler<T, Stored>
 ) {
-	const storageStream = PreMarkerStream<T, Stored>()
+	const storageStream = PreStorageStream<T, Stored>()
 	return function (resource?: IOwnedStream<T>): IStorageStream<T, Stored> {
 		return new storageStream().setHandler(handler).init(resource)
 	}

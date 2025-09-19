@@ -1,21 +1,21 @@
 import assert from "assert"
 import {
-	BackupIndex,
 	LineIndex,
-	LineLengths
+	LineLengths,
+	StringLineIndex
 } from "../../../dist/src/classes/Position.js"
 import { TestCounter } from "../lib.js"
-import { backupIndexTest } from "./lib.js"
+import { stringLineIndexTest } from "./lib.js"
 
-const backupIndexTestCounter = new TestCounter(
+const stringLineIndexTestCounter = new TestCounter(
 	([categoryCount]: number[]) => `BackupIndex(#${categoryCount})`
 )
 
-backupIndexTestCounter.test(
+stringLineIndexTestCounter.test(
 	[],
 	() =>
-		backupIndexTest.withInstance(
-			new BackupIndex().init(new LineLengths([1, 2, 3])),
+		stringLineIndexTest.withInstance(
+			new StringLineIndex().init(new LineLengths([1, 2, 3])),
 			function (test) {
 				test.copy(new LineIndex(4, 0))
 				test.toNumber(1)
@@ -34,13 +34,13 @@ backupIndexTestCounter.test(
 	true
 )
 
-backupIndexTestCounter.test(
+stringLineIndexTestCounter.test(
 	[],
 	() => {
 		const lengths = new LineLengths([0, 2, 4, 8])
-		const impureBackupIndex = new BackupIndex(2, 2).init(lengths)
-		backupIndexTest.withInstance(
-			new BackupIndex(4, 9).init(lengths),
+		const impureBackupIndex = new StringLineIndex(2, 2).init(lengths)
+		stringLineIndexTest.withInstance(
+			new StringLineIndex(4, 9).init(lengths),
 			function (test) {
 				impureBackupIndex.from(new LineIndex(4, 11))
 				test.nextLine()
@@ -58,12 +58,12 @@ backupIndexTestCounter.test(
 	true
 )
 
-backupIndexTestCounter.test(
+stringLineIndexTestCounter.test(
 	[],
 	() => {
 		const lengths = new LineLengths([0, 1, 3, 4])
-		backupIndexTest.withInstance(
-			new BackupIndex(4, 0).init(lengths),
+		stringLineIndexTest.withInstance(
+			new StringLineIndex(4, 0).init(lengths),
 			function (test) {
 				test.copy(new LineIndex(5, 1))
 				test.nextLineTip(new LineIndex(5, 5))
@@ -77,12 +77,12 @@ backupIndexTestCounter.test(
 	true
 )
 
-backupIndexTestCounter.test(
+stringLineIndexTestCounter.test(
 	[],
 	() => {
 		const lengths = new LineLengths([0, 8, 3, 4])
-		backupIndexTest.withInstance(
-			new BackupIndex(2, 3).init(lengths),
+		stringLineIndexTest.withInstance(
+			new StringLineIndex(2, 3).init(lengths),
 			function (test) {
 				test.from(new LineIndex(3, 3))
 				test.nextCharEdge(lengths)

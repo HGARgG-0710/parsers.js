@@ -277,10 +277,13 @@ function PreDepthStream<
  * utilize the `DepthStream` correctly - processing just the right
  * number of items before "falling outside" of a given parent node.
  *
- * It also supports backing up (via `.prev()`), and gettin the
+ * It also supports backing up one element (via `.prev()`), and getting the
  * multi-index of the current node in the tree via `.treeIndex: MultiIndex`,
  * as well as navigating to it directly via `.goTo(ind: MultiIndex)`.
- * Similarly, there are `.rewind()` and `.finish()` methods present.
+ * 
+ * Similarly, there is a `.finish()` method present, as well as a `.rewind()`
+ * method for returning back to the first element in the traversal sequence 
+ * from the current one. 
  */
 export const DepthStream: ReturnType<typeof PreDepthStream> & {
 	generic?: typeof PreDepthStream

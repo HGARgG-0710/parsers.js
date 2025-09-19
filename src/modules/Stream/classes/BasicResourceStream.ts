@@ -46,7 +46,6 @@ export abstract class BasicResourceStreamAnnotation<
 	}
 
 	protected postEnd?(): void
-	protected basePrevIter?(curr?: T): T
 	protected postStart?(): void
 	protected initGetter?(...args: Partial<Args>): T
 
@@ -61,7 +60,6 @@ export abstract class BasicResourceStreamAnnotation<
 	protected syncCurr(): void {}
 
 	next(): void {}
-	prev(): void {}
 
 	*[Symbol.iterator]() {}
 }

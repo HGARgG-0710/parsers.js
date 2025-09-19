@@ -107,10 +107,6 @@ class LastIndex<T = any> {
 		this.lastIndex = this.sizeObj.lastPos()
 	}
 
-	unset() {
-		this.lastIndex = -1
-	}
-
 	get() {
 		return this.lastIndex
 	}
@@ -165,10 +161,6 @@ class IndexRotation<T = any> {
 
 	forward(n: number) {
 		this.rotation = this.shifted(n)
-	}
-
-	backward() {
-		this.forward(this.sizeObj.lastPos())
 	}
 
 	get() {
@@ -340,18 +332,6 @@ class SpaceAllocator<T = any> {
  * of `RotationBuffer`.
  */
 class Space<T = any> {
-	private get rotation() {
-		return this.rawItems.rotation
-	}
-
-	private get empty() {
-		return this.space.empty
-	}
-
-	private get rawItems() {
-		return this.allocator.rawItems
-	}
-
 	private get space() {
 		return this.allocator.space
 	}
@@ -386,12 +366,6 @@ class Space<T = any> {
 
 	reset() {
 		this.allocator.reset()
-	}
-
-	renew() {
-		this.rotation.reset()
-		this.lastIndex.unset()
-		this.empty.markIs()
 	}
 
 	/**
@@ -501,12 +475,6 @@ export class RotationBuffer<T = any> {
 
 	forward(n: number = 1) {
 		this.rotation.forward(n)
-	}
-
-	backward() {
-		if (this.spaceData.isFull()) this.space.renew()
-		else this.rotation.backward()
-		return this.empty.is()
 	}
 
 	read(i: number) {

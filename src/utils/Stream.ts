@@ -6,7 +6,6 @@ import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,
 	IPeekableStream,
-	IPrevableStream,
 	IRawStream,
 	IStream,
 	IStreamGenerator
@@ -15,13 +14,9 @@ import type {
 	IStreamTransform,
 	ITableHandler
 } from "../interfaces/StreamHandler.js"
-import { isFinishable, isNavigable, isRewindable } from "../is/Stream.js"
+import { isFinishable, isNavigable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
-import {
-	direction,
-	negate,
-	pick
-} from "../modules/Stream/utils/StreamPosition.js"
+import { negate } from "../modules/Stream/utils/StreamPosition.js"
 
 const { isFunction, isNumber } = type
 
@@ -31,15 +26,6 @@ const { isFunction, isNumber } = type
 export function next<T = any>(input: IStream<T>) {
 	const curr = input.curr
 	input.next()
-	return curr
-}
-
-/**
- * Given an `IPrevableStream<T>`, stores and returns its `.curr`, while calls `.prev()` on it.
- */
-export function prev<T = any>(input: IPrevableStream<T>) {
-	const curr = input.curr
-	input.prev()
 	return curr
 }
 
@@ -78,7 +64,7 @@ export function destroy<T = any>(
  * specified by the `steps` (default - `1`)
  */
 export function skip<T = any>(
-	input: IPrevableStream<T>,
+	input: IStream<T>,
 	steps: IStreamPosition<T> = 1
 ) {
 	return uniNavigate(input, negate(steps))
@@ -154,10 +140,9 @@ export function consumeGenerator<T = any, Out = any>(
  * (`.isStart` or `.isEnd` accordingly) has been reached.
  */
 export function has<T = any>(pos: IStreamPosition<T>) {
-	const stopPoint = direction(pos) ? "isEnd" : "isStart"
-	return function (input: IPrevableStream<T>) {
+	return function (input: IStream<T>) {
 		uniNavigate(input, pos)
-		return input[stopPoint]
+		return input.isEnd
 	}
 }
 
@@ -182,7 +167,7 @@ export function count<T = any>(input: IStream<T>) {
  */
 export function delimited<T = any>(delimPred: IStreamPosition<T>) {
 	return function <K extends IPushable<T> = IPushable<T>>(
-		input: IPrevableStream<T>,
+		input: IStream<T>,
 		result: K = new ArrayCollection<T>() as any
 	) {
 		while (!input.isEnd) {
@@ -236,9 +221,8 @@ export function finish<T = any>(stream: IStream<T>) {
  *
  * Provided with a `IStream<T>` and an `IStreamPosition<T>`, it:
  *
- * 1. if the result is a `number` and it is negative, calls the `stream.prev()` this many times;
- * 2. if the result is a `number` and it is positive, calls the `stream.next()` this many times;
- * 3. if the result is an `IStreamPositionPredicate`, continues to walk the stream until either
+ * 1. if the result is a `number` and it is positive, calls the `stream.next()` this many times;
+ * 2. if the result is an `IPositionPredicate`, continues to walk the stream until either
  * it is over, or the condition given is met;
  *
  * @returns `stream.curr`
@@ -247,15 +231,8 @@ export function uniNavigate<T = any>(
 	stream: IStream<T>,
 	position: IStreamPosition<T>
 ): T {
-	if (isNumber(position)) {
-		if (position < 0) while (position++) stream.prev!()
-		else while (position--) stream.next()
-	} else {
-		const change = pick(position)
-		while (!stream.isEnd && !position(stream))
-			change(stream! as IPrevableStream<T>)
-	}
-
+	if (isNumber(position)) while (position-- > 0) stream.next()
+	else while (!stream.isEnd && !position(stream)) stream.next()
 	return stream.curr
 }
 
@@ -271,27 +248,6 @@ export function navigate<T = any>(
 	return isNavigable(stream)
 		? stream.navigate(position)
 		: uniNavigate(stream, position)
-}
-
-/**
- * Performs a universal `rewind`ing operaion on
- * the given `IPrevableStream<T>`.
- * Continues to call '.prev()' on the given stream,
- * until `stream.isStart` is true;
- * @returns `stream.curr`
- */
-export function uniRewind<T = any>(stream: IPrevableStream<T>) {
-	while (!stream.isStart) stream.prev()
-	return stream.curr
-}
-
-/**
- * Calls and returns `stream.rewind()` if `isRewindable(stream)`, else - `uniRewind(stream)`
- */
-export function rewind<T = any>(stream: IStream<T>): T {
-	return isRewindable<T>(stream)
-		? stream.rewind()
-		: uniRewind(stream as IPrevableStream<T>)
 }
 
 /**
@@ -323,4 +279,3 @@ export function peek(n: number) {
 }
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"
-

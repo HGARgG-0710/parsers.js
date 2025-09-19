@@ -4,9 +4,7 @@ import type {
 	IFinishable,
 	IInputStream,
 	INavigable,
-	IPeekableStream,
-	IPrevable,
-	IRewindable
+	IPeekableStream
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
 import { isPredicatePosition } from "../../../utils/Position.js"
@@ -22,8 +20,6 @@ class InputStreamAnnotation<T = any>
 		IPeekableStream<T>,
 		INavigable<T>,
 		IFinishable<T>,
-		IRewindable<T>,
-		IPrevable,
 		IInputStream<T, IParseable<T>>,
 		IPosed<number>
 {
@@ -65,8 +61,6 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 			IPeekableStream<T>,
 			INavigable<T>,
 			IFinishable<T>,
-			IRewindable<T>,
-			IPrevable,
 			IInputStream<T, IParseable<T>>,
 			IPosed<number>
 	{
@@ -94,18 +88,8 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 			return this.currGetter()
 		}
 
-		protected basePrevIter() {
-			--this.pos
-			this.view.backward()
-			return this.currGetter()
-		}
-
 		isCurrEnd(): boolean {
 			return this.pos === this.source!.size
-		}
-
-		isCurrStart(): boolean {
-			return this.pos === 0
 		}
 
 		setResource(source: IParseable<T>): void {
@@ -145,11 +129,12 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 let inputStream: typeof InputStreamAnnotation | null = null
 
 /**
- * This is a class implementing `IPeekableStream<T>`, `INavigable<T>`,
- * `IFinishable<T>`, `IRewindable<T>`, `IPrevable`, `IInputStream<T, IParseable<T>>`
- * and `IPosed<number>`.
+ * This is a class extending `SourceStream` and implementing
+ * `IStream<T>`, `IPeekable<T>`, `INavigable<T>`, `IFinishable<T>`,
+ * `IInputStream<T, IParseable<T>>` and `IPosed<number>`.
  *
- * It extends `SourceStream`.
+ * The stream can also be restored to its initial state by
+ * calling the `.rewind()` method.
  *
  * It uses the `IParseable<T>`'s natural interface as a
  * structure with contigious read-access, thus permitting

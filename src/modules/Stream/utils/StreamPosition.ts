@@ -1,13 +1,8 @@
-import { functional, type } from "@hgargg-0710/one"
-import type { IChange, IPositionStream } from "../../../interfaces/Stream.js"
+import { functional } from "@hgargg-0710/one"
+import type { IPositionStream, IStream } from "../../../interfaces/Stream.js"
 import { isPredicatePosition } from "../../../utils/Position.js"
-import { next, prev } from "../../../utils/Stream.js"
-import type {
-	IStreamPosition,
-	IStreamPositionPredicate
-} from "../interfaces/StreamPosition.js"
+import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 
-const { isNumber } = type
 const { negate: _negate } = functional
 
 /**
@@ -20,9 +15,7 @@ const { negate: _negate } = functional
 export function negate<T = any>(
 	position: IStreamPosition<T>
 ): IStreamPosition<T> {
-	return isPredicatePosition(position)
-		? preserve(position, _negate)
-		: position
+	return isPredicatePosition(position) ? _negate(position) : position
 }
 
 /**
@@ -41,53 +34,12 @@ export function equals<T = any>(
 }
 
 /**
- * Returns whether given `IStreamPosition<T>` is used to designate backwards iteration.
- * Does so in the next manner:
- *
- * 1. If `pos` is a number: `pos >= 0`
- * 2. If `pos` is a `IPredicatePosition`: `pos.direction`, or, if absent, `true` by default
- */
-export function direction<T = any>(pos: IStreamPosition<T>) {
-	return isNumber(pos) ? pos >= 0 : !("direction" in pos) || !!pos.direction
-}
-
-/**
- * Returns `next`, when `direction(pos) === true` and `prev` otherwise
- */
-export function pick<T = any>(pos: IStreamPosition<T>): IChange<T> {
-	return direction(pos) ? next : prev
-}
-
-/**
- * Applies a given (supposedly,
- * one creating a new `IPredicatePosition`)
- * `transform` onto the given `IPredicatePosition`,
- * whilst preserving the `.direction` on its result
- */
-export function preserve<T = any>(
-	init: IStreamPositionPredicate<T>,
-	transform: (x: IStreamPositionPredicate<T>) => IStreamPositionPredicate<T>
-) {
-	const transformed = transform(init)
-	transformed.direction = direction(init)
-	return transformed
-}
-
-/**
  * For a `pos: number`, this returns `pos`, and for a `IPredicatePosition`,
  * it returns `preserve(pos, (pos) => pos.bind(target))`.
  */
-export function bind<T = any>(target: any, pos: IStreamPosition<T>) {
-	return isPredicatePosition(pos)
-		? preserve(pos, (pos) => pos.bind(target))
-		: pos
-}
-
-/**
- * Reverses the `.direction` of the given `predicate`.
- * Note: mutating the original `predicate`
- */
-export function reverse<T = any>(predicate: IStreamPositionPredicate<T>) {
-	predicate.direction = !direction(predicate)
-	return predicate
+export function bind<T = any>(
+	target: any,
+	pos: IStreamPosition<T>
+): IStreamPosition<T> {
+	return isPredicatePosition<IStream<T>>(pos) ? pos.bind(target) : pos
 }

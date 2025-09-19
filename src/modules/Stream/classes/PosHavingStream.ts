@@ -1,5 +1,5 @@
-import { annotation } from "./annotation.js"
 import type { IPositionStream } from "../../../interfaces.js"
+import { annotation } from "./annotation.js"
 
 /**
  * This is an abstract class that implements `IPositionStream<T>`.
@@ -20,23 +20,11 @@ export abstract class PosHavingStream<T = any>
 		this.pos += n
 	}
 
-	protected backward(n: number = 1) {
-		this.pos -= n
-	}
-
 	get pos() {
 		return this._pos
 	}
 
-	isCurrStart() {
-		return this.pos === 0
-	}
-
 	next() {
 		this.forward()
-	}
-
-	prev() {
-		this.backward()
 	}
 }

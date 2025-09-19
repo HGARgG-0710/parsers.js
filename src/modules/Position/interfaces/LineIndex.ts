@@ -12,5 +12,4 @@ export interface ILineIndex extends ICopiable {
 	readonly line: number
 	nextChar(): void
 	nextLine(): void
-	prevChar?(): void
 }

@@ -12,15 +12,6 @@ import type {
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 
 /**
- * An interface for specifying a presence of a `.prev` method.
- * It is intended (primarily) for backwards iteration (on sequence
- * types) by one element.
- */
-export interface IPrevable {
-	prev: () => void
-}
-
-/**
  * An interface for specifying a presence of a `.finish` method.
  * It is intended for going to the end (in sequences). Returns the
  * new current element of the sequence.
@@ -38,24 +29,6 @@ export interface IFinishable<T = any> {
  */
 export interface INavigable<T = any> {
 	navigate: (position: IStreamPosition<T>) => T
-}
-
-/**
- * An interface for specifying a presence of a `.rewind` method.
- * It is intended for going to the beginning (in sequences). Returns
- * the new current element of the sequence.
- */
-export interface IRewindable<T = any> {
-	rewind: () => T
-}
-
-/**
- * An `IStream`-specific interface. Specifies whether
- * or not the current element (`.curr`) is the first one
- * in the `IStream` or not.
- */
-export interface IIsCurrStartable {
-	isCurrStart: () => boolean
 }
 
 /**
@@ -113,13 +86,10 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  */
 export type IStream<T = any> = Partial<INavigable<T>> &
 	Partial<IFinishable<T>> &
-	Partial<IRewindable<T>> &
 	Partial<IStateHaving> &
 	Partial<IInitializable> &
-	Partial<IIsCurrStartable> &
 	Partial<IPeekable<T>> &
 	Partial<IResourceful> &
-	Partial<IPrevable> &
 	Partial<IPosed<number>> &
 	Partial<Iterable<T>> &
 	ICopiable & {
@@ -129,11 +99,6 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 		isCurrEnd: () => boolean
 		next: () => void
 	}
-
-/**
- * This is an `IStream<T>` that is iterable backwards (`IPrevable`)
- */
-export type IPrevableStream<T = any> = IStream<T> & IPrevable
 
 /**
  * This is an `IStream<T>` that is `IPeekable<T>`
@@ -158,12 +123,6 @@ export type IStatefulStream<T = any> = IStream<T> & IStateful<IParseState>
 export type IPositionStream<T = any> = IPosed<number> & IStream<T>
 
 /**
- * This is a function representing a change in the `.curr: T`
- * [one that calls `.prev()/next()` underneath].
- */
-export type IChange<T = any> = (input: IPrevableStream<T>) => T
-
-/**
  * This is an `IStream<T>` that is also `Iterable<T>`
  */
 export type IIterableStream<T = any> = IStream<T> & Iterable<T>
@@ -183,8 +142,8 @@ export type * from "../modules/Stream/interfaces/HandlerStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"
 export type * from "../modules/Stream/interfaces/InputStream.js"
 export type * from "../modules/Stream/interfaces/LimitStream.js"
-export type * from "../modules/Stream/interfaces/StorageStream.js"
 export type * from "../modules/Stream/interfaces/OwnedStream.js"
 export type * from "../modules/Stream/interfaces/PeekStream.js"
 export type * from "../modules/Stream/interfaces/SingletonStream.js"
+export type * from "../modules/Stream/interfaces/StorageStream.js"
 export type * from "../modules/Stream/interfaces/StreamPosition.js"

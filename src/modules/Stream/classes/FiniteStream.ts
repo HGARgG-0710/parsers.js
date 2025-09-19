@@ -1,20 +1,16 @@
 import { array } from "@hgargg-0710/one"
-import type { IOwnedStream, IPosed, IPrevable } from "../../../interfaces.js"
+import type { IOwnedStream, IPosed } from "../../../interfaces.js"
 import { ArrayStream, ArrayStreamAnnotation } from "./ArrayStream.js"
 
 const { lastIndex } = array
 
 class FiniteStreamAnnotation<T = any>
 	extends ArrayStreamAnnotation<T>
-	implements IPosed<number>, IPrevable
+	implements IPosed<number>
 {
 	readonly pos: number
 
 	protected baseNextIter(curr?: T | undefined): T {
-		return null as T
-	}
-
-	protected basePrevIter(curr?: T | undefined): T {
 		return null as T
 	}
 
@@ -42,10 +38,6 @@ function BuildFiniteStream<T = any>() {
 			return this.items[++this.pos]
 		}
 
-		protected basePrevIter(curr?: T | undefined): T {
-			return this.items[--this.pos]
-		}
-
 		isCurrEnd() {
 			return this.pos === lastIndex(this.items)
 		}
@@ -69,7 +61,7 @@ function PreFiniteStream<T = any>(): typeof FiniteStreamAnnotation<T> {
  * This is a class implementing `IOwnedStream<T>` and `IPosed`.
  * It is an extension of `ArrayStream`.
  * It is defined via iteration through the provided finite list
- * of `.items`. Likewise, it is also capable of backward iteration.
+ * of `.items`.
  */
 export const FiniteStream: ReturnType<typeof PreFiniteStream> & {
 	generic?: typeof PreFiniteStream

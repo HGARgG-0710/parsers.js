@@ -31,10 +31,6 @@ export class ReadableView<T = any> implements IView<T> {
 		return this
 	}
 
-	backward() {
-		if (this.offset > 0) --this.offset
-	}
-
 	forward() {
 		++this.offset
 	}

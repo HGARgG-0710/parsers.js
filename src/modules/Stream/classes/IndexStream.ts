@@ -1,12 +1,12 @@
 import { LineIndex } from "../../../classes/Position.js"
 import type { ILineIndex } from "../../../interfaces.js"
-import type { IOwnedStream, IPrevable } from "../../../interfaces/Stream.js"
+import type { IOwnedStream } from "../../../interfaces/Stream.js"
 import type { IIndexStream } from "../interfaces/IndexStream.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 class IndexStreamAnnotation<T = any>
 	extends IdentityStreamAnnotation<T>
-	implements IIndexStream<T>, IPrevable
+	implements IIndexStream<T>
 {
 	readonly lineIndex: ILineIndex
 
@@ -18,7 +18,7 @@ class IndexStreamAnnotation<T = any>
 function BuildIndexStream<T = any>() {
 	return class
 		extends IdentityStream.generic!<T, []>()
-		implements IIndexStream<T>, IPrevable
+		implements IIndexStream<T>
 	{
 		private isNewline: (resource: IOwnedStream<T>) => boolean
 
@@ -30,11 +30,6 @@ function BuildIndexStream<T = any>() {
 		next() {
 			super.next()
 			this.lineIndexTransition()
-		}
-
-		prev() {
-			super.prev()
-			this.lineIndex.prevChar!()
 		}
 
 		setNewlinePredicate(isNewline: (stream: IOwnedStream<T>) => boolean) {
@@ -60,7 +55,7 @@ function PreIndexStream<T = any>(): typeof IndexStreamAnnotation<T> {
 }
 
 /**
- * This is a class implementing `IIndexStream<T>` and `IPrevable`.
+ * This is a class implementing `IIndexStream<T>`.
  * It extends `IdentityStream<T>`.
  *
  * The stream keeps track of a `public readonly .lineIndex: ILineIndex`,

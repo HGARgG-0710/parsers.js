@@ -99,6 +99,9 @@ IMMIDIATE NOTES:
 				does, EXCEPT for `DelegateStream` [from `PipeStream`]. 
 			2. MAKE this *new* combination into a new `mixin`-export 
 				inside the `Stream` submodule...
+			3. LET IT BE 'STATEFUL'; This cannot be stressed enough. 
+				The ability to access global state is immensely powerful, 
+				as it enrichs the code with possibility of dead children. 
 
 notes on `RegexParser` development: 
 	-2. About empty expressions: they aren't allowed (always false). 
@@ -308,10 +311,26 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 								next(): void
 								isCurrEnd(): boolean
 							}
+
+						THE `implements` CLAUSES RESPECTIVELY must LIST THE APPROPRIATE INTERFACES IMPLEMENTED. 
+						That's what it for. 
 							
-					2. Remove the `.prev()` method and all related functionality. 
-						Backing up is NEVER NECESSARY when parsing. It is much simpler
-						and more efficient to use a `.peek(n)`-based lookahead. 
+					2. [Consequences of removal of `prev`]; 
+						About `navigate`:
+							1. specialize INavigable as: 
+								INavigable<T, I> {
+									navigate(index: I): T
+								}
+
+								Then, use as: 
+									1. INavigable<T, IStreamPosition<T>>
+										For `InputStream` and ``
+									2. INavigable<T, MultiIndex>
+										For `DepthStream`
+
+							2. rename the `DepthStream.prototype.goTo` method into `DepthStream.prototype.navigate` 
+								(as it once used to be in the JavaScript version before well-made interfaces). 
+	
 					3. Make the presence of desired properties on specific implementations EXPLICIT via interfaces. 
 						Introduce LOTS 
 
@@ -586,6 +605,9 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		60. AccumulatorStream
 		61. ByteStream
 
+	TODO: chase down all leftover 'TODO's inside the code: 
+		Search: // TODO, // *, // !, // ?, // ^, // %
+
 	TODO: BENCHMARK: 
 		1. RotationBuffer vs 'shift/unshift'-based solution: 
 			0. Generalize the `PeekStream` to a common "abstract" ancestor
@@ -828,6 +850,13 @@ MINOR TODOS:
 				with them being as small as possible - encapsulation 
 					of even ONE (independent) variable is enough cause for 
 						a separate class. 
+
+	TODO: ADD TO DOCUMENTATION/GitHub Description [a crucial notice]
+		The library is intended for PREDICTIVE PARSERS ONLY (meaning: no backtracking). 
+		It is only intended for making of Predictive Recursive-Descent parsers, which can ONLY 
+		handle Context-Free Grammars. 
+
+		Note also that the library is intended for creation of Stream-based Validators. 
 	
 LATER TODOS:
 	TODO [VITAL]: FIX the `ICopiable` presence in interfaces! 

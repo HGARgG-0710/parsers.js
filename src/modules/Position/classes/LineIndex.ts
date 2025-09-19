@@ -9,8 +9,6 @@ const { sum } = number
  * This is a class implementing the `ILineIndex` interface.
  * It represents a pair of indexes, by which characters inside
  * a string can be located - character number and line number.
- *
- * It does not allow for backward iteration.
  */
 export class LineIndex implements ILineIndex {
 	protected ["constructor"]: new (line?: number, char?: number) => this
@@ -55,10 +53,8 @@ export class LineIndex implements ILineIndex {
 
 /**
  * This is a class for keeping track of `lengths: number[]`,
- * employed by the `BackupIndex` objects to share common
+ * employed by the `StringLineIndex` objects to share common
  * knowledge about a certain source's lines' lengths.
- * Essential for implementing the backing-up algorithm
- * inside the `.prevChar()` correctly.
  *
  * Permits modification. Injected by the user.
  *
@@ -142,7 +138,7 @@ function isAcceptableChar(lineIndex: ILineIndex, lengths: LineLengths) {
  * It represents a pair of indexes, by which characters inside
  * a string can be located - character number and line number.
  *
- * It allows for backward iteration. It also allows one to
+ * It allows one to
  * convert the index in question to `number` via the
  * `toNumber()` method, as well as directly modifying
  * the `.line` and `.char` to that of another `ILineIndex`
@@ -154,28 +150,11 @@ function isAcceptableChar(lineIndex: ILineIndex, lengths: LineLengths) {
  * `.init(lineLengths: LineLengths)` to operate
  * successfully.
  */
-export class BackupIndex
+export class StringLineIndex
 	extends LineIndex
 	implements IInitializable<[LineLengths]>
 {
 	private lengths: LineLengths
-
-	private isFirstLine() {
-		return this.line === 0
-	}
-
-	private isLineStart() {
-		return this.char === 0
-	}
-
-	private prevLineEndChar() {
-		--this.line
-		return this.lengths.get(this.line)
-	}
-
-	private sameLinePrevChar() {
-		return this.char - 1
-	}
 
 	private isNewLine() {
 		return isNewLine(this, this.lengths)
@@ -220,13 +199,6 @@ export class BackupIndex
 	nextLine(): void {
 		if (this.isNewLine()) this.addNewLine()
 		super.nextLine()
-	}
-
-	prevChar() {
-		if (!this.isLineStart() || !this.isFirstLine())
-			this.char = this.isLineStart()
-				? this.prevLineEndChar()
-				: this.sameLinePrevChar()
 	}
 
 	toNumber() {

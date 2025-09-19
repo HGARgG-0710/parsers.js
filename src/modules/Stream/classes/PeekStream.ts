@@ -6,7 +6,6 @@ import type {
 	IOwnedStream,
 	IPeekable,
 	IPeekStream,
-	IPrevable,
 	IStream
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
@@ -25,7 +24,7 @@ interface IPeekProvidableFor<T = any> {
 type IPeekStreamConstructor<T = any> = new (
 	resource?: IOwnedStream,
 	n?: number
-) => ILinkedStream<T> & IPeekable<T> & IPeekResettable & IPrevable
+) => ILinkedStream<T> & IPeekable<T> & IPeekResettable
 
 /**
  * This is a class for providing lookaheads
@@ -75,10 +74,6 @@ class PeekProvider<T = any> {
 
 	hasAny() {
 		return this.peekCount > 0
-	}
-
-	backward() {
-		this.peekBuffer.backward()
 	}
 
 	fetchNext() {
@@ -147,23 +142,12 @@ function BuildPeekStream<T = any>() {
 			this.syncCurr()
 		}
 
-		private basePrevIter() {
-			super.prev()
-			this.syncCurr()
-		}
-
 		private fetchNextPeek() {
 			this.curr = this.peekProvider.fetchNext()
 		}
 
 		private toTemp(count: number) {
 			this.tempWriter.toTemp(this.resource!, count)
-		}
-
-		private fetchPrevPeek() {
-			this.peekProvider.backward()
-			if (this.peekProvider.hasAny()) this.basePrevIter()
-			else this.fetchNextPeek()
 		}
 
 		trivialPeek() {
@@ -189,13 +173,6 @@ function BuildPeekStream<T = any>() {
 			if (this.isCurrEnd()) this.endStream()
 			else if (this.peekProvider.hasAny()) this.fetchNextPeek()
 			else this.baseNextIter()
-		}
-
-		prev() {
-			this.isEnd = false
-			if (this.isCurrStart()) this.startStream()
-			else if (this.peekProvider.hasAny()) this.fetchPrevPeek()
-			else this.basePrevIter()
 		}
 
 		resetPeeks() {
@@ -225,12 +202,8 @@ function PrePeekStream<T = any>(): IPeekStreamConstructor<T> {
  * 2. `.peek(n); n >= 1` comes directly after `.peek(n - 1)`
  *
  * Note that `.peek` doesn't actually change the current position,
- * so it's possible to call `.peek(n)` several times without `.next/.prev()`
- * in between, and expect the same results.
- *
- * Also note that the `IPeekStream<T>` in question is also
- * `IPrevable`, so if underlying `resource` supports `.prev()` calls,
- * then so should the returned `IPeekStream<T> & IPrevable` instance.
+ * so it's possible to call `.peek(n)` several times without `.next()`
+ * in between, and expect the same result.
  *
  * The provided `n` is the initial (expected) lookahead. Making
  * a good guess for `n` can enable one to free oneself from needing
@@ -238,7 +211,7 @@ function PrePeekStream<T = any>(): IPeekStreamConstructor<T> {
  */
 export function PeekStream<T = any>(n: number) {
 	const peekStream = PrePeekStream()
-	return function (resource?: IOwnedStream<T>): IPeekStream<T> & IPrevable {
+	return function (resource?: IOwnedStream<T>): IPeekStream<T> {
 		return new peekStream(resource, n)
 	}
 }

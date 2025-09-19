@@ -10,7 +10,6 @@ export class PosStreamAnnotation<T = any>
 	implements IPositionStream<T>
 {
 	protected forward(n: number = 1) {}
-	protected backward(n: number = 1) {}
 	readonly pos: number
 }
 
@@ -21,11 +20,6 @@ const PosStreamMixin = new mixin<ILinkedStream & IPosed>(
 			next() {
 				this.super.IdentityStream.next.call(this)
 				this.super.PosHavingStream.next.call(this)
-			},
-
-			prev() {
-				this.super.IdentityStream.prev.call(this)
-				this.super.PosHavingStream.prev.call(this)
 			}
 		},
 		constructor(resource: IOwnedStream) {
@@ -47,9 +41,9 @@ function PrePosStream<T = any>() {
  * 1. `IdentityStream`
  * 2. `PosHavingStream`
  *
- * For its `.next()` and `.prev()` operations, it updates the underlying
- * `.resource: IOwnedStream`'s `.curr`, while also updating its `.pos`
- * correspondently.
+ * For its `.next()` operation, it updates the underlying
+ * `.resource: IOwnedStream`'s `.curr`, while also 
+ * incrementing its `.pos` property. 
  *
  * It calls both the constructors from `PosHavingStream` and `IdentityStream`
  * [in that order].

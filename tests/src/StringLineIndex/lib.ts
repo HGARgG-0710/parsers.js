@@ -1,6 +1,9 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { BackupIndex, LineLengths } from "../../../dist/src/classes/Position.js"
+import {
+	LineLengths,
+	StringLineIndex
+} from "../../../dist/src/classes/Position.js"
 import type { ILineIndex } from "../../../dist/src/interfaces.js"
 import { assertDistinct } from "../Copiable/lib.js"
 import {
@@ -32,14 +35,14 @@ function prevCharAssert(instance: ILineIndex, origChar: number) {
 }
 
 const toNumber = new MethodTest("toNumber", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	expected: number
 ) {
 	assert.strictEqual(this.toNumber(), expected)
 })
 
 const prevCharDefault = new MethodTest("prevCharDefault", function (
-	this: BackupIndex
+	this: StringLineIndex
 ) {
 	assert(this.char > 0)
 	const origLine = this.line
@@ -50,7 +53,7 @@ const prevCharDefault = new MethodTest("prevCharDefault", function (
 })
 
 const prevCharStart = new MethodTest("prevCharStart", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	line: number,
 	char: number
 ) {
@@ -61,7 +64,7 @@ const prevCharStart = new MethodTest("prevCharStart", function (
 })
 
 const copy = new MethodTest("copy", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	firstExcess: ILineIndex
 ) {
 	superCopy.withInstance(this)
@@ -72,7 +75,7 @@ const copy = new MethodTest("copy", function (
 })
 
 const nextLineTip = new MethodTest("nextLineTip", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	firstExcess: ILineIndex
 ) {
 	fromInvalid.withInstance(this, firstExcess)
@@ -81,7 +84,7 @@ const nextLineTip = new MethodTest("nextLineTip", function (
 })
 
 const fromInvalid = new MethodTest("fromInvalid", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	lineIndex: ILineIndex
 ) {
 	const origLine = this.line
@@ -101,7 +104,7 @@ const fromInvalid = new MethodTest("fromInvalid", function (
 })
 
 const from = new MethodTest("from", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	lineIndex: ILineIndex
 ) {
 	this.from(lineIndex)
@@ -110,7 +113,7 @@ const from = new MethodTest("from", function (
 })
 
 const nextCharEdge = new MethodTest("nextCharEdge", function (
-	this: BackupIndex,
+	this: StringLineIndex,
 	lengths: LineLengths
 ) {
 	assert(!lengths.isNew(this.line))
@@ -120,7 +123,7 @@ const nextCharEdge = new MethodTest("nextCharEdge", function (
 	nextLineStartAssert(this, origLine)
 })
 
-class BackupIndexTest extends LineIndexTest {
+class StringLineIndexTest extends LineIndexTest {
 	prevCharDefault() {
 		this.testMethod("prevCharDefault")
 	}
@@ -170,4 +173,4 @@ class BackupIndexTest extends LineIndexTest {
 	}
 }
 
-export const backupIndexTest = new BackupIndexTest()
+export const stringLineIndexTest = new StringLineIndexTest()

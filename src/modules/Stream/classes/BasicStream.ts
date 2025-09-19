@@ -16,7 +16,6 @@ export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
 	readonly owner?: IOwningStream
 
 	protected postEnd?(): void
-	protected basePrevIter?(curr?: T): T
 	protected postStart?(): void
 	protected initGetter?(...args: Partial<Args>): T
 
@@ -24,7 +23,6 @@ export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
 	protected postInit(...args: Partial<Args>) {}
 
 	next(): void {}
-	prev(): void {}
 
 	setOwner(newOwner?: unknown): void {}
 
@@ -72,15 +70,6 @@ const BasicStreamMixin = new mixin<IOwnedStream>(
 				} else this.update(this.baseNextIter(curr))
 			},
 
-			prev() {
-				const curr = this.curr
-				this.isEnd = false
-				if (this.isCurrStart!()) {
-					this.startStream()
-					this.postStart?.()
-				} else this.update(this.basePrevIter!(curr))
-			},
-
 			init(...args: any[]) {
 				this.startStream()
 				this.super.Initializable.init.call(this, ...args)
@@ -109,12 +98,11 @@ function PreBasicStream<T = any, Args extends any[] = any[]>() {
  * 3. OwnableStream
  * 4. IterableStream
  *
- * It is also in possession of common patterns for `.next()`,
- * `.prev()` and `.init()` methods, which are implemented in
- * the extending code of the user through methods and properties:
+ * It is also in possession of common patterns for `.next()`
+ * and `.init()` methods, which are implemented in the extending c
+ * ode of the user through methods and properties:
  *
  * 1. protected .baseNextIter(curr?: T): T [mandatory]
- * 2. protected .basePrevIter(curr?: T): T [optional]
  * 3. protected .initGetter(...args: Partial<InitArgs>): T [optional]
  * 4. protected .posStart(): void [optional]
  * 5. protected .postEnd(): void [optional]
@@ -123,16 +111,16 @@ function PreBasicStream<T = any, Args extends any[] = any[]>() {
  * It also possesses a set of other methods that encapsulate
  * (default) behaviour and can be overriden. They are:
  *
- * 1. [from `DyssyncStream`] `protected .startStream()` - code called upon `.isCurrStart()` inside `.prev`
+ * 1. [from `DyssyncStream`] `protected .startStream()` - code called inside 
+ * `init` before all else. 
  * 	* (By default, sets `.isStart = true` and `.isEnd = false`)
- * 	* (Called as first action inside of initialization code)
  *
  * 2. [from `DyssyncStream`] `protected .endStream()` - code called upon `.isCurrEnd()` inside `.next`
  * 	* (By default, sets `.isEnd = true` and `.isStart = false`)
  *
- * 3. `.update(newCurr: T)` - code called inside `.next` and `.prev`
- * with results of `.baseNextIter()` and `.basePrevIter()` (respectively)
- * as the argument, whenver `!this.isCurrEnd/isCurrStart()`.
+ * 3. `.update(newCurr: T)` - code called inside `.next`
+ * with the result of `.baseNextIter()` as the argument, whenever 
+ * `!this.isCurrEnd()`.
  * 	* (By default, just assigns `this.curr = newCurr`
  *
  * 4. `protected postInit(...args: Partial<Args>): void` - gets called after
