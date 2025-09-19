@@ -57,9 +57,9 @@ export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
 	trivialCompose(eqcurry(_type), type)
 
 /**
- * Returns a function `deserializer` that returns either:
+ * Returns a function `nodeWrapper` that returns either:
  *
- * 1. `INode<T>` by calling `allowedTypes.getByType(from.type).fromPlain(from, deserializer)`,
+ * 1. `INode<T>` by calling `allowedTypes.getByType(from.type).fromPlain(from, nodeWrapper)`,
  * which (basically) converts an object (which can be a result of deserialization) into
  * a valid tree within the given `NodeSystem`. Thus, it would, for instance, allow
  * deserializing strings with JSON objects into valid `INode<T>` objects, and therefore -
@@ -75,10 +75,10 @@ export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
 		return allowedTypes.has(type)
 	}
 
-	return function deserializer(from: any) {
+	return function nodeWrapper(from: any) {
 		if (!isTyped(from)) return false
 		if (!isValid(from.type)) return false
-		return allowedTypes.getByType(from.type)!.fromPlain(from, deserializer)
+		return allowedTypes.getByType(from.type)!.fromPlain(from, nodeWrapper)
 	}
 }
 
@@ -86,20 +86,21 @@ export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
  * This returns a generator that yields the result of
  * mapping a given `nodeStream` [it is assumed to have
  * an `IRecursiveNode`, or other collection-based node as
- * `nodeStream.curr`] with `mapWith(x, parentMap)`, for
+ * `nodeStream.curr`] with `parentMap(x, parentMap)` (and
+ * default `parentMap` being `defaultMap`), for
  * every `x` in `nodeStream` after the immidiate
  * `nodeStream.curr` [which is skipped, since it is
  * assumed that it has been used for mapping to the function
  * in question].
  */
-export function treeMap<T extends IWalkable<T> = IWalkable>(
-	mapWith: ITableHandler<IIterableStream<T>>
-): IParserFunction<IIterableStream<T>> {
+export function treeMap<T extends IWalkable<T> = IWalkable, Out = any>(
+	defaultMap: ITableHandler<IIterableStream<T>, Iterable<Out>>
+): IParserFunction<IIterableStream<T>, Iterable<Out>> {
 	return function* (
 		nodeStream: IIterableStream<T>,
-		parentMap?: ITableHandler<IIterableStream<T>>
+		parentMap: ITableHandler<IIterableStream<T>, Iterable<Out>> = defaultMap
 	) {
 		nodeStream.next()
-		for (const _ of nodeStream) yield* mapWith(nodeStream, parentMap)
+		for (const _ of nodeStream) yield* parentMap(nodeStream, parentMap)
 	}
 }

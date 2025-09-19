@@ -141,7 +141,7 @@ class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	constructor(private readonly walker: TreeWalker<TreeLike>) {}
 }
 
-class DepthStreamAnnotation<
+export class DepthStreamAnnotation<
 	TreeLike extends IWalkable<TreeLike> = IWalkable
 > extends SourceStreamAnnotation<TreeLike, TreeLike> {
 	protected currGetter(): TreeLike {
@@ -280,10 +280,10 @@ function PreDepthStream<
  * It also supports backing up one element (via `.prev()`), and getting the
  * multi-index of the current node in the tree via `.treeIndex: MultiIndex`,
  * as well as navigating to it directly via `.goTo(ind: MultiIndex)`.
- * 
+ *
  * Similarly, there is a `.finish()` method present, as well as a `.rewind()`
- * method for returning back to the first element in the traversal sequence 
- * from the current one. 
+ * method for returning back to the first element in the traversal sequence
+ * from the current one.
  */
 export const DepthStream: ReturnType<typeof PreDepthStream> & {
 	generic?: typeof PreDepthStream
