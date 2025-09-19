@@ -1,19 +1,8 @@
-import type {
-	IFreeable,
-	IOwnedStream,
-	IPoolGetter
-} from "../../../interfaces.js"
+import type { IFreeable, IOwnedStream } from "../../../interfaces.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
-
-class FreeStreamAnnotation<T = any> extends IdentityStreamAnnotation<T> {
-	setPoolGetter(poolGetter: IPoolGetter): this {
-		return this
-	}
-}
 
 function BuildFreeStream<T extends IFreeable = any>() {
 	return class extends IdentityStream.generic!<T, []>() {
-		private poolGetter: IPoolGetter
 		private freeable: T | null = null
 
 		private enqueueCurrForFreeing() {
@@ -21,7 +10,7 @@ function BuildFreeStream<T extends IFreeable = any>() {
 		}
 
 		private freeEnqueued() {
-			this.freeable!.free(this.poolGetter)
+			this.freeable!.free()
 			this.freeable = null
 		}
 
@@ -30,27 +19,22 @@ function BuildFreeStream<T extends IFreeable = any>() {
 			this.enqueueCurrForFreeing()
 		}
 
-		setPoolGetter(poolGetter: IPoolGetter) {
-			this.poolGetter = poolGetter
-			return this
-		}
-
 		next() {
 			this.freeEnqueued()
 			super.next()
 			this.enqueueCurrForFreeing()
 		}
-	} as typeof FreeStreamAnnotation<T>
+	}
 }
 
-let freeStream: typeof FreeStreamAnnotation | null = null
+let freeStream: typeof IdentityStreamAnnotation | null = null
 
 function PreFreeStream<
 	T extends IFreeable = any
->(): typeof FreeStreamAnnotation<T> {
+>(): typeof IdentityStreamAnnotation<T> {
 	return freeStream
 		? freeStream
-		: (freeStream = BuildFreeStream<T>() as typeof FreeStreamAnnotation)
+		: (freeStream = BuildFreeStream<T>() as typeof IdentityStreamAnnotation)
 }
 
 /**
@@ -66,9 +50,9 @@ function PreFreeStream<
  * with "pure" (stateless) operations over a given `IOwnedStream<T>`
  * [id est - no state storage].
  */
-export function FreeStream<T extends IFreeable = any>(poolGetter: IPoolGetter) {
+export function FreeStream<T extends IFreeable = any>() {
 	const freeStream = PreFreeStream<T>()
 	return function (resource?: IOwnedStream<T>) {
-		return new freeStream().setPoolGetter(poolGetter).init(resource)
+		return new freeStream(resource)
 	}
 }

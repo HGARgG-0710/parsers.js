@@ -282,6 +282,17 @@ export interface IConcattable<In = any, Out = any> {
 	concat: (x: In) => Out
 }
 
+/**
+ * This is an interface representing an object that
+ * can be pool-freed (and then - reused). The method is
+ * intended to encapsulate the pool to be used for freeing.
+ * Key purpose of the method is that it be easily usable
+ * from within any reclamation logic.
+ */
+export interface IFreeable {
+	free(): void
+}
+
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/ByteSource.js"
@@ -295,7 +306,6 @@ export type * from "./interfaces/HashMap.js"
 export type * from "./interfaces/IndexMap.js"
 export type * from "./interfaces/Initializer.js"
 export type * from "./interfaces/Node.js"
-export type * from "./interfaces/PoolGetter.js"
 export type * from "./interfaces/Position.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"

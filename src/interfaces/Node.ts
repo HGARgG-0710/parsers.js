@@ -1,3 +1,4 @@
+import type { ObjectPool } from "../classes.js"
 import type {
 	ICopiable,
 	IFreeable,
@@ -72,8 +73,7 @@ export interface INode<T = any, Args extends any[] = any[]>
 	extends ITyped<T>,
 		IWalkable<INode<T>>,
 		ISerializableObject,
-		IInitializable<Args>,
-		Partial<IFreeable> {
+		IInitializable<Args> {
 	parent: INode<T> | null
 }
 
@@ -84,7 +84,7 @@ export interface INode<T = any, Args extends any[] = any[]>
  * its children's serializations [`.jsonInsertablePre()` and `.jsonInsertablePost()`],
  * and another [`.jsonInsertableEmpty()`] doesn't.
  */
-export interface IRecursiveNode<T = any> extends INode<T, [INode<T>[]]> {
+export interface IRecursiveNode<T = any> extends IPoolNode<T, [INode<T>[]]> {
 	jsonInsertablePre(): [string, string]
 	jsonInsertableEmpty(): [string, string]
 	jsonInsertablePost(): [string, string]
@@ -100,7 +100,15 @@ export type ICollectionNode<T = any> = IRecursiveNode<T> & IPushable<INode<T>>
 /**
  * This is an `INode<T>`, carrying data of type `V`
  */
-export interface ICellNode<T = any, V = any> extends INode<T>, IValued<V> {}
+export interface ICellNode<T = any, V = any> extends IPoolNode<T>, IValued<V> {}
+
+/**
+ * This is an interface for representing a poolable `INode<T>`.
+ * It can be freed via the 'free()' method.
+ */
+export interface IPoolNode<T = any, Args extends any[] = any[]>
+	extends INode<T, Args>,
+		IFreeable {}
 
 /**
  * This is a function for creation of `INode<T>` from an `x: any`,
@@ -125,6 +133,19 @@ export interface INodeType<
 }
 
 /**
+ * This is a type for representing the class of a
+ * poolable node. It carries a `.pool` property for
+ * accessing the pool, and making use of it.
+ */
+export interface IPoolNodeType<
+	T = any,
+	Args extends any[] = any[],
+	K extends IPoolNode<T, Args> = IPoolNode<T, Args>
+> extends INodeType<T, Args, K> {
+	readonly pool: ObjectPool
+}
+
+/**
  * This interface is intended to represent instances of `INodeType<T, [V], ICellNode<T, V>>`
  * that carry data of type `V`.
  */
@@ -132,7 +153,7 @@ export interface ICellNodeType<
 	T = any,
 	V = any,
 	K extends ICellNode<T, V> = ICellNode<T, V>
-> extends INodeType<T, [V], K> {}
+> extends IPoolNodeType<T, [V], K> {}
 
 /**
  * This is an interface for representing `INodeType<T, Args>` extensions
@@ -141,7 +162,7 @@ export interface ICellNodeType<
 export interface IRecursiveNodeType<
 	T = any,
 	K extends IRecursiveNode<T> = IRecursiveNode<T>
-> extends INodeType<T, [INode<T>[]], K> {}
+> extends IPoolNodeType<T, [INode<T>[]], K> {}
 
 /**
  * This is a type specifically for representing `IRecursiveNodeType`s
@@ -162,6 +183,9 @@ export type INodeTypeFactory<
 	K extends INodeType<T, Args> = INodeType<T, Args>
 > = (type: T) => K
 
+/**
+ * This is the interface for representing a function-factory for `ICellNodeType<T, V>`.
+ */
 export type ICellNodeTypeFactory<T = any, V = any> = INodeTypeFactory<
 	T,
 	[V],

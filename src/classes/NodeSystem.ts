@@ -4,13 +4,10 @@ import type {
 	INodeTypeCategories,
 	INodeTypeFactory
 } from "../interfaces/Node.js"
-import type { IPoolGetter } from "../interfaces/PoolGetter.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { BasicMap } from "../samples/TerminalMap.js"
 import { Autocache } from "./Autocache.js"
 import { BasicHash } from "./HashMap.js"
-import { ObjectPool } from "./ObjectPool.js"
-import { TypedPoolKeeper } from "./PoolGetter.js"
 
 type INodeTypesMap<T = any> = Map<T, INodeType<T>>
 
@@ -34,19 +31,18 @@ export function NodeFactory<
 
 /**
  * A class for the managing of a system of 'INodeType<T>'s.
- * A `NodeSystem` is intended to be single across an application/parser,
- * since it also manages the pools (via internal 'TypedPoolKeeper<T>'s).
+ * A `NodeSystem` is intended to represent a list of "keys", 
+ * defining the types of nodes, which are deemed valid. 
  *
- * It is primarily intended to be used from within JavaScript
- * due to its poorer type granularity over the manual solution.
+ * It is primarily intended to be used within JavaScript code 
+ * and not TypeScript due to poorer type granularity. 
  *
  * It can serve as:
  *
  * 1. a way to automate the calls to `INodeTypeFactor`-ies
- * 2. a keeper of `ObjectPool`s for each of the available `INodeType`s
- * 3. a keeper of the `INodeType`s themselves [allowing access by `.type`]
- * 4. a way to extend existing 'NodeSystem's [via the `.merge` method]
- * 5. a way to check that another `NodeSystem` is a superset of the current one
+ * 2. a keeper of the `INodeType`s themselves [allowing access by `.type`]
+ * 3. a way to extend existing 'NodeSystem's [via the `.merge` method]
+ * 4. a way to check that another `NodeSystem` is a superset of the current one
  *
  * It also ensures that the `.type`s of the given `INodeTypeCategories<T>`
  * are DISJOINT [which is to say - that no two distinct `INodeTypeFactor`-ies
@@ -58,30 +54,6 @@ export function NodeFactory<
 export class NodeSystem<T = any> {
 	private readonly types: INodeTypesMap<T>
 	private readonly typesSet: Set<T>
-	private readonly pools = new TypedPoolKeeper<T>()
-
-	private getExistingPoolFor(type: T) {
-		return this.pools.get(type)!
-	}
-
-	private poolExistsFor(type: T) {
-		return this.pools.has(type)
-	}
-
-	private getExistingByType(type: T) {
-		return this.getByType(type)!
-	}
-
-	private createPoolFor(type: T) {
-		return this.pools.set(
-			type,
-			new ObjectPool(this.getExistingByType(type))
-		)
-	}
-
-	get typePools(): IPoolGetter {
-		return this.pools
-	}
 
 	getByType(type: T) {
 		return this.types.get(type)
@@ -97,13 +69,6 @@ export class NodeSystem<T = any> {
 
 	merge(system: NodeSystem<T>) {
 		return new NodeSystem(this.categories.concat(system.categories))
-	}
-
-	getPool(type: T) {
-		if (this.has(type)) {
-			if (!this.poolExistsFor(type)) this.createPoolFor(type)
-			return this.getExistingPoolFor(type)
-		}
 	}
 
 	constructor(private readonly categories: INodeTypeCategories<T>) {

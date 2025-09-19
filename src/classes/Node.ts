@@ -1,5 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
-import type { IFreeable, IPoolGetter } from "../interfaces.js"
+import type { IFreeable } from "../interfaces.js"
 import type {
 	ICellNode,
 	ICellNodeType,
@@ -8,9 +8,10 @@ import type {
 	INode,
 	INodeMaker,
 	INodeType,
+	IPoolNodeType,
 	ITyped
 } from "../interfaces/Node.js"
-import { isCopiable } from "../is.js"
+import { isCopiable, isFreeable } from "../is.js"
 import {
 	isContentNodeSerializable,
 	isRecursiveNodeSerializable,
@@ -18,6 +19,7 @@ import {
 } from "../is/Node.js"
 import { isType } from "../utils/Node.js"
 import { NodeFactory } from "./NodeSystem.js"
+import { ObjectPool } from "./ObjectPool.js"
 
 const { id } = functional
 
@@ -29,11 +31,13 @@ const { id } = functional
  *
  * 1. required `readonly type: T`
  * 2. various boilerplate methods
- * 3. default behaviour for the future classes [.free, .backtrack]
- * 4. guarantee of (otherwise optional) `IFreeable<T>` conformance
+ * 3. default behaviour for the future classes:
+ * 	1. .backtrack method
+ *  	2. .findUnwalkedChildren
+ *  	3. .lastChild == -I
  */
 export abstract class BaseNode<T = any, Args extends any[] = any[]>
-	implements INode<T>, IFreeable<T>
+	implements INode<T>
 {
 	abstract readonly type: T
 
@@ -72,20 +76,38 @@ export abstract class BaseNode<T = any, Args extends any[] = any[]>
 	get lastChild() {
 		return -1
 	}
+}
 
-	free(poolGetter: IPoolGetter<T>) {
-		poolGetter.get(this.type)!.free(this)
+/**
+ * This is a class that encapsulates the pooling logic for
+ * `BaseNode<T, Args>` descendants. It is strongly recommended
+ * for use as a parent whenever needing the pooling functionality
+ * for the library's `INode` interface.
+ *
+ * The 'protected abstract readonly pool: ObjectPool' property
+ * is intended to be overriden by the child classes, and to
+ * contain the pool which would do the creation and the freeing
+ * of the `INode<T, Args>` instances.
+ */
+export abstract class PoolableNode<T = any, Args extends any[] = any[]>
+	extends BaseNode<T, Args>
+	implements IFreeable
+{
+	protected abstract readonly pool: ObjectPool
+
+	free() {
+		this.pool.free(this)
 	}
 }
 
 abstract class PreTokenNode<T = any>
-	extends BaseNode<T, []>
+	extends PoolableNode<T, []>
 	implements INode<T>
 {
 	protected ["constructor"]: new () => this
 
 	static fromPlain<T = any>(
-		this: INodeType<T, []>,
+		this: IPoolNodeType<T, []>,
 		x: any,
 		nodeMaker: INodeMaker<T>
 	) {
@@ -114,24 +136,30 @@ abstract class PreTokenNode<T = any>
  */
 export const TokenNode = NodeFactory(function <T = any>(
 	type: T
-): INodeType<T, []> {
+): IPoolNodeType<T, []> {
 	const jsonObject = { type }
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
+		static readonly pool = new ObjectPool(tokenNode)
 
 		toJSON() {
 			return jsonObject
+		}
+
+		protected get pool() {
+			return tokenNode.pool
 		}
 
 		get type() {
 			return type
 		}
 	}
+
 	return tokenNode
 })
 
-abstract class SingleItemNode<T = any, Value = any> extends BaseNode<
+abstract class SingleItemNode<T = any, Value = any> extends PoolableNode<
 	T,
 	[Value]
 > {
@@ -202,6 +230,13 @@ abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
 	get lastChild() {
 		return this.child ? 0 : -1
 	}
+
+	toJSON() {
+		return {
+			type: this.type,
+			child: this.child
+		}
+	}
 }
 
 /**
@@ -217,6 +252,11 @@ export const SingleChildNode = NodeFactory(function <T = any>(
 	class singleChildNode extends PreSingleChildNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
+		static readonly pool = new ObjectPool(singleChildNode)
+
+		protected get pool() {
+			return singleChildNode.pool
+		}
 
 		get type() {
 			return type
@@ -241,6 +281,11 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static readonly is = isType(type)
+		static readonly pool = new ObjectPool(contentNode)
+
+		protected get pool() {
+			return contentNode.pool
+		}
 
 		get type() {
 			return type
@@ -251,7 +296,7 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 })
 
 abstract class PreRecursiveNode<T = any>
-	extends BaseNode<T, [INode<T>[]]>
+	extends PoolableNode<T, [INode<T>[]]>
 	implements ICollectionNode<T>
 {
 	protected ["constructor"]: new (children?: INode<T>[]) => this
@@ -306,9 +351,9 @@ abstract class PreRecursiveNode<T = any>
 		return this
 	}
 
-	free(poolGetter: IPoolGetter<T>): void {
-		for (const child of this.children) child.free?.(poolGetter)
-		super.free(poolGetter)
+	free(): void {
+		for (const child of this.children) if (isFreeable(child)) child.free()
+		super.free()
 	}
 
 	jsonInsertablePre(): [string, string] {
@@ -365,6 +410,11 @@ export const RecursiveNode = NodeFactory(function <T = any>(
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
+		static readonly pool = new ObjectPool(recursiveNode)
+
+		protected get pool() {
+			return recursiveNode.pool
+		}
 
 		get type() {
 			return type

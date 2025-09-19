@@ -468,9 +468,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			2. Use `ObjectPool(MockClass)` on it
 			3. Create some instances - test it...
 
-		[easy - no sooner than `ObjectPool`]
-		15. `TypedPoolKeeper`
-
 		[easy]
 		16. `PropDigger`: 
 			[VITAL: add these as TEST CASES in `PropDigger/cases.ts`!!!]
