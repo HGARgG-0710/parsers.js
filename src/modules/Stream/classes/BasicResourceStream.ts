@@ -26,15 +26,10 @@ export abstract class BasicResourceStreamAnnotation<
 	protected abstract baseNextIter(curr?: T): T
 
 	protected set isEnd(isEnd: boolean) {}
-	protected set isStart(isEnd: boolean) {}
 	protected set curr(curr: T) {}
 
 	get isEnd() {
 		return false
-	}
-
-	get isStart() {
-		return true
 	}
 
 	get curr() {

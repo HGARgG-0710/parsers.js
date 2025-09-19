@@ -17,7 +17,6 @@ abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
 	protected set isEnd(isEnd: boolean) {}
-	protected set isStart(isEnd: boolean) {}
 	protected set curr(curr: T) {}
 
 	protected endStream(): void {}
@@ -29,10 +28,6 @@ abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
 
 	get isEnd() {
 		return false
-	}
-
-	get isStart() {
-		return true
 	}
 
 	get curr() {

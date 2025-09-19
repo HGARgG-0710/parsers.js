@@ -117,7 +117,6 @@ function BuildLimitStream<T = any>() {
 		}
 
 		next() {
-			this.isStart = false
 			if (this.isCurrEnd()) this.endStream()
 			else this.baseNextIter(this.curr)
 		}

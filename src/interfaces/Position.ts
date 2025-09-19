@@ -9,7 +9,7 @@
  * may (or may not) be known in advance. For such general cases,
  * `IPosition` is a perfect fit.
  */
-export type IPosition<Type = any> = IPredicatePosition<Type> | number
+export type IPosition<T = any> = IPredicatePosition<T> | number
 
 /**
  * An `IPosition` representing an "unknown" halting point.
@@ -18,7 +18,7 @@ export type IPosition<Type = any> = IPredicatePosition<Type> | number
  */
 export type IPredicatePosition<In = any> = (
 	item: In,
-	pos?: IPosition
+	pos?: IPosition<In>
 ) => boolean
 
 /**

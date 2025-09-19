@@ -9,7 +9,6 @@ export abstract class TrivialStreamAnnotation<
 	Args extends any[] = []
 > extends OwnableStream<T, Args> {
 	protected set isEnd(isEnd: boolean) {}
-	protected set isStart(isEnd: boolean) {}
 	protected set curr(curr: T) {}
 
 	protected endStream(): void {}
@@ -17,10 +16,6 @@ export abstract class TrivialStreamAnnotation<
 
 	get isEnd() {
 		return false
-	}
-
-	get isStart() {
-		return true
 	}
 
 	get curr() {

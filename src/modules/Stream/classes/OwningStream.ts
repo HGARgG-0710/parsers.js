@@ -4,21 +4,20 @@ import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 
 /**
- * This is an abstract class implementing the `IResourcefulStream<T>`, and extending 
- * `Initializable<[IOwnedStream, ...(Args | [])]`. It allows being 
- * `.init(resource: IOwnedStream, ...args: Args)`-ialized by setting its 
- * `readonly .resource: IOwnedStream` property, which can also be modified directly 
- * by its descendant-classes. 
- * 
- * Besides `.initializer`, `.init`, `.setResource` and `.resource`, 
- * it provides no concrete methods/properties. 
-*/
+ * This is an abstract class implementing the `IResourcefulStream<T>`, and extending
+ * `Initializable<[IOwnedStream, ...(Args | [])]`. It allows being
+ * `.init(resource: IOwnedStream, ...args: Args)`-ialized by setting its
+ * `readonly .resource: IOwnedStream` property, which can also be modified directly
+ * by its descendant-classes.
+ *
+ * Besides `.initializer`, `.init`, `.setResource` and `.resource`,
+ * it provides no concrete methods/properties.
+ */
 export abstract class OwningStream<T = any, Args extends any[] = []>
 	extends Initializable<[IOwnedStream, ...(Args | [])]>
 	implements IResourcefulStream<T>
 {
 	abstract readonly isEnd: boolean
-	abstract readonly isStart: boolean
 	abstract readonly curr: T
 
 	private _resource?: IOwnedStream

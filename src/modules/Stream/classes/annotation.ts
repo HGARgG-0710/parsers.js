@@ -18,7 +18,6 @@ export abstract class annotation<T = any, Args extends any[] = any[]>
 	implements IStream<T>, IInitializable<Args>
 {
 	abstract readonly isEnd: boolean
-	abstract readonly isStart: boolean
 	abstract readonly curr: T
 
 	abstract next(): void

@@ -74,8 +74,7 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  *
  * The `.isEnd: boolean` property specifies whether or not the `IStream` in question
  * has already been finished. The `.curr: T` represents the current element.
- * The `.isStart: boolean` represents whether the `IStream` has already been
- * started or not, `.next: () => void` moves the `IStream` one element forward,
+ * The `.next: () => void` moves the `IStream` one element forward,
  * and the `isCurrEnd: () => boolean` specifies whether or not the current
  * item (`.curr: T`) is the last in the `IStream`.
  *
@@ -95,7 +94,6 @@ export type IStream<T = any> = Partial<INavigable<T>> &
 	ICopiable & {
 		readonly curr: T
 		readonly isEnd: boolean
-		readonly isStart: boolean
 		isCurrEnd: () => boolean
 		next: () => void
 	}

@@ -23,11 +23,6 @@ export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
 export const isEnd = prop("isEnd") as <T = any>(x: IStream<T>) => boolean
 
 /**
- * Returns the value of the `.isStart` property of the given `IStream`
- */
-export const isStart = prop("isStart") as <T = any>(x: IStream<T>) => boolean
-
-/**
  * Returns the `.buffer` property of the given `IBufferized`
  */
 export const buffer = prop("buffer") as <T = any>(

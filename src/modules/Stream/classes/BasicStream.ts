@@ -53,17 +53,14 @@ const BasicStreamMixin = new mixin<IOwnedStream>(
 
 			endStream() {
 				this.isEnd = true
-				this.isStart = false
 			},
 
 			startStream() {
-				this.isStart = true
 				this.isEnd = false
 			},
 
 			next() {
 				const curr = this.curr
-				this.isStart = false
 				if (this.isCurrEnd()) {
 					this.endStream()
 					this.postEnd?.()
@@ -111,15 +108,15 @@ function PreBasicStream<T = any, Args extends any[] = any[]>() {
  * It also possesses a set of other methods that encapsulate
  * (default) behaviour and can be overriden. They are:
  *
- * 1. [from `DyssyncStream`] `protected .startStream()` - code called inside 
- * `init` before all else. 
- * 	* (By default, sets `.isStart = true` and `.isEnd = false`)
+ * 1. [from `DyssyncStream`] `protected .startStream()` - code called inside
+ * `init` before all else.
+ * 	* (By default, sets `.isEnd = false`)
  *
  * 2. [from `DyssyncStream`] `protected .endStream()` - code called upon `.isCurrEnd()` inside `.next`
- * 	* (By default, sets `.isEnd = true` and `.isStart = false`)
+ * 	* (By default, sets `.isEnd = true`)
  *
  * 3. `.update(newCurr: T)` - code called inside `.next`
- * with the result of `.baseNextIter()` as the argument, whenever 
+ * with the result of `.baseNextIter()` as the argument, whenever
  * `!this.isCurrEnd()`.
  * 	* (By default, just assigns `this.curr = newCurr`
  *

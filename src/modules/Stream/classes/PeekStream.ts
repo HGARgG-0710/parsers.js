@@ -169,7 +169,6 @@ function BuildPeekStream<T = any>() {
 		}
 
 		next() {
-			this.isStart = false
 			if (this.isCurrEnd()) this.endStream()
 			else if (this.peekProvider.hasAny()) this.fetchNextPeek()
 			else this.baseNextIter()

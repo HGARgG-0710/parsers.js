@@ -136,8 +136,7 @@ export function consumeGenerator<T = any, Out = any>(
 
 /**
  * Navigates up to the desired position on the given `IStream<T>`,
- * returns whether the bound corresponding to the direction of iteration
- * (`.isStart` or `.isEnd` accordingly) has been reached.
+ * returns whether the end of the stream has been reached.
  */
 export function has<T = any>(pos: IStreamPosition<T>) {
 	return function (input: IStream<T>) {

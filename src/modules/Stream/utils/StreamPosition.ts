@@ -9,8 +9,8 @@ const { negate: _negate } = functional
  * Given an `IStreamPosition<T>`, it returns one of:
  *
  * 1. The original position, If it is a `number`
- * 2. The result of preserving the original `.direction`
- * on `(x) => !position(x)` if it is a `IPredicatePosition`
+ * 2. The new `IPredicatePosition<IStream<T>>`
+ * `(stream?: IStream<T>, pos?: IStreaamPosition<T>) => !position(stream, pos)`
  */
 export function negate<T = any>(
 	position: IStreamPosition<T>

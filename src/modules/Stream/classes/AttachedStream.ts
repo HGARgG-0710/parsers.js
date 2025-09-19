@@ -14,7 +14,6 @@ export abstract class AttachedStreamAnnotation<T = any, Args extends any[] = []>
 	implements ILinkedStream<T>
 {
 	readonly isEnd: boolean
-	readonly isStart: boolean
 	readonly curr: T;
 
 	*[Symbol.iterator]() {}
