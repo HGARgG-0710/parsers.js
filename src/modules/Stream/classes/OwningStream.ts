@@ -42,8 +42,6 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 
 	abstract next(): void
 
-	abstract copy(): this
-
 	abstract [Symbol.iterator](): Generator<T>
 
 	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {

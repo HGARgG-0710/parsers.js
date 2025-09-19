@@ -1,9 +1,4 @@
-import type {
-	ICopiable,
-	IPosed,
-	IResource,
-	IVisiblyOpen
-} from "../interfaces.js"
+import type { IPosed, IResource, IVisiblyOpen } from "../interfaces.js"
 
 /**
  * This is an interface for representing a lazily readable
@@ -12,8 +7,7 @@ import type {
  * position of which can be tracked via the `readonly .pos: number`
  */
 export interface ICharacterSource
-	extends ICopiable,
-		IResource,
+	extends IResource,
 		IVisiblyOpen,
 		IPosed<number> {
 	hasChars: () => boolean

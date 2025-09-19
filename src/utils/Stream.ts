@@ -17,6 +17,7 @@ import type {
 import { isFinishable, isNavigable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
+import { tryCopy } from "../utils.js"
 
 const { isFunction, isNumber } = type
 
@@ -253,10 +254,11 @@ export function navigate<T = any>(
  * Makes a copy of a `rawStream`:
  *
  * 1. if a chooser - returns as-is (copying operation is meaningless)
- * 2. if an `ILinkedStream` - `rawStream.copy()`
+ * 2. if an `ILinkedStream` - does `rawStream.copy()` if the method is present, 
+ * else returns `rawStream`
  */
 export function rawStreamCopy(rawStream: IRawStream) {
-	return isFunction(rawStream) ? rawStream : rawStream.copy()
+	return isFunction(rawStream) ? rawStream : tryCopy(rawStream)
 }
 
 /**

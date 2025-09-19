@@ -44,7 +44,5 @@ export abstract class DyssyncStream<T = any, Args extends any[] = []>
 
 	abstract init(...args: Partial<Args>): this
 
-	abstract copy(): this
-
 	abstract [Symbol.iterator](): Generator<T>
 }

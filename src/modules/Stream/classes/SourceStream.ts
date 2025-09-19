@@ -1,5 +1,5 @@
 import type { IResourceSettable } from "../../../interfaces.js"
-import { isCopiable } from "../../../is.js"
+import { tryCopy } from "../../../utils.js"
 import { resourceInitializer } from "../../Initializer/classes/ResourceInitializer.js"
 import { BasicStream, BasicStreamAnnotation } from "./BasicStream.js"
 
@@ -62,9 +62,7 @@ function BuildSourceStream<T = any, SourceType = unknown>() {
 		}
 
 		copy(): this {
-			return new this.constructor(
-				isCopiable(this.source) ? this.source.copy() : this.source
-			)
+			return new this.constructor(tryCopy(this.source))
 		}
 
 		constructor(source?: SourceType) {
@@ -121,9 +119,9 @@ function PreSourceStream<
  *
  * It also provides a `protected .updateCurr(): T` method,
  * which calls `this.update(this.currGetter())`.
- * 
- * It is intended to be extended when one needs definitions for 
- * `IInputStream`-classes, representing access to resources, 
+ *
+ * It is intended to be extended when one needs definitions for
+ * `IInputStream`-classes, representing access to resources,
  * such as files, or open network connections.
  */
 export const SourceStream: ReturnType<typeof PreSourceStream> & {

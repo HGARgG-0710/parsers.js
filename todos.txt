@@ -298,23 +298,10 @@ CURRENTLY BEING DONE:
 IMMIDIATE [first - order 'import's, then - do 'docs']: 			
 	CURRENT AGENDA: 			
 		P0: 
+			0. Exports: 
+				1. Verify all of the package's exports - remove undesirable/redundant ones
+
 			2. Types: 
-				1. Since we have made it that `IStream` contain the `Iterable` [and `IInitializable`] properties OPTIONALLY: 
-					1. Take it further, and REMOVE the mention of ALL the "Partial" properties (that includes `ICopiable`). 
-						The 'ICopiable' stretches across THE WHOLE of the library...
-						This way, one would have: 
-
-							// THE PERFECT SOLUTION [~1yr worth of suffering around that bloody thing...]
-							export interface IStream<T> {
-								readonly isEnd: boolean
-								readonly curr: T
-								next(): void
-								isCurrEnd(): boolean
-							}
-
-						THE `implements` CLAUSES RESPECTIVELY must LIST THE APPROPRIATE INTERFACES IMPLEMENTED. 
-						That's what it for. 
-							
 					2. [Consequences of removal of `prev`]; 
 						About `navigate`:
 							1. specialize INavigable as: 
@@ -578,7 +565,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 							4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
 				
 				CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
-		45. FreezableStream
 		46. HandlerStream
 		47. IndexStream
 		48. InputStream
@@ -856,19 +842,6 @@ MINOR TODOS:
 		Note also that the library is intended for creation of Stream-based Validators. 
 	
 LATER TODOS:
-	TODO [VITAL]: FIX the `ICopiable` presence in interfaces! 
-		It is EXCESSIVE, and is only required within SPECIFIC cases, when the user 
-			THEMSELVES may want to copy the class in question. Otherwise put: 
-
-				1. test CLASS IMPLEMENTATIONS, not interfaces
-				2. the user SHOULDN'T HAVE TO IMPLEMENT THE `.copy` METHOD!!!
-
-		This specifically touches on the `IStream`. 
-		DO NOT add the `ICopiable` on ANYTHING that isn't supposed to be 
-			ACTUALLY COPIED by the user [which it might]. 
-		Instead, let the [MUTABLE] TEST-CLASSES demand `ICopiable` 
-		from specific class-cases. 
-
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
 		Reasons: 
 			1. works FAR better with the `&`-role-composition	
@@ -1369,23 +1342,14 @@ FUTURE:
 					'ITestable' - a new interface to export
 			3. [unrelated] add serialization of tested items [interfaces for it, etc]
 			4. [unrelated] add 'Snapshot' API (similar to `Jest`)
-
-		2. `autocache` package [make a dependency of parsers.js]: 
-			1. Autocache
-			2. IIndexable
-			3. ISettable
 		
-		3. `serializable`: 
-			1. `ISerializable` interface
-			2. `ISerializableObject` interface
-		
-		4. 'mixin.ts': 
+		2. 'mixin.ts': 
 			1. a new package - the 'mixin' module here
 				It should be USED IN `parsers.js` as BOTH: 
 					1. a dependency
 					2. a re-export [since there are mixins CURRENTLY exported]
 
-		5. `object_pool`: 
+		3. `object_pool`: 
 			This is the `ObjectPool` (and `IInitializable` interface) class. 
 			It is far too independent to be just left here. 
 			Far too useful to be allowed to be "herded" together with the domain-specific 
@@ -1417,15 +1381,12 @@ FUTURE:
 			supposed to have been done entirely using 'mixins' 
 				(which are absent from TypeScript, and, in a formalized variant, from JS)...
 
-	3. Reminder: do you rmember the stack.js? 
-		Old (partially abandonned) project for using "stackless" code?
-
-	4. (maybe) later - ensure JS-runtime-independence: 
+	3. (maybe) later - ensure JS-runtime-independence: 
 		Verify that the package has compatibility with: 
 		1. Deno [v2.0+]
 		2. Bun [v1.0+]
 
-	5. Rewrite this using your NEW language [later the "TS Replacement"]. 
+	4. Rewrite this using your NEW language [later the "TS Replacement"]. 
 		Reasons: 
 			1. natural runtime-static-time combination
 			2. better + simpler type-system

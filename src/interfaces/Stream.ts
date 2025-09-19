@@ -1,6 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	ICopiable,
 	IOwnedStream,
 	IParseState,
 	IPosed,
@@ -82,7 +81,7 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  * Iterating through the __very last__ element from the very first
  * requires that `.isCurrEnd() == true` and `.isEnd == false`).
  */
-export interface IStream<T = any> extends ICopiable {
+export interface IStream<T = any> {
 	readonly curr: T
 	readonly isEnd: boolean
 	isCurrEnd: () => boolean

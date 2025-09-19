@@ -13,6 +13,7 @@ import type {
 import { StreamList } from "../../../internal/StreamList.js"
 import { isStateful } from "../../../is/Stream.js"
 import { mixin } from "../../../mixin.js"
+import { tryCopy } from "../../../utils.js"
 import { rawStreamCopy } from "../../../utils/Stream.js"
 import { IdentityStream } from "./IdentityStream.js"
 import { StatefulStream } from "./StatefulStream.js"
@@ -142,7 +143,7 @@ function BuildBeforeCompositeStream<T = any>() {
 		// 			* 2. problem is - we MAY require the state IN ORDER to initialize them; This becomes INCREASINGLY tangled
 		copy() {
 			return new this.constructor(
-				this.lowStream?.copy(),
+				tryCopy(this.lowStream),
 				this.rawStreams
 					? mutate(array.copy(this.rawStreams), rawStreamCopy)
 					: MissingArgument,

@@ -1,13 +1,13 @@
-import type { ICopiable, IVisiblyOpen, IResource } from "../interfaces.js"
+import type { IResource, IVisiblyOpen } from "../interfaces.js"
 
 /**
  * This is an interface intended to represent a
- * holdable linearly-writable resource, which is unique, 
- * but can be copied [a separate `.cleanup()` 
- * call will be required]. 
- * 
- * The writing is performed to the end of the file. 
+ * holdable linearly-writable resource, which is unique,
+ * but can be copied [a separate `.cleanup()`
+ * call will be required].
+ *
+ * The writing is performed to the end of the file.
  */
-export interface IDestination extends ICopiable, IResource, IVisiblyOpen {
+export interface IDestination extends IResource, IVisiblyOpen {
 	write(input: string): void
 }

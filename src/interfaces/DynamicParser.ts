@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ICopiable, IInitializable } from "../interfaces.js"
+import type { IInitializable } from "../interfaces.js"
 import type { ILinkedStream, IStreamArray } from "./Stream.js"
 
 /**
@@ -21,8 +21,7 @@ export interface IParseState<FinalType = any, InitType = any> extends Summat {
  * call.
  */
 export interface IParse<FinalType = any, InitType = any>
-	extends ICopiable,
-		IInitializable<[InitType?, Summat?]> {
+	extends IInitializable<[InitType?, Summat?]> {
 	readonly state: IParseState<FinalType, InitType>
 	readonly streams: IStreamArray
 	renewStream(stream: ILinkedStream): void

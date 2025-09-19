@@ -1,4 +1,5 @@
 import type { IStream } from "../../../interfaces.js"
+import { tryCopy } from "../../../utils.js"
 import { ArrayStream } from "./ArrayStream.js"
 
 import { array } from "@hgargg-0710/one"
@@ -53,6 +54,6 @@ export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
 	}
 
 	copy() {
-		return new this.constructor(...this.items.map((x) => x.copy()))
+		return new this.constructor(...this.items.map(tryCopy))
 	}
 }

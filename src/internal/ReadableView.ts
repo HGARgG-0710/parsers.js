@@ -1,10 +1,10 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ICopiable, IInitializable, IReadable } from "../interfaces.js"
+import type { IInitializable, IReadable } from "../interfaces.js"
 
 const { isNumber } = type
 
-type IView<T = any> = ICopiable & IReadable<T> & IInitializable<[IReadable<T>]>
+type IView<T = any> = IReadable<T> & IInitializable<[IReadable<T>]>
 
 /**
  * This is a class representing an offset to an `IReadable`.

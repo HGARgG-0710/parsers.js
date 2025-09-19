@@ -11,12 +11,13 @@ import type {
 	IPoolNodeType,
 	ITyped
 } from "../interfaces/Node.js"
-import { isCopiable, isFreeable } from "../is.js"
+import { isFreeable } from "../is.js"
 import {
 	isContentNodeSerializable,
 	isRecursiveNodeSerializable,
 	isTyped
 } from "../is/Node.js"
+import { tryCopy } from "../utils.js"
 import { isType } from "../utils/Node.js"
 import { NodeFactory } from "./NodeSystem.js"
 import { ObjectPool } from "./ObjectPool.js"
@@ -40,10 +41,7 @@ export abstract class BaseNode<T = any, Args extends any[] = any[]>
 	implements INode<T>
 {
 	abstract readonly type: T
-
 	abstract init(...x: [] | Partial<Args>): this
-	abstract copy(): this
-
 	toJSON?(): ITyped<T>
 
 	parent: INode<T> | null = null
@@ -190,9 +188,7 @@ abstract class PreContentNode<T = any, Value = any>
 	}
 
 	copy() {
-		return new this.constructor(
-			isCopiable(this.value) ? this.value.copy() : this.value
-		)
+		return new this.constructor(tryCopy(this.value))
 	}
 
 	init(value?: Value | undefined) {
@@ -218,7 +214,7 @@ abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
 
 	copy(): this {
 		return this.child
-			? new this.constructor(this.child.copy())
+			? new this.constructor(tryCopy(this.child))
 			: new this.constructor()
 	}
 
@@ -342,7 +338,7 @@ abstract class PreRecursiveNode<T = any>
 	}
 
 	copy() {
-		return new this.constructor(this.children.map((x) => x.copy()))
+		return new this.constructor(this.children.map(tryCopy))
 	}
 
 	init(children: INode<T>[] = []) {

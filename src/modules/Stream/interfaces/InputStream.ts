@@ -1,10 +1,11 @@
-import type { IInitializable } from "../../../interfaces.js"
+import type { ICopiable, IInitializable } from "../../../interfaces.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
 /**
  * This is an `IOwnedStream<T>`, `.init()`ializable with `InitType`.
  */
-export type IInputStream<T = any, InitType = any> = IOwnedStream<T> &
+export type IInputStream<T = any, InitType = any> = ICopiable &
+	IOwnedStream<T> &
 	IInitializable<[InitType]>
 
 /**

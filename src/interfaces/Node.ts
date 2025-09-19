@@ -1,6 +1,5 @@
 import type { ObjectPool } from "../classes.js"
 import type {
-	ICopiable,
 	IFreeable,
 	IInitializable,
 	IPushable,
@@ -51,7 +50,7 @@ export interface ITypeCheckable {
  * 4. finding the next child in a tree that, based on the `startIndex` argument,
  * 	hasn't yet been visited (in the context of a given iteration order)
  */
-export interface IWalkable<T extends IWalkable<T> = any> extends ICopiable {
+export interface IWalkable<T extends IWalkable<T> = any> {
 	readonly lastChild: number
 	read: (index: number) => T
 	index: (multindex: readonly number[]) => T

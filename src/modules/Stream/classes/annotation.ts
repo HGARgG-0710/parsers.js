@@ -19,14 +19,9 @@ export abstract class annotation<T = any, Args extends any[] = any[]>
 {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
-
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract copy(): this
-
 	abstract init(...args: Partial<Args> | []): this
-
 	abstract [Symbol.iterator](): Generator<T>
-
 	constructor(...x: [] | Partial<Args>) {}
 }

@@ -1,5 +1,4 @@
 import type {
-	ICopiable,
 	IGettable,
 	IPushable,
 	IReadable,
@@ -17,8 +16,7 @@ import type {
  * will via the `.freeze/.unfreeze()` methods.
  */
 export interface IAccumulator<T = any, Accumulated = T>
-	extends ICopiable,
-		IPushable<T>,
+	extends IPushable<T>,
 		IGettable<Accumulated>,
 		IUnfreezable {}
 
@@ -30,8 +28,6 @@ export interface IAccumulator<T = any, Accumulated = T>
  * via the `.read(i: number)` method to be persistent
  * (that is, to *not* change over time, unless explicitly
  * `.writ`-ten to).
- *
- * Note that it is (also) a valid `IParseable<T>`
  */
 export interface IPersistentAccumulator<T = any>
 	extends IAccumulator<T, readonly T[]>,

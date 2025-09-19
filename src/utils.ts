@@ -1,5 +1,6 @@
 import { BadIndex } from "./constants.js"
 import type { IResource } from "./interfaces.js"
+import { isCopiable } from "./is.js"
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -17,6 +18,14 @@ export function withResource<T = any>(
 	const retval = callback(resource)
 	resource.cleanup()
 	return retval
+}
+
+/**
+ * Carries out a conditional call to `x.copy()` if it
+ * can be made.
+ */
+export function tryCopy<T = any>(x: T) {
+	return isCopiable(x) ? x.copy() : x
 }
 
 export * as IndexMap from "./utils/IndexMap.js"
