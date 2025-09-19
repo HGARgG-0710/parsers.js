@@ -4,6 +4,7 @@ import type {
 	IFinishable,
 	IInputStream,
 	INavigable,
+	IPeekable,
 	IPeekableStream
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
@@ -58,10 +59,10 @@ function BuildInputStream<T = any>(): typeof InputStreamAnnotation<T> {
 	return class
 		extends SourceStream.generic!<T, IParseable<T>>()
 		implements
-			IPeekableStream<T>,
+			IInputStream<T, IParseable<T>>,
+			IPeekable<T>,
 			INavigable<T>,
 			IFinishable<T>,
-			IInputStream<T, IParseable<T>>,
 			IPosed<number>
 	{
 		protected ["constructor"]: new (source?: IParseable<T>) => this

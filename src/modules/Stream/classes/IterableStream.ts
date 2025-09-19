@@ -7,10 +7,10 @@ import { annotation } from "./annotation.js"
  * which walks through the entirety of the current stream,
  * returning each item one by one.
  */
-export abstract class IterableStream<
-	T = any,
-	Args extends any[] = any[]
-> extends annotation<T, Args> {
+export abstract class IterableStream<T = any, Args extends any[] = any[]>
+	extends annotation<T, Args>
+	implements Iterable<T>
+{
 	*[Symbol.iterator]() {
 		while (!this.isEnd) {
 			yield this.curr

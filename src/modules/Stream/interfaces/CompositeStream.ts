@@ -27,10 +27,7 @@ export type IRawStreamArray = IRawStream[]
  * `IStreamChoice` used to build the structure
  * on an `ILinkedStream`-by-`ILinkedStream` basis.
  */
-export interface IStreamChooser {
-	(prevStream?: IOwnedStream): IRawStreamArray
-	readonly isSwitch?: false
-}
+export type IStreamChooser = (prevStream?: IOwnedStream) => IRawStreamArray
 
 /**
  * This is an `IArray` of `IRawStream`s.
@@ -49,11 +46,11 @@ export type IStreamArray = IArray<IRawStream>
  * verifies possibility of restructuring of
  * current recursive-`ILinkedStream` structure,
  * and, if possible, does so. Also used for
- * submitting changes to `.streams`. Returns 
- * `true` if the renewal was successful (more 
+ * submitting changes to `.streams`. Returns
+ * `true` if the renewal was successful (more
  * items for the underlying `IStream` structure
- * to handle), and `false` on failure (no more 
- * items to handle). 
+ * to handle), and `false` on failure (no more
+ * items to handle).
  *
  * 2. `readonly .streams: IStreamArray` property,
  * which permits the user to modify the internals

@@ -1,7 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICopiable,
-	IInitializable,
 	IOwnedStream,
 	IParseState,
 	IPosed,
@@ -65,7 +64,7 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  * behave the same way as if the user had written the entire parser manually.
  *
  * The greatest benefit of the library for any application employing a parser
- * is precisely this - the ability of `IStream`s to represent simple,
+ * is precisely this - the ability of `IStream`s to represent primitive,
  * granular operations allows one to make extremely simple, highly maintainable
  * and modular code.
  *
@@ -83,20 +82,12 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
  * Iterating through the __very last__ element from the very first
  * requires that `.isCurrEnd() == true` and `.isEnd == false`).
  */
-export type IStream<T = any> = Partial<INavigable<T>> &
-	Partial<IFinishable<T>> &
-	Partial<IStateHaving> &
-	Partial<IInitializable> &
-	Partial<IPeekable<T>> &
-	Partial<IResourceful> &
-	Partial<IPosed<number>> &
-	Partial<Iterable<T>> &
-	ICopiable & {
-		readonly curr: T
-		readonly isEnd: boolean
-		isCurrEnd: () => boolean
-		next: () => void
-	}
+export interface IStream<T = any> extends ICopiable {
+	readonly curr: T
+	readonly isEnd: boolean
+	isCurrEnd: () => boolean
+	next: () => void
+}
 
 /**
  * This is an `IStream<T>` that is `IPeekable<T>`
@@ -135,6 +126,7 @@ export type IStreamGenerator<T = any, Out = any> = (
 	parentMap?: ITableHandler<IIterableStream<T>>
 ) => Generator<Out>
 
+export type * from "../modules/Stream/interfaces/AccumulatorStream.js"
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
 export type * from "../modules/Stream/interfaces/HandlerStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"

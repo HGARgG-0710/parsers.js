@@ -1,12 +1,13 @@
+import type { ICopiable } from "../../../interfaces.js"
 import { mixin } from "../../../mixin.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 import { AttachedStream, AttachedStreamAnnotation } from "./AttachedStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 
-export class IdentityStreamAnnotation<
-	T = any,
-	Args extends any[] = []
-> extends AttachedStreamAnnotation<T, Args> {
+export class IdentityStreamAnnotation<T = any, Args extends any[] = []>
+	extends AttachedStreamAnnotation<T, Args>
+	implements ICopiable
+{
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
 	copy(): this {

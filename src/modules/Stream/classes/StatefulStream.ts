@@ -1,4 +1,5 @@
 import type { IParseState, IStateful } from "../../../interfaces.js"
+import { annotation } from "./annotation.js"
 
 /**
  * This is an abstract class implementing `IStateful<IParseState>`.
@@ -9,7 +10,10 @@ import type { IParseState, IStateful } from "../../../interfaces.js"
  * purpose of a more fine-grained and flexible refactoring of a
  * given `IStream`-implementing class.
  */
-export abstract class StatefulStream implements IStateful<IParseState> {
+export abstract class StatefulStream<T = any>
+	extends annotation<T>
+	implements IStateful<IParseState>
+{
 	private _state: IParseState
 
 	private set state(newState: IParseState) {
