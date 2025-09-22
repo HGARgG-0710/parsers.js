@@ -1,54 +1,28 @@
-import { closeSync, fstatSync, openSync } from "fs"
-import type { ICharacterSource } from "../interfaces.js"
+import type { IByteSource, ICharacterSource } from "../interfaces.js"
 import type { IDecoder } from "../interfaces/Decoder.js"
 import { ResourceManager } from "./ResourceManager.js"
 
 /**
- * This is a class implementing `ISource`. 
- * It utilizes a user-provided `IDecoder` using 
- * dependency-injection, and provides one with a 
- * read access to a given `filename: string`. 
-*/
+ * This is a class implementing `ISource`.
+ * It utilizes a user-provided `IDecoder` using
+ * dependency-injection, and provides one with a
+ * read access to a given `filename: string`.
+ */
 export class ReadingSource implements ICharacterSource {
-	["constructor"]: new (filename: string) => this
+	["constructor"]: new (byteSource: IByteSource) => this
 
-	private readonly descriptor: number
-	private readonly size: number
-
-	private _decoded: string
-	private _isOpen: boolean
-	private decoder: IDecoder
-
-	private maybeAssignDecoded(maybeDecoded: string | false) {
-		if (maybeDecoded) this.assignDecoded(maybeDecoded)
-	}
-
-	private assignDecoded(decoded: string) {
-		this.decoded = decoded
-	}
-
-	private set isOpen(newIsOpen: boolean) {
-		this._isOpen = newIsOpen
-	}
+	private readonly decoder: IDecoder
 
 	get isOpen() {
-		return this._isOpen
-	}
-
-	private set decoded(newDecoded: string) {
-		this._decoded = newDecoded
+		return this.byteSource.isOpen
 	}
 
 	get decoded() {
-		return this._decoded
+		return this.decoder.currChar
 	}
 
-	get pos() {
-		return this.decoder.pos
-	}
-
-	nextChar(i: number = 1): void {
-		this.maybeAssignDecoded(this.decoder.nextChar(i))
+	nextChar(): void {
+		this.decoder.nextChar()
 	}
 
 	hasChars() {
@@ -56,35 +30,24 @@ export class ReadingSource implements ICharacterSource {
 	}
 
 	cleanup() {
-		if (this.isOpen) {
-			closeSync(this.descriptor)
-			this.isOpen = false
-		}
-	}
-
-	init(decoder?: IDecoder) {
-		if (decoder) this.decoder = decoder.init(this.descriptor, this.size)
-		return this
-	}
-
-	rewind() {
-		this.decoder.rewind()
+		this.byteSource.cleanup()
 	}
 
 	copy() {
-		return new this.constructor(this.filename)
+		return new this.constructor(this.byteSource)
 	}
 
-	constructor(private readonly filename: string) {
-		this.descriptor = openSync(filename, "r")
-		this.size = fstatSync(this.descriptor).size
-		this.isOpen = true
+	constructor(
+		private readonly byteSource: IByteSource,
+		decoderFactory: (byteSource: IByteSource) => IDecoder
+	) {
+		this.decoder = decoderFactory(byteSource)
 	}
 }
 
 export namespace ReadingSource {
 	/**
-	 * The `ResourceManager` for the `ReadingSource` class. 
-	*/
+	 * The `ResourceManager` for the `ReadingSource` class.
+	 */
 	export const manager = new ResourceManager(ReadingSource)
 }

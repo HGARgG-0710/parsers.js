@@ -1,4 +1,4 @@
-import type { IPosed, IResource, IVisiblyOpen } from "../interfaces.js"
+import type { IResource, IVisiblyOpen } from "../interfaces.js"
 
 /**
  * This is an interface for representing a lazily readable
@@ -6,12 +6,8 @@ import type { IPosed, IResource, IVisiblyOpen } from "../interfaces.js"
  * which can be `.rewind()`-ed (and, hence, reused), and the
  * position of which can be tracked via the `readonly .pos: number`
  */
-export interface ICharacterSource
-	extends IResource,
-		IVisiblyOpen,
-		IPosed<number> {
+export interface ICharacterSource extends IResource, IVisiblyOpen {
 	hasChars: () => boolean
-	nextChar: (n?: number) => void
-	rewind: () => void
+	nextChar: () => void
 	readonly decoded: string
 }

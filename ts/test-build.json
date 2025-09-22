@@ -3,19 +3,15 @@
 		"baseUrl": "..",
 		"outDir": "../dist",
 		"strictNullChecks": true,
-		"lib": [
-			"ESNext"
-		],
+		"lib": ["ESNext", "DOM"],
 		"target": "ES2020",
 		"module": "node16",
 		"moduleResolution": "node16",
 		"verbatimModuleSyntax": true,
 		"paths": {
-			"@hgargg-0710/*": [
-				"../node_modules/@hgargg-0710/*"
-			]
+			"@hgargg-0710/*": ["../node_modules/@hgargg-0710/*"]
 		},
-		"noUnusedLocals": true, 
+		"noUnusedLocals": true,
 		"sourceMap": true
 	},
 	"exclude": [
@@ -25,7 +21,5 @@
 		"../**/interfaces.ts",
 		"../types.ts"
 	],
-	"include": [
-		"../**/*.ts"
-	]
+	"include": ["../**/*.ts"]
 }

@@ -1,17 +1,3 @@
-import type { IInitializable } from "../interfaces.js"
-
-/**
- * This is a type for representing the descriptor to a
- * source file.
- */
-export type ISourceDescriptor = number
-
-/**
- * This is a type for representing the size of the
- * given source file in bytes
- */
-export type ISize = number
-
 /**
  * This is the interface for representing the objects
  * capable of a decoding operation, performed over a
@@ -28,9 +14,8 @@ export type ISize = number
  * the input [always lesser-than-or-equal to the provided
  * `ISize` of the source file].
  */
-export interface IDecoder extends IInitializable<[ISourceDescriptor, ISize]> {
-	nextChar(i?: number): false | string
+export interface IDecoder {
+	nextChar(i?: number): void
 	hasChars(): boolean
-	rewind(): void
-	readonly pos: number
+	readonly currChar: string
 }

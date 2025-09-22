@@ -1,15 +1,9 @@
-import { type } from "@hgargg-0710/one"
-import type { IPosed, ICharacterSource } from "../../../interfaces.js"
+import type { ICharacterSource } from "../../../interfaces.js"
 import type {
 	IInputStream,
-	INavigable,
 	ISourcedStream
 } from "../../../interfaces/Stream.js"
-import { uniNavigate } from "../../../utils/Stream.js"
-import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
-
-const { isNumber } = type
 
 /**
  * This is a class extending `SourceStream<string, ISource>`, and
@@ -26,15 +20,13 @@ const { isNumber } = type
 export class LazyStream
 	extends SourceStream.generic!<string, ICharacterSource>()
 	implements
-		INavigable<string>,
-		IPosed<number>,
 		IInputStream<string, ICharacterSource>,
 		ISourcedStream<string, ICharacterSource>
 {
 	readonly source?: ICharacterSource
 
-	private nextDecoded(n?: number) {
-		this.source!.nextChar(n)
+	private nextDecoded() {
+		this.source!.nextChar()
 	}
 
 	protected currGetter() {
@@ -46,24 +38,8 @@ export class LazyStream
 		return this.currGetter()
 	}
 
-	get pos() {
-		return this.source!.pos
-	}
-
 	isCurrEnd() {
 		return !this.source!.hasChars()
-	}
-
-	navigate(pos: IStreamPosition) {
-		if (isNumber(pos)) this.nextDecoded(pos)
-		else uniNavigate(this, pos)
-		this.updateCurr()
-		return this.curr
-	}
-
-	setResource(source: ICharacterSource): void {
-		source.rewind()
-		super.setResource(source)
 	}
 
 	copy(): this {

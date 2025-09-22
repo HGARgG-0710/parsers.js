@@ -1,321 +1,114 @@
-import { array, boolean, number, object, type } from "@hgargg-0710/one"
-import assert from "node:assert"
-import { readSync } from "node:fs"
-import type {
-	IDecoder,
-	ISize,
-	ISourceDescriptor
-} from "../interfaces/Decoder.js"
-import { Initializable } from "./Initializer.js"
+import type { IByteSource, IDecoder } from "../interfaces.js"
 
-const { numbers } = array
-const { extendPrototype } = object
-const { ConstDescriptor } = object.descriptor
-const { isEven } = number
-const { T } = boolean
-const { isUndefined } = type
+abstract class PreDecoder implements IDecoder {
+	protected abstract getEncoding(): string
+	protected abstract encodingSize(): number
+	protected abstract shouldStop(i: number): boolean
 
-function readBytes(
-	source: ISourceDescriptor,
-	target: Buffer,
-	pos: number,
-	length: number = 1,
-	offset: number = 0
-) {
-	readSync(source, target, offset, length, pos)
-}
+	private readonly decoder: TextDecoder
+	private readonly toDecode: Uint8Array[] = []
+	protected readonly tempBytes: Uint8Array
 
-function getBasicDecodingMethodFor(encoding: BufferEncoding) {
-	return function (this: PreDecoder) {
-		return this.temp.toString(encoding)
-	}
-}
+	private currSize: number
+	private _decoded: string
 
-const preDecoderInitializer = {
-	init(target: PreDecoder, source?: number, size?: number) {
-		if (!isUndefined(source)) target.setDescriptor(source)
-		if (!isUndefined(size)) target.setSize(size)
-	}
-}
-
-abstract class PreDecoder
-	extends Initializable<[number, number]>
-	implements IDecoder
-{
-	private ["constructor"]: new (source?: number, size?: number) => this
-
-	private _pos: number = 0
-	private _descriptor: ISourceDescriptor
-	private _size: ISize
-
-	protected readonly temp: Buffer
-
-	protected abstract read(): number
-	protected abstract decode(buffer?: Buffer): string
-
-	private set descriptor(newDescriptor: number) {
-		this._descriptor = newDescriptor
+	private get currBuffer() {
+		return this.toDecode[this.currSize]
 	}
 
-	protected get descriptor() {
-		return this._descriptor
+	private set currChar(newDecoded: string) {
+		this._decoded = newDecoded
 	}
 
-	private set size(newSize: number) {
-		this._size = newSize
+	get currChar() {
+		return this._decoded
 	}
 
-	protected get size() {
-		return this._size
+	private fromTemp() {
+		for (let i = 0; i < this.currBuffer.length; ++i)
+			this.currBuffer[i] = this.tempBytes[i]
 	}
 
-	private set pos(newPos: number) {
-		this._pos = newPos
+	private pickSize() {
+		for (let i = 0; i < this.encodingSize(); ++i) {
+			if (this.shouldStop(i)) {
+				this.currSize = i
+				break
+			}
+			this.tempBytes[i] = this.byteSource.currByte
+			if (this.byteSource.hasBytes()) this.byteSource.nextByte()
+		}
 	}
 
-	protected get initializer() {
-		return preDecoderInitializer
+	private decodeCurr() {
+		this.currChar = this.decoder.decode(this.currBuffer)
 	}
 
-	get pos() {
-		return this._pos
+	nextChar() {
+		this.pickSize()
+		this.fromTemp()
+		this.decodeCurr()
 	}
 
-	private copyLastOf(n: number) {
-		while (n-- && this.hasChars()) this.copySingleChar()
+	hasChars(): boolean {
+		return this.byteSource.hasBytes()
 	}
 
-	private furtherAwayAt(n: number) {
-		this.copyLastOf(n)
-		return this.decodeLastCopied()
+	constructor(private readonly byteSource: IByteSource) {
+		this.decoder = new TextDecoder(this.getEncoding())
+		this.tempBytes = new Uint8Array(this.encodingSize())
+		for (let i = 0; i < this.encodingSize(); ++i)
+			this.toDecode.push(new Uint8Array(i))
 	}
-
-	protected advance(n: number) {
-		this.pos += n
-	}
-
-	protected readBytes(length: number = 1, offset: number = 0) {
-		readBytes(this.descriptor, this.temp, this.pos, length, offset)
-		this.advance(length)
-	}
-
-	protected copySingleChar() {
-		this.read()
-	}
-
-	protected decodeLastCopied() {
-		return this.decode(this.temp)
-	}
-
-	setDescriptor(source: number) {
-		this.descriptor = source
-	}
-
-	setSize(size: number) {
-		this.size = size
-	}
-
-	hasChars() {
-		return this.size > this.pos
-	}
-
-	nextChar(n = 1) {
-		return this.hasChars() && this.furtherAwayAt(n)
-	}
-
-	copy() {
-		return new this.constructor(this.descriptor, this.size)
-	}
-
-	rewind() {
-		this.pos = 0
-	}
-}
-
-abstract class PreMultiByteDecoder extends PreDecoder {
-	private currBuffer: Buffer
-	private tempRead: number
-	private isTemp: boolean
-
-	protected readonly charSizes: (Buffer | null)[]
-	protected abstract decode(buffer: Buffer): string
-
-	private static transferFromTemp(instance: PreMultiByteDecoder) {
-		instance.temp.copy(instance.currBuffer)
-	}
-
-	private maybeTransferFromTemp() {
-		if (!this.isTemp) PreMultiByteDecoder.transferFromTemp(this)
-	}
-
-	private assignCurrBuffer(currSize: number) {
-		this.currBuffer = this.charSizes[currSize]!
-	}
-
-	private readLeftovers(currSize: number) {
-		this.readBytes(currSize - this.tempRead)
-	}
-
-	private fillCurrBuffer(currSize: number) {
-		this.maybeTransferFromTemp()
-		this.readLeftovers(currSize)
-	}
-
-	private reassignCurrBuffer(currSize: number) {
-		this.assignCurrBuffer(currSize)
-		this.fillCurrBuffer(currSize)
-	}
-
-	private pickCurrSize(size: number) {
-		return this.isTemp ? this.temp.length : size
-	}
-
-	private setupNewCurrBuffer(size: number) {
-		this.reassignCurrBuffer(this.pickCurrSize(size))
-	}
-
-	private pickBuffer(size: number) {
-		this.setupNewCurrBuffer(size)
-		return this.currBuffer
-	}
-
-	protected fromTemp() {
-		this.isTemp = true
-		return this.temp.length
-	}
-
-	protected fillFirstDefault(length: number = 1) {
-		readBytes(this.descriptor, this.temp, this.pos, length, 0)
-		this.advance(length)
-		this.tempRead = length
-	}
-
-	protected readBytes(length: number = 1) {
-		readBytes(
-			this.descriptor,
-			this.currBuffer,
-			this.pos,
-			length,
-			this.temp.length
-		)
-
-		this.advance(length)
-	}
-
-	protected copySingleChar() {
-		this.pickBuffer(this.read())
-	}
-
-	protected decodeLastCopied() {
-		return this.decode(this.currBuffer)
-	}
-}
-
-abstract class _PreMultiByteDecoder extends PreMultiByteDecoder {
-	protected decode: (buffer: Buffer) => string
-}
-
-function Decoder(
-	maxSize: number,
-	encoding: BufferEncoding
-): new () => IDecoder {
-	class decoder extends PreDecoder {
-		protected readonly temp = Buffer.alloc(maxSize)
-		protected read: () => number
-		protected decode: () => string
-	}
-
-	extendPrototype(decoder, {
-		read: ConstDescriptor(function (this: PreDecoder) {
-			this.readBytes(maxSize)
-			return maxSize
-		}),
-		decode: ConstDescriptor(getBasicDecodingMethodFor(encoding))
-	})
-
-	return decoder
-}
-
-function MultiByteDecoder(
-	maxSize: number,
-	encoding: BufferEncoding,
-	defaultSize: number,
-	toPick: (size: number) => boolean = T
-): abstract new () => _PreMultiByteDecoder {
-	assert(0 < defaultSize)
-	assert(defaultSize <= maxSize)
-
-	abstract class multiByteDecoder extends _PreMultiByteDecoder {
-		protected readonly charSizes = numbers(maxSize).map((size) =>
-			toPick(size + 1) ? Buffer.alloc(size + 1) : null
-		)
-
-		protected readonly temp = this.charSizes[defaultSize - 1]!
-
-		protected decode: () => string
-	}
-
-	extendPrototype(multiByteDecoder, {
-		decode: ConstDescriptor(getBasicDecodingMethodFor(encoding)),
-		defaultSize: ConstDescriptor(defaultSize)
-	})
-
-	return multiByteDecoder
 }
 
 /**
  * A class implementing the `IDecoder` interface that works with
  * the Latin-1 encoding.
  */
-export const Decoder8 = Decoder(1, "latin1")
+export class Decoder8 extends PreDecoder {
+	protected getEncoding(): string {
+		return "latin1"
+	}
 
-/**
- * A class implementing the `IDecoder` interface that works with
- * the UCS2 encoding.
- */
-export const Decoder16 = Decoder(2, "ucs2")
+	protected encodingSize(): number {
+		return 1
+	}
 
-/**
- * A class implementing the `IDecoder` interface that works with
- * the UTF-8 encoding.
- */
-export class DecoderU8 extends MultiByteDecoder(4, "utf8", 1) {
-	protected read(): number {
-		this.fillFirstDefault(1)
-
-		const firstByte = this.temp[0]
-
-		// * U+0000-U+007F
-		if (firstByte >> 7 === 0) return this.fromTemp()
-
-		// * U+0080-U+07FF
-		if (firstByte & 0b11000000) return 1
-
-		// * U+0800-U+FFFF
-		if (firstByte & 0b11100000) return 2
-
-		// * U+010000-U+10FFFF
-		if (firstByte & 0b11110000) return 3
-
-		// invalid codepoint
-		throw new RangeError("Invalid UTF8-encoded codepoint given")
+	protected shouldStop(i: number): boolean {
+		return false
 	}
 }
 
 /**
  * A class implementing the `IDecoder` interface that works with
- * the little-endian UTF-16 encoding.
+ * the UTF-8 encoding.
  */
-export class DecoderU16LE extends MultiByteDecoder(4, "utf16le", 2, isEven) {
-	protected read(): number {
-		this.fillFirstDefault(2)
+export class DecoderU8 extends PreDecoder {
+	protected getEncoding(): string {
+		return "utf8"
+	}
 
-		const firstByte = this.temp[0]
-
-		// * U+0000-U+D7FF, U+E000-U+FFFF
-		if (firstByte <= 0xd7 || firstByte >= 0xe0) return this.fromTemp()
-
-		// * surrogate pairs
+	protected encodingSize(): number {
 		return 4
+	}
+
+	protected shouldStop(i: number): boolean {
+		const firstByte = this.tempBytes[0]
+		switch (i) {
+			case 0:
+				// * U+0000-U+007F
+				return firstByte >> 7 === 0
+			case 1:
+				// * U+0080-U+07FF
+				return (firstByte & 0b11000000) !== 0
+			case 2:
+				// * U+0800-U+FFFF
+				return (firstByte & 0b11100000) !== 0
+			case 3:
+				// * U+010000-U+10FFFF
+				return (firstByte & 0b11110000) !== 0
+		}
+		throw new RangeError("Invalid UTF-8 codepoint given")
 	}
 }

@@ -301,6 +301,10 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			0. Exports: 
 				1. Verify all of the package's exports - remove undesirable/redundant ones
 
+			1. JSDOC - verify: 
+				Look through jsdoc for ALL the library's code, once the writing phase is finished and only the tests remain. 
+				Ensure that it is entirely correct [there were some radical changes here and there that could upset the docs' authenticity]. 
+
 			2. Types: 
 					2. [Consequences of removal of `prev`]; 
 						About `navigate`:
@@ -373,6 +377,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. USE A MOCK HERE (`TreeLike`)
 
 	TODO: public classes/functions/utils/etc to be tested: 
+		-4. WebByteSource [separate demo-test]
 		-3. FileDescriptor
 		-2. InvalidFileReadPositionError
 		-1. ParseError [abstract]: 
@@ -386,7 +391,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. USE A MOCK HERE! [ISettable & IIndexable]
 		
 		[hard]
-		3. `Decoder8`, `Decoder16`, `DecoderU8`, `DecoderU16LE`: 
+		3. `Decoder8`, `DecoderU8`: 
 			1. DO NOT use mocks - instead, create REAL FILES [encoded appropriately]
 		4. `WritingDestination`: 
 			1. DO NOT use mocks - instead, utilize ACTUAL `IEncoder` classes from the library. 
@@ -399,7 +404,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		5. `WritingDestination.manager`: 
 			1. This is tested DESPITE `ResourceManager` being tested as well
 			2. Use REAL-LIFE files with this thing
-		7. `Encoder8`, `Encoder16`, `EncoderU8`, `EncoderU16`
+		7. `Encoder8`, `EncoderU8`
 
 		[very hard]
 		6. `DynamicParser`: 
@@ -431,7 +436,7 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			3. Each one given SHOULD BE REAL!!! [no mocks]
 
 		[semi-easy]
-		10. `LoadedU8`, `LoadedU16`, `Loaded8`, `Loaded16`: 
+		10. `LoadedU8`, `LoadedU16`, `Loaded8`: 
 			1. Use real files
 			2. NO MOCKS
 
@@ -474,8 +479,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		19. `ReadingSource`: 
 			1. Use real files
 			2. DO NOT use mocks for `IDecoder` - use real ones: 
-				1. 2 classes, specifically
-		
+				1. 2 classes, specifically	
+
 		[above-medium]
 		20. `ReadingSource.manager`: 
 			1. Test this also, DESPITE `ResourceManager` tests
@@ -608,6 +613,9 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 	TODO: test each (public) export: 
 		AUTOMATICALLY - let they be imported via the "."-path notation. 
 		Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`
+
+	TODO: add the MISSING `.manager: ResourceManager` cases for the `IByteSource` 
+		and other `IResource`s that ahve been skipped. 
 
 	TODO: Tests
 		1. TEST the internal/ (only what makes sense)

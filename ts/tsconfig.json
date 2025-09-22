@@ -4,7 +4,8 @@
 		"outDir": "../dist",
 		"strictNullChecks": true,
 		"lib": [
-			"ESNext"
+			"ESNext",
+			"DOM"
 		],
 		"target": "ES2020",
 		"module": "node16",
@@ -15,7 +16,7 @@
 				"../node_modules/@hgargg-0710/*"
 			]
 		},
-		"noUnusedLocals": true, 
+		"noUnusedLocals": true,
 	},
 	"exclude": [
 		"../node_modules",

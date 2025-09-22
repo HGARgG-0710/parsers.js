@@ -33,37 +33,28 @@ function DecodedLoaded(
 }
 
 /**
- * A class implementing the `IParseable<string>`. 
- * Provided with a `filename: string`, it reads its 
- * contents as a UTF-8 file, and then provides the 
- * `IParseable<string>` methods for interacting 
+ * A class implementing the `IParseable<string>`.
+ * Provided with a `filename: string`, it reads its
+ * contents as a UTF-8 file, and then provides the
+ * `IParseable<string>` methods for interacting
  * with the resulting `string`
-*/
+ */
 export const LoadedU8 = DecodedLoaded("utf8")
 
 /**
- * A class implementing the `IParseable<string>`. 
- * Provided with a `filename: string`, it reads its 
- * contents as a little-endian UTF-16 file, and then provides the 
- * `IParseable<string>` methods for interacting 
+ * A class implementing the `IParseable<string>`.
+ * Provided with a `filename: string`, it reads its
+ * contents as a little-endian UTF-16 file, and then provides the
+ * `IParseable<string>` methods for interacting
  * with the resulting `string`
-*/
+ */
 export const LoadedU16LE = DecodedLoaded("utf-16le")
 
 /**
- * A class implementing the `IParseable<string>`. 
- * Provided with a `filename: string`, it reads its 
- * contents as a Latin1 file, and then provides the 
- * `IParseable<string>` methods for interacting 
+ * A class implementing the `IParseable<string>`.
+ * Provided with a `filename: string`, it reads its
+ * contents as a Latin1 file, and then provides the
+ * `IParseable<string>` methods for interacting
  * with the resulting `string`
-*/
+ */
 export const Loaded8 = DecodedLoaded("latin1")
-
-/**
- * A class implementing the `IParseable<string>`. 
- * Provided with a `filename: string`, it reads its 
- * contents as a UCS2 file, and then provides the 
- * `IParseable<string>` methods for interacting 
- * with the resulting `string`
-*/
-export const Loaded16 = DecodedLoaded("ucs2")

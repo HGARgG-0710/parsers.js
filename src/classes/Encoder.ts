@@ -6,14 +6,14 @@ const { max } = number
 abstract class PreEncoder implements IEncoder {
 	["constructor"]: new (charCount: number) => this
 
-	private _buffer: Buffer
+	private _buffer: Uint8Array
 	private _size: number
 	private length: number
 
 	protected abstract readonly maxCharBytes: number
-	protected abstract readonly encoding: BufferEncoding
+	protected abstract encode(input: string, buffer: Uint8Array): number
 
-	private set buffer(newBuffer: Buffer) {
+	private set buffer(newBuffer: Uint8Array) {
 		this._buffer = newBuffer
 	}
 
@@ -42,7 +42,7 @@ abstract class PreEncoder implements IEncoder {
 	}
 
 	private realloc(byteSize: number) {
-		this.buffer = Buffer.alloc(byteSize)
+		this.buffer = new Uint8Array(byteSize)
 	}
 
 	private maybeRealloc(charCount: number) {
@@ -56,11 +56,11 @@ abstract class PreEncoder implements IEncoder {
 	}
 
 	private writeEncoded(input: string) {
-		this.encodedSize = this.buffer.write(input, this.encoding)
+		this.encodedSize = this.encode(input, this.buffer)
 	}
 
 	private initialAlloc(size: number) {
-		this.buffer = Buffer.alloc(this.worstByteSizeEstimate(size))
+		this.buffer = new Uint8Array(this.worstByteSizeEstimate(size))
 	}
 
 	get encodedSize() {
@@ -85,41 +85,37 @@ abstract class PreEncoder implements IEncoder {
 	}
 }
 
-function Encoder(
-	maxChars: number,
-	encoding: BufferEncoding
-): new (charCount: number) => IEncoder {
-	return class extends PreEncoder {
-		protected get maxCharBytes() {
-			return maxChars
-		}
+/**
+ * A class implementing the `IEncoder` interface, working
+ * with the Latin1 encoding
+ */
+export class Encoder8 extends PreEncoder {
+	protected get maxCharBytes() {
+		return 1
+	}
 
-		protected get encoding() {
-			return encoding
+	protected encode(input: string, buffer: Uint8Array): number {
+		let written = 0
+		for (const char of input) {
+			buffer[written] = Math.min(char.codePointAt(0)!, 255)
+			++written
 		}
+		return written
 	}
 }
 
 /**
- * A class implementing the `IEncoder` interface, working 
- * with the Latin1 encoding
-*/
-export const Encoder8 = Encoder(1, "latin1")
-
-/**
- * A class implementing the `IEncoder` interface, working 
- * with the UCS2 encoding
-*/
-export const Encoder16 = Encoder(2, "ucs2")
-
-/**
- * A class implementing the `IEncoder` interface, working 
+ * A class implementing the `IEncoder` interface, working
  * with the UTF-8 encoding
-*/
-export const EncoderU8 = Encoder(4, "utf-8")
+ */
+export class EncoderU8 extends PreEncoder {
+	private readonly encoder = new TextEncoder()
 
-/**
- * A class implementing the `IEncoder` interface, working 
- * with the little-endian UTF-16 encoding 
- */ 
-export const EncoderU16LE = Encoder(4, "utf-16le")
+	protected get maxCharBytes() {
+		return 4
+	}
+
+	protected encode(input: string, buffer: Uint8Array): number {
+		return this.encoder.encodeInto(input, buffer).written
+	}
+}

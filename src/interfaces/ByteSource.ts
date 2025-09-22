@@ -1,4 +1,4 @@
-import type { IResource, ISizeable, IVisiblyOpen } from "../interfaces.js"
+import type { IResource, IVisiblyOpen } from "../interfaces.js"
 
 /**
  * This is an interface for representing a source for
@@ -6,7 +6,7 @@ import type { IResource, ISizeable, IVisiblyOpen } from "../interfaces.js"
  * value of which can be changed to the byte after the
  * current one via the call to `nextByte()`.
  */
-export interface IByteSource extends IResource, IVisiblyOpen, ISizeable {
+export interface IByteSource extends IResource, IVisiblyOpen {
 	readonly currByte: number
 	nextByte(): void
 	hasBytes(): boolean
