@@ -1,3 +1,5 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import type { ILinkedStream, IOwnedStream } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
@@ -10,6 +12,8 @@ class SingletonStreamAnnotation<In = any, Out = any>
 	implements ILinkedStream<Out>
 {
 	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
+
+	static readonly pool: ObjectPool<SingletonStreamAnnotation, [IOwnedStream]>
 
 	protected get initializer() {
 		return ownerInitializer
@@ -24,6 +28,8 @@ class SingletonStreamAnnotation<In = any, Out = any>
 	setResource(resource: IOwnedStream) {}
 
 	next(): void {}
+
+	free(): void {}
 
 	isCurrEnd(): boolean {
 		return false
@@ -45,9 +51,17 @@ class SingletonStreamAnnotation<In = any, Out = any>
 const SingletonStreamMixin = new mixin<ILinkedStream>(
 	{
 		name: "SingletonStream",
+		static: {
+			pool: (classObj) =>
+				Pools.Stream.add(
+					new ObjectPool(
+						classObj as new (
+							resource?: IOwnedStream
+						) => ILinkedStream
+					)
+				)
+		},
 		properties: {
-			handler: null,
-
 			setResource(resource: IOwnedStream) {
 				this.super.OwningStream.setResource.call(this, resource)
 				this.curr = this.handler(resource)
@@ -88,6 +102,6 @@ export function SingletonStream<In = any, Out = any>(
 	handler: ISingletonHandler<In, Out>
 ) {
 	return function (resource?: IOwnedStream<In>): ILinkedStream<Out> {
-		return new _SingletonStream().setHandler(handler).init(resource)
+		return _SingletonStream.pool.create().setHandler(handler).init(resource)
 	}
 }

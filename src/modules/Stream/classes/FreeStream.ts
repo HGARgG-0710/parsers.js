@@ -14,6 +14,8 @@ function BuildFreeStream<T extends IFreeable = any>() {
 			this.freeable = null
 		}
 
+		free(): void {}
+
 		setResource(resource: IOwnedStream) {
 			super.setResource(resource)
 			this.enqueueCurrForFreeing()

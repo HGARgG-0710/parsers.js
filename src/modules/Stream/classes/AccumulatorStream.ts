@@ -1,18 +1,33 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import type { IOwnedStream, IPushable, IStorage } from "../../../interfaces.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 class AccumulatorStreamAnnotation<T = any> extends IdentityStreamAnnotation<T> {
+	static readonly pool: ObjectPool<
+		AccumulatorStreamAnnotation,
+		[IOwnedStream]
+	>
+
 	setStorage(storage: IPushable<T>) {
 		return this
 	}
 }
 
 function BuildAccumulatorStream<T = any>() {
-	return class extends IdentityStream.generic!<T>() {
+	class AccumulatorStream extends IdentityStream.generic!<T>() {
+		static readonly pool = Pools.Stream.add(
+			new ObjectPool(AccumulatorStream)
+		)
+
 		private storage: IStorage<T>
 
 		private pushCurr() {
 			this.storage.push(this.curr)
+		}
+
+		protected get pool(): ObjectPool<AccumulatorStream, [IOwnedStream]> {
+			return AccumulatorStream.pool
 		}
 
 		setStorage(storage: IStorage<T>) {
@@ -29,6 +44,8 @@ function BuildAccumulatorStream<T = any>() {
 			return super.copy().setStorage(this.storage.copy())
 		}
 	}
+
+	return AccumulatorStream
 }
 
 let accumulatorStream: typeof AccumulatorStreamAnnotation | null = null
@@ -52,6 +69,6 @@ function PreAccumulatorStream<T = any>() {
 export function AccumulatorStream<T = any>(storage: IStorage<T>) {
 	const accumulatorStream = PreAccumulatorStream<T>()
 	return function (stream?: IOwnedStream<T>) {
-		return new accumulatorStream().setStorage(storage).init(stream)
+		return accumulatorStream.pool.create().setStorage(storage).init(stream)
 	}
 }

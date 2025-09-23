@@ -1,6 +1,12 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import { RetainedArray } from "../../../classes/RetainedArray.js"
-import type { IInitializable, IInitializer } from "../../../interfaces.js"
+import type {
+	IInitializable,
+	IInitializer,
+	IPoolKeeping
+} from "../../../interfaces.js"
 import type {
 	ILinkedStream,
 	IOwnedStream,
@@ -9,8 +15,10 @@ import type {
 	IStream
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
+import { mixin } from "../../../mixin.js"
 import { write } from "../../../utils/Stream.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
+import { PoolableStream } from "./PoolableStream.js"
 
 interface IPeekResettable {
 	resetPeeks(): void
@@ -20,11 +28,6 @@ interface IPeekProvidableFor<T = any> {
 	trivialPeek(): T
 	newPeek(n: number): T
 }
-
-type IPeekStreamConstructor<T = any> = new (
-	resource?: IOwnedStream,
-	n?: number
-) => ILinkedStream<T> & IPeekable<T> & IPeekResettable
 
 /**
  * This is a class for providing lookaheads
@@ -126,68 +129,83 @@ const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 }
 
 function BuildPeekStream<T = any>() {
-	return class
-		extends DyssyncOwningStream.generic!<T, []>()
-		implements IPeekable<T>
-	{
-		protected get initializer() {
-			return peekStreamInitializer
-		}
+	return new mixin<ILinkedStream<T> & IPeekable<T>>(
+		{
+			name: "PeekStream",
+			static: {
+				pool: (classObj) =>
+					Pools.Stream.add(
+						new ObjectPool(
+							classObj as new (
+								resource?: IOwnedStream<T>
+							) => ILinkedStream<T> & IPeekable<T>
+						)
+					)
+			},
+			properties: {
+				baseNextIter() {
+					super.next()
+					this.syncCurr()
+				},
 
-		private readonly peekProvider: PeekProvider<T>
-		private readonly tempWriter = new TempWriter<T>()
+				fetchNextPeek() {
+					this.curr = this.peekProvider.fetchNext()
+				},
 
-		private baseNextIter() {
-			super.next()
-			this.syncCurr()
-		}
+				toTemp(count: number) {
+					this.tempWriter.toTemp(this.resource!, count)
+				},
 
-		private fetchNextPeek() {
-			this.curr = this.peekProvider.fetchNext()
-		}
+				get pool() {
+					return this.class.pool
+				},
 
-		private toTemp(count: number) {
-			this.tempWriter.toTemp(this.resource!, count)
-		}
+				get initializer() {
+					return peekStreamInitializer
+				},
 
-		trivialPeek() {
-			return this.curr
-		}
+				trivialPeek() {
+					return this.curr
+				},
 
-		newPeek(count: number) {
-			this.toTemp(count)
-			this.peekProvider.push(this.tempWriter.get())
-			return this.peekProvider.last()
-		}
+				newPeek(count: number) {
+					this.toTemp(count)
+					this.peekProvider.push(this.tempWriter.get())
+					return this.peekProvider.last()
+				},
 
-		peek(n: number) {
-			return this.peekProvider.provide(n, this)
-		}
+				peek(n: number) {
+					return this.peekProvider.provide(n, this)
+				},
 
-		isCurrEnd(): boolean {
-			return super.isCurrEnd() && this.peekProvider.hasNone()
-		}
+				isCurrEnd(): boolean {
+					return super.isCurrEnd() && this.peekProvider.hasNone()
+				},
 
-		next() {
-			if (this.isCurrEnd()) this.endStream()
-			else if (this.peekProvider.hasAny()) this.fetchNextPeek()
-			else this.baseNextIter()
-		}
+				next() {
+					if (this.isCurrEnd()) this.endStream()
+					else if (this.peekProvider.hasAny()) this.fetchNextPeek()
+					else this.baseNextIter()
+				},
 
-		resetPeeks() {
-			this.peekProvider.reset()
-		}
-
-		constructor(resource?: IOwnedStream<T>, n: number = 1) {
-			super(resource)
-			this.peekProvider = new PeekProvider(n)
-		}
-	}
+				resetPeeks() {
+					this.peekProvider.reset()
+				}
+			},
+			constructor(resource?: IOwnedStream<T>) {
+				this.super.DyssyncOwningStream.constructor.call(this, resource)
+				this.peekProvider = new PeekProvider(1)
+				this.tempWriter = new TempWriter()
+			}
+		},
+		[],
+		[DyssyncOwningStream, PoolableStream]
+	) as unknown as IPoolKeeping<IPeekStream<T>>
 }
 
-let peekStream: IPeekStreamConstructor | null = null
+let peekStream: IPoolKeeping<IPeekStream> | null = null
 
-function PrePeekStream<T = any>(): IPeekStreamConstructor<T> {
+function PrePeekStream<T = any>() {
 	return peekStream ? peekStream : (peekStream = BuildPeekStream<T>())
 }
 
@@ -203,14 +221,9 @@ function PrePeekStream<T = any>(): IPeekStreamConstructor<T> {
  * Note that `.peek` doesn't actually change the current position,
  * so it's possible to call `.peek(n)` several times without `.next()`
  * in between, and expect the same result.
- *
- * The provided `n` is the initial (expected) lookahead. Making
- * a good guess for `n` can enable one to free oneself from needing
- * purposeless re-sizing of the lookahead-array.
  */
-export function PeekStream<T = any>(n: number) {
-	const peekStream = PrePeekStream()
-	return function (resource?: IOwnedStream<T>): IPeekStream<T> {
-		return new peekStream(resource, n)
-	}
+export function PeekStream<T = any>(
+	resource?: IOwnedStream<T>
+): IPeekStream<T> {
+	return PrePeekStream().pool.create(resource)
 }

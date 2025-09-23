@@ -1,85 +1,90 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
+import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ILinkedStream,
 	IOwnedStream,
 	IStreamPosition
 } from "../../../interfaces/Stream.js"
+import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
 import { bind } from "../utils/StreamPosition.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
+import { PoolableStream } from "./PoolableStream.js"
 
-interface IPredicateSettable<T = any> {
-	setFilter(predicate: IStreamPosition<T>): this
-}
+function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
+	return new mixin<ILinkedStream<T>>(
+		{
+			name: "FilterStream",
+			static: {
+				pool: (classObj) =>
+					Pools.Stream.add(
+						new ObjectPool(
+							classObj as new (
+								resource?: IOwnedStream<T>
+							) => ILinkedStream<T>
+						)
+					)
+			},
+			properties: {
+				currGetter() {
+					this.updateCurr()
+					this.prod()
+				},
 
-type IFilterStreamConstructor<T = any> = new (
-	resource?: IOwnedStream<T>
-) => ILinkedStream<T> & IPredicateSettable<T>
+				updateCurr() {
+					this.curr = this.lookahead
+				},
 
-function BuildFilterStream<T = any>() {
-	return class extends DyssyncOwningStream.generic!<T, []>() {
-		private hasLookahead: boolean = false
-		private lookahead: T
-		private filter: IStreamPosition<T>
+				prod() {
+					this.lookahead = navigate(this.resource!, this.filter)
+					this.hasLookahead = this.resource!.isEnd
+				},
 
-		private currGetter() {
-			this.updateCurr()
-			this.prod()
-		}
+				setResource(newResource: IOwnedStream): void {
+					super.setResource(newResource)
+					this.prod()
+					this.updateCurr()
+				},
 
-		private updateCurr() {
-			this.curr = this.lookahead
-		}
+				isCurrEnd(): boolean {
+					return !this.hasLookahead
+				},
 
-		private prod() {
-			this.lookahead = navigate(this.resource!, this.filter)
-			this.hasLookahead = this.resource!.isEnd
-		}
+				next() {
+					super.next()
+					if (this.isCurrEnd()) this.endStream()
+					else this.currGetter()
+				},
 
-		setResource(newResource: IOwnedStream): void {
-			super.setResource(newResource)
-			this.prod()
-			this.updateCurr()
-		}
+				init(resource?: IOwnedStream<T>) {
+					return super.init(resource)
+				},
 
-		isCurrEnd(): boolean {
-			return !this.hasLookahead
-		}
-
-		next() {
-			super.next()
-			if (this.isCurrEnd()) this.endStream()
-			else this.currGetter()
-		}
-
-		setFilter(filter: IStreamPosition<T>) {
-			this.filter = bind(this, filter)
-			return this
-		}
-
-		init(resource?: IOwnedStream<T>) {
-			return super.init(resource)
-		}
-	}
-}
-
-let filterStream: IFilterStreamConstructor | null = null
-
-function PreFilterStream<T = any>(): IFilterStreamConstructor<T> {
-	return filterStream ? filterStream : (filterStream = BuildFilterStream<T>())
+				get pool() {
+					return this.class.pool
+				}
+			},
+			constructor(resource?: IOwnedStream<T>) {
+				this.super.DyssyncOwningStream.constructor.call(this, resource)
+				this.filter = bind(this, filter)
+			}
+		},
+		[],
+		[DyssyncOwningStream, PoolableStream]
+	).toClass() as unknown as IPoolKeeping<ILinkedStream<T>, [IOwnedStream<T>]>
 }
 
 /**
  * This is a function for creation of `ILinkedStream<T>` factories.
  * These streams are characterized by filtering their input through
- * the `condition: IStreamPosition<T>`, and only allowing the items,
+ * the `filter: IStreamPosition<T>`, and only allowing the items,
  * for which the filter returns true [when predicate]. When it's a
  * numeric filter, only every `n`th item is returned (where `n = condition`).
  */
-export function FilterStream<T = any>(condition: IStreamPosition<T>) {
-	const filterStream = PreFilterStream<T>()
-	return function (resource?: IOwnedStream<T>) {
-		return new filterStream()
-			.setFilter(condition)
-			.init(resource) as ILinkedStream<T>
+export function FilterStream<T = any>(filter: IStreamPosition<T>) {
+	const filterStream = BuildFilterStream(filter)
+	return function (resource?: IOwnedStream<T>): ILinkedStream<T> {
+		return filterStream.pool.create(resource)
 	}
 }

@@ -1,51 +1,20 @@
-import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IParseState } from "../../../interfaces.js"
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
+import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	IControlStream,
+	ILinkedStream,
 	IOwnedStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import type { IHandler } from "../interfaces/HandlerStream.js"
-import {
-	BasicResourceStream,
-	BasicResourceStreamAnnotation
-} from "./BasicResourceStream.js"
+import { BasicResourceStream } from "./BasicResourceStream.js"
+import { PoolableStream } from "./PoolableStream.js"
 import { StatefulStream } from "./StatefulStream.js"
 
-class HandlerStreamAnnotation<
-	In = any,
-	Out = any
-> extends BasicResourceStreamAnnotation<Out, []> {
-	protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
-
-	readonly state: IParseState
-
-	protected baseNextIter(): Out {
-		return null as Out
-	}
-
-	protected initGetter() {
-		return null as any
-	}
-
-	protected postInit() {}
-
-	get resource(): IOwnedStream<In> {
-		return null as any
-	}
-
-	isCurrEnd() {
-		return false
-	}
-
-	setState(state: Summat) {}
-
-	setHandler(handler: (stream: IOwnedStream<In>) => Out) {
-		return this
-	}
-}
-
-function BuildBeforeHandlerStream<In = any, Out = any>() {
+function BuildBeforeHandlerStream<In = any, Out = any>(
+	handler: IHandler<In, Out>
+) {
 	abstract class BeforeHandlerStream extends BasicResourceStream.generic!<Out>() {
 		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
@@ -74,30 +43,43 @@ function BuildBeforeHandlerStream<In = any, Out = any>() {
 			return this.resource!.isCurrEnd()
 		}
 
-		setHandler(handler: IHandler<In, Out>) {
-			this.handler = handler
-			return this
+		constructor(resource?: IOwnedStream<In>) {
+			super()
+			this.handler = handler.bind(this)
+			this.init(resource)
 		}
 	}
 
 	return BeforeHandlerStream
 }
 
-function BuildHandlerStream<In = any, Out = any>() {
-	return new mixin(
+function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
+	return new mixin<IControlStream<Out>>(
 		{
 			name: "HandlerStream",
-			properties: {},
+			static: {
+				pool: (classObj) =>
+					Pools.Stream.add(
+						new ObjectPool(
+							classObj as new (
+								resource?: IOwnedStream<In>
+							) => ILinkedStream<Out>
+						)
+					)
+			},
+			properties: {
+				get pool() {
+					return this.class.pool
+				}
+			},
 			constructor(...args: any[]) {
 				this.super.BeforeHandlerStream.constructor.call(this, ...args)
 			}
 		},
 		[],
-		[BuildBeforeHandlerStream(), StatefulStream]
-	).toClass() as unknown as typeof HandlerStreamAnnotation<In, Out>
+		[BuildBeforeHandlerStream(handler), StatefulStream, PoolableStream]
+	).toClass() as unknown as IPoolKeeping<IControlStream<Out>>
 }
-
-const handlerStream = BuildHandlerStream()
 
 /**
  * This is a function for creation of factories of objects implementing `IControlStream<Out>`.
@@ -112,10 +94,9 @@ const handlerStream = BuildHandlerStream()
 export function HandlerStream<In = any, Out = any>(
 	handler: (stream: IOwnedStream<In>) => Out
 ) {
-	return function (
-		resource?: IOwnedStream<In>
-	): IControlStream<Out> & Iterable<Out> {
-		return new handlerStream().setHandler(handler).init(resource)
+	const handlerStream = BuildHandlerStream(handler)
+	return function (resource?: IOwnedStream<In>): IControlStream<Out> {
+		return handlerStream.pool.create(resource)
 	}
 }
 

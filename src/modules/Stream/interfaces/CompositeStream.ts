@@ -1,4 +1,4 @@
-import type { IArray, ICopiable, IInitializable } from "../../../interfaces.js"
+import type { IArray, ICopiable } from "../../../interfaces.js"
 import type {
 	IControlStream,
 	ILinkedStream,
@@ -68,8 +68,7 @@ export type IStreamArray = IArray<IRawStream>
  * ever need to for whatever reason.
  */
 export type ICompositeStream<T = any> = ICopiable &
-	IControlStream<T> &
-	IInitializable<[IOwnedStream?]> & {
+	IControlStream<T> & {
 		renewResource: () => boolean
 		renewStream: (stream: ILinkedStream) => void
 		readonly streams: IStreamArray

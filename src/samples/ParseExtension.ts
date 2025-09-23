@@ -37,10 +37,10 @@ import type { ICompositeStream, IInputStream } from "../interfaces.js"
  * 	}
  * ```
  */
-export function ParseExtension<InType = any, InitType = any>(
-	workerStream: ICompositeStream
+export function ParseExtension<InType = any, InitType = any, OutType = any>(
+	workerStream: ICompositeStream<OutType>
 ) {
-	const protoExtension = DynamicParser(workerStream, new IdentityStream())
+	const protoExtension = DynamicParser(workerStream, IdentityStream())
 	return function (childStream: IInputStream<InType, InitType>) {
 		return protoExtension(childStream)
 	}

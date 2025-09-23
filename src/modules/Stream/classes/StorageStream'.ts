@@ -1,3 +1,5 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import type { IHandler, IOwnedStream } from "../../../interfaces/Stream.js"
 import type { IStorageStream } from "../interfaces/StorageStream.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
@@ -6,6 +8,8 @@ class StorageStreamAnnotation<
 	T = any,
 	Stored = any
 > extends IdentityStreamAnnotation<T> {
+	static readonly pool: ObjectPool<StorageStreamAnnotation, [IOwnedStream]>
+
 	get currStored(): Stored {
 		return null as Stored
 	}
@@ -16,10 +20,12 @@ class StorageStreamAnnotation<
 }
 
 function BuildStorageStream<T = any, Stored = any>() {
-	return class
+	return class StorageStream
 		extends IdentityStream.generic!<T, []>()
 		implements IStorageStream<T, Stored>
 	{
+		static readonly pool = Pools.Stream.add(new ObjectPool(StorageStream))
+
 		private handler: IHandler<T, Stored>
 		private _currStored: Stored
 
@@ -27,12 +33,16 @@ function BuildStorageStream<T = any, Stored = any>() {
 			this._currStored = newCurrStored
 		}
 
-		get currStored() {
-			return this._currStored
-		}
-
 		private updateStored() {
 			this.currStored = this.handler(this.resource!)
+		}
+
+		get pool() {
+			return StorageStream.pool
+		}
+
+		get currStored() {
+			return this._currStored
 		}
 
 		setResource(newResource: IOwnedStream): void {
@@ -85,6 +95,6 @@ export function StorageStream<T = any, Stored = any>(
 ) {
 	const storageStream = PreStorageStream<T, Stored>()
 	return function (resource?: IOwnedStream<T>): IStorageStream<T, Stored> {
-		return new storageStream().setHandler(handler).init(resource)
+		return storageStream.pool.create().setHandler(handler).init(resource)
 	}
 }

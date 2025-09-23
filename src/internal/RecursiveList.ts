@@ -1,8 +1,9 @@
 import { array, inplace, type } from "@hgargg-0710/one"
+import { Pools } from "../../main.js"
 import { Initializable } from "../classes/Initializer.js"
 import { ObjectPool } from "../classes/ObjectPool.js"
 import { MissingArgument } from "../constants.js"
-import type { IInitializable, IInitializer } from "../interfaces.js"
+import type { IFreeable, IInitializable, IInitializer } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 
 const { insert, mutate, out } = inplace
@@ -10,33 +11,35 @@ const { first, clear } = array
 const { isUndefined } = type
 
 interface ISwitchIdentifiable {
-	readonly isSwitch?: boolean
+	readonly isSwitch: boolean
 }
 
 type IDerivedList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
+	T extends ITerminalAcceptable = any,
+	Recursive = any
 > = RecursiveList.Poolable<T, Recursive>
 
 type IRecursivelySwitchable<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > = Terminal<T, Recursive> | Switch<T, Recursive, InitType>
 
 type IRecursiveItems<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
+	T extends ITerminalAcceptable = any,
+	Recursive = any
 > = IRecursivelySwitchable<T, Recursive>[]
 
 type IPreRecursiveItems<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
+	T extends ITerminalAcceptable = any,
+	Recursive = any
 > = (IRecursivelySwitchable<T, Recursive> | T | Recursive)[]
 
+type ITerminalAcceptable = IInitializable & IFreeable
+
 function isSwitch<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 >(x: ISwitchIdentifiable): x is Switch<T, Recursive, InitType> {
 	return x.isSwitch === true
@@ -63,10 +66,14 @@ abstract class ListIndexHaving {
  * More specifically, a 'Switch' is an "optional" recursion point.
  */
 export class Switch<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends ListIndexHaving {
+	static readonly pool = Pools.Internal.add(
+		new ObjectPool<Switch, [any]>(Switch)
+	)
+
 	private _recursive: Recursive
 	private _list: IDerivedList<T, Recursive>
 	private renewer: RecursiveList.Renewer<T, Recursive>
@@ -106,7 +113,7 @@ export class Switch<
 
 	recycle() {
 		this.recycleSubs()
-		switchPool.free(this)
+		Switch.pool.free(this)
 	}
 
 	constructor(recursive: Recursive) {
@@ -115,19 +122,19 @@ export class Switch<
 	}
 }
 
-export const switchPool = new ObjectPool<[any], Switch>(Switch)
-
 /**
  * This is a wrapper-class around a terminal `T`,
  * implementation of `ITerminal<T, Recursive>`, serving as
  * a way to encapsulate its functionality.
  */
 class Terminal<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any
-	>
-	extends ListIndexHaving
-{
+	T extends ITerminalAcceptable = any,
+	Recursive = any
+> extends ListIndexHaving {
+	static readonly pool = Pools.Internal.add(
+		new ObjectPool<Terminal, [any]>(Terminal)
+	)
+
 	private _terminal: T
 	private _parentList: SwitchArray<T, Recursive>
 
@@ -161,24 +168,22 @@ class Terminal<
 	}
 
 	recycle() {
-		terminalPool.free(this)
+		this.terminal.free()
+		Terminal.pool.free(this)
 	}
 }
 
-const terminalPool = new ObjectPool<[any], Terminal>(Terminal)
-
-function wrapSwitch<Recursive extends ISwitchIdentifiable = any>(r: Recursive) {
-	return switchPool.create(r)
+function wrapSwitch<Recursive = any>(r: Recursive) {
+	return Switch.pool.create(r)
 }
 
-function wrapTerminal<T extends IInitializable = any>(t: T) {
-	return terminalPool.create(t)
+function wrapTerminal<T extends ITerminalAcceptable = any>(t: T) {
+	return Terminal.pool.create(t)
 }
 
-function unwrap<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
->(wrapped: IRecursivelySwitchable<T, Recursive>) {
+function unwrap<T extends ITerminalAcceptable = any, Recursive = any>(
+	wrapped: IRecursivelySwitchable<T, Recursive>
+) {
 	return isSwitch(wrapped) ? wrapped.recursive : wrapped.terminal
 }
 
@@ -191,8 +196,8 @@ interface IRenewerSettable {
 }
 
 interface IDeepListSettable<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
+	T extends ITerminalAcceptable = any,
+	Recursive = any
 > {
 	setDeepList(deepList: DeepList<T, Recursive>): void
 }
@@ -229,8 +234,8 @@ const recursiveListInitializer: IInitializer<[RecursiveList.Renewer, any[]]> = {
 }
 
 abstract class RenewerHaving<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any,
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
 		InitType = any
 	>
 	extends Initializable<[RecursiveList.Renewer<T, Recursive>]>
@@ -258,8 +263,8 @@ abstract class RenewerHaving<
 }
 
 class UniversalRenewer<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends RenewerHaving<T, Recursive, InitType> {
 	private asTerminal(
@@ -282,10 +287,7 @@ class UniversalRenewer<
  * all have the same version of the variable,
  * and can modify/access it as-necessary.
  */
-class LastInitialized<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
-> {
+class LastInitialized<T extends ITerminalAcceptable = any, Recursive = any> {
 	private lastInitialized: T | null = null
 
 	get() {
@@ -313,8 +315,8 @@ class LastInitialized<
  * as well as the `.init` method that expects a `RecursiveList.Renewer`.
  */
 abstract class BaseEvaluableList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends RenewerHaving<T, Recursive, InitType> {
 	private expandEvaluated(
@@ -358,8 +360,8 @@ abstract class BaseEvaluableList<
  * essential for the two algorithms in question.
  */
 abstract class EvaluableListWithLastItem<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends BaseEvaluableList<T, Recursive, InitType> {
 	protected pickLastItem(evalWith: InitType) {
@@ -394,8 +396,8 @@ abstract class EvaluableListWithLastItem<
  * where it would (otherwise) would have been difficult/impossible.
  */
 class SwitchableEvaluator<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends BaseEvaluableList<T, Recursive, InitType> {
 	evalSwitchable(
@@ -438,8 +440,8 @@ class FoundSwitchFlag {
  * quits and returns `false`.
  */
 class RenewableList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends EvaluableListWithLastItem<T, Recursive, InitType> {
 	private readonly foundSwitch = new FoundSwitchFlag()
@@ -518,8 +520,8 @@ class RenewableList<
  * internal `.items` is handled by the `.renew`
  */
 class EvaluableList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends EvaluableListWithLastItem<T, Recursive, InitType> {
 	private readonly evaluator = new SwitchableEvaluator<
@@ -550,10 +552,7 @@ class EvaluableList<
  * The `.getBy` method, in particular, is the one that makes the
  * `RecursiveList.prototype.renewItem` method implementation feasible.
  */
-export class DeepList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any
-> {
+export class DeepList<T extends ITerminalAcceptable = any, Recursive = any> {
 	private readonly byTerminals: Map<T, [SwitchArray<T, Recursive>, number]> =
 		new Map()
 
@@ -562,8 +561,8 @@ export class DeepList<
 	 * given `parent`
 	 */
 	private getAt(parent: SwitchArray<T, Recursive>, index: number) {
-		// The reasoning here is - since one follows encapsulation, 
-		// and only ever puts `Terminal<T, Recursive>`, it is obvious 
+		// The reasoning here is - since one follows encapsulation,
+		// and only ever puts `Terminal<T, Recursive>`, it is obvious
 		// that this will be the type we'll get, and not a `Switch`
 		return parent.get(index) as Terminal<T, Recursive>
 	}
@@ -600,8 +599,8 @@ export class DeepList<
  * exception.
  */
 class PinpointRenewableList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any
 > extends BaseEvaluableList<T, Recursive, InitType> {
 	private readonly evaluator = new SwitchableEvaluator()
@@ -700,8 +699,8 @@ const switchArrayInitializer = {
  * structure of a `DynamicParser`.
  */
 class SwitchArray<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any,
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
 		InitType = any
 	>
 	extends Initializable<
@@ -838,8 +837,8 @@ class SwitchArray<
  * be leading to recursion within the structure of the list.
  */
 export class RecursiveList<
-	T extends IInitializable = any,
-	Recursive extends ISwitchIdentifiable = any,
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
 	InitType = any,
 	InitArgs extends any[] = []
 > extends Initializable<
@@ -942,8 +941,8 @@ export namespace RecursiveList {
 	 * based on the current `Recursive` element, and the last evaluated `T`.
 	 */
 	export abstract class Renewer<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any,
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
 		InitType = any
 	> {
 		abstract isRecursive(x: any): x is Recursive
@@ -965,8 +964,8 @@ export namespace RecursiveList {
 	}
 
 	export abstract class RootList<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any,
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
 		InitType = any,
 		InitArgs extends any[] = []
 	> {
@@ -1027,8 +1026,8 @@ export namespace RecursiveList {
 	 * for correct recursive pool reclamation routine.
 	 */
 	export abstract class Poolable<
-		T extends IInitializable = any,
-		Recursive extends ISwitchIdentifiable = any,
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
 		InitType = any,
 		InitArgs extends any[] = []
 	> extends RecursiveList<T, Recursive, InitType, InitArgs> {

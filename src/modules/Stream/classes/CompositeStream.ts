@@ -130,6 +130,8 @@ function BuildBeforeCompositeStream<T = any>() {
 			)
 		}
 
+		free(): void {}
+
 		renewStream(stream: ILinkedStream) {
 			this.streamList!.renewItem(stream)
 		}
@@ -184,6 +186,8 @@ function BuildCompositeStream<T = any>() {
 				get initializer() {
 					return compositeStreamInitializer
 				},
+
+				free() {},
 
 				setState(state: IParseState) {
 					this.super.StatefulStream.setState(state)

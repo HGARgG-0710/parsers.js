@@ -1,30 +1,30 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import { LineIndex } from "../../../classes/Position.js"
 import type { ILineIndex } from "../../../interfaces.js"
 import type { IOwnedStream } from "../../../interfaces/Stream.js"
-import type { IIndexStream } from "../interfaces/IndexStream.js"
-import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
+import type {
+	IIndexStream,
+	INewlinePredicate
+} from "../interfaces/IndexStream.js"
+import { IdentityStream } from "./IdentityStream.js"
 
-class IndexStreamAnnotation<T = any>
-	extends IdentityStreamAnnotation<T>
-	implements IIndexStream<T>
-{
-	readonly lineIndex: ILineIndex
-
-	setNewlinePredicate(isNewline: (resource: IOwnedStream<T>) => boolean) {
-		return this
-	}
-}
-
-function BuildIndexStream<T = any>() {
-	return class
+function BuildIndexStream<T = any>(isNewline: INewlinePredicate<T>) {
+	return class IndexStream
 		extends IdentityStream.generic!<T, []>()
 		implements IIndexStream<T>
 	{
-		private isNewline: (resource: IOwnedStream<T>) => boolean
+		static readonly pool = Pools.Stream.add(new ObjectPool(IndexStream))
+
+		private isNewline: INewlinePredicate<T>
 
 		private lineIndexTransition() {
 			if (this.isNewline(this.resource!)) this.lineIndex.nextLine()
 			else this.lineIndex.nextChar()
+		}
+
+		get pool() {
+			return IndexStream.pool
 		}
 
 		next() {
@@ -32,26 +32,15 @@ function BuildIndexStream<T = any>() {
 			this.lineIndexTransition()
 		}
 
-		setNewlinePredicate(isNewline: (stream: IOwnedStream<T>) => boolean) {
-			this.isNewline = isNewline
-			return this
-		}
-
 		constructor(
 			resource?: IOwnedStream<T>,
 			public readonly lineIndex: ILineIndex = new LineIndex()
 		) {
-			super(resource)
+			super()
+			this.isNewline = isNewline.bind(this)
+			this.init(resource)
 		}
-	} as typeof IndexStreamAnnotation<T>
-}
-
-let indexStream: typeof IndexStreamAnnotation | null = null
-
-function PreIndexStream<T = any>(): typeof IndexStreamAnnotation<T> {
-	return indexStream
-		? indexStream
-		: (indexStream = BuildIndexStream<T>() as typeof IndexStreamAnnotation)
+	}
 }
 
 /**
@@ -69,11 +58,9 @@ function PreIndexStream<T = any>(): typeof IndexStreamAnnotation<T> {
  * The Stream is useful for error diagnostics in `IStream`-based input validators,
  * and/or robust parsers.
  */
-export function IndexStream<T = any>(
-	isNewline: (resource: IOwnedStream<T>) => boolean
-) {
-	const indexStream = PreIndexStream<T>()
+export function IndexStream<T = any>(isNewline: INewlinePredicate<T>) {
+	const indexStream = BuildIndexStream<T>(isNewline)
 	return function (resource?: IOwnedStream<T>) {
-		return new indexStream().setNewlinePredicate(isNewline).init(resource)
+		return indexStream.pool.create(resource)
 	}
 }

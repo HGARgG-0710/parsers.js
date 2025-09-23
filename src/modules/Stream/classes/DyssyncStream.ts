@@ -1,4 +1,4 @@
-import type { IInitializable, IStream } from "../../../interfaces.js"
+import type { IStream } from "../../../interfaces.js"
 
 /**
  * This is an abstract class implementing `IStream<T>` and `IInitializable<Args>`.
@@ -9,7 +9,7 @@ import type { IInitializable, IStream } from "../../../interfaces.js"
  * and `.startStream` [sets `.isEnd = false`]
  */
 export abstract class DyssyncStream<T = any, Args extends any[] = []>
-	implements IStream<T>, IInitializable<Args>
+	implements IStream<T>
 {
 	private _curr: T
 	private _isEnd: boolean = false
@@ -41,8 +41,6 @@ export abstract class DyssyncStream<T = any, Args extends any[] = []>
 	abstract isCurrEnd(): boolean
 
 	abstract next(): void
-
-	abstract init(...args: Partial<Args>): this
 
 	abstract [Symbol.iterator](): Generator<T>
 }

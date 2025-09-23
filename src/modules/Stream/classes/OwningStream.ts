@@ -14,7 +14,7 @@ import type { IOwnedStream } from "../interfaces/OwnedStream.js"
  * it provides no concrete methods/properties.
  */
 export abstract class OwningStream<T = any, Args extends any[] = []>
-	extends Initializable<[IOwnedStream, ...(Args | [])]>
+	extends Initializable<[IOwnedStream, ...Args]>
 	implements IResourcefulStream<T>
 {
 	abstract readonly isEnd: boolean

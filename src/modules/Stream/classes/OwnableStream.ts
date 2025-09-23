@@ -11,7 +11,7 @@ import { annotation } from "./annotation.js"
  * by its children classes alone.
  */
 export abstract class OwnableStream<T = any, Args extends any[] = []>
-	extends annotation<T, Args>
+	extends annotation<T>
 	implements IOwnedStream<T>
 {
 	private _owner?: IOwningStream

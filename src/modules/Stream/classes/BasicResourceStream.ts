@@ -1,21 +1,14 @@
 import { mixin } from "../../../mixin.js"
-import type {
-	ILinkedStream,
-	IOwnedStream,
-	IOwningStream
-} from "../interfaces/OwnedStream.js"
+import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
 import { BasicStream } from "./BasicStream.js"
 import { OwningStream } from "./OwningStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
 export abstract class BasicResourceStreamAnnotation<
-		T = any,
-		Args extends any[] = []
-	>
-	extends OwningStream<T, Args>
-	implements ILinkedStream<T>
-{
+	T = any,
+	Args extends any[] = []
+> extends OwningStream<T, Args> {
 	protected ["constructor"]: new (
 		resource?: IOwnedStream,
 		...args: Args | []
@@ -59,7 +52,7 @@ export abstract class BasicResourceStreamAnnotation<
 	*[Symbol.iterator]() {}
 }
 
-const BasicResourceStreamMixin = new mixin<ILinkedStream>(
+const BasicResourceStreamMixin = new mixin<IOwnedStream & IOwningStream>(
 	{
 		name: "BasicResourceStream",
 		properties: {},

@@ -1,4 +1,4 @@
-import type { IInitializable, IStream } from "../../../interfaces.js"
+import type { IStream } from "../../../interfaces.js"
 
 /**
  * This is the base "annotation" class for the `IStream`-implementing
@@ -11,17 +11,12 @@ import type { IInitializable, IStream } from "../../../interfaces.js"
  *
  * It provides no concrete methods or properties,
  * only `abstract` ones. It also guarantees that the
- * deriving annotation class will implement the `IStream<T>`
- * and `IInitializable<Args>` interfaces
+ * deriving annotation class will implement the `IStream<T>`.
  */
-export abstract class annotation<T = any, Args extends any[] = any[]>
-	implements IStream<T>, IInitializable<Args>
-{
+export abstract class annotation<T = any> implements IStream<T> {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract init(...args: Partial<Args> | []): this
 	abstract [Symbol.iterator](): Generator<T>
-	constructor(...x: [] | Partial<Args>) {}
 }

@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { ObjectPool } from "./classes.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
 
@@ -291,6 +292,18 @@ export interface IConcattable<In = any, Out = any> {
  */
 export interface IFreeable {
 	free(): void
+}
+
+/**
+ * This is an interface for representing objects for
+ * carrying existing pools to objects. Primarily intended 
+ * to represent class-like objects. 
+ */
+export interface IPoolKeeping<
+	T extends IInitializable<Args> = any,
+	Args extends any[] = any[]
+> {
+	readonly pool: ObjectPool<T, Args>
 }
 
 export type * from "./interfaces/Accumulator.js"

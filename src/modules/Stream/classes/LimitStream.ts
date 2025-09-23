@@ -1,11 +1,16 @@
 import { boolean, type } from "@hgargg-0710/one"
+import { ObjectPool } from "../../../classes.js"
 import { ownerInitializer } from "../../../classes/Initializer.js"
-import type { ILinkedStream } from "../../../interfaces/Stream.js"
+import type { IPoolKeeping } from "../../../interfaces.js"
+import type { ILinkedStream, IOwnedStream } from "../../../interfaces/Stream.js"
+import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ILimitableStream } from "../interfaces/LimitStream.js"
 import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 import { bind, equals, negate } from "../utils/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
+import { PoolableStream } from "./PoolableStream.js"
+import { Pools } from "../../../../main.js"
 
 const { isNullary } = type
 const { T } = boolean
@@ -13,15 +18,6 @@ const { T } = boolean
 interface IStateSettupable {
 	setupState(): void
 }
-
-interface ILimitSetterMethods<T = any> {
-	setFrom(from: IStreamPosition<T>): this
-	setUntil(until: IStreamPosition<T>): this
-}
-
-type ILimitStreamConsructor<T = any> = new (
-	resource?: ILimitableStream<T>
-) => ILinkedStream<T> & IStateSettupable & ILimitSetterMethods<T>
 
 const limitStreamInitializer = {
 	init(
@@ -45,8 +41,8 @@ class Lookaround<T = any> {
 		return this.hasLookaround
 	}
 
-	set(lookbehind: T) {
-		this.lookaround = lookbehind
+	set(lookaround: T) {
+		this.lookaround = lookaround
 		this.hasLookaround = true
 	}
 
@@ -59,92 +55,95 @@ class Lookaround<T = any> {
 	}
 }
 
-function BuildLimitStream<T = any>() {
-	return class extends BasicResourceStream.generic!<T>() {
-		private lookbehind = new Lookaround<T>()
-		private lookahead = new Lookaround<T>()
+function BuildLimitStream<T = any>(
+	from: IStreamPosition<T>,
+	until: IStreamPosition<T>
+) {
+	return new mixin(
+		{
+			name: "LimitStream",
+			static: {
+				pool: (classObj) =>
+					Pools.Stream.add(
+						new ObjectPool(
+							classObj as new (
+								resource?: IOwnedStream<T>
+							) => ILinkedStream<T>
+						)
+					)
+			},
+			properties: {
+				prodForth() {
+					if (!this.lookahead.has())
+						this.lookahead.set(this.prodForthWithoutLookahead())
+				},
 
-		private from: IStreamPosition<T>
-		private until: IStreamPosition<T>
+				prodForthWithoutLookahead() {
+					super.next()
+					return this.curr
+				},
 
-		protected get initializer() {
-			return limitStreamInitializer
-		}
+				baseNextIter(curr: T) {
+					this.lookahead.reset()
+					return this.resource.curr
+				},
 
-		protected set resource(newResource: ILimitableStream<T>) {
-			super.resource = newResource
-		}
+				goStartPos() {
+					navigate(this.resource!, this.from)
+				},
 
-		get resource() {
-			return super.resource as ILimitableStream<T>
-		}
+				get pool() {
+					return this.class.pool
+				},
 
-		private prodForth() {
-			if (!this.lookahead.has())
-				this.lookahead.set(this.prodForthWithoutLookahead())
-		}
+				get initializer() {
+					return limitStreamInitializer
+				},
 
-		private prodForthWithoutLookahead() {
-			super.next()
-			return this.curr
-		}
+				set resource(newResource: ILimitableStream<T>) {
+					super.resource = newResource
+				},
 
-		protected baseNextIter(curr: T) {
-			this.lookbehind.set(curr)
-			this.lookahead.reset()
-			return this.resource.curr
-		}
+				get resource() {
+					return super.resource as ILimitableStream<T>
+				},
 
-		private goStartPos() {
-			navigate(this.resource!, this.from)
-		}
+				setResource(resource: ILimitableStream<T>) {
+					super.setResource(resource)
+					this.goStartPos()
+					this.syncCurr()
+				},
 
-		setResource(resource: ILimitableStream<T>) {
-			super.setResource(resource)
-			this.goStartPos()
-			this.syncCurr()
-		}
+				setupState() {
+					this.lookahead.reset()
+				},
 
-		setupState() {
-			this.lookahead.reset()
-			this.lookbehind.reset()
-		}
+				isCurrEnd(): boolean {
+					if (this.resource.isCurrEnd()) return true
+					this.prodForth()
+					return equals(this.resource!, this.until)
+				},
 
-		isCurrEnd(): boolean {
-			if (this.resource.isCurrEnd()) return true
-			this.prodForth()
-			return equals(this.resource!, this.until)
-		}
+				next() {
+					if (this.isCurrEnd()) this.endStream()
+					else this.baseNextIter(this.curr)
+				},
 
-		next() {
-			if (this.isCurrEnd()) this.endStream()
-			else this.baseNextIter(this.curr)
-		}
-
-		init(resource?: ILimitableStream<T>) {
-			return super.init(resource)
-		}
-
-		setFrom(from: IStreamPosition<T>) {
-			this.from = bind(this, from)
-			return this
-		}
-
-		setUntil(until: IStreamPosition<T>) {
-			this.until = bind(this, until)
-			return this
-		}
-
-		constructor(resource?: ILimitableStream<T>) {
-			super(resource)
-		}
-	}
-}
-
-let limitStream: ILimitStreamConsructor | null = null
-
-function PreLimitStream<T = any>(): ILimitStreamConsructor<T> {
-	return limitStream ? limitStream : (limitStream = BuildLimitStream<T>())
+				init(resource?: ILimitableStream<T>) {
+					return super.init(resource)
+				}
+			},
+			constructor(resource?: ILimitableStream<T>) {
+				this.super.BasicResourceStream.constructor.call(this)
+				this.lookahead = new Lookaround()
+				this.until = bind(this, until)
+				this.from = bind(this, from)
+				this.init(resource)
+			}
+		},
+		[],
+		[BasicResourceStream, PoolableStream]
+	) as unknown as IPoolKeeping<ILinkedStream<T>>
 }
 
 /**
@@ -173,13 +172,10 @@ export function LimitStream<T = any>(
 	}
 
 	const until = negate(longAs)
-	const limitStream = PreLimitStream<T>()
+	const limitStream = BuildLimitStream<T>(from, until)
 
 	return function (resource?: ILimitableStream<T>) {
-		return new limitStream()
-			.setFrom(from)
-			.setUntil(until)
-			.init(resource) as ILinkedStream<T>
+		return limitStream.pool.create(resource)
 	}
 }
 

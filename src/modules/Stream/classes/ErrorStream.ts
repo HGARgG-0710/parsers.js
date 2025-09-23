@@ -164,7 +164,22 @@ export function DefaultErrorStream<
 >(BaseErrorStream: ErrorBase): new (resource?: IOwnedStream) => ILinkedStream {
 	abstract class M extends BaseErrorStream {}
 
+	// Vital note: we don't implement the `free()` on this thing
+	// because of the prescribed `errHandler` behaviour - it is
+	// expected that AFTER the thing is called, we no longer need
+	// to free the allocated `IStream`s.
+	//
+	// Note, however, that in case this assumption fails and there
+	// is a `try-catch` block wrapped around the parser-function
+	// inside of which this `DefaultErrorStream` is employed
+	// (one inside of which it throws), one leaks only a very
+	// insubstantial amount of memory. In order for this leak to
+	// become even remotely significant, the user must create an
+	// ungodly number of `DefaultErrorStream`s, far beyond any
+	// amount requested by any reasonable practical application
+	// of the library.
 	return class extends M {
+		free() {}
 		protected errHandler(err: any): void {
 			throw err
 		}

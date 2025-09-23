@@ -1,19 +1,15 @@
 import { mixin } from "../../../mixin.js"
-import type {
-	ILinkedStream,
-	IOwnedStream,
-	IOwningStream
-} from "../interfaces/OwnedStream.js"
+import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
 import { DelegateStream } from "./DelegateStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PipeStream } from "./PipeStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
-abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
-	extends DelegateStream<T, Args>
-	implements ILinkedStream<T>
-{
+abstract class DyssyncOwningStreamAnnotation<
+	T = any,
+	Args extends any[] = []
+> extends DelegateStream<T, Args> {
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
 	protected set isEnd(isEnd: boolean) {}
@@ -43,12 +39,12 @@ abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
 	protected syncCurr(): void {}
 }
 
-const DyssyncOwningStreamMixin = new mixin<ILinkedStream>(
+const DyssyncOwningStreamMixin = new mixin<IOwningStream & IOwnedStream>(
 	{
 		name: "DyssyncOwningMixin",
 		properties: {},
 		constructor(resource?: IOwnedStream) {
-			this.super.PipeStream.call(this, resource)
+			this.super.PipeStream.constructor.call(this, resource)
 		}
 	},
 	[PipeStream, ResourceCopyingStream, SyncCurrStream],

@@ -12,6 +12,8 @@ import { IdentityStream } from "./IdentityStream.js"
 export class WriterStream extends IdentityStream.generic!<string>() {
 	private destination: IDestination
 
+	free() {}
+
 	private write(input: string) {
 		this.destination.write(input)
 	}

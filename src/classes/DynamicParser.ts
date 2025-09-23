@@ -16,7 +16,7 @@ type IParsedStreamConstructor<
 	parseInstance: Parse<InType, FinalType, InitType>
 ) => ILinkedStream<FinalType>
 
-let parsedStreamClass: IParsedStreamConstructor | null = null
+let parsedStream: IParsedStreamConstructor | null = null
 
 function BuildParsedStream<InType = any, FinalType = any, InitType = any>() {
 	return class
@@ -36,6 +36,8 @@ function BuildParsedStream<InType = any, FinalType = any, InitType = any>() {
 			return new this.constructor(this.parseInstance.copy())
 		}
 
+		free(): void {}
+
 		constructor(
 			private readonly parseInstance: Parse<InType, FinalType, InitType>
 		) {
@@ -49,9 +51,9 @@ function ParsedStream<
 	FinalType = any,
 	InitType = any
 >(): IParsedStreamConstructor<InType, FinalType, InitType> {
-	return parsedStreamClass
-		? parsedStreamClass
-		: (parsedStreamClass = BuildParsedStream<InType, FinalType, InitType>())
+	return parsedStream
+		? parsedStream
+		: (parsedStream = BuildParsedStream<InType, FinalType, InitType>())
 }
 
 const parseInitializer = {

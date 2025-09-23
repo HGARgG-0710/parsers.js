@@ -1,4 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
+import { Pools } from "../../main.js"
 import type { IFreeable } from "../interfaces.js"
 import type {
 	ICellNode,
@@ -139,7 +140,7 @@ export const TokenNode = NodeFactory(function <T = any>(
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
-		static readonly pool = new ObjectPool(tokenNode)
+		static readonly pool = Pools.Node.add(new ObjectPool(tokenNode))
 
 		toJSON() {
 			return jsonObject
@@ -248,7 +249,7 @@ export const SingleChildNode = NodeFactory(function <T = any>(
 	class singleChildNode extends PreSingleChildNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
-		static readonly pool = new ObjectPool(singleChildNode)
+		static readonly pool = Pools.Node.add(new ObjectPool(singleChildNode))
 
 		protected get pool() {
 			return singleChildNode.pool
@@ -277,7 +278,7 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static readonly is = isType(type)
-		static readonly pool = new ObjectPool(contentNode)
+		static readonly pool = Pools.Node.add(new ObjectPool(contentNode))
 
 		protected get pool() {
 			return contentNode.pool
@@ -406,7 +407,7 @@ export const RecursiveNode = NodeFactory(function <T = any>(
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
-		static readonly pool = new ObjectPool(recursiveNode)
+		static readonly pool = Pools.Node.add(new ObjectPool(recursiveNode))
 
 		protected get pool() {
 			return recursiveNode.pool

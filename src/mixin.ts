@@ -27,9 +27,14 @@ type _IOutClass<T = any, Args extends any[] = any[]> =
 	| (abstract new (...args: Args) => T)
 	| ((...args: Args) => T & { prototype: T })
 
+type _IStaticProperty<T = any, Args extends any[] = any[]> = (
+	classObj: _IOutClass<T, Args>
+) => any
+
 interface _IMixinShape<T = any, Args extends any[] = any[]> {
 	readonly name: string
-	readonly properties: object
+	readonly properties: Record<object.ObjectKey, any>
+	readonly static?: Record<object.ObjectKey, _IStaticProperty<T, Args>>
 	readonly constructor?: _IConstructorType<T, Args>
 }
 
@@ -136,6 +141,10 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		return this.mixinShape.name
 	}
 
+	private get static() {
+		return this.mixinShape.static
+	}
+
 	private get properties() {
 		return this.mixinShape.properties
 	}
@@ -168,6 +177,29 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 				)
 			)
 		)
+	}
+
+	private configureClass() {
+		this.defineStaticMembers()
+		this.defineInstanceClassref()
+		this.initSuper()
+	}
+
+	private defineStaticMember(
+		name: object.ObjectKey,
+		propClosure: _IStaticProperty<T, Args>
+	) {
+		this.class[name] = propClosure(this.class)
+	}
+
+	private defineStaticMembers() {
+		if (this.static)
+			for (const k of keys(this.static))
+				this.defineStaticMember(k, this.static[k])
+	}
+
+	private defineInstanceClassref() {
+		this.proto.class = this.class
 	}
 
 	private initSuper() {
@@ -218,7 +250,7 @@ class sealed_mixin<T = any, Args extends any[] = any[]> {
 		classes: _IOutClass[] = []
 	) {
 		this.defineClass()
-		this.initSuper()
+		this.configureClass()
 		this.fromClasses(classes)
 		this.fromMixins(mixins)
 		this.fromProperties()
@@ -362,4 +394,14 @@ export namespace mixin {
 		T = any,
 		Args extends any[] = any[]
 	> = _IConstructorType<T, Args>
+
+	/**
+	 * This is a type representing the property-closure of an
+	 * `IMixinShape` within the optional '.static' object,
+	 * representing the static properties of the current mixin.
+	 */
+	export type IStaticProperty<
+		T = any,
+		Args extends any[] = any[]
+	> = _IStaticProperty<T, Args>
 }

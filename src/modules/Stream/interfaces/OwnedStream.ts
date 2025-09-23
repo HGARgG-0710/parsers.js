@@ -1,4 +1,8 @@
-import type { IOwnerSettable, IResourceSettable } from "../../../interfaces.js"
+import type {
+	IFreeable,
+	IOwnerSettable,
+	IResourceSettable
+} from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
 	IStatefulStream,
@@ -23,19 +27,32 @@ export type IOwnedStream<
  * and has an `init(resource?: IOwnedStream, ...x: any[])` method signature.
  * It represents a stream that is capable of taking ownership of another stream.
  */
-export interface IOwningStream<T = any>
+export interface IOwningStream<T = any, Args extends any[] = any[]>
 	extends IResourcefulStream<T>,
 		IResourceSettable<IOwnedStream> {
-	init(resource?: IOwnedStream, ...x: any[]): this
+	init(resource?: IOwnedStream, ...x: Partial<Args> | []): this
 }
 
 /**
- * This is an `IOwnedStream<T>`, which is also `IOwningStream<T>`.
+ * This is an `IOwnedStream<T>`, which is also `IOwningStream<T>`,
+ * and an `IFreeable`.
+ *
  * This is a fundamental library type, that permits implementation of
  * algorithms and data-structures used in it for parser-representation,
  * and modification.
+ *
+ * The `free()` method is not obliged to perform any meaningful work,
+ * although it is still required in order to adhere to the algorithm.
+ * The library-provided classes typically implement pool-based freeing
+ * mechanisms, that are automatically employed whenever the user creates
+ * a new `IStream`-instance.
+ *
+ * The `Args` corresponds to the additional arguments of the `init` method.
  */
-export type ILinkedStream<T = any> = IOwnedStream<T> & IOwningStream<T>
+export type ILinkedStream<
+	T = any,
+	Args extends any[] = any[]
+> = IOwnedStream<T> & IOwningStream<T, Args> & IFreeable
 
 /**
  * This is an `ILinkedStream<T>`, which is also an `IStatefulStream<T>`.

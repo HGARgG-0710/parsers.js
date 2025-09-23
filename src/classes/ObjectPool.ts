@@ -31,6 +31,11 @@ class RetainedStack<T = any> {
 		return this.usedSize === 0
 	}
 
+	empty() {
+		this.maxSize = 0
+		this.usedSize = 0
+	}
+
 	pop() {
 		return this.stack[this.usedSize--]
 	}
@@ -47,26 +52,30 @@ class RetainedStack<T = any> {
 }
 
 /**
- * A class for creation of pool objects for a given type `T`. 
- * To be used correctly, it requires that: 
- * 
+ * A class for creation of pool objects for a given type `T`.
+ * To be used correctly, it requires that:
+ *
  * 1. type `T` in question be `IInitializable<TypeArgs>`
  * 2. that constructor for the type `T` given have all of its `...args: Partial<TypeArgs> | []` optional
- * 3. that the objects of type `T` from the given constructor be (guaranteedly) re-usable, 
- * that is, it is possible to re-initialize the given object without the possibility of it 
- * being usable in a way that can be considered "incorrect". That is to say, it is entirely 
+ * 3. that the objects of type `T` from the given constructor be (guaranteedly) re-usable,
+ * that is, it is possible to re-initialize the given object without the possibility of it
+ * being usable in a way that can be considered "incorrect". That is to say, it is entirely
  * up to the user to ensure that each new `.init(...)` method allows one to treat an existing object
  * as if it is one that is being created anew. This condition, in particular, is crucial for
  * performance (since it enables pooling via `ObjectPool`), and correctness (since it
- * prevents erronous usage). 
+ * prevents erronous usage).
  * 4. that all the `.free(object: T): void` calls are made on objects that are NO LONGER in use
  * (that is to say - there are no more active references on them)
-*/
+ */
 export class ObjectPool<
-	TypeArgs extends any[] = any[],
-	T extends IInitializable<TypeArgs> = any
+	T extends IInitializable<TypeArgs> = any,
+	TypeArgs extends any[] = any[]
 > {
 	private readonly freeStack = new RetainedStack<T>()
+
+	static clear(...pools: ObjectPool[]) {
+		for (const pool of pools) pool.clear()
+	}
 
 	private allocNew(...x: Partial<TypeArgs> | []) {
 		return new this.objectConstructor(...x)
@@ -85,6 +94,10 @@ export class ObjectPool<
 
 	free(item: T) {
 		this.freeStack.push(item)
+	}
+
+	clear() {
+		this.freeStack.empty()
 	}
 
 	constructor(

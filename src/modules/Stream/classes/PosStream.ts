@@ -1,11 +1,14 @@
+import { Pools } from "../../../../main.js"
+import { ObjectPool } from "../../../classes.js"
 import type { IPositionStream } from "../../../interfaces.js"
 import type { IPosed } from "../../../interfaces/Position.js"
 import { mixin } from "../../../mixin.js"
 import type { ILinkedStream, IOwnedStream } from "../interfaces/OwnedStream.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
+import { PoolableStream } from "./PoolableStream.js"
 import { PosHavingStream } from "./PosHavingStream.js"
 
-export class PosStreamAnnotation<T = any>
+class PosStreamAnnotation<T = any>
 	extends IdentityStreamAnnotation<T>
 	implements IPositionStream<T>
 {
@@ -16,7 +19,21 @@ export class PosStreamAnnotation<T = any>
 const PosStreamMixin = new mixin<ILinkedStream & IPosed>(
 	{
 		name: "PosStream",
+		static: {
+			pool: (classObj) =>
+				Pools.Stream.add(
+					new ObjectPool(
+						classObj as new (
+							resource?: IOwnedStream
+						) => ILinkedStream & IPosed
+					)
+				)
+		},
 		properties: {
+			get pool() {
+				return this.class.pool
+			},
+
 			next() {
 				this.super.IdentityStream.next.call(this)
 				this.super.PosHavingStream.next.call(this)
@@ -28,7 +45,7 @@ const PosStreamMixin = new mixin<ILinkedStream & IPosed>(
 		}
 	},
 	[],
-	[IdentityStream, PosHavingStream]
+	[IdentityStream, PosHavingStream, PoolableStream]
 )
 
 function PrePosStream<T = any>() {
@@ -42,8 +59,8 @@ function PrePosStream<T = any>() {
  * 2. `PosHavingStream`
  *
  * For its `.next()` operation, it updates the underlying
- * `.resource: IOwnedStream`'s `.curr`, while also 
- * incrementing its `.pos` property. 
+ * `.resource: IOwnedStream`'s `.curr`, while also
+ * incrementing its `.pos` property.
  *
  * It calls both the constructors from `PosHavingStream` and `IdentityStream`
  * [in that order].

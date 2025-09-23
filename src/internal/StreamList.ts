@@ -17,6 +17,7 @@ import {
 	RecursiveList,
 	renewerInitializer
 } from "./RecursiveList.js"
+import { Pools } from "../../main.js"
 
 const { isFunction } = type
 
@@ -48,6 +49,8 @@ export class StreamList extends RecursiveList.Poolable<
 	IStreamChooser,
 	IOwnedStream
 > {
+	static readonly pool = Pools.Internal.add(new ObjectPool(StreamList))
+
 	protected renewer: StreamList.StreamRenewer
 
 	protected get initializer() {
@@ -55,7 +58,7 @@ export class StreamList extends RecursiveList.Poolable<
 	}
 
 	protected reclaim(): void {
-		streamListPool.free(this)
+		StreamList.pool.free(this)
 	}
 
 	constructor(
@@ -77,7 +80,7 @@ export namespace StreamList {
 		protected renewer: StreamRenewer
 
 		createList(streams: IRawStreamArray) {
-			return streamListPool.create(this.renewer, streams, this.asDeep)
+			return StreamList.pool.create(this.renewer, streams, this.asDeep)
 		}
 
 		protected getList(): RecursiveList<
@@ -86,7 +89,7 @@ export namespace StreamList {
 			IOwnedStream,
 			[ICompositeStream]
 		> {
-			return streamListPool.create()
+			return StreamList.pool.create()
 		}
 
 		protected getRenewer(): RecursiveList.Renewer<
@@ -153,5 +156,3 @@ export namespace StreamList {
 		}
 	}
 }
-
-export const streamListPool = new ObjectPool(StreamList)
