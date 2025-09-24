@@ -1,6 +1,10 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
-import type { ILinkedStream, IOwnedStream } from "../../../interfaces/Stream.js"
+import type {
+	ICommonStream,
+	ILinkedStream,
+	IOwnedStream
+} from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
 import type { ISingletonHandler } from "../interfaces/SingletonStream.js"
@@ -68,7 +72,9 @@ const SingletonStreamMixin = new mixin<ILinkedStream>(
 			},
 
 			copy() {
-				return new this.constructor(this.resource?.copy())
+				return new this.constructor()
+					.setHandler(this.handler)
+					.init(this.resource?.copy())
 			},
 
 			setHandler(handler: ISingletonHandler) {
@@ -101,7 +107,7 @@ const _SingletonStream = PreSingletonStream()
 export function SingletonStream<In = any, Out = any>(
 	handler: ISingletonHandler<In, Out>
 ) {
-	return function (resource?: IOwnedStream<In>): ILinkedStream<Out> {
+	return function (resource?: IOwnedStream<In>): ICommonStream<Out> {
 		return _SingletonStream.pool.create().setHandler(handler).init(resource)
 	}
 }

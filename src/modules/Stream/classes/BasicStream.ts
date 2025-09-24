@@ -7,8 +7,8 @@ import { IterableStream } from "./IterableStream.js"
 import { OwnableStream } from "./OwnableStream.js"
 
 export abstract class BasicStreamAnnotation<T = any, Args extends any[] = any[]>
-	extends DyssyncStream<T, Args>
-	implements IOwnedStream<T>
+	extends DyssyncStream<T>
+	implements IOwnedStream<T>, Iterable<T>
 {
 	protected abstract readonly initializer: IInitializer<Args>
 	protected abstract baseNextIter(curr?: T): T

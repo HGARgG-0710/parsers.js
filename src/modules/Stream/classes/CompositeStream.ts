@@ -5,6 +5,7 @@ import { MissingArgument } from "../../../constants.js"
 import type { IStateSettable } from "../../../interfaces.js"
 import type { IParseState } from "../../../interfaces/DynamicParser.js"
 import type {
+	ICommonStream,
 	ICompositeStream,
 	ILinkedStream,
 	IOwnedStream,
@@ -24,7 +25,7 @@ type ICompositeStreamConstructor<T = any> = new (
 	lowStream?: IOwnedStream,
 	rawStreams?: IRawStreamArray,
 	state?: IParseState
-) => ICompositeStream<T>
+) => ICompositeStream<T> & Iterable<T>
 
 interface ICompositeStreamLike extends IStateSettable {
 	setRawStreams(rawStreams: IRawStreamArray): void
@@ -248,7 +249,7 @@ export function CompositeStream<T = any>(...streams: IRawStreamArray) {
 	return function (
 		resource?: IOwnedStream,
 		state?: IParseState
-	): ICompositeStream<T> {
+	): ICompositeStream<T> & ICommonStream<T> {
 		return new compositeStream(resource, streams, state)
 	}
 }

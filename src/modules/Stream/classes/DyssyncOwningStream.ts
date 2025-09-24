@@ -6,10 +6,10 @@ import { PipeStream } from "./PipeStream.js"
 import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
-abstract class DyssyncOwningStreamAnnotation<
-	T = any,
-	Args extends any[] = []
-> extends DelegateStream<T, Args> {
+abstract class DyssyncOwningStreamAnnotation<T = any, Args extends any[] = []>
+	extends DelegateStream<T, Args>
+	implements Iterable<T>
+{
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
 	protected set isEnd(isEnd: boolean) {}

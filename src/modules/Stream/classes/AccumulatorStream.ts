@@ -1,6 +1,6 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
-import type { IOwnedStream, IPushable, IStorage } from "../../../interfaces.js"
+import type { ICommonStream, IOwnedStream, IPushable, IStorage } from "../../../interfaces.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
 class AccumulatorStreamAnnotation<T = any> extends IdentityStreamAnnotation<T> {
@@ -68,7 +68,7 @@ function PreAccumulatorStream<T = any>() {
  */
 export function AccumulatorStream<T = any>(storage: IStorage<T>) {
 	const accumulatorStream = PreAccumulatorStream<T>()
-	return function (stream?: IOwnedStream<T>) {
+	return function (stream?: IOwnedStream<T>): ICommonStream<T> {
 		return accumulatorStream.pool.create().setStorage(storage).init(stream)
 	}
 }

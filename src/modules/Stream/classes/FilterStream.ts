@@ -8,6 +8,7 @@ import type {
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
+import type { ICommonStream } from "../interfaces/CommonStream.js"
 import { bind } from "../utils/StreamPosition.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
@@ -72,11 +73,11 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 		},
 		[],
 		[DyssyncOwningStream, PoolableStream]
-	).toClass() as unknown as IPoolKeeping<ILinkedStream<T>, [IOwnedStream<T>]>
+	).toClass() as unknown as IPoolKeeping<ICommonStream<T>, [IOwnedStream<T>]>
 }
 
 /**
- * This is a function for creation of `ILinkedStream<T>` factories.
+ * This is a function for creation of `IFilterStream<T>` factories.
  * These streams are characterized by filtering their input through
  * the `filter: IStreamPosition<T>`, and only allowing the items,
  * for which the filter returns true [when predicate]. When it's a
@@ -84,7 +85,7 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
  */
 export function FilterStream<T = any>(filter: IStreamPosition<T>) {
 	const filterStream = BuildFilterStream(filter)
-	return function (resource?: IOwnedStream<T>): ILinkedStream<T> {
+	return function (resource?: IOwnedStream<T>): ICommonStream<T> {
 		return filterStream.pool.create(resource)
 	}
 }

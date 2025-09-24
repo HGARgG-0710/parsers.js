@@ -428,7 +428,7 @@ class DefaultingTable<K = any, V = any, Default = any>
  * table, as well as introspect its contents via `.read`,
  * or directly via the `readonly .keys/.values` properies.
  *
- * It is the one used by the `MapClass` classes' instances.
+ * It is the one used by the `IndexMap` classes' instances.
  */
 export class TableMap<K = any, V = any, Default = any>
 	implements ITableMap<K, V, Default>

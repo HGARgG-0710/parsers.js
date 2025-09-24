@@ -18,5 +18,4 @@ export abstract class annotation<T = any> implements IStream<T> {
 	abstract readonly curr: T
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract [Symbol.iterator](): Generator<T>
 }

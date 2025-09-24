@@ -8,10 +8,10 @@ import type {
 	IPoolKeeping
 } from "../../../interfaces.js"
 import type {
+	ICommonStream,
 	ILinkedStream,
 	IOwnedStream,
 	IPeekable,
-	IPeekStream,
 	IStream
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
@@ -200,14 +200,10 @@ function BuildPeekStream<T = any>() {
 		},
 		[],
 		[DyssyncOwningStream, PoolableStream]
-	) as unknown as IPoolKeeping<IPeekStream<T>>
+	) as unknown as IPoolKeeping<ICommonStream<T> & IPeekable<T>>
 }
 
-let peekStream: IPoolKeeping<IPeekStream> | null = null
-
-function PrePeekStream<T = any>() {
-	return peekStream ? peekStream : (peekStream = BuildPeekStream<T>())
-}
+const peekStream = BuildPeekStream()
 
 /**
  * This is a function for creation of factories for the `IPeekStream<T>`
@@ -224,6 +220,6 @@ function PrePeekStream<T = any>() {
  */
 export function PeekStream<T = any>(
 	resource?: IOwnedStream<T>
-): IPeekStream<T> {
-	return PrePeekStream().pool.create(resource)
+): ICommonStream<T> & IPeekable<T> {
+	return peekStream.pool.create(resource)
 }

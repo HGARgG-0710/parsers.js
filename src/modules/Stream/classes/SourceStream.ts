@@ -6,7 +6,7 @@ import { BasicStream, BasicStreamAnnotation } from "./BasicStream.js"
 export abstract class SourceStreamAnnotation<
 	T = any,
 	SourceType = any
-> extends BasicStreamAnnotation<T> {
+> extends BasicStreamAnnotation<T, [SourceType]> {
 	protected ["constructor"]: new (source?: SourceType) => this
 
 	protected source?: SourceType

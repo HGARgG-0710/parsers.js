@@ -6,9 +6,12 @@ import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
 export abstract class BasicResourceStreamAnnotation<
-	T = any,
-	Args extends any[] = []
-> extends OwningStream<T, Args> {
+		T = any,
+		Args extends any[] = []
+	>
+	extends OwningStream<T, Args>
+	implements Iterable<T>
+{
 	protected ["constructor"]: new (
 		resource?: IOwnedStream,
 		...args: Args | []

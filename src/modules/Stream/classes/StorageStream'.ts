@@ -1,6 +1,10 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
-import type { IHandler, IOwnedStream } from "../../../interfaces/Stream.js"
+import type {
+	ICommonStream,
+	IHandler,
+	IOwnedStream
+} from "../../../interfaces/Stream.js"
 import type { IStorageStream } from "../interfaces/StorageStream.js"
 import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
 
@@ -94,7 +98,9 @@ export function StorageStream<T = any, Stored = any>(
 	handler: IHandler<T, Stored>
 ) {
 	const storageStream = PreStorageStream<T, Stored>()
-	return function (resource?: IOwnedStream<T>): IStorageStream<T, Stored> {
+	return function (
+		resource?: IOwnedStream<T>
+	): IStorageStream<T, Stored> & ICommonStream<T> {
 		return storageStream.pool.create().setHandler(handler).init(resource)
 	}
 }

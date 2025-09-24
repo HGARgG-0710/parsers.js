@@ -8,10 +8,10 @@ import { DelegateStream } from "./DelegateStream.js"
 import { PipeStream } from "./PipeStream.js"
 import { SyncStream } from "./SyncStream.js"
 
-export abstract class AttachedStreamAnnotation<
-	T = any,
-	Args extends any[] = []
-> extends DelegateStream<T, Args> {
+export abstract class AttachedStreamAnnotation<T = any, Args extends any[] = []>
+	extends DelegateStream<T, Args>
+	implements Iterable<T>
+{
 	readonly isEnd: boolean
 	readonly curr: T;
 

@@ -8,9 +8,7 @@ import type { IStream } from "../../../interfaces.js"
  * `protected` methods `.endStream()` [sets `.isEnd = true`],
  * and `.startStream` [sets `.isEnd = false`]
  */
-export abstract class DyssyncStream<T = any, Args extends any[] = []>
-	implements IStream<T>
-{
+export abstract class DyssyncStream<T = any> implements IStream<T> {
 	private _curr: T
 	private _isEnd: boolean = false
 

@@ -2,7 +2,7 @@ import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import { LineIndex } from "../../../classes/Position.js"
 import type { ILineIndex } from "../../../interfaces.js"
-import type { IOwnedStream } from "../../../interfaces/Stream.js"
+import type { ICommonStream, IOwnedStream } from "../../../interfaces/Stream.js"
 import type {
 	IIndexStream,
 	INewlinePredicate
@@ -60,7 +60,9 @@ function BuildIndexStream<T = any>(isNewline: INewlinePredicate<T>) {
  */
 export function IndexStream<T = any>(isNewline: INewlinePredicate<T>) {
 	const indexStream = BuildIndexStream<T>(isNewline)
-	return function (resource?: IOwnedStream<T>) {
+	return function (
+		resource?: IOwnedStream<T>
+	): IIndexStream<T> & ICommonStream<T> {
 		return indexStream.pool.create(resource)
 	}
 }

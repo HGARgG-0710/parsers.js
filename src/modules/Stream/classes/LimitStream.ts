@@ -1,8 +1,13 @@
 import { boolean, type } from "@hgargg-0710/one"
+import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
-import type { ILinkedStream, IOwnedStream } from "../../../interfaces/Stream.js"
+import type {
+	ICommonStream,
+	ILinkedStream,
+	IOwnedStream
+} from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ILimitableStream } from "../interfaces/LimitStream.js"
@@ -10,7 +15,6 @@ import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 import { bind, equals, negate } from "../utils/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
-import { Pools } from "../../../../main.js"
 
 const { isNullary } = type
 const { T } = boolean
@@ -143,7 +147,7 @@ function BuildLimitStream<T = any>(
 		},
 		[],
 		[BasicResourceStream, PoolableStream]
-	) as unknown as IPoolKeeping<ILinkedStream<T>>
+	) as unknown as IPoolKeeping<ICommonStream<T>>
 }
 
 /**
@@ -174,7 +178,7 @@ export function LimitStream<T = any>(
 	const until = negate(longAs)
 	const limitStream = BuildLimitStream<T>(from, until)
 
-	return function (resource?: ILimitableStream<T>) {
+	return function (resource?: ILimitableStream<T>): ICommonStream<T> {
 		return limitStream.pool.create(resource)
 	}
 }

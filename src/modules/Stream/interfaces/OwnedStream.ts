@@ -1,5 +1,6 @@
 import type {
 	IFreeable,
+	IInitializable,
 	IOwnerSettable,
 	IResourceSettable
 } from "../../../interfaces.js"
@@ -29,9 +30,8 @@ export type IOwnedStream<
  */
 export interface IOwningStream<T = any, Args extends any[] = any[]>
 	extends IResourcefulStream<T>,
-		IResourceSettable<IOwnedStream> {
-	init(resource?: IOwnedStream, ...x: Partial<Args> | []): this
-}
+		IResourceSettable<IOwnedStream>,
+		IInitializable<[IOwnedStream, ...Args]> {}
 
 /**
  * This is an `IOwnedStream<T>`, which is also `IOwningStream<T>`,

@@ -2,6 +2,7 @@ import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
+	ICommonStream,
 	IControlStream,
 	ILinkedStream,
 	IOwnedStream
@@ -78,7 +79,9 @@ function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
 		},
 		[],
 		[BuildBeforeHandlerStream(handler), StatefulStream, PoolableStream]
-	).toClass() as unknown as IPoolKeeping<IControlStream<Out>>
+	).toClass() as unknown as IPoolKeeping<
+		IControlStream<Out> & ICommonStream<Out>
+	>
 }
 
 /**
@@ -95,7 +98,9 @@ export function HandlerStream<In = any, Out = any>(
 	handler: (stream: IOwnedStream<In>) => Out
 ) {
 	const handlerStream = BuildHandlerStream(handler)
-	return function (resource?: IOwnedStream<In>): IControlStream<Out> {
+	return function (
+		resource?: IOwnedStream<In>
+	): IControlStream<Out> & ICommonStream<Out> {
 		return handlerStream.pool.create(resource)
 	}
 }
