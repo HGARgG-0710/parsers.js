@@ -1,5 +1,5 @@
 import { BadIndex } from "../../../constants.js"
-import type { IWalkable } from "../../../interfaces.js"
+import type { INavigable, IWalkable } from "../../../interfaces.js"
 import type { MultiIndex } from "../../../internal/MultiIndex.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
 import { isGoodIndex } from "../../../utils.js"
@@ -176,7 +176,7 @@ export class DepthStreamAnnotation<
 		return null as any
 	}
 
-	goTo(index: MultiIndex) {
+	navigate(index: MultiIndex) {
 		return null as any
 	}
 
@@ -186,7 +186,10 @@ export class DepthStreamAnnotation<
 }
 
 function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
-	return class extends SourceStream.generic!<TreeLike, TreeLike>() {
+	return class
+		extends SourceStream.generic!<TreeLike, TreeLike>()
+		implements INavigable<TreeLike, number[]>
+	{
 		private readonly walker = new TreeWalker<TreeLike>()
 		private readonly lastLevel = new LastLevelWithSiblings(this.walker)
 		private readonly nextResponse = new NextWalkerResponse(this.walker)
@@ -237,7 +240,7 @@ function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
 			return this.curr
 		}
 
-		goTo(index: number[]) {
+		navigate(index: number[]) {
 			this.walker.goIndex(index)
 			this.updateCurr()
 			return this.curr
@@ -279,7 +282,7 @@ function PreDepthStream<
  *
  * It also supports backing up one element (via `.prev()`), and getting the
  * multi-index of the current node in the tree via `.treeIndex: MultiIndex`,
- * as well as navigating to it directly via `.goTo(ind: MultiIndex)`.
+ * as well as navigating to it directly via `.navigate(ind: MultiIndex)`.
  *
  * Similarly, there is a `.finish()` method present, as well as a `.rewind()`
  * method for returning back to the first element in the traversal sequence

@@ -26,7 +26,7 @@ export const isFinishable = structCheck<IFinishable>({
  */
 export const isNavigable = structCheck<INavigable>({
 	navigate: isFunction
-}) as <T = any>(x: any) => x is INavigable<T>
+}) as <T = any>(x: any) => x is INavigable<T, any>
 
 /**
  * Returns whether the given input has `.state` and `.setState`

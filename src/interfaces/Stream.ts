@@ -19,14 +19,14 @@ export interface IFinishable<T = any> {
 }
 
 /**
- * An interface for specifying a presence of a `.navigate(position: IStreamPosition<T>) => T`.
+ * An interface for specifying a presence of a `.navigate(position: PosType) => T`.
  * Intended to be used with `IStream`. Accepts an `IStreamPosition<T>`, at which the stop must
  * be made. The position is signalled either as finite-relative (`number`), or predicate-relative
  * (`IStreamPositionPredicate<T>`). In the latter case, `false` usually means that the place of
  * interest has not yet been reached.
  */
-export interface INavigable<T = any> {
-	navigate: (position: IStreamPosition<T>) => T
+export interface INavigable<T = any, PosType = IStreamPosition<T>> {
+	navigate: (position: PosType) => T
 }
 
 /**

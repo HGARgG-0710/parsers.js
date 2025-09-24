@@ -116,8 +116,10 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	}
 
 	goIndex(pos?: number[]) {
-		if (pos) this.updatePos(pos)
-		this.syncWithPos()
+		if (pos) {
+			this.updatePos(pos)
+			this.syncWithPos()
+		}
 	}
 
 	init(walkable: TreeLike) {
