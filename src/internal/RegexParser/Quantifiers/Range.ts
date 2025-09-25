@@ -17,8 +17,8 @@ import type {
 	IOwnedStream,
 	IStreamChooser
 } from "../../../interfaces.js"
-import { isDecimal } from "../../../utils.js"
-import { consume, next } from "../../../utils/Stream.js"
+import { isDecimal } from "../../../samples/alphabet.js"
+import { consumable, next } from "../../../utils/Stream.js"
 import { QMark } from "./QMark.js"
 
 // * Supposed to have 1 position, with an optional SECOND!
@@ -42,13 +42,11 @@ const RangeBoundaryLimitStream = LimitStream(
 	(input: IOwnedStream<string>) => !isDecimal(input.curr)
 )
 
-const boundaryBuilder = new SourceBuilder()
+const withBoundaryBuilder = consumable(new SourceBuilder())
 const RangeBoundary = ContentNode("range-boundary")
 const RangeBoundaryStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) => {
-		boundaryBuilder.clear()
-		return new RangeBoundary(consume(input, boundaryBuilder).get())
-	}
+	(input: IOwnedStream<string> & Iterable<string>) =>
+		new RangeBoundary(withBoundaryBuilder(input).get())
 )
 
 function ProcessRangeBoundaries() {

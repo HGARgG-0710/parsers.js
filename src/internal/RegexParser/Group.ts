@@ -9,23 +9,21 @@ import type {
 	IStreamChooser
 } from "../../interfaces.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
-import { consume } from "../../utils/Stream.js"
+import { consumable } from "../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandleLookaheadGroup } from "./Group/Lookahead.js"
 import { HandleLookbehindGroup } from "./Group/Lookbehind.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 
-const bodyBuilder = new RetainedArray()
+const withBodyBuilder = consumable(new RetainedArray())
 
 export const GroupBody = RecursiveNode("group-body")
 
 export const GroupLimitStream = LimitStream((input) => input.curr === ")")
 
 export const GroupBodyStream = SingletonStream(
-	(input: IOwnedStream<string> & IIterableStream<string>) => {
-		bodyBuilder.clear()
-		return new GroupBody(consume(input, bodyBuilder).get() as any[])
-	}
+	(input: IOwnedStream<string> & IIterableStream<string>) =>
+		new GroupBody(withBodyBuilder(input).get() as any[])
 )
 
 const GroupHandler = TableHandler(

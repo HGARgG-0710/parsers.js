@@ -1,11 +1,11 @@
-import { SourceBuilder } from "../../../classes.js"
 import { ContentNode } from "../../../classes/Node.js"
+import { SourceBuilder } from "../../../classes/SourceBuilder.js"
 import { LimitStream, SingletonStream } from "../../../classes/Stream.js"
 import type { IOwnedStream } from "../../../interfaces.js"
-import { consume } from "../../../utils/Stream.js"
+import { consumable } from "../../../utils/Stream.js"
 import { expect } from "../Errors.js"
 
-const unicodeCharBuilder = new SourceBuilder()
+const withUnicodeCharBuilder = consumable(new SourceBuilder())
 
 const UnicodeChar = ContentNode<string, string>("unicode-char")
 
@@ -14,10 +14,8 @@ const expectOpBrack = expect("{")
 const UnicodeLimitStream = LimitStream((input) => input.curr === "{")
 
 const UnicodeCharStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) => {
-		unicodeCharBuilder.clear()
-		return new UnicodeChar(consume(input, unicodeCharBuilder).get())
-	}
+	(input: IOwnedStream<string> & Iterable<string>) =>
+		new UnicodeChar(withUnicodeCharBuilder(input).get())
 )
 
 function HandleUnicodeNumber() {

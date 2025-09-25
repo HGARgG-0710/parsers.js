@@ -9,24 +9,22 @@ import type {
 	IPeekableStream,
 	IStreamChooser
 } from "../../interfaces.js"
-import { consume } from "../../utils/Stream.js"
+import { consumable } from "../../utils/Stream.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
 const TypeMatch = ContentNode<string, string>("type-match")
 const AsString = ContentNode<string, INode<string>>("as-string")
 const AsInt = ContentNode<string, INode<string>>("as-int")
 
-const typeMatchBuilder = new SourceBuilder()
+const withTypeMatchBuilder = consumable(new SourceBuilder())
 
 const AsIntStream = SingletonStream((input) => new AsInt(input.curr))
 
 const AsStringStream = SingletonStream((input) => new AsString(input.curr))
 
 const TypeMatchStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) => {
-		typeMatchBuilder.clear()
-		return new TypeMatch(consume(input, typeMatchBuilder).get())
-	}
+	(input: IOwnedStream<string> & Iterable<string>) =>
+		new TypeMatch(withTypeMatchBuilder(input).get())
 )
 
 const TypeMatchLimitsStream = LimitStream((input) => input.curr === "}")
@@ -36,7 +34,7 @@ function isTypeMatchStart(stream: IPeekableStream<string>) {
 }
 
 function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
-	if (!isTypeMatchStart(input)) return HandleSingleChar()
+	if (!isTypeMatchStart(input)) return [HandleSingleChar()]
 	input.next() // i
 	input.next() // {
 	return [AsIntStream(), TypeMatchStream(), TypeMatchLimitsStream()]
@@ -45,7 +43,7 @@ function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
 function HandleStringTypeMatch(
 	input: IOwnedStream<string> & IPeekable<string>
 ) {
-	if (!isTypeMatchStart(input)) return HandleSingleChar()
+	if (!isTypeMatchStart(input)) return [HandleSingleChar()]
 	input.next() // s
 	input.next() // {
 	return [AsStringStream(), TypeMatchStream(), TypeMatchLimitsStream()]

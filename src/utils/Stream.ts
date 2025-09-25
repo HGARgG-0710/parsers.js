@@ -107,10 +107,12 @@ export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
  * In other words, it is a way to reuse the exact same
  * `result` for multiple distinct calls to `consume`.
  */
-export function consumable<T = any, K extends IRefillable<T> = IRefillable<T>>(
-	result: K
-) {
-	return function (stream: Iterable<T>) {
+export function consumable<
+	T = any,
+	I extends Iterable<T> = Iterable<T>,
+	K extends IRefillable<T> = IRefillable<T>
+>(result: K) {
+	return function (stream: I) {
 		result.clear()
 		return consume(stream, result)
 	}
@@ -254,7 +256,7 @@ export function navigate<T = any>(
  * Makes a copy of a `rawStream`:
  *
  * 1. if a chooser - returns as-is (copying operation is meaningless)
- * 2. if an `ILinkedStream` - does `rawStream.copy()` if the method is present, 
+ * 2. if an `ILinkedStream` - does `rawStream.copy()` if the method is present,
  * else returns `rawStream`
  */
 export function rawStreamCopy(rawStream: IRawStream) {
