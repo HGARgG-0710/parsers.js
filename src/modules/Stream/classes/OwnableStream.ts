@@ -1,19 +1,23 @@
+import type { IStream } from "../../../interfaces.js"
 import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.js"
-import { annotation } from "./annotation.js"
 
 /**
  * This is an abstract class that implements `IOwnedStream<T>` and `IInitializable<Args>`.
  * It contains no concrete properties/methods, except for those required by the
- * `IOwnedStrea<T>` specifically, and not `IStream<T>`.
+ * `IOwnedStream<T>` specifically, and not `IStream<T>`.
  *
  * It implementation of `setOwner` sets the encapsulated `readonly .owner: IOwningStream`
  * property, and the property itself can be set via the `protected set owner` setter
  * by its children classes alone.
  */
-export abstract class OwnableStream<T = any, Args extends any[] = []>
-	extends annotation<T>
-	implements IOwnedStream<T>
+export abstract class OwnableStream<T = any>
+	implements IStream<T>, IOwnedStream<T>
 {
+	abstract readonly isEnd: boolean
+	abstract readonly curr: T
+	abstract next: () => void
+	abstract isCurrEnd: () => boolean
+
 	private _owner?: IOwningStream
 
 	protected set owner(newOwner: IOwningStream | undefined) {

@@ -128,82 +128,77 @@ const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 	}
 }
 
-function BuildPeekStream<T = any>() {
-	return new mixin<ILinkedStream<T> & IPeekable<T>>(
-		{
-			name: "PeekStream",
-			static: {
-				pool: (classObj) =>
-					Pools.Stream.add(
-						new ObjectPool(
-							classObj as new (
-								resource?: IOwnedStream<T>
-							) => ILinkedStream<T> & IPeekable<T>
-						)
+const _PeekStream = new mixin(
+	{
+		name: "PeekStream",
+		static: {
+			pool: (classObj) =>
+				Pools.Stream.add(
+					new ObjectPool(
+						classObj as new (
+							resource?: IOwnedStream
+						) => ILinkedStream & IPeekable
 					)
+				)
+		},
+		properties: {
+			baseNextIter() {
+				super.next()
+				this.syncCurr()
 			},
-			properties: {
-				baseNextIter() {
-					super.next()
-					this.syncCurr()
-				},
 
-				fetchNextPeek() {
-					this.curr = this.peekProvider.fetchNext()
-				},
-
-				toTemp(count: number) {
-					this.tempWriter.toTemp(this.resource!, count)
-				},
-
-				get pool() {
-					return this.class.pool
-				},
-
-				get initializer() {
-					return peekStreamInitializer
-				},
-
-				trivialPeek() {
-					return this.curr
-				},
-
-				newPeek(count: number) {
-					this.toTemp(count)
-					this.peekProvider.push(this.tempWriter.get())
-					return this.peekProvider.last()
-				},
-
-				peek(n: number) {
-					return this.peekProvider.provide(n, this)
-				},
-
-				isCurrEnd(): boolean {
-					return super.isCurrEnd() && this.peekProvider.hasNone()
-				},
-
-				next() {
-					if (this.isCurrEnd()) this.endStream()
-					else if (this.peekProvider.hasAny()) this.fetchNextPeek()
-					else this.baseNextIter()
-				},
-
-				resetPeeks() {
-					this.peekProvider.reset()
-				}
+			fetchNextPeek() {
+				this.curr = this.peekProvider.fetchNext()
 			},
-			constructor(resource?: IOwnedStream<T>) {
-				this.super.DyssyncOwningStream.constructor.call(this, resource)
-				this.peekProvider = new PeekProvider(1)
-				this.tempWriter = new TempWriter()
+
+			toTemp(count: number) {
+				this.tempWriter.toTemp(this.resource!, count)
+			},
+
+			get pool() {
+				return this.class.pool
+			},
+
+			get initializer() {
+				return peekStreamInitializer
+			},
+
+			trivialPeek() {
+				return this.curr
+			},
+
+			newPeek(count: number) {
+				this.toTemp(count)
+				this.peekProvider.push(this.tempWriter.get())
+				return this.peekProvider.last()
+			},
+
+			peek(n: number) {
+				return this.peekProvider.provide(n, this)
+			},
+
+			isCurrEnd(): boolean {
+				return super.isCurrEnd() && this.peekProvider.hasNone()
+			},
+
+			next() {
+				if (this.isCurrEnd()) this.endStream()
+				else if (this.peekProvider.hasAny()) this.fetchNextPeek()
+				else this.baseNextIter()
+			},
+
+			resetPeeks() {
+				this.peekProvider.reset()
 			}
 		},
-		[],
-		[DyssyncOwningStream, PoolableStream]
-	) as unknown as IPoolKeeping<ICommonStream<T> & IPeekable<T>>
-}
-
-const peekStream = BuildPeekStream()
+		constructor(resource?: IOwnedStream) {
+			this.super.DyssyncOwningStream.constructor.call(this, resource)
+			this.peekProvider = new PeekProvider(1)
+			this.tempWriter = new TempWriter()
+		}
+	},
+	[DyssyncOwningStream, PoolableStream]
+).toClass() as unknown as IPoolKeeping<ICommonStream & IPeekable>
 
 /**
  * This is a function for creation of factories for the `IPeekStream<T>`
@@ -221,5 +216,9 @@ const peekStream = BuildPeekStream()
 export function PeekStream<T = any>(
 	resource?: IOwnedStream<T>
 ): ICommonStream<T> & IPeekable<T> {
-	return peekStream.pool.create(resource)
+	return _PeekStream.pool.create(resource)
+}
+
+export namespace PeekStream {
+	export const pool = _PeekStream.pool
 }

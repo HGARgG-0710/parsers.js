@@ -36,33 +36,24 @@ export enum ParentTestTypes {
 	CLASS_AND_MIXIN_PARENTS = 3
 }
 
-abstract class BaseMixinTest<T = any, Args extends any[] = any[]> {
-	protected readonly mixinInstance: mixin<T, Args>
-	protected readonly mixinSuper: ((...args: any) => any)[]
+abstract class BaseMixinTest {
+	protected readonly mixinInstance: mixin
+	protected readonly mixinSuper: Function[]
 
-	constructor(
-		mixinShape: mixin.IMixinShape<T, Args>,
-		superMixins: mixin[] = [],
-		superClasses: ((...args: any) => any)[] = []
-	) {
-		this.mixinInstance = new mixin(mixinShape, superMixins, superClasses)
-		this.mixinSuper = [
-			...superClasses,
-			...superMixins.map(
-				(x) => x.toClass() as unknown as (...args: any) => any
-			)
-		]
+	constructor(mixinShape: mixin.IMixinShape, superClasses: Function[] = []) {
+		this.mixinInstance = new mixin(mixinShape, superClasses)
+		this.mixinSuper = [...superClasses]
 	}
 }
 
 abstract class BaseMixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
-> extends BaseMixinTest<T, Args> {
+> extends BaseMixinTest {
 	protected readonly mixinName: string
 
 	protected abstract testedConditions(
-		mixinClass: mixin.IOutClass<T, Args>,
+		mixinClass: Function,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void
 
@@ -73,12 +64,8 @@ abstract class BaseMixinPrototypeTest<
 		)
 	}
 
-	constructor(
-		mixinShape: mixin.IMixinShape<T, Args>,
-		superMixins?: mixin[],
-		superClasses?: ((...args: any) => any)[]
-	) {
-		super(mixinShape, superMixins, superClasses)
+	constructor(mixinShape: mixin.IMixinShape, superClasses?: Function[]) {
+		super(mixinShape, superClasses)
 		this.mixinName = mixinShape.name
 	}
 }
@@ -92,7 +79,7 @@ abstract class DefaultMixinPrototypeTest<
 	): PropertyDescriptorMap
 
 	private verifyPrototype(
-		mixinClass: mixin.IOutClass<T, Args>,
+		mixinClass: Function,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	) {
 		assert(
@@ -105,12 +92,12 @@ abstract class DefaultMixinPrototypeTest<
 		)
 	}
 
-	private verifyName(mixinClass: mixin.IOutClass<T, Args>) {
+	private verifyName(mixinClass: Function) {
 		assert.strictEqual(this.mixinName, mixinClass.name)
 		assert.strictEqual(this.mixinName, this.mixinInstance.name)
 	}
 
-	private verifySuper(mixinClass: mixin.IOutClass<T, Args>) {
+	private verifySuper(mixinClass: Function) {
 		const mixinSuper = mixinClass.prototype.super
 		for (const x of this.mixinSuper) {
 			const currSuper = mixinSuper[x.name]
@@ -134,7 +121,7 @@ abstract class DefaultMixinPrototypeTest<
 	}
 
 	protected testedConditions(
-		mixinClass: mixin.IOutClass<T, Args>,
+		mixinClass: Function,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void {
 		this.verifyPrototype(mixinClass, expectedPrototypeDescriptors)
@@ -154,7 +141,7 @@ export class PureMixinPrototypeTest<
 	}
 
 	protected testedConditions(
-		mixinClass: mixin.IOutClass<T, Args>,
+		mixinClass: Function,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	): void {
 		super.testedConditions(mixinClass, expectedPrototypeDescriptors)
@@ -169,35 +156,30 @@ export class MixinPrototypeTest<
 	T = any,
 	Args extends any[] = any[]
 > extends DefaultMixinPrototypeTest<T, Args> {
-	private readonly origConstructor: mixin.INonVoidConstructor<T, Args>
+	private readonly origConstructor: Function
 
 	protected mixinPrototypeDescriptors(x: object): PropertyDescriptorMap {
 		return propertyDescriptors(x)
 	}
 
 	protected testedConditions(
-		mixinClass: mixin.IOutClass<T, Args>,
+		mixinClass: Function,
 		expectedPrototypeDescriptors: PropertyDescriptorMap
 	) {
 		super.testedConditions(mixinClass, expectedPrototypeDescriptors)
 		assert.strictEqual(mixinClass, this.origConstructor)
 	}
 
-	constructor(
-		mixinShape: mixin.IMixinShape<T, Args>,
-		superMixins?: mixin[],
-		superClasses?: ((...args: any[]) => any)[]
-	) {
-		super(mixinShape, superMixins, superClasses)
-		this.origConstructor =
-			mixinShape.constructor as mixin.INonVoidConstructor<T, Args>
+	constructor(mixinShape: mixin.IMixinShape, superClasses?: Function[]) {
+		super(mixinShape, superClasses)
+		this.origConstructor = mixinShape.constructor!
 	}
 }
 
 export class MixinInstanceTest<
 	T = any,
 	Args extends any[] = any[]
-> extends BaseMixinTest<T, Args> {
+> extends BaseMixinTest {
 	withInstance(expected: InterfaceShape) {
 		return new InterfaceTest<T, Args>(expected).withClass(
 			this.mixinInstance.toClass() as new (...args: Args) => T

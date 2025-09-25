@@ -12,7 +12,7 @@ const { lastIndex } = array
  * concatenates outputs from each one of the given `IStream`s,
  * taking their precise combined time to finish.
  */
-export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
+export class ConcatStream extends ArrayStream<any, IStream> {
 	private streamIndex: number = 0
 
 	private get currStream() {
@@ -46,7 +46,7 @@ export class ConcatStream extends ArrayStream.generic!<any, IStream>() {
 
 	protected baseNextIter() {
 		this.moveOneItemForward()
-		return this.currItem
+		return this.currItem()
 	}
 
 	isCurrEnd(): boolean {

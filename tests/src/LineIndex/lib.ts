@@ -1,10 +1,12 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ILineIndex } from "../../../dist/src/interfaces.js"
-import { MutableClassTest, MethodTest, type RuntimeInterface } from "../lib.js"
+import type { ICopiable, ILineIndex } from "../../../dist/src/interfaces.js"
+import { MethodTest, MutableClassTest, type RuntimeInterface } from "../lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber } = type
+
+type CopiableLineIndex = ICopiable & ILineIndex
 
 function nextLineAssert(instance: ILineIndex, origLine: number) {
 	lineAssert(instance, origLine + 1)
@@ -70,18 +72,18 @@ export const nextLine = new MethodTest("nextLine", function (this: ILineIndex) {
 	nextLineStartAssert(this, origLine)
 })
 
-export const copy = new MethodTest("copy", function (this: ILineIndex) {
+export const copy = new MethodTest("copy", function (this: CopiableLineIndex) {
 	const copied = this.copy()
 	charAssert(copied, this.char)
 	lineAssert(copied, this.line)
-	
+
 	const oldChar = this.char
 	this.nextChar()
 	charAssert(copied, oldChar)
 	assert.notStrictEqual(this.char, oldChar)
 })
 
-export class LineIndexTest extends MutableClassTest<ILineIndex> {
+export class LineIndexTest extends MutableClassTest<CopiableLineIndex> {
 	line(expected: number) {
 		this.testMethod("line", expected)
 	}
@@ -102,7 +104,10 @@ export class LineIndexTest extends MutableClassTest<ILineIndex> {
 		this.testMethod("copy")
 	}
 
-	constructor(interfaces: RuntimeInterface[] = [], methods: MethodTest[] = []) {
+	constructor(
+		interfaces: RuntimeInterface[] = [],
+		methods: MethodTest[] = []
+	) {
 		super(
 			[LineIndexInterface, ...interfaces],
 			[...methods, char, line, nextChar, nextLine, copy]

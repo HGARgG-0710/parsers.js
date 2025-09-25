@@ -1,7 +1,7 @@
 import { boolean, type } from "@hgargg-0710/one"
-import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../classes.js"
+import * as Pools from "../../../Pools.js"
 import { ownerInitializer } from "../../../classes/Initializer.js"
+import { ObjectPool } from "../../../classes/ObjectPool.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ICommonStream,
@@ -145,7 +145,6 @@ function BuildLimitStream<T = any>(
 				this.init(resource)
 			}
 		},
-		[],
 		[BasicResourceStream, PoolableStream]
 	) as unknown as IPoolKeeping<ICommonStream<T>>
 }
@@ -178,9 +177,13 @@ export function LimitStream<T = any>(
 	const until = negate(longAs)
 	const limitStream = BuildLimitStream<T>(from, until)
 
-	return function (resource?: ILimitableStream<T>): ICommonStream<T> {
+	function L(resource?: ILimitableStream<T>): ICommonStream<T> {
 		return limitStream.pool.create(resource)
 	}
+
+	L.pool = limitStream.pool
+
+	return L
 }
 
 export namespace LimitStream {

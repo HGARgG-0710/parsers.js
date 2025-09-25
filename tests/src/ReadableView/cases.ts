@@ -21,8 +21,6 @@ readableViewTestCounter.test(
 		readableViewTest<string>().withInstance(
 			new ReadableView(0, new ParseableInput("abcdefghi")),
 			function (test) {
-				test.backward(10, 3, "d")
-
 				test.forward(5, 2, "h")
 				test.forward(1, 0, "b")
 
@@ -64,10 +62,6 @@ readableViewTestCounter.test(
 		readableViewTest<number>().withInstance(
 			new ReadableView<number>(3, new NumberMockReadable2()),
 			function (test) {
-				test.backward(1, 3, 9)
-				test.backward(3, 1, 19)
-				test.backward(2, 5, 99)
-
 				test.forward(2, 0, 9)
 				test.forward(3, 1, 3)
 

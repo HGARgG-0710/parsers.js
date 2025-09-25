@@ -1,4 +1,4 @@
-import { annotation } from "./annotation.js"
+import type { IStream } from "../../../interfaces.js"
 
 /**
  * This is an abstract class implementing `IStrea<T, Args>`.
@@ -8,9 +8,13 @@ import { annotation } from "./annotation.js"
  * returning each item one by one.
  */
 export abstract class IterableStream<T = any>
-	extends annotation<T>
-	implements Iterable<T>
+	implements IStream<T>, Iterable<T>
 {
+	abstract readonly isEnd: boolean
+	abstract readonly curr: T
+	abstract next: () => void
+	abstract isCurrEnd: () => boolean;
+
 	*[Symbol.iterator]() {
 		while (!this.isEnd) {
 			yield this.curr

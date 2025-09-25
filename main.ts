@@ -1,6 +1,7 @@
 export * as aliases from "./src/aliases.js"
 export * as classes from "./src/classes.js"
 export * from "./src/constants.js"
+export type * from "./src/interfaces.js"
 export * as is from "./src/is.js"
 export * from "./src/mixin.js"
 export * as Pools from "./src/Pools.js"

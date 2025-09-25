@@ -1,60 +1,38 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
-import type { ICommonStream, IOwnedStream, IPushable, IStorage } from "../../../interfaces.js"
-import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
+import type {
+	ICommonStream,
+	IOwnedStream,
+	IStorage
+} from "../../../interfaces.js"
+import { IdentityStream } from "./IdentityStream.js"
 
-class AccumulatorStreamAnnotation<T = any> extends IdentityStreamAnnotation<T> {
-	static readonly pool: ObjectPool<
-		AccumulatorStreamAnnotation,
-		[IOwnedStream]
-	>
+class _AccumulatorStream<T = any> extends IdentityStream<T> {
+	static readonly pool = Pools.Stream.add(new ObjectPool(_AccumulatorStream))
 
-	setStorage(storage: IPushable<T>) {
+	private storage: IStorage<T>
+
+	private pushCurr() {
+		this.storage.push(this.curr)
+	}
+
+	protected get pool(): ObjectPool<_AccumulatorStream, [IOwnedStream]> {
+		return _AccumulatorStream.pool
+	}
+
+	setStorage(storage: IStorage<T>) {
+		this.storage = storage
 		return this
 	}
-}
 
-function BuildAccumulatorStream<T = any>() {
-	class AccumulatorStream extends IdentityStream.generic!<T>() {
-		static readonly pool = Pools.Stream.add(
-			new ObjectPool(AccumulatorStream)
-		)
-
-		private storage: IStorage<T>
-
-		private pushCurr() {
-			this.storage.push(this.curr)
-		}
-
-		protected get pool(): ObjectPool<AccumulatorStream, [IOwnedStream]> {
-			return AccumulatorStream.pool
-		}
-
-		setStorage(storage: IStorage<T>) {
-			this.storage = storage
-			return this
-		}
-
-		next() {
-			this.pushCurr()
-			super.next()
-		}
-
-		copy() {
-			return super.copy().setStorage(this.storage.copy())
-		}
+	next() {
+		this.pushCurr()
+		super.next()
 	}
 
-	return AccumulatorStream
-}
-
-let accumulatorStream: typeof AccumulatorStreamAnnotation | null = null
-
-function PreAccumulatorStream<T = any>() {
-	return accumulatorStream
-		? (accumulatorStream as typeof AccumulatorStreamAnnotation<T>)
-		: (accumulatorStream =
-				BuildAccumulatorStream<T>() as typeof AccumulatorStreamAnnotation)
+	copy() {
+		return super.copy().setStorage(this.storage.copy())
+	}
 }
 
 /**
@@ -67,8 +45,11 @@ function PreAccumulatorStream<T = any>() {
  * into `storage`.
  */
 export function AccumulatorStream<T = any>(storage: IStorage<T>) {
-	const accumulatorStream = PreAccumulatorStream<T>()
 	return function (stream?: IOwnedStream<T>): ICommonStream<T> {
-		return accumulatorStream.pool.create().setStorage(storage).init(stream)
+		return _AccumulatorStream.pool.create().setStorage(storage).init(stream)
 	}
+}
+
+export namespace AccumulatorStream {
+	export const pool = _AccumulatorStream.pool
 }

@@ -18,7 +18,7 @@ import { SourceStream } from "./SourceStream.js"
  * Immensely useful when needing to process a large amount of data.
  */
 export class LazyStream
-	extends SourceStream.generic!<string, ICharacterSource>()
+	extends SourceStream<string, ICharacterSource>
 	implements
 		IInputStream<string, ICharacterSource>,
 		ISourcedStream<string, ICharacterSource>

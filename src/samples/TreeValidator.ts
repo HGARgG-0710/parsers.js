@@ -1,4 +1,4 @@
-import type { DepthStreamAnnotation } from "../classes/Stream.js"
+import type { DepthStream } from "../classes/Stream.js"
 import type { INode } from "../interfaces.js"
 
 /**
@@ -31,7 +31,7 @@ export function TreeValidator<T = any>(
 		])
 	)
 
-	function validator(treeStream: DepthStreamAnnotation<INode<T>>) {
+	function validator(treeStream: DepthStream<INode<T>>) {
 		const failure = TreeValidator.ValidationStatus.failure(treeStream)
 		const success = TreeValidator.ValidationStatus.success(treeStream)
 
@@ -83,17 +83,17 @@ export namespace TreeValidator {
 	 * `readonly targetStream: DepthStream<INode<T>>` property for
 	 */
 	export class ValidationStatus<T = any> {
-		static success<T = any>(targetStream: DepthStreamAnnotation<INode<T>>) {
+		static success<T = any>(targetStream: DepthStream<INode<T>>) {
 			return new ValidationStatus(true, targetStream)
 		}
 
-		static failure<T = any>(targetStream: DepthStreamAnnotation<INode<T>>) {
+		static failure<T = any>(targetStream: DepthStream<INode<T>>) {
 			return new ValidationStatus(false, targetStream)
 		}
 
 		constructor(
 			readonly isSuccess: boolean,
-			readonly targetStream: DepthStreamAnnotation<INode<T>>
+			readonly targetStream: DepthStream<INode<T>>
 		) {}
 	}
 }

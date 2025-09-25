@@ -9,7 +9,7 @@ import { IdentityStream } from "./IdentityStream.js"
  * `.writeTo(destination: IDestination): this` method, which
  * __must__ be called before any future attempts to call `.next()`.
  */
-export class WriterStream extends IdentityStream.generic!<string>() {
+export class WriterStream extends IdentityStream<string> {
 	private destination: IDestination
 
 	free() {}

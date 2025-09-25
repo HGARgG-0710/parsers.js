@@ -1,10 +1,9 @@
 import { BadIndex } from "../../../constants.js"
 import type { INavigable, IWalkable } from "../../../interfaces.js"
-import type { MultiIndex } from "../../../internal/MultiIndex.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
 import { isGoodIndex } from "../../../utils.js"
 import { treeEndPath } from "../../../utils/Node.js"
-import { SourceStream, SourceStreamAnnotation } from "./SourceStream.js"
+import { SourceStream } from "./SourceStream.js"
 
 enum NextResponse {
 	GoFirstNext,
@@ -141,131 +140,6 @@ class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 	constructor(private readonly walker: TreeWalker<TreeLike>) {}
 }
 
-export class DepthStreamAnnotation<
-	TreeLike extends IWalkable<TreeLike> = IWalkable
-> extends SourceStreamAnnotation<TreeLike, TreeLike> {
-	protected currGetter(): TreeLike {
-		return null as any
-	}
-
-	protected baseNextIter() {
-		return null as any
-	}
-
-	protected basePrevIter(): TreeLike {
-		return null as any
-	}
-
-	setResource(tree: TreeLike): void {
-		return null as any
-	}
-
-	get index() {
-		return null as any
-	}
-
-	isCurrEnd(): boolean {
-		return null as any
-	}
-
-	isCurrStart(): boolean {
-		return null as any
-	}
-
-	rewind() {
-		return null as any
-	}
-
-	navigate(index: MultiIndex) {
-		return null as any
-	}
-
-	finish() {
-		return null as any
-	}
-}
-
-function BuildDepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>() {
-	return class
-		extends SourceStream.generic!<TreeLike, TreeLike>()
-		implements INavigable<TreeLike, number[]>
-	{
-		private readonly walker = new TreeWalker<TreeLike>()
-		private readonly lastLevel = new LastLevelWithSiblings(this.walker)
-		private readonly nextResponse = new NextWalkerResponse(this.walker)
-		private readonly prevResponse = new PrevWalkerResponse(this.walker)
-		private readonly endIndex = new TreeEndIndex(this.walker)
-
-		protected currGetter(): TreeLike {
-			return this.walker.curr
-		}
-
-		protected baseNextIter() {
-			this.nextResponse.respond()
-			return this.currGetter()
-		}
-
-		protected basePrevIter(): TreeLike {
-			this.prevResponse.respond()
-			return this.currGetter()
-		}
-
-		setResource(tree: TreeLike): void {
-			super.setResource(tree)
-			this.walker.init(tree)
-			this.endIndex.for(tree)
-		}
-
-		get treeIndex() {
-			return this.walker.pos.get()
-		}
-
-		isCurrEnd(): boolean {
-			this.nextResponse.pick()
-			return (
-				this.nextResponse.shallGoFirstNext() &&
-				!isGoodIndex(this.lastLevel.update())
-			)
-		}
-
-		isCurrStart(): boolean {
-			this.prevResponse.pick()
-			return this.prevResponse.isNil()
-		}
-
-		rewind() {
-			this.walker.restart()
-			this.updateCurr()
-			this.startStream()
-			return this.curr
-		}
-
-		navigate(index: number[]) {
-			this.walker.goIndex(index)
-			this.updateCurr()
-			return this.curr
-		}
-
-		finish() {
-			this.endIndex.go()
-			this.updateCurr()
-			this.endStream()
-			return this.curr
-		}
-	} as unknown as typeof DepthStreamAnnotation<TreeLike>
-}
-
-let depthStream: typeof DepthStreamAnnotation | null = null
-
-function PreDepthStream<
-	TreeLike extends IWalkable<TreeLike> = IWalkable
->(): typeof DepthStreamAnnotation<TreeLike> {
-	return depthStream
-		? depthStream
-		: (depthStream =
-				BuildDepthStream<TreeLike>() as typeof DepthStreamAnnotation)
-}
-
 /**
  * This is a tree-iteration stream, extending `SourceStream`.
  * It accepts a `TreeLike extends IWalkable<TreeLike> = IWalkable` type,
@@ -288,8 +162,70 @@ function PreDepthStream<
  * method for returning back to the first element in the traversal sequence
  * from the current one.
  */
-export const DepthStream: ReturnType<typeof PreDepthStream> & {
-	generic?: typeof PreDepthStream
-} = PreDepthStream()
+export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
+	extends SourceStream<TreeLike, TreeLike>
+	implements INavigable<TreeLike, number[]>
+{
+	private readonly walker = new TreeWalker<TreeLike>()
+	private readonly lastLevel = new LastLevelWithSiblings(this.walker)
+	private readonly nextResponse = new NextWalkerResponse(this.walker)
+	private readonly prevResponse = new PrevWalkerResponse(this.walker)
+	private readonly endIndex = new TreeEndIndex(this.walker)
 
-DepthStream.generic = PreDepthStream
+	protected currGetter(): TreeLike {
+		return this.walker.curr
+	}
+
+	protected baseNextIter() {
+		this.nextResponse.respond()
+		return this.currGetter()
+	}
+
+	protected basePrevIter(): TreeLike {
+		this.prevResponse.respond()
+		return this.currGetter()
+	}
+
+	setResource(tree: TreeLike): void {
+		super.setResource(tree)
+		this.walker.init(tree)
+		this.endIndex.for(tree)
+	}
+
+	get treeIndex() {
+		return this.walker.pos.get()
+	}
+
+	isCurrEnd(): boolean {
+		this.nextResponse.pick()
+		return (
+			this.nextResponse.shallGoFirstNext() &&
+			!isGoodIndex(this.lastLevel.update())
+		)
+	}
+
+	isCurrStart(): boolean {
+		this.prevResponse.pick()
+		return this.prevResponse.isNil()
+	}
+
+	rewind() {
+		this.walker.restart()
+		this.updateCurr()
+		this.startStream()
+		return this.curr
+	}
+
+	navigate(index: number[]) {
+		this.walker.goIndex(index)
+		this.updateCurr()
+		return this.curr
+	}
+
+	finish() {
+		this.endIndex.go()
+		this.updateCurr()
+		this.endStream()
+		return this.curr
+	}
+}

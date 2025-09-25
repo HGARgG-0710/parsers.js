@@ -10,98 +10,20 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	6. the (possibly, not so distant) "future"
 	
 REMINDER: Final Task Order
+	0. routine
+	1. Regex: RegexParser, RegexCompiler
 	2. tests [possibly - with finalization, if new redundancies are found]
 		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
 	3. wiki
-	4. FINALE [Regex, etc - FINAL NOTES]
 
 IMMIDIATE NOTES:
-	-3 [chore - later]. Fix the missing `InitType` generics in the `RecursiveList.ts` file. 
+	-4. [docs - reminder] Add a diagram of relations of various `IStream` traits present within the library. 
+		Will prove useful to the user when trying to identify at which point in the progrm to inherit. 
 
-	-2 [chore - later]. Add missing jsdoc to the `RecursiveList.ts` classes.
-
-	-1. [Fixing library critical flaw - found whilst working on Regex Parser]: 
-		// * About implementing on `Regex`-parser classes [and - generally, user classes...]; 
-		// 		^ 		5. CONCLUSION:
-		// 					# Usage:
-		// * 					# 1. make the using class 'IStateful'!!!...
-		// !!! REMINDER: usage  # 2. this.state.parse.renewStream(this.resource) - AFTER first exhausting `this.resource`; 
-
-	2. [old - solved; to remove...] PROBLEM: the new pattern is impossible [but still needed]. 
-		The library has a CRITICAL design flaw. 
-		It is as such: 
-
-			Provided an underlying `IStream<A>` and an upper `IStream<B>`, 
-				a single iteration of `IStream<B>` must finish BEFORE `IStream<A>`
-					is finished at least once. 
-
-		This means that cross-ending operations that "combine" several 
-		finished 'IStream's are FORBIDDEN! [which means that an entire 
-		class of parsers (quite a lot of them immensely popular) just 
-		flies out the window]. 
-
-		The root of the problem is highly non-trivial. 
-		In order for one to update the status of the underlying stream's, 
-		the INVOCATION of the "checking method" of the RecursiveList 
-		[or StreamList, or CompositeStream, or whatever...] must be made 
-		FROM WITHIN the 'IStream<B>' in question.  
-
-		(Proposed) Solution: 
-			1. make the 'IStream' in question 'IStateful' 
-				(i.e. - add `readonly state` property 
-					and a `setState` method). 
-
-					This way, we'll be able to access the 
-					'this.state.parser' inside of the "chooser"s 
-					with `this` being the `CompositeStream` already 
-					"in the know" to the parser's Global State. 
-
-			2. (If inside the chooser, and not standalone), 
-				Provide the state to the underlying `IStream`
-				inside the chooser via the respective `.setState` call. 
-			
-			3. Provide a new (public) method for `RecursiveList/StreamList/CompositeStream/whatever`, 
-				for renewing a SPECIFIC `IStream`: 
-					0. name it `renewItem(item: T, ...)`
-					1. used as `this.state.parser.renewItem(this)`, 
-						from inside [say] `NamedGroupStream`, with `this`
-						being a `NamedGroupStream`. This'll allow one to 
-						actually change 'this.resource' CORRECTLY, while 
-						preserving encapsulation, AND without violating any 
-						of the previously outlined design. 
-					2. Algorithm: 
-						1. Start at `item`
-						2. Walk downwards [WITHIN THE BOUNDRIES OF THE SAME `Switch`-contained COLLECTION!]
-							until an (updatable) `x: Recursive` which `.isOld(x) === true`; 
-						2.1. If such an item CANNOT BE FOUND, then one THROWS AN EXCEPTION of misuse 
-							of `renewItem` (id est - item CANNOT be explicitly renewed)
-							
-						3. If such an item CAN be found [i.e. BOTH `x: Recursive`, AND `.isOld(x) == true`], 
-							then - we trace to THE LAST non-`.isOld` item [STILL inside the current `Switch`-collection], 
-							and update all the remaining ones ACCORDINGLY, up to the current item [`this`, the thing 
-							we called the `.renewItem(this)` on]. 
-
-						3.1. IF we cannot find a single non-`isOld` item within the current group, then it is deemed 
-							FINISHED, and we throw the error - because the item in question *cannot* be renewed, and 
-							is, therefore, since it's a part of its definition, malformed as a Stream. 
-
-			4. Provide a respecitve shortcut (a delegate method)
-				for `DynamicParser`, like, say, `DynamicParser.renewItem(item: ILinkedStream)`.
-
-	3. REMINDER: about inheritance. 
-		Some of the derived IStream-classes employed in the `RegexParser`
-		violate LSP. Specifically, the ones that OUTLIVE their sub-streams. 
-		They mustn't inherit from `DyssyncOwningStream`. 
-
-		Instead:
-
-			1. Let they inherit from ALL of the stuff that `DyssyncOwningStream` 
-				does, EXCEPT for `DelegateStream` [from `PipeStream`]. 
-			2. MAKE this *new* combination into a new `mixin`-export 
-				inside the `Stream` submodule...
-			3. LET IT BE 'STATEFUL'; This cannot be stressed enough. 
-				The ability to access global state is immensely powerful, 
-				as it enrichs the code with possibility of dead children. 
+	1. [docs - wiki] Reminder: 
+		Describe the `this.state.parse.renewStream(this.resource)` in some detail. 
+		Let there be a description SPECIFICALLY for cases when children die BEFORE parents SEVERAL times. 
+		Let there be AN EXAMPLE class (like one of those in the `Regex` parser)
 
 notes on `RegexParser` development: 
 	-2. About empty expressions: they aren't allowed (always false). 
@@ -305,26 +227,6 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				Look through jsdoc for ALL the library's code, once the writing phase is finished and only the tests remain. 
 				Ensure that it is entirely correct [there were some radical changes here and there that could upset the docs' authenticity]. 
 
-			2. Types: 
-					2. [Consequences of removal of `prev`]; 
-						About `navigate`:
-							1. specialize INavigable as: 
-								INavigable<T, I> {
-									navigate(index: I): T
-								}
-
-								Then, use as: 
-									1. INavigable<T, IStreamPosition<T>>
-										For `InputStream` and ``
-									2. INavigable<T, MultiIndex>
-										For `DepthStream`
-
-							2. rename the `DepthStream.prototype.goTo` method into `DepthStream.prototype.navigate` 
-								(as it once used to be in the JavaScript version before well-made interfaces). 
-	
-					3. Make the presence of desired properties on specific implementations EXPLICIT via interfaces. 
-						Introduce LOTS 
-
 		P1:
 		[this is just an array-like strucutre, nothing unusual to see here]
 		1. LiquidMap
@@ -357,8 +259,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			2. ALSO - the `.manager` properties of `WritingDestination` and `ReadableSource`
 		2. ReadableSource
 		3. WritingDestination
-		4. Encoder[8, 16, U8, U16]
-		5. Loaded[8, 16, U8, U16]
+		4. Encoder[8, U8, U16]
+		5. Loaded[8, U8, U16]
 
 		P4. STREAMS - none of the "hard" stuff yet... Just data manipulation
 
@@ -377,6 +279,12 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. USE A MOCK HERE (`TreeLike`)
 
 	TODO: public classes/functions/utils/etc to be tested: 
+		-6. PoolCollection: 
+			
+		-5. PoolCollection: 
+			1. Pools.Stream [specific] - ensure all needed pools are cleared
+			2. Pools.Node [specific] - ensure all needed pools are cleared
+			3. Pools.Internal [specific] - ensure all needed pools are cleared
 		-4. WebByteSource [separate demo-test]
 		-3. FileDescriptor
 		-2. InvalidFileReadPositionError
@@ -633,77 +541,8 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				treating each class instance as a "test starting point", from which one can test various methods. 
 					Saves A LOT of boilerplate that is (usually) written when doing tests. 
 
-NEXT UP:
-	TODO: `.copy()`-fixing [IStream-implementations]: 
-		1. fix the `.copy()` methods' implementations that employ the `.set*`-methods/custom initializers
-			
-			2. BasicStream
-			4. ConcatStream
-			5. DelegateStream
-			6. DepthStream
-			7. FilterStream
-			8. FiniteStream
-			9. FreeStream
-			10. FreezableStream
-			11. HandlerStream
-			12. IndexStream
-			13. InputStream
-			14. InterleaveStream
-			15. IterableStream
-			16. LazyStream
-			17. LimitStream
-			18. LoopStream
-			19. MarkerStream
-			20. PeekStream
-			21. Position
-			22. PosStream
-			23. SingletonStream
-			24. TrivialStream
-			25. WrapperStream
-			26. WriterStream
-
-			Reminder: for `CompositeStream` - DO NOT IMPLEMENT!!!
-				Reason: *unbelievably* complex...
-				
-	TODO: about `annotation`s. 
-		CHANGE them so that boilerplate due to mixins is MINIMIZED. 
-		Let *most* influential ones be inherited INSTEAD, and others be copied. 
-		[Walk through all of them - fix this...]; 
-
-		Let they get their own directory, from which they'd be imported to be re-exported via the '.annotation' properties [use namespaces?]: 
-			'src/annotations/Stream/', etc
-
-	TODO [old - just do the test case...]: in 'mixin's - ENSURE that constructors are set as 'constructor: function () {}', 
-		and NOT `constructor () {}`
-
-		OR [yes - do that instead...]: 
-			TODO: 'mixin' module (`sealed` class): 
-				1. ALLOW setting `constructor` WITHOUT needing a prototype. 
-					In such cases, CREATE a prototype, via the `constructor = {}` INSIDE the `sealed_mixin`
-						class...
-
-				2. Explanation: the difference between `constructor() {}` and `constructor: function () {}` is: 
-					> const a = { constructor () {} }
-					> const b = { constructor: function () {} }
-					> a.constructor.prototype
-					undefined
-					> b.constructor.prototype
-					{}
-
-					This is why it's possible to do `new b.constructor(...)`, but not `new a.constructor(...)`
-
-				3. AFTER you do that, REPLACE all the 'constructor: function (...) {...}' with 'constructor(...){...}'
-
-				4. ADD A RESPECTIVE TEST CASE
-					This is how oen will know that the bug is fixed. 
 
 CURRENT TODOS [top-down order...]:		
-	TODO: *remove* the `prev()` as method! [on IStream *and* implementations, *and* annotations!]
-		1. Just a useless piece of functionality. 
-		2. Adds more things to test 
-		3. Not used in practice (due to expensiveness of backtracking)
-		4. [Key Reason] All benefits are Replaceable by `.peek(n)`
-
 	TODO: about exceptions: 
 		Some of those thrown by the library are far too generic (id est - need `internal/` special-purposed error-classes)
 		1. Walk through the library
@@ -713,47 +552,18 @@ CURRENT TODOS [top-down order...]:
 		Known cases: 
 			1. `throwSiblingsUnrenewable` method [PinpointRenewableList]
 
-	TODO: about `utils.Stream.consumable`: 
-		1. Add it EVERYWHERE around the `Regex` parser [lots of places... anywhere we use `consume`, for instance...]
-		2. Use it by importing the WHOLE `utils.Stream.consumable`. 
-
 	TODO: Docs [initial, new, final]
 		Documentation order: 
 			2. fix wiki [add new stuff, delete old]
 				1. LET `jsdoc` and `wiki` be THE SAME, except 'wiki' has more info. 
 					COPY BLATANTLY from the `jsdoc` into 'wiki', completing this stuff with new information. 
 					Also contains the per-method documentation [CLASSES ONLY, not for interfaces], 
-						and 
 				2. add documentation to PUBLIC/PROTECTED methods/properties *ONLY*!!!
 					ONLY on public classes [exports]
 					
 				3. add SPECIAL pages for `IStream`: 
-					1. on mixins and "annotation" classes
-						1. on differences between the JS and TS APIs, specifically
-						2. vital: make sure it's *ABUNDANTLY CLEAR* that this is PRIMARILY a JS-API
-							Reasons: 
-								1. TypeScript is a horrible language
-								2. TypeScript is a HORRIBLE language
-								3. Just look at all the nonsense we had to invent to make this work. 
-									TypeScript is a horrible language! 
-								4. Too much work to get this working...
-								5. Not cutting it out entirely due to how beautiful the TypeScript's API is otherwise...
-
-						3. CONCLUSION: 
-							1. do the '.annotation/.generic'-related changes in `v0.3`: 
-								DO NOT move to v0.4; 
-								Reason - purity of exports. 
-								The `.annotation`s ARE necessary, however, they are also: 
-									1. an implementation detail
-									2. necessary only to avoid exposing annotations to the user via `export`-keyword
-							2. DO NOT add the TypeScript-specific docs: 
-								Too much of a mess. 
-								Not worth it. 
-								Treat the `IStream`-classes in the docs as if they were the "real thing". 
-							3. REWRITE the projectr later in your TypeScript-replacement 
-								[it will share qauite a lot of the syntax, so very likely, one will not need to change all that much of the code]; 
-					2. on how to extend the "annotation"-based classes [.generic, .annotation, etc]
-					3. on the HIERARCHY [make an image via 'Excalidraw']
+					1. on mixins
+					2. on the HIERARCHY [make an image via 'Excalidraw']
 
 		2. Ensure NOTHING is missing from the wiki: 
 			1. utils
@@ -764,47 +574,11 @@ CURRENT TODOS [top-down order...]:
 				1. provide links to interfaces for class pages
 				2. provide links ot implementations for interfaces to interface pages
 
-		[later]
-		4. Finalization: 
-			1. piece-by-piece DOCUMENT any new exports: 
-				1. finished `samples` 
-				2. the `.annotation`s [leave them undocumented for the moment...]: 
-					1. NO JSDOC [reason: pointless]
-					2. wiki [brief explanation what these things are even]
-				3. Regex ...
+	TODO: about 'mixins.js'
+		1. REWRITE the projectr later in your TypeScript-replacement 
+			[it will share quite a lot of the syntax, so very likely, one will not need to change all that much of the code]; 
 
-MINOR TODOS: 			
-	TODO: EXPORT the current (AND NEW - create them) "wrapper-functions" around classes as '(...) => T & new (...) => T' 
-		via the 'const NAME = OTHER_NAME as any' type-trick. PARTICULARLY, do this for `Stream`s
-		1. In particular - ONLY add "function-wrappers" for the `class _StreamClassName {....}`for: 
-			1. classes that are INTENTIONALLY to remain 'sealed'
-			2. classes that are using the Factory pattern 
-			3. public classes that AREN'T INHERITED-FROM ELSEWHERE 
-			
-	TODO: make the 'MapClass' and 'HashMap' BOTH operate on a "local class" [instead of an 'inner-function class']
-		Replace Configurator Pattern with 'Generalized Factory-Pattern' [or, weaker form of `Configurator Pattern`]. 
-		Again - same thing as with the 'Stream'-s - for JIT's sake + to save (some) memory, 
-			since the user will (likely) want to be using the MapClass for their own goals. 
-
-	TODO: [`mixin-IStream`] MAKE the (remaining) `Annotation` classes *INTO EXPORTS*
-		Also - MAKE them part of the NAMESPACES that are the "main" export-functions. 
-		[Let they be available under `.annotation`, SAME WAY as `.generic`]
-		Reasons: 
-			1. the user MIGHT want to use them for their own (technically legal) TypeScript-machination purposes
-			2. some annotations are REQUIRED by other annotations...
-			3. [main reason] too much work moving them to /internal
-
-	TODO: simplify the `MapClass` code. 
-		Specifically, all the excessive `.prototype` manipulations. 
-		They are ugly and unnecessary (well, except maybe ` = plainGetIndex` thingy). 
-		
-	TODO: ENSURE that ALL THE EXPORTS ARE ON THE SPOT [this particualrly applies to IStream - LOTS of new classes has been added...]; 
-	
-	TODO: [IStream] regarding the `.generic!`...
-		REMOVE, replace with just `.generic` [i.e. A NON-NULL PROPERTY is what is must be...]; 
-
-	TODO: [IStream] ENSURE that the `Args` generic arg [in `Stream` module] IS NOT 'any[]', but '[]' BY DEFAULT!!!
-
+MINOR TODOS:
 	TODO [docs]:
 		ADD a GUIDE on how to CORRECTLY inherit the `Stream` classes [TS-only].
 
@@ -813,26 +587,9 @@ MINOR TODOS:
 			2. JavaScript-usage has no use for this insanity
 			3. TS-support is good!
 
-	TODO: ENSURE the 'Args | []' THING in ALL the `IStream`-implementing classes...
-
-	TODO [docs]: make a NOTE that the library is a PRIMARILY JavaScript API!
-		Meaning - that the stuff with `.generic/.annotation` is the price to pay 
-			for being JS-native [id est - being "natural", without forcing patterns
-				from "conservative" OOP languages, such as Java]
-
-	TODO: replace the `x: (...args: ...) => ...` with `x(...args: ...): ...`; 
-		Where relevant only [most places]. 
-		Reasons: 
-			1. better typing...
-			2. less confusion between the two 
-				[former is ONLY necessary for function-properties, 
-					whilst the latter is ONLY used for methods, 
-						so marking methods with the former, while possible, 
-							is neither sensible nor recommended most of the time]
-
 	TODO: find *THE* largest class in the library 
 		Use it as a sort of a: 
-			1. quality check [that all the classes "fit" within a certain size bound]
+			1. quality benchmark [that all the classes "fit" within a certain size bound]
 				And that there are NO MORE "big" classes that need refactoring. 
 			2. for-fun statistics thing [knowing what is the largest library's class currently is]
 
@@ -1027,11 +784,11 @@ TODO:
 
 				[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
 				
-		TC1. Create an 'ASTAnalyzer' class [under new 'Node' module]: 
+		TC1. Create an 'ASTAnalyzer' class [under the 'Node' module]: 
 			1. Takes in an `INode`
 			2. Traverses the tree
 			3. Returns information: 
-				1. [Buckets-Categorization] Arrays of '.trivial', '.content' and '.recursive' nodes
+				1. [Buckets-Categorization] Arrays of '.trivial', '.content', '.recursive', etc nodes IN ACCORDANCE TO A GIVEN 'NodeSystem'; 
 				2. [Type-Categorization] Returns a 'HashMap' of arrays of nodes, filtered by their '.type'; 
 					NOTE: the 'HashMap' is, TOO, completely configurable by the user [user-defined (if provided), else - default being: when 'string's are used for 'type's - ObjectHashInternal, otherwise - HashMapInternal]; 
 						(another function-argument for returning the final ASTAnalyzer class)
@@ -1217,10 +974,6 @@ TODO:
 
 				1. .reverse() - recursively reverses the given tree
 											
-		CU1. Add a 'binarySearch' utility: 
-			1. For IndexBuffer - as it keeps 'number's in an ordered fashion, there is no reason not to employ it...; 
-			2. This is generic (meaning, it provides a map 'f', and then compares via 'f(a, b)', with default being '(a, b) => a < b'); 
-
 		MC1. MapClass: fix types
 			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
 			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
@@ -1325,7 +1078,7 @@ TODO:
 	5. Testing: 
 		1. introduce mocks [use Jest]
 			Reason: complexity. 
-				There's still v0.4 to go (proper BFS implementation, for instance...); 
+				There's still v0.4 to go; 
 
 	6. Research (Chevrotain - source, capabilities, optimizations): 
 		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
@@ -1340,8 +1093,12 @@ FUTURE:
 	1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
 		0. `copiable` package: 
 			A TypeScript package. 
-			Contains the `ICopiable` trait. 
+			Contains: 
+				1. `ICopiable` trait
+				2. 'isCopiable' type-predicate
+
 			Make a dependency of this. 
+			RE-EXPORT IT as part of `parsers.js` under a submodule 'copiable.ICopiable' and 'copiable.isCopiable'; 
 
 		1. `test` package [already developed]: 
 			1. add the current 'ClassTest', 'MethodTest' 
@@ -1399,3 +1156,6 @@ FUTURE:
 			1. natural runtime-static-time combination
 			2. better + simpler type-system
 			3. [big one] natural support for mixins
+				1. replace the 'mixins.ts' solution with the one provided by the language
+					They are feature-equivalent and the end-code still utilizes the dependency 
+						in question. 

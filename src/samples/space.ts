@@ -3,7 +3,7 @@ import {
 	FilterStream,
 	IndexStream
 } from "../classes/Stream.js"
-import type { IOwnedStream, IStream } from "../interfaces.js"
+import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { isSpace } from "./alphabet.js"
 
 class LastItem<T = any> {
@@ -50,7 +50,10 @@ class Lookahead<T = any> {
  * and which produces a stream of `string`s such that all `\r\n` are replaced
  * by `\n`.
  */
-export class LFStream extends DyssyncOwningStream.generic!<string>() {
+export class LFStream
+	extends DyssyncOwningStream<string>
+	implements ICommonStream<string>
+{
 	private readonly lastItem = new LastItem()
 	private readonly lookahead = new Lookahead()
 
@@ -78,6 +81,8 @@ export class LFStream extends DyssyncOwningStream.generic!<string>() {
 		this.lookahead.init(this.resource!)
 		this.updateItems()
 	}
+
+	free() {}
 
 	next() {
 		super.next()

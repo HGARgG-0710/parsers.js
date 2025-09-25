@@ -1,5 +1,4 @@
 export * from "../modules/Stream/classes/AccumulatorStream.js"
-export * from "../modules/Stream/classes/annotation.js"
 export * from "../modules/Stream/classes/ArrayStream.js"
 export * from "../modules/Stream/classes/AttachedStream.js"
 export * from "../modules/Stream/classes/BasicResourceStream.js"

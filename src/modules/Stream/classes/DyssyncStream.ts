@@ -39,6 +39,4 @@ export abstract class DyssyncStream<T = any> implements IStream<T> {
 	abstract isCurrEnd(): boolean
 
 	abstract next(): void
-
-	abstract [Symbol.iterator](): Generator<T>
 }

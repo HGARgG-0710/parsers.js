@@ -1,5 +1,5 @@
 import { array, functional } from "@hgargg-0710/one"
-import { Pools } from "../../main.js"
+import * as Pools from "../Pools.js"
 import type { IFreeable } from "../interfaces.js"
 import type {
 	ICellNode,

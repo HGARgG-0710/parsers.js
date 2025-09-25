@@ -16,7 +16,7 @@ import { StatefulStream } from "./StatefulStream.js"
 function BuildBeforeHandlerStream<In = any, Out = any>(
 	handler: IHandler<In, Out>
 ) {
-	abstract class BeforeHandlerStream extends BasicResourceStream.generic!<Out>() {
+	abstract class BeforeHandlerStream extends BasicResourceStream<Out> {
 		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
 
 		private handler: IHandler<In, Out>
@@ -55,7 +55,7 @@ function BuildBeforeHandlerStream<In = any, Out = any>(
 }
 
 function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
-	return new mixin<IControlStream<Out>>(
+	return new mixin(
 		{
 			name: "HandlerStream",
 			static: {
@@ -77,7 +77,6 @@ function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
 				this.super.BeforeHandlerStream.constructor.call(this, ...args)
 			}
 		},
-		[],
 		[BuildBeforeHandlerStream(handler), StatefulStream, PoolableStream]
 	).toClass() as unknown as IPoolKeeping<
 		IControlStream<Out> & ICommonStream<Out>
@@ -98,11 +97,16 @@ export function HandlerStream<In = any, Out = any>(
 	handler: (stream: IOwnedStream<In>) => Out
 ) {
 	const handlerStream = BuildHandlerStream(handler)
-	return function (
+
+	function H(
 		resource?: IOwnedStream<In>
 	): IControlStream<Out> & ICommonStream<Out> {
 		return handlerStream.pool.create(resource)
 	}
+
+	H.pool = handlerStream.pool
+
+	return H
 }
 
 export namespace HandlerStream {

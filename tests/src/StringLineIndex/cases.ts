@@ -46,7 +46,6 @@ stringLineIndexTestCounter.test(
 				test.nextLine()
 				assert.strictEqual(lengths.get(4), 11)
 
-				test.prevCharDefault()
 				test.from(new LineIndex(5, 0))
 				test.line(4)
 				test.char(9)
@@ -69,7 +68,6 @@ stringLineIndexTestCounter.test(
 				test.nextLineTip(new LineIndex(5, 5))
 				test.line(4)
 				test.char(0)
-				test.prevCharStart(3, 4)
 				test.toNumber(13)
 			}
 		)

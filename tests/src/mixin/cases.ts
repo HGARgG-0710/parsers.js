@@ -284,7 +284,7 @@ mixinTestCounter.test(
 			constructor: constructor2
 		}
 
-		new MixinPrototypeTest(mixinShape1, [], [Parent2, Parent1]).toClass({
+		new MixinPrototypeTest(mixinShape1, [Parent2, Parent1]).toClass({
 			constructor: {
 				value: constructor1,
 				writable: true,
@@ -321,7 +321,7 @@ mixinTestCounter.test(
 			}
 		})
 
-		new MixinPrototypeTest(mixinShape2, [], [Parent1, Parent2]).toClass({
+		new MixinPrototypeTest(mixinShape2, [Parent1, Parent2]).toClass({
 			constructor: {
 				value: constructor2,
 				writable: true,
@@ -364,25 +364,21 @@ mixinTestCounter.test(
 			return A && B
 		}
 
-		new MixinInstanceTest(mixinShape1, [], [Parent2, Parent1]).withInstance(
-			{
-				X: (x: any) => x.X === 10,
-				c: (x: any) => x.c === 13,
-				m: mPred,
-				B: (x: any) => x.B === 12,
-				r: (x: any) => x.r === 19
-			}
-		)()
+		new MixinInstanceTest(mixinShape1, [Parent2, Parent1]).withInstance({
+			X: (x: any) => x.X === 10,
+			c: (x: any) => x.c === 13,
+			m: mPred,
+			B: (x: any) => x.B === 12,
+			r: (x: any) => x.r === 19
+		})()
 
-		new MixinInstanceTest(mixinShape2, [], [Parent1, Parent2]).withInstance(
-			{
-				X: (x: any) => x.X === 9,
-				c: (x: any) => x.c === 12,
-				m: mPred,
-				B: (x: any) => x.B === 19,
-				d: (x: any) => x.d() === 29
-			}
-		)()
+		new MixinInstanceTest(mixinShape2, [Parent1, Parent2]).withInstance({
+			X: (x: any) => x.X === 9,
+			c: (x: any) => x.c === 12,
+			m: mPred,
+			B: (x: any) => x.B === 19,
+			d: (x: any) => x.d() === 29
+		})()
 	},
 	true
 )
@@ -421,7 +417,7 @@ mixinTestCounter.test(
 			constructor: parent1Constructor
 		}
 
-		const parent1 = new mixin(parent1Shape)
+		const parent1 = new mixin(parent1Shape).toClass()
 
 		function parent2Constructor(m: number) {
 			this.z = m
@@ -440,7 +436,7 @@ mixinTestCounter.test(
 			constructor: parent2Constructor
 		}
 
-		const parent2 = new mixin(parent2Shape)
+		const parent2 = new mixin(parent2Shape).toClass()
 
 		function constructor(x: number, m: number) {
 			this.super.MixinParent1.constructor.call(this, x)
@@ -566,7 +562,7 @@ mixinTestCounter.test(
 					return 20
 				}
 			}
-		})
+		}).toClass()
 
 		const parent2Shape = {
 			name: "MixinParent2",
@@ -577,7 +573,7 @@ mixinTestCounter.test(
 			}
 		}
 
-		const parent2 = new mixin(parent2Shape)
+		const parent2 = new mixin(parent2Shape).toClass()
 
 		function constructor() {}
 
@@ -595,11 +591,11 @@ mixinTestCounter.test(
 			constructor
 		}
 
-		new MixinPrototypeTest(
-			mixinShape,
-			[parent1, parent2],
-			[ClassParent1]
-		).toClass({
+		new MixinPrototypeTest(mixinShape, [
+			ClassParent1,
+			parent1,
+			parent2
+		]).toClass({
 			constructor: {
 				value: constructor,
 				writable: true,
@@ -632,11 +628,11 @@ mixinTestCounter.test(
 			}
 		})
 
-		new MixinInstanceTest(
-			mixinShape,
-			[parent1, parent2],
-			[ClassParent1]
-		).withInstance({
+		new MixinInstanceTest(mixinShape, [
+			ClassParent1,
+			parent1,
+			parent2
+		]).withInstance({
 			s: (x: any) => x.s === 6,
 			m: (x: any) => x.m === 5,
 			iter: (x: any) => array.same([11, 95, 17, 49], [...x])
@@ -692,7 +688,8 @@ mixinTestCounter.test(
 					return 31
 				}
 			}
-		})
+		}).toClass()
+
 		const parent2 = new mixin({
 			name: "MixinParent2",
 			properties: {
@@ -700,7 +697,7 @@ mixinTestCounter.test(
 					return -3
 				}
 			}
-		})
+		}).toClass()
 
 		const parent3Shape = {
 			name: "MixinParent3",
@@ -715,7 +712,7 @@ mixinTestCounter.test(
 			}
 		}
 
-		const parent3 = new mixin(parent3Shape)
+		const parent3 = new mixin(parent3Shape).toClass()
 
 		const mixinShape = {
 			name: "Test7",
@@ -736,11 +733,13 @@ mixinTestCounter.test(
 			}
 		}
 
-		new PureMixinPrototypeTest(
-			mixinShape,
-			[parent1, parent2, parent3],
-			[ClassParent1, ClassParent2]
-		).toClass({
+		new PureMixinPrototypeTest(mixinShape, [
+			ClassParent1,
+			ClassParent2,
+			parent1,
+			parent2,
+			parent3
+		]).toClass({
 			d: {
 				get: undefined,
 				set: Object.getOwnPropertyDescriptor(
@@ -764,11 +763,13 @@ mixinTestCounter.test(
 			}
 		})
 
-		new MixinInstanceTest(
-			mixinShape,
-			[parent1, parent2, parent3],
-			[ClassParent1, ClassParent2]
-		).withInstance({
+		new MixinInstanceTest(mixinShape, [
+			ClassParent1,
+			ClassParent2,
+			parent1,
+			parent2,
+			parent3
+		]).withInstance({
 			m: (x: any) => x.m() === -13,
 			t: (x: any) => array.same([11, 20, 31, -3, -13], [...x]),
 			d: (x: any) => {
@@ -797,7 +798,7 @@ mixinTestCounter.test(
 		const mixinShape = {
 			name: "Test8",
 			properties: {},
-			constructor(x: number) {
+			constructor: function (x: number) {
 				this.x = x + 1
 			}
 		}

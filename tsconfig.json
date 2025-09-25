@@ -1,3 +1,32 @@
 {
-	"extends": "./ts/tsconfig.json"
+	"compilerOptions": {
+		"allowJs": false,
+		"checkJs": false,
+		"baseUrl": ".",
+		"outDir": "dist",
+		"strictNullChecks": true,
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"target": "ES2020",
+		"module": "node16",
+		"moduleResolution": "node16",
+		"declaration": true,
+		"verbatimModuleSyntax": true,
+		"paths": {
+			"@hgargg-0710/*": [
+				"node_modules/@hgargg-0710/*"
+			]
+		},
+		"noUnusedLocals": true,
+	},
+	"exclude": [
+		"node_modules",
+		"dist",
+		"tests",
+	],
+	"include": [
+		"**/*.ts", "src/modules/Stream/classes/PipeStream.js",
+	]
 }

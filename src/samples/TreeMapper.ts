@@ -30,9 +30,6 @@ export function TreeMapper<In extends IWalkable<In> = IWalkable, Out = any>(
 	const mapperStream = HandlerStream(map)
 	return function (from: In) {
 		const into = intoMaker()
-		return consume(
-			mapperStream(new (DepthStream.generic!<In>())(from)),
-			into
-		)
+		return consume(mapperStream(new DepthStream<In>(from)), into)
 	}
 }

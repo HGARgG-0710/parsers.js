@@ -698,7 +698,7 @@ const switchArrayInitializer = {
  * via the `IStreamArray` whenever modifying the internal
  * structure of a `DynamicParser`.
  */
-class SwitchArray<
+export class SwitchArray<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
 		InitType = any

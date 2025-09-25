@@ -1,7 +1,7 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import { LineIndex } from "../../../classes/Position.js"
-import type { ILineIndex } from "../../../interfaces.js"
+import type { ILineIndex, IPoolKeeping } from "../../../interfaces.js"
 import type { ICommonStream, IOwnedStream } from "../../../interfaces/Stream.js"
 import type {
 	IIndexStream,
@@ -9,9 +9,11 @@ import type {
 } from "../interfaces/IndexStream.js"
 import { IdentityStream } from "./IdentityStream.js"
 
-function BuildIndexStream<T = any>(isNewline: INewlinePredicate<T>) {
+function BuildIndexStream<T = any>(
+	isNewline: INewlinePredicate<T>
+): IPoolKeeping<IIndexStream<T> & ICommonStream<T>> {
 	return class IndexStream
-		extends IdentityStream.generic!<T, []>()
+		extends IdentityStream<T, []>
 		implements IIndexStream<T>
 	{
 		static readonly pool = Pools.Stream.add(new ObjectPool(IndexStream))
@@ -60,9 +62,12 @@ function BuildIndexStream<T = any>(isNewline: INewlinePredicate<T>) {
  */
 export function IndexStream<T = any>(isNewline: INewlinePredicate<T>) {
 	const indexStream = BuildIndexStream<T>(isNewline)
-	return function (
-		resource?: IOwnedStream<T>
-	): IIndexStream<T> & ICommonStream<T> {
+
+	function I(resource?: IOwnedStream<T>): IIndexStream<T> & ICommonStream<T> {
 		return indexStream.pool.create(resource)
 	}
+
+	I.pool = indexStream.pool
+
+	return I
 }

@@ -10,7 +10,7 @@ import { ArrayStream } from "./ArrayStream.js"
  * where `1-m` are the indexes of values in `.items: IStream`.
  * It stops after the shortest of present streams runs out.
  */
-export class InterleaveStream extends ArrayStream.generic!<any, IStream>() {
+export class InterleaveStream extends ArrayStream<any, IStream> {
 	private streamIndex: number = 0
 
 	private get currStream() {

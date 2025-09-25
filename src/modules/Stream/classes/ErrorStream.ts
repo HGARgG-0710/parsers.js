@@ -7,100 +7,7 @@ import type {
 } from "../../../interfaces.js"
 import { isIndexCarrying } from "../../../is/Stream.js"
 import { negate } from "../utils/StreamPosition.js"
-import { IdentityStream, IdentityStreamAnnotation } from "./IdentityStream.js"
-
-abstract class ErrorStreamAnnotation<
-	T = any
-> extends IdentityStreamAnnotation<T> {
-	protected abstract errHandler(err: any): void
-}
-
-let errorStream: typeof ErrorStreamAnnotation | null = null
-
-function BuildErrorStream<T = any>() {
-	abstract class ErrorStream extends IdentityStream.generic!<T>() {
-		protected abstract errHandler(err: any): void
-
-		next() {
-			try {
-				super.next()
-			} catch (e) {
-				this.errHandler(e)
-			}
-		}
-	}
-
-	return ErrorStream as unknown as typeof ErrorStreamAnnotation<T>
-}
-
-function PreErrorStream<T = any>(): typeof ErrorStreamAnnotation<T> {
-	return errorStream
-		? errorStream
-		: (errorStream = BuildErrorStream<T>() as typeof ErrorStreamAnnotation)
-}
-
-abstract class BasicErrorStreamAnnotation<T = any, I = string>
-	extends ErrorStreamAnnotation<T>
-	implements IIndexStream<T>
-{
-	protected readonly inputStream: IIndexStream<I>
-	readonly lineIndex: ILineIndex
-}
-
-let basicErrorStream: typeof BasicErrorStreamAnnotation | null = null
-
-function BuildBasicErrorStream<T = any, I = string>() {
-	abstract class BasicErrorStream extends PreErrorStream<T>() {
-		protected inputStream: IIndexStream<I>
-		private _lineIndex: ILineIndex
-
-		private set lineIndex(newIndex: ILineIndex) {
-			this._lineIndex = newIndex
-		}
-
-		get lineIndex() {
-			return this._lineIndex
-		}
-
-		private inputGetter() {
-			return resourceDigger.dig<this, IIndexStream<I>>(
-				this,
-				negate(isIndexCarrying)
-			)
-		}
-
-		private posGetter(): ILineIndex {
-			return this.inputStream!.lineIndex
-		}
-
-		private cacheInput() {
-			this.inputStream = this.inputGetter()
-			this.lineIndex = this.posGetter()
-		}
-
-		setResource(newResource: IOwnedStream): void {
-			super.setResource(newResource)
-			this.cacheInput()
-		}
-	}
-
-	return BasicErrorStream as unknown as typeof BasicErrorStreamAnnotation<
-		T,
-		I
-	>
-}
-
-function PreBasicErrorStream<
-	T = any,
-	I = string
->(): typeof BasicErrorStreamAnnotation<T, I> {
-	return basicErrorStream
-		? basicErrorStream
-		: (basicErrorStream = BuildBasicErrorStream<
-				T,
-				I
-		  >() as typeof BasicErrorStreamAnnotation)
-}
+import { IdentityStream } from "./IdentityStream.js"
 
 /**
  * This is an abstract stream class, extending `IdentityStream`,
@@ -117,11 +24,17 @@ function PreBasicErrorStream<
  * `throw` statement, or a natural `Error` occurs during the
  * traversal of one of the underlying `IStream`s.
  */
-export const ErrorStream: ReturnType<typeof PreErrorStream> & {
-	generic?: typeof PreErrorStream
-} = PreErrorStream()
+export abstract class ErrorStream<T = any> extends IdentityStream<T> {
+	protected abstract errHandler(err: any): void
 
-ErrorStream.generic = PreErrorStream
+	next() {
+		try {
+			super.next()
+		} catch (e) {
+			this.errHandler(e)
+		}
+	}
+}
 
 /**
  * This is an abstract descendant of the `ErrorStream`,
@@ -135,11 +48,42 @@ ErrorStream.generic = PreErrorStream
  * It, thus, allows tracking a given `ILineIndex` object,
  * and the underlying `IIndexStream`
  */
-export const BasicErrorStream: ReturnType<typeof PreBasicErrorStream> & {
-	generic?: typeof PreBasicErrorStream
-} = PreBasicErrorStream()
+export abstract class BasicErrorStream<
+	T = any,
+	I = string
+> extends ErrorStream<T> {
+	protected inputStream: IIndexStream<I>
+	private _lineIndex: ILineIndex
 
-BasicErrorStream.generic = PreBasicErrorStream
+	private set lineIndex(newIndex: ILineIndex) {
+		this._lineIndex = newIndex
+	}
+
+	get lineIndex() {
+		return this._lineIndex
+	}
+
+	private inputGetter() {
+		return resourceDigger.dig<this, IIndexStream<I>>(
+			this,
+			negate(isIndexCarrying)
+		)
+	}
+
+	private posGetter(): ILineIndex {
+		return this.inputStream!.lineIndex
+	}
+
+	private cacheInput() {
+		this.inputStream = this.inputGetter()
+		this.lineIndex = this.posGetter()
+	}
+
+	setResource(newResource: IOwnedStream): void {
+		super.setResource(newResource)
+		this.cacheInput()
+	}
+}
 
 /**
  * This is a mixin-function (as in `TypeScript` mixins) for creation of
@@ -160,7 +104,7 @@ BasicErrorStream.generic = PreBasicErrorStream
  * information as to the cause of the error during parsing.
  */
 export function DefaultErrorStream<
-	ErrorBase extends abstract new (...args: any[]) => ErrorStreamAnnotation
+	ErrorBase extends abstract new (...args: any[]) => ErrorStream
 >(BaseErrorStream: ErrorBase): new (resource?: IOwnedStream) => ILinkedStream {
 	abstract class M extends BaseErrorStream {}
 

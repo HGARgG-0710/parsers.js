@@ -3,7 +3,7 @@ import assert from "assert"
 import { MissingArgument } from "../../../dist/main.js"
 import type { IIndexed, IReadable } from "../../../dist/src/interfaces.js"
 import { ReadableView } from "../../../dist/src/internal/ReadableView.js"
-import { MutableClassTest, MethodTest } from "../lib.js"
+import { MethodTest, MutableClassTest } from "../lib.js"
 import { read } from "../Readable/lib.js"
 
 const { structCheck } = object
@@ -61,16 +61,6 @@ const forward = new MethodTest("forward", function <T = any>(
 	baseReadTest(this, index, expected)
 })
 
-const backward = new MethodTest("backward", function <T = any>(
-	this: ReadableView<T>,
-	count: number,
-	index: number,
-	expected: T
-) {
-	for (let i = 0; i < count; ++i) this.backward()
-	baseReadTest(this, index, expected)
-})
-
 class ReadableViewTest<T = any> extends MutableClassTest<ReadableView<T>> {
 	read(from: number, to: number, expected: IIndexed<T>) {
 		this.testMethod("read", from, to, expected)
@@ -88,12 +78,8 @@ class ReadableViewTest<T = any> extends MutableClassTest<ReadableView<T>> {
 		this.testMethod("forward", count, index, expected)
 	}
 
-	backward(count: number, index: number, expected: T) {
-		this.testMethod("backward", count, index, expected)
-	}
-
 	constructor() {
-		super([ViewInterface], [read, initNull, initNonNull, forward, backward])
+		super([ViewInterface], [read, initNull, initNonNull, forward])
 	}
 }
 

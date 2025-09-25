@@ -3,6 +3,7 @@ import type {
 	IOwnedStream,
 	IParseState,
 	IPosed,
+	IResourceSettable,
 	IStateHaving,
 	IStateSettable,
 	ITableHandler
@@ -96,7 +97,9 @@ export type IPeekableStream<T = any> = IStream<T> & IPeekable<T>
 /**
  * This is an `IStream<T>` that is also `IResourceful`
  */
-export type IResourcefulStream<T = any> = IStream<T> & IResourceful
+export type IResourcefulStream<T = any> = IStream<T> &
+	IResourceful &
+	IResourceSettable<IOwnedStream>
 
 /**
  * This is an `IStream<T>` that is also `IStateful`, as well as `IStateSettable`

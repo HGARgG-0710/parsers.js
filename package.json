@@ -4,7 +4,7 @@
 	"description": "A JavaScript library for simplification of the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
 	"type": "module",
 	"main": "./dist/main.js",
-	"types": "./dist/types.d.ts",
+	"types": "./dist/main.d.ts",
 	"license": "MIT",
 	"author": "hgargg-0710",
 	"keywords": [
@@ -14,25 +14,21 @@
 		"generation"
 	],
 	"dependencies": {
-		"@hgargg-0710/flow": "0.0.1",
-		"@hgargg-0710/one": "0.5.0"
+		"@hgargg-0710/one": "0.5.0",
+		"@hgargg-0710/summat.ts": "^0.0.1",
+		"@types/node": "^24.5.2"
 	},
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"
 	},
 	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
 	"scripts": {
-		"build-js": "tsc --project ts/tsconfig.json",
-		"build-types": "tsc --project ts/types.json",
-		"test-build": "tsc --project ts/test-build.json",
+		"copy-js": " copyfiles src/**/*.d.ts src/**/*.js dist", 
+		"build": "npm run copy-js && tsc --project .",
+		"debug-build": "npm run copy-js && tsc --project ts/debug.json",
 		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
-		"build": "npm run build-js && npm run build-types",
-		"test-build-all": "npm run test-build && npm run build-types && npm run test-compile",
+		"test-build": "npm run test-compile && npm run debug-build",
 		"test-all": "cd tests/out && node run.js",
 		"unused": "ts-unused-exports ./tsconfig.json"
-	},
-	"devDependencies": {
-		"@hgargg-0710/summat.ts": "0.0.1",
-		"@types/node": "^22.12.0"
 	}
 }

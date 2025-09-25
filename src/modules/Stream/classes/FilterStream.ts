@@ -14,7 +14,7 @@ import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
 function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
-	return new mixin<ILinkedStream<T>>(
+	return new mixin(
 		{
 			name: "FilterStream",
 			static: {
@@ -71,7 +71,6 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 				this.filter = bind(this, filter)
 			}
 		},
-		[],
 		[DyssyncOwningStream, PoolableStream]
 	).toClass() as unknown as IPoolKeeping<ICommonStream<T>, [IOwnedStream<T>]>
 }
@@ -85,7 +84,12 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
  */
 export function FilterStream<T = any>(filter: IStreamPosition<T>) {
 	const filterStream = BuildFilterStream(filter)
-	return function (resource?: IOwnedStream<T>): ICommonStream<T> {
+
+	function F(resource?: IOwnedStream<T>): ICommonStream<T> {
 		return filterStream.pool.create(resource)
 	}
+
+	F.pool = filterStream.pool
+
+	return F
 }

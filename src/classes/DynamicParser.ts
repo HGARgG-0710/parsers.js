@@ -1,5 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
+	ICommonStream,
 	ICompositeStream,
 	IInputStream,
 	ILinkedStream
@@ -8,52 +9,30 @@ import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
 import { AttachedStream } from "../modules/Stream/classes/AttachedStream.js"
 import { Initializable } from "./Initializer.js"
 
-type IParsedStreamConstructor<
-	InType = any,
-	FinalType = any,
-	InitType = any
-> = new (
-	parseInstance: Parse<InType, FinalType, InitType>
-) => ILinkedStream<FinalType>
+class ParsedStream<InType = any, FinalType = any, InitType = any>
+	extends AttachedStream<FinalType, []>
+	implements ILinkedStream<FinalType>
+{
+	protected ["constructor"]: new (
+		parseInstance: Parse<InType, FinalType, InitType>
+	) => this
 
-let parsedStream: IParsedStreamConstructor | null = null
+	next() {
+		super.next()
+		this.parseInstance.maybeUpdate()
+	}
 
-function BuildParsedStream<InType = any, FinalType = any, InitType = any>() {
-	return class
-		extends AttachedStream.generic!<FinalType, []>()
-		implements ILinkedStream<FinalType>
-	{
-		protected ["constructor"]: new (
-			parseInstance: Parse<InType, FinalType, InitType>
-		) => this
+	copy(): this {
+		return new this.constructor(this.parseInstance.copy())
+	}
 
-		next() {
-			super.next()
-			this.parseInstance.maybeUpdate()
-		}
+	free(): void {}
 
-		copy(): this {
-			return new this.constructor(this.parseInstance.copy())
-		}
-
-		free(): void {}
-
-		constructor(
-			private readonly parseInstance: Parse<InType, FinalType, InitType>
-		) {
-			super(parseInstance.workStream)
-		}
-	} as IParsedStreamConstructor<InType, FinalType, InitType>
-}
-
-function ParsedStream<
-	InType = any,
-	FinalType = any,
-	InitType = any
->(): IParsedStreamConstructor<InType, FinalType, InitType> {
-	return parsedStream
-		? parsedStream
-		: (parsedStream = BuildParsedStream<InType, FinalType, InitType>())
+	constructor(
+		private readonly parseInstance: Parse<InType, FinalType, InitType>
+	) {
+		super(parseInstance.workStream)
+	}
 }
 
 const parseInitializer = {
@@ -203,12 +182,10 @@ export function DynamicParser<InType = any, FinalType = any, InitType = any>(
 	inputStream: IInputStream<InType, InitType>
 ) {
 	const parse = new Parse(workStream, inputStream)
-	const parsedStream = ParsedStream<InType, FinalType, InitType>()
-
 	return function (
 		input: InitType,
 		state?: Summat
-	): ILinkedStream<FinalType> {
-		return new parsedStream(parse.copy().init(input, state))
+	): ICommonStream<FinalType> {
+		return new ParsedStream(parse.copy().init(input, state))
 	}
 }

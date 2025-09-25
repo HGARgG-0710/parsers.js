@@ -1,15 +1,15 @@
 import type { IPositionStream } from "../../../interfaces.js"
-import { annotation } from "./annotation.js"
 
 /**
  * This is an abstract class that implements `IPositionStream<T>`.
  * It contains no concrete properties, save for those that pertain to
  * `.pos` manipulation.
  */
-export abstract class PosHavingStream<T = any>
-	extends annotation<T>
-	implements IPositionStream<T>
-{
+export abstract class PosHavingStream<T = any> implements IPositionStream<T> {
+	abstract isCurrEnd: () => boolean
+	abstract readonly isEnd: boolean
+	abstract readonly curr: T
+
 	private _pos: number = 0
 
 	private set pos(newPos: number) {

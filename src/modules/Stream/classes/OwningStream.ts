@@ -19,6 +19,8 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
+	abstract isCurrEnd(): boolean
+	abstract next(): void
 
 	private _resource?: IOwnedStream
 
@@ -37,12 +39,6 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 	setResource(newResource: IOwnedStream) {
 		this.resource = newResource
 	}
-
-	abstract isCurrEnd(): boolean
-
-	abstract next(): void
-
-	abstract [Symbol.iterator](): Generator<T>
 
 	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {
 		super(resource, ...args)

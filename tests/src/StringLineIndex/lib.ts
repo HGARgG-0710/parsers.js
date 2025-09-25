@@ -10,7 +10,6 @@ import {
 	charAssert,
 	lineAssert,
 	LineIndexTest,
-	lineStartAssert,
 	nextLine,
 	nextLineStartAssert,
 	copy as superCopy
@@ -23,15 +22,10 @@ const { isFunction } = type
 const BackupIndexInterface = {
 	interfaceName: "BackupIndex",
 	conformance: structCheck({
-		prevChar: isFunction,
 		toNumber: isFunction,
 		from: isFunction,
 		init: isFunction
 	})
-}
-
-function prevCharAssert(instance: ILineIndex, origChar: number) {
-	charAssert(instance, origChar - 1)
 }
 
 const toNumber = new MethodTest("toNumber", function (
@@ -39,28 +33,6 @@ const toNumber = new MethodTest("toNumber", function (
 	expected: number
 ) {
 	assert.strictEqual(this.toNumber(), expected)
-})
-
-const prevCharDefault = new MethodTest("prevCharDefault", function (
-	this: StringLineIndex
-) {
-	assert(this.char > 0)
-	const origLine = this.line
-	const origChar = this.char
-	this.prevChar()
-	lineAssert(this, origLine)
-	prevCharAssert(this, origChar)
-})
-
-const prevCharStart = new MethodTest("prevCharStart", function (
-	this: StringLineIndex,
-	line: number,
-	char: number
-) {
-	lineStartAssert(this)
-	this.prevChar()
-	lineAssert(this, line)
-	charAssert(this, char)
 })
 
 const copy = new MethodTest("copy", function (
@@ -124,14 +96,6 @@ const nextCharEdge = new MethodTest("nextCharEdge", function (
 })
 
 class StringLineIndexTest extends LineIndexTest {
-	prevCharDefault() {
-		this.testMethod("prevCharDefault")
-	}
-
-	prevCharStart(line: number, char: number) {
-		this.testMethod("prevCharStart", line, char)
-	}
-
 	toNumber(expected: number) {
 		this.testMethod("toNumber", expected)
 	}
@@ -159,16 +123,7 @@ class StringLineIndexTest extends LineIndexTest {
 	constructor() {
 		super(
 			[BackupIndexInterface],
-			[
-				prevCharDefault,
-				prevCharStart,
-				toNumber,
-				fromInvalid,
-				from,
-				copy,
-				nextLineTip,
-				nextCharEdge
-			]
+			[toNumber, fromInvalid, from, copy, nextLineTip, nextCharEdge]
 		)
 	}
 }
