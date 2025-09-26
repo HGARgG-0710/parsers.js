@@ -1,5 +1,10 @@
 import type { array } from "@hgargg-0710/one"
-import { DynamicParser, IndexMap, TableHandler } from "../../classes.js"
+import {
+	DynamicParser,
+	IndexMap,
+	ParseableInput,
+	TableHandler
+} from "../../classes.js"
 import { CurrentHash } from "../../classes/HashMap.js"
 import {
 	CompositeStream,
@@ -9,8 +14,9 @@ import {
 } from "../../classes/Stream.js"
 import type {
 	IIndexMap,
-	INodeType,
+	IOwnedStream,
 	IParserFunction,
+	IRawStreamArray,
 	ITypeCheckable
 } from "../../interfaces.js"
 import {
@@ -36,7 +42,7 @@ import { HandleSingleChar } from "./SingleChar.js"
 import { maybeTypeMatch } from "./TypeMatch.js"
 
 export function LookaheadMap(
-	map: array.Pairs<INodeType<string>, IParserFunction>,
+	map: array.Pairs<ITypeCheckable, IParserFunction>,
 	_default: IParserFunction
 ): IIndexMap<ITypeCheckable, IParserFunction, IParserFunction> {
 	const [keys, values] = Pairs.from(map)
@@ -54,17 +60,12 @@ export function LookaheadMap(
 export const PreserveLowerStream = () => new IdentityStream()
 
 export class RegexParser {
-	parse(source: string) {}
+	parse(source: string) {
+		return parseRegex(new ParseableInput(source))
+	}
 }
 
-// * Overall structure of the parser:
-// ! 1. topmost layer [the ROOT NODE]
-// % [sketch - here, starting] 2. disjunction [a | b | ...]
-// * [done - sketch] 3. quantifiers [*, +, etc]
-// * [done - sketch] 4. tokenization [INCLUDING the '|' characters - THOSE MUST BE TURNED TO PROPER OBJECTS FIRST!]
-// * [done - sketch] 5. input
-
-const RegexTokenizer = TableHandler(
+const RegexTokenizer = TableHandler<IOwnedStream<string>, IRawStreamArray>(
 	new CurrentHash(
 		BasicMap(
 			[
@@ -89,19 +90,28 @@ const QuantifierProcessor = TableHandler(
 	)
 )
 
+// TODO: URGENT BUG!
+// * The `Disjunction` is (not quite) complete - still requires "packaging" of UNDERLYING pieces
+// * together. CONCLUSION:
+// ^ 1. Need a layer that would:
+// * 	1. Bunch WHOLE PIECES PRIOR to `|`-Pipes as ONE OBJECT [name it 'DisjunctCollector'];
+// ^ 2. THEN - one would use the `ProduceDisjunction` to collect it all into a single object.
+
 // ! THIS is the error-throwing code - put it at the spot where we KNOW there are NO MORE valid string-cases left...
 // function (input) {
 // TODO: add error-throwing code!
 // ! The `ParseError` is ILL-FIT for this.
 // * 	Specifically, one requires an `ShortStringParseError` error, which is designed for:
-// 		1. inputs that ONLY HAVE A SINGLE LINE [i.e. `BackupIndex` is clearly an overkill here, though usually - it isn't...]
-// 		2. inputs that fit very well inside the RAM [i.e. - DELIBERATELY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
+// 		1. inputs that ONLY HAVE A SINGLE LINE [i.e. using an `ILineIndex` is clearly an overkill here, though usually - it isn't...]
+// 		2. inputs that fit very well inside the RAM [i.e. - KNOWINGLY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
 // }
-const regexParser = DynamicParser(
+const parseRegex = DynamicParser(
 	CompositeStream(
+		// ! layer missin - 'RegexRootStream', the root elemeent - 'regex-root'; Collects it all via a plain old 'consumable()' into a `RetainedArray` or some such thing; 
 		ProduceDisjunction,
+		// ! layer missing - 'DisjunctCollector'
 		QuantifierProcessor,
-		PeekStream(2)(),
+		PeekStream(),
 		RegexTokenizer
 	)(),
 	new InputStream()

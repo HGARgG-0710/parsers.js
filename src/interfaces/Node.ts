@@ -71,8 +71,7 @@ export interface IWalkable<T extends IWalkable<T> = any> {
 export interface INode<T = any, Args extends any[] = any[]>
 	extends ITyped<T>,
 		IWalkable<INode<T>>,
-		ISerializableObject,
-		IInitializable<Args> {
+		ISerializableObject {
 	parent: INode<T> | null
 }
 
@@ -107,6 +106,7 @@ export interface ICellNode<T = any, V = any> extends IPoolNode<T>, IValued<V> {}
  */
 export interface IPoolNode<T = any, Args extends any[] = any[]>
 	extends INode<T, Args>,
+		IInitializable<Args>,
 		IFreeable {}
 
 /**

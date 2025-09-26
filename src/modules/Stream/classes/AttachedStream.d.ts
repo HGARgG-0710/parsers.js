@@ -21,8 +21,8 @@ export declare abstract class AttachedStream<T = any, Args extends any[] = []>
 	extends DelegateStream<T, Args>
 	implements Iterable<T>, IOwnedStream<T>
 {
-	readonly isEnd: boolean
-	readonly curr: T
+	get isEnd(): boolean
+	get curr(): T
 	readonly owner?: IOwningStream;
 	[Symbol.iterator]: () => Generator<T>
 	setOwner(newOwner: IOwningStream): void

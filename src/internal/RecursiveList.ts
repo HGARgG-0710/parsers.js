@@ -298,8 +298,8 @@ class LastInitialized<T extends ITerminalAcceptable = any, Recursive = any> {
 		this.linkNew(sublist.firstItemDeep())
 	}
 
-	linkNew(toBeLastInitialized: T) {
-		this.lastInitialized = toBeLastInitialized
+	linkNew(hasBeenLastInitialized: T) {
+		this.lastInitialized = hasBeenLastInitialized
 	}
 
 	unlinkOld() {
@@ -606,25 +606,11 @@ class PinpointRenewableList<
 	private readonly evaluator = new SwitchableEvaluator()
 	private readonly uniRenewer = new UniversalRenewer(this.renewer)
 
-	private throwSiblingsUnrenewable() {
-		throw new Error(
-			"None of the immediate non-deep siblings of the provided item are renewable. The pinpoint-renewal operation requested is malformed"
-		)
-	}
-
 	private foundNonOld(
 		firstNonOldIndex: number,
 		parent: SwitchArray<T, Recursive>
 	) {
 		return firstNonOldIndex !== parent.size
-	}
-
-	private assertNonOldFound(
-		searchIndex: number,
-		parent: SwitchArray<T, Recursive>
-	) {
-		if (!this.foundNonOld(searchIndex, parent))
-			this.throwSiblingsUnrenewable()
 	}
 
 	private itemAhead(of: number) {
@@ -658,22 +644,21 @@ class PinpointRenewableList<
 	}
 
 	// ! [FOR `.setListIndex` call-implementation...] IMPORTANT NOTE: the item at `.listIndex` of some `I` depends on item of `I + 1` [IF there is any such item... else - it's OUTSIDE [as in - ABOVE] the current `.parentList`, and renewal is deemed impossible/pointless];
-	private lastNonOldItem(item: Terminal<T, Recursive>) {
+	private lastNonOldItem(item: Terminal<T, Recursive>): [boolean, number] {
 		const [i, parent] = this.lastNonOldIndex(item)
-		this.assertNonOldFound(i, parent)
-		return i
+		return [this.foundNonOld(i, parent), i]
 	}
 
-	private firstOldItem(item: Terminal<T, Recursive>) {
-		return this.lastNonOldItem(item) - 1
+	private firstOldItem(item: Terminal<T, Recursive>): [boolean, number] {
+		const [foundNonOld, lastNonOld] = this.lastNonOldItem(item)
+		return [foundNonOld, lastNonOld - 1]
 	}
 
 	private renewOldItem(item: Terminal<T, Recursive>) {
-		this.renewNeeded(
-			this.firstOldItem(item),
-			item.listIndex,
-			item.parentList
-		)
+		const [foundNonOld, firstOldItem] = this.firstOldItem(item)
+		if (foundNonOld)
+			this.renewNeeded(firstOldItem, item.listIndex, item.parentList)
+		return foundNonOld
 	}
 
 	/**
@@ -681,7 +666,9 @@ class PinpointRenewableList<
 	 * a part of the current item-list.
 	 */
 	renewItem(item: Terminal<T, Recursive>) {
-		if (this.renewer.isOld(item.terminal)) this.renewOldItem(item)
+		return this.renewer.isOld(item.terminal)
+			? this.renewOldItem(item)
+			: true
 	}
 }
 
@@ -993,7 +980,7 @@ export namespace RecursiveList {
 		}
 
 		renewItem(item: T) {
-			this.asPinpointRenewable.renewItem(this.asDeep.getBy(item))
+			return this.asPinpointRenewable.renewItem(this.asDeep.getBy(item))
 		}
 
 		renewAll(lastItem: InitType) {

@@ -19,9 +19,9 @@ function handlePlus(input: IOwnedStream<INode<string>>) {
 	input.next() // Plus(+)
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
-		return SingletonStream(() => new NonGreedyPlus(child))()
+		return [SingletonStream(() => new NonGreedyPlus(child))()]
 	}
-	return SingletonStream(() => new GreedyPlus(child))()
+	return [SingletonStream(() => new GreedyPlus(child))()]
 }
 
 export const maybePlus: array.Pairs<INodeType<string>, IStreamChooser> = [

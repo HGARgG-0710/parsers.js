@@ -12,8 +12,6 @@ import type { DyssyncStream } from "./DyssyncStream.ts"
  * Note that it is incomplete (there is no code for initializing `.curr`).
  * It has only one element, and ends the moment the user calls `.next()`.
  * It also always has `.isCurrEnd() === true`.
- * 
- * Since the class is so trivial there is no benefit to instantiating it.
  */
 export declare abstract class TrivialStream<T = any>
 	extends DyssyncStream<T>

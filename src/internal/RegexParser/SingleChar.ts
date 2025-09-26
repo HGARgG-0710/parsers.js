@@ -7,4 +7,4 @@ const SingleCharStream = SingletonStream(
 	(input: IOwnedStream<string>) => new SingleChar(input.curr)
 )
 
-export const HandleSingleChar = () => SingleCharStream()
+export const HandleSingleChar = () => [SingleCharStream()]

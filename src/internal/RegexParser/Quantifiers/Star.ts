@@ -20,9 +20,9 @@ function handleStar(input: IOwnedStream<INode<string>>) {
 	input.next() // Star(*)
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
-		return SingletonStream(() => new NonGreedyStar(child))()
+		return [SingletonStream(() => new NonGreedyStar(child))()]
 	}
-	return SingletonStream(() => new GreedyStar(child))()
+	return [SingletonStream(() => new GreedyStar(child))()]
 }
 
 export const maybeStar: array.Pairs<INodeType<string>, IStreamChooser> = [

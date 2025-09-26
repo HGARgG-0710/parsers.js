@@ -231,7 +231,7 @@ export interface IWritable<T = any> {
  * `setState(state: Summat): void` method.
  */
 export interface IStateSettable {
-	setState(state: Summat): void
+	setState(state: Summat): this
 }
 
 /**

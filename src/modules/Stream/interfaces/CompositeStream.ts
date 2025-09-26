@@ -70,6 +70,6 @@ export type IStreamArray = IArray<IRawStream>
 export type ICompositeStream<T = any> = ICopiable &
 	IControlStream<T> & {
 		renewResource: () => boolean
-		renewStream: (stream: ILinkedStream) => void
+		renewStream(stream: ILinkedStream): boolean
 		readonly streams: IStreamArray
 	}

@@ -52,7 +52,7 @@ export abstract class BeforeCompositeStream<T = any>
 	private lowStream?: IOwnedStream
 
 	abstract state: IParseState
-	abstract setState(state: Summat): void
+	abstract setState(state: Summat): this
 
 	private renewIfPossible() {
 		return this.streamList!.renewAll(this.lowStream!)
@@ -111,17 +111,14 @@ export abstract class BeforeCompositeStream<T = any>
 		return this
 	}
 
-	isCurrEnd(): boolean {
-		return (
-			this.resource!.isCurrEnd() ||
-			(this.resource!.isEnd && !this.renewResource())
-		)
+	get isEnd() {
+		return super.isEnd && !this.renewResource()
 	}
 
 	free(): void {}
 
 	renewStream(stream: ILinkedStream) {
-		this.streamList!.renewItem(stream)
+		return this.streamList!.renewItem(stream)
 	}
 
 	copy() {

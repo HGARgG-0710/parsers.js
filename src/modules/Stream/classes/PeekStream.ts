@@ -143,7 +143,7 @@ const _PeekStream = new mixin(
 		},
 		properties: {
 			baseNextIter() {
-				super.next()
+				this.super.DyssyncOwningStream.next.call(this)
 				this.syncCurr()
 			},
 
@@ -178,7 +178,10 @@ const _PeekStream = new mixin(
 			},
 
 			isCurrEnd(): boolean {
-				return super.isCurrEnd() && this.peekProvider.hasNone()
+				return (
+					this.super.DyssyncOwningStream.isCurrEnd.call(this) &&
+					this.peekProvider.hasNone()
+				)
 			},
 
 			next() {

@@ -8,7 +8,7 @@ const AnyCharStream = SingletonStream(() => new AnyChar())
 
 function handleDot(input: IOwnedStream<string>) {
 	input.next() // .
-	return AnyCharStream()
+	return [AnyCharStream()]
 }
 
 export const maybeDot: array.Pairs<string, IStreamChooser> = [[".", handleDot]]

@@ -38,17 +38,16 @@ const { id } = functional
  *  	2. .findUnwalkedChildren
  *  	3. .lastChild == -I
  */
-export abstract class BaseNode<T = any, Args extends any[] = any[]>
-	implements INode<T>
-{
+export abstract class BaseNode<T = any> implements INode<T> {
 	abstract readonly type: T
-	abstract init(...x: [] | Partial<Args>): this
 	toJSON?(): ITyped<T>
 
 	parent: INode<T> | null = null
 
-	index(multind: number[]): INode<T> {
-		return this
+	index(multind: number[]) {
+		if (this.lastChild < 0) return this
+		const [firstIndex, ...subIndex] = multind
+		return this.read(firstIndex).index(subIndex)
 	}
 
 	backtrack(positions: number) {
@@ -89,9 +88,10 @@ export abstract class BaseNode<T = any, Args extends any[] = any[]>
  * of the `INode<T, Args>` instances.
  */
 export abstract class PoolableNode<T = any, Args extends any[] = any[]>
-	extends BaseNode<T, Args>
+	extends BaseNode<T>
 	implements IFreeable
 {
+	abstract init(...x: [] | Partial<Args>): this
 	protected abstract readonly pool: ObjectPool
 
 	free() {

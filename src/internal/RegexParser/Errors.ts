@@ -1,4 +1,5 @@
 import { type } from "@hgargg-0710/one"
+import { ConstructorError } from "../../classes/Error.js"
 import type { IOwnedStream } from "../../interfaces.js"
 
 const { isNumber } = type
@@ -16,10 +17,25 @@ export function bail(code: ErrorCode, atPos: number, info: any): never {
 	throw pickError(code, atPos, info)
 }
 
-// TODO: add a proper choice of error + error-message here (break each one of the choices by individual functions...)
+class InvalidEscapedCharError extends ConstructorError {}
+
+class MissingCharacterError extends ConstructorError {}
+
+// TODO: add new errors:
+// * 	1. 'throw new pickError(byCode, pos, info)'
+// * 	2. 'pickError = (byCode, pos, info) => new [switch(){}-chosen error class by *CODE* - MAKE THEM](pickMessage(code, pos, info))'
 // TODO: ADD WORKING WITH THE `.pos: number` of the underlying `PosStream`! Fundamental to the usability of the library's Regex-grammar...;
-function pickError(byCode: ErrorCode, pos: number, info: any): Error {
-	return new Error(pickMessage(byCode, pos, info))
+function pickError(byCode: ErrorCode, pos: number, info: any) {
+	return chooseErrorType(byCode, pickMessage(byCode, pos, info))
+}
+
+function chooseErrorType(byCode: ErrorCode, message: string) {
+	switch (byCode) {
+		case ErrorCode.InvalidEscapedChar:
+			return new InvalidEscapedCharError(message)
+		case ErrorCode.MissingCharacter:
+			return new MissingCharacterError(message)
+	}
 }
 
 function pickMessage(code: ErrorCode, pos: number, info: any): string {

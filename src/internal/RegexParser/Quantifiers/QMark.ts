@@ -19,9 +19,9 @@ function handleQMark(input: IOwnedStream<INode<string>>) {
 	input.next() // QMark(?)
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
-		return SingletonStream(() => new NonQMark(child))()
+		return [SingletonStream(() => new NonQMark(child))()]
 	}
-	return SingletonStream(() => new GreedyQMark(child))()
+	return [SingletonStream(() => new GreedyQMark(child))()]
 }
 
 export const maybeQMark: array.Pairs<INodeType<string>, IStreamChooser> = [

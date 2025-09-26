@@ -1,8 +1,7 @@
 import { Initializable } from "../../../classes/Initializer.js"
 import { mixin } from "../../../mixin.js"
+import { CommonStream } from "./CommonStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
-import { IterableStream } from "./IterableStream.js"
-import { OwnableStream } from "./OwnableStream.js"
 
 export const BasicStream = new mixin(
 	{
@@ -43,5 +42,5 @@ export const BasicStream = new mixin(
 			this.super.Initializable.constructor.call(this, ...args)
 		}
 	},
-	[Initializable, DyssyncStream, OwnableStream, IterableStream]
+	[Initializable, DyssyncStream, CommonStream]
 ).toClass()

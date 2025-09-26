@@ -8,7 +8,7 @@ const PipeStream = SingletonStream(() => new Pipe())
 
 function handlePipe(input: IOwnedStream<string>) {
 	input.next() // |
-	return PipeStream()
+	return [PipeStream()]
 }
 
 export const maybePipe: array.Pairs<string, IStreamChooser> = [

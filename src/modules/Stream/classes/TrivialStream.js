@@ -1,7 +1,6 @@
 import { mixin } from "../../../mixin.js"
+import { CommonStream } from "./CommonStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
-import { IterableStream } from "./IterableStream.js"
-import { OwnableStream } from "./OwnableStream.js"
 
 export const TrivialStream = new mixin(
 	{
@@ -19,5 +18,5 @@ export const TrivialStream = new mixin(
 			this.super.DyssyncStream.constructor.call(this)
 		}
 	},
-	[OwnableStream, IterableStream, DyssyncStream]
+	[CommonStream, DyssyncStream]
 ).toClass()

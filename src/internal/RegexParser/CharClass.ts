@@ -1,13 +1,15 @@
 import type { array } from "@hgargg-0710/one"
 import { TableHandler } from "../../classes.js"
 import { BasicHash } from "../../classes/HashMap.js"
-import { BaseNode, ContentNode } from "../../classes/Node.js"
+import { BaseNode, ContentNode, TokenNode } from "../../classes/Node.js"
 import {
-	DyssyncOwningStream,
 	LimitStream,
+	NodeStream,
 	SingletonStream
 } from "../../classes/Stream.js"
 import type {
+	ICommonStream,
+	ICompositeStream,
 	INode,
 	IOwnedStream,
 	IPeekable,
@@ -17,30 +19,127 @@ import { ObjectMap } from "../../samples/TerminalMap.js"
 import { HandleEscaped } from "./Escaped.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
-// TODO: THIS IS ANOTHER ONE OF *THOSE* nodes/Streams pairs... - it must survive SEVERAL DIFFERENT UNDER-STREAM BIRTHS- AND DEATHS-!
-// * Supposed to keep an underlying *array* of items [either `ClassUnit`, or `ClassRange`]
-class CharClass extends BaseNode<string> {}
+const Hyphen = TokenNode("hyphen")
 
-// ! Supposed to keep TWO PIECES - `.from: string` and `.to: string`;
-// * ALSO - supposed to outlive underyling 'Stream's!
-class ClassRange extends BaseNode<string> {}
+const ClassUnit = ContentNode("char-class-unit")
 
-const ClassUnit = ContentNode("class-unit")
+class ClassRange extends BaseNode<string> {
+	private rangeStart: INode<string>
+	private rangeEnd: INode<string>
+
+	get type() {
+		return "char-class-range"
+	}
+
+	get lastChild() {
+		return 1
+	}
+
+	read(i: number): INode<string, any[]> {
+		return i === 0 ? this.rangeStart : this.rangeEnd
+	}
+
+	constructor(from?: INode<string>, to?: INode<string>) {
+		super()
+		if (from) this.rangeStart = from
+		if (to) this.rangeEnd = to
+	}
+}
+
+class CharClass extends BaseNode<string> {
+	private readonly classItems: INode<string>[] = []
+
+	get type() {
+		return "char-class"
+	}
+
+	add(classItem: INode<string>) {
+		this.classItems.push(classItem)
+	}
+
+	get lastChild(): number {
+		return this.classItems.length - 1
+	}
+
+	read(i: number): INode<string> {
+		return this.classItems[i]
+	}
+}
+
+const HyphenStream = SingletonStream(() => new Hyphen())
 
 const CharClassLimitStream = LimitStream((input) => input.curr === "]")
-
-// ! For `CharClass`
-class CharClassStream extends DyssyncOwningStream.generic!<INode<string>>() {}
-
-// ! Does only two `this.resource.next()` calls INSIDE its own `next()`!
-// * Has only ONE `.next()` call available;
-class ClassRangeStream extends DyssyncOwningStream.generic!<INode<string>>() {}
 
 const ClassUnitStream = SingletonStream(
 	(input: IOwnedStream<string>) => new ClassUnit(input.curr)
 )
 
-const ClassUnitHandler = TableHandler(
+class ClassRangeStream extends NodeStream<INode<string>> {
+	private classRange: ClassRange
+
+	private updateCurr() {
+		this.curr = this.classRange
+	}
+
+	private readNextUnit() {
+		const unit = this.resource!.curr
+		this.resource!.next()
+		return unit
+	}
+
+	isCurrEnd(): boolean {
+		return true
+	}
+
+	next() {
+		this.endStream()
+	}
+
+	// ! DOESN'T CHECK FOR POSSIBILITY OF A MISSING SECOND ITEM!!! [like in 'a-' instead of 'a-z']
+	setResource(resource: IOwnedStream): void {
+		super.setResource(resource)
+		const fromUnit = this.readNextUnit() // the child Stream dies
+		this.reviveChild() // needs to be renewed
+		const toUnit = this.readNextUnit()
+		this.classRange = new ClassRange(fromUnit, toUnit)
+		this.updateCurr()
+	}
+}
+
+class CharClassStream extends NodeStream<INode<string>> {
+	private charClass: CharClass
+
+	setResource(resource: IOwnedStream): void {
+		super.setResource(resource)
+		this.charClass = new CharClass()
+		this.curr = this.charClass
+
+		let couldReviveLast = true
+		while (couldReviveLast) {
+			this.charClass.add(this.resource!.curr)
+			this.resource!.next()
+			couldReviveLast = this.reviveChild() // all `ClassRangeStream/ClassUnitStream` children have 1-element lifetime
+		}
+
+		// by the end of the loop, all possible children are exhausted,
+		// BUT, since for continuation of parent's life we only care about
+		// the `this.isEnd`, THIS WORKS
+	}
+
+	isCurrEnd(): boolean {
+		return true
+	}
+
+	next(): void {
+		// marking this stream as finished
+		this.endStream()
+	}
+}
+
+const ClassUnitHandler = TableHandler<
+	IOwnedStream<string>,
+	ICommonStream<INode<string>>
+>(
 	new BasicHash(
 		ObjectMap(
 			{
@@ -51,12 +150,21 @@ const ClassUnitHandler = TableHandler(
 	)
 )
 
+function HandleHyphen(input: IOwnedStream<string>) {
+	input.next()
+	return [HyphenStream()]
+}
+
 function HandleUnit(input: IOwnedStream<string>) {
 	return [ClassUnitStream(), ClassUnitHandler(input)]
 }
 
-function HandleRange(input: IOwnedStream<string>) {
-	return [new ClassRangeStream(), HandleUnit]
+function HandleUnitOrHyphen(input: IOwnedStream<string>) {
+	return (input.curr === "-" ? HandleHyphen : HandleUnit)(input)
+}
+
+function HandleRange(this: ICompositeStream, input: IOwnedStream<string>) {
+	return [new ClassRangeStream().setState(this.state), HandleUnitOrHyphen]
 }
 
 function isRangeAhead(input: IOwnedStream<string> & IPeekable<string>) {
@@ -65,14 +173,19 @@ function isRangeAhead(input: IOwnedStream<string> & IPeekable<string>) {
 }
 
 function ClassElementHandler(input: IOwnedStream<string> & IPeekable<string>) {
-	return (isRangeAhead(input) ? HandleRange : HandleUnit)(input)
+	return [isRangeAhead(input) ? HandleRange : HandleUnit]
 }
 
 export function HandleCharClass(
+	this: ICompositeStream,
 	input: IOwnedStream<string> & IPeekable<string>
 ) {
 	input.next() // [
-	return [new CharClassStream(), ClassElementHandler, CharClassLimitStream()]
+	return [
+		new CharClassStream().setState(this.state),
+		ClassElementHandler,
+		CharClassLimitStream()
+	]
 }
 
 export const maybeCharClass: array.Pairs<string, IStreamChooser> = [

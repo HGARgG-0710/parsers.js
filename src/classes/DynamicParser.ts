@@ -96,6 +96,7 @@ class Parse<InType = any, FinalType = any, InitType = any>
 
 	setState(preState: Summat) {
 		this.state = this.createState(preState)
+		return this
 	}
 
 	setInput(input: InitType) {
@@ -104,8 +105,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		this.shareState()
 	}
 
-	renewStream(stream: ILinkedStream): void {
-		this.workStream.renewStream(stream)
+	renewStream(stream: ILinkedStream): boolean {
+		return this.workStream.renewStream(stream)
 	}
 
 	update() {

@@ -4,7 +4,6 @@ import { RegexParser } from "../internal/RegexParser/Parser.js"
 class RegexCompiler {
 	private readonly parser = new RegexParser()
 
-	// TODO: add an annotation for this...
 	compile(source: string) {
 		this.parser.parse(source)
 	}

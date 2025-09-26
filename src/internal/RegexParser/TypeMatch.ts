@@ -34,7 +34,7 @@ function isTypeMatchStart(stream: IPeekableStream<string>) {
 }
 
 function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
-	if (!isTypeMatchStart(input)) return [HandleSingleChar()]
+	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // i
 	input.next() // {
 	return [AsIntStream(), TypeMatchStream(), TypeMatchLimitsStream()]
@@ -43,7 +43,7 @@ function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
 function HandleStringTypeMatch(
 	input: IOwnedStream<string> & IPeekable<string>
 ) {
-	if (!isTypeMatchStart(input)) return [HandleSingleChar()]
+	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // s
 	input.next() // {
 	return [AsStringStream(), TypeMatchStream(), TypeMatchLimitsStream()]

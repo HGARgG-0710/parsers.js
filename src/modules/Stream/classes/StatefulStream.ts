@@ -14,8 +14,8 @@ export abstract class StatefulStream<T = any>
 {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
-	abstract next: () => void
-	abstract isCurrEnd: () => boolean
+	abstract next(): void
+	abstract isCurrEnd(): boolean
 
 	private _state: IParseState
 
@@ -29,5 +29,6 @@ export abstract class StatefulStream<T = any>
 
 	setState(newState: IParseState) {
 		this.state = newState
+		return this
 	}
 }
