@@ -16,7 +16,7 @@ export declare abstract class BasicResourceStream<
 		T = any,
 		Args extends any[] = []
 	>
-	extends BasicStream<T, Args>
+	extends BasicStream<T, [IOwnedStream, ...(Args | [])]>
 	implements IOwningStream<T>
 {
 	protected ["constructor"]: new (

@@ -171,6 +171,11 @@ class ErrorStatus {
  * opening.
  */
 export class FileDescriptor implements IByteSource {
+	private ["constructor"]: new (
+		filename: string,
+		handler: (err: NodeJS.ErrnoException) => void
+	) => this
+
 	private readonly byteProvider: ByteProvider
 	private readonly descriptor: number
 	private readonly endPos: Chunk.BytePos
@@ -236,9 +241,13 @@ export class FileDescriptor implements IByteSource {
 		}
 	}
 
+	copy() {
+		return new this.constructor(this.filename, this.handler)
+	}
+
 	constructor(
 		private readonly filename: string,
-		handler: (err: NodeJS.ErrnoException) => void
+		private readonly handler: (err: NodeJS.ErrnoException) => void
 	) {
 		try {
 			this.descriptor = openSync(filename, "r")

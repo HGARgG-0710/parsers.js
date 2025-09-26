@@ -14,6 +14,11 @@ import { Chunk } from "../../internal/Chunk.js"
  * taken from an `<input type="file" />` element or suchlike.
  */
 export class WebByteSource implements IByteSource {
+	private ["constructor"]: new (
+		source: File | null,
+		handler?: () => void
+	) => this
+
 	private readonly source: File
 
 	private currChunk: Uint8Array
@@ -70,9 +75,16 @@ export class WebByteSource implements IByteSource {
 		return this.hasBytes()
 	}
 
+	copy() {
+		return new this.constructor(this.source, this.handler)
+	}
+
 	cleanup(): void {}
 
-	constructor(source: File | null, handler: () => void = () => {}) {
+	constructor(
+		source: File | null,
+		private readonly handler: () => void = () => {}
+	) {
 		if (source) this.source = source
 		else handler()
 	}

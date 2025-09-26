@@ -41,8 +41,4 @@ export class LazyStream
 	isCurrEnd() {
 		return !this.source!.hasChars()
 	}
-
-	copy(): this {
-		return new this.constructor(this.source)
-	}
 }

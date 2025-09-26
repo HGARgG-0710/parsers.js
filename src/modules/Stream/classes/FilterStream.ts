@@ -43,7 +43,10 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 				},
 
 				setResource(newResource: IOwnedStream): void {
-					super.setResource(newResource)
+					this.super.DyssyncOwningStream.setResource.call(
+						this,
+						newResource
+					)
 					this.prod()
 					this.updateCurr()
 				},
@@ -53,13 +56,16 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 				},
 
 				next() {
-					super.next()
+					this.super.DyssyncOwningStream.next.call(this)
 					if (this.isCurrEnd()) this.endStream()
 					else this.currGetter()
 				},
 
 				init(resource?: IOwnedStream<T>) {
-					return super.init(resource)
+					return this.super.DyssyncOwningStream.init.call(
+						this,
+						resource
+					)
 				},
 
 				get pool() {

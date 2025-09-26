@@ -9,7 +9,10 @@ import { ResourceManager } from "./ResourceManager.js"
  * read access to a given `filename: string`.
  */
 export class ReadingSource implements ICharacterSource {
-	["constructor"]: new (byteSource: IByteSource) => this
+	["constructor"]: new (
+		byteSource: IByteSource,
+		decoderFactory: (byteSource: IByteSource) => IDecoder
+	) => this
 
 	private readonly decoder: IDecoder
 
@@ -34,12 +37,12 @@ export class ReadingSource implements ICharacterSource {
 	}
 
 	copy() {
-		return new this.constructor(this.byteSource)
+		return new this.constructor(this.byteSource.copy(), this.decoderFactory)
 	}
 
 	constructor(
 		private readonly byteSource: IByteSource,
-		decoderFactory: (byteSource: IByteSource) => IDecoder
+		private readonly decoderFactory: (byteSource: IByteSource) => IDecoder
 	) {
 		this.decoder = decoderFactory(byteSource)
 	}

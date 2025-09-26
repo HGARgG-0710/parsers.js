@@ -32,7 +32,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.levelUp()
 	}
 
-	private updatePos(withNew: number[]) {
+	private updatePos(withNew: readonly number[]) {
 		this.pos.from(withNew)
 	}
 
@@ -115,7 +115,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.pos.clear()
 	}
 
-	goIndex(pos?: number[]) {
+	goIndex(pos?: readonly number[]) {
 		if (pos) {
 			this.updatePos(pos)
 			this.syncWithPos()

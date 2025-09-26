@@ -181,7 +181,7 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		return this.currGetter()
 	}
 
-	protected basePrevIter(): TreeLike {
+	private basePrevIter(): TreeLike {
 		this.prevResponse.respond()
 		return this.currGetter()
 	}
@@ -204,7 +204,7 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		)
 	}
 
-	isCurrStart(): boolean {
+	private isCurrStart(): boolean {
 		this.prevResponse.pick()
 		return this.prevResponse.isNil()
 	}
@@ -216,7 +216,7 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		return this.curr
 	}
 
-	navigate(index: number[]) {
+	navigate(index: readonly number[]) {
 		this.walker.goIndex(index)
 		this.updateCurr()
 		return this.curr
@@ -227,5 +227,10 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		this.updateCurr()
 		this.endStream()
 		return this.curr
+	}
+
+	prev() {
+		if (this.isCurrStart()) this.startStream()
+		else this.update(this.basePrevIter())
 	}
 }

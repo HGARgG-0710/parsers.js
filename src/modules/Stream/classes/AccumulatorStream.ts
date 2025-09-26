@@ -1,7 +1,7 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import type {
-	ICommonStream,
+	IAccumulatorStream,
 	IOwnedStream,
 	IStorage
 } from "../../../interfaces.js"
@@ -10,18 +10,22 @@ import { IdentityStream } from "./IdentityStream.js"
 class _AccumulatorStream<T = any> extends IdentityStream<T> {
 	static readonly pool = Pools.Stream.add(new ObjectPool(_AccumulatorStream))
 
-	private storage: IStorage<T>
+	private _storage: IStorage<T>
 
 	private pushCurr() {
-		this.storage.push(this.curr)
+		this._storage.push(this.curr)
 	}
 
 	protected get pool(): ObjectPool<_AccumulatorStream, [IOwnedStream]> {
 		return _AccumulatorStream.pool
 	}
 
+	get storage() {
+		return this._storage
+	}
+
 	setStorage(storage: IStorage<T>) {
-		this.storage = storage
+		this._storage = storage
 		return this
 	}
 
@@ -31,7 +35,7 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 	}
 
 	copy() {
-		return super.copy().setStorage(this.storage.copy())
+		return super.copy().setStorage(this._storage.copy())
 	}
 }
 
@@ -45,7 +49,7 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
  * into `storage`.
  */
 export function AccumulatorStream<T = any>(storage: IStorage<T>) {
-	return function (stream?: IOwnedStream<T>): ICommonStream<T> {
+	return function (stream?: IOwnedStream<T>): IAccumulatorStream<T> {
 		return _AccumulatorStream.pool.create().setStorage(storage).init(stream)
 	}
 }

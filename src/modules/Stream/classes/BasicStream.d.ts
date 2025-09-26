@@ -50,7 +50,6 @@ export declare abstract class BasicStream<T = any, Args extends any[] = any[]>
 	readonly owner?: IOwningStream
 
 	protected postEnd?(): void
-	protected postStart?(): void
 	protected initGetter?(...args: Partial<Args>): T
 
 	protected update(newCurr: T): void

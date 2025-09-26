@@ -124,13 +124,6 @@ export abstract class BeforeCompositeStream<T = any>
 		this.streamList!.renewItem(stream)
 	}
 
-	// ! [pre-doc]: WARNING - this thing, unlike other IStream-implementing classes' '.copy()' methods, DOESN'T "copy dynamically" [with preservation of parsing properties]
-	// * Reasons:
-	// 		1. [minor turnoff] that would require [somewhat] complex recursion [the 'StateDistributor', previously - a poorly written closure that ought to have been a class instead]
-	//		2. [justification] it's a rare feature [the user is highly unlikely to ever want to use that at all in any "normal" parsing scenario]
-	// 		3. [deal-breaker] would require altering the `.constuctor` signature:
-	// 			* 1. the format REQUIRED to perform the "post-initialization" '.setState' calls DEMANDS that we INITIALIZE the thing first
-	// 			* 2. problem is - we MAY require the state IN ORDER to initialize them; This becomes INCREASINGLY tangled
 	copy() {
 		return new this.constructor(
 			tryCopy(this.lowStream),

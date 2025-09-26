@@ -79,7 +79,7 @@ export class MultiIndex {
 		this.index.push(...subIndex)
 	}
 
-	from(index: number[]) {
+	from(index: readonly number[]) {
 		assert(isArray(index))
 		this.index = copy(index)
 		return this
