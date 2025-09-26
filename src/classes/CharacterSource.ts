@@ -1,6 +1,5 @@
 import type { IByteSource, ICharacterSource } from "../interfaces.js"
 import type { IDecoder } from "../interfaces/Decoder.js"
-import { ResourceManager } from "./ResourceManager.js"
 
 /**
  * This is a class implementing `ISource`.
@@ -46,11 +45,4 @@ export class ReadingSource implements ICharacterSource {
 	) {
 		this.decoder = decoderFactory(byteSource)
 	}
-}
-
-export namespace ReadingSource {
-	/**
-	 * The `ResourceManager` for the `ReadingSource` class.
-	 */
-	export const manager = new ResourceManager(ReadingSource)
 }

@@ -1,7 +1,6 @@
 import { closeSync, openSync, writeSync } from "fs"
 import type { IEncoder, IInitializable } from "../interfaces.js"
 import type { IDestination } from "../interfaces/Destination.js"
-import { ResourceManager } from "./ResourceManager.js"
 
 const pickTruncationWriteFlag = (truncate: boolean) => (truncate ? "w" : "a")
 
@@ -62,11 +61,4 @@ export class WritingDestination
 		this.destination = openSync(filename, pickTruncationWriteFlag(truncate))
 		this.isOpen = true
 	}
-}
-
-export namespace WritingDestination {
-	/**
-	 * The `ResourceManager` instance for the `WritingDestination` class. 
-	*/
-	export const manager = new ResourceManager(WritingDestination)
 }
