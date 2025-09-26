@@ -178,7 +178,7 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 
 	protected baseNextIter() {
 		this.nextResponse.respond()
-		return this.currGetter()
+		return super.baseNextIter()
 	}
 
 	private basePrevIter(): TreeLike {

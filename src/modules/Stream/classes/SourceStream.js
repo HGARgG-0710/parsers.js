@@ -7,6 +7,10 @@ export class SourceStream extends BasicStream {
 		this.update(this.currGetter())
 	}
 
+	baseNextIter() {
+		return this.currGetter()
+	}
+
 	get initializer() {
 		return resourceInitializer
 	}

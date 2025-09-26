@@ -35,7 +35,7 @@ export class LazyStream
 
 	protected baseNextIter() {
 		this.nextDecoded()
-		return this.currGetter()
+		return super.baseNextIter()
 	}
 
 	isCurrEnd() {

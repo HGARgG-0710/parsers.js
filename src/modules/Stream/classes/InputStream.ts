@@ -56,7 +56,7 @@ export class InputStream<T = any>
 	protected baseNextIter() {
 		++this.pos
 		this.view.forward()
-		return this.currGetter()
+		return super.baseNextIter()
 	}
 
 	isCurrEnd(): boolean {

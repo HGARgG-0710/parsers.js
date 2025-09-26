@@ -26,6 +26,7 @@ export declare abstract class SourceStream<
 	protected updateCurr(): void
 	protected get initializer(): IInitializer
 	protected initGetter(): T
+	protected baseNextIter(curr?: T): T
 	setResource(source?: SourceType): void
 	copy(): this
 	constructor(source?: SourceType)

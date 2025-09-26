@@ -14,7 +14,7 @@ export class ByteStream extends SourceStream<number, IByteSource> {
 
 	protected baseNextIter(curr?: number | undefined): number {
 		this.source!.nextByte()
-		return this.currGetter()
+		return super.baseNextIter()
 	}
 
 	isCurrEnd(): boolean {
