@@ -28,6 +28,5 @@ export declare abstract class SourceStream<
 	protected initGetter(): T
 	protected baseNextIter(curr?: T): T
 	setResource(source?: SourceType): void
-	copy(): this
 	constructor(source?: SourceType)
 }

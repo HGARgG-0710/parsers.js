@@ -1,7 +1,5 @@
-import { array, inplace } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import { ownerInitializer } from "../../../../classes/Initializer.js"
-import { MissingArgument } from "../../../../constants.js"
 import type { IStateSettable } from "../../../../interfaces.js"
 import type { IParseState } from "../../../../interfaces/DynamicParser.js"
 import type {
@@ -11,11 +9,7 @@ import type {
 	IRawStreamArray
 } from "../../../../interfaces/Stream.js"
 import { StreamList } from "../../../../internal/StreamList.js"
-import { tryCopy } from "../../../../utils.js"
-import { rawStreamCopy } from "../../../../utils/Stream.js"
 import { IdentityStream } from "../IdentityStream.js"
-
-const { mutate } = inplace
 
 interface ICompositeStreamLike extends IStateSettable {
 	setRawStreams(rawStreams: IRawStreamArray): void
@@ -119,16 +113,6 @@ export abstract class BeforeCompositeStream<T = any>
 
 	renewStream(stream: ILinkedStream) {
 		return this.streamList!.renewItem(stream)
-	}
-
-	copy() {
-		return new this.constructor(
-			tryCopy(this.lowStream),
-			this.rawStreams
-				? mutate(array.copy(this.rawStreams), rawStreamCopy)
-				: MissingArgument,
-			this.state
-		)
 	}
 
 	constructor(

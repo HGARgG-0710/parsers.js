@@ -8,11 +8,6 @@ import type { IDecoder } from "../interfaces/Decoder.js"
  * read access to a given `filename: string`.
  */
 export class ReadingSource implements ICharacterSource {
-	["constructor"]: new (
-		byteSource: IByteSource,
-		decoderFactory: (byteSource: IByteSource) => IDecoder
-	) => this
-
 	private readonly decoder: IDecoder
 
 	get isOpen() {
@@ -35,13 +30,9 @@ export class ReadingSource implements ICharacterSource {
 		this.byteSource.cleanup()
 	}
 
-	copy() {
-		return new this.constructor(this.byteSource.copy(), this.decoderFactory)
-	}
-
 	constructor(
 		private readonly byteSource: IByteSource,
-		private readonly decoderFactory: (byteSource: IByteSource) => IDecoder
+		decoderFactory: (byteSource: IByteSource) => IDecoder
 	) {
 		this.decoder = decoderFactory(byteSource)
 	}

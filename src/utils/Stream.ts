@@ -6,7 +6,6 @@ import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,
 	IPeekableStream,
-	IRawStream,
 	IStream,
 	IStreamGenerator
 } from "../interfaces/Stream.js"
@@ -17,9 +16,8 @@ import type {
 import { isFinishable, isNavigable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
-import { tryCopy } from "../utils.js"
 
-const { isFunction, isNumber } = type
+const { isNumber } = type
 
 /**
  * Given an `IStream<T>`, stores and returns its `.curr`, while calls `.next()` on it.
@@ -250,17 +248,6 @@ export function navigate<T = any>(
 	return isNavigable(stream)
 		? stream.navigate(position)
 		: uniNavigate(stream, position)
-}
-
-/**
- * Makes a copy of a `rawStream`:
- *
- * 1. if a chooser - returns as-is (copying operation is meaningless)
- * 2. if an `ILinkedStream` - does `rawStream.copy()` if the method is present,
- * else returns `rawStream`
- */
-export function rawStreamCopy(rawStream: IRawStream) {
-	return isFunction(rawStream) ? rawStream : tryCopy(rawStream)
 }
 
 /**

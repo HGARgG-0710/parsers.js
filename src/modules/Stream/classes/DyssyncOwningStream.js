@@ -1,7 +1,6 @@
 import { mixin } from "../../../mixin.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PipeStream } from "./PipeStream.js"
-import { ResourceCopyingStream } from "./ResourceCopyingStream.js"
 import { SyncCurrStream } from "./SyncCurrStream.js"
 
 export const DyssyncOwningStream = new mixin(
@@ -12,5 +11,5 @@ export const DyssyncOwningStream = new mixin(
 			this.super.PipeStream.constructor.call(this, resource)
 		}
 	},
-	[DyssyncStream, PipeStream, ResourceCopyingStream, SyncCurrStream],
+	[DyssyncStream, PipeStream, SyncCurrStream]
 ).toClass()

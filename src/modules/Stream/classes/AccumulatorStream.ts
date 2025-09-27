@@ -33,10 +33,6 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 		this.pushCurr()
 		super.next()
 	}
-
-	copy() {
-		return super.copy().setStorage(this._storage.copy())
-	}
 }
 
 /**

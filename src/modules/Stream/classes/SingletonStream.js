@@ -21,12 +21,6 @@ const _SingletonStream = new mixin(
 				this.curr = this.handler(resource)
 			},
 
-			copy() {
-				return new this.constructor()
-					.setHandler(this.handler)
-					.init(this.resource?.copy())
-			},
-
 			setHandler(handler) {
 				this.handler = handler
 				return this

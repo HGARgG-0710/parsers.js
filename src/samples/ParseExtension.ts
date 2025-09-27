@@ -17,9 +17,9 @@ import type { ICompositeStream, IInputStream } from "../interfaces.js"
  *
  * ```ts
  * 	//  `someInputStream` is arbitrary
- * 	const baseParser = DynamicParser(CompositeStream(...)(), someInputStream)
- * 	const extension = ParseExtension(CompositeStream(...)())
- * 	const otherExtension = ParseExtension(CompositeStream(...)())
+ * 	const baseParser = DynamicParser(() => CompositeStream(...)(), () => someInputStream)
+ * 	const extension = ParseExtension(() => CompositeStream(...)())
+ * 	const otherExtension = ParseExtension(() => CompositeStream(...)())
  *
  *		// serves as a composition
  * 	function ExtensionMaker (input: SomeInputType) {
@@ -38,10 +38,9 @@ import type { ICompositeStream, IInputStream } from "../interfaces.js"
  * ```
  */
 export function ParseExtension<InType = any, InitType = any, OutType = any>(
-	workerStream: ICompositeStream<OutType>
+	workerStream: () => ICompositeStream<OutType>
 ) {
-	const protoExtension = DynamicParser(
-		workerStream,
+	const protoExtension = DynamicParser(workerStream, () =>
 		IdentityStream.pool.create()
 	)
 	return function (childStream: IInputStream<InType, InitType>) {

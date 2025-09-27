@@ -8,8 +8,7 @@ import type { PipeStream } from "./PipeStream.js"
  *
  * 1. DyssyncStream
  * 2. PipeStream
- * 3. ResourceCopyingStream
- * 4. SyncCurrStream
+ * 3. SyncCurrStream
  *
  * It has the constructor of `PipeStream`
  */
@@ -18,7 +17,6 @@ export declare abstract class DyssyncOwningStream<
 		Args extends any[] = []
 	>
 	extends PipeStream<T, Args>
-	implements ICopiable
 {
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
@@ -31,6 +29,4 @@ export declare abstract class DyssyncOwningStream<
 	protected syncCurr(): void
 	protected endStream(): void
 	protected startStream(): void
-
-	copy(): this
 }

@@ -1,4 +1,3 @@
-import { tryCopy } from "../../../utils.js"
 import { resourceInitializer } from "../../Initializer/classes/ResourceInitializer.js"
 import { BasicStream } from "./BasicStream.js"
 
@@ -21,9 +20,5 @@ export class SourceStream extends BasicStream {
 
 	setResource(source) {
 		this.source = source
-	}
-
-	copy() {
-		return new this.constructor(tryCopy(this.source))
 	}
 }

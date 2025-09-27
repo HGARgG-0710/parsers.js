@@ -106,13 +106,14 @@ const QuantifierProcessor = TableHandler(
 // 		2. inputs that fit very well inside the RAM [i.e. - KNOWINGLY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
 // }
 const parseRegex = DynamicParser(
-	CompositeStream(
-		// ! layer missin - 'RegexRootStream', the root elemeent - 'regex-root'; Collects it all via a plain old 'consumable()' into a `RetainedArray` or some such thing; 
-		ProduceDisjunction,
-		// ! layer missing - 'DisjunctCollector'
-		QuantifierProcessor,
-		PeekStream(),
-		RegexTokenizer
-	)(),
-	new InputStream()
+	() =>
+		CompositeStream(
+			// ! layer missin - 'RegexRootStream', the root elemeent - 'regex-root'; Collects it all via a plain old 'consumable()' into a `RetainedArray` or some such thing;
+			ProduceDisjunction,
+			// ! layer missing - 'DisjunctCollector'
+			QuantifierProcessor,
+			PeekStream(),
+			RegexTokenizer
+		)(),
+	() => new InputStream()
 )

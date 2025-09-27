@@ -7,8 +7,7 @@ import type { BasicStream } from "./BasicStream.js"
  *
  * 1. `BasicStream`
  * 2. `OwningStream`
- * 3. `ResourceCopyingStream`
- * 4. `SyncCurrStream`
+ * 3. `SyncCurrStream`
  *
  * It inherits the constructor of `BasicStream`.
  */
@@ -29,5 +28,4 @@ export declare abstract class BasicResourceStream<
 	protected abstract baseNextIter(curr?: T): T
 	protected syncCurr(): void
 	setResource(newResource: IOwnedStream): void
-	copy(): this
 }

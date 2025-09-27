@@ -47,12 +47,6 @@ class _StorageStream<T = any, Stored = any>
 		this.handler = handler
 		return this
 	}
-
-	copy() {
-		return new this.constructor()
-			.setHandler(this.handler)
-			.init(this.resource)
-	}
 }
 
 /**

@@ -1,15 +1,19 @@
 import type { ObjectPool } from "../../../classes.ts"
 import type { ICommonStream } from "../interfaces/CommonStream.ts"
 import type { IOwnedStream } from "../interfaces/OwnedStream.ts"
-import type { AttachedStream } from "./AttachedStream.js"
+import type { PipeStream } from "./PipeStream.js"
 
 /**
- * This is a (concrete) mixin of:
+ * This is an abstract class, implementing `ILinkedStream<T>`.
+ * It is a mixin of `PipeStream` and `SyncStream`, which is
+ * to say, it completely and utterly delegates itself onto its
+ * `.resource: IOwnedStream`. The purpose of such a class is
+ * to allow for easy creation of `ILinkedStream`-classes with
+ * very little unique functionality of their own, and which are
+ * (however) independent enough to need their own constructor
+ * (and, therefore, the copying method).
  *
- * 1. `ResourceCopyingStream`
- * 2. `AttachedStream`
- *
- * It uses the constructor of `AttachedStream`.
+ * It shares the constructor of `PipeStream`.
  *
  * Extremely useful for usage as a default in
  * `TableHandler`s defining `IStreamChooser`s
@@ -18,19 +22,15 @@ import type { AttachedStream } from "./AttachedStream.js"
  * of transforming them);
  */
 export declare class IdentityStream<T = any, Args extends any[] = any[]>
-	extends AttachedStream<T, Args>
+	extends PipeStream<T, Args>
 	implements ICommonStream<T>
 {
-	protected ["constructor"]: new (
-		resource?: IOwnedStream,
-		...args: Partial<Args> | []
-	) => this
-
 	static readonly pool: ObjectPool<IdentityStream, [IOwnedStream]>
 	protected get pool(): ObjectPool<
 		ICommonStream<T>,
 		[IOwnedStream, ...(Args | [])]
 	>
+	get isEnd(): boolean
+	get curr(): T
 	free(): void
-	copy(): this
 }

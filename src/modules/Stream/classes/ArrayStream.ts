@@ -34,10 +34,6 @@ export abstract class ArrayStream<T = any, ElemType = any> extends BasicStream<
 		this.items = items
 	}
 
-	copy() {
-		return new this.constructor(...this.items)
-	}
-
 	constructor(...items: ElemType[]) {
 		super(...items)
 	}
