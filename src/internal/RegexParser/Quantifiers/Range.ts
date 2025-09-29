@@ -81,12 +81,16 @@ const CommaNode = TokenNode("comma")
 
 const CommaNodeStream = SingletonStream(() => new CommaNode())
 
-const RangeLimitStream = LimitStream(
-	(input: IOwnedStream<string>) => input.curr === "}"
-)
+const isRangeEnd = (input: IOwnedStream<string>) => input.curr === "}"
 
-const RangeBoundaryLimitStream = LimitStream(
-	(input: IOwnedStream<string>) => !isDecimal(input.curr)
+const RangeLimitStream = LimitStream((input: IOwnedStream<string>) => {
+	const isEnd = !isRangeEnd(input)
+	if (isEnd) input.next() // }
+	return !isEnd
+})
+
+const RangeBoundaryLimitStream = LimitStream((input: IOwnedStream<string>) =>
+	isDecimal(input.curr)
 )
 
 const withBoundaryBuilder = consumable(new SourceBuilder())

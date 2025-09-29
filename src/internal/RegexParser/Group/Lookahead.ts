@@ -2,6 +2,7 @@ import { SingleChildNode } from "../../../classes/Node.js"
 import { SingletonStream } from "../../../classes/Stream.js"
 import type { INode, IOwnedStream } from "../../../interfaces.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
+import { ParseRegexRecursively } from "../Parser.js"
 
 const LookaheadGroup = SingleChildNode("lookahead-group")
 const LookaheadGroupStream = SingletonStream(
@@ -13,7 +14,7 @@ export function HandleLookaheadGroup(input: IOwnedStream<string>) {
 	return [
 		LookaheadGroupStream(),
 		GroupBodyStream(),
-		// TODO: THIRD ITEM - the "main" chooser! ADD IT (this is the recursion spot)
+		ParseRegexRecursively,
 		GroupLimitStream()
 	]
 }

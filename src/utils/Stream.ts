@@ -74,7 +74,7 @@ export function skip<T = any>(
  *
  * By default, `result` is an `ArrayCollection<T>`
  */
-export function consume<T = any, K extends IPushable<T> = IPushable<T>>(
+export function consume<T = any, K extends IPushable<T> = ArrayCollection<T>>(
 	source: Iterable<T>,
 	result: K = new ArrayCollection<T>() as any
 ) {

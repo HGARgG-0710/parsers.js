@@ -27,7 +27,13 @@ const TypeMatchStream = SingletonStream(
 		new TypeMatch(withTypeMatchBuilder(input).get())
 )
 
-const TypeMatchLimitsStream = LimitStream((input) => input.curr === "}")
+const isTypeMatchEnd = (input: IOwnedStream<string>) => input.curr === "}"
+
+const TypeMatchLimitsStream = LimitStream((input: IOwnedStream<string>) => {
+	const isEnd = isTypeMatchEnd(input)
+	if (isEnd) input.next() // }
+	return !isEnd
+})
 
 function isTypeMatchStart(stream: IPeekableStream<string>) {
 	return stream.peek(1) === "{"

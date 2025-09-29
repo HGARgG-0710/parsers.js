@@ -1,13 +1,19 @@
 import type { array } from "@hgargg-0710/one"
 import { TableHandler } from "../../classes.js"
 import { BasicHash } from "../../classes/HashMap.js"
-import { BaseNode, ContentNode, TokenNode } from "../../classes/Node.js"
+import {
+	BaseNode,
+	ContentNode,
+	RecursiveNode,
+	TokenNode
+} from "../../classes/Node.js"
 import {
 	LimitStream,
 	NodeStream,
 	SingletonStream
 } from "../../classes/Stream.js"
 import type {
+	ICollectionNode,
 	ICommonStream,
 	ICompositeStream,
 	INode,
@@ -46,29 +52,17 @@ class ClassRange extends BaseNode<string> {
 	}
 }
 
-class CharClass extends BaseNode<string> {
-	private readonly classItems: INode<string>[] = []
-
-	get type() {
-		return "char-class"
-	}
-
-	add(classItem: INode<string>) {
-		this.classItems.push(classItem)
-	}
-
-	get lastChild(): number {
-		return this.classItems.length - 1
-	}
-
-	read(i: number): INode<string> {
-		return this.classItems[i]
-	}
-}
+const CharClass = RecursiveNode("char-class")
 
 const HyphenStream = SingletonStream(() => new Hyphen())
 
-const CharClassLimitStream = LimitStream((input) => input.curr === "]")
+const isClassEnd = (input: IOwnedStream<string>) => input.curr === "]"
+
+const CharClassLimitStream = LimitStream((input: IOwnedStream<string>) => {
+	const isEnd = isClassEnd(input)
+	if (isEnd) input.next() // ]
+	return !isEnd
+})
 
 const ClassUnitStream = SingletonStream(
 	(input: IOwnedStream<string>) => new ClassUnit(input.curr)
@@ -107,16 +101,16 @@ class ClassRangeStream extends NodeStream<INode<string>> {
 }
 
 class CharClassStream extends NodeStream<INode<string>> {
-	private charClass: CharClass
+	private charClass: ICollectionNode<string>
 
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
-		this.charClass = new CharClass()
+		this.charClass = new CharClass([])
 		this.curr = this.charClass
 
 		let couldReviveLast = true
 		while (couldReviveLast) {
-			this.charClass.add(this.resource!.curr)
+			this.charClass.push(this.resource!.curr)
 			this.resource!.next()
 			couldReviveLast = this.reviveChild() // all `ClassRangeStream/ClassUnitStream` children have 1-element lifetime
 		}

@@ -1,4 +1,5 @@
 import type { array } from "@hgargg-0710/one"
+import { Pools } from "../../../main.js"
 import {
 	DynamicParser,
 	IndexMap,
@@ -6,14 +7,17 @@ import {
 	TableHandler
 } from "../../classes.js"
 import { CurrentHash } from "../../classes/HashMap.js"
+import { SingleChildNode } from "../../classes/Node.js"
 import {
 	CompositeStream,
 	IdentityStream,
 	InputStream,
-	PeekStream
+	PeekStream,
+	SingletonStream
 } from "../../classes/Stream.js"
 import type {
 	IIndexMap,
+	INode,
 	IOwnedStream,
 	IParserFunction,
 	IRawStreamArray,
@@ -26,6 +30,7 @@ import {
 import { Pairs } from "../../samples.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { nodeMap } from "../../utils/IndexMap.js"
+import { consume } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
 import { maybeDot } from "./Dot.js"
@@ -60,8 +65,21 @@ export function LookaheadMap(
 export const PreserveLowerStream = () => new IdentityStream()
 
 export class RegexParser {
+	private parseSource(source: string) {
+		return consume(
+			parseRegex(new ParseableInput(source))
+		).get()[0] as INode<string>
+	}
+
+	private poolCleanup() {
+		Pools.Internal.clear()
+		Pools.Stream.clear()
+	}
+
 	parse(source: string) {
-		return parseRegex(new ParseableInput(source))
+		const result = this.parseSource(source)
+		this.poolCleanup()
+		return result
 	}
 }
 
@@ -105,15 +123,24 @@ const QuantifierProcessor = TableHandler(
 // 		1. inputs that ONLY HAVE A SINGLE LINE [i.e. using an `ILineIndex` is clearly an overkill here, though usually - it isn't...]
 // 		2. inputs that fit very well inside the RAM [i.e. - KNOWINGLY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
 // }
+
+const RootNode = SingleChildNode("regex-root")
+
+const RootNodeStream = SingletonStream(
+	(input: IOwnedStream<INode<string>>) => new RootNode(input.curr)
+)
+
+export function ParseRegexRecursively(): IRawStreamArray {
+	return [
+		RootNodeStream(),
+		ProduceDisjunction,
+		QuantifierProcessor,
+		PeekStream(),
+		RegexTokenizer
+	]
+}
+
 const parseRegex = DynamicParser(
-	() =>
-		CompositeStream(
-			// ! layer missin - 'RegexRootStream', the root elemeent - 'regex-root'; Collects it all via a plain old 'consumable()' into a `RetainedArray` or some such thing;
-			ProduceDisjunction,
-			// ! layer missing - 'DisjunctCollector'
-			QuantifierProcessor,
-			PeekStream(),
-			RegexTokenizer
-		)(),
+	() => CompositeStream(...ParseRegexRecursively())(),
 	() => new InputStream()
 )

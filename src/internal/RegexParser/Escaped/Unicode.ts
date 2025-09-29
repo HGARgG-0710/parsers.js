@@ -11,7 +11,13 @@ const UnicodeChar = ContentNode<string, string>("unicode-char")
 
 const expectOpBrack = expect("{")
 
-const UnicodeLimitStream = LimitStream((input) => input.curr === "{")
+const isUnicodeNumberEnd = (input: IOwnedStream<string>) => input.curr === "}"
+
+const UnicodeLimitStream = LimitStream((input: IOwnedStream<string>) => {
+	const isEnd = isUnicodeNumberEnd(input)
+	if (isEnd) input.next() // }
+	return !isEnd
+})
 
 const UnicodeCharStream = SingletonStream(
 	(input: IOwnedStream<string> & Iterable<string>) =>

@@ -643,7 +643,6 @@ class PinpointRenewableList<
 		return [i, parent]
 	}
 
-	// ! [FOR `.setListIndex` call-implementation...] IMPORTANT NOTE: the item at `.listIndex` of some `I` depends on item of `I + 1` [IF there is any such item... else - it's OUTSIDE [as in - ABOVE] the current `.parentList`, and renewal is deemed impossible/pointless];
 	private lastNonOldItem(item: Terminal<T, Recursive>): [boolean, number] {
 		const [i, parent] = this.lastNonOldIndex(item)
 		return [this.foundNonOld(i, parent), i]
