@@ -19,6 +19,11 @@ import type {
 	ITypeCheckable
 } from "../../../interfaces.js"
 import { isDecimal } from "../../../samples/alphabet.js"
+import {
+	CollectionStream,
+	EndBracketStream,
+	isCurr
+} from "../../../samples/Stream.js"
 import { consumable, next } from "../../../utils/Stream.js"
 import { QMark } from "./QMark.js"
 
@@ -79,25 +84,19 @@ class Range extends BaseNode<string> {
 
 const CommaNode = TokenNode("comma")
 
+const RangeBoundary = ContentNode("range-boundary")
+
 const CommaNodeStream = SingletonStream(() => new CommaNode())
 
-const isRangeEnd = (input: IOwnedStream<string>) => input.curr === "}"
-
-const RangeLimitStream = LimitStream((input: IOwnedStream<string>) => {
-	const isEnd = !isRangeEnd(input)
-	if (isEnd) input.next() // }
-	return !isEnd
-})
+const RangeLimitStream = EndBracketStream(isCurr("}"))
 
 const RangeBoundaryLimitStream = LimitStream((input: IOwnedStream<string>) =>
 	isDecimal(input.curr)
 )
 
-const withBoundaryBuilder = consumable(new SourceBuilder())
-const RangeBoundary = ContentNode("range-boundary")
-const RangeBoundaryStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) =>
-		new RangeBoundary(withBoundaryBuilder(input).get())
+const RangeBoundaryStream = CollectionStream(
+	RangeBoundary,
+	consumable(new SourceBuilder())
 )
 
 class RangeStream extends NodeStream<Range> {

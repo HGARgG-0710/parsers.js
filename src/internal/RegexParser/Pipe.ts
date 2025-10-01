@@ -1,10 +1,10 @@
 import type { array } from "@hgargg-0710/one"
 import { TokenNode } from "../../classes/Node.js"
-import { SingletonStream } from "../../classes/Stream.js"
 import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
+import { TokenStream } from "../../samples/Stream.js"
 
 export const Pipe = TokenNode("pipe")
-const PipeStream = SingletonStream(() => new Pipe())
+const PipeStream = TokenStream(Pipe)
 
 function handlePipe(input: IOwnedStream<string>) {
 	input.next() // |

@@ -1,3 +1,4 @@
+export * from "./classes/ArrayBuilder.js"
 export * from "./classes/ArrayCollection.js"
 export * from "./classes/Autocache.js"
 export * as ByteSource from "./classes/ByteSource.js"

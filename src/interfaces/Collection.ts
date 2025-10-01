@@ -1,4 +1,5 @@
 import type {
+	IClearable,
 	IFiniteWritable,
 	IGettable,
 	IIndexed,
@@ -23,4 +24,5 @@ export interface ICollection<T = any, C extends IIndexed<T> = any>
 		IPushable<T>,
 		IFiniteWritable<T>,
 		Iterable<T>,
-		IReadable<T> {}
+		IReadable<T>,
+		IClearable {}

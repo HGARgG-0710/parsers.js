@@ -5,6 +5,7 @@ import {
 } from "../classes/Stream.js"
 import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { isSpace } from "./alphabet.js"
+import { isCurr } from "./Stream.js"
 
 class LastItem<T = any> {
 	private lastItem: T
@@ -111,6 +112,4 @@ export function getNewline() {
  * LF-newlines as newline characters in respect to its
  * `LineIndex`-couting operation.
  * */
-export const NewlineStream = IndexStream(
-	(input: IOwnedStream<string>) => input.curr === "\n"
-)
+export const NewlineStream = IndexStream(isCurr("\n"))

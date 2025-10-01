@@ -7,13 +7,8 @@ import {
 	RecursiveNode,
 	TokenNode
 } from "../../classes/Node.js"
-import {
-	LimitStream,
-	NodeStream,
-	SingletonStream
-} from "../../classes/Stream.js"
+import { NodeStream } from "../../classes/Stream.js"
 import type {
-	ICollectionNode,
 	ICommonStream,
 	ICompositeStream,
 	INode,
@@ -21,7 +16,14 @@ import type {
 	IPeekable,
 	IStreamChooser
 } from "../../interfaces.js"
+import {
+	EndBracketStream,
+	isCurr,
+	TokenStream,
+	WrapperStream
+} from "../../samples/Stream.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
+import { consumeSingletonRevivables } from "../../utils/Stream.js"
 import { HandleEscaped } from "./Escaped.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
@@ -54,19 +56,11 @@ class ClassRange extends BaseNode<string> {
 
 const CharClass = RecursiveNode("char-class")
 
-const HyphenStream = SingletonStream(() => new Hyphen())
+const HyphenStream = TokenStream(Hyphen)
 
-const isClassEnd = (input: IOwnedStream<string>) => input.curr === "]"
+const CharClassLimitStream = EndBracketStream(isCurr("]"))
 
-const CharClassLimitStream = LimitStream((input: IOwnedStream<string>) => {
-	const isEnd = isClassEnd(input)
-	if (isEnd) input.next() // ]
-	return !isEnd
-})
-
-const ClassUnitStream = SingletonStream(
-	(input: IOwnedStream<string>) => new ClassUnit(input.curr)
-)
+const ClassUnitStream = WrapperStream(ClassUnit)
 
 class ClassRangeStream extends NodeStream<INode<string>> {
 	private classRange: ClassRange
@@ -101,23 +95,9 @@ class ClassRangeStream extends NodeStream<INode<string>> {
 }
 
 class CharClassStream extends NodeStream<INode<string>> {
-	private charClass: ICollectionNode<string>
-
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
-		this.charClass = new CharClass([])
-		this.curr = this.charClass
-
-		let couldReviveLast = true
-		while (couldReviveLast) {
-			this.charClass.push(this.resource!.curr)
-			this.resource!.next()
-			couldReviveLast = this.reviveChild() // all `ClassRangeStream/ClassUnitStream` children have 1-element lifetime
-		}
-
-		// by the end of the loop, all possible children are exhausted,
-		// BUT, since for continuation of parent's life we only care about
-		// the `this.isEnd`, THIS WORKS
+		this.curr = consumeSingletonRevivables(this, new CharClass([]))
 	}
 
 	isCurrEnd(): boolean {

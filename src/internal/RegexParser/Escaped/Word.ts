@@ -1,9 +1,9 @@
 import { TokenNode } from "../../../classes/Node.js"
-import { SingletonStream } from "../../../classes/Stream.js"
 import type { IOwnedStream } from "../../../interfaces.js"
+import { TokenStream } from "../../../samples/Stream.js"
 
 const Word = TokenNode("word")
-const WordStream = SingletonStream(() => new Word())
+const WordStream = TokenStream(Word)
 
 export function HandleWord(input: IOwnedStream<string>) {
 	input.next() // w

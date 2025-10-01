@@ -74,14 +74,14 @@ export abstract class BasicErrorStream<
 		return this.inputStream!.lineIndex
 	}
 
-	private cacheInput() {
+	private getInput() {
 		this.inputStream = this.inputGetter()
 		this.lineIndex = this.posGetter()
 	}
 
 	setResource(newResource: IOwnedStream): void {
 		super.setResource(newResource)
-		this.cacheInput()
+		this.getInput()
 	}
 }
 

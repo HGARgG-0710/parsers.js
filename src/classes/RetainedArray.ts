@@ -1,5 +1,5 @@
 import { number } from "@hgargg-0710/one"
-import type { IClearable, ICollection } from "../interfaces.js"
+import type { ICollection } from "../interfaces.js"
 import { BasicArray } from "../internal/BasicArray.js"
 
 const { min } = number
@@ -22,7 +22,7 @@ const { min } = number
  */
 export class RetainedArray<T = any>
 	extends BasicArray<T>
-	implements ICollection<T, readonly T[]>, IClearable
+	implements ICollection<T, readonly T[]>
 {
 	private ["constructor"]: new (n?: number) => this
 

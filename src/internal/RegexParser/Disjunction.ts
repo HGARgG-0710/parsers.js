@@ -1,17 +1,9 @@
-import { RetainedArray } from "../../classes.js"
+import { ArrayBuilder } from "../../classes.js"
 import { RecursiveNode } from "../../classes/Node.js"
-import {
-	LimitStream,
-	NodeStream,
-	SingletonStream
-} from "../../classes/Stream.js"
-import type {
-	ICollectionNode,
-	INode,
-	IOwnedStream,
-	IRawStreamArray
-} from "../../interfaces.js"
-import { consumable } from "../../utils/Stream.js"
+import { LimitStream, NodeStream } from "../../classes/Stream.js"
+import type { INode, IOwnedStream, IRawStreamArray } from "../../interfaces.js"
+import { CollectionStream } from "../../samples/Stream.js"
+import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
 import { Pipe } from "./Pipe.js"
 
 const isCurrPipe = (input: IOwnedStream<INode<string>>) => !Pipe.is(input.curr)
@@ -28,30 +20,18 @@ function PipeLimitChooser(input: IOwnedStream<INode<string>>) {
 const withDisjunctBuilder = consumable<
 	INode<string>,
 	Iterable<INode<string>>,
-	RetainedArray<INode<string>>
->(new RetainedArray<INode<string>>())
+	ArrayBuilder<INode<string>>
+>(new ArrayBuilder<INode<string>>())
 
 const Disjunct = RecursiveNode("disjunct")
-const DisjunctStream = SingletonStream(
-	(input: IOwnedStream<INode<string>> & Iterable<INode<string>>) =>
-		new Disjunct(withDisjunctBuilder(input).get() as INode<string>[])
-)
+const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
 
 const Disjunction = RecursiveNode("disjunction")
 
 class DisjunctionStream extends NodeStream<INode<string>> {
-	private disjunct: ICollectionNode<string>
-
 	setResource(resource: IOwnedStream): void {
 		this.setResource(resource)
-		this.disjunct = new Disjunction([])
-
-		let didLastRevive = true
-		while (didLastRevive) {
-			this.disjunct.push(this.resource!.curr)
-			this.resource!.next() // child dies - a `SingletonStream`
-			didLastRevive = this.reviveChild() // revive - same child, relies on a chooser
-		}
+		this.curr = consumeSingletonRevivables(this, new Disjunction([]))
 	}
 
 	isCurrEnd(): boolean {

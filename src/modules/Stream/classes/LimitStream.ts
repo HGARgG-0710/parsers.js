@@ -2,11 +2,12 @@ import { boolean, type } from "@hgargg-0710/one"
 import * as Pools from "../../../Pools.js"
 import { ownerInitializer } from "../../../classes/Initializer.js"
 import { ObjectPool } from "../../../classes/ObjectPool.js"
-import type { IPoolKeeping } from "../../../interfaces.js"
+import type { IPoolKeeping, IPredicatePosition } from "../../../interfaces.js"
 import type {
 	ICommonStream,
 	ILinkedStream,
-	IOwnedStream
+	IOwnedStream,
+	IStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
@@ -169,10 +170,7 @@ export function LimitStream<T = any>(
 	from: IStreamPosition<T>,
 	longAs?: IStreamPosition<T>
 ) {
-	if (isNullary(longAs)) {
-		longAs = from
-		from = LimitStream.NoMovementPredicate
-	}
+	;[from, longAs] = LimitStream.ensurePredicatePair(from, longAs)
 
 	const until = negate(longAs)
 	const limitStream = BuildLimitStream<T>(from, until)
@@ -196,4 +194,24 @@ export namespace LimitStream {
 	 * and this becomes the value for `from`
 	 */
 	export const NoMovementPredicate = T
+
+	/**
+	 * This is a function for ensuring that the provided pair of
+	 * predicates for definition of a `LimitStream` are interpreted
+	 * as desired - the first argument `from` is optional, so if
+	 * `longAs` is not provided, it is defined as `from`, with
+	 * `from` itself being replaced with `LimitStream.NoMovementPredicate`.
+	 */
+	export function ensurePredicatePair<
+		T = any,
+		A extends IStreamPosition<T> = IStreamPosition<T>,
+		B extends IStreamPosition<T> = IStreamPosition<T>
+	>(from: A, longAs?: B) {
+		return isNullary(longAs)
+			? ([NoMovementPredicate, from] as [
+					IPredicatePosition<IStream<T>>,
+					A
+			  ])
+			: ([from, longAs] as [A, B])
+	}
 }

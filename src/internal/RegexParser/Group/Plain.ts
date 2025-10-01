@@ -1,10 +1,10 @@
 import { SingleChildNode } from "../../../classes/Node.js"
-import { SingletonStream } from "../../../classes/Stream.js"
+import { WrapperStream } from "../../../samples/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
 import { ParseRegexRecursively } from "../Parser.js"
 
 const Group = SingleChildNode("group")
-const GroupStream = SingletonStream((input) => new Group(input.curr))
+const GroupStream = WrapperStream(Group)
 
 export function HandlePlainGroup() {
 	return [

@@ -6,6 +6,7 @@ import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,
 	IPeekableStream,
+	IRenewerStream,
 	IStream,
 	IStreamGenerator
 } from "../interfaces/Stream.js"
@@ -266,6 +267,28 @@ export function peek(n: number) {
 	return function <T = any>(input: IPeekableStream<T>) {
 		return input.peek(n)
 	}
+}
+
+/**
+ * This is a utility for exhausting all revivable
+ * children of a given `stream: IRenewableStream`,
+ * and pushing their outputs to `target` (which is
+ * then returned), *provided* that the lifetime of 
+ * `stream.resource` throughout all the revivals 
+ * is equal to 1, i.e. that `.resource` is always 
+ * a singleton-stream. 
+ */
+export function consumeSingletonRevivables<
+	T extends IPushable = ArrayCollection
+>(stream: IRenewerStream, target: T = new ArrayCollection() as any) {
+	let couldReviveLast: boolean
+
+	do {
+		target.push(next(stream.resource!))
+		couldReviveLast = stream.reviveChild()
+	} while (couldReviveLast)
+
+	return target
 }
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

@@ -1,27 +1,23 @@
 import { ContentNode } from "../../../classes/Node.js"
 import { SourceBuilder } from "../../../classes/SourceBuilder.js"
-import { LimitStream, SingletonStream } from "../../../classes/Stream.js"
 import type { IOwnedStream } from "../../../interfaces.js"
+import {
+	CollectionStream,
+	EndBracketStream,
+	isCurr
+} from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
 import { expect } from "../Errors.js"
-
-const withUnicodeCharBuilder = consumable(new SourceBuilder())
 
 const UnicodeChar = ContentNode<string, string>("unicode-char")
 
 const expectOpBrack = expect("{")
 
-const isUnicodeNumberEnd = (input: IOwnedStream<string>) => input.curr === "}"
+const UnicodeLimitStream = EndBracketStream(isCurr("}"))
 
-const UnicodeLimitStream = LimitStream((input: IOwnedStream<string>) => {
-	const isEnd = isUnicodeNumberEnd(input)
-	if (isEnd) input.next() // }
-	return !isEnd
-})
-
-const UnicodeCharStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) =>
-		new UnicodeChar(withUnicodeCharBuilder(input).get())
+const UnicodeCharStream = CollectionStream(
+	UnicodeChar,
+	consumable(new SourceBuilder())
 )
 
 function HandleUnicodeNumber() {

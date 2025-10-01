@@ -12,8 +12,7 @@ import {
 	CompositeStream,
 	IdentityStream,
 	InputStream,
-	PeekStream,
-	SingletonStream
+	PeekStream
 } from "../../classes/Stream.js"
 import type {
 	IIndexMap,
@@ -28,6 +27,7 @@ import {
 	TableCarrier
 } from "../../modules/IndexMap/classes/LiquidMap.js"
 import { Pairs } from "../../samples.js"
+import { WrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { nodeMap } from "../../utils/IndexMap.js"
 import { consume } from "../../utils/Stream.js"
@@ -126,13 +126,10 @@ const QuantifierProcessor = TableHandler(
 
 const RootNode = SingleChildNode("regex-root")
 
-const RootNodeStream = SingletonStream(
-	(input: IOwnedStream<INode<string>>) => new RootNode(input.curr)
-)
+const RootNodeStream = WrapperStream(RootNode)
 
 export function ParseRegexRecursively(): IRawStreamArray {
 	return [
-		RootNodeStream(),
 		ProduceDisjunction,
 		QuantifierProcessor,
 		PeekStream(),
@@ -141,6 +138,6 @@ export function ParseRegexRecursively(): IRawStreamArray {
 }
 
 const parseRegex = DynamicParser(
-	() => CompositeStream(...ParseRegexRecursively())(),
+	() => CompositeStream(RootNodeStream(), ...ParseRegexRecursively())(),
 	() => new InputStream()
 )

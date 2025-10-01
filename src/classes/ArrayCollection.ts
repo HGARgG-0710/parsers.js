@@ -16,6 +16,10 @@ export class ArrayCollection<T = any>
 		return this
 	}
 
+	clear() {
+		array.clear(this.items)
+	}
+
 	copy() {
 		return new this.constructor(array.copy(this.items))
 	}

@@ -1,14 +1,14 @@
 import type { array } from "@hgargg-0710/one"
-import { SingletonStream } from "../../../classes/Stream.js"
 import type { IOwnedStream, IStreamChooser } from "../../../interfaces.js"
+import { TokenStream } from "../../../samples/Stream.js"
 import { Plus } from "./Plus.js"
 import { QMark } from "./QMark.js"
 import { HandleRange } from "./Range.js"
 import { Star } from "./Star.js"
 
-const PlusStream = SingletonStream(() => new Plus())
-const StarStream = SingletonStream(() => new Star())
-const QMarkStream = SingletonStream(() => new QMark())
+const PlusStream = TokenStream(Plus)
+const StarStream = TokenStream(Star)
+const QMarkStream = TokenStream(QMark)
 
 function handlePlus(input: IOwnedStream<string>) {
 	input.next() // +

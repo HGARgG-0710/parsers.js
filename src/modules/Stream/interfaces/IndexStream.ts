@@ -24,4 +24,4 @@ export type IIndexCarrying = {
  * `resource?: IOwnedStream<T>` is to be considered
  * a line break by the `IndexStream` stream.
  */
-export type INewlinePredicate<T = any> = (resource?: IOwnedStream<T>) => boolean
+export type INewlinePredicate<T = any> = (resource: IOwnedStream<T>) => boolean
