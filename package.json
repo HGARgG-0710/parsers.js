@@ -27,7 +27,7 @@
 		"build": "npm run copy-js && tsc --project .",
 		"debug-build": "npm run copy-js && tsc --project ts/debug.json",
 		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
-		"test-build": "npm run test-compile && npm run debug-build",
+		"test-build": "npm run debug-build && npm run test-compile",
 		"test-all": "cd tests/out && node run.js",
 		"unused": "ts-unused-exports ./tsconfig.json"
 	}
