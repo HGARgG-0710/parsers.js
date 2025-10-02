@@ -9,9 +9,9 @@ import type {
  * [either over its keys, or input] to
  * obtain an `IMidMap<K/NK, V, Default>`.
  */
-export interface IExtendableMap<K = any, V = any, Default = any> {
-	extend(f: (newIndexed: any) => any): IMidMap<K, V, Default>
-	extendKey<NK = any>(f: (newKey: NK) => K): IMidMap<NK, V, Default>
+export interface IExtendableMap<K = any, V = any, Default = any, Index = K> {
+	extend<NI = any>(f: (newIndexed: NI) => Index): IMidMap<K, V, Default, NI>
+	extendKey<NK = any>(f: (newKey: NK) => K): IMidMap<NK, V, Default, Index>
 }
 
 /**
@@ -20,9 +20,9 @@ export interface IExtendableMap<K = any, V = any, Default = any> {
  * in the exactly same fashion as `IExtendableMap<K, V, Default>`
  * dictates, or `finalize()`d, to obtain an `IIndexMap<K, V, Default>`.
  */
-export interface IMidMap<K = any, V = any, Default = any>
-	extends IExtendableMap<K, V, Default> {
-	finalize(): IIndexMap<K, V, Default>
+export interface IMidMap<K = any, V = any, Default = any, Index = K>
+	extends IExtendableMap<K, V, Default, Index> {
+	finalize(): IIndexMap<K, V, Default, Index>
 }
 
 /**
@@ -35,17 +35,17 @@ export interface IMidMap<K = any, V = any, Default = any>
  * abstraction layers that affect thae way that the keys and
  * input are treated.
  */
-export interface IIndexMap<K = any, V = any, Default = any>
-	extends ISimpleMap<K, V, Default>,
-		IExtendableMap<K, V, Default> {}
+export interface IIndexMap<K = any, V = any, Default = any, Index = K>
+	extends ISimpleMap<K, V, Default, Index>,
+		IExtendableMap<K, V, Default, Index> {}
 
 /**
  * This is an `IIndexMap<K, V, Default>` without the
  * extension capabilities. Immutable unless implementation
  * states otherwise.
  */
-export interface ISimpleMap<K = any, V = any, Default = any>
-	extends IIndexable<V | Default>,
+export interface ISimpleMap<K = any, V = any, Default = any, Index = K>
+	extends IIndexable<Index, V | Default>,
 		ICopiable,
 		IFromTableCarrierConvertible<K, V, Default>,
 		IToModifiableConvertible<K, V, Default> {}

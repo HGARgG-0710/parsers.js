@@ -19,9 +19,9 @@ import type {
  * they can employ this function.
  */
 export function TableHandler<In = any, Out = any>(
-	indexable: IIndexable<IParserFunction<In, Out>>
+	indexable: IIndexable<In, IParserFunction<In, Out>>
 ): ITableHandler<In, Out> {
-	const T = function (x?: In, ...y: any[]) {
+	const T = function (x: In, ...y: any[]) {
 		return T.table.index(x, ...y).call(this, x, T, ...y)
 	}
 	T.table = indexable
@@ -38,10 +38,10 @@ export function TableHandler<In = any, Out = any>(
  * the `TableMap`, since, on occasions, one may want more complex
  * (and not necesserily always dynamic) output to be employed.
  */
-export function WrapHandler<Out = any>(
-	indexable: IIndexable<Out>
-): IWrapHandler<Out> {
-	const T = (x: any, ...y: any[]) => T.table.index(x, ...y)
+export function WrapHandler<In = any, Out = any>(
+	indexable: IIndexable<In, Out>
+): IWrapHandler<In, Out> {
+	const T = (x: In, ...y: any[]) => T.table.index(x, ...y)
 	T.table = indexable
 	return T
 }

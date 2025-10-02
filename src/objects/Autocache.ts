@@ -16,16 +16,16 @@ const { isFunction } = type
  * the item `x` is interpreted as missing, and is (then)
  * calculated a new `y: V` for, by using the provided `callback`
  * argument on it. The resulting `y` is then added to the
- * `cache` using the `cache.set(x, y)` call, while also 
- * being returned to the calling party. 
+ * `cache` using the `cache.set(x, y)` call, while also
+ * being returned to the calling party.
  *
  * If the `.index(x)` call does not return `NotCached`,
  * the item is interpreted as present, and
- * the result of the call to the result of `Autocache` 
+ * the result of the call to the result of `Autocache`
  * becomes the result of the call to `.index(x)`.
  */
 export function Autocache<K = any, V = any>(
-	cache: ISettable<K, V> & IIndexable<V | typeof NotCached>,
+	cache: ISettable<K, V> & IIndexable<K, V | typeof NotCached>,
 	callback: (x: K) => V
 ) {
 	assert(isFunction(callback))

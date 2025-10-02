@@ -16,7 +16,7 @@ export type IHash<K = any, InternalKey = any> = (
 export interface IHashClass<K = any, V = any, InternalKey = any, Default = any>
 	extends IHashable<K, InternalKey> {
 	new (structure: IPreMap<InternalKey, V, Default>): IHashMap<K, V, Default>
-	extend: (f: (x: any) => K) => IHashClass<any, V, InternalKey>
+	extend<NK = any>(f: (x: NK) => K): IHashClass<NK, V, InternalKey, Default>
 }
 
 /**
@@ -26,7 +26,7 @@ export interface IHashClass<K = any, V = any, InternalKey = any, Default = any>
  */
 export interface IHashMap<K = any, V = any, Default = any>
 	extends IPreMap<K, V, Default>,
-		IIndexable<V | Default>,
+		IIndexable<K, V | Default>,
 		IConcattable<Iterable<[K, V]>, IHashMap<K, V, Default>> {}
 
 export type * from "../modules/HashMap/interfaces/PlainMap.js"

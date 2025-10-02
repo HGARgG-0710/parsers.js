@@ -1,7 +1,7 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { ObjectPool } from "./objects.js"
 import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
+import type { ObjectPool } from "./objects.js"
 
 /**
  * This is an interface for representing objects that
@@ -134,8 +134,8 @@ export interface IReversible {
  * Serves as the most granular interface
  * for table-objects of the library.
  */
-export interface IIndexable<V = any> {
-	index: (x: any, ...y: any[]) => V
+export interface IIndexable<I = any, V = any, Other extends any[] = any[]> {
+	index: (x: I, ...y: Other) => V
 }
 
 /**
@@ -296,8 +296,8 @@ export interface IFreeable {
 
 /**
  * This is an interface for representing objects for
- * carrying existing pools to objects. Primarily intended 
- * to represent class-like objects. 
+ * carrying existing pools to objects. Primarily intended
+ * to represent class-like objects.
  */
 export interface IPoolKeeping<
 	T extends IInitializable<Args> = any,

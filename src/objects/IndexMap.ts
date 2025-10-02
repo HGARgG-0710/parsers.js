@@ -11,7 +11,7 @@ const { trivialCompose, id } = functional
 
 type IKeyExtension<K = any, RealKey = any> = (key: K) => RealKey
 
-type IExtension = (x: any, ...y: any[]) => any
+type IExtension<Index = any> = (x: Index, ...y: any[]) => any
 
 /**
  * This is a class for representing an encapsulated,
@@ -70,8 +70,13 @@ class FunctionComposition<Args extends any[] = any[], Out = any> {
  * implementation, while passing to it and copying the `this.liquid` via
  * `this.liquid.copy()`
  */
-export abstract class MidMap<K = any, V = any, Default = any, RealKey = any>
-	implements IMidMap<K, V, Default>
+export abstract class MidMap<
+	K = any,
+	V = any,
+	Default = any,
+	RealKey = any,
+	Index = K
+> implements IMidMap<K, V, Default, Index>
 {
 	protected ["constructor"]: new <
 		K = any,
@@ -100,9 +105,11 @@ export abstract class MidMap<K = any, V = any, Default = any, RealKey = any>
 		return this.preKeyExtension.get()
 	}
 
-	abstract finalize(): IIndexMap<K, V, Default>
+	abstract finalize(): IIndexMap<K, V, Default, Index>
 
-	extend<NV = any>(f: (newKey: NV) => V): MidMap<K, V, Default, RealKey> {
+	extend<NI = any>(
+		f: (newKey: NI) => Index
+	): MidMap<K, V, Default, RealKey, NI> {
 		return new this.constructor(
 			this.liquid,
 			this.preExtension.withFront(f),
@@ -110,7 +117,9 @@ export abstract class MidMap<K = any, V = any, Default = any, RealKey = any>
 		)
 	}
 
-	extendKey<NK = any>(f: (newKey: NK) => K): MidMap<NK, V, Default, RealKey> {
+	extendKey<NK = any>(
+		f: (newKey: NK) => K
+	): MidMap<NK, V, Default, RealKey, Index> {
 		return new this.constructor(
 			this.liquid,
 			this.preExtension.components,
@@ -162,8 +171,13 @@ export abstract class MidMap<K = any, V = any, Default = any, RealKey = any>
  * the user to optimize the search to run in a better
  * algorithmic (or practical) time.
  */
-export abstract class IndexMap<K = any, V = any, Default = any, RealKey = K>
-	implements IIndexMap<K, V, Default>
+export abstract class IndexMap<
+	K = any,
+	V = any,
+	Default = any,
+	RealKey = K,
+	Index = K
+> implements IIndexMap<K, V, Default, Index>
 {
 	private ["constructor"]: new (liquid: ILiquidMap<any, any, Default>) => this
 
@@ -174,11 +188,13 @@ export abstract class IndexMap<K = any, V = any, Default = any, RealKey = K>
 
 	abstract extendKey<NK = any>(
 		f: (newKey: NK) => K
-	): MidMap<NK, V, Default, RealKey>
+	): MidMap<NK, V, Default, RealKey, Index>
 
-	abstract extend(f: (newIndexed: any) => any): MidMap<K, V, Default, RealKey>
+	abstract extend<NI = any>(
+		f: (newIndexed: NI) => Index
+	): MidMap<K, V, Default, RealKey, NI>
 
-	private extension: IExtension = id
+	private extension: IExtension<Index> = id
 	private keyExtension: IKeyExtension<K, RealKey> = id as any
 
 	private get size() {
@@ -199,7 +215,7 @@ export abstract class IndexMap<K = any, V = any, Default = any, RealKey = K>
 	}
 
 	private initExtendedKeys() {
-		this._realKeys = this.keys.map(this.keyExtension)
+		this.realKeys = this.keys.map(this.keyExtension)
 	}
 
 	protected setExtension(extension: (x: any, ...y: any[]) => any) {
@@ -211,6 +227,10 @@ export abstract class IndexMap<K = any, V = any, Default = any, RealKey = K>
 		this.keyExtension = keyExtension.bind(this)
 		this.initExtendedKeys()
 		return this
+	}
+
+	private set realKeys(realKeys: RealKey[]) {
+		this._realKeys = realKeys
 	}
 
 	protected get realKeys() {
@@ -230,7 +250,7 @@ export abstract class IndexMap<K = any, V = any, Default = any, RealKey = K>
 		return this.carrier.default
 	}
 
-	index(x: any, ...y: any[]) {
+	index(x: Index, ...y: any[]) {
 		return this.carrier.read(this.indexOf(this.extension(x, ...y)))
 	}
 
@@ -263,17 +283,19 @@ export namespace IndexMap {
 		K,
 		V,
 		Default,
-		RealKey extends any[] = K extends any[] ? K : any[]
-	> extends IndexMap<K, V, Default, RealKey> {
+		RealKey extends any[] = K extends any[] ? K : any[],
+		Index = K
+	> extends IndexMap<K, V, Default, RealKey, Index> {
 		private static MidMap = class<
 			K = any,
 			V = any,
 			Default = any,
-			RealKey extends any[] = any
-		> extends MidMap<K, V, Default, RealKey> {
-			finalize(): ArrayMap<K, V, Default, RealKey> {
+			RealKey extends any[] = any,
+			Index = K
+		> extends MidMap<K, V, Default, RealKey, Index> {
+			finalize(): ArrayMap<K, V, Default, RealKey, Index> {
 				this.calcExtensions()
-				return new ArrayMap<K, V, Default, RealKey>(this.liquid)
+				return new ArrayMap<K, V, Default, RealKey, Index>(this.liquid)
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
@@ -283,8 +305,10 @@ export namespace IndexMap {
 			return array.recursiveSame(curr, x)
 		}
 
-		extend(f: (newKey: any) => any): MidMap<K, V, Default, RealKey> {
-			return new ArrayMap.MidMap<K, V, Default, RealKey>(
+		extend<NI = any>(
+			f: (newKey: NI) => Index
+		): MidMap<K, V, Default, RealKey, NI> {
+			return new ArrayMap.MidMap<K, V, Default, RealKey, NI>(
 				this.liquid.copy(),
 				[f]
 			)
@@ -292,8 +316,8 @@ export namespace IndexMap {
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, V, Default, RealKey> {
-			return new ArrayMap.MidMap<NK, V, Default>(
+		): MidMap<NK, V, Default, RealKey, Index> {
+			return new ArrayMap.MidMap<NK, V, Default, RealKey, Index>(
 				this.liquid.copy(),
 				[],
 				[f]
@@ -311,17 +335,19 @@ export namespace IndexMap {
 		K = any,
 		V = any,
 		Default = any,
-		RealKey = any
-	> extends IndexMap<K, V, Default, RealKey> {
+		RealKey = any,
+		Index = K
+	> extends IndexMap<K, V, Default, RealKey, Index> {
 		private static MidMap = class<
 			K = any,
 			V = any,
 			Default = any,
-			RealKey = any
-		> extends MidMap<K, V, Default, RealKey> {
-			finalize(): BasicMap<K, V, Default, RealKey> {
+			RealKey = any,
+			Index = K
+		> extends MidMap<K, V, Default, RealKey, Index> {
+			finalize(): BasicMap<K, V, Default, RealKey, Index> {
 				this.calcExtensions()
-				return new BasicMap<K, V, Default, RealKey>(this.liquid)
+				return new BasicMap<K, V, Default, RealKey, Index>(this.liquid)
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
@@ -331,8 +357,10 @@ export namespace IndexMap {
 			return this.realKeys.indexOf(sought)
 		}
 
-		extend(f: (newIndexed: any) => any): MidMap<K, V, Default, RealKey> {
-			return new BasicMap.MidMap<K, V, Default, RealKey>(
+		extend<NI = any>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, V, Default, RealKey, NI> {
+			return new BasicMap.MidMap<K, V, Default, RealKey, NI>(
 				this.liquid.copy(),
 				[f]
 			)
@@ -340,8 +368,8 @@ export namespace IndexMap {
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, V, Default, RealKey> {
-			return new BasicMap.MidMap<NK, V, Default, RealKey>(
+		): MidMap<NK, V, Default, RealKey, Index> {
+			return new BasicMap.MidMap<NK, V, Default, RealKey, Index>(
 				this.liquid.copy(),
 				[],
 				[f]
@@ -358,37 +386,42 @@ export namespace IndexMap {
 	export class PredicateMap<
 		T = any,
 		Default = any,
-		K = IPredicate<T>
-	> extends IndexMap<K, T, Default, IPredicate<T>> {
+		K = IPredicate<T>,
+		Index = any
+	> extends IndexMap<K, T, Default, IPredicate<T>, Index> {
 		private static MidMap = class<
 			T = any,
 			Default = any,
-			K = IPredicate<T>
-		> extends MidMap<K, T, Default, IPredicate<T>> {
-			finalize(): PredicateMap<T, Default, K> {
+			K = IPredicate<T>,
+			Index = any
+		> extends MidMap<K, T, Default, IPredicate<T>, Index> {
+			finalize(): PredicateMap<T, Default, K, Index> {
 				this.calcExtensions()
-				return new PredicateMap<T, Default, K>(this.liquid.copy())
+				return new PredicateMap<T, Default, K, Index>(
+					this.liquid.copy()
+				)
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
 		}
 
-		protected comparator(curr: IPredicate<T>, x: any): boolean {
+		protected comparator(curr: IPredicate<T>, x: T): boolean {
 			return curr(x)
 		}
 
-		extend(
-			f: (newIndexed: any) => any
-		): MidMap<K, T, Default, IPredicate<T>> {
-			return new PredicateMap.MidMap<T, Default, K>(this.liquid.copy(), [
-				f
-			])
+		extend<NI = any>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, T, Default, IPredicate<T>, NI> {
+			return new PredicateMap.MidMap<T, Default, K, NI>(
+				this.liquid.copy(),
+				[f]
+			)
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, IPredicate<T>> {
-			return new PredicateMap.MidMap<T, Default, NK>(
+		): MidMap<NK, T, Default, IPredicate<T>, Index> {
+			return new PredicateMap.MidMap<T, Default, NK, Index>(
 				this.liquid.copy(),
 				[],
 				[f]
@@ -406,35 +439,39 @@ export namespace IndexMap {
 	export class RegExpMap<
 		T = any,
 		Default = any,
-		K = ITestable<T>
-	> extends IndexMap<K, T, Default, ITestable<T>> {
+		K = ITestable<T>,
+		Index = string
+	> extends IndexMap<K, T, Default, ITestable<T>, Index> {
 		private static MidMap = class<
 			T = any,
 			Default = any,
-			K = ITestable<T>
-		> extends MidMap<K, T, Default, ITestable<T>> {
-			finalize(): RegExpMap<T, Default, K> {
+			K = ITestable<T>,
+			Index = string
+		> extends MidMap<K, T, Default, ITestable<T>, Index> {
+			finalize(): RegExpMap<T, Default, K, Index> {
 				this.calcExtensions()
-				return new RegExpMap<T, Default, K>(this.liquid.copy())
+				return new RegExpMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
 		}
 
-		protected comparator(curr: ITestable<T>, x: any): boolean {
+		protected comparator(curr: ITestable<T>, x: T): boolean {
 			return curr.test(x)
 		}
 
-		extend(
-			f: (newIndexed: any) => any
-		): MidMap<K, T, Default, ITestable<T>> {
-			return new RegExpMap.MidMap<T, Default, K>(this.liquid.copy(), [f])
+		extend<NI = any>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, T, Default, ITestable<T>, NI> {
+			return new RegExpMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [
+				f
+			])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, ITestable<T>> {
-			return new RegExpMap.MidMap<T, Default, NK>(
+		): MidMap<NK, T, Default, ITestable<T>, Index> {
+			return new RegExpMap.MidMap<T, Default, NK, Index>(
 				this.liquid.copy(),
 				[],
 				[f]
@@ -452,32 +489,36 @@ export namespace IndexMap {
 	export class SetMap<
 		T = any,
 		Default = any,
-		K = IHaving<T>
-	> extends IndexMap<K, T, Default, IHaving<T>> {
+		K = IHaving<T>,
+		Index = any
+	> extends IndexMap<K, T, Default, IHaving<T>, Index> {
 		private static MidMap = class<
 			T = any,
 			Default = any,
-			K = IHaving<T>
-		> extends MidMap<K, T, Default, IHaving<T>> {
-			finalize(): SetMap<T, Default, K> {
+			K = IHaving<T>,
+			Index = any
+		> extends MidMap<K, T, Default, IHaving<T>, Index> {
+			finalize(): SetMap<T, Default, K, Index> {
 				this.calcExtensions()
-				return new SetMap<T, Default, K>(this.liquid.copy())
+				return new SetMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
 		}
 
-		protected comparator(curr: IHaving<T>, x: any): boolean {
+		protected comparator(curr: IHaving<T>, x: T): boolean {
 			return curr.has(x)
 		}
 
-		extend(f: (newIndexed: any) => any): MidMap<K, T, Default, IHaving<T>> {
-			return new SetMap.MidMap<T, Default, K>(this.liquid.copy(), [f])
+		extend<NI = any>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, T, Default, IHaving<T>, NI> {
+			return new SetMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, IHaving<T>> {
+		): MidMap<NK, T, Default, IHaving<T>, Index> {
 			return new SetMap.MidMap<T, Default, NK>(
 				this.liquid.copy(),
 				[],
@@ -493,20 +534,21 @@ export namespace IndexMap {
 	 * via `===` [note: non-recursively]. The `.extend/extendKey` methods
 	 * are standard.
 	 */
-	export class ObjectMap<T = any, Default = any, K = object> extends IndexMap<
-		K,
-		T,
-		Default,
-		object
-	> {
+	export class ObjectMap<
+		T = any,
+		Default = any,
+		K = object,
+		Index = K
+	> extends IndexMap<K, T, Default, object, Index> {
 		private static MidMap = class<
 			T = any,
 			Default = any,
-			K = object
-		> extends MidMap<K, T, Default, object> {
-			finalize(): ObjectMap<T, Default, K> {
+			K = object,
+			Index = K
+		> extends MidMap<K, T, Default, object, Index> {
+			finalize(): ObjectMap<T, Default, K, Index> {
 				this.calcExtensions()
-				return new ObjectMap<T, Default, K>(this.liquid.copy())
+				return new ObjectMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
 			}
@@ -516,14 +558,18 @@ export namespace IndexMap {
 			return object.same(curr, x)
 		}
 
-		extend(f: (newIndexed: any) => any): MidMap<K, T, Default, object> {
-			return new ObjectMap.MidMap<T, Default, K>(this.liquid.copy(), [f])
+		extend<NI = any>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, T, Default, object, NI> {
+			return new ObjectMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [
+				f
+			])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, object> {
-			return new ObjectMap.MidMap<T, Default, NK>(
+		): MidMap<NK, T, Default, object, Index> {
+			return new ObjectMap.MidMap<T, Default, NK, Index>(
 				this.liquid.copy(),
 				[],
 				[f]

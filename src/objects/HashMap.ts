@@ -8,12 +8,15 @@ import { curr } from "../utils/Stream.js"
 const { id } = functional
 const { typeOf } = _type
 
-function extend<KeyType = any, ValueType = any, InternalKeyType = any>(
-	this: IHashClass<KeyType, ValueType, InternalKeyType>,
-	f: (...x: any[]) => KeyType
-) {
-	return HashClass<any, ValueType, InternalKeyType>((...x: any[]) =>
-		this.hash(f(...x))
+function mapClassExtend<
+	NK = any,
+	K = any,
+	V = any,
+	InternalKey = any,
+	Default = any
+>(f: (y: NK, ...x: any[]) => K, hash: IHash<K, InternalKey>) {
+	return HashClass<NK, V, InternalKey, Default>((key: NK, ...other: any[]) =>
+		hash(f(key, ...other))
 	)
 }
 
@@ -90,8 +93,9 @@ export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 ): IHashClass<K, V, InternalKey, Default> {
 	class hashClass extends PreHashClass<K, V, InternalKey, Default> {
 		static hash: IHash<K, InternalKey> = hash
-		static extend: (f: (x: any) => K) => IHashClass<K, V, InternalKey> =
-			extend<K, V, InternalKey>
+		static extend<NK = any>(f: (y: NK, ...x: any[]) => K) {
+			return mapClassExtend<NK, K, V, InternalKey, Default>(f, hash)
+		}
 
 		constructor(pre: IPreMap<InternalKey, V, Default>) {
 			super(pre)

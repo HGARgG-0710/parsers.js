@@ -10,7 +10,7 @@ import type { IStream } from "./Stream.js"
 export type ITableHandler<In = any, Out = any> = (
 	x?: In,
 	...y: any[]
-) => Out & { readonly table: IIndexable<IParserFunction<In, Out>> }
+) => Out & { readonly table: IIndexable<In, IParserFunction<In, Out>> }
 
 /**
  * This is an interface, which serves as a generalization of `ITableHandler`.
@@ -19,8 +19,8 @@ export type ITableHandler<In = any, Out = any> = (
  * the `.index(...)` call. It, thus, is simply a wrapper for the underlying
  * `readonly table` property.
  */
-export type IWrapHandler<Out = any> = ((x?: any, ...y: any[]) => Out) & {
-	readonly table: IIndexable<Out>
+export type IWrapHandler<In = any, Out = any> = ((x?: any, ...y: any[]) => Out) & {
+	readonly table: IIndexable<In, Out>
 }
 
 /**
