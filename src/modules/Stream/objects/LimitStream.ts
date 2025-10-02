@@ -1,5 +1,5 @@
 import { boolean, type } from "@hgargg-0710/one"
-import * as Pools from "../../../Pools.js"
+import * as Pools from "../../../global/Pools.js"
 import { ownerInitializer } from "../../../objects/Initializer.js"
 import { ObjectPool } from "../../../objects/ObjectPool.js"
 import type { IPoolKeeping, IPredicatePosition } from "../../../interfaces.js"

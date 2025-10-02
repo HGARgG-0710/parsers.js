@@ -7,12 +7,12 @@ const { structCheck } = object
 /**
  * Returns whether the given item is `ICopiable`.
  */
-export const isCopiable = structCheck<ICopiable>({ copy: isFunction })
+export const Copiable = structCheck<ICopiable>({ copy: isFunction })
 
 /**
  * Returns whether a given item is `IFreeable`.
  */
-export const isFreeable = structCheck<IFreeable>({ free: isFunction })
+export const Freeable = structCheck<IFreeable>({ free: isFunction })
 
 export * as Node from "./is/Node.js"
 export * as Stream from "./is/Stream.js"

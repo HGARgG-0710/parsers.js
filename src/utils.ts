@@ -1,6 +1,6 @@
+import { is } from "../main.js"
 import { BadIndex } from "./constants.js"
 import type { IResource } from "./interfaces.js"
-import { isCopiable } from "./is.js"
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -25,7 +25,7 @@ export function withResource<T = any>(
  * can be made.
  */
 export function tryCopy<T = any>(x: T) {
-	return isCopiable(x) ? x.copy() : x
+	return is.Copiable(x) ? x.copy() : x
 }
 
 export * as IndexMap from "./utils/IndexMap.js"

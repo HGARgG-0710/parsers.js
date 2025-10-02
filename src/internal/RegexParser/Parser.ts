@@ -108,13 +108,6 @@ const QuantifierProcessor = TableHandler(
 	)
 )
 
-// TODO: URGENT BUG!
-// * The `Disjunction` is (not quite) complete - still requires "packaging" of UNDERLYING pieces
-// * together. CONCLUSION:
-// ^ 1. Need a layer that would:
-// * 	1. Bunch WHOLE PIECES PRIOR to `|`-Pipes as ONE OBJECT [name it 'DisjunctCollector'];
-// ^ 2. THEN - one would use the `ProduceDisjunction` to collect it all into a single object.
-
 // ! THIS is the error-throwing code - put it at the spot where we KNOW there are NO MORE valid string-cases left...
 // function (input) {
 // TODO: add error-throwing code!

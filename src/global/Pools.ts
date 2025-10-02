@@ -1,7 +1,7 @@
 import {
 	JointPoolCollection,
 	PoolCollection
-} from "./objects/PoolCollection.js"
+} from "../objects/PoolCollection.js"
 
 /**
  * This is a `PoolCollection` designated for `ObjectPool`s

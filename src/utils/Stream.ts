@@ -1,7 +1,4 @@
-import { type } from "@hgargg-0710/one"
-import { ArrayCollection } from "../objects/ArrayCollection.js"
-import type { Regex } from "../objects/Regex.js"
-import { HandlerStream } from "../objects/Stream.js"
+import { object, type } from "@hgargg-0710/one"
 import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,
@@ -17,7 +14,11 @@ import type {
 import { isFinishable, isNavigable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
+import { ArrayCollection } from "../objects/ArrayCollection.js"
+import type { Regex } from "../objects/Regex.js"
+import { HandlerStream } from "../objects/Stream.js"
 
+const { prop } = object
 const { isNumber } = type
 
 /**
@@ -273,10 +274,10 @@ export function peek(n: number) {
  * This is a utility for exhausting all revivable
  * children of a given `stream: IRenewableStream`,
  * and pushing their outputs to `target` (which is
- * then returned), *provided* that the lifetime of 
- * `stream.resource` throughout all the revivals 
- * is equal to 1, i.e. that `.resource` is always 
- * a singleton-stream. 
+ * then returned), *provided* that the lifetime of
+ * `stream.resource` throughout all the revivals
+ * is equal to 1, i.e. that `.resource` is always
+ * a singleton-stream.
  */
 export function consumeSingletonRevivables<
 	T extends IPushable = ArrayCollection
@@ -290,5 +291,10 @@ export function consumeSingletonRevivables<
 
 	return target
 }
+
+/**
+ * Given an `IStream` returns its `.curr` property value
+ */
+export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

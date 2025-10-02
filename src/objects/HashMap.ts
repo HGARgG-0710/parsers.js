@@ -1,9 +1,9 @@
 import { type as _type, functional } from "@hgargg-0710/one"
-import { type } from "../aliases/Node.js"
-import { curr } from "../aliases/Stream.js"
 import type { IStream } from "../interfaces.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
+import { type } from "../utils/Node.js"
+import { curr } from "../utils/Stream.js"
 
 const { id } = functional
 const { typeOf } = _type

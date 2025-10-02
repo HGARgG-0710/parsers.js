@@ -1,6 +1,4 @@
-import { boolean, functional } from "@hgargg-0710/one"
-import { type } from "../aliases/Node.js"
-import type { NodeSystem } from "../objects/NodeSystem.js"
+import { boolean, functional, object } from "@hgargg-0710/one"
 import type {
 	IIterableStream,
 	IParserFunction,
@@ -8,10 +6,12 @@ import type {
 } from "../interfaces.js"
 import type { ITyped, IWalkable } from "../interfaces/Node.js"
 import { isTyped } from "../is/Node.js"
+import type { NodeSystem } from "../objects/NodeSystem.js"
 import { isGoodIndex } from "../utils.js"
 
 const { trivialCompose } = functional
 const { eqcurry } = boolean
+const { prop } = object
 
 /**
  * Returns whether the given `x` has at least 1 child
@@ -104,3 +104,8 @@ export function treeMap<T extends IWalkable<T> = IWalkable, Out = any>(
 		for (const _ of nodeStream) yield* parentMap(nodeStream, parentMap)
 	}
 }
+
+/**
+ * Returns the value of the `x.type` for the given `ITyped`
+ */
+export const type = prop("type") as <T = any>(x: ITyped<T>) => T

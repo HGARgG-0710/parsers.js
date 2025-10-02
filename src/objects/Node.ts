@@ -1,5 +1,6 @@
 import { array, functional } from "@hgargg-0710/one"
-import * as Pools from "../Pools.js"
+import { is } from "../../main.js"
+import * as Pools from "../global/Pools.js"
 import type { IFreeable } from "../interfaces.js"
 import type {
 	ICellNode,
@@ -12,7 +13,6 @@ import type {
 	IPoolNodeType,
 	ITyped
 } from "../interfaces/Node.js"
-import { isFreeable } from "../is.js"
 import {
 	isContentNodeSerializable,
 	isRecursiveNodeSerializable,
@@ -349,7 +349,7 @@ abstract class PreRecursiveNode<T = any>
 	}
 
 	free(): void {
-		for (const child of this.children) if (isFreeable(child)) child.free()
+		for (const child of this.children) if (is.Freeable(child)) child.free()
 		super.free()
 	}
 

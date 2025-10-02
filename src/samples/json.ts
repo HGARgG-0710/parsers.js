@@ -1,5 +1,5 @@
 import { functional } from "@hgargg-0710/one"
-import { curr } from "../aliases/Stream.js"
+import type { IOwnedStream, IRecursiveNode, IStream } from "../interfaces.js"
 import {
 	ConcatStream,
 	FiniteStream,
@@ -7,7 +7,7 @@ import {
 	InterleaveStream,
 	LoopStream
 } from "../objects/Stream.js"
-import type { IOwnedStream, IRecursiveNode, IStream } from "../interfaces.js"
+import { curr } from "../utils/Stream.js"
 
 const { trivialCompose } = functional
 
