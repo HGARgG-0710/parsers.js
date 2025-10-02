@@ -1,4 +1,4 @@
-import { TokenNode } from "../../../classes/Node.js"
+import { TokenNode } from "../../../objects/Node.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import { TokenStream } from "../../../samples/Stream.js"
 

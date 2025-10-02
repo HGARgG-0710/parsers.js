@@ -1,9 +1,9 @@
-import { TerminalMap } from "../classes/HashMap.js"
+import { TerminalMap } from "../objects/HashMap.js"
 import {
 	PlainArray,
 	PlainMap,
 	PlainObject
-} from "../modules/HashMap/classes/PlainMap.js"
+} from "../modules/HashMap/objects/PlainMap.js"
 
 import { Pairs } from "./Pairs.js"
 

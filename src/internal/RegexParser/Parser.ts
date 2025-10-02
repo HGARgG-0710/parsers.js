@@ -5,15 +5,15 @@ import {
 	IndexMap,
 	ParseableInput,
 	TableHandler
-} from "../../classes.js"
-import { CurrentHash } from "../../classes/HashMap.js"
-import { SingleChildNode } from "../../classes/Node.js"
+} from "../../objects.js"
+import { CurrentHash } from "../../objects/HashMap.js"
+import { SingleChildNode } from "../../objects/Node.js"
 import {
 	CompositeStream,
 	IdentityStream,
 	InputStream,
 	PeekStream
-} from "../../classes/Stream.js"
+} from "../../objects/Stream.js"
 import type {
 	IIndexMap,
 	INode,
@@ -25,7 +25,7 @@ import type {
 import {
 	LiquidMap,
 	TableCarrier
-} from "../../modules/IndexMap/classes/LiquidMap.js"
+} from "../../modules/IndexMap/objects/LiquidMap.js"
 import { Pairs } from "../../samples.js"
 import { WrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"

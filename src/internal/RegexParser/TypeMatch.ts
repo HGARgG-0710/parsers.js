@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
-import { SourceBuilder } from "../../classes.js"
-import { ContentNode } from "../../classes/Node.js"
+import { SourceBuilder } from "../../objects.js"
+import { ContentNode } from "../../objects/Node.js"
 import type {
 	INode,
 	IOwnedStream,

@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
-import { SingleChildNode, TokenNode } from "../../../classes/Node.js"
-import { SingletonStream } from "../../../classes/Stream.js"
+import { SingleChildNode, TokenNode } from "../../../objects/Node.js"
+import { SingletonStream } from "../../../objects/Stream.js"
 import type {
 	INode,
 	INodeType,

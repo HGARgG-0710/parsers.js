@@ -1,5 +1,5 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../classes/ObjectPool.js"
+import { ObjectPool } from "../../../objects/ObjectPool.js"
 import { mixin } from "../../../mixin.js"
 import { PipeStream } from "./PipeStream.js"
 import { PoolableStream } from "./PoolableStream.js"

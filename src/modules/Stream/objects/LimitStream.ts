@@ -1,7 +1,7 @@
 import { boolean, type } from "@hgargg-0710/one"
 import * as Pools from "../../../Pools.js"
-import { ownerInitializer } from "../../../classes/Initializer.js"
-import { ObjectPool } from "../../../classes/ObjectPool.js"
+import { ownerInitializer } from "../../../objects/Initializer.js"
+import { ObjectPool } from "../../../objects/ObjectPool.js"
 import type { IPoolKeeping, IPredicatePosition } from "../../../interfaces.js"
 import type {
 	ICommonStream,

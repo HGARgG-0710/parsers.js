@@ -1,10 +1,10 @@
-import { NodeSystem } from "../classes.js"
+import { NodeSystem } from "../objects.js"
 import {
 	ContentNode,
 	RecursiveNode,
 	SingleChildNode,
 	TokenNode
-} from "../classes/Node.js"
+} from "../objects/Node.js"
 
 /**
  * This is a template for the most basic complete `NodeSystem` possible.

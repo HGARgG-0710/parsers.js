@@ -1,6 +1,6 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../classes.js"
-import { LineIndex } from "../../../classes/Position.js"
+import { ObjectPool } from "../../../objects.js"
+import { LineIndex } from "../../../objects/Position.js"
 import type { ILineIndex, IPoolKeeping } from "../../../interfaces.js"
 import type { ICommonStream, IOwnedStream } from "../../../interfaces/Stream.js"
 import type {

@@ -1,7 +1,7 @@
 import type { array } from "@hgargg-0710/one"
-import { ArrayBuilder, TableHandler } from "../../classes.js"
-import { CurrentHash } from "../../classes/HashMap.js"
-import { RecursiveNode } from "../../classes/Node.js"
+import { ArrayBuilder, TableHandler } from "../../objects.js"
+import { CurrentHash } from "../../objects/HashMap.js"
+import { RecursiveNode } from "../../objects/Node.js"
 import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
 import {
 	CollectionStream,

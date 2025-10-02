@@ -1,4 +1,4 @@
-import { LimitStream, SingletonStream } from "../classes/Stream.js"
+import { LimitStream, SingletonStream } from "../objects/Stream.js"
 import type {
 	IGettable,
 	ILinkedStream,

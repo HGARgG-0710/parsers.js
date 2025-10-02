@@ -1,7 +1,7 @@
 import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import { mixin } from "../../../mixin.js"
-import { ownerInitializer } from "../../Initializer/classes/OwnerInitializer.js"
+import { ownerInitializer } from "../../Initializer/objects/OwnerInitializer.js"
 import { OwningStream } from "./OwningStream.js"
 import { TrivialStream } from "./TrivialStream.js"
 

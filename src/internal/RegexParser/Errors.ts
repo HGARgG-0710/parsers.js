@@ -1,5 +1,5 @@
 import { type } from "@hgargg-0710/one"
-import { ConstructorError } from "../../classes/Error.js"
+import { ConstructorError } from "../../objects/Error.js"
 import type { IOwnedStream } from "../../interfaces.js"
 
 const { isNumber } = type

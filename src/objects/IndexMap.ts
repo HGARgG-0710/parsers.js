@@ -532,5 +532,5 @@ export namespace IndexMap {
 	}
 }
 
-export * from "../modules/IndexMap/classes/ModifiableMap.js"
-export * from "../modules/IndexMap/classes/TableMap.js"
+export * from "../modules/IndexMap/objects/ModifiableMap.js"
+export * from "../modules/IndexMap/objects/TableMap.js"

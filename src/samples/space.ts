@@ -2,7 +2,7 @@ import {
 	DyssyncOwningStream,
 	FilterStream,
 	IndexStream
-} from "../classes/Stream.js"
+} from "../objects/Stream.js"
 import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { isSpace } from "./alphabet.js"
 import { isCurr } from "./Stream.js"

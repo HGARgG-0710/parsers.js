@@ -1,9 +1,10 @@
-import { resourceDigger } from "../../../classes.js"
+import { resourceDigger } from "../../../objects.js"
 import type {
 	IIndexStream,
 	ILineIndex,
 	ILinkedStream,
-	IOwnedStream
+	IOwnedStream,
+	IResourcefulStream
 } from "../../../interfaces.js"
 import { isIndexCarrying } from "../../../is/Stream.js"
 import { negate } from "../utils/StreamPosition.js"
@@ -64,8 +65,8 @@ export abstract class BasicErrorStream<
 	}
 
 	private inputGetter() {
-		return resourceDigger.dig<this, IIndexStream<I>>(
-			this,
+		return resourceDigger.dig<IResourcefulStream<T>, IIndexStream<I>>(
+			this.resource! as IOwnedStream & IResourcefulStream,
 			negate(isIndexCarrying)
 		)
 	}

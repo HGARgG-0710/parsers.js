@@ -1,4 +1,4 @@
-import type { ObjectPool } from "../../../classes.ts"
+import type { ObjectPool } from "../../../objects.ts"
 import type { ICommonStream } from "../interfaces/CommonStream.ts"
 import type { IOwnedStream } from "../interfaces/OwnedStream.ts"
 import type { ISingletonHandler } from "../interfaces/SingletonStream.ts"

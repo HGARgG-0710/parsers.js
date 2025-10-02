@@ -1,5 +1,5 @@
-import { ContentNode } from "../../../classes/Node.js"
-import { SourceBuilder } from "../../../classes/SourceBuilder.js"
+import { ContentNode } from "../../../objects/Node.js"
+import { SourceBuilder } from "../../../objects/SourceBuilder.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import {
 	CollectionStream,

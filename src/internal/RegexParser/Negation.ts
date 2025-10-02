@@ -1,5 +1,5 @@
 import type { array } from "@hgargg-0710/one"
-import { SingleChildNode } from "../../classes/Node.js"
+import { SingleChildNode } from "../../objects/Node.js"
 import type {
 	IOwnedStream,
 	IPeekable,

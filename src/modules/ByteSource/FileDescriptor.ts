@@ -1,5 +1,5 @@
 import { closeSync, fstatSync, openSync, readSync } from "fs"
-import { InvalidFileReadPositionError } from "../../classes/Error.js"
+import { InvalidFileReadPositionError } from "../../objects/Error.js"
 import type { IByteSource } from "../../interfaces.js"
 import { Chunk } from "../../internal/Chunk.js"
 

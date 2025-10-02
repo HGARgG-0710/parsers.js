@@ -1,4 +1,4 @@
-import { DepthStream, HandlerStream } from "../classes/Stream.js"
+import { DepthStream, HandlerStream } from "../objects/Stream.js"
 import type { IHandler, IPushable, IWalkable } from "../interfaces.js"
 import { consume } from "../utils/Stream.js"
 

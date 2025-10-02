@@ -1,4 +1,4 @@
-import type { ObjectPool } from "../../../classes.js"
+import type { ObjectPool } from "../../../objects.js"
 import type { IFreeable, IInitializable, IStream } from "../../../interfaces.js"
 
 /**

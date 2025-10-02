@@ -1,4 +1,4 @@
-import type { Regex } from "../classes.js"
+import type { Regex } from "../objects.js"
 import type { ILinkedStream, IPeekStream } from "../interfaces.js"
 
 /**

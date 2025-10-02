@@ -1,4 +1,4 @@
-import type { DepthStream } from "../classes/Stream.js"
+import type { DepthStream } from "../objects/Stream.js"
 import type { INode } from "../interfaces.js"
 
 /**

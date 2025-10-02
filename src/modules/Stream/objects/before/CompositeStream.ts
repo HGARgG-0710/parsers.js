@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { ownerInitializer } from "../../../../classes/Initializer.js"
+import { ownerInitializer } from "../../../../objects/Initializer.js"
 import type { IStateSettable } from "../../../../interfaces.js"
 import type { IParseState } from "../../../../interfaces/DynamicParser.js"
 import type {
@@ -63,6 +63,7 @@ export abstract class BeforeCompositeStream<T = any>
 
 	private updateResource() {
 		this.resource = this.streamList!.firstItemDeep()
+		this.resource.setOwner(this)
 	}
 
 	protected get initializer() {

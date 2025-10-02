@@ -6,7 +6,7 @@ import {
 	HandlerStream,
 	InterleaveStream,
 	LoopStream
-} from "../classes/Stream.js"
+} from "../objects/Stream.js"
 import type { IOwnedStream, IRecursiveNode, IStream } from "../interfaces.js"
 
 const { trivialCompose } = functional

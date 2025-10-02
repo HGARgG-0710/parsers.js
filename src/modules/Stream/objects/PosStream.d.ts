@@ -1,4 +1,4 @@
-import type { ObjectPool } from "../../../classes.ts"
+import type { ObjectPool } from "../../../objects.ts"
 import type { IOwnedStream, IPosed } from "../../../interfaces.ts"
 import type { ICommonStream } from "../interfaces/CommonStream.ts"
 import type { IdentityStream } from "./IdentityStream.js"

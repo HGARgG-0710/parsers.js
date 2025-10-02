@@ -1,6 +1,6 @@
 import { boolean, functional } from "@hgargg-0710/one"
 import { type } from "../aliases/Node.js"
-import type { NodeSystem } from "../classes/NodeSystem.js"
+import type { NodeSystem } from "../objects/NodeSystem.js"
 import type {
 	IIterableStream,
 	IParserFunction,

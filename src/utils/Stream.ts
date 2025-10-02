@@ -1,7 +1,7 @@
 import { type } from "@hgargg-0710/one"
-import { ArrayCollection } from "../classes/ArrayCollection.js"
-import type { Regex } from "../classes/Regex.js"
-import { HandlerStream } from "../classes/Stream.js"
+import { ArrayCollection } from "../objects/ArrayCollection.js"
+import type { Regex } from "../objects/Regex.js"
+import { HandlerStream } from "../objects/Stream.js"
 import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
 import type {
 	IIterableStream,

@@ -27,6 +27,6 @@
 		"tests",
 	],
 	"include": [
-		"**/*.ts", "src/modules/Stream/classes/PipeStream.js",
+		"**/*.ts"
 	]
 }

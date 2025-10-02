@@ -1,4 +1,4 @@
-import { SingleChildNode } from "../../../classes/Node.js"
+import { SingleChildNode } from "../../../objects/Node.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import { WrapperStream } from "../../../samples/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"

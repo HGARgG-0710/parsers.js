@@ -127,5 +127,5 @@ export const TokenHash = HashClass(type)
  */
 export const TypeofHash = HashClass(typeOf)
 
-export * as PlainMap from "../modules/HashMap/classes/PlainMap.js"
-export * from "../modules/HashMap/classes/TerminalMap.js"
+export * as PlainMap from "../modules/HashMap/objects/PlainMap.js"
+export * from "../modules/HashMap/objects/TerminalMap.js"

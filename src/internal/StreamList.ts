@@ -1,5 +1,5 @@
 import { type } from "@hgargg-0710/one"
-import { ObjectPool } from "../classes.js"
+import { ObjectPool } from "../objects.js"
 import type {
 	IInitializer,
 	ILinkedStream,

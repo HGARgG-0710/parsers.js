@@ -1,7 +1,7 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../classes.js"
-import { ownerInitializer } from "../../../classes/Initializer.js"
-import { RetainedArray } from "../../../classes/RetainedArray.js"
+import { ObjectPool } from "../../../objects.js"
+import { ownerInitializer } from "../../../objects/Initializer.js"
+import { RetainedArray } from "../../../objects/RetainedArray.js"
 import type {
 	IInitializable,
 	IInitializer,

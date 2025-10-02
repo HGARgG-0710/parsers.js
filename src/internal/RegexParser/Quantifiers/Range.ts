@@ -1,16 +1,16 @@
 import { array } from "@hgargg-0710/one"
-import { SourceBuilder } from "../../../classes.js"
+import { SourceBuilder } from "../../../objects.js"
 import {
 	BaseNode,
 	ContentNode,
 	SingleChildNode,
 	TokenNode
-} from "../../../classes/Node.js"
+} from "../../../objects/Node.js"
 import {
 	LimitStream,
 	NodeStream,
 	SingletonStream
-} from "../../../classes/Stream.js"
+} from "../../../objects/Stream.js"
 import type {
 	ICellNode,
 	INode,

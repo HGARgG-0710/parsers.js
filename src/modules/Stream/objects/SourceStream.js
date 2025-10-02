@@ -1,4 +1,4 @@
-import { resourceInitializer } from "../../Initializer/classes/ResourceInitializer.js"
+import { resourceInitializer } from "../../Initializer/objects/ResourceInitializer.js"
 import { BasicStream } from "./BasicStream.js"
 
 export class SourceStream extends BasicStream {

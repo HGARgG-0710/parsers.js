@@ -1,5 +1,5 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../classes.js"
+import { ObjectPool } from "../../../objects.js"
 import type {
 	ICommonStream,
 	IHandler,

@@ -1,6 +1,6 @@
 import type { array } from "@hgargg-0710/one"
-import { TableHandler } from "../../classes.js"
-import { CurrentHash } from "../../classes/HashMap.js"
+import { TableHandler } from "../../objects.js"
+import { CurrentHash } from "../../objects/HashMap.js"
 import type {
 	ICommonStream,
 	INode,

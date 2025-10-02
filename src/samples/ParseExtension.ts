@@ -1,5 +1,5 @@
-import { DynamicParser } from "../classes.js"
-import { IdentityStream } from "../classes/Stream.js"
+import { DynamicParser } from "../objects.js"
+import { IdentityStream } from "../objects/Stream.js"
 import type { ICompositeStream, IInputStream } from "../interfaces.js"
 
 /**

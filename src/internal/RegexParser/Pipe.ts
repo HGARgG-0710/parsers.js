@@ -1,5 +1,5 @@
 import type { array } from "@hgargg-0710/one"
-import { TokenNode } from "../../classes/Node.js"
+import { TokenNode } from "../../objects/Node.js"
 import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
 import { TokenStream } from "../../samples/Stream.js"
 

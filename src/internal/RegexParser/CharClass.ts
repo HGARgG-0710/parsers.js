@@ -1,13 +1,13 @@
 import type { array } from "@hgargg-0710/one"
-import { TableHandler } from "../../classes.js"
-import { BasicHash } from "../../classes/HashMap.js"
+import { TableHandler } from "../../objects.js"
+import { BasicHash } from "../../objects/HashMap.js"
 import {
 	BaseNode,
 	ContentNode,
 	RecursiveNode,
 	TokenNode
-} from "../../classes/Node.js"
-import { NodeStream } from "../../classes/Stream.js"
+} from "../../objects/Node.js"
+import { NodeStream } from "../../objects/Stream.js"
 import type {
 	ICommonStream,
 	ICompositeStream,

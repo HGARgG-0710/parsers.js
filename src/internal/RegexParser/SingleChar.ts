@@ -1,4 +1,4 @@
-import { ContentNode } from "../../classes/Node.js"
+import { ContentNode } from "../../objects/Node.js"
 import { DefaultChooser, WrapperStream } from "../../samples/Stream.js"
 
 const SingleChar = ContentNode<string, string>("char")
