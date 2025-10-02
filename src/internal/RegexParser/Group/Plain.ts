@@ -1,9 +1,8 @@
-import { SingleChildNode } from "../../../objects/Node.js"
 import { WrapperStream } from "../../../samples/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
+import { Group } from "../Nodes.js"
 import { ParseRegexRecursively } from "../Parser.js"
 
-const Group = SingleChildNode("group")
 const GroupStream = WrapperStream(Group)
 
 export function HandlePlainGroup() {

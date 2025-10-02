@@ -1,8 +1,7 @@
-import { TokenNode } from "../../../objects/Node.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import { TokenStream } from "../../../samples/Stream.js"
+import { Newline } from "../Nodes.js"
 
-const Newline = TokenNode("newline")
 const NewlineStream = TokenStream(Newline)
 
 export function HandleNewline(input: IOwnedStream<string>) {

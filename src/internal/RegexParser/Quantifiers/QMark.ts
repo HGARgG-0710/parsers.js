@@ -1,15 +1,14 @@
 import type { array } from "@hgargg-0710/one"
-import { SingleChildNode, TokenNode } from "../../../objects/Node.js"
-import { SingletonStream } from "../../../objects/Stream.js"
 import type {
 	INode,
 	INodeType,
 	IOwnedStream,
 	IStreamChooser
 } from "../../../interfaces.js"
+import { SingleChildNode } from "../../../objects/Node.js"
+import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
-
-export const QMark = TokenNode("qmark")
+import { QMark } from "../Nodes.js"
 
 const NonQMark = SingleChildNode("non-greedy-qmark")
 const GreedyQMark = SingleChildNode("greedy-qmark")

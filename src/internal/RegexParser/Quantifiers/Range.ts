@@ -1,16 +1,4 @@
 import { array } from "@hgargg-0710/one"
-import { SourceBuilder } from "../../../objects.js"
-import {
-	BaseNode,
-	ContentNode,
-	SingleChildNode,
-	TokenNode
-} from "../../../objects/Node.js"
-import {
-	LimitStream,
-	NodeStream,
-	SingletonStream
-} from "../../../objects/Stream.js"
 import type {
 	ICellNode,
 	INode,
@@ -18,6 +6,12 @@ import type {
 	IStreamChooser,
 	ITypeCheckable
 } from "../../../interfaces.js"
+import { SourceBuilder } from "../../../objects.js"
+import {
+	LimitStream,
+	NodeStream,
+	SingletonStream
+} from "../../../objects/Stream.js"
 import { isDecimal } from "../../../samples/alphabet.js"
 import {
 	CollectionStream,
@@ -25,66 +19,17 @@ import {
 	isCurr
 } from "../../../samples/Stream.js"
 import { consumable, next } from "../../../utils/Stream.js"
-import { QMark } from "./QMark.js"
-
-const InfiniteRange = SingleChildNode<string>("infinite-range")
-
-const TrivialRange = SingleChildNode<string>("trivial-range")
-
-class LimitsRange extends BaseNode<string> {
-	get type() {
-		return "limits-range"
-	}
-
-	get lastChild() {
-		return 1
-	}
-
-	read(i: number): INode<string, any[]> {
-		return i === 0 ? this.from : this.to
-	}
-
-	constructor(
-		private readonly from: ICellNode<string>,
-		private readonly to: ICellNode<string>
-	) {
-		super()
-	}
-}
-
-class Range extends BaseNode<string> {
-	static readonly type = "range"
-	static is(x: INode<string>) {
-		return x.type === Range.type
-	}
-
-	private child: INode<string>
-
-	get type() {
-		return "range"
-	}
-
-	get lastChild(): number {
-		return 0
-	}
-
-	read(i: number): INode<string, any[]> {
-		return this.child
-	}
-
-	index(multind: number[]): INode<string, any[]> {
-		const [, ...subIndex] = multind
-		return this.child.index(subIndex)
-	}
-
-	add(item: INode<string>) {
-		this.child = item
-	}
-}
-
-const CommaNode = TokenNode("comma")
-
-const RangeBoundary = ContentNode("range-boundary")
+import {
+	CommaNode,
+	GreedyRange,
+	InfiniteRange,
+	LimitsRange,
+	NonGreedyRange,
+	QMark,
+	Range,
+	RangeBoundary,
+	TrivialRange
+} from "../Nodes.js"
 
 const CommaNodeStream = SingletonStream(() => new CommaNode())
 
@@ -165,35 +110,6 @@ function HandleDecimalOrComma(input: IOwnedStream<string>) {
 export function HandleRange(input: IOwnedStream<string>) {
 	input.next() // {
 	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
-}
-
-abstract class ByGreedinessRange extends BaseNode<string> {
-	get lastChild(): number {
-		return 1
-	}
-
-	read(i: number): INode<string, any[]> {
-		return i === 0 ? this.child : this.range
-	}
-
-	constructor(
-		private readonly child: INode<string>,
-		private readonly range: Range
-	) {
-		super()
-	}
-}
-
-class NonGreedyRange extends ByGreedinessRange {
-	get type() {
-		return "non-greedy-range"
-	}
-}
-
-class GreedyRange extends ByGreedinessRange {
-	get type() {
-		return "greedy-range"
-	}
 }
 
 function handleRangeAfterItem(input: IOwnedStream<INode<string>>) {

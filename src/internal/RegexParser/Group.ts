@@ -1,8 +1,7 @@
 import type { array } from "@hgargg-0710/one"
+import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
 import { ArrayBuilder, TableHandler } from "../../objects.js"
 import { CurrentHash } from "../../objects/HashMap.js"
-import { RecursiveNode } from "../../objects/Node.js"
-import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
 import {
 	CollectionStream,
 	EndBracketStream,
@@ -13,8 +12,7 @@ import { consumable } from "../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandleLookaheadGroup } from "./Group/Lookahead.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
-
-export const GroupBody = RecursiveNode("group-body")
+import { GroupBody } from "./Nodes.js"
 
 export const GroupLimitStream = EndBracketStream(isCurr(")"))
 

@@ -1,10 +1,10 @@
 import type { array } from "@hgargg-0710/one"
 import type { IOwnedStream, IStreamChooser } from "../../../interfaces.js"
 import { TokenStream } from "../../../samples/Stream.js"
-import { Plus } from "./Plus.js"
-import { QMark } from "./QMark.js"
+import { Plus } from "../Nodes.js"
+import { QMark } from "../Nodes.js"
 import { HandleRange } from "./Range.js"
-import { Star } from "./Star.js"
+import { Star } from "../Nodes.js"
 
 const PlusStream = TokenStream(Plus)
 const StarStream = TokenStream(Star)

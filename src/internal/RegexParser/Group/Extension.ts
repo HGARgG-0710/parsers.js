@@ -1,15 +1,14 @@
+import type { INode, IOwnedStream } from "../../../interfaces.js"
 import { TableHandler } from "../../../objects.js"
 import { BasicHash } from "../../../objects/HashMap.js"
-import { SingleChildNode } from "../../../objects/Node.js"
 import { SingletonStream } from "../../../objects/Stream.js"
-import type { INode, IOwnedStream } from "../../../interfaces.js"
 import { ObjectMap } from "../../../samples/TerminalMap.js"
 import { peek } from "../../../utils/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
+import { IgnoreCaseGroup } from "../Nodes.js"
 import { ParseRegexRecursively } from "../Parser.js"
 import { HandleSingleChar } from "../SingleChar.js"
 
-const IgnoreCaseGroup = SingleChildNode("ignore-case-group")
 const IgnoreCaseGroupStream = SingletonStream(
 	(input: IOwnedStream<INode<string>>) => new IgnoreCaseGroup(input.curr)
 )

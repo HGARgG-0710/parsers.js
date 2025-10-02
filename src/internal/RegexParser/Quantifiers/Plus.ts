@@ -1,16 +1,16 @@
 import type { array } from "@hgargg-0710/one"
-import { SingleChildNode, TokenNode } from "../../../objects/Node.js"
-import { SingletonStream } from "../../../objects/Stream.js"
 import type {
 	INode,
 	INodeType,
 	IOwnedStream,
 	IStreamChooser
 } from "../../../interfaces.js"
+import { SingleChildNode } from "../../../objects/Node.js"
+import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
-import { QMark } from "./QMark.js"
+import { Plus } from "../Nodes.js"
+import { QMark } from "../Nodes.js"
 
-export const Plus = TokenNode("plus")
 const NonGreedyPlus = SingleChildNode("non-greedy-plus")
 const GreedyPlus = SingleChildNode("greedy-plus")
 

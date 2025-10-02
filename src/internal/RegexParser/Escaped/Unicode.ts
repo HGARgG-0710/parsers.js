@@ -1,6 +1,5 @@
-import { ContentNode } from "../../../objects/Node.js"
-import { SourceBuilder } from "../../../objects/SourceBuilder.js"
 import type { IOwnedStream } from "../../../interfaces.js"
+import { SourceBuilder } from "../../../objects/SourceBuilder.js"
 import {
 	CollectionStream,
 	EndBracketStream,
@@ -8,8 +7,7 @@ import {
 } from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
 import { expect } from "../Errors.js"
-
-const UnicodeChar = ContentNode<string, string>("unicode-char")
+import { UnicodeChar } from "../Nodes.js"
 
 const expectOpBrack = expect("{")
 

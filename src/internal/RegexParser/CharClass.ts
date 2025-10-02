@@ -1,13 +1,4 @@
 import type { array } from "@hgargg-0710/one"
-import { TableHandler } from "../../objects.js"
-import { BasicHash } from "../../objects/HashMap.js"
-import {
-	BaseNode,
-	ContentNode,
-	RecursiveNode,
-	TokenNode
-} from "../../objects/Node.js"
-import { NodeStream } from "../../objects/Stream.js"
 import type {
 	ICommonStream,
 	ICompositeStream,
@@ -16,6 +7,9 @@ import type {
 	IPeekable,
 	IStreamChooser
 } from "../../interfaces.js"
+import { TableHandler } from "../../objects.js"
+import { BasicHash } from "../../objects/HashMap.js"
+import { NodeStream } from "../../objects/Stream.js"
 import {
 	EndBracketStream,
 	isCurr,
@@ -25,36 +19,8 @@ import {
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
 import { HandleEscaped } from "./Escaped.js"
+import { CharClass, ClassRange, ClassUnit, Hyphen } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
-
-const Hyphen = TokenNode("hyphen")
-
-const ClassUnit = ContentNode("char-class-unit")
-
-class ClassRange extends BaseNode<string> {
-	private rangeStart: INode<string>
-	private rangeEnd: INode<string>
-
-	get type() {
-		return "char-class-range"
-	}
-
-	get lastChild() {
-		return 1
-	}
-
-	read(i: number): INode<string, any[]> {
-		return i === 0 ? this.rangeStart : this.rangeEnd
-	}
-
-	constructor(from?: INode<string>, to?: INode<string>) {
-		super()
-		if (from) this.rangeStart = from
-		if (to) this.rangeEnd = to
-	}
-}
-
-const CharClass = RecursiveNode("char-class")
 
 const HyphenStream = TokenStream(Hyphen)
 

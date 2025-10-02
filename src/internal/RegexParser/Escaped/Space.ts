@@ -1,8 +1,7 @@
-import { TokenNode } from "../../../objects/Node.js"
 import type { IOwnedStream } from "../../../interfaces.js"
 import { TokenStream } from "../../../samples/Stream.js"
+import { Space } from "../Nodes.js"
 
-const Space = TokenNode("space")
 const SpaceStream = TokenStream(Space)
 
 export function HandleSpace(input: IOwnedStream<string>) {

@@ -29,7 +29,7 @@ import {
 import { Pairs } from "../../samples.js"
 import { WrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
-import { nodeMap } from "../../utils/IndexMap.js"
+import { NodeMap } from "../../utils/IndexMap.js"
 import { consume } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
@@ -52,7 +52,7 @@ export function LookaheadMap(
 ): IIndexMap<ITypeCheckable, IParserFunction, IParserFunction> {
 	const [keys, values] = Pairs.from(map)
 	return (
-		nodeMap(new IndexMap.PredicateMap(new LiquidMap([], [])))
+		NodeMap(new IndexMap.PredicateMap(new LiquidMap([], [])))
 			.extend((input) => input.peek(1))
 			.finalize() as IIndexMap<
 			ITypeCheckable,

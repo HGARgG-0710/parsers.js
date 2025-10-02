@@ -1,13 +1,11 @@
 import type { array } from "@hgargg-0710/one"
-import { SourceBuilder } from "../../objects.js"
-import { ContentNode } from "../../objects/Node.js"
 import type {
-	INode,
 	IOwnedStream,
 	IPeekable,
 	IPeekableStream,
 	IStreamChooser
 } from "../../interfaces.js"
+import { SourceBuilder } from "../../objects.js"
 import {
 	CollectionStream,
 	EndBracketStream,
@@ -15,11 +13,8 @@ import {
 	WrapperStream
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
+import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
-
-const TypeMatch = ContentNode<string, string>("type-match")
-const AsString = ContentNode<string, INode<string>>("as-string")
-const AsInt = ContentNode<string, INode<string>>("as-int")
 
 const AsIntStream = WrapperStream(AsInt)
 

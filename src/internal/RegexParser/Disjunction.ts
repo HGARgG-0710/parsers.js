@@ -1,10 +1,10 @@
-import { ArrayBuilder } from "../../objects.js"
-import { RecursiveNode } from "../../objects/Node.js"
-import { LimitStream, NodeStream } from "../../objects/Stream.js"
 import type { INode, IOwnedStream, IRawStreamArray } from "../../interfaces.js"
+import { ArrayBuilder } from "../../objects.js"
+import { LimitStream, NodeStream } from "../../objects/Stream.js"
 import { CollectionStream } from "../../samples/Stream.js"
 import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
-import { Pipe } from "./Pipe.js"
+import { Disjunct, Disjunction } from "./Nodes.js"
+import { Pipe } from "./Nodes.js"
 
 const isCurrPipe = (input: IOwnedStream<INode<string>>) => !Pipe.is(input.curr)
 
@@ -23,10 +23,7 @@ const withDisjunctBuilder = consumable<
 	ArrayBuilder<INode<string>>
 >(new ArrayBuilder<INode<string>>())
 
-const Disjunct = RecursiveNode("disjunct")
 const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
-
-const Disjunction = RecursiveNode("disjunction")
 
 class DisjunctionStream extends NodeStream<INode<string>> {
 	setResource(resource: IOwnedStream): void {

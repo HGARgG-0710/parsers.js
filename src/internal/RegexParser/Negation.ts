@@ -1,5 +1,4 @@
 import type { array } from "@hgargg-0710/one"
-import { SingleChildNode } from "../../objects/Node.js"
 import type {
 	IOwnedStream,
 	IPeekable,
@@ -7,8 +6,8 @@ import type {
 } from "../../interfaces.js"
 import { WrapperStream } from "../../samples/Stream.js"
 import { HandleCharClass } from "./CharClass.js"
+import { Negated } from "./Nodes.js"
 
-const Negated = SingleChildNode("negated")
 const NegationStream = WrapperStream(Negated)
 
 function handleNegation(input: IOwnedStream<string> & IPeekable<string>) {
