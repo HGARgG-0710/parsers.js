@@ -7,7 +7,7 @@ import type { IResource, IVisiblyOpen } from "../interfaces.js"
  * position of which can be tracked via the `readonly .pos: number`
  */
 export interface ICharacterSource extends IResource, IVisiblyOpen {
-	hasChars: () => boolean
-	nextChar: () => void
+	hasChars(): boolean
+	nextChar(): void
 	readonly decoded: string
 }

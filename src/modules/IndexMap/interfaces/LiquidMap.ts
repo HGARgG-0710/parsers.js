@@ -60,5 +60,5 @@ export interface ITableCarrier<K = any, V = any, Default = any>
 		ISizeable {
 	readonly keys: readonly K[]
 	readonly values: readonly V[]
-	read: (i: number) => V | Default
+	read(i: number): V | Default
 }

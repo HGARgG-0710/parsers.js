@@ -23,7 +23,7 @@ export interface IPreMap<K = any, V = any, Default = any>
 		ISizeable,
 		IDefaulting<Default>,
 		ICopiable {
-	get: (key: K) => V | Default
+	get(key: K): V | Default
 }
 
 /**

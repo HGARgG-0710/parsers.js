@@ -1,5 +1,5 @@
-import type { ObjectPool } from "../../../objects.js"
 import type { IFreeable, IInitializable, IStream } from "../../../interfaces.js"
+import type { ObjectPool } from "../../../objects.js"
 
 /**
  * This is an abstract class implementing `IStream<T>`, `IInitializable` and `IFreeable`.
@@ -21,8 +21,8 @@ export abstract class PoolableStream<T = any, Args extends any[] = any[]>
 
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
-	abstract next: () => void
-	abstract isCurrEnd: () => boolean
+	abstract next(): void
+	abstract isCurrEnd(): boolean
 
 	abstract init(...args: Partial<Args> | []): this
 

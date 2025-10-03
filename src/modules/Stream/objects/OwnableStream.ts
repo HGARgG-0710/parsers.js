@@ -15,8 +15,8 @@ export abstract class OwnableStream<T = any>
 {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
-	abstract next: () => void
-	abstract isCurrEnd: () => boolean
+	abstract next(): void
+	abstract isCurrEnd(): boolean
 
 	private _owner?: IOwningStream
 

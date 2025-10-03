@@ -1,8 +1,7 @@
 import type {
+	IClearable,
 	IGettable,
 	IPushable,
-	IReadable,
-	ISizeable,
 	IUnfreezable
 } from "../interfaces.js"
 
@@ -18,18 +17,5 @@ import type {
 export interface IAccumulator<T = any, Accumulated = T>
 	extends IPushable<T>,
 		IGettable<Accumulated>,
-		IUnfreezable {}
-
-/**
- * This interface is intended to serve as an
- * extension for the `IAccumulator<T, readonly T[]>`.
- * For objects fitting the `IPersistentAccumulator`,
- * it is (generally) intended for the access to it
- * via the `.read(i: number)` method to be persistent
- * (that is, to *not* change over time, unless explicitly
- * `.writ`-ten to).
- */
-export interface IPersistentAccumulator<T = any>
-	extends IAccumulator<T, readonly T[]>,
-		ISizeable,
-		IReadable<T> {}
+		IUnfreezable,
+		IClearable {}

@@ -1,10 +1,10 @@
-import type { ObjectPool } from "../objects.js"
 import type {
 	IFreeable,
 	IInitializable,
 	IPushable,
 	ISerializableObject
 } from "../interfaces.js"
+import type { ObjectPool } from "../objects.js"
 
 /**
  * This is a type for objects that are capable of
@@ -37,7 +37,7 @@ export interface IChildrenHaving<T = any> {
  * operation using their `.is: (x: any) => boolean` method.
  */
 export interface ITypeCheckable {
-	is: (x: any) => boolean
+	is(x: any): boolean
 }
 
 /**
@@ -52,10 +52,10 @@ export interface ITypeCheckable {
  */
 export interface IWalkable<T extends IWalkable<T> = any> {
 	readonly lastChild: number
-	read: (index: number) => T
-	index: (multindex: readonly number[]) => T
-	backtrack: (positions: number) => T | null
-	findUnwalkedChildren: (startIndex: readonly number[]) => number
+	read(index: number): T
+	index(multindex: readonly number[]): T
+	backtrack(positions: number): T | null
+	findUnwalkedChildren(startIndex: readonly number[]): number
 }
 
 /**

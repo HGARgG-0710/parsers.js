@@ -30,6 +30,6 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	protected get initializer(): IInitializer<[IOwnedStream, ...([] | Args)]>
 
 	init(resource?: IOwnedStream, ...args: [] | Partial<Args>): this
-	copy: () => this
+	copy(): this
 	free(): void
 }

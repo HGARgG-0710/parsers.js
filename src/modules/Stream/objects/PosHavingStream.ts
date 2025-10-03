@@ -6,7 +6,7 @@ import type { IPositionStream } from "../../../interfaces.js"
  * `.pos` manipulation.
  */
 export abstract class PosHavingStream<T = any> implements IPositionStream<T> {
-	abstract isCurrEnd: () => boolean
+	abstract isCurrEnd(): boolean
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
 

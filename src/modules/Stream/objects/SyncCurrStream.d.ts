@@ -11,8 +11,8 @@ export declare abstract class SyncCurrStream<T = any>
 	abstract readonly isEnd: boolean
 	abstract readonly resource?: IOwnedStream
 
-	abstract next: () => void
-	abstract isCurrEnd: () => boolean
+	abstract next(): void
+	abstract isCurrEnd(): boolean
 	abstract setResource(newResource: IOwnedStream): void
 
 	protected syncCurr(): void

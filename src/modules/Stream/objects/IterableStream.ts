@@ -12,8 +12,8 @@ export abstract class IterableStream<T = any>
 {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
-	abstract next: () => void
-	abstract isCurrEnd: () => boolean;
+	abstract next(): void
+	abstract isCurrEnd(): boolean
 
 	*[Symbol.iterator]() {
 		while (!this.isEnd) {

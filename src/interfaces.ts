@@ -1,5 +1,4 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPersistentAccumulator } from "./interfaces/Accumulator.js"
 import type { IHash } from "./interfaces/HashMap.js"
 import type { ObjectPool } from "./objects.js"
 
@@ -8,7 +7,7 @@ import type { ObjectPool } from "./objects.js"
  * are copiable.
  */
 export interface ICopiable {
-	copy: () => this
+	copy(): this
 }
 
 /**
@@ -16,7 +15,7 @@ export interface ICopiable {
  * Has `has(x: any): boolean` method.
  */
 export interface IHaving<T = any> {
-	has: (x: T) => boolean
+	has(x: T): boolean
 }
 
 /**
@@ -24,7 +23,7 @@ export interface IHaving<T = any> {
  * Has `test(x: any): boolean` method.
  */
 export interface ITestable<T = any> {
-	test: (x: T) => boolean
+	test(x: T): boolean
 }
 
 /**
@@ -54,7 +53,7 @@ export interface IDefaulting<T = any> {
  * method is reponsible for this.
  */
 export interface ISettable<K = any, V = any> {
-	set: (key: K, value: V) => any
+	set(key: K, value: V): any
 }
 
 /**
@@ -63,7 +62,7 @@ export interface ISettable<K = any, V = any> {
  * method is responsible for this.
  */
 export interface IDeletable<K = any> {
-	delete: (key: K) => this
+	delete(key: K): this
 }
 
 /**
@@ -74,7 +73,7 @@ export interface IDeletable<K = any> {
  * for this.
  */
 export interface IRekeyable<K = any> {
-	rekey: (fromKey: K, toKey: K) => this
+	rekey(fromKey: K, toKey: K): this
 }
 
 /**
@@ -107,7 +106,7 @@ export interface IStateHaving<T extends Summat = Summat> {
  * presumably for some form of encapsulation.
  */
 export interface IGettable<T = any> {
-	get: () => T
+	get(): T
 }
 
 /**
@@ -116,7 +115,7 @@ export interface IGettable<T = any> {
  * is responsible for this.
  */
 export interface IInitializable<Args extends any[] = any[]> {
-	init: (...x: [] | Partial<Args>) => this
+	init(...x: [] | Partial<Args>): this
 }
 
 /**
@@ -125,7 +124,7 @@ export interface IInitializable<Args extends any[] = any[]> {
  * responsible for this.
  */
 export interface IReversible {
-	reverse: () => this
+	reverse(): this
 }
 
 /**
@@ -135,7 +134,7 @@ export interface IReversible {
  * for table-objects of the library.
  */
 export interface IIndexable<I = any, V = any, Other extends any[] = any[]> {
-	index: (x: I, ...y: Other) => V
+	index(x: I, ...y: Other): V
 }
 
 /**
@@ -143,7 +142,9 @@ export interface IIndexable<I = any, V = any, Other extends any[] = any[]> {
  * objects that have an explicit (optional) `toJSON`
  * method.
  */
-export type ISerializableObject = { toJSON?: () => any }
+export interface ISerializableObject {
+	toJSON?(): any
+}
 
 /**
  * This is a nominal type to represent
@@ -168,7 +169,7 @@ export type ISerializable =
  */
 export interface IFreezable {
 	readonly isFrozen: boolean
-	freeze: () => this
+	freeze(): this
 }
 
 /**
@@ -176,7 +177,7 @@ export interface IFreezable {
  * can be "unfrozen", and have a method `unfreeze(): this`
  */
 export interface IUnfreezable extends IFreezable {
-	unfreeze: () => this
+	unfreeze(): this
 }
 
 /**
@@ -199,21 +200,13 @@ export interface IReadable<T = any> {
 export type IParseable<T = any> = IReadable<T> & ISizeable & ICopiable
 
 /**
- * This is an interface for entities that have their contents
- * saved to some `readonly buffer: IPersistentAccumulator<T>`.
- */
-export interface IBufferized<T = any> {
-	readonly buffer: IPersistentAccumulator<T>
-}
-
-/**
  * This is an interface representing items with
  * the ability for write-access to the very end
  * via pushing new elements of type `T`. Achieved
  * via the method `push(...items: T[]): this`.
  */
 export interface IPushable<T = any> {
-	push: (...items: T[]) => this
+	push(...items: T[]): this
 }
 
 /**
@@ -222,7 +215,7 @@ export interface IPushable<T = any> {
  * `write(i: number, value: T): this`.
  */
 export interface IWritable<T = any> {
-	write: (i: number, value: T) => this
+	write(i: number, value: T): this
 }
 
 /**
@@ -280,7 +273,7 @@ export type IFiniteWritable<T = any> = ISizeable & IWritable<T>
  * the `concat(x: In): Out` method.
  */
 export interface IConcattable<In = any, Out = any> {
-	concat: (x: In) => Out
+	concat(x: In): Out
 }
 
 /**

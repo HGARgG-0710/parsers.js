@@ -16,7 +16,7 @@ import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPositio
  * new current element of the sequence.
  */
 export interface IFinishable<T = any> {
-	finish: () => T
+	finish(): T
 }
 
 /**
@@ -27,7 +27,7 @@ export interface IFinishable<T = any> {
  * interest has not yet been reached.
  */
 export interface INavigable<T = any, PosType = IStreamPosition<T>> {
-	navigate: (position: PosType) => T
+	navigate(position: PosType): T
 }
 
 /**
@@ -36,7 +36,7 @@ export interface INavigable<T = any, PosType = IStreamPosition<T>> {
  * to match patterns inside `IStream`s.
  */
 export interface IPeekable<T = any> {
-	peek: (n: number) => T
+	peek(n: number): T
 }
 
 /**
@@ -85,8 +85,8 @@ export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
 export interface IStream<T = any> {
 	readonly curr: T
 	readonly isEnd: boolean
-	isCurrEnd: () => boolean
-	next: () => void
+	isCurrEnd(): boolean
+	next(): void
 }
 
 /**

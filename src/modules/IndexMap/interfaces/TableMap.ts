@@ -27,14 +27,14 @@ export interface ITableMap<K = any, V = any, Default = any>
 		ICopiable,
 		Iterable<[K, V]>,
 		ITableCarrierConvertible<K, V, Default> {
-	unique: () => number[]
-	read: (index: number) => Default | [K, V]
-	swap: (i: number, j: number) => this
-	add: (index: number, ...pairs: array.Pairs<K, V>) => [K[], V[]]
-	delete: (index: number, count?: number) => this
-	replace: (index: number, pair: [K, V]) => this
-	set: (key: K, value: V) => number
-	keyIndex: (key: K) => number
-	by: (key: K) => V | Default
-	count: (key: K) => number
+	unique(): number[]
+	read(index: number): Default | [K, V]
+	swap(i: number, j: number): this
+	add(index: number, ...pairs: array.Pairs<K, V>): [K[], V[]]
+	delete(index: number, count?: number): this
+	replace(index: number, pair: [K, V]): this
+	set(key: K, value: V): number
+	keyIndex(key: K): number
+	by(key: K): V | Default
+	count(key: K): number
 }

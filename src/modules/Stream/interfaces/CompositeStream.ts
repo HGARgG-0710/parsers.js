@@ -68,7 +68,7 @@ export type IStreamArray = IArray<IRawStream>
  * ever need to for whatever reason.
  */
 export interface ICompositeStream<T = any> extends IControlStream<T> {
-	renewResource: () => boolean
+	renewResource(): boolean
 	renewStream(stream: ILinkedStream): boolean
 	readonly streams: IStreamArray
 }
