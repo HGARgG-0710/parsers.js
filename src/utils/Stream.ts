@@ -1,9 +1,23 @@
-import { object, type } from "@hgargg-0710/one"
-import type { IFiniteWritable, IPushable, IRefillable } from "../interfaces.js"
+import { boolean, object, type } from "@hgargg-0710/one"
 import type {
+	IFiniteWritable,
+	ILineIndex,
+	IPosed,
+	IPushable,
+	IRefillable,
+	IStateHaving,
+	IStateSettable
+} from "../interfaces.js"
+import type {
+	IFinishable,
+	IIndexCarrying,
+	IIndexStream,
 	IIterableStream,
+	INavigable,
+	IOwnedStream,
 	IPeekableStream,
 	IRenewerStream,
+	IResourcefulStream,
 	IStream,
 	IStreamGenerator
 } from "../interfaces/Stream.js"
@@ -11,15 +25,17 @@ import type {
 	IStreamTransform,
 	ITableHandler
 } from "../interfaces/StreamHandler.js"
-import { isFinishable, isNavigable } from "../is/Stream.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
+import { ownerDigger, resourceDigger } from "../objects.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
 
+const { structCheck } = object
 const { prop } = object
-const { isNumber } = type
+const { isNumber, isFunction } = type
+const { T } = boolean
 
 /**
  * Given an `IStream<T>`, stores and returns its `.curr`, while calls `.next()` on it.
@@ -296,5 +312,87 @@ export function consumeSingletonRevivables<
  * Given an `IStream` returns its `.curr` property value
  */
 export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
+
+/**
+ * This linearly searches for an `IIndexStream` among the linked
+ * list of `.owner`-s of the given `IOwnedStream`. Upon failure
+ * returns `null` - no `IIndexCarrying` could be found.
+ */
+export function locateIndexCarryingUpwards(
+	stream: IOwnedStream
+): IIndexStream | null {
+	return ownerDigger.dig(stream, negate(hasLineIndex)) || null
+}
+
+/**
+ * This linearly searches for an `IIndexStream` among the linked
+ * list of `.resources`-s of the given `IResourcefulStream`. Upon failure
+ * returns `null` - no `IIndexCarrying` could be found.
+ */
+export function locateIndexCarryingDownwards(
+	stream: IResourcefulStream
+): IIndexStream | null {
+	return resourceDigger.dig(stream, negate(hasLineIndex)) || null
+}
+
+/**
+ * This linearly searches for an `IPosed<number> & IOwnedStream`
+ * among the linked list of `.owner`s of the given `IOwnedStream`.
+ * Upon failure returns `null` - no `IPosed<number>` could be found.
+ */
+export function locatePosCarryingUpwards(
+	stream: IOwnedStream
+): (IPosed<number> & IOwnedStream) | null {
+	return resourceDigger.dig(stream, negate(hasPos)) || null
+}
+
+/**
+ * Returns whether a given item is an `IPosed<number>`.
+ */
+export const hasPos = structCheck<IPosed<number>>({ pos: isNumber })
+
+/**
+ * This is a predicate verifying (at runtime) bare conformance to the
+ * `ILineIndex` interface for the given `x?: any`
+ */
+export const isLineIndex = structCheck<ILineIndex>({
+	char: isNumber,
+	line: isNumber,
+	nextChar: isFunction,
+	nextLine: isFunction
+})
+
+/**
+ * This is a predicate for verifying that the given `x?: any`
+ * is an `IIndexCarrying`.
+ */
+export const hasLineIndex = structCheck<IIndexCarrying>({
+	lineIndex: isLineIndex
+})
+
+/**
+ * Returns whether the given `x` is a non-`null` object that has a `.finish` property,
+ * which is a function.
+ */
+export const isFinishable = structCheck<IFinishable>({
+	finish: isFunction
+}) as <T = any>(x: any) => x is IFinishable<T>
+
+/**
+ * Returns whether the given `x` is a non-`null` object that has a `.navigate` property,
+ * which is a function.
+ */
+export const isNavigable = structCheck<INavigable>({
+	navigate: isFunction
+}) as <T = any>(x: any) => x is INavigable<T, any>
+
+/**
+ * Returns whether the given input has `.state` and `.setState`
+ * properties, the latter of which is a function
+ */
+export const isStateful = structCheck<IStateHaving & IStateSettable>({
+	state: T,
+	setState: isFunction
+})
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

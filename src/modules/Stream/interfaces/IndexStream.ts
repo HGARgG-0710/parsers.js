@@ -14,7 +14,7 @@ export type IIndexStream<T = any> = ILinkedStream<T> & IIndexCarrying
  * Type for representing entitites that carry
  * a `readonly .lineIndex: ILineIndex` property.
  */
-export type IIndexCarrying = {
+export interface IIndexCarrying {
 	readonly lineIndex: ILineIndex
 }
 

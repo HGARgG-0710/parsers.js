@@ -57,3 +57,26 @@ export class InvalidFileReadPositionError extends ConstructorError {
 		)
 	}
 }
+
+/**
+ * This is the error thrown by `LineIndexErrorPosition` upon
+ * failing to successfully complete the `.locate()` method.
+ */
+export class MissingObjectError extends ConstructorError {
+	constructor(type: string) {
+		super(`Failure obtaining the object of type \`${type}\``)
+	}
+}
+
+/**
+ * This is an error for representing missing method implementations
+ * on a class that requires it.
+ */
+export class MissingImplementationError extends ConstructorError {
+	constructor(methodName: string, className: string) {
+		super(
+			`Missing implementation of method \`${methodName}\`` +
+				` on class \`${className}\``
+		)
+	}
+}

@@ -11,4 +11,5 @@ export interface ILineIndex {
 	nextChar(): void
 	nextLine(): void
 	renew(): void
+	toNumber?(): number
 }

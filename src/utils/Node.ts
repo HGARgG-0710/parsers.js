@@ -1,17 +1,22 @@
-import { boolean, functional, object } from "@hgargg-0710/one"
+import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
 import type {
 	IIterableStream,
 	IParserFunction,
 	ITableHandler
 } from "../interfaces.js"
-import type { ITyped, IWalkable } from "../interfaces/Node.js"
-import { isTyped } from "../is/Node.js"
+import type {
+	IChildrenHaving,
+	ITyped,
+	IValued,
+	IWalkable
+} from "../interfaces/Node.js"
 import type { NodeSystem } from "../objects/NodeSystem.js"
 import { isGoodIndex } from "../utils.js"
 
 const { trivialCompose } = functional
-const { eqcurry } = boolean
-const { prop } = object
+const { eqcurry, T } = boolean
+const { prop, structCheck } = object
+const { isArray } = _type
 
 /**
  * Returns whether the given `x` has at least 1 child
@@ -109,3 +114,27 @@ export function treeMap<T extends IWalkable<T> = IWalkable, Out = any>(
  * Returns the value of the `x.type` for the given `ITyped`
  */
 export const type = prop("type") as <T = any>(x: ITyped<T>) => T
+
+/**
+ * Verifies that given input is a non-`null` object with a `.type` property on it.
+ */
+export const isTyped = structCheck<ITyped>(["type"])
+
+/**
+ * Verifies that given input is a non-`null` object with `.type` and `.value` properties on it.
+ */
+export const isContentNodeSerializable = structCheck<ITyped & IValued>([
+	"type",
+	"value"
+])
+
+/**
+ * Verifies that given input is a non-`null` object with `.type` and `.children` property,
+ * the latter of which is an array.
+ */
+export const isRecursiveNodeSerializable = structCheck<
+	ITyped & IChildrenHaving
+>({
+	type: T,
+	children: isArray
+})

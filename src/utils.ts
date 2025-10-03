@@ -1,6 +1,9 @@
-import { is } from "../main.js"
+import { object, type } from "@hgargg-0710/one"
 import { BadIndex } from "./constants.js"
-import type { IResource } from "./interfaces.js"
+import type { ICopiable, IFreeable, IResource } from "./interfaces.js"
+
+const { isFunction } = type
+const { structCheck } = object
 
 /**
  * Returns whether or not the given `number` is greater than `BadIndex`
@@ -21,12 +24,22 @@ export function withResource<T = any>(
 }
 
 /**
+ * Returns whether the given item is `ICopiable`.
+ */
+export const isCopiable = structCheck<ICopiable>({ copy: isFunction })
+
+/**
  * Carries out a conditional call to `x.copy()` if it
  * can be made.
  */
 export function tryCopy<T = any>(x: T) {
-	return is.Copiable(x) ? x.copy() : x
+	return isCopiable(x) ? x.copy() : x
 }
+
+/**
+ * Returns whether a given item is `IFreeable`.
+ */
+export const isFreeable = structCheck<IFreeable>({ free: isFunction })
 
 export * as IndexMap from "./utils/IndexMap.js"
 export * as Node from "./utils/Node.js"
