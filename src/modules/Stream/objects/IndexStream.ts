@@ -1,8 +1,7 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
-import { LineIndex } from "../../../objects/Position.js"
 import type { ILineIndex, IPoolKeeping } from "../../../interfaces.js"
 import type { ICommonStream, IOwnedStream } from "../../../interfaces/Stream.js"
+import { ObjectPool } from "../../../objects.js"
 import type {
 	IIndexStream,
 	INewlinePredicate
@@ -10,7 +9,8 @@ import type {
 import { IdentityStream } from "./IdentityStream.js"
 
 function BuildIndexStream<T = any>(
-	isNewline: INewlinePredicate<T>
+	isNewline: INewlinePredicate<T>,
+	lineIndexMaker: () => ILineIndex
 ): IPoolKeeping<IIndexStream<T> & ICommonStream<T>> {
 	return class IndexStream
 		extends IdentityStream<T, []>
@@ -18,6 +18,7 @@ function BuildIndexStream<T = any>(
 	{
 		static readonly pool = Pools.Stream.add(new ObjectPool(IndexStream))
 
+		public readonly lineIndex: ILineIndex
 		private isNewline: INewlinePredicate<T>
 
 		private lineIndexTransition() {
@@ -29,17 +30,20 @@ function BuildIndexStream<T = any>(
 			return IndexStream.pool
 		}
 
+		setResource(resource: IOwnedStream): void {
+			super.setResource(resource)
+			this.lineIndex.renew()
+		}
+
 		next() {
 			super.next()
 			this.lineIndexTransition()
 		}
 
-		constructor(
-			resource?: IOwnedStream<T>,
-			public readonly lineIndex: ILineIndex = new LineIndex()
-		) {
+		constructor(resource?: IOwnedStream<T>) {
 			super()
 			this.isNewline = isNewline.bind(this)
+			this.lineIndex = lineIndexMaker()
 			this.init(resource)
 		}
 	}
@@ -60,8 +64,11 @@ function BuildIndexStream<T = any>(
  * The Stream is useful for error diagnostics in `IStream`-based input validators,
  * and/or robust parsers.
  */
-export function IndexStream<T = any>(isNewline: INewlinePredicate<T>) {
-	const indexStream = BuildIndexStream<T>(isNewline)
+export function IndexStream<T = any>(
+	isNewline: INewlinePredicate<T>,
+	lineIndexMaker: () => ILineIndex
+) {
+	const indexStream = BuildIndexStream<T>(isNewline, lineIndexMaker)
 
 	function I(resource?: IOwnedStream<T>): IIndexStream<T> & ICommonStream<T> {
 		return indexStream.pool.create(resource)

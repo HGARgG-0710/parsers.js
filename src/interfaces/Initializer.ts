@@ -11,7 +11,7 @@ export interface IInitializer<Args extends any[] = any[]> {
  * An object with a `.setResource` public setter method.
  */
 export interface IResourceSettable<T = unknown> {
-	setResource(newResource: T): void
+	setResource(resource: T): void
 }
 
 /**

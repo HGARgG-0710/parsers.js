@@ -24,8 +24,8 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 
 	private _resource?: IOwnedStream
 
-	protected set resource(newResource: IOwnedStream | undefined) {
-		this._resource = newResource
+	protected set resource(resource: IOwnedStream | undefined) {
+		this._resource = resource
 	}
 
 	protected get initializer() {
@@ -36,8 +36,8 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 		return this._resource
 	}
 
-	setResource(newResource: IOwnedStream) {
-		this.resource = newResource
+	setResource(resource: IOwnedStream) {
+		this.resource = resource
 	}
 
 	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {

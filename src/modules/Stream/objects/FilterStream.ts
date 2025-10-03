@@ -42,10 +42,10 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 					this.hasLookahead = this.resource!.isEnd
 				},
 
-				setResource(newResource: IOwnedStream): void {
+				setResource(resource: IOwnedStream): void {
 					this.super.DyssyncOwningStream.setResource.call(
 						this,
-						newResource
+						resource
 					)
 					this.prod()
 					this.updateCurr()

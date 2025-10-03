@@ -1,5 +1,5 @@
-import type { IInitializer } from "../../../interfaces.ts"
-import type { BasicStream } from "./BasicStream.js"
+import { resourceInitializer } from "../../Initializer/objects/ResourceInitializer.js"
+import { BasicStream } from "./BasicStream.js"
 
 /**
  * This is an abstract class extending `BasicStream<T, [SourceType]>`.
@@ -16,17 +16,30 @@ import type { BasicStream } from "./BasicStream.js"
  * `IInputStream`-classes, representing access to resources,
  * such as files, or open network connections.
  */
-export declare abstract class SourceStream<
+export abstract class SourceStream<
 	T = any,
 	SourceType = any
 > extends BasicStream<T, [SourceType]> {
-	protected ["constructor"]: new (source?: SourceType) => this
 	protected abstract currGetter(): T
 	protected source?: SourceType
-	protected updateCurr(): void
-	protected get initializer(): IInitializer
-	protected initGetter(): T
-	protected baseNextIter(curr?: T): T
-	setResource(source?: SourceType): void
-	constructor(source?: SourceType)
+
+	protected updateCurr() {
+		this.update(this.currGetter())
+	}
+
+	protected baseNextIter() {
+		return this.currGetter()
+	}
+
+	protected get initializer() {
+		return resourceInitializer
+	}
+
+	protected initGetter() {
+		return this.currGetter()
+	}
+
+	setResource(source: SourceType) {
+		this.source = source
+	}
 }

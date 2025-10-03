@@ -80,8 +80,8 @@ export abstract class BasicErrorStream<
 		this.lineIndex = this.posGetter()
 	}
 
-	setResource(newResource: IOwnedStream): void {
-		super.setResource(newResource)
+	setResource(resource: IOwnedStream): void {
+		super.setResource(resource)
 		this.getInput()
 	}
 }

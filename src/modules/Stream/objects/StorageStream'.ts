@@ -33,8 +33,8 @@ class _StorageStream<T = any, Stored = any>
 		return this._currStored
 	}
 
-	setResource(newResource: IOwnedStream): void {
-		super.setResource(newResource)
+	setResource(resource: IOwnedStream): void {
+		super.setResource(resource)
 		this.updateStored()
 	}
 

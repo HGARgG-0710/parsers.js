@@ -27,5 +27,5 @@ export declare abstract class BasicResourceStream<
 
 	protected abstract baseNextIter(curr?: T): T
 	protected syncCurr(): void
-	setResource(newResource: IOwnedStream): void
+	setResource(resource: IOwnedStream): void
 }

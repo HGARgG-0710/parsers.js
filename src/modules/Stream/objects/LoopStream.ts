@@ -23,6 +23,6 @@ export class LoopStream<T = any> extends ArrayStream<T, T> {
 	}
 
 	isCurrEnd(): boolean {
-		return false
+		return false // infinite stream - relies on another to finish
 	}
 }

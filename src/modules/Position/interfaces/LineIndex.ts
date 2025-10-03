@@ -10,4 +10,5 @@ export interface ILineIndex {
 	readonly line: number
 	nextChar(): void
 	nextLine(): void
+	renew(): void
 }

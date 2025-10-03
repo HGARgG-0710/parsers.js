@@ -105,8 +105,8 @@ function BuildLimitStream<T = any>(
 					return limitStreamInitializer
 				},
 
-				set resource(newResource: ILimitableStream<T>) {
-					super.resource = newResource
+				set resource(resource: ILimitableStream<T>) {
+					super.resource = resource
 				},
 
 				get resource() {

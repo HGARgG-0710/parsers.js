@@ -13,7 +13,7 @@ export declare abstract class SyncCurrStream<T = any>
 
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract setResource(newResource: IOwnedStream): void
+	abstract setResource(resource: IOwnedStream): void
 
 	protected syncCurr(): void
 }

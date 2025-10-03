@@ -11,6 +11,6 @@ export declare abstract class SyncStream<T> implements IResourcefulStream<T> {
 	readonly isEnd: boolean
 	readonly curr: T
 
-	abstract setResource(newResource: IOwnedStream): void
+	abstract setResource(resource: IOwnedStream): void
 	abstract readonly resource?: IOwnedStream
 }

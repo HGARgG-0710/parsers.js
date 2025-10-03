@@ -24,6 +24,10 @@ export class LineIndex implements ILineIndex {
 		this._line = newLine
 	}
 
+	private renewChar() {
+		this.char = 0
+	}
+
 	get line() {
 		return this._line
 	}
@@ -38,7 +42,12 @@ export class LineIndex implements ILineIndex {
 
 	nextLine() {
 		++this.line
-		this.char = 0
+		this.renewChar()
+	}
+
+	renew(): void {
+		this.line = 0
+		this.renewChar()
 	}
 
 	copy() {

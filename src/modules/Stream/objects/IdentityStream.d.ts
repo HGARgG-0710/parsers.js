@@ -21,7 +21,7 @@ import type { PipeStream } from "./PipeStream.js"
  * elements from the underlying `IStream` instead
  * of transforming them);
  */
-export declare class IdentityStream<T = any, Args extends any[] = any[]>
+export declare class IdentityStream<T = any, Args extends any[] = []>
 	extends PipeStream<T, Args>
 	implements ICommonStream<T>
 {
