@@ -64,17 +64,18 @@ function BuildIndexStream<T = any>(
  * The Stream is useful for error diagnostics in `IStream`-based input validators,
  * and/or robust parsers.
  */
-export function IndexStream<T = any>(
-	isNewline: INewlinePredicate<T>,
-	lineIndexMaker: () => ILineIndex
-) {
-	const indexStream = BuildIndexStream<T>(isNewline, lineIndexMaker)
+export function IndexStream<T = any>(isNewline: INewlinePredicate<T>) {
+	return function (lineIndexMaker: () => ILineIndex) {
+		const indexStream = BuildIndexStream<T>(isNewline, lineIndexMaker)
 
-	function I(resource?: IOwnedStream<T>): IIndexStream<T> & ICommonStream<T> {
-		return indexStream.pool.create(resource)
+		function I(
+			resource?: IOwnedStream<T>
+		): IIndexStream<T> & ICommonStream<T> {
+			return indexStream.pool.create(resource)
+		}
+
+		I.pool = indexStream.pool
+
+		return I
 	}
-
-	I.pool = indexStream.pool
-
-	return I
 }

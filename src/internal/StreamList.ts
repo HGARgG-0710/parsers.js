@@ -71,6 +71,12 @@ export class StreamList extends RecursiveList.Poolable<
 }
 
 export namespace StreamList {
+	/**
+	 * This is a concrete child class of `RecursiveList.RootList`, 
+	 * implemented to be compatible with `StreamList` and `StreamRenewer`, 
+	 * employed for the specific usecase of `RecursiveList` involving 
+	 * `IRawStream`s. 
+	*/
 	export class StreamRootList extends RecursiveList.RootList<
 		ILinkedStream,
 		IStreamChooser,

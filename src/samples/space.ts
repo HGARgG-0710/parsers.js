@@ -1,9 +1,9 @@
+import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import {
 	DyssyncOwningStream,
 	FilterStream,
 	IndexStream
 } from "../objects/Stream.js"
-import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { isSpace } from "./alphabet.js"
 import { isCurr } from "./Stream.js"
 
