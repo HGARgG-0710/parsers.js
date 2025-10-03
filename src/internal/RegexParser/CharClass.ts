@@ -9,7 +9,7 @@ import type {
 } from "../../interfaces.js"
 import { TableHandler } from "../../objects.js"
 import { BasicHash } from "../../objects/HashMap.js"
-import { NodeStream } from "../../objects/Stream.js"
+import { SingleNodeStream } from "../../objects/Stream.js"
 import {
 	EndBracketStream,
 	isCurr,
@@ -28,7 +28,7 @@ const CharClassLimitStream = EndBracketStream(isCurr("]"))
 
 const ClassUnitStream = WrapperStream(ClassUnit)
 
-class ClassRangeStream extends NodeStream<INode<string>> {
+class ClassRangeStream extends SingleNodeStream<INode<string>> {
 	private classRange: ClassRange
 
 	private updateCurr() {
@@ -39,14 +39,6 @@ class ClassRangeStream extends NodeStream<INode<string>> {
 		const unit = this.resource!.curr
 		this.resource!.next()
 		return unit
-	}
-
-	isCurrEnd(): boolean {
-		return true
-	}
-
-	next() {
-		this.endStream()
 	}
 
 	// ! DOESN'T CHECK FOR POSSIBILITY OF A MISSING SECOND ITEM!!! [like in 'a-' instead of 'a-z']
@@ -60,19 +52,10 @@ class ClassRangeStream extends NodeStream<INode<string>> {
 	}
 }
 
-class CharClassStream extends NodeStream<INode<string>> {
+class CharClassStream extends SingleNodeStream<INode<string>> {
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
 		this.curr = consumeSingletonRevivables(this, new CharClass([]))
-	}
-
-	isCurrEnd(): boolean {
-		return true
-	}
-
-	next(): void {
-		// marking this stream as finished
-		this.endStream()
 	}
 }
 

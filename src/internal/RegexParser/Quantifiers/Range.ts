@@ -9,7 +9,7 @@ import type {
 import { SourceBuilder } from "../../../objects.js"
 import {
 	LimitStream,
-	NodeStream,
+	SingleNodeStream,
 	SingletonStream
 } from "../../../objects/Stream.js"
 import { isDecimal } from "../../../samples/alphabet.js"
@@ -44,7 +44,7 @@ const RangeBoundaryStream = CollectionStream(
 	consumable(new SourceBuilder())
 )
 
-class RangeStream extends NodeStream<Range> {
+class RangeStream extends SingleNodeStream<Range> {
 	private finalRange: Range
 	private firstItem: ICellNode<string>
 	private lastItem: ICellNode<string>
@@ -85,14 +85,6 @@ class RangeStream extends NodeStream<Range> {
 		if (this.tryTrivial()) this.asTrivial()
 		else if (this.tryLimits()) this.asLimits()
 		else this.asInfinite()
-	}
-
-	isCurrEnd(): boolean {
-		return true
-	}
-
-	next() {
-		this.endStream()
 	}
 }
 
