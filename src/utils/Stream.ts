@@ -318,9 +318,9 @@ export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
  * list of `.owner`-s of the given `IOwnedStream`. Upon failure
  * returns `null` - no `IIndexCarrying` could be found.
  */
-export function locateIndexCarryingUpwards(
-	stream: IOwnedStream
-): IIndexStream | null {
+export function locateIndexCarryingUpwards<
+	T extends IOwnedStream = IOwnedStream
+>(stream: T): IIndexStream | null {
 	return ownerDigger.dig(stream, negate(hasLineIndex)) || null
 }
 
@@ -329,9 +329,9 @@ export function locateIndexCarryingUpwards(
  * list of `.resources`-s of the given `IResourcefulStream`. Upon failure
  * returns `null` - no `IIndexCarrying` could be found.
  */
-export function locateIndexCarryingDownwards(
-	stream: IResourcefulStream
-): IIndexStream | null {
+export function locateIndexCarryingDownwards<
+	T extends IResourcefulStream = IResourcefulStream
+>(stream: T): IIndexStream | null {
 	return resourceDigger.dig(stream, negate(hasLineIndex)) || null
 }
 
@@ -340,9 +340,20 @@ export function locateIndexCarryingDownwards(
  * among the linked list of `.owner`s of the given `IOwnedStream`.
  * Upon failure returns `null` - no `IPosed<number>` could be found.
  */
-export function locatePosCarryingUpwards(
-	stream: IOwnedStream
+export function locatePosCarryingUpwards<T extends IOwnedStream = IOwnedStream>(
+	stream: T
 ): (IPosed<number> & IOwnedStream) | null {
+	return ownerDigger.dig(stream, negate(hasPos)) || null
+}
+
+/**
+ * This linearly searches for an `IPosed<number> & IResourcefulStream`
+ * among the linked list of `.resource`s of the given `IResourceStream`.
+ * Upon failure returns `null` - no `IPosed<number>` could be found.
+ */
+export function locatePosCarryingDownwards<
+	T extends IResourcefulStream = IResourcefulStream
+>(stream: T): IResourcefulStream & IPosed<number> {
 	return resourceDigger.dig(stream, negate(hasPos)) || null
 }
 

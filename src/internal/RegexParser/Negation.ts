@@ -4,11 +4,11 @@ import type {
 	IPeekable,
 	IStreamChooser
 } from "../../interfaces.js"
-import { WrapperStream } from "../../samples/Stream.js"
+import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { HandleCharClass } from "./CharClass.js"
 import { Negated } from "./Nodes.js"
 
-const NegationStream = WrapperStream(Negated)
+const NegationStream = SingletonWrapperStream(Negated)
 
 function handleNegation(input: IOwnedStream<string> & IPeekable<string>) {
 	input.next() // ^

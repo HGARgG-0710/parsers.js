@@ -1,4 +1,3 @@
-import { LimitStream, SingletonStream } from "../objects/Stream.js"
 import type {
 	IGettable,
 	ILinkedStream,
@@ -6,6 +5,7 @@ import type {
 	IPredicatePosition,
 	IStream
 } from "../interfaces.js"
+import { LimitStream, SingletonStream } from "../objects/Stream.js"
 
 /**
  * This is a `LimitStream` that lasts upto the character at which `until`
@@ -29,7 +29,7 @@ export function EndBracketStream<T = any>(
  * has the result of the call to `new wrapperClass(input.curr)`.
  * Perfect for simple wrapping classes.
  */
-export function WrapperStream<T = any, W = any>(
+export function SingletonWrapperStream<T = any, W = any>(
 	wrapperClass: new (value: T) => W
 ) {
 	return SingletonStream((input: IStream<T>) => new wrapperClass(input.curr))

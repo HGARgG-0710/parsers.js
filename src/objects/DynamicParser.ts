@@ -2,6 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICommonStream,
 	ICompositeStream,
+	IErrorDataMaker,
 	IInputStream,
 	ILinkedStream
 } from "../interfaces.js"
@@ -29,8 +30,9 @@ class ParsedStream<InType = any, FinalType = any, InitType = any>
 
 const parseInitializer = {
 	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
-		if (state) target.setState(state)
 		if (input) target.setInput(input)
+		if (state) target.setState(state)
+		if (target.isSetupReady()) target.setupStreams()
 	}
 }
 
@@ -39,38 +41,26 @@ class Parse<InType = any, FinalType = any, InitType = any>
 	implements IParse<FinalType, InitType>
 {
 	private didUpdate = false
-
-	private _state: IParseState<FinalType, InitType>
-
-	private set state(newState: IParseState<FinalType, InitType>) {
-		this._state = newState
-	}
+	private input?: InitType
+	private _state?: IParseState<FinalType, InitType>
 
 	get state() {
-		return this._state
+		return this._state!
 	}
 
 	private createState(
 		preState: Summat = {}
 	): IParseState<FinalType, InitType> {
-		return { ...preState, parse: this }
+		return {
+			...preState,
+			parse: this,
+			errData: this.errDataMaker(this.inputStream, this.input!)
+		}
 	}
 
 	private onUpdate() {
 		this.didUpdate = false
 		this.workStream.renewResource()
-	}
-
-	private initInputStream(input: InitType) {
-		this.inputStream.init(input)
-	}
-
-	private initWorkStream() {
-		this.workStream.init(this.inputStream)
-	}
-
-	private shareState() {
-		this.workStream.setState(this.state)
 	}
 
 	protected get initializer() {
@@ -81,15 +71,23 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		return this.workStream.streams
 	}
 
+	setInput(input: InitType) {
+		this.input = input
+	}
+
 	setState(preState: Summat) {
-		this.state = this.createState(preState)
+		this._state = this.createState(preState)
 		return this
 	}
 
-	setInput(input: InitType) {
-		this.initInputStream(input)
-		this.initWorkStream()
-		this.shareState()
+	isSetupReady() {
+		return !!this.input && !!this._state
+	}
+
+	setupStreams() {
+		this.inputStream.init(this.input)
+		this.workStream.init(this.inputStream)
+		this.workStream.setState(this.state)
 	}
 
 	renewStream(stream: ILinkedStream): boolean {
@@ -106,7 +104,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 
 	constructor(
 		public readonly workStream: ICompositeStream<FinalType>,
-		private readonly inputStream: IInputStream<InType, InitType>
+		private readonly inputStream: IInputStream<InType, InitType>,
+		private readonly errDataMaker: IErrorDataMaker<InType, InitType>
 	) {
 		super()
 	}
@@ -160,9 +159,10 @@ class Parse<InType = any, FinalType = any, InitType = any>
  */
 export function DynamicParser<InType = any, FinalType = any, InitType = any>(
 	workStream: () => ICompositeStream<FinalType>,
-	inputStream: () => IInputStream<InType, InitType>
+	inputStream: () => IInputStream<InType, InitType>,
+	errDataMaker: IErrorDataMaker<InType, InitType>
 ) {
-	const getParse = () => new Parse(workStream(), inputStream())
+	const getParse = () => new Parse(workStream(), inputStream(), errDataMaker)
 	return function (
 		input: InitType,
 		state?: Summat

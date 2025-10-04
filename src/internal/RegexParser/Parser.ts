@@ -27,7 +27,7 @@ import {
 	TableCarrier
 } from "../../modules/IndexMap/objects/LiquidMap.js"
 import { Pairs } from "../../samples.js"
-import { WrapperStream } from "../../samples/Stream.js"
+import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { NodeMap } from "../../utils/IndexMap.js"
 import { consume } from "../../utils/Stream.js"
@@ -119,7 +119,7 @@ const QuantifierProcessor = TableHandler(
 
 const RootNode = SingleChildNode("regex-root")
 
-const RootNodeStream = WrapperStream(RootNode)
+const RootNodeStream = SingletonWrapperStream(RootNode)
 
 export function ParseRegexRecursively(): IRawStreamArray {
 	return [

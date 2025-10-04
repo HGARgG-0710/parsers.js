@@ -1,6 +1,4 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import { ownerInitializer } from "../../../../objects/Initializer.js"
-import type { IStateSettable } from "../../../../interfaces.js"
 import type { IParseState } from "../../../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
@@ -9,22 +7,17 @@ import type {
 	IRawStreamArray
 } from "../../../../interfaces/Stream.js"
 import { StreamList } from "../../../../internal/StreamList.js"
+import { resourceInitializer } from "../../../../objects/Initializer.js"
 import { IdentityStream } from "../IdentityStream.js"
-
-interface ICompositeStreamLike extends IStateSettable {
-	setRawStreams(rawStreams: IRawStreamArray): void
-	isEvaluationReady(): boolean
-	evaluateStreams(): void
-}
 
 const compositeStreamInitializer = {
 	init(
-		target: ICompositeStreamLike,
+		target: BeforeCompositeStream,
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray,
 		state?: IParseState
 	) {
-		ownerInitializer.init(target, lowStream)
+		resourceInitializer.init(target, lowStream)
 		if (rawStreams) target.setRawStreams(rawStreams)
 		if (state) target.setState(state)
 		if (target.isEvaluationReady()) target.evaluateStreams()

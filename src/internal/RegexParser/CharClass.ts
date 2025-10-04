@@ -14,7 +14,7 @@ import {
 	EndBracketStream,
 	isCurr,
 	TokenStream,
-	WrapperStream
+	SingletonWrapperStream
 } from "../../samples/Stream.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
@@ -26,7 +26,7 @@ const HyphenStream = TokenStream(Hyphen)
 
 const CharClassLimitStream = EndBracketStream(isCurr("]"))
 
-const ClassUnitStream = WrapperStream(ClassUnit)
+const ClassUnitStream = SingletonWrapperStream(ClassUnit)
 
 class ClassRangeStream extends SingleNodeStream<INode<string>> {
 	private classRange: ClassRange

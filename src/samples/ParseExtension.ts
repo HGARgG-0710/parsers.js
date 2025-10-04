@@ -1,6 +1,11 @@
+import type {
+	ICompositeStream,
+	IErrorDataMaker,
+	IInputStream,
+	IOwnedStream
+} from "../interfaces.js"
 import { DynamicParser } from "../objects.js"
 import { IdentityStream } from "../objects/Stream.js"
-import type { ICompositeStream, IInputStream } from "../interfaces.js"
 
 /**
  * This is a sample function for creation of an extension-parser,
@@ -38,10 +43,13 @@ import type { ICompositeStream, IInputStream } from "../interfaces.js"
  * ```
  */
 export function ParseExtension<InType = any, InitType = any, OutType = any>(
-	workerStream: () => ICompositeStream<OutType>
+	workerStream: () => ICompositeStream<OutType>,
+	errDataMaker: IErrorDataMaker<InType, IOwnedStream>
 ) {
-	const protoExtension = DynamicParser(workerStream, () =>
-		IdentityStream.pool.create()
+	const protoExtension = DynamicParser(
+		workerStream,
+		() => IdentityStream.pool.create(),
+		errDataMaker
 	)
 	return function (childStream: IInputStream<InType, InitType>) {
 		return protoExtension(childStream)

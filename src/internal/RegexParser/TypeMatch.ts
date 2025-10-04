@@ -10,15 +10,15 @@ import {
 	CollectionStream,
 	EndBracketStream,
 	isCurr,
-	WrapperStream
+	SingletonWrapperStream
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
 import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
-const AsIntStream = WrapperStream(AsInt)
+const AsIntStream = SingletonWrapperStream(AsInt)
 
-const AsStringStream = WrapperStream(AsString)
+const AsStringStream = SingletonWrapperStream(AsString)
 
 const TypeMatchStream = CollectionStream(
 	TypeMatch,

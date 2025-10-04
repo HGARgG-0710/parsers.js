@@ -1,3 +1,5 @@
+import type { IInputStream } from "./Stream.js"
+
 /**
  * This is an interface representing an encapsulation-object of
  * a printable error-occurence position. It is (optionally) printable
@@ -26,23 +28,36 @@ export interface IErrorPosition {
  * `pos: IErrorPosition` instance, which represents the encapsulation
  * of a printable position of the error, `hasError: boolean` to
  * indicate that the object does indeed contain a live unhandled error
- * (with `markActive/markHandled` public methods to manipulate it). 
+ * (with `markActive/markHandled` public methods to manipulate it).
+ * It also encapsulates a map of user-provided information that
+ * may be important for various user-defined errors. The map is
+ * accessible via the `getInfo/setInfo` methods.
  */
 export interface IErrorData {
 	readonly pos: IErrorPosition
 	readonly hasError: boolean
+	getInfo(keyName: string): any
+	setInfo(keyName: string, value: NonNullable<any>): void
 	markActive(): void
 	markHandled(): void
 }
 
 /**
- * This is a version of `IErrorData<Info>` that stores
- * the uid of a source during the course of parsing of
- * which the error ocurred. This can be a filename/filepath
- * (`Id = string` - default), or a `number` (descriptor),
- * etc
+ * This type represents a factory for `IErrorData` objects
+ * relying upon an `inputStream: IInputStream`, and an
+ * `input: InitType`
  */
-export interface IIdErrorData<Id = string> extends IErrorData {
-	readonly sourceId: Id
-	setSourceId?(name: Id): void
+export type IErrorDataMaker<InType = any, InitType = any> = (
+	inputStream: IInputStream<InType, InitType>,
+	input: InitType
+) => IErrorData
+
+/**
+ * This is an interface used by some of the library implementations
+ * of the `IErrorPosition`. These are strategy objects that 
+ * provide the algorithm for locating the positions of a specified 
+ * type. 
+ */
+export interface IErrorPositionLocator<T = any> {
+	locate(inputStream: IInputStream): T | null
 }

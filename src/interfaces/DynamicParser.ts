@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IInitializable } from "../interfaces.js"
+import type { IErrorData, IInitializable } from "../interfaces.js"
 import type { ILinkedStream, IStreamArray } from "./Stream.js"
 
 /**
@@ -10,6 +10,7 @@ import type { ILinkedStream, IStreamArray } from "./Stream.js"
  */
 export interface IParseState<FinalType = any, InitType = any> extends Summat {
 	readonly parse: IParse<FinalType, InitType>
+	readonly errData: IErrorData
 }
 
 /**

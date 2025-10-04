@@ -1,14 +1,18 @@
 import type {
 	IErrorData,
 	IErrorPosition,
-	IIdErrorData,
+	IErrorPositionLocator,
+	IIndexCarrying,
 	IIndexStream,
 	IInputStream,
-	IOwnedStream,
-	IPosed
+	IPosed,
+	IResourcefulStream,
+	IStream
 } from "../interfaces.js"
 import {
+	locateIndexCarryingDownwards,
 	locateIndexCarryingUpwards,
+	locatePosCarryingDownwards,
 	locatePosCarryingUpwards
 } from "../utils/Stream.js"
 import { MissingImplementationError, MissingObjectError } from "./Error.js"
@@ -20,8 +24,9 @@ import { MissingImplementationError, MissingObjectError } from "./Error.js"
  * child class to provide the `abstract readonly pos: IErrorPosition`.
  */
 export abstract class BaseErrorData implements IErrorData {
-	private _hasError: boolean = false
+	private readonly infoMap = new Map<string, any>()
 	abstract readonly pos: IErrorPosition
+	private _hasError: boolean = false
 
 	private set hasError(has: boolean) {
 		this._hasError = has
@@ -37,6 +42,14 @@ export abstract class BaseErrorData implements IErrorData {
 
 	markHandled(): void {
 		this.hasError = false
+	}
+
+	getInfo(keyName: string) {
+		return this.infoMap.get(keyName)
+	}
+
+	setInfo(keyName: string, value: NonNullable<any>): void {
+		this.infoMap.set(keyName, value)
 	}
 }
 
@@ -66,33 +79,27 @@ export abstract class DelegateErrorData implements IErrorData {
 		this.parentErrorData.markHandled()
 	}
 
-	constructor(private readonly parentErrorData: IErrorData) {}
+	setInfo(keyName: string, value: NonNullable<any>): void {
+		return this.parentErrorData.setInfo(keyName, value)
+	}
+
+	getInfo(keyName: string) {
+		return this.parentErrorData.getInfo(keyName)
+	}
+
+	constructor(protected readonly parentErrorData: IErrorData) {}
 }
 
 /**
- * This is a child class of `DelegateErrorData`, implementing
- * `IIdErrorData<string>`, and representing an `IErrorData`
- * that keeps the name of the source file inside the
- * `readonly .sourceId: string` property. It demands the
- * name of the file on creation.
+ * This is a child class of `DelegateErrorData`,
+ * providing (by default) the `.getInfo("filename")`
+ * value, indicating the filename of the currently
+ * parsed file.
  */
-export class FileErrorData
-	extends DelegateErrorData
-	implements IIdErrorData<string>
-{
-	private filename: string
-
-	setSourceId(name: string): void {
-		this.filename = name
-	}
-
-	get sourceId() {
-		return this.filename
-	}
-
+export class FileErrorData extends DelegateErrorData {
 	constructor(filename: string, parentErrorData: IErrorData) {
 		super(parentErrorData)
-		this.setSourceId(filename)
+		this.setInfo("filename", filename)
 	}
 }
 
@@ -128,15 +135,15 @@ export namespace ErrorPosition {
 	 * that expects to locate an `.refStream: IIndexStream` from an
 	 * `IInputStream` (which must first be initialized),
 	 * and then read the `.refStream.lineIndex` to provide the
-	 * position of the parser. 
-	 * 
-	 * It guaranteedly implements `toString(): string` as 
+	 * position of the parser.
+	 *
+	 * It guaranteedly implements `toString(): string` as
 	 * `() => .lineIndex.line:.lineIndex.char`,
 	 * and optionally implements the `isNumber`: the implementation
 	 * is valid only in cases when one can delegate to `.lineIndex.toNumber()`.
 	 */
 	export class LineIndexErrorPosition implements IErrorPosition {
-		private refStream: IIndexStream
+		private refStream: IStream & IIndexCarrying
 
 		private get lineIndex() {
 			return this.refStream.lineIndex
@@ -156,40 +163,109 @@ export namespace ErrorPosition {
 		}
 
 		locate() {
-			const indexStream = locateIndexCarryingUpwards(this.inputStream)
-			if (!indexStream) throw new MissingObjectError("IIndexStream")
+			const indexStream = this.indexCarryingLocator.locate(
+				this.inputStream
+			)
+			if (!indexStream)
+				throw new MissingObjectError("IStream & IIndexCarrying")
 			this.refStream = indexStream
 			return this
 		}
 
-		constructor(private readonly inputStream: IInputStream) {}
+		constructor(
+			private readonly inputStream: IInputStream,
+			private readonly indexCarryingLocator: IErrorPositionLocator<
+				IStream & IIndexCarrying
+			>
+		) {}
 	}
 
-	/** 	
+	/**
 	 * This is an implementation of `IErrorPosition`
 	 * that expects to locate an `.refStream: IOwnedStream & IPosed<number>` from an
 	 * `IInputStream` (which must first be initialized),
 	 * and then read the `.refStream.pos` to provide the
 	 * position of the parser.
-	 * 
-	 * It guaranteedly implements `.toNumber(): number` as 
-	 * `() => this.refStream.pos`. 
+	 *
+	 * It guaranteedly implements `.toNumber(): number` as
+	 * `() => this.refStream.pos`.
 	 */
 	export class BasicErrorPosition implements IErrorPosition {
-		private refStream: IOwnedStream & IPosed<number>
+		private refStream: IStream & IPosed<number>
 
 		toNumber(): number {
 			return this.refStream.pos
 		}
 
 		locate() {
-			const posStream = locatePosCarryingUpwards(this.inputStream)
+			const posStream = this.posCarryingLocator.locate(this.inputStream)
 			if (!posStream)
-				throw new MissingObjectError("IPosed<number> & IOwnedStream")
+				throw new MissingObjectError("IPosed<number> & IStream")
 			this.refStream = posStream
 			return this
 		}
 
-		constructor(private readonly inputStream: IInputStream) {}
+		constructor(
+			private readonly inputStream: IInputStream,
+			private readonly posCarryingLocator: IErrorPositionLocator<
+				IStream & IPosed<number>
+			>
+		) {}
+	}
+
+	export namespace ErrorPositionLocator {
+		/**
+		 * This `IErrorPositionLocator<IIndexStream>` locates
+		 * the first `.owner` of the `inputStream: IInputStream` given such
+		 * that it is an `IIndexCarrying` instance.
+		 */
+		export class UpwardsIndexCarryingErrorPositionLocator
+			implements IErrorPositionLocator<IIndexStream>
+		{
+			locate(inputStream: IInputStream) {
+				return locateIndexCarryingUpwards(inputStream)
+			}
+		}
+
+		/**
+		 * This `IErrorPositionLocator<IIndexStream>` locates
+		 * the first `.resource` of the
+		 * `inputStream: IInputStream & IResourcefulStream` given such
+		 * that it is an `IIndexCarrying` instance.
+		 */
+		export class DownwardsIndexCarryingErrorPositionLocator
+			implements IErrorPositionLocator<IStream & IIndexCarrying>
+		{
+			locate(inputStream: IInputStream & IResourcefulStream) {
+				return locateIndexCarryingDownwards(inputStream)
+			}
+		}
+
+		/**
+		 * This `IErrorPositionLocator<IStream & IPosed<number>>` locates
+		 * the first `.owner` of the `inputStream: IInputStream` given such
+		 * that it is an `IIndexCarrying` instance.
+		 */
+		export class UpwardsPosCarryingErrorPositionLocator
+			implements IErrorPositionLocator<IStream & IPosed<number>>
+		{
+			locate(inputStream: IInputStream) {
+				return locatePosCarryingUpwards(inputStream)
+			}
+		}
+
+		/**
+		 * This `IErrorPositionLocator<IStream & IPosed<number>>` locates
+		 * the first `.resource` of the
+		 * `inputStream: IInputStream & IResourcefulStream` given such
+		 * that it is an `IIndexCarrying` instance.
+		 */
+		export class DownwardsPosCarryingErrorPositionLocator
+			implements IErrorPositionLocator<IStream & IPosed<number>>
+		{
+			locate(inputStream: IInputStream & IResourcefulStream) {
+				return locatePosCarryingDownwards(inputStream)
+			}
+		}
 	}
 }
