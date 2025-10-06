@@ -1,19 +1,4 @@
 import type { array } from "@hgargg-0710/one"
-import { Pools } from "../../../main.js"
-import {
-	DynamicParser,
-	IndexMap,
-	ParseableInput,
-	TableHandler
-} from "../../objects.js"
-import { CurrentHash } from "../../objects/HashMap.js"
-import { SingleChildNode } from "../../objects/Node.js"
-import {
-	CompositeStream,
-	IdentityStream,
-	InputStream,
-	PeekStream
-} from "../../objects/Stream.js"
 import type {
 	IIndexMap,
 	INode,
@@ -26,11 +11,27 @@ import {
 	LiquidMap,
 	TableCarrier
 } from "../../modules/IndexMap/objects/LiquidMap.js"
+import {
+	DynamicParser,
+	ErrorData,
+	IndexMap,
+	ParseableInput,
+	TableHandler
+} from "../../objects.js"
+import { CurrentHash } from "../../objects/HashMap.js"
+import { SingleChildNode } from "../../objects/Node.js"
+import {
+	CompositeStream,
+	IdentityStream,
+	InputStream,
+	PeekStream,
+	PosStream
+} from "../../objects/Stream.js"
 import { Pairs } from "../../samples.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { NodeMap } from "../../utils/IndexMap.js"
-import { consume } from "../../utils/Stream.js"
+import { consume, hasPos } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
 import { maybeDot } from "./Dot.js"
@@ -71,15 +72,11 @@ export class RegexParser {
 		).get()[0] as INode<string>
 	}
 
-	private poolCleanup() {
-		Pools.Internal.clear()
-		Pools.Stream.clear()
-	}
-
 	parse(source: string) {
-		const result = this.parseSource(source)
-		this.poolCleanup()
-		return result
+		// * Vital note: there is NO CLEANUP HERE 
+		// because the user may (accidentally) be 
+		// re-parsing the same expressions over-and-over again. 
+		return this.parseSource(source)
 	}
 }
 
@@ -131,6 +128,20 @@ export function ParseRegexRecursively(): IRawStreamArray {
 }
 
 const parseRegex = DynamicParser(
-	() => CompositeStream(RootNodeStream(), ...ParseRegexRecursively())(),
-	() => new InputStream()
+	() =>
+		CompositeStream(
+			RootNodeStream(),
+			...ParseRegexRecursively(),
+			PosStream.pool.create()
+		)(),
+	() => new InputStream(),
+	(inputStream) =>
+		new ErrorData.StreamListErrorData(
+			inputStream,
+			(inputStream) =>
+				new ErrorData.ErrorPosition.PosCarrying(
+					inputStream,
+					new ErrorData.ErrorPosition.Locator.Downwards(hasPos)
+				)
+		)
 )

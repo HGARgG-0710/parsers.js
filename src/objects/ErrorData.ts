@@ -3,19 +3,13 @@ import type {
 	IErrorPosition,
 	IErrorPositionLocator,
 	IIndexCarrying,
-	IIndexStream,
 	IInputStream,
 	IPosed,
-	IResourcefulStream,
 	IStream
 } from "../interfaces.js"
-import {
-	locateIndexCarryingDownwards,
-	locateIndexCarryingUpwards,
-	locatePosCarryingDownwards,
-	locatePosCarryingUpwards
-} from "../utils/Stream.js"
+import { negate } from "../modules/Stream/utils/StreamPosition.js"
 import { MissingImplementationError, MissingObjectError } from "./Error.js"
+import { ownerDigger, PropDigger, resourceDigger } from "./PropDigger.js"
 
 /**
  * This is the abstract class implementing `IErrorData` serving as
@@ -142,7 +136,7 @@ export namespace ErrorPosition {
 	 * and optionally implements the `isNumber`: the implementation
 	 * is valid only in cases when one can delegate to `.lineIndex.toNumber()`.
 	 */
-	export class LineIndexErrorPosition implements IErrorPosition {
+	export class LineIndexCarrying implements IErrorPosition {
 		private refStream: IStream & IIndexCarrying
 
 		private get lineIndex() {
@@ -190,7 +184,7 @@ export namespace ErrorPosition {
 	 * It guaranteedly implements `.toNumber(): number` as
 	 * `() => this.refStream.pos`.
 	 */
-	export class BasicErrorPosition implements IErrorPosition {
+	export class PosCarrying implements IErrorPosition {
 		private refStream: IStream & IPosed<number>
 
 		toNumber(): number {
@@ -213,58 +207,43 @@ export namespace ErrorPosition {
 		) {}
 	}
 
-	export namespace ErrorPositionLocator {
+	export namespace Locator {
 		/**
-		 * This `IErrorPositionLocator<IIndexStream>` locates
-		 * the first `.owner` of the `inputStream: IInputStream` given such
-		 * that it is an `IIndexCarrying` instance.
+		 * An abstract implementation of `IErrorPositionLocator` to represent
+		 * a locator based off an abstract `PropDigger` instance provided by
+		 * the child classes. The `locate()` algorithm implementation calls
+		 * the `dig` method on `inputStream`, with a negation of the search
+		 * predicate supplied via the constructor,
 		 */
-		export class UpwardsIndexCarryingErrorPositionLocator
-			implements IErrorPositionLocator<IIndexStream>
+		export abstract class WithPropDigger<T = any>
+			implements IErrorPositionLocator<T & IStream>
 		{
-			locate(inputStream: IInputStream) {
-				return locateIndexCarryingUpwards(inputStream)
+			protected abstract get digger(): PropDigger
+
+			locate(inputStream: IInputStream): (T & IStream<any>) | null {
+				return (
+					this.digger.dig(inputStream, negate(this.predicate)) || null
+				)
+			}
+
+			constructor(private readonly predicate: (x: IStream) => boolean) {}
+		}
+
+		/**
+		 * A `WithPropDigger` case with `ownerDigger` as the `digger`. 
+		 */
+		export class Upwards<T = any> extends WithPropDigger<T> {
+			protected get digger(): PropDigger {
+				return ownerDigger
 			}
 		}
 
 		/**
-		 * This `IErrorPositionLocator<IIndexStream>` locates
-		 * the first `.resource` of the
-		 * `inputStream: IInputStream & IResourcefulStream` given such
-		 * that it is an `IIndexCarrying` instance.
-		 */
-		export class DownwardsIndexCarryingErrorPositionLocator
-			implements IErrorPositionLocator<IStream & IIndexCarrying>
-		{
-			locate(inputStream: IInputStream & IResourcefulStream) {
-				return locateIndexCarryingDownwards(inputStream)
-			}
-		}
-
-		/**
-		 * This `IErrorPositionLocator<IStream & IPosed<number>>` locates
-		 * the first `.owner` of the `inputStream: IInputStream` given such
-		 * that it is an `IIndexCarrying` instance.
-		 */
-		export class UpwardsPosCarryingErrorPositionLocator
-			implements IErrorPositionLocator<IStream & IPosed<number>>
-		{
-			locate(inputStream: IInputStream) {
-				return locatePosCarryingUpwards(inputStream)
-			}
-		}
-
-		/**
-		 * This `IErrorPositionLocator<IStream & IPosed<number>>` locates
-		 * the first `.resource` of the
-		 * `inputStream: IInputStream & IResourcefulStream` given such
-		 * that it is an `IIndexCarrying` instance.
-		 */
-		export class DownwardsPosCarryingErrorPositionLocator
-			implements IErrorPositionLocator<IStream & IPosed<number>>
-		{
-			locate(inputStream: IInputStream & IResourcefulStream) {
-				return locatePosCarryingDownwards(inputStream)
+		 * A `WithPropDigger` case with `resourceDigger` as the `digger`. 
+		*/
+		export class Downwards<T = any> extends WithPropDigger<T> {
+			protected get digger(): PropDigger {
+				return resourceDigger
 			}
 		}
 	}

@@ -11,13 +11,10 @@ import type {
 import type {
 	IFinishable,
 	IIndexCarrying,
-	IIndexStream,
 	IIterableStream,
 	INavigable,
-	IOwnedStream,
 	IPeekableStream,
 	IRenewerStream,
-	IResourcefulStream,
 	IStream,
 	IStreamGenerator
 } from "../interfaces/Stream.js"
@@ -27,7 +24,6 @@ import type {
 } from "../interfaces/StreamHandler.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
-import { ownerDigger, resourceDigger } from "../objects.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
@@ -312,50 +308,6 @@ export function consumeSingletonRevivables<
  * Given an `IStream` returns its `.curr` property value
  */
 export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
-
-/**
- * This linearly searches for an `IIndexStream` among the linked
- * list of `.owner`-s of the given `IOwnedStream`. Upon failure
- * returns `null` - no `IIndexCarrying` could be found.
- */
-export function locateIndexCarryingUpwards<
-	T extends IOwnedStream = IOwnedStream
->(stream: T): IIndexStream | null {
-	return ownerDigger.dig(stream, negate(hasLineIndex)) || null
-}
-
-/**
- * This linearly searches for an `IIndexStream` among the linked
- * list of `.resources`-s of the given `IResourcefulStream`. Upon failure
- * returns `null` - no `IIndexCarrying` could be found.
- */
-export function locateIndexCarryingDownwards<
-	T extends IResourcefulStream = IResourcefulStream
->(stream: T): IIndexStream | null {
-	return resourceDigger.dig(stream, negate(hasLineIndex)) || null
-}
-
-/**
- * This linearly searches for an `IPosed<number> & IOwnedStream`
- * among the linked list of `.owner`s of the given `IOwnedStream`.
- * Upon failure returns `null` - no `IPosed<number>` could be found.
- */
-export function locatePosCarryingUpwards<T extends IOwnedStream = IOwnedStream>(
-	stream: T
-): (IPosed<number> & IOwnedStream) | null {
-	return ownerDigger.dig(stream, negate(hasPos)) || null
-}
-
-/**
- * This linearly searches for an `IPosed<number> & IResourcefulStream`
- * among the linked list of `.resource`s of the given `IResourceStream`.
- * Upon failure returns `null` - no `IPosed<number>` could be found.
- */
-export function locatePosCarryingDownwards<
-	T extends IResourcefulStream = IResourcefulStream
->(stream: T): IResourcefulStream & IPosed<number> {
-	return resourceDigger.dig(stream, negate(hasPos)) || null
-}
 
 /**
  * Returns whether a given item is an `IPosed<number>`.
