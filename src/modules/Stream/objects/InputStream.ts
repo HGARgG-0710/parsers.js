@@ -33,7 +33,7 @@ export class InputStream<T = any>
 		IPeekable<T>,
 		INavigable<T>,
 		IFinishable<T>,
-		IPosed<number>
+		IPosed
 {
 	protected ["constructor"]: new (source?: IParseable<T>) => this
 

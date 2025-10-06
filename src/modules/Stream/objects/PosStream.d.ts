@@ -1,5 +1,5 @@
-import type { ObjectPool } from "../../../objects.ts"
 import type { IOwnedStream, IPosed } from "../../../interfaces.ts"
+import type { ObjectPool } from "../../../objects.ts"
 import type { ICommonStream } from "../interfaces/CommonStream.ts"
 import type { IdentityStream } from "./IdentityStream.js"
 
@@ -18,7 +18,7 @@ import type { IdentityStream } from "./IdentityStream.js"
  */
 export declare class PosStream<T = any>
 	extends IdentityStream<T>
-	implements ICommonStream<T>, IPosed<number>
+	implements ICommonStream<T>, IPosed
 {
 	static readonly pool: ObjectPool<PosStream, [IOwnedStream]>
 	protected forward(n?: number): void

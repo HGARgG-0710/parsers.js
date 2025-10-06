@@ -22,10 +22,10 @@ export type IPredicatePosition<In = any> = (
 ) => boolean
 
 /**
- * The interface for objects with a `readonly .pos: T`.
+ * The interface for objects with a `readonly .pos: number`.
  */
-export interface IPosed<T = any> {
-	readonly pos: T
+export interface IPosed {
+	readonly pos: number
 }
 
 export type * from "../modules/Position/interfaces/LineIndex.js"

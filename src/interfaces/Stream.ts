@@ -111,7 +111,7 @@ export type IStatefulStream<T = any> = IStream<T> & IStateful<IParseState>
  * Here `.pos: number` is used to track current item's numerical
  * position.
  */
-export type IPositionStream<T = any> = IPosed<number> & IStream<T>
+export type IPositionStream<T = any> = IPosed & IStream<T>
 
 /**
  * This is an `IStream<T>` that is also `Iterable<T>`

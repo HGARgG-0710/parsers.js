@@ -12,7 +12,7 @@ const { lastIndex } = array
  */
 export class FiniteStream<T = any>
 	extends ArrayStream<T, T>
-	implements IOwnedStream<T>, IPosed<number>
+	implements IOwnedStream<T>, IPosed
 {
 	private _pos: number = 0
 
