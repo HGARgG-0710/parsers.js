@@ -1,5 +1,7 @@
 import type {
+	IIndexCarrying,
 	IParseState,
+	IPosed,
 	IStateHaving,
 	IStream,
 	IStreamLocator
@@ -10,7 +12,7 @@ import {
 	ResourceDigger,
 	type PropDigger
 } from "../../../objects/PropDigger.js"
-import { hasState } from "../../../utils/Stream.js"
+import { hasLineIndex, hasPos, hasState } from "../../../utils/Stream.js"
 
 /**
  * An abstract implementation of `IErrorPositionLocator` to represent
@@ -68,5 +70,40 @@ export class StatefulLocator extends WithPropDigger<IStateHaving<IParseState>> {
 
 	private constructor(private readonly _digger: PropDigger) {
 		super(hasState)
+	}
+}
+/**
+ * This is an `IStreamLocator` for upwards/downwards search of a stream
+ * with a `.pos: number` property present.
+ */
+export class PosCarryingLocator extends WithPropDigger<IPosed> {
+	static readonly upwards = new PosCarryingLocator(OwnerDigger.instance)
+	static readonly downwards = new PosCarryingLocator(ResourceDigger.instance)
+
+	protected get digger() {
+		return this._digger
+	}
+
+	private constructor(private readonly _digger: PropDigger) {
+		super(hasPos)
+	}
+}
+
+/**
+ * This is an `IStreamLocator` for upwards/downwards search of a stream
+ * with a `.lineIndex: ILineIndex` property present.
+ */
+export class IndexCarryingLocator extends WithPropDigger<IIndexCarrying> {
+	static readonly upwards = new IndexCarryingLocator(OwnerDigger.instance)
+	static readonly downwards = new IndexCarryingLocator(
+		ResourceDigger.instance
+	)
+
+	protected get digger() {
+		return this._digger
+	}
+
+	private constructor(private readonly _digger: PropDigger) {
+		super(hasLineIndex)
 	}
 }

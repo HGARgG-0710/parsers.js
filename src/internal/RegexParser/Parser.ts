@@ -12,12 +12,12 @@ import {
 	LiquidMap,
 	TableCarrier
 } from "../../modules/IndexMap/objects/LiquidMap.js"
+import { PosCarryingLocator } from "../../modules/Stream/objects/Locator.js"
 import {
 	DynamicParser,
 	ErrorData,
 	IndexMap,
 	ParseableInput,
-	Stream,
 	TableHandler
 } from "../../objects.js"
 import { CurrentHash } from "../../objects/HashMap.js"
@@ -33,7 +33,7 @@ import { Pairs } from "../../samples.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { NodeMap, PeekMap } from "../../utils/IndexMap.js"
-import { consume, hasPos } from "../../utils/Stream.js"
+import { consume } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
 import { maybeDot } from "./Dot.js"
@@ -150,7 +150,7 @@ const parseRegex = DynamicParser(
 			(inputStream) =>
 				new ErrorData.ErrorPosition.PosCarrying(
 					inputStream,
-					new Stream.Locator.Downwards(hasPos)
+					PosCarryingLocator.downwards
 				)
 		)
 )
