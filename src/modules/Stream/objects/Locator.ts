@@ -50,7 +50,9 @@ export class Downwards<T = any> extends WithPropDigger<T> {
 }
 
 /**
- * This is a `WithPropDigger` Singleton-class for
+ * This is a `WithPropDigger` Singleton-class for locating the nearest 
+ * (upwards or downwards) `IStream` (`IResourcefulStream/IOwnedStream`)
+ * which is alos an `IStateHaving<IParseState>`. 
  */
 export class StatefulLocator extends WithPropDigger<IStateHaving<IParseState>> {
 	static readonly upwards: StatefulLocator = new StatefulLocator(ownerDigger)
