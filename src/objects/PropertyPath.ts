@@ -21,8 +21,8 @@ const { T } = boolean
  * (excluding `null`), then the continuous access
  * halts and this entity is returned as a result instead.
  */
-export class PropDigger {
-	public readonly properties: string[]
+export class PropertyPath {
+	readonly properties: string[]
 
 	private predicate: IPredicatePosition<any> = T
 
@@ -31,7 +31,7 @@ export class PropDigger {
 		callback: () => T
 	) {
 		this.predicate = newPred
-		const retval: T = callback.call(this)
+		const retval = callback()
 		this.predicate = T
 		return retval
 	}
@@ -57,7 +57,7 @@ export class PropDigger {
 		return currentLevel
 	}
 
-	private digFinite<In extends object = Summat, Out = any>(
+	private followFinite<In extends object = Summat, Out = any>(
 		x: In,
 		depth: number = 0
 	) {
@@ -67,34 +67,34 @@ export class PropDigger {
 		return currentLevel as unknown as Out
 	}
 
-	private digPredicate<In extends object = Summat, Out = any>(
+	private followPredicate<In extends object = Summat, Out = any>(
 		x: In,
 		pred: IPredicatePosition<In>
 	) {
 		return this.withPredicate(pred, () =>
-			this.digPredicateAware<In, Out>(x)
+			this.followPredicateAware<In, Out>(x)
 		)
 	}
 
-	private digPredicateAware<In extends object = Summat, Out = any>(x: In) {
+	private followPredicateAware<In extends object = Summat, Out = any>(x: In) {
 		let currentLevel = x
 		while (isStruct(currentLevel) && this.predicate(currentLevel))
 			currentLevel = this.loopProps(currentLevel)
 		return currentLevel as unknown as Out
 	}
 
-	dig<In extends object = Summat, Out = any>(x: In, depth: IPosition<In>) {
+	follow<In extends object = Summat, Out = any>(x: In, depth: IPosition<In>) {
 		return isNumber(depth)
-			? this.digFinite<In, Out>(x, depth)
-			: this.digPredicate<In, Out>(x, depth)
+			? this.followFinite<In, Out>(x, depth)
+			: this.followPredicate<In, Out>(x, depth)
 	}
 
 	with(...newProperties: string[]) {
-		return new PropDigger(...this.properties, ...newProperties)
+		return new PropertyPath(...this.properties, ...newProperties)
 	}
 
 	copy() {
-		return new PropDigger(...this.properties)
+		return new PropertyPath(...this.properties)
 	}
 
 	constructor(...properties: string[]) {
@@ -107,8 +107,8 @@ export class PropDigger {
  * This is a singleton, the instance is obtainable via the
  * `.instance` property.
  */
-export class ResourceDigger extends PropDigger {
-	static readonly instance = new ResourceDigger()
+export class ResourcePath extends PropertyPath {
+	static readonly instance = new ResourcePath()
 
 	private constructor() {
 		super("resource")
@@ -120,9 +120,9 @@ export class ResourceDigger extends PropDigger {
  * This is a singleton, the instance is obtainable via the
  * `.instance` property.
  */
-export class OwnerDigger extends PropDigger {
-	static readonly instance = new OwnerDigger()
-	
+export class OwnerPath extends PropertyPath {
+	static readonly instance = new OwnerPath()
+
 	private constructor() {
 		super("owner")
 	}

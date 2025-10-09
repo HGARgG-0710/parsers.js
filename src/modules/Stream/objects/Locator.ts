@@ -6,12 +6,13 @@ import type {
 	IStream,
 	IStreamLocator
 } from "../../../interfaces.js"
+import type { IPropertyPath } from "../../../interfaces/PropertyPath.js"
 import { negate } from "../../../modules/Stream/utils/StreamPosition.js"
 import {
-	OwnerDigger,
-	ResourceDigger,
-	type PropDigger
-} from "../../../objects/PropDigger.js"
+	OwnerPath,
+	ResourcePath,
+	type PropertyPath
+} from "../../../objects/PropertyPath.js"
 import { hasLineIndex, hasPos, hasState } from "../../../utils/Stream.js"
 
 /**
@@ -21,13 +22,11 @@ import { hasLineIndex, hasPos, hasState } from "../../../utils/Stream.js"
  * the `dig` method on `inputStream`, with a negation of the search
  * predicate supplied via the constructor,
  */
-export abstract class WithPropDigger<T = any>
-	implements IStreamLocator<T & IStream>
-{
-	protected abstract get digger(): PropDigger
+export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
+	protected abstract get path(): IPropertyPath<IStream, T & IStream>
 
 	locate(startStream: IStream): (T & IStream<any>) | null {
-		return this.digger.dig(startStream, negate(this.predicate)) || null
+		return this.path.follow(startStream, negate(this.predicate)) || null
 	}
 
 	constructor(private readonly predicate: (x: any) => x is T) {}
@@ -36,18 +35,18 @@ export abstract class WithPropDigger<T = any>
 /**
  * A `WithPropDigger` case with `ownerDigger` as the `digger`.
  */
-export class Upwards<T = any> extends WithPropDigger<T> {
-	protected get digger(): PropDigger {
-		return OwnerDigger.instance
+export class Upwards<T = any> extends WithPath<T> {
+	protected get path(): PropertyPath {
+		return OwnerPath.instance
 	}
 }
 
 /**
  * A `WithPropDigger` case with `resourceDigger` as the `digger`.
  */
-export class Downwards<T = any> extends WithPropDigger<T> {
-	protected get digger(): PropDigger {
-		return ResourceDigger.instance
+export class Downwards<T = any> extends WithPath<T> {
+	protected get path(): PropertyPath {
+		return ResourcePath.instance
 	}
 }
 
@@ -56,19 +55,19 @@ export class Downwards<T = any> extends WithPropDigger<T> {
  * (upwards or downwards) `IStream` (`IResourcefulStream/IOwnedStream`)
  * which is alos an `IStateHaving<IParseState>`.
  */
-export class StatefulLocator extends WithPropDigger<IStateHaving<IParseState>> {
+export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
 	static readonly upwards: StatefulLocator = new StatefulLocator(
-		OwnerDigger.instance
+		OwnerPath.instance
 	)
 	static readonly downwards: StatefulLocator = new StatefulLocator(
-		ResourceDigger.instance
+		ResourcePath.instance
 	)
 
-	protected get digger() {
+	protected get path() {
 		return this._digger
 	}
 
-	private constructor(private readonly _digger: PropDigger) {
+	private constructor(private readonly _digger: PropertyPath) {
 		super(hasState)
 	}
 }
@@ -76,15 +75,15 @@ export class StatefulLocator extends WithPropDigger<IStateHaving<IParseState>> {
  * This is an `IStreamLocator` for upwards/downwards search of a stream
  * with a `.pos: number` property present.
  */
-export class PosCarryingLocator extends WithPropDigger<IPosed> {
-	static readonly upwards = new PosCarryingLocator(OwnerDigger.instance)
-	static readonly downwards = new PosCarryingLocator(ResourceDigger.instance)
+export class PosCarryingLocator extends WithPath<IPosed> {
+	static readonly upwards = new PosCarryingLocator(OwnerPath.instance)
+	static readonly downwards = new PosCarryingLocator(ResourcePath.instance)
 
-	protected get digger() {
-		return this._digger
+	protected get path() {
+		return this._path
 	}
 
-	private constructor(private readonly _digger: PropDigger) {
+	private constructor(private readonly _path: PropertyPath) {
 		super(hasPos)
 	}
 }
@@ -93,17 +92,15 @@ export class PosCarryingLocator extends WithPropDigger<IPosed> {
  * This is an `IStreamLocator` for upwards/downwards search of a stream
  * with a `.lineIndex: ILineIndex` property present.
  */
-export class IndexCarryingLocator extends WithPropDigger<IIndexCarrying> {
-	static readonly upwards = new IndexCarryingLocator(OwnerDigger.instance)
-	static readonly downwards = new IndexCarryingLocator(
-		ResourceDigger.instance
-	)
+export class IndexCarryingLocator extends WithPath<IIndexCarrying> {
+	static readonly upwards = new IndexCarryingLocator(OwnerPath.instance)
+	static readonly downwards = new IndexCarryingLocator(ResourcePath.instance)
 
-	protected get digger() {
-		return this._digger
+	protected get path() {
+		return this._path
 	}
 
-	private constructor(private readonly _digger: PropDigger) {
+	private constructor(private readonly _path: PropertyPath) {
 		super(hasLineIndex)
 	}
 }
