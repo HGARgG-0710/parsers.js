@@ -7,7 +7,7 @@ export class Counter {
 	private count: number
 
 	inc() {
-		++this.count
+		return ++this.count
 	}
 
 	get() {
