@@ -18,9 +18,11 @@ import { MissingImplementationError, MissingObjectError } from "./Error.js"
  */
 export abstract class BaseErrorData implements IErrorData {
 	private readonly infoMap = new Map<string, any>()
+	private _hasError: boolean = false
+
 	abstract readonly pos: IPrintablePosition
 	abstract refresh(): void
-	private _hasError: boolean = false
+	abstract copy(): this
 
 	private set hasError(has: boolean) {
 		this._hasError = has
@@ -57,6 +59,8 @@ export abstract class BaseErrorData implements IErrorData {
  * information.
  */
 export abstract class DelegateErrorData implements IErrorData {
+	private ["constructor"]: new (parentErrorData: IErrorData) => this
+
 	refresh(): void {
 		this.parentErrorData.refresh()
 	}
@@ -79,6 +83,10 @@ export abstract class DelegateErrorData implements IErrorData {
 
 	getInfo(keyName: string) {
 		return this.parentErrorData.getInfo(keyName)
+	}
+
+	copy(): this {
+		return new this.constructor(this.parentErrorData.copy())
 	}
 
 	constructor(protected readonly parentErrorData: IErrorData) {}
@@ -104,6 +112,11 @@ export class FileErrorData extends DelegateErrorData {
  * and initialized with the given `inputStream: IInputStream`.
  */
 export class StreamListErrorData extends BaseErrorData {
+	["constructor"]: new (
+		inputStream: IInputStream,
+		posMaker: (inputStream: IInputStream) => IPrintablePosition
+	) => this
+
 	private _pos: IPrintablePosition | null = null
 
 	private ensurePosNonNull() {
@@ -123,6 +136,12 @@ export class StreamListErrorData extends BaseErrorData {
 	get pos() {
 		this.ensurePosNonNull()
 		return this._pos!
+	}
+
+	copy() {
+		this.ensurePosNonNull()
+		const newPos = this.pos.copy()
+		return new this.constructor(this.inputStream, () => newPos)
 	}
 
 	constructor(
@@ -149,11 +168,12 @@ export namespace ErrorPosition {
 	 * is valid only in cases when one can delegate to `.lineIndex.toNumber()`.
 	 */
 	export class LineIndexCarrying implements IPrintablePosition {
-		private _lineIndex: ILineIndex
+		private ["constructor"]: new (
+			inputStream: IInputStream,
+			indexCarryingLocator: IStreamLocator<IStream & IIndexCarrying>
+		) => this
 
-		private get lineIndex() {
-			return this._lineIndex
-		}
+		private lineIndex: ILineIndex
 
 		toNumber(): number {
 			if (this.lineIndex.toNumber) return this.lineIndex.toNumber()
@@ -174,8 +194,17 @@ export namespace ErrorPosition {
 			)
 			if (!indexStream)
 				throw new MissingObjectError("IStream & IIndexCarrying")
-			this._lineIndex = indexStream.lineIndex.copy()
+			this.lineIndex = indexStream.lineIndex.copy()
 			return this
+		}
+
+		copy(): this {
+			const copy = new this.constructor(
+				this.inputStream,
+				this.indexCarryingLocator
+			)
+			copy.lineIndex = this.lineIndex.copy()
+			return copy
 		}
 
 		constructor(
@@ -197,6 +226,11 @@ export namespace ErrorPosition {
 	 * `() => this.refStream.pos`.
 	 */
 	export class PosCarrying implements IPrintablePosition {
+		["constructor"]: new (
+			inputStream: IInputStream,
+			posCarryingLocator: IStreamLocator<IStream & IPosed>
+		) => this
+
 		private pos: number
 
 		toNumber(): number {
@@ -205,10 +239,18 @@ export namespace ErrorPosition {
 
 		locate() {
 			const posStream = this.posCarryingLocator.locate(this.inputStream)
-			if (!posStream)
-				throw new MissingObjectError("IPosed<number> & IStream")
+			if (!posStream) throw new MissingObjectError("IPosed & IStream")
 			this.pos = posStream.pos
 			return this
+		}
+
+		copy(): this {
+			const copy = new this.constructor(
+				this.inputStream,
+				this.posCarryingLocator
+			)
+			copy.pos = this.pos
+			return copy
 		}
 
 		constructor(

@@ -1,3 +1,4 @@
+import type { ICopiable } from "../interfaces.js"
 import type { IInputStream } from "./Stream.js"
 
 /**
@@ -16,7 +17,7 @@ import type { IInputStream } from "./Stream.js"
  * duplicating call to `.toNumber()`. This is why it is preferable
  * in such implementations to enable omission of `toString`.
  */
-export interface IPrintablePosition {
+export interface IPrintablePosition extends ICopiable {
 	toString?(): string
 	toNumber?(): number
 	locate(): this
@@ -33,7 +34,7 @@ export interface IPrintablePosition {
  * may be important for various user-defined errors. The map is
  * accessible via the `getInfo/setInfo` methods.
  */
-export interface IErrorData {
+export interface IErrorData extends ICopiable {
 	readonly pos: IPrintablePosition
 	readonly hasError: boolean
 	getInfo(keyName: string): any

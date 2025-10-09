@@ -1,12 +1,10 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ICopiable, ILineIndex } from "../../../dist/src/interfaces.js"
+import type { ILineIndex } from "../../../dist/src/interfaces.js"
 import { MethodTest, MutableClassTest, type RuntimeInterface } from "../lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber } = type
-
-type CopiableLineIndex = ICopiable & ILineIndex
 
 function nextLineAssert(instance: ILineIndex, origLine: number) {
 	lineAssert(instance, origLine + 1)
@@ -72,7 +70,7 @@ export const nextLine = new MethodTest("nextLine", function (this: ILineIndex) {
 	nextLineStartAssert(this, origLine)
 })
 
-export const copy = new MethodTest("copy", function (this: CopiableLineIndex) {
+export const copy = new MethodTest("copy", function (this: ILineIndex) {
 	const copied = this.copy()
 	charAssert(copied, this.char)
 	lineAssert(copied, this.line)
@@ -83,7 +81,7 @@ export const copy = new MethodTest("copy", function (this: CopiableLineIndex) {
 	assert.notStrictEqual(this.char, oldChar)
 })
 
-export class LineIndexTest extends MutableClassTest<CopiableLineIndex> {
+export class LineIndexTest extends MutableClassTest<ILineIndex> {
 	line(expected: number) {
 		this.testMethod("line", expected)
 	}

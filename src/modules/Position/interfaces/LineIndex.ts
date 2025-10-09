@@ -1,3 +1,5 @@
+import type { ICopiable } from "../../../interfaces.js"
+
 /**
  * This is an interface for representing a character-line
  * pair of numbers for representation of the current position
@@ -5,7 +7,7 @@
  * purposes such as diagnostics during course of input
  * validation and error output.
  */
-export interface ILineIndex {
+export interface ILineIndex extends ICopiable {
 	readonly char: number
 	readonly line: number
 	nextChar(): void
