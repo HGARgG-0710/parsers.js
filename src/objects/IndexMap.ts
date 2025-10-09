@@ -38,7 +38,7 @@ class FunctionComposition<Args extends any[] = any[], Out = any> {
 		return this.composed
 	}
 
-	constructor(public readonly components: Function[] = []) {}
+	constructor(readonly components: Function[] = []) {}
 }
 
 /**

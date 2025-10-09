@@ -103,7 +103,7 @@ class Parse<InType = any, FinalType = any, InitType = any>
 	}
 
 	constructor(
-		public readonly workStream: ICompositeStream<FinalType>,
+		readonly workStream: ICompositeStream<FinalType>,
 		private readonly inputStream: IInputStream<InType, InitType>,
 		private readonly errDataMaker: IErrorDataMaker<InType, InitType>
 	) {

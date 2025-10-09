@@ -1,5 +1,5 @@
 import { type } from "@hgargg-0710/one"
-import { ObjectPool } from "../objects.js"
+import { Pools } from "../../main.js"
 import type {
 	IInitializer,
 	ILinkedStream,
@@ -10,6 +10,7 @@ import type {
 	IRawStreamArray,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
+import { ObjectPool } from "../objects.js"
 import {
 	DeepList,
 	deepListInitializer,
@@ -17,7 +18,6 @@ import {
 	RecursiveList,
 	renewerInitializer
 } from "./RecursiveList.js"
-import { Pools } from "../../main.js"
 
 const { isFunction } = type
 
@@ -72,11 +72,11 @@ export class StreamList extends RecursiveList.Poolable<
 
 export namespace StreamList {
 	/**
-	 * This is a concrete child class of `RecursiveList.RootList`, 
-	 * implemented to be compatible with `StreamList` and `StreamRenewer`, 
-	 * employed for the specific usecase of `RecursiveList` involving 
-	 * `IRawStream`s. 
-	*/
+	 * This is a concrete child class of `RecursiveList.RootList`,
+	 * implemented to be compatible with `StreamList` and `StreamRenewer`,
+	 * employed for the specific usecase of `RecursiveList` involving
+	 * `IRawStream`s.
+	 */
 	export class StreamRootList extends RecursiveList.RootList<
 		ILinkedStream,
 		IStreamChooser,
@@ -108,7 +108,7 @@ export namespace StreamList {
 
 		constructor(
 			streams: IRawStreamArray,
-			public readonly topStream: ICompositeStream
+			readonly topStream: ICompositeStream
 		) {
 			super(streams, topStream)
 		}

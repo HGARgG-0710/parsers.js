@@ -9,7 +9,7 @@ import { MultiIndex } from "./MultiIndex.js"
  * to implement other tree-iteration algorithms.
  */
 export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
-	public readonly pos = new MultiIndex()
+	readonly pos = new MultiIndex()
 
 	private _curr: TreeLike
 	private level: TreeLike

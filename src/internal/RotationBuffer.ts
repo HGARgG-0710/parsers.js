@@ -190,7 +190,7 @@ class FilledSpaceCalculator<T = any> {
 	}
 
 	constructor(
-		public readonly sizeObj: BufferSize<T>,
+		readonly sizeObj: BufferSize<T>,
 		private readonly lastIndex: LastIndex<T>,
 		private readonly rotation: IndexRotation<T>
 	) {}
@@ -320,9 +320,9 @@ class SpaceAllocator<T = any> {
 	}
 
 	constructor(
-		public readonly rawItems: RawItems<T>,
-		public readonly space: SpaceData<T>,
-		public readonly lastIndex: LastIndex<T>
+		readonly rawItems: RawItems<T>,
+		readonly space: SpaceData<T>,
+		readonly lastIndex: LastIndex<T>
 	) {}
 }
 

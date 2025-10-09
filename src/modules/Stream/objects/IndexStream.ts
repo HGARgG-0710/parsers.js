@@ -18,7 +18,7 @@ function BuildIndexStream<T = any>(
 	{
 		static readonly pool = Pools.Stream.add(new ObjectPool(IndexStream))
 
-		public readonly lineIndex: ILineIndex
+		readonly lineIndex: ILineIndex
 		private isNewline: INewlinePredicate<T>
 
 		private lineIndexTransition() {

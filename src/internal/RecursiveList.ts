@@ -631,7 +631,7 @@ export class DeepList<
 		return this.getAt(parent, index)
 	}
 
-	constructor(public readonly items: SwitchArray<T, Recursive, InitType>) {}
+	constructor(readonly items: SwitchArray<T, Recursive, InitType>) {}
 }
 
 /**
@@ -885,7 +885,7 @@ export class RecursiveList<
 		...(InitArgs | [])
 	]
 > {
-	public readonly items = new SwitchArray<T, Recursive, InitType>()
+	readonly items = new SwitchArray<T, Recursive, InitType>()
 	private readonly asEvaluable: EvaluableList<T, Recursive, InitType>
 	private readonly asRenewable: RenewableList<T, Recursive, InitType>
 
