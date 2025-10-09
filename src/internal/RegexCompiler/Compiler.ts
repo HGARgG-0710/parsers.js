@@ -1,10 +1,12 @@
 import { RegexParser } from "../RegexParser/Parser.js"
 
 export class RegexCompiler {
-	private readonly parser = new RegexParser()
+	static readonly instance = new RegexCompiler()
 
 	compile(source: string) {
-		const regexAST = this.parser.parse(source)
+		const regexAST = RegexParser.instance.parse(source)
 		// ! Compilation code...
 	}
+
+	private constructor() {}
 }

@@ -15,6 +15,8 @@ const {
 const withoutSuper = withoutProperties("super")
 
 class ConstructorCreator {
+	static instance = new ConstructorCreator()
+
 	/**
 	 * @private */
 	isNonVoid(constructor) {
@@ -39,6 +41,8 @@ class ConstructorCreator {
 }
 
 class SuperCreator {
+	static instance = new SuperCreator()
+
 	toSuper(prototype) {
 		const superProto = {}
 		for (const key of keys(prototype))
@@ -76,6 +80,8 @@ class SuperCreator {
 }
 
 class PrototypeFiller {
+	static instance = new PrototypeFiller()
+
 	fromClasses(targetClass, classes) {
 		classes.forEach((currClass) =>
 			extendPrototype(
@@ -96,18 +102,6 @@ class PrototypeFiller {
 }
 
 export class mixin {
-	/**
-	 * @private @readonly */
-	superCreator = null
-
-	/**
-	 * @private @readonly */
-	prototypeFiller = null
-
-	/**
-	 * @private @readonly */
-	constructorCreator = null
-
 	/**
 	 * @private */
 	get defaultConstructor() {
@@ -164,8 +158,8 @@ export class mixin {
 	 * @private */
 	defineClass() {
 		this.defineNonVoidConstructor(
-			this.constructorCreator.ensureNonNullPrototype(
-				this.constructorCreator.ensureConstructorNonVoid(
+			ConstructorCreator.instance.ensureNonNullPrototype(
+				ConstructorCreator.instance.ensureConstructorNonVoid(
 					this.defaultConstructor
 				)
 			)
@@ -210,13 +204,13 @@ export class mixin {
 	/**
 	 * @private */
 	fromProperties() {
-		this.prototypeFiller.fromObject(this.proto, this.properties)
+		PrototypeFiller.instance.fromObject(this.proto, this.properties)
 	}
 
 	/**
 	 * @private */
 	fromClasses(classes) {
-		this.prototypeFiller.fromClasses(this.class, classes)
+		PrototypeFiller.instance.fromClasses(this.class, classes)
 		this.superFromClasses(classes)
 	}
 
@@ -229,7 +223,7 @@ export class mixin {
 	/**
 	 * @private */
 	provideSuper(forClass) {
-		this.super[forClass.name] = this.superCreator.toSuper(
+		this.super[forClass.name] = SuperCreator.instance.toSuper(
 			propertyDescriptors(forClass.prototype)
 		)
 	}
@@ -257,10 +251,6 @@ export class mixin {
 
 	constructor(mixinShape, classes = []) {
 		this.mixinShape = mixinShape
-		this.superCreator = new SuperCreator()
-		this.prototypeFiller = new PrototypeFiller()
-		this.constructorCreator = new ConstructorCreator()
-
 		this.defineClass()
 		this.configureClass()
 		this.fromClasses(classes)

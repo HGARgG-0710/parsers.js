@@ -4,6 +4,7 @@ import type {
 	INode,
 	IOwnedStream,
 	IParserFunction,
+	IPeekableStream,
 	IRawStreamArray,
 	ITypeCheckable
 } from "../../interfaces.js"
@@ -16,6 +17,7 @@ import {
 	ErrorData,
 	IndexMap,
 	ParseableInput,
+	Stream,
 	TableHandler
 } from "../../objects.js"
 import { CurrentHash } from "../../objects/HashMap.js"
@@ -30,7 +32,7 @@ import {
 import { Pairs } from "../../samples.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
-import { NodeMap } from "../../utils/IndexMap.js"
+import { NodeMap, PeekMap } from "../../utils/IndexMap.js"
 import { consume, hasPos } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
@@ -50,15 +52,21 @@ import { maybeTypeMatch } from "./TypeMatch.js"
 export function LookaheadMap(
 	map: array.Pairs<ITypeCheckable, IParserFunction>,
 	_default: IParserFunction
-): IIndexMap<ITypeCheckable, IParserFunction, IParserFunction> {
+): IIndexMap<
+	ITypeCheckable,
+	IParserFunction,
+	IParserFunction,
+	IPeekableStream
+> {
 	const [keys, values] = Pairs.from(map)
 	return (
-		NodeMap(new IndexMap.PredicateMap(new LiquidMap([], [])))
-			.extend((input) => input.peek(1))
-			.finalize() as IIndexMap<
+		PeekMap(
+			NodeMap(new IndexMap.PredicateMap(new LiquidMap([], [])))
+		).finalize() as IIndexMap<
 			ITypeCheckable,
 			IParserFunction,
-			IParserFunction
+			IParserFunction,
+			IPeekableStream
 		>
 	).fromCarrier(new TableCarrier(keys, values, _default))
 }
@@ -66,6 +74,8 @@ export function LookaheadMap(
 export const PreserveLowerStream = () => new IdentityStream()
 
 export class RegexParser {
+	static readonly instance = new RegexParser()
+
 	private parseSource(source: string) {
 		return consume(
 			parseRegex(new ParseableInput(source))
@@ -73,11 +83,13 @@ export class RegexParser {
 	}
 
 	parse(source: string) {
-		// * Vital note: there is NO CLEANUP HERE 
-		// because the user may (accidentally) be 
-		// re-parsing the same expressions over-and-over again. 
+		// * Vital note: there is NO CLEANUP HERE
+		// because the user may (accidentally) be
+		// re-parsing the same expressions over-and-over again.
 		return this.parseSource(source)
 	}
+
+	private constructor() {}
 }
 
 const RegexTokenizer = TableHandler<IOwnedStream<string>, IRawStreamArray>(
@@ -105,14 +117,11 @@ const QuantifierProcessor = TableHandler(
 	)
 )
 
-// ! THIS is the error-throwing code - put it at the spot where we KNOW there are NO MORE valid string-cases left...
-// function (input) {
 // TODO: add error-throwing code!
-// ! The `ParseError` is ILL-FIT for this.
-// * 	Specifically, one requires an `ShortStringParseError` error, which is designed for:
-// 		1. inputs that ONLY HAVE A SINGLE LINE [i.e. using an `ILineIndex` is clearly an overkill here, though usually - it isn't...]
-// 		2. inputs that fit very well inside the RAM [i.e. - KNOWINGLY SHORT strings; as this is supposed to be hand-written, the `Regex` strings are, indeed, very short]
-// }
+// * 1. introduce appropriate error-throwing function inside of EACH ONE of the streams...
+// * 2. re-structure parser pieces SPECIFICALLY to ensure the correct ordering of tokens!
+// * 3. create thematical errors (some of them - PUBLIC EXPORTS FROM THE LIBRARY!!!)
+// * 4. make `expect` and other such error-throwing functions PUBLICLY ACCESSIBLE!!!
 
 const RootNode = SingleChildNode("regex-root")
 
@@ -141,7 +150,7 @@ const parseRegex = DynamicParser(
 			(inputStream) =>
 				new ErrorData.ErrorPosition.PosCarrying(
 					inputStream,
-					new ErrorData.ErrorPosition.Locator.Downwards(hasPos)
+					new Stream.Locator.Downwards(hasPos)
 				)
 		)
 )

@@ -104,10 +104,26 @@ export class PropDigger {
 
 /**
  * A `PropDigger` over the `.resource` property.
+ * This is a singleton, the instance is obtainable via the
+ * `.instance` property.
  */
-export const resourceDigger = new PropDigger("resource")
+export class ResourceDigger extends PropDigger {
+	static readonly instance = new ResourceDigger()
+
+	private constructor() {
+		super("resource")
+	}
+}
 
 /**
  * A `PropDigger` over the `.owner` property.
+ * This is a singleton, the instance is obtainable via the
+ * `.instance` property.
  */
-export const ownerDigger = new PropDigger("owner")
+export class OwnerDigger extends PropDigger {
+	static readonly instance = new OwnerDigger()
+	
+	private constructor() {
+		super("owner")
+	}
+}

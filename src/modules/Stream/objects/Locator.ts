@@ -6,8 +6,8 @@ import type {
 } from "../../../interfaces.js"
 import { negate } from "../../../modules/Stream/utils/StreamPosition.js"
 import {
-	ownerDigger,
-	resourceDigger,
+	OwnerDigger,
+	ResourceDigger,
 	type PropDigger
 } from "../../../objects/PropDigger.js"
 import { hasState } from "../../../utils/Stream.js"
@@ -36,7 +36,7 @@ export abstract class WithPropDigger<T = any>
  */
 export class Upwards<T = any> extends WithPropDigger<T> {
 	protected get digger(): PropDigger {
-		return ownerDigger
+		return OwnerDigger.instance
 	}
 }
 
@@ -45,19 +45,21 @@ export class Upwards<T = any> extends WithPropDigger<T> {
  */
 export class Downwards<T = any> extends WithPropDigger<T> {
 	protected get digger(): PropDigger {
-		return resourceDigger
+		return ResourceDigger.instance
 	}
 }
 
 /**
- * This is a `WithPropDigger` Singleton-class for locating the nearest 
+ * This is a `WithPropDigger` Singleton-class for locating the nearest
  * (upwards or downwards) `IStream` (`IResourcefulStream/IOwnedStream`)
- * which is alos an `IStateHaving<IParseState>`. 
+ * which is alos an `IStateHaving<IParseState>`.
  */
 export class StatefulLocator extends WithPropDigger<IStateHaving<IParseState>> {
-	static readonly upwards: StatefulLocator = new StatefulLocator(ownerDigger)
+	static readonly upwards: StatefulLocator = new StatefulLocator(
+		OwnerDigger.instance
+	)
 	static readonly downwards: StatefulLocator = new StatefulLocator(
-		resourceDigger
+		ResourceDigger.instance
 	)
 
 	protected get digger() {

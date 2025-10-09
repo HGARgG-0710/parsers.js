@@ -12,11 +12,10 @@ export class RegexStorage {
 	static readonly instance = new RegexStorage()
 
 	// TODO: ADD PROPER TYPES FOR THIS!!! REPLACE THE `any` thingy...
-	private readonly cached: Map<string, any>
-	private readonly compiler = new RegexCompiler()
+	private readonly cached = new Map<string, any>()
 
 	private makeNew(regex: string) {
-		const compiled = this.compiler.compile(regex)
+		const compiled = RegexCompiler.instance.compile(regex)
 		this.cached.set(regex, compiled)
 		return compiled
 	}
