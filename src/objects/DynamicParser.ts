@@ -158,15 +158,32 @@ class Parse<InType = any, FinalType = any, InitType = any>
  * before the `.update()` call in question.
  */
 export function DynamicParser<InType = any, FinalType = any, InitType = any>(
-	workStream: () => ICompositeStream<FinalType>,
-	inputStream: () => IInputStream<InType, InitType>,
-	errDataMaker: IErrorDataMaker<InType, InitType>
+	config: DynamicParser.Config<InType, FinalType, InitType>
 ) {
+	const { workStream, inputStream, errDataMaker, getState } = config
 	const getParse = () => new Parse(workStream(), inputStream(), errDataMaker)
-	return function (
-		input: InitType,
-		state?: Summat
-	): ICommonStream<FinalType> {
-		return new ParsedStream(getParse().init(input, state))
+	return function (input: InitType): ICommonStream<FinalType> {
+		return new ParsedStream(getParse().init(input, getState?.()))
+	}
+}
+
+export namespace DynamicParser {
+	export class Config<InType = any, FinalType = any, InitType = any> {
+		private _getState?: () => Summat
+
+		get getState() {
+			return this._getState
+		}
+
+		state(stateGetter: () => Summat) {
+			this._getState = stateGetter
+			return this
+		}
+
+		constructor(
+			readonly workStream: () => ICompositeStream<FinalType>,
+			readonly inputStream: () => IInputStream<InType, InitType>,
+			readonly errDataMaker: IErrorDataMaker<InType, InitType>
+		) {}
 	}
 }
