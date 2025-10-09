@@ -1,6 +1,8 @@
 import { BadIndex } from "../../../constants.js"
+import { Pools } from "../../../global.js"
 import type { INavigable, IWalkable } from "../../../interfaces.js"
 import { TreeWalker } from "../../../internal/TreeWalker.js"
+import { ObjectPool } from "../../../objects.js"
 import { isGoodIndex } from "../../../utils.js"
 import { treeEndPath } from "../../../utils/Node.js"
 import { SourceStream } from "./SourceStream.js"
@@ -166,6 +168,8 @@ export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends SourceStream<TreeLike, TreeLike>
 	implements INavigable<TreeLike, number[]>
 {
+	static readonly pool = Pools.Stream.add(new ObjectPool(DepthStream))
+	
 	private readonly walker = new TreeWalker<TreeLike>()
 	private readonly lastLevel = new LastLevelWithSiblings(this.walker)
 	private readonly nextResponse = new NextWalkerResponse(this.walker)
