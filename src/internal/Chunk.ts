@@ -40,7 +40,7 @@ export namespace Chunk {
 			return this.pos % Chunk.size
 		}
 
-		isSamePage(bytePos: BytePos) {
+		isSameChunk(bytePos: BytePos) {
 			return this.getChunk() === bytePos.getChunk()
 		}
 

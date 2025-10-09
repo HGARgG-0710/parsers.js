@@ -57,7 +57,7 @@ class BufferReader {
 
 	readNext(): number {
 		if (!this.isEndPos(this.nextPos))
-			return this.nextPos.isSamePage(this.readPos)
+			return this.nextPos.isSameChunk(this.readPos)
 				? this.readBuffered()
 				: this.updateBuffer()
 		return FileError.InvalidPos

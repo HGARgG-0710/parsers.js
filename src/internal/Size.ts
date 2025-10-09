@@ -1,3 +1,7 @@
+/**
+ * This is a class for representing a mutable size 
+ * of a collection entity. 
+*/
 export class Size {
 	inc() {
 		++this.size
