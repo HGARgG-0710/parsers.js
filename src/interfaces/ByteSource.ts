@@ -11,3 +11,12 @@ export interface IByteSource extends IResource, IVisiblyOpen {
 	nextByte(): void
 	hasBytes(): boolean
 }
+
+/**
+ * This is an `IByteSource` that corresponds to a file. 
+ * It carries various additional information such as 
+ * the `filename: string`. 
+*/
+export interface IFileSource extends IByteSource {
+	readonly filename: string
+}

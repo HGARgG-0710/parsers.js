@@ -1,6 +1,6 @@
-import { InvalidFileReadPositionError } from "../../objects/Error.js"
-import type { IByteSource } from "../../interfaces.js"
+import type { IFileSource } from "../../interfaces.js"
 import { Chunk } from "../../internal/Chunk.js"
+import { InvalidFileReadPositionError } from "../../objects/Error.js"
 
 /**
  * This is an `IByteSource` intended to work in web-contexts.
@@ -13,12 +13,16 @@ import { Chunk } from "../../internal/Chunk.js"
  * The reading operation is likewise lazy. The `source` can be
  * taken from an `<input type="file" />` element or suchlike.
  */
-export class WebByteSource implements IByteSource {
+export class WebByteSource implements IFileSource {
 	private readonly source: File
 
 	private currChunk: Uint8Array
 	private lastChunkCount: number = 0
 	private readonly pos = new Chunk.BytePos()
+
+	get filename() {
+		return this.source.name
+	}
 
 	private readTempData(chunk: Blob) {
 		return new Promise<Uint8Array>((resolve, reject) => {

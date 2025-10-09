@@ -1,7 +1,7 @@
 import { closeSync, fstatSync, openSync, readSync } from "fs"
-import { InvalidFileReadPositionError } from "../../objects/Error.js"
-import type { IByteSource } from "../../interfaces.js"
+import type { IFileSource } from "../../interfaces.js"
 import { Chunk } from "../../internal/Chunk.js"
+import { InvalidFileReadPositionError } from "../../objects/Error.js"
 
 enum FileError {
 	NoError = 0,
@@ -170,7 +170,7 @@ class ErrorStatus {
  * in the event that an error is raised during file's
  * opening.
  */
-export class FileDescriptor implements IByteSource {
+export class FileDescriptor implements IFileSource {
 	private readonly byteProvider: ByteProvider
 	private readonly descriptor: number
 	private readonly endPos: Chunk.BytePos
@@ -237,7 +237,7 @@ export class FileDescriptor implements IByteSource {
 	}
 
 	constructor(
-		private readonly filename: string,
+		readonly filename: string,
 		handler: (err: NodeJS.ErrnoException) => void
 	) {
 		try {
