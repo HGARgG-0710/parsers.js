@@ -1,9 +1,10 @@
 import type {
 	IErrorData,
-	IErrorPosition,
 	IIndexCarrying,
 	IInputStream,
+	ILineIndex,
 	IPosed,
+	IPrintablePosition,
 	IStream,
 	IStreamLocator
 } from "../interfaces.js"
@@ -17,7 +18,8 @@ import { MissingImplementationError, MissingObjectError } from "./Error.js"
  */
 export abstract class BaseErrorData implements IErrorData {
 	private readonly infoMap = new Map<string, any>()
-	abstract readonly pos: IErrorPosition
+	abstract readonly pos: IPrintablePosition
+	abstract refresh(): void
 	private _hasError: boolean = false
 
 	private set hasError(has: boolean) {
@@ -28,7 +30,7 @@ export abstract class BaseErrorData implements IErrorData {
 		return this._hasError
 	}
 
-	markActive(): void {
+	protected markActive(): void {
 		this.hasError = true
 	}
 
@@ -55,16 +57,16 @@ export abstract class BaseErrorData implements IErrorData {
  * information.
  */
 export abstract class DelegateErrorData implements IErrorData {
+	refresh(): void {
+		this.parentErrorData.refresh()
+	}
+
 	get pos() {
 		return this.parentErrorData.pos
 	}
 
 	get hasError() {
 		return this.parentErrorData.hasError
-	}
-
-	markActive(): void {
-		this.parentErrorData.markActive()
 	}
 
 	markHandled(): void {
@@ -102,20 +104,32 @@ export class FileErrorData extends DelegateErrorData {
  * and initialized with the given `inputStream: IInputStream`.
  */
 export class StreamListErrorData extends BaseErrorData {
-	private _pos: IErrorPosition | null = null
+	private _pos: IPrintablePosition | null = null
+
+	private ensurePosNonNull() {
+		if (!this._pos) this._pos = this.posMaker(this.inputStream)
+	}
 
 	private locatePos() {
-		return this.posMaker(this.inputStream).locate()
+		return this._pos!.locate()
+	}
+
+	refresh(): void {
+		this.ensurePosNonNull()
+		this.locatePos()
+		this.markActive()
 	}
 
 	get pos() {
-		if (!this._pos) this._pos = this.locatePos()
-		return this._pos
+		this.ensurePosNonNull()
+		return this._pos!
 	}
 
 	constructor(
 		private readonly inputStream: IInputStream,
-		private readonly posMaker: (inputStream: IInputStream) => IErrorPosition
+		private readonly posMaker: (
+			inputStream: IInputStream
+		) => IPrintablePosition
 	) {
 		super()
 	}
@@ -134,11 +148,11 @@ export namespace ErrorPosition {
 	 * and optionally implements the `isNumber`: the implementation
 	 * is valid only in cases when one can delegate to `.lineIndex.toNumber()`.
 	 */
-	export class LineIndexCarrying implements IErrorPosition {
-		private refStream: IStream & IIndexCarrying
+	export class LineIndexCarrying implements IPrintablePosition {
+		private _lineIndex: ILineIndex
 
 		private get lineIndex() {
-			return this.refStream.lineIndex
+			return this._lineIndex
 		}
 
 		toNumber(): number {
@@ -160,7 +174,7 @@ export namespace ErrorPosition {
 			)
 			if (!indexStream)
 				throw new MissingObjectError("IStream & IIndexCarrying")
-			this.refStream = indexStream
+			this._lineIndex = indexStream.lineIndex.copy()
 			return this
 		}
 
@@ -182,18 +196,18 @@ export namespace ErrorPosition {
 	 * It guaranteedly implements `.toNumber(): number` as
 	 * `() => this.refStream.pos`.
 	 */
-	export class PosCarrying implements IErrorPosition {
-		private refStream: IStream & IPosed
+	export class PosCarrying implements IPrintablePosition {
+		private pos: number
 
 		toNumber(): number {
-			return this.refStream.pos
+			return this.pos
 		}
 
 		locate() {
 			const posStream = this.posCarryingLocator.locate(this.inputStream)
 			if (!posStream)
 				throw new MissingObjectError("IPosed<number> & IStream")
-			this.refStream = posStream
+			this.pos = posStream.pos
 			return this
 		}
 
