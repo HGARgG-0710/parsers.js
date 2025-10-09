@@ -1,4 +1,4 @@
-import type { StringLineIndex } from "./Position.js"
+import type { IErrorData } from "../interfaces.js"
 
 /**
  * This is an abstract class for representing
@@ -28,19 +28,10 @@ export abstract class ConstructorError extends Error {
  * Can be easily used with `ErrorStream` descendant.
  */
 export abstract class ParseError extends ConstructorError {
-	protected abstract makeMessage(
-		atIndex: StringLineIndex,
-		atPath: string,
-		options?: ErrorOptions
-	): string
-
-	constructor(
-		at: StringLineIndex,
-		source: string = "",
-		options?: ErrorOptions
-	) {
+	protected abstract makeMessage(errorData: IErrorData): string
+	constructor(errorData: IErrorData) {
 		super()
-		this.message = this.makeMessage(at, source, options)
+		this.message = this.makeMessage(errorData)
 	}
 }
 

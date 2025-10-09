@@ -5,7 +5,7 @@ import type {
 	ILinkedStream,
 	IOwnedStream
 } from "../../../interfaces.js"
-import { ErrorPosition } from "../../../objects/ErrorData.js"
+import { Stream } from "../../../objects.js"
 import { hasLineIndex } from "../../../utils/Stream.js"
 import { IdentityStream } from "./IdentityStream.js"
 
@@ -54,8 +54,9 @@ export abstract class BasicErrorStream<
 > extends ErrorStream<T> {
 	protected inputStream: IIndexStream<I>
 	private _lineIndex: ILineIndex
-	private indexCarryingLocator =
-		new ErrorPosition.Locator.Downwards<IIndexCarrying>(hasLineIndex)
+	private indexCarryingLocator = new Stream.Locator.Downwards<IIndexCarrying>(
+		hasLineIndex
+	)
 
 	get resource(): ILinkedStream {
 		return super.resource as ILinkedStream

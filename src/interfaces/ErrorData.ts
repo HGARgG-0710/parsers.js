@@ -51,13 +51,3 @@ export type IErrorDataMaker<InType = any, InitType = any> = (
 	inputStream: IInputStream<InType, InitType>,
 	input: InitType
 ) => IErrorData
-
-/**
- * This is an interface used by some of the library implementations
- * of the `IErrorPosition`. These are strategy objects that 
- * provide the algorithm for locating the positions of a specified 
- * type. 
- */
-export interface IErrorPositionLocator<T = any> {
-	locate(inputStream: IInputStream): T | null
-}

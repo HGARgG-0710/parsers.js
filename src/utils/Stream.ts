@@ -2,6 +2,7 @@ import { boolean, object, type } from "@hgargg-0710/one"
 import type {
 	IFiniteWritable,
 	ILineIndex,
+	IParseState,
 	IPosed,
 	IPushable,
 	IRefillable,
@@ -13,6 +14,7 @@ import type {
 	IIndexCarrying,
 	IIterableStream,
 	INavigable,
+	IOwnedStream,
 	IPeekableStream,
 	IRenewerStream,
 	IStream,
@@ -23,6 +25,7 @@ import type {
 	ITableHandler
 } from "../interfaces/StreamHandler.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
+import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { negate } from "../modules/Stream/utils/StreamPosition.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
@@ -30,7 +33,7 @@ import { HandlerStream } from "../objects/Stream.js"
 
 const { structCheck } = object
 const { prop } = object
-const { isNumber, isFunction } = type
+const { isNumber, isFunction, isObject } = type
 const { T } = boolean
 
 /**
@@ -312,7 +315,7 @@ export const curr = prop("curr") as <T = any>(x: IStream<T>) => T
 /**
  * Returns whether a given item is an `IPosed<number>`.
  */
-export const hasPos = structCheck<IPosed<number>>({ pos: isNumber })
+export const hasPos = structCheck<IPosed>({ pos: isNumber })
 
 /**
  * This is a predicate verifying (at runtime) bare conformance to the
@@ -357,5 +360,30 @@ export const isStateful = structCheck<IStateHaving & IStateSettable>({
 	state: T,
 	setState: isFunction
 })
+
+/**
+ * This is an object for identifying an `IParseState` object.
+ */
+export const isParseState = structCheck<IParseState>({
+	state: T,
+	errorData: isObject
+})
+
+/**
+ * This is an object for identifying an `IParseState`-bearing object.
+ */
+export const hasState = structCheck<IStateHaving<IParseState>>({
+	state: isParseState
+})
+
+/**
+ * This is a function for locating the `.state` of the
+ * current `.owner`-chain, of which the given `IOwnedStream`
+ * is (expected) to be a part of by searching it upwards.
+ * When no `.state` exists in the chain, `undefined` is returned.
+ */
+export function locateState(stream: IOwnedStream) {
+	return StatefulLocator.upwards.locate(stream)?.state
+}
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"

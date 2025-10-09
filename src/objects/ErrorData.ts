@@ -1,15 +1,13 @@
 import type {
 	IErrorData,
 	IErrorPosition,
-	IErrorPositionLocator,
 	IIndexCarrying,
 	IInputStream,
 	IPosed,
-	IStream
+	IStream,
+	IStreamLocator
 } from "../interfaces.js"
-import { negate } from "../modules/Stream/utils/StreamPosition.js"
 import { MissingImplementationError, MissingObjectError } from "./Error.js"
-import { ownerDigger, PropDigger, resourceDigger } from "./PropDigger.js"
 
 /**
  * This is the abstract class implementing `IErrorData` serving as
@@ -168,7 +166,7 @@ export namespace ErrorPosition {
 
 		constructor(
 			private readonly inputStream: IInputStream,
-			private readonly indexCarryingLocator: IErrorPositionLocator<
+			private readonly indexCarryingLocator: IStreamLocator<
 				IStream & IIndexCarrying
 			>
 		) {}
@@ -185,7 +183,7 @@ export namespace ErrorPosition {
 	 * `() => this.refStream.pos`.
 	 */
 	export class PosCarrying implements IErrorPosition {
-		private refStream: IStream & IPosed<number>
+		private refStream: IStream & IPosed
 
 		toNumber(): number {
 			return this.refStream.pos
@@ -201,50 +199,9 @@ export namespace ErrorPosition {
 
 		constructor(
 			private readonly inputStream: IInputStream,
-			private readonly posCarryingLocator: IErrorPositionLocator<
-				IStream & IPosed<number>
+			private readonly posCarryingLocator: IStreamLocator<
+				IStream & IPosed
 			>
 		) {}
-	}
-
-	export namespace Locator {
-		/**
-		 * An abstract implementation of `IErrorPositionLocator` to represent
-		 * a locator based off an abstract `PropDigger` instance provided by
-		 * the child classes. The `locate()` algorithm implementation calls
-		 * the `dig` method on `inputStream`, with a negation of the search
-		 * predicate supplied via the constructor,
-		 */
-		export abstract class WithPropDigger<T = any>
-			implements IErrorPositionLocator<T & IStream>
-		{
-			protected abstract get digger(): PropDigger
-
-			locate(inputStream: IInputStream): (T & IStream<any>) | null {
-				return (
-					this.digger.dig(inputStream, negate(this.predicate)) || null
-				)
-			}
-
-			constructor(private readonly predicate: (x: IStream) => boolean) {}
-		}
-
-		/**
-		 * A `WithPropDigger` case with `ownerDigger` as the `digger`. 
-		 */
-		export class Upwards<T = any> extends WithPropDigger<T> {
-			protected get digger(): PropDigger {
-				return ownerDigger
-			}
-		}
-
-		/**
-		 * A `WithPropDigger` case with `resourceDigger` as the `digger`. 
-		*/
-		export class Downwards<T = any> extends WithPropDigger<T> {
-			protected get digger(): PropDigger {
-				return resourceDigger
-			}
-		}
 	}
 }
