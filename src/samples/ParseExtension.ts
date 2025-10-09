@@ -1,3 +1,4 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICompositeStream,
 	IErrorDataMaker,
@@ -44,13 +45,18 @@ import { IdentityStream } from "../objects/Stream.js"
  */
 export function ParseExtension<InType = any, InitType = any, OutType = any>(
 	workerStream: () => ICompositeStream<OutType>,
-	errDataMaker: IErrorDataMaker<InType, IOwnedStream>
+	errDataMaker: IErrorDataMaker<InType, IOwnedStream>,
+	getState?: () => Summat
 ) {
-	const protoExtension = DynamicParser(
+	const config = new DynamicParser.Config(
 		workerStream,
 		() => IdentityStream.pool.create(),
 		errDataMaker
 	)
+	if (getState) config.state(getState)
+
+	const protoExtension = DynamicParser(config)
+
 	return function (childStream: IInputStream<InType, InitType>) {
 		return protoExtension(childStream)
 	}

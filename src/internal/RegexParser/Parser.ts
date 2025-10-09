@@ -12,7 +12,10 @@ import {
 	LiquidMap,
 	TableCarrier
 } from "../../modules/IndexMap/objects/LiquidMap.js"
-import { PosCarryingLocator } from "../../modules/Stream/objects/Locator.js"
+import {
+	CachingLocator,
+	PosCarryingLocator
+} from "../../modules/Stream/objects/Locator.js"
 import {
 	DynamicParser,
 	ErrorData,
@@ -136,21 +139,29 @@ export function ParseRegexRecursively(): IRawStreamArray {
 	]
 }
 
+const regexWorkStreamMaker = () =>
+	CompositeStream(
+		RootNodeStream(),
+		...ParseRegexRecursively(),
+		PosStream.pool.create()
+	)()
+
+const regexInputStreamMaker = () => new InputStream()
+
+const regexErrorDataMaker = (inputStream) =>
+	new ErrorData.StreamListErrorData(
+		inputStream,
+		(inputStream) =>
+			new ErrorData.ErrorPosition.PosCarrying(
+				inputStream,
+				new CachingLocator(PosCarryingLocator.downwards)
+			)
+	)
+
 const parseRegex = DynamicParser(
-	() =>
-		CompositeStream(
-			RootNodeStream(),
-			...ParseRegexRecursively(),
-			PosStream.pool.create()
-		)(),
-	() => new InputStream(),
-	(inputStream) =>
-		new ErrorData.StreamListErrorData(
-			inputStream,
-			(inputStream) =>
-				new ErrorData.ErrorPosition.PosCarrying(
-					inputStream,
-					PosCarryingLocator.downwards
-				)
-		)
+	new DynamicParser.Config(
+		regexWorkStreamMaker,
+		regexInputStreamMaker,
+		regexErrorDataMaker
+	)
 )

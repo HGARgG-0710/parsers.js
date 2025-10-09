@@ -1,5 +1,6 @@
 import type {
 	IIndexCarrying,
+	IInputStream,
 	IParseState,
 	IPosed,
 	IStateHaving,
@@ -103,4 +104,24 @@ export class IndexCarryingLocator extends WithPath<IIndexCarrying> {
 	private constructor(private readonly _path: PropertyPath) {
 		super(hasLineIndex)
 	}
+}
+
+/**
+ * This is a Decorator class for existing `IStreamLocator<T>`s,
+ * which caches the result, to avoid repeated calling of underlying
+ * `locator: IStreamLocator<T>`. Useful for cases when the sought
+ * item is guaranteed not to change its identity, i.e. when the
+ * exact same object is queried from different places several
+ * times via the `locate` method call.
+ */
+export class CachingLocator<T = any> implements IStreamLocator<T> {
+	private result: T | null = null
+
+	locate(inputStream: IInputStream): T | null {
+		return this.result
+			? this.result
+			: (this.result = this.locator.locate(inputStream))
+	}
+
+	constructor(private readonly locator: IStreamLocator<T>) {}
 }
