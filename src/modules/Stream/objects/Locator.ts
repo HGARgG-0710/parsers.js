@@ -1,6 +1,7 @@
 import type {
 	IIndexCarrying,
 	IInputStream,
+	IMarkerHaving,
 	IParseState,
 	IPosed,
 	IStateHaving,
@@ -9,12 +10,13 @@ import type {
 } from "../../../interfaces.js"
 import type { IPropertyPath } from "../../../interfaces/PropertyPath.js"
 import { negate } from "../../../modules/Stream/utils/StreamPosition.js"
+import { OwnerPath, ResourcePath } from "../../../objects/PropertyPath.js"
 import {
-	OwnerPath,
-	ResourcePath,
-	type PropertyPath
-} from "../../../objects/PropertyPath.js"
-import { hasLineIndex, hasPos, hasState } from "../../../utils/Stream.js"
+	hasLineIndex,
+	hasMarker,
+	hasPos,
+	hasState
+} from "../../../utils/Stream.js"
 
 /**
  * An abstract implementation of `IErrorPositionLocator` to represent
@@ -37,7 +39,7 @@ export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
  * A `WithPropDigger` case with `ownerDigger` as the `digger`.
  */
 export class Upwards<T = any> extends WithPath<T> {
-	protected get path(): PropertyPath {
+	protected get path(): IPropertyPath {
 		return OwnerPath.instance
 	}
 }
@@ -46,7 +48,7 @@ export class Upwards<T = any> extends WithPath<T> {
  * A `WithPropDigger` case with `resourceDigger` as the `digger`.
  */
 export class Downwards<T = any> extends WithPath<T> {
-	protected get path(): PropertyPath {
+	protected get path(): IPropertyPath {
 		return ResourcePath.instance
 	}
 }
@@ -65,10 +67,10 @@ export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
 	)
 
 	protected get path() {
-		return this._digger
+		return this._path
 	}
 
-	private constructor(private readonly _digger: PropertyPath) {
+	private constructor(private readonly _path: IPropertyPath) {
 		super(hasState)
 	}
 }
@@ -84,7 +86,7 @@ export class PosCarryingLocator extends WithPath<IPosed> {
 		return this._path
 	}
 
-	private constructor(private readonly _path: PropertyPath) {
+	private constructor(private readonly _path: IPropertyPath) {
 		super(hasPos)
 	}
 }
@@ -101,7 +103,7 @@ export class IndexCarryingLocator extends WithPath<IIndexCarrying> {
 		return this._path
 	}
 
-	private constructor(private readonly _path: PropertyPath) {
+	private constructor(private readonly _path: IPropertyPath) {
 		super(hasLineIndex)
 	}
 }
@@ -124,4 +126,36 @@ export class CachingLocator<T = any> implements IStreamLocator<T> {
 	}
 
 	constructor(private readonly locator: IStreamLocator<T>) {}
+}
+
+/**
+ * This is an extension of `WithPath<IMarkerHaving<M>>`, for locating
+ * the next stream (upwards/downwards) with the `.marker: M` property of
+ * value of `this.marker` (set by `setMarker(marker: M): this`).
+ */
+export class MarkerLocator<M = any> extends WithPath<IMarkerHaving<M>> {
+	private marker: M
+
+	static upwards() {
+		return new MarkerLocator(OwnerPath.instance)
+	}
+
+	static downwards() {
+		return new MarkerLocator(ResourcePath.instance)
+	}
+
+	setMarker(marker: M) {
+		this.marker = marker
+		return this
+	}
+
+	protected get path() {
+		return this._path
+	}
+
+	private constructor(private readonly _path: IPropertyPath) {
+		super(
+			(x): x is IMarkerHaving => hasMarker(x) && x.marker === this.marker
+		)
+	}
 }

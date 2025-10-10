@@ -9,16 +9,17 @@ import type {
 	IStateHaving,
 	IStateSettable
 } from "../interfaces.js"
-import type {
-	IFinishable,
-	IIndexCarrying,
-	IIterableStream,
-	INavigable,
-	IOwnedStream,
-	IPeekableStream,
-	IRenewerStream,
-	IStream,
-	IStreamGenerator
+import {
+	IMarkerHaving,
+	type IFinishable,
+	type IIndexCarrying,
+	type IIterableStream,
+	type INavigable,
+	type IOwnedStream,
+	type IPeekableStream,
+	type IRenewerStream,
+	type IStream,
+	type IStreamGenerator
 } from "../interfaces/Stream.js"
 import type {
 	IStreamTransform,
@@ -385,5 +386,11 @@ export const hasState = structCheck<IStateHaving<IParseState>>({
 export function locateState(stream: IOwnedStream) {
 	return StatefulLocator.upwards.locate(stream)?.state
 }
+
+/**
+ * This is a function for verifying that a given item 
+ * is an instance of `IMarkerHaving`. 
+*/
+export const hasMarker = structCheck<IMarkerHaving>(["marker"])
 
 export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"
