@@ -1,5 +1,5 @@
 import type { ICopiable } from "../interfaces.js"
-import type { IInputStream } from "./Stream.js"
+import type { IInputStream, IOwnedStream } from "./Stream.js"
 
 /**
  * This is an interface representing an encapsulation-object of
@@ -52,3 +52,5 @@ export type IErrorDataMaker<InType = any, InitType = any> = (
 	inputStream: IInputStream<InType, InitType>,
 	input: InitType
 ) => IErrorData
+
+export type IErrorDataGetter<T = any> = (stream: IOwnedStream<T>) => IErrorData

@@ -1,4 +1,12 @@
-import type { IErrorData } from "../interfaces.js"
+import type {
+	IDebugNamed,
+	IErrorData,
+	IErrorDataGetter,
+	IOwnedStream,
+	IPrintablePosition,
+	ITypeCheckable
+} from "../interfaces.js"
+import { locateState } from "../utils/Stream.js"
 
 /**
  * This is an abstract class for representing
@@ -50,16 +58,6 @@ export class InvalidFileReadPositionError extends ConstructorError {
 }
 
 /**
- * This is the error thrown by `LineIndexErrorPosition` upon
- * failing to successfully complete the `.locate()` method.
- */
-export class MissingObjectError extends ConstructorError {
-	constructor(type: string) {
-		super(`Failure obtaining the object of type \`${type}\``)
-	}
-}
-
-/**
  * This is an error for representing missing method implementations
  * on a class that requires it.
  */
@@ -69,5 +67,243 @@ export class MissingImplementationError extends ConstructorError {
 			`Missing implementation of method \`${methodName}\`` +
 				` on class \`${className}\``
 		)
+	}
+}
+
+export function findErrorDataUpstream<T = any>(stream: IOwnedStream<T>) {
+	const state = locateState(stream)
+	if (!state) throw new NoStatefulLocatableError()
+	return state.errData
+}
+
+export function prepareExpectError<T = any>(
+	errData: IErrorData,
+	received: T,
+	expected: any
+) {
+	errData.refresh()
+	errData.setInfo("received", received)
+	errData.setInfo("expected", expected)
+	return errData
+}
+
+export function expect<T = any>(item: T) {
+	return function (
+		stream: IOwnedStream<T>,
+		errDataGetter: IErrorDataGetter<T>
+	) {
+		if (stream.curr !== item)
+			throw new ExpectedItemMissingError(
+				prepareExpectError(errDataGetter(stream), stream.curr, item)
+			)
+	}
+}
+
+export function expectKind<T = any>(kind: ITypeCheckable & IDebugNamed) {
+	return function (
+		stream: IOwnedStream<T>,
+		errDataGetter: IErrorDataGetter<T>
+	) {
+		if (!kind.is(stream.curr))
+			throw new ExpectedKindMissingError(
+				prepareExpectError(errDataGetter(stream), stream.curr, kind)
+			)
+	}
+}
+
+export function allow<T = any>(..._items: T[]) {
+	const items = new Set(_items)
+	return function (
+		stream: IOwnedStream<T>,
+		errDataGetter: IErrorDataGetter<T>
+	) {
+		if (!items.has(stream.curr))
+			throw new ExpectedInItemListMissingError(
+				prepareExpectError(errDataGetter(stream), stream.curr, _items)
+			)
+	}
+}
+
+export function skip<T = any>(...items: T[]) {
+	const allowItems = allow(...items)
+	return function (
+		stream: IOwnedStream<T>,
+		errDataGetter: IErrorDataGetter<T>
+	) {
+		allowItems(stream, errDataGetter)
+		stream.next()
+	}
+}
+
+export function prepareUnexpectedItemError<T = any>(
+	errData: IErrorData,
+	received: T
+) {
+	errData.refresh()
+	errData.setInfo("received", received)
+	return errData
+}
+
+export function unexpected<T = any>(
+	stream: IOwnedStream<T>,
+	errDataGetter: IErrorDataGetter<T>
+) {
+	throw new UnexpectedItemError(
+		prepareUnexpectedItemError(errDataGetter(stream), stream.curr)
+	)
+}
+
+export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
+	return function (
+		stream: IOwnedStream<T>,
+		errDataGetter: IErrorDataGetter<T>
+	) {
+		const currItem = stream.curr
+		for (const kind of kinds) if (kind.is(currItem)) return
+		throw new ExpectedInKindListMissingError(
+			prepareExpectError(errDataGetter(stream), stream.curr, kinds)
+		)
+	}
+}
+
+export abstract class MessageBuilderParseError extends ParseError {
+	private _errData: IErrorData
+
+	protected get errData() {
+		return this._errData
+	}
+
+	protected abstract mandatoryFields(): string[]
+
+	protected optionalFields(): string[] {
+		return []
+	}
+
+	private printMandatory() {
+		return this.mandatoryFields().join(", ")
+	}
+
+	private printOptional() {
+		return this.optionalFields().join("")
+	}
+
+	protected getFullMessage() {
+		return this.printMandatory() + this.printOptional()
+	}
+
+	protected makeMessage(errorData: IErrorData): string {
+		this._errData = errorData
+		const message = this.getFullMessage()
+		errorData.markHandled()
+		return message
+	}
+}
+
+export abstract class ExpectedMissingError extends MessageBuilderParseError {
+	protected abstract printExpected(expected: any): string
+
+	protected printReceived(received: any) {
+		return `received item: ${received}`
+	}
+
+	protected printPosition(position: IPrintablePosition) {
+		return position.toString
+			? `, at source position: ${position.toString()}`
+			: position.toNumber
+			? `, at source position: ${position.toNumber()}`
+			: ``
+	}
+
+	protected printFilename(filename: string) {
+		return filename ? `, in file: ${filename}` : ``
+	}
+
+	private expected() {
+		return this.printExpected(this.errData.getInfo("expected"))
+	}
+
+	private received() {
+		return this.printReceived(this.errData.getInfo("received"))
+	}
+
+	protected mandatoryFields() {
+		return [this.expected(), this.received()]
+	}
+
+	private position() {
+		return this.printPosition(this.errData.pos)
+	}
+
+	private filename() {
+		return this.printFilename(this.errData.getInfo("filename"))
+	}
+
+	protected optionalFields() {
+		return [this.position(), this.filename()]
+	}
+}
+
+export class ExpectedItemMissingError extends ExpectedMissingError {
+	protected printExpected(item: any) {
+		return `expected item: ${item}`
+	}
+}
+
+export class ExpectedKindMissingError extends ExpectedMissingError {
+	protected printExpected(kind: IDebugNamed): string {
+		return `expected item of kind: ${kind.debugName}`
+	}
+}
+
+export class ExpectedInItemListMissingError extends ExpectedMissingError {
+	protected printExpected(allowed: any[]): string {
+		return `expected one of the items in: ${allowed.join(", ")}`
+	}
+}
+
+export class ExpectedInKindListMissingError extends ExpectedMissingError {
+	protected printExpected(kinds: IDebugNamed[]): string {
+		return (
+			`expected an item of one of the kinds:` +
+			`[${kinds.map((x) => x.debugName).join(", ")}]`
+		)
+	}
+}
+
+export class UnexpectedItemError extends MessageBuilderParseError {
+	private printReceived(received: any) {
+		return `received unexpected input item: ${received}`
+	}
+
+	private received() {
+		return this.printReceived(this.errData.getInfo("received"))
+	}
+
+	protected mandatoryFields(): string[] {
+		return [this.received()]
+	}
+}
+
+export abstract class NoPropertyHavingLocatableError extends ConstructorError {
+	constructor(property: string) {
+		super(`Failed to locate an object with \`.${property}\` property`)
+	}
+}
+
+export class NoStatefulLocatableError extends NoPropertyHavingLocatableError {
+	constructor() {
+		super("state")
+	}
+}
+
+export class NoIndexCarryingLocatableError extends NoPropertyHavingLocatableError {
+	constructor() {
+		super("lineIndex")
+	}
+}
+
+export class NoPosedLocatableError extends NoPropertyHavingLocatableError {
+	constructor() {
+		super("pos")
 	}
 }

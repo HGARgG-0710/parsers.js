@@ -36,8 +36,12 @@ export interface IChildrenHaving<T = any> {
  * of being used for some kind of runtime type-checking
  * operation using their `.is: (x: any) => boolean` method.
  */
-export interface ITypeCheckable {
-	is(x: any): boolean
+export interface ITypeCheckable<T = any> {
+	is(x: T): boolean
+}
+
+export interface IDebugNamed {
+	readonly debugName: string
 }
 
 /**

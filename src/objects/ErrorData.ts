@@ -8,7 +8,11 @@ import type {
 	IStream,
 	IStreamLocator
 } from "../interfaces.js"
-import { MissingImplementationError, MissingObjectError } from "./Error.js"
+import {
+	MissingImplementationError,
+	NoIndexCarryingLocatableError,
+	NoPosedLocatableError
+} from "./Error.js"
 
 /**
  * This is the abstract class implementing `IErrorData` serving as
@@ -192,8 +196,7 @@ export namespace ErrorPosition {
 			const indexStream = this.indexCarryingLocator.locate(
 				this.inputStream
 			)
-			if (!indexStream)
-				throw new MissingObjectError("IStream & IIndexCarrying")
+			if (!indexStream) throw new NoIndexCarryingLocatableError()
 			this.lineIndex = indexStream.lineIndex.copy()
 			return this
 		}
@@ -239,7 +242,7 @@ export namespace ErrorPosition {
 
 		locate() {
 			const posStream = this.posCarryingLocator.locate(this.inputStream)
-			if (!posStream) throw new MissingObjectError("IPosed & IStream")
+			if (!posStream) throw new NoPosedLocatableError()
 			this.pos = posStream.pos
 			return this
 		}

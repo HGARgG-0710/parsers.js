@@ -1,9 +1,11 @@
 import type {
-	IIndexStream,
+	IIndexCarrying,
 	ILineIndex,
 	ILinkedStream,
-	IOwnedStream
+	IOwnedStream,
+	IStream
 } from "../../../interfaces.js"
+import { NoIndexCarryingLocatableError } from "../../../objects/Error.js"
 import { IdentityStream } from "./IdentityStream.js"
 import { IndexCarryingLocator } from "./Locator.js"
 
@@ -50,7 +52,7 @@ export abstract class BasicErrorStream<
 	T = any,
 	I = string
 > extends ErrorStream<T> {
-	protected inputStream: IIndexStream<I>
+	protected inputStream: IIndexCarrying & IStream<I>
 	private _lineIndex: ILineIndex
 
 	get resource(): ILinkedStream {
@@ -65,8 +67,14 @@ export abstract class BasicErrorStream<
 		return this._lineIndex
 	}
 
-	private inputGetter() {
+	private rawInputGetter() {
 		return IndexCarryingLocator.downwards.locate(this.resource!)
+	}
+
+	private inputGetter() {
+		const inputStream = this.rawInputGetter()
+		if (!inputStream) throw new NoIndexCarryingLocatableError()
+		return inputStream
 	}
 
 	private posGetter(): ILineIndex {
