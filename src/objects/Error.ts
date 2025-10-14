@@ -169,6 +169,10 @@ export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
 export abstract class MessageBuilderParseError extends ParseError {
 	private _errData: IErrorData
 
+	protected get separator() {
+		return ", "
+	}
+
 	protected get errData() {
 		return this._errData
 	}
@@ -180,7 +184,7 @@ export abstract class MessageBuilderParseError extends ParseError {
 	}
 
 	private printMandatory() {
-		return this.mandatoryFields().join(", ")
+		return this.mandatoryFields().join(this.separator)
 	}
 
 	private printOptional() {
@@ -208,14 +212,14 @@ export abstract class ExpectedMissingError extends MessageBuilderParseError {
 
 	protected printPosition(position: IPrintablePosition) {
 		return position.toString
-			? `, at source position: ${position.toString()}`
+			? `${this.separator}at source position: ${position.toString()}`
 			: position.toNumber
-			? `, at source position: ${position.toNumber()}`
+			? `${this.separator}at source position: ${position.toNumber()}`
 			: ``
 	}
 
 	protected printFilename(filename: string) {
-		return filename ? `, in file: ${filename}` : ``
+		return filename ? `${this.separator}in file: ${filename}` : ``
 	}
 
 	private expected() {
@@ -257,7 +261,7 @@ export class ExpectedKindMissingError extends ExpectedMissingError {
 
 export class ExpectedInItemListMissingError extends ExpectedMissingError {
 	protected printExpected(allowed: any[]): string {
-		return `expected one of the items in: ${allowed.join(", ")}`
+		return `expected one of the items in: [${allowed.join(", ")}]`
 	}
 }
 
