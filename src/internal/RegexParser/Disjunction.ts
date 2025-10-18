@@ -27,7 +27,7 @@ const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
 class DisjunctionStream extends SingleNodeStream<INode<string>> {
 	setResource(resource: IOwnedStream): void {
 		this.setResource(resource)
-		this.curr = consumeSingletonRevivables(this, new Disjunction([]))
+		this.curr = consumeSingletonRevivables(this, new Disjunction())
 	}
 }
 

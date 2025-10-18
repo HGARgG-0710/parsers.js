@@ -1,14 +1,13 @@
 import type { array } from "@hgargg-0710/one"
-import { TableHandler } from "../../objects.js"
-import { CurrentHash } from "../../objects/HashMap.js"
 import type {
 	ICommonStream,
 	INode,
 	IOwnedStream,
 	IStreamChooser
 } from "../../interfaces.js"
+import { TableHandler } from "../../objects.js"
+import { CurrentHash } from "../../objects/HashMap.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
-import { checkMaybeError } from "./Errors.js"
 import { HandleDigit } from "./Escaped/Digit.js"
 import { HandleEscapedLiteral } from "./Escaped/Literal.js"
 import { HandleNewline } from "./Escaped/Newline.js"
@@ -40,9 +39,7 @@ const BaseEscapedHandler = TableHandler<
 
 export function HandleEscaped(input: IOwnedStream<string>) {
 	input.next() // \
-	const result = BaseEscapedHandler(input)
-	checkMaybeError(result)
-	return [result]
+	return [BaseEscapedHandler(input)]
 }
 
 export const maybeEscaped: array.Pairs<string, IStreamChooser> = [

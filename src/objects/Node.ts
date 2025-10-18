@@ -1,4 +1,10 @@
 import { array, functional } from "@hgargg-0710/one"
+import { isFreeable } from "src/utils.js"
+import {
+	isContentNodeSerializable,
+	isRecursiveNodeSerializable,
+	isTyped
+} from "src/utils/Node.js"
 import * as Pools from "../global/Pools.js"
 import type { IFreeable } from "../interfaces.js"
 import type {
@@ -8,16 +14,9 @@ import type {
 	ICollectionNodeType,
 	INode,
 	INodeMaker,
-	INodeType,
 	IPoolNodeType,
 	ITyped
 } from "../interfaces/Node.js"
-import { isFreeable } from "src/utils.js"
-import {
-	isContentNodeSerializable,
-	isRecursiveNodeSerializable,
-	isTyped
-} from "src/utils/Node.js"
 import { tryCopy } from "../utils.js"
 import { isType } from "../utils/Node.js"
 import { NodeFactory } from "./NodeSystem.js"
@@ -40,6 +39,9 @@ const { id } = functional
  */
 export abstract class BaseNode<T = any> implements INode<T> {
 	abstract readonly type: T
+	abstract readonly debugName: string
+	abstract debugPrint(): string
+
 	toJSON?(): ITyped<T>
 
 	parent: INode<T> | null = null
@@ -121,6 +123,10 @@ abstract class PreTokenNode<T = any>
 	init() {
 		return this
 	}
+
+	debugPrint(): string {
+		return `${this.debugName}`
+	}
 }
 
 /**
@@ -134,13 +140,15 @@ abstract class PreTokenNode<T = any>
  * using `TokenNode` are poolable via `ObjectPool`
  */
 export const TokenNode = NodeFactory(function <T = any>(
-	type: T
+	type: T,
+	debugName: string
 ): IPoolNodeType<T, []> {
 	const jsonObject = { type }
 	class tokenNode extends PreTokenNode<T> implements INode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
 		static readonly pool = Pools.Node.add(new ObjectPool(tokenNode))
+		static readonly debugName = debugName
 
 		toJSON() {
 			return jsonObject
@@ -152,6 +160,10 @@ export const TokenNode = NodeFactory(function <T = any>(
 
 		get type() {
 			return type
+		}
+
+		get debugName() {
+			return tokenNode.debugName
 		}
 	}
 
@@ -204,6 +216,10 @@ abstract class PreContentNode<T = any, Value = any>
 		}
 	}
 
+	debugPrint(): string {
+		return `${this.debugName} { value: ${this.value} }`
+	}
+
 	constructor(value?: Value) {
 		super()
 		this.init(value)
@@ -234,6 +250,12 @@ abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
 			child: this.child
 		}
 	}
+
+	debugPrint(): string {
+		return `${this.debugName}${
+			this.child ? ` { child: ${this.child.debugPrint()} }` : ""
+		}`
+	}
 }
 
 /**
@@ -244,12 +266,14 @@ abstract class PreSingleChildNode<T = any> extends SingleItemNode<T, INode<T>> {
  * `RecursiveNode`.
  */
 export const SingleChildNode = NodeFactory(function <T = any>(
-	type: T
-): INodeType<T, [INode<T>]> {
+	type: T,
+	debugName: string
+): IPoolNodeType<T, [INode<T>]> {
 	class singleChildNode extends PreSingleChildNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
 		static readonly pool = Pools.Node.add(new ObjectPool(singleChildNode))
+		static readonly debugName = debugName
 
 		protected get pool() {
 			return singleChildNode.pool
@@ -257,6 +281,10 @@ export const SingleChildNode = NodeFactory(function <T = any>(
 
 		get type() {
 			return type
+		}
+
+		get debugName() {
+			return singleChildNode.debugName
 		}
 	}
 
@@ -273,12 +301,14 @@ export const SingleChildNode = NodeFactory(function <T = any>(
  * returned by `ContentNode` are poolable using the `ObjectPool`
  */
 export const ContentNode = NodeFactory(function <T = any, Value = any>(
-	type: T
+	type: T,
+	debugName: string
 ): ICellNodeType<T, Value> {
 	class contentNode extends PreContentNode<T, Value> {
 		static readonly type = type
 		static readonly is = isType(type)
 		static readonly pool = Pools.Node.add(new ObjectPool(contentNode))
+		static readonly debugName = debugName
 
 		protected get pool() {
 			return contentNode.pool
@@ -286,6 +316,10 @@ export const ContentNode = NodeFactory(function <T = any, Value = any>(
 
 		get type() {
 			return type
+		}
+
+		get debugName() {
+			return contentNode.debugName
 		}
 	}
 
@@ -380,7 +414,13 @@ abstract class PreRecursiveNode<T = any>
 		}
 	}
 
-	constructor(children?: INode<T>[]) {
+	debugPrint(): string {
+		return `${this.debugName} { children: [ ${this.children
+			.map((x) => x.debugPrint())
+			.join(", ")} ] }`
+	}
+
+	constructor(children: INode<T>[] = []) {
 		super()
 		this.init(children)
 	}
@@ -402,12 +442,14 @@ abstract class PreRecursiveNode<T = any>
  * `IRecursiveNode<T, [INode<T>[] | undefined]` that are poolable via `ObjectPool`
  */
 export const RecursiveNode = NodeFactory(function <T = any>(
-	type: T
+	type: T,
+	debugName: string
 ): ICollectionNodeType<T> {
 	class recursiveNode extends PreRecursiveNode<T> {
 		static readonly type = type
 		static readonly is = isType(type)
 		static readonly pool = Pools.Node.add(new ObjectPool(recursiveNode))
+		static readonly debugName = debugName
 
 		protected get pool() {
 			return recursiveNode.pool
@@ -415,6 +457,10 @@ export const RecursiveNode = NodeFactory(function <T = any>(
 
 		get type() {
 			return type
+		}
+
+		get debugName() {
+			return recursiveNode.debugName
 		}
 	}
 	return recursiveNode

@@ -3,6 +3,7 @@ import type {
 	ICellNode,
 	INode,
 	IOwnedStream,
+	IPoolNode,
 	IStreamChooser,
 	ITypeCheckable
 } from "../../../interfaces.js"
@@ -44,8 +45,8 @@ const RangeBoundaryStream = CollectionStream(
 	consumable(new SourceBuilder())
 )
 
-class RangeStream extends SingleNodeStream<Range> {
-	private finalRange: Range
+class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
+	private finalRange: IPoolNode<string, [INode<string>]>
 	private firstItem: ICellNode<string>
 	private lastItem: ICellNode<string>
 
@@ -56,13 +57,13 @@ class RangeStream extends SingleNodeStream<Range> {
 	}
 
 	private asTrivial() {
-		this.finalRange.add(new TrivialRange(this.firstItem))
+		this.finalRange.init(new TrivialRange(this.firstItem))
 		this.resource!.next() // killing last child
 		// ! VALIDATE THAT THE CHILD IS INDEED LAST!!!
 	}
 
 	private asInfinite() {
-		this.finalRange.add(new InfiniteRange(this.firstItem))
+		this.finalRange.init(new InfiniteRange(this.firstItem))
 	}
 
 	private tryLimits() {
@@ -72,7 +73,7 @@ class RangeStream extends SingleNodeStream<Range> {
 
 	private asLimits() {
 		this.lastItem = this.resource!.curr
-		this.finalRange.add(new LimitsRange(this.firstItem, this.lastItem))
+		this.finalRange.init(new LimitsRange(this.firstItem, this.lastItem))
 	}
 
 	setResource(resource: IOwnedStream): void {
@@ -105,8 +106,8 @@ export function HandleRange(input: IOwnedStream<string>) {
 }
 
 function handleRangeAfterItem(input: IOwnedStream<INode<string>>) {
-	const child = next(input)
-	const range = next(input) as Range // Range({...})
+	const child = next(input) // the thing onto which the range quantifier is applied
+	const range = next(input) as IPoolNode<string, [INode<string>]> // Range({...})
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
 		return [SingletonStream(() => new NonGreedyRange(child, range))()]

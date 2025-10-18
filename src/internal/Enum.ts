@@ -37,7 +37,7 @@ export class Enum<T = any> {
 		return new Map(Pairs.to(this.enumItems, this.enumItems.map(mapped)))
 	}
 
-	constructor(enumItems: T[]) {
+	constructor(enumItems: T[] = []) {
 		this.setItems = new Set(enumItems)
 		this.enumItems = Array.from(this.setItems)
 	}

@@ -1,7 +1,6 @@
 import { type as _type, string } from "@hgargg-0710/one"
 import type {
 	IOwnedStream,
-	IPeekable,
 	IPredicate,
 	IResourceful,
 	IStream,
@@ -9,6 +8,7 @@ import type {
 	ITyped
 } from "../interfaces.js"
 import type { IExtendableMap } from "../interfaces/IndexMap.js"
+import { peek } from "./Stream.js"
 
 const { typeOf } = _type
 
@@ -62,4 +62,4 @@ export const CharCodeMap = <K = any, T = any, Default = any>(
  */
 export const PeekMap = <K = any, T = any, Default = any, Index = any>(
 	map: IExtendableMap<K, T, Default, Index>
-) => map.extend((x: IPeekable<Index>) => x.peek(1))
+) => map.extend(peek(1))

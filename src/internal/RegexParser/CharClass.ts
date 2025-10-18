@@ -8,19 +8,23 @@ import type {
 	IStreamChooser
 } from "../../interfaces.js"
 import { TableHandler } from "../../objects.js"
+import { expectKind, tryReviveChild } from "../../objects/Error.js"
 import { BasicHash } from "../../objects/HashMap.js"
 import { SingleNodeStream } from "../../objects/Stream.js"
 import {
 	EndBracketStream,
 	isCurr,
-	TokenStream,
-	SingletonWrapperStream
+	SingletonWrapperStream,
+	TokenStream
 } from "../../samples/Stream.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
 import { HandleEscaped } from "./Escaped.js"
 import { CharClass, ClassRange, ClassUnit, Hyphen } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
+
+const expectHyphen = expectKind(Hyphen)
+const expectClassUnit = expectKind(ClassUnit)
 
 const HyphenStream = TokenStream(Hyphen)
 
@@ -35,18 +39,29 @@ class ClassRangeStream extends SingleNodeStream<INode<string>> {
 		this.curr = this.classRange
 	}
 
-	private readNextUnit() {
+	private readClassUnit() {
+		expectClassUnit(this.resource!)
+		return this.readNextItem()
+	}
+
+	private readHyphen() {
+		expectHyphen(this.resource!)
+		return this.readNextItem()
+	}
+
+	private readNextItem() {
 		const unit = this.resource!.curr
 		this.resource!.next()
 		return unit
 	}
 
-	// ! DOESN'T CHECK FOR POSSIBILITY OF A MISSING SECOND ITEM!!! [like in 'a-' instead of 'a-z']
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
-		const fromUnit = this.readNextUnit() // the child Stream dies
-		this.reviveChild() // needs to be renewed
-		const toUnit = this.readNextUnit()
+		const fromUnit = this.readClassUnit() // the child Stream dies
+		tryReviveChild(this) // needs to be renewed
+		this.readHyphen()
+		tryReviveChild(this) // needs to be renewed
+		const toUnit = this.readClassUnit()
 		this.classRange = new ClassRange(fromUnit, toUnit)
 		this.updateCurr()
 	}
@@ -55,7 +70,7 @@ class ClassRangeStream extends SingleNodeStream<INode<string>> {
 class CharClassStream extends SingleNodeStream<INode<string>> {
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
-		this.curr = consumeSingletonRevivables(this, new CharClass([]))
+		this.curr = consumeSingletonRevivables(this, new CharClass())
 	}
 }
 
@@ -74,7 +89,7 @@ const ClassUnitHandler = TableHandler<
 )
 
 function HandleHyphen(input: IOwnedStream<string>) {
-	input.next()
+	input.next() // -
 	return [HyphenStream()]
 }
 

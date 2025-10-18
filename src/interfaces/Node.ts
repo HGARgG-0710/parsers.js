@@ -5,6 +5,7 @@ import type {
 	ISerializableObject
 } from "../interfaces.js"
 import type { ObjectPool } from "../objects.js"
+import type { IDebugNamed, IDebugPrintable } from "./Debug.js"
 
 /**
  * This is a type for objects that are capable of
@@ -40,10 +41,6 @@ export interface ITypeCheckable<T = any> {
 	is(x: T): boolean
 }
 
-export interface IDebugNamed {
-	readonly debugName: string
-}
-
 /**
  * This is a generic interface for tree-like objects that
  * permits:
@@ -72,10 +69,12 @@ export interface IWalkable<T extends IWalkable<T> = any> {
  * Some of them can also be used within the `FreeStream`, or other classes/
  * interfaces that require `IFreeable`.
  */
-export interface INode<T = any, Args extends any[] = any[]>
+export interface INode<T = any>
 	extends ITyped<T>,
 		IWalkable<INode<T>>,
-		ISerializableObject {
+		ISerializableObject,
+		IDebugNamed,
+		IDebugPrintable {
 	parent: INode<T> | null
 }
 
@@ -109,7 +108,7 @@ export interface ICellNode<T = any, V = any> extends IPoolNode<T>, IValued<V> {}
  * It can be freed via the 'free()' method.
  */
 export interface IPoolNode<T = any, Args extends any[] = any[]>
-	extends INode<T, Args>,
+	extends INode<T>,
 		IInitializable<Args>,
 		IFreeable {}
 
@@ -128,9 +127,10 @@ export type INodeMaker<T = any, K extends INode<T> = INode<T>> = (
 export interface INodeType<
 	T = any,
 	Args extends any[] = any[],
-	K extends INode<T, Args> = INode<T, Args>
+	K extends INode<T> = INode<T>
 > extends ITypeCheckable,
-		ITyped<T> {
+		ITyped<T>,
+		IDebugNamed {
 	new (...args: Args): K
 	fromPlain(x: any, maker: INodeMaker<T>): K | false
 }
@@ -144,7 +144,7 @@ export interface IPoolNodeType<
 	T = any,
 	Args extends any[] = any[],
 	K extends IPoolNode<T, Args> = IPoolNode<T, Args>
-> extends INodeType<T, Args, K> {
+> extends INodeType<T, Partial<Args> | [], K> {
 	readonly pool: ObjectPool
 }
 
@@ -165,7 +165,7 @@ export interface ICellNodeType<
 export interface IRecursiveNodeType<
 	T = any,
 	K extends IRecursiveNode<T> = IRecursiveNode<T>
-> extends IPoolNodeType<T, [INode<T>[]], K> {}
+> extends IPoolNodeType<T, [INode<T>[]?], K> {}
 
 /**
  * This is a type specifically for representing `IRecursiveNodeType`s
@@ -184,7 +184,7 @@ export type INodeTypeFactory<
 	T = any,
 	Args extends any[] = any[],
 	K extends INodeType<T, Args> = INodeType<T, Args>
-> = (type: T) => K
+> = (type: T, ...args: any[]) => K
 
 /**
  * This is the interface for representing a function-factory for `ICellNodeType<T, V>`.

@@ -24,15 +24,15 @@ const { isFunction } = type
  * the result of the call to the result of `Autocache`
  * becomes the result of the call to `.index(x)`.
  */
-export function Autocache<K = any, V = any>(
+export function Autocache<K = any, V = any, Other extends any[] = any[]>(
 	cache: ISettable<K, V> & IIndexable<K, V | typeof NotCached>,
-	callback: (x: K) => V
+	callback: (x: K, ...y: Other) => V
 ) {
 	assert(isFunction(callback))
-	return function (x: K) {
-		const cached = cache.index(x)
+	return function (x: K, ...y: Other) {
+		const cached = cache.index(x, ...y)
 		if (cached === NotCached) {
-			const newlyCached = callback(x)
+			const newlyCached = callback(x, ...y)
 			cache.set(x, newlyCached)
 			return newlyCached
 		}

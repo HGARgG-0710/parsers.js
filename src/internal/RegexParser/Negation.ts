@@ -4,14 +4,17 @@ import type {
 	IPeekable,
 	IStreamChooser
 } from "../../interfaces.js"
+import { expect } from "../../objects/Error.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { HandleCharClass } from "./CharClass.js"
 import { Negated } from "./Nodes.js"
 
 const NegationStream = SingletonWrapperStream(Negated)
+const expectCharClassStart = expect("[")
 
 function handleNegation(input: IOwnedStream<string> & IPeekable<string>) {
 	input.next() // ^
+	expectCharClassStart(input)
 	return [NegationStream(), HandleCharClass]
 }
 

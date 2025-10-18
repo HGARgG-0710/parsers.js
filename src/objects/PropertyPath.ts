@@ -1,129 +1,213 @@
-import { boolean, type } from "@hgargg-0710/one"
-import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IPosition, IPredicatePosition } from "../interfaces.js"
+import { array, boolean, type } from "@hgargg-0710/one"
+import type {
+	IOwnedStream,
+	IPosition,
+	IPredicatePosition,
+	IResourcefulStream,
+	IStream
+} from "../interfaces.js"
+import type {
+	IPathCallback,
+	IPathFollower,
+	IPropertyPath
+} from "../interfaces/PropertyPath.js"
+import { AutoMap } from "../internal/AutoMap.js"
 
 const { isStruct, isNumber } = type
 const { T } = boolean
+const { clear } = array
 
-/**
- * This is a class for performing (repeatedly)
- * a pattern of property-access on given objects.
- *
- * More specifically, it accepts a vararg list of
- * `properties[]: string` representing a sequence
- * of properties to be accessed one after another
- * on the original object a given number of times
- * (depth: IPosition<In>).
- *
- * It, thus, allows passing a predicate or a finite
- * access depth. Likewise, if it is detected that the
- * access is being done no a non-`object` entity
- * (excluding `null`), then the continuous access
- * halts and this entity is returned as a result instead.
- */
-export class PropertyPath {
-	readonly properties: string[]
+export class SimplePath<I = any> implements IPropertyPath<I> {
+	private callback: IPathCallback<I> | null = null
 
-	private predicate: IPredicatePosition<any> = T
-
-	private withPredicate<In extends Summat = object, T = any>(
-		newPred: IPredicatePosition<In>,
-		callback: () => T
-	) {
-		this.predicate = newPred
-		const retval = callback()
-		this.predicate = T
-		return retval
+	private indexAt(input: any, i: number) {
+		return input[this.property]
 	}
 
-	private get loopSize() {
-		return this.properties.length
+	private newCurr(input: I, current: any, i: number) {
+		this.callback?.(input, current)
+		return this.indexAt(current, i)
 	}
 
-	private readPropertyAt<In extends object = Summat>(x: In, index: number) {
-		return x[this.properties[index]]
+	atIndex(input: I, position: number): [number, any] {
+		let current: any = input
+		let i = 0
+		for (; isStruct(current) && i < position; ++i)
+			current = this.newCurr(input, current, i)
+		return [i, current]
 	}
 
-	private loopProps<In extends object = Summat>(orig: In) {
-		let currentLevel = orig
-		for (
-			let j = 0;
-			j < this.loopSize &&
-			isStruct(currentLevel) &&
-			this.predicate(currentLevel, j);
-			++j
-		)
-			currentLevel = this.readPropertyAt(currentLevel, j)
-		return currentLevel
+	atPredicate(input: I, position: IPredicatePosition<I>): [number, any] {
+		let current: any = input
+		let i = 0
+		for (; isStruct(current) && position(current, i); ++i)
+			current = this.newCurr(input, current, i)
+		return [i, current]
 	}
 
-	private followFinite<In extends object = Summat, Out = any>(
-		x: In,
-		depth: number = 0
-	) {
-		let currentLevel = x
-		for (let i = 0; i < depth && isStruct(currentLevel); ++i)
-			currentLevel = this.loopProps(currentLevel)
-		return currentLevel as unknown as Out
-	}
-
-	private followPredicate<In extends object = Summat, Out = any>(
-		x: In,
-		pred: IPredicatePosition<In>
-	) {
-		return this.withPredicate(pred, () =>
-			this.followPredicateAware<In, Out>(x)
-		)
-	}
-
-	private followPredicateAware<In extends object = Summat, Out = any>(x: In) {
-		let currentLevel = x
-		while (isStruct(currentLevel) && this.predicate(currentLevel))
-			currentLevel = this.loopProps(currentLevel)
-		return currentLevel as unknown as Out
-	}
-
-	follow<In extends object = Summat, Out = any>(x: In, depth: IPosition<In>) {
-		return isNumber(depth)
-			? this.followFinite<In, Out>(x, depth)
-			: this.followPredicate<In, Out>(x, depth)
-	}
-
-	with(...newProperties: string[]) {
-		return new PropertyPath(...this.properties, ...newProperties)
+	setCallback(callback: IPathCallback<I>): void {
+		this.callback = callback
 	}
 
 	copy() {
-		return new PropertyPath(...this.properties)
+		return this
 	}
 
-	constructor(...properties: string[]) {
-		this.properties = properties
+	constructor(private readonly property: string) {}
+}
+
+export class CachePath<I = any> implements IPropertyPath<I> {
+	private ["constructor"]: new () => this
+
+	private cache: any[]
+
+	atIndex(input: I, position: number): [number, any] {
+		position = Math.min(position, this.cache.length - 1)
+		return [position, this.cache[position]]
+	}
+
+	atPredicate(input: I, position: IPredicatePosition<I>): [number, any] {
+		let current = this.cache[0]
+		let i = 0
+		while (i < this.cache.length && position(current, i))
+			current = this.cache[++i]
+		return [i, current]
+	}
+
+	init(cache: any[]) {
+		this.cache = cache
+	}
+
+	setCallback(callback: IPathCallback<I>): void {}
+
+	copy(): this {
+		const copy = new this.constructor()
+		copy.init(array.copy(this.cache))
+		return copy
+	}
+}
+
+export class PathFollower<I = any, T = any> implements IPathFollower<I, T> {
+	private ["constructor"]: new (path: IPropertyPath) => this
+
+	private pickIteration(input: I, position: IPosition<I>) {
+		return isNumber(position)
+			? this.path.atIndex(input, position)
+			: this.path.atPredicate(input, position)
+	}
+
+	setCallback(callback: IPathCallback<I>) {
+		this.path.setCallback(callback)
+	}
+
+	follow(input: I, position: IPosition<I> = T): T | undefined {
+		return this.pickIteration(input, position)[1]
+	}
+
+	length(input: I, position: IPosition<I>): number {
+		return this.pickIteration(input, position)[0]
+	}
+
+	copy() {
+		return new this.constructor(this.path.copy())
+	}
+
+	constructor(private readonly path: IPropertyPath) {}
+}
+
+export class CachingFollower<I = any, T = any> implements IPathFollower<I, T> {
+	private readonly cacheMap: AutoMap<I, any[]> = new AutoMap(() => [])
+	private readonly isEmptyMap: AutoMap<I, boolean> = new AutoMap(() => true)
+	private readonly cachePath = new CachePath()
+	private readonly cacheFollower = new PathFollower(this.cachePath)
+
+	setCallback(callback: IPathCallback<I>): void {}
+
+	private isEmptyCache(input: I) {
+		return this.isEmptyMap.get(input)
+	}
+
+	private markEmpty(input: I) {
+		this.isEmptyMap.set(input, true)
+	}
+
+	private markNonEmpty(input: I) {
+		this.isEmptyMap.set(input, false)
+	}
+
+	private setCache(input: I) {
+		this.cachePath.init(this.cacheMap.get(input))
+	}
+
+	private followUncached(input: I, position: IPosition<I>) {
+		const result = this.delegate.follow(input, position)
+		this.markNonEmpty(input)
+		return result
+	}
+
+	private followCached(input: I, position: IPosition<I>) {
+		this.setCache(input)
+		return this.cacheFollower.follow(input, position)
+	}
+
+	private lengthUncached(input: I, position: IPosition<I>) {
+		return this.delegate.length(input, position)
+	}
+
+	private lengthCached(input: I, position: IPosition<I>) {
+		this.setCache(input)
+		return this.cacheFollower.length(input, position)
+	}
+
+	clear(input: I) {
+		clear(this.cacheMap.get(input))
+		this.markEmpty(input)
+	}
+
+	follow(input: I, position: IPosition<I> = T): T | undefined {
+		return this.isEmptyCache(input)
+			? this.followUncached(input, position)
+			: this.followCached(input, position)
+	}
+
+	length(input: I, position: IPosition<I> = T): number {
+		return this.isEmptyCache(input)
+			? this.lengthUncached(input, position)
+			: this.lengthCached(input, position)
+	}
+
+	constructor(private readonly delegate: IPathFollower<I, T>) {
+		delegate.setCallback((input: I, x: any) =>
+			this.cacheMap.get(input).push(x)
+		)
 	}
 }
 
 /**
  * A `PropDigger` over the `.resource` property.
- * This is a singleton, the instance is obtainable via the
- * `.instance` property.
  */
-export class ResourcePath extends PropertyPath {
-	static readonly instance = new ResourcePath()
+export class ResourceFollower extends PathFollower<
+	IResourcefulStream,
+	IStream
+> {
+	static caching() {
+		return new CachingFollower(new ResourceFollower())
+	}
 
-	private constructor() {
-		super("resource")
+	constructor() {
+		super(new SimplePath("resource"))
 	}
 }
 
 /**
  * A `PropDigger` over the `.owner` property.
- * This is a singleton, the instance is obtainable via the
- * `.instance` property.
  */
-export class OwnerPath extends PropertyPath {
-	static readonly instance = new OwnerPath()
+export class OwnerFollower extends PathFollower<IOwnedStream, IStream> {
+	static caching() {
+		return new CachingFollower(new OwnerFollower())
+	}
 
-	private constructor() {
-		super("owner")
+	constructor() {
+		super(new SimplePath("owner"))
 	}
 }

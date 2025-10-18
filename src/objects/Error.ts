@@ -1,12 +1,17 @@
+import { array } from "@hgargg-0710/one"
 import type {
 	IDebugNamed,
 	IErrorData,
 	IErrorDataGetter,
 	IOwnedStream,
 	IPrintablePosition,
+	IRenewerStream,
+	IStream,
 	ITypeCheckable
 } from "../interfaces.js"
+import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
+import { ResourceFollower } from "./PropertyPath.js"
 
 /**
  * This is an abstract class for representing
@@ -89,11 +94,11 @@ export function prepareExpectError<T = any>(
 
 export function expect<T = any>(item: T) {
 	return function (
-		stream: IOwnedStream<T>,
-		errDataGetter: IErrorDataGetter<T>
+		stream: IStream<T>,
+		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
 		if (stream.curr !== item)
-			throw new ExpectedItemMissingError(
+			throw new ParseError.ExpectedItemMissingError(
 				prepareExpectError(errDataGetter(stream), stream.curr, item)
 			)
 	}
@@ -101,11 +106,11 @@ export function expect<T = any>(item: T) {
 
 export function expectKind<T = any>(kind: ITypeCheckable & IDebugNamed) {
 	return function (
-		stream: IOwnedStream<T>,
-		errDataGetter: IErrorDataGetter<T>
+		stream: IStream<T>,
+		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
 		if (!kind.is(stream.curr))
-			throw new ExpectedKindMissingError(
+			throw new ParseError.ExpectedKindMissingError(
 				prepareExpectError(errDataGetter(stream), stream.curr, kind)
 			)
 	}
@@ -114,11 +119,11 @@ export function expectKind<T = any>(kind: ITypeCheckable & IDebugNamed) {
 export function allow<T = any>(..._items: T[]) {
 	const items = new Set(_items)
 	return function (
-		stream: IOwnedStream<T>,
-		errDataGetter: IErrorDataGetter<T>
+		stream: IStream<T>,
+		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
 		if (!items.has(stream.curr))
-			throw new ExpectedInItemListMissingError(
+			throw new ParseError.ExpectedInItemListMissingError(
 				prepareExpectError(errDataGetter(stream), stream.curr, _items)
 			)
 	}
@@ -127,8 +132,8 @@ export function allow<T = any>(..._items: T[]) {
 export function skip<T = any>(...items: T[]) {
 	const allowItems = allow(...items)
 	return function (
-		stream: IOwnedStream<T>,
-		errDataGetter: IErrorDataGetter<T>
+		stream: IStream<T>,
+		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
 		allowItems(stream, errDataGetter)
 		stream.next()
@@ -145,147 +150,222 @@ export function prepareUnexpectedItemError<T = any>(
 }
 
 export function unexpected<T = any>(
-	stream: IOwnedStream<T>,
-	errDataGetter: IErrorDataGetter<T>
-) {
-	throw new UnexpectedItemError(
+	stream: IStream<T>,
+	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+): never {
+	throw new ParseError.UnexpectedItemError(
 		prepareUnexpectedItemError(errDataGetter(stream), stream.curr)
 	)
 }
 
 export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
 	return function (
-		stream: IOwnedStream<T>,
-		errDataGetter: IErrorDataGetter<T>
+		stream: IStream<T>,
+		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
 		const currItem = stream.curr
 		for (const kind of kinds) if (kind.is(currItem)) return
-		throw new ExpectedInKindListMissingError(
+		throw new ParseError.ExpectedInKindListMissingError(
 			prepareExpectError(errDataGetter(stream), stream.curr, kinds)
 		)
 	}
 }
 
-export abstract class MessageBuilderParseError extends ParseError {
-	private _errData: IErrorData
-
-	protected get separator() {
-		return ", "
-	}
-
-	protected get errData() {
-		return this._errData
-	}
-
-	protected abstract mandatoryFields(): string[]
-
-	protected optionalFields(): string[] {
-		return []
-	}
-
-	private printMandatory() {
-		return this.mandatoryFields().join(this.separator)
-	}
-
-	private printOptional() {
-		return this.optionalFields().join("")
-	}
-
-	protected getFullMessage() {
-		return this.printMandatory() + this.printOptional()
-	}
-
-	protected makeMessage(errorData: IErrorData): string {
-		this._errData = errorData
-		const message = this.getFullMessage()
-		errorData.markHandled()
-		return message
-	}
+export function prepareReviveError<T = any>(
+	errData: IErrorData,
+	stream: IStream<T>
+) {
+	errData.setInfo("originStream", stream)
+	return errData
 }
 
-export abstract class ExpectedMissingError extends MessageBuilderParseError {
-	protected abstract printExpected(expected: any): string
-
-	protected printReceived(received: any) {
-		return `received item: ${received}`
-	}
-
-	protected printPosition(position: IPrintablePosition) {
-		return position.toString
-			? `${this.separator}at source position: ${position.toString()}`
-			: position.toNumber
-			? `${this.separator}at source position: ${position.toNumber()}`
-			: ``
-	}
-
-	protected printFilename(filename: string) {
-		return filename ? `${this.separator}in file: ${filename}` : ``
-	}
-
-	private expected() {
-		return this.printExpected(this.errData.getInfo("expected"))
-	}
-
-	private received() {
-		return this.printReceived(this.errData.getInfo("received"))
-	}
-
-	protected mandatoryFields() {
-		return [this.expected(), this.received()]
-	}
-
-	private position() {
-		return this.printPosition(this.errData.pos)
-	}
-
-	private filename() {
-		return this.printFilename(this.errData.getInfo("filename"))
-	}
-
-	protected optionalFields() {
-		return [this.position(), this.filename()]
-	}
-}
-
-export class ExpectedItemMissingError extends ExpectedMissingError {
-	protected printExpected(item: any) {
-		return `expected item: ${item}`
-	}
-}
-
-export class ExpectedKindMissingError extends ExpectedMissingError {
-	protected printExpected(kind: IDebugNamed): string {
-		return `expected item of kind: ${kind.debugName}`
-	}
-}
-
-export class ExpectedInItemListMissingError extends ExpectedMissingError {
-	protected printExpected(allowed: any[]): string {
-		return `expected one of the items in: [${allowed.join(", ")}]`
-	}
-}
-
-export class ExpectedInKindListMissingError extends ExpectedMissingError {
-	protected printExpected(kinds: IDebugNamed[]): string {
-		return (
-			`expected an item of one of the kinds:` +
-			`[${kinds.map((x) => x.debugName).join(", ")}]`
+export function tryReviveChild<T = any>(
+	stream: IRenewerStream<T>,
+	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+) {
+	if (stream.reviveChild() === false)
+		throw new ParseError.CannotReviveChildError<T>(
+			prepareReviveError(errDataGetter(stream), stream)
 		)
-	}
 }
 
-export class UnexpectedItemError extends MessageBuilderParseError {
-	private printReceived(received: any) {
-		return `received unexpected input item: ${received}`
+export namespace ParseError {
+	export abstract class MessageBuilderParseError extends ParseError {
+		private _errData: IErrorData
+
+		protected get separator() {
+			return ",\n"
+		}
+
+		protected get errData() {
+			return this._errData
+		}
+
+		protected abstract mandatoryFields(): string[]
+
+		protected optionalFields(): string[] {
+			return []
+		}
+
+		private printMandatory() {
+			return this.mandatoryFields().join(this.separator)
+		}
+
+		private printOptional() {
+			return this.optionalFields().join(this.separator)
+		}
+
+		protected getFullMessage() {
+			const optional = this.printOptional()
+			return (
+				optional +
+				(optional.length ? this.separator : "") +
+				this.printMandatory()
+			)
+		}
+
+		protected makeMessage(errorData: IErrorData): string {
+			this._errData = errorData
+			const message = this.getFullMessage()
+			errorData.markHandled()
+			return message
+		}
 	}
 
-	private received() {
-		return this.printReceived(this.errData.getInfo("received"))
+	export abstract class GenericParseError extends MessageBuilderParseError {
+		protected printPosition(position: IPrintablePosition) {
+			return position.toString
+				? `at source position: ${position.toString()}`
+				: position.toNumber
+				? `at source position: ${position.toNumber()}`
+				: ``
+		}
+
+		protected printFilename(filename: string) {
+			return filename ? `in file: ${filename}` : ``
+		}
+
+		private position() {
+			return this.printPosition(this.errData.pos)
+		}
+
+		private filename() {
+			return this.printFilename(this.errData.getInfo("filename"))
+		}
+
+		protected optionalFields() {
+			return [this.filename(), this.position()]
+		}
 	}
 
-	protected mandatoryFields(): string[] {
-		return [this.received()]
+	export abstract class ExpectedMissingError extends GenericParseError {
+		protected abstract printExpected(expected: any): string
+
+		protected printReceived(received: any) {
+			return `received item: ${tryDebugPrinting(received)}`
+		}
+
+		private expected() {
+			return this.printExpected(this.errData.getInfo("expected"))
+		}
+
+		private received() {
+			return this.printReceived(this.errData.getInfo("received"))
+		}
+
+		protected mandatoryFields() {
+			return [this.expected(), this.received()]
+		}
 	}
+
+	export class ExpectedItemMissingError extends ExpectedMissingError {
+		protected printExpected(item: any) {
+			return `expected item: ${tryDebugPrinting(item)}`
+		}
+	}
+
+	export class ExpectedKindMissingError extends ExpectedMissingError {
+		protected printExpected(kind: IDebugNamed): string {
+			return `expected item of kind: ${kind.debugName}`
+		}
+	}
+
+	export class ExpectedInItemListMissingError extends ExpectedMissingError {
+		protected printExpected(allowed: any[]): string {
+			return `expected one of the items in: [${allowed.join(", ")}]`
+		}
+	}
+
+	export class ExpectedInKindListMissingError extends ExpectedMissingError {
+		protected printExpected(kinds: IDebugNamed[]): string {
+			return (
+				`expected an item of one of the kinds:` +
+				`[${kinds.map((x) => x.debugName).join(", ")}]`
+			)
+		}
+	}
+
+	export class UnexpectedItemError extends GenericParseError {
+		private printReceived(received: any) {
+			return `received unexpected input item: ${tryDebugPrinting(
+				received
+			)}`
+		}
+
+		private received() {
+			return this.printReceived(this.errData.getInfo("received"))
+		}
+
+		protected mandatoryFields(): string[] {
+			return [this.received()]
+		}
+	}
+
+	export abstract class StreamStackError<T = any> extends GenericParseError {
+		private readonly resourceFollower = ResourceFollower.caching()
+
+		private lastStackIndex: number | null = null
+		private stackDepth: number | null = null
+
+		private reverseStackIndex(i: number) {
+			return this.lastStackIndex! - i
+		}
+
+		private printChildCurrItem(i: number, item: T) {
+			return `current item in stream (${this.reverseStackIndex(
+				i
+			)}): ${tryDebugPrinting(item)}`
+		}
+
+		private followCurr(childDepth: number) {
+			return this.resourceFollower.follow(this.originStream, childDepth)
+		}
+
+		private childCurrItem(i: number) {
+			return this.printChildCurrItem(i, this.followCurr(i)!.curr)
+		}
+
+		private getStackDepth() {
+			return this.stackDepth !== null
+				? this.stackDepth
+				: (this.lastStackIndex =
+						(this.stackDepth = this.resourceFollower.length(
+							this.originStream
+						)) - 1)
+		}
+
+		private get originStream(): IRenewerStream<T> {
+			return this.errData.getInfo("originStream")
+		}
+
+		protected mandatoryFields(): string[] {
+			return array
+				.numbers(this.getStackDepth())
+				.map((i) => this.childCurrItem(i))
+		}
+	}
+
+	export class CannotReviveChildError<T = any> extends StreamStackError<T> {}
 }
 
 export abstract class NoPropertyHavingLocatableError extends ConstructorError {

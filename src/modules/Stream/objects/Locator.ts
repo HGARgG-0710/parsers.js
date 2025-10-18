@@ -8,9 +8,12 @@ import type {
 	IStream,
 	IStreamLocator
 } from "../../../interfaces.js"
-import type { IPropertyPath } from "../../../interfaces/PropertyPath.js"
+import type { IPathFollower } from "../../../interfaces/PropertyPath.js"
 import { negate } from "../../../modules/Stream/utils/StreamPosition.js"
-import { OwnerPath, ResourcePath } from "../../../objects/PropertyPath.js"
+import {
+	OwnerFollower,
+	ResourceFollower
+} from "../../../objects/PropertyPath.js"
 import {
 	hasLineIndex,
 	hasMarker,
@@ -26,10 +29,10 @@ import {
  * predicate supplied via the constructor,
  */
 export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
-	protected abstract get path(): IPropertyPath<IStream, T & IStream>
+	protected abstract get follower(): IPathFollower<IStream, T & IStream>
 
 	locate(startStream: IStream): (T & IStream<any>) | null {
-		return this.path.follow(startStream, negate(this.predicate)) || null
+		return this.follower.follow(startStream, negate(this.predicate)) || null
 	}
 
 	constructor(private readonly predicate: (x: any) => x is T) {}
@@ -39,8 +42,10 @@ export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
  * A `WithPropDigger` case with `ownerDigger` as the `digger`.
  */
 export class Upwards<T = any> extends WithPath<T> {
-	protected get path(): IPropertyPath {
-		return OwnerPath.instance
+	static readonly follower = new OwnerFollower()
+
+	protected get follower(): IPathFollower {
+		return Upwards.follower
 	}
 }
 
@@ -48,8 +53,10 @@ export class Upwards<T = any> extends WithPath<T> {
  * A `WithPropDigger` case with `resourceDigger` as the `digger`.
  */
 export class Downwards<T = any> extends WithPath<T> {
-	protected get path(): IPropertyPath {
-		return ResourcePath.instance
+	static readonly follower = new ResourceFollower()
+
+	protected get follower(): IPathFollower {
+		return Downwards.follower
 	}
 }
 
@@ -60,17 +67,17 @@ export class Downwards<T = any> extends WithPath<T> {
  */
 export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
 	static readonly upwards: StatefulLocator = new StatefulLocator(
-		OwnerPath.instance
+		new OwnerFollower()
 	)
 	static readonly downwards: StatefulLocator = new StatefulLocator(
-		ResourcePath.instance
+		new ResourceFollower()
 	)
 
-	protected get path() {
-		return this._path
+	protected get follower() {
+		return this._follower
 	}
 
-	private constructor(private readonly _path: IPropertyPath) {
+	private constructor(private readonly _follower: IPathFollower) {
 		super(hasState)
 	}
 }
@@ -79,14 +86,14 @@ export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
  * with a `.pos: number` property present.
  */
 export class PosCarryingLocator extends WithPath<IPosed> {
-	static readonly upwards = new PosCarryingLocator(OwnerPath.instance)
-	static readonly downwards = new PosCarryingLocator(ResourcePath.instance)
+	static readonly upwards = new PosCarryingLocator(new OwnerFollower())
+	static readonly downwards = new PosCarryingLocator(new ResourceFollower())
 
-	protected get path() {
-		return this._path
+	protected get follower() {
+		return this._follower
 	}
 
-	private constructor(private readonly _path: IPropertyPath) {
+	private constructor(private readonly _follower: IPathFollower) {
 		super(hasPos)
 	}
 }
@@ -96,14 +103,14 @@ export class PosCarryingLocator extends WithPath<IPosed> {
  * with a `.lineIndex: ILineIndex` property present.
  */
 export class IndexCarryingLocator extends WithPath<IIndexCarrying> {
-	static readonly upwards = new IndexCarryingLocator(OwnerPath.instance)
-	static readonly downwards = new IndexCarryingLocator(ResourcePath.instance)
+	static readonly upwards = new IndexCarryingLocator(new OwnerFollower())
+	static readonly downwards = new IndexCarryingLocator(new ResourceFollower())
 
-	protected get path() {
-		return this._path
+	protected get follower() {
+		return this._follower
 	}
 
-	private constructor(private readonly _path: IPropertyPath) {
+	private constructor(private readonly _follower: IPathFollower) {
 		super(hasLineIndex)
 	}
 }
@@ -137,11 +144,11 @@ export class MarkerLocator<M = any> extends WithPath<IMarkerHaving<M>> {
 	private marker: M
 
 	static upwards() {
-		return new MarkerLocator(OwnerPath.instance)
+		return new MarkerLocator(new OwnerFollower())
 	}
 
 	static downwards() {
-		return new MarkerLocator(ResourcePath.instance)
+		return new MarkerLocator(new ResourceFollower())
 	}
 
 	setMarker(marker: M) {
@@ -149,11 +156,11 @@ export class MarkerLocator<M = any> extends WithPath<IMarkerHaving<M>> {
 		return this
 	}
 
-	protected get path() {
-		return this._path
+	protected get follower() {
+		return this._follower
 	}
 
-	private constructor(private readonly _path: IPropertyPath) {
+	private constructor(private readonly _follower: IPathFollower) {
 		super(
 			(x): x is IMarkerHaving => hasMarker(x) && x.marker === this.marker
 		)

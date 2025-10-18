@@ -16,6 +16,7 @@ import type {
 	IMarkerHaving,
 	INavigable,
 	IOwnedStream,
+	IPeekable,
 	IPeekableStream,
 	IRenewerStream,
 	IStream,
@@ -281,7 +282,7 @@ export function match(word: Regex) {
  * This is a curried functional version of `input.peek(n)`.
  */
 export function peek(n: number) {
-	return function <T = any>(input: IPeekableStream<T>) {
+	return function <T = any>(input: IPeekable<T>) {
 		return input.peek(n)
 	}
 }
