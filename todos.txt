@@ -6,9 +6,129 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	3. the "general", which may get removed/deleted/never-get-done/changed, or (maybe) done
 		At worst - they get done later due to being less significant. 
 	4. the "leftovers" for v0.3 - this is definitely getting done, and definitely done last - before the publishing
-	5. the "v0.4"
-	6. the (possibly, not so distant) "future"
-	
+	5. the (possibly, not so distant) "future"
+		
+3. Commit D: test the 'static' field of `mixin`: 
+	0. Before: finish Commit L
+	1. add the appropriate test cases
+	2. add a new test like the old ones, with 'constructor() {}' instead of 'constructor: function () {}'
+	3. add a test for the 'this.class' property on the mixin-instances
+		
+6. Commit L: 
+	Do: After Commits J
+	FIX the 'test-build'
+	Let it be possible to run tests again 
+		(currently, some madness arising from 
+			import order causes the whole thing to crash). 
+
+	Do this by REMOVING 'import's like 'import {A} from "../.../classes.ts"'
+	or 'import {A} from "../.../Stream.ts', etc - use FILE-BY-FILE loading, 
+	avoid re-exports like the plague. 
+
+Immediate: 
+	2. `RegexParser` error-handling: 
+		0. remove the current error-related stuff from there: 
+			1. get rid of the old `expect/Errors.ts` stuff (replace with PROPER RegexParser-specific error-classes)
+			2. add parser-specific error-messages
+		1. walk the parser, FROM UPSIDE DOWN, adding the appropriate functionality to ALL the places:
+			1. usages of `expect`
+			2. usages of `unexpected`
+			3. usages of parser-specific errors (such as `invalid escape sequence`)
+
+TODOs: 
+	5. [LATER] TO DOCUMENTATION [about `MarkerLocator`]: 
+		usage example: 
+
+			function SomeChooser (input) {
+				// here, `this.state.counter` is `readonly .counter: Counter`, 
+				// defined as part of `getState()` function: `getState() => { counter: new Counter() }`
+				const marker = this.state.counter.inc()
+				const markerGetter = () => marker
+				return [
+					new SomeErrHandlerStream(), 	// handles errors that can ocurr downstream
+					StorageStream(markerGetter)(), 	// keeps marker for `SomeErrHandlerStream` to retrieve (if needed)
+
+					SomeStream(), 					// error is thrown HERE 
+													// CRUCIAL - if this is a CHOOSER instead of a Stream, 
+													// we may face the possibility of *recursion* 
+													// (and hence, not know the DEPTH of `.resource` we need to skip). 
+													// This is PRECISELY why the entire construct of `MarkerStream` is needed here. 
+													// In finite cases, this is an overkill, since the maximum size of the current chooser is known. 
+
+					MarkerStream(markerGetter)(),   // marker to find LATER from `SomeErrHandlerStream`
+					SomeOtherStream()			    // chooser-lifetime-limiting stream (oftentimes - a `LimitStream`)
+				]
+			}
+
+			// in `SomeErrHandlerStream()`: 
+			class SomeErrHandlerStream extends ErrorStream {
+				private readonly markerLocator = MarkerLocator.downwards<TConcreteWhatever, number>()
+
+				next() {
+					if (!this._isCurrEnd) super.next()
+					else this.isEnd = true
+				}
+
+				protected errHandler() {
+					// ...
+					// in event of unfixable error, PANIC RECOVERY
+					const bracketStream = this.markerLocator.locate(this).resource
+					for (const x of bracketStream) {}
+					this.curr = new SomeErrorToken()
+					this._isCurrEnd = true
+				}
+
+				setResource(resource) {
+					super.setResource(resource)
+					const storageStream = this.resource
+					const marker = storageStream.currStored
+					this.markerLocator.setMarker(marker)
+				}
+			}
+
+	1. Commit J: Walk through the library, fixing outdated JSDOC. 
+		Lots of it has accumulated, likely.	
+		ADD missing JSDoc
+	6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
+		1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!
+		2. new type - `IIndexStream = IStream & ILineIndex` [new], OLD `IIndexStream` becomes `IIndexStream & ILinkedStream`
+	10. Commit U: `RegexParser`: 
+		1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
+	11. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
+	13. VITAL REMINDER [documentation]: let the user employ *`ErrorData.ErrorPosition.Locator.Upwards`* when creating their ParseExtension-s
+		Reason: they grab the position from INSIDE the stream underneath. 
+			This is the only RELIABLE WAY (yes, by breaking encapsulation...), 
+	12. walk through ALL the library types, and FIX all the types which ARE EXCESSIVE! 
+		Let Interface Segregation Principle be followed rigorously - if something demands 
+			MORE properties than IT USES, then a NEW INTERFACE is warranted. 
+	13. [after adding error-handling to `RegexParser`] Update the `PropertyPath` tests:
+		rename the stuff that needs to be renamed...
+	14. Make the `INodeType`-implementations of the library into `IDebugNamed`
+		This is important to allow one for using them with `expectKind()`-function; 
+		LET THE USER provide the factories with respective `string` identifiers ON 
+			CREATION of the classes for node-making. 
+
+15. Commit Z - create the first `RegexCompiler` sketch [use Thompson's Construction]:
+	Do After: Commit Y2
+
+	VITAL: this DOES NOT utilize `IStream`-s internally. 
+	Instead, we accept an `IPeekableStream<string>`, then CALL `.peek(n)` on it,
+		RECORDING the CAPTURED portion of the input as we go, GOING BACK to the 
+			PREVIOUS MATCH when current one fails. 
+
+	1. Before doing: find a good article about Thompson's Construction, understand it
+		Try the Russ Cox one + the wikipedia. 
+	2. Before doing: find out a way to add the lookahead, ALL FEATURES of the language INTO the new construction
+
+	Structure: 
+		1. DepthStream(...) around the gained AST
+		2. Result is the OBJECT `RegexMatcher`, 
+			which is constructed in accordance to the gained AST
+				via a specialized `RegexMatcherBuilder`, which has methods 
+					defined for EACH individual case. 
+		3. Connecting code CALLS the `RegexMatcherBuilder` methods, while 
+			traversing the tree, thus filling the `RegexMatcher`. 
+
 REMINDER: Final Task Order
 	0. routine
 	1. Regex: RegexParser, RegexCompiler
@@ -26,43 +146,12 @@ IMMIDIATE NOTES:
 		Let there be AN EXAMPLE class (like one of those in the `Regex` parser)
 
 notes on `RegexParser` development: 
-	-2. About empty expressions: they aren't allowed (always false). 
-		This is why "|a+b?" doesn't match empty string. 
-
-		Reason: 
-			1. makes no sense, this is an ad-hoc-match regex-engine, not a fulltext one
-				Allowing matches for an empty string can only produce infinite loops 
-				in the usage context in question. Forbidding it makes for simpler parser code. 
-
-	-1. About Pooling: 
-		1. Add 'ObjectPool's to this. ESPECIALLY for `IStream` objects created. 
-			1. NOT THE tree-objects, though. Those are intended to be persistent and distinct
-
-	0. About Error-Handling: 
-		1. Non-error-resistant
-		2. Throws upon encounter of unacceptable characters
-		3. The error Stream is *very* "low" - right above the 'InputStream'; 
-
-		4. CURRENTLY, it "skips" (as in - ignores) erronous segments. 
-			LET IT REACT TO THEM! 
-			Particularly - it must *EXPECT* a character [vital, since doing otherwise would completely change the meaning of ' ' symbol in some contexts
-				Example: 's {name}' - VALID SIMPLE MULTI-CHAR REGEX; whereas - 's{name}' - a single type-match]; 
-
-		5. VITAL: 
-			1. Add a `PosStream` at the beginning [reason: for a better error-message]
-			2. See `RegexParser.ts` file regarding the need for a whole separate
-	1. Based off `IStream`-s
-	2. Input: 'InputStream' (since it's supposed to be used by the user in-program, and the strings are (supposed to be) relatively small)
-	3. To replace the `TokenChooser` itself [since we cannot use `Regex`] here, one uses `HandlerStream` + `StreamHandler`
-
 	4. Syntax: 			
-		1. Disjunction [a | b]
-		2. Root Node [.type: "regex-tree"]
 		3. DISCLAIMER: [important] `Regex` assumes matching the given `IStream` 
 			FROM ITS CURRENT POSITION. Id est, it really doesn't make sense to have, say, 
 			#, or :, because it matches AS MUCH AS IS NEEDED, and FROM THE POINT THAT IT STARTS. 	
 
-		DECISIONS [hard]: 
+		DONE - DECISIONS [hard]: 
 			0. IMPORTANT: for performance reasons - USE THOMPSON'S REGEX ALGORITHM!
 				Read this: 
 					1. https://swtch.com/~rsc/regexp/regexp1.html
@@ -92,7 +181,6 @@ notes on `RegexParser` development:
 				Reason: 
 					1. simplicity
 					2. 99% of all applications will benefit from this [easier crossplatform support, etc...]: 
-			4. No ':#' (or, in JS flavour, '^$')
 			5. Negation ONLY exists for character classes: 
 				Replacing the '[^...]' with '^[...]' [more readable]
 				This means, among other things - NO negative lookahead/lookbehind! 
@@ -113,25 +201,29 @@ notes on `RegexParser` development:
 
 			8. no 'v' functionality [unneeded, too much complexity]
 
-		KIND-OF DONE [see notes]: 	
-			23. [sort of - 'Range' incomplete, sketch] *, +, ?, {n}, {n, k} - operate the same as JavaScript
+		DONE [see notes]: 	
+			-2. About empty expressions: they aren't allowed (always false). 
+				This is why "|a+b?" doesn't match empty string. 
+
+				Reason: 
+					1. makes no sense, this is an ad-hoc-match regex-engine, not a fulltext one
+						Allowing matches for an empty string can only produce infinite loops 
+						in the usage context in question. Forbidding it makes for simpler parser code. 	
 		
-			5. [kind of done - NEEDS IMPLEMENTATION OF NEGATION!] \b, \d, \s, etc [from JavaScript RegExp]
-				But NOT the negative forms [excepting `\B` here...], which are supposed to be replaced by: 
-					1. \S == ^[\s]
-					2. \D == ^[\d]
+			23. [done] *, +, ?, {n}, {n, k} - operate the same as JavaScript
+			5. [done] \b, \d, \s, etc [from JavaScript RegExp]
+				NOTE - the negative forms like '^\s' are a SHORTHAND for `^[\s]`: 
+					1. \S == ^[\s] == ^\s
+					2. \D == ^[\d] == ^\d
 					...
-			24. [kind-of done - sketched out, to be finished] [abc-z...] - non-negative character classes - same as JavaScript + allows for ^-negation inside	: 
-			2.  [kind-of done, put it on hold for now...] '^...' - negation of '...'
-				NO ELEMENTARY [^...], replaced by composite ^[...]. 
-				In /^ab+/, same as /(:^a)b+/
-			7. [kind-of-done, put on hold for now...] Backslashing AS-IS-NECESSARY [like a simple '(\=...)', or, generally, `\^` for instance...]
-			22. [kind-of-finished; leave alone for now - first need general structure of the parser] Capturing groups [besides (:...)]: 
-				1. unnamed [regular]: (...)
-				2. named: ({name}...)
-				3. non-capturing: (:...) - same as (?:...) in JavaScript [replacement]
-				4. lookahead: (=...) - same as '(?=...)' in JavaScript [replacement]	
-				5. lookbehind: (<...) - same as '(?<=...)' in JavaScript [replacement]	
+			24. [done] [abc-z...] - non-negative character classes - same as JavaScript + allows for ^-negation inside	: 
+			2.  [done] '^[...]' - negation of '[...]' (same as JS `[^...]`)
+					
+			7. [done] Backslashing AS-IS-NECESSARY [like a simple '(\=...)', or, generally, `\^` for instance...]
+			22. [done] Capturing groups [besides (:...)]: 
+				1. capturing: (...)
+				2. non-capturing: (:...) - same as (?:...) in JavaScript [replacement]
+				3. lookahead: (=...) - same as '(?=...)' in JavaScript [replacement]	
 
 			10. [kind of done - finish the errors later]\u{HHHHHH} (1-6 digits, REPLACES the \c, \x and multitudes of \u in JavaScript RegExp); 
 				1. NEW ERROR - must verify that the resulting 6-digit value IS HEXIDECIMAL! 
@@ -279,8 +371,15 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 			1. USE A MOCK HERE (`TreeLike`)
 
 	TODO: public classes/functions/utils/etc to be tested: 
-		-6. PoolCollection: 
-			
+		TODO: since new classes have been added (once again), 
+			after finishing this list, walk THROUGH the library code, 
+				spotting classes that are UNTESTED, and deciding whether to 
+					test them or not (note: all *public exports* must be 
+						unit-tested without exception)...
+
+		-7. ArrayBuilder
+		-6. JointPoolCollection: 
+			1. Pools.All
 		-5. PoolCollection: 
 			1. Pools.Stream [specific] - ensure all needed pools are cleared
 			2. Pools.Node [specific] - ensure all needed pools are cleared
@@ -325,6 +424,13 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				for `SourceBuilder + IndexMap + DepthStream + INode + NodeSystem` for 
 				GENERATION of the "+/-, (), [a-zA-Z]-vars (no-self-mod)"
 				grammar sources BASED OFF a Node-based AST. 
+
+				It also must be: 
+
+					1. error-resistant (MarkerStream + Counter)
+					2. boasts custom error messages
+					3. keep track of MULTIPLE ERRORS [inside `.state.errors: IErrorData[]` - utilize the 
+						`refresh() + .push(.copy()) + .markHandled()` cycle]; 
 		
 		[easy, but tedious]
 		8. `BasicHash`, 
@@ -490,16 +596,10 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 		55. PosStream
 		56. SingletonStream
 		57. WriterStream
-		58. BasicErrorStream [abstract]: 
-			1. will define a child-class
-			2. will check that it works as-intended:
-				1. sample 1 - with a case-specific `ParseError`-descendant
-				2. sample 2 - a (simple) fault-resistant parser
-		59. DefaultErrorStream: 
-			1. with bare ErrorStream
-			2. with `BasicErrorStream`
 		60. AccumulatorStream
 		61. ByteStream
+		62. SingleNodeStream
+		63. NodeStream
 
 	TODO: chase down all leftover 'TODO's inside the code: 
 		Search: // TODO, // *, // !, // ?, // ^, // %
@@ -574,6 +674,31 @@ CURRENT TODOS [top-down order...]:
 				1. provide links to interfaces for class pages
 				2. provide links ot implementations for interfaces to interface pages
 
+	TS1. DepthStream: create a new version - children-first traversal [call it `ChildrenStream`]; 
+		The 'DepthStream' (currently) is the pre-order tree traversal algorithm Stream-implementation; 
+		There should be ANOTHER - the post-order tree traversal; 
+
+		1. Create a new 'IStream' implementaiton for this - 'PostStream'; 
+			This is (particularly) useful for some types of interpreters; 
+
+			The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
+			The Post visits first the children, then the siblings, only THEN the parent [when there are NO MORE children - then the parent is visited]; 
+
+			Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
+				whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
+
+			[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
+					
+	UT3. Add more complex 'Node' utilities. Based off previous 'one.js' v0.3.1 [the removed methods], add: 
+		1. deepSearch - searching inside the given Tree for a value with a given 'prop'
+		2. depth - calculating the depth of the given Tree
+		3. treeCount - counts the values of a given predicate for all items in the tree
+
+		ALSO: Add new methods to 'RecursiveNode': 
+
+			1. .reverse() - recursively reverses the given tree									
+
+
 	TODO: about 'mixins.js'
 		1. REWRITE the projectr later in your TypeScript-replacement 
 			[it will share quite a lot of the syntax, so very likely, one will not need to change all that much of the code]; 
@@ -607,6 +732,15 @@ MINOR TODOS:
 		Note also that the library is intended for creation of Stream-based Validators. 
 	
 LATER TODOS:
+	TODO: RESEARCH AND BENCHMARKS (Chevrotain)
+		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
+			1. *possibly*, if the libraryperformance is really bad, do something about it...
+		2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
+			Supposedly, it (significantly) speeds up property access on classes. 
+			Benchmark...
+			3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
+				Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
+
 	TODO [maybe?]: change all the `<... = any>`s in the code to `<... = unknown>`s. 
 		Reasons: 
 			1. works FAR better with the `&`-role-composition	
@@ -714,280 +848,21 @@ LATER TODOS:
 			Reason: too different from project-to-project. 
 			These are the same. []
 	
-[TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
-	Secondary: 			
-		RE1. [???] 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-			Namely: 
-				1. intersection: 	/[[...]&&[...]]/v
-				2. subtraction: 	/[[...]--[...]]/v
-				3. string literals: /[q{...}]/v
-		
-	Minor: 	
-		TY2. Type simplification - the `array.Pairs` overuse: 
-			Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
-			Specifically - when the [Symbol.iterator] is the only actually needed property.
-				
-	IMPORTANT: clean the git history - keep only the commits for each individual version; 
-		Squash all the others + change the respective commit messages; 
-		[do this via `git rebase -i` + `git push --force`]
 
-	BEFORE WE LEAVE [vital]: 		
-		TODO: JIRA for v0.4
-			WHEN you do the FINAL 'git rebase -i' of the thing, 
-				remove all the *old* `todos.txt` files (to make the repo seem presentable). 
-		
-			Let the *new* notes for v0.4 now be inside of:
-				1. JIRA 
-				2. `GitHub Projects` [as a backup only...]
-		
-	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
+	JD1. [IMPORTANT] Expand JSDoc: 	
+			Read more about `JSDoc` in TypeScript at:
+				https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html	
 
-	TODO: WRITE the CHANGELOG
+			1. use it more thoroughly (give higher priority for classes and so forth - not just a brief description + Wiki link)
+			2. expand its contents (argument types, @type, self-reference, etc)
+			3. [IMPORTANT] document early - another one of the banes of parsers.js: 
+				Due to the fact that development was (mostly) content- and feature- oriented, 
+					one very much forogt about importance of spending appropriate amount of 
+						time on documentation. Hence, one (slowly) started to forget what one 
+							was doing, and whether it even (sometimes) made any sense. 
+				Had there been documentation, certain specific poor choices may have been more avertable, and 
+					some little time could have been saved. 
 	
-[v0.4]
-
-TODO: 
-	0. General notes (see these before anything else): 
-		PR1. Move all this to GitHub Issues: 
-			1. The library's issue-tracking IS A MESS
-				It ought to be organized...
-			2. Put each of these pieces into a seaprate Issue
-			3. Remove 'todos.txt'; 
-		TE1. Do TDD this time
-		JD1. [IMPORTANT] Expand JSDoc: 	
-				Read more about `JSDoc` in TypeScript at:
-					https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html	
-
-				1. use it more thoroughly (give higher priority for classes and so forth - not just a brief description + Wiki link)
-				2. expand its contents (argument types, @type, self-reference, etc)
-				3. [IMPORTANT] document early - another one of the banes of parsers.js: 
-					Due to the fact that development was (mostly) content- and feature- oriented, 
-						one very much forogt about importance of spending appropriate amount of 
-							time on documentation. Hence, one (slowly) started to forget what one 
-								was doing, and whether it even (sometimes) made any sense. 
-					Had there been documentation, certain specific poor choices may have been more avertable, and 
-						some little time could have been saved. 
-						
-	1. Primary [new ideas, modules, interfaces/classes, algorithms]	
-		TS1. DepthStream: create a new version - children-first traversal [call it `ChildrenStream`]; 
-			The 'DepthStream' (currently) is the pre-order tree traversal algorithm Stream-implementation; 
-			There should be ANOTHER - the post-order tree traversal; 
-
-			1. Create a new 'IStream' implementaiton for this - 'PostStream'; 
-				This is (particularly) useful for some types of interpreters; 
-
-				The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
-				The Post visits first the children, then the siblings, only THEN the parent [when there are NO MORE children - then the parent is visited]; 
-
-				Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
-					whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
-
-				[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
-				
-		TC1. Create an 'ASTAnalyzer' class [under the 'Node' module]: 
-			1. Takes in an `INode`
-			2. Traverses the tree
-			3. Returns information: 
-				1. [Buckets-Categorization] Arrays of '.trivial', '.content', '.recursive', etc nodes IN ACCORDANCE TO A GIVEN 'NodeSystem'; 
-				2. [Type-Categorization] Returns a 'HashMap' of arrays of nodes, filtered by their '.type'; 
-					NOTE: the 'HashMap' is, TOO, completely configurable by the user [user-defined (if provided), else - default being: when 'string's are used for 'type's - ObjectHashInternal, otherwise - HashMapInternal]; 
-						(another function-argument for returning the final ASTAnalyzer class)
-	
-			4. Provides functionality [ASTAnalyzer]: 
-				1. mapTypes((type_name: string) => string): 
-					creates a new 'ASTNode', by means of mapping the '.type'-s
-						of the current one using the given function. 
-					Immensely powerful for changing between different data formats. 
-	
-				2. mapValues((x: any) => any)
-					creates a new 'ASTNode', by means of mapping the '.value's of each 'ContentASTNode', 
-						while preserving all else
-				
-				3. .find(type: ..., pred: (x) => boolean): 
-					Seeks an item in the tree with a type '.type', obeying the predicate '.pred';
-					Optimizes to look specifically in a '.type'-bucket of the given 'type'. 
-					Can be radically faster for large inputs. 
-				
-				4. .find(pred: (x) => boolean): 
-					if the 'type' is not passed, the entire tree is searched; 
-					Optimization - uses prior obtained collections for increasing cache locality of large searches. 
-				
-				5. .iterate(type) - returns a Stream, filled specifically with values of type 'type'; 
-					Namely, it returns an 'InputStream', wrapped around the respective '.type'-bucket; 
-					The items are listed on a from-beginning-to-end of the 'Stream' used to construct the ASTAnalyzer; 
-	
-				6. .filter(pred) - returns a new tree, such that it ONLY contains elements that obey the given predicate: 
-					HOWEVER, one can also mandate that in order for a sub-tree (RecursiveASTNode) to remain, 
-						at least one of its children must be 'true' as well. 
-						This is done by means of returning `null`, instead of `true`/`false`.  
-				
-				7. .search(type: any) - searches, and returns for multi-index information for each of the elemenets of a given type. 
-					Optimization: uses ONLY JUST the information from a given '.type'-bucket; 
-					This allows one to: 
-						1. Iterate a portion of the tree INSTEAD of needing to start "at the beginning
-						2. Know exactly when to stop (seeing the *last* item that needs to be iterated over)
-	
-				8. .map((x: ContentASTNode | TrivialASTNode) => any): 
-					Maps all the non-RecursiveASTNode parts of the tree to a different 'Tree'. 
-					Useful for creation of generalized non-AST trees, to be used with 'TreeStream': 
-						Example, passing a function that returns 'string', then - CONCATENATING all 
-							the items inside the obtained Tree, via: 
-	
-								// [sketch - no types]
-								function GenerationFunction(F) {	
-									return function generate(ast) {	
-										return array(TreeStreamPre(ast.map(F)), new UnfreezableString()).get()
-									}
-								}
-								
-								// this is to create either a SUBSET defined by a recursive IndexMap-like function, *or* via working through a '[type]'-defined set of "superior" nodes; 
-								// NOTE: 'ast.types[type]' is an *ARRAY*
-								function GenerationRecursive(F, type) {	
-									return function generate(ast) {	
-										return array(InputStream(ast.types.index(type).map(F)), new UnfreezableString()).get()
-									}
-								}
-		
-					Also - '.map(F)' OPTIMIZES, so, it expects the given values to be returning FUNCTIONS, for plugging in their children's 'F(x)', 
-						so: 
-	
-							1. A -> B
-							2. F(A) -> X(K): X(B) == string
-							3. F(B) == string
-								F(A)(B); 
-							
-					The optimization is - SPLITTING the '.types'-buckets via doing '.types[name].map(...)'; 
-				
-				9. RecursiveASTNode: 
-					1. Contains various copying .value-Array-delegate methods: 
-						1. .map(f) - creates a new RecursiveASTNode via 'new RecursiveASTNode(this.type, this.value.map(f))'
-						2. .filter(f) - creates a new RecursiveASTNode via 'new RecursiveASTNode(this.type, this.value.filter(f))'
-	
-			5. Optimization information (additional): 
-				1. IDEA: add a new 'ASTHierarchy' information object, which: 
-					1. Specifies, what '.type'-s CAN be found within which '.type'-s of RecursiveASTNode-s: 
-						IMMENSELY powerful for search-optimization inside a given Tree 
-							[limits the '.type'-buckets in which one needs to look]; 
-					2. Specifies maximum "depth" of a certain particular 'RecursiveASTNode': 
-						1. Allows one to replace a continuous check of 'isGoodIndex(.lastChild)' with 'isGoodIndex(.lastChild) && i < MAX_DEPTH_COUNT'; 
-							Guarantees a performance bound. 
-							When the bound is PRECISE, the 'isGoodIndex' can be dropped
-					3. Specifies maximum length for '.children' of a given 'RecursiveASTNode': very useful for iteration! 
-						1. Replaces '.children.length' check with a 'counter < FIXED_PRECOMPUTED_LENGTH'; 
-					4. Specifies expected structure for a given 'RecursiveASTNode': 
-						1. May permit one to be going one-by-one downwards for it, EXPECTING the given '.type's; 
-						2. Eliminates checks for '.isSiblingAfter'
-	
-					'ASTHierarchy' is optional, and its purpose is solely to: 
-						1. provide algorithm optimizations
-						2. enforce bounds for a given format
-	
-					NOTE: 'ASTHierarchy' is ONLY good for optimization, when IT IS PRECISE 
-						[id est, we can SKIP certain function-calls/checks]. 
-	
-				NOTE: optimizations work via: 	
-					1. ASTStream-s: 
-						0. Alternative to 'TreeStream': less generic, provides better optimizations for AST: 
-							1. ASTStreamPre - alt. of TreeStreamPre
-							2. ASTStreamLevel - alt. of TreeStreamPre
-							3. ASTStreamPost - alt. of TreeStreamPost
-						1. Accepts an 'ASTNode' instead of a 'Tree'
-						2. Optimizations: 
-							1. No '.lastChild' presence check in '.isChild()' method - instead, just '.lastChild > -1'	
-								This is a good optimization for TreeStream-iteration of large trees ('.isChild()' is called ON EVERY '.next()' call); 
-							2. Algorithm Configurable via 'ASTHierarchy':
-								1. Optimizations are present ONLY when ASTHierarchy is PRECISE
-								2. Expects a VALID abstract syntax tree
-	
-				2. For '.type's field values, one uses EITHER an 'ObjectHashInternal' (if strings), or a 'MapHashInternal' (if not strings); 
-		
-		ME3. [IStream] Iterator Helper functions - '.filter', '.take', ...: 
-			Provide them. 
-			Use them in the library definitions that actually EMPLOY them [example: PositionalValidator would benefit greatly from a single '.filter()' call]; 
-			These will (each) require individual internal-class implementations + public interfaces to use.
-				Reason for "internal" nature of these classes: one doesn't want to allow user to create them on their own
-			
-	2. Secondary [new utils, methods]
-		UT1. bufferize(tree, size) - util [Tree/utils.ts]
-			Given a 'Tree', returns an array of values of size `size`: 
-
-				{
-					childNumber: number,
-					value: any
-				}
-
-			The `size` is a fixed number >= 0, 'childNumber' is the number of children, ahead of current node in the array.
-			To be used for creating a persistent linear data structure for working with the given AST. 
-			Good for cases, when the number of items is known, and is large (part of the the "big input" optimizations); 
-
-			Would permit user to store a '.state.size: Pattern<number>' property (Pointer(number)) on the ParserState-s, 
-				for counting the size of the input in terms of nodes, then re-use it with 'bufferize', 
-					and use the tree for evaluation; 
-
-			If the 'size' is unknown, implements a simple DFS (namely - conversion of a given 'Tree' into an 'Array')
-			
-		UT2. util - enumerateTree [Tree/utils.ts]
-			Given an array of "types" of nodes, it recursively converts their properties (given in the 'shapes' array), 
-				to single-array-siblings form (the current ChildrenTree); 	
-
-			This would permit a more "variable" set of trees (those that have properties with fixed names), 
-				to be enumerated accordingly...; 
-
-			Example [1]: 
-
-				{
-					type: any, 
-					a: any
-					b: any
-					c: any
-				}
-
-			Becomes [1]: 
-
-				{
-					type: any, 
-					value: [
-						// ... a, b, c
-						// ... or b, a, c
-						// ... or any other order
-					]
-				}
-
-			Example [2]: 
-
-				{ type: any }; remains the same
-			
-			Example [3]: 
-
-				{ type: any, namedProp: any }; becomes { type: any, value: any }; by changing the property name to 'value'
-
-			For this, define a 'TreeKind'/'TreeShape' - with a list of properties to be used/transformed; 
-			More specifically, it creates a tree of `Node`s, from a tree with a given shape. 
-			
-		UT3. Add more complex 'Node' utilities. Based off previous 'one.js' v0.3.1 [the removed methods], add: 
-
-			1. deepSearch - searching inside the given Tree for a value with a given 'prop'
-			2. depth - calculating the depth of the given Tree
-			3. treeCount - counts the values of a given predicate for all items in the tree
-
-			ALSO: Add new methods to 'RecursiveNode': 
-
-				1. .reverse() - recursively reverses the given tree
-											
-		MC1. MapClass: fix types
-			More precisely, the "shady" types of `.extend/extendKey`, and of `.index(x: ???, y: ...any)`; 
-			These are supposed to make the distinction between the OUTER KEY type and the INNER KEY type ['K']. 
-			The inner key type matters during construction, but the outer key type matters during other usage. 
-			Likewise, FIX the `IIndexable`. Let it specify the type of the PRIMARY ARGUMENT 'x: ???'; 
-							
-	3. Unrelated/separate module/grand refactoring: 		
-		DP1. [Unrelated - later, spread to appropriate note-files] Deployment Pipelines for other maintained projects: 
-			1. draw-text [install-npm + prod-to GitHub Pages]
-				Also - ADD THE NPM DEPENDENCIES THAT IT REALLY REQUIRES - *INCLUDING* 'parsers.js'
-			2. selector [to npm]
-			3. regex [to npm]
-			4. xml [to npm]
-
 	4. Docs: 
 		WE1. CREATE A proper website with documentation for the library. 
 			Do benchmarks, et cetera...; 
@@ -1075,21 +950,39 @@ TODO:
 						Must be synced with `wiki`. 
 						LET the `public/protected` docs for these methods be THE SAME. 
 
-	5. Testing: 
-		1. introduce mocks [use Jest]
-			Reason: complexity. 
-				There's still v0.4 to go; 
+	
+[TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
+	Secondary: 			
+		RE1. [???] 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+			Namely: 
+				1. intersection: 	/[[...]&&[...]]/v
+				2. subtraction: 	/[[...]--[...]]/v
+				3. string literals: /[q{...}]/v
+		
+	Minor: 	
+		TY2. Type simplification - the `array.Pairs` overuse: 
+			Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
+			Specifically - when the [Symbol.iterator] is the only actually needed property.
+				
+	IMPORTANT: clean the git history - keep only the commits for each individual version; 
+		Squash all the others + change the respective commit messages; 
+		[do this via `git rebase -i` + `git push --force`]
 
-	6. Research (Chevrotain - source, capabilities, optimizations): 
-		1. Compare performance with Chevrotain benchmark (the JSON parser example): 
-			1. *possibly*, if the libraryperformance is really bad, do something about it...
-		2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
-			Supposedly, it (significantly) speeds up property access on classes. 
-			Benchmark...
-			3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
-				Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html
+	BEFORE WE LEAVE [vital]: 		
+		TODO: JIRA for v0.4
+			WHEN you do the FINAL 'git rebase -i' of the thing, 
+				remove all the *old* `todos.txt` files (to make the repo seem presentable). 
+		
+			Let the *new* notes for v0.4 now be inside of:
+				1. JIRA 
+				2. `GitHub Projects` [as a backup only...]
+		
+	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
 
-FUTURE: 
+	TODO: WRITE the CHANGELOG
+	
+FUTURE [v0.3.1, ...]: 
+	0. MOVE THIS STUFF TO PULL REQUESTS!!! [organize the repository - it is a fucking mess...]
 	1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
 		0. `copiable` package: 
 			A TypeScript package. 
