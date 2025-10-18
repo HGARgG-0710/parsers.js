@@ -8,7 +8,7 @@ import type {
 	ITypeCheckable
 } from "../../../interfaces.js"
 import { SourceBuilder } from "../../../objects.js"
-import { ensureChildUnrevivable, expectKind } from "../../../objects/Error.js"
+import { ensureChildUnrevivable, expect, expectKind } from "../../../objects/Error.js"
 import {
 	LimitStream,
 	SingleNodeStream,
@@ -47,7 +47,8 @@ const RangeBoundaryStream = CollectionStream(
 )
 
 const expectRangeBoundary = expectKind(RangeBoundary)
-const expectComma = expectKind(Comma)
+const expectCommaNode = expectKind(Comma)
+const expectComma = expect(",")
 
 class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
 	private finalRange: IPoolNode<string, [INode<string>]>
@@ -71,7 +72,7 @@ class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
 	}
 
 	private tryLimits() {
-		expectComma(this.resource!)
+		expectCommaNode(this.resource!)
 		this.resource!.next() // skipping 2nd item (Comma)
 		return this.reviveChild() // is this alive for the 3rd?
 	}
@@ -95,6 +96,7 @@ class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
 }
 
 function HandleComma(input: IOwnedStream<string>) {
+	expectComma(input)
 	input.next() // ,
 	return [CommaNodeStream()]
 }
