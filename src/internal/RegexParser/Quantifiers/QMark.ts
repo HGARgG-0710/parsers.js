@@ -10,15 +10,15 @@ import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
 import { QMark } from "../Nodes.js"
 
-const NonQMark = SingleChildNode("non-greedy-qmark")
-const GreedyQMark = SingleChildNode("greedy-qmark")
+const NonGreedyQMark = SingleChildNode("non-greedy-qmark", "NonGreedyQMark")
+const GreedyQMark = SingleChildNode("greedy-qmark", "GreedyQMark")
 
 function handleQMark(input: IOwnedStream<INode<string>>) {
 	const child = next(input)
 	input.next() // QMark(?)
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
-		return [SingletonStream(() => new NonQMark(child))()]
+		return [SingletonStream(() => new NonGreedyQMark(child))()]
 	}
 	return [SingletonStream(() => new GreedyQMark(child))()]
 }

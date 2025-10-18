@@ -189,6 +189,16 @@ export function tryReviveChild<T = any>(
 		)
 }
 
+export function ensureChildUnrevivable<T = any>(
+	stream: IRenewerStream<T>,
+	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+) {
+	if (stream.reviveChild() === true)
+		throw new ParseError.ChildIsNotUnrevivable(
+			prepareReviveError(errDataGetter(stream), stream)
+		)
+}
+
 export namespace ParseError {
 	export abstract class MessageBuilderParseError extends ParseError {
 		private _errData: IErrorData
@@ -366,6 +376,8 @@ export namespace ParseError {
 	}
 
 	export class CannotReviveChildError<T = any> extends StreamStackError<T> {}
+
+	export class ChildIsNotUnrevivable<T = any> extends StreamStackError<T> {}
 }
 
 export abstract class NoPropertyHavingLocatableError extends ConstructorError {

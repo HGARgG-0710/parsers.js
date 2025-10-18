@@ -1,4 +1,5 @@
 import type { IOwnedStream } from "../../../interfaces.js"
+import { expect } from "../../../objects/Error.js"
 import { SourceBuilder } from "../../../objects/SourceBuilder.js"
 import {
 	CollectionStream,
@@ -6,7 +7,6 @@ import {
 	isCurr
 } from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
-import { expect } from "../Errors.js"
 import { UnicodeChar } from "../Nodes.js"
 
 const expectOpBrack = expect("{")
@@ -24,7 +24,7 @@ function HandleUnicodeNumber() {
 
 export function HandleUnicode(input: IOwnedStream<string>) {
 	input.next() // u
-	expectOpBrack(input) // '{' is `.curr`
+	expectOpBrack(input)
 	input.next() // {
 	return HandleUnicodeNumber()
 }

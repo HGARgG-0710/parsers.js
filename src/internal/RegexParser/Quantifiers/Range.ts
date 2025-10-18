@@ -8,6 +8,7 @@ import type {
 	ITypeCheckable
 } from "../../../interfaces.js"
 import { SourceBuilder } from "../../../objects.js"
+import { ensureChildUnrevivable, expectKind } from "../../../objects/Error.js"
 import {
 	LimitStream,
 	SingleNodeStream,
@@ -21,7 +22,7 @@ import {
 } from "../../../samples/Stream.js"
 import { consumable, next } from "../../../utils/Stream.js"
 import {
-	CommaNode,
+	Comma,
 	GreedyRange,
 	InfiniteRange,
 	LimitsRange,
@@ -32,7 +33,7 @@ import {
 	TrivialRange
 } from "../Nodes.js"
 
-const CommaNodeStream = SingletonStream(() => new CommaNode())
+const CommaNodeStream = SingletonStream(() => new Comma())
 
 const RangeLimitStream = EndBracketStream(isCurr("}"))
 
@@ -45,35 +46,41 @@ const RangeBoundaryStream = CollectionStream(
 	consumable(new SourceBuilder())
 )
 
+const expectRangeBoundary = expectKind(RangeBoundary)
+const expectComma = expectKind(Comma)
+
 class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
 	private finalRange: IPoolNode<string, [INode<string>]>
-	private firstItem: ICellNode<string>
-	private lastItem: ICellNode<string>
+	private first: ICellNode<string>
+	private last: ICellNode<string>
 
 	private tryTrivial() {
-		this.firstItem = this.resource!.curr as ICellNode<string>
+		expectRangeBoundary(this.resource!)
+		this.first = this.resource!.curr as ICellNode<string>
 		this.resource!.next() // skipping first item
-		return this.reviveChild()
+		return !this.reviveChild() // does this die after 1st?
 	}
 
 	private asTrivial() {
-		this.finalRange.init(new TrivialRange(this.firstItem))
-		this.resource!.next() // killing last child
-		// ! VALIDATE THAT THE CHILD IS INDEED LAST!!!
+		this.finalRange.init(new TrivialRange(this.first))
+		this.resource!.next() // killing last (1st here) child
 	}
 
 	private asInfinite() {
-		this.finalRange.init(new InfiniteRange(this.firstItem))
+		this.finalRange.init(new InfiniteRange(this.first))
 	}
 
 	private tryLimits() {
-		this.resource!.next() // skipping second item
-		return this.reviveChild()
+		expectComma(this.resource!)
+		this.resource!.next() // skipping 2nd item (Comma)
+		return this.reviveChild() // is this alive for the 3rd?
 	}
 
 	private asLimits() {
-		this.lastItem = this.resource!.curr
-		this.finalRange.init(new LimitsRange(this.firstItem, this.lastItem))
+		expectRangeBoundary(this.resource!)
+		this.last = this.resource!.curr
+		this.finalRange.init(new LimitsRange(this.first, this.last))
+		ensureChildUnrevivable(this) // we're definitely finished, no weird leftovers
 	}
 
 	setResource(resource: IOwnedStream): void {
@@ -81,8 +88,6 @@ class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
 		this.finalRange = new Range()
 		this.curr = this.finalRange
 
-		// ! THIS MUST LATER BE VERIFIED!!! [we don't *know* what are the tyep that are stored in the `readItems`]:
-		// * only 3 formats: 'number', 'number,' and 'number,number' are allowed
 		if (this.tryTrivial()) this.asTrivial()
 		else if (this.tryLimits()) this.asLimits()
 		else this.asInfinite()

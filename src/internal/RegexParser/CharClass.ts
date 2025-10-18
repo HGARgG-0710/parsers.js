@@ -101,7 +101,7 @@ function HandleUnitOrHyphen(input: IOwnedStream<string>) {
 	return (input.curr === "-" ? HandleHyphen : HandleUnit)(input)
 }
 
-function HandleRange(this: ICompositeStream, input: IOwnedStream<string>) {
+function HandleClassRange(this: ICompositeStream, input: IOwnedStream<string>) {
 	return [new ClassRangeStream().setState(this.state), HandleUnitOrHyphen]
 }
 
@@ -111,7 +111,7 @@ function isRangeAhead(input: IOwnedStream<string> & IPeekable<string>) {
 }
 
 function ClassElementHandler(input: IOwnedStream<string> & IPeekable<string>) {
-	return [isRangeAhead(input) ? HandleRange : HandleUnit]
+	return [isRangeAhead(input) ? HandleClassRange : HandleUnit]
 }
 
 export function HandleCharClass(

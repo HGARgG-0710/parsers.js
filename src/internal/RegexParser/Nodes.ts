@@ -85,7 +85,7 @@ export const Range = SingleChildNode("range", "Range")
 
 // internal, temp node (exists for convinience and validation purposes),
 // doesn't actully appear in the AST
-export const CommaNode = TokenNode("comma", "Comma")
+export const Comma = TokenNode("comma", "Comma")
 
 export const RangeBoundary = ContentNode("range-boundary", "RangeBoundary")
 

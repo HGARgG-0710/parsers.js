@@ -11,8 +11,8 @@ import { next } from "../../../utils/Stream.js"
 import { Plus } from "../Nodes.js"
 import { QMark } from "../Nodes.js"
 
-const NonGreedyPlus = SingleChildNode("non-greedy-plus")
-const GreedyPlus = SingleChildNode("greedy-plus")
+const NonGreedyPlus = SingleChildNode("non-greedy-plus", "NonGreedyPlus")
+const GreedyPlus = SingleChildNode("greedy-plus", "GreedyPlus")
 
 function handlePlus(input: IOwnedStream<INode<string>>) {
 	const child = next(input)

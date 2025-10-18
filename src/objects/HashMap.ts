@@ -3,7 +3,7 @@ import type { IStream } from "../interfaces.js"
 import type { IHash, IHashClass, IHashMap } from "../interfaces/HashMap.js"
 import type { IPreMap } from "../modules/HashMap/interfaces/PlainMap.js"
 import { type } from "../utils/Node.js"
-import { curr } from "../utils/Stream.js"
+import { curr, peek } from "../utils/Stream.js"
 
 const { id } = functional
 const { typeOf } = _type
@@ -130,6 +130,10 @@ export const TokenHash = HashClass(type)
  * This is a `HashClass((x) => typeof x)`
  */
 export const TypeofHash = HashClass(typeOf)
+
+export const PeekHash = <K = any, V = any, InternalKey = any, Default = any>(
+	hashClass: IHashClass<K, V, InternalKey, Default>
+) => hashClass.extend(peek(1))
 
 export * as PlainMap from "../modules/HashMap/objects/PlainMap.js"
 export * from "../modules/HashMap/objects/TerminalMap.js"

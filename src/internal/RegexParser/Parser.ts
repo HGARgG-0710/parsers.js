@@ -24,7 +24,7 @@ import {
 	PlainErrorPrinter,
 	TableHandler
 } from "../../objects.js"
-import { BasicHash, CurrentHash } from "../../objects/HashMap.js"
+import { BasicHash, CurrentHash, PeekHash } from "../../objects/HashMap.js"
 import {
 	CompositeStream,
 	IdentityStream,
@@ -36,7 +36,7 @@ import { Pairs } from "../../samples.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { NodeMap, PeekMap } from "../../utils/IndexMap.js"
-import { consume, peek } from "../../utils/Stream.js"
+import { consume } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
 import { maybeDot } from "./Dot.js"
@@ -98,7 +98,7 @@ export function LookaheadMap(
 
 export const PreserveLowerStream = () => new IdentityStream()
 
-export const PeekHash = BasicHash.extend(peek(1))
+export const BasicPeekHash = PeekHash(BasicHash)
 
 const RegexTokenizer = TableHandler<IOwnedStream<string>, IRawStreamArray>(
 	new CurrentHash(
