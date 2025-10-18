@@ -1,12 +1,14 @@
-import type { IOwnedStream } from "../../../interfaces.js"
+import type { ICellNode, IOwnedStream } from "../../../interfaces.js"
 import { expect } from "../../../objects/Error.js"
 import { SourceBuilder } from "../../../objects/SourceBuilder.js"
+import { ValidatorStream } from "../../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
 	isCurr
 } from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
+import { validateHex, validateUnicodeCodeLength } from "../Errors.js"
 import { UnicodeChar } from "../Nodes.js"
 
 const expectOpBrack = expect("{")
@@ -18,8 +20,19 @@ const UnicodeCharStream = CollectionStream(
 	consumable(new SourceBuilder())
 )
 
+const UnicodeCharValidatorStream = ValidatorStream(function (
+	resource: IOwnedStream<ICellNode<string, string>>
+) {
+	validateUnicodeCodeLength(resource)
+	validateHex(resource)
+})
+
 function HandleUnicodeNumber() {
-	return [UnicodeCharStream(), UnicodeLimitStream()]
+	return [
+		UnicodeCharValidatorStream(),
+		UnicodeCharStream(),
+		UnicodeLimitStream()
+	]
 }
 
 export function HandleUnicode(input: IOwnedStream<string>) {
