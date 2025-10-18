@@ -1,13 +1,13 @@
 import type { ObjectPool } from "../../../objects.ts"
-import type { Initializable } from "../../../objects/Initializer.ts"
 import type {
 	ILinkedStream,
 	IOwnedStream,
 	IOwningStream
 } from "../interfaces/OwnedStream.ts"
+import type { OwningStream } from "./OwningStream.ts"
 
-export abstract class CustomLinkedStream<T = any, Args extends any[] = []>
-	extends Initializable<[IOwnedStream, Args]>
+export declare abstract class CustomLinkedStream<T = any, Args extends any[] = []>
+	extends OwningStream<T, Args>
 	implements ILinkedStream<T>
 {
 	setOwner(newOwner: IOwningStream): void

@@ -10,6 +10,8 @@ import { CustomLinkedStream } from "./CustomLinkedStream.js"
 // * 		LowHarmlessStream()
 // * 	]
 // * }
+// ! they are BOUND to have THE SAME lifetime, and `ErrorStream`s serve as PROXIES for other streams...
+// !!! LIKEWISE, `ErrorHandlingStream`s CANNOT wrap around choosers - they must accept an UNINITIALIZED STREAM!
 export abstract class ErrorStream<T = any>
 	extends CustomLinkedStream<T>
 	implements ILinkedStream<T>
@@ -20,21 +22,25 @@ export abstract class ErrorStream<T = any>
 		return resourceInitializer
 	}
 
+	get resource() {
+		return this.delegate.resource
+	}
+
 	isCurrEnd(): boolean {
-		return this.resource.isCurrEnd()
+		return this.delegate.isCurrEnd()
 	}
 
 	get isEnd() {
-		return this.resource.isEnd
+		return this.delegate.isEnd
 	}
 
 	get curr() {
-		return this.resource.curr
+		return this.delegate.curr
 	}
 
 	next() {
 		try {
-			this.resource.next()
+			this.delegate.next()
 		} catch (err) {
 			this.errHandler(err)
 		}
@@ -42,14 +48,14 @@ export abstract class ErrorStream<T = any>
 
 	setResource(resource: IOwnedStream): void {
 		try {
-			this.resource.init(resource)
+			this.delegate.init(resource)
 		} catch (err) {
 			this.errHandler(err)
 		}
 	}
 
-	constructor(readonly resource: ILinkedStream<T>) {
+	constructor(private readonly delegate: ILinkedStream<T>) {
 		super()
-		resource.setOwner(this)
+		delegate.setOwner(this)
 	}
 }
