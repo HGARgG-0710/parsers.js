@@ -1,4 +1,3 @@
-import type { ObjectPool } from "../../../objects.ts"
 import type { ILinkedStream, IOwningStream } from "../interfaces/OwnedStream.ts"
 import type { OwningStream } from "./OwningStream.ts"
 
@@ -11,6 +10,5 @@ export declare abstract class CustomLinkedStream<
 {
 	setOwner(newOwner: IOwningStream): void
 	readonly owner?: IOwningStream
-	free(): void
-	protected abstract readonly pool: ObjectPool<ILinkedStream<T>>
+	abstract free(): void
 }

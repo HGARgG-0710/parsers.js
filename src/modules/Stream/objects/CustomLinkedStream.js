@@ -1,7 +1,6 @@
 import { mixin } from "../../../mixin.js"
 import { OwnableStream } from "./OwnableStream.js"
 import { OwningStream } from "./OwningStream.js"
-import { PoolableStream } from "./PoolableStream.js"
 
 export const CustomLinkedStream = new mixin(
 	{
@@ -11,5 +10,5 @@ export const CustomLinkedStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[OwningStream, OwnableStream, PoolableStream]
+	[OwningStream, OwnableStream]
 )

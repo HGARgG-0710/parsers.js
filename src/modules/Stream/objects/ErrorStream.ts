@@ -18,6 +18,13 @@ export abstract class ErrorStream<T = any>
 {
 	protected abstract errHandler(err: any): void
 
+	// * Explanation: 
+	// Since the `.init` method DELEGATES the initialization to `.delegate`,
+	// one CANNOT treat the `.init` as a mean of stream-creation: one simply 
+	// MAY NOT reuse the `ErrorStream`, since it is *bound* to the underlying
+	v// `.delegate: IOwnedStream`.
+	free() {}
+
 	get initializer() {
 		return resourceInitializer
 	}
