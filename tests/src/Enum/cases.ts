@@ -41,7 +41,7 @@ enumTestCounter.test(
 enumTestCounter.test(
 	[TestTypes.STATIC_TEST],
 	() => {
-		assertThrowing(() => Enum.assertDisjoint(new Enum([]), new Enum([])))
+		assertThrowing(() => Enum.assertDisjoint(new Enum(), new Enum()))
 
 		assertThrowing(() =>
 			Enum.assertDisjoint(

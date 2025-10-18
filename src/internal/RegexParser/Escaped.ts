@@ -14,7 +14,7 @@ import { HandleNewline } from "./Escaped/Newline.js"
 import { HandleSpace } from "./Escaped/Space.js"
 import { HandleTab } from "./Escaped/Tab.js"
 import { HandleUnicode } from "./Escaped/Unicode.js"
-import { HandleVerticalTab } from "./Escaped/Vtab.js"
+import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 
 const BaseEscapedHandler = TableHandler<
@@ -30,7 +30,7 @@ const BaseEscapedHandler = TableHandler<
 				u: HandleUnicode,
 				n: HandleNewline,
 				t: HandleTab,
-				v: HandleVerticalTab
+				v: HandleVTab
 			},
 			HandleEscapedLiteral
 		)
