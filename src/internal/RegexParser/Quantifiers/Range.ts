@@ -20,6 +20,7 @@ import {
 } from "../../../objects/Stream.js"
 import { isDecimal } from "../../../samples/alphabet.js"
 import {
+	CachedTokenStream,
 	CollectionStream,
 	EndBracketStream,
 	isCurr
@@ -37,7 +38,7 @@ import {
 	TrivialRange
 } from "../Nodes.js"
 
-const CommaNodeStream = SingletonStream(() => new Comma())
+const CommaStream = CachedTokenStream(Comma)
 
 const RangeLimitStream = EndBracketStream(isCurr("}"))
 
@@ -102,7 +103,7 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 function HandleComma(input: IOwnedStream<string>) {
 	expectComma(input)
 	input.next() // ,
-	return [CommaNodeStream()]
+	return [CommaStream()]
 }
 
 function HandleDecimalOrComma(input: IOwnedStream<string>) {

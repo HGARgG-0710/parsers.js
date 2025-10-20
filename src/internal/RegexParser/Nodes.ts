@@ -1,21 +1,22 @@
 import type { ICellNode, INode, IPoolNode } from "../../interfaces.js"
 import {
 	BaseNode,
+	CachedContentNode,
+	CachedTokenNode,
 	ContentNode,
 	RecursiveNode,
-	SingleChildNode,
-	TokenNode
+	SingleChildNode
 } from "../../objects/Node.js"
 import { isType } from "../../utils/Node.js"
 
-export const Digit = TokenNode("digit", "Digit")
+export const Digit = CachedTokenNode("digit", "Digit")
 export const EscapedLiteral = ContentNode("escaped-literal", "EscapedLiteral")
-export const Newline = TokenNode("newline", "Newline")
-export const Space = TokenNode("space", "Space")
-export const Tab = TokenNode("tab", "Tab")
+export const Newline = CachedTokenNode("newline", "Newline")
+export const Space = CachedTokenNode("space", "Space")
+export const Tab = CachedTokenNode("tab", "Tab")
 export const UnicodeChar = ContentNode("unicode-char", "UnicodeChar")
-export const VTab = TokenNode("vtab", "VTab")
-export const Word = TokenNode("word", "Word")
+export const VTab = CachedTokenNode("vtab", "VTab")
+export const Word = CachedTokenNode("word", "Word")
 
 export const IgnoreCaseGroup = SingleChildNode(
 	"ignore-case-group",
@@ -28,8 +29,11 @@ export const LookaheadGroup = SingleChildNode(
 )
 
 export const Group = SingleChildNode("group", "Group")
-export const Plus = TokenNode("plus", "Plus")
-export const QMark = TokenNode("qmark", "QMark")
+export const Plus = CachedTokenNode("plus", "Plus")
+export const QMark = CachedTokenNode("qmark", "QMark")
+export const Star = CachedTokenNode("star", "Star")
+export const Range = SingleChildNode("range", "Range")
+
 export const InfiniteRange = SingleChildNode("infinite-range", "InfiniteRange")
 export const TrivialRange = SingleChildNode("trivial-range", "TrivialRange")
 
@@ -66,11 +70,9 @@ export class LimitsRange extends BaseNode {
 	}
 }
 
-export const Range = SingleChildNode("range", "Range")
-
 // internal, temp node (exists for convinience and validation purposes),
 // doesn't actully appear in the AST
-export const Comma = TokenNode("comma", "Comma")
+export const Comma = CachedTokenNode("comma", "Comma")
 
 export const RangeBoundary = ContentNode("range-boundary", "RangeBoundary")
 
@@ -125,14 +127,13 @@ export class GreedyRange extends ByGreedinessRange {
 	}
 }
 
-export const Star = TokenNode("star", "Star")
 export const NonGreedyStar = SingleChildNode("non-greedy-star", "NonGreedyStar")
 export const GreedyStar = SingleChildNode("greedy-star", "GreedyStar")
 
 // temporary (not part of AST), internal, exists for convinience
-export const Hyphen = TokenNode("hyphen", "Hyphen")
+export const Hyphen = CachedTokenNode("hyphen", "Hyphen")
 
-export const ClassUnit = ContentNode("char-class-unit", "ClassUnit")
+export const ClassUnit = CachedContentNode("char-class-unit", "ClassUnit")
 
 export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"
@@ -172,11 +173,11 @@ export class ClassRange extends BaseNode {
 export const CharClass = RecursiveNode("char-class", "CharClass")
 export const Disjunct = RecursiveNode("disjunct", "Disjunct")
 export const Disjunction = RecursiveNode("disjunction", "Disjunction")
-export const AnyChar = TokenNode("any-char", "AnyChar")
+export const AnyChar = CachedTokenNode("any-char", "AnyChar")
 export const GroupBody = RecursiveNode("group-body", "GroupBody")
 export const Negated = SingleChildNode("negated", "Negated")
-export const Pipe = TokenNode("pipe", "Pipe")
-export const SingleChar = ContentNode("char", "SingleChar")
+export const Pipe = CachedTokenNode("pipe", "Pipe")
+export const SingleChar = CachedContentNode("char", "SingleChar")
 export const TypeMatch = ContentNode("type-match", "TypeMatch")
 export const AsString = ContentNode("as-string", "AsString")
 export const AsInt = ContentNode("as-int", "AsInt")

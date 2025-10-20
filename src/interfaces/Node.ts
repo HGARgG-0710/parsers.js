@@ -100,10 +100,12 @@ export interface IRecursiveNode extends IPoolNode<[INode[]]> {
  */
 export type ICollectionNode = IRecursiveNode & IPushable<INode>
 
+export interface ICarrierNode<V = any> extends INode, IValued<V> {}
+
 /**
  * This is an `INode`, carrying data of type `V`
  */
-export interface ICellNode<V = any> extends IPoolNode, IValued<V> {}
+export interface ICellNode<V = any> extends IPoolNode, ICarrierNode<V> {}
 
 /**
  * This is an interface for representing a poolable `INode`.
@@ -142,6 +144,15 @@ export interface IPoolNodeType<
 	K extends IPoolNode<Args> = IPoolNode<Args>
 > extends INodeType<Partial<Args> | [], K> {
 	readonly pool: ObjectPool
+}
+
+export interface ICarrierNodeType<V = any>
+	extends INodeType<[V], ICarrierNode<V>> {
+	make(value: V): ICarrierNode
+}
+
+export interface ISingletonNodeType extends INodeType<[], INode> {
+	make(): INode
 }
 
 /**

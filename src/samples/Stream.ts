@@ -3,6 +3,7 @@ import type {
 	ILinkedStream,
 	IOwnedStream,
 	IPredicatePosition,
+	ISingletonNodeType,
 	IStream
 } from "../interfaces.js"
 import { LimitStream, SingletonStream } from "../objects/Stream.js"
@@ -41,6 +42,10 @@ export function SingletonWrapperStream<T = any, W = any>(
  */
 export function TokenStream<T = any>(tokenClass: new () => T) {
 	return SingletonStream(() => new tokenClass())
+}
+
+export function CachedTokenStream(tokenClass: ISingletonNodeType) {
+	return SingletonStream(() => tokenClass.make())
 }
 
 /**

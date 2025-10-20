@@ -5,17 +5,17 @@ import type {
 	INode,
 	IOwnedStream,
 	IPeekable,
+	IStream,
 	IStreamChooser
 } from "../../interfaces.js"
 import { TableHandler } from "../../objects.js"
 import { expectKind, tryReviveChild } from "../../objects/Error.js"
 import { BasicHash } from "../../objects/HashMap.js"
-import { SingleNodeStream } from "../../objects/Stream.js"
+import { SingleNodeStream, SingletonStream } from "../../objects/Stream.js"
 import {
+	CachedTokenStream,
 	EndBracketStream,
-	isCurr,
-	SingletonWrapperStream,
-	TokenStream
+	isCurr
 } from "../../samples/Stream.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
@@ -26,11 +26,13 @@ import { HandleSingleChar } from "./SingleChar.js"
 const expectHyphen = expectKind(Hyphen)
 const expectClassUnit = expectKind(ClassUnit)
 
-const HyphenStream = TokenStream(Hyphen)
+const HyphenStream = CachedTokenStream(Hyphen)
 
 const CharClassLimitStream = EndBracketStream(isCurr("]"))
 
-const ClassUnitStream = SingletonWrapperStream(ClassUnit)
+const ClassUnitStream = SingletonStream((input: IStream<string>) =>
+	ClassUnit.make(input.curr)
+)
 
 class ClassRangeStream extends SingleNodeStream<INode> {
 	private classRange: ClassRange

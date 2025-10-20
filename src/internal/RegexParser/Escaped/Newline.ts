@@ -1,8 +1,8 @@
 import type { IOwnedStream } from "../../../interfaces.js"
-import { TokenStream } from "../../../samples/Stream.js"
+import { CachedTokenStream } from "../../../samples/Stream.js"
 import { Newline } from "../Nodes.js"
 
-const NewlineStream = TokenStream(Newline)
+const NewlineStream = CachedTokenStream(Newline)
 
 export function HandleNewline(input: IOwnedStream<string>) {
 	input.next() // n

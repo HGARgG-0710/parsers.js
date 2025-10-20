@@ -8,12 +8,15 @@ import {
 import * as Pools from "../global/Pools.js"
 import type { IFreeable } from "../interfaces.js"
 import type {
+	ICarrierNode,
+	ICarrierNodeType,
 	ICellNode,
 	ICellNodeType,
 	ICollectionNode,
 	ICollectionNodeType,
 	INode,
 	INodeMaker,
+	INodeType,
 	IPoolNodeType,
 	ITyped,
 	IValidNodeType
@@ -127,6 +130,28 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 	}
 }
 
+const makeTokenNodeFactory = PreNodeFactory<IPoolNodeType<[]>>(PreTokenNode)
+
+export const CachedTokenNode = NodeFactory(function (
+	type: IValidNodeType,
+	debugName: string
+) {
+	const factory = makeTokenNodeFactory(type, debugName)
+	const cachedInstance = new factory()
+	return class extends factory {
+		static make() {
+			return cachedInstance
+		}
+
+		constructor() {
+			throw new TypeError(
+				"cannot call constructor of a `CachedTokenNode` - use `.make()` method instead"
+			)
+			super()
+		}
+	}
+})
+
 /**
  * This is an `INodeTypeFactory<T, []>` for creation of simplest possible
  * `INode` instances. They contain no data, and have minimal memory
@@ -137,9 +162,7 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
  * Note: the `INode` instances of `INodeType< []>`s created
  * using `TokenNode` are poolable via `ObjectPool`
  */
-export const TokenNode = NodeFactory(
-	PreNodeFactory<IPoolNodeType<[]>>(PreTokenNode)
-)
+export const TokenNode = NodeFactory(makeTokenNodeFactory)
 
 abstract class SingleItemNode<Value = any> extends PoolableNode<[Value]> {
 	protected ["constructor"]: new (value?: Value) => this
@@ -154,13 +177,13 @@ abstract class SingleItemNode<Value = any> extends PoolableNode<[Value]> {
 	}
 }
 
-abstract class PreContentNode<Value = any>
+abstract class MaybeContainingNode<Value = any>
 	extends SingleItemNode<Value>
-	implements ICellNode<Value>
+	implements ICarrierNode<Value>
 {
 	private _value: Value | undefined
 
-	private setValue(newValue: Value | undefined) {
+	protected setValue(newValue: Value | undefined) {
 		this._value = newValue
 	}
 
@@ -170,11 +193,6 @@ abstract class PreContentNode<Value = any>
 
 	copy() {
 		return new this.constructor(tryCopy(this.value))
-	}
-
-	init(value?: Value | undefined) {
-		this.setValue(value)
-		return this
 	}
 
 	toJSON() {
@@ -190,7 +208,59 @@ abstract class PreContentNode<Value = any>
 
 	constructor(value?: Value) {
 		super()
-		this.init(value)
+		this.setValue(value)
+	}
+}
+
+abstract class AlwaysContainingNode<
+	Value = any
+> extends MaybeContainingNode<Value> {
+	constructor(value: Value) {
+		super(value)
+	}
+}
+
+const makeCachedContentNodeFactory =
+	PreNodeFactory<ICarrierNodeType>(AlwaysContainingNode)
+
+export const CachedContentNode = NodeFactory(function <V = any>(
+	type: IValidNodeType,
+	debugName: string
+): ICarrierNodeType<V> {
+	const factory = makeCachedContentNodeFactory(type, debugName)
+	const instanceMap = new Map<V, ICarrierNode>()
+
+	function getCachedInstance(value: V) {
+		return instanceMap.get(value)
+	}
+
+	function cacheNewInstance(value: V) {
+		const newInstance = new factory(value)
+		instanceMap.set(value, newInstance)
+		return newInstance
+	}
+
+	return class extends factory {
+		static make(value: V) {
+			return getCachedInstance(value) || cacheNewInstance(value)
+		}
+
+		constructor(value: V) {
+			throw new TypeError(
+				"Cannot create a `CachedContentNode` instance via `new` call, use the static `make` method instead"
+			)
+			super(value)
+		}
+	}
+})
+
+abstract class PreContentNode<Value = any>
+	extends MaybeContainingNode<Value>
+	implements ICellNode<Value>
+{
+	init(value?: Value | undefined) {
+		this.setValue(value)
+		return this
 	}
 }
 
@@ -378,7 +448,7 @@ export const RecursiveNode = NodeFactory(
 // I fucking hate you, you dumb piece of shit.
 // It lacks support for passing Generic Expressions (lazily-evaluated generics...)
 // If it had it, there wouldn't be a fucking need for doing... this
-function PreNodeFactory<K extends IPoolNodeType = IPoolNodeType>(preNode: any) {
+function PreNodeFactory<K extends INodeType = INodeType>(preNode: any) {
 	return function (type: IValidNodeType, debugName: string): K {
 		class concreteNode extends preNode {
 			static readonly type = type
