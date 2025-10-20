@@ -5,7 +5,8 @@ import type {
 	IResourceful,
 	IStream,
 	ITypeCheckable,
-	ITyped
+	ITyped,
+	IValidNodeType
 } from "../interfaces.js"
 import type { IExtendableMap } from "../interfaces/IndexMap.js"
 import { peek } from "./Stream.js"
@@ -15,8 +16,8 @@ const { typeOf } = _type
 /**
  * Calls and returns `indexMap.extend((x: ITyped<T>) => x.type)`
  */
-export const TypeMap = <K = any, T = any, Default = any>(
-	map: IExtendableMap<K, T, Default>
+export const TypeMap = <T = any, Default = any>(
+	map: IExtendableMap<IValidNodeType, T, Default>
 ) => map.extend((x: ITyped) => x.type)
 
 /**

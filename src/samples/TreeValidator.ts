@@ -1,9 +1,9 @@
+import type { INode, IValidNodeType } from "../interfaces.js"
 import type { DepthStream } from "../objects/Stream.js"
-import type { INode } from "../interfaces.js"
 
 /**
  * This is a function for creation of primitive Tree-Structure validators.
- * It works with a `DepthStream<INode<T>>` object, and relies on this
+ * It works with a `DepthStream<INode>` object, and relies on this
  * assumption heavily. The `validNodeTypes` is an `Iterable` of pairs
  * of `[T, Iterable<T>]`, where first item in the pair (parent node
  * `.type` value) is used to get the second - an `Iterable` of
@@ -21,8 +21,8 @@ import type { INode } from "../interfaces.js"
  * (in complex languages) is intended to be used in combination
  * with lexical analysis for tree-modification after the initial parsing.
  */
-export function TreeValidator<T = any>(
-	validNodeTypes: Iterable<[T, Iterable<T>]>
+export function TreeValidator(
+	validNodeTypes: Iterable<[IValidNodeType, Iterable<IValidNodeType>]>
 ) {
 	const validTypesAsMap = new Map(
 		[...validNodeTypes].map(([parentType, childrenTypes]) => [
@@ -31,11 +31,11 @@ export function TreeValidator<T = any>(
 		])
 	)
 
-	function validator(treeStream: DepthStream<INode<T>>) {
+	function validator(treeStream: DepthStream<INode>) {
 		const failure = TreeValidator.ValidationStatus.failure(treeStream)
 		const success = TreeValidator.ValidationStatus.success(treeStream)
 
-		function skipUnvalidatedParent(currParent: INode<T>) {
+		function skipUnvalidatedParent(currParent: INode) {
 			for (let i = 0; i <= currParent.lastChild; ++i) {
 				treeStream.next()
 				const currValidated = tryValidatingParent()
@@ -44,7 +44,10 @@ export function TreeValidator<T = any>(
 			return success
 		}
 
-		function validateChildren(currParent: INode<T>, allowedTypes: Set<T>) {
+		function validateChildren(
+			currParent: INode,
+			allowedTypes: Set<IValidNodeType>
+		) {
 			for (let i = 0; i <= currParent.lastChild; ++i) {
 				treeStream.next()
 				const currChild = treeStream.curr
@@ -55,7 +58,7 @@ export function TreeValidator<T = any>(
 			return success
 		}
 
-		function tryValidatingParent(): TreeValidator.ValidationStatus<T> {
+		function tryValidatingParent(): TreeValidator.ValidationStatus {
 			while (!treeStream.isEnd) {
 				const currParent = treeStream.curr
 				const allowedTypes = validTypesAsMap.get(currParent.type)
@@ -80,20 +83,20 @@ export namespace TreeValidator {
 	 *
 	 * Contains the `readonly .isSuccess: bool` property for identifying
 	 * whether the validation has been successful. It also carries a
-	 * `readonly targetStream: DepthStream<INode<T>>` property for
+	 * `readonly targetStream: DepthStream<INode>` property for
 	 */
-	export class ValidationStatus<T = any> {
-		static success<T = any>(targetStream: DepthStream<INode<T>>) {
+	export class ValidationStatus {
+		static success(targetStream: DepthStream<INode>) {
 			return new ValidationStatus(true, targetStream)
 		}
 
-		static failure<T = any>(targetStream: DepthStream<INode<T>>) {
+		static failure<T = any>(targetStream: DepthStream<INode>) {
 			return new ValidationStatus(false, targetStream)
 		}
 
 		constructor(
 			readonly isSuccess: boolean,
-			readonly targetStream: DepthStream<INode<T>>
+			readonly targetStream: DepthStream<INode>
 		) {}
 	}
 }

@@ -8,7 +8,11 @@ import type {
 	ITypeCheckable
 } from "../../../interfaces.js"
 import { SourceBuilder } from "../../../objects.js"
-import { ensureChildUnrevivable, expect, expectKind } from "../../../objects/Error.js"
+import {
+	ensureChildUnrevivable,
+	expect,
+	expectKind
+} from "../../../objects/Error.js"
 import {
 	LimitStream,
 	SingleNodeStream,
@@ -50,8 +54,8 @@ const expectRangeBoundary = expectKind(RangeBoundary)
 const expectCommaNode = expectKind(Comma)
 const expectComma = expect(",")
 
-class RangeStream extends SingleNodeStream<IPoolNode<string, [INode<string>]>> {
-	private finalRange: IPoolNode<string, [INode<string>]>
+class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
+	private finalRange: IPoolNode<[INode]>
 	private first: ICellNode<string>
 	private last: ICellNode<string>
 
@@ -112,9 +116,9 @@ export function HandleRange(input: IOwnedStream<string>) {
 	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
 }
 
-function handleRangeAfterItem(input: IOwnedStream<INode<string>>) {
+function handleRangeAfterItem(input: IOwnedStream<INode>) {
 	const child = next(input) // the thing onto which the range quantifier is applied
-	const range = next(input) as IPoolNode<string, [INode<string>]> // Range({...})
+	const range = next(input) as IPoolNode<[INode]> // Range({...})
 	if (QMark.is(input.curr)) {
 		input.next() // QMark(?)
 		return [SingletonStream(() => new NonGreedyRange(child, range))()]

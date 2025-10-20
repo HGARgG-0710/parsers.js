@@ -21,7 +21,7 @@ const UnicodeCharStream = CollectionStream(
 )
 
 const UnicodeCharValidatorStream = ValidatorStream(function (
-	resource: IOwnedStream<ICellNode<string, string>>
+	resource: IOwnedStream<ICellNode<string>>
 ) {
 	validateUnicodeCodeLength(resource)
 	validateHex(resource)

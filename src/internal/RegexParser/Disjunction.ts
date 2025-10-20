@@ -5,26 +5,26 @@ import { CollectionStream } from "../../samples/Stream.js"
 import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
 import { Disjunct, Disjunction, Pipe } from "./Nodes.js"
 
-const isCurrPipe = (input: IOwnedStream<INode<string>>) => !Pipe.is(input.curr)
+const isCurrPipe = (input: IOwnedStream<INode>) => !Pipe.is(input.curr)
 
 const PipeLimitStream = LimitStream(isCurrPipe)
 
 // * note: this is NOT a bug, since accepting empty strings MAKES NO SENSE for this specific grammar,
 // a sequence of characters that is matched from the given '.curr'-point MUST be non-zero in length
-function PipeLimitChooser(input: IOwnedStream<INode<string>>) {
+function PipeLimitChooser(input: IOwnedStream<INode>) {
 	while (isCurrPipe(input)) input.next()
 	return [PipeLimitStream()]
 }
 
 const withDisjunctBuilder = consumable<
-	INode<string>,
-	Iterable<INode<string>>,
-	ArrayBuilder<INode<string>>
->(new ArrayBuilder<INode<string>>())
+	INode,
+	Iterable<INode>,
+	ArrayBuilder<INode>
+>(new ArrayBuilder<INode>())
 
 const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
 
-class DisjunctionStream extends SingleNodeStream<INode<string>> {
+class DisjunctionStream extends SingleNodeStream<INode> {
 	setResource(resource: IOwnedStream): void {
 		this.setResource(resource)
 		this.curr = consumeSingletonRevivables(this, new Disjunction())

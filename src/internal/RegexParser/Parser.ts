@@ -61,7 +61,7 @@ export class RegexParser {
 	private parseSource(source: string) {
 		return consume(
 			parseRegex(new ParseableInput(source))
-		).get()[0] as INode<string>
+		).get()[0] as INode
 	}
 
 	parse(source: string) {

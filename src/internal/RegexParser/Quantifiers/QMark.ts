@@ -13,7 +13,7 @@ import { QMark } from "../Nodes.js"
 const NonGreedyQMark = SingleChildNode("non-greedy-qmark", "NonGreedyQMark")
 const GreedyQMark = SingleChildNode("greedy-qmark", "GreedyQMark")
 
-function handleQMark(input: IOwnedStream<INode<string>>) {
+function handleQMark(input: IOwnedStream<INode>) {
 	const child = next(input)
 	input.next() // QMark(?)
 	if (QMark.is(input.curr)) {
@@ -23,6 +23,6 @@ function handleQMark(input: IOwnedStream<INode<string>>) {
 	return [SingletonStream(() => new GreedyQMark(child))()]
 }
 
-export const maybeQMark: array.Pairs<INodeType<string>, IStreamChooser> = [
+export const maybeQMark: array.Pairs<INodeType, IStreamChooser> = [
 	[QMark, handleQMark]
 ]

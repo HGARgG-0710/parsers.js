@@ -19,7 +19,7 @@ import { HandleWord } from "./Escaped/Word.js"
 
 const BaseEscapedHandler = TableHandler<
 	IOwnedStream<string>,
-	ICommonStream<INode<string>>
+	ICommonStream<INode>
 >(
 	new CurrentHash(
 		ObjectMap(

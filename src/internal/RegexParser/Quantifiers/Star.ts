@@ -9,7 +9,7 @@ import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
 import { GreedyStar, NonGreedyStar, QMark, Star } from "../Nodes.js"
 
-function handleStar(input: IOwnedStream<INode<string>>) {
+function handleStar(input: IOwnedStream<INode>) {
 	const child = next(input)
 	input.next() // Star(*)
 	if (QMark.is(input.curr)) {
@@ -19,6 +19,6 @@ function handleStar(input: IOwnedStream<INode<string>>) {
 	return [SingletonStream(() => new GreedyStar(child))()]
 }
 
-export const maybeStar: array.Pairs<INodeType<string>, IStreamChooser> = [
+export const maybeStar: array.Pairs<INodeType, IStreamChooser> = [
 	[Star, handleStar]
 ]

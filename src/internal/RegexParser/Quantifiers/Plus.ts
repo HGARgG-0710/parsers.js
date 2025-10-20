@@ -8,13 +8,12 @@ import type {
 import { SingleChildNode } from "../../../objects/Node.js"
 import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
-import { Plus } from "../Nodes.js"
-import { QMark } from "../Nodes.js"
+import { Plus, QMark } from "../Nodes.js"
 
 const NonGreedyPlus = SingleChildNode("non-greedy-plus", "NonGreedyPlus")
 const GreedyPlus = SingleChildNode("greedy-plus", "GreedyPlus")
 
-function handlePlus(input: IOwnedStream<INode<string>>) {
+function handlePlus(input: IOwnedStream<INode>) {
 	const child = next(input)
 	input.next() // Plus(+)
 	if (QMark.is(input.curr)) {
@@ -24,6 +23,6 @@ function handlePlus(input: IOwnedStream<INode<string>>) {
 	return [SingletonStream(() => new GreedyPlus(child))()]
 }
 
-export const maybePlus: array.Pairs<INodeType<string>, IStreamChooser> = [
+export const maybePlus: array.Pairs<INodeType, IStreamChooser> = [
 	[Plus, handlePlus]
 ]

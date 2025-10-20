@@ -2,14 +2,15 @@ import assert from "assert"
 import type {
 	INodeType,
 	INodeTypeCategories,
-	INodeTypeFactory
+	INodeTypeFactory,
+	IValidNodeType
 } from "../interfaces/Node.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { BasicMap } from "../samples/TerminalMap.js"
 import { Autocache } from "./Autocache.js"
 import { BasicHash } from "./HashMap.js"
 
-type INodeTypesMap<T = any> = Map<T, INodeType<T>>
+type INodeTypesMap = Map<IValidNodeType, INodeType>
 
 /**
  * This is a function for wrapping an `INodeTypeFactory<T, Args>`
@@ -22,20 +23,19 @@ type INodeTypesMap<T = any> = Map<T, INodeType<T>>
  * class-caching technique] is utilized.
  */
 export function NodeFactory<
-	T = any,
 	Args extends any[] = any[],
-	K extends INodeTypeFactory<T, Args> = INodeTypeFactory<T, Args>
+	K extends INodeTypeFactory<Args> = INodeTypeFactory<Args>
 >(preFactory: K): K {
 	return Autocache(new BasicHash(BasicMap()), preFactory) as K
 }
 
 /**
  * A class for the managing of a system of 'INodeType<T>'s.
- * A `NodeSystem` is intended to represent a list of "keys", 
- * defining the types of nodes, which are deemed valid. 
+ * A `NodeSystem` is intended to represent a list of "keys",
+ * defining the types of nodes, which are deemed valid.
  *
- * It is primarily intended to be used within JavaScript code 
- * and not TypeScript due to poorer type granularity. 
+ * It is primarily intended to be used within JavaScript code
+ * and not TypeScript due to poorer type granularity.
  *
  * It can serve as:
  *
@@ -51,27 +51,27 @@ export function NodeFactory<
  * two regions of an application that are not completely unrelated
  * [and in which reuse of types is at all probable].
  */
-export class NodeSystem<T = any> {
-	private readonly types: INodeTypesMap<T>
-	private readonly typesSet: Set<T>
+export class NodeSystem {
+	private readonly types: INodeTypesMap
+	private readonly typesSet: Set<IValidNodeType>
 
-	getByType(type: T) {
+	getByType(type: IValidNodeType) {
 		return this.types.get(type)
 	}
 
-	has(type: T) {
+	has(type: IValidNodeType) {
 		return this.types.has(type)
 	}
 
-	assertSuperset(nodeSystem: NodeSystem<T>) {
+	assertSuperset(nodeSystem: NodeSystem) {
 		assert(this.typesSet.isSubsetOf(nodeSystem.typesSet))
 	}
 
-	merge(system: NodeSystem<T>) {
+	merge(system: NodeSystem) {
 		return new NodeSystem(this.categories.concat(system.categories))
 	}
 
-	constructor(private readonly categories: INodeTypeCategories<T>) {
+	constructor(private readonly categories: INodeTypeCategories) {
 		const factories = categories.map(([nodeFactory]) => nodeFactory)
 		const typeEnums = categories.map(([, types]) => new Enum(types))
 

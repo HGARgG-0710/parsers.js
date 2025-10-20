@@ -45,13 +45,13 @@ function prepareInvalidUnicodeCodeLengthError(
 	return errData
 }
 
+const currUnicodeHex = (stream: IStream<ICellNode<string>>) => stream.curr.value
+
 export function validateUnicodeCodeLength(
-	stream: IStream<ICellNode<string, string>>,
-	errDataGetter: IErrorDataGetter<
-		ICellNode<string, string>
-	> = findErrorDataUpstream
+	stream: IStream<ICellNode<string>>,
+	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataUpstream
 ) {
-	const codeLength = stream.curr.value.length
+	const codeLength = currUnicodeHex(stream).length
 	if (codeLength !== VALID_UNICODE_CODE_LENGTH)
 		throw new InvalidUnicodeCodeLengthError(
 			prepareInvalidUnicodeCodeLengthError(
@@ -67,12 +67,10 @@ function prepareHexError(errorData: IErrorData, hex: string) {
 }
 
 export function validateHex(
-	stream: IStream<ICellNode<string, string>>,
-	errDataGetter: IErrorDataGetter<
-		ICellNode<string, string>
-	> = findErrorDataUpstream
+	stream: IStream<ICellNode<string>>,
+	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataUpstream
 ) {
-	const unicodeHex = stream.curr.value
+	const unicodeHex = currUnicodeHex(stream)
 	if (!isHex(unicodeHex))
 		throw new InvalidHexError(
 			prepareHexError(errDataGetter(stream), unicodeHex)

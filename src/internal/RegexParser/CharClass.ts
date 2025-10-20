@@ -32,7 +32,7 @@ const CharClassLimitStream = EndBracketStream(isCurr("]"))
 
 const ClassUnitStream = SingletonWrapperStream(ClassUnit)
 
-class ClassRangeStream extends SingleNodeStream<INode<string>> {
+class ClassRangeStream extends SingleNodeStream<INode> {
 	private classRange: ClassRange
 
 	private updateCurr() {
@@ -67,7 +67,7 @@ class ClassRangeStream extends SingleNodeStream<INode<string>> {
 	}
 }
 
-class CharClassStream extends SingleNodeStream<INode<string>> {
+class CharClassStream extends SingleNodeStream<INode> {
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
 		this.curr = consumeSingletonRevivables(this, new CharClass())
@@ -76,7 +76,7 @@ class CharClassStream extends SingleNodeStream<INode<string>> {
 
 const ClassUnitHandler = TableHandler<
 	IOwnedStream<string>,
-	ICommonStream<INode<string>>
+	ICommonStream<INode>
 >(
 	new BasicHash(
 		ObjectMap(

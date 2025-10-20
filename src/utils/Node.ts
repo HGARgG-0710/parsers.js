@@ -7,6 +7,7 @@ import type {
 import type {
 	IChildrenHaving,
 	ITyped,
+	IValidNodeType,
 	IValued,
 	IWalkable
 } from "../interfaces/Node.js"
@@ -64,10 +65,10 @@ export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
 /**
  * Returns a function `nodeWrapper` that returns either:
  *
- * 1. `INode<T>` by calling `allowedTypes.getByType(from.type).fromPlain(from, nodeWrapper)`,
+ * 1. `INode` by calling `allowedTypes.getByType(from.type).fromPlain(from, nodeWrapper)`,
  * which (basically) converts an object (which can be a result of deserialization) into
  * a valid tree within the given `NodeSystem`. Thus, it would, for instance, allow
- * deserializing strings with JSON objects into valid `INode<T>` objects, and therefore -
+ * deserializing strings with JSON objects into valid `INode` objects, and therefore -
  * enable snapshot testing techniques for parsers developed using the library.
  * 2. `false`, if deserialization is impossible due to invalid object,
  * i.e. an object with no respective entry in `allowedType` for its `.type`,
@@ -75,8 +76,8 @@ export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
  * actually be returned by the `.fromPlain` method itself (which is, in general,
  * expected to be recursive here - hence the passing of `deserializer`).
  */
-export function fromObject<T = any>(allowedTypes: NodeSystem<T>) {
-	function isValid(type: T): boolean {
+export function fromObject(allowedTypes: NodeSystem) {
+	function isValid(type: IValidNodeType): boolean {
 		return allowedTypes.has(type)
 	}
 
@@ -113,7 +114,7 @@ export function treeMap<T extends IWalkable<T> = IWalkable, Out = any>(
 /**
  * Returns the value of the `x.type` for the given `ITyped`
  */
-export const type = prop("type") as <T = any>(x: ITyped<T>) => T
+export const type = prop("type") as <T = any>(x: ITyped) => IValidNodeType
 
 /**
  * Verifies that given input is a non-`null` object with a `.type` property on it.
