@@ -20,13 +20,13 @@ import {
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
 import { HandleEscaped } from "./Escaped.js"
-import { CharClass, ClassRange, ClassUnit, Hyphen } from "./Nodes.js"
+import { CharClass, ClassRange, ClassUnit, Temp } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
-const expectHyphen = expectKind(Hyphen)
+const expectHyphen = expectKind(Temp.Hyphen)
 const expectClassUnit = expectKind(ClassUnit)
 
-const HyphenStream = CachedTokenStream(Hyphen)
+const HyphenStream = CachedTokenStream(Temp.Hyphen)
 
 const CharClassLimitStream = EndBracketStream(isCurr("]"))
 

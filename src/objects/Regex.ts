@@ -1,15 +1,14 @@
-import type { IPeekableStream } from "../interfaces.js"
+import type { IPeekableStream, IRegexBuilder, IRegexMatcher } from "../interfaces.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 
-export class Regex {
-	// ! TYPE THIS - return type of `RegexCompiler.compile`;
-	private readonly final
+export class Regex<T = any> {
+	private readonly final: IRegexMatcher<T>
 
-	matchAt(stream: IPeekableStream): false | string {
+	matchAt(stream: IPeekableStream<T>): false | string {
 		return this.final.match(stream)
 	}
 
-	constructor(source: string) {
-		this.final = RegexStorage.instance.get(source)
+	constructor(source: string, builder: IRegexBuilder) {
+		this.final = RegexStorage.instance.get(source, builder)
 	}
 }

@@ -1,3 +1,4 @@
+import type { IRegexBuilder, IRegexMatcher } from "../interfaces.js"
 import { RegexCompiler } from "./RegexCompiler/Compiler.js"
 
 /**
@@ -11,11 +12,10 @@ import { RegexCompiler } from "./RegexCompiler/Compiler.js"
 export class RegexStorage {
 	static readonly instance = new RegexStorage()
 
-	// TODO: ADD PROPER TYPES FOR THIS!!! REPLACE THE `any` thingy...
-	private readonly cached = new Map<string, any>()
+	private readonly cached = new Map<string, IRegexMatcher>()
 
-	private makeNew(regex: string) {
-		const compiled = RegexCompiler.instance.compile(regex)
+	private makeNew(regex: string, builder: IRegexBuilder) {
+		const compiled = RegexCompiler.instance.compile(regex, builder)
 		this.cached.set(regex, compiled)
 		return compiled
 	}
@@ -24,8 +24,8 @@ export class RegexStorage {
 		return this.cached.get(regex)
 	}
 
-	get(regex: string) {
-		return this.getCachedIfPresent(regex) || this.makeNew(regex)
+	get(regex: string, builder: IRegexBuilder) {
+		return this.getCachedIfPresent(regex) || this.makeNew(regex, builder)
 	}
 
 	private constructor() {}

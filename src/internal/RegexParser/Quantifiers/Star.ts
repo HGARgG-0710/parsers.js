@@ -7,12 +7,12 @@ import type {
 } from "../../../interfaces.js"
 import { SingletonStream } from "../../../objects/Stream.js"
 import { next } from "../../../utils/Stream.js"
-import { GreedyStar, NonGreedyStar, QMark, Star } from "../Nodes.js"
+import { GreedyStar, NonGreedyStar, Temp } from "../Nodes.js"
 
 function handleStar(input: IOwnedStream<INode>) {
 	const child = next(input)
 	input.next() // Star(*)
-	if (QMark.is(input.curr)) {
+	if (Temp.QMark.is(input.curr)) {
 		input.next() // QMark(?)
 		return [SingletonStream(() => new NonGreedyStar(child))()]
 	}
@@ -20,5 +20,5 @@ function handleStar(input: IOwnedStream<INode>) {
 }
 
 export const maybeStar: array.Pairs<INodeType, IStreamChooser> = [
-	[Star, handleStar]
+	[Temp.Star, handleStar]
 ]

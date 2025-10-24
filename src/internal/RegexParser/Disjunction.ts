@@ -3,9 +3,9 @@ import { ArrayBuilder } from "../../objects.js"
 import { LimitStream, SingleNodeStream } from "../../objects/Stream.js"
 import { CollectionStream } from "../../samples/Stream.js"
 import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
-import { Disjunct, Disjunction, Pipe } from "./Nodes.js"
+import { Disjunct, Disjunction, Temp } from "./Nodes.js"
 
-const isCurrPipe = (input: IOwnedStream<INode>) => !Pipe.is(input.curr)
+const isCurrPipe = (input: IOwnedStream<INode>) => !Temp.Pipe.is(input.curr)
 
 const PipeLimitStream = LimitStream(isCurrPipe)
 

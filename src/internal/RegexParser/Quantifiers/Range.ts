@@ -27,18 +27,17 @@ import {
 } from "../../../samples/Stream.js"
 import { consumable, next } from "../../../utils/Stream.js"
 import {
-	Comma,
 	GreedyRange,
 	InfiniteRange,
 	LimitsRange,
 	NonGreedyRange,
-	QMark,
 	Range,
 	RangeBoundary,
+	Temp,
 	TrivialRange
 } from "../Nodes.js"
 
-const CommaStream = CachedTokenStream(Comma)
+const CommaStream = CachedTokenStream(Temp.Comma)
 
 const RangeLimitStream = EndBracketStream(isCurr("}"))
 
@@ -52,7 +51,7 @@ const RangeBoundaryStream = CollectionStream(
 )
 
 const expectRangeBoundary = expectKind(RangeBoundary)
-const expectCommaNode = expectKind(Comma)
+const expectCommaNode = expectKind(Temp.Comma)
 const expectComma = expect(",")
 
 class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
@@ -120,7 +119,7 @@ export function HandleRange(input: IOwnedStream<string>) {
 function handleRangeAfterItem(input: IOwnedStream<INode>) {
 	const child = next(input) // the thing onto which the range quantifier is applied
 	const range = next(input) as IPoolNode<[INode]> // Range({...})
-	if (QMark.is(input.curr)) {
+	if (Temp.QMark.is(input.curr)) {
 		input.next() // QMark(?)
 		return [SingletonStream(() => new NonGreedyRange(child, range))()]
 	}
