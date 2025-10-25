@@ -7,15 +7,15 @@ import type {
 	ITableHandler,
 	ITyped,
 	IValidNodeType
-} from "../../interfaces.js"
-import { TableHandler } from "../../objects.js"
-import { ConstructorError } from "../../objects/Error.js"
-import { CurrentHash, TokenHash } from "../../objects/HashMap.js"
-import { DepthStream } from "../../objects/Stream.js"
-import { BasicMap } from "../../samples/TerminalMap.js"
-import { mapTypes } from "../../utils/Node.js"
-import { next } from "../../utils/Stream.js"
-import { AutoMap } from "../AutoMap.js"
+} from "../interfaces.js"
+import { TableHandler } from "../objects.js"
+import { ConstructorError } from "../objects/Error.js"
+import { CurrentHash, TokenHash } from "../objects/HashMap.js"
+import { DepthStream } from "../objects/Stream.js"
+import { BasicMap } from "../samples/TerminalMap.js"
+import { mapTypes } from "../utils/Node.js"
+import { next } from "../utils/Stream.js"
+import { AutoMap } from "./AutoMap.js"
 import {
 	AnyChar,
 	AsInt,
@@ -40,8 +40,8 @@ import {
 	UnicodeChar,
 	VTab,
 	Word
-} from "../RegexParser/Nodes.js"
-import { RegexParser } from "../RegexParser/Parser.js"
+} from "./RegexParser/Nodes.js"
+import { RegexParser } from "./RegexParser/Parser.js"
 
 // TODO : add the return type for `IRegexCompilerHandler` and `IRegexCompilerFunction`...
 type IRegexCompilerHandler = ITableHandler<DepthStream<INode>>
@@ -219,17 +219,31 @@ function compileNegated(negCharClassBuilder: IRegexPartBuilder) {
 	}
 }
 
-// TODO: TO ADD:
-// * 	1. Range ->
-// 			1. TrivialRange
-// 				1. RangeBoundary
-// 			2. InfiniteRange
-// 				1. RangeBoundary
-// 			3. LimitsRange
-// 				1. RangeBoundary
-// 				2. RangeBoundary
-// * 	2. "greedy" quantifiers
-// * 	3. "non-greedy" quantifiers
+// TODO: TO ADD [quantifiers]:
+// * 	1. Greedy: 
+// 			1. Star
+// 			2. QMark
+// 			3. Plus
+//			4. Range
+// 				1. TrivialRange
+// 					1. RangeBoundary
+// 				2. InfiniteRange
+// 					1. RangeBoundary
+// 				3. LimitsRange
+// 					1. RangeBoundary
+// 					2. RangeBoundary
+// * 	2. NonGreedy: 
+// 			1. Star
+// 			2. QMark
+// 			3. Plus
+// 			4. Range
+// 				1. TrivialRange
+// 					1. RangeBoundary
+// 				2. InfiniteRange
+// 					1. RangeBoundary
+// 				3. LimitsRange
+// 					1. RangeBoundary
+// 					2. RangeBoundary
 // TODO: order the `RegexCompilerTable.get()` method table FOR PERFORMANCE (some entities will be MORE LIKELY to appear than others)
 
 class RegexCompilerTable {

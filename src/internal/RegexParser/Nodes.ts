@@ -12,11 +12,12 @@ import { isType } from "../../utils/Node.js"
 export namespace Temp {
 	export const Comma = CachedTokenNode("comma", "Comma")
 	export const Hyphen = CachedTokenNode("hyphen", "Hyphen")
-	export const Plus = CachedTokenNode("plus", "Plus")
-	export const QMark = CachedTokenNode("qmark", "QMark")
-	export const Star = CachedTokenNode("star", "Star")
 	export const Pipe = CachedTokenNode("pipe", "Pipe")
 }
+
+export const Plus = CachedTokenNode("plus", "Plus")
+export const QMark = CachedTokenNode("qmark", "QMark")
+export const Star = CachedTokenNode("star", "Star")
 
 export const Digit = CachedTokenNode("digit", "Digit")
 export const EscapedLiteral = ContentNode("escaped-literal", "EscapedLiteral")
@@ -79,59 +80,56 @@ export class LimitsRange extends BaseNode {
 
 export const RangeBoundary = ContentNode("range-boundary", "RangeBoundary")
 
-abstract class ByGreedinessRange extends BaseNode {
+abstract class ByGreedinessQuantifier extends BaseNode {
 	get lastChild(): number {
 		return 1
 	}
 
 	read(i: number): INode {
-		return i === 0 ? this.child : this.range
+		return i === 0 ? this.item : this.quantifier
 	}
 
 	debugPrint(): string {
 		return `${
 			this.debugName
-		} { child: ${this.child.debugPrint()}, range: ${this.range.debugPrint()} }`
+		} { child: ${this.item.debugPrint()}, range: ${this.quantifier.debugPrint()} }`
 	}
 
 	constructor(
-		private readonly child: INode,
-		private readonly range: IPoolNode<[INode]>
+		private readonly item: INode,
+		private readonly quantifier: IPoolNode<[INode]>
 	) {
 		super()
 	}
 }
 
-export class NonGreedyRange extends ByGreedinessRange {
-	static readonly type = "non-greedy-range"
-	static readonly debugName = "NonGreedyRange"
-	static is = isType(NonGreedyRange.type)
+export class NonGreedy extends ByGreedinessQuantifier {
+	static readonly type = "non-greedy"
+	static readonly debugName = "NonGreedy"
+	static is = isType(NonGreedy.type)
 
 	get type() {
-		return NonGreedyRange.type
+		return NonGreedy.type
 	}
 
 	get debugName() {
-		return NonGreedyRange.debugName
+		return NonGreedy.debugName
 	}
 }
 
-export class GreedyRange extends ByGreedinessRange {
-	static readonly type = "greedy-range"
-	static readonly debugName = "GreedyRange"
-	static is = isType(GreedyRange.type)
+export class Greedy extends ByGreedinessQuantifier {
+	static readonly type = "greedy"
+	static readonly debugName = "Greedy"
+	static is = isType(Greedy.type)
 
 	get type() {
-		return GreedyRange.type
+		return Greedy.type
 	}
 
 	get debugName() {
-		return GreedyRange.debugName
+		return Greedy.debugName
 	}
 }
-
-export const NonGreedyStar = SingleChildNode("non-greedy-star", "NonGreedyStar")
-export const GreedyStar = SingleChildNode("greedy-star", "GreedyStar")
 
 export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
 export class ClassRange extends BaseNode {

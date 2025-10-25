@@ -13,11 +13,7 @@ import {
 	expect,
 	expectKind
 } from "../../../objects/Error.js"
-import {
-	LimitStream,
-	SingleNodeStream,
-	SingletonStream
-} from "../../../objects/Stream.js"
+import { LimitStream, SingleNodeStream } from "../../../objects/Stream.js"
 import { isDecimal } from "../../../samples/alphabet.js"
 import {
 	CachedTokenStream,
@@ -25,17 +21,16 @@ import {
 	EndBracketStream,
 	isCurr
 } from "../../../samples/Stream.js"
-import { consumable, next } from "../../../utils/Stream.js"
+import { consumable } from "../../../utils/Stream.js"
 import {
-	GreedyRange,
 	InfiniteRange,
 	LimitsRange,
-	NonGreedyRange,
 	Range,
 	RangeBoundary,
 	Temp,
 	TrivialRange
 } from "../Nodes.js"
+import { handleQuantifier } from "./Greedy.js"
 
 const CommaStream = CachedTokenStream(Temp.Comma)
 
@@ -116,16 +111,6 @@ export function HandleRange(input: IOwnedStream<string>) {
 	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
 }
 
-function handleRangeAfterItem(input: IOwnedStream<INode>) {
-	const child = next(input) // the thing onto which the range quantifier is applied
-	const range = next(input) as IPoolNode<[INode]> // Range({...})
-	if (Temp.QMark.is(input.curr)) {
-		input.next() // QMark(?)
-		return [SingletonStream(() => new NonGreedyRange(child, range))()]
-	}
-	return [SingletonStream(() => new GreedyRange(child, range))()]
-}
-
 export const maybeRange: array.Pairs<ITypeCheckable, IStreamChooser> = [
-	[Range, handleRangeAfterItem]
+	[Range, handleQuantifier]
 ]
