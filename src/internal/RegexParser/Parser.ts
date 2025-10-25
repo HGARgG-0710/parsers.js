@@ -56,12 +56,10 @@ import { maybeTypeMatch } from "./TypeMatch.js"
 export class RegexParser {
 	static readonly instance = new RegexParser()
 
-	private readonly errPrinter = new PlainErrorPrinter()
+	private readonly errPrinter = PlainErrorPrinter.instance
 
 	private parseSource(source: string) {
-		return consume(
-			parseRegex(new ParseableInput(source))
-		).get()[0] as INode
+		return consume(parseRegex(new ParseableInput(source))).get()[0] as INode
 	}
 
 	parse(source: string) {

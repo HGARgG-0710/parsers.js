@@ -12,7 +12,7 @@ export class ErrorPrinter {
 		this.shutDown()
 	}
 
-	constructor(
+	protected constructor(
 		private readonly errorFormatter: (error: Error) => string,
 		private readonly errorPrinter: (errStr: string) => void,
 		private readonly shutDown: () => void = () => {}
@@ -20,10 +20,12 @@ export class ErrorPrinter {
 }
 
 export class PlainErrorPrinter extends ErrorPrinter {
+	static readonly instance = new PlainErrorPrinter()
+
 	static readonly formatter = (error: Error) =>
 		`${error.name}: ${error.message}`
 
-	constructor(shutDown?: () => void) {
+	protected constructor(shutDown?: () => void) {
 		super(PlainErrorPrinter.formatter, console.error, shutDown)
 	}
 }
