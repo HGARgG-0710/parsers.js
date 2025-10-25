@@ -15,6 +15,11 @@ import { next } from "../../utils/Stream.js"
 import { AutoMap } from "../AutoMap.js"
 import {
 	AnyChar,
+	AsInt,
+	AsString,
+	CharClass,
+	ClassRange,
+	ClassUnit,
 	Digit,
 	Disjunct,
 	Disjunction,
@@ -27,6 +32,7 @@ import {
 	SingleChar,
 	Space,
 	Tab,
+	TypeMatch,
 	UnicodeChar,
 	VTab,
 	Word
@@ -40,7 +46,7 @@ type IRegexCompilerFunction = (
 	handler: IRegexCompilerHandler
 ) => any
 
-function compileWrapperPart(
+function compileWrapper(
 	input: DepthStream<INode>,
 	handler: IRegexCompilerHandler
 ) {
@@ -54,7 +60,11 @@ function compileComplexPart(builder: IRegexPartBuilder) {
 		handler: IRegexCompilerHandler
 	) {
 		builder.begin()
-		for (const _ of input) builder.addItem(handler(input))
+		const root = input.curr
+		for (let i = 0; i < root.lastChild; ++i) {
+			input.next()
+			builder.addItem(handler(input))
+		}
 		return builder.finish()
 	}
 }
@@ -129,6 +139,43 @@ const compileLiteral = compileCell<string>((builder, value) =>
 	builder.literal(value)
 )
 
+function compileAsInt(
+	input: DepthStream<INode>,
+	_handler: IRegexCompilerHandler
+) {
+	return Number((input.curr as ICellNode<string>).value)
+}
+
+function compileAsString(
+	input: DepthStream<INode>,
+	_handler: IRegexCompilerHandler
+) {
+	return (input.curr as ICellNode<string>).value
+}
+
+function compileTypeMatch(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // TypeMatch
+		return builder.typeMatch(handler(input))
+	}
+}
+
+function compileClassRange(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // ClassRange
+		const from = handler(input)
+		input.next() // ClassUnit
+		const to = handler(input)
+		return builder.charRange(from, to)
+	}
+}
+
 // TODO: TO ADD:
 // * 	1. Range ->
 // 			1. TrivialRange
@@ -143,32 +190,31 @@ const compileLiteral = compileCell<string>((builder, value) =>
 // * 	4. Negated:
 // 			1. This is STATICALLY EQUATED as in "Negated(X) -> Y"
 // 			2. I.e. THERE ARE SEPARATE METHODS FOR THE "negated" VARIANTS!!!
-// * 	5. TypeMatch:
-// 			1. AsInt
-// 			2. AsString
-// * 	6. CharClass:
-// 			1. ClassRange
-// 			2. ClassUnit
+// TODO: order the `RegexCompilerTable.get()` method table FOR PERFORMANCE (some entities will be MORE LIKELY to appear than others)
 
 class RegexCompilerTable {
-	private compileDisjunction: IRegexCompilerFunction
-	private compileDisjunct: IRegexCompilerFunction
-	private compileIgnoreCase: IRegexCompilerFunction
-	private compileLookahead: IRegexCompilerFunction
-	private compileAnyChar: IRegexCompilerFunction
-	private compileWord: IRegexCompilerFunction
-	private compileDigit: IRegexCompilerFunction
-	private compileTab: IRegexCompilerFunction
-	private compileVTab: IRegexCompilerFunction
-	private compileSpace: IRegexCompilerFunction
-	private compileNewline: IRegexCompilerFunction
-	private compileUnicodeChar: IRegexCompilerFunction
-	private compileEscaped: IRegexCompilerFunction
-	private compileLiteral: IRegexCompilerFunction
+	private readonly compileDisjunction: IRegexCompilerFunction
+	private readonly compileDisjunct: IRegexCompilerFunction
+	private readonly compileIgnoreCase: IRegexCompilerFunction
+	private readonly compileLookahead: IRegexCompilerFunction
+	private readonly compileAnyChar: IRegexCompilerFunction
+	private readonly compileWord: IRegexCompilerFunction
+	private readonly compileDigit: IRegexCompilerFunction
+	private readonly compileTab: IRegexCompilerFunction
+	private readonly compileVTab: IRegexCompilerFunction
+	private readonly compileSpace: IRegexCompilerFunction
+	private readonly compileNewline: IRegexCompilerFunction
+	private readonly compileUnicodeChar: IRegexCompilerFunction
+	private readonly compileEscaped: IRegexCompilerFunction
+	private readonly compileLiteral: IRegexCompilerFunction
+	private readonly compileTypeMatch: IRegexCompilerFunction
+	private readonly compileCharClass: IRegexCompilerFunction
+	private readonly compileClassRange: IRegexCompilerFunction
+	private readonly compileClassUnit: IRegexCompilerFunction
 
 	get(): [ITyped, IRegexCompilerFunction][] {
 		return [
-			[RootNode, compileWrapperPart],
+			[RootNode, compileWrapper],
 			[Disjunction, this.compileDisjunction],
 			[Disjunct, this.compileDisjunct],
 			[Group, compileGroup],
@@ -183,6 +229,12 @@ class RegexCompilerTable {
 			[Newline, this.compileNewline],
 			[UnicodeChar, this.compileUnicodeChar],
 			[EscapedLiteral, this.compileEscaped],
+			[TypeMatch, this.compileTypeMatch],
+			[AsString, compileAsString],
+			[AsInt, compileAsInt],
+			[CharClass, this.compileCharClass],
+			[ClassRange, this.compileClassRange],
+			[ClassUnit, this.compileClassUnit],
 			[SingleChar, this.compileLiteral]
 		]
 	}
@@ -208,6 +260,10 @@ class RegexCompilerTable {
 		this.compileUnicodeChar = compileUnicodeChar(builder)
 		this.compileEscaped = compileLiteral(builder)
 		this.compileLiteral = compileLiteral(builder)
+		this.compileTypeMatch = compileTypeMatch(builder)
+		this.compileCharClass = compileComplexPart(builder.charClass)
+		this.compileClassRange = compileClassRange(builder)
+		this.compileClassUnit = compileWrapper
 	}
 }
 

@@ -38,16 +38,17 @@ export const LookaheadGroup = SingleChildNode(
 )
 
 export const Group = SingleChildNode("group", "Group")
-export const Range = SingleChildNode("range", "Range")
 
+export const Range = SingleChildNode("range", "Range")
 export const InfiniteRange = SingleChildNode("infinite-range", "InfiniteRange")
 export const TrivialRange = SingleChildNode("trivial-range", "TrivialRange")
 
 export class LimitsRange extends BaseNode {
 	static readonly debugName = "LimitsRange"
+	static readonly type = "limits-range"
 
 	get type() {
-		return "limits-range"
+		return LimitsRange.type
 	}
 
 	get lastChild() {
@@ -132,10 +133,10 @@ export class GreedyRange extends ByGreedinessRange {
 export const NonGreedyStar = SingleChildNode("non-greedy-star", "NonGreedyStar")
 export const GreedyStar = SingleChildNode("greedy-star", "GreedyStar")
 
-export const ClassUnit = CachedContentNode("char-class-unit", "ClassUnit")
-
+export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
 export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"
+	static readonly type = "char-class-range"
 
 	private start: INode
 	private end: INode
@@ -145,7 +146,7 @@ export class ClassRange extends BaseNode {
 	}
 
 	get type() {
-		return "char-class-range"
+		return ClassRange.type
 	}
 
 	get lastChild() {

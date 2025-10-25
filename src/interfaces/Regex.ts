@@ -1,3 +1,4 @@
+import type { IValidNodeType } from "./Node.js"
 import type { IPeekableStream } from "./Stream.js"
 
 export interface IRegexMatcher<T = any> {
@@ -15,6 +16,7 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 	readonly catenation: IRegexPartBuilder
 	readonly ignoreCase: IRegexPartBuilder
 	readonly lookahead: IRegexPartBuilder
+	readonly charClass: IRegexPartBuilder
 
 	// TODO: *add* the return types...
 	anyChar(): any
@@ -25,7 +27,9 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 	space(): any
 	newline(): any
 	literal(x: string): any
+	charRange(from: string, to: string): any
 	unicodeChar(hex: string): any
+	typeMatch(type: IValidNodeType): any
 
 	finalize(): IRegexMatcher<T>
 }
