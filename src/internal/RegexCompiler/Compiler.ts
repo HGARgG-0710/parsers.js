@@ -5,12 +5,15 @@ import type {
 	IRegexMatcher,
 	IRegexPartBuilder,
 	ITableHandler,
-	ITyped
+	ITyped,
+	IValidNodeType
 } from "../../interfaces.js"
 import { TableHandler } from "../../objects.js"
+import { ConstructorError } from "../../objects/Error.js"
 import { CurrentHash, TokenHash } from "../../objects/HashMap.js"
 import { DepthStream } from "../../objects/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
+import { mapTypes } from "../../utils/Node.js"
 import { next } from "../../utils/Stream.js"
 import { AutoMap } from "../AutoMap.js"
 import {
@@ -27,6 +30,7 @@ import {
 	Group,
 	IgnoreCaseGroup,
 	LookaheadGroup,
+	Negated,
 	Newline,
 	RootNode,
 	SingleChar,
@@ -45,6 +49,34 @@ type IRegexCompilerFunction = (
 	input: DepthStream<INode>,
 	handler: IRegexCompilerHandler
 ) => any
+type IRegexCompilerErrorHandler = (
+	input: DepthStream<INode>,
+	_handler: IRegexCompilerHandler
+) => void
+
+function RegexTypeHandler(
+	map: [IValidNodeType, IRegexCompilerFunction][],
+	errHandler: IRegexCompilerErrorHandler
+) {
+	return TableHandler(
+		new CurrentHash(new TokenHash(BasicMap(map, errHandler)))
+	)
+}
+
+class RegexCompilationError extends ConstructorError {
+	constructor(item: INode) {
+		super(
+			`Error compiling the item: ${item.debugPrint()} to a Regex object`
+		)
+	}
+}
+
+function compilerBuilderErrHandler(
+	input: DepthStream<INode>,
+	_handler: IRegexCompilerHandler
+) {
+	throw new RegexCompilationError(input.curr)
+}
 
 function compileWrapper(
 	input: DepthStream<INode>,
@@ -176,6 +208,17 @@ function compileClassRange(builder: IRegexBuilder) {
 	}
 }
 
+function compileNegated(negCharClassBuilder: IRegexPartBuilder) {
+	const negCharClassCompiler = compileComplexPart(negCharClassBuilder)
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // Negated
+		return negCharClassCompiler(input, handler)
+	}
+}
+
 // TODO: TO ADD:
 // * 	1. Range ->
 // 			1. TrivialRange
@@ -187,9 +230,6 @@ function compileClassRange(builder: IRegexBuilder) {
 // 				2. RangeBoundary
 // * 	2. "greedy" quantifiers
 // * 	3. "non-greedy" quantifiers
-// * 	4. Negated:
-// 			1. This is STATICALLY EQUATED as in "Negated(X) -> Y"
-// 			2. I.e. THERE ARE SEPARATE METHODS FOR THE "negated" VARIANTS!!!
 // TODO: order the `RegexCompilerTable.get()` method table FOR PERFORMANCE (some entities will be MORE LIKELY to appear than others)
 
 class RegexCompilerTable {
@@ -211,6 +251,7 @@ class RegexCompilerTable {
 	private readonly compileCharClass: IRegexCompilerFunction
 	private readonly compileClassRange: IRegexCompilerFunction
 	private readonly compileClassUnit: IRegexCompilerFunction
+	private readonly compileNegated: IRegexCompilerFunction
 
 	get(): [ITyped, IRegexCompilerFunction][] {
 		return [
@@ -235,6 +276,7 @@ class RegexCompilerTable {
 			[CharClass, this.compileCharClass],
 			[ClassRange, this.compileClassRange],
 			[ClassUnit, this.compileClassUnit],
+			[Negated, this.compileNegated],
 			[SingleChar, this.compileLiteral]
 		]
 	}
@@ -264,6 +306,7 @@ class RegexCompilerTable {
 		this.compileCharClass = compileComplexPart(builder.charClass)
 		this.compileClassRange = compileClassRange(builder)
 		this.compileClassUnit = compileWrapper
+		this.compileNegated = compileNegated(builder.negCharClass)
 	}
 }
 
@@ -284,23 +327,15 @@ class RegexCompilerTableStorage {
 function RegexNodeStream(source: string) {
 	return new DepthStream(RegexParser.instance.parse(source))
 }
-
 class RegexCompilerAlgorithmBuilder {
 	static readonly instance = new RegexCompilerAlgorithmBuilder()
 
 	private buildAlgorithm: ITableHandler
 
 	init(builder: IRegexBuilder) {
-		this.buildAlgorithm = TableHandler(
-			new CurrentHash(
-				new TokenHash(
-					BasicMap(
-						RegexCompilerTableStorage.instance
-							.get(builder)
-							.map(([x, f]: [ITyped, Function]) => [x.type, f])
-					)
-				)
-			)
+		this.buildAlgorithm = RegexTypeHandler(
+			mapTypes(RegexCompilerTableStorage.instance.get(builder)),
+			compilerBuilderErrHandler
 		)
 	}
 

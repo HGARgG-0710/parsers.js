@@ -17,13 +17,14 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 	readonly ignoreCase: IRegexPartBuilder
 	readonly lookahead: IRegexPartBuilder
 	readonly charClass: IRegexPartBuilder
+	readonly negCharClass: IRegexPartBuilder
 
 	// TODO: *add* the return types...
 	anyChar(): any
 	word(): any
 	digit(): any
 	space(): any
-	// ! CRUCIAL REMINDER - this includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
+	// ! CRUCIAL REMINDER - `.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 	newline(): any
 	literal(x: string): any
 	charRange(from: string, to: string): any

@@ -139,3 +139,9 @@ export const isRecursiveNodeSerializable = structCheck<
 	type: T,
 	children: isArray
 })
+
+export function mapTypes<T = any>(
+	typeTable: [ITyped, T][]
+): [IValidNodeType, T][] {
+	return typeTable.map(([t, f]) => [t.type, f])
+}
