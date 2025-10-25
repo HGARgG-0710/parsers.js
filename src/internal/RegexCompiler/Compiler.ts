@@ -112,8 +112,8 @@ function compileElementary(makeElementary: (builder: IRegexBuilder) => any) {
 const compileAnyChar = compileElementary((builder) => builder.anyChar())
 const compileWord = compileElementary((builder) => builder.word())
 const compileDigit = compileElementary((builder) => builder.digit())
-const compileTab = compileElementary((builder) => builder.tab())
-const compileVTab = compileElementary((builder) => builder.vTab())
+const compileTab = compileElementary((builder) => builder.literal("\t"))
+const compileVTab = compileElementary((builder) => builder.literal("\v"))
 const compileSpace = compileElementary((builder) => builder.space())
 const compileNewline = compileElementary((builder) => builder.newline())
 

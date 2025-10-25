@@ -22,9 +22,8 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 	anyChar(): any
 	word(): any
 	digit(): any
-	tab(): any
-	vTab(): any
 	space(): any
+	// ! CRUCIAL REMINDER - this includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 	newline(): any
 	literal(x: string): any
 	charRange(from: string, to: string): any
