@@ -7,17 +7,55 @@ import {
 	RecursiveNode,
 	SingleChildNode
 } from "../../objects/Node.js"
-import { isType } from "../../utils/Node.js"
 
 export namespace Temp {
 	export const Comma = CachedTokenNode("comma", "Comma")
 	export const Hyphen = CachedTokenNode("hyphen", "Hyphen")
 	export const Pipe = CachedTokenNode("pipe", "Pipe")
+	export const Plus = CachedTokenNode("plus", "Plus")
+	export const QMark = CachedTokenNode("qmark", "QMark")
+	export const Star = CachedTokenNode("star", "Star")
 }
 
-export const Plus = CachedTokenNode("plus", "Plus")
-export const QMark = CachedTokenNode("qmark", "QMark")
-export const Star = CachedTokenNode("star", "Star")
+export const Greedy = SingleChildNode("greedy", "Greedy")
+export const NonGreedy = SingleChildNode("non-greedy", "NonGreedy")
+
+export const OneOrMore = SingleChildNode("one-or-more", "OneOrMore")
+export const NoneOrMore = SingleChildNode("none-or-more", "NoneOrMore")
+export const Optional = SingleChildNode("optional", "Optional")
+export class RangeQuantifier extends BaseNode {
+	static readonly debugName = "RangeQuantifier"
+	static readonly type = "range-quantifier"
+
+	get type() {
+		return RangeQuantifier.type
+	}
+
+	get debugName() {
+		return RangeQuantifier.debugName
+	}
+
+	debugPrint(): string {
+		return `${
+			this.debugName
+		} { item: ${this.item.debugPrint()}, range: ${this.range.debugPrint()} }`
+	}
+
+	read(i: number): INode {
+		return i === 0 ? this.item : this.range
+	}
+
+	get lastChild() {
+		return 1
+	}
+
+	constructor(
+		private readonly item: INode,
+		private readonly range: IPoolNode<[INode]>
+	) {
+		super()
+	}
+}
 
 export const Digit = CachedTokenNode("digit", "Digit")
 export const EscapedLiteral = ContentNode("escaped-literal", "EscapedLiteral")
@@ -41,8 +79,8 @@ export const LookaheadGroup = SingleChildNode(
 export const Group = SingleChildNode("group", "Group")
 
 export const Range = SingleChildNode("range", "Range")
-export const InfiniteRange = SingleChildNode("infinite-range", "InfiniteRange")
 export const TrivialRange = SingleChildNode("trivial-range", "TrivialRange")
+export const InfiniteRange = SingleChildNode("infinite-range", "InfiniteRange")
 
 export class LimitsRange extends BaseNode {
 	static readonly debugName = "LimitsRange"
@@ -71,66 +109,17 @@ export class LimitsRange extends BaseNode {
 	}
 
 	constructor(
-		private readonly from: ICellNode<string>,
-		private readonly to: ICellNode<string>
+		private readonly from: ICellNode<number>,
+		private readonly to: ICellNode<number>
 	) {
 		super()
 	}
 }
 
-export const RangeBoundary = ContentNode("range-boundary", "RangeBoundary")
-
-abstract class ByGreedinessQuantifier extends BaseNode {
-	get lastChild(): number {
-		return 1
-	}
-
-	read(i: number): INode {
-		return i === 0 ? this.item : this.quantifier
-	}
-
-	debugPrint(): string {
-		return `${
-			this.debugName
-		} { child: ${this.item.debugPrint()}, range: ${this.quantifier.debugPrint()} }`
-	}
-
-	constructor(
-		private readonly item: INode,
-		private readonly quantifier: IPoolNode<[INode]>
-	) {
-		super()
-	}
-}
-
-export class NonGreedy extends ByGreedinessQuantifier {
-	static readonly type = "non-greedy"
-	static readonly debugName = "NonGreedy"
-	static is = isType(NonGreedy.type)
-
-	get type() {
-		return NonGreedy.type
-	}
-
-	get debugName() {
-		return NonGreedy.debugName
-	}
-}
-
-export class Greedy extends ByGreedinessQuantifier {
-	static readonly type = "greedy"
-	static readonly debugName = "Greedy"
-	static is = isType(Greedy.type)
-
-	get type() {
-		return Greedy.type
-	}
-
-	get debugName() {
-		return Greedy.debugName
-	}
-}
-
+export const RangeBoundary = ContentNode<number>(
+	"range-boundary",
+	"RangeBoundary"
+)
 export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
 export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"

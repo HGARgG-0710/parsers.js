@@ -9,6 +9,7 @@ import type {
 	IStream,
 	ITypeCheckable
 } from "../interfaces.js"
+import { isDecimal } from "../samples/alphabet.js"
 import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
@@ -199,6 +200,25 @@ export function ensureChildUnrevivable<T = any>(
 		)
 }
 
+export function prepareNonDecimalError(
+	errData: IErrorData,
+	nonDecimal: string
+) {
+	errData.setInfo("nonDecimal", nonDecimal)
+	return errData
+}
+
+export function ensureCurrDecimal(
+	input: IStream<string>,
+	errDataGetter: IErrorDataGetter<string> = findErrorDataUpstream
+) {
+	const maybeDecimal = input.curr
+	if (!isDecimal(maybeDecimal))
+		throw new ParseError.ExpectedDecimalError(
+			prepareNonDecimalError(errDataGetter(input), maybeDecimal)
+		)
+}
+
 export namespace ParseError {
 	export abstract class MessageBuilderParseError extends ParseError {
 		private _errData: IErrorData
@@ -378,6 +398,20 @@ export namespace ParseError {
 	export class CannotReviveChildError<T = any> extends StreamStackError<T> {}
 
 	export class ChildIsNotUnrevivable<T = any> extends StreamStackError<T> {}
+
+	export class ExpectedDecimalError extends GenericParseError {
+		private printNonDecimal(nonDecimal: string) {
+			return `expected a decimal value, received: ${nonDecimal}`
+		}
+
+		private nonDecimal() {
+			return this.printNonDecimal(this.errData.getInfo("nonDecimal"))
+		}
+
+		protected mandatoryFields(): string[] {
+			return [this.nonDecimal()]
+		}
+	}
 }
 
 export abstract class NoPropertyHavingLocatableError extends ConstructorError {

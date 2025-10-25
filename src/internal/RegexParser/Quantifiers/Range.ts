@@ -10,14 +10,19 @@ import type {
 import { SourceBuilder } from "../../../objects.js"
 import {
 	ensureChildUnrevivable,
+	ensureCurrDecimal,
 	expect,
 	expectKind
 } from "../../../objects/Error.js"
-import { LimitStream, SingleNodeStream } from "../../../objects/Stream.js"
+import {
+	LimitStream,
+	SingleNodeStream,
+	SingletonStream,
+	ValidatorStream
+} from "../../../objects/Stream.js"
 import { isDecimal } from "../../../samples/alphabet.js"
 import {
 	CachedTokenStream,
-	CollectionStream,
 	EndBracketStream,
 	isCurr
 } from "../../../samples/Stream.js"
@@ -30,19 +35,21 @@ import {
 	Temp,
 	TrivialRange
 } from "../Nodes.js"
-import { handleQuantifier } from "./Greedy.js"
+import { handleRangeQuantifier } from "./Greedy.js"
 
 const CommaStream = CachedTokenStream(Temp.Comma)
 
 const RangeLimitStream = EndBracketStream(isCurr("}"))
-
 const RangeBoundaryLimitStream = LimitStream((input: IOwnedStream<string>) =>
 	isDecimal(input.curr)
 )
 
-const RangeBoundaryStream = CollectionStream(
-	RangeBoundary,
-	consumable(new SourceBuilder())
+const boundaryMaker = consumable(new SourceBuilder())
+
+const RangeBoundaryValidatorStream = ValidatorStream(ensureCurrDecimal)
+const RangeBoundaryStream = SingletonStream(
+	(input: IOwnedStream<string> & Iterable<string>) =>
+		new RangeBoundary(Number(boundaryMaker(input).get()))
 )
 
 const expectRangeBoundary = expectKind(RangeBoundary)
@@ -51,12 +58,12 @@ const expectComma = expect(",")
 
 class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 	private finalRange: IPoolNode<[INode]>
-	private first: ICellNode<string>
-	private last: ICellNode<string>
+	private first: ICellNode<number>
+	private last: ICellNode<number>
 
 	private tryTrivial() {
 		expectRangeBoundary(this.resource!)
-		this.first = this.resource!.curr as ICellNode<string>
+		this.first = this.resource!.curr as ICellNode<number>
 		this.resource!.next() // skipping first item
 		return !this.reviveChild() // does this die after 1st?
 	}
@@ -100,10 +107,16 @@ function HandleComma(input: IOwnedStream<string>) {
 	return [CommaStream()]
 }
 
+function HandleDecimal() {
+	return [
+		RangeBoundaryStream(),
+		RangeBoundaryValidatorStream(),
+		RangeBoundaryLimitStream()
+	]
+}
+
 function HandleDecimalOrComma(input: IOwnedStream<string>) {
-	return isDecimal(input.curr)
-		? [RangeBoundaryStream(), RangeBoundaryLimitStream()]
-		: HandleComma(input)
+	return isDecimal(input.curr) ? HandleDecimal() : HandleComma(input)
 }
 
 export function HandleRange(input: IOwnedStream<string>) {
@@ -112,5 +125,5 @@ export function HandleRange(input: IOwnedStream<string>) {
 }
 
 export const maybeRange: array.Pairs<ITypeCheckable, IStreamChooser> = [
-	[Range, handleQuantifier]
+	[Range, handleRangeQuantifier]
 ]

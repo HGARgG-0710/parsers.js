@@ -27,15 +27,24 @@ import {
 	Disjunct,
 	Disjunction,
 	EscapedLiteral,
+	Greedy,
 	Group,
 	IgnoreCaseGroup,
+	InfiniteRange,
+	LimitsRange,
 	LookaheadGroup,
 	Negated,
 	Newline,
+	NoneOrMore,
+	NonGreedy,
+	OneOrMore,
+	Optional,
+	RangeQuantifier,
 	RootNode,
 	SingleChar,
 	Space,
 	Tab,
+	TrivialRange,
 	TypeMatch,
 	UnicodeChar,
 	VTab,
@@ -45,14 +54,18 @@ import { RegexParser } from "./RegexParser/Parser.js"
 
 // TODO : add the return type for `IRegexCompilerHandler` and `IRegexCompilerFunction`...
 type IRegexCompilerHandler = ITableHandler<DepthStream<INode>>
+
 type IRegexCompilerFunction = (
 	input: DepthStream<INode>,
 	handler: IRegexCompilerHandler
 ) => any
+
 type IRegexCompilerErrorHandler = (
 	input: DepthStream<INode>,
 	_handler: IRegexCompilerHandler
 ) => void
+
+type IRegexCompilerTypeTable = [ITyped, IRegexCompilerFunction][]
 
 function RegexTypeHandler(
 	map: [IValidNodeType, IRegexCompilerFunction][],
@@ -219,32 +232,124 @@ function compileNegated(negCharClassBuilder: IRegexPartBuilder) {
 	}
 }
 
-// TODO: TO ADD [quantifiers]:
-// * 	1. Greedy: 
-// 			1. Star
-// 			2. QMark
-// 			3. Plus
-//			4. Range
-// 				1. TrivialRange
-// 					1. RangeBoundary
-// 				2. InfiniteRange
-// 					1. RangeBoundary
-// 				3. LimitsRange
-// 					1. RangeBoundary
-// 					2. RangeBoundary
-// * 	2. NonGreedy: 
-// 			1. Star
-// 			2. QMark
-// 			3. Plus
-// 			4. Range
-// 				1. TrivialRange
-// 					1. RangeBoundary
-// 				2. InfiniteRange
-// 					1. RangeBoundary
-// 				3. LimitsRange
-// 					1. RangeBoundary
-// 					2. RangeBoundary
-// TODO: order the `RegexCompilerTable.get()` method table FOR PERFORMANCE (some entities will be MORE LIKELY to appear than others)
+function compileOptional(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // Optional
+		return builder.optional(handler(input))
+	}
+}
+
+function compileNoneOrMore(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // NoneOrMore
+		return builder.noneOrMore(handler(input))
+	}
+}
+
+function compileOneOrMore(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // OneOrMore
+		builder.catenation.begin()
+		builder.catenation.addItem(handler(input))
+		input.next()
+		builder.catenation.addItem(builder.noneOrMore(handler(input)))
+		return builder.catenation.finish()
+	}
+}
+
+function readRangeBoundary(range: INode, isStart: boolean) {
+	return (range.read(1 - +isStart) as ICellNode<number>).value
+}
+
+function readStartBoundary(range: INode) {
+	return readRangeBoundary(range, true)
+}
+
+function readEndBoundary(range: INode) {
+	return readRangeBoundary(range, false)
+}
+
+function handleTrivialRange(input: DepthStream<INode>) {
+	const times = readStartBoundary(input.curr)
+	return [times, times]
+}
+
+function handleInfiniteRange(input: DepthStream<INode>) {
+	const from = readStartBoundary(input.curr)
+	return [from, Infinity]
+}
+
+function handleLimitsRange(input: DepthStream<INode>) {
+	const range = input.curr
+	return [readStartBoundary(range), readEndBoundary(range)]
+}
+
+// ! Replace the `compilerBuilderErrHandler` with a more appropriate one...
+const rangeKindsHandler = RegexTypeHandler(
+	mapTypes([
+		[TrivialRange, handleTrivialRange],
+		[InfiniteRange, handleInfiniteRange],
+		[LimitsRange, handleLimitsRange]
+	]),
+	compilerBuilderErrHandler
+)
+
+// TODO: REFACTOR THIS [the function is way too large...]
+function compileRange(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // RangeQuantifier
+		const toMatch = handler(input)
+		input.next()
+		input.next() // Range
+
+		const [from, to] = rangeKindsHandler(input)
+		const more = to - from
+
+		builder.catenation.begin()
+		builder.catenation.addItem(builder.repeat(toMatch, from))
+
+		if (more > 0)
+			if (more === Infinity)
+				builder.catenation.addItem(builder.noneOrMore(toMatch))
+			else
+				for (let i = 0; i < more; ++i)
+					builder.catenation.addItem(builder.optional(toMatch))
+
+		return builder.catenation.finish()
+	}
+}
+
+function compileGreedy(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // Greedy
+		return builder.greedy(handler(input))
+	}
+}
+
+function compileNonGreedy(builder: IRegexBuilder) {
+	return function (
+		input: DepthStream<INode>,
+		handler: IRegexCompilerHandler
+	) {
+		input.next() // NonGreedy
+		return builder.nonGreedy(handler(input))
+	}
+}
 
 class RegexCompilerTable {
 	private readonly compileDisjunction: IRegexCompilerFunction
@@ -266,32 +371,84 @@ class RegexCompilerTable {
 	private readonly compileClassRange: IRegexCompilerFunction
 	private readonly compileClassUnit: IRegexCompilerFunction
 	private readonly compileNegated: IRegexCompilerFunction
+	private readonly compileGreedy: IRegexCompilerFunction
+	private readonly compileNonGreedy: IRegexCompilerFunction
+	private readonly compileOptional: IRegexCompilerFunction
+	private readonly compileNoneOrMore: IRegexCompilerFunction
+	private readonly compileOneOrMore: IRegexCompilerFunction
+	private readonly compileRange: IRegexCompilerFunction
 
-	get(): [ITyped, IRegexCompilerFunction][] {
+	private getToplevel(): IRegexCompilerTypeTable {
 		return [
 			[RootNode, compileWrapper],
 			[Disjunction, this.compileDisjunction],
-			[Disjunct, this.compileDisjunct],
+			[Disjunct, this.compileDisjunct]
+		]
+	}
+
+	private getGroups(): IRegexCompilerTypeTable {
+		return [
 			[Group, compileGroup],
 			[IgnoreCaseGroup, this.compileIgnoreCase],
-			[LookaheadGroup, this.compileLookahead],
+			[LookaheadGroup, this.compileLookahead]
+		]
+	}
+
+	private getCharClasses(): IRegexCompilerTypeTable {
+		return [
 			[AnyChar, this.compileAnyChar],
 			[Word, this.compileWord],
 			[Digit, this.compileDigit],
-			[Tab, this.compileTab],
 			[VTab, this.compileVTab],
 			[Space, this.compileSpace],
-			[Newline, this.compileNewline],
-			[UnicodeChar, this.compileUnicodeChar],
-			[EscapedLiteral, this.compileEscaped],
-			[TypeMatch, this.compileTypeMatch],
-			[AsString, compileAsString],
-			[AsInt, compileAsInt],
 			[CharClass, this.compileCharClass],
 			[ClassRange, this.compileClassRange],
 			[ClassUnit, this.compileClassUnit],
-			[Negated, this.compileNegated],
-			[SingleChar, this.compileLiteral]
+			[Negated, this.compileNegated]
+		]
+	}
+
+	private getSpecialCharacters(): IRegexCompilerTypeTable {
+		return [
+			[Tab, this.compileTab],
+			[Newline, this.compileNewline],
+			[UnicodeChar, this.compileUnicodeChar],
+			[EscapedLiteral, this.compileEscaped]
+		]
+	}
+
+	private getTypeMatch(): IRegexCompilerTypeTable {
+		return [
+			[TypeMatch, this.compileTypeMatch],
+			[AsString, compileAsString],
+			[AsInt, compileAsInt]
+		]
+	}
+
+	private getQuantifiers(): IRegexCompilerTypeTable {
+		return [
+			[Greedy, this.compileGreedy],
+			[NonGreedy, this.compileNonGreedy],
+			[Optional, this.compileOptional],
+			[NoneOrMore, this.compileNoneOrMore],
+			[OneOrMore, this.compileOneOrMore],
+			[RangeQuantifier, this.compileRange]
+		]
+	}
+
+	private getElementary(): IRegexCompilerTypeTable {
+		return [[SingleChar, this.compileLiteral]]
+	}
+
+	get(): IRegexCompilerTypeTable {
+		return [
+			...this.getToplevel(),
+			...this.getGroups(),
+			...this.getCharClasses(),
+			...this.getSpecialCharacters(),
+			...this.getTypeMatch(),
+			...this.getQuantifiers(),
+			...this.getElementary()
 		]
 	}
 
@@ -321,6 +478,12 @@ class RegexCompilerTable {
 		this.compileClassRange = compileClassRange(builder)
 		this.compileClassUnit = compileWrapper
 		this.compileNegated = compileNegated(builder.negCharClass)
+		this.compileGreedy = compileGreedy(builder)
+		this.compileNonGreedy = compileNonGreedy(builder)
+		this.compileOptional = compileOptional(builder)
+		this.compileNoneOrMore = compileNoneOrMore(builder)
+		this.compileOneOrMore = compileOneOrMore(builder)
+		this.compileRange = compileRange(builder)
 	}
 }
 
@@ -341,6 +504,7 @@ class RegexCompilerTableStorage {
 function RegexNodeStream(source: string) {
 	return new DepthStream(RegexParser.instance.parse(source))
 }
+
 class RegexCompilerAlgorithmBuilder {
 	static readonly instance = new RegexCompilerAlgorithmBuilder()
 

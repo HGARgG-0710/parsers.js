@@ -8,7 +8,7 @@ import type { IStream } from "./Stream.js"
  * "glued" together by an `IIndexable` data structure.
  */
 export type ITableHandler<In = any, Out = any> = (
-	x?: In,
+	x: In,
 	...y: any[]
 ) => Out & { readonly table: IIndexable<In, IParserFunction<In, Out>> }
 
@@ -19,7 +19,10 @@ export type ITableHandler<In = any, Out = any> = (
  * the `.index(...)` call. It, thus, is simply a wrapper for the underlying
  * `readonly table` property.
  */
-export type IWrapHandler<In = any, Out = any> = ((x?: any, ...y: any[]) => Out) & {
+export type IWrapHandler<In = any, Out = any> = ((
+	x?: any,
+	...y: any[]
+) => Out) & {
 	readonly table: IIndexable<In, Out>
 }
 

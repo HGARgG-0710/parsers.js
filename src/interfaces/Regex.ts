@@ -30,6 +30,11 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 	charRange(from: string, to: string): any
 	unicodeChar(hex: string): any
 	typeMatch(type: IValidNodeType): any
+	greedy(item: any): any
+	nonGreedy(item: any): any
+	noneOrMore(item: any): any
+	optional(item: any): any
+	repeat(item: any, times: number): any
 
 	finalize(): IRegexMatcher<T>
 }
