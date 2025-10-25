@@ -12,6 +12,7 @@ import { CurrentHash, TokenHash } from "../../objects/HashMap.js"
 import { DepthStream } from "../../objects/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
 import { next } from "../../utils/Stream.js"
+import { AutoMap } from "../AutoMap.js"
 import {
 	AnyChar,
 	Digit,
@@ -165,7 +166,28 @@ class RegexCompilerTable {
 	private compileEscaped: IRegexCompilerFunction
 	private compileLiteral: IRegexCompilerFunction
 
-	init(builder: IRegexBuilder) {
+	get(): [ITyped, IRegexCompilerFunction][] {
+		return [
+			[RootNode, compileWrapperPart],
+			[Disjunction, this.compileDisjunction],
+			[Disjunct, this.compileDisjunct],
+			[Group, compileGroup],
+			[IgnoreCaseGroup, this.compileIgnoreCase],
+			[LookaheadGroup, this.compileLookahead],
+			[AnyChar, this.compileAnyChar],
+			[Word, this.compileWord],
+			[Digit, this.compileDigit],
+			[Tab, this.compileTab],
+			[VTab, this.compileVTab],
+			[Space, this.compileSpace],
+			[Newline, this.compileNewline],
+			[UnicodeChar, this.compileUnicodeChar],
+			[EscapedLiteral, this.compileEscaped],
+			[SingleChar, this.compileLiteral]
+		]
+	}
+
+	constructor(builder: IRegexBuilder) {
 		this.compileDisjunction = compileComplexPart(builder.disjunction)
 		this.compileDisjunct = compileComplexPart(builder.catenation)
 		this.compileIgnoreCase = compileRecursiveChoiceWrapper(
@@ -187,63 +209,70 @@ class RegexCompilerTable {
 		this.compileEscaped = compileLiteral(builder)
 		this.compileLiteral = compileLiteral(builder)
 	}
+}
 
-	get(): [ITyped, IRegexCompilerFunction][] {
-		return [
-			[RootNode, compileWrapperPart],
-			[Disjunction, this.compileDisjunction],
-			[Disjunct, this.compileDisjunct],
-			[Group, compileGroup],
-			[IgnoreCaseGroup, this.compileIgnoreCase],
-			[LookaheadGroup, this.compileLookahead],
-			[AnyChar, this.compileAnyChar],
-			[Word, this.compileWord],
-			[Digit, this.compileDigit],
-			[Tab, this.compileTab],
-			[VTab, this.compileVTab],
-			[Space, this.compileSpace],
-			[Newline, this.compileNewline],
-			[UnicodeChar, this.compileUnicodeChar],
-			[EscapedLiteral, this.compileEscaped],
-			[SingleChar, this.compileLiteral]
-		]
+class RegexCompilerTableStorage {
+	static readonly instance = new RegexCompilerTableStorage()
+
+	private readonly stored = new AutoMap<IRegexBuilder, RegexCompilerTable>(
+		(regexBuilder) => new RegexCompilerTable(regexBuilder)
+	)
+
+	get(builder: IRegexBuilder) {
+		return this.stored.get(builder).get()
 	}
+
+	private constructor() {}
 }
 
 function RegexNodeStream(source: string) {
 	return new DepthStream(RegexParser.instance.parse(source))
 }
 
-export class RegexCompiler {
-	static readonly instance = new RegexCompiler()
+class RegexCompilerAlgorithmBuilder {
+	static readonly instance = new RegexCompilerAlgorithmBuilder()
 
-	private builder: IRegexBuilder
 	private buildAlgorithm: ITableHandler
-	private readonly compilerTable = new RegexCompilerTable()
 
-	private build(regexAstStream: DepthStream) {
-		this.builder.addItem(this.buildAlgorithm(regexAstStream))
-	}
-
-	private init(builder: IRegexBuilder) {
-		this.builder = builder
-		this.compilerTable.init(builder)
-		this.constructAlgorithm()
-	}
-
-	private constructAlgorithm() {
+	init(builder: IRegexBuilder) {
 		this.buildAlgorithm = TableHandler(
 			new CurrentHash(
 				new TokenHash(
 					BasicMap(
-						this.compilerTable
-							.get()
+						RegexCompilerTableStorage.instance
+							.get(builder)
 							.map(([x, f]: [ITyped, Function]) => [x.type, f])
 					)
 				)
 			)
 		)
 	}
+
+	algorithm(input: DepthStream<INode>) {
+		return this.buildAlgorithm(input)
+	}
+
+	private constructor() {}
+}
+
+export class RegexCompiler {
+	static readonly instance = new RegexCompiler()
+
+	private builder: IRegexBuilder
+
+	private build(regexAstStream: DepthStream<INode>) {
+		this.builder.addItem(
+			RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)
+		)
+	}
+
+	private init(builder: IRegexBuilder) {
+		this.builder = builder
+		RegexCompilerAlgorithmBuilder.instance.init(builder)
+		this.constructAlgorithm()
+	}
+
+	private constructAlgorithm() {}
 
 	compile(source: string, builder: IRegexBuilder): IRegexMatcher {
 		this.init(builder)
