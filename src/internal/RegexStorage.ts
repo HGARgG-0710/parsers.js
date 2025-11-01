@@ -1,5 +1,5 @@
 import type { IRegexBuilder, IRegexMatcher } from "../interfaces.js"
-import { RegexCompiler } from "./RegexCompiler.js"
+import { RegexCompiler } from "./RegexCompiler/Compiler.js"
 
 /**
  * This serves as a preliminary abstraction to `RegexCompiler`.
