@@ -1,4 +1,4 @@
-import type { ICellNode, INode, IRegexBuilder } from "../../../interfaces.js"
+import type { ICellNode, INode } from "../../../interfaces.js"
 import type { DepthStream } from "../../../objects/Stream.js"
 import { mapTypes } from "../../../utils/Node.js"
 import {
@@ -7,8 +7,9 @@ import {
 	TrivialRange
 } from "../../RegexParser/Nodes.js"
 import { type IRegexCompilerHandler } from "../Compiler.js"
-import { RegexTypeHandler } from "../RegexTypeHandler.js"
 import { compilerBuilderErrHandler } from "../Errors.js"
+import type { IRegexBuilder } from "../RegexBuilder.js"
+import { RegexTypeHandler } from "../RegexTypeHandler.js"
 
 function readRangeBoundary(range: INode, isStart: boolean) {
 	return (range.read(1 - +isStart) as ICellNode<number>).value

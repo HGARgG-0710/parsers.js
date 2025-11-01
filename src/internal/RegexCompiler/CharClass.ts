@@ -1,11 +1,8 @@
-import type {
-	INode,
-	IRegexBuilder,
-	IRegexPartBuilder
-} from "../../interfaces.js"
+import type { INode, IRegexPartBuilder } from "../../interfaces.js"
 import type { DepthStream } from "../../objects/Stream.js"
 import { type IRegexCompilerHandler } from "./Compiler.js"
 import { compileComplexPart } from "./Complex.js"
+import type { IRegexBuilder } from "./RegexBuilder.js"
 
 export function compileClassRange(builder: IRegexBuilder) {
 	return function (

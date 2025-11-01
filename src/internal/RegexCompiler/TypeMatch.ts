@@ -1,6 +1,7 @@
-import type { ICellNode, INode, IRegexBuilder } from "../../interfaces.js"
+import type { ICellNode, INode } from "../../interfaces.js"
 import type { DepthStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
+import type { IRegexBuilder } from "./RegexBuilder.js"
 
 export function compileAsInt(
 	input: DepthStream<INode>,

@@ -1,10 +1,11 @@
-import type { ICellNode, INode, IRegexBuilder } from "../../interfaces.js"
+import type { ICellNode, INode } from "../../interfaces.js"
+import type { Regex } from "../../objects.js"
 import type { DepthStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
+import type { IRegexBuilder } from "./RegexBuilder.js"
 
-// TODO: ADD the type for nodes - not just `any` here...
 function compileCell<T = any>(
-	fromCell: (builder: IRegexBuilder, value: T) => any
+	fromCell: (builder: IRegexBuilder, value: T) => Regex.Raw
 ) {
 	return function (builder: IRegexBuilder) {
 		return function (

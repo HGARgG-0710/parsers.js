@@ -1,5 +1,3 @@
-import type { IRegexBuilder } from "../../interfaces.js"
-import { AutoMap } from "../AutoMap.js"
 import {
 	AnyChar,
 	AsInt,
@@ -53,6 +51,7 @@ import { compileNoneOrMore } from "./Quantifiers/NoneOrMore.js"
 import { compileOneOrMore } from "./Quantifiers/OneOrMore.js"
 import { compileOptional } from "./Quantifiers/Optional.js"
 import { compileRange } from "./Quantifiers/Range.js"
+import { RawRegexBuilder } from "./RegexBuilder.js"
 import { compileAsInt, compileAsString, compileTypeMatch } from "./TypeMatch.js"
 import { compileWrapper } from "./Wrapper.js"
 
@@ -68,9 +67,12 @@ class ToplevelCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
-		this.compileDisjunction = compileComplexPart(builder.disjunction)
-		this.compileDisjunct = compileComplexPart(builder.catenation)
+	constructor() {
+		const builder = RawRegexBuilder.instance
+		this.compileDisjunction = compileComplexPart(() =>
+			builder.disjunction()
+		)
+		this.compileDisjunct = compileComplexPart(() => builder.catenation())
 	}
 }
 
@@ -93,7 +95,8 @@ class QuantifierCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
+	constructor() {
+		const builder = RawRegexBuilder.instance
 		this.compileGreedy = compileGreedy(builder)
 		this.compileNonGreedy = compileNonGreedy(builder)
 		this.compileOptional = compileOptional(builder)
@@ -126,15 +129,16 @@ class CharClassCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
+	constructor() {
+		const builder = RawRegexBuilder.instance
 		this.compileAnyChar = compileAnyChar(builder)
 		this.compileWord = compileWord(builder)
 		this.compileDigit = compileDigit(builder)
 		this.compileSpace = compileSpace(builder)
-		this.compileCharClass = compileComplexPart(builder.charClass)
+		this.compileCharClass = compileComplexPart(() => builder.charClass())
 		this.compileClassRange = compileClassRange(builder)
 		this.compileClassUnit = compileWrapper
-		this.compileNegated = compileNegated(builder.negCharClass)
+		this.compileNegated = compileNegated(() => builder.negCharClass())
 	}
 }
 
@@ -150,13 +154,14 @@ class GroupCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder, toplevel: ToplevelCompilerTable) {
+	constructor(toplevel: ToplevelCompilerTable) {
+		const builder = RawRegexBuilder.instance
 		this.compileIgnoreCase = compileRecursiveChoiceWrapper(
-			builder.ignoreCase,
+			() => builder.ignoreCase(),
 			toplevel.compileDisjunction
 		)
 		this.compileLookahead = compileRecursiveChoiceWrapper(
-			builder.lookahead,
+			() => builder.lookahead(),
 			toplevel.compileDisjunction
 		)
 	}
@@ -179,7 +184,8 @@ class SpecialCharacterTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
+	constructor() {
+		const builder = RawRegexBuilder.instance
 		this.compileTab = compileTab(builder)
 		this.compileVTab = compileVTab(builder)
 		this.compileNewline = compileNewline(builder)
@@ -199,7 +205,8 @@ class TypeMatchCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
+	constructor() {
+		const builder = RawRegexBuilder.instance
 		this.compileTypeMatch = compileTypeMatch(builder)
 	}
 }
@@ -211,12 +218,15 @@ class ElementaryCompilerTable {
 		return [[SingleChar, this.compileLiteral]]
 	}
 
-	constructor(builder: IRegexBuilder) {
+	constructor() {
+		const builder = RawRegexBuilder.instance
 		this.compileLiteral = compileLiteral(builder)
 	}
 }
 
-class RegexCompilerTable {
+export class RegexCompilerTable {
+	static readonly instance = new RegexCompilerTable()
+
 	private readonly charClasses: CharClassCompilerTable
 	private readonly quantifiers: QuantifierCompilerTable
 	private readonly toplevel: ToplevelCompilerTable
@@ -237,27 +247,13 @@ class RegexCompilerTable {
 		]
 	}
 
-	constructor(builder: IRegexBuilder) {
-		this.quantifiers = new QuantifierCompilerTable(builder)
-		this.charClasses = new CharClassCompilerTable(builder)
-		this.toplevel = new ToplevelCompilerTable(builder)
-		this.groups = new GroupCompilerTable(builder, this.toplevel)
-		this.special = new SpecialCharacterTable(builder)
-		this.typeMatch = new TypeMatchCompilerTable(builder)
-		this.elementary = new ElementaryCompilerTable(builder)
+	private constructor() {
+		this.quantifiers = new QuantifierCompilerTable()
+		this.charClasses = new CharClassCompilerTable()
+		this.toplevel = new ToplevelCompilerTable()
+		this.groups = new GroupCompilerTable(this.toplevel)
+		this.special = new SpecialCharacterTable()
+		this.typeMatch = new TypeMatchCompilerTable()
+		this.elementary = new ElementaryCompilerTable()
 	}
-}
-
-export class RegexCompilerTableStorage {
-	static readonly instance = new RegexCompilerTableStorage()
-
-	private readonly stored = new AutoMap<IRegexBuilder, RegexCompilerTable>(
-		(regexBuilder) => new RegexCompilerTable(regexBuilder)
-	)
-
-	get(builder: IRegexBuilder) {
-		return this.stored.get(builder).get()
-	}
-
-	private constructor() {}
 }

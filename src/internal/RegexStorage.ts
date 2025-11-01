@@ -1,4 +1,4 @@
-import type { IRegexBuilder, IRegexMatcher } from "../interfaces.js"
+import type { IConcreteRegexFinalizer, IRegexMatcher } from "../interfaces.js"
 import { RegexCompiler } from "./RegexCompiler/Compiler.js"
 
 /**
@@ -14,8 +14,8 @@ export class RegexStorage {
 
 	private readonly cached = new Map<string, IRegexMatcher>()
 
-	private makeNew(regex: string, builder: IRegexBuilder) {
-		const compiled = RegexCompiler.instance.compile(regex, builder)
+	private makeNew(regex: string, finalizer: IConcreteRegexFinalizer) {
+		const compiled = RegexCompiler.instance.compile(regex, finalizer)
 		this.cached.set(regex, compiled)
 		return compiled
 	}
@@ -24,8 +24,8 @@ export class RegexStorage {
 		return this.cached.get(regex)
 	}
 
-	get(regex: string, builder: IRegexBuilder) {
-		return this.getCachedIfPresent(regex) || this.makeNew(regex, builder)
+	get(regex: string, finalizer: IConcreteRegexFinalizer) {
+		return this.getCachedIfPresent(regex) || this.makeNew(regex, finalizer)
 	}
 
 	private constructor() {}

@@ -1,6 +1,6 @@
 import type {
+	IConcreteRegexFinalizer,
 	INode,
-	IRegexBuilder,
 	IRegexMatcher,
 	ITableHandler,
 	ITyped
@@ -8,7 +8,8 @@ import type {
 import { DepthStream } from "../../objects/Stream.js"
 import { mapTypes } from "../../utils/Node.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
-import { RegexCompilerTableStorage } from "./RegexCompilerTable.js"
+import { RawRegexBuilder } from "./RegexBuilder.js"
+import { RegexCompilerTable } from "./RegexCompilerTable.js"
 import { RegexNodeStream } from "./RegexNodeStream.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
@@ -30,43 +31,34 @@ export type IRegexCompilerTypeTable = [ITyped, IRegexCompilerFunction][]
 class RegexCompilerAlgorithmBuilder {
 	static readonly instance = new RegexCompilerAlgorithmBuilder()
 
-	private buildAlgorithm: ITableHandler
-
-	init(builder: IRegexBuilder) {
-		this.buildAlgorithm = RegexTypeHandler(
-			mapTypes(RegexCompilerTableStorage.instance.get(builder)),
-			compilerBuilderErrHandler
-		)
-	}
+	private readonly buildAlgorithm: ITableHandler
 
 	algorithm(input: DepthStream<INode>) {
 		return this.buildAlgorithm(input)
 	}
 
-	private constructor() {}
+	private constructor() {
+		this.buildAlgorithm = RegexTypeHandler(
+			mapTypes(RegexCompilerTable.instance.get()),
+			compilerBuilderErrHandler
+		)
+	}
 }
 
 export class RegexCompiler {
 	static readonly instance = new RegexCompiler()
 
-	private builder: IRegexBuilder
-
 	private build(regexAstStream: DepthStream<INode>) {
-		this.builder.addItem(
+		RawRegexBuilder.instance.addItem(
 			RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)
 		)
 	}
 
-	private init(builder: IRegexBuilder) {
-		this.builder = builder
-		RegexCompilerAlgorithmBuilder.instance.init(builder)
-	}
-
-	compile(source: string, builder: IRegexBuilder): IRegexMatcher {
-		this.init(builder)
-		this.builder.begin()
+	compile(source: string, finalizer: IConcreteRegexFinalizer): IRegexMatcher {
+		const builder = RawRegexBuilder.instance
+		builder.begin()
 		this.build(RegexNodeStream(source))
-		return this.builder.finalize()
+		return finalizer.concrete(builder.get())
 	}
 
 	private constructor() {}

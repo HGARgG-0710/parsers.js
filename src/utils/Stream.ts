@@ -272,8 +272,8 @@ export function navigate<T = any>(
 /**
  * This is a curried functional utility-version of `word.match(stream)`
  */
-export function match(word: Regex) {
-	return function (stream: IPeekableStream) {
+export function match<T = any>(word: Regex<T>) {
+	return function (stream: IPeekableStream<T>) {
 		return word.matchAt(stream)
 	}
 }

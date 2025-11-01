@@ -62,7 +62,7 @@ export const EscapedLiteral = ContentNode("escaped-literal", "EscapedLiteral")
 export const Newline = CachedTokenNode("newline", "Newline")
 export const Space = CachedTokenNode("space", "Space")
 export const Tab = CachedTokenNode("tab", "Tab")
-export const UnicodeChar = ContentNode("unicode-char", "UnicodeChar")
+export const UnicodeChar = ContentNode<string>("unicode-char", "UnicodeChar")
 export const VTab = CachedTokenNode("vtab", "VTab")
 export const Word = CachedTokenNode("word", "Word")
 
