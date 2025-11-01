@@ -99,12 +99,12 @@ function compileWrapper(
 	return handler(input)
 }
 
-function compileComplexPart(builder: IRegexPartBuilder) {
+function compileComplexPart(getBuilder: () => IRegexPartBuilder) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
-		builder.begin()
+		const builder = getBuilder()
 		const root = input.curr
 		for (let i = 0; i < root.lastChild; ++i) {
 			input.next()
@@ -124,7 +124,7 @@ function compileGroup(
 }
 
 function compileRecursiveChoiceWrapper(
-	builder: IRegexPartBuilder,
+	getBuilder: () => IRegexPartBuilder,
 	handleDisjunction: IRegexCompilerFunction
 ) {
 	return function (
@@ -136,7 +136,7 @@ function compileRecursiveChoiceWrapper(
 		input.next() // skip the RootRegex
 
 		// expect the `Disjunction`
-		builder.begin()
+		const builder = getBuilder()
 		builder.addItem(handleDisjunction(input, handler))
 		return builder.finish()
 	}
@@ -221,8 +221,8 @@ function compileClassRange(builder: IRegexBuilder) {
 	}
 }
 
-function compileNegated(negCharClassBuilder: IRegexPartBuilder) {
-	const negCharClassCompiler = compileComplexPart(negCharClassBuilder)
+function compileNegated(getNegCharClassBuilder: () => IRegexPartBuilder) {
+	const negCharClassCompiler = compileComplexPart(getNegCharClassBuilder)
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
@@ -252,17 +252,17 @@ function compileNoneOrMore(builder: IRegexBuilder) {
 	}
 }
 
-function compileOneOrMore(builder: IRegexBuilder) {
+function compileOneOrMore(regexBuilder: IRegexBuilder) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // OneOrMore
-		builder.catenation.begin()
-		builder.catenation.addItem(handler(input))
+		const catBuilder = regexBuilder.catenation()
+		catBuilder.addItem(handler(input))
 		input.next()
-		builder.catenation.addItem(builder.noneOrMore(handler(input)))
-		return builder.catenation.finish()
+		catBuilder.addItem(regexBuilder.noneOrMore(handler(input)))
+		return catBuilder.finish()
 	}
 }
 
@@ -304,7 +304,7 @@ const rangeKindsHandler = RegexTypeHandler(
 )
 
 // TODO: REFACTOR THIS [the function is way too large...]
-function compileRange(builder: IRegexBuilder) {
+function compileRange(regexBuilder: IRegexBuilder) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
@@ -317,17 +317,17 @@ function compileRange(builder: IRegexBuilder) {
 		const [from, to] = rangeKindsHandler(input)
 		const more = to - from
 
-		builder.catenation.begin()
-		builder.catenation.addItem(builder.repeat(toMatch, from))
+		const catBuilder = regexBuilder.catenation()
+		catBuilder.addItem(regexBuilder.repeat(toMatch, from))
 
 		if (more > 0)
 			if (more === Infinity)
-				builder.catenation.addItem(builder.noneOrMore(toMatch))
+				catBuilder.addItem(regexBuilder.noneOrMore(toMatch))
 			else
 				for (let i = 0; i < more; ++i)
-					builder.catenation.addItem(builder.optional(toMatch))
+					catBuilder.addItem(regexBuilder.optional(toMatch))
 
-		return builder.catenation.finish()
+		return catBuilder.finish()
 	}
 }
 

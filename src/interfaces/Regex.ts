@@ -6,18 +6,19 @@ export interface IRegexMatcher<T = any> {
 }
 
 interface IPrePartBuilder {
-	begin(): void
 	// TODO: ADD THE TYPE for the `item` argument...
 	addItem(item): void
 }
 
 export interface IRegexBuilder<T = any> extends IPrePartBuilder {
-	readonly disjunction: IRegexPartBuilder
-	readonly catenation: IRegexPartBuilder
-	readonly ignoreCase: IRegexPartBuilder
-	readonly lookahead: IRegexPartBuilder
-	readonly charClass: IRegexPartBuilder
-	readonly negCharClass: IRegexPartBuilder
+	begin(): void
+
+	disjunction: () => IRegexPartBuilder
+	catenation: () => IRegexPartBuilder
+	ignoreCase: () => IRegexPartBuilder
+	lookahead: () => IRegexPartBuilder
+	charClass: () => IRegexPartBuilder
+	negCharClass: () => IRegexPartBuilder
 
 	// TODO: *add* the return types...
 	anyChar(): any
@@ -40,8 +41,6 @@ export interface IRegexBuilder<T = any> extends IPrePartBuilder {
 }
 
 export interface IRegexPartBuilder extends IPrePartBuilder {
-	begin(): void
-
 	// TODO: add types for this! what is the `item`??? what is the return type of `finish()`???
 	// * THIS SHOULD BE THE SAME as `addItem`, or related...
 	finish(): any
