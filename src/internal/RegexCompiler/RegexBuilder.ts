@@ -3,7 +3,17 @@ import assert from "assert"
 import type { IRegexPartBuilder, IValidNodeType } from "../../interfaces.js"
 import { Regex } from "../../objects.js"
 
-const { Either, Char, Catenation, Optional, NoneOrMore, TokenType } = Regex.Raw
+const {
+	Either,
+	Char,
+	Catenation,
+	Optional,
+	NoneOrMore,
+	TokenType,
+	CodeRange,
+	Anything,
+	NoneOf
+} = Regex.Raw
 const { numbers } = array
 
 export interface IRegexBuilder {
@@ -71,32 +81,24 @@ export class RawRegexBuilder implements IRegexBuilder {
 	}
 
 	negCharClass(): IRegexPartBuilder {
-		// ! MISSING A CLASS - `NoneOf` - the opposite of `Either`; Use the `NoneOf.Builder` class...
+		return new NoneOf.Builder()
 	}
 
 	anything(): Regex.Raw {
-		// ! Conclusion: we're missing a class here...
-		// * Name it `Regex.Raw.Anything` - matches NOT ONLY "any characters", but "any tokens"...
+		return new Anything()
 	}
 
 	word(): Regex.Raw {
-		// ! This one is tricky...
-		// ? Options...
-		// * 1. use [a-zA-Z0-9_] - simple, classic, efficient BUT - limited
-		// * 2. use a GENERAL unicode-version - MUCH harder to implement, MUCH greater practical benefit - auto-enables user to work with Unicode strings...
-		// % Option 1. has good performance, but poor generality
-		// % Option 2. has perfect generality, but abysmal performance
-		// ^ CONCLUSION:
-		// * 	0. Use Option 2, BUT...
-		// ! 	1. Naive implementation is ABSURD. We HAVE to implement this *somehow* else
-		// ! 	2. CONCLUSION: need a new `CodeRange` class for `RawRegex`, which:
-		// * 		1. checks a character's `x.charCodeAt(0)` to be within ONE OF THE ACCEPTED RANGES!
-		// * 	3. This *will* offer competitive performance relative to the naive "Either" solution...
+		return new Either(
+			this.charRange("a", "z"),
+			this.charRange("A", "Z"),
+			this.digit(),
+			this.literal("_")
+		)
 	}
 
-	// TODO: use `CodeRange` for this instead...
 	digit(): Regex.Raw {
-		return new Either(...numbers(10).map((n) => Char.make(n.toString())))
+		return this.charRange("0", "9")
 	}
 
 	space(): Regex.Raw {
@@ -121,7 +123,7 @@ export class RawRegexBuilder implements IRegexBuilder {
 	}
 
 	charRange(from: string, to: string): Regex.Raw {
-		// ! Same thing as before - CHAR RANGES, this is a SEPARATE class altogether...
+		return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
 	}
 
 	unicodeChar(hex: string): Regex.Raw {

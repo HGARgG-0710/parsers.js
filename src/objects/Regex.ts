@@ -148,5 +148,33 @@ export namespace Regex {
 				super()
 			}
 		}
+
+		export class CodeRange extends Raw {
+			constructor(
+				private readonly from: number,
+				private readonly to: number
+			) {
+				super()
+			}
+		}
+
+		export class Anything extends Raw {}
+
+		export class NoneOf extends Raw {
+			private readonly items: Raw[]
+
+			constructor(...items: Raw[]) {
+				super()
+				this.items = items
+			}
+		}
+
+		export namespace NoneOf {
+			export class Builder extends Raw.Builder {
+				finish(): Raw {
+					return new NoneOf(...this.get())
+				}
+			}
+		}
 	}
 }

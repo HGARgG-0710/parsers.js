@@ -1,4 +1,4 @@
-import { type as _type, string } from "@hgargg-0710/one"
+import { type as _type } from "@hgargg-0710/one"
 import type {
 	IOwnedStream,
 	IPredicate,
@@ -55,8 +55,8 @@ export const NodeMap = <T = any, Default = any>(
  * inputs for the `.index` method.
  */
 export const CharCodeMap = <K = any, T = any, Default = any>(
-	map: IExtendableMap<K, T, Default, number>
-) => map.extend(string.charCodeAt)
+	map: IExtendableMap<K, T, Default, number | undefined>
+) => map.extend((x: string, i = 0) => x.codePointAt(i))
 
 /**
  * This is a function calling `map.extend((x: IPeekable) => x.peek(1))`.
