@@ -82,41 +82,42 @@ export class RawRegexBuilder implements IRegexBuilder {
 	word(): Regex.Raw {
 		// ! This one is tricky...
 		// ? Options...
-		// * 1. use [a-zA-Z0-9_] - simple, classic, efficient BUT -
+		// * 1. use [a-zA-Z0-9_] - simple, classic, efficient BUT - limited
 		// * 2. use a GENERAL unicode-version - MUCH harder to implement, MUCH greater practical benefit - auto-enables user to work with Unicode strings...
 		// % Option 1. has good performance, but poor generality
 		// % Option 2. has perfect generality, but abysmal performance
 		// ^ CONCLUSION:
 		// * 	0. Use Option 2, BUT...
 		// ! 	1. Naive implementation is ABSURD. We HAVE to implement this *somehow* else
-		// ! 	2. CONCLUSION: need a new `CharCodeRange` class for `RawRegex`, which:
+		// ! 	2. CONCLUSION: need a new `CodeRange` class for `RawRegex`, which:
 		// * 		1. checks a character's `x.charCodeAt(0)` to be within ONE OF THE ACCEPTED RANGES!
 		// * 	3. This *will* offer competitive performance relative to the naive "Either" solution...
 	}
 
+	// TODO: use `CodeRange` for this instead...
 	digit(): Regex.Raw {
-		return new Either(...numbers(10).map((n) => new Char(n.toString())))
+		return new Either(...numbers(10).map((n) => Char.make(n.toString())))
 	}
 
 	space(): Regex.Raw {
 		return new Either(
-			new Char(" "),
-			new Char("\t"),
+			Char.make(" "),
+			Char.make("\t"),
 			this.newline(),
-			new Char("\v"),
-			new Char("\f")
+			Char.make("\v"),
+			Char.make("\f")
 		)
 	}
 
 	newline(): Regex.Raw {
 		return new Either(
-			new Char("\n"),
-			new Catenation(new Char("\r"), new Char("\n"))
+			Char.make("\n"),
+			new Catenation(Char.make("\r"), Char.make("\n"))
 		)
 	}
 
 	literal(x: string): Regex.Raw {
-		return new Char(x)
+		return Char.make(x)
 	}
 
 	charRange(from: string, to: string): Regex.Raw {
@@ -124,7 +125,7 @@ export class RawRegexBuilder implements IRegexBuilder {
 	}
 
 	unicodeChar(hex: string): Regex.Raw {
-		return new Char(String.fromCodePoint(parseInt(hex, 16)))
+		return Char.make(String.fromCodePoint(parseInt(hex, 16)))
 	}
 
 	typeMatch(type: IValidNodeType): Regex.Raw {

@@ -6,6 +6,7 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
+import { AutoMap } from "../internal/AutoMap.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayBuilder } from "./ArrayBuilder.js"
 
@@ -63,7 +64,6 @@ export namespace Regex {
 	// * 							1. IConcreteRegexFinalizer - the replacement for the *key* `finalize(): IRegexMatcher` method
 	// ! 							2. now, it's become `.concrete(raw: RawRegex): IRegexMatcher` - this encapsulates the inner workings of a given implementation
 	// * 							3. RawRegexBuilder IS A SINGLETON!
-	// ! 				7. NEED TO USE THE `Flyweight` pattern for the `Char` objects!!!
 
 	export abstract class Raw {}
 
@@ -129,7 +129,15 @@ export namespace Regex {
 		}
 
 		export class Char extends Raw {
-			constructor(private readonly char: string) {
+			private static readonly instances = new AutoMap(
+				(char: string) => new Char(char)
+			)
+
+			static make(char: string) {
+				return this.instances.get(char)
+			}
+
+			private constructor(private readonly char: string) {
 				super()
 				assert(char.length === 1)
 			}
