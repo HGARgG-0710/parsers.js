@@ -11,7 +11,7 @@ export class OverflowCounter {
 	}
 
 	constructor(private readonly limit: number = Number.MAX_SAFE_INTEGER) {
-		assert(limit > 0)
 		assert(Number.isInteger(limit))
+		assert(limit > 0)
 	}
 }
