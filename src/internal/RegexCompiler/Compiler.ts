@@ -5,6 +5,7 @@ import type {
 	ITableHandler,
 	ITyped
 } from "../../interfaces.js"
+import type { Regex } from "../../objects.js"
 import { DepthStream } from "../../objects/Stream.js"
 import { mapTypes } from "../../utils/Node.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
@@ -13,17 +14,19 @@ import { RegexCompilerTable } from "./RegexCompilerTable.js"
 import { RegexNodeStream } from "./RegexNodeStream.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
-// TODO : add the return type for `IRegexCompilerHandler` and `IRegexCompilerFunction`...
-export type IRegexCompilerHandler = ITableHandler<DepthStream<INode>>
+export type IRegexCompilerHandler<Out = Regex.Raw> = ITableHandler<
+	DepthStream<INode>,
+	Out
+>
 
-export type IRegexCompilerFunction = (
+export type IRegexCompilerFunction<Out = Regex.Raw> = (
 	input: DepthStream<INode>,
-	handler: IRegexCompilerHandler
+	handler: IRegexCompilerHandler<Out>
 ) => any
 
-export type IRegexCompilerErrorHandler = (
+export type IRegexCompilerErrorHandler<Out = Regex.Raw> = (
 	input: DepthStream<INode>,
-	_handler: IRegexCompilerHandler
+	_handler: IRegexCompilerHandler<Out>
 ) => void
 
 export type IRegexCompilerTypeTable = [ITyped, IRegexCompilerFunction][]
@@ -31,7 +34,7 @@ export type IRegexCompilerTypeTable = [ITyped, IRegexCompilerFunction][]
 class RegexCompilerAlgorithmBuilder {
 	static readonly instance = new RegexCompilerAlgorithmBuilder()
 
-	private readonly buildAlgorithm: ITableHandler
+	private readonly buildAlgorithm: IRegexCompilerHandler
 
 	algorithm(input: DepthStream<INode>) {
 		return this.buildAlgorithm(input)
@@ -49,16 +52,11 @@ export class RegexCompiler {
 	static readonly instance = new RegexCompiler()
 
 	private build(regexAstStream: DepthStream<INode>) {
-		RawRegexBuilder.instance.addItem(
-			RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)
-		)
+		return RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)	
 	}
 
 	compile(source: string, finalizer: IConcreteRegexFinalizer): IRegexMatcher {
-		const builder = RawRegexBuilder.instance
-		builder.begin()
-		this.build(RegexNodeStream(source))
-		return finalizer.concrete(builder.get())
+		return finalizer.concrete(this.build(RegexNodeStream(source)))
 	}
 
 	private constructor() {}

@@ -1,17 +1,10 @@
-import type { array } from "@hgargg-0710/one"
 import type {
-	IIndexMap,
+	IInputStream,
 	INode,
 	IOwnedStream,
-	IParserFunction,
-	IPeekableStream,
-	IRawStreamArray,
-	ITypeCheckable
+	IParseable,
+	IRawStreamArray
 } from "../../interfaces.js"
-import {
-	LiquidMap,
-	TableCarrier
-} from "../../modules/IndexMap/objects/LiquidMap.js"
 import {
 	CachingLocator,
 	PosCarryingLocator
@@ -19,7 +12,6 @@ import {
 import {
 	DynamicParser,
 	ErrorData,
-	IndexMap,
 	ParseableInput,
 	PlainErrorPrinter,
 	TableHandler
@@ -32,16 +24,15 @@ import {
 	PeekStream,
 	PosStream
 } from "../../objects/Stream.js"
-import { Pairs } from "../../samples.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { BasicMap } from "../../samples/TerminalMap.js"
-import { NodeMap, PeekMap } from "../../utils/IndexMap.js"
 import { consume } from "../../utils/Stream.js"
 import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
 import { maybeDot } from "./Dot.js"
 import { maybeEscaped } from "./Escaped.js"
 import { maybeGroup } from "./Group.js"
+import { LookaheadMap } from "./LookaheadMap.js"
 import { maybeNegation } from "./Negation.js"
 import { RootNode } from "./Nodes.js"
 import { maybePipe } from "./Pipe.js"
@@ -70,28 +61,6 @@ export class RegexParser {
 	}
 
 	private constructor() {}
-}
-
-export function LookaheadMap(
-	map: array.Pairs<ITypeCheckable, IParserFunction>,
-	_default: IParserFunction
-): IIndexMap<
-	ITypeCheckable,
-	IParserFunction,
-	IParserFunction,
-	IPeekableStream
-> {
-	const [keys, values] = Pairs.from(map)
-	return (
-		PeekMap(
-			NodeMap(new IndexMap.PredicateMap(new LiquidMap([], [])))
-		).finalize() as IIndexMap<
-			ITypeCheckable,
-			IParserFunction,
-			IParserFunction,
-			IPeekableStream
-		>
-	).fromCarrier(new TableCarrier(keys, values, _default))
 }
 
 export const PreserveLowerStream = () => new IdentityStream()
@@ -143,7 +112,7 @@ const regexWorkStreamMaker = () =>
 
 const regexInputStreamMaker = () => new InputStream()
 
-const regexErrorDataMaker = (inputStream) =>
+const regexErrorDataMaker = (inputStream: IInputStream<any, IParseable>) =>
 	new ErrorData.StreamListErrorData(
 		inputStream,
 		(inputStream) =>

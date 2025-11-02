@@ -72,9 +72,9 @@ export const IgnoreCaseGroup = SingleChildNode(
 	"IgnoreCaseGroup"
 )
 
-export const LookaheadGroup = SingleChildNode(
-	"lookahead-group",
-	"LookaheadGroup"
+export const NoCaptureGroup = SingleChildNode(
+	"no-capture-group",
+	"NoCaptureGroup"
 )
 
 export const Group = SingleChildNode("group", "Group")

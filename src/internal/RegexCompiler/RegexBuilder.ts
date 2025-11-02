@@ -1,5 +1,4 @@
 import { array } from "@hgargg-0710/one"
-import assert from "assert"
 import type { IRegexPartBuilder, IValidNodeType } from "../../interfaces.js"
 import { Regex } from "../../objects.js"
 
@@ -12,18 +11,19 @@ const {
 	TokenType,
 	CodeRange,
 	Anything,
-	NoneOf
+	NoneOf,
+	NonGreedy,
+	IgnoreCase,
+	NoCapture
 } = Regex.Raw
+
 const { numbers } = array
 
 export interface IRegexBuilder {
-	begin(): void
-	addItem(item: Regex.Raw): void
-
 	disjunction(): IRegexPartBuilder
 	catenation(): IRegexPartBuilder
 	ignoreCase(): IRegexPartBuilder
-	lookahead(): IRegexPartBuilder
+	noCapture(): IRegexPartBuilder
 	charClass(): IRegexPartBuilder
 	negCharClass(): IRegexPartBuilder
 
@@ -41,22 +41,10 @@ export interface IRegexBuilder {
 	noneOrMore(item: Regex.Raw): Regex.Raw
 	optional(item: Regex.Raw): Regex.Raw
 	repeat(item: Regex.Raw, times: number): Regex.Raw
-
-	get(): Regex.Raw
 }
 
 export class RawRegexBuilder implements IRegexBuilder {
 	static readonly instance = new RawRegexBuilder()
-
-	private raw: Regex.Raw | null = null
-
-	begin(): void {
-		this.raw = null
-	}
-
-	addItem(item: Regex.Raw): void {
-		this.raw = item
-	}
 
 	disjunction(): IRegexPartBuilder {
 		return new Either.Builder()
@@ -67,13 +55,11 @@ export class RawRegexBuilder implements IRegexBuilder {
 	}
 
 	ignoreCase(): IRegexPartBuilder {
-		// ! MISSING A CLASS - need to register that the underlying A/a, Z/z, etc... distinction IS LOST!
+		return new IgnoreCase.Builder()
 	}
 
-	// TODO: CHANGE the "lookahead" name to "noCapture" [i.e. - ]
-	lookahead(): IRegexPartBuilder {
-		// ! MISSING A CLASS - one needs to REGISTER that the stuff *inside* the current one WILL NOT be matched!!!
-		// * Unlike the classic Thompson's Construction matching algtorithm, one ALSO must collect the ITEMS FROM THE UNDERLYING `IStream`!!!
+	noCapture(): IRegexPartBuilder {
+		return new NoCapture.Builder()
 	}
 
 	charClass(): IRegexPartBuilder {
@@ -126,6 +112,10 @@ export class RawRegexBuilder implements IRegexBuilder {
 		return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
 	}
 
+	// * note: we're parsing here and not inside `RegexParser` since 
+	// * this reduces the amount of transformation logic inside the 
+	// * parser (purpose of `RegexParser` is only to produce a front-facing
+	// * AST, one to be later re-built into the `Regex.Raw` form). 
 	unicodeChar(hex: string): Regex.Raw {
 		return Char.make(String.fromCodePoint(parseInt(hex, 16)))
 	}
@@ -135,11 +125,11 @@ export class RawRegexBuilder implements IRegexBuilder {
 	}
 
 	greedy(item: Regex.Raw): Regex.Raw {
-		// ! Lack a type of items - either the `NonGreedy` or `Greedy` class (or both...)
+		return item
 	}
 
 	nonGreedy(item: Regex.Raw): Regex.Raw {
-		// ! lack of types...
+		return new NonGreedy(item)
 	}
 
 	noneOrMore(item: Regex.Raw): Regex.Raw {
@@ -152,11 +142,6 @@ export class RawRegexBuilder implements IRegexBuilder {
 
 	repeat(item: Regex.Raw, times: number): Regex.Raw {
 		return new Catenation(...numbers(times).map(() => item))
-	}
-
-	get(): Regex.Raw {
-		assert(this.raw)
-		return this.raw
 	}
 
 	private constructor() {}

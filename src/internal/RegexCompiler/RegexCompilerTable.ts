@@ -13,7 +13,7 @@ import {
 	Greedy,
 	Group,
 	IgnoreCaseGroup,
-	LookaheadGroup,
+	NoCaptureGroup,
 	Negated,
 	Newline,
 	NonGreedy,
@@ -146,13 +146,13 @@ class CharClassCompilerTable {
 
 class GroupCompilerTable {
 	private readonly compileIgnoreCase: IRegexCompilerFunction
-	private readonly compileLookahead: IRegexCompilerFunction
+	private readonly compileNoCapture: IRegexCompilerFunction
 
 	get(): IRegexCompilerTypeTable {
 		return [
 			[Group, compileGroup],
 			[IgnoreCaseGroup, this.compileIgnoreCase],
-			[LookaheadGroup, this.compileLookahead]
+			[NoCaptureGroup, this.compileNoCapture]
 		]
 	}
 
@@ -162,8 +162,8 @@ class GroupCompilerTable {
 			() => builder.ignoreCase(),
 			toplevel.compileDisjunction
 		)
-		this.compileLookahead = compileRecursiveChoiceWrapper(
-			() => builder.lookahead(),
+		this.compileNoCapture = compileRecursiveChoiceWrapper(
+			() => builder.noCapture(),
 			toplevel.compileDisjunction
 		)
 	}

@@ -1,7 +1,9 @@
-import type { INode, IRegexPartBuilder } from "../../interfaces.js";
-import type { DepthStream } from "../../objects/Stream.js";
-import type { IRegexCompilerHandler, IRegexCompilerFunction } from "./Compiler.js";
-
+import type { INode, IRegexPartBuilder } from "../../interfaces.js"
+import type { DepthStream } from "../../objects/Stream.js"
+import type {
+	IRegexCompilerFunction,
+	IRegexCompilerHandler
+} from "./Compiler.js"
 
 export function compileGroup(
 	input: DepthStream<INode>,
@@ -20,15 +22,11 @@ export function compileRecursiveChoiceWrapper(
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
-		input.next() // skip the wrapper (LookaheadGroup, IgnoreCaseGroup, etc)
+		input.next() // skip the wrapper (NoCaptureGroup, IgnoreCaseGroup, etc)
 		input.next() // skip the GroupBody
 		input.next() // skip the RootRegex
 
-
-
 		// expect the `Disjunction`
-		const builder = getBuilder()
-		builder.addItem(handleDisjunction(input, handler))
-		return builder.finish()
+		return getBuilder().addItem(handleDisjunction(input, handler)).finish()
 	}
 }

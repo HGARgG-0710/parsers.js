@@ -5,14 +5,14 @@ export interface IRegexMatcher {
 	match<T = any>(stream: IPeekableStream<T>): false | string | (string | T)[]
 }
 
-interface ICompositePartBuilder {
-	addItem(item: Regex.Raw): void
+export interface ICompositeRegexBuilder {
+	addItem(item: Regex.Raw): this
 }
 
 export interface IConcreteRegexFinalizer {
 	concrete(raw: Regex.Raw): IRegexMatcher
 }
 
-export interface IRegexPartBuilder extends ICompositePartBuilder {
+export interface IRegexPartBuilder extends ICompositeRegexBuilder {
 	finish(): Regex.Raw
 }

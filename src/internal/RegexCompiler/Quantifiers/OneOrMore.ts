@@ -9,10 +9,10 @@ export function compileOneOrMore(regexBuilder: IRegexBuilder) {
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // OneOrMore
-		const catBuilder = regexBuilder.catenation()
-		catBuilder.addItem(handler(input))
+		const catBuilder = regexBuilder.catenation().addItem(handler(input))
 		input.next()
-		catBuilder.addItem(regexBuilder.noneOrMore(handler(input)))
-		return catBuilder.finish()
+		return catBuilder
+			.addItem(regexBuilder.noneOrMore(handler(input)))
+			.finish()
 	}
 }

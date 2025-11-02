@@ -10,7 +10,7 @@ import {
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumable } from "../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
-import { HandleLookaheadGroup } from "./Group/Lookahead.js"
+import { HandleNoCaptureGroup } from "./Group/NoCapture.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 import { GroupBody } from "./Nodes.js"
 
@@ -26,7 +26,7 @@ const GroupHandler = TableHandler(
 		ObjectMap(
 			{
 				"#": HandleExtensionGroup,
-				"=": HandleLookaheadGroup
+				"=": HandleNoCaptureGroup
 			},
 			HandlePlainGroup
 		)

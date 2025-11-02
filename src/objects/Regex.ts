@@ -73,6 +73,7 @@ export namespace Regex {
 
 			addItem(item: IRegexPartBuilder) {
 				this.items.push(item)
+				return this
 			}
 
 			protected get() {
@@ -173,6 +174,46 @@ export namespace Regex {
 			export class Builder extends Raw.Builder {
 				finish(): Raw {
 					return new NoneOf(...this.get())
+				}
+			}
+		}
+
+		export class NonGreedy extends Raw {
+			constructor(private readonly item: Raw) {
+				super()
+			}
+		}
+
+		export class IgnoreCase extends Raw {
+			private readonly items: Raw[]
+
+			constructor(...items: Raw[]) {
+				super()
+				this.items = items
+			}
+		}
+
+		export namespace IgnoreCase {
+			export class Builder extends Raw.Builder {
+				finish(): Raw {
+					return new IgnoreCase(...this.get())
+				}
+			}
+		}
+
+		export class NoCapture extends Raw {
+			private readonly items: Raw[]
+
+			constructor(...items: Raw[]) {
+				super()
+				this.items = items
+			}
+		}
+
+		export namespace NoCapture {
+			export class Builder extends Raw.Builder {
+				finish(): Raw {
+					return new NoCapture(...this.get())
 				}
 			}
 		}

@@ -39,7 +39,7 @@ function handleLimitsRange(input: DepthStream<INode>) {
 }
 
 // ! Replace the `compilerBuilderErrHandler` with a more appropriate one...
-const rangeKindsHandler = RegexTypeHandler(
+const rangeKindsHandler = RegexTypeHandler<number[]>(
 	mapTypes([
 		[TrivialRange, handleTrivialRange],
 		[InfiniteRange, handleInfiniteRange],
@@ -62,8 +62,9 @@ export function compileRange(regexBuilder: IRegexBuilder) {
 		const [from, to] = rangeKindsHandler(input)
 		const more = to - from
 
-		const catBuilder = regexBuilder.catenation()
-		catBuilder.addItem(regexBuilder.repeat(toMatch, from))
+		const catBuilder = regexBuilder
+			.catenation()
+			.addItem(regexBuilder.repeat(toMatch, from))
 
 		if (more > 0)
 			if (more === Infinity)

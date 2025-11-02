@@ -7,10 +7,10 @@ import type { IStream } from "./Stream.js"
  * multiple different processing functions,
  * "glued" together by an `IIndexable` data structure.
  */
-export type ITableHandler<In = any, Out = any> = (
+export type ITableHandler<In = any, Out = any> = ((
 	x: In,
 	...y: any[]
-) => Out & { readonly table: IIndexable<In, IParserFunction<In, Out>> }
+) => Out) & { readonly table: IIndexable<In, IParserFunction<In, Out>> }
 
 /**
  * This is an interface, which serves as a generalization of `ITableHandler`.
