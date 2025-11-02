@@ -9,6 +9,7 @@ import { EscapedLiteral } from "../Nodes.js"
 const EscapedLiteralStream = SingletonWrapperStream(EscapedLiteral)
 const EscapedLiteralHandler = DefaultChooser(EscapedLiteralStream)
 
+// TODO: MAKE SURE nothing is missing (and nothing is excessive here...)
 const allowEscapeLiteral = allow(
 	"^",
 	"\\",
@@ -22,7 +23,8 @@ const allowEscapeLiteral = allow(
 	"[",
 	"]",
 	"(",
-	")"
+	")", 
+	"#"
 )
 
 export function HandleEscapedLiteral(input: IOwnedStream<string>) {

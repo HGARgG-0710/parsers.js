@@ -121,7 +121,13 @@ export const RangeBoundary = ContentNode<number>(
 	"range-boundary",
 	"RangeBoundary"
 )
+
 export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
+export const CharClassRangeBoundary = SingleChildNode(
+	"char-class-range-boundary",
+	"CharClassRangeBoundary"
+)
+
 export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"
 	static readonly type = "char-class-range"

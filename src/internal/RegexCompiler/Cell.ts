@@ -2,25 +2,25 @@ import type { ICellNode, INode } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import type { DepthStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
-import type { IRegexBuilder } from "./RegexBuilder.js"
+import type { IRegexFactory } from "./RegexFactory.js"
 
-function compileCell<T = any>(
-	fromCell: (builder: IRegexBuilder, value: T) => Regex.Raw
+function compileCell<T = any, Out extends Regex.Raw = Regex.Raw>(
+	fromCell: (factory: IRegexFactory, value: T) => Out
 ) {
-	return function (builder: IRegexBuilder) {
+	return function (factory: IRegexFactory) {
 		return function (
 			input: DepthStream<INode>,
 			_handler: IRegexCompilerHandler
 		) {
-			return fromCell(builder, (input.curr as ICellNode<T>).value)
+			return fromCell(factory, (input.curr as ICellNode<T>).value)
 		}
 	}
 }
 
-export const compileUnicodeChar = compileCell<string>((builder, hex) =>
-	builder.unicodeChar(hex)
+export const compileUnicodeChar = compileCell<string, Regex.Raw.Char>(
+	(factory, hex) => factory.unicodeChar(hex)
 )
 
-export const compileLiteral = compileCell<string>((builder, value) =>
-	builder.literal(value)
+export const compileLiteral = compileCell<string, Regex.Raw.Char>(
+	(factory, value) => factory.literal(value)
 )

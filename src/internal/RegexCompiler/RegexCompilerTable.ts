@@ -13,9 +13,9 @@ import {
 	Greedy,
 	Group,
 	IgnoreCaseGroup,
-	NoCaptureGroup,
 	Negated,
 	Newline,
+	NoCaptureGroup,
 	NonGreedy,
 	NoneOrMore,
 	OneOrMore,
@@ -53,7 +53,7 @@ import { compileNoneOrMore } from "./Quantifiers/NoneOrMore.js"
 import { compileOneOrMore } from "./Quantifiers/OneOrMore.js"
 import { compileOptional } from "./Quantifiers/Optional.js"
 import { compileRange } from "./Quantifiers/Range.js"
-import { RawRegexBuilder } from "./RegexBuilder.js"
+import { RawRegexFactory } from "./RegexFactory.js"
 import { compileAsInt, compileAsString, compileTypeMatch } from "./TypeMatch.js"
 import { compileWrapper } from "./Wrapper.js"
 
@@ -70,11 +70,11 @@ class ToplevelCompilerTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
+		const factory = RawRegexFactory.instance
 		this.compileDisjunction = compileComplexPart(() =>
-			builder.disjunction()
+			factory.disjunction()
 		)
-		this.compileDisjunct = compileComplexPart(() => builder.catenation())
+		this.compileDisjunct = compileComplexPart(() => factory.catenation())
 	}
 }
 
@@ -98,13 +98,13 @@ class QuantifierCompilerTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
-		this.compileGreedy = compileGreedy(builder)
-		this.compileNonGreedy = compileNonGreedy(builder)
-		this.compileOptional = compileOptional(builder)
-		this.compileNoneOrMore = compileNoneOrMore(builder)
-		this.compileOneOrMore = compileOneOrMore(builder)
-		this.compileRange = compileRange(builder)
+		const factory = RawRegexFactory.instance
+		this.compileGreedy = compileGreedy(factory)
+		this.compileNonGreedy = compileNonGreedy(factory)
+		this.compileOptional = compileOptional(factory)
+		this.compileNoneOrMore = compileNoneOrMore(factory)
+		this.compileOneOrMore = compileOneOrMore(factory)
+		this.compileRange = compileRange(factory)
 	}
 }
 
@@ -132,15 +132,15 @@ class CharClassCompilerTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
-		this.compileAnyChar = compileAnyChar(builder)
-		this.compileWord = compileWord(builder)
-		this.compileDigit = compileDigit(builder)
-		this.compileSpace = compileSpace(builder)
-		this.compileCharClass = compileComplexPart(() => builder.charClass())
-		this.compileClassRange = compileClassRange(builder)
+		const factory = RawRegexFactory.instance
+		this.compileAnyChar = compileAnyChar(factory)
+		this.compileWord = compileWord(factory)
+		this.compileDigit = compileDigit(factory)
+		this.compileSpace = compileSpace(factory)
+		this.compileCharClass = compileComplexPart(() => factory.charClass())
 		this.compileClassUnit = compileWrapper
-		this.compileNegated = compileNegated(() => builder.negCharClass())
+		this.compileClassRange = compileClassRange(factory)
+		this.compileNegated = compileNegated(() => factory.negCharClass())
 	}
 }
 
@@ -157,13 +157,13 @@ class GroupCompilerTable {
 	}
 
 	constructor(toplevel: ToplevelCompilerTable) {
-		const builder = RawRegexBuilder.instance
+		const factory = RawRegexFactory.instance
 		this.compileIgnoreCase = compileRecursiveChoiceWrapper(
-			() => builder.ignoreCase(),
+			() => factory.ignoreCase(),
 			toplevel.compileDisjunction
 		)
 		this.compileNoCapture = compileRecursiveChoiceWrapper(
-			() => builder.noCapture(),
+			() => factory.noCapture(),
 			toplevel.compileDisjunction
 		)
 	}
@@ -189,13 +189,13 @@ class SpecialCharacterTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
-		this.compileTab = compileTab(builder)
-		this.compileVTab = compileVTab(builder)
-		this.compileFormFeed = compileFormFeed(builder)
-		this.compileNewline = compileNewline(builder)
-		this.compileUnicodeChar = compileUnicodeChar(builder)
-		this.compileEscaped = compileLiteral(builder)
+		const factory = RawRegexFactory.instance
+		this.compileTab = compileTab(factory)
+		this.compileVTab = compileVTab(factory)
+		this.compileFormFeed = compileFormFeed(factory)
+		this.compileNewline = compileNewline(factory)
+		this.compileUnicodeChar = compileUnicodeChar(factory)
+		this.compileEscaped = compileLiteral(factory)
 	}
 }
 
@@ -211,8 +211,8 @@ class TypeMatchCompilerTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
-		this.compileTypeMatch = compileTypeMatch(builder)
+		const factory = RawRegexFactory.instance
+		this.compileTypeMatch = compileTypeMatch(factory)
 	}
 }
 
@@ -224,8 +224,8 @@ class ElementaryCompilerTable {
 	}
 
 	constructor() {
-		const builder = RawRegexBuilder.instance
-		this.compileLiteral = compileLiteral(builder)
+		const factory = RawRegexFactory.instance
+		this.compileLiteral = compileLiteral(factory)
 	}
 }
 

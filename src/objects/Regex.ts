@@ -30,40 +30,13 @@ export namespace Regex {
 	// 				2. checking for whether ANY ONE OF THEM is the "Match"
 	// ^			CONCLUSION:
 	// * 				1. one needs to BUILD a list of "State" objects [WHICH ARE LINKED-LISTS *themselves*]:
-	// ! 					1. One needs to have `IRegexBuilder` CREATE the structure of:
-	// * 						1. Either
-	// * 						2. Concat
-	// * 						3. OneOrMany
-	// * 						4. Optional
-	// * 						5. Char
-	// * 						6. NoneOrMany
-	// * 						7. TokenType
+	// * 					1. To support `.finalize()` (as well as user-extension), one must implement the
+	// *						Visitor Pattern on the `Regex.Raw` nodes, and provide a PUBLIC INTERFACE for
+	// * 						visitors for users to implement (useful if they want to create their own `IConcreteRegexFinalizer`-s);
 	// ! 					2. One needs the ".finalize(): IRegexMatcher" method to:
-	// * 						1. CONVERT this "high-level" 7-structure into a LINKED LIST of "State"s
+	// * 						1. CONVERT this "high-level" 12-structure of `Regex.Raw` into a LINKED LIST of "State"s
 	// ! 						2. Thus, a NEW component - `NFAFlattener` - it accepts the "RawRegex" form,
-	// * 						3. AND *flattens* it
-	// * 				2. "State" must have a child class of `Match`
-	// ! 					1. "State" has an `get .isMatch(): bool` get-accessor, returning a constant
-	// ! 						The "Match" child OVERRIDES it to return `true` (the default value is `false`).
-	// ^					CONCLUSION: `State` is abstract has two children:
-	// * 							1. BasicState (`.isMatch = false`, HAS a *character/token-type*),
-	// * 							2. EitherState (`.isMatch = false`)
-	// * 							3. Match (`.isMatch = true`)
-	// * 				3. ABOUT the `IRegexBuilder` interface:
-	// ! 					1. It SHOULD be rewritten in terms of the "RawRegex.ts" classes - meaning,
-	// * 						THAT EVERY IMPLEMENTATION should be in terms of *these* abstractions, since
-	// * 						THEY'RE *UNIVERSAL*, and no matter WHICH syntax creates a tree used by `RegexCompiler`,
-	// * 						the resulting "RawRegex" format should *ALWAYS be the same*.
-	// ! 						The only thing that differs, in the end, is the "State" - an IMPLEMENTATION DETAIL of the
-	// ! 						`NFAMatcher`
-	// ^ 				4. CONCLUSION: the "RawRegex" should ACTUALLY be PUBLIC CLASSES (i.e., *only* the "finalize" is THE IMPLEMENTAITON DETAIL).
-	// ^ 				5. CONCLUSION: the "RawRegex" classes MUST share a common `abstract class`! This is the type that is PRODUCED by the `IRegexBuilder` interface...
-	// ^^^				6. Conclusion: remove the `IRegexBuilder` interface - replace it with a CONCRETE `RawRegexBuilder` class,
-	// * 					1. And a NEW interface (one that is NOW USED by the `Regex`):
-	// ! 						1. and one that is PASSED AS ARGUMENT *instead* of the `IRegexBuilder` instance
-	// * 							1. IConcreteRegexFinalizer - the replacement for the *key* `finalize(): IRegexMatcher` method
-	// ! 							2. now, it's become `.concrete(raw: RawRegex): IRegexMatcher` - this encapsulates the inner workings of a given implementation
-	// * 							3. RawRegexBuilder IS A SINGLETON!
+	// * 						3. AND *flattens* it into the Linked List of `State`s (internal implementation detail)
 
 	export abstract class Raw {}
 
@@ -138,7 +111,7 @@ export namespace Regex {
 				return this.instances.get(char)
 			}
 
-			private constructor(private readonly char: string) {
+			private constructor(readonly char: string) {
 				super()
 				assert(char.length === 1)
 			}

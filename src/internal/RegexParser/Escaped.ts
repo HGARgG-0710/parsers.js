@@ -18,10 +18,7 @@ import { HandleUnicode } from "./Escaped/Unicode.js"
 import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 
-const BaseEscapedHandler = TableHandler<
-	IOwnedStream<string>,
-	ICommonStream<INode>
->(
+const EscapedHandler = TableHandler<IOwnedStream<string>, ICommonStream<INode>>(
 	new CurrentHash(
 		ObjectMap(
 			{
@@ -39,9 +36,32 @@ const BaseEscapedHandler = TableHandler<
 	)
 )
 
+const RangeBoundaryEscapedHandler = TableHandler<
+	IOwnedStream<string>,
+	ICommonStream<INode>
+>(
+	new CurrentHash(
+		ObjectMap(
+			{
+				u: HandleUnicode,
+				n: HandleNewline,
+				t: HandleTab,
+				v: HandleVTab,
+				f: HandleFormFeed
+			},
+			HandleEscapedLiteral
+		)
+	)
+)
+
+export function HandleRangeBoundaryEscaped(input: IOwnedStream<string>) {
+	input.next() // \
+	return [RangeBoundaryEscapedHandler(input)]
+}
+
 export function HandleEscaped(input: IOwnedStream<string>) {
 	input.next() // \
-	return [BaseEscapedHandler(input)]
+	return [EscapedHandler(input)]
 }
 
 export const maybeEscaped: array.Pairs<string, IStreamChooser> = [

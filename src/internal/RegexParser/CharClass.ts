@@ -19,16 +19,23 @@ import {
 } from "../../samples/Stream.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { consumeSingletonRevivables } from "../../utils/Stream.js"
-import { HandleEscaped } from "./Escaped.js"
-import { CharClass, ClassRange, ClassUnit, Temp } from "./Nodes.js"
+import { HandleEscaped, HandleRangeBoundaryEscaped } from "./Escaped.js"
+import {
+	CharClass,
+	CharClassRangeBoundary,
+	ClassRange,
+	ClassUnit,
+	Temp
+} from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
 const expectHyphen = expectKind(Temp.Hyphen)
-const expectClassUnit = expectKind(ClassUnit)
+const expectRangeBoundary = expectKind(CharClassRangeBoundary)
 
 const HyphenStream = CachedTokenStream(Temp.Hyphen)
 const CharClassLimitStream = EndBracketStream(isCurr("]"))
 const ClassUnitStream = SingletonWrapperStream(ClassUnit)
+const RangeBoundaryStream = SingletonWrapperStream(CharClassRangeBoundary)
 
 class ClassRangeStream extends SingleNodeStream<INode> {
 	private classRange: ClassRange
@@ -37,8 +44,8 @@ class ClassRangeStream extends SingleNodeStream<INode> {
 		this.curr = this.classRange
 	}
 
-	private readClassUnit() {
-		expectClassUnit(this.resource!)
+	private readBoundary() {
+		expectRangeBoundary(this.resource!)
 		return this.readNextItem()
 	}
 
@@ -48,19 +55,19 @@ class ClassRangeStream extends SingleNodeStream<INode> {
 	}
 
 	private readNextItem() {
-		const unit = this.resource!.curr
+		const unit = this.resource!.curr as INode
 		this.resource!.next()
 		return unit
 	}
 
 	setResource(resource: IOwnedStream): void {
 		super.setResource(resource)
-		const fromUnit = this.readClassUnit() // the child Stream dies
+		const from = this.readBoundary() // the child Stream dies
 		tryReviveChild(this) // needs to be renewed
 		this.readHyphen()
 		tryReviveChild(this) // needs to be renewed
-		const toUnit = this.readClassUnit()
-		this.classRange = new ClassRange(fromUnit, toUnit)
+		const to = this.readBoundary()
+		this.classRange = new ClassRange(from, to)
 		this.updateCurr()
 	}
 }
@@ -95,12 +102,30 @@ function HandleUnit(input: IOwnedStream<string>) {
 	return [ClassUnitStream(), ClassUnitHandler(input)]
 }
 
-function HandleUnitOrHyphen(input: IOwnedStream<string>) {
-	return (input.curr === "-" ? HandleHyphen : HandleUnit)(input)
+const RangeBoundaryHandler = TableHandler<
+	IOwnedStream<string>,
+	ICommonStream<INode>
+>(
+	new BasicHash(
+		ObjectMap(
+			{
+				"\\": HandleRangeBoundaryEscaped
+			},
+			HandleSingleChar
+		)
+	)
+)
+
+function HandleRangeBoundary(input: IOwnedStream<string>) {
+	return [RangeBoundaryStream(), RangeBoundaryHandler(input)]
+}
+
+function HandleBoundaryOrHyphen(input: IOwnedStream<string>) {
+	return (input.curr === "-" ? HandleHyphen : HandleRangeBoundary)(input)
 }
 
 function HandleClassRange(this: ICompositeStream, input: IOwnedStream<string>) {
-	return [new ClassRangeStream().setState(this.state), HandleUnitOrHyphen]
+	return [new ClassRangeStream().setState(this.state), HandleBoundaryOrHyphen]
 }
 
 function isRangeAhead(input: IOwnedStream<string> & IPeekable<string>) {

@@ -1,24 +1,24 @@
 import type { INode } from "../../../interfaces.js"
 import type { DepthStream } from "../../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "../Compiler.js"
-import type { IRegexBuilder } from "../RegexBuilder.js"
+import type { IRegexFactory } from "../RegexFactory.js"
 
-export function compileGreedy(builder: IRegexBuilder) {
+export function compileGreedy(factory: IRegexFactory) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // Greedy
-		return builder.greedy(handler(input))
+		return factory.greedy(handler(input))
 	}
 }
 
-export function compileNonGreedy(builder: IRegexBuilder) {
+export function compileNonGreedy(factory: IRegexFactory) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // NonGreedy
-		return builder.nonGreedy(handler(input))
+		return factory.nonGreedy(handler(input))
 	}
 }

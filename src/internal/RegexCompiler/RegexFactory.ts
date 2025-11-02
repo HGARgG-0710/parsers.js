@@ -1,4 +1,5 @@
 import { array } from "@hgargg-0710/one"
+import assert from "assert"
 import type { IRegexPartBuilder, IValidNodeType } from "../../interfaces.js"
 import { Regex } from "../../objects.js"
 
@@ -19,7 +20,7 @@ const {
 
 const { numbers } = array
 
-export interface IRegexBuilder {
+export interface IRegexFactory {
 	disjunction(): IRegexPartBuilder
 	catenation(): IRegexPartBuilder
 	ignoreCase(): IRegexPartBuilder
@@ -32,9 +33,11 @@ export interface IRegexBuilder {
 	digit(): Regex.Raw
 	space(): Regex.Raw
 	newline(): Regex.Raw
-	literal(x: string): Regex.Raw
+	literal(x: string): Regex.Raw.Char
 	charRange(from: string, to: string): Regex.Raw
-	unicodeChar(hex: string): Regex.Raw
+	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw
+	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw
+	unicodeChar(hex: string): Regex.Raw.Char
 	typeMatch(type: IValidNodeType): Regex.Raw
 	greedy(item: Regex.Raw): Regex.Raw
 	nonGreedy(item: Regex.Raw): Regex.Raw
@@ -43,8 +46,22 @@ export interface IRegexBuilder {
 	repeat(item: Regex.Raw, times: number): Regex.Raw
 }
 
-export class RawRegexBuilder implements IRegexBuilder {
-	static readonly instance = new RawRegexBuilder()
+class CodePointNavigator {
+	charAfter(x: string) {
+		return String.fromCodePoint(x.codePointAt(0)! + 1)
+	}
+
+	charBefore(x: string) {
+		const codePoint = x.codePointAt(0)!
+		assert(codePoint > 0)
+		return String.fromCodePoint(codePoint - 1)
+	}
+}
+
+export class RawRegexFactory implements IRegexFactory {
+	static readonly instance = new RawRegexFactory()
+
+	private readonly codePointNavigator = new CodePointNavigator()
 
 	disjunction(): IRegexPartBuilder {
 		return new Either.Builder()
@@ -104,7 +121,7 @@ export class RawRegexBuilder implements IRegexBuilder {
 		)
 	}
 
-	literal(x: string): Regex.Raw {
+	literal(x: string) {
 		return Char.make(x)
 	}
 
@@ -112,11 +129,11 @@ export class RawRegexBuilder implements IRegexBuilder {
 		return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
 	}
 
-	// * note: we're parsing here and not inside `RegexParser` since 
-	// * this reduces the amount of transformation logic inside the 
+	// * note: we're parsing here and not inside `RegexParser` since
+	// * this reduces the amount of transformation logic inside the
 	// * parser (purpose of `RegexParser` is only to produce a front-facing
-	// * AST, one to be later re-built into the `Regex.Raw` form). 
-	unicodeChar(hex: string): Regex.Raw {
+	// * AST, one to be later re-built into the `Regex.Raw` form).
+	unicodeChar(hex: string) {
 		return Char.make(String.fromCodePoint(parseInt(hex, 16)))
 	}
 
@@ -142,6 +159,20 @@ export class RawRegexBuilder implements IRegexBuilder {
 
 	repeat(item: Regex.Raw, times: number): Regex.Raw {
 		return new Catenation(...numbers(times).map(() => item))
+	}
+
+	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw {
+		return new Either(
+			from,
+			this.charRange(this.codePointNavigator.charAfter("\n"), to)
+		)
+	}
+
+	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
+		return new Either(
+			this.charRange(from, this.codePointNavigator.charBefore("\n")),
+			to
+		)
 	}
 
 	private constructor() {}

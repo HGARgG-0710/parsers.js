@@ -8,7 +8,7 @@ import {
 } from "../../RegexParser/Nodes.js"
 import { type IRegexCompilerHandler } from "../Compiler.js"
 import { compilerBuilderErrHandler } from "../Errors.js"
-import type { IRegexBuilder } from "../RegexBuilder.js"
+import type { IRegexFactory } from "../RegexFactory.js"
 import { RegexTypeHandler } from "../RegexTypeHandler.js"
 
 function readRangeBoundary(range: INode, isStart: boolean) {
@@ -49,7 +49,7 @@ const rangeKindsHandler = RegexTypeHandler<number[]>(
 )
 
 // TODO: REFACTOR THIS [the function is way too long...]
-export function compileRange(regexBuilder: IRegexBuilder) {
+export function compileRange(regexBuilder: IRegexFactory) {
 	return function (
 		input: DepthStream<INode>,
 		handler: IRegexCompilerHandler
