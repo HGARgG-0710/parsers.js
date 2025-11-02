@@ -1,21 +1,72 @@
 [v0.3]
 
-Due to TODO swamp, one has decided to SPLIT all the tasks into:
-	1. actually relevant (current), which are BEING DONE at the moment
-	2. minor ones that WILL get done, but slightly later
-	3. the "general", which may get removed/deleted/never-get-done/changed, or (maybe) done
-		At worst - they get done later due to being less significant. 
-	4. the "leftovers" for v0.3 - this is definitely getting done, and definitely done last - before the publishing
-	5. the (possibly, not so distant) "future"
-		
+IMMEDIATE: 
+	0. ADD `mixin`s to `Node`s (break the `Nodes.ts` file ONTO SEVERAL): 
+		1. (new - MIXIN) SingleItemNode <- FromPlainConvertibleSingleItemNode [.fromPlain method] + PoolableNode
+		2. FromPlainConvertibleSingleItemNode = .fromPlain method (of (curr.) SingleItemNode) + BaseNode
+			LET the `CachedContentNode` INHERIT FROM THIS, and not from `SingleItemNode`...v
+
+		REASON: the (unneeded) "free" method is LEAKING into `CachedContentNode` 
+			(which ISN'T supposed to be used on trees which are POOLABLE!)
+
+		For this: 
+			1. add the new `modules/Node`
+				1. this'll enable separating the "good" TypeScript code from the "bad" JavaScript code...
+			2. SPREAD the contents of `Node.ts` across `modules/Node/*` files
+				1. This'll reduce the number of details within the file
+			3. Re-export stuff from 'modules/Node/*' inside `Node.ts` afterwards...
+			
+	6. REFACTOR [from `RegexParser`]: 
+		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 
+			Cases present:
+				1. SingleChar
+		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
+
+	1. REMOVE the `(=...)` and (#i...) from the RecursiveRegex! 
+		Reason: they're REDUNDANT - ONCE a single such as they are APPEARS, LET it 
+			be interpreted as-is! That is, they can appear FIRST on 1, 2, ..., etc levels, 
+				and STILL MEAN SOMETHING, but if they appear TWICE IN A ROW, then the second one 
+					MUST be an ordinary group! Meaning, you CANNOT have: 
+
+						1. (=...(=...))  # second ignored
+						2. (#i...(#i...)) # second ignored
+
+	2. Regex [testing]: 
+		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
+	
+	3. Regex [RegexParser and RegexCompiler]: 
+		note: one needs NEW CLASSES, to enable: 
+			1. \p{...}-like (JS RegExp) groups of characters (new character classes): 
+				1. The \P{...} is replaced by ^[\p{...}]
+				2. There isn't an actual \p{...}, instead it is replaced by a NUMBER of *different* commands
+				3. For details on what to design, see: 
+					1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
+					2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
+			2. DON'T FORGET EMOJIS [those are mandatory...]
+
 3. Commit D: test the 'static' field of `mixin`: 
-	0. Before: finish Commit L
+	0. First: finish Commit L
 	1. add the appropriate test cases
 	2. add a new test like the old ones, with 'constructor() {}' instead of 'constructor: function () {}'
-	3. add a test for the 'this.class' property on the mixin-instances
-		
+	3. add a test for the 'this.class' property on the mixin-instances		
+
+IDEA [later]: 
+	Make a COMPLETE count of all the classes in the library. 
+	That includes: 
+		1. test classes
+		2. Node-classes
+		3. private classes
+		4. public classes 
+		5. abstract classes
+
+		Current approx: ~217 (maybe more)
+
+		Method for counting: 
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 182 (at the time of writing...)
+			2. RegexParser/Nodes.ts classes = 35 (not counting those matched by 1.)
+
 6. Commit L: 
-	Do: After Commits J
+	Do: After Commits Z
 	FIX the 'test-build'
 	Let it be possible to run tests again 
 		(currently, some madness arising from 
@@ -24,16 +75,6 @@ Due to TODO swamp, one has decided to SPLIT all the tasks into:
 	Do this by REMOVING 'import's like 'import {A} from "../.../classes.ts"'
 	or 'import {A} from "../.../Stream.ts', etc - use FILE-BY-FILE loading, 
 	avoid re-exports like the plague. 
-
-Immediate: 
-	2. `RegexParser` error-handling: 
-		0. remove the current error-related stuff from there: 
-			1. get rid of the old `expect/Errors.ts` stuff (replace with PROPER RegexParser-specific error-classes)
-			2. add parser-specific error-messages
-		1. walk the parser, FROM UPSIDE DOWN, adding the appropriate functionality to ALL the places:
-			1. usages of `expect`
-			2. usages of `unexpected`
-			3. usages of parser-specific errors (such as `invalid escape sequence`)
 
 TODOs: 
 	5. [LATER] TO DOCUMENTATION [about `MarkerLocator`]: 
@@ -45,10 +86,11 @@ TODOs:
 				const marker = this.state.counter.inc()
 				const markerGetter = () => marker
 				return [
-					new SomeErrHandlerStream(), 	// handles errors that can ocurr downstream
-					StorageStream(markerGetter)(), 	// keeps marker for `SomeErrHandlerStream` to retrieve (if needed)
-
-					SomeStream(), 					// error is thrown HERE 
+					new SomeErrHandlerStream( // handles errors that can ocurr downstream
+						StorageStream(markerGetter)( // keeps marker for `SomeErrHandlerStream` to retrieve (if needed)
+							SomeStream() // error is thrown HERE 
+						) 
+					), 	
 													// CRUCIAL - if this is a CHOOSER instead of a Stream, 
 													// we may face the possibility of *recursion* 
 													// (and hence, not know the DEPTH of `.resource` we need to skip). 
@@ -110,6 +152,30 @@ TODOs:
 
 15. Commit Z - create the first `RegexCompiler` sketch [use Thompson's Construction]:
 	Do After: Commit Y2
+
+	SOLUTION: provide *TWO* implementations: 
+		1. NFA
+		2. DFA
+
+		Do it like: 
+			1. Add an interface - `IRegexBuilder` (this is public...)
+			2. Add implementations: `DFARegexBuilder` and `NFARegexBuilder`: 
+				Both implement Thompson's Construction as per: https://swtch.com/~rsc/regexp/regexp1.html
+			3. Let the `RegexCompiler` be `init`ializable with an `IRegexBuilder`, which it calls...
+				RegexCompiler is STILL A SINGLETON! Yes, this is global state. 
+			4. Let the `Regex` have a second argument - `builder: IRegexBuilder`. 
+				Let it be optional, and prefer the `NFARegexBuilder` BY DEFAULT: 
+					Reason: 
+						1. it's reasonably fast
+						2. it has reasonable memory requirements (unlike DFARegexBuilder)
+
+			5. Let the FINAL interface `IRegexMatcher` returned by `IRegexBuilder` (from .finalize(): IRegexMatcher method)
+				contain the `.match(x: IPeekableStream<T>): boolean` method, which would:
+					1. convert the `.peek(i)` call sequences to respective states of the NFA/DFA [get the appropriate 'List' structure of State-s]
+					2. check for the presence of the "EndState" in the state list [and conclude whether or not one matches in the end...]
+					
+				1. Let the `IRegexMatcher` objects be the ones that are CACHED by the `RegexStorage` singleton class. 
+
 
 	VITAL: this DOES NOT utilize `IStream`-s internally. 
 	Instead, we accept an `IPeekableStream<string>`, then CALL `.peek(n)` on it,
