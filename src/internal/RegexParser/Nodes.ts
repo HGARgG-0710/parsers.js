@@ -65,6 +65,7 @@ export const Tab = CachedTokenNode("tab", "Tab")
 export const UnicodeChar = ContentNode<string>("unicode-char", "UnicodeChar")
 export const VTab = CachedTokenNode("vtab", "VTab")
 export const Word = CachedTokenNode("word", "Word")
+export const FormFeed = CachedTokenNode("ffeed", "FormFeed")
 
 export const IgnoreCaseGroup = SingleChildNode(
 	"ignore-case-group",

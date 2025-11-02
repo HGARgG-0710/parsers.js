@@ -9,6 +9,7 @@ import {
 	Disjunct,
 	Disjunction,
 	EscapedLiteral,
+	FormFeed,
 	Greedy,
 	Group,
 	IgnoreCaseGroup,
@@ -39,6 +40,7 @@ import { compileComplexPart } from "./Complex.js"
 import {
 	compileAnyChar,
 	compileDigit,
+	compileFormFeed,
 	compileNewline,
 	compileSpace,
 	compileTab,
@@ -173,11 +175,13 @@ class SpecialCharacterTable {
 	private readonly compileNewline: IRegexCompilerFunction
 	private readonly compileUnicodeChar: IRegexCompilerFunction
 	private readonly compileEscaped: IRegexCompilerFunction
+	private readonly compileFormFeed: IRegexCompilerFunction
 
 	get(): IRegexCompilerTypeTable {
 		return [
 			[Tab, this.compileTab],
 			[VTab, this.compileVTab],
+			[FormFeed, this.compileFormFeed],
 			[Newline, this.compileNewline],
 			[UnicodeChar, this.compileUnicodeChar],
 			[EscapedLiteral, this.compileEscaped]
@@ -188,6 +192,7 @@ class SpecialCharacterTable {
 		const builder = RawRegexBuilder.instance
 		this.compileTab = compileTab(builder)
 		this.compileVTab = compileVTab(builder)
+		this.compileFormFeed = compileFormFeed(builder)
 		this.compileNewline = compileNewline(builder)
 		this.compileUnicodeChar = compileUnicodeChar(builder)
 		this.compileEscaped = compileLiteral(builder)

@@ -24,3 +24,6 @@ export const compileTab = compileElementary((builder) => builder.literal("\t"))
 export const compileVTab = compileElementary((builder) => builder.literal("\v"))
 export const compileSpace = compileElementary((builder) => builder.space())
 export const compileNewline = compileElementary((builder) => builder.newline())
+export const compileFormFeed = compileElementary((builder) =>
+	builder.literal("\f")
+)

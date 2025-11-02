@@ -9,6 +9,7 @@ import { TableHandler } from "../../objects.js"
 import { CurrentHash } from "../../objects/HashMap.js"
 import { ObjectMap } from "../../samples/TerminalMap.js"
 import { HandleDigit } from "./Escaped/Digit.js"
+import { HandleFormFeed } from "./Escaped/FormFeed.js"
 import { HandleEscapedLiteral } from "./Escaped/Literal.js"
 import { HandleNewline } from "./Escaped/Newline.js"
 import { HandleSpace } from "./Escaped/Space.js"
@@ -30,7 +31,8 @@ const BaseEscapedHandler = TableHandler<
 				u: HandleUnicode,
 				n: HandleNewline,
 				t: HandleTab,
-				v: HandleVTab
+				v: HandleVTab,
+				f: HandleFormFeed
 			},
 			HandleEscapedLiteral
 		)
