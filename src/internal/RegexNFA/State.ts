@@ -1,13 +1,60 @@
 // ! NEED MORE `State` classes:
-// * 1. for `CodePoint` - one that defines a (quick) check for 'from <= x.codePointAt(0) && x.codePointAt(0) <= to'
-// * 2. for `UnicodeProperty` - one that (quickly/simply) defines a specific unicode property supported by the library's `Regex` syntax
-// ? 3. EitherState - for representing `Either`?
+// * 1. for `UnicodeProperty` - one that (quickly/simply) defines a specific unicode property supported by the library's `Regex` syntax
 
+import { type } from "@hgargg-0710/one"
 import type { IValidNodeType } from "../../interfaces.js"
+import { RetainedArray } from "../../objects.js"
+import { isTyped } from "../../utils/Node.js"
+
+const { isString, isNull } = type
+
+export interface IMaybeVerifiableState extends State {
+	verify?(x: any): boolean
+}
+
+export interface IVerifiableState extends State {
+	verify(x: any): boolean
+}
+
+export class StateArrayList {
+	readonly states = new RetainedArray<ArrowState>()
+	private matchState: MatchState | null = null
+
+	isMatch() {
+		return !isNull(this.matchState)
+	}
+
+	isEmpty() {
+		return this.states.size === 0
+	}
+
+	clear() {
+		this.states.clear()
+		this.matchState = null
+	}
+
+	add(state: State) {
+		if (!state.beenSeen(this.runCount)) {
+			state.addTo(this)
+			state.markSeen(this.runCount)
+		}
+	}
+
+	setMatchState(state: MatchState) {
+		this.matchState = state
+	}
+
+	*[Symbol.iterator]() {
+		yield* this.states
+	}
+
+	constructor(private readonly runCount: number) {}
+}
 
 export class Fragment {
 	patch(outState: State) {
 		for (const outArrow of this.outArrows) outArrow.set(outState)
+		return this
 	}
 
 	append(...frags: Fragment[]) {
@@ -19,14 +66,30 @@ export class Fragment {
 }
 
 export class StateArrow {
-	private to: State
+	private _to: State
+
+	get to() {
+		return this._to
+	}
 
 	set(out: State) {
-		this.to = out
+		this._to = out
 	}
 }
 
 export abstract class State {
+	private seenTimes = -1
+
+	abstract addTo(list: StateArrayList): void
+
+	markSeen(i: number) {
+		this.seenTimes = i
+	}
+
+	beenSeen(i: number) {
+		return this.seenTimes === i
+	}
+
 	get isMatch() {
 		return false
 	}
@@ -34,40 +97,106 @@ export abstract class State {
 
 export abstract class ArrowState extends State {
 	readonly arrow = new StateArrow()
+
+	addTo(list: StateArrayList): void {
+		list.states.push(this)
+	}
+
+	abstract verify(x: any): boolean
 }
 
 export class CharState extends ArrowState {
+	verify(x: any): boolean {
+		return x === this.char
+	}
+
 	constructor(private readonly char: string) {
 		super()
 	}
 }
 
-export class EitherState extends State {
-	constructor(readonly options: State[]) {
+export class EitherState extends State implements IVerifiableState {
+	// * note: we allow optional `verify` because depending on the 
+	// * context in which `EitherState` is used, it serves DIFFERENT 
+	// * PURPOSES. The reason it's represented by the same object is 
+	// * because they are so semantically close. 
+	// ? (although maybe it'd be better to split them? meh, maybe later)
+	verify(x: any): boolean {
+		for (const option of this.options)
+			if (option.verify && !option.verify(x)) return false
+		return true
+	}
+
+	addTo(list: StateArrayList): void {
+		for (const option of this.options) list.add(option)
+	}
+
+	constructor(readonly options: IMaybeVerifiableState[]) {
 		super()
 	}
 }
 
-// ! pre-doc: a state that matches a SINGLE character/token. Only requirement is that the `IStream` be not-yet-finished...
-export class AnythingState extends ArrowState {}
-
 export class CodeRangeState extends ArrowState {
+	verify(x: any): boolean {
+		if (!isString(x)) return false
+		const codePoint = x.codePointAt(0)!
+		return this.from <= codePoint && codePoint <= this.to
+	}
+
 	constructor(private readonly from: number, private readonly to: number) {
 		super()
 	}
 }
 
-// ! pre-doc: an empty state - always matches
-export class EmptyState extends ArrowState {}
+// ! pre-doc: a state that matches any item - ADVANCES THE POSITION
+export class AnythingState extends ArrowState {
+	verify(x: any): boolean {
+		return true
+	}
+}
+
+// ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
+export class EmptyState extends ArrowState {
+	addTo(list: StateArrayList): void {
+		list.add(this.arrow.to)
+	}
+
+	verify(x: any): boolean {
+		return true
+	}
+}
 
 // ! pre-doc: this checks a given item for: 1. being an `ITyped`; 2. having the correct `type` (use `utils.Node.isType` for this...)
 export class TokenState extends ArrowState {
+	verify(x: any): boolean {
+		return isTyped(x) && x.type === this.type
+	}
+
 	constructor(private readonly type: IValidNodeType) {
 		super()
 	}
 }
 
+export class NoneOfState extends ArrowState {
+	verify(x: any): boolean {
+		for (const item of this.items) if (item.verify(x)) return false
+		return true
+	}
+
+	constructor(private readonly items: IVerifiableState[]) {
+		super()
+	}
+}
+
 export class MatchState extends State {
+	addTo(list: StateArrayList): void {
+		list.setMatchState(this)
+	}
+
+	verify(x: any) {
+		return false
+	}
+
 	get isMatch() {
 		return true
 	}

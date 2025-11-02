@@ -11,9 +11,9 @@ class RegexCompilationError extends ConstructorError {
 	}
 }
 
-export function compilerBuilderErrHandler(
+export function compilerBuilderErrHandler<T = any>(
 	input: DepthStream<INode>,
-	_handler: IRegexCompilerHandler
+	_handler: IRegexCompilerHandler<T>
 ) {
 	throw new RegexCompilationError(input.curr)
 }

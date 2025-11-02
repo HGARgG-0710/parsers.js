@@ -8,6 +8,7 @@ import type {
 	IValidNodeType
 } from "../interfaces.js"
 import { AutoMap } from "../internal/AutoMap.js"
+import { NFARegexFinalizer as _NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
@@ -18,26 +19,16 @@ export class Regex<T = any> {
 		return this.final.match(stream)
 	}
 
-	constructor(source: string, finalizer: IConcreteRegexFinalizer) {
+	constructor(
+		source: string,
+		finalizer: IConcreteRegexFinalizer = _NFARegexFinalizer.instance
+	) {
 		this.final = RegexStorage.instance.get(source, finalizer)
 	}
 }
 
 export namespace Regex {
-	// * Plan for the algorithm:
-	// ! 	1. IRegexMatcher.match implementation:
-	// * 		1. it relies upon:
-	// 				1. traversing a list of LINKED "State" objects
-	// 				2. checking for whether ANY ONE OF THEM is the "Match"
-	// ^			CONCLUSION:
-	// * 				1. one needs to BUILD a list of "State" objects [WHICH ARE LINKED-LISTS *themselves*]:
-	// * 					1. To support `.finalize()` (as well as user-extension), one must implement the
-	// *						Visitor Pattern on the `Regex.Raw` nodes, and provide a PUBLIC INTERFACE for
-	// * 						visitors for users to implement (useful if they want to create their own `IConcreteRegexFinalizer`-s);
-	// ! 					2. One needs the ".finalize(): IRegexMatcher" method to:
-	// * 						1. CONVERT this "high-level" 12-structure of `Regex.Raw` into a LINKED LIST of "State"s
-	// ! 						2. Thus, a NEW component - `NFAFlattener` - it accepts the "RawRegex" form,
-	// * 						3. AND *flattens* it into the Linked List of `State`s (internal implementation detail)
+	export const NFARegexFinalizer = _NFARegexFinalizer
 
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
@@ -145,7 +136,7 @@ export namespace Regex {
 				return visitor.handleTokenType(this)
 			}
 
-			constructor(private readonly type: IValidNodeType) {
+			constructor(readonly type: IValidNodeType) {
 				super()
 			}
 		}
@@ -167,7 +158,7 @@ export namespace Regex {
 		}
 
 		export class NoneOf extends Raw {
-			private readonly items: Raw[]
+			readonly items: Raw[]
 
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNoneOf(this)

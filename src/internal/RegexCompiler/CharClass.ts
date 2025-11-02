@@ -13,7 +13,10 @@ import {
 	VTab
 } from "../RegexParser/Nodes.js"
 import { compileUnicodeChar } from "./Cell.js"
-import { type IRegexCompilerHandler } from "./Compiler.js"
+import type {
+	IRegexCompilerFunction,
+	IRegexCompilerHandler
+} from "./Compiler.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileFormFeed,
@@ -97,7 +100,7 @@ function handleFormFeedBoundary(factory: IRegexFactory) {
 // ! Add a proper err handler later instead of the generic `compilerBuilderErrHandler`...
 function rangeBoundaryHandler(factory: IRegexFactory) {
 	return RegexTypeHandler<string | Regex.Raw>(
-		mapTypes([
+		mapTypes<IRegexCompilerFunction<string | Regex.Raw>>([
 			[EscapedLiteral, handleCellBoundary],
 			[SingleChar, handleCellBoundary],
 			[UnicodeChar, handleUnicodeBoundary(factory)],
@@ -115,7 +118,7 @@ function compileClassRangeBoundary(factory: IRegexFactory) {
 	const handleRangeBoundary = rangeBoundaryHandler(factory)
 	return function (
 		input: DepthStream<INode>,
-		_handler: IRegexCompilerHandler
+		_handler: IRegexCompilerHandler<string | Regex.Raw>
 	) {
 		input.next() // CharClassRangeBoundary
 		return handleRangeBoundary(input)

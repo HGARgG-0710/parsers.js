@@ -1,26 +1,33 @@
 import type { IRawRegexVisitor } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import {
-	AnythingState,
+	ArrowState,
 	CharState,
 	CodeRangeState,
 	EitherState,
 	EmptyState,
-	Fragment
+	Fragment,
+	NoneOfState,
+	TokenState,
+	type IVerifiableState
 } from "./State.js"
 
 // ! pre-doc: this is the thing that converts the "Regex.Raw" into a linked list of `State`s
 export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
-	handleCatenation(catenation: Regex.Raw.Catenation): Fragment | null {
-		if (catenation.items.length === 0) return null
-		const firstFrag = catenation.items[0].accept(this)
+	private toFragment(arrowState: ArrowState) {
+		return new Fragment(arrowState, [arrowState.arrow])
+	}
+
+	handleCatenation({ items }: Regex.Raw.Catenation): Fragment | null {
+		if (items.length === 0) return null
+		const firstFrag = items[0].accept(this)
 		if (!firstFrag) return null
 
 		const fragStart = firstFrag.inState
 		let lastFrag = firstFrag
 
-		for (let i = 1; i < catenation.items.length; ++i) {
-			const currItem = catenation.items[i]
+		for (let i = 1; i < items.length; ++i) {
+			const currItem = items[i]
 			const currFrag = currItem.accept(this)
 			if (currFrag) {
 				lastFrag.patch(currFrag.inState)
@@ -32,14 +39,13 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleChar({ char }: Regex.Raw.Char): Fragment {
-		const charState = new CharState(char)
-		return new Fragment(charState, [charState.arrow])
+		return this.toFragment(new CharState(char))
 	}
 
-	handleEither(either: Regex.Raw.Either): Fragment | null {
+	handleEither({ options }: Regex.Raw.Either): Fragment | null {
 		const frags: Fragment[] = []
-		for (let i = 0; i < either.options.length; ++i) {
-			const currOption = either.options[i]
+		for (let i = 0; i < options.length; ++i) {
+			const currOption = options[i]
 			const currFrag = currOption.accept(this)
 			if (currFrag) frags.push(currFrag)
 		}
@@ -48,8 +54,7 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleAnything(anything: Regex.Raw.Anything): Fragment | null {
-		const anythingState = new AnythingState()
-		return new Fragment(anythingState, [anythingState.arrow])
+		return this.toFragment(new EmptyState())
 	}
 
 	// ! FINISH
@@ -58,8 +63,7 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleCodeRange({ from, to }: Regex.Raw.CodeRange): Fragment | null {
-		const rangeState = new CodeRangeState(from, to)
-		return new Fragment(rangeState, [rangeState.arrow])
+		return this.toFragment(new CodeRangeState(from, to))
 	}
 
 	// ! FINISH
@@ -92,13 +96,18 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		)
 	}
 
-	// ! FINISH
-	handleNoneOf(noneOf: Regex.Raw.NoneOf): Fragment | null {
-		return null
+	handleNoneOf({ items }: Regex.Raw.NoneOf): Fragment | null {
+		const negated: IVerifiableState[] = []
+		for (const currItem of items) {
+			const currFrag = currItem.accept(this)
+			// * we know it's `IVerifiableState` since it's always a ^[...]
+			// (i.e. by Type connascence)
+			if (currFrag) negated.push(currFrag.inState as IVerifiableState)
+		}
+		return this.toFragment(new NoneOfState(negated))
 	}
 
-	// ! FINISH
-	handleTokenType(tokenType: Regex.Raw.TokenType): Fragment | null {
-		return null
+	handleTokenType({ type }: Regex.Raw.TokenType): Fragment | null {
+		return this.toFragment(new TokenState(type))
 	}
 }

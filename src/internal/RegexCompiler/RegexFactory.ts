@@ -1,7 +1,7 @@
 import { array } from "@hgargg-0710/one"
-import assert from "assert"
 import type { IRegexPartBuilder, IValidNodeType } from "../../interfaces.js"
 import { Regex } from "../../objects.js"
+import { CodePointNavigator } from "../CodePointNavigator.js"
 
 const {
 	Either,
@@ -46,22 +46,8 @@ export interface IRegexFactory {
 	repeat(item: Regex.Raw, times: number): Regex.Raw
 }
 
-class CodePointNavigator {
-	charAfter(x: string) {
-		return String.fromCodePoint(x.codePointAt(0)! + 1)
-	}
-
-	charBefore(x: string) {
-		const codePoint = x.codePointAt(0)!
-		assert(codePoint > 0)
-		return String.fromCodePoint(codePoint - 1)
-	}
-}
-
 export class RawRegexFactory implements IRegexFactory {
 	static readonly instance = new RawRegexFactory()
-
-	private readonly codePointNavigator = new CodePointNavigator()
 
 	disjunction(): IRegexPartBuilder {
 		return new Either.Builder()
@@ -164,13 +150,13 @@ export class RawRegexFactory implements IRegexFactory {
 	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw {
 		return new Either(
 			from,
-			this.charRange(this.codePointNavigator.charAfter("\n"), to)
+			this.charRange(CodePointNavigator.charAfter("\n"), to)
 		)
 	}
 
 	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
 		return new Either(
-			this.charRange(from, this.codePointNavigator.charBefore("\n")),
+			this.charRange(from, CodePointNavigator.charBefore("\n")),
 			to
 		)
 	}

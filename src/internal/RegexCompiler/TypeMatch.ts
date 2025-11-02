@@ -1,4 +1,5 @@
 import type { ICellNode, INode, IValidNodeType } from "../../interfaces.js"
+import type { Regex } from "../../objects.js"
 import type { DepthStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
 import type { IRegexFactory } from "./RegexFactory.js"
@@ -20,9 +21,10 @@ export function compileAsString(
 export function compileTypeMatch(factory: IRegexFactory) {
 	return function (
 		input: DepthStream<INode>,
-		handler: IRegexCompilerHandler<IValidNodeType>
+		handler: IRegexCompilerHandler<Regex.Raw | IValidNodeType>
 	) {
 		input.next() // TypeMatch
-		return factory.typeMatch(handler(input))
+		// by Type connascence
+		return factory.typeMatch(handler(input) as IValidNodeType)
 	}
 }

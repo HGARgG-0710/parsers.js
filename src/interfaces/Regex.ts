@@ -10,7 +10,7 @@ export interface ICompositeRegexBuilder {
 }
 
 export interface IConcreteRegexFinalizer {
-	concrete(raw: Regex.Raw): IRegexMatcher
+	toConcrete(raw: Regex.Raw): IRegexMatcher
 }
 
 export interface IRegexPartBuilder extends ICompositeRegexBuilder {

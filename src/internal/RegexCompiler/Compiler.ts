@@ -55,7 +55,7 @@ export class RegexCompiler {
 	}
 
 	compile(source: string, finalizer: IConcreteRegexFinalizer): IRegexMatcher {
-		return finalizer.concrete(this.build(RegexNodeStream(source)))
+		return finalizer.toConcrete(this.build(RegexNodeStream(source)))
 	}
 
 	private constructor() {}
