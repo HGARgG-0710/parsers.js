@@ -2,6 +2,7 @@ import assert from "assert"
 import type {
 	IConcreteRegexFinalizer,
 	IPeekableStream,
+	IRawRegexVisitor,
 	IRegexMatcher,
 	IRegexPartBuilder,
 	IValidNodeType
@@ -38,13 +39,15 @@ export namespace Regex {
 	// ! 						2. Thus, a NEW component - `NFAFlattener` - it accepts the "RawRegex" form,
 	// * 						3. AND *flattens* it into the Linked List of `State`s (internal implementation detail)
 
-	export abstract class Raw {}
+	export abstract class Raw {
+		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
+	}
 
 	export namespace Raw {
 		export abstract class Builder implements IRegexPartBuilder {
 			private readonly items = new ArrayCollection<Raw>()
 
-			addItem(item: IRegexPartBuilder) {
+			addItem(item: Raw) {
 				this.items.push(item)
 				return this
 			}
@@ -57,7 +60,11 @@ export namespace Regex {
 		}
 
 		export class Either extends Raw {
-			private readonly options: Raw[]
+			readonly options: Raw[]
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleEither(this)
+			}
 
 			constructor(...options: Raw[]) {
 				super()
@@ -74,7 +81,11 @@ export namespace Regex {
 		}
 
 		export class Catenation extends Raw {
-			private readonly items: Raw[]
+			readonly items: Raw[]
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleCatenation(this)
+			}
 
 			constructor(...items: Raw[]) {
 				super()
@@ -91,13 +102,21 @@ export namespace Regex {
 		}
 
 		export class Optional extends Raw {
-			constructor(private readonly item: Raw) {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleOptional(this)
+			}
+
+			constructor(readonly item: Raw) {
 				super()
 			}
 		}
 
 		export class NoneOrMore extends Raw {
-			constructor(private readonly item: Raw) {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNoneOrMore(this)
+			}
+
+			constructor(readonly item: Raw) {
 				super()
 			}
 		}
@@ -111,6 +130,10 @@ export namespace Regex {
 				return this.instances.get(char)
 			}
 
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleChar(this)
+			}
+
 			private constructor(readonly char: string) {
 				super()
 				assert(char.length === 1)
@@ -118,24 +141,37 @@ export namespace Regex {
 		}
 
 		export class TokenType extends Raw {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleTokenType(this)
+			}
+
 			constructor(private readonly type: IValidNodeType) {
 				super()
 			}
 		}
 
 		export class CodeRange extends Raw {
-			constructor(
-				private readonly from: number,
-				private readonly to: number
-			) {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleCodeRange(this)
+			}
+
+			constructor(readonly from: number, readonly to: number) {
 				super()
 			}
 		}
 
-		export class Anything extends Raw {}
+		export class Anything extends Raw {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleAnything(this)
+			}
+		}
 
 		export class NoneOf extends Raw {
 			private readonly items: Raw[]
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNoneOf(this)
+			}
 
 			constructor(...items: Raw[]) {
 				super()
@@ -152,6 +188,10 @@ export namespace Regex {
 		}
 
 		export class NonGreedy extends Raw {
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNonGreedy(this)
+			}
+
 			constructor(private readonly item: Raw) {
 				super()
 			}
@@ -159,6 +199,10 @@ export namespace Regex {
 
 		export class IgnoreCase extends Raw {
 			private readonly items: Raw[]
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleIgnoreCase(this)
+			}
 
 			constructor(...items: Raw[]) {
 				super()
@@ -176,6 +220,10 @@ export namespace Regex {
 
 		export class NoCapture extends Raw {
 			private readonly items: Raw[]
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNoCapture(this)
+			}
 
 			constructor(...items: Raw[]) {
 				super()
