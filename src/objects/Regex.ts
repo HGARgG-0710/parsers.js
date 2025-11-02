@@ -8,7 +8,7 @@ import type {
 } from "../interfaces.js"
 import { AutoMap } from "../internal/AutoMap.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
-import { ArrayBuilder } from "./ArrayBuilder.js"
+import { ArrayCollection } from "./ArrayCollection.js"
 
 export class Regex<T = any> {
 	private readonly final: IRegexMatcher
@@ -69,14 +69,14 @@ export namespace Regex {
 
 	export namespace Raw {
 		export abstract class Builder implements IRegexPartBuilder {
-			private readonly arrBuilder = new ArrayBuilder<Raw>()
+			private readonly items = new ArrayCollection<Raw>()
 
 			addItem(item: IRegexPartBuilder) {
-				this.arrBuilder.push(item)
+				this.items.push(item)
 			}
 
 			protected get() {
-				return this.arrBuilder.get()
+				return this.items.get() as Raw[]
 			}
 
 			abstract finish(): Raw
