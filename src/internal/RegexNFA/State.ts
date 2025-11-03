@@ -33,10 +33,15 @@ export class StateArrayList {
 		this.matchState = null
 	}
 
+	reset(listId: number) {
+		this.listId = listId
+		this.clear()
+	}
+
 	add(state: State) {
-		if (!state.beenSeen(this.runCount)) {
+		if (!state.beenSeen(this.listId)) {
 			state.addTo(this)
-			state.markSeen(this.runCount)
+			state.markSeen(this.listId)
 		}
 	}
 
@@ -48,7 +53,7 @@ export class StateArrayList {
 		yield* this.states
 	}
 
-	constructor(private readonly runCount: number) {}
+	constructor(private listId: number) {}
 }
 
 export class Fragment {
@@ -116,10 +121,10 @@ export class CharState extends ArrowState {
 }
 
 export class EitherState extends State implements IVerifiableState {
-	// * note: we allow optional `verify` because depending on the 
-	// * context in which `EitherState` is used, it serves DIFFERENT 
-	// * PURPOSES. The reason it's represented by the same object is 
-	// * because they are so semantically close. 
+	// * note: we allow optional `verify` because depending on the
+	// * context in which `EitherState` is used, it serves DIFFERENT
+	// * PURPOSES. The reason it's represented by the same object is
+	// * because they are so semantically close.
 	// ? (although maybe it'd be better to split them? meh, maybe later)
 	verify(x: any): boolean {
 		for (const option of this.options)
@@ -194,6 +199,10 @@ export class MatchState extends State {
 	}
 
 	verify(x: any) {
+		return false
+	}
+
+	beenSeen(i: number): boolean {
 		return false
 	}
 

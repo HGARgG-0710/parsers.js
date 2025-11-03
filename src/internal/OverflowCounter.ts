@@ -4,10 +4,11 @@ export class OverflowCounter {
 	private counter = 0
 
 	inc() {
-		const currCounter = this.counter
-		if (this.counter === this.limit) this.counter = 0
-		else this.counter++
-		return currCounter
+		return this.counter === this.limit ? (this.counter = 0) : ++this.counter
+	}
+
+	get() {
+		return this.counter
 	}
 
 	constructor(private readonly limit: number = Number.MAX_SAFE_INTEGER) {

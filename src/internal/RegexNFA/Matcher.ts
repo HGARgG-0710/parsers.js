@@ -1,54 +1,69 @@
 import type { IPeekableStream, IRegexMatcher } from "../../interfaces.js"
 import { OverflowCounter } from "../OverflowCounter.js"
-import { StateArrayList, type State } from "./State.js"
-
-function toStateArrayList<T = any>(
-	input: IPeekableStream<T>,
-	startState: State,
-	runCount: number
-) {
-	let currList = new StateArrayList(runCount)
-	let nextList = new StateArrayList(runCount)
-	let temp: StateArrayList
-
-	currList.add(startState)
-
-	let i = 0
-
-	// ! BUG - need to check IF THE NEXT PEEK IS VALID! [it's an equivalent, but anyway...]
-	while (!input.isEnd) {
-		if (currList.isEmpty()) break
-		if (step(currList, nextList, input.peek(i++))) break
-		temp = currList
-		currList = nextList
-		nextList = temp
-	}
-
-	return currList
-}
-
-function step<T = any>(
-	currList: StateArrayList,
-	nextList: StateArrayList,
-	curr: T
-) {
-	nextList.clear()
-	for (const state of currList)
-		if (state.verify(curr)) {
-			const nextState = state.arrow.to
-			nextList.add(nextState)
-			if (nextState.isMatch) return true
-		}
-	return false
-}
+import { ArrowState, StateArrayList, type State } from "./State.js"
 
 export class NFARegexMatcher implements IRegexMatcher {
-	private readonly runCounter = new OverflowCounter()
+	private readonly listId = new OverflowCounter()
+	private currList: StateArrayList
+	private nextList: StateArrayList
+
+	private input: IPeekableStream
+
+	private peekAt(i: number) {
+		return this.input.peek(i)
+	}
+
+	private resetNextList() {
+		this.nextList.reset(this.listId.inc())
+	}
+
+	private addVerified(state: ArrowState) {
+		const nextState = state.arrow.to
+		this.nextList.add(nextState)
+		return nextState.isMatch
+	}
+
+	private tryMatching<T = any>(state: ArrowState, against: T) {
+		return state.verify(against) && this.addVerified(state)
+	}
+
+	private step<T = any>(i: number) {
+		let isMatch: boolean = false
+		const curr: T = this.peekAt(i)
+		this.resetNextList()
+		for (const state of this.currList)
+			if ((isMatch = this.tryMatching(state, curr))) break
+		return isMatch
+	}
+
+	private resetLists() {
+		const newId = this.listId.inc()
+		this.currList.reset(newId)
+		this.nextList.reset(newId + 1)
+		this.currList.add(this.startState)
+	}
+
+	private toStateArrayList() {
+		this.resetLists()
+		let i = 0
+
+		// ! BUG - need to check IF THE NEXT PEEK IS VALID! [it's an equivalent, but anyway...]
+		while (!this.input.isEnd) {
+			if (this.currList.isEmpty()) break
+			if (this.step(i++)) break
+			const temp = this.currList
+			this.currList = this.nextList
+			this.nextList = temp
+		}
+
+		return this.currList
+	}
 
 	match<T = any>(
 		stream: IPeekableStream<T>
 	): false | string | (string | T)[] {
-		const list = toStateArrayList(stream, this.state, this.runCounter.inc())
+		this.input = stream
+		const list = this.toStateArrayList()
 		if (!list.isMatch()) return false
 		// TODO: handle options:
 		// * 1. SUCCCESS MATCH - string (WE NEED TO *COLLECT* THE ITEMS FROM THE STRING!!!)
@@ -57,5 +72,9 @@ export class NFARegexMatcher implements IRegexMatcher {
 		// 		has ever appeared...
 	}
 
-	constructor(private readonly state: State) {}
+	constructor(private readonly startState: State) {
+		const currId = this.listId.get()
+		this.currList = new StateArrayList(currId)
+		this.nextList = new StateArrayList(currId + 1)
+	}
 }
