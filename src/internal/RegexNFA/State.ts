@@ -71,13 +71,13 @@ export class Fragment {
 }
 
 export class StateArrow {
-	private _to: State
+	private _to: IMaybeVerifiableState
 
 	get to() {
 		return this._to
 	}
 
-	set(out: State) {
+	set(out: IMaybeVerifiableState) {
 		this._to = out
 	}
 }
@@ -167,7 +167,7 @@ export class EmptyState extends ArrowState {
 	}
 
 	verify(x: any): boolean {
-		return true
+		return !this.arrow.to.verify || this.arrow.to.verify(x)
 	}
 }
 
@@ -199,7 +199,7 @@ export class MatchState extends State {
 	}
 
 	verify(x: any) {
-		return false
+		return true
 	}
 
 	beenSeen(i: number): boolean {

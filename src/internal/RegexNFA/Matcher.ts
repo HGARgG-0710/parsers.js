@@ -56,7 +56,7 @@ export class NFARegexMatcher implements IRegexMatcher {
 			this.nextList = temp
 		}
 
-		return this.currList
+		return this.nextList
 	}
 
 	match<T = any>(
