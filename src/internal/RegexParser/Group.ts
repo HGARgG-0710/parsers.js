@@ -25,10 +25,10 @@ const GroupHandler = TableHandler(
 	new CurrentHash(
 		ObjectMap(
 			{
-				"#": HandleExtensionGroup,
+				"#": HandleExtensionGroup(),
 				"=": HandleNoCaptureGroup
 			},
-			HandlePlainGroup
+			HandlePlainGroup()
 		)
 	)
 )

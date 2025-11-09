@@ -3,13 +3,13 @@ import { GroupBodyStream, GroupLimitStream } from "../Group.js"
 import { Group } from "../Nodes.js"
 import { ParseRegexRecursively } from "../Parser.js"
 
-const GroupStream = SingletonWrapperStream(Group)
+export const GroupStream = SingletonWrapperStream(Group)
 
-export function HandlePlainGroup() {
+export function HandlePlainGroup(recursiveParser = ParseRegexRecursively) {
 	return [
 		GroupStream(),
 		GroupBodyStream(),
-		ParseRegexRecursively,
+		recursiveParser,
 		GroupLimitStream()
 	]
 }

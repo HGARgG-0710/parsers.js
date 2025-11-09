@@ -13,10 +13,9 @@ import {
 	DynamicParser,
 	ErrorData,
 	ParseableInput,
-	PlainErrorPrinter,
-	TableHandler
+	PlainErrorPrinter
 } from "../../objects.js"
-import { BasicHash, CurrentHash, PeekHash } from "../../objects/HashMap.js"
+import { BasicHash, PeekHash } from "../../objects/HashMap.js"
 import {
 	CompositeStream,
 	IdentityStream,
@@ -25,24 +24,11 @@ import {
 	PosStream
 } from "../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
-import { BasicMap } from "../../samples/TerminalMap.js"
 import { consume } from "../../utils/Stream.js"
-import { maybeCharClass } from "./CharClass.js"
 import { ProduceDisjunction } from "./Disjunction.js"
-import { maybeDot } from "./Dot.js"
-import { maybeEscaped } from "./Escaped.js"
-import { maybeGroup } from "./Group.js"
-import { LookaheadMap } from "./LookaheadMap.js"
-import { maybeNegation } from "./Negation.js"
 import { RootNode } from "./Nodes.js"
-import { maybePipe } from "./Pipe.js"
-import { maybePlus } from "./Quantifiers/Plus.js"
-import { maybePreQuantifier } from "./Quantifiers/Pre.js"
-import { maybeQMark } from "./Quantifiers/QMark.js"
-import { maybeRange } from "./Quantifiers/Range.js"
-import { maybeStar } from "./Quantifiers/Star.js"
-import { HandleSingleChar } from "./SingleChar.js"
-import { maybeTypeMatch } from "./TypeMatch.js"
+import { QuantifierProcessor } from "./Quantifiers.js"
+import { RegexTokenizer } from "./Tokenizer.js"
 
 export class RegexParser {
 	static readonly instance = new RegexParser()
@@ -67,34 +53,11 @@ export const PreserveLowerStream = () => new IdentityStream()
 
 export const BasicPeekHash = PeekHash(BasicHash)
 
-const RegexTokenizer = TableHandler<IOwnedStream<string>, IRawStreamArray>(
-	new CurrentHash(
-		BasicMap(
-			[
-				...maybeEscaped,
-				...maybeNegation,
-				...maybeTypeMatch,
-				...maybeGroup,
-				...maybeCharClass,
-				...maybeDot,
-				...maybePreQuantifier,
-				...maybePipe
-			],
-			HandleSingleChar
-		)
-	)
-)
-
-const QuantifierProcessor = TableHandler(
-	LookaheadMap(
-		[...maybePlus, ...maybeQMark, ...maybeStar, ...maybeRange],
-		PreserveLowerStream
-	)
-)
-
 const RootNodeStream = SingletonWrapperStream(RootNode)
 
-export function ParseRegexRecursively(): IRawStreamArray {
+export function ParseRegexRecursively(
+	input?: IOwnedStream<string>
+): IRawStreamArray {
 	return [
 		ProduceDisjunction,
 		QuantifierProcessor,
