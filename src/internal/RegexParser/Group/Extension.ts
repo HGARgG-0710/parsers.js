@@ -1,5 +1,6 @@
 import type { IOwnedStream } from "../../../interfaces.js"
 import { TableHandler } from "../../../objects.js"
+import { PeekStream } from "../../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
 import { ObjectMap } from "../../../samples/TerminalMap.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
@@ -21,7 +22,8 @@ export const HandleExtensionGroup = (recursiveParser = ParseRegexRecursively) =>
 							IgnoreCaseGroupStream(),
 							GroupBodyStream(),
 							recursiveParser,
-							GroupLimitStream()
+							GroupLimitStream(),
+							PeekStream()
 						]
 					}
 				},

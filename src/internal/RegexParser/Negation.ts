@@ -1,23 +1,30 @@
-import type { array } from "@hgargg-0710/one"
 import type {
 	IOwnedStream,
 	IPeekable,
-	IStreamChooser
+	IRawStreamArray
 } from "../../interfaces.js"
-import { expect } from "../../objects/Error.js"
+import { unexpected } from "../../objects/Error.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
-import { HandleCharClass } from "./CharClass.js"
+import { HandleMaybeBoundaryClass } from "./Class/BoundaryClass.js"
+import { HandleCharClass } from "./Class/CharClass.js"
+import { CurrCharHandler } from "./CurrCharHandler.js"
 import { Negated } from "./Nodes.js"
 
 const NegationStream = SingletonWrapperStream(Negated)
-const expectCharClassStart = expect("[")
+
+const NegatedHandler = CurrCharHandler<IRawStreamArray>(
+	{
+		"[": HandleCharClass,
+		"\\": HandleMaybeBoundaryClass
+	},
+	(input: IOwnedStream<string>) => unexpected(input)
+)
 
 function handleNegation(input: IOwnedStream<string> & IPeekable<string>) {
 	input.next() // ^
-	expectCharClassStart(input)
-	return [NegationStream(), HandleCharClass]
+	return [NegationStream(), NegatedHandler]
 }
 
-export const maybeNegation: array.Pairs<string, IStreamChooser> = [
-	["^", handleNegation]
-]
+export const maybeNegation = {
+	"^": handleNegation
+}

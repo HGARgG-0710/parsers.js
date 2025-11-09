@@ -1,5 +1,5 @@
 import type { ICellNode, IOwnedStream } from "../../../interfaces.js"
-import { expect } from "../../../objects/Error.js"
+import { skip } from "../../../objects/Error.js"
 import { SourceBuilder } from "../../../objects/SourceBuilder.js"
 import { ValidatorStream } from "../../../objects/Stream.js"
 import {
@@ -11,7 +11,7 @@ import { consumable } from "../../../utils/Stream.js"
 import { validateHex, validateUnicodeCodeLength } from "../Errors.js"
 import { UnicodeChar } from "../Nodes.js"
 
-const expectOpBrack = expect("{")
+const skipOpbrack = skip("{")
 
 const UnicodeLimitStream = EndBracketStream(isCurr("}"))
 
@@ -37,7 +37,6 @@ function HandleUnicodeNumber() {
 
 export function HandleUnicode(input: IOwnedStream<string>) {
 	input.next() // u
-	expectOpBrack(input)
-	input.next() // {
+	skipOpbrack(input) // {
 	return HandleUnicodeNumber()
 }

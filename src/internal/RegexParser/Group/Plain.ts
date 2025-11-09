@@ -1,3 +1,4 @@
+import { PeekStream } from "../../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
 import { GroupBodyStream, GroupLimitStream } from "../Group.js"
 import { Group } from "../Nodes.js"
@@ -10,6 +11,7 @@ export function HandlePlainGroup(recursiveParser = ParseRegexRecursively) {
 		GroupStream(),
 		GroupBodyStream(),
 		recursiveParser,
-		GroupLimitStream()
+		GroupLimitStream(),
+		PeekStream()
 	]
 }

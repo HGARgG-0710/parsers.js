@@ -2,6 +2,7 @@ import type {
 	IGettable,
 	ILinkedStream,
 	IOwnedStream,
+	IPeekableStream,
 	IPredicatePosition,
 	ISingletonNodeType,
 	IStream
@@ -53,6 +54,11 @@ export function CachedTokenStream(tokenClass: ISingletonNodeType) {
  */
 export function isCurr<T = any>(value: T) {
 	return (input: IStream<T>) => input.curr === value
+}
+
+export function isNonEscaped(value: string) {
+	return (input: IPeekableStream<string>) =>
+		input.curr !== "\\" && input.peek(1) === value
 }
 
 /**

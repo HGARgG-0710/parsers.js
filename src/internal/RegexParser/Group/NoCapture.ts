@@ -1,15 +1,8 @@
-import type { array } from "@hgargg-0710/one"
-import type {
-	IOwnedStream,
-	IRawStreamArray,
-	IStreamChooser
-} from "../../../interfaces.js"
-import { TableHandler } from "../../../objects.js"
-import { CurrentHash } from "../../../objects/HashMap.js"
+import { type IOwnedStream, type IRawStreamArray } from "../../../interfaces.js"
 import { PeekStream } from "../../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
-import { BasicMap, ObjectMap } from "../../../samples/TerminalMap.js"
-import { maybeCharClass } from "../CharClass.js"
+import { maybeCharClass } from "../Class/CharClass.js"
+import { CurrCharHandler } from "../CurrCharHandler.js"
 import { ProduceDisjunction } from "../Disjunction.js"
 import { maybeDot } from "../Dot.js"
 import { maybeEscaped } from "../Escaped.js"
@@ -26,45 +19,32 @@ import { HandlePlainGroup } from "./Plain.js"
 
 const NoCaptureGroupStream = SingletonWrapperStream(NoCaptureGroup)
 
-const OtherGroupHandler = TableHandler(
-	new CurrentHash(
-		ObjectMap(
-			{
-				"#": HandleExtensionGroup(ParseNoCaptureRecursively)
-			},
-			HandlePlainGroup(ParseNoCaptureRecursively)
-		)
-	)
+const OtherGroupHandler = CurrCharHandler<IRawStreamArray>(
+	{
+		"#": HandleExtensionGroup(ParseNoCaptureRecursively)
+	},
+	HandlePlainGroup(ParseNoCaptureRecursively)
 )
 
 function handleOtherGroup(input: IOwnedStream<string>) {
 	input.next() // (
-	return [OtherGroupHandler(input)]
+	return OtherGroupHandler(input)
 }
 
-const maybeOtherGroup: array.Pairs<string, IStreamChooser> = [
-	["(", handleOtherGroup]
-]
+const maybeOtherGroup = { "(": handleOtherGroup }
 
-const NoCaptureRegexTokenizer = TableHandler<
-	IOwnedStream<string>,
-	IRawStreamArray
->(
-	new CurrentHash(
-		BasicMap(
-			[
-				...maybeEscaped,
-				...maybeNegation,
-				...maybeTypeMatch,
-				...maybeOtherGroup,
-				...maybeCharClass,
-				...maybeDot,
-				...maybePreQuantifier,
-				...maybePipe
-			],
-			HandleSingleChar
-		)
-	)
+const NoCaptureRegexTokenizer = CurrCharHandler<IRawStreamArray>(
+	{
+		...maybeEscaped,
+		...maybeNegation,
+		...maybeTypeMatch,
+		...maybeOtherGroup,
+		...maybeCharClass,
+		...maybeDot,
+		...maybePreQuantifier,
+		...maybePipe
+	},
+	HandleSingleChar
 )
 
 function ParseNoCaptureRecursively(input: IOwnedStream<string>) {
@@ -82,6 +62,7 @@ export function HandleNoCaptureGroup(input: IOwnedStream<string>) {
 		NoCaptureGroupStream(),
 		GroupBodyStream(),
 		ParseNoCaptureRecursively,
-		GroupLimitStream()
+		GroupLimitStream(),
+		PeekStream()
 	]
 }

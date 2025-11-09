@@ -1,13 +1,6 @@
-import type { array } from "@hgargg-0710/one"
-import type {
-	ICommonStream,
-	INode,
-	IOwnedStream,
-	IStreamChooser
-} from "../../interfaces.js"
-import { TableHandler } from "../../objects.js"
-import { CurrentHash } from "../../objects/HashMap.js"
-import { ObjectMap } from "../../samples/TerminalMap.js"
+import type { ICommonStream, INode, IOwnedStream } from "../../interfaces.js"
+import { HandleBoundaryClass } from "./Class/BoundaryClass.js"
+import { CurrCharHandler } from "./CurrCharHandler.js"
 import { HandleDigit } from "./Escaped/Digit.js"
 import { HandleFormFeed } from "./Escaped/FormFeed.js"
 import { HandleEscapedLiteral } from "./Escaped/Literal.js"
@@ -18,40 +11,30 @@ import { HandleUnicode } from "./Escaped/Unicode.js"
 import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 
-const EscapedHandler = TableHandler<IOwnedStream<string>, ICommonStream<INode>>(
-	new CurrentHash(
-		ObjectMap(
-			{
-				w: HandleWord,
-				d: HandleDigit,
-				s: HandleSpace,
-				u: HandleUnicode,
-				n: HandleNewline,
-				t: HandleTab,
-				v: HandleVTab,
-				f: HandleFormFeed
-			},
-			HandleEscapedLiteral
-		)
-	)
+const EscapedHandler = CurrCharHandler<ICommonStream<INode>>(
+	{
+		w: HandleWord,
+		d: HandleDigit,
+		s: HandleSpace,
+		u: HandleUnicode,
+		n: HandleNewline,
+		t: HandleTab,
+		v: HandleVTab,
+		f: HandleFormFeed,
+		b: HandleBoundaryClass
+	},
+	HandleEscapedLiteral
 )
 
-const RangeBoundaryEscapedHandler = TableHandler<
-	IOwnedStream<string>,
-	ICommonStream<INode>
->(
-	new CurrentHash(
-		ObjectMap(
-			{
-				u: HandleUnicode,
-				n: HandleNewline,
-				t: HandleTab,
-				v: HandleVTab,
-				f: HandleFormFeed
-			},
-			HandleEscapedLiteral
-		)
-	)
+const RangeBoundaryEscapedHandler = CurrCharHandler<ICommonStream<INode>>(
+	{
+		u: HandleUnicode,
+		n: HandleNewline,
+		t: HandleTab,
+		v: HandleVTab,
+		f: HandleFormFeed
+	},
+	HandleEscapedLiteral
 )
 
 export function HandleRangeBoundaryEscaped(input: IOwnedStream<string>) {
@@ -64,6 +47,6 @@ export function HandleEscaped(input: IOwnedStream<string>) {
 	return [EscapedHandler(input)]
 }
 
-export const maybeEscaped: array.Pairs<string, IStreamChooser> = [
-	["\\", HandleEscaped]
-]
+export const maybeEscaped = {
+	"\\": HandleEscaped
+}

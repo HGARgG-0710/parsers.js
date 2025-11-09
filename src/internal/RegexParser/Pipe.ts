@@ -1,5 +1,4 @@
-import type { array } from "@hgargg-0710/one"
-import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
+import type { IOwnedStream } from "../../interfaces.js"
 import { CachedTokenStream } from "../../samples/Stream.js"
 import { Temp } from "./Nodes.js"
 
@@ -10,6 +9,6 @@ function handlePipe(input: IOwnedStream<string>) {
 	return [PipeStream()]
 }
 
-export const maybePipe: array.Pairs<string, IStreamChooser> = [
-	["|", handlePipe]
-]
+export const maybePipe = {
+	"|": handlePipe
+}

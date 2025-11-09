@@ -11,8 +11,8 @@ import { SourceBuilder } from "../../../objects.js"
 import {
 	ensureChildUnrevivable,
 	ensureCurrDecimal,
-	expect,
-	expectKind
+	expectKind,
+	skip
 } from "../../../objects/Error.js"
 import {
 	LimitStream,
@@ -54,7 +54,7 @@ const RangeBoundaryStream = SingletonStream(
 
 const expectRangeBoundary = expectKind(RangeBoundary)
 const expectCommaNode = expectKind(Temp.Comma)
-const expectComma = expect(",")
+const skipComma = skip(",")
 
 class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 	private finalRange: IPoolNode<[INode]>
@@ -102,8 +102,7 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 }
 
 function HandleComma(input: IOwnedStream<string>) {
-	expectComma(input)
-	input.next() // ,
+	skipComma(input) // ,
 	return [CommaStream()]
 }
 

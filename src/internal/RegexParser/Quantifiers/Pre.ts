@@ -1,5 +1,4 @@
-import type { array } from "@hgargg-0710/one"
-import type { IOwnedStream, IStreamChooser } from "../../../interfaces.js"
+import type { IOwnedStream } from "../../../interfaces.js"
 import { CachedTokenStream } from "../../../samples/Stream.js"
 import { Temp } from "../Nodes.js"
 import { HandleRange } from "./Range.js"
@@ -23,9 +22,9 @@ function handleQmark(input: IOwnedStream<string>) {
 	return [QMarkStream()]
 }
 
-export const maybePreQuantifier: array.Pairs<string, IStreamChooser> = [
-	["+", handlePlus],
-	["*", handleStar],
-	["?", handleQmark],
-	["{", HandleRange]
-]
+export const maybePreQuantifier = {
+	"+": handlePlus,
+	"*": handleStar,
+	"?": handleQmark,
+	"{": HandleRange
+}

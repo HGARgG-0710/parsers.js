@@ -123,9 +123,9 @@ export const RangeBoundary = ContentNode<number>(
 )
 
 export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
-export const CharClassRangeBoundary = SingleChildNode(
-	"char-class-range-boundary",
-	"CharClassRangeBoundary"
+export const ClassRangeBoundary = SingleChildNode(
+	"class-range-boundary",
+	"ClassRangeBoundary"
 )
 
 export class ClassRange extends BaseNode {
@@ -175,3 +175,5 @@ export const TypeMatch = ContentNode("type-match", "TypeMatch")
 export const AsString = ContentNode("as-string", "AsString")
 export const AsInt = ContentNode("as-int", "AsInt")
 export const RootNode = SingleChildNode("regex-root", "RootNode")
+
+export const BoundaryClass = RecursiveNode("boundary-class", "BoundaryClass")

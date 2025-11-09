@@ -1,5 +1,4 @@
-import type { array } from "@hgargg-0710/one"
-import type { IOwnedStream, IStreamChooser } from "../../interfaces.js"
+import type { IOwnedStream } from "../../interfaces.js"
 import { CachedTokenStream } from "../../samples/Stream.js"
 import { AnyChar } from "./Nodes.js"
 
@@ -10,4 +9,4 @@ function handleDot(input: IOwnedStream<string>) {
 	return [AnyCharStream()]
 }
 
-export const maybeDot: array.Pairs<string, IStreamChooser> = [[".", handleDot]]
+export const maybeDot = { ".": handleDot }

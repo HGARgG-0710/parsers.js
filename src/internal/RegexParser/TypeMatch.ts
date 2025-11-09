@@ -1,15 +1,14 @@
-import type { array } from "@hgargg-0710/one"
 import type {
 	IOwnedStream,
 	IPeekable,
-	IPeekableStream,
-	IStreamChooser
+	IPeekableStream
 } from "../../interfaces.js"
 import { SourceBuilder } from "../../objects.js"
+import { PeekStream } from "../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
-	isCurr,
+	isNonEscaped,
 	SingletonWrapperStream
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
@@ -25,7 +24,7 @@ const TypeMatchStream = CollectionStream(
 	consumable(new SourceBuilder())
 )
 
-const TypeMatchLimitsStream = EndBracketStream(isCurr("}"))
+const TypeMatchLimitsStream = EndBracketStream(isNonEscaped("}"))
 
 function isTypeMatchStart(stream: IPeekableStream<string>) {
 	return stream.peek(1) === "{"
@@ -35,7 +34,12 @@ function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
 	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // i
 	input.next() // {
-	return [AsIntStream(), TypeMatchStream(), TypeMatchLimitsStream()]
+	return [
+		AsIntStream(),
+		TypeMatchStream(),
+		TypeMatchLimitsStream(),
+		PeekStream()
+	]
 }
 
 function HandleStringTypeMatch(
@@ -44,10 +48,15 @@ function HandleStringTypeMatch(
 	if (!isTypeMatchStart(input)) return HandleSingleChar()
 	input.next() // s
 	input.next() // {
-	return [AsStringStream(), TypeMatchStream(), TypeMatchLimitsStream()]
+	return [
+		AsStringStream(),
+		TypeMatchStream(),
+		TypeMatchLimitsStream(),
+		PeekStream()
+	]
 }
 
-export const maybeTypeMatch: array.Pairs<string, IStreamChooser> = [
-	["i", HandleIntTypeMatch],
-	["s", HandleStringTypeMatch]
-]
+export const maybeTypeMatch = {
+	i: HandleIntTypeMatch,
+	s: HandleStringTypeMatch
+}
