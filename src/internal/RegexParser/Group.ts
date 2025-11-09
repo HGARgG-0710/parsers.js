@@ -6,11 +6,11 @@ import {
 	isNonEscaped
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
-import { CurrCharHandler } from "./CurrCharHandler.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandleNoCaptureGroup } from "./Group/NoCapture.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 import { GroupBody } from "./Nodes.js"
+import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
 export const GroupLimitStream = EndBracketStream(isNonEscaped(")"))
 

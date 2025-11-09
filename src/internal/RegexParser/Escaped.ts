@@ -1,6 +1,5 @@
 import type { ICommonStream, INode, IOwnedStream } from "../../interfaces.js"
 import { HandleBoundaryClass } from "./Class/BoundaryClass.js"
-import { CurrCharHandler } from "./CurrCharHandler.js"
 import { HandleDigit } from "./Escaped/Digit.js"
 import { HandleFormFeed } from "./Escaped/FormFeed.js"
 import { HandleEscapedLiteral } from "./Escaped/Literal.js"
@@ -10,6 +9,7 @@ import { HandleTab } from "./Escaped/Tab.js"
 import { HandleUnicode } from "./Escaped/Unicode.js"
 import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
+import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
 const EscapedHandler = CurrCharHandler<ICommonStream<INode>>(
 	{

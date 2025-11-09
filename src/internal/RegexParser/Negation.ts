@@ -7,8 +7,8 @@ import { unexpected } from "../../objects/Error.js"
 import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { HandleMaybeBoundaryClass } from "./Class/BoundaryClass.js"
 import { HandleCharClass } from "./Class/CharClass.js"
-import { CurrCharHandler } from "./CurrCharHandler.js"
 import { Negated } from "./Nodes.js"
+import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
 const NegationStream = SingletonWrapperStream(Negated)
 

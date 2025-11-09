@@ -4,14 +4,14 @@ import type {
 	IParserFunction,
 	IPeekableStream,
 	ITypeCheckable
-} from "../../interfaces.js"
+} from "../../../interfaces.js"
 import {
 	LiquidMap,
 	TableCarrier
-} from "../../modules/IndexMap/objects/LiquidMap.js"
-import { IndexMap } from "../../objects.js"
-import { Pairs } from "../../samples.js"
-import { NodeMap, PeekMap } from "../../utils/IndexMap.js"
+} from "../../../modules/IndexMap/objects/LiquidMap.js"
+import { IndexMap } from "../../../objects.js"
+import { Pairs } from "../../../samples.js"
+import { NodeMap, PeekMap } from "../../../utils/IndexMap.js"
 
 export function LookaheadMap(
 	map: array.Pairs<ITypeCheckable, IParserFunction>,
