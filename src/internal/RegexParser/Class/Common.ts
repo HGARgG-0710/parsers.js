@@ -27,8 +27,7 @@ const RangeBoundaryStream = SingletonWrapperStream(ClassRangeBoundary)
 const expectRangeBoundary = expectKind(ClassRangeBoundary)
 const expectHyphen = expectKind(Temp.Hyphen)
 
-// * NOTE : this is not intended for use. TypeScript is just fucking stupid (again)...
-export class ClassRangeStream extends SingleNodeStream<INode> {
+class ClassRangeStream extends SingleNodeStream<INode> {
 	private classRange: ClassRange
 
 	private updateCurr() {

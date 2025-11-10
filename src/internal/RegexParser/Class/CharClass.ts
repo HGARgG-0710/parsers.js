@@ -2,7 +2,8 @@ import type {
 	ICollectionNode,
 	ICompositeStream,
 	IOwnedStream,
-	IPeekable
+	IPeekable,
+	IRawStreamArray
 } from "../../../interfaces.js"
 import { PeekStream } from "../../../objects/Stream.js"
 import { EndBracketStream, isNonEscaped } from "../../../samples/Stream.js"
@@ -22,7 +23,7 @@ const CharClassHandler = HandleClass(() => new CharClassStream())
 export function HandleCharClass(
 	this: ICompositeStream,
 	input: IOwnedStream<string> & IPeekable<string>
-) {
+): IRawStreamArray {
 	input.next() // [
 	return [CharClassHandler, CharClassLimitStream(), PeekStream()]
 }
