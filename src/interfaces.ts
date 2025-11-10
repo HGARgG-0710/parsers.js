@@ -189,6 +189,8 @@ export interface IReadable<T = any> {
 	read(i: number): T
 }
 
+export type IConcreteReadable<T = any> = IReadable<T> & ISizeable
+
 /**
  * This is a type for representing entities that
  * can successfully be parsed. They must be:
@@ -197,7 +199,7 @@ export interface IReadable<T = any> {
  * 2. sizeable
  * 3. copiable
  */
-export type IParseable<T = any> = IReadable<T> & ISizeable & ICopiable
+export type IParseable<T = any> = IConcreteReadable<T> & ICopiable
 
 /**
  * This is an interface representing items with

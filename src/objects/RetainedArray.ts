@@ -25,12 +25,12 @@ export class RetainedArray<T = any>
 
 	private fakeSize: number = 0
 
-	private get allocSize() {
+	private get capacity() {
 		return super.size
 	}
 
 	private freeSpace() {
-		return this.allocSize - this.fakeSize
+		return this.capacity - this.fakeSize
 	}
 
 	private condAlloc(newItems: number) {

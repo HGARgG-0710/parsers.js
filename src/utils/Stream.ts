@@ -110,9 +110,9 @@ export function consume<T = any, K extends IPushable<T> = ArrayCollection<T>>(
  * @returns the `result`
  */
 export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
-	for (let i = 0; i < result.size && !stream.isEnd; ++i)
-		result.write(i, next(stream))
-	return result
+	let i = 0
+	for (; i < result.size && !stream.isEnd; ++i) result.write(i, next(stream))
+	return i
 }
 
 /**

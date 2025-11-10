@@ -69,13 +69,16 @@ export class InputStream<T = any>
 		this.view.init(source)
 	}
 
-	navigate(relativePos: IStreamPosition) {
-		if (isPredicatePosition(relativePos))
-			return uniNavigate(this, relativePos)
-
+	private navigateInt(relativePos: number) {
 		this.pos = max(0, min(this.lastPos, this.lastPos + relativePos))
 		this.updateCurr()
 		return this.curr
+	}
+
+	navigate(relativePos: IStreamPosition) {
+		return isPredicatePosition(relativePos)
+			? uniNavigate(this, relativePos)
+			: this.navigateInt(relativePos)
 	}
 
 	rewind() {
@@ -88,6 +91,14 @@ export class InputStream<T = any>
 
 	peek(n: number) {
 		return this.view.read(n)
+	}
+
+	toPeek(n: number): void {
+		this.view.forward(n)
+	}
+
+	hasPeek(n: number): boolean {
+		return this.view.has(n)
 	}
 
 	constructor(source?: IParseable<T>) {

@@ -1,6 +1,10 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { IInitializable, IReadable } from "../interfaces.js"
+import type {
+	IConcreteReadable,
+	IInitializable,
+	IReadable
+} from "../interfaces.js"
 
 const { isNumber } = type
 
@@ -13,10 +17,10 @@ type IView<T = any> = IReadable<T> & IInitializable<[IReadable<T>]>
 export class ReadableView<T = any> implements IView<T> {
 	private ["constructor"]: new (
 		offset: number,
-		sequence: IReadable<T>
+		sequence: IConcreteReadable<T>
 	) => this
 
-	private readable: IReadable<T>
+	private readable: IConcreteReadable<T>
 
 	copy() {
 		return new this.constructor(this.offset, this.readable)
@@ -26,16 +30,20 @@ export class ReadableView<T = any> implements IView<T> {
 		return this.readable.read(this.offset + i)
 	}
 
-	init(readable?: IReadable<T>) {
+	init(readable?: IConcreteReadable<T>) {
 		if (readable) this.readable = readable
 		return this
 	}
 
-	forward() {
-		++this.offset
+	has(n: number) {
+		return this.readable.size - this.offset > n
 	}
 
-	constructor(private offset: number, readable?: IReadable<T>) {
+	forward(n: number = 1) {
+		this.offset += n
+	}
+
+	constructor(private offset: number, readable?: IConcreteReadable<T>) {
 		assert(isNumber(offset))
 		assert(offset >= 0)
 		this.init(readable)

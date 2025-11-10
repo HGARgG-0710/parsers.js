@@ -37,6 +37,8 @@ export interface INavigable<T = any, PosType = IStreamPosition<T>> {
  */
 export interface IPeekable<T = any> {
 	peek(n: number): T
+	hasPeek(n: number): boolean
+	toPeek(n: number): void
 }
 
 /**

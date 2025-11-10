@@ -47,14 +47,13 @@ export class NFARegexMatcher implements IRegexMatcher {
 		this.resetLists()
 		let i = 0
 
-		// ! BUG - need to check IF THE NEXT PEEK IS VALID! [it's an equivalent, but anyway...]
-		while (!this.input.isEnd) {
+		do {
 			if (this.currList.isEmpty()) break
 			if (this.step(i++)) break
 			const temp = this.currList
 			this.currList = this.nextList
 			this.nextList = temp
-		}
+		} while (this.input.hasPeek(i))
 
 		return this.nextList
 	}
@@ -70,6 +69,7 @@ export class NFARegexMatcher implements IRegexMatcher {
 		// * 2. SUCCESS MATCH - (string | T)[]; One needs a GENERIC COLLECTION for (string | T)[],
 		// 		which would DEGRADE to `string` (via concatenation) in case that NO "ITyped" types
 		// 		has ever appeared...
+		// ! REMEMBER to add the `stream.toPeek(matchedItems.length)`
 	}
 
 	constructor(private readonly startState: State) {

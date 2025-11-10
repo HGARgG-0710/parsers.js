@@ -1,7 +1,4 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
-import { ownerInitializer } from "../../../objects/Initializer.js"
-import { RetainedArray } from "../../../objects/RetainedArray.js"
 import type {
 	IInitializable,
 	IInitializer,
@@ -16,9 +13,14 @@ import type {
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
 import { mixin } from "../../../mixin.js"
+import { ObjectPool } from "../../../objects.js"
+import { ownerInitializer } from "../../../objects/Initializer.js"
+import { RetainedArray } from "../../../objects/RetainedArray.js"
 import { write } from "../../../utils/Stream.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
+
+const DefaultPeekSize = 4
 
 interface IPeekResettable {
 	resetPeeks(): void
@@ -27,6 +29,7 @@ interface IPeekResettable {
 interface IPeekProvidableFor<T = any> {
 	trivialPeek(): T
 	newPeek(n: number): T
+	readonly peeksMaybeLeft: boolean
 }
 
 /**
@@ -58,20 +61,24 @@ class PeekProvider<T = any> {
 		return this.peekBuffer.read(n - 1)
 	}
 
+	private newPeek(n: number) {
+		return this.providableFor.newPeek(this.unseenItems(n))
+	}
+
 	hasNone() {
 		return this.peekCount === 0
 	}
 
-	provide(n: number, providableFor: IPeekProvidableFor<T>) {
+	provide(n: number) {
 		switch (true) {
 			case this.isTrivial(n):
-				return providableFor.trivialPeek()
+				return this.providableFor.trivialPeek()
 
 			case this.hasSeen(n):
 				return this.priorPeek(n)
 
 			default:
-				return providableFor.newPeek(this.unseenItems(n))
+				return this.newPeek(n)
 		}
 	}
 
@@ -79,10 +86,21 @@ class PeekProvider<T = any> {
 		return this.peekCount > 0
 	}
 
+	has(n: number) {
+		if (this.hasSeen(n)) return true
+		this.newPeek(n)
+		return this.providableFor.peeksMaybeLeft
+	}
+
 	fetchNext() {
 		const nextPeek = this.peekBuffer.first()
 		this.peekBuffer.forward()
 		return nextPeek
+	}
+
+	advance(n: number) {
+		if (n > 1) this.peekBuffer.forward(n - 1)
+		return this.fetchNext()
 	}
 
 	last() {
@@ -97,7 +115,10 @@ class PeekProvider<T = any> {
 		this.peekBuffer.clear()
 	}
 
-	constructor(n: number = 1) {
+	constructor(
+		private readonly providableFor: IPeekProvidableFor<T>,
+		n: number = 1
+	) {
 		this.peekBuffer = new RotationBuffer(n)
 	}
 }
@@ -110,7 +131,8 @@ class TempWriter<T = any> {
 	private readonly tempItems = new RetainedArray<T>()
 
 	toTemp(from: IStream<T>, count: number) {
-		write(from, this.tempItems.init(count))
+		const writtenItems = write(from, this.tempItems.init(count))
+		return writtenItems === count
 	}
 
 	get() {
@@ -142,6 +164,8 @@ const _PeekStream = new mixin(
 				)
 		},
 		properties: {
+			peeksMaybeLeft: false,
+
 			baseNextIter() {
 				this.super.DyssyncOwningStream.next.call(this)
 				this.syncCurr()
@@ -152,7 +176,7 @@ const _PeekStream = new mixin(
 			},
 
 			toTemp(count: number) {
-				this.tempWriter.toTemp(this.resource!, count)
+				return this.tempWriter.toTemp(this.resource!, count)
 			},
 
 			get pool() {
@@ -168,13 +192,13 @@ const _PeekStream = new mixin(
 			},
 
 			newPeek(count: number) {
-				this.toTemp(count)
+				this.peeksMaybeLeft = this.toTemp(count)
 				this.peekProvider.push(this.tempWriter.get())
 				return this.peekProvider.last()
 			},
 
 			peek(n: number) {
-				return this.peekProvider.provide(n, this)
+				return this.peekProvider.provide(n)
 			},
 
 			isCurrEnd(): boolean {
@@ -190,13 +214,21 @@ const _PeekStream = new mixin(
 				else this.baseNextIter()
 			},
 
+			hasPeek(n: number) {
+				return this.peekProvider.has(n)
+			},
+
+			toPeek(n: number) {
+				this.curr = this.peekProvider.advance(n)
+			},
+
 			resetPeeks() {
 				this.peekProvider.reset()
 			}
 		},
 		constructor(resource?: IOwnedStream) {
 			this.super.DyssyncOwningStream.constructor.call(this, resource)
-			this.peekProvider = new PeekProvider(1)
+			this.peekProvider = new PeekProvider(this, DefaultPeekSize)
 			this.tempWriter = new TempWriter()
 		}
 	},
