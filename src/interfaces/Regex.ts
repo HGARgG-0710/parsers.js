@@ -27,7 +27,6 @@ export interface IRawRegexVisitor<T = any> {
 	handleCodeRange(codeRange: Regex.Raw.CodeRange): T
 	handleAnything(anything: Regex.Raw.Anything): T
 	handleNoneOf(noneOf: Regex.Raw.NoneOf): T
-	handleNonGreedy(nonGreedy: Regex.Raw.NonGreedy): T
 	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): T
 	handleNoCapture(noCapture: Regex.Raw.NoCapture): T
 }

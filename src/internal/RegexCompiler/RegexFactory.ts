@@ -13,7 +13,6 @@ const {
 	CodeRange,
 	Anything,
 	NoneOf,
-	NonGreedy,
 	IgnoreCase,
 	NoCapture
 } = Regex.Raw
@@ -39,8 +38,6 @@ export interface IRegexFactory {
 	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw
 	unicodeChar(hex: string): Regex.Raw.Char
 	typeMatch(type: IValidNodeType): Regex.Raw
-	greedy(item: Regex.Raw): Regex.Raw
-	nonGreedy(item: Regex.Raw): Regex.Raw
 	noneOrMore(item: Regex.Raw): Regex.Raw
 	optional(item: Regex.Raw): Regex.Raw
 	repeat(item: Regex.Raw, times: number): Regex.Raw
@@ -125,14 +122,6 @@ export class RawRegexFactory implements IRegexFactory {
 
 	typeMatch(type: IValidNodeType): Regex.Raw {
 		return new TokenType(type)
-	}
-
-	greedy(item: Regex.Raw): Regex.Raw {
-		return item
-	}
-
-	nonGreedy(item: Regex.Raw): Regex.Raw {
-		return new NonGreedy(item)
 	}
 
 	noneOrMore(item: Regex.Raw): Regex.Raw {

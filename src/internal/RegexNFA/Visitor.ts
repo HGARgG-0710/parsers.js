@@ -71,11 +71,6 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return null
 	}
 
-	// ! FINISH [this one's going to be *very* hard...]
-	handleNonGreedy(nonGreedy: Regex.Raw.NonGreedy): Fragment | null {
-		return null
-	}
-
 	handleNoneOrMore({ item }: Regex.Raw.NoneOrMore): Fragment | null {
 		const subExpr = item.accept(this)
 		if (!subExpr) return null

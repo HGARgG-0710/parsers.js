@@ -17,9 +17,6 @@ export namespace Temp {
 	export const Star = CachedTokenNode("star", "Star")
 }
 
-export const Greedy = SingleChildNode("greedy", "Greedy")
-export const NonGreedy = SingleChildNode("non-greedy", "NonGreedy")
-
 export const OneOrMore = SingleChildNode("one-or-more", "OneOrMore")
 export const NoneOrMore = SingleChildNode("none-or-more", "NoneOrMore")
 export const Optional = SingleChildNode("optional", "Optional")

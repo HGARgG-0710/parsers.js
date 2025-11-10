@@ -178,16 +178,6 @@ export namespace Regex {
 			}
 		}
 
-		export class NonGreedy extends Raw {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleNonGreedy(this)
-			}
-
-			constructor(private readonly item: Raw) {
-				super()
-			}
-		}
-
 		export class IgnoreCase extends Raw {
 			private readonly items: Raw[]
 

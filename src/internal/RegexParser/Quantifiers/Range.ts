@@ -35,7 +35,7 @@ import {
 	Temp,
 	TrivialRange
 } from "../Nodes.js"
-import { handleRangeQuantifier } from "./Greedy.js"
+import { handleRangeQuantifier } from "./Common.js"
 
 const CommaStream = CachedTokenStream(Temp.Comma)
 

@@ -10,13 +10,11 @@ import {
 	Disjunction,
 	EscapedLiteral,
 	FormFeed,
-	Greedy,
 	Group,
 	IgnoreCaseGroup,
 	Negated,
 	Newline,
 	NoCaptureGroup,
-	NonGreedy,
 	NoneOrMore,
 	OneOrMore,
 	Optional,
@@ -32,9 +30,9 @@ import {
 } from "../RegexParser/Nodes.js"
 import { compileLiteral, compileUnicodeChar } from "./Cell.js"
 import { compileClassRange, compileNegated } from "./CharClass.js"
-import {
-	type IRegexCompilerFunction,
-	type IRegexCompilerTypeTable
+import type {
+	IRegexCompilerFunction,
+	IRegexCompilerTypeTable
 } from "./Compiler.js"
 import { compileComplexPart } from "./Complex.js"
 import {
@@ -48,7 +46,6 @@ import {
 	compileWord
 } from "./Elementary.js"
 import { compileGroup, compileRecursiveChoiceWrapper } from "./Group.js"
-import { compileGreedy, compileNonGreedy } from "./Quantifiers/Greedy.js"
 import { compileNoneOrMore } from "./Quantifiers/NoneOrMore.js"
 import { compileOneOrMore } from "./Quantifiers/OneOrMore.js"
 import { compileOptional } from "./Quantifiers/Optional.js"
@@ -79,8 +76,6 @@ class ToplevelCompilerTable {
 }
 
 class QuantifierCompilerTable {
-	private readonly compileGreedy: IRegexCompilerFunction
-	private readonly compileNonGreedy: IRegexCompilerFunction
 	private readonly compileOptional: IRegexCompilerFunction
 	private readonly compileNoneOrMore: IRegexCompilerFunction
 	private readonly compileOneOrMore: IRegexCompilerFunction
@@ -88,8 +83,6 @@ class QuantifierCompilerTable {
 
 	get(): IRegexCompilerTypeTable {
 		return [
-			[Greedy, this.compileGreedy],
-			[NonGreedy, this.compileNonGreedy],
 			[Optional, this.compileOptional],
 			[NoneOrMore, this.compileNoneOrMore],
 			[OneOrMore, this.compileOneOrMore],
@@ -99,8 +92,6 @@ class QuantifierCompilerTable {
 
 	constructor() {
 		const factory = RawRegexFactory.instance
-		this.compileGreedy = compileGreedy(factory)
-		this.compileNonGreedy = compileNonGreedy(factory)
 		this.compileOptional = compileOptional(factory)
 		this.compileNoneOrMore = compileNoneOrMore(factory)
 		this.compileOneOrMore = compileOneOrMore(factory)
