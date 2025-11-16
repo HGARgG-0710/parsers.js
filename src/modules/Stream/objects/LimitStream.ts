@@ -1,8 +1,7 @@
 import { boolean, type } from "@hgargg-0710/one"
+import { asSteps, bind, isStepPredicate, negate } from "src/utils/Position.js"
 import * as Pools from "../../../global/Pools.js"
-import { ownerInitializer } from "../../../objects/Initializer.js"
-import { ObjectPool } from "../../../objects/ObjectPool.js"
-import type { IPoolKeeping, IPredicatePosition } from "../../../interfaces.js"
+import type { IPoolKeeping, IStepPredicate } from "../../../interfaces.js"
 import type {
 	ICommonStream,
 	ILinkedStream,
@@ -10,10 +9,15 @@ import type {
 	IStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
+import { ownerInitializer } from "../../../objects/Initializer.js"
+import { ObjectPool } from "../../../objects/ObjectPool.js"
 import { navigate } from "../../../utils/Stream.js"
-import type { ILimitableStream } from "../interfaces/LimitStream.js"
+import type {
+	ILimitableStream,
+	ILongAsEndTestTypes,
+	IUntilEndTestTypes
+} from "../interfaces/LimitStream.js"
 import type { IStreamPosition } from "../interfaces/StreamPosition.js"
-import { bind, equals, negate } from "../utils/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
@@ -60,6 +64,41 @@ class Lookaround<T = any> {
 	}
 }
 
+class ConfirmedStepsCounter {
+	private stepsBeforeCheck: number = 0
+	private _toCheckAgain: boolean = true
+
+	private registerCheck() {
+		this._toCheckAgain = false
+	}
+
+	private scheduleNewCheck() {
+		this._toCheckAgain = true
+	}
+
+	private noMoreSteps() {
+		return this.stepsBeforeCheck <= 0
+	}
+
+	get toCheckAgain() {
+		return this._toCheckAgain
+	}
+
+	setSteps(steps: number) {
+		this.stepsBeforeCheck = steps
+		this.registerCheck()
+	}
+
+	isEnd() {
+		return this.noMoreSteps() && !this._toCheckAgain
+	}
+
+	decSteps() {
+		--this.stepsBeforeCheck
+		if (this.noMoreSteps()) this.scheduleNewCheck()
+	}
+}
+
 function BuildLimitStream<T = any>(
 	from: IStreamPosition<T>,
 	until: IStreamPosition<T>
@@ -84,13 +123,15 @@ function BuildLimitStream<T = any>(
 				},
 
 				prodForthWithoutLookahead() {
-					super.next()
+					super.BasicResourceStream.next.call(this)
 					return this.curr
 				},
 
 				baseNextIter(curr: T) {
+					this.steps.decSteps()
+					const nextItem = this.lookahead.get()
 					this.lookahead.reset()
-					return this.resource.curr
+					return nextItem
 				},
 
 				goStartPos() {
@@ -126,7 +167,11 @@ function BuildLimitStream<T = any>(
 				isCurrEnd(): boolean {
 					if (this.resource.isCurrEnd()) return true
 					this.prodForth()
-					return equals(this.resource!, this.until)
+					if (this.steps.toCheckAgain) {
+						this.steps.setSteps(asSteps(this.resource!, this.until))
+						return this.steps.isEnd()
+					}
+					return false
 				},
 
 				next() {
@@ -141,8 +186,9 @@ function BuildLimitStream<T = any>(
 			constructor(resource?: ILimitableStream<T>) {
 				this.super.BasicResourceStream.constructor.call(this)
 				this.lookahead = new Lookaround()
-				this.until = bind(this, until)
-				this.from = bind(this, from)
+				this.steps = new ConfirmedStepsCounter()
+				this.from = isStepPredicate(from) ? bind(this, from) : from
+				this.until = isStepPredicate(until) ? bind(this, until) : until
 				this.init(resource)
 			}
 		},
@@ -170,9 +216,9 @@ export function LimitStream<T = any>(
 	from: IStreamPosition<T>,
 	longAs?: IStreamPosition<T>
 ) {
-	;[from, longAs] = LimitStream.ensurePredicatePair(from, longAs)
+	;[from, longAs] = LimitStream.ensureLimitsPair(from, longAs)
 
-	const until = negate(longAs)
+	const until = isStepPredicate(longAs) ? negate(longAs) : longAs
 	const limitStream = BuildLimitStream<T>(from, until)
 
 	function L(resource?: ILimitableStream<T>): ICommonStream<T> {
@@ -202,16 +248,21 @@ export namespace LimitStream {
 	 * `longAs` is not provided, it is defined as `from`, with
 	 * `from` itself being replaced with `LimitStream.NoMovementPredicate`.
 	 */
-	export function ensurePredicatePair<
+	export function ensureLimitsPair<
 		T = any,
 		A extends IStreamPosition<T> = IStreamPosition<T>,
 		B extends IStreamPosition<T> = IStreamPosition<T>
 	>(from: A, longAs?: B) {
 		return isNullary(longAs)
-			? ([NoMovementPredicate, from] as [
-					IPredicatePosition<IStream<T>>,
-					A
-			  ])
+			? ([NoMovementPredicate, from] as [IStepPredicate<IStream<T>>, A])
 			: ([from, longAs] as [A, B])
+	}
+
+	export function testUntilPredicateResult(isEnd: IUntilEndTestTypes) {
+		return isEnd === true || isEnd === 0
+	}
+
+	export function testLongAsPredicateResult(longAs: ILongAsEndTestTypes) {
+		return longAs === false || longAs === 0
 	}
 }

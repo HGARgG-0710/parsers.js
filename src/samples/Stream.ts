@@ -3,11 +3,15 @@ import type {
 	ILinkedStream,
 	IOwnedStream,
 	IPeekableStream,
-	IPredicatePosition,
 	ISingletonNodeType,
+	IStepPredicate,
 	IStream
 } from "../interfaces.js"
-import { LimitStream, SingletonStream } from "../objects/Stream.js"
+import {
+	HandlerStream,
+	LimitStream,
+	SingletonStream
+} from "../objects/Stream.js"
 
 /**
  * This is a `LimitStream` that lasts upto the character at which `until`
@@ -15,14 +19,17 @@ import { LimitStream, SingletonStream } from "../objects/Stream.js"
  * for `(...)`-type bracketed expressions.
  */
 export function EndBracketStream<T = any>(
-	from: IPredicatePosition<IStream<T>>,
-	until?: IPredicatePosition<IStream<T>>
+	from: IStepPredicate<IStream<T>>,
+	until?: IStepPredicate<IStream<T>>
 ) {
-	;[from, until] = LimitStream.ensurePredicatePair(from, until)
+	;[from, until] = LimitStream.ensureLimitsPair(from, until)
 	return LimitStream(from, (input: IStream<T>) => {
 		const isEnd = until(input)
-		if (isEnd) input.next()
-		return !isEnd
+		if (LimitStream.testUntilPredicateResult(isEnd)) {
+			input.next()
+			return false
+		}
+		return isEnd || true
 	})
 }
 
@@ -58,7 +65,7 @@ export function isCurr<T = any>(value: T) {
 
 export function isNonEscaped(value: string) {
 	return (input: IPeekableStream<string>) =>
-		input.curr !== "\\" && input.peek(1) === value
+		input.curr === "\\" ? 1 : input.curr === value
 }
 
 /**
@@ -97,3 +104,8 @@ export function DefaultChooser<T = any, K extends IOwnedStream = IOwnedStream>(
 ) {
 	return () => [streamFactory()]
 }
+
+export const EscapedStream = HandlerStream((stream: IOwnedStream<string>) => {
+	if (stream.curr == "\\") stream.next()
+	return stream.curr
+})

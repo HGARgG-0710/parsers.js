@@ -1,19 +1,40 @@
-import { functional, type } from "@hgargg-0710/one"
-import type { IPosition, IPredicatePosition } from "../interfaces.js"
+import { type } from "@hgargg-0710/one"
+import type { IStepPredicate } from "../interfaces.js"
 
-const { isFunction, isNumber } = type
-const { or } = functional
+const { isFunction, isNumber, isBoolean } = type
 
 /**
  * Returns whether given `x` is an `IPredicatePosition<T>`
  */
-export const isPredicatePosition = isFunction as <T = any>(
+export const isStepPredicate = isFunction as <T = any>(
 	x: any
-) => x is IPredicatePosition<T>
+) => x is IStepPredicate<T>
+
+export function negate<T = any>(
+	position: IStepPredicate<T>
+): IStepPredicate<T> {
+	return (x: T) => {
+		const longAs = position(x)
+		if (isNumber(longAs)) return longAs
+		return !longAs
+	}
+}
+
+export function asSteps<T = any>(
+	stream: T,
+	position: IStepPredicate<T>
+): number {
+	const result = position(stream)
+	return isBoolean(result) ? (result ? 1 : 0) : result
+}
 
 /**
- * Returns whether given `x` is a `IPosition<T>`
+ * For a `pos: number`, this returns `pos`, and for a `IPredicatePosition`,
+ * it returns `preserve(pos, (pos) => pos.bind(target))`.
  */
-export const isPosition = or(isNumber, isPredicatePosition) as <T = any>(
-	x: any
-) => x is IPosition<T>
+export function bind<T = any>(
+	target: T,
+	pos: IStepPredicate
+): IStepPredicate<T> {
+	return pos.bind(target)
+}

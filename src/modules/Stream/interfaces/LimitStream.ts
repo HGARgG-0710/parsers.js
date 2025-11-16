@@ -6,3 +6,7 @@ import type { IOwnedStream } from "./OwnedStream.js"
  * position].
  */
 export type ILimitableStream<T = any> = IOwnedStream<T> & IPosed
+
+export type ILongAsEndTestTypes = number | boolean
+
+export type IUntilEndTestTypes = number | boolean

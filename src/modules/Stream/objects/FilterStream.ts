@@ -9,7 +9,7 @@ import type {
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ICommonStream } from "../interfaces/CommonStream.js"
-import { bind } from "../utils/StreamPosition.js"
+import { bind, isStepPredicate } from "src/utils/Position.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
@@ -74,7 +74,7 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
 			},
 			constructor(resource?: IOwnedStream<T>) {
 				this.super.DyssyncOwningStream.constructor.call(this, resource)
-				this.filter = bind(this, filter)
+				this.filter = isStepPredicate(filter) ? bind(this, filter) : filter
 			}
 		},
 		[DyssyncOwningStream, PoolableStream]

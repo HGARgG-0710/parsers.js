@@ -37,11 +37,8 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
  * Checks for an id that starts with a lower- or upper- case letter or a _ symbol,
  * and continues either with a lower-/upper- case letter, _ symbol, or digits from
  * 0 to 9.
- *
- * Note: The "letter" here is employed in a Unicode context, i.e.
- * foreign letters too work as a identifiers.
  */
-export const isIdentifier = (x: string) => /^[A-Za-z_]\w+$/u.test(x)
+export const isIdentifier = (x: string) => /^[A-Za-z_]\w+$/.test(x)
 
 /**
  * Verifies that a given string is a sequence of `"\n"`, `"\t"`, and `" "` characters.

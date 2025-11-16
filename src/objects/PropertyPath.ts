@@ -1,9 +1,9 @@
 import { array, boolean, type } from "@hgargg-0710/one"
 import type {
 	IOwnedStream,
-	IPosition,
-	IPredicatePosition,
 	IResourcefulStream,
+	IStep,
+	IStepPredicate,
 	IStream
 } from "../interfaces.js"
 import type {
@@ -37,7 +37,7 @@ export class SimplePath<I = any> implements IPropertyPath<I> {
 		return [i, current]
 	}
 
-	atPredicate(input: I, position: IPredicatePosition<I>): [number, any] {
+	atPredicate(input: I, position: IStepPredicate<I>): [number, any] {
 		let current: any = input
 		let i = 0
 		for (; isStruct(current) && position(current, i); ++i)
@@ -66,7 +66,7 @@ export class CachePath<I = any> implements IPropertyPath<I> {
 		return [position, this.cache[position]]
 	}
 
-	atPredicate(input: I, position: IPredicatePosition<I>): [number, any] {
+	atPredicate(input: I, position: IStepPredicate<I>): [number, any] {
 		let current = this.cache[0]
 		let i = 0
 		while (i < this.cache.length && position(current, i))
@@ -90,21 +90,21 @@ export class CachePath<I = any> implements IPropertyPath<I> {
 export class PathFollower<I = any, T = any> implements IPathFollower<I, T> {
 	private ["constructor"]: new (path: IPropertyPath) => this
 
-	private pickIteration(input: I, position: IPosition<I>) {
-		return isNumber(position)
-			? this.path.atIndex(input, position)
-			: this.path.atPredicate(input, position)
+	private pickIteration(input: I, step: IStep<I>) {
+		return isNumber(step)
+			? this.path.atIndex(input, step)
+			: this.path.atPredicate(input, step)
 	}
 
 	setCallback(callback: IPathCallback<I>) {
 		this.path.setCallback(callback)
 	}
 
-	follow(input: I, position: IPosition<I> = T): T | undefined {
+	follow(input: I, position: IStep<I> = T): T | undefined {
 		return this.pickIteration(input, position)[1]
 	}
 
-	length(input: I, position: IPosition<I>): number {
+	length(input: I, position: IStep<I>): number {
 		return this.pickIteration(input, position)[0]
 	}
 
@@ -139,22 +139,22 @@ export class CachingFollower<I = any, T = any> implements IPathFollower<I, T> {
 		this.cachePath.init(this.cacheMap.get(input))
 	}
 
-	private followUncached(input: I, position: IPosition<I>) {
-		const result = this.delegate.follow(input, position)
+	private followUncached(input: I, step: IStep<I>) {
+		const result = this.delegate.follow(input, step)
 		this.markNonEmpty(input)
 		return result
 	}
 
-	private followCached(input: I, position: IPosition<I>) {
+	private followCached(input: I, position: IStep<I>) {
 		this.setCache(input)
 		return this.cacheFollower.follow(input, position)
 	}
 
-	private lengthUncached(input: I, position: IPosition<I>) {
+	private lengthUncached(input: I, position: IStep<I>) {
 		return this.delegate.length(input, position)
 	}
 
-	private lengthCached(input: I, position: IPosition<I>) {
+	private lengthCached(input: I, position: IStep<I>) {
 		this.setCache(input)
 		return this.cacheFollower.length(input, position)
 	}
@@ -164,16 +164,16 @@ export class CachingFollower<I = any, T = any> implements IPathFollower<I, T> {
 		this.markEmpty(input)
 	}
 
-	follow(input: I, position: IPosition<I> = T): T | undefined {
+	follow(input: I, position: IStep<I> = T): T | undefined {
 		return this.isEmptyCache(input)
 			? this.followUncached(input, position)
 			: this.followCached(input, position)
 	}
 
-	length(input: I, position: IPosition<I> = T): number {
+	length(input: I, step: IStep<I> = T): number {
 		return this.isEmptyCache(input)
-			? this.lengthUncached(input, position)
-			: this.lengthCached(input, position)
+			? this.lengthUncached(input, step)
+			: this.lengthCached(input, step)
 	}
 
 	constructor(private readonly delegate: IPathFollower<I, T>) {

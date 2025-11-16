@@ -49,8 +49,15 @@ IMMEDIATE:
 		Reason: this enables a LARGER SET OF PATTERNS recognizable 
 			by the language that have a "nice" shortcut. 
 
-	TODO: *rename* the `IPosition` type...
-		It is better be called "IStepDecider", or something such...
+	TODO: about the `LimitStream`: 
+		GET RID of all the {/(/[-skipping input.next() calls. [UNLESS we are explicitly using the `skip`...]
+		INCORPORATE THEM into the `LimitStream` definitions. 
+		Specifically, use the `() => 1` for `from`, SINCE it will 
+		work in PRECISELY the same manner...
+
+	REMINDER: about the `IStepPredicate`: 
+		The value CAN BE < 0. 
+		In these cases, it is TREATED THE SAME AS 0!!!
 
 	1. CRITICAL DESIGN FLAW: recursion. 
 		The LimitedStream is NOT FIT FOR IT.  
@@ -66,10 +73,13 @@ IMMEDIATE:
 
 		For more specific details, see the appropriate note on the phone...
 
-	-2. BUG: the "TypeMatch" parsing is FAULTY. 
+	-2. REMINDER [for tests]: about the `TypeMatch` parsing...
 		It must ENSURE that the escaped characters are treated AS-ARE. 
 		Specifically, the "\}" must be converted to a simple "}". 
 		That is due to the END of the string...
+		Likewise, this is ONLY for the `AsString`. 
+		The `AsInt` PROHIBITS the non-decimal characters ALTOGETHER!!!
+		(note: that must be checked AS WELL!!!)
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...
@@ -128,7 +138,7 @@ IMMEDIATE:
 				1. SingleChar
 		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
 
-	1. REMINDER: the deep (=...(=...)) are supposed to NOT WORK, i.e. - ONLY the first one is registered, 
+	1. REMINDER [for tests]: the deep (=...(=...)) are supposed to NOT WORK, i.e. - ONLY the first one is registered, 
 		the SECOND ONE is interpreted *DIFFERENTLY*!!!
 
 	2. Regex [testing]: 

@@ -28,10 +28,10 @@ import type {
 } from "../interfaces/StreamHandler.js"
 import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
 import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
-import { negate } from "../modules/Stream/utils/StreamPosition.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
+import { isStepPredicate, negate, asSteps } from "./Position.js"
 
 const { structCheck } = object
 const { prop } = object
@@ -85,7 +85,7 @@ export function skip<T = any>(
 	input: IStream<T>,
 	steps: IStreamPosition<T> = 1
 ) {
-	return uniNavigate(input, negate(steps))
+	return uniNavigate(input, isStepPredicate(steps) ? negate(steps) : steps)
 }
 
 /**
@@ -251,7 +251,12 @@ export function uniNavigate<T = any>(
 	position: IStreamPosition<T>
 ): T {
 	if (isNumber(position)) while (position-- > 0) stream.next()
-	else while (!stream.isEnd && !position(stream)) stream.next()
+	else
+		while (!stream.isEnd) {
+			const steps = asSteps(stream, position)
+			if (steps <= 0) break
+			for (let i = 0; i < steps && !stream.isEnd; ++i) stream.next()
+		}
 	return stream.curr
 }
 
@@ -393,5 +398,3 @@ export function locateState(stream: IOwnedStream) {
  * is an instance of `IMarkerHaving`.
  */
 export const hasMarker = structCheck<IMarkerHaving>(["marker"])
-
-export * as StreamPosition from "../modules/Stream/utils/StreamPosition.js"
