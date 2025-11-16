@@ -31,7 +31,7 @@ import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
-import { isStepPredicate, negate, asSteps } from "./Position.js"
+import { isStepPredicate, negate, asSteps } from "./Step.js"
 
 const { structCheck } = object
 const { prop } = object

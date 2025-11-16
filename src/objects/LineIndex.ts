@@ -1,6 +1,6 @@
 import { array, number } from "@hgargg-0710/one"
 import assert from "node:assert"
-import type { ICopiable, IInitializable } from "../../../interfaces.js"
+import type { ICopiable, IInitializable } from "../interfaces.js"
 import type { ILineIndex } from "../interfaces/LineIndex.js"
 
 const { sum } = number

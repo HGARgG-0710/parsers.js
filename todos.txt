@@ -1,5 +1,37 @@
 [v0.3]
 
+REMINDERs: 
+	0. REMINDER: the 'IgnoreCase' '(#i...)' is NOT recursively applied: 
+		It is shallow. 
+		Meaning - one CAN have it used DEEPLY *or* NON-DEEPLY, and have appropriate results. 
+		Every time that one splits into a DIFFERENT: 
+			1. ...|...|...
+			2. (...(...innerstuff))
+		ONE NO LONGER HAS THE (#i...) THING ACTIVE. 
+		However, it DOES affect all immediate CharState-s and CodeRangeState-s. 
+		IT WORKS ON \p{...} AS WELL!!!
+		Reason: this enables a LARGER SET OF PATTERNS recognizable 
+			by the language that have a "nice" shortcut. 
+
+	REMINDER: about the `IStepPredicate`: 
+		The value CAN BE < 0. 
+		In these cases, it is TREATED THE SAME AS 0!!!
+		
+	-2. REMINDER [for tests]: about the `TypeMatch` parsing...
+		It must ENSURE that the escaped characters are treated AS-ARE. 
+		Specifically, the "\}" must be converted to a simple "}". 
+		That is due to the END of the string...
+		Likewise, this is ONLY for the `AsString`. 
+		The `AsInt` PROHIBITS the non-decimal characters ALTOGETHER!!!
+		(note: that must be checked AS WELL!!!)
+		
+	1. REMINDER [for tests]: the deep (=...(=...)) are supposed to NOT WORK, i.e. - ONLY the first one is registered, 
+		the SECOND ONE is interpreted *DIFFERENTLY*!!!
+
+	2. Regex [testing]: 
+		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
+
+
 IMMEDIATE: 
 	ORDER of tasks: 
 		1. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
@@ -37,27 +69,11 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	0. REMINDER: the 'IgnoreCase' '(#i...)' is NOT recursively applied: 
-		It is shallow. 
-		Meaning - one CAN have it used DEEPLY *or* NON-DEEPLY, and have appropriate results. 
-		Every time that one splits into a DIFFERENT: 
-			1. ...|...|...
-			2. (...(...innerstuff))
-		ONE NO LONGER HAS THE (#i...) THING ACTIVE. 
-		However, it DOES affect all immediate CharState-s and CodeRangeState-s. 
-		IT WORKS ON \p{...} AS WELL!!!
-		Reason: this enables a LARGER SET OF PATTERNS recognizable 
-			by the language that have a "nice" shortcut. 
-
 	TODO: about the `LimitStream`: 
 		GET RID of all the {/(/[-skipping input.next() calls. [UNLESS we are explicitly using the `skip`...]
 		INCORPORATE THEM into the `LimitStream` definitions. 
 		Specifically, use the `() => 1` for `from`, SINCE it will 
 		work in PRECISELY the same manner...
-
-	REMINDER: about the `IStepPredicate`: 
-		The value CAN BE < 0. 
-		In these cases, it is TREATED THE SAME AS 0!!!
 
 	1. CRITICAL DESIGN FLAW: recursion. 
 		The LimitedStream is NOT FIT FOR IT.  
@@ -72,14 +88,6 @@ IMMEDIATE:
 		only the class that executes the deesired role...
 
 		For more specific details, see the appropriate note on the phone...
-
-	-2. REMINDER [for tests]: about the `TypeMatch` parsing...
-		It must ENSURE that the escaped characters are treated AS-ARE. 
-		Specifically, the "\}" must be converted to a simple "}". 
-		That is due to the END of the string...
-		Likewise, this is ONLY for the `AsString`. 
-		The `AsInt` PROHIBITS the non-decimal characters ALTOGETHER!!!
-		(note: that must be checked AS WELL!!!)
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...
@@ -137,12 +145,6 @@ IMMEDIATE:
 			Cases present:
 				1. SingleChar
 		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
-
-	1. REMINDER [for tests]: the deep (=...(=...)) are supposed to NOT WORK, i.e. - ONLY the first one is registered, 
-		the SECOND ONE is interpreted *DIFFERENTLY*!!!
-
-	2. Regex [testing]: 
-		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 	
 	3. Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
@@ -169,10 +171,10 @@ IDEA [later]:
 		4. public classes 
 		5. abstract classes
 
-		Current approx: ~217 (maybe more)
+		Current approx: ~241 (maybe more)
 
 		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 195 (at the time of writing...)
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 201 (at the time of writing...)
 			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
 
 6. Commit L: 
@@ -259,51 +261,6 @@ TODOs:
 		This is important to allow one for using them with `expectKind()`-function; 
 		LET THE USER provide the factories with respective `string` identifiers ON 
 			CREATION of the classes for node-making. 
-
-15. Commit Z - create the first `RegexCompiler` sketch [use Thompson's Construction]:
-	Do After: Commit Y2
-
-	SOLUTION: provide *TWO* implementations: 
-		1. NFA
-		2. DFA
-
-		Do it like: 
-			1. Add an interface - `IRegexBuilder` (this is public...)
-			2. Add implementations: `DFARegexBuilder` and `NFARegexBuilder`: 
-				Both implement Thompson's Construction as per: https://swtch.com/~rsc/regexp/regexp1.html
-			3. Let the `RegexCompiler` be `init`ializable with an `IRegexBuilder`, which it calls...
-				RegexCompiler is STILL A SINGLETON! Yes, this is global state. 
-			4. Let the `Regex` have a second argument - `builder: IRegexBuilder`. 
-				Let it be optional, and prefer the `NFARegexBuilder` BY DEFAULT: 
-					Reason: 
-						1. it's reasonably fast
-						2. it has reasonable memory requirements (unlike DFARegexBuilder)
-
-			5. Let the FINAL interface `IRegexMatcher` returned by `IRegexBuilder` (from .finalize(): IRegexMatcher method)
-				contain the `.match(x: IPeekableStream<T>): boolean` method, which would:
-					1. convert the `.peek(i)` call sequences to respective states of the NFA/DFA [get the appropriate 'List' structure of State-s]
-					2. check for the presence of the "EndState" in the state list [and conclude whether or not one matches in the end...]
-					
-				1. Let the `IRegexMatcher` objects be the ones that are CACHED by the `RegexStorage` singleton class. 
-
-
-	VITAL: this DOES NOT utilize `IStream`-s internally. 
-	Instead, we accept an `IPeekableStream<string>`, then CALL `.peek(n)` on it,
-		RECORDING the CAPTURED portion of the input as we go, GOING BACK to the 
-			PREVIOUS MATCH when current one fails. 
-
-	1. Before doing: find a good article about Thompson's Construction, understand it
-		Try the Russ Cox one + the wikipedia. 
-	2. Before doing: find out a way to add the lookahead, ALL FEATURES of the language INTO the new construction
-
-	Structure: 
-		1. DepthStream(...) around the gained AST
-		2. Result is the OBJECT `RegexMatcher`, 
-			which is constructed in accordance to the gained AST
-				via a specialized `RegexMatcherBuilder`, which has methods 
-					defined for EACH individual case. 
-		3. Connecting code CALLS the `RegexMatcherBuilder` methods, while 
-			traversing the tree, thus filling the `RegexMatcher`. 
 
 REMINDER: Final Task Order
 	1. Regex: Visitor for Regex.Raw, NFA-Finalizer, DFA-Finalizer

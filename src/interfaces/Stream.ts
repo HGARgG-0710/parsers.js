@@ -2,7 +2,6 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	IOwnedStream,
 	IParseState,
-	IPosed,
 	IResourceSettable,
 	IStateHaving,
 	IStateSettable,
@@ -129,6 +128,13 @@ export type IStreamGenerator<T = any, Out = any> = (
 	stream: IIterableStream<T>,
 	parentMap?: ITableHandler<IIterableStream<T>>
 ) => Generator<Out>
+
+/**
+ * The interface for objects with a `readonly .pos: number`.
+ */
+export interface IPosed {
+	readonly pos: number
+}
 
 export type * from "../modules/Stream/interfaces/AccumulatorStream.js"
 export type * from "../modules/Stream/interfaces/CommonStream.js"

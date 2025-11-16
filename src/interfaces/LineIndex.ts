@@ -1,4 +1,4 @@
-import type { ICopiable } from "../../../interfaces.js"
+import type { ICopiable } from "../interfaces.js"
 
 /**
  * This is an interface for representing a character-line

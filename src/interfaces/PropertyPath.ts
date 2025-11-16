@@ -1,5 +1,5 @@
 import type { ICopiable } from "../interfaces.js"
-import type { IStep, IStepPredicate } from "./Position.js"
+import type { IStep, IStepPredicate } from "./Step.js"
 
 /**
  * This is an itnerface for representing an object for

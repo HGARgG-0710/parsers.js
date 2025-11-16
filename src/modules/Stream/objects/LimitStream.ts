@@ -1,5 +1,5 @@
 import { boolean, type } from "@hgargg-0710/one"
-import { asSteps, bind, isStepPredicate, negate } from "src/utils/Position.js"
+import { asSteps, bind, isStepPredicate, negate } from "src/utils/Step.js"
 import * as Pools from "../../../global/Pools.js"
 import type { IPoolKeeping, IStepPredicate } from "../../../interfaces.js"
 import type {

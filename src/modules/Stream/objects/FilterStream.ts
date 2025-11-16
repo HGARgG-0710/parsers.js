@@ -9,7 +9,7 @@ import type {
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ICommonStream } from "../interfaces/CommonStream.js"
-import { bind, isStepPredicate } from "src/utils/Position.js"
+import { bind, isStepPredicate } from "src/utils/Step.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 

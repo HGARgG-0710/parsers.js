@@ -7,7 +7,7 @@ import type {
 	IPeekable
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
-import { isStepPredicate } from "../../../utils/Position.js"
+import { isStepPredicate } from "../../../utils/Step.js"
 import { uniNavigate } from "../../../utils/Stream.js"
 import type { IStreamPosition } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
