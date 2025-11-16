@@ -1,5 +1,11 @@
-import { resourceInitializer } from "../../Initializer/objects/ResourceInitializer.js"
-import type { ILinkedStream, IOwnedStream } from "../interfaces/OwnedStream.js"
+import type { Summat } from "@hgargg-0710/summat.ts"
+import { isStateful } from "../../../utils/Stream.js"
+import type { ICommonStream } from "../interfaces/CommonStream.js"
+import type {
+	IControlStream,
+	ILinkedStream,
+	IOwnedStream
+} from "../interfaces/OwnedStream.js"
 import { CustomLinkedStream } from "./CustomLinkedStream.js"
 
 // ! LATER FOR DOCS - *THIS* is how one is supposed to use ErrorHandling-Streams:
@@ -14,20 +20,16 @@ import { CustomLinkedStream } from "./CustomLinkedStream.js"
 // !!! LIKEWISE, `ErrorHandlingStream`s CANNOT wrap around choosers - they must accept an UNINITIALIZED STREAM!
 export abstract class ErrorStream<T = any>
 	extends CustomLinkedStream<T>
-	implements ILinkedStream<T>
+	implements IControlStream<T>, Iterable<T>
 {
 	protected abstract errHandler(err: any): void
 
-	// * Explanation: 
+	// * Explanation:
 	// Since the `.init` method DELEGATES the initialization to `.delegate`,
-	// one CANNOT treat the `.init` as a mean of stream-creation: one simply 
+	// one CANNOT treat the `.init` as a mean of stream-creation: one simply
 	// MAY NOT reuse the `ErrorStream`, since it is *bound* to the underlying
-	v// `.delegate: IOwnedStream`.
+	// `.delegate: IOwnedStream`.
 	free() {}
-
-	get initializer() {
-		return resourceInitializer
-	}
 
 	get resource() {
 		return this.delegate.resource
@@ -43,6 +45,16 @@ export abstract class ErrorStream<T = any>
 
 	get curr() {
 		return this.delegate.curr
+	}
+
+	setState(state: Summat) {
+		if (isStateful(this.delegate)) this.delegate.setState(state)
+		return this
+	}
+
+	// ! pre-doc [important]: this returns `.undefined` [as is supposed to...]
+	get state() {
+		return (this.delegate as IControlStream).state
 	}
 
 	next() {
@@ -61,8 +73,11 @@ export abstract class ErrorStream<T = any>
 		}
 	}
 
+	*[Symbol.iterator]() {
+		yield* this.delegate as ICommonStream<T>
+	}
+
 	constructor(private readonly delegate: ILinkedStream<T>) {
 		super()
-		delegate.setOwner(this)
 	}
 }
