@@ -1,7 +1,7 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import { type IDepthMark, Pools } from "../../main.js"
 import { MissingArgument } from "../constants.js"
-import type { IFreeable, IInitializable } from "../interfaces.js"
+import type { IDepthMarked, IFreeable, IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import { Initializable } from "../objects/Initializer.js"
 import { ObjectPool } from "../objects/ObjectPool.js"
@@ -38,9 +38,10 @@ type IPreRecursiveItems<
 	InitType = any
 > = (IRecursivelySwitchable<T, Recursive, InitType> | T | Recursive)[]
 
-export interface ITerminalAcceptable extends IInitializable, IFreeable {
-	readonly depthMark?: IDepthMark
-}
+export interface ITerminalAcceptable
+	extends IInitializable,
+		IFreeable,
+		Partial<IDepthMarked> {}
 
 function isSwitch<
 	T extends ITerminalAcceptable = any,
@@ -390,8 +391,7 @@ abstract class BaseEvaluableList<
 	private depthMap: GlobalDepthMap<T>
 
 	private markDepth(terminal: T) {
-		if (this.depthMap.hasMark(terminal))
-			this.depthMap.inc(terminal.depthMark!)
+		this.depthMap.incFor(terminal)
 	}
 
 	private expandEvaluated(
@@ -794,32 +794,39 @@ class PinpointRenewableList<
 class GlobalDepthMap<T extends ITerminalAcceptable = any> {
 	private readonly depths = new Map<IDepthMark, number>()
 
-	private tryGet(mark: IDepthMark) {
-		const depth = this.depths.get(mark)
-		return depth === undefined ? false : depth
-	}
-
 	private set(mark: IDepthMark, depth: number) {
 		this.depths.set(mark, depth)
 		return depth
 	}
 
-	hasMark(item: T) {
-		return item.depthMark !== undefined
+	private hasMark(item: T) {
+		return item.depthMarks !== undefined
+	}
+
+	private for(terminal: T, callback: (mark: IDepthMark) => void) {
+		if (this.hasMark(terminal))
+			for (const mark in terminal.depthMarks!) callback(mark)
+	}
+
+	incFor(terminal: T) {
+		this.for(terminal, (mark) => this.inc(mark))
+	}
+
+	decFor(terminal: T) {
+		this.for(terminal, (mark) => this.dec(mark))
 	}
 
 	inc(mark: IDepthMark) {
-		const depth = this.tryGet(mark)
-		return this.set(mark, depth === false ? 0 : depth + 1)
+		return this.set(mark, this.get(mark) + 1)
 	}
 
 	dec(mark: IDepthMark) {
-		const depth = this.tryGet(mark)
-		if (depth !== false) if (depth > 0) this.set(mark, depth - 1)
+		const depth = this.get(mark)
+		if (depth > 0) this.set(mark, depth - 1)
 	}
 
 	get(mark: IDepthMark) {
-		return this.depths.get(mark)
+		return this.depths.get(mark) || 0
 	}
 }
 
@@ -1295,18 +1302,12 @@ export namespace RecursiveList {
 	> extends RecursiveList<T, Recursive, InitType, InitArgs> {
 		protected abstract reclaim(list: Poolable<T, Recursive, InitType>): void
 
-		private restoreDepth(item: Terminal<T, Recursive, InitType>) {
-			const { terminal } = item
-			if (this.depthMap.hasMark(terminal))
-				this.depthMap.dec(terminal.depthMark!)
-		}
-
 		private recycleAsTerminal(
 			item: IRecursivelySwitchable<T, Recursive, InitType>
 		) {
 			if (!isSwitch(item)) {
 				this.asDeep.unregister(item)
-				this.restoreDepth(item)
+				this.depthMap.decFor(item.terminal)
 			}
 		}
 

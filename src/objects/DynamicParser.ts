@@ -103,7 +103,7 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		if (this.didUpdate) this.onUpdate()
 	}
 
-	getDepth(mark: IDepthMark): number | undefined {
+	getDepth(mark: IDepthMark): number {
 		return this.workStream.getDepth(mark)
 	}
 

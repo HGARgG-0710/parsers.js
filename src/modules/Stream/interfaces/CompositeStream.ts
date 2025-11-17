@@ -70,6 +70,6 @@ export type IStreamArray = IArray<IRawStream>
 export interface ICompositeStream<T = any> extends IControlStream<T> {
 	renewResource(): boolean
 	renewStream(stream: ILinkedStream): boolean
-	getDepth(mark: IDepthMark): number | undefined
+	getDepth(mark: IDepthMark): number
 	readonly streams: IStreamArray
 }

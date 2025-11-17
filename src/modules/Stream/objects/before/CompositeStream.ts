@@ -68,7 +68,7 @@ export abstract class BeforeCompositeStream<T = any>
 		return this.streamList!.items
 	}
 
-	getDepth(mark: IDepthMark): number | undefined {
+	getDepth(mark: IDepthMark): number {
 		return this.streamList!.getDepth(mark)
 	}
 

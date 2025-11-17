@@ -11,6 +11,10 @@ function BuildValidatorStream<T = any>(validator: IValidator<T>) {
 
 		private readonly validator: IValidator<T>
 
+		protected get pool() {
+			return ValidatorStream.pool
+		}
+
 		next(): void {
 			this.validator(this.resource!)
 			super.next()

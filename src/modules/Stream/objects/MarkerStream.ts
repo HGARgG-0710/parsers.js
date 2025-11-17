@@ -11,6 +11,10 @@ class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
 	private _marker: M
 	private markerMaker: IMarkerMaker<T, M>
 
+	protected get pool() {
+		return _MarkerStream.pool
+	}
+
 	get marker() {
 		return this._marker
 	}

@@ -1,10 +1,10 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
 import type {
 	ICommonStream,
 	IHandler,
 	IOwnedStream
 } from "../../../interfaces/Stream.js"
+import { ObjectPool } from "../../../objects.js"
 import type { IStorageStream } from "../interfaces/StorageStream.js"
 import { IdentityStream } from "./IdentityStream.js"
 
@@ -25,7 +25,7 @@ class _StorageStream<T = any, Stored = any>
 		this.currStored = this.handler(this.resource!)
 	}
 
-	get pool() {
+	protected get pool() {
 		return _StorageStream.pool
 	}
 

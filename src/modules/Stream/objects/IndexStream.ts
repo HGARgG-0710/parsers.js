@@ -26,7 +26,7 @@ function BuildIndexStream<T = any>(
 			else this.lineIndex.nextChar()
 		}
 
-		get pool() {
+		protected get pool() {
 			return IndexStream.pool
 		}
 

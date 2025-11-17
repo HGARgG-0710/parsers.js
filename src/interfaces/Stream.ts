@@ -139,6 +139,7 @@ export interface IPosed {
 export type * from "../modules/Stream/interfaces/AccumulatorStream.js"
 export type * from "../modules/Stream/interfaces/CommonStream.js"
 export type * from "../modules/Stream/interfaces/CompositeStream.js"
+export type * from "../modules/Stream/interfaces/DepthMarkStream.js"
 export type * from "../modules/Stream/interfaces/HandlerStream.js"
 export type * from "../modules/Stream/interfaces/IndexStream.js"
 export type * from "../modules/Stream/interfaces/InputStream.js"

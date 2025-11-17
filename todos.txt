@@ -68,7 +68,9 @@ IMMEDIATE:
 
 				[after the 'LimitStream' thing is finished...]
 				3. add corresponding `BracketRecursiveLimitStream`
-				4. REPLACE in the appropriate places inside the `RegexParser`...
+				4. REPLACE in the appropriate places inside the `RegexParser`...:
+					1. add the `DepthMarkStream` to 'CharClass/BoundaryClass' and OTHER such places...
+					2. replace the `LimitStream`s with `RecursiveLimitStream` in places of RECURSION (`PlainGroup`, etc)
 				5. Add a NEW `IStream` SUB-INTERFACE the `depthMark`-containing one: 
 					1. Let `RecursiveList` implement it (note: it is created via a FACTORY-FUNCTION that relies upon the predicate)
 						1. each factory has ITS OWN POOL
@@ -76,23 +78,9 @@ IMMEDIATE:
 						This is since it is TIGHTLY COUPLED to the WIDEST AVAILABLE `IStream` INTERFACE 
 							existing within the library. Any user extensions will HAVE TO TAKE THE DESIRED 
 							PROPERTIES INTO ACCOUNT! 
-		
-			NEW PROBLEM: 
-				In some cases, like '([{}()])', there may actually be TWO kinds of 
-				inputs. Meaning to say that HERE, the FIRST ) will be used as ending, 
-				BECAUSE the 'CharClass' DOES NOT itself HAVE a "("-corresponding mark. 
 
-				CONCLUSION: 
-					1. *ALLOW* a specialized 'DepthMarkStream', which has a corresponding `.depthMark`. 
-						It is (other than that) an ordinary `IdentityStream` - just forwards whatever 
-						has entered it forwards...
-					2. ALSO - force `.depthMark` to instead be AN ARRAY OF MARKS, meaning, if 
-						there are MULTIPLE kinds of recursion going on at the same time, one 
-						wants to INFORM the APPROPRIATE parts of the application - ALL OF THEM...
-						This is, too, the case with '[...]'; 
-						Then, one is performing ALL the desired actions for a LIST of marks (i.e. 
-						code is LARGELY same as before...)
-					3. LET the `RecursiveLimitStream` *still* store a `.depthMark`
+				6. LET the `DepthMarkStream` AND `RecursiveLimitStream` BOTH accept *MULTIPLE*
+					marks. Let the marks be INTEGERS (create an `enum` for them specifically...)
 		1. The LimitStream (quality) thing
 		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
 			2. to compiler (AND the `Regex.Raw`)
@@ -248,10 +236,10 @@ IDEA [later]:
 		4. public classes 
 		5. abstract classes
 
-		Current approx: ~241 (maybe more)
+		Current total: 244 
 
 		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 201 (at the time of writing...)
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 204 (at the time of writing...)
 			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
 
 6. Commit L: 
