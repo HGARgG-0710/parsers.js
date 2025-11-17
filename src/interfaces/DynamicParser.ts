@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IErrorData, IInitializable } from "../interfaces.js"
+import type { IDepthMark, IErrorData, IInitializable } from "../interfaces.js"
 import type { ILinkedStream, IStreamArray } from "./Stream.js"
 
 /**
@@ -27,4 +27,5 @@ export interface IParse<FinalType = any, InitType = any>
 	readonly streams: IStreamArray
 	renewStream(stream: ILinkedStream): void
 	update(): void
+	getDepth(mark: IDepthMark): number | undefined
 }

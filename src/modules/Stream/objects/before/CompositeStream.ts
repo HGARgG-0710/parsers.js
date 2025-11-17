@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { IDepthMark } from "../../../../interfaces.js"
 import type { IParseState } from "../../../../interfaces/DynamicParser.js"
 import type {
 	ICompositeStream,
@@ -65,6 +66,10 @@ export abstract class BeforeCompositeStream<T = any>
 
 	get streams() {
 		return this.streamList!.items
+	}
+
+	getDepth(mark: IDepthMark): number | undefined {
+		return this.streamList!.getDepth(mark)
 	}
 
 	setResource(lowStream: IOwnedStream) {

@@ -1,7 +1,7 @@
 import { array, inplace, type } from "@hgargg-0710/one"
-import { Pools } from "../../main.js"
+import { type IDepthMark, Pools } from "../../main.js"
 import { MissingArgument } from "../constants.js"
-import type { IFreeable, IInitializable, IInitializer } from "../interfaces.js"
+import type { IFreeable, IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
 import { Initializable } from "../objects/Initializer.js"
 import { ObjectPool } from "../objects/ObjectPool.js"
@@ -38,7 +38,9 @@ type IPreRecursiveItems<
 	InitType = any
 > = (IRecursivelySwitchable<T, Recursive, InitType> | T | Recursive)[]
 
-type ITerminalAcceptable = IInitializable & IFreeable
+export interface ITerminalAcceptable extends IInitializable, IFreeable {
+	readonly depthMark?: IDepthMark
+}
 
 function isSwitch<
 	T extends ITerminalAcceptable = any,
@@ -221,31 +223,54 @@ interface IDeepListSettable<
 	setDeepList(deepList: DeepList<T, Recursive, InitType>): void
 }
 
-export const deepListInitializer: IInitializer<[DeepList]> = {
+interface IDepthMapSettable {
+	setDepthMap(map: GlobalDepthMap): void
+}
+
+type IRecursiveListLike = IRenewerSettable &
+	IItemsSettable &
+	IDeepListSettable &
+	IDepthMapSettable
+
+const depthMapInitializer = {
+	init(target: IDepthMapSettable, map?: GlobalDepthMap) {
+		if (map) target.setDepthMap(map)
+	}
+}
+
+const deepListInitializer = {
 	init(target: IDeepListSettable, deepList?: DeepList) {
 		if (deepList) target.setDeepList(deepList)
 	}
 }
 
-export const renewerInitializer: IInitializer<[RecursiveList.Renewer]> = {
+const renewerInitializer = {
 	init(target: IRenewerSettable, renewer?: RecursiveList.Renewer) {
 		if (renewer) target.setRenewer(renewer)
 	}
 }
 
-export const itemsInitializer: IInitializer<[any[]]> = {
+const itemsInitializer = {
 	init(target: IItemsSettable, items?: any[]) {
 		if (items) target.setItems(items)
 	}
 }
 
-const recursiveListInitializer: IInitializer<[RecursiveList.Renewer, any[]]> = {
+const baseEvaluableListInitializer = {
 	init(
-		target: IRenewerSettable & IItemsSettable,
+		target: IRenewerSettable & IDepthMapSettable,
 		renewer?: RecursiveList.Renewer,
-		items?: any[],
-		deepList?: DeepList
+		depthMap?: GlobalDepthMap
 	) {
+		depthMapInitializer.init(target, depthMap)
+		renewerInitializer.init(target, renewer)
+	}
+}
+
+const recursiveListInitializer = {
+	init(target: IRecursiveListLike, args: RecursiveListArgs) {
+		const { renewer, items, deepList, depthMap } = args
+		depthMapInitializer.init(target, depthMap)
 		deepListInitializer.init(target, deepList)
 		renewerInitializer.init(target, renewer)
 		itemsInitializer.init(target, items)
@@ -263,9 +288,12 @@ const recursiveListInitializer: IInitializer<[RecursiveList.Renewer, any[]]> = {
 abstract class RenewerHaving<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
-		InitType = any
+		InitType = any,
+		Args extends any[] = []
 	>
-	extends Initializable<[RecursiveList.Renewer<T, Recursive, InitType>]>
+	extends Initializable<
+		[RecursiveList.Renewer<T, Recursive, InitType>, ...Args]
+	>
 	implements IRenewerSettable
 {
 	private _renewer: RecursiveList.Renewer<T, Recursive, InitType>
@@ -358,7 +386,14 @@ abstract class BaseEvaluableList<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends RenewerHaving<T, Recursive, InitType> {
+> extends RenewerHaving<T, Recursive, InitType, [GlobalDepthMap<T>]> {
+	private depthMap: GlobalDepthMap<T>
+
+	private markDepth(terminal: T) {
+		if (this.depthMap.hasMark(terminal))
+			this.depthMap.inc(terminal.depthMark!)
+	}
+
 	private expandEvaluated(
 		fillable: Switch<T, Recursive, InitType>,
 		evaledWith: T | InitType
@@ -375,7 +410,12 @@ abstract class BaseEvaluableList<
 		this.evaluateSublist(fillable.list, evaledWith)
 	}
 
+	protected get initializer() {
+		return baseEvaluableListInitializer
+	}
+
 	protected initTerminal(toInitialize: T, initParam: T | InitType) {
+		this.markDepth(toInitialize)
 		toInitialize.init(initParam)
 	}
 
@@ -384,6 +424,10 @@ abstract class BaseEvaluableList<
 		evaledWith: T | InitType
 	) {
 		sublist.evaluate(evaledWith)
+	}
+
+	setDepthMap(map: GlobalDepthMap) {
+		this.depthMap = map
 	}
 }
 
@@ -567,6 +611,16 @@ class EvaluableList<
 		InitType
 	>()
 
+	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>): void {
+		super.setRenewer(renewer)
+		this.evaluator.setRenewer(renewer)
+	}
+
+	setDepthMap(map: GlobalDepthMap): void {
+		super.setDepthMap(map)
+		this.evaluator.setDepthMap(map)
+	}
+
 	private evaluateEach(origTerm: T | InitType) {
 		for (const curr of this.items)
 			this.evaluator.evalSwitchable(curr, this.pickLastItem(origTerm))
@@ -660,14 +714,23 @@ class PinpointRenewableList<
 		return of + 1
 	}
 
+	private getTerminalAfter(
+		from: number,
+		parent: SwitchArray<T, Recursive, InitType>
+	) {
+		return parent.get(this.itemAhead(from)) as Terminal<
+			T,
+			Recursive,
+			InitType
+		>
+	}
+
 	private renewNeeded(
 		from: number,
 		to: number,
 		parent: SwitchArray<T, Recursive, InitType>
 	) {
-		let initItem = (
-			parent.get(this.itemAhead(from)) as Terminal<T, Recursive, InitType>
-		).terminal
+		let initItem = this.getTerminalAfter(from, parent).terminal
 		for (let i = from; i >= to; --i) {
 			const currItem = parent.get(i)
 			this.evaluator.evalSwitchable(currItem, initItem)
@@ -707,6 +770,16 @@ class PinpointRenewableList<
 		return foundNonOld
 	}
 
+	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>): void {
+		super.setRenewer(renewer)
+		this.evaluator.setRenewer(renewer)
+	}
+
+	setDepthMap(map: GlobalDepthMap): void {
+		super.setDepthMap(map)
+		this.evaluator.setDepthMap(map)
+	}
+
 	/**
 	 * Renews a given terminal `item: T`, provided it is
 	 * a part of the current item-list.
@@ -716,6 +789,143 @@ class PinpointRenewableList<
 			? this.renewOldItem(item)
 			: true
 	}
+}
+
+class GlobalDepthMap<T extends ITerminalAcceptable = any> {
+	private readonly depths = new Map<IDepthMark, number>()
+
+	private tryGet(mark: IDepthMark) {
+		const depth = this.depths.get(mark)
+		return depth === undefined ? false : depth
+	}
+
+	private set(mark: IDepthMark, depth: number) {
+		this.depths.set(mark, depth)
+		return depth
+	}
+
+	hasMark(item: T) {
+		return item.depthMark !== undefined
+	}
+
+	inc(mark: IDepthMark) {
+		const depth = this.tryGet(mark)
+		return this.set(mark, depth === false ? 0 : depth + 1)
+	}
+
+	dec(mark: IDepthMark) {
+		const depth = this.tryGet(mark)
+		if (depth !== false) if (depth > 0) this.set(mark, depth - 1)
+	}
+
+	get(mark: IDepthMark) {
+		return this.depths.get(mark)
+	}
+}
+
+class RecursiveListArgsBuilder<
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
+	InitType = any
+> {
+	static readonly instance = new RecursiveListArgsBuilder()
+
+	private renewer?: RecursiveList.Renewer<T, Recursive, InitType>
+	private items?: (T | Recursive)[]
+	private deepList?: DeepList<T, Recursive, InitType>
+	private depthMap?: GlobalDepthMap
+
+	reset() {
+		this.renewer = undefined
+		this.items = undefined
+		this.deepList = undefined
+		this.depthMap = undefined
+	}
+
+	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>) {
+		this.renewer = renewer
+		return this
+	}
+
+	setItems(items: (T | Recursive)[]) {
+		this.items = items
+		return this
+	}
+
+	setDeepList(deepList: DeepList<T, Recursive, InitType>) {
+		this.deepList = deepList
+		return this
+	}
+
+	setDepthMap(depthMap: GlobalDepthMap) {
+		this.depthMap = depthMap
+		return this
+	}
+
+	build(): RecursiveListArgs<T, Recursive, InitType> {
+		return RecursiveListArgs.instance.init(
+			this.renewer,
+			this.items,
+			this.deepList,
+			this.depthMap
+		)
+	}
+
+	private constructor() {}
+}
+
+export class RecursiveListArgs<
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
+	InitType = any
+> {
+	static readonly instance = new RecursiveListArgs()
+
+	private _renewer?: RecursiveList.Renewer<T, Recursive, InitType>
+	private _items?: (T | Recursive)[]
+	private _deepList?: DeepList<T, Recursive, InitType>
+	private _depthMap?: GlobalDepthMap<T>
+
+	get renewer() {
+		return this._renewer
+	}
+
+	get items() {
+		return this._items
+	}
+
+	get deepList() {
+		return this._deepList
+	}
+
+	get depthMap() {
+		return this._depthMap
+	}
+
+	static build<
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
+		InitType = any
+	>(): RecursiveListArgsBuilder<T, Recursive, InitType> {
+		const builder = RecursiveListArgsBuilder.instance
+		builder.reset()
+		return builder
+	}
+
+	init(
+		renewer?: RecursiveList.Renewer<T, Recursive, InitType>,
+		items?: (T | Recursive)[],
+		deepList?: DeepList<T, Recursive, InitType>,
+		depthMap?: GlobalDepthMap
+	) {
+		this._renewer = renewer
+		this._items = items
+		this._deepList = deepList
+		this._depthMap = depthMap
+		return this
+	}
+
+	private constructor() {}
 }
 
 const switchArrayInitializer = {
@@ -878,23 +1088,17 @@ export class RecursiveList<
 	InitType = any,
 	InitArgs extends any[] = []
 > extends Initializable<
-	[
-		RecursiveList.Renewer<T, Recursive, InitType>,
-		(T | Recursive)[],
-		DeepList<T, Recursive, InitType>,
-		...(InitArgs | [])
-	]
+	[RecursiveListArgs<T, Recursive, InitType>, ...(InitArgs | [])]
 > {
 	readonly items = new SwitchArray<T, Recursive, InitType>()
 	private readonly asEvaluable: EvaluableList<T, Recursive, InitType>
 	private readonly asRenewable: RenewableList<T, Recursive, InitType>
 
+	protected depthMap: GlobalDepthMap<T>
 	protected asDeep: DeepList<T, Recursive, InitType>
 	protected renewer: RecursiveList.Renewer<T, Recursive, InitType>
 
-	private putSelfAsParentFor(
-		maybeTerminal: Terminal<T, Recursive, InitType>
-	) {
+	private adopt(maybeTerminal: Terminal<T, Recursive, InitType>) {
 		maybeTerminal.setParentList(this.items)
 	}
 
@@ -902,18 +1106,15 @@ export class RecursiveList<
 		this.asDeep.register(wrapped, this.items, index)
 	}
 
-	private initNewTerminal(
-		wrapped: Terminal<T, Recursive, InitType>,
-		at: number
-	) {
-		this.putSelfAsParentFor(wrapped)
+	private newTerminal(wrapped: Terminal<T, Recursive, InitType>, at: number) {
+		this.adopt(wrapped)
 		this.register(wrapped, at)
 	}
 
 	private toWrapped(fromArr: (T | Recursive)[], atIndex: number) {
 		const wrapped = this.renewer.wrap(fromArr[atIndex])
 		wrapped.setListIndex(atIndex)
-		if (!isSwitch(wrapped)) this.initNewTerminal(wrapped, atIndex)
+		if (!isSwitch(wrapped)) this.newTerminal(wrapped, atIndex)
 		return wrapped
 	}
 
@@ -923,6 +1124,10 @@ export class RecursiveList<
 
 	protected get initializer() {
 		return recursiveListInitializer
+	}
+
+	setDepthMap(map: GlobalDepthMap) {
+		this.depthMap = map
 	}
 
 	setDeepList(deepList: DeepList<T, Recursive, InitType>) {
@@ -959,16 +1164,14 @@ export class RecursiveList<
 	}
 
 	constructor(
-		renewer?: RecursiveList.Renewer<T, Recursive, InitType>,
-		items?: (T | Recursive)[],
-		deepList?: DeepList<T, Recursive, InitType>,
-		...args: Partial<InitArgs> | []
+		args: RecursiveListArgs<T, Recursive, InitType>,
+		...rest: Partial<InitArgs> | []
 	) {
 		super()
 		const lastInitialized = new LastInitialized()
 		this.asEvaluable = new EvaluableList(lastInitialized, this.items)
 		this.asRenewable = new RenewableList(lastInitialized, this.items)
-		this.init(renewer, items, deepList, ...args)
+		this.init(args, ...rest)
 	}
 }
 
@@ -1037,6 +1240,12 @@ export namespace RecursiveList {
 			InitType
 		>()
 
+		protected readonly globalDepth = new GlobalDepthMap()
+
+		getDepth(mark: IDepthMark) {
+			return this.globalDepth.get(mark)
+		}
+
 		get items() {
 			return this.list.items
 		}
@@ -1061,8 +1270,15 @@ export namespace RecursiveList {
 			this.renewer = this.getRenewer()
 			this.list = this.getList()
 			this.asDeep = new DeepList<T>(this.items)
-			this.asPinpointRenewable.init(this.renewer)
-			this.list.init(this.renewer, items, this.asDeep, ...args)
+			this.asPinpointRenewable.init(this.renewer, this.globalDepth)
+			this.list.init(
+				RecursiveListArgs.build()
+					.setRenewer(this.renewer)
+					.setItems(items)
+					.setDeepList(this.asDeep)
+					.setDepthMap(this.globalDepth)
+					.build()
+			)
 		}
 	}
 
@@ -1079,9 +1295,24 @@ export namespace RecursiveList {
 	> extends RecursiveList<T, Recursive, InitType, InitArgs> {
 		protected abstract reclaim(list: Poolable<T, Recursive, InitType>): void
 
+		private restoreDepth(item: Terminal<T, Recursive, InitType>) {
+			const { terminal } = item
+			if (this.depthMap.hasMark(terminal))
+				this.depthMap.dec(terminal.depthMark!)
+		}
+
+		private recycleAsTerminal(
+			item: IRecursivelySwitchable<T, Recursive, InitType>
+		) {
+			if (!isSwitch(item)) {
+				this.asDeep.unregister(item)
+				this.restoreDepth(item)
+			}
+		}
+
 		recycleSubs() {
 			for (const curr of this) {
-				if (!isSwitch(curr)) this.asDeep.unregister(curr)
+				this.recycleAsTerminal(curr)
 				curr.recycle()
 			}
 		}
@@ -1093,15 +1324,6 @@ export namespace RecursiveList {
 
 		*[Symbol.iterator]() {
 			yield* this.items
-		}
-
-		constructor(
-			renewer?: Renewer<T, Recursive, InitType>,
-			origItems?: (T | Recursive)[],
-			deepList?: DeepList<T, Recursive, InitType>,
-			...args: Partial<InitArgs> | []
-		) {
-			super(renewer, origItems, deepList, ...args)
 		}
 	}
 }

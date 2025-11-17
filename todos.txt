@@ -34,7 +34,67 @@ REMINDERs:
 
 IMMEDIATE: 
 	ORDER of tasks: 
-		1. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
+		0. RecursiveLimitStream (the critical recursion flaw thing...)
+			TODO: 
+				1. add a new stream - `RecursiveLimitStream`
+				2. base upon the `LimitStream`
+					1. IT IS *IStateful*!
+						1. A mixin?
+					2. Delegates to an instance of `LimitStream`
+						that uses THE MODIFICATION of the given predicate...
+						Note: this is a PROXY around the corresponding `LimitStream` instance
+					3. The predicate employs `.owner` variable, like: 
+
+						# the "magic" predicate...
+						(stream) => {
+							# NOTE: the `stream.owner` is `this.owner` (since `this` is the RecursiveLimitStream), 
+							# AND the `stream` is also `this.owner.delegate.resource` (the `this.owner.delegate` is `this`), 
+							# and `this.delegate` is THE LimitStream, to which the predicate is given...
+							const targetStream = this.owner
+							return !targetStream.isSameGlobalDepth() || targetStream.predicate(stream)
+						}
+
+						The public `isSameDepth()` is defined as: 
+
+							isSameGlobalDepth() {
+								# The `.depth` is created upon call to `.init`!!! [vital - for later Renewal]
+								# It is obtained as `this.depth = this.state.getDepth(this.mark)`; 	
+								return this.depth === this.currGlobalDepth()
+							}
+							
+							private currGlobalDepth() {
+								return state.parse.getDepth(this.depthMark)
+							}
+
+				[after the 'LimitStream' thing is finished...]
+				3. add corresponding `BracketRecursiveLimitStream`
+				4. REPLACE in the appropriate places inside the `RegexParser`...
+				5. Add a NEW `IStream` SUB-INTERFACE the `depthMark`-containing one: 
+					1. Let `RecursiveList` implement it (note: it is created via a FACTORY-FUNCTION that relies upon the predicate)
+						1. each factory has ITS OWN POOL
+					2. UPDATE the `ErrorStream` - add the `get depthMark()  { return this.delegate.depthMark }`
+						This is since it is TIGHTLY COUPLED to the WIDEST AVAILABLE `IStream` INTERFACE 
+							existing within the library. Any user extensions will HAVE TO TAKE THE DESIRED 
+							PROPERTIES INTO ACCOUNT! 
+		
+			NEW PROBLEM: 
+				In some cases, like '([{}()])', there may actually be TWO kinds of 
+				inputs. Meaning to say that HERE, the FIRST ) will be used as ending, 
+				BECAUSE the 'CharClass' DOES NOT itself HAVE a "("-corresponding mark. 
+
+				CONCLUSION: 
+					1. *ALLOW* a specialized 'DepthMarkStream', which has a corresponding `.depthMark`. 
+						It is (other than that) an ordinary `IdentityStream` - just forwards whatever 
+						has entered it forwards...
+					2. ALSO - force `.depthMark` to instead be AN ARRAY OF MARKS, meaning, if 
+						there are MULTIPLE kinds of recursion going on at the same time, one 
+						wants to INFORM the APPROPRIATE parts of the application - ALL OF THEM...
+						This is, too, the case with '[...]'; 
+						Then, one is performing ALL the desired actions for a LIST of marks (i.e. 
+						code is LARGELY same as before...)
+					3. LET the `RecursiveLimitStream` *still* store a `.depthMark`
+		1. The LimitStream (quality) thing
+		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
 			2. to compiler (AND the `Regex.Raw`)
 				1. new `Regex.Raw` child for Negation(BoundaryClass(...)); 
 					Call it `NonBoundary(...)`. 
@@ -69,11 +129,22 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	TODO: about the `LimitStream`: 
-		GET RID of all the {/(/[-skipping input.next() calls. [UNLESS we are explicitly using the `skip`...]
+	TODO [code quality]: about the `LimitStream`: 
+		GET RID of all the {/(/[-skipping input.next() calls from the choosers. 
+		INSTEAD, *manually* call the respective `skip`-function WITHIN the 
+		`from` IStepPredicate passed to the LimitStream. 
 		INCORPORATE THEM into the `LimitStream` definitions. 
-		Specifically, use the `() => 1` for `from`, SINCE it will 
-		work in PRECISELY the same manner...
+		Reasons: 
+			1. better quality code (more cohesive components, less coupling, better reusability)
+			2. more robust code (an additional, possibly-redundant, check, in case we've forgotten 
+				the one outside and/or we don't know the current symbol, but expect the desired (...)-sequence)
+
+		ALSO - fix the `EndBracketStream`. 
+			Change it to `BracketStream(from: T, to: IStepPredicate, errDataGetter?: IErrorDataGetter<T>)`, 
+				with `from` BEING the bracket itself (i.e., for instance, when T = string). 
+			Then, let the SKIPPING predicate be the `skip` we are interested in (note: let it 
+				be NOT NECESSARILY DEFAULT `skip`, i.e., one would USE the `errDataGetter`, with the 
+					DEFAULT being nothing - one just uses the `skip` default...)
 
 	1. CRITICAL DESIGN FLAW: recursion. 
 		The LimitedStream is NOT FIT FOR IT.  
@@ -88,6 +159,12 @@ IMMEDIATE:
 		only the class that executes the deesired role...
 
 		For more specific details, see the appropriate note on the phone...
+
+	TODO [reminder]: ADD the `DFARegexFinalizer`. 
+		This one (might) be based off the respective `NFARegexVisitor`
+		algorithm for building the actual NFA, then, it would CONVERT the 
+		NFA to a DFA (as per the Russ Cox article, again...), and THEN, 
+		one might doing something...
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...

@@ -2,6 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	ICommonStream,
 	ICompositeStream,
+	IDepthMark,
 	IErrorDataMaker,
 	IInputStream,
 	ILinkedStream
@@ -100,6 +101,10 @@ class Parse<InType = any, FinalType = any, InitType = any>
 
 	maybeUpdate() {
 		if (this.didUpdate) this.onUpdate()
+	}
+
+	getDepth(mark: IDepthMark): number | undefined {
+		return this.workStream.getDepth(mark)
 	}
 
 	constructor(

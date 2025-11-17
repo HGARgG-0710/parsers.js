@@ -1,4 +1,4 @@
-import type { IArray } from "../../../interfaces.js"
+import type { IArray, IDepthMark } from "../../../interfaces.js"
 import type {
 	IControlStream,
 	ILinkedStream,
@@ -70,5 +70,6 @@ export type IStreamArray = IArray<IRawStream>
 export interface ICompositeStream<T = any> extends IControlStream<T> {
 	renewResource(): boolean
 	renewStream(stream: ILinkedStream): boolean
+	getDepth(mark: IDepthMark): number | undefined
 	readonly streams: IStreamArray
 }

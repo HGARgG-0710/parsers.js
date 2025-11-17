@@ -301,6 +301,8 @@ export interface IPoolKeeping<
 	readonly pool: ObjectPool<T, Args>
 }
 
+export type IDepthMark = string | number
+
 export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/ByteSource.js"

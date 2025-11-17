@@ -1,42 +1,15 @@
 import { type } from "@hgargg-0710/one"
 import { Pools } from "../../main.js"
-import type {
-	IInitializer,
-	ILinkedStream,
-	IOwnedStream
-} from "../interfaces.js"
+import type { ILinkedStream, IOwnedStream } from "../interfaces.js"
 import type {
 	ICompositeStream,
 	IRawStreamArray,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
 import { ObjectPool } from "../objects.js"
-import {
-	DeepList,
-	deepListInitializer,
-	itemsInitializer,
-	RecursiveList,
-	renewerInitializer
-} from "./RecursiveList.js"
+import { RecursiveList, RecursiveListArgs } from "./RecursiveList.js"
 
 const { isFunction } = type
-
-type StreamDeepList = DeepList<ILinkedStream, IStreamChooser>
-
-const streamListInitializer: IInitializer<
-	[RecursiveList.Renewer, any[], StreamDeepList]
-> = {
-	init(
-		target: StreamList,
-		renewer?: RecursiveList.Renewer,
-		items?: any[],
-		deepList?: StreamDeepList
-	) {
-		deepListInitializer.init(target, deepList)
-		renewerInitializer.init(target, renewer)
-		itemsInitializer.init(target, items)
-	}
-}
 
 /**
  * This is the `PoolableRecursiveList` actually employed
@@ -53,20 +26,8 @@ export class StreamList extends RecursiveList.Poolable<
 
 	protected renewer: StreamList.StreamRenewer
 
-	protected get initializer() {
-		return streamListInitializer
-	}
-
 	protected reclaim(): void {
 		StreamList.pool.free(this)
-	}
-
-	constructor(
-		renewer?: StreamList.StreamRenewer,
-		origItems?: IRawStreamArray,
-		deepList?: StreamDeepList
-	) {
-		super(renewer, origItems, deepList)
 	}
 }
 
@@ -86,7 +47,14 @@ export namespace StreamList {
 		protected renewer: StreamRenewer
 
 		createList(streams: IRawStreamArray) {
-			return StreamList.pool.create(this.renewer, streams, this.asDeep)
+			return StreamList.pool.create(
+				RecursiveListArgs.build()
+					.setRenewer(this.renewer)
+					.setItems(streams)
+					.setDeepList(this.asDeep)
+					.setDepthMap(this.globalDepth)
+					.build()
+			)
 		}
 
 		protected getList(): RecursiveList<
