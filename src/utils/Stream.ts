@@ -26,7 +26,7 @@ import type {
 	IStreamTransform,
 	ITableHandler
 } from "../interfaces/StreamHandler.js"
-import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
+import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
@@ -83,7 +83,7 @@ export function destroy<T = any>(
  */
 export function skip<T = any>(
 	input: IStream<T>,
-	steps: IStreamPosition<T> = 1
+	steps: IStreamStep<T> = 1
 ) {
 	return uniNavigate(input, isStepPredicate(steps) ? negate(steps) : steps)
 }
@@ -158,7 +158,7 @@ export function consumeGenerator<T = any, Out = any>(
  * Navigates up to the desired position on the given `IStream<T>`,
  * returns whether the end of the stream has been reached.
  */
-export function has<T = any>(pos: IStreamPosition<T>) {
+export function has<T = any>(pos: IStreamStep<T>) {
 	return function (input: IStream<T>) {
 		uniNavigate(input, pos)
 		return input.isEnd
@@ -184,7 +184,7 @@ export function count<T = any>(input: IStream<T>) {
  *
  * By default, `result` is an `ArrayCollection<T>`
  */
-export function delimited<T = any>(delimPred: IStreamPosition<T>) {
+export function delimited<T = any>(delimPred: IStreamStep<T>) {
 	return function <K extends IPushable<T> = IPushable<T>>(
 		input: IStream<T>,
 		result: K = new ArrayCollection<T>() as any
@@ -248,7 +248,7 @@ export function finish<T = any>(stream: IStream<T>) {
  */
 export function uniNavigate<T = any>(
 	stream: IStream<T>,
-	position: IStreamPosition<T>
+	position: IStreamStep<T>
 ): T {
 	if (isNumber(position)) while (position-- > 0) stream.next()
 	else
@@ -267,7 +267,7 @@ export function uniNavigate<T = any>(
  */
 export function navigate<T = any>(
 	stream: IStream<T>,
-	position: IStreamPosition<T>
+	position: IStreamStep<T>
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)

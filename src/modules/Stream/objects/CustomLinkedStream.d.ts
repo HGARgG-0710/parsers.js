@@ -1,4 +1,5 @@
-import type { ILinkedStream, IOwningStream } from "../interfaces/OwnedStream.ts"
+import type { ICommonStream } from "../interfaces/CommonStream.ts"
+import type { IOwningStream } from "../interfaces/OwnedStream.ts"
 import type { OwningStream } from "./OwningStream.ts"
 
 export declare abstract class CustomLinkedStream<
@@ -6,9 +7,10 @@ export declare abstract class CustomLinkedStream<
 		Args extends any[] = []
 	>
 	extends OwningStream<T, Args>
-	implements ILinkedStream<T>
+	implements ICommonStream<T>
 {
 	setOwner(newOwner: IOwningStream): void
 	readonly owner?: IOwningStream
 	abstract free(): void
+	[Symbol.iterator]: () => Generator<T>
 }

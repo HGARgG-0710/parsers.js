@@ -17,7 +17,7 @@ import type {
 	ILongAsEndTestTypes,
 	IUntilEndTestTypes
 } from "../interfaces/LimitStream.js"
-import type { IStreamPosition } from "../interfaces/StreamPosition.js"
+import type { IStreamStep } from "../interfaces/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
@@ -100,8 +100,8 @@ class ConfirmedStepsCounter {
 }
 
 function BuildLimitStream<T = any>(
-	from: IStreamPosition<T>,
-	until: IStreamPosition<T>
+	from: IStreamStep<T>,
+	until: IStreamStep<T>
 ) {
 	return new mixin(
 		{
@@ -213,8 +213,8 @@ function BuildLimitStream<T = any>(
  * value.
  */
 export function LimitStream<T = any>(
-	from: IStreamPosition<T>,
-	longAs?: IStreamPosition<T>
+	from: IStreamStep<T>,
+	longAs?: IStreamStep<T>
 ) {
 	;[from, longAs] = LimitStream.ensureLimitsPair(from, longAs)
 
@@ -250,8 +250,8 @@ export namespace LimitStream {
 	 */
 	export function ensureLimitsPair<
 		T = any,
-		A extends IStreamPosition<T> = IStreamPosition<T>,
-		B extends IStreamPosition<T> = IStreamPosition<T>
+		A extends IStreamStep<T> = IStreamStep<T>,
+		B extends IStreamStep<T> = IStreamStep<T>
 	>(from: A, longAs?: B) {
 		return isNullary(longAs)
 			? ([NoMovementPredicate, from] as [IStepPredicate<IStream<T>>, A])

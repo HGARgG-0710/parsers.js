@@ -9,7 +9,7 @@ import type {
 import { ReadableView } from "../../../internal/ReadableView.js"
 import { isStepPredicate } from "../../../utils/Step.js"
 import { uniNavigate } from "../../../utils/Stream.js"
-import type { IStreamPosition } from "../interfaces/StreamPosition.js"
+import type { IStreamStep } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
 
 const { max, min } = number
@@ -75,7 +75,7 @@ export class InputStream<T = any>
 		return this.curr
 	}
 
-	navigate(relativePos: IStreamPosition) {
+	navigate(relativePos: IStreamStep) {
 		return isStepPredicate(relativePos)
 			? uniNavigate(this, relativePos)
 			: this.navigateInt(relativePos)

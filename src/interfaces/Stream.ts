@@ -7,7 +7,7 @@ import type {
 	IStateSettable,
 	ITableHandler
 } from "../interfaces.js"
-import type { IStreamPosition } from "../modules/Stream/interfaces/StreamPosition.js"
+import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 
 /**
  * An interface for specifying a presence of a `.finish` method.
@@ -25,7 +25,7 @@ export interface IFinishable<T = any> {
  * (`IStreamPositionPredicate<T>`). In the latter case, `false` usually means that the place of
  * interest has not yet been reached.
  */
-export interface INavigable<T = any, PosType = IStreamPosition<T>> {
+export interface INavigable<T = any, PosType = IStreamStep<T>> {
 	navigate(position: PosType): T
 }
 
@@ -148,6 +148,7 @@ export type * from "../modules/Stream/interfaces/Locator.js"
 export type * from "../modules/Stream/interfaces/MarkerStream.js"
 export type * from "../modules/Stream/interfaces/OwnedStream.js"
 export type * from "../modules/Stream/interfaces/PeekStream.js"
+export type * from "../modules/Stream/interfaces/ProxyStream.js"
 export type * from "../modules/Stream/interfaces/RenewerStream.js"
 export type * from "../modules/Stream/interfaces/SingletonStream.js"
 export type * from "../modules/Stream/interfaces/StorageStream.js"

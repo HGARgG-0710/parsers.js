@@ -4,7 +4,7 @@ import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ILinkedStream,
 	IOwnedStream,
-	IStreamPosition
+	IStreamStep
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { navigate } from "../../../utils/Stream.js"
@@ -13,7 +13,7 @@ import { bind, isStepPredicate } from "src/utils/Step.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
-function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
+function BuildFilterStream<T = any>(filter: IStreamStep<T>) {
 	return new mixin(
 		{
 			name: "FilterStream",
@@ -88,7 +88,7 @@ function BuildFilterStream<T = any>(filter: IStreamPosition<T>) {
  * for which the filter returns true [when predicate]. When it's a
  * numeric filter, only every `n`th item is returned (where `n = condition`).
  */
-export function FilterStream<T = any>(filter: IStreamPosition<T>) {
+export function FilterStream<T = any>(filter: IStreamStep<T>) {
 	const filterStream = BuildFilterStream(filter)
 
 	function F(resource?: IOwnedStream<T>): ICommonStream<T> {

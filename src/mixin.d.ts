@@ -13,7 +13,7 @@ import type { object } from "@hgargg-0710/one"
  * The `mixin.IMixinShape<T, Args>` object given contains all the
  * things necessary to construct the mixin's own properties. The
  * constructor also accepts `mixins: mixin[]` and
- * `classes: mixin.IOutClass<T, Args>[]` parameters, used for
+ * `parents: mixin.IOutClass<T, Args>[]` parameters, used for
  * allowing a form of "weak" (i.e. prototype-based) inheritance.
  *
  * The `IMixinShape<T, Args>` object has the `name: string` property,
@@ -72,7 +72,7 @@ import type { object } from "@hgargg-0710/one"
 export declare class mixin {
 	readonly name: string
 	toClass(): Function
-	constructor(mixinShape: mixin.IMixinShape, classes?: Function[])
+	constructor(mixinShape: mixin.IMixinShape, parents?: Function[])
 }
 
 export namespace mixin {

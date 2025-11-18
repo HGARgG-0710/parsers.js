@@ -36,40 +36,11 @@ IMMEDIATE:
 	ORDER of tasks: 
 		0. RecursiveLimitStream (the critical recursion flaw thing...)
 			TODO: 
-				1. add a new stream - `RecursiveLimitStream`
-				2. base upon the `LimitStream`
-					1. IT IS *IStateful*!
-						1. A mixin?
-					2. Delegates to an instance of `LimitStream`
-						that uses THE MODIFICATION of the given predicate...
-						Note: this is a PROXY around the corresponding `LimitStream` instance
-					3. The predicate employs `.owner` variable, like: 
-
-						# the "magic" predicate...
-						(stream) => {
-							# NOTE: the `stream.owner` is `this.owner` (since `this` is the RecursiveLimitStream), 
-							# AND the `stream` is also `this.owner.delegate.resource` (the `this.owner.delegate` is `this`), 
-							# and `this.delegate` is THE LimitStream, to which the predicate is given...
-							const targetStream = this.owner
-							return !targetStream.isSameGlobalDepth() || targetStream.predicate(stream)
-						}
-
-						The public `isSameDepth()` is defined as: 
-
-							isSameGlobalDepth() {
-								# The `.depth` is created upon call to `.init`!!! [vital - for later Renewal]
-								# It is obtained as `this.depth = this.state.getDepth(this.mark)`; 	
-								return this.depth === this.currGlobalDepth()
-							}
-							
-							private currGlobalDepth() {
-								return state.parse.getDepth(this.depthMark)
-							}
-
 				[after the 'LimitStream' thing is finished...]
 				3. add corresponding `BracketRecursiveLimitStream`
 				4. REPLACE in the appropriate places inside the `RegexParser`...:
 					1. add the `DepthMarkStream` to 'CharClass/BoundaryClass' and OTHER such places...
+						PARTICULARLY near places where `LimitStream`s are used...
 					2. replace the `LimitStream`s with `RecursiveLimitStream` in places of RECURSION (`PlainGroup`, etc)
 				5. Add a NEW `IStream` SUB-INTERFACE the `depthMark`-containing one: 
 					1. Let `RecursiveList` implement it (note: it is created via a FACTORY-FUNCTION that relies upon the predicate)
@@ -133,6 +104,20 @@ IMMEDIATE:
 			Then, let the SKIPPING predicate be the `skip` we are interested in (note: let it 
 				be NOT NECESSARILY DEFAULT `skip`, i.e., one would USE the `errDataGetter`, with the 
 					DEFAULT being nothing - one just uses the `skip` default...)
+
+	1. GLOBAL ACROSS-LIBRARY TODO: 
+		Currently, all the `get` accessors are being denoted in .d.ts annotations 
+		via the `readonly propName: T`, which is WRONG, and causes overriding the 
+		definition of the accessor to be IMPOSSIBLE. 
+		FIX IT - let the `get propName(): T` be used WHERE IT'S SUPPOSED TO BE.
+
+	VITAL TODO: on `bind(...)`-ing of the `IStepPredicate`S
+		It's a waste. 
+		Put a stop to this practice across the library. 
+		Creating needless copies of callbacks for each instance is 
+		NOT the way to do it.
+		Since, when one calls "x.y()", the `y` function on `x` is AUTOMATICALLY 
+		employed with `this === x`. 
 
 	1. CRITICAL DESIGN FLAW: recursion. 
 		The LimitedStream is NOT FIT FOR IT.  
