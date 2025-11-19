@@ -1,9 +1,12 @@
-import type { IOwnedStream, IRawStreamArray } from "../../interfaces.js"
+import type { IRawStreamArray, IStreamPredicate } from "../../interfaces.js"
 import { ArrayBuilder } from "../../objects.js"
+import { skip } from "../../objects/Error.js"
+import { LimitStream } from "../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
-	isNonEscaped
+	isCurr,
+	isNotNonEscapedNext
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
@@ -12,7 +15,20 @@ import { HandlePlainGroup } from "./Group/Plain.js"
 import { GroupBody } from "./Nodes.js"
 import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
-export const GroupLimitStream = EndBracketStream(isNonEscaped(")"))
+const skipOpbrack = skip("(")
+
+export function GroupLimitStream(from?: IStreamPredicate<string>) {
+	return EndBracketStream(
+		LimitStream.Limits.builder<string>()
+			.setFrom((input) => {
+				skipOpbrack(input) // (
+				return from ? from(input) : 0
+			})
+			.setIsEmpty(isCurr(")"))
+			.setLongAs(isNotNonEscapedNext(")"))
+			.build()
+	)
+}
 
 export const GroupBodyStream = CollectionStream(
 	GroupBody,
@@ -27,11 +43,6 @@ const GroupHandler = CurrCharHandler<IRawStreamArray>(
 	HandlePlainGroup()
 )
 
-function handleGroup(input: IOwnedStream<string>) {
-	input.next() // (
-	return GroupHandler(input)
-}
-
 export const maybeGroup = {
-	"(": handleGroup
+	"(": GroupHandler
 }

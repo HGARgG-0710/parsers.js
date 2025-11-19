@@ -4,15 +4,29 @@ import type {
 	IRawStreamArray
 } from "../../../interfaces.js"
 import { skip } from "../../../objects/Error.js"
-import { PeekStream } from "../../../objects/Stream.js"
-import { EndBracketStream, isNonEscaped } from "../../../samples/Stream.js"
+import { LimitStream, PeekStream } from "../../../objects/Stream.js"
+import {
+	EndBracketStream,
+	isCurr,
+	isNotNonEscapedNext
+} from "../../../samples/Stream.js"
 import { BoundaryClass } from "../Nodes.js"
 import { ClassStream, HandleClass } from "./Common.js"
 
 const skipBoundary = skip("b")
-const skipOpbrack = skip("{")
+const skipOpbrace = skip("{")
 
-const BoundaryClassLimitStream = EndBracketStream(isNonEscaped("}"))
+const BoundaryClassLimitStream = EndBracketStream(
+	LimitStream.Limits.builder()
+		.setFrom((input) => {
+			skipBoundary(input) // b
+			skipOpbrace(input) // {
+			return 0
+		})
+		.setIsEmpty(isCurr("}"))
+		.setLongAs(isNotNonEscapedNext("}"))
+		.build()
+)
 
 class BoundaryClassStream extends ClassStream<ICollectionNode> {
 	protected spawnTarget(): ICollectionNode {
@@ -32,7 +46,5 @@ export function HandleMaybeBoundaryClass(
 export function HandleBoundaryClass(
 	input: IOwnedStream<string>
 ): IRawStreamArray {
-	skipBoundary(input) // b
-	skipOpbrack(input) // {
 	return [BoundaryClassHandler, BoundaryClassLimitStream(), PeekStream()]
 }

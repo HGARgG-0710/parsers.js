@@ -23,7 +23,7 @@ export class ConcatStream extends ArrayStream<any, IStream> {
 	}
 
 	private currStreamDone() {
-		return this.currStream.isCurrEnd()
+		return this.currStream.isEnd
 	}
 
 	private nextStream() {

@@ -31,7 +31,7 @@ import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
-import { isStepPredicate, negate, asSteps } from "./Step.js"
+import { asSteps } from "./Step.js"
 
 const { structCheck } = object
 const { prop } = object
@@ -81,11 +81,15 @@ export function destroy<T = any>(
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip<T = any>(
-	input: IStream<T>,
-	steps: IStreamStep<T> = 1
-) {
-	return uniNavigate(input, isStepPredicate(steps) ? negate(steps) : steps)
+export function skip<T = any>(input: IStream<T>, step: IStreamStep<T> = 1) {
+	if (isNumber(step)) while (step-- > 0) input.next()
+	else
+		while (!input.isEnd) {
+			const steps = asSteps(input, step)
+			if (steps <= 0) break
+			for (let i = 0; i < steps && !input.isEnd; ++i) input.next()
+		}
+	return input.curr
 }
 
 /**
@@ -160,7 +164,7 @@ export function consumeGenerator<T = any, Out = any>(
  */
 export function has<T = any>(pos: IStreamStep<T>) {
 	return function (input: IStream<T>) {
-		uniNavigate(input, pos)
+		skip(input, pos)
 		return input.isEnd
 	}
 }
@@ -235,32 +239,6 @@ export function finish<T = any>(stream: IStream<T>) {
 }
 
 /**
- * General implementation of the 'navigate' operation for a given `stream`
- * (note: when available, calling `stream.navigate()` is typically much faster);
- *
- * Provided with a `IStream<T>` and an `IStreamPosition<T>`, it:
- *
- * 1. if the result is a `number` and it is positive, calls the `stream.next()` this many times;
- * 2. if the result is an `IPositionPredicate`, continues to walk the stream until either
- * it is over, or the condition given is met;
- *
- * @returns `stream.curr`
- */
-export function uniNavigate<T = any>(
-	stream: IStream<T>,
-	position: IStreamStep<T>
-): T {
-	if (isNumber(position)) while (position-- > 0) stream.next()
-	else
-		while (!stream.isEnd) {
-			const steps = asSteps(stream, position)
-			if (steps <= 0) break
-			for (let i = 0; i < steps && !stream.isEnd; ++i) stream.next()
-		}
-	return stream.curr
-}
-
-/**
  * If the given `IStream<T>` is `INavigable<T>`,
  * calls and returns `stream.navigate(position)`,
  * otherwise - `uniNavigate(stream, position)`.
@@ -271,7 +249,7 @@ export function navigate<T = any>(
 ) {
 	return isNavigable(stream)
 		? stream.navigate(position)
-		: uniNavigate(stream, position)
+		: skip(stream, position)
 }
 
 /**

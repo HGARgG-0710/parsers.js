@@ -9,7 +9,6 @@ import type {
 	IStreamLocator
 } from "../../../interfaces.js"
 import type { IPathFollower } from "../../../interfaces/PropertyPath.js"
-import { negate } from "src/utils/Step.js"
 import {
 	OwnerFollower,
 	ResourceFollower

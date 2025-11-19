@@ -5,12 +5,25 @@ import type {
 	IPeekable,
 	IRawStreamArray
 } from "../../../interfaces.js"
-import { PeekStream } from "../../../objects/Stream.js"
-import { EndBracketStream, isNonEscaped } from "../../../samples/Stream.js"
+import { skip } from "../../../objects/Error.js"
+import { LimitStream, PeekStream } from "../../../objects/Stream.js"
+import {
+	EndBracketStream,
+	isCurr,
+	isNotNonEscapedNext
+} from "../../../samples/Stream.js"
 import { CharClass } from "../Nodes.js"
 import { ClassStream, HandleClass } from "./Common.js"
 
-const CharClassLimitStream = EndBracketStream(isNonEscaped("]"))
+const skipSqopbrack = skip("[")
+
+const CharClassLimitStream = EndBracketStream(
+	LimitStream.Limits.builder<string>()
+		.setFrom((input) => skipSqopbrack(input))
+		.setIsEmpty(isCurr("]"))
+		.setLongAs(isNotNonEscapedNext("]"))
+		.build()
+)
 
 class CharClassStream extends ClassStream<ICollectionNode> {
 	protected spawnTarget(): ICollectionNode {

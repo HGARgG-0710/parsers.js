@@ -6,12 +6,14 @@ import { ParseRegexRecursively } from "../Parser.js"
 
 export const GroupStream = SingletonWrapperStream(Group)
 
+const PlainGroupLimitStream = GroupLimitStream()
+
 export function HandlePlainGroup(recursiveParser = ParseRegexRecursively) {
 	return [
 		GroupStream(),
 		GroupBodyStream(),
 		recursiveParser,
-		GroupLimitStream(),
+		PlainGroupLimitStream(),
 		PeekStream()
 	]
 }

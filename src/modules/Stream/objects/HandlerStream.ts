@@ -1,5 +1,4 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ICommonStream,
@@ -8,6 +7,7 @@ import type {
 	IOwnedStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
+import { ObjectPool } from "../../../objects.js"
 import type { IHandler } from "../interfaces/HandlerStream.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
@@ -46,7 +46,7 @@ function BuildBeforeHandlerStream<In = any, Out = any>(
 
 		constructor(resource?: IOwnedStream<In>) {
 			super()
-			this.handler = handler.bind(this)
+			this.handler = handler
 			this.init(resource)
 		}
 	}

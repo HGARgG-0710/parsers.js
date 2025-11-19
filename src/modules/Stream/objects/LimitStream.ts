@@ -1,42 +1,26 @@
 import { boolean, type } from "@hgargg-0710/one"
-import { asSteps, bind, isStepPredicate, negate } from "src/utils/Step.js"
+import assert from "assert"
+import { asSteps, isStepPredicate } from "src/utils/Step.js"
 import * as Pools from "../../../global/Pools.js"
-import type { IPoolKeeping, IStepPredicate } from "../../../interfaces.js"
+import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ICommonStream,
 	ILinkedStream,
-	IOwnedStream,
-	IStream
+	IOwnedStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
-import { ownerInitializer } from "../../../objects/Initializer.js"
 import { ObjectPool } from "../../../objects/ObjectPool.js"
 import { navigate } from "../../../utils/Stream.js"
+import type { ILimitableStream } from "../interfaces/LimitStream.js"
 import type {
-	ILimitableStream,
-	ILongAsEndTestTypes,
-	IUntilEndTestTypes
-} from "../interfaces/LimitStream.js"
-import type { IStreamStep } from "../interfaces/StreamPosition.js"
+	IStreamPredicate,
+	IStreamStep
+} from "../interfaces/StreamPosition.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
+const { T, F } = boolean
 const { isNullary } = type
-const { T } = boolean
-
-interface IStateSettupable {
-	setupState(): void
-}
-
-const limitStreamInitializer = {
-	init(
-		target: ILinkedStream & IStateSettupable,
-		resource?: ILimitableStream
-	) {
-		target.setupState()
-		ownerInitializer.init(target, resource)
-	}
-}
 
 /**
  * A class encapsulating a lookaround of a `LimitStream`,
@@ -101,7 +85,8 @@ class ConfirmedStepsCounter {
 
 function BuildLimitStream<T = any>(
 	from: IStreamStep<T>,
-	until: IStreamStep<T>
+	longAs: IStreamStep<T>,
+	isEmpty: IStreamPredicate<T>
 ) {
 	return new mixin(
 		{
@@ -117,58 +102,40 @@ function BuildLimitStream<T = any>(
 					)
 			},
 			properties: {
-				prodForth() {
-					if (!this.lookahead.has())
-						this.lookahead.set(this.prodForthWithoutLookahead())
-				},
-
-				prodForthWithoutLookahead() {
-					super.BasicResourceStream.next.call(this)
-					return this.curr
-				},
-
 				baseNextIter(curr: T) {
 					this.steps.decSteps()
-					const nextItem = this.lookahead.get()
-					this.lookahead.reset()
-					return nextItem
+					this.resource.next()
+					return this.resource.curr
 				},
 
 				goStartPos() {
 					navigate(this.resource!, this.from)
 				},
 
+				maybeEmpty() {
+					this.isEnd = this.isEmpty(this.resource!)
+					if (!this.isEnd) this.syncCurr()
+				},
+
 				get pool() {
 					return this.class.pool
 				},
 
-				get initializer() {
-					return limitStreamInitializer
-				},
-
-				set resource(resource: ILimitableStream<T>) {
-					super.resource = resource
-				},
-
-				get resource() {
-					return super.resource as ILimitableStream<T>
-				},
-
 				setResource(resource: ILimitableStream<T>) {
-					super.setResource(resource)
+					this.super.BasicResourceStream.setResource.call(
+						this,
+						resource
+					)
 					this.goStartPos()
-					this.syncCurr()
-				},
-
-				setupState() {
-					this.lookahead.reset()
+					this.maybeEmpty()
 				},
 
 				isCurrEnd(): boolean {
-					if (this.resource.isCurrEnd()) return true
-					this.prodForth()
+					if (this.isEnd || this.resource?.isCurrEnd()) return true
 					if (this.steps.toCheckAgain) {
-						this.steps.setSteps(asSteps(this.resource!, this.until))
+						this.steps.setSteps(
+							asSteps(this.resource!, this.longAs)
+						)
 						return this.steps.isEnd()
 					}
 					return false
@@ -177,18 +144,15 @@ function BuildLimitStream<T = any>(
 				next() {
 					if (this.isCurrEnd()) this.endStream()
 					else this.baseNextIter(this.curr)
-				},
-
-				init(resource?: ILimitableStream<T>) {
-					return super.init(resource)
 				}
 			},
 			constructor(resource?: ILimitableStream<T>) {
 				this.super.BasicResourceStream.constructor.call(this)
 				this.lookahead = new Lookaround()
 				this.steps = new ConfirmedStepsCounter()
-				this.from = isStepPredicate(from) ? bind(this, from) : from
-				this.until = isStepPredicate(until) ? bind(this, until) : until
+				this.isEmpty = isEmpty
+				this.from = from
+				this.longAs = longAs
 				this.init(resource)
 			}
 		},
@@ -212,14 +176,9 @@ function BuildLimitStream<T = any>(
  * given `ILimitableStream<T>` must (itself) be greater than `from` in its absolute
  * value.
  */
-export function LimitStream<T = any>(
-	from: IStreamStep<T>,
-	longAs?: IStreamStep<T>
-) {
-	;[from, longAs] = LimitStream.ensureLimitsPair(from, longAs)
-
-	const until = isStepPredicate(longAs) ? negate(longAs) : longAs
-	const limitStream = BuildLimitStream<T>(from, until)
+export function LimitStream<T = any>(limits: LimitStream.Limits<T>) {
+	const { from, longAs, isEmpty } = limits
+	const limitStream = BuildLimitStream<T>(from, longAs, isEmpty)
 
 	function L(resource?: ILimitableStream<T>): ICommonStream<T> {
 		return limitStream.pool.create(resource)
@@ -241,28 +200,46 @@ export namespace LimitStream {
 	 */
 	export const NoMovementPredicate = T
 
-	/**
-	 * This is a function for ensuring that the provided pair of
-	 * predicates for definition of a `LimitStream` are interpreted
-	 * as desired - the first argument `from` is optional, so if
-	 * `longAs` is not provided, it is defined as `from`, with
-	 * `from` itself being replaced with `LimitStream.NoMovementPredicate`.
-	 */
-	export function ensureLimitsPair<
-		T = any,
-		A extends IStreamStep<T> = IStreamStep<T>,
-		B extends IStreamStep<T> = IStreamStep<T>
-	>(from: A, longAs?: B) {
-		return isNullary(longAs)
-			? ([NoMovementPredicate, from] as [IStepPredicate<IStream<T>>, A])
-			: ([from, longAs] as [A, B])
+	export class Limits<T = any> {
+		static builder<T = any>() {
+			return new LimitsBuilder<T>()
+		}
+
+		wrapLongAs(into: (wrapped: IStreamPredicate<T>) => IStreamStep<T>) {
+			assert(isStepPredicate(this.longAs))
+			return new Limits(this.from, into(this.longAs), this.isEmpty)
+		}
+
+		constructor(
+			readonly from: IStreamStep<T>,
+			readonly longAs: IStreamStep<T>,
+			readonly isEmpty: IStreamPredicate<T>
+		) {}
 	}
 
-	export function testUntilPredicateResult(isEnd: IUntilEndTestTypes) {
-		return isEnd === true || isEnd === 0
-	}
+	class LimitsBuilder<T = any> {
+		private from: IStreamStep<T> = F
+		private isEmpty: IStreamPredicate<T> = F
+		private longAs?: IStreamStep<T>
 
-	export function testLongAsPredicateResult(longAs: ILongAsEndTestTypes) {
-		return longAs === false || longAs === 0
+		setFrom(from?: IStreamStep<T>) {
+			if (!isNullary(from)) this.from = from
+			return this
+		}
+
+		setIsEmpty(isEmpty?: IStreamPredicate<T>) {
+			if (!isNullary(isEmpty)) this.isEmpty = isEmpty
+			return this
+		}
+
+		setLongAs(longAs?: IStreamStep<T>) {
+			if (!isNullary(longAs)) this.longAs = longAs
+			return this
+		}
+
+		build() {
+			assert(this.longAs)
+			return new Limits(this.from, this.longAs, this.isEmpty)
+		}
 	}
 }

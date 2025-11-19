@@ -42,7 +42,7 @@ function BuildIndexStream<T = any>(
 
 		constructor(resource?: IOwnedStream<T>) {
 			super()
-			this.isNewline = isNewline.bind(this)
+			this.isNewline = isNewline
 			this.lineIndex = lineIndexMaker()
 			this.init(resource)
 		}

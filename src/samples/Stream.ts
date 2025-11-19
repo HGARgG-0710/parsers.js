@@ -1,10 +1,11 @@
+import { functional } from "@hgargg-0710/one"
+import assert from "assert"
 import type {
 	IGettable,
 	ILinkedStream,
 	IOwnedStream,
 	IPeekableStream,
 	ISingletonNodeType,
-	IStepPredicate,
 	IStream
 } from "../interfaces.js"
 import {
@@ -12,26 +13,33 @@ import {
 	LimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
+import { asSteps } from "../utils/Step.js"
+import { skip } from "../utils/Stream.js"
+const { negate } = functional
+
+export function AutoNextLimitStream(n: number) {
+	return function <T = any>(limits: LimitStream.Limits<T>) {
+		return LimitStream(
+			limits.wrapLongAs((longAs) => (input: IStream<T>) => {
+				const steps = asSteps(input, longAs)
+				if (steps === 0) {
+					skip(input, n)
+					return false
+				}
+				return steps
+			})
+		)
+	}
+}
+
+export const PastEndStream = AutoNextLimitStream(1)
 
 /**
  * This is a `LimitStream` that lasts upto the character at which `until`
  * becomes true, and then skips it (unlike common `LimitStream`). Very useful
  * for `(...)`-type bracketed expressions.
  */
-export function EndBracketStream<T = any>(
-	from: IStepPredicate<IStream<T>>,
-	until?: IStepPredicate<IStream<T>>
-) {
-	;[from, until] = LimitStream.ensureLimitsPair(from, until)
-	return LimitStream(from, (input: IStream<T>) => {
-		const isEnd = until(input)
-		if (LimitStream.testUntilPredicateResult(isEnd)) {
-			input.next()
-			return false
-		}
-		return isEnd || true
-	})
-}
+export const EndBracketStream = AutoNextLimitStream(2)
 
 /**
  * This is a `SingletonStream` that, as its `.curr: W`
@@ -63,9 +71,29 @@ export function isCurr<T = any>(value: T) {
 	return (input: IStream<T>) => input.curr === value
 }
 
-export function isNonEscaped(value: string) {
+export function isPeek(n: number) {
+	assert(n >= 0)
+	return <T = any>(value: T) =>
+		(input: IPeekableStream<T>) =>
+			input.peek(n) === value
+}
+
+export function isNotPeek(n: number) {
+	const isIt = isPeek(n)
+	return <T = any>(value: T) => negate(isIt(value))
+}
+
+export const isNext = isPeek(1)
+
+export const isNotNext = isNotPeek(1)
+
+export function isNotNonEscapedNext(value: string) {
+	const isNotValueNext = isNotNext(value)
+	const isNotOneAfterNext = isNotPeek(2)(value)
 	return (input: IPeekableStream<string>) =>
-		input.curr === "\\" ? 1 : input.curr === value
+		input.curr === "\\"
+			? 1 + Number(isNotOneAfterNext(input))
+			: isNotValueNext(input)
 }
 
 /**
@@ -106,6 +134,6 @@ export function DefaultChooser<T = any, K extends IOwnedStream = IOwnedStream>(
 }
 
 export const EscapedStream = HandlerStream((stream: IOwnedStream<string>) => {
-	if (stream.curr == "\\") stream.next()
+	if (stream.curr === "\\") stream.next()
 	return stream.curr
 })

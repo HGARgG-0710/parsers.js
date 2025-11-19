@@ -224,7 +224,7 @@ export abstract class IndexMap<
 	}
 
 	protected setKeyExtension(keyExtension: IKeyExtension<K, RealKey>) {
-		this.keyExtension = keyExtension.bind(this)
+		this.keyExtension = keyExtension
 		this.initExtendedKeys()
 		return this
 	}

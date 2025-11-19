@@ -138,6 +138,7 @@ export function skip<T = any>(...items: T[]) {
 	) {
 		allowItems(stream, errDataGetter)
 		stream.next()
+		return 0
 	}
 }
 

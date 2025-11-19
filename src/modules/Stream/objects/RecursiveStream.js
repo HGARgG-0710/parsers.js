@@ -53,17 +53,21 @@ export class LimitDepthMarks {
 	}
 }
 
-export function RecursiveLimitStream(depthMarks, from, longAs) {
-	;[from, longAs] = LimitStream.ensureLimitsPair(from, longAs)
+export function RecursiveLimitStream(depthMarks, limits) {
 	const { mainMark } = depthMarks
-	
-	const delegateStream = LimitStream(from, function (resource) {
-		const proxyStream = this.owner
-		return (
-			!proxyStream.isSameGlobalDepthFor(mainMark) ||
-			longAs.call(this, resource)
+
+	const delegateStream = LimitStream(
+		limits.wrapLongAs(
+			(longAs) =>
+				function (resource) {
+					const proxyStream = this.owner
+					return (
+						!proxyStream.isSameGlobalDepthFor(mainMark) ||
+						longAs.call(this, resource)
+					)
+				}
 		)
-	})
+	)
 
 	const recursiveProxyStream = RecursiveProxyStream(depthMarks.get())
 

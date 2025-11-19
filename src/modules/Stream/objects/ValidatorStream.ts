@@ -22,7 +22,7 @@ function BuildValidatorStream<T = any>(validator: IValidator<T>) {
 
 		constructor(resource?: IOwnedStream<T>) {
 			super(resource)
-			this.validator = validator.bind(this)
+			this.validator = validator
 		}
 	} as IPoolKeeping<ICommonStream<T>>
 }

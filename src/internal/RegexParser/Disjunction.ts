@@ -1,13 +1,29 @@
-import type { INode, IOwnedStream, IRawStreamArray } from "../../interfaces.js"
+import type {
+	INode,
+	IOwnedStream,
+	IPeekableStream,
+	IRawStreamArray
+} from "../../interfaces.js"
 import { ArrayBuilder } from "../../objects.js"
-import { LimitStream, SingleNodeStream } from "../../objects/Stream.js"
-import { CollectionStream } from "../../samples/Stream.js"
+import {
+	LimitStream,
+	PeekStream,
+	SingleNodeStream
+} from "../../objects/Stream.js"
+import { CollectionStream, PastEndStream } from "../../samples/Stream.js"
 import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
 import { Disjunct, Disjunction, Temp } from "./Nodes.js"
 
-const isCurrPipe = (input: IOwnedStream<INode>) => !Temp.Pipe.is(input.curr)
+const isCurrPipe = (input: IOwnedStream<INode>) => Temp.Pipe.is(input.curr)
+const isNotNextPipe = (input: IPeekableStream<INode>) =>
+	!Temp.Pipe.is(input.peek(1))
 
-const PipeLimitStream = LimitStream(isCurrPipe)
+const PipeLimitStream = PastEndStream(
+	LimitStream.Limits.builder<INode>()
+		.setIsEmpty(isCurrPipe)
+		.setLongAs(isNotNextPipe)
+		.build()
+)
 
 // * note: this is NOT a bug, since accepting empty strings MAKES NO SENSE for this specific grammar,
 // a sequence of characters that is matched from the given '.curr'-point MUST be non-zero in length
@@ -32,5 +48,10 @@ class DisjunctionStream extends SingleNodeStream<INode> {
 }
 
 export function ProduceDisjunction(): IRawStreamArray {
-	return [new DisjunctionStream(), DisjunctStream(), PipeLimitChooser]
+	return [
+		new DisjunctionStream(),
+		DisjunctStream(),
+		PipeLimitChooser,
+		PeekStream()
+	]
 }

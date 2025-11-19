@@ -1,4 +1,5 @@
 import { type IOwnedStream, type IRawStreamArray } from "../../../interfaces.js"
+import { skip } from "../../../objects/Error.js"
 import { PeekStream } from "../../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
 import { maybeCharClass } from "../Class/CharClass.js"
@@ -17,7 +18,13 @@ import { CurrCharHandler } from "../Utils/CurrCharHandler.js"
 import { HandleExtensionGroup } from "./Extension.js"
 import { HandlePlainGroup } from "./Plain.js"
 
+const skipEq = skip("=")
+
 const NoCaptureGroupStream = SingletonWrapperStream(NoCaptureGroup)
+const NoCaptureGroupLimitStream = GroupLimitStream((input) => {
+	skipEq(input) // =
+	return 0
+})
 
 const OtherGroupHandler = CurrCharHandler<IRawStreamArray>(
 	{
@@ -26,19 +33,19 @@ const OtherGroupHandler = CurrCharHandler<IRawStreamArray>(
 	HandlePlainGroup(ParseNoCaptureRecursively)
 )
 
-function handleOtherGroup(input: IOwnedStream<string>) {
+function handleNoCaptureGroup(input: IOwnedStream<string>) {
 	input.next() // (
 	return OtherGroupHandler(input)
 }
 
-const maybeOtherGroup = { "(": handleOtherGroup }
+const maybeNoCaptureGroup = { "(": handleNoCaptureGroup }
 
 const NoCaptureRegexTokenizer = CurrCharHandler<IRawStreamArray>(
 	{
 		...maybeEscaped,
 		...maybeNegation,
 		...maybeTypeMatch,
-		...maybeOtherGroup,
+		...maybeNoCaptureGroup,
 		...maybeCharClass,
 		...maybeDot,
 		...maybePreQuantifier,
@@ -57,12 +64,11 @@ function ParseNoCaptureRecursively(input: IOwnedStream<string>) {
 }
 
 export function HandleNoCaptureGroup(input: IOwnedStream<string>) {
-	input.next() // =
 	return [
 		NoCaptureGroupStream(),
 		GroupBodyStream(),
 		ParseNoCaptureRecursively,
-		GroupLimitStream(),
+		NoCaptureGroupLimitStream(),
 		PeekStream()
 	]
 }

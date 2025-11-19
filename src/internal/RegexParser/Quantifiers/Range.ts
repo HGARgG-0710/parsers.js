@@ -3,6 +3,7 @@ import type {
 	ICellNode,
 	INode,
 	IOwnedStream,
+	IPeekableStream,
 	IPoolNode,
 	IStreamChooser,
 	ITypeCheckable
@@ -24,7 +25,9 @@ import { isDecimal } from "../../../samples/alphabet.js"
 import {
 	CachedTokenStream,
 	EndBracketStream,
-	isCurr
+	isCurr,
+	isNotNext,
+	PastEndStream
 } from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
 import {
@@ -37,11 +40,28 @@ import {
 } from "../Nodes.js"
 import { handleRangeQuantifier } from "./Common.js"
 
+const skipOpbrace = skip("{")
+const expectRangeBoundary = expectKind(RangeBoundary)
+const expectCommaNode = expectKind(Temp.Comma)
+const skipComma = skip(",")
+
 const CommaStream = CachedTokenStream(Temp.Comma)
 
-const RangeLimitStream = EndBracketStream(isCurr("}"))
-const RangeBoundaryLimitStream = LimitStream((input: IOwnedStream<string>) =>
-	isDecimal(input.curr)
+const RangeLimitStream = EndBracketStream(
+	LimitStream.Limits.builder<string>()
+		.setFrom((input) => {
+			skipOpbrace(input) // {
+			return 0
+		})
+		.setIsEmpty(isCurr("}"))
+		.setLongAs(isNotNext("}"))
+		.build()
+)
+
+const RangeBoundaryLimitStream = PastEndStream(
+	LimitStream.Limits.builder<string>()
+		.setLongAs((input: IPeekableStream<string>) => isDecimal(input.peek(1)))
+		.build()
 )
 
 const boundaryMaker = consumable(new SourceBuilder())
@@ -51,10 +71,6 @@ const RangeBoundaryStream = SingletonStream(
 	(input: IOwnedStream<string> & Iterable<string>) =>
 		new RangeBoundary(Number(boundaryMaker(input).get()))
 )
-
-const expectRangeBoundary = expectKind(RangeBoundary)
-const expectCommaNode = expectKind(Temp.Comma)
-const skipComma = skip(",")
 
 class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 	private finalRange: IPoolNode<[INode]>
@@ -118,8 +134,7 @@ function HandleDecimalOrComma(input: IOwnedStream<string>) {
 	return isDecimal(input.curr) ? HandleDecimal() : HandleComma(input)
 }
 
-export function HandleRange(input: IOwnedStream<string>) {
-	input.next() // {
+export function HandleRange() {
 	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
 }
 

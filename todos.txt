@@ -34,6 +34,13 @@ REMINDERs:
 
 IMMEDIATE: 
 	ORDER of tasks: 
+		0. LimitStream - REMOVE the `from, longAs/until`, 
+			0. The `IStepPredicate` separation (onto 3 interfaces, see below...)
+
+			1. PROBLEM [RecursiveLimitStream]: 
+				The `longAs` calls inside `asSteps` DO NOT support the `this` context. 
+				Specifically, CHANGE the calls to enable it... [somehow...]
+
 		0. RecursiveLimitStream (the critical recursion flaw thing...)
 			TODO: 
 				[after the 'LimitStream' thing is finished...]
@@ -52,7 +59,6 @@ IMMEDIATE:
 
 				6. LET the `DepthMarkStream` AND `RecursiveLimitStream` BOTH accept *MULTIPLE*
 					marks. Let the marks be INTEGERS (create an `enum` for them specifically...)
-		1. The LimitStream (quality) thing
 		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
 			2. to compiler (AND the `Regex.Raw`)
 				1. new `Regex.Raw` child for Negation(BoundaryClass(...)); 
@@ -88,22 +94,16 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	TODO [code quality]: about the `LimitStream`: 
-		GET RID of all the {/(/[-skipping input.next() calls from the choosers. 
-		INSTEAD, *manually* call the respective `skip`-function WITHIN the 
-		`from` IStepPredicate passed to the LimitStream. 
-		INCORPORATE THEM into the `LimitStream` definitions. 
-		Reasons: 
-			1. better quality code (more cohesive components, less coupling, better reusability)
-			2. more robust code (an additional, possibly-redundant, check, in case we've forgotten 
-				the one outside and/or we don't know the current symbol, but expect the desired (...)-sequence)
+	1. TODO: make the `Step` submodule a PART OF `Stream`!!!
 
-		ALSO - fix the `EndBracketStream`. 
-			Change it to `BracketStream(from: T, to: IStepPredicate, errDataGetter?: IErrorDataGetter<T>)`, 
-				with `from` BEING the bracket itself (i.e., for instance, when T = string). 
-			Then, let the SKIPPING predicate be the `skip` we are interested in (note: let it 
-				be NOT NECESSARILY DEFAULT `skip`, i.e., one would USE the `errDataGetter`, with the 
-					DEFAULT being nothing - one just uses the `skip` default...)
+	2. The `IStepPredicate` interface: 
+		BREAK IT DOWN ONTO 3. 
+		Specifically, there should be: 
+			(A) one that has a MANDATORY `i: number` second argument 
+				(used for `navigate`, and suchlike places)
+			(B) one that DOESN'T have the `i: number` (used for `asSteps` calls). 
+			(C) one that returns a GUARANTEED `boolean` (used for `Stream.Locator`)
+				See the `negate` error (note: replace with `functional.negate` from `one.js` once it's `boolean`-only...)
 
 	1. GLOBAL ACROSS-LIBRARY TODO: 
 		Currently, all the `get` accessors are being denoted in .d.ts annotations 
@@ -118,20 +118,6 @@ IMMEDIATE:
 		NOT the way to do it.
 		Since, when one calls "x.y()", the `y` function on `x` is AUTOMATICALLY 
 		employed with `this === x`. 
-
-	1. CRITICAL DESIGN FLAW: recursion. 
-		The LimitedStream is NOT FIT FOR IT.  
-		The first one that gets the "closing bracket" EATS IT UP AND KILLS ALL OF ITS PARENTS. 
-		This is why one must employ DEPTH-BASED APPROACH. 
-		Depth is stored inside a DepthKeeper, for each "mark" (string/number), 
-		which are OPTIONALLY stored on `ITerminal`. The access to each "depth" 
-		for the mark is given via delegation through the `ICompositeStream` and `this.state.parse`.
-		The depth is UPDATED DYNAMICALLY for each dead/alive stream with appropriate mark. 
-		One delegates to a specific kind of `LimitedStream` inside the new `RecursiveLimitedStream`
-		class that REPLACES IT IN APPROPRIATE USAGES. The usages themselves REMAIN THE SAME, 
-		only the class that executes the deesired role...
-
-		For more specific details, see the appropriate note on the phone...
 
 	TODO [reminder]: ADD the `DFARegexFinalizer`. 
 		This one (might) be based off the respective `NFARegexVisitor`
@@ -1053,7 +1039,7 @@ LATER TODOS:
 	
 [TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
 	Secondary: 			
-		RE1. [???] 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
 			Namely: 
 				1. intersection: 	/[[...]&&[...]]/v
 				2. subtraction: 	/[[...]--[...]]/v
@@ -1076,8 +1062,6 @@ LATER TODOS:
 			Let the *new* notes for v0.4 now be inside of:
 				1. JIRA 
 				2. `GitHub Projects` [as a backup only...]
-		
-	AS for the `Dungeon Librarian` - it's JIRA there, AS USUAL. 
 
 	TODO: WRITE the CHANGELOG
 	

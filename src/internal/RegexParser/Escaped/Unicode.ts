@@ -1,19 +1,29 @@
 import type { ICellNode, IOwnedStream } from "../../../interfaces.js"
 import { skip } from "../../../objects/Error.js"
 import { SourceBuilder } from "../../../objects/SourceBuilder.js"
-import { ValidatorStream } from "../../../objects/Stream.js"
+import { LimitStream, ValidatorStream } from "../../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
-	isCurr
+	isNotNext
 } from "../../../samples/Stream.js"
 import { consumable } from "../../../utils/Stream.js"
 import { validateHex, validateUnicodeCodeLength } from "../Errors.js"
 import { UnicodeChar } from "../Nodes.js"
 
-const skipOpbrack = skip("{")
+const skipU = skip("u")
+const skipOpbrace = skip("{")
 
-const UnicodeLimitStream = EndBracketStream(isCurr("}"))
+const UnicodeLimitStream = EndBracketStream(
+	LimitStream.Limits.builder<string>()
+		.setFrom((input) => {
+			skipU(input) // u
+			skipOpbrace(input) // {
+			return 0
+		})
+		.setLongAs(isNotNext("}"))
+		.build()
+)
 
 const UnicodeCharStream = CollectionStream(
 	UnicodeChar,
@@ -27,16 +37,10 @@ const UnicodeCharValidatorStream = ValidatorStream(function (
 	validateHex(resource)
 })
 
-function HandleUnicodeNumber() {
+export function HandleUnicode(input: IOwnedStream<string>) {
 	return [
 		UnicodeCharValidatorStream(),
 		UnicodeCharStream(),
 		UnicodeLimitStream()
 	]
-}
-
-export function HandleUnicode(input: IOwnedStream<string>) {
-	input.next() // u
-	skipOpbrack(input) // {
-	return HandleUnicodeNumber()
 }

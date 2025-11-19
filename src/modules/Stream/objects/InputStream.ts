@@ -8,7 +8,7 @@ import type {
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
 import { isStepPredicate } from "../../../utils/Step.js"
-import { uniNavigate } from "../../../utils/Stream.js"
+import { skip } from "../../../utils/Stream.js"
 import type { IStreamStep } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
 
@@ -77,7 +77,7 @@ export class InputStream<T = any>
 
 	navigate(relativePos: IStreamStep) {
 		return isStepPredicate(relativePos)
-			? uniNavigate(this, relativePos)
+			? skip(this, relativePos)
 			: this.navigateInt(relativePos)
 	}
 

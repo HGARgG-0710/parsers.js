@@ -1,9 +1,9 @@
 import type {
 	IDepthMark,
 	IRecursiveProxyStreamFactory,
-	IRecursiveProxyStreamInstantiator,
-	IStreamStep
+	IRecursiveProxyStreamInstantiator
 } from "../../../interfaces.ts"
+import type { LimitStream } from "./LimitStream.ts"
 
 export declare function RecursiveProxyStream<T = any>(
 	depthMarks: readonly IDepthMark[]
@@ -18,6 +18,5 @@ export declare class LimitDepthMarks {
 
 export declare function RecursiveLimitStream<T = any>(
 	depthMarks: LimitDepthMarks,
-	from: IStreamStep<T>,
-	to?: IStreamStep<T>
+	limits: LimitStream.Limits<T>
 ): IRecursiveProxyStreamInstantiator<T>

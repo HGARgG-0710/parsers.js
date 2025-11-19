@@ -1,5 +1,4 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ILinkedStream,
@@ -7,9 +6,9 @@ import type {
 	IStreamStep
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
+import { ObjectPool } from "../../../objects.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ICommonStream } from "../interfaces/CommonStream.js"
-import { bind, isStepPredicate } from "src/utils/Step.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
@@ -74,7 +73,7 @@ function BuildFilterStream<T = any>(filter: IStreamStep<T>) {
 			},
 			constructor(resource?: IOwnedStream<T>) {
 				this.super.DyssyncOwningStream.constructor.call(this, resource)
-				this.filter = isStepPredicate(filter) ? bind(this, filter) : filter
+				this.filter = filter
 			}
 		},
 		[DyssyncOwningStream, PoolableStream]

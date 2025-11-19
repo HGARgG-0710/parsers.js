@@ -20,7 +20,7 @@ class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
 	}
 
 	setMarkerMaker(markerMaker: IMarkerMaker<T, M>) {
-		this.markerMaker = markerMaker.bind(this)
+		this.markerMaker = markerMaker
 		return this
 	}
 

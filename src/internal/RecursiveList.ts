@@ -977,7 +977,7 @@ export class SwitchArray<
 	}
 
 	private maybeWrapSwitchMult(items: (T | Recursive)[]) {
-		return mutate(items, this.maybeWrapSwitch.bind(this))
+		return mutate(items, (r: T | Recursive) => this.maybeWrapSwitch(r))
 	}
 
 	private baseWrite(
