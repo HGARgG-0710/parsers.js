@@ -12,8 +12,8 @@ import {
 import {
 	DynamicParser,
 	ErrorData,
-	ParseableInput,
-	PlainErrorPrinter
+	ErrorPrinter,
+	ParseableInput
 } from "../../objects.js"
 import { BasicHash, PeekHash } from "../../objects/HashMap.js"
 import {
@@ -32,7 +32,7 @@ import { RegexTokenizer } from "./Tokenizer.js"
 export class RegexParser {
 	static readonly instance = new RegexParser()
 
-	private readonly errPrinter = PlainErrorPrinter.instance
+	private readonly errPrinter = ErrorPrinter.PlainErrorPrinter.instance
 
 	private parseSource(source: string) {
 		return consume(parseRegex(new ParseableInput(source))).get()[0] as INode
