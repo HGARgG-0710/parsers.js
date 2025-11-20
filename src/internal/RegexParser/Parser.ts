@@ -18,7 +18,6 @@ import {
 import { BasicHash, PeekHash } from "../../objects/HashMap.js"
 import {
 	CompositeStream,
-	IdentityStream,
 	InputStream,
 	PeekStream,
 	PosStream
@@ -48,8 +47,6 @@ export class RegexParser {
 
 	private constructor() {}
 }
-
-export const PreserveLowerStream = () => new IdentityStream()
 
 export const BasicPeekHash = PeekHash(BasicHash)
 
