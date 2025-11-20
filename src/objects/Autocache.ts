@@ -24,7 +24,7 @@ const { isFunction } = type
  * the result of the call to the result of `Autocache`
  * becomes the result of the call to `.index(x)`.
  */
-export function Autocache<K = any, V = any, Other extends any[] = any[]>(
+export function AutoCache<K = any, V = any, Other extends any[] = any[]>(
 	cache: ISettable<K, V> & IIndexable<K, V | typeof NotCached>,
 	callback: (x: K, ...y: Other) => V
 ) {

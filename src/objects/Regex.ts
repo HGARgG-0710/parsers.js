@@ -7,7 +7,7 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { AutoMap } from "../internal/AutoMap.js"
+import { AutoMap } from "./AutoMap.js"
 import { NFARegexFinalizer as _NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"

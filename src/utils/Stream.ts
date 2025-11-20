@@ -28,10 +28,10 @@ import type {
 } from "../interfaces/StreamHandler.js"
 import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
+import { asSteps } from "../modules/Stream/utils/Step.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
-import { asSteps } from "./Step.js"
 
 const { structCheck } = object
 const { prop } = object
@@ -376,3 +376,5 @@ export function locateState(stream: IOwnedStream) {
  * is an instance of `IMarkerHaving`.
  */
 export const hasMarker = structCheck<IMarkerHaving>(["marker"])
+
+export * as Step from "../modules/Stream/utils/Step.js"

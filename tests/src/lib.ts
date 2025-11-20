@@ -1,7 +1,7 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import test from "node:test"
-import { Autocache } from "../../dist/src/classes.js"
+import { AutoCache } from "../../dist/src/classes.js"
 import { IndexMap, ModifiableMap } from "../../dist/src/classes/IndexMap.js"
 import type { ICopiable } from "../../dist/src/interfaces.js"
 import { LiquidMap } from "../../dist/src/modules/IndexMap/classes/LiquidMap.js"
@@ -127,7 +127,7 @@ export class PrefixCounter {
 }
 
 export class TestCounter {
-	private readonly prefixes = Autocache(
+	private readonly prefixes = AutoCache(
 		new ModifiableMap(new IndexMap.ArrayMap(new LiquidMap())),
 		() => new PrefixCounter()
 	)

@@ -34,13 +34,6 @@ REMINDERs:
 
 IMMEDIATE: 
 	ORDER of tasks: 
-		0. LimitStream - REMOVE the `from, longAs/until`, 
-			0. The `IStepPredicate` separation (onto 3 interfaces, see below...)
-
-			1. PROBLEM [RecursiveLimitStream]: 
-				The `longAs` calls inside `asSteps` DO NOT support the `this` context. 
-				Specifically, CHANGE the calls to enable it... [somehow...]
-
 		0. RecursiveLimitStream (the critical recursion flaw thing...)
 			TODO: 
 				[after the 'LimitStream' thing is finished...]
@@ -94,32 +87,19 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	1. TODO: make the `Step` submodule a PART OF `Stream`!!!
-
-	2. The `IStepPredicate` interface: 
-		BREAK IT DOWN ONTO 3. 
-		Specifically, there should be: 
-			(A) one that has a MANDATORY `i: number` second argument 
-				(used for `navigate`, and suchlike places)
-			(B) one that DOESN'T have the `i: number` (used for `asSteps` calls). 
-			(C) one that returns a GUARANTEED `boolean` (used for `Stream.Locator`)
-				See the `negate` error (note: replace with `functional.negate` from `one.js` once it's `boolean`-only...)
-
 	1. GLOBAL ACROSS-LIBRARY TODO: 
 		Currently, all the `get` accessors are being denoted in .d.ts annotations 
 		via the `readonly propName: T`, which is WRONG, and causes overriding the 
 		definition of the accessor to be IMPOSSIBLE. 
 		FIX IT - let the `get propName(): T` be used WHERE IT'S SUPPOSED TO BE.
 
-	VITAL TODO: on `bind(...)`-ing of the `IStepPredicate`S
-		It's a waste. 
-		Put a stop to this practice across the library. 
-		Creating needless copies of callbacks for each instance is 
-		NOT the way to do it.
-		Since, when one calls "x.y()", the `y` function on `x` is AUTOMATICALLY 
-		employed with `this === x`. 
+	TODO: about `.bind()`ing of predicates on object instances: 
+		Add it ONLY when necessary. 
+		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
+		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
+		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
 
-	TODO [reminder]: ADD the `DFARegexFinalizer`. 
+	TODO [reminder]: ADD the `DFARegexFinalizer` 
 		This one (might) be based off the respective `NFARegexVisitor`
 		algorithm for building the actual NFA, then, it would CONVERT the 
 		NFA to a DFA (as per the Russ Cox article, again...), and THEN, 

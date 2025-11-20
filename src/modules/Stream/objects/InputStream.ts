@@ -7,7 +7,7 @@ import type {
 	IPeekable
 } from "../../../interfaces/Stream.js"
 import { ReadableView } from "../../../internal/ReadableView.js"
-import { isStepPredicate } from "../../../utils/Step.js"
+import { isStreamPredicate } from "../utils/Step.js"
 import { skip } from "../../../utils/Stream.js"
 import type { IStreamStep } from "../interfaces/StreamPosition.js"
 import { SourceStream } from "./SourceStream.js"
@@ -76,7 +76,7 @@ export class InputStream<T = any>
 	}
 
 	navigate(relativePos: IStreamStep) {
-		return isStepPredicate(relativePos)
+		return isStreamPredicate(relativePos)
 			? skip(this, relativePos)
 			: this.navigateInt(relativePos)
 	}

@@ -1,5 +1,4 @@
 import type { ICopiable } from "../interfaces.js"
-import type { IStep, IStepPredicate } from "./Step.js"
 
 /**
  * This is an itnerface for representing an object for
@@ -11,15 +10,19 @@ import type { IStep, IStepPredicate } from "./Step.js"
  * such characteristic).
  */
 export interface IPathFollower<I = any, T = any> {
-	follow(input: I, step?: IStep<I>): T | undefined
-	length(input: I, step?: IStep<I>): number
+	follow(input: I, step?: IPathStep<I>): T | undefined
+	length(input: I, step?: IPathStep<I>): number
 	setCallback(callback: IPathCallback<I>): void
 }
 
 export interface IPropertyPath<I = any> extends ICopiable {
 	atIndex(input: I, position: number): [number, any]
-	atPredicate(input: I, predicate: IStepPredicate<I>): [number, any]
+	atPredicate(input: I, predicate: IPathPredicate<I>): [number, any]
 	setCallback(callback: IPathCallback<I>): void
 }
 
 export type IPathCallback<I = any> = (input: I, x: any) => void
+
+export type IPathStep<I = any> = number | IPathPredicate<I>
+
+export type IPathPredicate<I = any> = (item: I, pos?: number) => boolean

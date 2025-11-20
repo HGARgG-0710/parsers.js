@@ -1,8 +1,11 @@
-import type { IStep, IStepPredicate, IStream } from "../../../interfaces.js"
+import type { IStream } from "../../../interfaces.js"
 
 /**
  * This is `IPosition<IStream<T>>`, specific to library's stream objects.
  */
-export type IStreamStep<T = any> = IStep<IStream<T>>
+export type IStreamStep<T = any> = number | IStreamPredicate<T>
 
-export type IStreamPredicate<T = any> = IStepPredicate<IStream<T>>
+export type IStreamPredicate<T = any> = (
+	item: IStream<T>,
+	pos?: number
+) => boolean | number

@@ -1,3 +1,4 @@
+import { functional } from "@hgargg-0710/one"
 import type {
 	IIndexCarrying,
 	IInputStream,
@@ -19,6 +20,8 @@ import {
 	hasPos,
 	hasState
 } from "../../../utils/Stream.js"
+
+const { negate } = functional
 
 /**
  * An abstract implementation of `IErrorPositionLocator` to represent

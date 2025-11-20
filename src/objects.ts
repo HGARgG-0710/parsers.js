@@ -1,6 +1,7 @@
 export * from "./objects/ArrayBuilder.js"
 export * from "./objects/ArrayCollection.js"
-export * from "./objects/Autocache.js"
+export * from "./objects/AutoCache.js"
+export * from "./objects/AutoMap.js"
 export * as ByteSource from "./objects/ByteSource.js"
 export * from "./objects/CharacterSource.js"
 export * from "./objects/Counter.js"

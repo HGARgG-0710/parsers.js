@@ -13,7 +13,7 @@ import {
 	LimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
-import { asSteps } from "../utils/Step.js"
+import { asSteps } from "src/modules/Stream/utils/Step.js"
 import { skip } from "../utils/Stream.js"
 const { negate } = functional
 

@@ -1,25 +1,30 @@
 import { boolean, type } from "@hgargg-0710/one"
 import assert from "assert"
-import { asSteps, isStepPredicate } from "src/utils/Step.js"
 import * as Pools from "../../../global/Pools.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
 import type {
 	ICommonStream,
 	ILinkedStream,
-	IOwnedStream
+	IOwnedStream,
+	IStream
 } from "../../../interfaces/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { ObjectPool } from "../../../objects/ObjectPool.js"
 import { navigate } from "../../../utils/Stream.js"
-import type { ILimitableStream } from "../interfaces/LimitStream.js"
+import type {
+	IContextualStreamStep,
+	ILimitableStream,
+	IStreamPredicateFormation
+} from "../interfaces/LimitStream.js"
 import type {
 	IStreamPredicate,
 	IStreamStep
 } from "../interfaces/StreamPosition.js"
+import { asSteps, bindStep, isStreamPredicate } from "../utils/Step.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 import { PoolableStream } from "./PoolableStream.js"
 
-const { T, F } = boolean
+const { F } = boolean
 const { isNullary } = type
 
 /**
@@ -85,7 +90,7 @@ class ConfirmedStepsCounter {
 
 function BuildLimitStream<T = any>(
 	from: IStreamStep<T>,
-	longAs: IStreamStep<T>,
+	longAs: IContextualStreamStep<T>,
 	isEmpty: IStreamPredicate<T>
 ) {
 	return new mixin(
@@ -151,8 +156,8 @@ function BuildLimitStream<T = any>(
 				this.lookahead = new Lookaround()
 				this.steps = new ConfirmedStepsCounter()
 				this.isEmpty = isEmpty
-				this.from = from
-				this.longAs = longAs
+				this.from = bindStep(from, this)
+				this.longAs = LimitStream.bindContext(longAs, this)
 				this.init(resource)
 			}
 		},
@@ -198,22 +203,45 @@ export namespace LimitStream {
 	 * Note: If `to` is not passed, value for `from` is used for it instead,
 	 * and this becomes the value for `from`
 	 */
-	export const NoMovementPredicate = T
+	export const NoMovementPredicate = F
 
 	export class Limits<T = any> {
 		static builder<T = any>() {
 			return new LimitsBuilder<T>()
 		}
 
-		wrapLongAs(into: (wrapped: IStreamPredicate<T>) => IStreamStep<T>) {
-			assert(isStepPredicate(this.longAs))
-			return new Limits(this.from, into(this.longAs), this.isEmpty)
+		wrapLongAs(into: IStreamPredicateFormation<T>) {
+			assert(this.longAs instanceof StreamPredicateContext)
+			return new Limits(this.from, this.longAs.add(into), this.isEmpty)
 		}
 
 		constructor(
 			readonly from: IStreamStep<T>,
-			readonly longAs: IStreamStep<T>,
+			readonly longAs: IContextualStreamStep<T>,
 			readonly isEmpty: IStreamPredicate<T>
+		) {}
+	}
+
+	export class StreamPredicateContext<T = any> {
+		add(newFormation: IStreamPredicateFormation<T>) {
+			return new StreamPredicateContext(
+				this.startPred,
+				this.formations.concat(newFormation)
+			)
+		}
+
+		bind<K extends IStream<T> = IStream<T>>(
+			stream: K
+		): IStreamPredicate<T> {
+			let currPred = this.startPred
+			for (const formation of this.formations)
+				currPred = formation(currPred.bind(stream))
+			return currPred.bind(stream)
+		}
+
+		constructor(
+			private readonly startPred: IStreamPredicate<T>,
+			private readonly formations: IStreamPredicateFormation<T>[] = []
 		) {}
 	}
 
@@ -221,6 +249,13 @@ export namespace LimitStream {
 		private from: IStreamStep<T> = F
 		private isEmpty: IStreamPredicate<T> = F
 		private longAs?: IStreamStep<T>
+
+		private nonNullContextualLongAs() {
+			assert(this.longAs)
+			return isStreamPredicate(this.longAs)
+				? new StreamPredicateContext(this.longAs)
+				: this.longAs
+		}
 
 		setFrom(from?: IStreamStep<T>) {
 			if (!isNullary(from)) this.from = from
@@ -238,8 +273,20 @@ export namespace LimitStream {
 		}
 
 		build() {
-			assert(this.longAs)
-			return new Limits(this.from, this.longAs, this.isEmpty)
+			return new Limits(
+				this.from,
+				this.nonNullContextualLongAs(),
+				this.isEmpty
+			)
 		}
+	}
+
+	export function bindContext<T = any, K extends IStream<T> = IStream<T>>(
+		step: IContextualStreamStep<T>,
+		context: K
+	): IStreamStep<T> {
+		return step instanceof LimitStream.StreamPredicateContext
+			? step.bind(context)
+			: step
 	}
 }

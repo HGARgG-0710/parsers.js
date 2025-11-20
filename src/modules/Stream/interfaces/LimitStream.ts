@@ -1,4 +1,5 @@
-import type { IPosed } from "../../../interfaces.js"
+import type { IPosed, IStreamPredicate } from "../../../interfaces.js"
+import type { LimitStream } from "../objects/LimitStream.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
 /**
@@ -10,3 +11,11 @@ export type ILimitableStream<T = any> = IOwnedStream<T> & IPosed
 export type ILongAsEndTestTypes = number | boolean
 
 export type IUntilEndTestTypes = number | boolean
+
+export type IStreamPredicateFormation<T = any> = (
+	pred: IStreamPredicate<T>
+) => IStreamPredicate<T>
+
+export type IContextualStreamStep<T = any> =
+	| number
+	| LimitStream.StreamPredicateContext<T>

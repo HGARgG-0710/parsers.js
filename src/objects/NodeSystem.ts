@@ -7,7 +7,7 @@ import type {
 } from "../interfaces/Node.js"
 import { Enum, MapConcatenator } from "../internal/Enum.js"
 import { BasicMap } from "../samples/TerminalMap.js"
-import { Autocache } from "./Autocache.js"
+import { AutoCache } from "./AutoCache.js"
 import { BasicHash } from "./HashMap.js"
 
 type INodeTypesMap = Map<IValidNodeType, INodeType>
@@ -26,7 +26,7 @@ export function NodeFactory<
 	Args extends any[] = any[],
 	K extends INodeTypeFactory<Args> = INodeTypeFactory<Args>
 >(preFactory: K): K {
-	return Autocache(new BasicHash(BasicMap()), preFactory) as K
+	return AutoCache(new BasicHash(BasicMap()), preFactory) as K
 }
 
 /**

@@ -44,5 +44,4 @@ export const isFreeable = structCheck<IFreeable>({ free: isFunction })
 export * as Debug from "./utils/Debug.js"
 export * as IndexMap from "./utils/IndexMap.js"
 export * as Node from "./utils/Node.js"
-export * as Step from "./utils/Step.js"
 export * as Stream from "./utils/Stream.js"

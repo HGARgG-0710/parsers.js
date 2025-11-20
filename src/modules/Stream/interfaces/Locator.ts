@@ -6,7 +6,6 @@ import type { IInputStream } from "../../../interfaces/Stream.js"
  * provide the algorithm for locating the positions of a specified
  * type.
  */
-
 export interface IStreamLocator<T = any> {
 	locate(inputStream: IInputStream): T | null
 }
