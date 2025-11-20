@@ -1,10 +1,4 @@
-import type {
-	ICollectionNode,
-	ICompositeStream,
-	IOwnedStream,
-	IPeekable,
-	IRawStreamArray
-} from "../../../interfaces.js"
+import type { ICollectionNode, IRawStreamArray } from "../../../interfaces.js"
 import { skip } from "../../../objects/Error.js"
 import { LimitStream, PeekStream } from "../../../objects/Stream.js"
 import {
@@ -13,6 +7,7 @@ import {
 	isNotNonEscapedNext
 } from "../../../samples/Stream.js"
 import { CharClass } from "../Nodes.js"
+import { EnableClbrackStream } from "../Recursive.js"
 import { ClassStream, HandleClass } from "./Common.js"
 
 const skipSqopbrack = skip("[")
@@ -33,12 +28,13 @@ class CharClassStream extends ClassStream<ICollectionNode> {
 
 const CharClassHandler = HandleClass(() => new CharClassStream())
 
-export function HandleCharClass(
-	this: ICompositeStream,
-	input: IOwnedStream<string> & IPeekable<string>
-): IRawStreamArray {
-	input.next() // [
-	return [CharClassHandler, CharClassLimitStream(), PeekStream()]
+export function HandleCharClass(): IRawStreamArray {
+	return [
+		CharClassHandler,
+		CharClassLimitStream(),
+		PeekStream(),
+		EnableClbrackStream()
+	]
 }
 
 export const maybeCharClass = {

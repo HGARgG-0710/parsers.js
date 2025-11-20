@@ -31,27 +31,23 @@ REMINDERs:
 	2. Regex [testing]: 
 		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 
-
 IMMEDIATE: 
 	ORDER of tasks: 
-		0. RecursiveLimitStream (the critical recursion flaw thing...)
-			TODO: 
-				[after the 'LimitStream' thing is finished...]
-				3. add corresponding `BracketRecursiveLimitStream`
-				4. REPLACE in the appropriate places inside the `RegexParser`...:
-					1. add the `DepthMarkStream` to 'CharClass/BoundaryClass' and OTHER such places...
-						PARTICULARLY near places where `LimitStream`s are used...
-					2. replace the `LimitStream`s with `RecursiveLimitStream` in places of RECURSION (`PlainGroup`, etc)
-				5. Add a NEW `IStream` SUB-INTERFACE the `depthMark`-containing one: 
-					1. Let `RecursiveList` implement it (note: it is created via a FACTORY-FUNCTION that relies upon the predicate)
-						1. each factory has ITS OWN POOL
-					2. UPDATE the `ErrorStream` - add the `get depthMark()  { return this.delegate.depthMark }`
-						This is since it is TIGHTLY COUPLED to the WIDEST AVAILABLE `IStream` INTERFACE 
-							existing within the library. Any user extensions will HAVE TO TAKE THE DESIRED 
-							PROPERTIES INTO ACCOUNT! 
+		1. Add built-in support for XML-serialization to `INode` (note: *NOT* the deserialization - it's rather more difficult...)
+			Reasons: 
+				1. XML is hyper-popular
+				2. It's very simple to do (since XML is so minimalistic)
+				3. It's very similar to the toJSON approach
+				4. Very odd to single out JSON, since XML is no less popular
+					(If anything, it's even MORE popular for certain things, like document formats)
+				5. You'll need this LATER in your other projects
+				6. Incredibly handy (one can model 2 types of parsing trees: 
+					one for syntax-level representation; 
+					and ANOTHER for XML-document-level presentation; 
+					Parse string into first, map to second, call the `.toXML()`, 
+					and VOILA - one has a valid XML representing the desired 
+					tree structure...)
 
-				6. LET the `DepthMarkStream` AND `RecursiveLimitStream` BOTH accept *MULTIPLE*
-					marks. Let the marks be INTEGERS (create an `enum` for them specifically...)
 		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
 			2. to compiler (AND the `Regex.Raw`)
 				1. new `Regex.Raw` child for Negation(BoundaryClass(...)); 
@@ -104,6 +100,10 @@ IMMEDIATE:
 		algorithm for building the actual NFA, then, it would CONVERT the 
 		NFA to a DFA (as per the Russ Cox article, again...), and THEN, 
 		one might doing something...
+
+	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
+		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
+		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...

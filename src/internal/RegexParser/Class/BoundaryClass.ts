@@ -11,6 +11,7 @@ import {
 	isNotNonEscapedNext
 } from "../../../samples/Stream.js"
 import { BoundaryClass } from "../Nodes.js"
+import { EnableClbrackStream } from "../Recursive.js"
 import { ClassStream, HandleClass } from "./Common.js"
 
 const skipBoundary = skip("b")
@@ -40,11 +41,14 @@ export function HandleMaybeBoundaryClass(
 	input: IOwnedStream<string>
 ): IRawStreamArray {
 	input.next() // \
-	return HandleBoundaryClass(input)
+	return HandleBoundaryClass()
 }
 
-export function HandleBoundaryClass(
-	input: IOwnedStream<string>
-): IRawStreamArray {
-	return [BoundaryClassHandler, BoundaryClassLimitStream(), PeekStream()]
+export function HandleBoundaryClass(): IRawStreamArray {
+	return [
+		BoundaryClassHandler,
+		BoundaryClassLimitStream(),
+		PeekStream(),
+		EnableClbrackStream()
+	]
 }

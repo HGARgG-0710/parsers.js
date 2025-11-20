@@ -20,6 +20,7 @@ import {
 } from "../../samples/Stream.js"
 import { consumable } from "../../utils/Stream.js"
 import { AsInt, AsString, TypeMatch } from "./Nodes.js"
+import { EnableClbrackStream } from "./Recursive.js"
 import { HandleSingleChar } from "./SingleChar.js"
 
 const skipIntModifier = skip("i")
@@ -53,15 +54,12 @@ function TypeMatchLimitStream(
 	)
 }
 
-const StringTypeLimitsStream = TypeMatchLimitStream(
+const StringTypeLimitStream = TypeMatchLimitStream(
 	skipStringModifier,
 	isNotNonEscapedNext("}")
 )
 
-const IntTypeLimitsStream = TypeMatchLimitStream(
-	skipIntModifier,
-	isNotNext("}")
-)
+const IntTypeLimitStream = TypeMatchLimitStream(skipIntModifier, isNotNext("}"))
 
 function isTypeMatchStart(stream: IPeekableStream<string>) {
 	return stream.peek(1) === "{"
@@ -76,27 +74,22 @@ function HandleTypeMatchMaybe(
 	}
 }
 
-function HandleIntTypeMatch(input: IOwnedStream<string> & IPeekable<string>) {
-	input.next() // i
-	input.next() // {
+function HandleIntTypeMatch() {
 	return [
 		AsIntStream(),
 		TypeMatchStream(),
 		AsIntValidatorStream(),
-		IntTypeLimitsStream()
+		IntTypeLimitStream()
 	]
 }
 
-function HandleStringTypeMatch(
-	input: IOwnedStream<string> & IPeekable<string>
-) {
-	input.next() // s
-	input.next() // {
+function HandleStringTypeMatch() {
 	return [
 		AsStringStream(),
 		TypeMatchStream(),
 		EscapedStream(),
-		StringTypeLimitsStream()
+		StringTypeLimitStream(),
+		EnableClbrackStream()
 	]
 }
 

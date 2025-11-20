@@ -13,7 +13,7 @@ export declare class LimitDepthMarks {
 	readonly mainMark: IDepthMark
 	readonly restMarks: IDepthMark[]
 	get(): IDepthMark[]
-	constructor(mainMark: IDepthMark, restMarks: IDepthMark[])
+	constructor(mainMark: IDepthMark, restMarks?: IDepthMark[])
 }
 
 export declare function RecursiveLimitStream<T = any>(

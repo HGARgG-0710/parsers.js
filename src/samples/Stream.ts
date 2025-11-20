@@ -1,5 +1,6 @@
 import { functional } from "@hgargg-0710/one"
 import assert from "assert"
+import { asSteps } from "src/modules/Stream/utils/Step.js"
 import type {
 	IGettable,
 	ILinkedStream,
@@ -10,36 +11,50 @@ import type {
 } from "../interfaces.js"
 import {
 	HandlerStream,
+	LimitDepthMarks,
 	LimitStream,
+	RecursiveLimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
-import { asSteps } from "src/modules/Stream/utils/Step.js"
 import { skip } from "../utils/Stream.js"
+
 const { negate } = functional
 
-export function AutoNextLimitStream(n: number) {
+export function autoNextLimits(n: number) {
 	return function <T = any>(limits: LimitStream.Limits<T>) {
-		return LimitStream(
-			limits.wrapLongAs((longAs) => (input: IStream<T>) => {
-				const steps = asSteps(input, longAs)
-				if (steps === 0) {
-					skip(input, n)
-					return false
-				}
-				return steps
-			})
-		)
+		return limits.wrapLongAs((longAs) => (input: IStream<T>) => {
+			const steps = asSteps(input, longAs)
+			if (steps === 0) {
+				skip(input, n)
+				return false
+			}
+			return steps
+		})
+	}
+}
+
+export function AutoNextRecursiveLimitStream(n: number) {
+	const limitWrapper = autoNextLimits(n)
+	return function <T = any>(
+		depthMarks: LimitDepthMarks,
+		limits: LimitStream.Limits<T>
+	) {
+		return RecursiveLimitStream(depthMarks, limitWrapper(limits))
+	}
+}
+
+export function AutoNextLimitStream(n: number) {
+	const limitWrapper = autoNextLimits(n)
+	return function <T = any>(limits: LimitStream.Limits<T>) {
+		return LimitStream(limitWrapper(limits))
 	}
 }
 
 export const PastEndStream = AutoNextLimitStream(1)
 
-/**
- * This is a `LimitStream` that lasts upto the character at which `until`
- * becomes true, and then skips it (unlike common `LimitStream`). Very useful
- * for `(...)`-type bracketed expressions.
- */
 export const EndBracketStream = AutoNextLimitStream(2)
+
+export const RecursiveBracketStream = AutoNextRecursiveLimitStream(2)
 
 /**
  * This is a `SingletonStream` that, as its `.curr: W`

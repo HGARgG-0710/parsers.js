@@ -47,7 +47,7 @@ export class LimitDepthMarks {
 		return [this.mainMark, ...this.restMarks]
 	}
 
-	constructor(mainMark, restMarks) {
+	constructor(mainMark, restMarks = []) {
 		this.mainMark = mainMark
 		this.restMarks = restMarks
 	}
@@ -63,7 +63,9 @@ export function RecursiveLimitStream(depthMarks, limits) {
 					const proxyStream = this.owner
 					return (
 						!proxyStream.isSameGlobalDepthFor(mainMark) ||
-						longAs.call(this, resource)
+						// * Explanation: one doesn't use `longAs.call(this, resource)` 
+						// because `longAs` is already bound to `this`
+						longAs(resource)
 					)
 				}
 		)
