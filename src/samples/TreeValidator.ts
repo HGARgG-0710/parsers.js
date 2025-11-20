@@ -1,5 +1,5 @@
 import type { INode, IValidNodeType } from "../interfaces.js"
-import type { DepthStream } from "../objects/Stream.js"
+import type { TreeStream } from "../objects/Stream.js"
 
 /**
  * This is a function for creation of primitive Tree-Structure validators.
@@ -31,7 +31,7 @@ export function TreeValidator(
 		])
 	)
 
-	function validator(treeStream: DepthStream<INode>) {
+	function validator(treeStream: TreeStream<INode>) {
 		const failure = TreeValidator.ValidationStatus.failure(treeStream)
 		const success = TreeValidator.ValidationStatus.success(treeStream)
 
@@ -86,17 +86,17 @@ export namespace TreeValidator {
 	 * `readonly targetStream: DepthStream<INode>` property for
 	 */
 	export class ValidationStatus {
-		static success(targetStream: DepthStream<INode>) {
+		static success(targetStream: TreeStream<INode>) {
 			return new ValidationStatus(true, targetStream)
 		}
 
-		static failure<T = any>(targetStream: DepthStream<INode>) {
+		static failure<T = any>(targetStream: TreeStream<INode>) {
 			return new ValidationStatus(false, targetStream)
 		}
 
 		constructor(
 			readonly isSuccess: boolean,
-			readonly targetStream: DepthStream<INode>
+			readonly targetStream: TreeStream<INode>
 		) {}
 	}
 }

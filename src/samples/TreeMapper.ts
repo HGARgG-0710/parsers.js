@@ -1,4 +1,4 @@
-import { DepthStream, HandlerStream } from "../objects/Stream.js"
+import { TreeStream, HandlerStream } from "../objects/Stream.js"
 import type { IHandler, IPushable, IWalkable } from "../interfaces.js"
 import { consume } from "../utils/Stream.js"
 
@@ -30,6 +30,6 @@ export function TreeMapper<In extends IWalkable<In> = IWalkable, Out = any>(
 	const mapperStream = HandlerStream(map)
 	return function (from: In) {
 		const into = intoMaker()
-		return consume(mapperStream(new DepthStream<In>(from)), into)
+		return consume(mapperStream(new TreeStream<In>(from)), into)
 	}
 }

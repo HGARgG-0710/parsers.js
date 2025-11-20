@@ -1,12 +1,12 @@
 import type { INode, IRegexPartBuilder } from "../../interfaces.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import type {
 	IRegexCompilerFunction,
 	IRegexCompilerHandler
 } from "./Compiler.js"
 
 export function compileGroup(
-	input: DepthStream<INode>,
+	input: TreeStream<INode>,
 	handler: IRegexCompilerHandler
 ) {
 	input.next() // Group
@@ -19,7 +19,7 @@ export function compileRecursiveChoiceWrapper(
 	handleDisjunction: IRegexCompilerFunction
 ) {
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // skip the wrapper (NoCaptureGroup, IgnoreCaseGroup, etc)

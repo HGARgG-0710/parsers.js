@@ -1,5 +1,5 @@
 import type { ICellNode, INode } from "../../../interfaces.js"
-import type { DepthStream } from "../../../objects/Stream.js"
+import type { TreeStream } from "../../../objects/Stream.js"
 import { mapTypes } from "../../../utils/Node.js"
 import {
 	InfiniteRange,
@@ -23,17 +23,17 @@ function readEndBoundary(range: INode) {
 	return readRangeBoundary(range, false)
 }
 
-function handleTrivialRange(input: DepthStream<INode>) {
+function handleTrivialRange(input: TreeStream<INode>) {
 	const times = readStartBoundary(input.curr)
 	return [times, times]
 }
 
-function handleInfiniteRange(input: DepthStream<INode>) {
+function handleInfiniteRange(input: TreeStream<INode>) {
 	const from = readStartBoundary(input.curr)
 	return [from, Infinity]
 }
 
-function handleLimitsRange(input: DepthStream<INode>) {
+function handleLimitsRange(input: TreeStream<INode>) {
 	const range = input.curr
 	return [readStartBoundary(range), readEndBoundary(range)]
 }
@@ -51,7 +51,7 @@ const rangeKindsHandler = RegexTypeHandler<number[]>(
 // TODO: REFACTOR THIS [the function is way too long...]
 export function compileRange(regexBuilder: IRegexFactory) {
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // RangeQuantifier

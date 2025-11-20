@@ -1,10 +1,10 @@
 import type { INode, IRegexPartBuilder } from "../../interfaces.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
 
 export function compileComplexPart(getBuilder: () => IRegexPartBuilder) {
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		const builder = getBuilder()

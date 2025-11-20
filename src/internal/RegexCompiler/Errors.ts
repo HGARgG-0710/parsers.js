@@ -1,6 +1,6 @@
 import type { INode } from "../../interfaces.js"
 import { ConstructorError } from "../../objects/Error.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
 
 class RegexCompilationError extends ConstructorError {
@@ -12,7 +12,7 @@ class RegexCompilationError extends ConstructorError {
 }
 
 export function compilerBuilderErrHandler<T = any>(
-	input: DepthStream<INode>,
+	input: TreeStream<INode>,
 	_handler: IRegexCompilerHandler<T>
 ) {
 	throw new RegexCompilationError(input.curr)

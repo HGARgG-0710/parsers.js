@@ -1,7 +1,7 @@
 import { type } from "@hgargg-0710/one"
 import type { ICellNode, INode, IRegexPartBuilder } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import { mapTypes } from "../../utils/Node.js"
 import {
 	EscapedLiteral,
@@ -33,7 +33,7 @@ const { isString } = type
 export function compileClassRange(factory: IRegexFactory) {
 	const boundaryCompiler = compileClassRangeBoundary(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler<Regex.Raw | string>
 	) {
 		input.next() // ClassRange
@@ -51,7 +51,7 @@ export function compileClassRange(factory: IRegexFactory) {
 }
 
 function handleCellBoundary(
-	input: DepthStream<INode>,
+	input: TreeStream<INode>,
 	_handler: IRegexCompilerHandler
 ) {
 	return (input.curr as ICellNode<string>).value
@@ -60,7 +60,7 @@ function handleCellBoundary(
 function handleUnicodeBoundary(factory: IRegexFactory) {
 	const unicodeCharCompiler = compileUnicodeChar(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		_handler: IRegexCompilerHandler
 	) {
 		return unicodeCharCompiler(input, _handler).char
@@ -70,7 +70,7 @@ function handleUnicodeBoundary(factory: IRegexFactory) {
 function handleTabBoundary(factory: IRegexFactory) {
 	const tabCompiler = compileTab(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		_handler: IRegexCompilerHandler
 	) {
 		return tabCompiler(input, _handler).char
@@ -80,7 +80,7 @@ function handleTabBoundary(factory: IRegexFactory) {
 function handleVTabBoundary(factory: IRegexFactory) {
 	const vTabCompiler = compileVTab(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		_handler: IRegexCompilerHandler
 	) {
 		return vTabCompiler(input, _handler).char
@@ -90,7 +90,7 @@ function handleVTabBoundary(factory: IRegexFactory) {
 function handleFormFeedBoundary(factory: IRegexFactory) {
 	const formFeedCompiler = compileFormFeed(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		_handler: IRegexCompilerHandler
 	) {
 		return formFeedCompiler(input, _handler).char
@@ -117,7 +117,7 @@ function rangeBoundaryHandler(factory: IRegexFactory) {
 function compileClassRangeBoundary(factory: IRegexFactory) {
 	const handleRangeBoundary = rangeBoundaryHandler(factory)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		_handler: IRegexCompilerHandler<string | Regex.Raw>
 	) {
 		input.next() // CharClassRangeBoundary
@@ -130,7 +130,7 @@ export function compileNegated(
 ) {
 	const negCharClassCompiler = compileComplexPart(getNegCharClassBuilder)
 	return function (
-		input: DepthStream<INode>,
+		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler
 	) {
 		input.next() // Negated

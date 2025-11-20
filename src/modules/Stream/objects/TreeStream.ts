@@ -164,11 +164,11 @@ class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
  * method for returning back to the first element in the traversal sequence
  * from the current one.
  */
-export class DepthStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
+export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends SourceStream<TreeLike, TreeLike>
 	implements INavigable<TreeLike, number[]>
 {
-	static readonly pool = Pools.Stream.add(new ObjectPool(DepthStream))
+	static readonly pool = Pools.Stream.add(new ObjectPool(TreeStream))
 	
 	private readonly walker = new TreeWalker<TreeLike>()
 	private readonly lastLevel = new LastLevelWithSiblings(this.walker)

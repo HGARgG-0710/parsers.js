@@ -1,6 +1,6 @@
-import { DepthStream } from "../../objects/Stream.js"
+import { TreeStream } from "../../objects/Stream.js"
 import { RegexParser } from "../RegexParser/Parser.js"
 
 export function RegexNodeStream(source: string) {
-	return new DepthStream(RegexParser.instance.parse(source))
+	return new TreeStream(RegexParser.instance.parse(source))
 }

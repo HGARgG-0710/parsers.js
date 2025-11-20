@@ -1,6 +1,6 @@
 import type { ICellNode, INode } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
 import type { IRegexFactory } from "./RegexFactory.js"
 
@@ -9,7 +9,7 @@ function compileCell<T = any, Out extends Regex.Raw = Regex.Raw>(
 ) {
 	return function (factory: IRegexFactory) {
 		return function (
-			input: DepthStream<INode>,
+			input: TreeStream<INode>,
 			_handler: IRegexCompilerHandler
 		) {
 			return fromCell(factory, (input.curr as ICellNode<T>).value)

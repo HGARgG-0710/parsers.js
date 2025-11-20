@@ -1,6 +1,6 @@
 import type { INode } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
-import type { DepthStream } from "../../objects/Stream.js"
+import type { TreeStream } from "../../objects/Stream.js"
 import type { IRegexCompilerHandler } from "./Compiler.js"
 import type { IRegexFactory } from "./RegexFactory.js"
 
@@ -9,7 +9,7 @@ function compileElementary<Out extends Regex.Raw = Regex.Raw>(
 ) {
 	return function (factory: IRegexFactory) {
 		return function (
-			_input: DepthStream<INode>,
+			_input: TreeStream<INode>,
 			_handler: IRegexCompilerHandler
 		) {
 			return makeElementary(factory)

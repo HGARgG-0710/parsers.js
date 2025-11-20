@@ -6,7 +6,7 @@ import type {
 	ITyped
 } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
-import { DepthStream } from "../../objects/Stream.js"
+import { TreeStream } from "../../objects/Stream.js"
 import { mapTypes } from "../../utils/Node.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
 import { RegexCompilerTable } from "./RegexCompilerTable.js"
@@ -14,17 +14,17 @@ import { RegexNodeStream } from "./RegexNodeStream.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
 export type IRegexCompilerHandler<Out = Regex.Raw> = ITableHandler<
-	DepthStream<INode>,
+	TreeStream<INode>,
 	Out
 >
 
 export type IRegexCompilerFunction<Out = Regex.Raw> = (
-	input: DepthStream<INode>,
+	input: TreeStream<INode>,
 	handler: IRegexCompilerHandler<Out>
 ) => any
 
 export type IRegexCompilerErrorHandler<Out = Regex.Raw> = (
-	input: DepthStream<INode>,
+	input: TreeStream<INode>,
 	_handler: IRegexCompilerHandler<Out>
 ) => void
 
@@ -35,7 +35,7 @@ class RegexCompilerAlgorithmBuilder {
 
 	private readonly buildAlgorithm: IRegexCompilerHandler
 
-	algorithm(input: DepthStream<INode>) {
+	algorithm(input: TreeStream<INode>) {
 		return this.buildAlgorithm(input)
 	}
 
@@ -50,7 +50,7 @@ class RegexCompilerAlgorithmBuilder {
 export class RegexCompiler {
 	static readonly instance = new RegexCompiler()
 
-	private build(regexAstStream: DepthStream<INode>) {
+	private build(regexAstStream: TreeStream<INode>) {
 		return RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)	
 	}
 
