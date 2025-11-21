@@ -9,6 +9,7 @@ import type {
 	IXMLAttrMapValue,
 	IXMLAttrTable,
 	IXMLDebuggable,
+	IXMLGenerationTable,
 	IXMLOpenableNode,
 	IXMLSimple,
 	IXMLTagMap,
@@ -34,17 +35,24 @@ export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
 	}
 )
 
-export function XMLStream(attrs: IXMLAttrTable, tags: IXMLTagTable) {
+export function XMLStream(table: IXMLGenerationTable) {
 	return HandlerStream<IXMLDebuggable, string>(
-		trivialCompose(toXML(attrs, tags), curr)
+		trivialCompose((source: IXMLDebuggable) => toXML(source, table), curr)
 	)
 }
 
-export function toXML(attrs: IXMLAttrTable, tags: IXMLTagTable) {
-	return function (source: IXMLDebuggable) {
-		if (!source.toXML) throw new XMLGenerationError(source)
-		return source.toXML(attrs, tags)
-	}
+export function toXML(source: IXMLDebuggable, table: IXMLGenerationTable) {
+	if (!source.toXML) throw new XMLGenerationError(source)
+	return source.toXML(table)
+}
+
+export function toValidAttributes(
+	attrs: [string, string][]
+): [string, string][] {
+	return attrs.map(([key, value]) => {
+		assert(isIdentifier(key))
+		return [key, toValidAttributeValue(value)]
+	})
 }
 
 export function toValidAttributeValue(value: string) {
@@ -199,10 +207,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 		const { tagName, attrs, preTags, postTags } = args
 		assert(isIdentifier(tagName))
 		this.tagName = tagName
-		this.attrs = attrs.map(([key, value]) => {
-			assert(isIdentifier(key))
-			return [key, toValidAttributeValue(value)]
-		})
+		this.attrs = toValidAttributes(attrs)
 		this.preTags = preTags
 		this.postTags = postTags
 	}
@@ -224,12 +229,11 @@ export class XMLGenerator {
 	}
 
 	constructor(
-		attrs: IXMLAttrTable,
-		tags: IXMLTagTable,
+		genTable: IXMLGenerationTable,
 		private readonly wrapperNode: IXMLOpenableNode
 	) {
-		this.XMLStream = XMLStream(attrs, tags)
-		this.toXML = toXML(attrs, tags)
+		this.XMLStream = XMLStream(genTable)
+		this.toXML = (node: IXMLDebuggable) => toXML(node, genTable)
 	}
 }
 
@@ -386,4 +390,22 @@ export class XMLTagSet implements IXMLTagTable {
 	}
 
 	constructor(private readonly tags: IXMLTagMap) {}
+}
+
+export class XMLGenerationTable implements IXMLGenerationTable {
+	toAttr(
+		parentType: IValidNodeType,
+		childType: IValidNodeType
+	): false | IXMLAttributeGenerator {
+		return this.attrs.get(parentType, childType)
+	}
+
+	isTag(parentType: IValidNodeType, childType: IValidNodeType): boolean {
+		return this.tags.get(parentType, childType)
+	}
+
+	constructor(
+		private readonly attrs: IXMLAttrTable,
+		private readonly tags: IXMLTagTable
+	) {}
 }

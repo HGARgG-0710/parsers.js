@@ -1,4 +1,5 @@
 import { mixin } from "../../mixin.js"
+import { toXML } from "../../samples/xml.js"
 import { BaseNode } from "./BaseNode.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
@@ -37,6 +38,19 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 			type: this.type,
 			value: this.value
 		}
+	}
+
+	toXML(table) {
+		const attrConverter = table.toAttr(this.type, this.type)
+		const isTag = table.isTag(this.type, this.type)
+		const openTag = attrConverter
+			? `<${this.type} ${attrConverter(this)}>`
+			: isTag
+			? `<${this.type}>`
+			: ""
+		const tagContent = isTag ? `${this.value}` : ""
+		const closeTag = attrConverter || isTag ? `</${this.type}>` : ""
+		return `${openTag}\n${tagContent}\n${closeTag}`
 	}
 
 	debugPrint() {
@@ -100,6 +114,18 @@ class PreSingleChildNode extends SingleItemNode {
 
 	get lastChild() {
 		return this.child ? 0 : -1
+	}
+
+	toXML(table) {
+		const { child } = this
+		const attrConverter = table.toAttr(this.type, child.type)
+		const isTag = table.isTag(this.type, child.type)
+		const openTag = attrConverter
+			? `<${this.type} ${attrConverter(child)}>`
+			: `<${this.type}>`
+		const tagContent = isTag ? toXML(child, table) : ""
+		const closeTag = `</${this.type}>`
+		return `${openTag}\n${tagContent}\n${closeTag}`
 	}
 
 	toJSON() {

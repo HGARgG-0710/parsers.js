@@ -21,7 +21,15 @@ export abstract class BaseNode implements INode {
 
 	toJSON?(): ITyped
 
-	parent: INode | null = null
+	private _parent: INode | null = null
+
+	setParent(parent: INode) {
+		this._parent = parent
+	}
+
+	get parent() {
+		return this._parent
+	}
 
 	index(multind: number[]) {
 		if (this.lastChild < 0) return this

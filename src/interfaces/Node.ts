@@ -2,7 +2,8 @@ import type {
 	IFreeable,
 	IInitializable,
 	IJSONSerializableObject,
-	IPushable
+	IPushable,
+	IXMLSerializable
 } from "../interfaces.js"
 import type { ObjectPool } from "../objects.js"
 import type { IDebugNamed, IDebugPrintable } from "./Debug.js"
@@ -75,9 +76,11 @@ export interface INode
 	extends ITyped,
 		IWalkable<INode>,
 		IJSONSerializableObject,
+		IXMLSerializable,
 		IDebugNamed,
 		IDebugPrintable {
-	parent: INode | null
+	setParent(parnet: INode): void
+	readonly parent: INode | null
 }
 
 /**

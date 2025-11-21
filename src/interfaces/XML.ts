@@ -12,6 +12,14 @@ export type IXMLAttrMap = Map<
 
 export type IXMLTagMap = Map<IValidNodeType, Set<IValidNodeType>>
 
+export interface IXMLGenerationTable {
+	toAttr(
+		parentType: IValidNodeType,
+		childType: IValidNodeType
+	): false | IXMLAttributeGenerator
+	isTag(parentType: IValidNodeType, childType: IValidNodeType): boolean
+}
+
 export interface IXMLAttrTable {
 	get(
 		parentType: IValidNodeType,
@@ -24,7 +32,7 @@ export interface IXMLTagTable {
 }
 
 export interface IXMLSerializable {
-	toXML?(attrs: IXMLAttrTable, tags: IXMLTagTable): string
+	toXML?(table: IXMLGenerationTable): string
 }
 
 export type IXMLDebuggable = IXMLSerializable & IDebugNamed

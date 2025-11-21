@@ -3,8 +3,10 @@ import type {
 	ICollectionNode,
 	ICollectionNodeType,
 	INode,
-	INodeMaker
+	INodeMaker,
+	IXMLGenerationTable
 } from "../../interfaces.js"
+import { toValidAttributes, toXML } from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
 import { isRecursiveNodeSerializable } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
@@ -36,7 +38,7 @@ abstract class PreRecursiveNode
 	}
 
 	private assignSelfParent() {
-		for (const child of this.children) child.parent = this
+		for (const child of this.children) child.setParent(this)
 	}
 
 	read(i: number): INode {
@@ -99,6 +101,18 @@ abstract class PreRecursiveNode
 			type: this.type,
 			children: this.children
 		}
+	}
+
+	toXML(table: IXMLGenerationTable): string {
+		const openTag = `<${this.type} ${this.children.map((c) => {
+			const asAttr = table.toAttr(this.type, c.type)
+			return asAttr ? toValidAttributes(asAttr(c)) : ""
+		})}/>`
+		const childTags = this.children.map((c) =>
+			table.isTag(this.type, c.type) ? toXML(c, table) : ""
+		)
+		const closeTag = `</${this.type}>`
+		return [openTag, ...childTags, closeTag].join("\n")
 	}
 
 	debugPrint(): string {

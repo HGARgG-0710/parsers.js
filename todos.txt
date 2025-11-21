@@ -43,45 +43,35 @@ CURRENT:
 
 
 XML FEATURE DESIGN:
-	1. The `INode`s have an optional `toXML?(): string` method. 
-		It gets to call the `toXML()` method on OTHER tree elements. 
-		Upon encountering a node that is NOT in possession of the `toXML`
-		method, an error is thrown. Specifically, one goes on to 
-		throw the `XMLGenerationError`, with the message of 
-		`class {faultyNode.debugName} has no method "toXML()"`. 
+	10. TODO: about the `toXML`: 
+		ENABLE the ability for *good* formatting. 
+		Specifically, UNLIKE the JSON documents, this one's supposed to be 
+			HUMAN-READABLE!!! This means, in particular, that one, SOMEHOW, 
+				has got to deal with the complexity of dealing with `\t`-indentation 
+					on EACH level...
 
-		PROBLEM: one needs to *PRESERVE* the `toXML` call (the function from `samples.xml`), 
-			but we DON'T pass it around. 
-			SOLUTION: rework the `toXML` closure into a NEW CLASS - it would store the 
-				`attrs` + `tags` (it'd be a simple DTO that's just passed around...)
-				Then, it's passed to BOTH the `.toXML(dto)` method, and `toXML(node, dto)`
-				FUNCTION in `samples.xml`! Both problems are solved...
-
-				For this, one'll require a change in the `IXMLSerializable` interface...
-				As well as making this DTO thing *a part of the interface's signature*. 
-
-		The toplevel `ErrorPrinter` can, then, handle the error...
-
-	2. The `toXML()` method accepts the parameters: 
-		1. `attrs: IXMLAttrTable`
-		2. `tags: IXMLTagTable`
-
-		The `IXMLAttrTable` has methods: 
-			1. get(parentType: IValidNodeType, childType: IValidNodeType): false | ((chidlNode: INode) => [string, string][])
-				For a given `type`, it either returns `false`, if a given 
-				type of `childType` is NOT represented inside of context of 
-				`parentType` as an attribute, OR it returns a function that 
-				returns for the given childNode list of [string, string]-pairs, 
-				representing the LIST OF ATTRIBUTES that are added to the parent
-				node based on the child's type and contents. 
-
-		The `IXMLTagTable` has methods: 
-			1. get(parentType: IValidNodeType, childType: IValidNodeType): boolean
-
-		Those two are created by the toplevel class/function for XML-Generation. 
-
-	9. TODO: add the `IXMLSerializable` to the implementations of `INode` INSIDE the Node.ts: 
-		FOR THAT - first, finish the refactoring of the file... (the mixin-inheritance thing...)
+		One COULD return an `string[]` from the `.toXML()` method [interface change]. 
+		THEN: 
+			1. the `XMLGenerator.fromNode` would just do `.join("\n")`
+				Assuming that not ALL the toplevel nodes are root-nodes, 
+				but instead Comments/PIs, etc
+			2. About `XMLStream`: 
+				1. One will need a NEW `IStream` - `FlattenerStream`
+					It's an ILinkedStream<T>.
+					It will accept an `IStream<T[]>` and return `IStream<T>` based off the array elements. 
+					Specifically, when given ["a", "b", "c"] element, it will return "a", "b", "c" ONE-AFTER-ANOTHER.
+				2. The XMLStream would WRAP the current `HandlerStream` INTO a `FlattenerStream`. 
+			3. the tags that are NOT `RecursiveNode` would return a '[xmlRep]'-single-item-array. 
+			4. the `RecursiveNode` would return INCREASINGLY LARGE arrays, by flattening 
+				ALL of the `string[]`s of children into its OWN `string[]`-return-value
+			5. The `ContentNode`s would have to be *FORMATTED*, i.e. the `\n`
+				would HAVE to be replaced with MULTIPLE LINES of text, i.e. one does 
+				`this.value.split("\n")`. 
+			6. ALL the `toXML()` calls would HAVE to be changed to reflect this... 
+				Includes: 
+					1. TokenNode.ts
+					2. RecursiveNode.ts
+					3. ContentNode.js
 
 IMMEDIATE: 
 	ORDER of tasks: 
@@ -156,6 +146,19 @@ IMMEDIATE:
 	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
 		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
 		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
+
+	TODO: add a NEW kind of `IStream` - `CountingStream`
+		This is an `IdentityStream`. 
+		It would have a bound `type ICountingPredicate = (stream: IPeekableStream<T>) => [boolean, number]`, 
+		which would be applied on the `this.resource`, and the result would indicate: 
+
+			1. whether to increase the current count or not (`boolean`)
+			2. how many elements to skip
+		
+		The `2.`-number returned is then used to call `.next()`-iterations, that would just 
+		delegate to `this.resource`. The counting-predicate is SUPPOSED to use the `.peek(n)`
+		on the `this.resource`, since that doesn't actually advance it. 
+		This class is very good for, for instance, counting SLOC *without comments* in code. 
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...

@@ -30,6 +30,10 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		return { type: this.type }
 	}
 
+	toXML(): string {
+		return `<${this.type} />`
+	}
+
 	debugPrint(): string {
 		return `${this.debugName}`
 	}
