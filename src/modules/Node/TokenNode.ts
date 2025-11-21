@@ -3,8 +3,10 @@ import type {
 	INodeMaker,
 	IPoolNodeType,
 	ITyped,
-	IValidNodeType
+	IValidNodeType,
+	IXMLGenerationTable
 } from "../../interfaces.js"
+import { printValidAttrs } from "../../samples/xml.js"
 import { isTyped } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
 import { NodeFactory } from "./NodeFactory.js"
@@ -30,8 +32,13 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		return { type: this.type }
 	}
 
-	toXML(): string {
-		return `<${this.type} />`
+	toXML(table: IXMLGenerationTable): string[] {
+		const attrConverter = table.toAttr(this.type, this.type)
+		return [
+			attrConverter
+				? `<${this.type} ${printValidAttrs(attrConverter(this))} />`
+				: `<${this.type} />`
+		]
 	}
 
 	debugPrint(): string {

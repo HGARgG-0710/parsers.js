@@ -32,13 +32,13 @@ export interface IXMLTagTable {
 }
 
 export interface IXMLSerializable {
-	toXML?(table: IXMLGenerationTable): string
+	toXML?(table: IXMLGenerationTable): string[]
 }
 
 export type IXMLDebuggable = IXMLSerializable & IDebugNamed
 
 export interface IXMLSimple {
-	toXML(): string
+	toXML(): string[]
 }
 
 export type IXMLVersion = "1.0" | "1.1"

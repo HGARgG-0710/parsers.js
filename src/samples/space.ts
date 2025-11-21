@@ -101,7 +101,7 @@ export const SpacelessStream = FilterStream(
 )
 
 /**
- * Returns an OS-sensetive newline character value.
+ * Returns a crossplatform newline character value.
  */
 export function getNewline() {
 	return process.platform === "win32" ? "\r\n" : "\n"

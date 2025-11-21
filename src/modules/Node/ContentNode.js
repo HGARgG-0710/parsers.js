@@ -1,5 +1,5 @@
 import { mixin } from "../../mixin.js"
-import { toXML } from "../../samples/xml.js"
+import { printValidAttrs, toValidTagContent, toXML } from "../../samples/xml.js"
 import { BaseNode } from "./BaseNode.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
@@ -40,17 +40,26 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 		}
 	}
 
-	toXML(table) {
-		const attrConverter = table.toAttr(this.type, this.type)
-		const isTag = table.isTag(this.type, this.type)
+	toXMLRaw() {
+		return String(this.value).split("\n").map(toValidTagContent)
+	}
+
+	toXMLWrapped(attrConverter, isTag) {
 		const openTag = attrConverter
-			? `<${this.type} ${attrConverter(this)}>`
-			: isTag
-			? `<${this.type}>`
-			: ""
-		const tagContent = isTag ? `${this.value}` : ""
-		const closeTag = attrConverter || isTag ? `</${this.type}>` : ""
-		return `${openTag}\n${tagContent}\n${closeTag}`
+			? `<${this.type} ${printValidAttrs(attrConverter(this))}>`
+			: `<${this.type}>`
+		const tagContentFormatted = isTag
+			? this.toXMLRaw().map((x) => `\t${x}`)
+			: []
+		const closeTag = `</${this.type}>`
+		return [openTag, ...tagContentFormatted, closeTag]
+	}
+
+	toXML(table) {
+		const asAttrs = table.toAttr(this.type, this.type)
+		const isTag = table.isTag(this.type, this.type)
+		const isRaw = !(asAttrs || isTag)
+		return isRaw ? this.toXMLRaw() : this.toXMLWrapped(asAttrs, isTag)
 	}
 
 	debugPrint() {
@@ -121,11 +130,11 @@ class PreSingleChildNode extends SingleItemNode {
 		const attrConverter = table.toAttr(this.type, child.type)
 		const isTag = table.isTag(this.type, child.type)
 		const openTag = attrConverter
-			? `<${this.type} ${attrConverter(child)}>`
+			? `<${this.type} ${printValidAttrs(attrConverter(child))}>`
 			: `<${this.type}>`
-		const tagContent = isTag ? toXML(child, table) : ""
+		const tagContent = isTag ? toXML(child, table) : []
 		const closeTag = `</${this.type}>`
-		return `${openTag}\n${tagContent}\n${closeTag}`
+		return [openTag, ...tagContent.map((x) => `\t${x}`), closeTag]
 	}
 
 	toJSON() {

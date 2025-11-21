@@ -55,8 +55,23 @@ export function toValidAttributes(
 	})
 }
 
+export function printAttrs(attrs: [string, string][]) {
+	return attrs.map(([key, value]) => `${key}="${value}"`).join(" ")
+}
+
+export function printValidAttrs(attrs: [string, string][]) {
+	return printAttrs(toValidAttributes(attrs))
+}
+
 export function toValidAttributeValue(value: string) {
-	return value.replaceAll('"', "&quot;")
+	return value
+		.replaceAll('"', "&quot;")
+		.replaceAll("\n", "&#xA")
+		.replaceAll("\t", "&#x9")
+		.replaceAll("\r", "&#xD")
+		.replaceAll(">", "&gt;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(" ", "&#x20")
 }
 
 export function toValidComment(comment: string) {
@@ -90,11 +105,15 @@ export function toValidProcessingInstructionContent(content: string) {
 	return content.replaceAll("?>", "?&gt;")
 }
 
+export function toValidTagContent(content: string) {
+	return content.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+}
+
 export class XMLProcessingInstructionNode implements IXMLSimple {
 	private readonly content: string
 
-	toXML(): string {
-		return `<?${this.target} ${this.content}?>`
+	toXML(): string[] {
+		return [`<?${this.target} ${this.content}?>`]
 	}
 
 	constructor(private readonly target: string, content: string) {
@@ -106,8 +125,8 @@ export class XMLProcessingInstructionNode implements IXMLSimple {
 export class XMLCommentNode implements IXMLSimple {
 	private readonly comment: string
 
-	toXML(): string {
-		return `<!--${this.comment}-->`
+	toXML(): string[] {
+		return [`<!--${this.comment}-->`]
 	}
 
 	constructor(comment: string) {
@@ -116,10 +135,12 @@ export class XMLCommentNode implements IXMLSimple {
 }
 
 export class XMLDeclarationNode implements IXMLSimple {
-	toXML(): string {
-		return `<?xml version=${this.version} encoding=${
-			this.encoding
-		} standalone=${this.standalone ? "yes" : "no"}?>`
+	toXML(): string[] {
+		return [
+			`<?xml version=${this.version} encoding=${
+				this.encoding
+			} standalone=${this.standalone ? "yes" : "no"}?>`
+		]
 	}
 
 	constructor(
@@ -187,20 +208,24 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	private readonly postTags: IXMLSimple[]
 
 	pre() {
-		return this.preTags.map((tag) => `${tag.toXML()}\n`)
+		return this.preTags
+			.map((tag) => tag.toXML())
+			.flat()
+			.map((x) => `${x}\n`)
 	}
 
 	tag(): [string, string] {
 		return [
-			`<${this.tagName} ${this.attrs
-				.map(([key, value]) => `${key}="${value}"`)
-				.join(" ")}>`,
+			`<${this.tagName} ${printAttrs(this.attrs)}>`,
 			`<${this.tagName} />`
 		]
 	}
 
 	post() {
-		return this.postTags.map((x) => `\n${x.toXML()}`)
+		return this.postTags
+			.map((x) => x.toXML())
+			.flat()
+			.map((x) => `\n${x}`)
 	}
 
 	constructor(args: XMLOpenableNodeArgs) {
@@ -218,14 +243,14 @@ export class XMLGenerator {
 		resource: IOwnedStream<IXMLDebuggable>
 	) => ICommandStream<string>
 
-	private readonly toXML: (source: IXMLDebuggable) => string
+	private readonly toXML: (source: IXMLDebuggable) => string[]
 
 	fromStream(stream: IOwnedStream<IXMLDebuggable>) {
 		return XMLWrapper(this.wrapperNode, this.XMLStream(stream))
 	}
 
 	fromNode(node: IXMLDebuggable) {
-		return this.toXML(node)
+		return this.toXML(node).join("\n")
 	}
 
 	constructor(

@@ -34,6 +34,12 @@ REMINDERs:
 	1. REMINDER [for tests]: *make sure* that the *STATIC* properties on a 'mixin' GET TO BE INHERITED by the 
 		child classes/mixins. Reason: THIS IS HOW JavaScript INHERITANCE WORKS!
 
+	2. REMINDER [for the docs]: XML-generation DOES NOT support any form of DTD-entities. 
+		Those'll have to be added to the nodes manually by the user...
+
+	3. REMINDER [testing]: make sure that the XML-generation WORKS with "invalid" 
+		attribute values, etc. 
+
 CURRENT: 
 	6. REFACTOR [from `RegexParser`]: 
 		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 
@@ -52,26 +58,14 @@ XML FEATURE DESIGN:
 
 		One COULD return an `string[]` from the `.toXML()` method [interface change]. 
 		THEN: 
-			1. the `XMLGenerator.fromNode` would just do `.join("\n")`
-				Assuming that not ALL the toplevel nodes are root-nodes, 
-				but instead Comments/PIs, etc
 			2. About `XMLStream`: 
 				1. One will need a NEW `IStream` - `FlattenerStream`
 					It's an ILinkedStream<T>.
 					It will accept an `IStream<T[]>` and return `IStream<T>` based off the array elements. 
 					Specifically, when given ["a", "b", "c"] element, it will return "a", "b", "c" ONE-AFTER-ANOTHER.
+
+					THIS WILL utilize an underlying delegate `FiniteStream`...
 				2. The XMLStream would WRAP the current `HandlerStream` INTO a `FlattenerStream`. 
-			3. the tags that are NOT `RecursiveNode` would return a '[xmlRep]'-single-item-array. 
-			4. the `RecursiveNode` would return INCREASINGLY LARGE arrays, by flattening 
-				ALL of the `string[]`s of children into its OWN `string[]`-return-value
-			5. The `ContentNode`s would have to be *FORMATTED*, i.e. the `\n`
-				would HAVE to be replaced with MULTIPLE LINES of text, i.e. one does 
-				`this.value.split("\n")`. 
-			6. ALL the `toXML()` calls would HAVE to be changed to reflect this... 
-				Includes: 
-					1. TokenNode.ts
-					2. RecursiveNode.ts
-					3. ContentNode.js
 
 IMMEDIATE: 
 	ORDER of tasks: 
@@ -146,6 +140,17 @@ IMMEDIATE:
 	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
 		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
 		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
+
+	3. PROBLEM: XML-generation ONLY produces LF files. 
+		Meaning to say, one has NO IDEA about *which* OS the files are intended for, 
+		and *therefore*, one *cannot* decide for certain. 
+		To solve this, ADD the `GlobalConfig` singleton-class, LET it configure 
+		whether one is to use '\r' vs '\r\n' for the output files...
+
+	1. PROBLEM: XML-generation ONLY uses 'attr-name="..."'-kinds of attributes
+		Meaning, it DOESN'T use "attr-name='...'" (single quotes vs double quotes). 
+		MAKE THIS configurable inside the `GlobalConfig` singleton-object 
+		(exported from the `global` submodule). 
 
 	TODO: add a NEW kind of `IStream` - `CountingStream`
 		This is an `IdentityStream`. 
