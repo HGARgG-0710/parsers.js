@@ -1,10 +1,7 @@
+import { ContentNode, SingleChildNode } from "src/modules/Node/ContentNode.js"
+import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
+import { TokenNode } from "src/modules/Node/TokenNode.js"
 import { NodeSystem } from "../objects.js"
-import {
-	ContentNode,
-	RecursiveNode,
-	SingleChildNode,
-	TokenNode
-} from "../objects/Node.js"
 
 /**
  * This is a template for the most basic complete `NodeSystem` possible.

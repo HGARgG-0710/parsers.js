@@ -1,12 +1,11 @@
 import type { ICellNode, INode, IPoolNode } from "../../interfaces.js"
+import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
 import {
-	BaseNode,
 	CachedContentNode,
-	CachedTokenNode,
-	ContentNode,
-	RecursiveNode,
-	SingleChildNode
-} from "../../objects/Node.js"
+	ContentNode, SingleChildNode
+} from "src/modules/Node/ContentNode.js"
+import { BaseNode } from "src/modules/Node/BaseNode.js"
+import { CachedTokenNode } from "src/modules/Node/TokenNode.js"
 
 export namespace Temp {
 	export const Comma = CachedTokenNode("comma", "Comma")

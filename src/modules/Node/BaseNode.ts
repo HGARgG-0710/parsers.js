@@ -1,0 +1,56 @@
+import { array } from "@hgargg-0710/one"
+import type { INode, ITyped, IValidNodeType } from "../../interfaces.js"
+
+/**
+ * An abstract class implementing the `INode` type.
+ * Recommended way to create `INode` implementations.
+ *
+ * Provides:
+ *
+ * 1. required `readonly type: T`
+ * 2. various boilerplate methods
+ * 3. default behaviour for the future classes:
+ * 	1. .backtrack method
+ *  	2. .findUnwalkedChildren
+ *  	3. .lastChild == -I
+ */
+export abstract class BaseNode implements INode {
+	abstract readonly type: IValidNodeType
+	abstract readonly debugName: string
+	abstract debugPrint(): string
+
+	toJSON?(): ITyped
+
+	parent: INode | null = null
+
+	index(multind: number[]) {
+		if (this.lastChild < 0) return this
+		const [firstIndex, ...subIndex] = multind
+		return this.read(firstIndex).index(subIndex)
+	}
+
+	backtrack(positions: number) {
+		let curr: INode = this
+		while (--positions) curr = curr.parent!
+		return curr
+	}
+
+	findUnwalkedChildren(endInd: number[]) {
+		let currTree: INode = this
+		let result = array.lastIndex(endInd)
+		while (
+			(currTree = currTree.parent!) &&
+			currTree.lastChild <= endInd[result]
+		)
+			--result
+		return result
+	}
+
+	read(i: number): INode {
+		return this
+	}
+
+	get lastChild() {
+		return -1
+	}
+}
