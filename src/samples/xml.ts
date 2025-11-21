@@ -3,10 +3,15 @@ import assert from "assert"
 import type {
 	ICommandStream,
 	IOwnedStream,
+	IValidNodeType,
+	IXMLAttributeGenerator,
+	IXMLAttrMap,
+	IXMLAttrMapValue,
 	IXMLAttrTable,
 	IXMLDebuggable,
 	IXMLOpenableNode,
 	IXMLSimple,
+	IXMLTagMap,
 	IXMLTagTable,
 	IXMLVersion
 } from "../interfaces.js"
@@ -226,4 +231,159 @@ export class XMLGenerator {
 		this.XMLStream = XMLStream(attrs, tags)
 		this.toXML = toXML(attrs, tags)
 	}
+}
+
+class XMLAttrTableChildBuilder {
+	setAll(value: IXMLAttrMapValue) {
+		this.owner.forAllParents(this.type, value)
+		return this
+	}
+
+	setOne(parent: IValidNodeType, value: IXMLAttrMapValue) {
+		this.owner.forOneParent(this.type, parent, value)
+		return this
+	}
+
+	removeFrom(parent: IValidNodeType) {
+		this.owner.remove(this.type, parent)
+	}
+
+	finish() {
+		return this.owner
+	}
+
+	constructor(
+		private readonly type: IValidNodeType,
+		private readonly owner: XMLAttrTableBuilder
+	) {}
+}
+
+class XMLAttrTableBuilder {
+	private readonly attrs: IXMLAttrMap = new Map()
+
+	private getParentMap(byType: IValidNodeType) {
+		const parentMap = this.attrs.get(byType)
+		if (parentMap) return parentMap
+		const newMap = new Map()
+		this.attrs.set(byType, newMap)
+		return newMap
+	}
+
+	forChild(type: IValidNodeType) {
+		return new XMLAttrTableChildBuilder(type, this)
+	}
+
+	remove(childType: IValidNodeType, parentType: IValidNodeType) {
+		this.getParentMap(parentType).delete(childType)
+	}
+
+	forOneParent(
+		childType: IValidNodeType,
+		parentType: IValidNodeType,
+		value: IXMLAttrMapValue
+	) {
+		this.getParentMap(parentType).set(childType, value)
+	}
+
+	forAllParents(childType: IValidNodeType, value: IXMLAttrMapValue) {
+		for (const [, parentMap] of this.attrs) parentMap.set(childType, value)
+		return this
+	}
+
+	build() {
+		return new XMLAttrTable(this.attrs)
+	}
+
+	constructor(types: readonly IValidNodeType[]) {
+		for (const type of types) this.attrs.set(type, new Map())
+	}
+}
+
+export class XMLAttrTable implements IXMLAttrTable {
+	static builder(types: readonly IValidNodeType[]) {
+		return new XMLAttrTableBuilder(types)
+	}
+
+	get(
+		parentType: IValidNodeType,
+		childType: IValidNodeType
+	): false | IXMLAttributeGenerator {
+		const byParent = this.attrs.get(parentType)
+		if (!byParent) return false
+		return byParent.get(childType) || false
+	}
+
+	constructor(private readonly attrs: IXMLAttrMap) {}
+}
+
+class XMLTagSetChildBuilder {
+	toAll() {
+		this.owner.forAllParents(this.type)
+		return this
+	}
+
+	addTo(parent: IValidNodeType) {
+		this.owner.forOneParent(this.type, parent)
+		return this
+	}
+
+	removeFrom(parent: IValidNodeType) {
+		this.owner.remove(this.type, parent)
+		return this
+	}
+
+	finish() {
+		return this.owner
+	}
+
+	constructor(
+		private readonly type: IValidNodeType,
+		private readonly owner: XMLTagSetBuilder
+	) {}
+}
+
+class XMLTagSetBuilder {
+	private readonly tags: IXMLTagMap = new Map()
+
+	private getParentSet(byType: IValidNodeType) {
+		const parentSet = this.tags.get(byType)
+		if (parentSet) return parentSet
+		const newSet = new Set<IValidNodeType>()
+		this.tags.set(byType, newSet)
+		return newSet
+	}
+
+	forChild(type: IValidNodeType) {
+		return new XMLTagSetChildBuilder(type, this)
+	}
+
+	remove(childType: IValidNodeType, fromParent: IValidNodeType) {
+		this.getParentSet(fromParent).delete(childType)
+	}
+
+	forOneParent(childType: IValidNodeType, parentType: IValidNodeType) {
+		this.getParentSet(parentType).add(childType)
+	}
+
+	forAllParents(childType: IValidNodeType) {
+		for (const [, tagSet] of this.tags) tagSet.add(childType)
+	}
+
+	constructor(types: readonly IValidNodeType[]) {
+		for (const type of types) this.tags.set(type, new Set())
+	}
+}
+
+export class XMLTagSet implements IXMLTagTable {
+	static builder(types: readonly IValidNodeType[]) {
+		return new XMLTagSetBuilder(types)
+	}
+
+	get(parentType: IValidNodeType, childType: IValidNodeType): boolean {
+		const parentSet = this.tags.get(parentType)
+		if (!parentSet) return false
+		return parentSet.has(childType)
+	}
+
+	constructor(private readonly tags: IXMLTagMap) {}
 }

@@ -1,13 +1,22 @@
 import type { IDebugNamed } from "./Debug.js"
 import type { INode, IValidNodeType } from "./Node.js"
 
-export type IAttributeGenerator = (node: INode) => [string, string][]
+export type IXMLAttributeGenerator = (node: INode) => [string, string][]
+
+export type IXMLAttrMapValue = false | IXMLAttributeGenerator
+
+export type IXMLAttrMap = Map<
+	IValidNodeType,
+	Map<IValidNodeType, IXMLAttrMapValue>
+>
+
+export type IXMLTagMap = Map<IValidNodeType, Set<IValidNodeType>>
 
 export interface IXMLAttrTable {
 	get(
 		parentType: IValidNodeType,
 		childType: IValidNodeType
-	): false | IAttributeGenerator
+	): false | IXMLAttributeGenerator
 }
 
 export interface IXMLTagTable {
