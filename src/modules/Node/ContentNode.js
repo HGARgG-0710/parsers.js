@@ -1,44 +1,31 @@
-import type {
-	ICarrierNode,
-	ICarrierNodeType,
-	ICellNode,
-	ICellNodeType,
-	INode,
-	INodeMaker,
-	IPoolNodeType,
-	IValidNodeType
-} from "../../interfaces.js"
-import { tryCopy } from "../../utils.js"
-import { isContentNodeSerializable } from "../../utils/Node.js"
-import { PreNodeFactory } from "./before/PreNodeFactory.js"
+import { mixin } from "../../mixin.js"
+import { BaseNode } from "./BaseNode.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
+import { PreNodeFactory } from "./before/PreNodeFactory.js"
 
-abstract class SingleItemNode<Value = any> extends PoolableNode<[Value]> {
-	protected ["constructor"]: new (value?: Value) => this
-
-	static fromPlain<Value = any>(
-		this: ICellNodeType<Value>,
-		x: any,
-		nodeMaker: INodeMaker<ICellNode<Value>>
-	) {
+class FromPlainConvertibleSingleItemNode extends BaseNode {
+	static fromPlain(x, nodeMaker) {
 		if (!isContentNodeSerializable(x)) return false
 		return new this(x.value)
 	}
 }
 
-abstract class MaybeContainingNode<Value = any>
-	extends SingleItemNode<Value>
-	implements ICarrierNode<Value>
-{
-	private _value: Value | undefined
+const SingleItemNode = new mixin(
+	{
+		name: "SingleItemNode",
+		properties: {}
+	},
+	[FromPlainConvertibleSingleItemNode, PoolableNode]
+).toClass()
 
-	protected setValue(newValue: Value | undefined) {
+class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
+	setValue(newValue) {
 		this._value = newValue
 	}
 
 	get value() {
-		return this._value!
+		return this._value
 	}
 
 	copy() {
@@ -52,50 +39,38 @@ abstract class MaybeContainingNode<Value = any>
 		}
 	}
 
-	debugPrint(): string {
+	debugPrint() {
 		return `${this.debugName} { value: ${this.value} }`
 	}
 
-	constructor(value?: Value) {
+	constructor(value) {
 		super()
 		this.setValue(value)
 	}
 }
 
-abstract class AlwaysContainingNode<
-	Value = any
-> extends MaybeContainingNode<Value> {
-	constructor(value: Value) {
-		super(value)
-	}
-}
+const makeCachedContentNodeFactory = PreNodeFactory(MaybeContainingNode)
 
-const makeCachedContentNodeFactory =
-	PreNodeFactory<ICarrierNodeType>(AlwaysContainingNode)
-
-export const CachedContentNode = NodeFactory(function <V = any>(
-	type: IValidNodeType,
-	debugName: string
-): ICarrierNodeType<V> {
+export const CachedContentNode = NodeFactory(function (type, debugName) {
 	const factory = makeCachedContentNodeFactory(type, debugName)
-	const instanceMap = new Map<V, ICarrierNode>()
+	const instanceMap = new Map()
 
-	function getCachedInstance(value: V) {
+	function getCachedInstance(value) {
 		return instanceMap.get(value)
 	}
 
-	function cacheNewInstance(value: V) {
+	function cacheNewInstance(value) {
 		const newInstance = new factory(value)
 		instanceMap.set(value, newInstance)
 		return newInstance
 	}
 
 	return class extends factory {
-		static make(value: V) {
+		static make(value) {
 			return getCachedInstance(value) || cacheNewInstance(value)
 		}
 
-		constructor(value: V) {
+		constructor(value) {
 			throw new TypeError(
 				"Cannot create a `CachedContentNode` instance via `new` call, use the static `make` method instead"
 			)
@@ -104,26 +79,21 @@ export const CachedContentNode = NodeFactory(function <V = any>(
 	}
 })
 
-abstract class PreContentNode<Value = any>
-	extends MaybeContainingNode<Value>
-	implements ICellNode<Value>
-{
-	init(value?: Value | undefined) {
+class PreContentNode extends MaybeContainingNode {
+	init(value) {
 		this.setValue(value)
 		return this
 	}
 }
 
-abstract class PreSingleChildNode extends SingleItemNode<INode> {
-	private child?: INode
-
-	copy(): this {
+class PreSingleChildNode extends SingleItemNode {
+	copy() {
 		return this.child
 			? new this.constructor(tryCopy(this.child))
 			: new this.constructor()
 	}
 
-	init(newChild?: INode): this {
+	init(newChild) {
 		this.child = newChild
 		return this
 	}
@@ -139,7 +109,7 @@ abstract class PreSingleChildNode extends SingleItemNode<INode> {
 		}
 	}
 
-	debugPrint(): string {
+	debugPrint() {
 		return `${this.debugName}${
 			this.child ? ` { child: ${this.child.debugPrint()} }` : ""
 		}`
@@ -152,11 +122,9 @@ abstract class PreSingleChildNode extends SingleItemNode<INode> {
  * In cases when a child is guaranteed to be the same preferable over
  * `RecursiveNode`.
  */
-export const SingleChildNode = NodeFactory(
-	PreNodeFactory<IPoolNodeType<[INode]>>(PreSingleChildNode)
-)
+export const SingleChildNode = NodeFactory(PreNodeFactory(PreSingleChildNode))
 
-const makeContentNodeFactory = PreNodeFactory<ICellNodeType>(PreContentNode)
+const makeContentNodeFactory = PreNodeFactory(PreContentNode)
 
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of `INode`
@@ -168,9 +136,6 @@ const makeContentNodeFactory = PreNodeFactory<ICellNodeType>(PreContentNode)
  * returned by `ContentNode` are poolable using the `ObjectPool`
  */
 
-export const ContentNode = NodeFactory(function <Value = any>(
-	type: IValidNodeType,
-	debugName: string
-): ICellNodeType<Value> {
+export const ContentNode = NodeFactory(function (type, debugName) {
 	return makeContentNodeFactory(type, debugName)
 })

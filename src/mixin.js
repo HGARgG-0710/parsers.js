@@ -169,15 +169,34 @@ export class mixin {
 	/**
 	 * @private */
 	configureClass() {
-		this.defineStaticMembers()
 		this.defineInstanceClassref()
 		this.initSuper()
 	}
 
 	/**
 	 * @private */
+	setStaticMember(name, value) {
+		this.class[name] = value
+	}
+
+	/**
+	 * @private */
 	defineStaticMember(name, propClosure) {
-		this.class[name] = propClosure(this.class)
+		this.setStaticMember(name, propClosure(this.class))
+	}
+
+	/**
+	 * @private */
+	inheritStatic(parent) {
+		const staticNames = keys(parent)
+		for (const propName of staticNames)
+			this.setStaticMember(propName, parent[propName])
+	}
+
+	/**
+	 * @private */
+	inheritStaticMembers(parents) {
+		for (const parent of parents) this.inheritStatic(parent)
 	}
 
 	/**
@@ -209,9 +228,10 @@ export class mixin {
 
 	/**
 	 * @private */
-	fromClasses(classes) {
-		PrototypeFiller.instance.fromClasses(this.class, classes)
-		this.superFromClasses(classes)
+	fromClasses(parents) {
+		PrototypeFiller.instance.fromClasses(this.class, parents)
+		this.superFromClasses(parents)
+		this.inheritStaticMembers(parents)
 	}
 
 	/**
@@ -254,6 +274,7 @@ export class mixin {
 		this.defineClass()
 		this.configureClass()
 		this.fromClasses(classes)
+		this.defineStaticMembers()
 		this.fromProperties()
 	}
 }

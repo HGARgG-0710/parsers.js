@@ -30,23 +30,11 @@ REMINDERs:
 
 	2. Regex [testing]: 
 		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
+		
+	1. REMINDER [for tests]: *make sure* that the *STATIC* properties on a 'mixin' GET TO BE INHERITED by the 
+		child classes/mixins. Reason: THIS IS HOW JavaScript INHERITANCE WORKS!
 
 CURRENT: 
-	0. ADD `mixin`s to `Node`s (break the `Nodes.ts` file ONTO SEVERAL): 
-		1. (new - MIXIN) SingleItemNode <- FromPlainConvertibleSingleItemNode [.fromPlain method] + PoolableNode
-		2. FromPlainConvertibleSingleItemNode = .fromPlain method (of (curr.) SingleItemNode) + BaseNode
-			LET the `CachedContentNode` INHERIT FROM THIS, and not from `SingleItemNode`...v
-
-		REASON: the (unneeded) "free" method is LEAKING into `CachedContentNode` 
-			(which ISN'T supposed to be used on trees which are POOLABLE!)
-
-		For this: 
-			1. add the new `modules/Node`
-				1. this'll enable separating the "good" TypeScript code from the "bad" JavaScript code...
-			2. SPREAD the contents of `Node.ts` across `modules/Node/*` files
-				1. This'll reduce the number of details within the file
-			3. Re-export stuff from 'modules/Node/*' inside `Node.ts` afterwards...
-			
 	6. REFACTOR [from `RegexParser`]: 
 		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 
 			Cases present:
