@@ -142,7 +142,7 @@ export interface IIndexable<I = any, V = any, Other extends any[] = any[]> {
  * objects that have an explicit (optional) `toJSON`
  * method.
  */
-export interface ISerializableObject {
+export interface IJSONSerializableObject {
 	toJSON?(): any
 }
 
@@ -151,13 +151,13 @@ export interface ISerializableObject {
  * all the possible values that can be
  * successfully serialized using `JSON.stringify`
  */
-export type ISerializable =
-	| ISerializableObject
+export type IJSONSerializable =
+	| IJSONSerializableObject
 	| null
 	| number
 	| string
 	| boolean
-	| ISerializable[]
+	| IJSONSerializable[]
 	| Number
 	| String
 	| Boolean
@@ -323,3 +323,4 @@ export type * from "./interfaces/Node.js"
 export type * from "./interfaces/Regex.js"
 export type * from "./interfaces/Stream.js"
 export type * from "./interfaces/StreamHandler.js"
+export type * from "./interfaces/XML.js"

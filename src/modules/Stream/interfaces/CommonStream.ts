@@ -1,4 +1,4 @@
-import type { ILinkedStream } from "./OwnedStream.js"
+import type { IControlStream, ILinkedStream } from "./OwnedStream.js"
 
 /**
  * This is an interface for representing the most common
@@ -8,3 +8,5 @@ import type { ILinkedStream } from "./OwnedStream.js"
  * purposes).
  */
 export type ICommonStream<T = any> = ILinkedStream<T> & Iterable<T>
+
+export type ICommandStream<T = any> = IControlStream<T> & ICommonStream<T>

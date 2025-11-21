@@ -31,6 +31,62 @@ REMINDERs:
 	2. Regex [testing]: 
 		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 
+CURRENT: 
+	0. ADD `mixin`s to `Node`s (break the `Nodes.ts` file ONTO SEVERAL): 
+		1. (new - MIXIN) SingleItemNode <- FromPlainConvertibleSingleItemNode [.fromPlain method] + PoolableNode
+		2. FromPlainConvertibleSingleItemNode = .fromPlain method (of (curr.) SingleItemNode) + BaseNode
+			LET the `CachedContentNode` INHERIT FROM THIS, and not from `SingleItemNode`...v
+
+		REASON: the (unneeded) "free" method is LEAKING into `CachedContentNode` 
+			(which ISN'T supposed to be used on trees which are POOLABLE!)
+
+		For this: 
+			1. add the new `modules/Node`
+				1. this'll enable separating the "good" TypeScript code from the "bad" JavaScript code...
+			2. SPREAD the contents of `Node.ts` across `modules/Node/*` files
+				1. This'll reduce the number of details within the file
+			3. Re-export stuff from 'modules/Node/*' inside `Node.ts` afterwards...
+			
+	6. REFACTOR [from `RegexParser`]: 
+		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 
+			Cases present:
+				1. SingleChar
+		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
+
+
+XML FEATURE DESIGN:
+	1. The `INode`s have an optional `toXML?(): string` method. 
+		It gets to call the `toXML()` method on OTHER tree elements. 
+		Upon encountering a node that is NOT in possession of the `toXML`
+		method, an error is thrown. Specifically, one goes on to 
+		throw the `XMLGenerationError`, with the message of 
+		`class {faultyNode.debugName} has no method "toXML()"`. 
+
+		The toplevel `ErrorPrinter` can, then, handle the error...
+
+	2. The `toXML()` method accepts the parameters: 
+		1. `attrs: IXMLAttrTable`
+		2. `tags: IXMLTagTable`
+
+		The `IXMLAttrTable` has methods: 
+			1. get(parentType: IValidNodeType, childType: IValidNodeType): false | ((chidlNode: INode) => [string, string][])
+				For a given `type`, it either returns `false`, if a given 
+				type of `childType` is NOT represented inside of context of 
+				`parentType` as an attribute, OR it returns a function that 
+				returns for the given childNode list of [string, string]-pairs, 
+				representing the LIST OF ATTRIBUTES that are added to the parent
+				node based on the child's type and contents. 
+
+		The `IXMLTagTable` has methods: 
+			1. get(parentType: IValidNodeType, childType: IValidNodeType): boolean
+
+		Those two are created by the toplevel class/function for XML-Generation. 
+
+	9. TODO: add the `IXMLSerializable` to the implementations of `INode` INSIDE the Node.ts: 
+		FOR THAT - first, finish the refactoring of the file... (the mixin-inheritance thing...)
+
+	11. Add the default implementations of `IXMLAttrTable` and `IXMLTagTable` to `samples.xml`
+
 IMMEDIATE: 
 	ORDER of tasks: 
 		1. Add built-in support for XML-serialization to `INode` (note: *NOT* the deserialization - it's rather more difficult...)
@@ -140,27 +196,6 @@ IMMEDIATE:
 			by THE NUMBER OF POSITIONS that MUST BE TRACKED within the `NFARegexMatcherOutputBuilder`!
 			Thus, as a result of `.finish()`, one can GET the result via `const x = outputBuilder.finish(); const advance = x.length`. 
 			This is absolutely essential, otherwise the parsing cannot convene...
-
-	0. ADD `mixin`s to `Node`s (break the `Nodes.ts` file ONTO SEVERAL): 
-		1. (new - MIXIN) SingleItemNode <- FromPlainConvertibleSingleItemNode [.fromPlain method] + PoolableNode
-		2. FromPlainConvertibleSingleItemNode = .fromPlain method (of (curr.) SingleItemNode) + BaseNode
-			LET the `CachedContentNode` INHERIT FROM THIS, and not from `SingleItemNode`...v
-
-		REASON: the (unneeded) "free" method is LEAKING into `CachedContentNode` 
-			(which ISN'T supposed to be used on trees which are POOLABLE!)
-
-		For this: 
-			1. add the new `modules/Node`
-				1. this'll enable separating the "good" TypeScript code from the "bad" JavaScript code...
-			2. SPREAD the contents of `Node.ts` across `modules/Node/*` files
-				1. This'll reduce the number of details within the file
-			3. Re-export stuff from 'modules/Node/*' inside `Node.ts` afterwards...
-			
-	6. REFACTOR [from `RegexParser`]: 
-		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 
-			Cases present:
-				1. SingleChar
-		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
 	
 	3. Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
@@ -187,10 +222,10 @@ IDEA [later]:
 		4. public classes 
 		5. abstract classes
 
-		Current total: 244 
+		Current total: 252
 
 		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 204 (at the time of writing...)
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 212 (at the time of writing...)
 			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
 
 6. Commit L: 

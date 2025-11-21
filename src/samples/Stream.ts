@@ -10,9 +10,13 @@ import type {
 	IStream
 } from "../interfaces.js"
 import {
+	ConcatStream,
+	FiniteStream,
 	HandlerStream,
+	InterleaveStream,
 	LimitDepthMarks,
 	LimitStream,
+	LoopStream,
 	RecursiveLimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
@@ -152,3 +156,17 @@ export const EscapedStream = HandlerStream((stream: IOwnedStream<string>) => {
 	if (stream.curr === "\\") stream.next()
 	return stream.curr
 })
+
+export function DelimitedStream<T = any, E = any>(
+	delimiter: T,
+	endProvider: (ends: E) => [T[], T[]]
+) {
+	return function (ends: E, stream: IStream<T>) {
+		const [pre, post] = endProvider(ends)
+		return new ConcatStream(
+			new FiniteStream(...pre),
+			new InterleaveStream(stream, new LoopStream(delimiter)),
+			new FiniteStream(...post)
+		)
+	}
+}

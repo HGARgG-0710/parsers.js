@@ -1,18 +1,8 @@
 import { functional } from "@hgargg-0710/one"
-import type {
-	INode,
-	IOwnedStream,
-	IRecursiveNode,
-	IStream
-} from "../interfaces.js"
-import {
-	ConcatStream,
-	FiniteStream,
-	HandlerStream,
-	InterleaveStream,
-	LoopStream
-} from "../objects/Stream.js"
+import type { INode, IOwnedStream, IRecursiveNode } from "../interfaces.js"
+import { HandlerStream } from "../objects/Stream.js"
 import { curr } from "../utils/Stream.js"
+import { DelimitedStream } from "./Stream.js"
 
 const { trivialCompose } = functional
 
@@ -38,19 +28,12 @@ export const JSONStream = HandlerStream<any, string>(
  * Useful for in need of, for instance, writing things to
  * a file via an owning `WriterStream`.
  */
-export function JSONWrapper(
-	wrapperNode: IRecursiveNode,
-	inStream: IStream<string>
-): IOwnedStream<string> {
-	const [pre, post] = wrapperNode.jsonInsertableEmpty()
-	return new ConcatStream(
-		new FiniteStream(pre),
-		new InterleaveStream(inStream, new LoopStream(",")),
-		new FiniteStream(post)
-	)
-}
+export const JSONWrapper = DelimitedStream<string, IRecursiveNode>(
+	",",
+	(node) => node.jsonInsertableEmpty().map((x) => [x]) as [string[], string[]]
+)
 
-// ! PRE-DOC [important]: this is purely a convinience class. 
+// ! PRE-DOC [important]: this is purely a convinience class.
 export class JSONGenerator {
 	fromStream(stream: IOwnedStream<INode>) {
 		return JSONWrapper(this.wrapperElement, JSONStream(stream))

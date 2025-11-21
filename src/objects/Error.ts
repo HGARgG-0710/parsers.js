@@ -438,3 +438,9 @@ export class NoPosedLocatableError extends NoPropertyHavingLocatableError {
 		super("pos")
 	}
 }
+
+export class XMLGenerationError extends MissingImplementationError {
+	constructor(node: IDebugNamed) {
+		super("toXML", node.debugName)
+	}
+}

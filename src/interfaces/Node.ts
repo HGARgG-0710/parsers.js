@@ -1,8 +1,8 @@
 import type {
 	IFreeable,
 	IInitializable,
-	IPushable,
-	ISerializableObject
+	IJSONSerializableObject,
+	IPushable
 } from "../interfaces.js"
 import type { ObjectPool } from "../objects.js"
 import type { IDebugNamed, IDebugPrintable } from "./Debug.js"
@@ -74,7 +74,7 @@ export interface IWalkable<T extends IWalkable<T> = any> {
 export interface INode
 	extends ITyped,
 		IWalkable<INode>,
-		ISerializableObject,
+		IJSONSerializableObject,
 		IDebugNamed,
 		IDebugPrintable {
 	parent: INode | null
