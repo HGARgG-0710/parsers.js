@@ -1,5 +1,10 @@
 import { functional } from "@hgargg-0710/one"
-import type { IOwnedStream, IRecursiveNode, IStream } from "../interfaces.js"
+import type {
+	INode,
+	IOwnedStream,
+	IRecursiveNode,
+	IStream
+} from "../interfaces.js"
 import {
 	ConcatStream,
 	FiniteStream,
@@ -43,4 +48,17 @@ export function JSONWrapper(
 		new InterleaveStream(inStream, new LoopStream(",")),
 		new FiniteStream(post)
 	)
+}
+
+// ! PRE-DOC [important]: this is purely a convinience class. 
+export class JSONGenerator {
+	fromStream(stream: IOwnedStream<INode>) {
+		return JSONWrapper(this.wrapperElement, JSONStream(stream))
+	}
+
+	fromNode(node: INode) {
+		return JSON.stringify(node)
+	}
+
+	constructor(private readonly wrapperElement: IRecursiveNode) {}
 }
