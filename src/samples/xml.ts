@@ -19,7 +19,7 @@ import { regex } from "./regex.js"
 const { trivialCompose } = functional
 
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
-	"\n",
+	"\t\n",
 	(xmlNode) => {
 		const [preLast, postFirst] = xmlNode.tag()
 		return [
@@ -174,7 +174,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	private readonly postTags: IXMLSimple[]
 
 	pre() {
-		return this.preTags.map((tag) => tag.toXML())
+		return this.preTags.map((tag) => `${tag.toXML()}\n`)
 	}
 
 	tag(): [string, string] {
@@ -187,7 +187,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	}
 
 	post() {
-		return this.postTags.map((x) => x.toXML())
+		return this.postTags.map((x) => `\n${x.toXML()}`)
 	}
 
 	constructor(args: XMLOpenableNodeArgs) {
