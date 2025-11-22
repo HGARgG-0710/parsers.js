@@ -1,13 +1,12 @@
-import type { IOwnedStream, IResourcefulStream } from "../../../interfaces.ts"
+import type { IOwnedStream, IResourcefulStream } from "../../../interfaces.js"
 
 /**
  * This is a (sealed) mixin providing the `protected syncCurr(): void` method,
  * which sets `this.curr` to `this.resource.curr`.
  */
-export declare abstract class SyncCurrStream<T = any>
-	implements IResourcefulStream<T>
-{
-	abstract readonly curr: T
+export abstract class SyncCurrStream<T = any> implements IResourcefulStream<T> {
+	protected abstract set curr(newCurr: T)
+	abstract get curr(): T
 	abstract readonly isEnd: boolean
 	abstract readonly resource?: IOwnedStream
 
@@ -15,5 +14,7 @@ export declare abstract class SyncCurrStream<T = any>
 	abstract isCurrEnd(): boolean
 	abstract setResource(resource: IOwnedStream): void
 
-	protected syncCurr(): void
+	protected syncCurr(): void {
+		this.curr = this.resource!.curr
+	}
 }

@@ -84,12 +84,6 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	1. GLOBAL ACROSS-LIBRARY TODO: 
-		Currently, all the `get` accessors are being denoted in .d.ts annotations 
-		via the `readonly propName: T`, which is WRONG, and causes overriding the 
-		definition of the accessor to be IMPOSSIBLE. 
-		FIX IT - let the `get propName(): T` be used WHERE IT'S SUPPOSED TO BE.
-
 	TODO: about `.bind()`ing of predicates on object instances: 
 		Add it ONLY when necessary. 
 		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 

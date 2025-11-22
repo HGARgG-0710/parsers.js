@@ -31,8 +31,8 @@ export declare abstract class ProxyStream<T = any, Args extends any[] = []>
 	get state(): IParseState
 	get curr(): T
 	get isEnd(): boolean
-	readonly owner?: IOwningStream<any, any[]> | undefined
-	readonly resource?: IOwnedStream | undefined;
+	get owner(): IOwningStream | undefined
+	get resource(): IOwnedStream | undefined
 	[Symbol.iterator]: () => Generator<T>
 	constructor(delegate: ILinkedStream<T>)
 }

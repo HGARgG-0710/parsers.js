@@ -22,5 +22,5 @@ export declare class PosStream<T = any>
 {
 	static readonly pool: ObjectPool<PosStream, [IOwnedStream]>
 	protected forward(n?: number): void
-	readonly pos: number
+	get pos(): number
 }

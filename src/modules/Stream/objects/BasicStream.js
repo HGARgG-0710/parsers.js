@@ -1,7 +1,7 @@
-import { Initializable } from "../../../objects/Initializer.js"
 import { mixin } from "../../../mixin.js"
-import { CommonStream } from "./CommonStream.js"
+import { Initializable } from "../../../objects/Initializer.js"
 import { DyssyncStream } from "./DyssyncStream.js"
+import { PreCommonStream } from "./PreCommonStream.js"
 
 export const BasicStream = new mixin(
 	{
@@ -13,14 +13,6 @@ export const BasicStream = new mixin(
 
 			postInit(...args) {
 				if (this.initGetter) this.curr = this.initGetter(...args)
-			},
-
-			endStream() {
-				this.isEnd = true
-			},
-
-			startStream() {
-				this.isEnd = false
 			},
 
 			next() {
@@ -42,5 +34,5 @@ export const BasicStream = new mixin(
 			this.super.Initializable.constructor.call(this, ...args)
 		}
 	},
-	[Initializable, DyssyncStream, CommonStream]
+	[Initializable, DyssyncStream, PreCommonStream]
 ).toClass()

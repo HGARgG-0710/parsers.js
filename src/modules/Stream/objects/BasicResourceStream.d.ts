@@ -23,8 +23,7 @@ export declare abstract class BasicResourceStream<
 		...args: Args | []
 	) => this
 
-	readonly resource?: IOwnedStream
-
+	get resource(): IOwnedStream | undefined
 	protected abstract baseNextIter(curr?: T): T
 	protected syncCurr(): void
 	setResource(resource: IOwnedStream): void

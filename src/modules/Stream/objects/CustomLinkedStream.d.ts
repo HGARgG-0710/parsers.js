@@ -10,7 +10,7 @@ export declare abstract class CustomLinkedStream<
 	implements ICommonStream<T>
 {
 	setOwner(newOwner: IOwningStream): void
-	readonly owner?: IOwningStream
+	get owner(): IOwningStream | undefined
 	abstract free(): void
 	[Symbol.iterator]: () => Generator<T>
 }

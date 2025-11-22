@@ -11,6 +11,6 @@ export declare abstract class PipeStream<T = any, Args extends any[] = []>
 	implements IOwnedStream<T>, Iterable<T>
 {
 	setOwner(newOwner: IOwningStream<any, any[]>): void
-	readonly owner?: IOwningStream;
+	get owner(): IOwningStream | undefined
 	[Symbol.iterator](): Generator<T>
 }

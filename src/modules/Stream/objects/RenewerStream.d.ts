@@ -16,7 +16,7 @@ export declare abstract class RenewerStream<T = any, Args extends any[] = []>
 	extends StatefulStream<T>
 	implements IOwningStream<T, Args>, IRenewerStream<T>
 {
-	readonly resource?: IOwnedStream
+	get resource(): IOwnedStream | undefined
 	setResource(resource: IOwnedStream): void
 	reviveChild(): boolean
 	abstract init(resource?: IOwnedStream, ...args: Partial<Args> | []): this

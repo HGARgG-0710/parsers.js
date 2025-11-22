@@ -47,16 +47,15 @@ export declare abstract class BasicStream<T = any, Args extends any[] = any[]>
 	protected abstract readonly initializer: IInitializer<Args>
 	protected abstract baseNextIter(curr?: T): T
 
-	readonly owner?: IOwningStream
+	get owner(): IOwningStream | undefined
 
 	protected postEnd?(): void
 	protected initGetter?(...args: Partial<Args>): T
-
 	protected update(newCurr: T): void
 	protected postInit(...args: Partial<Args>): void
 
 	next(): void
-	setOwner(newOwner?: unknown): void
+	setOwner(newOwner: IOwningStream): void
 	init(...args: Partial<Args>): this
 
 	[Symbol.iterator](): Generator<T>
