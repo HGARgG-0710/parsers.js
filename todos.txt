@@ -40,6 +40,11 @@ REMINDERs:
 	3. REMINDER [testing]: make sure that the XML-generation WORKS with "invalid" 
 		attribute values, etc. 
 
+	4. REMINDER [for the docs]: about the `NodeStream.prototype.free`: 
+		By default, it does NOTHING, however, ONCE `static readonly pool: ObjectPool` 
+		is DEFINED on the `this.constructor` (which is the child of the `NodeStream`), 
+		it WILL be used for `this.pool` on the `NodeStream` instances. 
+
 CURRENT: 
 	6. REFACTOR [from `RegexParser`]: 
 		1. SingletonStream((input: IStream<string>) => SomeCachedNode.make(input.curr)): 

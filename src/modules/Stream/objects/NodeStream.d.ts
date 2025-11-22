@@ -4,6 +4,7 @@ import type {
 	IOwnedStream,
 	IOwningStream
 } from "../../../interfaces.ts"
+import type { ObjectPool } from "../../../objects.ts"
 import type { RenewerStream } from "./RenewerStream.js"
 
 /**
@@ -28,6 +29,7 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	[Symbol.iterator](): Generator<T>
 
 	protected get initializer(): IInitializer<[IOwnedStream, ...([] | Args)]>
+	protected get pool(): ObjectPool<NodeStream, [IOwnedStream?]> | undefined
 
 	init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
 	copy(): this

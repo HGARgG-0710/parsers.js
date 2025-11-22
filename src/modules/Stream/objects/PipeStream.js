@@ -1,6 +1,6 @@
 import { mixin } from "../../../mixin.js"
-import { CommonStream } from "./CommonStream.js"
 import { DelegateStream } from "./DelegateStream.js"
+import { PreCommonStream } from "./PreCommonStream.js"
 
 export const PipeStream = new mixin(
 	{
@@ -10,5 +10,5 @@ export const PipeStream = new mixin(
 			this.super.DelegateStream.constructor.call(this, resource)
 		}
 	},
-	[DelegateStream, CommonStream]
+	[DelegateStream, PreCommonStream]
 ).toClass()

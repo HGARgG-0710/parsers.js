@@ -4,7 +4,7 @@ import {
 	ownerInitializer
 } from "../../../objects/Initializer.js"
 import { isStateful } from "../../../utils/Stream.js"
-import { CommonStream } from "./CommonStream.js"
+import { PreCommonStream } from "./PreCommonStream.js"
 
 export const ProxyStream = new mixin(
 	{
@@ -63,5 +63,5 @@ export const ProxyStream = new mixin(
 			this.delegate.setOnwer(this)
 		}
 	},
-	[Initializable, CommonStream]
+	[Initializable, PreCommonStream]
 ).toClass()
