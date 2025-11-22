@@ -47,43 +47,8 @@ CURRENT:
 				1. SingleChar
 		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
 
-
-XML FEATURE DESIGN:
-	10. TODO: about the `toXML`: 
-		ENABLE the ability for *good* formatting. 
-		Specifically, UNLIKE the JSON documents, this one's supposed to be 
-			HUMAN-READABLE!!! This means, in particular, that one, SOMEHOW, 
-				has got to deal with the complexity of dealing with `\t`-indentation 
-					on EACH level...
-
-		One COULD return an `string[]` from the `.toXML()` method [interface change]. 
-		THEN: 
-			2. About `XMLStream`: 
-				1. One will need a NEW `IStream` - `FlattenerStream`
-					It's an ILinkedStream<T>.
-					It will accept an `IStream<T[]>` and return `IStream<T>` based off the array elements. 
-					Specifically, when given ["a", "b", "c"] element, it will return "a", "b", "c" ONE-AFTER-ANOTHER.
-
-					THIS WILL utilize an underlying delegate `FiniteStream`...
-				2. The XMLStream would WRAP the current `HandlerStream` INTO a `FlattenerStream`. 
-
 IMMEDIATE: 
 	ORDER of tasks: 
-		1. Add built-in support for XML-serialization to `INode` (note: *NOT* the deserialization - it's rather more difficult...)
-			Reasons: 
-				1. XML is hyper-popular
-				2. It's very simple to do (since XML is so minimalistic)
-				3. It's very similar to the toJSON approach
-				4. Very odd to single out JSON, since XML is no less popular
-					(If anything, it's even MORE popular for certain things, like document formats)
-				5. You'll need this LATER in your other projects
-				6. Incredibly handy (one can model 2 types of parsing trees: 
-					one for syntax-level representation; 
-					and ANOTHER for XML-document-level presentation; 
-					Parse string into first, map to second, call the `.toXML()`, 
-					and VOILA - one has a valid XML representing the desired 
-					tree structure...)
-
 		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
 			2. to compiler (AND the `Regex.Raw`)
 				1. new `Regex.Raw` child for Negation(BoundaryClass(...)); 
@@ -151,6 +116,10 @@ IMMEDIATE:
 		Meaning, it DOESN'T use "attr-name='...'" (single quotes vs double quotes). 
 		MAKE THIS configurable inside the `GlobalConfig` singleton-object 
 		(exported from the `global` submodule). 
+
+	TODO: refactor the `DyssyncOwningStream + PoolableStream` into a `DyssyncOwningPoolableStream`. 
+		It's a mixin, UTILIZED by classes. 
+		This will ALLOW TO REDUCE THE NUMBER OF "dirty" .js files, and increase the number of .ts files...
 
 	TODO: add a NEW kind of `IStream` - `CountingStream`
 		This is an `IdentityStream`. 

@@ -1,7 +1,7 @@
-import { functional } from "@hgargg-0710/one"
+import { functional, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
-	ICommandStream,
+	ICommonStream,
 	IOwnedStream,
 	IValidNodeType,
 	IXMLAttributeGenerator,
@@ -17,11 +17,12 @@ import type {
 	IXMLVersion
 } from "../interfaces.js"
 import { XMLGenerationError } from "../objects/Error.js"
-import { HandlerStream } from "../objects/Stream.js"
+import { FlattenerStream, HandlerStream } from "../objects/Stream.js"
 import { curr } from "../utils/Stream.js"
 import { DelimitedStream } from "./Stream.js"
 import { regex } from "./regex.js"
 
+const { isString } = type
 const { trivialCompose } = functional
 
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
@@ -36,9 +37,12 @@ export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
 )
 
 export function XMLStream(table: IXMLGenerationTable) {
-	return HandlerStream<IXMLDebuggable, string>(
+	const lineProducerStream = HandlerStream<IXMLDebuggable, string[]>(
 		trivialCompose((source: IXMLDebuggable) => toXML(source, table), curr)
 	)
+
+	return (resource: IOwnedStream<IXMLDebuggable>): ICommonStream<string> =>
+		FlattenerStream.pool.create(lineProducerStream(resource))
 }
 
 export function toXML(source: IXMLDebuggable, table: IXMLGenerationTable) {
@@ -97,7 +101,8 @@ export function isProcessingInstructionTarget(id: string) {
 	return fullNonNamespaceId.test(id)
 }
 
-export function isIdentifier(id: string) {
+export function isIdentifier(id: IValidNodeType): id is string {
+	assert(isString(id))
 	return fullMaybeNamespaceId.test(id)
 }
 
@@ -241,7 +246,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 export class XMLGenerator {
 	private readonly XMLStream: (
 		resource: IOwnedStream<IXMLDebuggable>
-	) => ICommandStream<string>
+	) => ICommonStream<string>
 
 	private readonly toXML: (source: IXMLDebuggable) => string[]
 

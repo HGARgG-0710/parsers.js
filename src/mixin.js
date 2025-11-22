@@ -168,13 +168,6 @@ export class mixin {
 
 	/**
 	 * @private */
-	configureClass() {
-		this.defineInstanceClassref()
-		this.initSuper()
-	}
-
-	/**
-	 * @private */
 	setStaticMember(name, value) {
 		this.class[name] = value
 	}
@@ -205,13 +198,6 @@ export class mixin {
 		if (this.static)
 			for (const k of keys(this.static))
 				this.defineStaticMember(k, this.static[k])
-	}
-
-	/**
-	 * @private
-	 */
-	defineInstanceClassref() {
-		this.proto.class = this.class
 	}
 
 	/**
@@ -272,7 +258,7 @@ export class mixin {
 	constructor(mixinShape, classes = []) {
 		this.mixinShape = mixinShape
 		this.defineClass()
-		this.configureClass()
+		this.initSuper()
 		this.fromClasses(classes)
 		this.defineStaticMembers()
 		this.fromProperties()

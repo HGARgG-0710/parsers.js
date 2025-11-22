@@ -1,5 +1,11 @@
+import assert from "assert"
 import { mixin } from "../../mixin.js"
-import { printValidAttrs, toValidTagContent, toXML } from "../../samples/xml.js"
+import {
+	isIdentifier,
+	printValidAttrs,
+	toValidTagContent,
+	toXML
+} from "../../samples/xml.js"
 import { BaseNode } from "./BaseNode.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
@@ -45,13 +51,15 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 	}
 
 	toXMLWrapped(attrConverter, isTag) {
+		const { type } = this
+		assert(isIdentifier(type))
 		const openTag = attrConverter
-			? `<${this.type} ${printValidAttrs(attrConverter(this))}>`
-			: `<${this.type}>`
+			? `<${type} ${printValidAttrs(attrConverter(this))}>`
+			: `<${type}>`
 		const tagContentFormatted = isTag
 			? this.toXMLRaw().map((x) => `\t${x}`)
 			: []
-		const closeTag = `</${this.type}>`
+		const closeTag = `</${type}>`
 		return [openTag, ...tagContentFormatted, closeTag]
 	}
 
@@ -126,14 +134,15 @@ class PreSingleChildNode extends SingleItemNode {
 	}
 
 	toXML(table) {
-		const { child } = this
-		const attrConverter = table.toAttr(this.type, child.type)
-		const isTag = table.isTag(this.type, child.type)
+		const { child, type } = this
+		assert(isIdentifier(type))
+		const attrConverter = table.toAttr(type, child.type)
+		const isTag = table.isTag(type, child.type)
 		const openTag = attrConverter
-			? `<${this.type} ${printValidAttrs(attrConverter(child))}>`
-			: `<${this.type}>`
+			? `<${type} ${printValidAttrs(attrConverter(child))}>`
+			: `<${type}>`
 		const tagContent = isTag ? toXML(child, table) : []
-		const closeTag = `</${this.type}>`
+		const closeTag = `</${type}>`
 		return [openTag, ...tagContent.map((x) => `\t${x}`), closeTag]
 	}
 

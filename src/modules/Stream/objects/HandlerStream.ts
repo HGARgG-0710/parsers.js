@@ -71,7 +71,7 @@ function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
 			},
 			properties: {
 				get pool() {
-					return this.class.pool
+					return this.constructor.pool
 				}
 			},
 			constructor(...args: any[]) {

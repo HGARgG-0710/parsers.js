@@ -123,7 +123,7 @@ function BuildLimitStream<T = any>(
 				},
 
 				get pool() {
-					return this.class.pool
+					return this.constructor.pool
 				},
 
 				setResource(resource: ILimitableStream<T>) {

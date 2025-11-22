@@ -1,6 +1,6 @@
 import { mixin } from "../../../mixin.js"
-import { CommonStream } from "./CommonStream.js"
 import { OwningStream } from "./OwningStream.js"
+import { PreCommonStream } from "./PreCommonStream.js"
 
 export const CustomLinkedStream = new mixin(
 	{
@@ -10,5 +10,5 @@ export const CustomLinkedStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[OwningStream, CommonStream]
+	[OwningStream, PreCommonStream]
 ).toClass()

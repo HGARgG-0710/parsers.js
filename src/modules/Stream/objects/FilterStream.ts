@@ -68,7 +68,7 @@ function BuildFilterStream<T = any>(filter: IStreamStep<T>) {
 				},
 
 				get pool() {
-					return this.class.pool
+					return this.constructor.pool
 				}
 			},
 			constructor(resource?: IOwnedStream<T>) {

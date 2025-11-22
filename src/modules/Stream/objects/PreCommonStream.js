@@ -2,7 +2,7 @@ import { mixin } from "../../../mixin.js"
 import { IterableStream } from "./IterableStream.js"
 import { OwnableStream } from "./OwnableStream.js"
 
-export const CommonStream = new mixin(
+export const PreCommonStream = new mixin(
 	{
 		name: "CommonStream",
 		properties: {}

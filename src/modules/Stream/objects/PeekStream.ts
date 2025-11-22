@@ -180,7 +180,7 @@ const _PeekStream = new mixin(
 			},
 
 			get pool() {
-				return this.class.pool
+				return this.constructor.pool
 			},
 
 			get initializer() {

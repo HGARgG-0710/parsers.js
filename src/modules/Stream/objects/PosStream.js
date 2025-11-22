@@ -13,7 +13,7 @@ export const PosStream = new mixin(
 		},
 		properties: {
 			get pool() {
-				return this.class.pool
+				return this.constructor.pool
 			},
 
 			next() {

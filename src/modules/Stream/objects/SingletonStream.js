@@ -2,8 +2,8 @@ import { Pools } from "../../../../main.js"
 import { ObjectPool } from "../../../classes.js"
 import { mixin } from "../../../mixin.js"
 import { ownerInitializer } from "../../Initializer/objects/OwnerInitializer.js"
-import { CommonStream } from "./CommonStream.js"
 import { OwningStream } from "./OwningStream.js"
+import { PreCommonStream } from "./PreCommonStream.js"
 import { TrivialStream } from "./TrivialStream.js"
 
 const _SingletonStream = new mixin(
@@ -32,7 +32,7 @@ const _SingletonStream = new mixin(
 		}
 	},
 	[],
-	[CommonStream, OwningStream, TrivialStream]
+	[PreCommonStream, OwningStream, TrivialStream]
 ).toClass()
 
 export function SingletonStream(handler) {

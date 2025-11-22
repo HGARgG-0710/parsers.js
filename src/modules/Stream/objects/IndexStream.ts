@@ -26,10 +26,6 @@ function BuildIndexStream<T = any>(
 			else this.lineIndex.nextChar()
 		}
 
-		protected get pool() {
-			return IndexStream.pool
-		}
-
 		setResource(resource: IOwnedStream): void {
 			super.setResource(resource)
 			this.lineIndex.renew()

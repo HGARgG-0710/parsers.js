@@ -21,10 +21,6 @@ function BuildDepthMarkStream<T = any>(marks: readonly IDepthMark[]) {
 			new ObjectPool<IDepthMarkStreamForPool<T>>(DepthMarkStream)
 		)
 
-		protected get pool() {
-			return DepthMarkStream.pool
-		}
-
 		get depthMarks() {
 			return marks
 		}

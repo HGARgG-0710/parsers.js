@@ -1,4 +1,5 @@
 import type { IStream } from "../../../interfaces.js"
+import { CurrDyssyncStream } from "./CurrDyssyncStream.js"
 
 /**
  * This is an abstract class implementing `IStream<T>` and `IInitializable<Args>`.
@@ -8,8 +9,10 @@ import type { IStream } from "../../../interfaces.js"
  * `protected` methods `.endStream()` [sets `.isEnd = true`],
  * and `.startStream` [sets `.isEnd = false`]
  */
-export abstract class DyssyncStream<T = any> implements IStream<T> {
-	private _curr: T
+export abstract class DyssyncStream<T = any>
+	extends CurrDyssyncStream<T>
+	implements IStream<T>
+{
 	private _isEnd: boolean = false
 
 	protected endStream() {
@@ -20,23 +23,11 @@ export abstract class DyssyncStream<T = any> implements IStream<T> {
 		this.isEnd = false
 	}
 
-	protected set curr(newCurr) {
-		this._curr = newCurr
-	}
-
 	protected set isEnd(newIsEnd: boolean) {
 		this._isEnd = newIsEnd
-	}
-
-	get curr() {
-		return this._curr
 	}
 
 	get isEnd() {
 		return this._isEnd
 	}
-
-	abstract isCurrEnd(): boolean
-
-	abstract next(): void
 }

@@ -1,10 +1,10 @@
 import { Pools } from "../../../../main.js"
-import { ObjectPool } from "../../../objects.js"
 import type {
 	IAccumulatorStream,
 	IOwnedStream,
 	IStorage
 } from "../../../interfaces.js"
+import { ObjectPool } from "../../../objects.js"
 import { IdentityStream } from "./IdentityStream.js"
 
 class _AccumulatorStream<T = any> extends IdentityStream<T> {
@@ -16,8 +16,8 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 		this._storage.push(this.curr)
 	}
 
-	protected get pool(): ObjectPool<_AccumulatorStream, [IOwnedStream]> {
-		return _AccumulatorStream.pool
+	protected get pool() {
+		return super.pool as ObjectPool<_AccumulatorStream, [IOwnedStream]>
 	}
 
 	get storage() {
