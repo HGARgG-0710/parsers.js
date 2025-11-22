@@ -3,7 +3,7 @@ import type { IEncoder } from "../interfaces/Encoder.js"
 
 const { max } = number
 
-abstract class PreEncoder implements IEncoder {
+export abstract class BaseEncoder implements IEncoder {
 	["constructor"]: new (charCount: number) => this
 
 	private _buffer: Uint8Array
@@ -89,7 +89,7 @@ abstract class PreEncoder implements IEncoder {
  * A class implementing the `IEncoder` interface, working
  * with the Latin1 encoding
  */
-export class Encoder8 extends PreEncoder {
+export class Encoder8 extends BaseEncoder {
 	protected get maxCharBytes() {
 		return 1
 	}
@@ -108,7 +108,7 @@ export class Encoder8 extends PreEncoder {
  * A class implementing the `IEncoder` interface, working
  * with the UTF-8 encoding
  */
-export class EncoderU8 extends PreEncoder {
+export class EncoderU8 extends BaseEncoder {
 	private readonly encoder = new TextEncoder()
 
 	protected get maxCharBytes() {

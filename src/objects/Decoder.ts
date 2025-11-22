@@ -1,6 +1,6 @@
 import type { IByteSource, IDecoder } from "../interfaces.js"
 
-abstract class PreDecoder implements IDecoder {
+export abstract class BaseDecoder implements IDecoder {
 	protected abstract getEncoding(): string
 	protected abstract encodingSize(): number
 	protected abstract shouldStop(i: number): boolean
@@ -66,7 +66,7 @@ abstract class PreDecoder implements IDecoder {
  * A class implementing the `IDecoder` interface that works with
  * the Latin-1 encoding.
  */
-export class Decoder8 extends PreDecoder {
+export class Decoder8 extends BaseDecoder {
 	protected getEncoding(): string {
 		return "latin1"
 	}
@@ -84,7 +84,7 @@ export class Decoder8 extends PreDecoder {
  * A class implementing the `IDecoder` interface that works with
  * the UTF-8 encoding.
  */
-export class DecoderU8 extends PreDecoder {
+export class DecoderU8 extends BaseDecoder {
 	protected getEncoding(): string {
 		return "utf8"
 	}

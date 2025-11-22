@@ -1,7 +1,7 @@
 import { readFileSync } from "fs"
 import type { IParseable } from "../interfaces.js"
 
-function DecodedLoaded(
+export function DecodedLoaded(
 	encoding: BufferEncoding
 ): new (filename: string) => IParseable<string> {
 	return class implements IParseable<string> {

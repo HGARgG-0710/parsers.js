@@ -52,6 +52,48 @@ CURRENT:
 				1. SingleChar
 		2. PUT into `samples/Stream.ts` [same place as SingletonWrapperStream]
 
+	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
+		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
+		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
+
+	TODO: ADD the `AppCleanup` class into the `global` submodule
+
+	TODO: ADD the `GlobalConfig` class into the `global` submodule [see related todos...]
+	
+	3. PROBLEM: XML-generation ONLY produces LF files. 
+		Meaning to say, one has NO IDEA about *which* OS the files are intended for, 
+		and *therefore*, one *cannot* decide for certain. 
+		To solve this, ADD the `GlobalConfig` singleton-class, LET it configure 
+		whether one is to use '\r' vs '\r\n' for the output files...
+		
+	1. PROBLEM: XML-generation ONLY uses 'attr-name="..."'-kinds of attributes
+		Meaning, it DOESN'T use "attr-name='...'" (single quotes vs double quotes). 
+		MAKE THIS configurable inside the `GlobalConfig` singleton-object 
+		(exported from the `global` submodule). 
+		
+	TODO: refactor the `DyssyncOwningStream + PoolableStream` into a `DyssyncOwningPoolableStream`. 
+		It's a mixin, UTILIZED by classes. 
+		This will ALLOW TO REDUCE THE NUMBER OF "dirty" .js files, and increase the number of .ts files...
+		
+	TODO: add a NEW kind of `IStream` - `CountingStream`
+		This is an `IdentityStream`. 
+		It would have a bound `type ICountingPredicate = (stream: IPeekableStream<T>) => [boolean, number]`, 
+		which would be applied on the `this.resource`, and the result would indicate: 
+
+			1. whether to increase the current count or not (`boolean`)
+			2. how many elements to skip
+		
+		The `2.`-number returned is then used to call `.next()`-iterations, that would just 
+		delegate to `this.resource`. The counting-predicate is SUPPOSED to use the `.peek(n)`
+		on the `this.resource`, since that doesn't actually advance it. 
+		This class is very good for, for instance, counting SLOC *without comments* in code. 
+		
+	TODO: about `.bind()`ing of predicates on object instances: 
+		Add it ONLY when necessary. 
+		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
+		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
+		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
+
 IMMEDIATE: 
 	ORDER of tasks: 
 		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
@@ -89,49 +131,11 @@ IMMEDIATE:
 						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
 						INSTEAD!
 
-	TODO: about `.bind()`ing of predicates on object instances: 
-		Add it ONLY when necessary. 
-		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
-		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
-		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
-
 	TODO [reminder]: ADD the `DFARegexFinalizer` 
 		This one (might) be based off the respective `NFARegexVisitor`
 		algorithm for building the actual NFA, then, it would CONVERT the 
 		NFA to a DFA (as per the Russ Cox article, again...), and THEN, 
 		one might doing something...
-
-	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
-		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
-		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
-
-	3. PROBLEM: XML-generation ONLY produces LF files. 
-		Meaning to say, one has NO IDEA about *which* OS the files are intended for, 
-		and *therefore*, one *cannot* decide for certain. 
-		To solve this, ADD the `GlobalConfig` singleton-class, LET it configure 
-		whether one is to use '\r' vs '\r\n' for the output files...
-
-	1. PROBLEM: XML-generation ONLY uses 'attr-name="..."'-kinds of attributes
-		Meaning, it DOESN'T use "attr-name='...'" (single quotes vs double quotes). 
-		MAKE THIS configurable inside the `GlobalConfig` singleton-object 
-		(exported from the `global` submodule). 
-
-	TODO: refactor the `DyssyncOwningStream + PoolableStream` into a `DyssyncOwningPoolableStream`. 
-		It's a mixin, UTILIZED by classes. 
-		This will ALLOW TO REDUCE THE NUMBER OF "dirty" .js files, and increase the number of .ts files...
-
-	TODO: add a NEW kind of `IStream` - `CountingStream`
-		This is an `IdentityStream`. 
-		It would have a bound `type ICountingPredicate = (stream: IPeekableStream<T>) => [boolean, number]`, 
-		which would be applied on the `this.resource`, and the result would indicate: 
-
-			1. whether to increase the current count or not (`boolean`)
-			2. how many elements to skip
-		
-		The `2.`-number returned is then used to call `.next()`-iterations, that would just 
-		delegate to `this.resource`. The counting-predicate is SUPPOSED to use the `.peek(n)`
-		on the `this.resource`, since that doesn't actually advance it. 
-		This class is very good for, for instance, counting SLOC *without comments* in code. 
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...
@@ -194,10 +198,12 @@ IDEA [later]:
 		4. public classes 
 		5. abstract classes
 
-		Current total: 252
+		Current total [approx]: 256
 
 		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 212 (at the time of writing...)
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 216 (at the time of writing...)
+				NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
+					(since they're also exported in .d.ts files...)
 			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
 
 6. Commit L: 
