@@ -49,6 +49,11 @@ export function getNewline() {
 	return toNewline(Config.xml.lf)
 }
 
+export function closingTag(type: IValidNodeType) {
+	assert(isIdentifier(type))
+	return `</${type}>`
+}
+
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
 	() => `${getTab()}${getNewline()}`,
 	(xmlNode) => {

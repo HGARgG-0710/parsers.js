@@ -10,6 +10,7 @@ import type {
 	IXMLGenerationTable
 } from "../../interfaces.js"
 import {
+	closingTag,
 	isIdentifier,
 	printValidAttrs,
 	tabbed,
@@ -123,7 +124,7 @@ abstract class PreRecursiveNode
 		const childTags = this.children
 			.map((c) => (table.isTag(type, c.type, c) ? toXML(c, table) : []))
 			.flat()
-		const closeTag = `</${type}>`
+		const closeTag = closingTag(type)
 		return [openTag, ...tabbed(childTags), closeTag]
 	}
 

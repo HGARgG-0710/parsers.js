@@ -2,6 +2,7 @@ import assert from "assert"
 import { mixin } from "../../mixin.js"
 import { splitNewlines } from "../../samples/space.js"
 import {
+	closingTag,
 	isIdentifier,
 	printValidAttrs,
 	tabbed,
@@ -59,7 +60,7 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 			? `<${type} ${printValidAttrs(attrConverter(this))}>`
 			: `<${type}>`
 		const tagContentFormatted = isTag ? tabbed(this.toXMLRaw()) : []
-		const closeTag = `</${type}>`
+		const closeTag = closingTag(type)
 		return [openTag, ...tagContentFormatted, closeTag]
 	}
 
@@ -147,7 +148,7 @@ class PreSingleChildNode extends SingleItemNode {
 			? `<${type} ${printValidAttrs(attrConverter(child))}>`
 			: `<${type}>`
 		const tagContent = isTag ? toXML(child, table) : []
-		const closeTag = `</${type}>`
+		const closeTag = closingTag(type)
 		return [openTag, ...tabbed(tagContent), closeTag]
 	}
 
