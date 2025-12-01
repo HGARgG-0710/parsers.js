@@ -1,5 +1,6 @@
 class XMLConfig {
 	lf = true
+	attrQuoteDouble = true
 }
 
 class LibConfig {

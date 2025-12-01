@@ -32,6 +32,10 @@ const { isString } = type
 const { trivialCompose } = functional
 const { F } = boolean
 
+export function getAttrQuote() {
+	return Config.xml.attrQuoteDouble ? '"' : "'"
+}
+
 export function getNewline() {
 	return toNewline(Config.xml.lf)
 }
@@ -71,7 +75,10 @@ export function toValidAttributes(
 }
 
 export function printAttrs(attrs: [string, string][]) {
-	return attrs.map(([key, value]) => `${key}="${value}"`).join(" ")
+	const quote = getAttrQuote()
+	return attrs
+		.map(([key, value]) => `${key}=${quote}${value}${quote}`)
+		.join(" ")
 }
 
 export function printValidAttrs(attrs: [string, string][]) {
@@ -81,6 +88,7 @@ export function printValidAttrs(attrs: [string, string][]) {
 export function toValidAttributeValue(value: string) {
 	return value
 		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&apos;")
 		.replaceAll("\n", "&#xA")
 		.replaceAll("\t", "&#x9")
 		.replaceAll("\r", "&#xD")
@@ -224,10 +232,11 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	private readonly postTags: IXMLSimple[]
 
 	pre() {
+		const newline = getNewline()
 		return this.preTags
 			.map((tag) => tag.toXML())
 			.flat()
-			.map((x) => `${x}${getNewline()}`)
+			.map((x) => `${x}${newline}`)
 	}
 
 	tag(): [string, string] {
@@ -238,10 +247,11 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	}
 
 	post() {
+		const newline = getNewline()
 		return this.postTags
 			.map((x) => x.toXML())
 			.flat()
-			.map((x) => `${getNewline()}${x}`)
+			.map((x) => `${newline}${x}`)
 	}
 
 	constructor(args: XMLOpenableNodeArgs) {
