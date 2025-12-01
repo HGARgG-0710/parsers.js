@@ -1,6 +1,7 @@
 class XMLConfig {
 	lf = true
 	attrQuoteDouble = true
+	tab = "\t"
 }
 
 class LibConfig {

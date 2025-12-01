@@ -9,7 +9,12 @@ import type {
 	IValidationTable,
 	IXMLGenerationTable
 } from "../../interfaces.js"
-import { isIdentifier, printValidAttrs, toXML } from "../../samples/xml.js"
+import {
+	isIdentifier,
+	printValidAttrs,
+	tabbed,
+	toXML
+} from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
 import { isRecursiveNodeSerializable } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
@@ -119,7 +124,7 @@ abstract class PreRecursiveNode
 			.map((c) => (table.isTag(type, c.type, c) ? toXML(c, table) : []))
 			.flat()
 		const closeTag = `</${type}>`
-		return [openTag, ...childTags.map((x) => `\t${x}`), closeTag]
+		return [openTag, ...tabbed(childTags), closeTag]
 	}
 
 	validate(table: IValidationTable<INode>): boolean {

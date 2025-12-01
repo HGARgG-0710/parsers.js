@@ -4,6 +4,7 @@ import { splitNewlines } from "../../samples/space.js"
 import {
 	isIdentifier,
 	printValidAttrs,
+	tabbed,
 	toValidTagContent,
 	toXML
 } from "../../samples/xml.js"
@@ -57,9 +58,7 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 		const openTag = attrConverter
 			? `<${type} ${printValidAttrs(attrConverter(this))}>`
 			: `<${type}>`
-		const tagContentFormatted = isTag
-			? this.toXMLRaw().map((x) => `\t${x}`)
-			: []
+		const tagContentFormatted = isTag ? tabbed(this.toXMLRaw()) : []
 		const closeTag = `</${type}>`
 		return [openTag, ...tagContentFormatted, closeTag]
 	}
@@ -149,7 +148,7 @@ class PreSingleChildNode extends SingleItemNode {
 			: `<${type}>`
 		const tagContent = isTag ? toXML(child, table) : []
 		const closeTag = `</${type}>`
-		return [openTag, ...tagContent.map((x) => `\t${x}`), closeTag]
+		return [openTag, ...tabbed(tagContent), closeTag]
 	}
 
 	toJSON() {

@@ -32,6 +32,15 @@ const { isString } = type
 const { trivialCompose } = functional
 const { F } = boolean
 
+export function getTab() {
+	return Config.xml.tab
+}
+
+export function tabbed(lines: string[]) {
+	const tab = getTab()
+	return lines.map((x) => `${tab}${x}`)
+}
+
 export function getAttrQuote() {
 	return Config.xml.attrQuoteDouble ? '"' : "'"
 }
@@ -41,7 +50,7 @@ export function getNewline() {
 }
 
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
-	() => `\t${getNewline()}`,
+	() => `${getTab()}${getNewline()}`,
 	(xmlNode) => {
 		const [preLast, postFirst] = xmlNode.tag()
 		return [
