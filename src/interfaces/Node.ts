@@ -62,10 +62,14 @@ export interface IWalkable<T extends IWalkable<T> = any> {
 	findUnwalkedChildren(startIndex: readonly number[]): number
 }
 
-export type IValidityMap<T = any> = Map<
+export type ITreeMap<T = any, R = boolean> = Map<
 	IValidNodeType,
-	Map<IValidNodeType, (x: T) => boolean>
+	Map<IValidNodeType, (x: T) => R>
 >
+
+export type IValidityMap<T = any> = ITreeMap<T, boolean>
+
+export type IStringPairs = [string, string][]
 
 export interface IValidationTable<T = any> {
 	validate(

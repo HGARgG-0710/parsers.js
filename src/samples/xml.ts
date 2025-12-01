@@ -7,8 +7,6 @@ import type {
 	IValidationTable,
 	IValidNodeType,
 	IXMLAttributeGenerator,
-	IXMLAttrMap,
-	IXMLAttrMapValue,
 	IXMLAttrTable,
 	IXMLDebuggable,
 	IXMLGenerationTable,
@@ -18,7 +16,11 @@ import type {
 	IXMLVersion
 } from "../interfaces.js"
 import { XMLGenerationError } from "../objects/Error.js"
-import { TreeValidationTable } from "../objects/Node.js"
+import {
+	TreePairGenerationTable,
+	TreeTable,
+	TreeValidationTable
+} from "../objects/Node.js"
 import { FlattenerStream, HandlerStream } from "../objects/Stream.js"
 import { curr } from "../utils/Stream.js"
 import { DelimitedStream } from "./Stream.js"
@@ -270,94 +272,32 @@ export class XMLGenerator {
 	}
 }
 
-class XMLAttrTableChildBuilder {
-	setAll(value: IXMLAttrMapValue) {
-		this.owner.forAllParents(this.type, value)
-		return this
-	}
+export abstract class XMLAttrTable implements IXMLAttrTable {
+	abstract builderProcess(
+		builder: TreePairGenerationTable.Builder<INode>
+	): TreePairGenerationTable.Builder<INode>
 
-	setOne(parent: IValidNodeType, value: IXMLAttrMapValue) {
-		this.owner.forOneParent(this.type, parent, value)
-		return this
-	}
-
-	removeFrom(parent: IValidNodeType) {
-		this.owner.remove(this.type, parent)
-	}
-
-	finish() {
-		return this.owner
-	}
-
-	constructor(
-		private readonly type: IValidNodeType,
-		private readonly owner: XMLAttrTableBuilder
-	) {}
-}
-
-class XMLAttrTableBuilder {
-	private readonly attrs: IXMLAttrMap = new Map()
-
-	private getParentMap(byType: IValidNodeType) {
-		const parentMap = this.attrs.get(byType)
-		if (parentMap) return parentMap
-		const newMap = new Map()
-		this.attrs.set(byType, newMap)
-		return newMap
-	}
-
-	forChild(type: IValidNodeType) {
-		return new XMLAttrTableChildBuilder(type, this)
-	}
-
-	remove(childType: IValidNodeType, parentType: IValidNodeType) {
-		this.getParentMap(parentType).delete(childType)
-	}
-
-	forOneParent(
-		childType: IValidNodeType,
-		parentType: IValidNodeType,
-		value: IXMLAttrMapValue
-	) {
-		this.getParentMap(parentType).set(childType, value)
-	}
-
-	forAllParents(childType: IValidNodeType, value: IXMLAttrMapValue) {
-		for (const [, parentMap] of this.attrs) parentMap.set(childType, value)
-		return this
-	}
-
-	build() {
-		return new XMLAttrTable(this.attrs)
-	}
-
-	constructor(types: readonly IValidNodeType[]) {
-		for (const type of types) this.attrs.set(type, new Map())
-	}
-}
-
-export class XMLAttrTable implements IXMLAttrTable {
-	static builder(types: readonly IValidNodeType[]) {
-		return new XMLAttrTableBuilder(types)
-	}
+	private readonly delegate: TreePairGenerationTable<INode>
 
 	get(
 		parentType: IValidNodeType,
 		childType: IValidNodeType
 	): false | IXMLAttributeGenerator {
-		const byParent = this.attrs.get(parentType)
-		if (!byParent) return false
-		return byParent.get(childType) || false
+		return this.delegate.generate(parentType, childType)
 	}
 
-	constructor(private readonly attrs: IXMLAttrMap) {}
+	constructor(types: readonly IValidNodeType[]) {
+		this.delegate = this.builderProcess(
+			new TreePairGenerationTable.Builder<INode>(types)
+		).build()
+	}
 }
 
 export abstract class XMLTagTable implements IXMLTagTable {
 	private readonly delegate: IValidationTable<INode>
 
 	abstract builderProcess(
-		builder: TreeValidationTable.Builder<INode>
+		builder: TreeTable.BaseBuilder<INode, boolean>
 	): TreeValidationTable.Builder<INode>
 
 	get(
@@ -370,7 +310,7 @@ export abstract class XMLTagTable implements IXMLTagTable {
 
 	constructor(types: readonly IValidNodeType[]) {
 		this.delegate = this.builderProcess(
-			new TreeValidationTable.Builder(types).withDefault(F)
+			new TreeValidationTable.Builder<INode>(types).withDefault(F)
 		).build()
 	}
 }

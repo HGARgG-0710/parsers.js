@@ -1,40 +1,44 @@
 import { boolean } from "@hgargg-0710/one"
 import type {
+	IStringPairs,
+	ITreeMap,
 	ITyped,
+	IValidNodeType,
 	IValidationTable,
-	IValidityMap,
-	IValidNodeType
+	IValidityMap
 } from "../../interfaces.js"
 
 const { T } = boolean
 
-export class TreeValidationTable<T = any> implements IValidationTable<T> {
-	validate(
-		parentType: IValidNodeType,
-		childType: IValidNodeType,
-		x: T
-	): boolean {
-		const byParent = this.isValidMap.get(parentType)
-		if (!byParent) return this.defaultValid(x)
-		const byChild = byParent.get(childType)
-		if (!byChild) return this.defaultValid(x)
-		return byChild(x)
+export abstract class TreeTable<T = any, R = any> {
+	has(parentType: IValidNodeType, childType: IValidNodeType) {
+		const parentMap = this.items.get(parentType)
+		if (!parentMap) return false
+		const childMap = parentMap.get(childType)
+		if (!childMap) return false
+		return true
+	}
+
+	get(parentType: IValidNodeType, childType: IValidNodeType) {
+		return this.has(parentType, childType)
+			? this.items.get(parentType)!.get(childType)!
+			: this.defaultItem
 	}
 
 	constructor(
-		private readonly isValidMap: IValidityMap<T>,
-		private readonly defaultValid: (x: T) => boolean = T
+		protected readonly items: ITreeMap<T, R>,
+		private readonly defaultItem: (x: T) => R
 	) {}
 }
 
-export namespace TreeValidationTable {
-	class ChildBuilder<T = any> {
-		forAll(pred: (x: T) => boolean) {
+export namespace TreeTable {
+	class ChildBuilder<T = any, R = any> {
+		forAll(pred: (x: T) => R) {
 			this.owner.forAllParents(this.type, pred)
 			return this
 		}
 
-		for(parent: ITyped, pred: (x: T) => boolean) {
+		for(parent: ITyped, pred: (x: T) => R) {
 			this.owner.forOneParent(parent.type, this.type, pred)
 			return this
 		}
@@ -55,17 +59,17 @@ export namespace TreeValidationTable {
 
 		constructor(
 			private readonly type: IValidNodeType,
-			private readonly owner: Builder<T>
+			private readonly owner: BaseBuilder<T, R>
 		) {}
 	}
 
-	class ParentBuilder<T = any> {
-		forAll(pred: (x: T) => boolean) {
+	class ParentBuilder<T = any, R = any> {
+		forAll(pred: (x: T) => R) {
 			this.owner.forAllChildren(this.type, pred)
 			return this
 		}
 
-		for(child: ITyped, pred: (x: T) => boolean) {
+		for(child: ITyped, pred: (x: T) => R) {
 			this.owner.forOneParent(this.type, child.type, pred)
 		}
 
@@ -83,27 +87,23 @@ export namespace TreeValidationTable {
 
 		constructor(
 			private readonly type: IValidNodeType,
-			private readonly owner: Builder<T>
+			private readonly owner: BaseBuilder<T>
 		) {}
 	}
 
-	export class Builder<T = any> {
+	export abstract class BaseBuilder<T = any, R = any> {
 		private getParentMap(parentType: IValidNodeType) {
-			let parentMap = this.isValidMap.get(parentType)
+			let parentMap = this.items.get(parentType)
 			if (!parentMap) {
 				parentMap = new Map()
-				this.isValidMap.set(parentType, parentMap)
+				this.items.set(parentType, parentMap)
 			}
 			return parentMap
 		}
 
-		private readonly isValidMap: IValidityMap<T> = new Map()
-		private defaultValid?: (x: T) => boolean
+		protected readonly items: ITreeMap<T, R> = new Map()
 
-		withDefault(defaultPred: (x: T) => boolean) {
-			this.defaultValid = defaultPred
-			return this
-		}
+		abstract build(): TreeTable<T, R>
 
 		forChild(child: ITyped) {
 			return new ChildBuilder(child.type, this)
@@ -116,19 +116,19 @@ export namespace TreeValidationTable {
 		forOneParent(
 			parentType: IValidNodeType,
 			childType: IValidNodeType,
-			pred: (x: T) => boolean
+			item: (x: T) => R
 		) {
-			this.getParentMap(parentType).set(childType, pred)
+			this.getParentMap(parentType).set(childType, item)
 		}
 
-		forAllChildren(parentType: IValidNodeType, pred: (x: T) => boolean) {
+		forAllChildren(parentType: IValidNodeType, item: (x: T) => R) {
 			const parentMap = this.getParentMap(parentType)
-			for (const [childType] of parentMap) parentMap.set(childType, pred)
+			for (const [childType] of parentMap) parentMap.set(childType, item)
 		}
 
-		forAllParents(childType: IValidNodeType, pred: (x: T) => boolean) {
-			for (const [, parentMap] of this.isValidMap)
-				parentMap.set(childType, pred)
+		forAllParents(childType: IValidNodeType, item: (x: T) => R) {
+			for (const [, parentMap] of this.items)
+				parentMap.set(childType, item)
 		}
 
 		removeChildFor(parentType: IValidNodeType, childType: IValidNodeType) {
@@ -136,19 +136,76 @@ export namespace TreeValidationTable {
 		}
 
 		removeChild(type: IValidNodeType) {
-			for (const [, parentMap] of this.isValidMap) parentMap.delete(type)
+			for (const [, parentMap] of this.items) parentMap.delete(type)
 		}
 
 		removeParent(type: IValidNodeType) {
-			this.isValidMap.delete(type)
-		}
-
-		build() {
-			return new TreeValidationTable(this.isValidMap, this.defaultValid)
+			this.items.delete(type)
 		}
 
 		constructor(types: readonly IValidNodeType[]) {
-			for (const type of types) this.isValidMap.set(type, new Map())
+			for (const type of types) this.items.set(type, new Map())
+		}
+	}
+}
+
+export class TreeValidationTable<T = any>
+	extends TreeTable<T, boolean>
+	implements IValidationTable<T>
+{
+	validate(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		x: T
+	): boolean {
+		const isValid = this.get(parentType, childType)
+		return isValid(x)
+	}
+
+	constructor(
+		isValidMap: IValidityMap<T>,
+		defaultValid: (x: T) => boolean = T
+	) {
+		super(isValidMap, defaultValid)
+	}
+}
+
+export namespace TreeValidationTable {
+	export class Builder<T = any> extends TreeTable.BaseBuilder<T, boolean> {
+		private defaultValid?: (x: T) => boolean
+
+		withDefault(defaultValid: (x: T) => boolean) {
+			this.defaultValid = defaultValid
+			return this
+		}
+
+		build() {
+			return new TreeValidationTable(this.items, this.defaultValid)
+		}
+	}
+}
+
+export class TreePairGenerationTable<T = any> extends TreeTable<
+	T,
+	IStringPairs
+> {
+	generate(parentType: IValidNodeType, childType: IValidNodeType) {
+		if (!this.has(parentType, childType)) return false
+		return this.get(parentType, childType)
+	}
+
+	constructor(items: ITreeMap<T, IStringPairs>) {
+		super(items, (): IStringPairs => [["", ""]])
+	}
+}
+
+export namespace TreePairGenerationTable {
+	export class Builder<T = any> extends TreeTable.BaseBuilder<
+		T,
+		IStringPairs
+	> {
+		build() {
+			return new TreePairGenerationTable(this.items)
 		}
 	}
 }
