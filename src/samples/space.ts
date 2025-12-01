@@ -113,3 +113,11 @@ export function getNewline() {
  * `LineIndex`-couting operation.
  * */
 export const NewlineStream = IndexStream(isCurr("\n"))
+
+export function toNewline(isLF: boolean) {
+	return isLF ? "\n" : "\r\n"
+}
+
+export function splitNewlines(s: string) {
+	return s.split("\r\n").join("\n").split("\n")
+}

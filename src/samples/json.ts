@@ -29,7 +29,7 @@ export const JSONStream = HandlerStream<any, string>(
  * a file via an owning `WriterStream`.
  */
 export const JSONWrapper = DelimitedStream<string, IRecursiveNode>(
-	",",
+	() => ",",
 	(node) => node.jsonInsertableEmpty().map((x) => [x]) as [string[], string[]]
 )
 

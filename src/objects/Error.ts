@@ -10,6 +10,7 @@ import type {
 	ITypeCheckable
 } from "../interfaces.js"
 import { isDecimal } from "../samples/alphabet.js"
+import { getNewline } from "../samples/space.js"
 import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
@@ -225,7 +226,7 @@ export namespace ParseError {
 		private _errData: IErrorData
 
 		protected get separator() {
-			return ",\n"
+			return `,${getNewline()}`
 		}
 
 		protected get errData() {

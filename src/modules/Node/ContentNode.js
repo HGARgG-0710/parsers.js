@@ -1,5 +1,6 @@
 import assert from "assert"
 import { mixin } from "../../mixin.js"
+import { splitNewlines } from "../../samples/space.js"
 import {
 	isIdentifier,
 	printValidAttrs,
@@ -47,7 +48,7 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 	}
 
 	toXMLRaw() {
-		return String(this.value).split("\n").map(toValidTagContent)
+		return splitNewlines(String(this.value)).map(toValidTagContent)
 	}
 
 	toXMLWrapped(attrConverter, isTag) {

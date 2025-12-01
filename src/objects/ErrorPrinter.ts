@@ -1,5 +1,6 @@
 import { createWriteStream, WriteStream } from "fs"
 import type { IErrorLogger } from "../interfaces.js"
+import { getNewline } from "../samples/space.js"
 
 export class ErrorPrinter {
 	execute<T = any>(f: () => T) {
@@ -36,7 +37,7 @@ export namespace ErrorPrinter {
 
 	export class FileErrorPrinter extends ErrorPrinter {
 		static readonly formatter = (error: Error) =>
-			`${error.name}: ${error.message}\n`
+			`${error.name}: ${error.message}${getNewline()}`
 
 		constructor(
 			private readonly logger: IErrorLogger,

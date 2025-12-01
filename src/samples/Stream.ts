@@ -158,14 +158,14 @@ export const EscapedStream = HandlerStream((stream: IOwnedStream<string>) => {
 })
 
 export function DelimitedStream<T = any, E = any>(
-	delimiter: T,
+	getDelimiter: () => T,
 	endProvider: (ends: E) => [T[], T[]]
 ) {
 	return function (ends: E, stream: IStream<T>) {
 		const [pre, post] = endProvider(ends)
 		return new ConcatStream(
 			new FiniteStream(...pre),
-			new InterleaveStream(stream, new LoopStream(delimiter)),
+			new InterleaveStream(stream, new LoopStream(getDelimiter)),
 			new FiniteStream(...post)
 		)
 	}

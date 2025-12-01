@@ -1,5 +1,6 @@
 import { boolean, functional, type } from "@hgargg-0710/one"
 import assert from "assert"
+import { Config } from "../global.js"
 import type {
 	ICommonStream,
 	INode,
@@ -25,13 +26,18 @@ import { FlattenerStream, HandlerStream } from "../objects/Stream.js"
 import { curr } from "../utils/Stream.js"
 import { DelimitedStream } from "./Stream.js"
 import { regex } from "./regex.js"
+import { toNewline } from "./space.js"
 
 const { isString } = type
 const { trivialCompose } = functional
 const { F } = boolean
 
+export function getNewline() {
+	return toNewline(Config.xml.lf)
+}
+
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
-	"\t\n",
+	() => `\t${getNewline()}`,
 	(xmlNode) => {
 		const [preLast, postFirst] = xmlNode.tag()
 		return [
@@ -221,7 +227,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 		return this.preTags
 			.map((tag) => tag.toXML())
 			.flat()
-			.map((x) => `${x}\n`)
+			.map((x) => `${x}${getNewline()}`)
 	}
 
 	tag(): [string, string] {
@@ -235,7 +241,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 		return this.postTags
 			.map((x) => x.toXML())
 			.flat()
-			.map((x) => `\n${x}`)
+			.map((x) => `${getNewline()}${x}`)
 	}
 
 	constructor(args: XMLOpenableNodeArgs) {
@@ -260,7 +266,7 @@ export class XMLGenerator {
 	}
 
 	fromNode(node: IXMLDebuggable) {
-		return this.toXML(node).join("\n")
+		return this.toXML(node).join(getNewline())
 	}
 
 	constructor(

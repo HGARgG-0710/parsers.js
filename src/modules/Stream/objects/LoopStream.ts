@@ -7,7 +7,7 @@ import { ArrayStream } from "./ArrayStream.js"
  * know in advance when an associated `IStream` is going
  * to finish.
  */
-export class LoopStream<T = any> extends ArrayStream<T, T> {
+export class LoopStream<T = any> extends ArrayStream<T, () => T> {
 	private streamIndex: number = 0
 
 	private get itemCount() {
@@ -19,7 +19,7 @@ export class LoopStream<T = any> extends ArrayStream<T, T> {
 	}
 
 	protected baseNextIter(): T {
-		return this.items[this.wrapped(this.streamIndex + 1)]
+		return this.items[this.wrapped(this.streamIndex + 1)]()
 	}
 
 	isCurrEnd(): boolean {
