@@ -1,5 +1,4 @@
 import { functional } from "@hgargg-0710/one"
-import assert from "assert"
 import type {
 	ICollectionNode,
 	ICollectionNodeType,
@@ -9,13 +8,7 @@ import type {
 	IValidationTable,
 	IXMLGenerationTable
 } from "../../interfaces.js"
-import {
-	closingTag,
-	isIdentifier,
-	printValidAttrs,
-	tabbed,
-	toXML
-} from "../../samples/xml.js"
+import { closingTag, openingTag, tabbed, toXML } from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
 import { isRecursiveNodeSerializable } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
@@ -114,13 +107,15 @@ abstract class PreRecursiveNode
 
 	toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
-		assert(isIdentifier(type))
-		const openTag = `<${type} ${this.children
-			.map((c) => {
-				const asAttr = table.toAttr(this.type, c.type)
-				return asAttr ? printValidAttrs(asAttr(c)) : ""
-			})
-			.join(" ")}/>`
+		const openTag = openingTag(
+			type,
+			this.children
+				.map((c) => {
+					const asAttr = table.toAttr(this.type, c.type)
+					return asAttr ? asAttr(c) : []
+				})
+				.flat()
+		)
 		const childTags = this.children
 			.map((c) => (table.isTag(type, c.type, c) ? toXML(c, table) : []))
 			.flat()

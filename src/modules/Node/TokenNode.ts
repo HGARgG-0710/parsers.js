@@ -1,4 +1,3 @@
-import assert from "assert"
 import type {
 	INode,
 	INodeMaker,
@@ -10,7 +9,7 @@ import type {
 	IValidNodeType,
 	IXMLGenerationTable
 } from "../../interfaces.js"
-import { isIdentifier, printValidAttrs } from "../../samples/xml.js"
+import { selfClosingTag } from "../../samples/xml.js"
 import { isTyped } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
 import { NodeFactory } from "./NodeFactory.js"
@@ -38,13 +37,8 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 
 	toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
-		assert(isIdentifier(type))
 		const attrConverter = table.toAttr(type, type)
-		return [
-			attrConverter
-				? `<${type} ${printValidAttrs(attrConverter(this))} />`
-				: `<${type} />`
-		]
+		return [selfClosingTag(type, attrConverter ? attrConverter(this) : [])]
 	}
 
 	validate(table: IValidationTable<INode>): boolean {

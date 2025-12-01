@@ -49,9 +49,27 @@ export function getNewline() {
 	return toNewline(Config.xml.lf)
 }
 
+export function openingTag(
+	type: IValidNodeType,
+	attrs: [string, string][] = []
+) {
+	assert(isIdentifier(type))
+	const attrStr = printValidAttrs(attrs)
+	return attrStr ? `<${type} ${attrStr}>` : `<${type}>`
+}
+
 export function closingTag(type: IValidNodeType) {
 	assert(isIdentifier(type))
 	return `</${type}>`
+}
+
+export function selfClosingTag(
+	type: IValidNodeType,
+	attrs: [string, string][] = []
+) {
+	assert(isIdentifier(type))
+	const attrStr = printValidAttrs(attrs)
+	return attrStr ? `<${type} ${attrStr} />` : `<${type} />`
 }
 
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
@@ -254,10 +272,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	}
 
 	tag(): [string, string] {
-		return [
-			`<${this.tagName} ${printAttrs(this.attrs)}>`,
-			`<${this.tagName} />`
-		]
+		return [openingTag(this.tagName, this.attrs), closingTag(this.tagName)]
 	}
 
 	post() {

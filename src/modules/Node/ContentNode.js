@@ -1,10 +1,8 @@
-import assert from "assert"
 import { mixin } from "../../mixin.js"
 import { splitNewlines } from "../../samples/space.js"
 import {
 	closingTag,
-	isIdentifier,
-	printValidAttrs,
+	openingTag,
 	tabbed,
 	toValidTagContent,
 	toXML
@@ -55,10 +53,10 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 
 	toXMLWrapped(attrConverter, isTag) {
 		const { type } = this
-		assert(isIdentifier(type))
-		const openTag = attrConverter
-			? `<${type} ${printValidAttrs(attrConverter(this))}>`
-			: `<${type}>`
+		const openTag = openingTag(
+			type,
+			attrConverter ? attrConverter(this) : []
+		)
 		const tagContentFormatted = isTag ? tabbed(this.toXMLRaw()) : []
 		const closeTag = closingTag(type)
 		return [openTag, ...tagContentFormatted, closeTag]
@@ -140,13 +138,13 @@ class PreSingleChildNode extends SingleItemNode {
 
 	toXML(table) {
 		const { child, type } = this
-		assert(isIdentifier(type))
 		const hasChild = !!child
 		const attrConverter = hasChild && table.toAttr(type, child.type)
 		const isTag = hasChild && table.isTag(type, child.type, child)
-		const openTag = attrConverter
-			? `<${type} ${printValidAttrs(attrConverter(child))}>`
-			: `<${type}>`
+		const openTag = openingTag(
+			type,
+			attrConverter ? attrConverter(child) : []
+		)
 		const tagContent = isTag ? toXML(child, table) : []
 		const closeTag = closingTag(type)
 		return [openTag, ...tabbed(tagContent), closeTag]
