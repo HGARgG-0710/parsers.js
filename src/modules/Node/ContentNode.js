@@ -74,6 +74,10 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 		return `${this.debugName} { value: ${this.value} }`
 	}
 
+	validate(table) {
+		return table.validate(this.type, this.type, this)
+	}
+
 	constructor(value) {
 		super()
 		this.setValue(value)
@@ -151,6 +155,14 @@ class PreSingleChildNode extends SingleItemNode {
 			type: this.type,
 			child: this.child
 		}
+	}
+
+	validate(table) {
+		const { child } = this
+		return (
+			table.validate(this.type, child?.type, child) &&
+			(child ? child.validate(table) : true)
+		)
 	}
 
 	debugPrint() {

@@ -1,16 +1,19 @@
 import type {
+	ICarrierNode,
 	ICarrierNodeType,
+	ICellNode,
 	ICellNodeType,
 	INode,
 	IPoolNode,
 	IPoolNodeType,
+	IValidatable,
 	IValidNodeType
 } from "../../interfaces.ts"
 
 export declare const CachedContentNode: <V = any>(
 	type: IValidNodeType,
 	debugName: string
-) => ICarrierNodeType<V>
+) => ICarrierNodeType<V, ICarrierNode<V> & IValidatable<INode>>
 
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of
@@ -22,7 +25,7 @@ export declare const CachedContentNode: <V = any>(
 export declare const SingleChildNode: (
 	type: IValidNodeType,
 	debugName: string
-) => IPoolNodeType<[INode], IPoolNode<[INode]>>
+) => IPoolNodeType<[INode], IPoolNode<[INode]> & IValidatable<INode>>
 
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of `INode`
@@ -36,4 +39,4 @@ export declare const SingleChildNode: (
 export declare const ContentNode: <Value = any>(
 	type: IValidNodeType,
 	debugName: string
-) => ICellNodeType<Value>
+) => ICellNodeType<Value, ICellNode<Value> & IValidatable<INode>>

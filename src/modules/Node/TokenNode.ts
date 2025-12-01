@@ -2,8 +2,11 @@ import assert from "assert"
 import type {
 	INode,
 	INodeMaker,
+	IPoolNode,
 	IPoolNodeType,
 	ITyped,
+	IValidatable,
+	IValidationTable,
 	IValidNodeType,
 	IXMLGenerationTable
 } from "../../interfaces.js"
@@ -44,12 +47,19 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		]
 	}
 
+	validate(table: IValidationTable<INode>): boolean {
+		return table.validate(this.type, this.type, this)
+	}
+
 	debugPrint(): string {
 		return `${this.debugName}`
 	}
 }
 
-const makeTokenNodeFactory = PreNodeFactory<IPoolNodeType<[]>>(PreTokenNode)
+const makeTokenNodeFactory =
+	PreNodeFactory<IPoolNodeType<[], IPoolNode & IValidatable<INode>>>(
+		PreTokenNode
+	)
 
 export const CachedTokenNode = NodeFactory(function (
 	type: IValidNodeType,

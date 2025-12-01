@@ -62,6 +62,23 @@ export interface IWalkable<T extends IWalkable<T> = any> {
 	findUnwalkedChildren(startIndex: readonly number[]): number
 }
 
+export type IValidityMap<T = any> = Map<
+	IValidNodeType,
+	Map<IValidNodeType, (x: T) => boolean>
+>
+
+export interface IValidationTable<T = any> {
+	validate(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		x: T
+	): boolean
+}
+
+export interface IValidatable<T = any> {
+	validate(table: IValidationTable<T>): boolean
+}
+
 /**
  * This interface is intended to represent individual nodes
  * inside a Tree-like structure, with `.type: T`. The instances
@@ -77,6 +94,7 @@ export interface INode
 		IWalkable<INode>,
 		IJSONSerializableObject,
 		IXMLSerializable,
+		Partial<IValidatable<INode>>,
 		IDebugNamed,
 		IDebugPrintable {
 	setParent(parnet: INode): void
@@ -149,8 +167,10 @@ export interface IPoolNodeType<
 	readonly pool: ObjectPool
 }
 
-export interface ICarrierNodeType<V = any>
-	extends INodeType<[V], ICarrierNode<V>> {
+export interface ICarrierNodeType<
+	V = any,
+	C extends ICarrierNode<V> = ICarrierNode<V>
+> extends INodeType<[V], C> {
 	make(value: V): ICarrierNode
 }
 
@@ -176,7 +196,8 @@ export interface IRecursiveNodeType<K extends IRecursiveNode = IRecursiveNode>
  * This is a type specifically for representing `IRecursiveNodeType`s
  * that are intended to produce `ICollectionNode`s
  */
-export type ICollectionNodeType = IRecursiveNodeType<ICollectionNode>
+export type ICollectionNodeType<C extends ICollectionNode = ICollectionNode> =
+	IRecursiveNodeType<C>
 
 /**
  * This is an interface for representing a function-factory for `INodeType< Args>`

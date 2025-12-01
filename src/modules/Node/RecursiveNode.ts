@@ -5,6 +5,8 @@ import type {
 	ICollectionNodeType,
 	INode,
 	INodeMaker,
+	IValidatable,
+	IValidationTable,
 	IXMLGenerationTable
 } from "../../interfaces.js"
 import { isIdentifier, printValidAttrs, toXML } from "../../samples/xml.js"
@@ -120,6 +122,12 @@ abstract class PreRecursiveNode
 		return [openTag, ...childTags.map((x) => `\t${x}`), closeTag]
 	}
 
+	validate(table: IValidationTable<INode>): boolean {
+		return this.children.every((child) =>
+			table.validate(this.type, child.type, child)
+		)
+	}
+
 	debugPrint(): string {
 		return `${this.debugName} { children: [ ${this.children
 			.map((x) => x.debugPrint())
@@ -148,5 +156,7 @@ abstract class PreRecursiveNode
  */
 
 export const RecursiveNode = NodeFactory(
-	PreNodeFactory<ICollectionNodeType>(PreRecursiveNode)
+	PreNodeFactory<ICollectionNodeType<ICollectionNode & IValidatable<INode>>>(
+		PreRecursiveNode
+	)
 )
