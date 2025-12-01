@@ -140,8 +140,9 @@ class PreSingleChildNode extends SingleItemNode {
 	toXML(table) {
 		const { child, type } = this
 		assert(isIdentifier(type))
-		const attrConverter = table.toAttr(type, child.type)
-		const isTag = table.isTag(type, child.type, child)
+		const hasChild = !!child
+		const attrConverter = hasChild && table.toAttr(type, child.type)
+		const isTag = hasChild && table.isTag(type, child.type, child)
 		const openTag = attrConverter
 			? `<${type} ${printValidAttrs(attrConverter(child))}>`
 			: `<${type}>`
