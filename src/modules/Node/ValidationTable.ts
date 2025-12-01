@@ -98,17 +98,19 @@ export namespace TreeValidationTable {
 		}
 
 		private readonly isValidMap: IValidityMap<T> = new Map()
+		private defaultValid?: (x: T) => boolean
 
-		protected targetInstance() {
-			return new TreeValidationTable(this.isValidMap)
+		withDefault(defaultPred: (x: T) => boolean) {
+			this.defaultValid = defaultPred
+			return this
 		}
 
-		forChild(type: IValidNodeType) {
-			return new ChildBuilder(type, this)
+		forChild(child: ITyped) {
+			return new ChildBuilder(child.type, this)
 		}
 
-		forParent(type: IValidNodeType) {
-			return new ParentBuilder(type, this)
+		forParent(parent: ITyped) {
+			return new ParentBuilder(parent.type, this)
 		}
 
 		forOneParent(
@@ -142,7 +144,7 @@ export namespace TreeValidationTable {
 		}
 
 		build() {
-			return this.targetInstance()
+			return new TreeValidationTable(this.isValidMap, this.defaultValid)
 		}
 
 		constructor(types: readonly IValidNodeType[]) {

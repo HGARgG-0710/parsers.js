@@ -1,8 +1,10 @@
-import { functional, type } from "@hgargg-0710/one"
+import { boolean, functional, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
 	ICommonStream,
+	INode,
 	IOwnedStream,
+	IValidationTable,
 	IValidNodeType,
 	IXMLAttributeGenerator,
 	IXMLAttrMap,
@@ -12,11 +14,11 @@ import type {
 	IXMLGenerationTable,
 	IXMLOpenableNode,
 	IXMLSimple,
-	IXMLTagMap,
 	IXMLTagTable,
 	IXMLVersion
 } from "../interfaces.js"
 import { XMLGenerationError } from "../objects/Error.js"
+import { TreeValidationTable } from "../objects/Node.js"
 import { FlattenerStream, HandlerStream } from "../objects/Stream.js"
 import { curr } from "../utils/Stream.js"
 import { DelimitedStream } from "./Stream.js"
@@ -24,6 +26,7 @@ import { regex } from "./regex.js"
 
 const { isString } = type
 const { trivialCompose } = functional
+const { F } = boolean
 
 export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
 	"\t\n",
@@ -350,76 +353,26 @@ export class XMLAttrTable implements IXMLAttrTable {
 	constructor(private readonly attrs: IXMLAttrMap) {}
 }
 
-class XMLTagSetChildBuilder {
-	toAll() {
-		this.owner.forAllParents(this.type)
-		return this
-	}
+export abstract class XMLTagTable implements IXMLTagTable {
+	private readonly delegate: IValidationTable<INode>
 
-	addTo(parent: IValidNodeType) {
-		this.owner.forOneParent(this.type, parent)
-		return this
-	}
+	abstract builderProcess(
+		builder: TreeValidationTable.Builder<INode>
+	): TreeValidationTable.Builder<INode>
 
-	removeFrom(parent: IValidNodeType) {
-		this.owner.remove(this.type, parent)
-		return this
-	}
-
-	finish() {
-		return this.owner
-	}
-
-	constructor(
-		private readonly type: IValidNodeType,
-		private readonly owner: XMLTagSetBuilder
-	) {}
-}
-
-class XMLTagSetBuilder {
-	private readonly tags: IXMLTagMap = new Map()
-
-	private getParentSet(byType: IValidNodeType) {
-		const parentSet = this.tags.get(byType)
-		if (parentSet) return parentSet
-		const newSet = new Set<IValidNodeType>()
-		this.tags.set(byType, newSet)
-		return newSet
-	}
-
-	forChild(type: IValidNodeType) {
-		return new XMLTagSetChildBuilder(type, this)
-	}
-
-	remove(childType: IValidNodeType, fromParent: IValidNodeType) {
-		this.getParentSet(fromParent).delete(childType)
-	}
-
-	forOneParent(childType: IValidNodeType, parentType: IValidNodeType) {
-		this.getParentSet(parentType).add(childType)
-	}
-
-	forAllParents(childType: IValidNodeType) {
-		for (const [, tagSet] of this.tags) tagSet.add(childType)
+	get(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		child: INode
+	): boolean {
+		return this.delegate.validate(parentType, childType, child)
 	}
 
 	constructor(types: readonly IValidNodeType[]) {
-		for (const type of types) this.tags.set(type, new Set())
+		this.delegate = this.builderProcess(
+			new TreeValidationTable.Builder(types).withDefault(F)
+		).build()
 	}
-}
-
-export class XMLTagSet implements IXMLTagTable {
-	static builder(types: readonly IValidNodeType[]) {
-		return new XMLTagSetBuilder(types)
-	}
-
-	get(parentType: IValidNodeType, childType: IValidNodeType): boolean {
-		const parentSet = this.tags.get(parentType)
-		if (!parentSet) return false
-		return parentSet.has(childType)
-	}
-
-	constructor(private readonly tags: IXMLTagMap) {}
 }
 
 export class XMLGenerationTable implements IXMLGenerationTable {
@@ -430,8 +383,12 @@ export class XMLGenerationTable implements IXMLGenerationTable {
 		return this.attrs.get(parentType, childType)
 	}
 
-	isTag(parentType: IValidNodeType, childType: IValidNodeType): boolean {
-		return this.tags.get(parentType, childType)
+	isTag(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		child: INode
+	): boolean {
+		return this.tags.get(parentType, childType, child)
 	}
 
 	constructor(

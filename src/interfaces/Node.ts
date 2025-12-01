@@ -71,7 +71,7 @@ export interface IValidationTable<T = any> {
 	validate(
 		parentType: IValidNodeType,
 		childType: IValidNodeType,
-		x: T
+		child: T
 	): boolean
 }
 

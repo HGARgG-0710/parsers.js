@@ -116,7 +116,7 @@ abstract class PreRecursiveNode
 			})
 			.join(" ")}/>`
 		const childTags = this.children
-			.map((c) => (table.isTag(type, c.type) ? toXML(c, table) : []))
+			.map((c) => (table.isTag(type, c.type, c) ? toXML(c, table) : []))
 			.flat()
 		const closeTag = `</${type}>`
 		return [openTag, ...childTags.map((x) => `\t${x}`), closeTag]

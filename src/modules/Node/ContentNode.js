@@ -65,7 +65,7 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 
 	toXML(table) {
 		const asAttrs = table.toAttr(this.type, this.type)
-		const isTag = table.isTag(this.type, this.type)
+		const isTag = table.isTag(this.type, this.type, this)
 		const isRaw = !(asAttrs || isTag)
 		return isRaw ? this.toXMLRaw() : this.toXMLWrapped(asAttrs, isTag)
 	}
@@ -141,7 +141,7 @@ class PreSingleChildNode extends SingleItemNode {
 		const { child, type } = this
 		assert(isIdentifier(type))
 		const attrConverter = table.toAttr(type, child.type)
-		const isTag = table.isTag(type, child.type)
+		const isTag = table.isTag(type, child.type, child)
 		const openTag = attrConverter
 			? `<${type} ${printValidAttrs(attrConverter(child))}>`
 			: `<${type}>`

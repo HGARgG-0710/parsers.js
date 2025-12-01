@@ -17,7 +17,12 @@ export interface IXMLGenerationTable {
 		parentType: IValidNodeType,
 		childType: IValidNodeType
 	): false | IXMLAttributeGenerator
-	isTag(parentType: IValidNodeType, childType: IValidNodeType): boolean
+
+	isTag(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		child: INode
+	): boolean
 }
 
 export interface IXMLAttrTable {
@@ -28,7 +33,11 @@ export interface IXMLAttrTable {
 }
 
 export interface IXMLTagTable {
-	get(parentType: IValidNodeType, childType: IValidNodeType): boolean
+	get(
+		parentType: IValidNodeType,
+		childType: IValidNodeType,
+		child: INode
+	): boolean
 }
 
 export interface IXMLSerializable {
