@@ -1,11 +1,25 @@
 import type {
 	IClearable,
+	ICopiable,
 	IFiniteWritable,
 	IGettable,
 	IIndexed,
 	IPushable,
 	IReadable
 } from "../interfaces.js"
+
+export interface IExtendableCollection<
+	T = any,
+	C extends IIndexed<T> = IIndexed<T>
+> extends IPushable<T>,
+		IClearable,
+		IGettable<C> {}
+
+export interface IPrototypeCollection<
+	T = any,
+	C extends IIndexed<T> = IIndexed<T>
+> extends IExtendableCollection<T, C>,
+		ICopiable {}
 
 /**
  * This is an interface intended to represent a
@@ -19,10 +33,8 @@ import type {
  * than `IAccumulator`, but less so than the `IArray`.
  * It is not intended to be operated on too actively.
  */
-export interface ICollection<T = any, C extends IIndexed<T> = any>
-	extends IGettable<C>,
-		IPushable<T>,
+export interface ICollection<T = any, C extends IIndexed<T> = IIndexed<T>>
+	extends IPrototypeCollection<T, C>,
 		IFiniteWritable<T>,
 		Iterable<T>,
-		IReadable<T>,
-		IClearable {}
+		IReadable<T> {}

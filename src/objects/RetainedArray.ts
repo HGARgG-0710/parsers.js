@@ -42,7 +42,9 @@ export class RetainedArray<T = any>
 	}
 
 	copy() {
-		return new this.constructor(this.size)
+		const copied = new this.constructor(this.size)
+		for (let i = 0; i < this.size; ++i) copied.write(i, this.read(i))
+		return copied
 	}
 
 	push(x: T): this {
