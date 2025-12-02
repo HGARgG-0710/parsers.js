@@ -1,5 +1,5 @@
 import type { IPosed, IStreamPredicate } from "../../../interfaces.js"
-import type { LimitStream } from "../objects/LimitStream.js"
+import type { LimitStream } from "../objects/concrete/LimitStream.js"
 import type { IOwnedStream } from "./OwnedStream.js"
 
 /**

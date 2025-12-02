@@ -9,7 +9,7 @@ import type {
 } from "../../../../interfaces/Stream.js"
 import { StreamList } from "../../../../internal/StreamList.js"
 import { resourceInitializer } from "../../../../objects/Initializer.js"
-import { IdentityStream } from "../IdentityStream.js"
+import { IdentityStream } from "../concrete.js"
 
 const compositeStreamInitializer = {
 	init(

@@ -1,0 +1,292 @@
+import { boolean, type } from "@hgargg-0710/one"
+import assert from "assert"
+import * as Pools from "../../../../global/Pools.js"
+import type { IPoolKeeping } from "../../../../interfaces.js"
+import type {
+	ICommonStream,
+	ILinkedStream,
+	IOwnedStream,
+	IStream
+} from "../../../../interfaces/Stream.js"
+import { mixin } from "../../../../mixin.js"
+import { ObjectPool } from "../../../../objects/ObjectPool.js"
+import { navigate } from "../../../../utils/Stream.js"
+import type {
+	IContextualStreamStep,
+	ILimitableStream,
+	IStreamPredicateFormation
+} from "../../interfaces/LimitStream.js"
+import type {
+	IStreamPredicate,
+	IStreamStep
+} from "../../interfaces/StreamPosition.js"
+import { asSteps, bindStep, isStreamPredicate } from "../../utils/Step.js"
+import { PoolableStream } from "../templates.js"
+import { BasicResourceStream } from "../templates/BasicResourceStream.js"
+
+const { F } = boolean
+const { isNullary } = type
+
+/**
+ * A class encapsulating a lookaround of a `LimitStream`,
+ * which may be present or absent.
+ */
+class Lookaround<T = any> {
+	private hasLookaround = false
+	private lookaround?: T
+
+	has() {
+		return this.hasLookaround
+	}
+
+	set(lookaround: T) {
+		this.lookaround = lookaround
+		this.hasLookaround = true
+	}
+
+	reset() {
+		this.hasLookaround = false
+	}
+
+	get() {
+		return this.lookaround!
+	}
+}
+
+class ConfirmedStepsCounter {
+	private stepsBeforeCheck: number = 0
+	private _toCheckAgain: boolean = true
+
+	private registerCheck() {
+		this._toCheckAgain = false
+	}
+
+	private scheduleNewCheck() {
+		this._toCheckAgain = true
+	}
+
+	private noMoreSteps() {
+		return this.stepsBeforeCheck <= 0
+	}
+
+	get toCheckAgain() {
+		return this._toCheckAgain
+	}
+
+	setSteps(steps: number) {
+		this.stepsBeforeCheck = steps
+		this.registerCheck()
+	}
+
+	isEnd() {
+		return this.noMoreSteps() && !this._toCheckAgain
+	}
+
+	decSteps() {
+		--this.stepsBeforeCheck
+		if (this.noMoreSteps()) this.scheduleNewCheck()
+	}
+}
+
+function BuildLimitStream<T = any>(
+	from: IStreamStep<T>,
+	longAs: IContextualStreamStep<T>,
+	isEmpty: IStreamPredicate<T>
+) {
+	return new mixin(
+		{
+			name: "LimitStream",
+			static: {
+				pool: (classObj) =>
+					Pools.Stream.add(
+						new ObjectPool(
+							classObj as new (
+								resource?: IOwnedStream<T>
+							) => ILinkedStream<T>
+						)
+					)
+			},
+			properties: {
+				baseNextIter(curr: T) {
+					this.steps.decSteps()
+					this.resource.next()
+					return this.resource.curr
+				},
+
+				goStartPos() {
+					navigate(this.resource!, this.from)
+				},
+
+				maybeEmpty() {
+					this.isEnd = this.isEmpty(this.resource!)
+					if (!this.isEnd) this.syncCurr()
+				},
+
+				get pool() {
+					return this.constructor.pool
+				},
+
+				setResource(resource: ILimitableStream<T>) {
+					this.super.BasicResourceStream.setResource.call(
+						this,
+						resource
+					)
+					this.goStartPos()
+					this.maybeEmpty()
+				},
+
+				isCurrEnd(): boolean {
+					if (this.isEnd || this.resource?.isCurrEnd()) return true
+					if (this.steps.toCheckAgain) {
+						this.steps.setSteps(
+							asSteps(this.resource!, this.longAs)
+						)
+						return this.steps.isEnd()
+					}
+					return false
+				},
+
+				next() {
+					if (this.isCurrEnd()) this.endStream()
+					else this.baseNextIter(this.curr)
+				}
+			},
+			constructor(resource?: ILimitableStream<T>) {
+				this.super.BasicResourceStream.constructor.call(this)
+				this.lookahead = new Lookaround()
+				this.steps = new ConfirmedStepsCounter()
+				this.isEmpty = isEmpty
+				this.from = bindStep(from, this)
+				this.longAs = LimitStream.bindContext(longAs, this)
+				this.init(resource)
+			}
+		},
+		[BasicResourceStream, PoolableStream]
+	) as unknown as IPoolKeeping<ICommonStream<T>>
+}
+
+/**
+ * This is a function for creation of factories for instances
+ * of `ILinkedStream<T>` interface. These instances accept a
+ * `ILimitableStream<T>`, and return items that fall in between `from`
+ * and `longAs`. They are `IStreamPosition<T>`s, with `from` defining
+ * the "starting point" of the resulting `ILinkedStream<T>`
+ * [more specifically, how-many-steps-before/until-what-condition-is-true],
+ * and `longAs` defining the predicate/number-of-steps to use as an ending.
+ *
+ * By default, if `longAs` is not provided, it has the
+ * value of `from`.
+ *
+ * Important note: if `from` is a negative number - the `.pos` of the
+ * given `ILimitableStream<T>` must (itself) be greater than `from` in its absolute
+ * value.
+ */
+export function LimitStream<T = any>(limits: LimitStream.Limits<T>) {
+	const { from, longAs, isEmpty } = limits
+	const limitStream = BuildLimitStream<T>(from, longAs, isEmpty)
+
+	function L(resource?: ILimitableStream<T>): ICommonStream<T> {
+		return limitStream.pool.create(resource)
+	}
+
+	L.pool = limitStream.pool
+
+	return L
+}
+
+export namespace LimitStream {
+	/**
+	 * The predicate that has to be used as the argument for the `from`
+	 * argument of `LimitedStream` in order to preserve the current
+	 * position upon call to the `.init` initialization method.
+	 *
+	 * Note: If `to` is not passed, value for `from` is used for it instead,
+	 * and this becomes the value for `from`
+	 */
+	export const NoMovementPredicate = F
+
+	export class Limits<T = any> {
+		static builder<T = any>() {
+			return new LimitsBuilder<T>()
+		}
+
+		wrapLongAs(into: IStreamPredicateFormation<T>) {
+			assert(this.longAs instanceof StreamPredicateContext)
+			return new Limits(this.from, this.longAs.add(into), this.isEmpty)
+		}
+
+		constructor(
+			readonly from: IStreamStep<T>,
+			readonly longAs: IContextualStreamStep<T>,
+			readonly isEmpty: IStreamPredicate<T>
+		) {}
+	}
+
+	export class StreamPredicateContext<T = any> {
+		add(newFormation: IStreamPredicateFormation<T>) {
+			return new StreamPredicateContext(
+				this.startPred,
+				this.formations.concat(newFormation)
+			)
+		}
+
+		bind<K extends IStream<T> = IStream<T>>(
+			stream: K
+		): IStreamPredicate<T> {
+			let currPred = this.startPred
+			for (const formation of this.formations)
+				currPred = formation(currPred.bind(stream))
+			return currPred.bind(stream)
+		}
+
+		constructor(
+			private readonly startPred: IStreamPredicate<T>,
+			private readonly formations: IStreamPredicateFormation<T>[] = []
+		) {}
+	}
+
+	class LimitsBuilder<T = any> {
+		private from: IStreamStep<T> = F
+		private isEmpty: IStreamPredicate<T> = F
+		private longAs?: IStreamStep<T>
+
+		private nonNullContextualLongAs() {
+			assert(this.longAs)
+			return isStreamPredicate(this.longAs)
+				? new StreamPredicateContext(this.longAs)
+				: this.longAs
+		}
+
+		setFrom(from?: IStreamStep<T>) {
+			if (!isNullary(from)) this.from = from
+			return this
+		}
+
+		setIsEmpty(isEmpty?: IStreamPredicate<T>) {
+			if (!isNullary(isEmpty)) this.isEmpty = isEmpty
+			return this
+		}
+
+		setLongAs(longAs?: IStreamStep<T>) {
+			if (!isNullary(longAs)) this.longAs = longAs
+			return this
+		}
+
+		build() {
+			return new Limits(
+				this.from,
+				this.nonNullContextualLongAs(),
+				this.isEmpty
+			)
+		}
+	}
+
+	export function bindContext<T = any, K extends IStream<T> = IStream<T>>(
+		step: IContextualStreamStep<T>,
+		context: K
+	): IStreamStep<T> {
+		return step instanceof LimitStream.StreamPredicateContext
+			? step.bind(context)
+			: step
+	}
+}
