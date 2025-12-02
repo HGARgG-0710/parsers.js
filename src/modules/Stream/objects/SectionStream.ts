@@ -5,19 +5,13 @@ import type {
 } from "../../../interfaces.js"
 import { CollectionBuilder } from "../../../objects.js"
 import type { ISectionGrabber } from "../interfaces/SectionStream.js"
-import { CustomLinkedStream } from "./CustomLinkedStream.js"
+import { CurrDyssyncLinkedStream } from "./CurrDyssyncLinkedStream.js"
 
 export class SectionStream<
 	T = any,
 	C extends IIndexed<T> = IIndexed<T>
-> extends CustomLinkedStream<C> {
+> extends CurrDyssyncLinkedStream<C> {
 	private readonly builder: CollectionBuilder<T, C>
-
-	private _curr: C
-
-	private set curr(newCurr: C) {
-		this._curr = newCurr
-	}
 
 	private grabNewPiece() {
 		this.builder.clear()
@@ -27,10 +21,6 @@ export class SectionStream<
 
 	private getNextItem() {
 		this.curr = this.grabNewPiece()
-	}
-
-	get curr() {
-		return this._curr
 	}
 
 	free(): void {}
