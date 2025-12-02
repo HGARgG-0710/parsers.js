@@ -54,7 +54,7 @@ function BuildFilterStream<T = any>(
 		constructor(resource?: IOwnedStream<T>) {
 			super()
 			this.filter = bindStep(filter, this)
-			this.init(resource)
+			super(resource)
 		}
 	}
 }

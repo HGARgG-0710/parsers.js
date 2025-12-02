@@ -1073,14 +1073,6 @@ export class SwitchArray<
 	*[Symbol.iterator]() {
 		for (let i = this.size; i--; ) yield this.items[i]
 	}
-
-	constructor(
-		items?: IRecursiveItems<T, Recursive, InitType>,
-		renewer?: RecursiveList.Renewer<T, Recursive, InitType>
-	) {
-		super()
-		this.init(items, renewer)
-	}
 }
 
 /**
@@ -1178,7 +1170,7 @@ export class RecursiveList<
 		const lastInitialized = new LastInitialized()
 		this.asEvaluable = new EvaluableList(lastInitialized, this.items)
 		this.asRenewable = new RenewableList(lastInitialized, this.items)
-		this.init(args, ...rest)
+		super(args, ...rest)
 	}
 }
 

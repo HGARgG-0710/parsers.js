@@ -40,7 +40,7 @@ function BuildIndexStream<T = any>(
 			super()
 			this.isNewline = isNewline
 			this.lineIndex = lineIndexMaker()
-			this.init(resource)
+			super(resource)
 		}
 	}
 }
