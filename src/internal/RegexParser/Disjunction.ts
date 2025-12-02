@@ -1,22 +1,21 @@
-import type {
-	INode,
-	IOwnedStream,
-	IPeekableStream,
-	IRawStreamArray
-} from "../../interfaces.js"
+import type { INode, IOwnedStream, IRawStreamArray } from "../../interfaces.js"
 import { ArrayBuilder } from "../../objects.js"
 import {
 	LimitStream,
 	PeekStream,
 	SingleNodeStream
 } from "../../objects/Stream.js"
-import { CollectionStream, PastEndStream } from "../../samples/Stream.js"
+import {
+	CollectionStream,
+	isCurrKind,
+	isNotNextKind,
+	PastEndStream
+} from "../../samples/Stream.js"
 import { consumable, consumeSingletonRevivables } from "../../utils/Stream.js"
 import { Disjunct, Disjunction, Temp } from "./Nodes.js"
 
-const isCurrPipe = (input: IOwnedStream<INode>) => Temp.Pipe.is(input.curr)
-const isNotNextPipe = (input: IPeekableStream<INode>) =>
-	!Temp.Pipe.is(input.peek(1))
+const isCurrPipe = isCurrKind<INode>(Temp.Pipe)
+const isNotNextPipe = isNotNextKind<INode>(Temp.Pipe)
 
 const PipeLimitStream = PastEndStream(
 	LimitStream.Limits.builder<INode>()

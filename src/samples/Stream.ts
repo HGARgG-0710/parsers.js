@@ -7,7 +7,8 @@ import type {
 	IOwnedStream,
 	IPeekableStream,
 	ISingletonNodeType,
-	IStream
+	IStream,
+	ITypeCheckable
 } from "../interfaces.js"
 import {
 	ConcatStream,
@@ -99,7 +100,8 @@ export function isPeek(n: number) {
 
 export function isNotPeek(n: number) {
 	const isIt = isPeek(n)
-	return <T = any>(value: T) => negate(isIt(value))
+	return <T = any>(value: T): ((input: IPeekableStream<T>) => boolean) =>
+		negate(isIt(value))
 }
 
 export const isNext = isPeek(1)
@@ -170,3 +172,22 @@ export function DelimitedStream<T = any, E = any>(
 		)
 	}
 }
+
+export function isCurrKind<T = any>(kind: ITypeCheckable<T>) {
+	return (input: IOwnedStream<T>) => kind.is(input.curr)
+}
+
+export function peekKind(n: number) {
+	return <T = any>(kind: ITypeCheckable<T>) =>
+		(input: IPeekableStream<T>) =>
+			kind.is(input.peek(n))
+}
+
+export function isNotPeekKind(n: number) {
+	const isKind = peekKind(n)
+	return <T = any>(
+		kind: ITypeCheckable<T>
+	): ((input: IPeekableStream<T>) => boolean) => negate(isKind(kind))
+}
+
+export const isNotNextKind = isNotPeekKind(1)
