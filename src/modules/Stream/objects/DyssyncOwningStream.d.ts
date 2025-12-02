@@ -1,5 +1,4 @@
-import type { ICopiable } from "../../../interfaces.ts"
-import type { IOwnedStream, IOwningStream } from "../interfaces/OwnedStream.ts"
+import type { IOwnedStream } from "../interfaces/OwnedStream.ts"
 import type { PipeStream } from "./PipeStream.js"
 
 /**
@@ -13,11 +12,9 @@ import type { PipeStream } from "./PipeStream.js"
  * It has the constructor of `PipeStream`
  */
 export declare abstract class DyssyncOwningStream<
-		T = any,
-		Args extends any[] = []
-	>
-	extends PipeStream<T, Args>
-{
+	T = any,
+	Args extends any[] = []
+> extends PipeStream<T, Args> {
 	protected ["constructor"]: new (resource?: IOwnedStream<T>) => this
 
 	protected set isEnd(isEnd: boolean)

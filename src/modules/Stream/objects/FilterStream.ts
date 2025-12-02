@@ -1,83 +1,62 @@
 import { Pools } from "../../../../main.js"
 import type { IPoolKeeping } from "../../../interfaces.js"
-import type {
-	ILinkedStream,
-	IOwnedStream,
-	IStreamStep
-} from "../../../interfaces/Stream.js"
-import { mixin } from "../../../mixin.js"
+import type { IOwnedStream, IStreamStep } from "../../../interfaces/Stream.js"
 import { ObjectPool } from "../../../objects.js"
 import { navigate } from "../../../utils/Stream.js"
 import type { ICommonStream } from "../interfaces/CommonStream.js"
-import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
-import { PoolableStream } from "./PoolableStream.js"
+import { bindStep } from "../utils/Step.js"
+import { DyssyncOwningPoolableStream } from "./DyssyncOwningPoolableStream.js"
 
-function BuildFilterStream<T = any>(filter: IStreamStep<T>) {
-	return new mixin(
-		{
-			name: "FilterStream",
-			static: {
-				pool: (classObj) =>
-					Pools.Stream.add(
-						new ObjectPool(
-							classObj as new (
-								resource?: IOwnedStream<T>
-							) => ILinkedStream<T>
-						)
-					)
-			},
-			properties: {
-				currGetter() {
-					this.updateCurr()
-					this.prod()
-				},
+function BuildFilterStream<T = any>(
+	filter: IStreamStep<T>
+): IPoolKeeping<ICommonStream<T>, [IOwnedStream<T>]> {
+	return class FilterStream extends DyssyncOwningPoolableStream<T> {
+		static readonly pool = Pools.Stream.add(new ObjectPool(FilterStream))
 
-				updateCurr() {
-					this.curr = this.lookahead
-				},
+		private readonly filter: IStreamStep<T>
+		private lookahead: T
+		private hasLookahead: boolean = false
 
-				prod() {
-					this.lookahead = navigate(this.resource!, this.filter)
-					this.hasLookahead = this.resource!.isEnd
-				},
+		private currGetter() {
+			this.updateCurr()
+			this.prod()
+		}
 
-				setResource(resource: IOwnedStream): void {
-					this.super.DyssyncOwningStream.setResource.call(
-						this,
-						resource
-					)
-					this.prod()
-					this.updateCurr()
-				},
+		private updateCurr() {
+			this.curr = this.lookahead
+		}
 
-				isCurrEnd(): boolean {
-					return !this.hasLookahead
-				},
+		private prod() {
+			this.lookahead = navigate(this.resource!, this.filter)
+			this.hasLookahead = this.resource!.isEnd
+		}
 
-				next() {
-					this.super.DyssyncOwningStream.next.call(this)
-					if (this.isCurrEnd()) this.endStream()
-					else this.currGetter()
-				},
+		protected get pool() {
+			return FilterStream.pool
+		}
 
-				init(resource?: IOwnedStream<T>) {
-					return this.super.DyssyncOwningStream.init.call(
-						this,
-						resource
-					)
-				},
+		setResource(resource: IOwnedStream): void {
+			super.setResource(resource)
+			this.prod()
+			this.updateCurr()
+		}
 
-				get pool() {
-					return this.constructor.pool
-				}
-			},
-			constructor(resource?: IOwnedStream<T>) {
-				this.super.DyssyncOwningStream.constructor.call(this, resource)
-				this.filter = filter
-			}
-		},
-		[DyssyncOwningStream, PoolableStream]
-	).toClass() as unknown as IPoolKeeping<ICommonStream<T>, [IOwnedStream<T>]>
+		isCurrEnd(): boolean {
+			return !this.hasLookahead
+		}
+
+		next() {
+			super.next()
+			if (this.isCurrEnd()) this.endStream()
+			else this.currGetter()
+		}
+
+		constructor(resource?: IOwnedStream<T>) {
+			super()
+			this.filter = bindStep(filter, this)
+			this.init(resource)
+		}
+	}
 }
 
 /**

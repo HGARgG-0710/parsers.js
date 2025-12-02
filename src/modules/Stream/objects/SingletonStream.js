@@ -28,7 +28,7 @@ const _SingletonStream = new mixin(
 			}
 		},
 		constructor(resource) {
-			this.super.DyssyncOwningStream.constructor.call(this, resource)
+			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
 	[],

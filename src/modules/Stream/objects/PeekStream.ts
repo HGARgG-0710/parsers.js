@@ -1,24 +1,17 @@
 import { Pools } from "../../../../main.js"
-import type {
-	IInitializable,
-	IInitializer,
-	IPoolKeeping
-} from "../../../interfaces.js"
+import type { IInitializable, IInitializer } from "../../../interfaces.js"
 import type {
 	ICommonStream,
-	ILinkedStream,
 	IOwnedStream,
 	IPeekable,
 	IStream
 } from "../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../internal/RotationBuffer.js"
-import { mixin } from "../../../mixin.js"
 import { ObjectPool } from "../../../objects.js"
 import { ownerInitializer } from "../../../objects/Initializer.js"
 import { RetainedArray } from "../../../objects/RetainedArray.js"
 import { write } from "../../../utils/Stream.js"
-import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
-import { PoolableStream } from "./PoolableStream.js"
+import { DyssyncOwningPoolableStream } from "./DyssyncOwningPoolableStream.js"
 
 const DefaultPeekSize = 4
 
@@ -150,90 +143,79 @@ const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 	}
 }
 
-const _PeekStream = new mixin(
-	{
-		name: "PeekStream",
-		static: {
-			pool: (classObj) =>
-				Pools.Stream.add(
-					new ObjectPool(
-						classObj as new (
-							resource?: IOwnedStream
-						) => ILinkedStream & IPeekable
-					)
-				)
-		},
-		properties: {
-			peeksMaybeLeft: false,
+class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
+	static readonly pool = Pools.Stream.add(new ObjectPool(_PeekStream))
 
-			baseNextIter() {
-				this.super.DyssyncOwningStream.next.call(this)
-				this.syncCurr()
-			},
+	private readonly tempWriter = new TempWriter()
+	private readonly peekProvider = new PeekProvider(this, DefaultPeekSize)
 
-			fetchNextPeek() {
-				this.curr = this.peekProvider.fetchNext()
-			},
+	private _peeksMaybeLeft = false
 
-			toTemp(count: number) {
-				return this.tempWriter.toTemp(this.resource!, count)
-			},
+	private set peeksMaybeLeft(arePeeks: boolean) {
+		this._peeksMaybeLeft = arePeeks
+	}
 
-			get pool() {
-				return this.constructor.pool
-			},
+	get peeksMaybeLeft() {
+		return this._peeksMaybeLeft
+	}
 
-			get initializer() {
-				return peekStreamInitializer
-			},
+	private baseNextIter() {
+		super.next()
+		this.syncCurr()
+	}
 
-			trivialPeek() {
-				return this.curr
-			},
+	private fetchNextPeek() {
+		this.curr = this.peekProvider.fetchNext()
+	}
 
-			newPeek(count: number) {
-				this.peeksMaybeLeft = this.toTemp(count)
-				this.peekProvider.push(this.tempWriter.get())
-				return this.peekProvider.last()
-			},
+	private toTemp(count: number) {
+		return this.tempWriter.toTemp(this.resource!, count)
+	}
 
-			peek(n: number) {
-				return this.peekProvider.provide(n)
-			},
+	protected get pool() {
+		return _PeekStream.pool
+	}
 
-			isCurrEnd(): boolean {
-				return (
-					this.super.DyssyncOwningStream.isCurrEnd.call(this) &&
-					this.peekProvider.hasNone()
-				)
-			},
+	protected get initializer() {
+		return peekStreamInitializer
+	}
 
-			next() {
-				if (this.isCurrEnd()) this.endStream()
-				else if (this.peekProvider.hasAny()) this.fetchNextPeek()
-				else this.baseNextIter()
-			},
+	trivialPeek() {
+		return this.curr
+	}
 
-			hasPeek(n: number) {
-				return this.peekProvider.has(n)
-			},
+	newPeek(count: number) {
+		this.peeksMaybeLeft = this.toTemp(count)
+		this.peekProvider.push(this.tempWriter.get())
+		return this.peekProvider.last()
+	}
 
-			toPeek(n: number) {
-				this.curr = this.peekProvider.advance(n)
-			},
+	peek(n: number) {
+		return this.peekProvider.provide(n)
+	}
 
-			resetPeeks() {
-				this.peekProvider.reset()
-			}
-		},
-		constructor(resource?: IOwnedStream) {
-			this.super.DyssyncOwningStream.constructor.call(this, resource)
-			this.peekProvider = new PeekProvider(this, DefaultPeekSize)
-			this.tempWriter = new TempWriter()
-		}
-	},
-	[DyssyncOwningStream, PoolableStream]
-).toClass() as unknown as IPoolKeeping<ICommonStream & IPeekable>
+	isCurrEnd(): boolean {
+		return super.isCurrEnd() && this.peekProvider.hasNone()
+	}
+
+	next() {
+		if (this.isCurrEnd()) this.endStream()
+		else if (this.peekProvider.hasAny()) this.fetchNextPeek()
+		else this.baseNextIter()
+	}
+
+	hasPeek(n: number) {
+		return this.peekProvider.has(n)
+	}
+
+	toPeek(n: number) {
+		this.curr = this.peekProvider.advance(n)
+	}
+
+	resetPeeks() {
+		this.peekProvider.reset()
+	}
+}
 
 /**
  * This is a function for creation of factories for the `IPeekStream<T>`
