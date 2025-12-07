@@ -42,7 +42,7 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return this.toFragment(new CharState(char))
 	}
 
-	handleEither({ options }: Regex.Raw.Either): Fragment | null {
+	handleEither({ items: options }: Regex.Raw.Either): Fragment | null {
 		const frags: Fragment[] = []
 		for (let i = 0; i < options.length; ++i) {
 			const currOption = options[i]
@@ -58,18 +58,14 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	// ! FINISH
-	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): Fragment | null {
-		return null
-	}
+	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): Fragment | null {}
 
 	handleCodeRange({ from, to }: Regex.Raw.CodeRange): Fragment | null {
 		return this.toFragment(new CodeRangeState(from, to))
 	}
 
 	// ! FINISH
-	handleNoCapture(noCapture: Regex.Raw.NoCapture): Fragment | null {
-		return null
-	}
+	handleNoCapture(noCapture: Regex.Raw.NoCapture): Fragment | null {}
 
 	handleNoneOrMore({ item }: Regex.Raw.NoneOrMore): Fragment | null {
 		const subExpr = item.accept(this)
@@ -105,4 +101,10 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	handleTokenType({ type }: Regex.Raw.TokenType): Fragment | null {
 		return this.toFragment(new TokenState(type))
 	}
+
+	// ! FINISH
+	handleBoundary(boundary: Regex.Raw.Boundary): Fragment | null {}
+
+	// ! FINISH
+	handleNonBoundary(nonBoundary: Regex.Raw.NonBoundary): Fragment | null {}
 }

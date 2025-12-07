@@ -29,4 +29,6 @@ export interface IRawRegexVisitor<T = any> {
 	handleNoneOf(noneOf: Regex.Raw.NoneOf): T
 	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): T
 	handleNoCapture(noCapture: Regex.Raw.NoCapture): T
+	handleNonBoundary(nonBoundary: Regex.Raw.NonBoundary): T
+	handleBoundary(boundary: Regex.Raw.Boundary): T
 }

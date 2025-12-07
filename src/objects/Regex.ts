@@ -7,10 +7,10 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { AutoMap } from "./AutoMap.js"
 import { NFARegexFinalizer as _NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"
+import { AutoMap } from "./AutoMap.js"
 
 export class Regex<T = any> {
 	private readonly final: IRegexMatcher
@@ -50,16 +50,18 @@ export namespace Regex {
 			abstract finish(): Raw
 		}
 
-		export class Either extends Raw {
-			readonly options: Raw[]
+		export abstract class Mult extends Raw {
+			readonly items: Raw[]
 
+			constructor(...items: Raw[]) {
+				super()
+				this.items = items
+			}
+		}
+
+		export class Either extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleEither(this)
-			}
-
-			constructor(...options: Raw[]) {
-				super()
-				this.options = options
 			}
 		}
 
@@ -71,16 +73,9 @@ export namespace Regex {
 			}
 		}
 
-		export class Catenation extends Raw {
-			readonly items: Raw[]
-
+		export class Catenation extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleCatenation(this)
-			}
-
-			constructor(...items: Raw[]) {
-				super()
-				this.items = items
 			}
 		}
 
@@ -157,16 +152,9 @@ export namespace Regex {
 			}
 		}
 
-		export class NoneOf extends Raw {
-			readonly items: Raw[]
-
+		export class NoneOf extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNoneOf(this)
-			}
-
-			constructor(...items: Raw[]) {
-				super()
-				this.items = items
 			}
 		}
 
@@ -178,16 +166,9 @@ export namespace Regex {
 			}
 		}
 
-		export class IgnoreCase extends Raw {
-			private readonly items: Raw[]
-
+		export class IgnoreCase extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleIgnoreCase(this)
-			}
-
-			constructor(...items: Raw[]) {
-				super()
-				this.items = items
 			}
 		}
 
@@ -199,16 +180,9 @@ export namespace Regex {
 			}
 		}
 
-		export class NoCapture extends Raw {
-			private readonly items: Raw[]
-
+		export class NoCapture extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNoCapture(this)
-			}
-
-			constructor(...items: Raw[]) {
-				super()
-				this.items = items
 			}
 		}
 
@@ -216,6 +190,34 @@ export namespace Regex {
 			export class Builder extends Raw.Builder {
 				finish(): Raw {
 					return new NoCapture(...this.get())
+				}
+			}
+		}
+
+		export class NonBoundary extends Mult {
+			accept<T>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNonBoundary(this)
+			}
+		}
+
+		export namespace NonBoundary {
+			export class Builder extends Raw.Builder {
+				finish(): Raw {
+					return new NonBoundary(...this.get())
+				}
+			}
+		}
+
+		export class Boundary extends Mult {
+			accept<T>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleBoundary(this)
+			}
+		}
+
+		export namespace Boundary {
+			export class Builder extends Raw.Builder {
+				finish(): Raw {
+					return new Boundary(...this.get())
 				}
 			}
 		}

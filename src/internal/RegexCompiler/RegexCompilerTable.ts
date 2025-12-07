@@ -2,6 +2,7 @@ import {
 	AnyChar,
 	AsInt,
 	AsString,
+	BoundaryClass,
 	CharClass,
 	ClassRange,
 	ClassUnit,
@@ -29,7 +30,12 @@ import {
 	Word
 } from "../RegexParser/Nodes.js"
 import { compileLiteral, compileUnicodeChar } from "./Cell.js"
-import { compileClassRange, compileNegated } from "./CharClass.js"
+import {
+	compileBoundaryClass,
+	compileCharClass,
+	compileClassRange,
+	compileNegated
+} from "./CharClass.js"
 import type {
 	IRegexCompilerFunction,
 	IRegexCompilerTypeTable
@@ -105,6 +111,7 @@ class CharClassCompilerTable {
 	private readonly compileDigit: IRegexCompilerFunction
 	private readonly compileSpace: IRegexCompilerFunction
 	private readonly compileCharClass: IRegexCompilerFunction
+	private readonly compileBoundaryClass: IRegexCompilerFunction
 	private readonly compileClassRange: IRegexCompilerFunction
 	private readonly compileClassUnit: IRegexCompilerFunction
 	private readonly compileNegated: IRegexCompilerFunction
@@ -116,6 +123,7 @@ class CharClassCompilerTable {
 			[Digit, this.compileDigit],
 			[Space, this.compileSpace],
 			[CharClass, this.compileCharClass],
+			[BoundaryClass, this.compileBoundaryClass],
 			[ClassRange, this.compileClassRange],
 			[ClassUnit, this.compileClassUnit],
 			[Negated, this.compileNegated]
@@ -128,10 +136,11 @@ class CharClassCompilerTable {
 		this.compileWord = compileWord(factory)
 		this.compileDigit = compileDigit(factory)
 		this.compileSpace = compileSpace(factory)
-		this.compileCharClass = compileComplexPart(() => factory.charClass())
+		this.compileCharClass = compileCharClass(factory)
+		this.compileBoundaryClass = compileBoundaryClass(factory)
 		this.compileClassUnit = compileWrapper
 		this.compileClassRange = compileClassRange(factory)
-		this.compileNegated = compileNegated(() => factory.negCharClass())
+		this.compileNegated = compileNegated(factory)
 	}
 }
 

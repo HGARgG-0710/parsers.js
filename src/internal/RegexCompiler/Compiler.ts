@@ -7,7 +7,6 @@ import type {
 } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import { TreeStream } from "../../objects/Stream.js"
-import { mapTypes } from "../../utils/Node.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
 import { RegexCompilerTable } from "./RegexCompilerTable.js"
 import { RegexNodeStream } from "./RegexNodeStream.js"
@@ -41,7 +40,7 @@ class RegexCompilerAlgorithmBuilder {
 
 	private constructor() {
 		this.buildAlgorithm = RegexTypeHandler(
-			mapTypes(RegexCompilerTable.instance.get()),
+			RegexCompilerTable.instance.get(),
 			compilerBuilderErrHandler
 		)
 	}
@@ -51,7 +50,7 @@ export class RegexCompiler {
 	static readonly instance = new RegexCompiler()
 
 	private build(regexAstStream: TreeStream<INode>) {
-		return RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)	
+		return RegexCompilerAlgorithmBuilder.instance.algorithm(regexAstStream)
 	}
 
 	compile(source: string, finalizer: IConcreteRegexFinalizer): IRegexMatcher {

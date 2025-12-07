@@ -1,6 +1,5 @@
 import type { ICellNode, INode } from "../../../interfaces.js"
 import type { TreeStream } from "../../../objects/Stream.js"
-import { mapTypes } from "../../../utils/Node.js"
 import {
 	InfiniteRange,
 	LimitsRange,
@@ -40,20 +39,17 @@ function handleLimitsRange(input: TreeStream<INode>) {
 
 // ! Replace the `compilerBuilderErrHandler` with a more appropriate one...
 const rangeKindsHandler = RegexTypeHandler<number[]>(
-	mapTypes([
+	[
 		[TrivialRange, handleTrivialRange],
 		[InfiniteRange, handleInfiniteRange],
 		[LimitsRange, handleLimitsRange]
-	]),
+	],
 	compilerBuilderErrHandler
 )
 
 // TODO: REFACTOR THIS [the function is way too long...]
 export function compileRange(regexBuilder: IRegexFactory) {
-	return function (
-		input: TreeStream<INode>,
-		handler: IRegexCompilerHandler
-	) {
+	return function (input: TreeStream<INode>, handler: IRegexCompilerHandler) {
 		input.next() // RangeQuantifier
 		const toMatch = handler(input)
 		input.next()

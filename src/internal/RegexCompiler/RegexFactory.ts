@@ -14,7 +14,9 @@ const {
 	Anything,
 	NoneOf,
 	IgnoreCase,
-	NoCapture
+	NoCapture,
+	NonBoundary,
+	Boundary
 } = Regex.Raw
 
 const { numbers } = array
@@ -25,7 +27,9 @@ export interface IRegexFactory {
 	ignoreCase(): IRegexPartBuilder
 	noCapture(): IRegexPartBuilder
 	charClass(): IRegexPartBuilder
+	boundaryClass(): IRegexPartBuilder
 	negCharClass(): IRegexPartBuilder
+	negBoundaryClass(): IRegexPartBuilder
 
 	anything(): Regex.Raw
 	word(): Regex.Raw
@@ -68,6 +72,14 @@ export class RawRegexFactory implements IRegexFactory {
 
 	negCharClass(): IRegexPartBuilder {
 		return new NoneOf.Builder()
+	}
+
+	boundaryClass(): IRegexPartBuilder {
+		return new Boundary.Builder()
+	}
+
+	negBoundaryClass(): IRegexPartBuilder {
+		return new NonBoundary.Builder()
 	}
 
 	anything(): Regex.Raw {

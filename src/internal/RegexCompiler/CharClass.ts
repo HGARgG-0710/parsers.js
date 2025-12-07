@@ -2,8 +2,9 @@ import { type } from "@hgargg-0710/one"
 import type { ICellNode, INode, IRegexPartBuilder } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import type { TreeStream } from "../../objects/Stream.js"
-import { mapTypes } from "../../utils/Node.js"
 import {
+	BoundaryClass,
+	CharClass,
 	EscapedLiteral,
 	FormFeed,
 	Newline,
@@ -13,10 +14,7 @@ import {
 	VTab
 } from "../RegexParser/Nodes.js"
 import { compileUnicodeChar } from "./Cell.js"
-import type {
-	IRegexCompilerFunction,
-	IRegexCompilerHandler
-} from "./Compiler.js"
+import type { IRegexCompilerHandler } from "./Compiler.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileFormFeed,
@@ -29,6 +27,14 @@ import type { IRegexFactory } from "./RegexFactory.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
 const { isString } = type
+
+export function compileCharClass(factory: IRegexFactory) {
+	return compileComplexPart(() => factory.charClass())
+}
+
+export function compileBoundaryClass(factory: IRegexFactory) {
+	return compileComplexPart(() => factory.boundaryClass())
+}
 
 export function compileClassRange(factory: IRegexFactory) {
 	const boundaryCompiler = compileClassRangeBoundary(factory)
@@ -100,7 +106,7 @@ function handleFormFeedBoundary(factory: IRegexFactory) {
 // ! Add a proper err handler later instead of the generic `compilerBuilderErrHandler`...
 function rangeBoundaryHandler(factory: IRegexFactory) {
 	return RegexTypeHandler<string | Regex.Raw>(
-		mapTypes<IRegexCompilerFunction<string | Regex.Raw>>([
+		[
 			[EscapedLiteral, handleCellBoundary],
 			[SingleChar, handleCellBoundary],
 			[UnicodeChar, handleUnicodeBoundary(factory)],
@@ -108,12 +114,11 @@ function rangeBoundaryHandler(factory: IRegexFactory) {
 			[Tab, handleTabBoundary(factory)],
 			[VTab, handleVTabBoundary(factory)],
 			[FormFeed, handleFormFeedBoundary(factory)]
-		]),
+		],
 		compilerBuilderErrHandler
 	)
 }
 
-// ! INTERNAL FUNCTION - used by `compileRange` [instead of the `handler` - FIX IT...];
 function compileClassRangeBoundary(factory: IRegexFactory) {
 	const handleRangeBoundary = rangeBoundaryHandler(factory)
 	return function (
@@ -125,15 +130,21 @@ function compileClassRangeBoundary(factory: IRegexFactory) {
 	}
 }
 
-export function compileNegated(
-	getNegCharClassBuilder: () => IRegexPartBuilder
-) {
-	const negCharClassCompiler = compileComplexPart(getNegCharClassBuilder)
-	return function (
-		input: TreeStream<INode>,
-		handler: IRegexCompilerHandler
-	) {
+// ! ADD A PROPER ERROR HANDLER HERE!!! (not the `compilerBuilderErrHandler`)
+function negatedBuilderPicker(factory: IRegexFactory) {
+	return RegexTypeHandler<IRegexPartBuilder>(
+		[
+			[CharClass, () => factory.negCharClass()],
+			[BoundaryClass, () => factory.negBoundaryClass()]
+		],
+		compilerBuilderErrHandler
+	)
+}
+
+export function compileNegated(factory: IRegexFactory) {
+	const builderPicker = negatedBuilderPicker(factory)
+	return function (input: TreeStream<INode>, handler: IRegexCompilerHandler) {
 		input.next() // Negated
-		return negCharClassCompiler(input, handler)
+		return compileComplexPart(() => builderPicker(input))(input, handler)
 	}
 }
