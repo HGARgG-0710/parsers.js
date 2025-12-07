@@ -16,7 +16,7 @@ class StateArrayListPair {
 		const newId = this.listId.inc()
 		this.currList.reset(newId)
 		this.nextList.reset(newId + 1)
-		this.currList.add(startState)
+		this.currList.add(startState, this.peekKeeper)
 	}
 
 	switch() {
@@ -33,7 +33,7 @@ class StateArrayListPair {
 		return this.currList
 	}
 
-	constructor() {
+	constructor(private readonly peekKeeper: PeekKeeper) {
 		const currId = this.listId.get()
 		this.currList = new StateArrayList(currId)
 		this.nextList = new StateArrayList(currId + 1)
@@ -61,12 +61,12 @@ class MatchResult {
 
 class MatchExecutor {
 	private readonly peekKeeper = new PeekKeeper()
-	private readonly lists = new StateArrayListPair()
+	private readonly lists = new StateArrayListPair(this.peekKeeper)
 	private readonly result = new MatchResult(this.peekKeeper)
 
 	private addVerified(state: ArrowState) {
 		const nextState = state.arrow.to
-		this.lists.next.add(nextState)
+		this.lists.next.add(nextState, this.peekKeeper)
 		return nextState.isMatch
 	}
 
@@ -74,7 +74,7 @@ class MatchExecutor {
 		return state.verify(this.peekKeeper) && this.addVerified(state)
 	}
 
-	private step() {
+	private attempt() {
 		let isMatch: boolean = false
 		this.lists.resetNext()
 		for (const state of this.lists.curr)
@@ -83,17 +83,17 @@ class MatchExecutor {
 	}
 
 	private init(stream: IPeekableStream) {
-		this.lists.reset(this.startState)
 		this.peekKeeper.init(stream)
+		this.lists.reset(this.startState)
 	}
 
-	private processPeeks() {
+	private fromPeeks() {
 		do {
 			if (this.lists.curr.isEmpty()) break
-			if (this.step()) break
+			if (this.attempt()) break
 			this.peekKeeper.advance()
 			this.lists.switch()
-		} while (this.peekKeeper.hasAnyMore())
+		} while (this.peekKeeper.hasCurrPeek())
 		return this.lists.next
 	}
 
@@ -104,7 +104,7 @@ class MatchExecutor {
 
 	doMatch(stream: IPeekableStream) {
 		this.init(stream)
-		return this.toMatchResult(this.processPeeks())
+		return this.toMatchResult(this.fromPeeks())
 	}
 
 	constructor(private readonly startState: State) {}

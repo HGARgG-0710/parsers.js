@@ -2,20 +2,39 @@ import type { IRawRegexVisitor } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import {
 	ArrowState,
+	BoundaryState,
 	CharState,
 	CodeRangeState,
 	EitherState,
 	EmptyState,
 	Fragment,
+	NonBoundaryState,
 	NoneOfState,
-	TokenState,
-	type IVerifiableState
+	State,
+	TokenState
 } from "./State.js"
 
 // ! pre-doc: this is the thing that converts the "Regex.Raw" into a linked list of `State`s
 export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	private toFragment(arrowState: ArrowState) {
 		return new Fragment(arrowState, [arrowState.arrow])
+	}
+
+	private toFragList(raw: Regex.Raw[]) {
+		const result: Fragment[] = []
+		for (const currItem of raw) {
+			const currFrag = currItem.accept(this)
+			if (currFrag) result.push(currFrag)
+		}
+		return result
+	}
+
+	private toInStateList(frags: Fragment[]) {
+		return frags.map((x) => x.inState)
+	}
+
+	private toInStates(raw: Regex.Raw[]): State[] {
+		return this.toInStateList(this.toFragList(raw))
 	}
 
 	handleCatenation({ items }: Regex.Raw.Catenation): Fragment | null {
@@ -42,14 +61,9 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return this.toFragment(new CharState(char))
 	}
 
-	handleEither({ items: options }: Regex.Raw.Either): Fragment | null {
-		const frags: Fragment[] = []
-		for (let i = 0; i < options.length; ++i) {
-			const currOption = options[i]
-			const currFrag = currOption.accept(this)
-			if (currFrag) frags.push(currFrag)
-		}
-		const inState = new EitherState(frags.map((x) => x.inState))
+	handleEither({ items }: Regex.Raw.Either): Fragment | null {
+		const frags = this.toFragList(items)
+		const inState = new EitherState(this.toInStateList(frags))
 		return new Fragment(inState, []).append(...frags)
 	}
 
@@ -88,23 +102,18 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleNoneOf({ items }: Regex.Raw.NoneOf): Fragment | null {
-		const negated: IVerifiableState[] = []
-		for (const currItem of items) {
-			const currFrag = currItem.accept(this)
-			// * we know it's `IVerifiableState` since it's always a ^[...]
-			// (i.e. by Type connascence)
-			if (currFrag) negated.push(currFrag.inState as IVerifiableState)
-		}
-		return this.toFragment(new NoneOfState(negated))
+		return this.toFragment(new NoneOfState(this.toInStates(items)))
 	}
 
 	handleTokenType({ type }: Regex.Raw.TokenType): Fragment | null {
 		return this.toFragment(new TokenState(type))
 	}
 
-	// ! FINISH
-	handleBoundary(boundary: Regex.Raw.Boundary): Fragment | null {}
+	handleBoundary({ items }: Regex.Raw.Boundary): Fragment | null {
+		return this.toFragment(new BoundaryState(this.toInStates(items)))
+	}
 
-	// ! FINISH
-	handleNonBoundary(nonBoundary: Regex.Raw.NonBoundary): Fragment | null {}
+	handleNonBoundary({ items }: Regex.Raw.NonBoundary): Fragment | null {
+		return this.toFragment(new NonBoundaryState(this.toInStates(items)))
+	}
 }

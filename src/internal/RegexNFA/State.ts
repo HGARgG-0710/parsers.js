@@ -8,14 +8,6 @@ import { isTyped } from "../../utils/Node.js"
 
 const { isString, isNull } = type
 
-export interface IMaybeVerifiableState extends State {
-	verify?(keeper: PeekKeeper): boolean
-}
-
-export interface IVerifiableState extends State {
-	verify(keeper: PeekKeeper): boolean
-}
-
 export class PeekKeeper<T = any> {
 	private stream: IPeekableStream<T>
 	private index = 0
@@ -28,11 +20,11 @@ export class PeekKeeper<T = any> {
 		++this.index
 	}
 
-	behind(n: number) {
-		this.stream.peek(Math.max(this.index - n, 0))
+	behind() {
+		--this.index
 	}
 
-	hasAnyMore() {
+	hasCurrPeek() {
 		return this.stream.hasPeek(this.index)
 	}
 
@@ -72,9 +64,9 @@ export class StateArrayList {
 		this.clear()
 	}
 
-	add(state: State) {
+	add(state: State, keeper: PeekKeeper) {
 		if (!state.beenSeen(this.listId)) {
-			state.addTo(this)
+			state.addTo(this, keeper)
 			state.markSeen(this.listId)
 		}
 	}
@@ -105,21 +97,22 @@ export class Fragment {
 }
 
 export class StateArrow {
-	private _to: IMaybeVerifiableState
+	private _to: State
 
 	get to() {
 		return this._to
 	}
 
-	set(out: IMaybeVerifiableState) {
+	set(out: State) {
 		this._to = out
 	}
 }
 
 export abstract class State {
-	private seenTimes = -1
+	abstract addTo(list: StateArrayList, keeper: PeekKeeper): void
+	abstract verify(keeper: PeekKeeper): boolean
 
-	abstract addTo(list: StateArrayList): void
+	private seenTimes = -1
 
 	markSeen(i: number) {
 		this.seenTimes = i
@@ -137,11 +130,9 @@ export abstract class State {
 export abstract class ArrowState extends State {
 	readonly arrow = new StateArrow()
 
-	addTo(list: StateArrayList): void {
+	addTo(list: StateArrayList, keeper: PeekKeeper): void {
 		list.states.push(this)
 	}
-
-	abstract verify(keeper: PeekKeeper): boolean
 }
 
 export class CharState extends ArrowState {
@@ -154,24 +145,36 @@ export class CharState extends ArrowState {
 	}
 }
 
-export class EitherState extends State implements IVerifiableState {
+class MultVerifier {
+	static verifyNone(options: State[], keeper: PeekKeeper): boolean {
+		return !MultVerifier.verifySome(options, keeper)
+	}
+
+	static verifySome(options: State[], keeper: PeekKeeper): boolean {
+		for (const option of options) if (option.verify(keeper)) return true
+		return false
+	}
+}
+
+abstract class MultState extends State {
 	// * note: we allow optional `verify` because depending on the
 	// * context in which `EitherState` is used, it serves DIFFERENT
 	// * PURPOSES. The reason it's represented by the same object is
 	// * because they are so semantically close.
 	// ? (although maybe it'd be better to split them? meh, maybe later)
 	verify(keeper: PeekKeeper): boolean {
-		for (const option of this.options)
-			if (option.verify && !option.verify(keeper)) return false
-		return true
+		return MultVerifier.verifySome(this.options, keeper)
 	}
 
-	addTo(list: StateArrayList): void {
-		for (const option of this.options) list.add(option)
-	}
-
-	constructor(readonly options: IMaybeVerifiableState[]) {
+	constructor(protected readonly options: State[]) {
 		super()
+	}
+}
+
+export class EitherState extends MultState {
+	addTo(list: StateArrayList, keeper: PeekKeeper): void {
+		for (const option of this.options)
+			if (option.verify(keeper)) option.addTo(list, keeper)
 	}
 }
 
@@ -197,12 +200,12 @@ export class AnythingState extends ArrowState {
 
 // ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
 export class EmptyState extends ArrowState {
-	addTo(list: StateArrayList): void {
-		list.add(this.arrow.to)
+	addTo(list: StateArrayList, keeper: PeekKeeper): void {
+		list.add(this.arrow.to, keeper)
 	}
 
 	verify(keeper: PeekKeeper): boolean {
-		return !this.arrow.to.verify || this.arrow.to.verify(keeper)
+		return this.arrow.to.verify(keeper)
 	}
 }
 
@@ -219,13 +222,44 @@ export class TokenState extends ArrowState {
 }
 
 export class NoneOfState extends ArrowState {
-	verify(verify: PeekKeeper): boolean {
-		for (const item of this.items) if (item.verify(verify)) return false
-		return true
+	verify(keeper: PeekKeeper): boolean {
+		return MultVerifier.verifyNone(this.options, keeper)
 	}
 
-	constructor(private readonly items: IVerifiableState[]) {
+	constructor(private readonly options: State[]) {
 		super()
+	}
+}
+
+export class BoundaryState extends ArrowState {
+	private verifySimple(keeper: PeekKeeper) {
+		return MultVerifier.verifySome(this.options, keeper)
+	}
+
+	protected verifyFirst(keeper: PeekKeeper) {
+		return keeper.isFirst()
+	}
+
+	protected verifyCommon(keeper: PeekKeeper) {
+		keeper.behind()
+		const isLastMatch = this.verifySimple(keeper)
+		keeper.advance()
+		const isCurrMatch = this.verifySimple(keeper)
+		return isCurrMatch !== isLastMatch
+	}
+
+	verify(keeper: PeekKeeper): boolean {
+		return this.verifyFirst(keeper) || this.verifyCommon(keeper)
+	}
+
+	constructor(private readonly options: State[]) {
+		super()
+	}
+}
+
+export class NonBoundaryState extends BoundaryState {
+	protected verifyCommon(keeper: PeekKeeper): boolean {
+		return !super.verifyCommon(keeper)
 	}
 }
 
