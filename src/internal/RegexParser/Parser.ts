@@ -1,3 +1,4 @@
+import { Config } from "../../global.js"
 import type {
 	IInputStream,
 	INode,
@@ -9,12 +10,7 @@ import {
 	CachingLocator,
 	PosCarryingLocator
 } from "../../modules/Stream/objects/Locator.js"
-import {
-	DynamicParser,
-	ErrorData,
-	ErrorPrinter,
-	ParseableInput
-} from "../../objects.js"
+import { DynamicParser, ErrorData, ParseableInput } from "../../objects.js"
 import { BasicHash, PeekHash } from "../../objects/HashMap.js"
 import {
 	CompositeStream,
@@ -32,7 +28,9 @@ import { RegexTokenizer } from "./Tokenizer.js"
 export class RegexParser {
 	static readonly instance = new RegexParser()
 
-	private readonly errPrinter = ErrorPrinter.PlainErrorPrinter.instance
+	private get errPrinter() {
+		return Config.regex.errorPrinter
+	}
 
 	private parseSource(source: string) {
 		return consume(parseRegex(new ParseableInput(source))).get()[0] as INode
