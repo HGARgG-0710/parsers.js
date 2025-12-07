@@ -39,10 +39,9 @@ class StateArrayListPair {
 	}
 }
 
-export class NFARegexMatcher implements IRegexMatcher {
+class MatchExecutor {
 	private readonly peekKeeper = new PeekKeeper()
-
-	private lists = new StateArrayListPair()
+	private readonly lists = new StateArrayListPair()
 
 	private addVerified(state: ArrowState) {
 		const nextState = state.arrow.to
@@ -67,7 +66,7 @@ export class NFARegexMatcher implements IRegexMatcher {
 		this.peekKeeper.init(stream)
 	}
 
-	private toStateArrayList(stream: IPeekableStream) {
+	toStateArrayList(stream: IPeekableStream) {
 		this.init(stream)
 
 		do {
@@ -80,10 +79,16 @@ export class NFARegexMatcher implements IRegexMatcher {
 		return this.lists.next
 	}
 
+	constructor(private readonly startState: State) {}
+}
+
+export class NFARegexMatcher implements IRegexMatcher {
+	private readonly executor: MatchExecutor
+
 	match<T = any>(
 		stream: IPeekableStream<T>
 	): false | string | (string | T)[] {
-		const list = this.toStateArrayList(stream)
+		const list = this.executor.toStateArrayList(stream)
 		if (!list.isMatch()) return false
 		// TODO: handle options:
 		// * 1. SUCCCESS MATCH - string (WE NEED TO *COLLECT* THE ITEMS FROM THE STRING!!!)
@@ -93,5 +98,7 @@ export class NFARegexMatcher implements IRegexMatcher {
 		// ! REMEMBER to add the `stream.toPeek(matchedItems.length)`
 	}
 
-	constructor(private readonly startState: State) {}
+	constructor(startState: State) {
+		this.executor = new MatchExecutor(startState)
+	}
 }
