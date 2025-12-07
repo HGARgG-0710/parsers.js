@@ -45,7 +45,9 @@ export class PeekKeeper<T = any> {
 		this.index = 0
 	}
 
-	constructor() {}
+	commit() {
+		this.stream.toPeek(this.index)
+	}
 }
 
 export class StateArrayList {

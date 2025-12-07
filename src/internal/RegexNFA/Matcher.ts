@@ -1,3 +1,4 @@
+import assert from "node:assert"
 import type { IPeekableStream, IRegexMatcher } from "../../interfaces.js"
 import { OverflowCounter } from "../OverflowCounter.js"
 import { ArrowState, PeekKeeper, StateArrayList, type State } from "./State.js"
@@ -39,9 +40,29 @@ class StateArrayListPair {
 	}
 }
 
+class MatchResult {
+	private result?: StateArrayList
+
+	commit() {
+		this.peekKeeper.commit()
+	}
+
+	get() {
+		assert(this.result)
+		return this.result
+	}
+
+	set(result: StateArrayList) {
+		this.result = result
+	}
+
+	constructor(private readonly peekKeeper: PeekKeeper) {}
+}
+
 class MatchExecutor {
 	private readonly peekKeeper = new PeekKeeper()
 	private readonly lists = new StateArrayListPair()
+	private readonly result = new MatchResult(this.peekKeeper)
 
 	private addVerified(state: ArrowState) {
 		const nextState = state.arrow.to
@@ -66,17 +87,24 @@ class MatchExecutor {
 		this.peekKeeper.init(stream)
 	}
 
-	toStateArrayList(stream: IPeekableStream) {
-		this.init(stream)
-
+	private processPeeks() {
 		do {
 			if (this.lists.curr.isEmpty()) break
 			if (this.step()) break
 			this.peekKeeper.advance()
 			this.lists.switch()
 		} while (this.peekKeeper.hasAnyMore())
-
 		return this.lists.next
+	}
+
+	private toMatchResult(rawStateList: StateArrayList) {
+		this.result.set(rawStateList)
+		return this.result
+	}
+
+	doMatch(stream: IPeekableStream) {
+		this.init(stream)
+		return this.toMatchResult(this.processPeeks())
 	}
 
 	constructor(private readonly startState: State) {}
@@ -88,14 +116,15 @@ export class NFARegexMatcher implements IRegexMatcher {
 	match<T = any>(
 		stream: IPeekableStream<T>
 	): false | string | (string | T)[] {
-		const list = this.executor.toStateArrayList(stream)
+		const result = this.executor.doMatch(stream)
+		const list = result.get()
 		if (!list.isMatch()) return false
+		result.commit()
 		// TODO: handle options:
 		// * 1. SUCCCESS MATCH - string (WE NEED TO *COLLECT* THE ITEMS FROM THE STRING!!!)
 		// * 2. SUCCESS MATCH - (string | T)[]; One needs a GENERIC COLLECTION for (string | T)[],
 		// 		which would DEGRADE to `string` (via concatenation) in case that NO "ITyped" types
 		// 		has ever appeared...
-		// ! REMEMBER to add the `stream.toPeek(matchedItems.length)`
 	}
 
 	constructor(startState: State) {
