@@ -1,6 +1,9 @@
 import { Pools } from "../../../../../main.js"
 import type { ILineIndex, IPoolKeeping } from "../../../../interfaces.js"
-import type { ICommonStream, IOwnedStream } from "../../../../interfaces/Stream.js"
+import type {
+	ICommonStream,
+	IOwnedStream
+} from "../../../../interfaces/Stream.js"
 import { ObjectPool } from "../../../../objects.js"
 import type {
 	IIndexStream,
@@ -40,7 +43,7 @@ function BuildIndexStream<T = any>(
 			super()
 			this.isNewline = isNewline
 			this.lineIndex = lineIndexMaker()
-			super(resource)
+			this.init(resource)
 		}
 	}
 }

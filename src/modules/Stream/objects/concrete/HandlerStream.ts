@@ -50,7 +50,7 @@ function BuildBeforeHandlerStream<In = any, Out = any>(
 		constructor(resource?: IOwnedStream<In>) {
 			super()
 			this.handler = handler
-			super(resource)
+			this.init(resource)
 		}
 	}
 

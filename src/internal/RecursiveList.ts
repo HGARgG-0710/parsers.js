@@ -1170,7 +1170,7 @@ export class RecursiveList<
 		const lastInitialized = new LastInitialized()
 		this.asEvaluable = new EvaluableList(lastInitialized, this.items)
 		this.asRenewable = new RenewableList(lastInitialized, this.items)
-		super(args, ...rest)
+		this.init(args, ...rest)
 	}
 }
 
