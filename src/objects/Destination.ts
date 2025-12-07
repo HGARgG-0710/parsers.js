@@ -8,46 +8,29 @@ const pickTruncationWriteFlag = (truncate: boolean) => (truncate ? "w" : "a")
  * A class implementing `IDestination` and `IInitializable<[IEncoder]>`.
  * Purposed for safe managed writing access to files.
  */
-export class WritingDestination
+export class FileDestination
 	implements IDestination, IInitializable<[IEncoder]>
 {
 	["constructor"]: new (filename: string, truncate?: boolean) => this
 
-	private encoder: IEncoder
-	private _isOpen: boolean
-	private readonly destination: number
-
-	private get encodedSize() {
-		return this.encoder.encodedSize
-	}
-
-	private get buffer() {
-		return this.encoder.buffer
-	}
-
-	private set isOpen(newIsOpen: boolean) {
-		this._isOpen = newIsOpen
-	}
+	private state: IFileDestinationState
+	private readonly open: IFileDestinationState
 
 	get isOpen() {
-		return this._isOpen
+		return this.state === this.open
 	}
 
-	init(encoder: IEncoder) {
-		this.encoder = encoder
+	init(encoder: IEncoder): this {
+		this.state.init(encoder)
 		return this
 	}
 
-	write(input: string) {
-		this.encoder.toBuffer(input)
-		writeSync(this.destination, this.buffer, 0, this.encodedSize)
+	write(input: string): void {
+		this.state.write(input)
 	}
 
 	cleanup() {
-		if (this.isOpen) {
-			closeSync(this.destination)
-			this.isOpen = false
-		}
+		this.state = this.state.cleanup()
 	}
 
 	copy() {
@@ -58,7 +41,54 @@ export class WritingDestination
 		private readonly filename: string,
 		private readonly truncate: boolean = false
 	) {
-		this.destination = openSync(filename, pickTruncationWriteFlag(truncate))
-		this.isOpen = true
+		const descriptor = openSync(filename, pickTruncationWriteFlag(truncate))
+		this.state = this.open = new FileDestinationOpen(
+			descriptor,
+			new FileDestinationClosed()
+		)
+	}
+}
+
+interface IFileDestinationState {
+	cleanup(): IFileDestinationState
+	write(input: string): void
+	init(encoder: IEncoder): void
+}
+
+class FileDestinationOpen implements IFileDestinationState {
+	private encoder: IEncoder
+
+	init(encoder: IEncoder) {
+		this.encoder = encoder
+	}
+
+	write(input: string) {
+		this.encoder.toBuffer(input)
+		writeSync(
+			this.descriptor,
+			this.encoder.buffer,
+			0,
+			this.encoder.encodedSize
+		)
+	}
+
+	cleanup(): IFileDestinationState {
+		closeSync(this.descriptor)
+		return this.closed
+	}
+
+	constructor(
+		private readonly descriptor: number,
+		private readonly closed: FileDestinationClosed
+	) {}
+}
+
+class FileDestinationClosed implements IFileDestinationState {
+	init(encoder: IEncoder): void {}
+
+	write(input: string): void {}
+
+	cleanup(): IFileDestinationState {
+		return this
 	}
 }
