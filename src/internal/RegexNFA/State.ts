@@ -2,18 +2,50 @@
 // * 1. for `UnicodeProperty` - one that (quickly/simply) defines a specific unicode property supported by the library's `Regex` syntax
 
 import { type } from "@hgargg-0710/one"
-import type { IValidNodeType } from "../../interfaces.js"
+import type { IPeekableStream, IValidNodeType } from "../../interfaces.js"
 import { RetainedArray } from "../../objects.js"
 import { isTyped } from "../../utils/Node.js"
 
 const { isString, isNull } = type
 
 export interface IMaybeVerifiableState extends State {
-	verify?(x: any): boolean
+	verify?(keeper: PeekKeeper): boolean
 }
 
 export interface IVerifiableState extends State {
-	verify(x: any): boolean
+	verify(keeper: PeekKeeper): boolean
+}
+
+export class PeekKeeper<T = any> {
+	private stream: IPeekableStream<T>
+	private index = 0
+
+	get curr() {
+		return this.stream.peek(this.index)
+	}
+
+	advance() {
+		++this.index
+	}
+
+	behind(n: number) {
+		this.stream.peek(Math.max(this.index - n, 0))
+	}
+
+	hasAnyMore() {
+		return this.stream.hasPeek(this.index)
+	}
+
+	isFirst() {
+		return this.index === 0
+	}
+
+	init(stream: IPeekableStream<T>) {
+		this.stream = stream
+		this.index = 0
+	}
+
+	constructor() {}
 }
 
 export class StateArrayList {
@@ -107,12 +139,12 @@ export abstract class ArrowState extends State {
 		list.states.push(this)
 	}
 
-	abstract verify(x: any): boolean
+	abstract verify(keeper: PeekKeeper): boolean
 }
 
 export class CharState extends ArrowState {
-	verify(x: any): boolean {
-		return x === this.char
+	verify(keeper: PeekKeeper): boolean {
+		return keeper.curr === this.char
 	}
 
 	constructor(private readonly char: string) {
@@ -126,9 +158,9 @@ export class EitherState extends State implements IVerifiableState {
 	// * PURPOSES. The reason it's represented by the same object is
 	// * because they are so semantically close.
 	// ? (although maybe it'd be better to split them? meh, maybe later)
-	verify(x: any): boolean {
+	verify(keeper: PeekKeeper): boolean {
 		for (const option of this.options)
-			if (option.verify && !option.verify(x)) return false
+			if (option.verify && !option.verify(keeper)) return false
 		return true
 	}
 
@@ -142,9 +174,10 @@ export class EitherState extends State implements IVerifiableState {
 }
 
 export class CodeRangeState extends ArrowState {
-	verify(x: any): boolean {
-		if (!isString(x)) return false
-		const codePoint = x.codePointAt(0)!
+	verify(keeper: PeekKeeper): boolean {
+		const currItem = keeper.curr
+		if (!isString(currItem)) return false
+		const codePoint = currItem.codePointAt(0)!
 		return this.from <= codePoint && codePoint <= this.to
 	}
 
@@ -155,7 +188,7 @@ export class CodeRangeState extends ArrowState {
 
 // ! pre-doc: a state that matches any item - ADVANCES THE POSITION
 export class AnythingState extends ArrowState {
-	verify(x: any): boolean {
+	verify(keeper: PeekKeeper): boolean {
 		return true
 	}
 }
@@ -166,15 +199,16 @@ export class EmptyState extends ArrowState {
 		list.add(this.arrow.to)
 	}
 
-	verify(x: any): boolean {
-		return !this.arrow.to.verify || this.arrow.to.verify(x)
+	verify(keeper: PeekKeeper): boolean {
+		return !this.arrow.to.verify || this.arrow.to.verify(keeper)
 	}
 }
 
 // ! pre-doc: this checks a given item for: 1. being an `ITyped`; 2. having the correct `type` (use `utils.Node.isType` for this...)
 export class TokenState extends ArrowState {
-	verify(x: any): boolean {
-		return isTyped(x) && x.type === this.type
+	verify(verify: PeekKeeper): boolean {
+		const currItem = verify.curr
+		return isTyped(currItem) && currItem.type === this.type
 	}
 
 	constructor(private readonly type: IValidNodeType) {
@@ -183,8 +217,8 @@ export class TokenState extends ArrowState {
 }
 
 export class NoneOfState extends ArrowState {
-	verify(x: any): boolean {
-		for (const item of this.items) if (item.verify(x)) return false
+	verify(verify: PeekKeeper): boolean {
+		for (const item of this.items) if (item.verify(verify)) return false
 		return true
 	}
 
@@ -198,7 +232,7 @@ export class MatchState extends State {
 		list.setMatchState(this)
 	}
 
-	verify(x: any) {
+	verify(keeper: PeekKeeper) {
 		return true
 	}
 

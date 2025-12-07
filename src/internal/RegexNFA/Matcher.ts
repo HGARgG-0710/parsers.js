@@ -1,68 +1,89 @@
 import type { IPeekableStream, IRegexMatcher } from "../../interfaces.js"
 import { OverflowCounter } from "../OverflowCounter.js"
-import { ArrowState, StateArrayList, type State } from "./State.js"
+import { ArrowState, PeekKeeper, StateArrayList, type State } from "./State.js"
 
-export class NFARegexMatcher implements IRegexMatcher {
+class StateArrayListPair {
 	private readonly listId = new OverflowCounter()
 	private currList: StateArrayList
 	private nextList: StateArrayList
 
-	private input: IPeekableStream
-
-	private peekAt(i: number) {
-		return this.input.peek(i)
-	}
-
-	private resetNextList() {
+	resetNext() {
 		this.nextList.reset(this.listId.inc())
 	}
 
-	private addVerified(state: ArrowState) {
-		const nextState = state.arrow.to
-		this.nextList.add(nextState)
-		return nextState.isMatch
-	}
-
-	private tryMatching<T = any>(state: ArrowState, against: T) {
-		return state.verify(against) && this.addVerified(state)
-	}
-
-	private step<T = any>(i: number) {
-		let isMatch: boolean = false
-		const curr: T = this.peekAt(i)
-		this.resetNextList()
-		for (const state of this.currList)
-			if ((isMatch = this.tryMatching(state, curr))) break
-		return isMatch
-	}
-
-	private resetLists() {
+	reset(startState: State) {
 		const newId = this.listId.inc()
 		this.currList.reset(newId)
 		this.nextList.reset(newId + 1)
-		this.currList.add(this.startState)
+		this.currList.add(startState)
 	}
 
-	private toStateArrayList() {
-		this.resetLists()
-		let i = 0
+	switch() {
+		const temp = this.currList
+		this.currList = this.nextList
+		this.nextList = temp
+	}
+
+	get next() {
+		return this.nextList
+	}
+
+	get curr() {
+		return this.currList
+	}
+
+	constructor() {
+		const currId = this.listId.get()
+		this.currList = new StateArrayList(currId)
+		this.nextList = new StateArrayList(currId + 1)
+	}
+}
+
+export class NFARegexMatcher implements IRegexMatcher {
+	private readonly peekKeeper = new PeekKeeper()
+
+	private lists = new StateArrayListPair()
+
+	private addVerified(state: ArrowState) {
+		const nextState = state.arrow.to
+		this.lists.next.add(nextState)
+		return nextState.isMatch
+	}
+
+	private tryMatching(state: ArrowState) {
+		return state.verify(this.peekKeeper) && this.addVerified(state)
+	}
+
+	private step() {
+		let isMatch: boolean = false
+		this.lists.resetNext()
+		for (const state of this.lists.curr)
+			if ((isMatch = this.tryMatching(state))) break
+		return isMatch
+	}
+
+	private init(stream: IPeekableStream) {
+		this.lists.reset(this.startState)
+		this.peekKeeper.init(stream)
+	}
+
+	private toStateArrayList(stream: IPeekableStream) {
+		this.init(stream)
 
 		do {
-			if (this.currList.isEmpty()) break
-			if (this.step(i++)) break
-			const temp = this.currList
-			this.currList = this.nextList
-			this.nextList = temp
-		} while (this.input.hasPeek(i))
+			if (this.lists.curr.isEmpty()) break
+			if (this.step()) break
+			this.peekKeeper.advance()
+			this.lists.switch()
+		} while (this.peekKeeper.hasAnyMore())
 
-		return this.nextList
+		return this.lists.next
 	}
 
 	match<T = any>(
 		stream: IPeekableStream<T>
 	): false | string | (string | T)[] {
-		this.input = stream
-		const list = this.toStateArrayList()
+		const list = this.toStateArrayList(stream)
 		if (!list.isMatch()) return false
 		// TODO: handle options:
 		// * 1. SUCCCESS MATCH - string (WE NEED TO *COLLECT* THE ITEMS FROM THE STRING!!!)
@@ -72,9 +93,5 @@ export class NFARegexMatcher implements IRegexMatcher {
 		// ! REMEMBER to add the `stream.toPeek(matchedItems.length)`
 	}
 
-	constructor(private readonly startState: State) {
-		const currId = this.listId.get()
-		this.currList = new StateArrayList(currId)
-		this.nextList = new StateArrayList(currId + 1)
-	}
+	constructor(private readonly startState: State) {}
 }
