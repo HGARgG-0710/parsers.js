@@ -1,7 +1,7 @@
 import { array } from "@hgargg-0710/one"
 import type { IRegexPartBuilder, IValidNodeType } from "../../interfaces.js"
 import { Regex } from "../../objects.js"
-import { CodePointNavigator } from "../CodePointNavigator.js"
+import { charAfter, charBefore } from "../CodePoint.js"
 
 const {
 	Either,
@@ -149,17 +149,11 @@ export class RawRegexFactory implements IRegexFactory {
 	}
 
 	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw {
-		return new Either(
-			from,
-			this.charRange(CodePointNavigator.charAfter("\n"), to)
-		)
+		return new Either(from, this.charRange(charAfter("\n"), to))
 	}
 
 	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
-		return new Either(
-			this.charRange(from, CodePointNavigator.charBefore("\n")),
-			to
-		)
+		return new Either(this.charRange(from, charBefore("\n")), to)
 	}
 
 	private constructor() {}

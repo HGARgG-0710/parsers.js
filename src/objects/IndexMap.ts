@@ -197,14 +197,6 @@ export abstract class IndexMap<
 	private extension: IExtension<Index> = id
 	private keyExtension: IKeyExtension<K, RealKey> = id as any
 
-	private get size() {
-		return this.keys.length
-	}
-
-	private get keys() {
-		return this.carrier.keys
-	}
-
 	private initCarrier() {
 		this.carrier = this.liquid.toCarrier()
 	}
@@ -246,6 +238,14 @@ export abstract class IndexMap<
 		return BadIndex
 	}
 
+	get size() {
+		return this.keys.length
+	}
+
+	get keys() {
+		return this.carrier.keys
+	}
+
 	get default() {
 		return this.carrier.default
 	}
@@ -283,7 +283,7 @@ export namespace IndexMap {
 		K,
 		V,
 		Default,
-		RealKey extends any[] = K extends any[] ? K : any[],
+		RealKey extends any[] = K extends any[] ? K : K[],
 		Index = K
 	> extends IndexMap<K, V, Default, RealKey, Index> {
 		private static MidMap = class<

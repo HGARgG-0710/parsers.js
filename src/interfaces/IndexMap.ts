@@ -1,4 +1,4 @@
-import type { ICopiable, IIndexable } from "../interfaces.js"
+import type { ICopiable, IIndexable, ISizeable } from "../interfaces.js"
 import type {
 	IFromTableCarrierConvertible,
 	IToModifiableConvertible
@@ -37,7 +37,10 @@ export interface IMidMap<K = any, V = any, Default = any, Index = K>
  */
 export interface IIndexMap<K = any, V = any, Default = any, Index = K>
 	extends ISimpleMap<K, V, Default, Index>,
-		IExtendableMap<K, V, Default, Index> {}
+		IExtendableMap<K, V, Default, Index>,
+		ISizeable {
+	readonly keys: readonly K[]
+}
 
 /**
  * This is an `IIndexMap<K, V, Default>` without the
