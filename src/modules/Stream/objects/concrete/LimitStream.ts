@@ -9,6 +9,7 @@ import type {
 	IStream
 } from "../../../../interfaces/Stream.js"
 import { mixin } from "../../../../mixin.js"
+import { Poolable } from "../../../../objects.js"
 import { ObjectPool } from "../../../../objects/ObjectPool.js"
 import { navigate } from "../../../../utils/Stream.js"
 import type {
@@ -21,7 +22,6 @@ import type {
 	IStreamStep
 } from "../../interfaces/StreamPosition.js"
 import { asSteps, bindStep, isStreamPredicate } from "../../utils/Step.js"
-import { PoolableStream } from "../templates.js"
 import { BasicResourceStream } from "../templates/BasicResourceStream.js"
 
 const { F } = boolean
@@ -161,7 +161,7 @@ function BuildLimitStream<T = any>(
 				this.init(resource)
 			}
 		},
-		[BasicResourceStream, PoolableStream]
+		[BasicResourceStream, Poolable]
 	) as unknown as IPoolKeeping<ICommonStream<T>>
 }
 

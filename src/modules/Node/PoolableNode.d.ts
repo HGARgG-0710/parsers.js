@@ -1,7 +1,6 @@
-import type { IFreeable } from "../../interfaces.js";
-import type { ObjectPool } from "../../objects.js";
-import { BaseNode } from "./BaseNode.js";
-
+import type { IFreeable, IInitializable } from "../../interfaces.ts"
+import type { ObjectPool } from "../../objects.ts"
+import { BaseNode } from "./BaseNode.ts"
 
 /**
  * This is a class that encapsulates the pooling logic for
@@ -14,14 +13,11 @@ import { BaseNode } from "./BaseNode.js";
  * contain the pool which would do the creation and the freeing
  * of the `INode<Args>` instances.
  */
-
-export abstract class PoolableNode<Args extends any[] = any[]>
+export declare abstract class PoolableNode<Args extends any[] = any[]>
 	extends BaseNode
-	implements IFreeable {
+	implements IFreeable, IInitializable<Args>
+{
 	abstract init(...x: [] | Partial<Args>): this
-	protected abstract readonly pool: ObjectPool
-
-	free() {
-		this.pool.free(this)
-	}
+	protected abstract readonly pool: ObjectPool<typeof this>
+	free(): void
 }

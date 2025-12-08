@@ -1,6 +1,6 @@
 import { mixin } from "../../../../mixin.js"
+import { Poolable } from "../../../../objects.js"
 import { DyssyncOwningStream } from "./DyssyncOwningStream.js"
-import { PoolableStream } from "./PoolableStream.js"
 
 export const DyssyncOwningPoolableStream = new mixin(
 	{
@@ -10,5 +10,5 @@ export const DyssyncOwningPoolableStream = new mixin(
 			this.super.DyssyncOwningStream.constructor.call(this, resource)
 		}
 	},
-	[DyssyncOwningStream, PoolableStream]
+	[DyssyncOwningStream, Poolable]
 )

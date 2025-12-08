@@ -10,7 +10,7 @@ import {
  *
  * If the user creates their own `ILinkedStream`s that have
  * a pool (i.e. a non-empty `free` method, such as when mixing in
- * `PoolableStream`), it is recommended they add the pool to
+ * `Poolable`), it is recommended they add the pool to
  * `Pools.Streaam` via calling `Pools.Stream.add(userPool)`.
  */
 export const Stream = new PoolCollection()

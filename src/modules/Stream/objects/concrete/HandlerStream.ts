@@ -8,13 +8,9 @@ import type {
 	IOwnedStream
 } from "../../../../interfaces/Stream.js"
 import { mixin } from "../../../../mixin.js"
-import { ObjectPool } from "../../../../objects.js"
+import { ObjectPool, Poolable, Stateful } from "../../../../objects.js"
 import type { IHandler } from "../../interfaces/HandlerStream.js"
-import {
-	BasicResourceStream,
-	PoolableStream,
-	StatefulStream
-} from "../templates.js"
+import { BasicResourceStream } from "../templates.js"
 
 function BuildBeforeHandlerStream<In = any, Out = any>(
 	handler: IHandler<In, Out>
@@ -80,7 +76,7 @@ function BuildHandlerStream<In = any, Out = any>(handler: IHandler<In, Out>) {
 				this.super.BeforeHandlerStream.constructor.call(this, ...args)
 			}
 		},
-		[BuildBeforeHandlerStream(handler), StatefulStream, PoolableStream]
+		[BuildBeforeHandlerStream(handler), Stateful, Poolable]
 	).toClass() as unknown as IPoolKeeping<
 		IControlStream<Out> & ICommonStream<Out>
 	>

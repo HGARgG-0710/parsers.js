@@ -1,7 +1,7 @@
 import { Pools } from "../../../../global.js"
 import { mixin } from "../../../../mixin.js"
-import { ObjectPool } from "../../../../objects.js"
-import { CurrDyssyncLinkedStream, PoolableStream } from "../templates.js"
+import { ObjectPool, Poolable } from "../../../../objects.js"
+import { CurrDyssyncLinkedStream } from "../templates.js"
 import { FiniteStream } from "./FiniteStream.js"
 
 export const FlattenerStream = new mixin(
@@ -49,5 +49,5 @@ export const FlattenerStream = new mixin(
 			this.super.CurrDyssyncLinkedStream.constructor.call(this, resource)
 		}
 	},
-	[CurrDyssyncLinkedStream, PoolableStream]
+	[CurrDyssyncLinkedStream, Poolable]
 ).toClass()

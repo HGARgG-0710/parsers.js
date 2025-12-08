@@ -29,7 +29,6 @@ const _SingletonStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[],
 	[PreCommonStream, OwningStream, TrivialStream]
 ).toClass()
 

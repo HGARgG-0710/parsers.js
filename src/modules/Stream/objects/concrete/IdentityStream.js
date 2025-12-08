@@ -1,7 +1,8 @@
 import { Pools } from "../../../../global.js"
+import { Poolable } from "../../../../objects.js"
 import { mixin } from "../../../mixin.js"
 import { ObjectPool } from "../../../objects/ObjectPool.js"
-import { PipeStream, PoolableStream, SyncStream } from "../templates.js"
+import { PipeStream, SyncStream } from "../templates.js"
 
 export const IdentityStream = new mixin(
 	{
@@ -18,5 +19,5 @@ export const IdentityStream = new mixin(
 			this.super.PipeStream.constructor.call(this, resource)
 		}
 	},
-	[PipeStream, SyncStream, PoolableStream]
+	[PipeStream, SyncStream, Poolable]
 ).toClass()
