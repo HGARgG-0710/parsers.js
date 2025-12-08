@@ -8,7 +8,7 @@ import type {
 	ILinkedStream
 } from "../interfaces.js"
 import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
-import { Initializable } from "./Initializer.js"
+import { Initializable } from "./Initializable.js"
 import { IdentityStream } from "./Stream.js"
 
 class ParsedStream<InType = any, FinalType = any, InitType = any>

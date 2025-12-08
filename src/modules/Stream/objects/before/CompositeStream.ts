@@ -8,7 +8,7 @@ import type {
 	IRawStreamArray
 } from "../../../../interfaces/Stream.js"
 import { StreamList } from "../../../../internal/StreamList.js"
-import { resourceInitializer } from "../../../../objects/Initializer.js"
+import { resourceInitializer } from "../../../../objects/Initializable.js"
 import { IdentityStream } from "../concrete.js"
 
 const compositeStreamInitializer = {

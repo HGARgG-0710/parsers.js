@@ -2,13 +2,56 @@
 // * 1. for `UnicodeProperty` - one that (quickly/simply) defines a specific unicode property supported by the library's `Regex` syntax
 
 import { type } from "@hgargg-0710/one"
+import assert from "node:assert"
+import { Pools } from "../../global.js"
 import type { IPeekableStream, IValidNodeType } from "../../interfaces.js"
-import { RetainedArray } from "../../objects.js"
+import { ObjectPool, Poolable, RetainedArray } from "../../objects.js"
 import { isTyped } from "../../utils/Node.js"
 
 const { isString, isNull } = type
 
+export class BoundState<T = any> extends Poolable<[ArrowState, PeekKeeper<T>]> {
+	static readonly pool = Pools.Internal.add(
+		new ObjectPool<BoundState, [State, PeekKeeper]>(BoundState)
+	)
+
+	private state: ArrowState
+	readonly keeper = new PeekKeeper<T>()
+
+	protected get pool() {
+		return BoundState.pool as ObjectPool<
+			typeof this,
+			[State, PeekKeeper<T>]
+		>
+	}
+
+	init(state?: ArrowState, keeper?: PeekKeeper): this {
+		if (state) this.state = state
+		if (keeper) this.keeper.from(keeper)
+		return this
+	}
+
+	verify() {
+		return this.state.verify(this.keeper)
+	}
+
+	advance() {
+		this.state.advance(this.keeper)
+	}
+
+	next() {
+		return this.state.next()
+	}
+
+	hasCurrPeek() {
+		return this.keeper.hasCurrPeek()
+	}
+}
+
 export class PeekKeeper<T = any> {
+	private static TotalKeepers = 0
+
+	readonly id: number
 	private stream: IPeekableStream<T>
 	private index = 0
 
@@ -40,11 +83,41 @@ export class PeekKeeper<T = any> {
 	commit() {
 		this.stream.toPeek(this.index)
 	}
+
+	from(keeper: PeekKeeper<T>) {
+		this.index = keeper.index
+		this.stream = keeper.stream
+	}
+
+	constructor() {
+		assert(PeekKeeper.TotalKeepers <= Number.MAX_SAFE_INTEGER)
+		this.id = PeekKeeper.TotalKeepers++
+	}
 }
 
 export class StateArrayList {
-	readonly states = new RetainedArray<ArrowState>()
+	readonly states = new RetainedArray<BoundState>()
 	private matchState: MatchState | null = null
+
+	private clearStates() {
+		for (const boundState of this.states) boundState.free()
+		this.states.clear()
+	}
+
+	private resetMatch() {
+		this.matchState = null
+	}
+
+	private newIdAdd(state: State, keeper: PeekKeeper) {
+		state.markSeen(this.listId)
+		state.forgetAllKeepers()
+		this.commonAdd(state, keeper)
+	}
+
+	private commonAdd(state: State, keeper: PeekKeeper) {
+		state.register(keeper)
+		state.addTo(this, keeper)
+	}
 
 	isMatch() {
 		return !isNull(this.matchState)
@@ -55,8 +128,8 @@ export class StateArrayList {
 	}
 
 	clear() {
-		this.states.clear()
-		this.matchState = null
+		this.clearStates()
+		this.resetMatch()
 	}
 
 	reset(listId: number) {
@@ -65,10 +138,8 @@ export class StateArrayList {
 	}
 
 	add(state: State, keeper: PeekKeeper) {
-		if (!state.beenSeen(this.listId)) {
-			state.addTo(this, keeper)
-			state.markSeen(this.listId)
-		}
+		if (!state.beenSeen(this.listId)) return this.newIdAdd(state, keeper)
+		if (!state.beenSeenWith(keeper)) return this.commonAdd(state, keeper)
 	}
 
 	setMatchState(state: MatchState) {
@@ -111,8 +182,23 @@ export class StateArrow {
 export abstract class State {
 	abstract addTo(list: StateArrayList, keeper: PeekKeeper): void
 	abstract verify(keeper: PeekKeeper): boolean
+	abstract advance(keeper: PeekKeeper): void
+
+	private readonly keeperIds = new RetainedArray<number>()
 
 	private seenTimes = -1
+
+	beenSeenWith(keeper: PeekKeeper): boolean {
+		return this.keeperIds.has(keeper.id)
+	}
+
+	register(keeper: PeekKeeper) {
+		this.keeperIds.push(keeper.id)
+	}
+
+	forgetAllKeepers() {
+		this.keeperIds.clear()
+	}
 
 	markSeen(i: number) {
 		this.seenTimes = i
@@ -130,8 +216,20 @@ export abstract class State {
 export abstract class ArrowState extends State {
 	readonly arrow = new StateArrow()
 
+	with(keeper: PeekKeeper) {
+		return BoundState.pool.create(this, keeper)
+	}
+
+	advance(keeper: PeekKeeper) {
+		keeper.advance()
+	}
+
 	addTo(list: StateArrayList, keeper: PeekKeeper): void {
-		list.states.push(this)
+		list.states.push(this.with(keeper))
+	}
+
+	next() {
+		return this.arrow.to
 	}
 }
 
@@ -146,10 +244,6 @@ export class CharState extends ArrowState {
 }
 
 class MultVerifier {
-	static verifyNone(options: State[], keeper: PeekKeeper): boolean {
-		return !MultVerifier.verifySome(options, keeper)
-	}
-
 	static verifySome(options: State[], keeper: PeekKeeper): boolean {
 		for (const option of options) if (option.verify(keeper)) return true
 		return false
@@ -172,9 +266,10 @@ abstract class MultState extends State {
 }
 
 export class EitherState extends MultState {
+	advance(keeper: PeekKeeper): void {}
+
 	addTo(list: StateArrayList, keeper: PeekKeeper): void {
-		for (const option of this.options)
-			if (option.verify(keeper)) option.addTo(list, keeper)
+		for (const option of this.options) option.addTo(list, keeper)
 	}
 }
 
@@ -201,18 +296,18 @@ export class AnythingState extends ArrowState {
 // ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
 export class EmptyState extends ArrowState {
 	addTo(list: StateArrayList, keeper: PeekKeeper): void {
-		list.add(this.arrow.to, keeper)
+		this.next().addTo(list, keeper)
 	}
 
 	verify(keeper: PeekKeeper): boolean {
-		return this.arrow.to.verify(keeper)
+		return this.next().verify(keeper)
 	}
 }
 
 // ! pre-doc: this checks a given item for: 1. being an `ITyped`; 2. having the correct `type` (use `utils.Node.isType` for this...)
 export class TokenState extends ArrowState {
-	verify(verify: PeekKeeper): boolean {
-		const currItem = verify.curr
+	verify(keeper: PeekKeeper): boolean {
+		const currItem = keeper.curr
 		return isTyped(currItem) && currItem.type === this.type
 	}
 
@@ -223,7 +318,7 @@ export class TokenState extends ArrowState {
 
 export class NoneOfState extends ArrowState {
 	verify(keeper: PeekKeeper): boolean {
-		return MultVerifier.verifyNone(this.options, keeper)
+		return !MultVerifier.verifySome(this.options, keeper)
 	}
 
 	constructor(private readonly options: State[]) {
@@ -252,6 +347,13 @@ export class BoundaryState extends ArrowState {
 		return this.verifyFirst(keeper) || this.verifyCommon(keeper)
 	}
 
+	// * IMPORTANT. This is what enables one to put boundary 
+	// * classes *in between* other patterns like '\w+\b{\w}.'
+	// * (matches word followed by anything that isn't a word, equiv. of '\w+^[\W]')
+	// (in fact, this line is pretty much the reason that
+	// `advance` was even originally added to the `State`)
+	advance(keeper: PeekKeeper): void {}
+
 	constructor(private readonly options: State[]) {
 		super()
 	}
@@ -264,6 +366,8 @@ export class NonBoundaryState extends BoundaryState {
 }
 
 export class MatchState extends State {
+	advance(keeper: PeekKeeper): void {}
+
 	addTo(list: StateArrayList): void {
 		list.setMatchState(this)
 	}

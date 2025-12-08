@@ -30,6 +30,15 @@ export abstract class BasicArray<T = any> {
 		return this.items.length
 	}
 
+	find(item: T) {
+		for (let i = 0; i < this.size; ++i) if (this.read(i) === item) return i
+		return -1
+	}
+
+	has(item: T) {
+		return this.find(item) > -1
+	}
+
 	get() {
 		return this.items as readonly T[]
 	}

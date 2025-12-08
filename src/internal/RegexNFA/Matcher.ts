@@ -1,7 +1,7 @@
 import assert from "node:assert"
 import type { IPeekableStream, IRegexMatcher } from "../../interfaces.js"
 import { OverflowCounter } from "../OverflowCounter.js"
-import { ArrowState, PeekKeeper, StateArrayList, type State } from "./State.js"
+import { BoundState, PeekKeeper, StateArrayList, type State } from "./State.js"
 
 class StateArrayListPair {
 	private readonly listId = new OverflowCounter()
@@ -64,36 +64,45 @@ class MatchExecutor {
 	private readonly lists = new StateArrayListPair(this.peekKeeper)
 	private readonly result = new MatchResult(this.peekKeeper)
 
-	private addVerified(state: ArrowState) {
-		const nextState = state.arrow.to
-		this.lists.next.add(nextState, this.peekKeeper)
-		return nextState.isMatch
-	}
-
-	private tryMatching(state: ArrowState) {
-		return state.verify(this.peekKeeper) && this.addVerified(state)
-	}
-
-	private attempt() {
-		let isMatch: boolean = false
-		this.lists.resetNext()
-		for (const state of this.lists.curr)
-			if ((isMatch = this.tryMatching(state))) break
-		return isMatch
-	}
-
 	private init(stream: IPeekableStream) {
 		this.peekKeeper.init(stream)
 		this.lists.reset(this.startState)
 	}
 
+	private addVerified(state: BoundState) {
+		const nextState = state.next()
+		this.lists.next.add(nextState, state.keeper)
+		return nextState.isMatch
+	}
+
+	private tryMatching(state: BoundState) {
+		return state.verify() && this.addVerified(state)
+	}
+
+	private prepareCommit(endKeeper: PeekKeeper) {
+		this.peekKeeper.from(endKeeper)
+	}
+
+	private toMatch(state: BoundState) {
+		this.prepareCommit(state.keeper)
+		return true
+	}
+
+	private runAttempt() {
+		this.lists.resetNext()
+		for (const state of this.lists.curr) {
+			if (!state.hasCurrPeek()) continue
+			if (this.tryMatching(state)) return this.toMatch(state)
+			state.advance()
+		}
+		return false
+	}
+
 	private fromPeeks() {
 		do {
-			if (this.lists.curr.isEmpty()) break
-			if (this.attempt()) break
-			this.peekKeeper.advance()
+			if (this.runAttempt()) break
 			this.lists.switch()
-		} while (this.peekKeeper.hasCurrPeek())
+		} while (!this.lists.curr.isEmpty())
 		return this.lists.next
 	}
 

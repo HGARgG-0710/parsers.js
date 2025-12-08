@@ -3,7 +3,7 @@ import { type IDepthMark, Pools } from "../../main.js"
 import { MissingArgument } from "../constants.js"
 import type { IDepthMarked, IFreeable, IInitializable } from "../interfaces.js"
 import type { IArray } from "../interfaces/Array.js"
-import { Initializable } from "../objects/Initializer.js"
+import { Initializable } from "../objects/Initializable.js"
 import { ObjectPool } from "../objects/ObjectPool.js"
 
 const { insert, mutate, out } = inplace

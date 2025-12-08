@@ -7,7 +7,7 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { NFARegexFinalizer as _NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
+import { NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
@@ -21,14 +21,14 @@ export class Regex<T = any> {
 
 	constructor(
 		source: string,
-		finalizer: IConcreteRegexFinalizer = _NFARegexFinalizer.instance
+		finalizer: IConcreteRegexFinalizer = NFARegexFinalizer.instance
 	) {
 		this.final = RegexStorage.instance.get(source, finalizer)
 	}
 }
 
 export namespace Regex {
-	export const NFARegexFinalizer = _NFARegexFinalizer
+	export const NFAFinalizer = NFARegexFinalizer
 
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T

@@ -4,7 +4,7 @@ import type {
 	IInitializer,
 	IParseState
 } from "../../../../interfaces.ts"
-import type { Initializable } from "../../../../objects/Initializer.ts"
+import type { Initializable } from "../../../../objects/Initializable.ts"
 import type {
 	ILinkedStream,
 	IOwnedStream,

@@ -8,7 +8,7 @@ import type {
 } from "../../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../../internal/RotationBuffer.js"
 import { ObjectPool } from "../../../../objects.js"
-import { ownerInitializer } from "../../../../objects/Initializer.js"
+import { ownerInitializer } from "../../../../objects/Initializable.js"
 import { RetainedArray } from "../../../../objects/RetainedArray.js"
 import { write } from "../../../../utils/Stream.js"
 import { DyssyncOwningPoolableStream } from "../templates.js"

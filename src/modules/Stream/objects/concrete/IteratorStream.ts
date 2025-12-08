@@ -1,5 +1,5 @@
 import type { IInitializer, IStream } from "../../../../interfaces.js"
-import { Initializable } from "../../../../objects/Initializer.js"
+import { Initializable } from "../../../../objects/Initializable.js"
 
 const iteratorStreamInitializer: IInitializer<[Iterable<any>]> = {
 	init(target: IteratorStream, iterable: Iterable<any>) {

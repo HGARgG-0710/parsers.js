@@ -1,5 +1,5 @@
 import type { IResourcefulStream } from "../../../../interfaces.js"
-import { Initializable } from "../../../../objects/Initializer.js"
+import { Initializable } from "../../../../objects/Initializable.js"
 import { ownerInitializer } from "../../../Initializer/objects/OwnerInitializer.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 
