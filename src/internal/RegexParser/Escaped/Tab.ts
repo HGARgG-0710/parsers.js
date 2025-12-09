@@ -6,5 +6,5 @@ const TabStream = CachedTokenStream(Tab)
 
 export function HandleTab(input: IOwnedStream<string>) {
 	input.next() // t
-	return TabStream()
+	return [TabStream()]
 }

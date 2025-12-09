@@ -6,5 +6,5 @@ const FormFeedStream = CachedTokenStream(FormFeed)
 
 export function HandleFormFeed(input: IOwnedStream<string>) {
 	input.next() // f
-	return FormFeedStream()
+	return [FormFeedStream()]
 }

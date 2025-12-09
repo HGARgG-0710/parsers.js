@@ -1,4 +1,4 @@
-import type { Regex } from "../objects.js"
+import type { Parametrized, Regex } from "../objects.js"
 import type { TreeStream } from "../objects/Stream.js"
 import type { INode, ITyped, IValidNodeType } from "./Node.js"
 import type { IPeekableStream, IStreamChooser } from "./Stream.js"
@@ -36,7 +36,7 @@ export interface IRawRegexVisitor<T = any> {
 }
 
 export type IRegexParserBindableTableRow = (
-	recursive: IStreamChooser
+	recursive: Parametrized<Regex.Extension[], IStreamChooser>
 ) => [string, IStreamChooser]
 
 export type IRegexCompilerTypeTableBindableRow<Out = Regex.Raw> = (

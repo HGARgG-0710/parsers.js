@@ -31,7 +31,7 @@ export class PlainObject<T = any> implements IPlainMap<string, T> {
 		return Object.values(this.object).values()
 	}
 
-	constructor(private readonly object: object = {}) {
+	constructor(private readonly object: Record<string, T | undefined> = {}) {
 		assert(isStruct(object))
 	}
 }

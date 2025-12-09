@@ -7,13 +7,14 @@ import type {
 
 /**
  * This is a type of element of `IRawStreamArray`
- */ export type IRawStream = ILinkedStream | IStreamChooser
+ */
+export type IRawStream<T = any> = ILinkedStream<T> | IStreamChooser<T>
 
 /**
  * This is a way to represent a chain of outputs
  * from an `IStreamChooser`.
  */
-export type IRawStreamArray = IRawStream[]
+export type IRawStreamArray<T = any> = IRawStream<T>[]
 
 /**
  * This is one of the two primary library types for
@@ -27,7 +28,9 @@ export type IRawStreamArray = IRawStream[]
  * `IStreamChoice` used to build the structure
  * on an `ILinkedStream`-by-`ILinkedStream` basis.
  */
-export type IStreamChooser = (prevStream?: IOwnedStream) => IRawStreamArray
+export type IStreamChooser<T = any> = (
+	prevStream?: IOwnedStream
+) => IRawStreamArray<T>
 
 /**
  * This is an `IArray` of `IRawStream`s.

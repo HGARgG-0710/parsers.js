@@ -1,7 +1,7 @@
 import type {
+	ICompositeStream,
 	IInputStream,
 	INode,
-	IOwnedStream,
 	IParseable,
 	IRawStreamArray
 } from "../../interfaces.js"
@@ -9,7 +9,7 @@ import {
 	CachingLocator,
 	PosCarryingLocator
 } from "../../modules/Stream/objects/Locator.js"
-import { DynamicParser, ErrorData, Regex } from "../../objects.js"
+import { DynamicParser, ErrorData, Parametrized, Regex } from "../../objects.js"
 import {
 	CompositeStream,
 	InputStream,
@@ -24,15 +24,16 @@ import { RegexTokenizer } from "./Tokenizer.js"
 
 const RootNodeStream = SingletonWrapperStream(RootNode)
 
-function regexWorkStreamMaker(extensions: Regex.Extension[]) {
-	const recursiveParser = ParseRegexRecursively(extensions)
-	return () =>
-		CompositeStream<INode>(
-			RootNodeStream(),
-			...recursiveParser(),
-			PosStream.pool.create()
-		)()
-}
+const regexWorkStreamMaker = new Parametrized(
+	(extensions: Regex.Extension[]) => {
+		return (): ICompositeStream<INode> =>
+			CompositeStream<INode>(
+				RootNodeStream(),
+				...ParseRegexRecursively.for(extensions)(),
+				PosStream.pool.create()
+			)()
+	}
+)
 
 const regexInputStreamMaker = () => new InputStream<string>()
 
@@ -46,22 +47,21 @@ const regexErrorDataMaker = (inputStream: IInputStream<string, IParseable>) =>
 			)
 	)
 
-export function ParseRegexRecursively(extensions: Regex.Extension[]) {
-	const Tokenizer = RegexTokenizer(extensions)
-	return function (input?: IOwnedStream<string>): IRawStreamArray {
-		return [
+export const ParseRegexRecursively = new Parametrized(
+	(extensions: Regex.Extension[]) => {
+		return (): IRawStreamArray => [
 			ProduceDisjunction,
 			QuantifierProcessor,
 			PeekStream(),
-			Tokenizer
+			RegexTokenizer.for(extensions)
 		]
 	}
-}
+)
 
 export function getParser(extensions: Regex.Extension[]) {
 	return DynamicParser(
 		new DynamicParser.Config(
-			regexWorkStreamMaker(extensions),
+			regexWorkStreamMaker.for(extensions),
 			regexInputStreamMaker,
 			regexErrorDataMaker
 		)

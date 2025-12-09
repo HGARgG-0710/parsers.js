@@ -1,5 +1,5 @@
-import { type IOwnedStream } from "../../../interfaces.js"
-import type { Regex } from "../../../objects.js"
+import { type IRawStreamArray } from "../../../interfaces.js"
+import { Parametrized, type Regex } from "../../../objects.js"
 import { skip } from "../../../objects/Error.js"
 import { PeekStream } from "../../../objects/Stream.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
@@ -15,12 +15,13 @@ const NoCaptureGroupLimitStream = GroupLimitStream((input) => {
 	return 0
 })
 
-export function HandleNoCaptureGroup(extensions: Regex.Extension[]) {
-	return (input: IOwnedStream<string>) => [
-		NoCaptureGroupStream(),
-		GroupBodyStream(),
-		ParseRegexRecursively(extensions),
-		NoCaptureGroupLimitStream(),
-		PeekStream()
-	]
-}
+export const HandleNoCaptureGroup = new Parametrized(
+	(extensions: Regex.Extension[]) => (): IRawStreamArray =>
+		[
+			NoCaptureGroupStream(),
+			GroupBodyStream(),
+			ParseRegexRecursively.for(extensions),
+			NoCaptureGroupLimitStream(),
+			PeekStream()
+		]
+)

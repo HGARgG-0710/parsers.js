@@ -1,7 +1,7 @@
 import type { IRawRegexVisitor } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import {
-	ArrowState,
+	type ArrowState,
 	BoundaryState,
 	CharState,
 	CodeRangeState,

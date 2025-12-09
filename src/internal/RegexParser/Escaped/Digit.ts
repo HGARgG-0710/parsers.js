@@ -6,5 +6,5 @@ const DigitStream = CachedTokenStream(Digit)
 
 export function HandleDigit(input: IOwnedStream<string>) {
 	input.next() // d
-	return DigitStream()
+	return [DigitStream()]
 }

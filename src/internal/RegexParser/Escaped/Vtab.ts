@@ -6,5 +6,5 @@ const VTabStream = CachedTokenStream(VTab)
 
 export function HandleVTab(input: IOwnedStream<string>) {
 	input.next() // v
-	return VTabStream()
+	return [VTabStream()]
 }

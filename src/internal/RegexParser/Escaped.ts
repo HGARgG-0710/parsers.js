@@ -1,4 +1,4 @@
-import type { ICommonStream, INode, IOwnedStream } from "../../interfaces.js"
+import type { IOwnedStream, IRawStreamArray } from "../../interfaces.js"
 import { HandleBoundaryClass } from "./Class/BoundaryClass.js"
 import { HandleDigit } from "./Escaped/Digit.js"
 import { HandleFormFeed } from "./Escaped/FormFeed.js"
@@ -11,7 +11,7 @@ import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
-const EscapedHandler = CurrCharHandler<ICommonStream<INode>>(
+const EscapedHandler = CurrCharHandler<IRawStreamArray>(
 	{
 		w: HandleWord,
 		d: HandleDigit,
@@ -26,7 +26,7 @@ const EscapedHandler = CurrCharHandler<ICommonStream<INode>>(
 	HandleEscapedLiteral
 )
 
-const RangeBoundaryEscapedHandler = CurrCharHandler<ICommonStream<INode>>(
+const RangeBoundaryEscapedHandler = CurrCharHandler<IRawStreamArray>(
 	{
 		u: HandleUnicode,
 		n: HandleNewline,
@@ -39,12 +39,12 @@ const RangeBoundaryEscapedHandler = CurrCharHandler<ICommonStream<INode>>(
 
 export function HandleRangeBoundaryEscaped(input: IOwnedStream<string>) {
 	input.next() // \
-	return [RangeBoundaryEscapedHandler(input)]
+	return RangeBoundaryEscapedHandler(input)
 }
 
 export function HandleEscaped(input: IOwnedStream<string>) {
 	input.next() // \
-	return [EscapedHandler(input)]
+	return EscapedHandler(input)
 }
 
 export const maybeEscaped = {

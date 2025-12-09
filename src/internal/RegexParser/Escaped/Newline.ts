@@ -6,5 +6,5 @@ const NewlineStream = CachedTokenStream(Newline)
 
 export function HandleNewline(input: IOwnedStream<string>) {
 	input.next() // n
-	return NewlineStream()
+	return [NewlineStream()]
 }

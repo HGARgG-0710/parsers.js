@@ -6,5 +6,5 @@ const WordStream = CachedTokenStream(Word)
 
 export function HandleWord(input: IOwnedStream<string>) {
 	input.next() // w
-	return WordStream()
+	return [WordStream()]
 }

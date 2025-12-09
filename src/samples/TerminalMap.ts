@@ -1,14 +1,14 @@
-import { TerminalMap } from "../objects/HashMap.js"
 import {
 	PlainArray,
 	PlainMap,
 	PlainObject
 } from "../modules/HashMap/objects/PlainMap.js"
+import { TerminalMap } from "../objects/HashMap.js"
 
 import { Pairs } from "./Pairs.js"
 
 export function ObjectMap<T = any, Default = any>(
-	object?: object,
+	object?: Record<string, T>,
 	_default?: Default
 ) {
 	return new TerminalMap(new PlainObject<T>(object), _default)

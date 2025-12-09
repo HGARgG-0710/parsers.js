@@ -6,5 +6,5 @@ const SpaceStream = CachedTokenStream(Space)
 
 export function HandleSpace(input: IOwnedStream<string>) {
 	input.next() // s
-	return SpaceStream()
+	return [SpaceStream()]
 }

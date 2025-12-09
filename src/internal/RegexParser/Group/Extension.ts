@@ -1,7 +1,12 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
-import type { IStreamChooser, IStreamPredicate } from "../../../interfaces.js"
-import { Regex, TableHandler } from "../../../objects.js"
+import type {
+	IOwnedStream,
+	IRawStreamArray,
+	IStreamChooser,
+	IStreamPredicate
+} from "../../../interfaces.js"
+import { Parametrized, Regex, TableHandler } from "../../../objects.js"
 import { skip } from "../../../objects/Error.js"
 import { PeekStream } from "../../../objects/Stream.js"
 import { Pairs } from "../../../samples.js"
@@ -31,41 +36,42 @@ const IgnoreCaseLimitStream = ExtensionGroupLimitStream((input) => {
 	return 0
 })
 
-function getExtensionGroupsParsers(
-	recursive: IStreamChooser,
-	extensions: Regex.Extension[]
-) {
-	return dekv(
-		Pairs.from(
-			extensions
-				.filter((ext) => ext.getParserTableRow)
-				.map((ext) => {
-					const row = ext.getParserTableRow!(recursive)
-					const char = row[0]
-					assert(char.length === 1)
-					return row
-				})
-		)
-	)
-}
-
-export function HandleExtensionGroup(extensions: Regex.Extension[]) {
-	const recursiveParser = ParseRegexRecursively(extensions)
-	return TableHandler(
-		new BasicPeekHash(
-			ObjectMap(
-				{
-					...getExtensionGroupsParsers(recursiveParser, extensions),
-					i: () => [
-						IgnoreCaseGroupStream(),
-						GroupBodyStream(),
-						recursiveParser,
-						IgnoreCaseLimitStream(),
-						PeekStream()
-					]
-				},
-				HandleSingleChar
+const getExtensionGroupsParsers = new Parametrized(
+	(extensions: Regex.Extension[]) => {
+		return dekv(
+			Pairs.from(
+				extensions
+					.filter((ext) => ext.getParserTableRow)
+					.map((ext) => {
+						const row = ext.getParserTableRow!(
+							ParseRegexRecursively
+						)
+						const [char] = row
+						assert(char.length === 1)
+						return row
+					})
 			)
 		)
-	)
-}
+	}
+)
+
+export const HandleExtensionGroup = new Parametrized(
+	(extensions: Regex.Extension[]) =>
+		TableHandler<IOwnedStream, IRawStreamArray>(
+			new BasicPeekHash(
+				ObjectMap<IStreamChooser>(
+					{
+						...getExtensionGroupsParsers.for(extensions),
+						i: (): IRawStreamArray => [
+							IgnoreCaseGroupStream(),
+							GroupBodyStream(),
+							ParseRegexRecursively.for(extensions),
+							IgnoreCaseLimitStream(),
+							PeekStream()
+						]
+					},
+					HandleSingleChar
+				)
+			)
+		)
+)
