@@ -1,3 +1,9 @@
+import type {
+	IRegexCompilerFunction,
+	IRegexCompilerTypeTable
+} from "src/interfaces/Regex.js"
+import type { IRegexFactory } from "../../interfaces.js"
+import { AutoMap, Regex } from "../../objects.js"
 import {
 	AnyChar,
 	AsInt,
@@ -36,10 +42,6 @@ import {
 	compileClassRange,
 	compileNegated
 } from "./CharClass.js"
-import type {
-	IRegexCompilerFunction,
-	IRegexCompilerTypeTable
-} from "./Compiler.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileAnyChar,
@@ -56,7 +58,6 @@ import { compileNoneOrMore } from "./Quantifiers/NoneOrMore.js"
 import { compileOneOrMore } from "./Quantifiers/OneOrMore.js"
 import { compileOptional } from "./Quantifiers/Optional.js"
 import { compileRange } from "./Quantifiers/Range.js"
-import { RawRegexFactory } from "./RegexFactory.js"
 import { compileAsInt, compileAsString, compileTypeMatch } from "./TypeMatch.js"
 import { compileWrapper } from "./Wrapper.js"
 
@@ -72,8 +73,7 @@ class ToplevelCompilerTable {
 		]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileDisjunction = compileComplexPart(() =>
 			factory.disjunction()
 		)
@@ -96,8 +96,7 @@ class QuantifierCompilerTable {
 		]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileOptional = compileOptional(factory)
 		this.compileNoneOrMore = compileNoneOrMore(factory)
 		this.compileOneOrMore = compileOneOrMore(factory)
@@ -130,8 +129,7 @@ class CharClassCompilerTable {
 		]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileAnyChar = compileAnyChar(factory)
 		this.compileWord = compileWord(factory)
 		this.compileDigit = compileDigit(factory)
@@ -148,16 +146,31 @@ class GroupCompilerTable {
 	private readonly compileIgnoreCase: IRegexCompilerFunction
 	private readonly compileNoCapture: IRegexCompilerFunction
 
-	get(): IRegexCompilerTypeTable {
+	private getCustomExtensionsRows(extensions: Regex.Extension[]) {
+		return extensions.map((ext) => ext.getCompilerTableRow(this.factory))
+	}
+
+	private getExtensions(
+		extensions: Regex.Extension[]
+	): IRegexCompilerTypeTable {
 		return [
-			[Group, compileGroup],
-			[IgnoreCaseGroup, this.compileIgnoreCase],
-			[NoCaptureGroup, this.compileNoCapture]
+			...this.getCustomExtensionsRows(extensions),
+			[IgnoreCaseGroup, this.compileIgnoreCase]
 		]
 	}
 
-	constructor(toplevel: ToplevelCompilerTable) {
-		const factory = RawRegexFactory.instance
+	get(extensions: Regex.Extension[]): IRegexCompilerTypeTable {
+		return [
+			[Group, compileGroup],
+			[NoCaptureGroup, this.compileNoCapture],
+			...this.getExtensions(extensions)
+		]
+	}
+
+	constructor(
+		private readonly factory: IRegexFactory,
+		toplevel: ToplevelCompilerTable
+	) {
 		this.compileIgnoreCase = compileRecursiveChoiceWrapper(
 			() => factory.ignoreCase(),
 			toplevel.compileDisjunction
@@ -188,8 +201,7 @@ class SpecialCharacterTable {
 		]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileTab = compileTab(factory)
 		this.compileVTab = compileVTab(factory)
 		this.compileFormFeed = compileFormFeed(factory)
@@ -202,7 +214,7 @@ class SpecialCharacterTable {
 class TypeMatchCompilerTable {
 	private readonly compileTypeMatch: IRegexCompilerFunction
 
-	get(): IRegexCompilerTypeTable {
+	get(): IRegexCompilerTypeTable<Regex.Raw | string | number> {
 		return [
 			[TypeMatch, this.compileTypeMatch],
 			[AsString, compileAsString],
@@ -210,8 +222,7 @@ class TypeMatchCompilerTable {
 		]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileTypeMatch = compileTypeMatch(factory)
 	}
 }
@@ -223,14 +234,28 @@ class ElementaryCompilerTable {
 		return [[SingleChar, this.compileLiteral]]
 	}
 
-	constructor() {
-		const factory = RawRegexFactory.instance
+	constructor(factory: IRegexFactory) {
 		this.compileLiteral = compileLiteral(factory)
 	}
 }
 
+class RegexCompilerTableMap {
+	private readonly compilerTables = new AutoMap<
+		IRegexFactory,
+		RegexCompilerTable
+	>((factory) => new RegexCompilerTable(factory))
+
+	get(factory: IRegexFactory) {
+		return this.compilerTables.get(factory)
+	}
+}
+
 export class RegexCompilerTable {
-	static readonly instance = new RegexCompilerTable()
+	private static readonly tables = new RegexCompilerTableMap()
+
+	static with(factory: IRegexFactory) {
+		return this.tables.get(factory)
+	}
 
 	private readonly charClasses: CharClassCompilerTable
 	private readonly quantifiers: QuantifierCompilerTable
@@ -240,10 +265,12 @@ export class RegexCompilerTable {
 	private readonly typeMatch: TypeMatchCompilerTable
 	private readonly elementary: ElementaryCompilerTable
 
-	get(): IRegexCompilerTypeTable {
+	get(
+		extensions: Regex.Extension[]
+	): IRegexCompilerTypeTable<Regex.Raw | string | number> {
 		return [
 			...this.toplevel.get(),
-			...this.groups.get(),
+			...this.groups.get(extensions),
 			...this.charClasses.get(),
 			...this.special.get(),
 			...this.typeMatch.get(),
@@ -252,13 +279,13 @@ export class RegexCompilerTable {
 		]
 	}
 
-	private constructor() {
-		this.quantifiers = new QuantifierCompilerTable()
-		this.charClasses = new CharClassCompilerTable()
-		this.toplevel = new ToplevelCompilerTable()
-		this.groups = new GroupCompilerTable(this.toplevel)
-		this.special = new SpecialCharacterTable()
-		this.typeMatch = new TypeMatchCompilerTable()
-		this.elementary = new ElementaryCompilerTable()
+	constructor(factory: IRegexFactory) {
+		this.quantifiers = new QuantifierCompilerTable(factory)
+		this.charClasses = new CharClassCompilerTable(factory)
+		this.toplevel = new ToplevelCompilerTable(factory)
+		this.groups = new GroupCompilerTable(factory, this.toplevel)
+		this.special = new SpecialCharacterTable(factory)
+		this.typeMatch = new TypeMatchCompilerTable(factory)
+		this.elementary = new ElementaryCompilerTable(factory)
 	}
 }

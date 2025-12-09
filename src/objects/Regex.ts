@@ -1,16 +1,23 @@
+import { array } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
 	IConcreteRegexFinalizer,
 	IPeekableStream,
 	IRawRegexVisitor,
+	IRegexCompilerTypeTableBindableRow,
+	IRegexFactory,
 	IRegexMatcher,
+	IRegexParserBindableTableRow,
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
+import { charAfter, charBefore } from "../internal/CodePoint.js"
 import { NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
+
+const { numbers } = array
 
 export class Regex<T = any> {
 	private readonly final: IRegexMatcher
@@ -19,11 +26,8 @@ export class Regex<T = any> {
 		return this.final.match(stream)
 	}
 
-	constructor(
-		source: string,
-		finalizer: IConcreteRegexFinalizer = NFARegexFinalizer.instance
-	) {
-		this.final = RegexStorage.instance.get(source, finalizer)
+	constructor(source: string, config: Regex.Config = Regex.Config.default) {
+		this.final = RegexStorage.instance.get(source, config)
 	}
 }
 
@@ -32,6 +36,28 @@ export namespace Regex {
 
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
+	}
+
+	// TODO: FINISH THIS...
+	export class Extension {
+		constructor(
+			readonly getParserTableRow: IRegexParserBindableTableRow, 
+			readonly getCompilerTableRow: IRegexCompilerTypeTableBindableRow<any>
+		) {}
+	}
+
+	// ! pre-doc: this thing MUST be extended in order to be used.
+	// ! 	The Singleton pattern is a PARTICULARLY good fit here,
+	// ! 	since instances *SHOULD* be cached for better startup performace.
+	export class Config {
+		static readonly default = new Config()
+
+		protected constructor(
+			readonly extensions: Extension[] = [],
+			readonly factory: IRegexFactory = Regex.Raw.Factory.instance,
+			readonly finalizer: IConcreteRegexFinalizer = Regex.NFAFinalizer
+				.instance
+		) {}
 	}
 
 	export namespace Raw {
@@ -53,6 +79,11 @@ export namespace Regex {
 		export abstract class Mult extends Raw {
 			readonly items: Raw[]
 
+			// ! pre-doc: THIS IS A DEFAULT, the user is supposed to OVERRIDE IT... [unless they're not]
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleCatenationLike(this.items)
+			}
+
 			constructor(...items: Raw[]) {
 				super()
 				this.items = items
@@ -73,11 +104,7 @@ export namespace Regex {
 			}
 		}
 
-		export class Catenation extends Mult {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleCatenation(this)
-			}
-		}
+		export class Catenation extends Mult {}
 
 		export namespace Catenation {
 			export class Builder extends Raw.Builder {
@@ -166,11 +193,7 @@ export namespace Regex {
 			}
 		}
 
-		export class IgnoreCase extends Mult {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleIgnoreCase(this)
-			}
-		}
+		export class IgnoreCase extends Mult {}
 
 		export namespace IgnoreCase {
 			export class Builder extends Raw.Builder {
@@ -220,6 +243,118 @@ export namespace Regex {
 					return new Boundary(...this.get())
 				}
 			}
+		}
+
+		export class Factory implements IRegexFactory {
+			static readonly instance: IRegexFactory = new Factory()
+
+			disjunction(): IRegexPartBuilder {
+				return new Either.Builder()
+			}
+
+			catenation(): IRegexPartBuilder {
+				return new Catenation.Builder()
+			}
+
+			ignoreCase(): IRegexPartBuilder {
+				return new IgnoreCase.Builder()
+			}
+
+			noCapture(): IRegexPartBuilder {
+				return new NoCapture.Builder()
+			}
+
+			charClass(): IRegexPartBuilder {
+				return new Either.Builder()
+			}
+
+			negCharClass(): IRegexPartBuilder {
+				return new NoneOf.Builder()
+			}
+
+			boundaryClass(): IRegexPartBuilder {
+				return new Boundary.Builder()
+			}
+
+			negBoundaryClass(): IRegexPartBuilder {
+				return new NonBoundary.Builder()
+			}
+
+			anything(): Regex.Raw {
+				return new Anything()
+			}
+
+			word(): Regex.Raw {
+				return new Either(
+					this.charRange("a", "z"),
+					this.charRange("A", "Z"),
+					this.digit(),
+					this.literal("_")
+				)
+			}
+
+			digit(): Regex.Raw {
+				return this.charRange("0", "9")
+			}
+
+			space(): Regex.Raw {
+				return new Either(
+					Char.make(" "),
+					Char.make("\t"),
+					this.newline(),
+					Char.make("\v"),
+					Char.make("\f")
+				)
+			}
+
+			newline(): Regex.Raw {
+				return new Either(
+					Char.make("\n"),
+					new Catenation(Char.make("\r"), Char.make("\n"))
+				)
+			}
+
+			literal(x: string) {
+				return Char.make(x)
+			}
+
+			charRange(from: string, to: string): Regex.Raw {
+				return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
+			}
+
+			// * note: we're parsing here and not inside `RegexParser` since
+			// * this reduces the amount of transformation logic inside the
+			// * parser (purpose of `RegexParser` is only to produce a front-facing
+			// * AST, one to be later re-built into the `Regex.Raw` form).
+			unicodeChar(hex: string) {
+				return Char.make(String.fromCodePoint(parseInt(hex, 16)))
+			}
+
+			typeMatch(type: IValidNodeType): Regex.Raw {
+				return new TokenType(type)
+			}
+
+			noneOrMore(item: Regex.Raw): Regex.Raw {
+				return new NoneOrMore(item)
+			}
+
+			optional(item: Regex.Raw): Regex.Raw {
+				return new Optional(item)
+			}
+
+			repeat(item: Regex.Raw, times: number): Regex.Raw {
+				return new Catenation(...numbers(times).map(() => item))
+			}
+
+			newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw {
+				return new Either(from, this.charRange(charAfter("\n"), to))
+			}
+
+			charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
+				return new Either(this.charRange(from, charBefore("\n")), to)
+			}
+
+			protected constructor() {}
 		}
 	}
 }

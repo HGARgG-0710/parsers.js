@@ -1,13 +1,12 @@
-import type { ICellNode, INode } from "../../../interfaces.js"
+import type { ICellNode, INode, IRegexFactory } from "../../../interfaces.js"
 import type { TreeStream } from "../../../objects/Stream.js"
 import {
 	InfiniteRange,
 	LimitsRange,
 	TrivialRange
 } from "../../RegexParser/Nodes.js"
-import { type IRegexCompilerHandler } from "../Compiler.js"
+import { type IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import { compilerBuilderErrHandler } from "../Errors.js"
-import type { IRegexFactory } from "../RegexFactory.js"
 import { RegexTypeHandler } from "../RegexTypeHandler.js"
 
 function readRangeBoundary(range: INode, isStart: boolean) {

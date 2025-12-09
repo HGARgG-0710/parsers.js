@@ -1,13 +1,9 @@
-import type { INode } from "../../../interfaces.js"
+import type { INode, IRegexFactory } from "../../../interfaces.js"
 import type { TreeStream } from "../../../objects/Stream.js"
-import type { IRegexCompilerHandler } from "../Compiler.js"
-import type { IRegexFactory } from "../RegexFactory.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 
 export function compileOptional(factory: IRegexFactory) {
-	return function (
-		input: TreeStream<INode>,
-		handler: IRegexCompilerHandler
-	) {
+	return function (input: TreeStream<INode>, handler: IRegexCompilerHandler) {
 		input.next() // Optional
 		return factory.optional(handler(input))
 	}

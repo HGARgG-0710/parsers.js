@@ -1,8 +1,12 @@
-import type { ICellNode, INode, IValidNodeType } from "../../interfaces.js"
+import type {
+	ICellNode,
+	INode,
+	IRegexFactory,
+	IValidNodeType
+} from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import type { TreeStream } from "../../objects/Stream.js"
-import type { IRegexCompilerHandler } from "./Compiler.js"
-import type { IRegexFactory } from "./RegexFactory.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 
 export function compileAsInt(
 	input: TreeStream<INode>,

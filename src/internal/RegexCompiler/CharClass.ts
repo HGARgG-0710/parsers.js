@@ -1,5 +1,10 @@
 import { type } from "@hgargg-0710/one"
-import type { ICellNode, INode, IRegexPartBuilder } from "../../interfaces.js"
+import type {
+	ICellNode,
+	INode,
+	IRegexFactory,
+	IRegexPartBuilder
+} from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import type { TreeStream } from "../../objects/Stream.js"
 import {
@@ -14,7 +19,7 @@ import {
 	VTab
 } from "../RegexParser/Nodes.js"
 import { compileUnicodeChar } from "./Cell.js"
-import type { IRegexCompilerHandler } from "./Compiler.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileFormFeed,
@@ -23,7 +28,6 @@ import {
 	compileVTab
 } from "./Elementary.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
-import type { IRegexFactory } from "./RegexFactory.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
 const { isString } = type

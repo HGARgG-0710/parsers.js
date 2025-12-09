@@ -1,41 +1,38 @@
 import { Config } from "../../global.js"
-import type {
-	IInputStream,
-	INode,
-	IOwnedStream,
-	IParseable,
-	IRawStreamArray
-} from "../../interfaces.js"
-import {
-	CachingLocator,
-	PosCarryingLocator
-} from "../../modules/Stream/objects/Locator.js"
-import { DynamicParser, ErrorData, ParseableInput } from "../../objects.js"
+import type { ICommonStream, INode, IParseable } from "../../interfaces.js"
+import { AutoMap, ParseableInput, Regex } from "../../objects.js"
 import { BasicHash, PeekHash } from "../../objects/HashMap.js"
-import {
-	CompositeStream,
-	InputStream,
-	PeekStream,
-	PosStream
-} from "../../objects/Stream.js"
-import { SingletonWrapperStream } from "../../samples/Stream.js"
 import { consume } from "../../utils/Stream.js"
-import { ProduceDisjunction } from "./Disjunction.js"
-import { RootNode } from "./Nodes.js"
-import { QuantifierProcessor } from "./Quantifiers.js"
-import { RegexTokenizer } from "./Tokenizer.js"
+import { getParser } from "./ParserBuilder.js"
+
+class RegexParserMap {
+	private readonly parsers = new AutoMap<Regex.Extension[], RegexParser>(
+		(extensions) => new RegexParser(extensions)
+	)
+
+	get(extensions: Regex.Extension[]) {
+		return this.parsers.get(extensions)
+	}
+}
 
 export class RegexParser {
-	static readonly instance = new RegexParser()
+	private static readonly parsers = new RegexParserMap()
+
+	static with(extensions: Regex.Extension[]) {
+		return this.parsers.get(extensions)
+	}
+
+	private readonly raw: (input: IParseable) => ICommonStream<INode>
 
 	private get errPrinter() {
 		return Config.regex.errorPrinter
 	}
 
 	private parseSource(source: string) {
-		return consume(parseRegex(new ParseableInput(source))).get()[0] as INode
+		return consume(this.raw(new ParseableInput(source))).get()[0]
 	}
 
+	// ! pre-doc: IMPORTANT - the user is advised to CACHE config objects, because `extensions` identity is what determines the necessity to re-build the parser anew...
 	parse(source: string) {
 		// * Vital note: there is NO CLEANUP HERE
 		// because the user may (accidentally) be
@@ -43,47 +40,9 @@ export class RegexParser {
 		return this.errPrinter.execute(() => this.parseSource(source))
 	}
 
-	private constructor() {}
+	constructor(extensions: Regex.Extension[]) {
+		this.raw = getParser(extensions)
+	}
 }
 
 export const BasicPeekHash = PeekHash(BasicHash)
-
-const RootNodeStream = SingletonWrapperStream(RootNode)
-
-export function ParseRegexRecursively(
-	input?: IOwnedStream<string>
-): IRawStreamArray {
-	return [
-		ProduceDisjunction,
-		QuantifierProcessor,
-		PeekStream(),
-		RegexTokenizer
-	]
-}
-
-const regexWorkStreamMaker = () =>
-	CompositeStream(
-		RootNodeStream(),
-		...ParseRegexRecursively(),
-		PosStream.pool.create()
-	)()
-
-const regexInputStreamMaker = () => new InputStream()
-
-const regexErrorDataMaker = (inputStream: IInputStream<any, IParseable>) =>
-	new ErrorData.StreamListErrorData(
-		inputStream,
-		(inputStream) =>
-			new ErrorData.ErrorPosition.PosCarrying(
-				inputStream,
-				new CachingLocator(PosCarryingLocator.downwards)
-			)
-	)
-
-const parseRegex = DynamicParser(
-	new DynamicParser.Config(
-		regexWorkStreamMaker,
-		regexInputStreamMaker,
-		regexErrorDataMaker
-	)
-)

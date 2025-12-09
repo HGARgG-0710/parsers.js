@@ -94,7 +94,6 @@ export type IIndexed<T = any> = {
 	length: number
 } & Iterable<T>
 
-
 /**
  * Represents an entity with some sort of `readonly state: T`
  */

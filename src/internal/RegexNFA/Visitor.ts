@@ -37,7 +37,7 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return this.toInStateList(this.toFragList(raw))
 	}
 
-	handleCatenation({ items }: Regex.Raw.Catenation): Fragment | null {
+	handleCatenationLike(items: Regex.Raw[]): Fragment | null {
 		if (items.length === 0) return null
 		const firstFrag = items[0].accept(this)
 		if (!firstFrag) return null
@@ -70,9 +70,6 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	handleAnything(anything: Regex.Raw.Anything): Fragment | null {
 		return this.toFragment(new EmptyState())
 	}
-
-	// ! FINISH
-	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): Fragment | null {}
 
 	handleCodeRange({ from, to }: Regex.Raw.CodeRange): Fragment | null {
 		return this.toFragment(new CodeRangeState(from, to))

@@ -1,8 +1,7 @@
-import type { ICellNode, INode } from "../../interfaces.js"
+import type { ICellNode, INode, IRegexFactory } from "../../interfaces.js"
 import type { Regex } from "../../objects.js"
 import type { TreeStream } from "../../objects/Stream.js"
-import type { IRegexCompilerHandler } from "./Compiler.js"
-import type { IRegexFactory } from "./RegexFactory.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 
 function compileCell<T = any, Out extends Regex.Raw = Regex.Raw>(
 	fromCell: (factory: IRegexFactory, value: T) => Out

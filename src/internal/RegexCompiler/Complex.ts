@@ -1,6 +1,6 @@
 import type { INode, IRegexPartBuilder } from "../../interfaces.js"
 import type { TreeStream } from "../../objects/Stream.js"
-import type { IRegexCompilerHandler } from "./Compiler.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 
 export function compileComplexPart(getBuilder: () => IRegexPartBuilder) {
 	return function (

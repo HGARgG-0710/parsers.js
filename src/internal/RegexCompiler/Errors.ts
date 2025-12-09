@@ -1,7 +1,7 @@
 import type { INode } from "../../interfaces.js"
 import { ConstructorError } from "../../objects/Error.js"
 import type { TreeStream } from "../../objects/Stream.js"
-import type { IRegexCompilerHandler } from "./Compiler.js"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 
 class RegexCompilationError extends ConstructorError {
 	constructor(item: INode) {

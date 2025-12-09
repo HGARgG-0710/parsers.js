@@ -1,9 +1,9 @@
-import type { INode, IRegexPartBuilder } from "../../interfaces.js"
-import type { TreeStream } from "../../objects/Stream.js"
 import type {
 	IRegexCompilerFunction,
 	IRegexCompilerHandler
-} from "./Compiler.js"
+} from "src/interfaces/Regex.js"
+import type { INode, IRegexPartBuilder } from "../../interfaces.js"
+import type { TreeStream } from "../../objects/Stream.js"
 
 export function compileGroup(
 	input: TreeStream<INode>,
@@ -18,10 +18,7 @@ export function compileRecursiveChoiceWrapper(
 	getBuilder: () => IRegexPartBuilder,
 	handleDisjunction: IRegexCompilerFunction
 ) {
-	return function (
-		input: TreeStream<INode>,
-		handler: IRegexCompilerHandler
-	) {
+	return function (input: TreeStream<INode>, handler: IRegexCompilerHandler) {
 		input.next() // skip the wrapper (NoCaptureGroup, IgnoreCaseGroup, etc)
 		input.next() // skip the GroupBody
 		input.next() // skip the RootRegex

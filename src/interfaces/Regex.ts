@@ -1,5 +1,8 @@
 import type { Regex } from "../objects.js"
-import type { IPeekableStream } from "./Stream.js"
+import type { TreeStream } from "../objects/Stream.js"
+import type { INode, ITyped, IValidNodeType } from "./Node.js"
+import type { IPeekableStream, IStreamChooser } from "./Stream.js"
+import type { ITableHandler } from "./StreamHandler.js"
 
 export interface IRegexMatcher {
 	match<T = any>(stream: IPeekableStream<T>): false | string | (string | T)[]
@@ -19,7 +22,7 @@ export interface IRegexPartBuilder extends ICompositeRegexBuilder {
 
 export interface IRawRegexVisitor<T = any> {
 	handleEither(either: Regex.Raw.Either): T
-	handleCatenation(catenation: Regex.Raw.Catenation): T
+	handleCatenationLike(items: Regex.Raw[]): T
 	handleOptional(optional: Regex.Raw.Optional): T
 	handleNoneOrMore(noneOrMore: Regex.Raw.NoneOrMore): T
 	handleChar(char: Regex.Raw.Char): T
@@ -27,8 +30,59 @@ export interface IRawRegexVisitor<T = any> {
 	handleCodeRange(codeRange: Regex.Raw.CodeRange): T
 	handleAnything(anything: Regex.Raw.Anything): T
 	handleNoneOf(noneOf: Regex.Raw.NoneOf): T
-	handleIgnoreCase(ignoreCase: Regex.Raw.IgnoreCase): T
 	handleNoCapture(noCapture: Regex.Raw.NoCapture): T
 	handleNonBoundary(nonBoundary: Regex.Raw.NonBoundary): T
 	handleBoundary(boundary: Regex.Raw.Boundary): T
+}
+
+export type IRegexParserBindableTableRow = (
+	recursive: IStreamChooser
+) => [string, IStreamChooser]
+
+export type IRegexCompilerTypeTableBindableRow<Out = Regex.Raw> = (
+	factory: IRegexFactory
+) => IRegexCompilerTypeTableRow<Out>
+
+export type IRegexCompilerTypeTableRow<Out = Regex.Raw> = [
+	ITyped,
+	IRegexCompilerFunction<Out>
+]
+
+export type IRegexCompilerTypeTable<Out = Regex.Raw> =
+	IRegexCompilerTypeTableRow<Out>[]
+
+export type IRegexCompilerFunction<Out = Regex.Raw> = (
+	input: TreeStream<INode>,
+	handler: IRegexCompilerHandler<Out>
+) => Out
+
+export type IRegexCompilerHandler<Out = Regex.Raw> = ITableHandler<
+	TreeStream<INode>,
+	Out
+>
+
+export interface IRegexFactory {
+	disjunction(): IRegexPartBuilder
+	catenation(): IRegexPartBuilder
+	ignoreCase(): IRegexPartBuilder
+	noCapture(): IRegexPartBuilder
+	charClass(): IRegexPartBuilder
+	boundaryClass(): IRegexPartBuilder
+	negCharClass(): IRegexPartBuilder
+	negBoundaryClass(): IRegexPartBuilder
+
+	anything(): Regex.Raw
+	word(): Regex.Raw
+	digit(): Regex.Raw
+	space(): Regex.Raw
+	newline(): Regex.Raw
+	literal(x: string): Regex.Raw.Char
+	charRange(from: string, to: string): Regex.Raw
+	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw
+	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw
+	unicodeChar(hex: string): Regex.Raw.Char
+	typeMatch(type: IValidNodeType): Regex.Raw
+	noneOrMore(item: Regex.Raw): Regex.Raw
+	optional(item: Regex.Raw): Regex.Raw
+	repeat(item: Regex.Raw, times: number): Regex.Raw
 }

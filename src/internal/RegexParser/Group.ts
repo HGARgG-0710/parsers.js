@@ -1,5 +1,5 @@
 import type { IRawStreamArray, IStreamPredicate } from "../../interfaces.js"
-import { ArrayBuilder } from "../../objects.js"
+import { ArrayBuilder, Regex } from "../../objects.js"
 import { skip } from "../../objects/Error.js"
 import { LimitDepthMarks, LimitStream } from "../../objects/Stream.js"
 import {
@@ -37,14 +37,18 @@ export const GroupBodyStream = CollectionStream(
 	consumable(new ArrayBuilder())
 )
 
-const GroupHandler = CurrCharHandler<IRawStreamArray>(
-	{
-		"#": HandleExtensionGroup(),
-		"=": HandleNoCaptureGroup
-	},
-	HandlePlainGroup()
-)
+function GroupHandler(extensions: Regex.Extension[]) {
+	return CurrCharHandler<IRawStreamArray>(
+		{
+			"#": HandleExtensionGroup(extensions),
+			"=": HandleNoCaptureGroup(extensions)
+		},
+		HandlePlainGroup(extensions)
+	)
+}
 
-export const maybeGroup = {
-	"(": GroupHandler
+export function maybeGroup(extensions: Regex.Extension[]) {
+	return {
+		"(": GroupHandler(extensions)
+	}
 }
