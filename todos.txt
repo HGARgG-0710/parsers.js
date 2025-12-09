@@ -49,89 +49,25 @@ REMINDERs:
 		The state in which there IS NO CHILD for a 'SingleChildNode' class instance, 
 		IS NORMAL. This must be tested AS WELL, for ALL the methods on it... (INCLUDING `toXML()`!!!)
 
-CURRENT: 
-	TODO: refactor - `isCurrPipe` and `isNotNextPipe` [from `RegexParser -> Disjunction.ts`]: 
-		Put into `samples.Stream`, use names similar to `isCurr` and `isNotNext`. 
-		Curr. suggestion: `isCurrKind` and `isNotNextKind`. 
-
-	TODO: ADD the `GlobalConfig` class into the `global` submodule [see related todos...]
+	5. REMINDER: the XML generation in the library must support BOTH the LF *and* the CRLF generation. 
+		This is done via the `Config: LibConfig` exported global instance modification. 
 	
-	3. PROBLEM: XML-generation ONLY produces LF files. 
-		Meaning to say, one has NO IDEA about *which* OS the files are intended for, 
-		and *therefore*, one *cannot* decide for certain. 
-		To solve this, ADD the `GlobalConfig` singleton-class, LET it configure 
-		whether one is to use '\r' vs '\r\n' for the output files...
-		
-	1. PROBLEM: XML-generation ONLY uses 'attr-name="..."'-kinds of attributes
-		Meaning, it DOESN'T use "attr-name='...'" (single quotes vs double quotes). 
-		MAKE THIS configurable inside the `GlobalConfig` singleton-object 
-		(exported from the `global` submodule). 
-		
-	TODO: refactor the `DyssyncOwningStream + PoolableStream` into a `DyssyncOwningPoolableStream`. 
-		It's a mixin, UTILIZED by classes. 
-		This will ALLOW TO REDUCE THE NUMBER OF "dirty" .js files, and increase the number of .ts files...
-		
-	TODO: add a NEW kind of `IStream` - `CountingStream`
-		This is an `IdentityStream`. 
-		It would have a bound `type ICountingPredicate = (stream: IPeekableStream<T>) => [boolean, number]`, 
-		which would be applied on the `this.resource`, and the result would indicate: 
+	6. REMINDER: the XML generation in the library must support BOTH Single and Double Quotes for 
+		the Attribute-strings! That's important, since it affects the display of the XML. 
 
-			1. whether to increase the current count or not (`boolean`)
-			2. how many elements to skip
-		
-		The `2.`-number returned is then used to call `.next()`-iterations, that would just 
-		delegate to `this.resource`. The counting-predicate is SUPPOSED to use the `.peek(n)`
-		on the `this.resource`, since that doesn't actually advance it. 
-		This class is very good for, for instance, counting SLOC *without comments* in code. 
-		
-	TODO: about `.bind()`ing of predicates on object instances: 
-		Add it ONLY when necessary. 
-		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
-		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
-		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
+	7. REMINDER: whenever using `IStepPredicate`s, and suchlike (i.e. fields of lambda types), 
+		ALWAYS ensure that the said lambdas have access to `this`. ALWAYS. It's a mandatory 
+		part of thorough testing...
+
+	8. REMINDER: add IMPORT-TESTING!!!
+		This is vital, since import paths are many and some of them are pretty complex
+			(ex: `objects.Stream.templates.CurrDyssyncStream`)
 
 IMMEDIATE: 
-	ORDER of tasks: 
-		2. add `BoundaryClass` AND - new `Negation(BoundaryClass(...))`: 
-			2. to compiler (AND the `Regex.Raw`)
-				1. new `Regex.Raw` child for Negation(BoundaryClass(...)); 
-					Call it `NonBoundary(...)`. 
-					It is converted into a `NegateState(BoundaryState(...))
-				2. new `Regex.Raw` child for `BoundaryClass(...)`
-					Call it `Boundary(...)`. 
-					Converted to respective `BoundaryState(...)`. 
-				3. TO THE `RegexFactory` (*both* interface AND implementation...)
-			3. to NFARegex-implementation
-				0. New - `BoundaryState`: 
-					1. New - `NegateState` (delegates ALL calls to `BoundaryState`, save for `.verify`, WHICH IS INVERTED!!!); 
-						Note: it is written WITH EXTENSIBILITY IN MIND! [meaning: not ONLY `BoundaryState` can it invert, theoretically...]
-				1. add the `PeekableKeeper` instance (stores `i` of `.stream.peek(i)` and the `.stream: IPeekableStream`)
-					It is the thing passed to the `verify`. 
-					Reason: the `BoundaryClass` needs to have the access to `.peek(i)` and `.peek(i - 1)` AND the `i` value; 
-						The `i` value is needed in order to check for `i === 0` (specifically, the `.isStart`)
+	MAJOR PROBLEM COUNT: 3
 
-					Methods: 
-						1. get curr() => this.stream.peek(this.i)
-							NOTE: this is actually a PRIVATE PROPERTY that is cached...
-								Reason: performance...
-						2. advance() => ++this.i
-						3. behind(n) => this.peek(Math.max(i - n, 0))
-						4. isLast() => this.stream.isLastPeek(this.i)
-						5. isFirst() => this.i === 0
-						6. init(stream: IPeekableStream): 
-							1. resets the `i` back to 0
-							2. changes the internal `.stream` value
-						7. get stream() => this._stream [the ._stream is a PRIVATE MUTABLE property...]
-
-					1. MOVE the "++i" logic INSIDE the `PeekableKeeper` and ONTO the `State.advance(keeper: PeekableKeeper)`. 
-						By default, one calls the `keeper.advance()`, but the `BoundaryState` (an `ArrowState`) DOES NOTHING
-						INSTEAD!
-
-	TODO [reminder]: ADD the `DFARegexFinalizer` 
-		This one (might) be based off the respective `NFARegexVisitor`
-		algorithm for building the actual NFA, then, it would CONVERT the 
-		NFA to a DFA (as per the Russ Cox article, again...), and THEN, 
-		one might doing something...
+	CURRENT: 
+		0. TODO: refactor the `FileDescriptor` using the 'State' Pattern! 
 
 	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
 		Due to the (bizzare) way in which this works...
@@ -162,12 +98,9 @@ IMMEDIATE:
 				and EITHER joins it all together (a single large string), or just returns 
 				the collected array as-is.
 			4. UPDATE the `toMatchList` function to also accept the "outputBuilder"
-		3. BUG - `toMatchList`, the `!input.isEnd` check is BROKEN - need to pre-check the `.peek(i)` call for validity...
-			1. ALSO - save the result into the `let currItem: T` variable; ADD GENERICS for the passed `IPeekableStream<T>` input-stream...
-		4. BUG - after a SUCCESSFUL match has been performed, one must ADVANCE the `stream: IPeekableStream` given 
-			by THE NUMBER OF POSITIONS that MUST BE TRACKED within the `NFARegexMatcherOutputBuilder`!
-			Thus, as a result of `.finish()`, one can GET the result via `const x = outputBuilder.finish(); const advance = x.length`. 
-			This is absolutely essential, otherwise the parsing cannot convene...
+		3. Getting the string/array result:
+			From the `NFARegexMatcherOutputBuilder`!
+			Thus, as a result of `.finish()`, one can GET the result via `const x = outputBuilder.finish()' 
 	
 	3. Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
@@ -197,10 +130,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-		Current total: 258
+		Current total: 281
 
 		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 220 (at the time of writing...)
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 243 (at the time of writing...)
 				NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 					(since they're also exported in .d.ts files...)
 			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -281,6 +214,8 @@ TODOs:
 	10. Commit U: `RegexParser`: 
 		1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
 	11. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
+		THIS IS VITAL. 
+		SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
 	13. VITAL REMINDER [documentation]: let the user employ *`ErrorData.ErrorPosition.Locator.Upwards`* when creating their ParseExtension-s
 		Reason: they grab the position from INSIDE the stream underneath. 
 			This is the only RELIABLE WAY (yes, by breaking encapsulation...), 
@@ -293,9 +228,24 @@ TODOs:
 		This is important to allow one for using them with `expectKind()`-function; 
 		LET THE USER provide the factories with respective `string` identifiers ON 
 			CREATION of the classes for node-making. 
+	TODO: about `.bind()`ing of predicates on object instances: 
+		Add it ONLY when necessary. 
+		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
+		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
+		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
+
+	TODO: BUG (possible) - in `IStream` implementations - LOOK AND SEE!
+		When one extends a given class, but adds *SPECIALIZED* composite-objects 
+		via `private readonly`/etc, that are added INSIDE the generated constructor 
+		but AFTER the `setResource` is called from within the `.init` call that happens 
+		inside the `super(resource)`, one must ENSURE that the said composite objects 
+		are NOT REQUIRED within the `setResource` method. 
+
+		Meaning to say - one must be MINDFUL about WHERE the said `super(resource)`
+		must be REPLACED with `super()`, and the `super(resource)` be called AT THE END!!!
 
 REMINDER: Final Task Order
-	1. Regex: Visitor for Regex.Raw, NFA-Finalizer, DFA-Finalizer
+	1. Regex: completing features/fixes
 	2. tests [possibly - with finalization, if new redundancies are found]
 		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
 	3. wiki
