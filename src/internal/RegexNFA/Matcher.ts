@@ -4,7 +4,7 @@ import { OverflowCounter } from "../OverflowCounter.js"
 import { BoundState, PeekKeeper, StateArrayList, type State } from "./State.js"
 
 class StateArrayListPair {
-	private readonly listId = new OverflowCounter()
+	private readonly listId: OverflowCounter
 	private currList: StateArrayList
 	private nextList: StateArrayList
 
@@ -12,11 +12,11 @@ class StateArrayListPair {
 		this.nextList.reset(this.listId.inc())
 	}
 
-	reset(startState: State) {
+	reset(startState: State, peekKeeper: PeekKeeper) {
 		const newId = this.listId.inc()
 		this.currList.reset(newId)
 		this.nextList.reset(newId + 1)
-		this.currList.add(startState, this.peekKeeper)
+		this.currList.add(startState, peekKeeper)
 	}
 
 	switch() {
@@ -33,8 +33,9 @@ class StateArrayListPair {
 		return this.currList
 	}
 
-	constructor(private readonly peekKeeper: PeekKeeper) {
+	constructor(overflowCallback: () => void) {
 		const currId = this.listId.get()
+		this.listId = new OverflowCounter(overflowCallback)
 		this.currList = new StateArrayList(currId)
 		this.nextList = new StateArrayList(currId + 1)
 	}
@@ -61,12 +62,20 @@ class MatchResult {
 
 class MatchExecutor {
 	private readonly peekKeeper = new PeekKeeper()
-	private readonly lists = new StateArrayListPair(this.peekKeeper)
 	private readonly result = new MatchResult(this.peekKeeper)
+	private readonly lists = new StateArrayListPair(() => this.resetStateIds())
+
+	private resetStateIds() {
+		this.startState.resetSeenTimes()
+	}
+
+	private resetLists() {
+		this.lists.reset(this.startState, this.peekKeeper)
+	}
 
 	private init(stream: IPeekableStream) {
 		this.peekKeeper.init(stream)
-		this.lists.reset(this.startState)
+		this.resetLists()
 	}
 
 	private addVerified(state: BoundState) {

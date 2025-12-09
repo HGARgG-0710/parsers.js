@@ -189,6 +189,10 @@ export abstract class State {
 
 	private seenTimes = -1
 
+	resetSeenTimes() {
+		this.seenTimes = -1
+	}
+
 	beenSeenWith(keeper: PeekKeeper): boolean {
 		return this.keeperIds.has(keeper.id)
 	}
@@ -217,6 +221,11 @@ export abstract class State {
 export abstract class ArrowState extends State {
 	readonly arrow = new StateArrow()
 
+	resetSeenTimes(): void {
+		super.resetSeenTimes()
+		this.next().resetSeenTimes()
+	}
+
 	with(keeper: PeekKeeper) {
 		return BoundState.pool.create(this, keeper)
 	}
@@ -241,7 +250,14 @@ class MultVerifier {
 	}
 }
 
-abstract class MultState extends State {
+export class EitherState extends State {
+	resetSeenTimes(): void {
+		super.resetSeenTimes()
+		for (const option of this.options) option.resetSeenTimes()
+	}
+
+	advance(keeper: PeekKeeper): void {}
+
 	// * note: we allow optional `verify` because depending on the
 	// * context in which `EitherState` is used, it serves DIFFERENT
 	// * PURPOSES. The reason it's represented by the same object is
@@ -251,16 +267,12 @@ abstract class MultState extends State {
 		return MultVerifier.verifySome(this.options, keeper)
 	}
 
-	constructor(protected readonly options: State[]) {
-		super()
-	}
-}
-
-export class EitherState extends MultState {
-	advance(keeper: PeekKeeper): void {}
-
 	addTo(list: StateArrayList, keeper: PeekKeeper): void {
 		for (const option of this.options) option.addTo(list, keeper)
+	}
+
+	constructor(private readonly options: State[]) {
+		super()
 	}
 }
 
