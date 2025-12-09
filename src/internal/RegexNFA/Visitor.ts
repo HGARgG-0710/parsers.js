@@ -57,8 +57,8 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return new Fragment(fragStart, lastFrag.outArrows)
 	}
 
-	handleChar({ char }: Regex.Raw.Char): Fragment {
-		return this.toFragment(new CharState(char))
+	handleChar({ char, extensions }: Regex.Raw.Char): Fragment {
+		return this.toFragment(new CharState(char, extensions))
 	}
 
 	handleEither({ items }: Regex.Raw.Either): Fragment | null {
@@ -71,8 +71,12 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return this.toFragment(new EmptyState())
 	}
 
-	handleCodeRange({ from, to }: Regex.Raw.CodeRange): Fragment | null {
-		return this.toFragment(new CodeRangeState(from, to))
+	handleCodeRange({
+		from,
+		to,
+		extensions
+	}: Regex.Raw.CodeRange): Fragment | null {
+		return this.toFragment(new CodeRangeState(from, to, extensions))
 	}
 
 	// ! FINISH

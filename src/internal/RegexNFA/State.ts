@@ -5,8 +5,9 @@ import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { Pools } from "../../global.js"
 import type { IPeekableStream, IValidNodeType } from "../../interfaces.js"
-import { ObjectPool, Poolable, RetainedArray } from "../../objects.js"
+import { ObjectPool, Poolable, Regex, RetainedArray } from "../../objects.js"
 import { isTyped } from "../../utils/Node.js"
+import { toLowerCase, toUpperCase } from "../Unicode.js"
 
 const { isString, isNull } = type
 
@@ -233,16 +234,6 @@ export abstract class ArrowState extends State {
 	}
 }
 
-export class CharState extends ArrowState {
-	verify(keeper: PeekKeeper): boolean {
-		return keeper.curr === this.char
-	}
-
-	constructor(private readonly char: string) {
-		super()
-	}
-}
-
 class MultVerifier {
 	static verifySome(options: State[], keeper: PeekKeeper): boolean {
 		for (const option of options) if (option.verify(keeper)) return true
@@ -273,16 +264,50 @@ export class EitherState extends MultState {
 	}
 }
 
-export class CodeRangeState extends ArrowState {
-	verify(keeper: PeekKeeper): boolean {
-		const currItem = keeper.curr
-		if (!isString(currItem)) return false
-		const codePoint = currItem.codePointAt(0)!
+abstract class LocaleSensitiveState extends ArrowState {
+	protected abstract baseVerify(x: string): boolean
+
+	private ignoreCaseVerify(item: string): boolean {
+		return (
+			this.baseVerify(toLowerCase(item)) ||
+			this.baseVerify(toUpperCase(item))
+		)
+	}
+
+	verify({ curr }: PeekKeeper): boolean {
+		if (!isString(curr)) return false
+		return this.extensions.ignoreCase
+			? this.ignoreCaseVerify(curr)
+			: this.baseVerify(curr)
+	}
+
+	constructor(private readonly extensions: Regex.ExtensionMap) {
+		super()
+	}
+}
+
+export class CharState extends LocaleSensitiveState {
+	protected baseVerify(item: string): boolean {
+		return item === this.char
+	}
+
+	constructor(private readonly char: string, extensions: Regex.ExtensionMap) {
+		super(extensions)
+	}
+}
+
+export class CodeRangeState extends LocaleSensitiveState {
+	protected baseVerify(char: string) {
+		const codePoint = char.codePointAt(0)!
 		return this.from <= codePoint && codePoint <= this.to
 	}
 
-	constructor(private readonly from: number, private readonly to: number) {
-		super()
+	constructor(
+		private readonly from: number,
+		private readonly to: number,
+		extensions: Regex.ExtensionMap
+	) {
+		super(extensions)
 	}
 }
 
@@ -347,7 +372,7 @@ export class BoundaryState extends ArrowState {
 		return this.verifyFirst(keeper) || this.verifyCommon(keeper)
 	}
 
-	// * IMPORTANT. This is what enables one to put boundary 
+	// * IMPORTANT. This is what enables one to put boundary
 	// * classes *in between* other patterns like '\w+\b{\w}.'
 	// * (matches word followed by anything that isn't a word, equiv. of '\w+^[\W]')
 	// (in fact, this line is pretty much the reason that

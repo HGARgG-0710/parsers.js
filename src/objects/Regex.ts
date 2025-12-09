@@ -11,7 +11,7 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { charAfter, charBefore } from "../internal/CodePoint.js"
+import { charAfter, charBefore } from "../internal/Unicode.js"
 import { NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { ArrayCollection } from "./ArrayCollection.js"
@@ -34,13 +34,38 @@ export class Regex<T = any> {
 export namespace Regex {
 	export const NFAFinalizer = NFARegexFinalizer
 
+	export class ExtensionMap {
+		ignoreCase = false
+	}
+
+	// ! pre-doc: the `setExtensionMap` is INTENDED to be used INSIDE the user-provided `IRegexFactory`
+	// ! 	This way, there is a GREAT deal of coupling between the different pieces of the extension code.
+	// ! 	This is (unfortunately) the result of needing to synchronize behaviour of multiple components
+	// 		(i.e., as a general rule, customizing a list of components which are coupled to one another
+	// 		creates respective coupling inside the customization code...)
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
+
+		private extMap = new ExtensionMap()
+
+		setExtensionMap(map: ExtensionMap) {
+			this.extMap = map
+			return this
+		}
+
+		ignoreCase() {
+			this.extMap.ignoreCase = true
+			return this
+		}
+
+		get extensions() {
+			return this.extMap
+		}
 	}
 
 	export class Extension {
 		constructor(
-			readonly getParserTableRow?: IRegexParserBindableTableRow, 
+			readonly getParserTableRow?: IRegexParserBindableTableRow,
 			readonly getCompilerTableRow?: IRegexCompilerTypeTableBindableRow<any>
 		) {}
 	}
@@ -60,23 +85,13 @@ export namespace Regex {
 	}
 
 	export namespace Raw {
-		export abstract class Builder implements IRegexPartBuilder {
-			private readonly items = new ArrayCollection<Raw>()
-
-			addItem(item: Raw) {
-				this.items.push(item)
-				return this
-			}
-
-			protected get() {
-				return this.items.get() as Raw[]
-			}
-
-			abstract finish(): Raw
-		}
-
 		export abstract class Mult extends Raw {
 			readonly items: Raw[]
+
+			ignoreCase(): this {
+				for (const x of this.items) x.ignoreCase()
+				return super.ignoreCase()
+			}
 
 			// ! pre-doc: THIS IS A DEFAULT, the user is supposed to OVERRIDE IT... [unless they're not]
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
@@ -89,6 +104,23 @@ export namespace Regex {
 			}
 		}
 
+		export namespace Mult {
+			export abstract class Builder implements IRegexPartBuilder {
+				private readonly items = new ArrayCollection<Raw>()
+
+				addItem(item: Raw) {
+					this.items.push(item)
+					return this
+				}
+
+				protected get() {
+					return this.items.get() as Raw[]
+				}
+
+				abstract finish(): Raw
+			}
+		}
+
 		export class Either extends Mult {
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleEither(this)
@@ -96,7 +128,7 @@ export namespace Regex {
 		}
 
 		export namespace Either {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
 					return new Either(...this.get())
 				}
@@ -106,7 +138,7 @@ export namespace Regex {
 		export class Catenation extends Mult {}
 
 		export namespace Catenation {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Regex.Raw {
 					return new Catenation(...this.get())
 				}
@@ -185,7 +217,7 @@ export namespace Regex {
 		}
 
 		export namespace NoneOf {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
 					return new NoneOf(...this.get())
 				}
@@ -195,9 +227,9 @@ export namespace Regex {
 		export class IgnoreCase extends Mult {}
 
 		export namespace IgnoreCase {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
-					return new IgnoreCase(...this.get())
+					return new IgnoreCase(...this.get()).ignoreCase()
 				}
 			}
 		}
@@ -209,7 +241,7 @@ export namespace Regex {
 		}
 
 		export namespace NoCapture {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
 					return new NoCapture(...this.get())
 				}
@@ -223,7 +255,7 @@ export namespace Regex {
 		}
 
 		export namespace NonBoundary {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
 					return new NonBoundary(...this.get())
 				}
@@ -237,7 +269,7 @@ export namespace Regex {
 		}
 
 		export namespace Boundary {
-			export class Builder extends Raw.Builder {
+			export class Builder extends Mult.Builder {
 				finish(): Raw {
 					return new Boundary(...this.get())
 				}
