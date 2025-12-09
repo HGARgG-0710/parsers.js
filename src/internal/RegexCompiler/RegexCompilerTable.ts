@@ -147,7 +147,9 @@ class GroupCompilerTable {
 	private readonly compileNoCapture: IRegexCompilerFunction
 
 	private getCustomExtensionsRows(extensions: Regex.Extension[]) {
-		return extensions.map((ext) => ext.getCompilerTableRow(this.factory))
+		return extensions
+			.filter((ext) => ext.getCompilerTableRow)
+			.map((ext) => ext.getCompilerTableRow!(this.factory))
 	}
 
 	private getExtensions(

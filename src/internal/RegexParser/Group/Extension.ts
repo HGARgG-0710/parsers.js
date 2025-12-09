@@ -37,12 +37,14 @@ function getExtensionGroupsParsers(
 ) {
 	return dekv(
 		Pairs.from(
-			extensions.map((ext) => {
-				const row = ext.getParserTableRow(recursive)
-				const char = row[0]
-				assert(char.length === 1)
-				return row
-			})
+			extensions
+				.filter((ext) => ext.getParserTableRow)
+				.map((ext) => {
+					const row = ext.getParserTableRow!(recursive)
+					const char = row[0]
+					assert(char.length === 1)
+					return row
+				})
 		)
 	)
 }

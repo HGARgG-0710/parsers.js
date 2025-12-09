@@ -38,11 +38,10 @@ export namespace Regex {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
 	}
 
-	// TODO: FINISH THIS...
 	export class Extension {
 		constructor(
-			readonly getParserTableRow: IRegexParserBindableTableRow, 
-			readonly getCompilerTableRow: IRegexCompilerTypeTableBindableRow<any>
+			readonly getParserTableRow?: IRegexParserBindableTableRow, 
+			readonly getCompilerTableRow?: IRegexCompilerTypeTableBindableRow<any>
 		) {}
 	}
 
