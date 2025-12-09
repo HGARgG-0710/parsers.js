@@ -1,5 +1,6 @@
+import { Stateful } from "../../../../objects.js"
 import { mixin } from "../../../mixin.js"
-import { ProxyStream, StatefulStream } from "../templates.js"
+import { ProxyStream } from "../templates.js"
 import { LimitStream } from "./LimitStream.js"
 
 export function RecursiveProxyStream(depthMarks) {
@@ -37,7 +38,7 @@ export function RecursiveProxyStream(depthMarks) {
 				this.super.ProxyStream.constructor.call(this, delegate)
 			}
 		},
-		[ProxyStream, StatefulStream]
+		[ProxyStream, Stateful]
 	).toClass()
 }
 

@@ -2,7 +2,7 @@ import { mixin } from "../../../../mixin.js"
 import {
 	Initializable,
 	ownerInitializer
-} from "../../../objects/Initializer.js"
+} from "../../../../objects/Initializable.js"
 import { isStateful } from "../../../utils/Stream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
 

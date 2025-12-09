@@ -13,6 +13,15 @@ import type {
 export const ownerInitializer: IInitializer<[IOwnerSettable, ...any[]]> = {
 	init(owner: IResourceSettable, resource?: IOwnerSettable, ...rest: any[]) {
 		if (resource) {
+			resource.setOwner(owner)
+			owner.setResource(resource)
+		}
+	}
+}
+
+export const reverseOwnerInitializer: IInitializer<[IOwnerSettable]> = {
+	init(owner: IResourceSettable, resource?: IOwnerSettable, ...rest: any[]) {
+		if (resource) {
 			owner.setResource(resource)
 			resource.setOwner(owner)
 		}

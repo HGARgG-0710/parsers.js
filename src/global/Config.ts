@@ -16,10 +16,17 @@ class UnicodeConfig {
 	locales: string[] = ["en-US"]
 }
 
+class ErrorConfig {
+	tab = "\t"
+	lf = true
+	loggedNewlinesBetween = 2
+}
+
 class LibConfig {
 	readonly xml = new XMLConfig()
 	readonly regex = new RegexConfig()
 	readonly unicode = new UnicodeConfig()
+	readonly errors = new ErrorConfig()
 }
 
 export const Config = new LibConfig()

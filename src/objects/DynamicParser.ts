@@ -87,8 +87,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 
 	setupStreams() {
 		this.inputStream.init(this.input)
-		this.workStream.init(this.inputStream)
 		this.workStream.setState(this.state)
+		this.workStream.init(this.inputStream)
 	}
 
 	renewStream(stream: ILinkedStream): boolean {

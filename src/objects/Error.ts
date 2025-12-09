@@ -1,4 +1,5 @@
 import { array } from "@hgargg-0710/one"
+import { Config } from "../global.js"
 import type {
 	IDebugNamed,
 	IErrorData,
@@ -14,6 +15,10 @@ import { getNewline } from "../samples/space.js"
 import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
+
+function tabbed(lines: string[]) {
+	return lines.map((x) => `${Config.errors.tab}${x}`)
+}
 
 /**
  * This is an abstract class for representing
@@ -306,7 +311,7 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields() {
-			return [this.expected(), this.received()]
+			return tabbed([this.expected(), this.received()])
 		}
 	}
 
@@ -349,7 +354,7 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields(): string[] {
-			return [this.received()]
+			return tabbed([this.received()])
 		}
 	}
 
@@ -391,9 +396,11 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields(): string[] {
-			return array
-				.numbers(this.getStackDepth())
-				.map((i) => this.childCurrItem(i))
+			return tabbed(
+				array
+					.numbers(this.getStackDepth())
+					.map((i) => this.childCurrItem(i))
+			)
 		}
 	}
 
@@ -411,7 +418,7 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields(): string[] {
-			return [this.nonDecimal()]
+			return tabbed([this.nonDecimal()])
 		}
 	}
 }

@@ -1,3 +1,4 @@
+import { isStateful } from "../../../../utils/Stream.js"
 import { mixin } from "../../../mixin.js"
 import { StatefulStream } from "../templates.js"
 import { BeforeCompositeStream } from "./before/CompositeStream.js"

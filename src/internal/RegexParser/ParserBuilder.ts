@@ -37,13 +37,15 @@ const regexWorkStreamMaker = new Parametrized(
 
 const regexInputStreamMaker = () => new InputStream<string>()
 
-const regexErrorDataMaker = (inputStream: IInputStream<string, IParseable>) =>
+const regexErrorDataMaker = (
+	inputStream: IInputStream<string, IParseable<string>>
+) =>
 	new ErrorData.StreamListErrorData(
 		inputStream,
 		(inputStream) =>
 			new ErrorData.ErrorPosition.PosCarrying(
 				inputStream,
-				new CachingLocator(PosCarryingLocator.downwards)
+				new CachingLocator(PosCarryingLocator.upwards)
 			)
 	)
 

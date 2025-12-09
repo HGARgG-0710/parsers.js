@@ -28,5 +28,5 @@ export abstract class Initializable<
 	}
 }
 
-export * from "../modules/Initializer/objects/OwnerInitializer.js"
-export * from "../modules/Initializer/objects/ResourceInitializer.js"
+export * from "../modules/Initializable/objects/OwnerInitializer.js"
+export * from "../modules/Initializable/objects/ResourceInitializer.js"

@@ -1,4 +1,4 @@
-import { resourceInitializer } from "../../../Initializer/objects/ResourceInitializer.js"
+import { resourceInitializer } from "../../../Initializable/objects/ResourceInitializer.js"
 import { BasicStream } from "./BasicStream.js"
 
 /**

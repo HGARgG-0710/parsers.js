@@ -95,15 +95,6 @@ export abstract class BeforeCompositeStream<T = any>
 		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
 	}
 
-	init(
-		lowStream?: IOwnedStream,
-		rawStreams?: IRawStreamArray,
-		state?: IParseState
-	) {
-		super.init(lowStream, rawStreams, state)
-		return this
-	}
-
 	get isEnd() {
 		return super.isEnd && !this.renewResource()
 	}

@@ -1,6 +1,18 @@
+import assert from "assert"
 import { createWriteStream, WriteStream } from "fs"
-import type { IErrorLogger } from "../interfaces.js"
-import { getNewline } from "../samples/space.js"
+import { Config } from "../global.js"
+import type { IErrorLogger, IShutdownHandler } from "../interfaces.js"
+import { toNewline } from "../samples/space.js"
+
+function newlines(error: string, offset: number = 0) {
+	return `${error}${getNewline().repeat(
+		Config.errors.loggedNewlinesBetween - offset
+	)}`
+}
+
+function getNewline (): string {
+	return toNewline(Config.errors.lf)
+}
 
 export class ErrorPrinter {
 	execute<T = any>(f: () => T) {
@@ -13,35 +25,43 @@ export class ErrorPrinter {
 
 	protected errHandler(error: Error) {
 		this.errorLogger(this.errorFormatter(error))
-		this.shutDown()
+		this.shutDown(error)
 	}
 
 	protected constructor(
 		private readonly errorFormatter: (error: Error) => string,
 		private readonly errorLogger: (errStr: string) => void,
-		private readonly shutDown: () => void = () => {}
+		private readonly shutDown: IShutdownHandler = () => {}
 	) {}
 }
 
 export namespace ErrorPrinter {
+	export const shutDownCounter = (errCount: number) => {
+		assert(errCount > 0)
+		let timesThrown = 0
+		return () => {
+			if (++timesThrown == errCount) process.exit(1)
+		}
+	}
+
 	export class PlainErrorPrinter extends ErrorPrinter {
 		static readonly instance = new PlainErrorPrinter()
 
 		static readonly formatter = (error: Error) =>
-			`${error.name}: ${error.message}`
+			newlines(`${error.name}: ${error.message}`, 1)
 
-		protected constructor(shutDown?: () => void) {
+		protected constructor(shutDown?: (err: Error) => void) {
 			super(PlainErrorPrinter.formatter, console.error, shutDown)
 		}
 	}
 
 	export class FileErrorPrinter extends ErrorPrinter {
 		static readonly formatter = (error: Error) =>
-			`${error.name}: ${error.message}${getNewline()}`
+			newlines(`${error.name}: ${error.message}`)
 
 		constructor(
 			private readonly logger: IErrorLogger,
-			shutDown?: () => void
+			shutDown?: (err: Error) => void
 		) {
 			super(
 				FileErrorPrinter.formatter,

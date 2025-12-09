@@ -30,7 +30,7 @@ export abstract class ErrorStream<T = any>
 
 	setResource(resource: IOwnedStream): void {
 		try {
-			this.delegate.init(resource)
+			super.setResource(resource)
 		} catch (err) {
 			this.errHandler(err)
 		}
