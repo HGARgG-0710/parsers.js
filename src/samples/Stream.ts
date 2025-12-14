@@ -165,7 +165,7 @@ export function DelimitedStream<T = any, E = any>(
 ) {
 	return function (ends: E, stream: IStream<T>) {
 		const [pre, post] = endProvider(ends)
-		return new ConcatStream(
+		return new ConcatStream<T>(
 			new FiniteStream(...pre),
 			new InterleaveStream(stream, new LoopStream(getDelimiter)),
 			new FiniteStream(...post)

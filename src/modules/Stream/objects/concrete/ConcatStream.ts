@@ -11,7 +11,7 @@ const { lastIndex } = array
  * concatenates outputs from each one of the given `IStream`s,
  * taking their precise combined time to finish.
  */
-export class ConcatStream extends ArrayStream<any, IStream> {
+export class ConcatStream<T = any> extends ArrayStream<T, IStream<T>> {
 	private streamIndex: number = 0
 
 	private get currStream() {

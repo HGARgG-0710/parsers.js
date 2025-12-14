@@ -22,11 +22,17 @@ class ErrorConfig {
 	loggedNewlinesBetween = 2
 }
 
+class JSONConfig {
+	spaces = 0
+	replacer: null | (number | string)[] = null
+}
+
 class LibConfig {
 	readonly xml = new XMLConfig()
 	readonly regex = new RegexConfig()
 	readonly unicode = new UnicodeConfig()
 	readonly errors = new ErrorConfig()
+	readonly json = new JSONConfig()
 }
 
 export const Config = new LibConfig()

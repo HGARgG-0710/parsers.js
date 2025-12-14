@@ -16,6 +16,7 @@ import type {
 	IXMLTagTable,
 	IXMLVersion
 } from "../interfaces.js"
+import type { ISourceGenerator } from "../interfaces/SourceGenerator.js"
 import { XMLGenerationError } from "../objects/Error.js"
 import {
 	TreePairGenerationTable,
@@ -293,7 +294,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	}
 }
 
-export class XMLGenerator {
+export class XMLGenerator implements ISourceGenerator<IXMLDebuggable> {
 	private readonly XMLStream: (
 		resource: IOwnedStream<IXMLDebuggable>
 	) => ICommonStream<string>
