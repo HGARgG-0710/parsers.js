@@ -171,28 +171,59 @@ class ErrorStatus {
  * opening.
  */
 export class FileDescriptor implements IFileSource {
+	private readonly open: FileDescriptorOpen
+	private state: IFileDescriptorState
+
+	nextByte(): void {
+		this.state.nextByte((newState) => (this.state = newState))
+	}
+
+	cleanup(): void {
+		this.state = this.state.cleanup()
+	}
+
+	get isOpen() {
+		return this.state === this.open
+	}
+
+	hasBytes() {
+		return this.state.hasBytes()
+	}
+
+	get currByte() {
+		return this.open.currByte
+	}
+
+	get size() {
+		return this.open.size
+	}
+
+	constructor(
+		readonly filename: string,
+		handler: (err: NodeJS.ErrnoException) => void
+	) {
+		this.open = new FileDescriptorOpen(filename, handler)
+		this.state = this.open
+	}
+}
+
+interface IFileDescriptorState {
+	cleanup(): IFileDescriptorState
+	nextByte(stateSetter: (state: IFileDescriptorState) => void): void
+	hasBytes(): boolean
+}
+
+class FileDescriptorOpen implements IFileDescriptorState {
 	private readonly byteProvider: ByteProvider
 	private readonly descriptor: number
 	private readonly endPos: Chunk.BytePos
 	private readonly errorStatus = new ErrorStatus()
+	private readonly closed = new FileDescriptorClosed()
 
 	readonly size: number
-	private _isOpen: boolean
-
-	private set isOpen(newIsOpen: boolean) {
-		this._isOpen = newIsOpen
-	}
 
 	private getSize() {
 		return fstatSync(this.descriptor).size
-	}
-
-	private markOpen() {
-		this.isOpen = true
-	}
-
-	private markClosed() {
-		this.isOpen = false
 	}
 
 	private getEndPos() {
@@ -211,29 +242,25 @@ export class FileDescriptor implements IFileSource {
 		}
 	}
 
-	get isOpen() {
-		return this._isOpen
-	}
-
 	hasBytes(): boolean {
 		return this.byteProvider.hasAny()
 	}
 
-	nextByte(): void {
+	nextByte(stateSetter: (state: IFileDescriptorState) => void): void {
 		this.byteProvider.moveForward()
-		if (!this.errorStatus.isEmpty())
+		if (!this.errorStatus.isEmpty()) {
+			stateSetter(this.closed)
 			displayError(this.errorStatus.get(), this.getErrorData())
+		}
 	}
 
 	get currByte() {
 		return this.byteProvider.byte
 	}
 
-	cleanup(): void {
-		if (this.isOpen) {
-			closeSync(this.descriptor)
-			this.markClosed()
-		}
+	cleanup(): IFileDescriptorState {
+		closeSync(this.descriptor)
+		return this.closed
 	}
 
 	constructor(
@@ -245,9 +272,20 @@ export class FileDescriptor implements IFileSource {
 			this.size = this.getSize()
 			this.endPos = this.getEndPos()
 			this.byteProvider = this.getByteProvider()
-			this.markOpen()
 		} catch (err) {
 			handler(err)
 		}
+	}
+}
+
+class FileDescriptorClosed implements IFileDescriptorState {
+	nextByte(stateSetter: (state: IFileDescriptorState) => void): void {}
+
+	cleanup(): IFileDescriptorState {
+		return this
+	}
+
+	hasBytes(): boolean {
+		return false
 	}
 }
