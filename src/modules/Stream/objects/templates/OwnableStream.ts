@@ -9,7 +9,7 @@ import type {
  * It contains no concrete properties/methods, except for those required by the
  * `IOwnedStream<T>` specifically, and not `IStream<T>`.
  *
- * It implementation of `setOwner` sets the encapsulated `readonly .owner: IOwningStream`
+ * It implementation of `connectOwner` sets the encapsulated `readonly .owner: IOwningStream`
  * property, and the property itself can be set via the `protected set owner` setter
  * by its children classes alone.
  */
@@ -31,7 +31,7 @@ export abstract class OwnableStream<T = any>
 		return this._owner
 	}
 
-	setOwner(newOwner: IOwningStream): void {
+	connectOwner(newOwner: IOwningStream): void {
 		this.owner = newOwner
 	}
 }

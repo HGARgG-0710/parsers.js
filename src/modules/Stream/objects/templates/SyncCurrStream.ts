@@ -15,7 +15,8 @@ export abstract class SyncCurrStream<T = any> implements IResourcefulStream<T> {
 
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract setResource(resource: IOwnedStream): void
+	abstract connectResource(resource: IOwnedStream): void
+	abstract baseInit(): void
 
 	protected syncCurr(): void {
 		this.curr = this.resource!.curr

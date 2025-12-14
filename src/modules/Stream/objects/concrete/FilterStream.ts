@@ -38,8 +38,7 @@ function BuildFilterStream<T = any>(
 			return FilterStream.pool
 		}
 
-		setResource(resource: IOwnedStream): void {
-			super.setResource(resource)
+		baseInit(): void {
 			this.prod()
 			this.updateCurr()
 		}

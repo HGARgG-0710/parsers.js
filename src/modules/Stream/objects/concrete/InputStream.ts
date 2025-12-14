@@ -1,5 +1,9 @@
 import { number } from "@hgargg-0710/one"
-import type { IParseable, IPosed } from "../../../../interfaces.js"
+import type {
+	IBaseInitializable,
+	IParseable,
+	IPosed
+} from "../../../../interfaces.js"
 import type {
 	IFinishable,
 	IInputStream,
@@ -33,7 +37,8 @@ export class InputStream<T = any>
 		IPeekable<T>,
 		INavigable<T>,
 		IFinishable<T>,
-		IPosed
+		IPosed,
+		IBaseInitializable
 {
 	protected ["constructor"]: new (source?: IParseable<T>) => this
 
@@ -63,10 +68,9 @@ export class InputStream<T = any>
 		return this.pos === this.source!.size
 	}
 
-	setResource(source: IParseable<T>): void {
-		super.setResource(source)
-		this.lastPos = source.size - 1
-		this.view.init(source)
+	baseInit(): void {
+		this.lastPos = this.source!.size - 1
+		this.view.init(this.source!)
 	}
 
 	private navigateInt(relativePos: number) {

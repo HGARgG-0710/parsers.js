@@ -16,7 +16,7 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	extends RenewerStream<T, Args>
 	implements ICommonStream<T>
 {
-	setOwner(newOwner: IOwningStream): void
+	connectOwner(newOwner: IOwningStream): void
 	get owner(): IOwningStream | undefined
 
 	protected endStream(): void

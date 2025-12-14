@@ -10,7 +10,7 @@ export declare abstract class PipeStream<T = any, Args extends any[] = []>
 	extends DelegateStream<T, Args>
 	implements IOwnedStream<T>, Iterable<T>
 {
-	setOwner(newOwner: IOwningStream<any, any[]>): void
+	connectOwner(newOwner: IOwningStream<any, any[]>): void
 	get owner(): IOwningStream | undefined
 	[Symbol.iterator](): Generator<T>
 }

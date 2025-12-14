@@ -85,12 +85,12 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 	}
 
 	private asTrivial() {
-		this.finalRange.init(new TrivialRange(this.first))
+		this.finalRange = new Range(new TrivialRange(this.first))
 		this.resource!.next() // killing last (1st here) child
 	}
 
 	private asInfinite() {
-		this.finalRange.init(new InfiniteRange(this.first))
+		this.finalRange = new Range(new InfiniteRange(this.first))
 	}
 
 	private tryLimits() {
@@ -102,15 +102,12 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 	private asLimits() {
 		expectRangeBoundary(this.resource!)
 		this.last = this.resource!.curr
-		this.finalRange.init(new LimitsRange(this.first, this.last))
+		this.finalRange = new Range(new LimitsRange(this.first, this.last))
 		ensureChildUnrevivable(this) // we're definitely finished, no weird leftovers
 	}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
-		this.finalRange = new Range()
+	baseInit(): void {
 		this.curr = this.finalRange
-
 		if (this.tryTrivial()) this.asTrivial()
 		else if (this.tryLimits()) this.asLimits()
 		else this.asInfinite()

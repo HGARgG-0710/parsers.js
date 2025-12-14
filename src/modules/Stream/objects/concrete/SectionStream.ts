@@ -1,8 +1,4 @@
-import type {
-	IIndexed,
-	IOwnedStream,
-	IPrototypeCollection
-} from "../../../../interfaces.js"
+import type { IIndexed, IPrototypeCollection } from "../../../../interfaces.js"
 import { CollectionBuilder } from "../../../../objects.js"
 import type { ISectionGrabber } from "../../interfaces/SectionStream.js"
 import { CurrDyssyncLinkedStream } from "../templates.js"
@@ -25,9 +21,8 @@ export class SectionStream<
 
 	free(): void {}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
-		this.grabber.init(resource)
+	baseInit(): void {
+		this.grabber.init(this.resource)
 		this.getNextItem()
 	}
 

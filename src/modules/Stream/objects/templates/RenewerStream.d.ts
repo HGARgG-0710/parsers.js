@@ -25,7 +25,8 @@ export declare abstract class RenewerStream<T = any, Args extends any[] = []>
 	abstract next(): void
 
 	get resource(): IOwnedStream | undefined
-	setResource(resource: IOwnedStream): void
+	connectResource(resource: IOwnedStream): void
+	baseInit(): void
 	reviveChild(): boolean
 	abstract init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
 }

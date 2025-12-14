@@ -1,7 +1,10 @@
 import { Pools } from "../../../../global.js"
 import { ObjectPool } from "../../../../objects.js"
 import type { ICommonStream } from "../../interfaces/CommonStream.js"
-import type { IMarkerMaker, IMarkerStream } from "../../interfaces/MarkerStream.js"
+import type {
+	IMarkerMaker,
+	IMarkerStream
+} from "../../interfaces/MarkerStream.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 import { IdentityStream } from "./IdentityStream.js"
 
@@ -20,8 +23,7 @@ class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
 		return this
 	}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
+	baseInit(): void {
 		this._marker = this.markerMaker(this)
 	}
 }

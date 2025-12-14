@@ -1,29 +1,25 @@
 import type {
 	IInitializer,
-	IOwnerSettable,
-	IResourceSettable
+	IOwnerConnectable,
+	IResourceConnectable
 } from "../../../interfaces/Initializer.js"
 
 /**
- * This is an `IInitializer` purposed to be used with `IResourceSettable`
- * `target`s, and a `resource?: IOwnerSettable` argument. If `resource` is
- * non-`null`, then `target.setResource(resource)` is called, followed by
- * `resource.setOwner(target)`.
+ * This is an `IInitializer` purposed to be used with `IResourceConnectable`
+ * `target`s, and a `resource?: IOwnerConnectable` argument. If `resource` is
+ * non-`null`, then `target.connectResource(resource)` is called, followed by
+ * `resource.connectOwner(target)`.
  */
-export const ownerInitializer: IInitializer<[IOwnerSettable, ...any[]]> = {
-	init(owner: IResourceSettable, resource?: IOwnerSettable, ...rest: any[]) {
+export const ownerInitializer: IInitializer<[IOwnerConnectable, ...any[]]> = {
+	init(
+		owner: IResourceConnectable,
+		resource?: IOwnerConnectable,
+		...rest: any[]
+	) {
 		if (resource) {
-			resource.setOwner(owner)
-			owner.setResource(resource)
-		}
-	}
-}
-
-export const reverseOwnerInitializer: IInitializer<[IOwnerSettable]> = {
-	init(owner: IResourceSettable, resource?: IOwnerSettable, ...rest: any[]) {
-		if (resource) {
-			owner.setResource(resource)
-			resource.setOwner(owner)
+			resource.connectOwner(owner)
+			owner.connectResource(resource)
+			owner.baseInit()
 		}
 	}
 }

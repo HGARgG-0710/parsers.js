@@ -58,7 +58,7 @@ export declare abstract class BasicStream<T = any, Args extends any[] = any[]>
 	protected postInit(...args: Partial<Args>): void
 
 	next(): void
-	setOwner(newOwner: IOwningStream): void
+	connectOwner(newOwner: IOwningStream): void
 	init(...args: Partial<Args>): this
 
 	[Symbol.iterator](): Generator<T>

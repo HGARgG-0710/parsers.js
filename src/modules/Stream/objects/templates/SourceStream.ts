@@ -1,3 +1,4 @@
+import type { IResourceConnectable } from "../../../../interfaces.js"
 import { resourceInitializer } from "../../../Initializable/objects/ResourceInitializer.js"
 import { BasicStream } from "./BasicStream.js"
 
@@ -16,10 +17,10 @@ import { BasicStream } from "./BasicStream.js"
  * `IInputStream`-classes, representing access to resources,
  * such as files, or open network connections.
  */
-export abstract class SourceStream<
-	T = any,
-	SourceType = any
-> extends BasicStream<T, [SourceType]> {
+export abstract class SourceStream<T = any, SourceType = any>
+	extends BasicStream<T, [SourceType]>
+	implements IResourceConnectable<SourceType>
+{
 	protected abstract currGetter(): T
 	protected source?: SourceType
 
@@ -39,7 +40,9 @@ export abstract class SourceStream<
 		return this.currGetter()
 	}
 
-	setResource(source: SourceType) {
+	connectResource(source: SourceType) {
 		this.source = source
 	}
+
+	baseInit() {}
 }

@@ -126,11 +126,7 @@ function BuildLimitStream<T = any>(
 					return this.constructor.pool
 				},
 
-				setResource(resource: ILimitableStream<T>) {
-					this.super.BasicResourceStream.setResource.call(
-						this,
-						resource
-					)
+				baseInit() {
 					this.goStartPos()
 					this.maybeEmpty()
 				},

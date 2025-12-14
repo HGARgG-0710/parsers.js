@@ -1,7 +1,7 @@
+import { Stateful } from "../../../../objects.js"
 import { isStateful } from "../../../../utils/Stream.js"
 import { mixin } from "../../../mixin.js"
-import { StatefulStream } from "../templates.js"
-import { BeforeCompositeStream } from "./before/CompositeStream.js"
+import { BeforeCompositeStream } from "../before/CompositeStream.js"
 
 const _CompositeStream = new mixin(
 	{
@@ -15,7 +15,7 @@ const _CompositeStream = new mixin(
 			free() {},
 
 			setState(state) {
-				this.super.StatefulStream.setState.call(this, state)
+				this.super.Stateful.setState.call(this, state)
 				this.distributeState()
 				return this
 			}
@@ -29,7 +29,7 @@ const _CompositeStream = new mixin(
 			)
 		}
 	},
-	[BeforeCompositeStream, StatefulStream]
+	[BeforeCompositeStream, Stateful]
 ).toClass()
 
 export function CompositeStream(...streams) {

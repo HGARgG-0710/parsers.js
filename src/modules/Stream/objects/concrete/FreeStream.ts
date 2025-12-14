@@ -1,4 +1,4 @@
-import type { IFreeable, IOwnedStream } from "../../../../interfaces.js"
+import type { IFreeable } from "../../../../interfaces.js"
 import { IdentityStream } from "./IdentityStream.js"
 
 /**
@@ -31,8 +31,7 @@ export class FreeStream<T extends IFreeable = any> extends IdentityStream<
 
 	free(): void {}
 
-	setResource(resource: IOwnedStream) {
-		super.setResource(resource)
+	baseInit() {
 		this.enqueueCurrForFreeing()
 	}
 

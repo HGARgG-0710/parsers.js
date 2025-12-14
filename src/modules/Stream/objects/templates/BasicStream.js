@@ -1,5 +1,5 @@
+import { Initializable } from "../../../../objects/Initializable.js"
 import { mixin } from "../../../../mixin.js"
-import { Initializable } from "../../../../objects/Initializer.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
 

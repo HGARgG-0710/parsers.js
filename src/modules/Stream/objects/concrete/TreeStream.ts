@@ -190,10 +190,9 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		return this.currGetter()
 	}
 
-	setResource(tree: TreeLike): void {
-		super.setResource(tree)
-		this.walker.init(tree)
-		this.endIndex.for(tree)
+	baseInit(): void {
+		this.walker.init(this.source!)
+		this.endIndex.for(this.source!)
 	}
 
 	get treeIndex() {

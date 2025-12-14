@@ -10,7 +10,7 @@ import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
  * `readonly .resource: IOwnedStream` property, which can also be modified directly
  * by its descendant-classes.
  *
- * Besides `.initializer`, `.init`, `.setResource` and `.resource`,
+ * Besides `.initializer`, `.init`, `.connectResource` and `.resource`,
  * it provides no concrete methods/properties.
  */
 export abstract class OwningStream<T = any, Args extends any[] = []>
@@ -36,9 +36,11 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 		return this._resource
 	}
 
-	setResource(resource: IOwnedStream) {
+	connectResource(resource: IOwnedStream) {
 		this.resource = resource
 	}
+
+	baseInit(): void {}
 
 	constructor(resource?: IOwnedStream, ...args: [] | Partial<Args>) {
 		super(resource, ...args)

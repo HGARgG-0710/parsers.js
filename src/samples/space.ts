@@ -73,8 +73,7 @@ export class LFStream
 		this.defineCurr()
 	}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
+	baseInit(): void {
 		this.lastItem.init(this.resource!)
 		this.lookahead.init(this.resource!)
 		this.updateItems()

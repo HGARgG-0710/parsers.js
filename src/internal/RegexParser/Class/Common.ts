@@ -50,8 +50,7 @@ class ClassRangeStream extends SingleNodeStream<INode> {
 		return unit
 	}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
+	baseInit(): void {
 		const from = this.readBoundary() // the child Stream dies
 		tryReviveChild(this) // needs to be renewed
 		this.readHyphen()
@@ -125,8 +124,7 @@ export abstract class ClassStream<
 > extends SingleNodeStream<INode> {
 	protected abstract spawnTarget(): T
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
+	baseInit(): void {
 		this.curr = consumeSingletonRevivables(this, this.spawnTarget())
 	}
 }

@@ -29,8 +29,7 @@ function BuildIndexStream<T = any>(
 			else this.lineIndex.nextChar()
 		}
 
-		setResource(resource: IOwnedStream): void {
-			super.setResource(resource)
+		baseInit(): void {
 			this.lineIndex.renew()
 		}
 

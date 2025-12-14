@@ -29,5 +29,6 @@ export declare abstract class BasicResourceStream<
 	get resource(): IOwnedStream | undefined
 	protected abstract baseNextIter(curr?: T): T
 	protected syncCurr(): void
-	setResource(resource: IOwnedStream): void
+	connectResource(resource: IOwnedStream): void
+	baseInit(): void
 }

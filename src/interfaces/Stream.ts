@@ -2,7 +2,7 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	IOwnedStream,
 	IParseState,
-	IResourceSettable,
+	IResourceConnectable,
 	IStateHaving,
 	IStateSettable,
 	ITableHandler
@@ -100,7 +100,7 @@ export type IPeekableStream<T = any> = IStream<T> & IPeekable<T>
  */
 export type IResourcefulStream<T = any> = IStream<T> &
 	IResourceful &
-	IResourceSettable<IOwnedStream>
+	IResourceConnectable<IOwnedStream>
 
 /**
  * This is an `IStream<T>` that is also `IStateful`, as well as `IStateSettable`

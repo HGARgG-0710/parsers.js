@@ -1,6 +1,6 @@
 import { mixin } from "../../../../mixin.js"
+import { Stateful } from "../../../../objects.js"
 import { OwningStream } from "./OwningStream.js"
-import { StatefulStream } from "./StatefulStream.js"
 
 export const RenewerStream = new mixin(
 	{
@@ -11,5 +11,5 @@ export const RenewerStream = new mixin(
 			}
 		}
 	},
-	[StatefulStream, OwningStream]
+	[Stateful, OwningStream]
 ).toClass()

@@ -57,7 +57,7 @@ export abstract class BeforeCompositeStream<T = any>
 
 	private updateResource() {
 		this.resource = this.streamList!.firstItemDeep()
-		this.resource.setOwner(this)
+		this.resource.connectOwner(this)
 	}
 
 	protected get initializer() {
@@ -72,7 +72,7 @@ export abstract class BeforeCompositeStream<T = any>
 		return this.streamList!.getDepth(mark)
 	}
 
-	setResource(lowStream: IOwnedStream) {
+	connectResource(lowStream: IOwnedStream) {
 		this.lowStream = lowStream
 	}
 

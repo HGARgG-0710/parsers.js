@@ -33,8 +33,7 @@ class _StorageStream<T = any, Stored = any>
 		return this._currStored
 	}
 
-	setResource(resource: IOwnedStream): void {
-		super.setResource(resource)
+	baseInit(): void {
 		this.updateStored()
 	}
 

@@ -1,8 +1,8 @@
 import type {
 	IFreeable,
 	IInitializable,
-	IOwnerSettable,
-	IResourceSettable
+	IOwnerConnectable,
+	IResourceConnectable
 } from "../../../interfaces.js"
 import type {
 	IResourcefulStream,
@@ -11,7 +11,7 @@ import type {
 } from "../../../interfaces/Stream.js"
 
 /**
- * This is an `IStream<T>`, which is also `IOwnerSettable<IOwningStream>`, and
+ * This is an `IStream<T>`, which is also `IOwnerConnectable<IOwningStream>`, and
  * has a `readonly owner?: IOwningStream` property. It represents a stream,
  * which can be taken ownership of.
  */
@@ -19,18 +19,18 @@ export type IOwnedStream<
 	T = any,
 	OwnerType extends IOwningStream = IOwningStream
 > = IStream<T> &
-	IOwnerSettable<IOwningStream> & {
+	IOwnerConnectable<IOwningStream> & {
 		readonly owner?: OwnerType
 	}
 
 /**
- * This is an `IResourcefulStream<T>`, which is also `IResourceSettable<IOwnedStream>`,
+ * This is an `IResourcefulStream<T>`, which is also `IResourceConnectable<IOwnedStream>`,
  * and has an `init(resource?: IOwnedStream, ...x: any[])` method signature.
  * It represents a stream that is capable of taking ownership of another stream.
  */
 export interface IOwningStream<T = any, Args extends any[] = any[]>
 	extends IResourcefulStream<T>,
-		IResourceSettable<IOwnedStream>,
+		IResourceConnectable<IOwnedStream>,
 		IInitializable<[IOwnedStream, ...Args]> {}
 
 /**

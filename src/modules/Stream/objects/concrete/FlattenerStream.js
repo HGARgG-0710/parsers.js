@@ -39,8 +39,7 @@ export const FlattenerStream = new mixin(
 				else this.baseNextIter()
 			},
 
-			setResource(resource) {
-				this.super.CurrDyssyncLinkedStream.setResource(resource)
+			baseInit() {
 				this.reviveDelegate()
 			}
 		},

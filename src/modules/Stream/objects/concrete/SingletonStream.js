@@ -2,7 +2,8 @@ import { Pools } from "../../../../global.js"
 import { mixin } from "../../../../mixin.js"
 import { ObjectPool } from "../../../../objects.js"
 import { ownerInitializer } from "../../Initializer/objects/OwnerInitializer.js"
-import { OwningStream, PreCommonStream, TrivialStream } from "../templates.js"
+import { TrivialStream } from "../templates.js"
+import { CustomLinkedStream } from "../templates/CustomLinkedStream.js"
 
 const _SingletonStream = new mixin(
 	{
@@ -15,8 +16,7 @@ const _SingletonStream = new mixin(
 				return ownerInitializer
 			},
 
-			setResource(resource) {
-				this.super.OwningStream.setResource.call(this, resource)
+			baseInit(resource) {
 				this.curr = this.handler(resource)
 			},
 
@@ -29,7 +29,7 @@ const _SingletonStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[PreCommonStream, OwningStream, TrivialStream]
+	[CustomLinkedStream, TrivialStream]
 ).toClass()
 
 export function SingletonStream(handler) {

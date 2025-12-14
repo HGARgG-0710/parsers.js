@@ -7,16 +7,20 @@ export interface IInitializer<Args extends any[] = any[]> {
 	init(target: unknown, ...args: Partial<Args> | []): void
 }
 
-/**
- * An object with a `.setResource` public setter method.
- */
-export interface IResourceSettable<T = unknown> {
-	setResource(resource: T): void
+export interface IBaseInitializable {
+	baseInit(): void
 }
 
 /**
- * An object with a '.setOwner' public setter method
+ * An object with a `.connectResource` public setter method.
  */
-export interface IOwnerSettable<T = unknown> {
-	setOwner(newOwner: T): void
+export interface IResourceConnectable<T = unknown> extends IBaseInitializable {
+	connectResource(resource: T): void
+}
+
+/**
+ * An object with a '.connectOwner' public setter method
+ */
+export interface IOwnerConnectable<T = unknown> {
+	connectOwner(newOwner: T): void
 }

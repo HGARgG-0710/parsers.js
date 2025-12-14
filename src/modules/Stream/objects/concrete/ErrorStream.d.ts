@@ -1,9 +1,8 @@
-import type {
-	IControlStream,
-	IOwnedStream
-} from "../../interfaces/OwnedStream.js"
-import { ProxyStream } from "../templates.js"
+import type { IParseState } from "../../../../interfaces.ts"
+import type { IControlStream } from "../../interfaces/OwnedStream.ts"
+import type { ProxyStream } from "../templates.ts"
 
+// ! [testing] CRUCIAL REMINDER: here, the `Stateful` OVERRIDES the delegation of `get .state/setState(): void` to `this.delegate` on the `ProxyStream` parent
 // ! LATER FOR DOCS - *THIS* is how one is supposed to use ErrorHandling-Streams:
 // * function SomeChooser() {
 // * 	return [
@@ -14,25 +13,13 @@ import { ProxyStream } from "../templates.js"
 // * }
 // ! they are BOUND to have THE SAME lifetime, and `ErrorStream`s serve as PROXIES for other streams...
 // !!! LIKEWISE, `ErrorHandlingStream`s CANNOT wrap around choosers - they must accept an UNINITIALIZED STREAM!
-export abstract class ErrorStream<T = any>
+export declare abstract class ErrorStream<T = any>
 	extends ProxyStream<T>
 	implements IControlStream<T>, Iterable<T>
 {
 	protected abstract errHandler(err: any): void
-
-	next() {
-		try {
-			super.next()
-		} catch (err) {
-			this.errHandler(err)
-		}
-	}
-
-	setResource(resource: IOwnedStream): void {
-		try {
-			super.setResource(resource)
-		} catch (err) {
-			this.errHandler(err)
-		}
-	}
+	protected wrapInHandler<T = any>(callback: () => T): T
+	next(): void
+	baseInit(): void
+	get state(): IParseState
 }

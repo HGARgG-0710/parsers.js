@@ -13,7 +13,8 @@ export abstract class SyncStream<T> implements IResourcefulStream<T> {
 
 	abstract next(): void
 	abstract isCurrEnd(): boolean
-	abstract setResource(resource: IOwnedStream): void
+	abstract connectResource(resource: IOwnedStream): void
+	abstract baseInit(): void
 
 	get isEnd(): boolean {
 		return this.resource!.isEnd

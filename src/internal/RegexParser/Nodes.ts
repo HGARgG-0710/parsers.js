@@ -1,11 +1,12 @@
-import type { ICellNode, INode, IPoolNode } from "../../interfaces.js"
-import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
+import { BaseNode } from "src/modules/Node/BaseNode.js"
 import {
 	CachedContentNode,
-	ContentNode, SingleChildNode
+	ContentNode,
+	SingleChildNode
 } from "src/modules/Node/ContentNode.js"
-import { BaseNode } from "src/modules/Node/BaseNode.js"
+import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
 import { CachedTokenNode } from "src/modules/Node/TokenNode.js"
+import type { ICellNode, INode, IPoolNode } from "../../interfaces.js"
 
 export namespace Temp {
 	export const Comma = CachedTokenNode("comma", "Comma")
@@ -128,9 +129,6 @@ export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"
 	static readonly type = "char-class-range"
 
-	private start: INode
-	private end: INode
-
 	get debugName() {
 		return ClassRange.debugName
 	}
@@ -153,10 +151,8 @@ export class ClassRange extends BaseNode {
 		} { start: ${this.start.debugPrint()}, end: ${this.end.debugPrint()} }`
 	}
 
-	constructor(start?: INode, end?: INode) {
+	constructor(private readonly start: INode, private readonly end: INode) {
 		super()
-		if (start) this.start = start
-		if (end) this.end = end
 	}
 }
 
