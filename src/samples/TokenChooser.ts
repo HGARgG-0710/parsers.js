@@ -1,5 +1,5 @@
-import type { Regex } from "../objects.js"
 import type { ILinkedStream, IPeekStream } from "../interfaces.js"
+import type { Regex } from "../objects.js"
 
 /**
  * Returns a function for performing a linear walk-through
@@ -22,13 +22,17 @@ import type { ILinkedStream, IPeekStream } from "../interfaces.js"
  * due to the way in which the `Regex.prototype.matchAt` method
  * signature.
  */
-export function TokenChooser<Out = any, Default = void>(
-	choices: Iterable<[Regex, (stream: ILinkedStream & IPeekStream) => Out]>,
+export function TokenChooser<In = any, Out = any, Default = void>(
+	choices: Iterable<[Regex, (read: (string | In)[] | string) => Out]>,
 	defaultHandler: (stream: ILinkedStream) => Default
 ) {
-	return function (stream: ILinkedStream & IPeekStream) {
-		for (const [pattern, chooser] of choices)
-			if (pattern.matchAt(stream)) return chooser(stream)
+	return function (
+		stream: ILinkedStream<In | string> & IPeekStream<In | string>
+	) {
+		for (const [pattern, chooser] of choices) {
+			const matched = pattern.matchAt(stream)
+			if (matched) return chooser(matched)
+		}
 		return defaultHandler(stream)
 	}
 }
