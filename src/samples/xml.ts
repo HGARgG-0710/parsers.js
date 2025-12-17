@@ -7,7 +7,7 @@ import type {
 	IOwnedStream,
 	IValidationTable,
 	IValidNodeType,
-	IXMLAttributeGenerator,
+	IXMLAttrMapValue,
 	IXMLAttrTable,
 	IXMLDebuggable,
 	IXMLGenerationTable,
@@ -328,7 +328,7 @@ export abstract class XMLAttrTable implements IXMLAttrTable {
 	get(
 		parentType: IValidNodeType,
 		childType: IValidNodeType
-	): false | IXMLAttributeGenerator {
+	): IXMLAttrMapValue {
 		return this.delegate.generate(parentType, childType)
 	}
 
@@ -365,7 +365,7 @@ export class XMLGenerationTable implements IXMLGenerationTable {
 	toAttr(
 		parentType: IValidNodeType,
 		childType: IValidNodeType
-	): false | IXMLAttributeGenerator {
+	): IXMLAttrMapValue {
 		return this.attrs.get(parentType, childType)
 	}
 

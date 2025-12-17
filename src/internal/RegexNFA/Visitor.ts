@@ -79,9 +79,6 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		return this.toFragment(new CodeRangeState(from, to, extensions))
 	}
 
-	// ! FINISH
-	handleNoCapture(noCapture: Regex.Raw.NoCapture): Fragment | null {}
-
 	handleNoneOrMore({ item }: Regex.Raw.NoneOrMore): Fragment | null {
 		const subExpr = item.accept(this)
 		if (!subExpr) return null

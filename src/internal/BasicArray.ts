@@ -47,6 +47,21 @@ export abstract class BasicArray<T = any> {
 		for (let i = 0; i < this.size; ++i) yield this.read(i)
 	}
 
+	last(i: number = 0) {
+		const index = this.size - 1 - i
+		assert(index >= 0)
+		return this.read(index)
+	}
+
+	filter(pred: (x: T, i: number, target: this) => boolean) {
+		const result: T[] = []
+		for (let i = 0; i < this.size; ++i) {
+			const currItem = this.read(i)
+			if (pred(currItem, i, this)) result.push(currItem)
+		}
+		return result
+	}
+
 	constructor(protected items: T[] = []) {
 		assert(isArray(items))
 	}

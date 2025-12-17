@@ -4,20 +4,43 @@
 import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { Pools } from "../../global.js"
-import type { IPeekableStream, IValidNodeType } from "../../interfaces.js"
+import type {
+	IMatchedState,
+	IPeekableStream,
+	IValidNodeType
+} from "../../interfaces.js"
 import { ObjectPool, Poolable, Regex, RetainedArray } from "../../objects.js"
 import { isTyped } from "../../utils/Node.js"
+import type { OverflowCounter } from "../OverflowCounter.js"
 import { toLowerCase, toUpperCase } from "../Unicode.js"
 
 const { isString, isNull } = type
 
-export class BoundState<T = any> extends Poolable<[ArrowState, PeekKeeper<T>]> {
+export class BoundState<T = any>
+	extends Poolable<[ArrowState, PeekKeeper<T>]>
+	implements IMatchedState
+{
 	static readonly pool = Pools.Internal.add(
 		new ObjectPool<BoundState, [State, PeekKeeper]>(BoundState)
 	)
 
-	private state: ArrowState
+	private _state: ArrowState
+	private _wasVerified: boolean
+	private _captured: string | T
+
 	readonly keeper = new PeekKeeper<T>()
+
+	private set wasVerified(wasVerified: boolean) {
+		this._wasVerified = wasVerified
+	}
+
+	private set captured(item: string | T) {
+		this._captured = item
+	}
+
+	private set state(newState: ArrowState) {
+		this._state = newState
+	}
 
 	protected get pool() {
 		return BoundState.pool as ObjectPool<
@@ -29,11 +52,27 @@ export class BoundState<T = any> extends Poolable<[ArrowState, PeekKeeper<T>]> {
 	init(state?: ArrowState, keeper?: PeekKeeper): this {
 		if (state) this.state = state
 		if (keeper) this.keeper.from(keeper)
+		this.wasVerified = false
+		this.captured = ""
 		return this
 	}
 
+	get wasVerified() {
+		return this._wasVerified
+	}
+
+	get captured() {
+		return this._captured
+	}
+
+	get state() {
+		return this._state
+	}
+
 	verify() {
-		return this.state.verify(this.keeper)
+		const result = (this.wasVerified = this.state.verify(this.keeper))
+		if (result) this.captured = this.state.getCaptured(this.keeper)
+		return result
 	}
 
 	advance() {
@@ -96,9 +135,45 @@ export class PeekKeeper<T = any> {
 	}
 }
 
-export class StateArrayList {
-	readonly states = new RetainedArray<BoundState>()
-	private matchState: MatchState | null = null
+export class StateHistory<T = any> {
+	readonly stateArrs = new RetainedArray<StateArray<T>>()
+
+	hasItemAt(i: number) {
+		return i < this.stateArrs.size
+	}
+
+	top(i?: number) {
+		return this.stateArrs.last(i)
+	}
+
+	pushNew() {
+		const newId = this.listId.inc()
+		const newArr = StateArray.pool.create(newId)
+		this.stateArrs.push(newArr)
+		return newArr
+	}
+
+	clear() {
+		for (const arr of this.stateArrs) {
+			arr.clear()
+			arr.free()
+		}
+		this.stateArrs.clear()
+	}
+
+	constructor(private readonly listId: OverflowCounter) {}
+}
+
+export class StateArray<T = any> extends Poolable<[number]> {
+	static readonly pool = Pools.Internal.add(new ObjectPool(StateArray))
+
+	private listId: number
+	private _matchState: MatchState | null = null
+	readonly states = new RetainedArray<BoundState<T>>()
+
+	private set matchState(newMatchState: MatchState) {
+		this._matchState = newMatchState
+	}
 
 	private clearStates() {
 		for (const boundState of this.states) boundState.free()
@@ -106,10 +181,10 @@ export class StateArrayList {
 	}
 
 	private resetMatch() {
-		this.matchState = null
+		this._matchState = null
 	}
 
-	private newIdAdd(state: State, keeper: PeekKeeper) {
+	private newIdAdd(state: State<T>, keeper: PeekKeeper) {
 		state.markSeen(this.listId)
 		state.forgetAllKeepers()
 		this.commonAdd(state, keeper)
@@ -120,7 +195,11 @@ export class StateArrayList {
 		state.addTo(this, keeper)
 	}
 
-	isMatch() {
+	protected get pool() {
+		return StateArray.pool as ObjectPool<this, [number]>
+	}
+
+	hasMatch() {
 		return !isNull(this.matchState)
 	}
 
@@ -133,9 +212,18 @@ export class StateArrayList {
 		this.resetMatch()
 	}
 
-	reset(listId: number) {
-		this.listId = listId
-		this.clear()
+	init(listId?: number) {
+		if (listId) {
+			this.listId = listId
+			this.clear()
+		}
+		return this
+	}
+
+	verifiedPriorTo(state: State) {
+		return this.states.filter(
+			(x) => x.wasVerified && x.state.next() === state
+		)
 	}
 
 	add(state: State, keeper: PeekKeeper) {
@@ -147,11 +235,18 @@ export class StateArrayList {
 		this.matchState = state
 	}
 
+	get matchState() {
+		assert(this._matchState)
+		return this._matchState
+	}
+
 	*[Symbol.iterator]() {
 		yield* this.states
 	}
 
-	constructor(private listId: number) {}
+	constructor(listId: number = -1) {
+		super(listId)
+	}
 }
 
 export class Fragment {
@@ -180,10 +275,10 @@ export class StateArrow {
 	}
 }
 
-export abstract class State {
-	abstract addTo(list: StateArrayList, keeper: PeekKeeper): void
-	abstract verify(keeper: PeekKeeper): boolean
-	abstract advance(keeper: PeekKeeper): void
+export abstract class State<T = any> {
+	abstract addTo(list: StateArray, keeper: PeekKeeper<T>): void
+	abstract verify(keeper: PeekKeeper<T>): boolean
+	abstract advance(keeper: PeekKeeper<T>): void
 
 	private readonly keeperIds = new RetainedArray<number>()
 
@@ -193,11 +288,11 @@ export abstract class State {
 		this.seenTimes = -1
 	}
 
-	beenSeenWith(keeper: PeekKeeper): boolean {
+	beenSeenWith(keeper: PeekKeeper<T>): boolean {
 		return this.keeperIds.has(keeper.id)
 	}
 
-	register(keeper: PeekKeeper) {
+	register(keeper: PeekKeeper<T>) {
 		this.keeperIds.push(keeper.id)
 	}
 
@@ -211,6 +306,10 @@ export abstract class State {
 
 	beenSeen(i: number) {
 		return this.seenTimes === i
+	}
+
+	getCaptured(keeper: PeekKeeper<T>): T | string {
+		return ""
 	}
 
 	get isMatch() {
@@ -234,7 +333,7 @@ export abstract class ArrowState extends State {
 		keeper.advance()
 	}
 
-	addTo(list: StateArrayList, keeper: PeekKeeper): void {
+	addTo(list: StateArray, keeper: PeekKeeper): void {
 		list.states.push(this.with(keeper))
 	}
 
@@ -267,7 +366,7 @@ export class EitherState extends State {
 		return MultVerifier.verifySome(this.options, keeper)
 	}
 
-	addTo(list: StateArrayList, keeper: PeekKeeper): void {
+	addTo(list: StateArray, keeper: PeekKeeper): void {
 		for (const option of this.options) option.addTo(list, keeper)
 	}
 
@@ -288,7 +387,7 @@ abstract class LocaleSensitiveState extends ArrowState {
 
 	verify({ curr }: PeekKeeper): boolean {
 		if (!isString(curr)) return false
-		return this.extensions.ignoreCase
+		return this.extensions.get("ignoreCase")
 			? this.ignoreCaseVerify(curr)
 			: this.baseVerify(curr)
 	}
@@ -332,7 +431,7 @@ export class AnythingState extends ArrowState {
 
 // ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
 export class EmptyState extends ArrowState {
-	addTo(list: StateArrayList, keeper: PeekKeeper): void {
+	addTo(list: StateArray, keeper: PeekKeeper): void {
 		this.next().addTo(list, keeper)
 	}
 
@@ -405,7 +504,7 @@ export class NonBoundaryState extends BoundaryState {
 export class MatchState extends State {
 	advance(keeper: PeekKeeper): void {}
 
-	addTo(list: StateArrayList): void {
+	addTo(list: StateArray): void {
 		list.setMatchState(this)
 	}
 

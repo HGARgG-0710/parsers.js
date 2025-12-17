@@ -1,28 +1,42 @@
 import assert from "node:assert"
-import type { IPeekableStream, IRegexMatcher } from "../../interfaces.js"
+import type {
+	ICaptureResolutionPredicate,
+	IMatch,
+	IPeekableStream,
+	IRegexMatcher
+} from "../../interfaces.js"
 import { OverflowCounter } from "../OverflowCounter.js"
-import { BoundState, PeekKeeper, StateArrayList, type State } from "./State.js"
+import { MatchCollector, MatchIterator } from "./Match.js"
+import {
+	BoundState,
+	PeekKeeper,
+	StateArray,
+	StateHistory,
+	type State
+} from "./State.js"
 
-class StateArrayListPair {
-	private readonly listId: OverflowCounter
-	private currList: StateArrayList
-	private nextList: StateArrayList
+class StateArrayPair<T = any> {
+	private currList: StateArray
+	private nextList: StateArray
+
+	private resetLists() {
+		this.currList = this.history.pushNew()
+		this.nextList = this.history.pushNew()
+	}
 
 	resetNext() {
-		this.nextList.reset(this.listId.inc())
+		this.nextList = this.history.pushNew()
 	}
 
 	reset(startState: State, peekKeeper: PeekKeeper) {
-		const newId = this.listId.inc()
-		this.currList.reset(newId)
-		this.nextList.reset(newId + 1)
+		this.history.clear()
+		this.resetLists()
 		this.currList.add(startState, peekKeeper)
 	}
 
-	switch() {
-		const temp = this.currList
+	advance() {
 		this.currList = this.nextList
-		this.nextList = temp
+		this.nextList = this.history.pushNew()
 	}
 
 	get next() {
@@ -33,16 +47,13 @@ class StateArrayListPair {
 		return this.currList
 	}
 
-	constructor(overflowCallback: () => void) {
-		const currId = this.listId.get()
-		this.listId = new OverflowCounter(overflowCallback)
-		this.currList = new StateArrayList(currId)
-		this.nextList = new StateArrayList(currId + 1)
+	constructor(private readonly history: StateHistory<T>) {
+		this.resetLists()
 	}
 }
 
-class MatchResult {
-	private result?: StateArrayList
+class MatchResult<T = any> {
+	private result?: StateArray<T>
 
 	commit() {
 		this.peekKeeper.commit()
@@ -53,24 +64,20 @@ class MatchResult {
 		return this.result
 	}
 
-	set(result: StateArrayList) {
+	set(result: StateArray<T>) {
 		this.result = result
 	}
 
 	constructor(private readonly peekKeeper: PeekKeeper) {}
 }
 
-class MatchExecutor {
-	private readonly peekKeeper = new PeekKeeper()
-	private readonly result = new MatchResult(this.peekKeeper)
-	private readonly lists = new StateArrayListPair(() => this.resetStateIds())
-
-	private resetStateIds() {
-		this.startState.resetSeenTimes()
-	}
+class MatchExecutor<T = any> {
+	private readonly peekKeeper = new PeekKeeper<T>()
+	private readonly result = new MatchResult<T>(this.peekKeeper)
+	private readonly stateArrPair = new StateArrayPair<T>(this.history)
 
 	private resetLists() {
-		this.lists.reset(this.startState, this.peekKeeper)
+		this.stateArrPair.reset(this.startState, this.peekKeeper)
 	}
 
 	private init(stream: IPeekableStream) {
@@ -80,7 +87,7 @@ class MatchExecutor {
 
 	private addVerified(state: BoundState) {
 		const nextState = state.next()
-		this.lists.next.add(nextState, state.keeper)
+		this.stateArrPair.next.add(nextState, state.keeper)
 		return nextState.isMatch
 	}
 
@@ -98,8 +105,7 @@ class MatchExecutor {
 	}
 
 	private runAttempt() {
-		this.lists.resetNext()
-		for (const state of this.lists.curr) {
+		for (const state of this.stateArrPair.curr) {
 			if (!state.hasCurrPeek()) continue
 			if (this.tryMatching(state)) return this.toMatch(state)
 			state.advance()
@@ -110,42 +116,62 @@ class MatchExecutor {
 	private fromPeeks() {
 		do {
 			if (this.runAttempt()) break
-			this.lists.switch()
-		} while (!this.lists.curr.isEmpty())
-		return this.lists.next
+			this.stateArrPair.advance()
+		} while (!this.stateArrPair.curr.isEmpty())
+		return this.stateArrPair.next
 	}
 
-	private toMatchResult(rawStateList: StateArrayList) {
+	private toMatchResult(rawStateList: StateArray) {
 		this.result.set(rawStateList)
 		return this.result
 	}
 
-	doMatch(stream: IPeekableStream) {
+	doMatchOn(stream: IPeekableStream) {
 		this.init(stream)
 		return this.toMatchResult(this.fromPeeks())
 	}
 
-	constructor(private readonly startState: State) {}
+	constructor(
+		private readonly startState: State,
+		private readonly history: StateHistory
+	) {}
 }
 
-export class NFARegexMatcher implements IRegexMatcher {
-	private readonly executor: MatchExecutor
+export class NFARegexMatcher<T = any> implements IRegexMatcher {
+	private readonly executor: MatchExecutor<T>
+	private readonly collector = new MatchCollector<T>()
+	private readonly stateHistory = new StateHistory<T>(
+		new OverflowCounter(() => this.resetStateIds())
+	)
 
-	match<T = any>(
-		stream: IPeekableStream<T>
-	): false | string | (string | T)[] {
-		const result = this.executor.doMatch(stream)
-		const list = result.get()
-		if (!list.isMatch()) return false
-		result.commit()
-		// TODO: handle options:
-		// * 1. SUCCCESS MATCH - string (WE NEED TO *COLLECT* THE ITEMS FROM THE STRING!!!)
-		// * 2. SUCCESS MATCH - (string | T)[]; One needs a GENERIC COLLECTION for (string | T)[],
-		// 		which would DEGRADE to `string` (via concatenation) in case that NO "ITyped" types
-		// 		has ever appeared...
+	private readonly iterator = new MatchIterator<T>(
+		this.stateHistory,
+		this.captureResolver
+	)
+
+	private resetStateIds() {
+		this.startState.resetSeenTimes()
 	}
 
-	constructor(startState: State) {
-		this.executor = new MatchExecutor(startState)
+	private collectResultFrom(states: StateArray<T>) {
+		this.collector.reset()
+		for (const capture of this.iterator.traceback(states.matchState))
+			this.collector.prepend(capture)
+		return this.collector.collect()
+	}
+
+	match<T = any>(stream: IPeekableStream<T>): IMatch {
+		const result = this.executor.doMatchOn(stream)
+		const states = result.get()
+		if (!states.hasMatch()) return false
+		result.commit()
+		return this.collectResultFrom(states)
+	}
+
+	constructor(
+		private readonly startState: State,
+		private readonly captureResolver: ICaptureResolutionPredicate
+	) {
+		this.executor = new MatchExecutor(startState, this.stateHistory)
 	}
 }

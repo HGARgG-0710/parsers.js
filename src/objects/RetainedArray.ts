@@ -1,4 +1,4 @@
-import type { ICollection } from "../interfaces.js"
+import type { ICollection, IInitializable } from "../interfaces.js"
 import { BasicArray } from "../internal/BasicArray.js"
 
 /**
@@ -19,7 +19,7 @@ import { BasicArray } from "../internal/BasicArray.js"
  */
 export class RetainedArray<T = any>
 	extends BasicArray<T>
-	implements ICollection<T, readonly T[]>
+	implements ICollection<T, readonly T[]>, IInitializable<[number]>
 {
 	private ["constructor"]: new (n?: number) => this
 
@@ -48,8 +48,9 @@ export class RetainedArray<T = any>
 	}
 
 	push(x: T): this {
-		if (this.freeSpace() > 1) this.write(this.fakeSize++, x)
+		if (this.freeSpace() > 0) this.write(this.fakeSize, x)
 		else super.push(x)
+		this.fakeSize++
 		return this
 	}
 
@@ -62,7 +63,7 @@ export class RetainedArray<T = any>
 		this.fakeSize = 0
 	}
 
-	init(newSize: number) {
+	init(newSize: number = 0) {
 		this.clear()
 		this.condAlloc(newSize - this.size)
 		return this

@@ -4,8 +4,16 @@ import type { INode, ITyped, IValidNodeType } from "./Node.js"
 import type { IPeekableStream, IStreamChooser } from "./Stream.js"
 import type { ITableHandler } from "./StreamHandler.js"
 
+export type IPartialMatch<T = any> = T | string
+
+export type IMixedMatch<T = any> = IPartialMatch<T>[]
+
+export type IMatchResult<T = any> = string | IMixedMatch<T>
+
+export type IMatch<T = any> = false | IMatchResult<T>
+
 export interface IRegexMatcher {
-	match<T = any>(stream: IPeekableStream<T>): false | string | (string | T)[]
+	match<T = any>(stream: IPeekableStream<T>): IMatch
 }
 
 export interface ICompositeRegexBuilder {
@@ -30,7 +38,6 @@ export interface IRawRegexVisitor<T = any> {
 	handleCodeRange(codeRange: Regex.Raw.CodeRange): T
 	handleAnything(anything: Regex.Raw.Anything): T
 	handleNoneOf(noneOf: Regex.Raw.NoneOf): T
-	handleNoCapture(noCapture: Regex.Raw.NoCapture): T
 	handleNonBoundary(nonBoundary: Regex.Raw.NonBoundary): T
 	handleBoundary(boundary: Regex.Raw.Boundary): T
 }
@@ -86,3 +93,11 @@ export interface IRegexFactory {
 	optional(item: Regex.Raw): Regex.Raw
 	repeat(item: Regex.Raw, times: number): Regex.Raw
 }
+
+export interface IMatchedState<T = any> {
+	readonly captured: IPartialMatch<T>
+}
+
+export type ICaptureResolutionPredicate<T = any> = (
+	boundStates: IMatchedState<T>[]
+) => number

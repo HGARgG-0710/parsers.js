@@ -1,4 +1,4 @@
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
 	IConcreteRegexFinalizer,
@@ -11,13 +11,14 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { charAfter, charBefore } from "../internal/Unicode.js"
 import { NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
+import { charAfter, charBefore } from "../internal/Unicode.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
 
 const { numbers } = array
+const { isUndefined } = type
 
 export class Regex<T = any> {
 	private readonly final: IRegexMatcher
@@ -35,7 +36,49 @@ export namespace Regex {
 	export const NFAFinalizer = NFARegexFinalizer
 
 	export class ExtensionMap {
-		ignoreCase = false
+		private readonly defaults: Map<string, any>
+		private readonly defined: Map<string, any>
+
+		protected getInitDefaults(): array.Pairs<string, any> {
+			return [
+				["ignoreCase", false],
+				["noCapture", false]
+			]
+		}
+
+		protected getInitDefined(): array.Pairs<string, any> {
+			return []
+		}
+
+		set(propName: string, value: any) {
+			this.defined.set(propName, value)
+		}
+
+		getDefined(propName: string) {
+			return this.defined.get(propName)
+		}
+
+		get(propName: string) {
+			assert(this.defaults.has(propName))
+			const lookupTop = this.defined.get(propName)
+			if (!isUndefined(lookupTop)) return lookupTop
+			return this.defaults.get(propName)
+		}
+
+		*[Symbol.iterator]() {
+			for (const [propName, value] of this.defined)
+				yield [propName, value]
+		}
+
+		from(map: ExtensionMap): this {
+			for (const [definedProp, value] of map) this.set(definedProp, value)
+			return this
+		}
+
+		constructor() {
+			this.defaults = new Map<string, any>(this.getInitDefaults())
+			this.defined = new Map<string, any>(this.getInitDefined())
+		}
 	}
 
 	// ! pre-doc: the `setExtensionMap` is INTENDED to be used INSIDE the user-provided `IRegexFactory`
@@ -43,18 +86,20 @@ export namespace Regex {
 	// ! 	This is (unfortunately) the result of needing to synchronize behaviour of multiple components
 	// 		(i.e., as a general rule, customizing a list of components which are coupled to one another
 	// 		creates respective coupling inside the customization code...)
+	// ! ALSO - the `setExtensionMap` MUST be called BEFORE the `Regex.*.Builder.finish()`,
+	// ! 	since THAT is where 'noCapture()/ignoreCase()' are both called!
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
 
 		private extMap = new ExtensionMap()
 
-		setExtensionMap(map: ExtensionMap) {
-			this.extMap = map
+		inheritExtensions(map: ExtensionMap) {
+			this.extMap.from(map)
 			return this
 		}
 
-		ignoreCase() {
-			this.extMap.ignoreCase = true
+		set(extName: string, value: any) {
+			this.extMap.set(extName, value)
 			return this
 		}
 
@@ -80,7 +125,7 @@ export namespace Regex {
 			readonly extensions: Extension[] = [],
 			readonly factory: IRegexFactory = Regex.Raw.Factory.instance,
 			readonly finalizer: IConcreteRegexFinalizer = Regex.NFAFinalizer
-				.instance
+				.default
 		) {}
 	}
 
@@ -88,9 +133,18 @@ export namespace Regex {
 		export abstract class Mult extends Raw {
 			readonly items: Raw[]
 
-			ignoreCase(): this {
-				for (const x of this.items) x.ignoreCase()
-				return super.ignoreCase()
+			inheritExtensions(map: ExtensionMap): this {
+				for (const item of this.items) item.inheritExtensions(map)
+				return super.inheritExtensions(map)
+			}
+
+			set(extName: string, value: any): this {
+				for (const x of this.items) x.set(extName, value)
+				return this.setShallow(extName, value)
+			}
+
+			setShallow(extName: string, value: any) {
+				return super.set(extName, value)
 			}
 
 			// ! pre-doc: THIS IS A DEFAULT, the user is supposed to OVERRIDE IT... [unless they're not]
@@ -229,21 +283,17 @@ export namespace Regex {
 		export namespace IgnoreCase {
 			export class Builder extends Mult.Builder {
 				finish(): Raw {
-					return new IgnoreCase(...this.get()).ignoreCase()
+					return new IgnoreCase(...this.get()).set("ignoreCase", true)
 				}
 			}
 		}
 
-		export class NoCapture extends Mult {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleNoCapture(this)
-			}
-		}
+		export class NoCapture extends Mult {}
 
 		export namespace NoCapture {
 			export class Builder extends Mult.Builder {
 				finish(): Raw {
-					return new NoCapture(...this.get())
+					return new NoCapture(...this.get()).set("noCapture", true)
 				}
 			}
 		}

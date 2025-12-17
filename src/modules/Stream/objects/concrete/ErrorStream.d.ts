@@ -18,7 +18,7 @@ export declare abstract class ErrorStream<T = any>
 	implements IControlStream<T>, Iterable<T>
 {
 	protected abstract errHandler(err: any): void
-	protected wrapInHandler<T = any>(callback: () => T): T
+	protected wrapInHandler<T = any>(callback: () => T): T | void
 	next(): void
 	baseInit(): void
 	get state(): IParseState
