@@ -99,5 +99,5 @@ export interface IMatchedState<T = any> {
 }
 
 export type ICaptureResolutionPredicate<T = any> = (
-	boundStates: IMatchedState<T>[]
+	matchedStates: IMatchedState<T>[]
 ) => number

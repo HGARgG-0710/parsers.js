@@ -1,3 +1,39 @@
+IDEA [later]: 
+	Make a COMPLETE count of all the classes in the library. 
+	That includes: 
+		1. test classes
+		2. Node-classes
+		3. private classes
+		4. public classes 
+		5. abstract classes
+
+	That excludes: 
+		1. public JS-exported classes
+
+		Current total: 285
+
+		Method for counting: 
+			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 247 (at the time of writing...)
+				NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
+					(since they're also exported in .d.ts files...)
+			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
+			3. Search (regex): export class = 2
+				ONLY inside the `*.js` files. 
+
+		Value: 1. + 2. - 3.
+
+	ALSO: count the number of EXPORTED classes specifically... 
+		Use that number on the library's Wiki, enumerate EACH of the sub-exports. 
+		Would be very useful when searching for things (allows one to eliminate 
+			the smaller submodules much faster). 
+
+		includes: 
+			1. .ts classes
+			2. .d.ts classes
+
+		excludes: 
+			1. .js classes
+
 [v0.3]
 
 REMINDERs: 
@@ -14,7 +50,7 @@ REMINDERs:
 			by the language that have a "nice" shortcut. 
 
 	REMINDER: about the `IStepPredicate`: 
-		The value CAN BE < 0. 
+		The value (both input AND output) CAN BE < 0. 
 		In these cases, it is TREATED THE SAME AS 0!!!
 		
 	-2. REMINDER [for tests]: about the `TypeMatch` parsing...
@@ -62,47 +98,125 @@ REMINDERs:
 	8. REMINDER: add IMPORT-TESTING!!!
 		This is vital, since import paths are many and some of them are pretty complex
 			(ex: `objects.Stream.templates.CurrDyssyncStream`)
+	
+	0. REMINDER [testing]: `NFARegexFinalizer` - `OverflowCounter`; 
+		ENSURE that *once* the `OverflowCounter` reaches its limit, 
+			THE HANDLER IS RUN. 
+
+		In particular, in context of `NFARegexFinalizer`, ENSURE that 
+		going *over* the "limit" DOES NOT cause the thing to "miss" 
+		certain states... 
+	
+	1. REMINDER [testing]: about the function-fields testing
+		ENSURE that those have access to `this` (via the `.bind()`ing)
+		WHENEVER it makes sense. Do it on a case-by-case basis...
+
+	2. REMINDER [DynamicParser + CompositeStream + IErrorData + IPrintablePosition]: 
+		Document this. 
+		Absolutely crucial. 
+		WHEN one is intending to STORE a position/other-`.state`-data on a 'PosStream/ILineIndex'/etc: 
+
+			1. USE LAZY PROPERTY-LOADING
+			2. Store those "global" things on `MarkerStream`s
+			3. PUT those `MarkerStream`s AT THE BOTTOM of the parser's `CompositeStream`
+				That'll allow one to GUARANTEEDLY search for them from ANY point in the 
+				application at ANY point in time. 
+				An alternative is to store the reference to global `ICompositeStream`-contained 
+				data BEFORE the parsing even begins (as an example of an implementation of this 
+				principle - the `.state: IParseState`, it's SUPPOSED TO be initialized BEFORE 
+				the `baseInit()` ever happens, so that it's ALWAYS available, WITHOUT need for 
+				deep-searching on `this.resource/owner`... That'd, of course, require for the 
+				said `IStream`s to be `IStateful`/other-such-interface, since otherwise no `state`, 
+				or other such property, can be stored on them directly via a reference). 
+			
+		Meaning to say, an implicit property that ALL 'ILinkedStream's must follow 
+		is derived: 
+			
+			[!!!]
+			We DO NOT access a given `this.state.errData` property ANY SOONER than 
+				the `baseInit` method (meaning to say, we can ONLY do it, ONCE the 
+				`this.resource` IS initialized...). 
+
+		ALSO IMPORTANT: make sure that there IS *always* a possibility to access the `IErrorData`
+			via the `this.state` when one does the "error-throwing" function-calls that 
+				delegate to the `errDataGetter` (typically, findErrorDataUpstream). 
+
+			SPECIFICALLY, the `findErrorDataUpstream` DOES take `this.state` INTO ACCOUNT 
+				when searching, AND that the `this.state` on ALL the 'IStream's gets initialized
+				BEFORE their `respective` baseInit-s are run (since they're the parts that are 
+				intended to contain potentially-error-invoking-parsing-logic). 
+				Otherwise, we'll be needing to fix the search algorithm...
+
+	1. REMINDER: *document* the `.capturePreference` and the `NFARegexFinalizer`, 
+		and ALL the "internal" classes THAT ARE ACTUALLY PUBLIC...
+		IDEA: add the `public/` directory for EVERY "complex" directory inside of 
+		`src/internal` (such as `RegexParser`, `RegexCompiler` and `RegexNFA`). 
+
+		There, public exports for the given "internal" thing would be provided. 
 
 IMMEDIATE: 
-	MAJOR PROBLEM COUNT: 3
+	MAJOR PROBLEM COUNT: 1
 
 	CURRENT: 
-		0. TODO: refactor the `FileDescriptor` using the 'State' Pattern! 
+		-1. ADD the 'T = any' generics to the 'RegexNFA/*.ts'. 
+			They truly *do* belong there...
+			Likewise, ADD the respective generics onto the `NFARegexMatcher`
 
-	-1. BUG: `NFARegexFinalizer` - `OverflowCounter`; 
-		Due to the (bizzare) way in which this works...
-		Every `OverflowCounter.limit: number` times, one has to 
-			RESTART the `State.seenTimes` private variable to `-1`
-				via the (new) `State.prototype.resetSeen()` method, 
-					BECAUSE there's an insanely small (but very real, i.e. it CAN happen...)
-					chance of causing a bug in which states are added, 
-					since the `seenTimes` is THE SAME as from these GOD-KNOWS-HOW-MANY
-					runs, and, therefore, one HASN'T added the state (although it 
-					HAS NOT actually yet been added this cycle...). 
+		0. TODO: bug - with garbage accumulating due to `RetainedArray` usage: 
+			Specifically, one must be able to FLUSH *all* the `RetainedArray`s 
+				WITHIN a single `App`-class. LET there be: 
+					1. `RetainedArray.prototype.flush()` method, which would ELIMINATE *all* the allocated space inside the given `RetainedArray`. 
+					2. Add a new `FlushableCollection`: 
+						1. Make a new interface - 'IFlushable', with `FlushableCollection` having a `.flush()` method 
+							that works EXACTLY like the `PoolCollection.prototype.clear()` method...
+							EXCEPT that it *also* removes the `IFlushable`s FROM its 'Set<IFlushable>'s upon the "complete" flush(). 
+							This is important, SINCE 
+					3. LET *all* the `RetainedArray`s have their OWN global `FlushableCollection` object. 
+						Specifically, `Retained.Internal`. LET IT BE GLOBAL. 
+						Put it into the new `Retained.ts` module... [submodule of `global.ts`]
+						The rule is: 
+							1. WHEN we "flush" the `Retained.Internal`, ALL of the items are FLUSHED, 
+								and REMOVED...
+							2. It (Retained.Internal) is FLUSHED inside the 'cleanup()' method of the default `App`. 
 
-		Let it happen AUTOMATICALLY, via a callback passed to `OverflowCounter`, 
-		ONCE the ".inc()" causes the state to become 0 again...
+		1. PeekStream: BUG - replace the `RetainedArray` with something MORE advanced. 
+			Specifically, one is supposed to FLUSH the `.tempItems` EVERY "x" times we call the `.clear()` (even from inside of `.init()`). 
+			Specifically, EXTEND the `RetainedArray` to ALLOW for an AUTOMATIC `.flush()` call DURING the `.clear()` call, 
+				WHENEVER a *circular counter* happens to reach the "autoflush-limit". This prevents re-allocations that are 
+					TOO FREQUENT, while also ensuring that the unused memory is NOT acidentally retained for too long...
+			LET the frequency of Auto-Flushes BE CONFIGURABLE via the 
+				LibConfig -> flush -> PeekStream
 
-	-2. TO FINISH - `NFARegexMatcher`: 
-		1. Add the missing `State` classes' construction code (i.e. - FINISH the `NFARegexVisitor`)
-			1. NoCapture: THIS requires modifying the `toMatchList` algorithm...
-				1. As well as (most likely) the `State` classes
-			2. IgnoreCase: THIS *does not* require modification of the algorithm: 	
-				1. BUT it requires FIRST implementing the "UnicodeProperty" API... (that one has, thus far, missed adding)
-				2. It also requires adding new methods ONTO different `State` descendants...
-		2. Add the ["internal/"] `NFARegexMatcherOutputBuilder`: 
-			1. An array of (string | T)[] type
-			2. has a .push(x) method and `.hasNonStrings`, which is UPDATED, by checking 
-				if a given thing IS A STRING OR NOT. 
-			3. Has a `.finish()` method which checks for a KEPT PROPERTY of `.hasNonStrings`, 
-				and EITHER joins it all together (a single large string), or just returns 
-				the collected array as-is.
-			4. UPDATE the `toMatchList` function to also accept the "outputBuilder"
-		3. Getting the string/array result:
-			From the `NFARegexMatcherOutputBuilder`!
-			Thus, as a result of `.finish()`, one can GET the result via `const x = outputBuilder.finish()' 
+			1. LIKEWISE, let the `MatchCollector` have THE SAME for the `reversed: RetainedArray`: 
+				LibConfig -> flush -> MatchCollector
+			
+			2. LIKEWISE, let *ALL* the cases of `RetainedArray` *have* the Auto-`.flush()` params in the `LibConfig` class...
+
+		2. 'Poolable' and 'Initializable': LIKEWISE, *LET* there be an appropriate `postFree()` 
+			method that marks the reusable objects as INVALID AND NO LONGER USABLE. Specifically, it 
+			will mark respective fields as `null`, thus REMOVING excess references, and PREVENTING CERTAIN 
+			CRAZY OUTDATED-REFERENCE BUGS. 	
+
+			1. IMPORTANT - for 'RetainedArray', let the `postFree()` be `this.flush()`. 
+				This is so that we KNOW that the thing in question DOES NOT (accdientally) contain references to things 
+				that are NO LONGER NEEDED. Things that are NO LONGER NEEDED, but still CAN BE REUSED are stored EXLUSIVELY 
+				inside POOLS!!!
+
+		3. NoCapture [to complete]: 
+			1. TODO: *ADD* the '.extensions.get("noCapture")' to the `State.ts`. 	
+				1. Specifically, REIMPLEMENT the 'getCaptured()' method on different 
+					`State` extensions!!! This is important, SINCE, this enables one to 
+					(finally) make the thing behave AS EXPECTED (or, at least, so one 
+					*thinks*...); 
+			2. About the 'match/no-match': 
+				1. this is very important, the result of 'get getCaptured(): boolean' method on the 'State' class 
+					is DETERMINED by the `this.extensions.get("noCapture")`, where `this.extensions: ExtensionMap`. 
+				2. THUS, 'NoCapture' becomes a case of a GROUP EXTENSION: 	
+					1. THEREFORE, *parser* REQUIRES modification!!!
+						1. syntax change: (=...) -> (#c...)
+				3. The 'State' classes would have their own 'getCaptured(keeper): string | T' method
 	
-	3. Regex [RegexParser and RegexCompiler]: 
+	3. [MAJOR PROBLEM] Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
 			1. \p{...}-like (JS RegExp) groups of characters (new character classes): 
 				1. The \P{...} is replaced by ^[\p{...}]
@@ -112,35 +226,26 @@ IMMEDIATE:
 					2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
 			2. DON'T FORGET EMOJIS [those are mandatory...]
 
+	1. CLEAN UP the GIT HISTORY (once you're done with the "major issues", 
+		and one can finally start working on JSDOC (wiki precursor - to later 
+		be replaced with simple URLs to the Wiki, to avoid info-duplication)
+		and Tests, and afterwards, WIKI...)
+
 3. Commit D: test the 'static' field of `mixin`: 
 	0. First: finish Commit L
 	1. add the appropriate test cases
 	2. add a new test like the old ones, with 'constructor() {}' instead of 'constructor: function () {}'
 	3. add a test for the 'this.class' property on the mixin-instances		
 
-IDEA [later]: 
-	Make a COMPLETE count of all the classes in the library. 
-	That includes: 
-		1. test classes
-		2. Node-classes
-		3. private classes
-		4. public classes 
-		5. abstract classes
-
-	That excludes: 
-		1. public JS-exported classes
-
-		Current total: 281
-
-		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 243 (at the time of writing...)
-				NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
-					(since they're also exported in .d.ts files...)
-			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
-			3. Search (regex): export class = 2
-				ONLY inside the `*.js` files. 
-
-		Value: 1. + 2. - 3.
+TY2. Type simplification - the `array.Pairs` overuse: 
+	Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
+	Specifically - when the [Symbol.iterator] is the only actually needed property.
+	
+RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+	Namely: 
+		1. intersection: 	/[[...]&&[...]]/v
+		2. subtraction: 	/[[...]--[...]]/v
+		3. string literals: /[q{...}]/v
 
 6. Commit L: 
 	Do: After Commits Z
@@ -197,8 +302,7 @@ TODOs:
 					this._isCurrEnd = true
 				}
 
-				setResource(resource) {
-					super.setResource(resource)
+				baseInit() {
 					const storageStream = this.resource
 					const marker = storageStream.currStored
 					this.markerLocator.setMarker(marker)
@@ -216,7 +320,8 @@ TODOs:
 	11. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
 		THIS IS VITAL. 
 		SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
-	13. VITAL REMINDER [documentation]: let the user employ *`ErrorData.ErrorPosition.Locator.Upwards`* when creating their ParseExtension-s
+	13. VITAL REMINDER [documentation]: let the user employ *`ErrorData.ErrorPosition.Locator.Downwards`* 
+		when creating their ParseExtension-s. 
 		Reason: they grab the position from INSIDE the stream underneath. 
 			This is the only RELIABLE WAY (yes, by breaking encapsulation...), 
 	12. walk through ALL the library types, and FIX all the types which ARE EXCESSIVE! 
@@ -228,27 +333,24 @@ TODOs:
 		This is important to allow one for using them with `expectKind()`-function; 
 		LET THE USER provide the factories with respective `string` identifiers ON 
 			CREATION of the classes for node-making. 
-	TODO: about `.bind()`ing of predicates on object instances: 
-		Add it ONLY when necessary. 
-		Specifically, walk through THE WHOLE of library, analyze WHICH of the parameters are 
-		preidcates, and WHICH need to be bound to `this` inside constructor/init/wherever...S
-		NOT ALL of them need to be, only the ones that need to be passed to an outside function. 
 
 	TODO: BUG (possible) - in `IStream` implementations - LOOK AND SEE!
 		When one extends a given class, but adds *SPECIALIZED* composite-objects 
 		via `private readonly`/etc, that are added INSIDE the generated constructor 
-		but AFTER the `setResource` is called from within the `.init` call that happens 
+		but AFTER the `connectResource` is called from within the `.init` call that happens 
 		inside the `super(resource)`, one must ENSURE that the said composite objects 
-		are NOT REQUIRED within the `setResource` method. 
+		are NOT REQUIRED within the `connectResource` method. 
 
 		Meaning to say - one must be MINDFUL about WHERE the said `super(resource)`
-		must be REPLACED with `super()`, and the `super(resource)` be called AT THE END!!!
+		must be REPLACED with `super()`, and the `this.init(resource)` be called AT THE END!!!
 
 REMINDER: Final Task Order
 	1. Regex: completing features/fixes
-	2. tests [possibly - with finalization, if new redundancies are found]
+	2. minor stuff (finishing touches!)
+	3. jsdoc
+	4. tests [possibly - with finalization, if new redundancies are found]
 		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
-	3. wiki
+	5. wiki
 
 IMMIDIATE NOTES:
 	-4. [docs - reminder] Add a diagram of relations of various `IStream` traits present within the library. 
@@ -983,18 +1085,7 @@ LATER TODOS:
 						LET the `public/protected` docs for these methods be THE SAME. 
 
 	
-[TOTAL LIST - final + leftovers...] TODOS for v0.3: 		
-	Secondary: 			
-		RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-			Namely: 
-				1. intersection: 	/[[...]&&[...]]/v
-				2. subtraction: 	/[[...]--[...]]/v
-				3. string literals: /[q{...}]/v
-		
-	Minor: 	
-		TY2. Type simplification - the `array.Pairs` overuse: 
-			Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
-			Specifically - when the [Symbol.iterator] is the only actually needed property.
+[TOTAL LIST - final + leftovers...] TODOS for v0.3: 			
 				
 	IMPORTANT: clean the git history - keep only the commits for each individual version; 
 		Squash all the others + change the respective commit messages; 
@@ -1011,8 +1102,9 @@ LATER TODOS:
 
 	TODO: WRITE the CHANGELOG
 	
-FUTURE [v0.3.1, ...]: 
-	0. MOVE THIS STUFF TO PULL REQUESTS!!! [organize the repository - it is a fucking mess...]
+FUTURE [v1.0, ...]: 
+	0. MOVE THIS (v1.0-specific) STUFF TO PULL REQUESTS!!! [organize the repository - it is a fucking mess...]
+
 	1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
 		0. `copiable` package: 
 			A TypeScript package. 
@@ -1047,34 +1139,12 @@ FUTURE [v0.3.1, ...]:
 
 			Export this from here as a dependency. 
 
-	2. [maybe? later, definitely] A Java rewrite: 
-		the project is a very fine one, a very fine one indeed... 
-		Howeeeverr...
-		One cannot (for instance) utilize it for projects that do not allow the usage of JavaScript. 
-		Solution: 
-			1. rewrite in *name-of-THAT-Big-project* [once finished]
-			2. decompile the JS sources [obtained from TypeScript]
-			3. change the sources
-			4. transpile to Java [that is the alternative language of choice]
-				That is without the tests of course. 
-				Those you'll need to write anew (using something like JUnit, maybe?)
-				THE `.copy()` aspect WILL STILL REMAIN!!!
-			5. write new tests [Java]
-			6. publish
-		
-		Also, that is NOT to notice that the `Java` version would leverage the OOP principles far 
-			better than the current JS code (since it's been transpiled from TypeScrtipt). 
-		
-		NOTE [VITAL]: remember that the complex `IStream` hierarchy was (actually)
-			supposed to have been done entirely using 'mixins' 
-				(which are absent from TypeScript, and, in a formalized variant, from JS)...
-
-	3. (maybe) later - ensure JS-runtime-independence: 
+	2. (maybe) later - ensure JS-runtime-independence: 
 		Verify that the package has compatibility with: 
 		1. Deno [v2.0+]
 		2. Bun [v1.0+]
 
-	4. Rewrite this using your NEW language [later the "TS Replacement"]. 
+	3. Rewrite this using your NEW language [later the "TS Replacement"]. 
 		Reasons: 
 			1. natural runtime-static-time combination
 			2. better + simpler type-system
