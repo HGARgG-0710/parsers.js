@@ -1,95 +1,42 @@
-import { type } from "@hgargg-0710/one"
-import assert from "assert"
+import { array } from "@hgargg-0710/one"
 import type { IPrototypeCollection } from "../interfaces.js"
-import type { IAccumulator } from "../interfaces/Accumulator.js"
+import { ArrayCollection } from "./ArrayCollection.js"
 
-const { isString } = type
+const { copy } = array
 
 /**
  * This is a class for a piece-wise construction
- * of a string primitive. Implements `IAccumulator<string>`.
+ * of a string primitive. Implements `IPrototypeCollection<string, string>`.
  */
-export class SourceBuilder
-	implements IAccumulator<string>, IPrototypeCollection<string, string>
-{
+export class SourceBuilder implements IPrototypeCollection<string, string> {
 	private ["constructor"]: new (finalSource?: string) => this
 
-	private readonly proxy: StringProxy
-	private readonly frozen: SourceBuilderFrozen
-	private readonly unfrozen: SourceBuilderUnfrozen
-	private state: ISourceBuilderState
+	private readonly source = new ArrayCollection<string>()
 
-	get isFrozen() {
-		return this.state === this.frozen
+	private transfer(strings: readonly string[]) {
+		this.source.init(copy(strings as string[]))
 	}
 
-	copy() {
-		const copy = new this.constructor(this.source)
-		if (this.isFrozen) copy.freeze()
-		return copy
+	copy(): this {
+		const copied = new this.constructor()
+		copied.transfer(this.source.get())
+		return copied
 	}
 
-	unfreeze() {
-		this.state = this.unfrozen
+	push(string: string) {
+		this.source.push(string)
 		return this
 	}
 
-	freeze() {
-		this.state = this.frozen
-		return this
+	clear() {
+		this.source.clear()
 	}
 
 	get() {
-		return this.proxy.retrieve()
+		return this.source.get().join()
 	}
 
-	push(...strings: string[]) {
-		this.state.push(...strings)
-		return this
+	constructor(startString?: string) {
+		if (startString) this.source.push(startString)
 	}
-
-	clear() {
-		this.proxy.clear()
-		this.unfreeze()
-	}
-
-	constructor(private source: string = "") {
-		assert(isString(source))
-		this.proxy = new StringProxy(source)
-		this.frozen = new SourceBuilderFrozen()
-		this.unfrozen = new SourceBuilderUnfrozen(this.proxy)
-		this.state = this.unfrozen
-	}
-}
-
-interface ISourceBuilderState {
-	push(...strings: string[]): void
-}
-
-class StringProxy {
-	append(strings: string[]) {
-		this.source += strings.join("")
-	}
-
-	clear() {
-		this.source = ""
-	}
-
-	retrieve() {
-		return this.source
-	}
-
-	constructor(private source: string) {}
-}
-
-class SourceBuilderFrozen implements ISourceBuilderState {
-	push(...strings: string[]): void {}
-}
-
-class SourceBuilderUnfrozen implements ISourceBuilderState {
-	push(...strings: string[]) {
-		this.source.append(strings)
-	}
-
-	constructor(private source: StringProxy) {}
 }

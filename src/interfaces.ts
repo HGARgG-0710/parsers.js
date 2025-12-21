@@ -163,24 +163,6 @@ export type IJSONSerializable =
 	| Boolean
 
 /**
- * This is an interface for representing entities
- * that can be "frozen", and have a method `freeze(): this`,
- * and a `readonly isFrozen: boolean` property
- */
-export interface IFreezable {
-	readonly isFrozen: boolean
-	freeze(): this
-}
-
-/**
- * This is an interface for representing entities that
- * can be "unfrozen", and have a method `unfreeze(): this`
- */
-export interface IUnfreezable extends IFreezable {
-	unfreeze(): this
-}
-
-/**
  * This is an interface for entities with some form of
  * read-access, achieved via the `.read(i: number): T`
  * method.
@@ -303,7 +285,6 @@ export interface IPoolKeeping<
 
 export type IDepthMark = string | number
 
-export type * from "./interfaces/Accumulator.js"
 export type * from "./interfaces/Array.js"
 export type * from "./interfaces/ByteSource.js"
 export type * from "./interfaces/CharacterSource.js"
