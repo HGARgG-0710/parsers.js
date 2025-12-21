@@ -8,11 +8,15 @@ export const ErrorStream = new mixin(
 		properties: {
 			wrapInHandler(callback) {
 				try {
-					return callback()
+					const retval = callback()
+					this.onSuccess()
+					return retval
 				} catch (err) {
 					this.errHandler(err)
 				}
 			},
+
+			onSuccess() {},
 
 			next() {
 				this.wrapInHandler(() => this.super.ProxyStream.next())

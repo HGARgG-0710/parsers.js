@@ -10,8 +10,6 @@ export abstract class ProxyStream<T = any>
 	extends CustomLinkedStream<T>
 	implements IProxyStream<T>
 {
-	protected readonly delegate: IProxyStream<T>
-
 	// * Explanation:
 	// Since the `.init` method DELEGATES the initialization to `.delegate`,
 	// one CANNOT treat the `.init` as a mean of stream-creation: one simply
@@ -61,9 +59,8 @@ export abstract class ProxyStream<T = any>
 		this.delegate.baseInit()
 	}
 
-	constructor(delegate: IProxyStream<T>) {
+	constructor(protected readonly delegate: IProxyStream<T>) {
 		super()
-		this.delegate = delegate
 		this.delegate.connectOwner(this)
 	}
 }

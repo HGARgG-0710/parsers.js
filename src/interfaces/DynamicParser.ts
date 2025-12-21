@@ -11,6 +11,7 @@ import type { ILinkedStream, IStreamArray } from "./Stream.js"
 export interface IParseState<FinalType = any, InitType = any> extends Summat {
 	readonly parse: IParse<FinalType, InitType>
 	readonly errData: IErrorData
+	readonly errors: Error[]
 }
 
 /**

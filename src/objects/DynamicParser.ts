@@ -55,7 +55,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		return {
 			...preState,
 			parse: this,
-			errData: this.errDataMaker(this.inputStream, this.input!)
+			errData: this.errDataMaker(this.inputStream, this.input!),
+			errors: []
 		}
 	}
 
