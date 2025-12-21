@@ -1,5 +1,4 @@
 import { boolean } from "@hgargg-0710/one"
-import assert from "assert"
 import type {
 	IStringPairs,
 	ITreeMap,
@@ -167,9 +166,10 @@ export class TreeValidationTable<T = any>
 		return isValid(x)
 	}
 
+	// ! pre-test: the 'isValidSingle' MUST have access to `this` [ensure that...]
 	constructor(
 		isValidMap: IValidityMap<T>,
-		private readonly isValidSingle: (x: T) => boolean,
+		private readonly isValidSingle: (x: T) => boolean = T,
 		defaultValid: (x: T) => boolean = T
 	) {
 		super(isValidMap, defaultValid)
@@ -192,7 +192,6 @@ export namespace TreeValidationTable {
 		}
 
 		build() {
-			assert(this.isSingleValid)
 			return new TreeValidationTable(
 				this.items,
 				this.isSingleValid,
