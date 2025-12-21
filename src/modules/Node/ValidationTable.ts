@@ -11,6 +11,10 @@ import type {
 const { T } = boolean
 
 export abstract class TreeTable<T = any, R = any> {
+	hasType(typeName: IValidNodeType) {
+		return this.types.has(typeName)
+	}
+
 	has(parentType: IValidNodeType, childType: IValidNodeType) {
 		const parentMap = this.items.get(parentType)
 		if (!parentMap) return false
@@ -26,6 +30,7 @@ export abstract class TreeTable<T = any, R = any> {
 	}
 
 	constructor(
+		private readonly types: Set<IValidNodeType>,
 		protected readonly items: ITreeMap<T, R>,
 		private readonly defaultItem: (x: T) => R
 	) {}
@@ -101,6 +106,7 @@ export namespace TreeTable {
 			return parentMap
 		}
 
+		protected readonly types: Set<IValidNodeType>
 		protected readonly items: ITreeMap<T, R> = new Map()
 
 		abstract build(): TreeTable<T, R>
@@ -145,6 +151,7 @@ export namespace TreeTable {
 
 		constructor(types: readonly IValidNodeType[]) {
 			for (const type of types) this.items.set(type, new Map())
+			this.types = new Set(types)
 		}
 	}
 }
@@ -153,6 +160,8 @@ export class TreeValidationTable<T = any>
 	extends TreeTable<T, boolean>
 	implements IValidationTable<T>
 {
+	private readonly isValidSingle: (x: T) => boolean
+
 	validateSingle(item: T): boolean {
 		return this.isValidSingle(item)
 	}
@@ -167,19 +176,30 @@ export class TreeValidationTable<T = any>
 	}
 
 	// ! pre-test: the 'isValidSingle' MUST have access to `this` [ensure that...]
-	constructor(
-		isValidMap: IValidityMap<T>,
-		private readonly isValidSingle: (x: T) => boolean = T,
-		defaultValid: (x: T) => boolean = T
-	) {
-		super(isValidMap, defaultValid)
+	constructor({
+		types,
+		isValidMap,
+		isValidSingle,
+		defaultValid
+	}: TreeValidationTable.Args) {
+		super(types, isValidMap, defaultValid)
+		this.isValidSingle = isValidSingle
 	}
 }
 
 export namespace TreeValidationTable {
+	export class Args<T = any> {
+		constructor(
+			readonly types: Set<IValidNodeType>,
+			readonly isValidMap: IValidityMap<T>,
+			readonly isValidSingle: (x: T) => boolean,
+			readonly defaultValid: (x: T) => boolean
+		) {}
+	}
+
 	export class Builder<T = any> extends TreeTable.BaseBuilder<T, boolean> {
-		private defaultValid?: (x: T) => boolean
-		private isSingleValid?: (x: T) => boolean
+		private defaultValid: (x: T) => boolean = T
+		private isSingleValid: (x: T) => boolean = T
 
 		withSingleValidator(isValid: (x: T) => boolean) {
 			this.isSingleValid = isValid
@@ -193,9 +213,12 @@ export namespace TreeValidationTable {
 
 		build() {
 			return new TreeValidationTable(
-				this.items,
-				this.isSingleValid,
-				this.defaultValid
+				new Args(
+					this.types,
+					this.items,
+					this.isSingleValid,
+					this.defaultValid
+				)
 			)
 		}
 	}
@@ -210,11 +233,8 @@ export class TreePairGenerationTable<T = any> extends TreeTable<
 		return this.get(parentType, childType)
 	}
 
-	constructor(
-		items: ITreeMap<T, IStringPairs>,
-		defaultPairs: (x: T) => IStringPairs = () => [["", ""]]
-	) {
-		super(items, defaultPairs)
+	constructor(types: Set<IValidNodeType>, items: ITreeMap<T, IStringPairs>) {
+		super(types, items, () => [["", ""]])
 	}
 }
 
@@ -224,7 +244,7 @@ export namespace TreePairGenerationTable {
 		IStringPairs
 	> {
 		build() {
-			return new TreePairGenerationTable(this.items)
+			return new TreePairGenerationTable(this.types, this.items)
 		}
 	}
 }
