@@ -7,6 +7,7 @@ import type {
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
 import { ObjectPool } from "../objects.js"
+import { isStateful } from "../utils/Stream.js"
 import { RecursiveList, RecursiveListArgs } from "./RecursiveList.js"
 
 const { isFunction } = type
@@ -98,10 +99,20 @@ export namespace StreamList {
 			return this.parent.createList(streams)
 		}
 
+		private rawEvaluate(currRec: IStreamChooser, last: IOwnedStream) {
+			return currRec.call(this.topStream, last) as IRawStreamArray
+		}
+
+		private distributeState(rawStreams: IRawStreamArray) {
+			const globalState = this.topStream.state
+			for (const x of rawStreams)
+				if (isStateful(x)) x.setState(globalState)
+		}
+
 		evaluate(currRec: IStreamChooser, last: IOwnedStream) {
-			return this.fromStreams(
-				currRec.call(this.topStream, last) as IRawStreamArray
-			)
+			const rawStreams = this.rawEvaluate(currRec, last)
+			this.distributeState(rawStreams)
+			return this.fromStreams(rawStreams)
 		}
 
 		isOld(terminal: ILinkedStream): boolean {

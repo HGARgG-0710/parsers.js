@@ -1,6 +1,5 @@
 import type {
 	ICommonStream,
-	ICompositeStream,
 	INode,
 	IOwnedStream,
 	IPeekable,
@@ -92,10 +91,8 @@ function HandleBoundaryOrHyphen(input: IOwnedStream<string>) {
 	return (input.curr === "-" ? HandleHyphen : HandleRangeBoundary)(input)
 }
 
-function HandleClassRange(this: ICompositeStream, input: IOwnedStream<string>) {
-	const classRangeStream = new ClassRangeStream()
-	classRangeStream.setState(this.state)
-	return [classRangeStream, HandleBoundaryOrHyphen]
+function HandleClassRange(input: IOwnedStream<string>) {
+	return [new ClassRangeStream(), HandleBoundaryOrHyphen]
 }
 
 const ClassUnitHandler = TableHandler<
@@ -134,12 +131,7 @@ export abstract class ClassStream<
 export function HandleClass<T extends INode & IPushable<INode>>(
 	ClassKind: () => ClassStream<T>
 ) {
-	return function (
-		this: ICompositeStream,
-		input: IOwnedStream<string> & IPeekable<string>
-	) {
-		const classKindInstance = ClassKind()
-		classKindInstance.setState(this.state)
-		return [classKindInstance, ClassElementHandler]
+	return function (input: IOwnedStream<string> & IPeekable<string>) {
+		return [ClassKind(), ClassElementHandler]
 	}
 }
