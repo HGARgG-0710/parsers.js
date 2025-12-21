@@ -2,10 +2,9 @@ import type {
 	ICommonStream,
 	INode,
 	IOwnedStream,
-	IPeekable,
-	IPushable
+	IPeekable
 } from "../../../interfaces.js"
-import { TableHandler } from "../../../objects.js"
+import { ArrayBuilder, TableHandler } from "../../../objects.js"
 import { expectKind, tryReviveChild } from "../../../objects/Error.js"
 import { BasicHash } from "../../../objects/HashMap.js"
 import { SingleNodeStream } from "../../../objects/Stream.js"
@@ -14,7 +13,7 @@ import {
 	SingletonWrapperStream
 } from "../../../samples/Stream.js"
 import { ObjectMap } from "../../../samples/TerminalMap.js"
-import { consumeSingletonRevivables } from "../../../utils/Stream.js"
+import { consumableRevivables } from "../../../utils/Stream.js"
 import { HandleEscaped, HandleRangeBoundaryEscaped } from "../Escaped.js"
 import { ClassRange, ClassRangeBoundary, ClassUnit, Temp } from "../Nodes.js"
 import { HandleSingleChar } from "../SingleChar.js"
@@ -119,18 +118,20 @@ function ClassElementHandler(input: IOwnedStream<string> & IPeekable<string>) {
 }
 
 export abstract class ClassStream<
-	T extends INode & IPushable<INode>
+	T extends INode
 > extends SingleNodeStream<INode> {
-	protected abstract spawnTarget(): T
+	protected abstract spawnNode(children: INode[]): T
+
+	private readonly exhaustChildren = consumableRevivables(
+		new ArrayBuilder<INode>()
+	)
 
 	baseInit(): void {
-		this.curr = consumeSingletonRevivables(this, this.spawnTarget())
+		this.curr = this.spawnNode(this.exhaustChildren(this).get())
 	}
 }
 
-export function HandleClass<T extends INode & IPushable<INode>>(
-	ClassKind: () => ClassStream<T>
-) {
+export function HandleClass<T extends INode>(ClassKind: () => ClassStream<T>) {
 	return function (input: IOwnedStream<string> & IPeekable<string>) {
 		return [ClassKind(), ClassElementHandler]
 	}

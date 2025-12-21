@@ -8,12 +8,15 @@ import type {
 	IReadable
 } from "../interfaces.js"
 
+export interface IBaseCollection<T = any, C extends IIndexed<T> = IIndexed<T>>
+	extends IPushable<T>,
+		IGettable<C> {}
+
 export interface IExtendableCollection<
 	T = any,
 	C extends IIndexed<T> = IIndexed<T>
-> extends IPushable<T>,
-		IClearable,
-		IGettable<C> {}
+> extends IBaseCollection<T, C>,
+		IClearable {}
 
 export interface IPrototypeCollection<
 	T = any,
@@ -38,3 +41,8 @@ export interface ICollection<T = any, C extends IIndexed<T> = IIndexed<T>>
 		IFiniteWritable<T>,
 		Iterable<T>,
 		IReadable<T> {}
+
+/**
+ * An `IPushable<T>`, which is also `IClearable`.
+ */
+export type IRefillableCollection<T = any> = IPushable<T> & IClearable

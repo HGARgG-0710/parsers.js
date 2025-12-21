@@ -120,7 +120,7 @@ export function isNotNonEscapedNext(value: string) {
 /**
  * This is a `SingletonStream` that expects a
  * `wrapper` class and `withConsumable` function
- * (normally a `consumable(...)`-result), and
+ * (normally a `consumableIterable(...)`-result), and
  * produces as its `.curr` value the result of the
  * call to `new wrapper(withConsumable(input).get())`.
  *

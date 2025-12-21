@@ -1,7 +1,13 @@
-import { TreeStream, HandlerStream } from "../objects/Stream.js"
-import type { IHandler, IPushable, IWalkable } from "../interfaces.js"
+import type {
+	IBaseCollection,
+	IHandler,
+	IPushable,
+	IWalkable
+} from "../interfaces.js"
+import { HandlerStream, TreeStream } from "../objects/Stream.js"
 import { consume } from "../utils/Stream.js"
 
+// ! pre-test: ENSURE that this thing WORKS with 'ArrayCollection', 'ArrayBuilder' and 'SourceBuilder'
 /**
  * This is a function for creation of tree-mapping
  * operations, from the given AST-like type `In`
@@ -23,13 +29,29 @@ import { consume } from "../utils/Stream.js"
  * general capability, the usefulness of which is not
  * to be underestimated].
  */
-export function TreeMapper<In extends IWalkable<In> = IWalkable, Out = any>(
-	map: IHandler<In, Out>,
-	intoMaker: () => IPushable<Out>
-) {
+export function TreeEvaluator<
+	In extends IWalkable<In> = IWalkable,
+	Out = any,
+	CollectionType extends IPushable<Out> = IPushable<Out>
+>(map: IHandler<In, Out>, intoMaker: () => CollectionType) {
 	const mapperStream = HandlerStream(map)
 	return function (from: In) {
 		const into = intoMaker()
 		return consume(mapperStream(new TreeStream<In>(from)), into)
+	}
+}
+
+// ! pre-test: ENSURE that this thing WORKS with 'ArrayCollection', 'ArrayBuilder'
+export function TreeMapper<
+	In extends IWalkable<In> = IWalkable,
+	Out extends IWalkable<Out> = IWalkable
+>(
+	map: IHandler<In, Out>,
+	intoMaker: () => IBaseCollection<Out, readonly Out[]>,
+	wrapperNode: (items: Out[]) => Out
+) {
+	const evaluator = TreeEvaluator(map, intoMaker)
+	return function (from: In) {
+		return wrapperNode(evaluator(from).get() as Out[])
 	}
 }

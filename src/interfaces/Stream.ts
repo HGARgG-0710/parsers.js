@@ -4,8 +4,7 @@ import type {
 	IParseState,
 	IResourceConnectable,
 	IStateHaving,
-	IStateSettable,
-	ITableHandler
+	IStateSettable
 } from "../interfaces.js"
 import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 
@@ -118,16 +117,6 @@ export type IPositionStream<T = any> = IPosed & IStream<T>
  * This is an `IStream<T>` that is also `Iterable<T>`
  */
 export type IIterableStream<T = any> = IStream<T> & Iterable<T>
-
-/**
- * This is a type for representing functions returning `IStream`-based generators,
- * and supporting (optional) `ITableHandler`-passing (intended to be used in
- * the same contexts as them).
- */
-export type IStreamGenerator<T = any, Out = any> = (
-	stream: IIterableStream<T>,
-	parentMap?: ITableHandler<IIterableStream<T>>
-) => Generator<Out>
 
 /**
  * The interface for objects with a `readonly .pos: number`.

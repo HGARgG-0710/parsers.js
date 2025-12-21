@@ -7,7 +7,7 @@ import {
 	EndBracketStream,
 	isNotNext
 } from "../../../samples/Stream.js"
-import { consumable } from "../../../utils/Stream.js"
+import { consumableIterable } from "../../../utils/Stream.js"
 import { validateHex, validateUnicodeCodeLength } from "../Errors.js"
 import { UnicodeChar } from "../Nodes.js"
 
@@ -27,7 +27,7 @@ const UnicodeLimitStream = EndBracketStream(
 
 const UnicodeCharStream = CollectionStream(
 	UnicodeChar,
-	consumable(new SourceBuilder())
+	consumableIterable(new SourceBuilder())
 )
 
 const UnicodeCharValidatorStream = ValidatorStream(function (

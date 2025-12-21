@@ -1,11 +1,10 @@
 import { functional } from "@hgargg-0710/one"
 import type {
-	ICollectionNode,
-	ICollectionNodeType,
 	INode,
 	INodeMaker,
+	IRecursiveNode,
+	IRecursiveNodeType,
 	IValidatable,
-	IValidationTable,
 	IXMLGenerationTable
 } from "../../interfaces.js"
 import { closingTag, openingTag, tabbed, toXML } from "../../samples/xml.js"
@@ -18,24 +17,24 @@ import { PoolableNode } from "./PoolableNode.js"
 const { id } = functional
 
 abstract class PreRecursiveNode
-	extends PoolableNode<[INode[]]>
-	implements ICollectionNode
+	extends PoolableNode<[readonly INode[]]>
+	implements IRecursiveNode
 {
-	protected ["constructor"]: new (children?: INode[]) => this
+	protected ["constructor"]: new (children?: readonly INode[]) => this
 
 	static fromPlain(
-		this: ICollectionNodeType,
+		this: IRecursiveNodeType,
 		x: any,
-		nodeMaker: INodeMaker<ICollectionNode>
+		nodeMaker: INodeMaker<IRecursiveNode>
 	) {
 		if (!isRecursiveNodeSerializable(x)) return false
 		const maybeNodes = x.children.map(nodeMaker)
 		return maybeNodes.every(id) && new this(maybeNodes as INode[])
 	}
 
-	private children: INode[]
+	private children: readonly INode[]
 
-	private setChildren(children: INode[]) {
+	private setChildren(children: readonly INode[]) {
 		this.children = children
 	}
 
@@ -45,11 +44,6 @@ abstract class PreRecursiveNode
 
 	read(i: number): INode {
 		return this.children[i]
-	}
-
-	push(...children: INode[]) {
-		this.children.push(...children)
-		return this
 	}
 
 	get lastChild() {
@@ -67,7 +61,7 @@ abstract class PreRecursiveNode
 		return new this.constructor(this.children.map(tryCopy))
 	}
 
-	init(children: INode[] = []) {
+	init(children: readonly INode[] = []) {
 		this.setChildren(children)
 		this.assignSelfParent()
 		return this
@@ -123,26 +117,20 @@ abstract class PreRecursiveNode
 		return [openTag, ...tabbed(childTags), closeTag]
 	}
 
-	validate(table: IValidationTable<INode>): boolean {
-		return this.children.every((child) =>
-			table.validate(this.type, child.type, child)
-		)
-	}
-
 	debugPrint(): string {
 		return `${this.debugName} { children: [ ${this.children
 			.map((x) => x.debugPrint())
 			.join(", ")} ] }`
 	}
 
-	constructor(children: INode[] = []) {
+	constructor(children: readonly INode[] = []) {
 		super()
 		this.init(children)
 	}
 }
 /**
- * This is an `<T = any> (type: T) => IRecursiveNodeType< [INode?, ICollectionNode]>` for
- * creation of `ICollectionNode`s with `.type: T` properties,
+ * This is an `<T = any> (type: T) => IRecursiveNodeType< [INode?, IRecursiveNode]>` for
+ * creation of `IRecursiveNode`s with `.type: T` properties,
  * to which the give-value of `type: T` is given [prototype property],
  * as well as a variety of methods for working with `children: INode[]`,
  * which are specified on construction [upon omission, empty array is assumed].
@@ -157,7 +145,7 @@ abstract class PreRecursiveNode
  */
 
 export const RecursiveNode = NodeFactory(
-	PreNodeFactory<ICollectionNodeType<ICollectionNode & IValidatable<INode>>>(
+	PreNodeFactory<IRecursiveNodeType<IRecursiveNode & IValidatable<INode>>>(
 		PreRecursiveNode
 	)
 )

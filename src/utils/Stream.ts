@@ -1,31 +1,26 @@
 import { boolean, object, type } from "@hgargg-0710/one"
+import type { IRefillableCollection } from "src/interfaces/Collection.js"
 import type {
 	IFiniteWritable,
 	ILineIndex,
 	IParseState,
 	IPosed,
 	IPushable,
-	IRefillable,
 	IStateHaving,
 	IStateSettable
 } from "../interfaces.js"
 import type {
 	IFinishable,
 	IIndexCarrying,
-	IIterableStream,
 	IMarkerHaving,
 	INavigable,
 	IOwnedStream,
 	IPeekable,
 	IPeekableStream,
 	IRenewerStream,
-	IStream,
-	IStreamGenerator
+	IStream
 } from "../interfaces/Stream.js"
-import type {
-	IStreamTransform,
-	ITableHandler
-} from "../interfaces/StreamHandler.js"
+import type { IStreamTransform } from "../interfaces/StreamHandler.js"
 import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { asSteps } from "../modules/Stream/utils/Step.js"
@@ -97,10 +92,11 @@ export function skip<T = any>(input: IStream<T>, step: IStreamStep<T> = 1) {
  *
  * By default, `result` is an `ArrayCollection<T>`
  */
-export function consume<T = any, K extends IPushable<T> = ArrayCollection<T>>(
-	source: Iterable<T>,
-	result: K = new ArrayCollection<T>() as any
-) {
+export function consume<
+	T = any,
+	I extends Iterable<T> = Iterable<T>,
+	K extends IPushable<T> = ArrayCollection<T>
+>(source: I, result: K = new ArrayCollection<T>() as any) {
 	for (const curr of source) result.push(curr)
 	return result
 }
@@ -128,33 +124,25 @@ export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
  * In other words, it is a way to reuse the exact same
  * `result` for multiple distinct calls to `consume`.
  */
-export function consumable<
+export function consumableIterable<
 	T = any,
 	I extends Iterable<T> = Iterable<T>,
-	K extends IRefillable<T> = IRefillable<T>
+	K extends IRefillableCollection<T> = IRefillableCollection<T>
 >(result: K) {
-	return function (stream: I) {
+	return function (source: I) {
 		result.clear()
-		return consume(stream, result)
+		return consume(source, result)
 	}
 }
 
-/**
- * Returns a function that returns a function that
- * iterates the `generator(stream, parentMap)`,
- * filling the `result` with its output, and then
- * - returning it.
- */
-export function consumeGenerator<T = any, Out = any>(
-	generator: IStreamGenerator<T>
-) {
-	return function <K extends IPushable<Out> = IPushable<Out>>(result: K) {
-		return function (
-			stream: IIterableStream<T>,
-			parentMap?: ITableHandler<IIterableStream<T>>
-		) {
-			return consume(generator(stream, parentMap), result)
-		}
+export function consumableRevivables<
+	T = any,
+	I extends IRenewerStream<T> = IRenewerStream<T>,
+	K extends IRefillableCollection<T> = IRefillableCollection<T>
+>(result: K) {
+	return function (source: I) {
+		result.clear()
+		return consumeSingletonRevivables(source, result)
 	}
 }
 
@@ -280,14 +268,15 @@ export function peek(n: number) {
  * a singleton-stream.
  */
 export function consumeSingletonRevivables<
-	T extends IPushable = ArrayCollection
->(stream: IRenewerStream, target: T = new ArrayCollection() as any) {
+	T = any,
+	K extends IPushable<T> = ArrayCollection<T>
+>(stream: IRenewerStream<T>, target: K = new ArrayCollection<T>() as any) {
 	let couldReviveLast: boolean
 
 	do {
 		target.push(next(stream.resource!))
 		couldReviveLast = stream.reviveChild()
-	} while (couldReviveLast)
+	} while (couldReviveLast && !stream.isEnd)
 
 	return target
 }

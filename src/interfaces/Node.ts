@@ -2,7 +2,6 @@ import type {
 	IFreeable,
 	IInitializable,
 	IJSONSerializableObject,
-	IPushable,
 	IXMLSerializable
 } from "../interfaces.js"
 import type { ObjectPool } from "../objects.js"
@@ -72,6 +71,8 @@ export type IValidityMap<T = any> = ITreeMap<T, boolean>
 export type IStringPairs = [string, string][]
 
 export interface IValidationTable<T = any> {
+	validateSingle(item: T): boolean
+
 	validate(
 		parentType: IValidNodeType,
 		childType: IValidNodeType,
@@ -122,13 +123,6 @@ export interface IRecursiveNode extends IPoolNode<[INode[]]> {
 	jsonInsertableEmpty(): [string, string]
 	jsonInsertablePost(): [string, string]
 }
-
-/**
- * This is a case of `IRecursiveNode`, which is also capable of
- * being used as a grow-only collection. Particularly useful for
- * tree-mapping.
- */
-export type ICollectionNode = IRecursiveNode & IPushable<INode>
 
 export interface ICarrierNode<V = any> extends INode, IValued<V> {}
 
@@ -202,13 +196,6 @@ export interface IRecursiveNodeType<K extends IRecursiveNode = IRecursiveNode>
 	extends IPoolNodeType<[INode[]?], K> {}
 
 /**
- * This is a type specifically for representing `IRecursiveNodeType`s
- * that are intended to produce `ICollectionNode`s
- */
-export type ICollectionNodeType<C extends ICollectionNode = ICollectionNode> =
-	IRecursiveNodeType<C>
-
-/**
  * This is an interface for representing a function-factory for `INodeType< Args>`
  * instances.
  */
@@ -231,12 +218,6 @@ export type ICellNodeTypeFactory<V = any> = INodeTypeFactory<
 export type IRecursiveNodeTypeFactory<
 	K extends IRecursiveNodeType = IRecursiveNodeType
 > = (type: IValidNodeType) => K
-
-/**
- * This is an interface for representing function-factory for `ICollectionNodeType< Args>`
- */
-export type ICollectionNodeFactory =
-	IRecursiveNodeTypeFactory<ICollectionNodeType>
 
 /**
  * This is an interface for representing a mapping of an `INodeTypeFactory<T>`

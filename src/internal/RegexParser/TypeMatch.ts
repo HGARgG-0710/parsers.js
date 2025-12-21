@@ -18,7 +18,7 @@ import {
 	isNotNonEscapedNext,
 	SingletonWrapperStream
 } from "../../samples/Stream.js"
-import { consumable } from "../../utils/Stream.js"
+import { consumableIterable } from "../../utils/Stream.js"
 import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { EnableClbrackStream } from "./Recursive.js"
 import { HandleSingleChar } from "./SingleChar.js"
@@ -32,7 +32,7 @@ const AsIntValidatorStream = ValidatorStream(ensureCurrDecimal)
 const AsStringStream = SingletonWrapperStream(AsString)
 const TypeMatchStream = CollectionStream(
 	TypeMatch,
-	consumable(new SourceBuilder())
+	consumableIterable(new SourceBuilder())
 )
 
 const emptinessCondition = isCurr("}")

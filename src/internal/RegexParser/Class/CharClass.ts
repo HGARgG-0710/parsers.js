@@ -1,4 +1,8 @@
-import type { ICollectionNode, IRawStreamArray } from "../../../interfaces.js"
+import type {
+	INode,
+	IRawStreamArray,
+	IRecursiveNode
+} from "../../../interfaces.js"
 import { skip } from "../../../objects/Error.js"
 import { LimitStream, PeekStream } from "../../../objects/Stream.js"
 import {
@@ -20,9 +24,9 @@ const CharClassLimitStream = EndBracketStream(
 		.build()
 )
 
-class CharClassStream extends ClassStream<ICollectionNode> {
-	protected spawnTarget(): ICollectionNode {
-		return new CharClass()
+class CharClassStream extends ClassStream<IRecursiveNode> {
+	protected spawnNode(children: INode[]): IRecursiveNode {
+		return new CharClass(children)
 	}
 }
 

@@ -1,10 +1,5 @@
 import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
 import type {
-	IIterableStream,
-	IParserFunction,
-	ITableHandler
-} from "../interfaces.js"
-import type {
 	IChildrenHaving,
 	ITyped,
 	IValidNodeType,
@@ -85,29 +80,6 @@ export function fromObject(allowedTypes: NodeSystem) {
 		if (!isTyped(from)) return false
 		if (!isValid(from.type)) return false
 		return allowedTypes.getByType(from.type)!.fromPlain(from, nodeWrapper)
-	}
-}
-
-/**
- * This returns a generator that yields the result of
- * mapping a given `nodeStream` [it is assumed to have
- * an `IRecursiveNode`, or other collection-based node as
- * `nodeStream.curr`] with `parentMap(x, parentMap)` (and
- * default `parentMap` being `defaultMap`), for
- * every `x` in `nodeStream` after the immidiate
- * `nodeStream.curr` [which is skipped, since it is
- * assumed that it has been used for mapping to the function
- * in question].
- */
-export function treeMap<T extends IWalkable<T> = IWalkable, Out = any>(
-	defaultMap: ITableHandler<IIterableStream<T>, Iterable<Out>>
-): IParserFunction<IIterableStream<T>, Iterable<Out>> {
-	return function* (
-		nodeStream: IIterableStream<T>,
-		parentMap: ITableHandler<IIterableStream<T>, Iterable<Out>> = defaultMap
-	) {
-		nodeStream.next()
-		for (const _ of nodeStream) yield* parentMap(nodeStream, parentMap)
 	}
 }
 

@@ -3,6 +3,7 @@ import type {
 	INode,
 	ITypeCheckable,
 	ITyped,
+	IValidationTable,
 	IValidNodeType
 } from "../../interfaces.js"
 
@@ -69,8 +70,22 @@ export abstract class BaseNode implements INode {
 
 	scanFor(kind: ITypeCheckable): boolean {
 		if (kind.is(this)) return true
-		for (let i = 0; i < this.lastChild; ++i)
-			if (this.read(i).scanFor(kind)) return true
+		for (const child of this) if (child.scanFor(kind)) return true
 		return false
+	}
+
+	validate(table: IValidationTable<INode>): boolean {
+		if (!table.validateSingle(this)) return false
+		for (const child of this)
+			if (
+				!table.validate(this.type, child.type, child) ||
+				(child.validate && !child.validate(table))
+			)
+				return false
+		return true
+	}
+
+	*[Symbol.iterator]() {
+		for (let i = 0; i <= this.lastChild; ++i) yield this.read(i)
 	}
 }

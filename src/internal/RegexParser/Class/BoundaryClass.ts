@@ -1,7 +1,8 @@
 import type {
-	ICollectionNode,
+	INode,
 	IOwnedStream,
-	IRawStreamArray
+	IRawStreamArray,
+	IRecursiveNode
 } from "../../../interfaces.js"
 import { skip } from "../../../objects/Error.js"
 import { LimitStream, PeekStream } from "../../../objects/Stream.js"
@@ -29,9 +30,9 @@ const BoundaryClassLimitStream = EndBracketStream(
 		.build()
 )
 
-class BoundaryClassStream extends ClassStream<ICollectionNode> {
-	protected spawnTarget(): ICollectionNode {
-		return new BoundaryClass()
+class BoundaryClassStream extends ClassStream<IRecursiveNode> {
+	protected spawnNode(children: INode[]): IRecursiveNode {
+		return new BoundaryClass(children)
 	}
 }
 

@@ -1,4 +1,5 @@
 import { boolean } from "@hgargg-0710/one"
+import assert from "assert"
 import type {
 	IStringPairs,
 	ITreeMap,
@@ -153,6 +154,10 @@ export class TreeValidationTable<T = any>
 	extends TreeTable<T, boolean>
 	implements IValidationTable<T>
 {
+	validateSingle(item: T): boolean {
+		return this.isValidSingle(item)
+	}
+
 	validate(
 		parentType: IValidNodeType,
 		childType: IValidNodeType,
@@ -164,6 +169,7 @@ export class TreeValidationTable<T = any>
 
 	constructor(
 		isValidMap: IValidityMap<T>,
+		private readonly isValidSingle: (x: T) => boolean,
 		defaultValid: (x: T) => boolean = T
 	) {
 		super(isValidMap, defaultValid)
@@ -173,6 +179,12 @@ export class TreeValidationTable<T = any>
 export namespace TreeValidationTable {
 	export class Builder<T = any> extends TreeTable.BaseBuilder<T, boolean> {
 		private defaultValid?: (x: T) => boolean
+		private isSingleValid?: (x: T) => boolean
+
+		withSingleValidator(isValid: (x: T) => boolean) {
+			this.isSingleValid = isValid
+			return this
+		}
 
 		withDefault(defaultValid: (x: T) => boolean) {
 			this.defaultValid = defaultValid
@@ -180,7 +192,12 @@ export namespace TreeValidationTable {
 		}
 
 		build() {
-			return new TreeValidationTable(this.items, this.defaultValid)
+			assert(this.isSingleValid)
+			return new TreeValidationTable(
+				this.items,
+				this.isSingleValid,
+				this.defaultValid
+			)
 		}
 	}
 }
@@ -194,8 +211,11 @@ export class TreePairGenerationTable<T = any> extends TreeTable<
 		return this.get(parentType, childType)
 	}
 
-	constructor(items: ITreeMap<T, IStringPairs>) {
-		super(items, (): IStringPairs => [["", ""]])
+	constructor(
+		items: ITreeMap<T, IStringPairs>,
+		defaultPairs: (x: T) => IStringPairs = () => [["", ""]]
+	) {
+		super(items, defaultPairs)
 	}
 }
 

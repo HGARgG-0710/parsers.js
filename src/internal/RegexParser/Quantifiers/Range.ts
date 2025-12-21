@@ -29,7 +29,7 @@ import {
 	isNotNext,
 	PastEndStream
 } from "../../../samples/Stream.js"
-import { consumable } from "../../../utils/Stream.js"
+import { consumableIterable } from "../../../utils/Stream.js"
 import {
 	InfiniteRange,
 	LimitsRange,
@@ -64,7 +64,7 @@ const RangeBoundaryLimitStream = PastEndStream(
 		.build()
 )
 
-const boundaryMaker = consumable(new SourceBuilder())
+const boundaryMaker = consumableIterable(new SourceBuilder())
 
 const RangeBoundaryValidatorStream = ValidatorStream(ensureCurrDecimal)
 const RangeBoundaryStream = SingletonStream(

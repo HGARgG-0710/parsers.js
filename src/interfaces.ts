@@ -221,11 +221,6 @@ export interface IClearable {
 }
 
 /**
- * An `IPushable<T>`, which is also `IClearable`.
- */
-export type IRefillable<T = any> = IPushable<T> & IClearable
-
-/**
  * An interface for representing
  * resources that can be cleaned up
  * via the `.cleanup(): void` method.

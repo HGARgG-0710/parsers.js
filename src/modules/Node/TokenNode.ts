@@ -5,7 +5,6 @@ import type {
 	IPoolNodeType,
 	ITyped,
 	IValidatable,
-	IValidationTable,
 	IValidNodeType,
 	IXMLGenerationTable
 } from "../../interfaces.js"
@@ -39,10 +38,6 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		const { type } = this
 		const attrConverter = table.toAttr(type, type)
 		return [selfClosingTag(type, attrConverter ? attrConverter(this) : [])]
-	}
-
-	validate(table: IValidationTable<INode>): boolean {
-		return table.validate(this.type, this.type, this)
 	}
 
 	debugPrint(): string {

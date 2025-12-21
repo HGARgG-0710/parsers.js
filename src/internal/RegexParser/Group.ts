@@ -8,7 +8,7 @@ import {
 	isNotNonEscapedNext,
 	RecursiveBracketStream
 } from "../../samples/Stream.js"
-import { consumable } from "../../utils/Stream.js"
+import { consumableIterable } from "../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandleNoCaptureGroup } from "./Group/NoCapture.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
@@ -34,7 +34,7 @@ export function GroupLimitStream(from?: IStreamPredicate<string>) {
 
 export const GroupBodyStream = CollectionStream(
 	GroupBody,
-	consumable(new ArrayBuilder())
+	consumableIterable(new ArrayBuilder())
 )
 
 const GroupHandler = new Parametrized((extensions: Regex.Extension[]) =>
