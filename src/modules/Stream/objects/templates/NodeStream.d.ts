@@ -1,8 +1,10 @@
 import type {
 	ICommonStream,
 	IInitializer,
+	ILinkedStream,
 	IOwnedStream,
-	IOwningStream
+	IOwningStream,
+	IParseState
 } from "../../../../interfaces.ts"
 import type { ObjectPool } from "../../../../objects.ts"
 import type { RenewerStream } from "./RenewerStream.js"
@@ -18,6 +20,15 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 {
 	connectOwner(newOwner: IOwningStream): void
 	get owner(): IOwningStream | undefined
+
+	readonly state: IParseState
+	setState(state: IParseState): void
+
+	protected set resource(newResource: ILinkedStream | undefined)
+	get resource(): ILinkedStream | undefined
+	connectResource(resource: ILinkedStream): void
+	baseInit(): void
+	init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
 
 	protected endStream(): void
 	protected startStream(): void

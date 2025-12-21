@@ -17,7 +17,6 @@ const _CompositeStream = new mixin(
 			setState(state) {
 				this.super.Stateful.setState.call(this, state)
 				this.distributeState()
-				return this
 			}
 		},
 		constructor(lowStream, rawStreams, state) {

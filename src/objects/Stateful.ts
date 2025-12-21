@@ -13,6 +13,5 @@ export abstract class Stateful implements IStateful<IParseState> {
 
 	setState(newState: IParseState) {
 		this.state = newState
-		return this
 	}
 }

@@ -1,4 +1,8 @@
-import type { IParseState, IProxyStream } from "../../../../interfaces.js"
+import type {
+	IParseState,
+	IProxyStream,
+	ISubProxyStream
+} from "../../../../interfaces.js"
 import { isStateful } from "../../../../utils/Stream.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 import { CustomLinkedStream } from "./CustomLinkedStream.js"
@@ -43,7 +47,6 @@ export abstract class ProxyStream<T = any>
 
 	setState(state: IParseState) {
 		if (isStateful(this.delegate)) this.delegate.setState(state)
-		return this
 	}
 
 	get depthMarks() {
@@ -59,7 +62,7 @@ export abstract class ProxyStream<T = any>
 		this.delegate.baseInit()
 	}
 
-	constructor(protected readonly delegate: IProxyStream<T>) {
+	constructor(protected readonly delegate: ISubProxyStream<T>) {
 		super()
 		this.delegate.connectOwner(this)
 	}

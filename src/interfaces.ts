@@ -225,8 +225,8 @@ export interface IWritable<T = any> {
  * with the ability to store state via the
  * `setState(state: Summat): void` method.
  */
-export interface IStateSettable {
-	setState(state: Summat): this
+export interface IStateSettable<T extends Summat = Summat> {
+	setState(state: T): void
 }
 
 /**

@@ -1,6 +1,7 @@
 import { mixin } from "../../../../mixin.js"
+import { Stateful } from "../../../../objects.js"
+import { CustomLinkedStream } from "./CustomLinkedStream.js"
 import { DyssyncStream } from "./DyssyncStream.js"
-import { PreCommonStream } from "./PreCommonStream.js"
 import { RenewerStream } from "./RenewerStream.js"
 
 export const NodeStream = new mixin(
@@ -16,5 +17,5 @@ export const NodeStream = new mixin(
 			}
 		}
 	},
-	[RenewerStream, PreCommonStream, DyssyncStream]
+	[RenewerStream, Stateful, CustomLinkedStream, DyssyncStream]
 ).toClass()

@@ -1,7 +1,7 @@
 import { finish } from "../../../../utils/Stream.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 import type { IErrObjectFactory } from "../../interfaces/PanicStream.js"
-import type { IProxyStream } from "../../interfaces/ProxyStream.js"
+import type { ISubProxyStream } from "../../interfaces/ProxyStream.js"
 import { ErrorStream } from "./ErrorStream.js"
 
 export class PanicStream<T = any, ErrType = any> extends ErrorStream<
@@ -22,7 +22,7 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return curr
 	}
 
-	// ! pre-doc: this is a HOOK - the user CAN override it [and should - if their case demands it]; 
+	// ! pre-doc: this is a HOOK - the user CAN override it [and should - if their case demands it];
 	protected getChild(): IOwnedStream {
 		return this.resource!
 	}
@@ -55,7 +55,7 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 	}
 
 	constructor(
-		delegate: IProxyStream<T | ErrType>,
+		delegate: ISubProxyStream<T | ErrType>,
 		errObjectFactory: IErrObjectFactory<ErrType>
 	) {
 		super(delegate)

@@ -77,9 +77,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		this.input = input
 	}
 
-	setState(preState: Summat) {
+	setState(preState: Summat): void {
 		this._state = this.createState(preState)
-		return this
 	}
 
 	isSetupReady() {

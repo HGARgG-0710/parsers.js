@@ -55,7 +55,7 @@ export interface IResourceful {
  * `IStateHaving<T>`, as well as `IStateSettable`
  */
 export type IStateful<T extends Summat = Summat> = IStateHaving<T> &
-	IStateSettable
+	IStateSettable<T>
 
 /**
  * An interface for representing the library's primary data structure - a Stream.

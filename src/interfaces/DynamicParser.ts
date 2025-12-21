@@ -26,7 +26,7 @@ export interface IParse<FinalType = any, InitType = any>
 	extends IInitializable<[InitType?, Summat?]> {
 	readonly state: IParseState<FinalType, InitType>
 	readonly streams: IStreamArray
-	renewStream(stream: ILinkedStream): void
+	renewStream(stream: ILinkedStream): boolean
 	update(): void
 	getDepth(mark: IDepthMark): number
 }

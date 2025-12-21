@@ -40,7 +40,7 @@ export abstract class BeforeCompositeStream<T = any>
 	private lowStream?: IOwnedStream
 
 	abstract state: IParseState
-	abstract setState(state: Summat): this
+	abstract setState(state: Summat): void
 
 	private renewIfPossible() {
 		return this.streamList!.renewAll(this.lowStream!)
