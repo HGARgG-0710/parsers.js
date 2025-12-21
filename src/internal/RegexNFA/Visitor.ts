@@ -99,12 +99,17 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		)
 	}
 
-	handleNoneOf({ items }: Regex.Raw.NoneOf): Fragment | null {
-		return this.toFragment(new NoneOfState(this.toInStates(items)))
+	handleNoneOf({ items, extensions }: Regex.Raw.NoneOf): Fragment | null {
+		return this.toFragment(
+			new NoneOfState(this.toInStates(items), extensions)
+		)
 	}
 
-	handleTokenType({ type }: Regex.Raw.TokenType): Fragment | null {
-		return this.toFragment(new TokenState(type))
+	handleTokenType({
+		type,
+		extensions
+	}: Regex.Raw.TokenType): Fragment | null {
+		return this.toFragment(new TokenState(type, extensions))
 	}
 
 	handleBoundary({ items }: Regex.Raw.Boundary): Fragment | null {

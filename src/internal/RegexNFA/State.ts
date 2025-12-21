@@ -344,7 +344,11 @@ export abstract class ArrowState<T = any> extends State<T> {
 
 abstract class SingleCapturingState<T = any> extends ArrowState<T> {
 	getCaptured(keeper: PeekKeeper<T>): T | string {
-		return keeper.curr
+		return this.extensions.get("noCapture") ? "" : keeper.curr
+	}
+
+	constructor(protected readonly extensions: Regex.ExtensionMap) {
+		super()
 	}
 }
 
@@ -397,10 +401,6 @@ abstract class LocaleSensitiveState<T = any> extends SingleCapturingState<T> {
 			? this.ignoreCaseVerify(curr)
 			: this.baseVerify(curr)
 	}
-
-	constructor(private readonly extensions: Regex.ExtensionMap) {
-		super()
-	}
 }
 
 export class CharState<T = any> extends LocaleSensitiveState<T> {
@@ -452,13 +452,16 @@ export class EmptyState<T = any> extends ArrowState<T> {
 
 // ! pre-doc: this checks a given item for: 1. being an `ITyped`; 2. having the correct `type` (use `utils.Node.isType` for this...)
 export class TokenState<T = any> extends SingleCapturingState<T> {
-	verify(keeper: PeekKeeper): boolean {
+	verify(keeper: PeekKeeper<T>): boolean {
 		const currItem = keeper.curr
 		return isTyped(currItem) && currItem.type === this.type
 	}
 
-	constructor(private readonly type: IValidNodeType) {
-		super()
+	constructor(
+		private readonly type: IValidNodeType,
+		extensions: Regex.ExtensionMap
+	) {
+		super(extensions)
 	}
 }
 
@@ -467,8 +470,11 @@ export class NoneOfState<T = any> extends SingleCapturingState<T> {
 		return !MultVerifier.verifySome(this.options, keeper)
 	}
 
-	constructor(private readonly options: State[]) {
-		super()
+	constructor(
+		private readonly options: State[],
+		extensions: Regex.ExtensionMap
+	) {
+		super(extensions)
 	}
 }
 
