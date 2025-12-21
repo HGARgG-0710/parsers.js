@@ -1,6 +1,7 @@
 import { ContentNode, SingleChildNode } from "src/modules/Node/ContentNode.js"
 import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
 import { TokenNode } from "src/modules/Node/TokenNode.js"
+import type { ITypeCheckable } from "../interfaces.js"
 import { NodeSystem } from "../objects.js"
 
 /**
@@ -30,4 +31,16 @@ export function PlainNodes<T = any>(
 		[RecursiveNode, recursive],
 		[SingleChildNode, single]
 	])
+}
+
+export class EitherType implements ITypeCheckable {
+	private readonly components: ITypeCheckable[]
+
+	is(x: any) {
+		return this.components.some((component) => component.is(x))
+	}
+
+	constructor(...components: ITypeCheckable[]) {
+		this.components = components
+	}
 }

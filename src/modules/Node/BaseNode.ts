@@ -1,5 +1,10 @@
 import { array } from "@hgargg-0710/one"
-import type { INode, ITyped, IValidNodeType } from "../../interfaces.js"
+import type {
+	INode,
+	ITypeCheckable,
+	ITyped,
+	IValidNodeType
+} from "../../interfaces.js"
 
 /**
  * An abstract class implementing the `INode` type.
@@ -60,5 +65,12 @@ export abstract class BaseNode implements INode {
 
 	get lastChild() {
 		return -1
+	}
+
+	scanFor(kind: ITypeCheckable): boolean {
+		if (kind.is(this)) return true
+		for (let i = 0; i < this.lastChild; ++i)
+			if (this.read(i).scanFor(kind)) return true
+		return false
 	}
 }

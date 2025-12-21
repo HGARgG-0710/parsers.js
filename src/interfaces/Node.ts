@@ -83,6 +83,10 @@ export interface IValidatable<T = any> {
 	validate(table: IValidationTable<T>): boolean
 }
 
+export interface IScannable {
+	scanFor(kind: ITypeCheckable): boolean
+}
+
 /**
  * This interface is intended to represent individual nodes
  * inside a Tree-like structure, with `.type: T`. The instances
@@ -99,6 +103,7 @@ export interface INode
 		IJSONSerializableObject,
 		IXMLSerializable,
 		Partial<IValidatable<INode>>,
+		IScannable,
 		IDebugNamed,
 		IDebugPrintable {
 	setParent(parnet: INode): void
