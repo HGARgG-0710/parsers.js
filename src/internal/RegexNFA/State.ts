@@ -263,14 +263,14 @@ export class Fragment {
 	constructor(readonly inState: State, readonly outArrows: StateArrow[]) {}
 }
 
-export class StateArrow {
-	private _to: State
+export class StateArrow<T = any> {
+	private _to: State<T>
 
 	get to() {
 		return this._to
 	}
 
-	set(out: State) {
+	set(out: State<T>) {
 		this._to = out
 	}
 }
@@ -317,8 +317,8 @@ export abstract class State<T = any> {
 	}
 }
 
-export abstract class ArrowState extends State {
-	readonly arrow = new StateArrow()
+export abstract class ArrowState<T = any> extends State<T> {
+	readonly arrow = new StateArrow<T>()
 
 	resetSeenTimes(): void {
 		super.resetSeenTimes()
@@ -329,16 +329,22 @@ export abstract class ArrowState extends State {
 		return BoundState.pool.create(this, keeper)
 	}
 
-	advance(keeper: PeekKeeper) {
+	advance(keeper: PeekKeeper<T>) {
 		keeper.advance()
 	}
 
-	addTo(list: StateArray, keeper: PeekKeeper): void {
+	addTo(list: StateArray<T>, keeper: PeekKeeper<T>): void {
 		list.states.push(this.with(keeper))
 	}
 
 	next() {
 		return this.arrow.to
+	}
+}
+
+abstract class SingleCapturingState<T = any> extends ArrowState<T> {
+	getCaptured(keeper: PeekKeeper<T>): T | string {
+		return keeper.curr
 	}
 }
 
@@ -375,7 +381,7 @@ export class EitherState extends State {
 	}
 }
 
-abstract class LocaleSensitiveState extends ArrowState {
+abstract class LocaleSensitiveState<T = any> extends SingleCapturingState<T> {
 	protected abstract baseVerify(x: string): boolean
 
 	private ignoreCaseVerify(item: string): boolean {
@@ -397,7 +403,7 @@ abstract class LocaleSensitiveState extends ArrowState {
 	}
 }
 
-export class CharState extends LocaleSensitiveState {
+export class CharState<T = any> extends LocaleSensitiveState<T> {
 	protected baseVerify(item: string): boolean {
 		return item === this.char
 	}
@@ -407,7 +413,7 @@ export class CharState extends LocaleSensitiveState {
 	}
 }
 
-export class CodeRangeState extends LocaleSensitiveState {
+export class CodeRangeState<T = any> extends LocaleSensitiveState<T> {
 	protected baseVerify(char: string) {
 		const codePoint = char.codePointAt(0)!
 		return this.from <= codePoint && codePoint <= this.to
@@ -423,14 +429,14 @@ export class CodeRangeState extends LocaleSensitiveState {
 }
 
 // ! pre-doc: a state that matches any item - ADVANCES THE POSITION
-export class AnythingState extends ArrowState {
-	verify(keeper: PeekKeeper): boolean {
+export class AnythingState<T = any> extends SingleCapturingState<T> {
+	verify(keeper: PeekKeeper<T>): boolean {
 		return true
 	}
 }
 
 // ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
-export class EmptyState extends ArrowState {
+export class EmptyState<T = any> extends ArrowState<T> {
 	addTo(list: StateArray, keeper: PeekKeeper): void {
 		this.next().addTo(list, keeper)
 	}
@@ -438,10 +444,14 @@ export class EmptyState extends ArrowState {
 	verify(keeper: PeekKeeper): boolean {
 		return this.next().verify(keeper)
 	}
+
+	getCaptured(keeper: PeekKeeper<T>): string | T {
+		return this.next().getCaptured(keeper)
+	}
 }
 
 // ! pre-doc: this checks a given item for: 1. being an `ITyped`; 2. having the correct `type` (use `utils.Node.isType` for this...)
-export class TokenState extends ArrowState {
+export class TokenState<T = any> extends SingleCapturingState<T> {
 	verify(keeper: PeekKeeper): boolean {
 		const currItem = keeper.curr
 		return isTyped(currItem) && currItem.type === this.type
@@ -452,7 +462,7 @@ export class TokenState extends ArrowState {
 	}
 }
 
-export class NoneOfState extends ArrowState {
+export class NoneOfState<T = any> extends SingleCapturingState<T> {
 	verify(keeper: PeekKeeper): boolean {
 		return !MultVerifier.verifySome(this.options, keeper)
 	}
@@ -462,7 +472,7 @@ export class NoneOfState extends ArrowState {
 	}
 }
 
-export class BoundaryState extends ArrowState {
+export class BoundaryState<T = any> extends ArrowState<T> {
 	private verifySimple(keeper: PeekKeeper) {
 		return MultVerifier.verifySome(this.options, keeper)
 	}
@@ -479,7 +489,7 @@ export class BoundaryState extends ArrowState {
 		return isCurrMatch !== isLastMatch
 	}
 
-	verify(keeper: PeekKeeper): boolean {
+	verify(keeper: PeekKeeper<T>): boolean {
 		return this.verifyFirst(keeper) || this.verifyCommon(keeper)
 	}
 
@@ -495,13 +505,13 @@ export class BoundaryState extends ArrowState {
 	}
 }
 
-export class NonBoundaryState extends BoundaryState {
-	protected verifyCommon(keeper: PeekKeeper): boolean {
+export class NonBoundaryState<T = any> extends BoundaryState<T> {
+	protected verifyCommon(keeper: PeekKeeper<T>): boolean {
 		return !super.verifyCommon(keeper)
 	}
 }
 
-export class MatchState extends State {
+export class MatchState<T = any> extends State<T> {
 	advance(keeper: PeekKeeper): void {}
 
 	addTo(list: StateArray): void {
