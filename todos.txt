@@ -10,17 +10,17 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-		Current total: 285
+	Current total: 314
 
-		Method for counting: 
-			1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 247 (at the time of writing...)
-				NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
-					(since they're also exported in .d.ts files...)
-			2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
-			3. Search (regex): export class = 2
-				ONLY inside the `*.js` files. 
+	Method for counting: 
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 275 (at the time of writing...)
+			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
+				(since they're also exported in .d.ts files...)
+		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
+		3. Search (regex): export class = 1
+			ONLY inside the `*.js` files. 
 
-		Value: 1. + 2. - 3.
+	Value: 1. + 2. - 3.
 
 	ALSO: count the number of EXPORTED classes specifically... 
 		Use that number on the library's Wiki, enumerate EACH of the sub-exports. 
@@ -53,7 +53,7 @@ REMINDERs:
 		The value (both input AND output) CAN BE < 0. 
 		In these cases, it is TREATED THE SAME AS 0!!!
 		
-	-2. REMINDER [for tests]: about the `TypeMatch` parsing...
+	-2. REMINDER [for tests]: about the `TypeMatch` parsing... (RegexParser)
 		It must ENSURE that the escaped characters are treated AS-ARE. 
 		Specifically, the "\}" must be converted to a simple "}". 
 		That is due to the END of the string...
@@ -154,10 +154,77 @@ REMINDERs:
 
 		There, public exports for the given "internal" thing would be provided. 
 
-IMMEDIATE: 
-	MAJOR PROBLEM COUNT: 1
+	3. REMINDER [for testing]: the user DOES NOT NEED to set the state via 'stream.setState(this.state)'
+		inside 'IStreamChooser'-s. It's AUTOMATICALLY SET before initialization. BUT, the user STILL has 
+		access to 'this.state' via global 'this: ICompositeStream', and so can STORE THEIR OWN GLOBAL 
+		PROPERTIES ON IT! 
 
-	CURRENT: 
+	4. REMINDER: *during testing/demo-ing* - VERIFY that the *pooling* does have a SIGNIFICANT, POSITIVE 
+		effect on parsing of VERY large datasets... Specifically, your JSON demo; Specifically, 
+		check MEMORY (it should be more stable) and EXECUTION SPEED (this one, particularly, since 
+		it's supposed to avoid Garbage Collections...). If NEITHER are impacted, REMOVE the pooling 
+		ALTOGETHER!!! For this, create a FEATURE BRANCH with a single commit that REMOVES the 
+		'ObjectPool's COMPLETELY. 
+
+	5. REMINDER: Parser.ts: 
+		The 'Concat' and 'Loop' has UNDERLYING PARSERS *sharing* their '.state'!
+		This is important! 
+
+IMMEDIATE: 
+	MAJOR PROBLEM COUNT: 1 (UnicodeState)
+
+	CURRENT: 	
+		-8. Parser.ts: REFACTOR the 'PropertiesGetter' to a separate 'internal/PropertiesGetter.ts' file. 
+			It'd be better this way (far too general to semantically belong there...)
+			Put its '*-State' classes/interfaces there, as well as the 'StateList' class. 
+
+		-7. Parser.ts [Interface Segregation Principle]: 
+			TRY to "reduce" the 'IParseStream' to a 'IStateHaving & IStream' [or something...]
+			The point is, TRY to make it possible to "nest" 'Concat' INTO 'Concat' or 'Loop'
+			(you can't, fundamentally, nest "Loop" into anything due to how it's implemented, 
+			but still...)
+
+			THE SAME goes for 'IParseStreamMaker<Init, Out>': 
+				1. replace 'IParseStream' with a "smaller" (more essential) interface
+				2. RENAME IT
+
+			HOWEVER, the 'ParseStream' (future 'Parser') should STILL return a 'IParseStream<T>'. 
+			This is important. 
+
+		-6. TODO: *join* the 'ParseStream.ts' with the 'Parsers.ts'
+			LET the 'ParseStream' become the 'Parser'-factory, and LET 
+			the 'Parser' ALSO become a NAMESPACE with 'Loop' and 'Concat' 
+			being a part of it. In particular, this'll follow the convention 
+			that the "simpler" parser is more immediate to access. 
+
+		-5. TODO: refactor the 'ParseLoopStream' 
+			[specifically, the constructor - replace the arguments with a DTO-Builder...]; 
+
+		-4. TODO: InputStream, LazyStream, etc
+			VERIFY that *all* of these are VIABLE for reading FROM-THE-MIDDLE of the "Source". 
+			Specifically, if the "source" has ALREADY been "touched" by a different stream, 
+			ENSURE that these are CAPABLE of handling it ADEQUATELY (this means that *all* the 
+			operations STILL REMAIN VALID). 
+			This is a mandatory requirement for the 'ParseStream'. 
+			If, for whatever reason, this becomes impossible for certain non-critical operations, 
+			ADD THIS AS AN IMPORTANT NOTICE TO THE DOCUMENTATION. 
+
+			1. ALSO - ensure that EMPTY STREAMS are *also* viable (almost) ANYWHERE, where non-empty 
+				ones are. This is an important edge cases. 
+
+		-3. TODO [for 'Parser.Loop' to work]: 'RecursiveList'
+			ALLOW empty streams; 
+			SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursiveList' to be EMPTY ON CREATION. 
+			Let it be possible to have an EMPTY 'ParseStream' (ex: when the underlying 'InputStream' has ALL DRIED UP!)
+	
+		-1. TODO: the 'Parse' class - MAKE it so that it utilizes the State Pattern instead of the 'didUpdate = false' boolean; 
+			This'll cimplify the class state control. 
+
+		2. TODO: fix the 'IPushable' interface - make it 'push(item: T): this', not 'push(...items: T[]): this'. 
+			Reasons: 
+				1. constant "wrapping" into an array negatively impacts performance 
+				2. the interface is excessively generic (too complex, too "convinient")
+
 		-1. ADD the 'T = any' generics to the 'RegexNFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
@@ -203,18 +270,10 @@ IMMEDIATE:
 				inside POOLS!!!
 
 		3. NoCapture [to complete]: 
-			1. TODO: *ADD* the '.extensions.get("noCapture")' to the `State.ts`. 	
-				1. Specifically, REIMPLEMENT the 'getCaptured()' method on different 
-					`State` extensions!!! This is important, SINCE, this enables one to 
-					(finally) make the thing behave AS EXPECTED (or, at least, so one 
-					*thinks*...); 
 			2. About the 'match/no-match': 
-				1. this is very important, the result of 'get getCaptured(): boolean' method on the 'State' class 
-					is DETERMINED by the `this.extensions.get("noCapture")`, where `this.extensions: ExtensionMap`. 
-				2. THUS, 'NoCapture' becomes a case of a GROUP EXTENSION: 	
+				1. THUS, 'NoCapture' becomes a case of a GROUP EXTENSION: 	
 					1. THEREFORE, *parser* REQUIRES modification!!!
 						1. syntax change: (=...) -> (#c...)
-				3. The 'State' classes would have their own 'getCaptured(keeper): string | T' method
 	
 	3. [MAJOR PROBLEM] Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
@@ -230,6 +289,15 @@ IMMEDIATE:
 		and one can finally start working on JSDOC (wiki precursor - to later 
 		be replaced with simple URLs to the Wiki, to avoid info-duplication)
 		and Tests, and afterwards, WIKI...)
+
+		1. ALSO: 
+			1. remove the old 'parsers.js' repo (temp-rename to '_parsers.js' for safety reasons; Don't want to lose all that work ;D)
+			2. create a NEW (cleaned up) 'parsers.js' repo
+			3. commit each of the versions of the project to there, ONE BY ONE;
+			4. DO THE TESTING on the new feature branch - TO BE MERGED into 'main'
+			5. RELOCATE the notes to EITHER 'ideas/', OR to GitHub Issues; 
+				(The first one's better, since these notes aren't supposed to be 
+				publicly available unlike the remainder of the project); 
 
 3. Commit D: test the 'static' field of `mixin`: 
 	0. First: finish Commit L
