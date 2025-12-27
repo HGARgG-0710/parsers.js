@@ -178,26 +178,18 @@ class Parse<InType = any, FinalType = any, InitType = any>
 export function ParseStream<InType = any, FinalType = any, InitType = any>(
 	config: ParseStream.Config<InType, FinalType, InitType>
 ) {
-	const { workStream, inputStream, errDataMaker, getState } = config
-	const getParse = () => new Parse(workStream(), inputStream(), errDataMaker)
-	return function (input: InitType): IParseStream<FinalType> {
-		return new _ParseStream(getParse().init(input, getState?.()))
+	return function (getState?: () => Summat) {
+		const { workStream, inputStream, errDataMaker } = config
+		const getParse = () =>
+			new Parse(workStream(), inputStream(), errDataMaker)
+		return function (input: InitType): IParseStream<FinalType> {
+			return new _ParseStream(getParse().init(input, getState?.()))
+		}
 	}
 }
 
 export namespace ParseStream {
 	export class Config<InType = any, FinalType = any, InitType = any> {
-		private _getState?: () => Summat
-
-		get getState() {
-			return this._getState
-		}
-
-		state(stateGetter: () => Summat) {
-			this._getState = stateGetter
-			return this
-		}
-
 		constructor(
 			readonly workStream: () => ICompositeStream<FinalType>,
 			readonly inputStream: () => IInputStream<InType, InitType>,

@@ -68,5 +68,5 @@ export function getParser(extensions: Regex.Extension[]) {
 			regexInputStreamMaker,
 			regexErrorDataMaker
 		)
-	)
+	)()
 }

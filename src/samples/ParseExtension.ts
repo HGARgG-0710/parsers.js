@@ -52,9 +52,8 @@ export function ParseExtension<InType = any, InitType = any, OutType = any>(
 		() => IdentityStream.pool.create(),
 		errDataMaker
 	)
-	if (getState) config.state(getState)
 
-	const protoExtension = ParseStream(config)
+	const protoExtension = ParseStream(config)(getState)
 
 	return function (childStream: IInputStream<InType, InitType>) {
 		return protoExtension(childStream)
