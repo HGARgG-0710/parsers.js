@@ -7,19 +7,20 @@ import { ArrayStream } from "../templates.js"
  * know in advance when an associated `IStream` is going
  * to finish.
  */
-export class LoopStream<T = any> extends ArrayStream<T, () => T> {
+export class LoopStream<T = any> extends ArrayStream<T, (i: number) => T> {
 	private streamIndex: number = 0
 
-	private get itemCount() {
-		return this.items.length
+	private wrapped(index: number) {
+		return index % this.items.length
 	}
 
-	private wrapped(index: number) {
-		return (this.streamIndex = index % this.itemCount)
+	private nextIndex() {
+		return this.wrapped(++this.streamIndex)
 	}
 
 	protected baseNextIter(): T {
-		return this.items[this.wrapped(this.streamIndex + 1)]()
+		const nextIndex = this.nextIndex()
+		return this.items[nextIndex](this.streamIndex)
 	}
 
 	isCurrEnd(): boolean {

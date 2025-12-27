@@ -84,7 +84,7 @@ export class ConcatStream<
 > extends ArrayStream<T, LazilyInitializedStream<StreamType>> {
 	private streamIndex: number = 0
 
-	private currStream() {
+	protected currStream() {
 		return this.rawStreamAt(0)
 	}
 

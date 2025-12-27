@@ -1,5 +1,6 @@
 import { array } from "@hgargg-0710/one"
 import type {
+	IBasicStream,
 	ICellNode,
 	INode,
 	IOwnedStream,
@@ -68,7 +69,7 @@ const boundaryMaker = consumableIterable(new SourceBuilder())
 
 const RangeBoundaryValidatorStream = ValidatorStream(ensureCurrDecimal)
 const RangeBoundaryStream = SingletonStream(
-	(input: IOwnedStream<string> & Iterable<string>) =>
+	(input: IBasicStream<string>) =>
 		new RangeBoundary(Number(boundaryMaker(input).get()))
 )
 

@@ -2,11 +2,13 @@ import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import assert from "assert"
 import type {
-	IOwnedStream,
+	IBaseState,
 	IParseStream,
-	IParseStreamMaker
+	IParseStreamMaker,
+	IRootStream
 } from "../interfaces.js"
-import { ConcatStream } from "./Stream.js"
+import { PreCommonStream } from "../modules/Stream/objects/templates.js"
+import { ConcatStream, LoopStream } from "./Stream.js"
 
 class StateList {
 	private readonly states: IPropertiesGetterState[]
@@ -80,10 +82,7 @@ class NextPropertiesGetterState extends CommonPropertiesGetterState {
 	}
 }
 
-class ParseConcatStream<T = any, Init = any> extends ConcatStream<
-	T,
-	IParseStream<T>
-> {
+class CommonStreamStateExtractor<T = any> {
 	private readonly lastStreamCommonStateExtractor = new PropertiesGetter(
 		new StateList(
 			new NextPropertiesGetterState(() => this.getState()),
@@ -98,28 +97,69 @@ class ParseConcatStream<T = any, Init = any> extends ConcatStream<
 		"errData"
 	)
 
-	private lastStream() {
-		return this.rawStreamAt(-1)
-	}
-
 	private lastCommonStateExtractDefined(): Summat {
-		return this.filterCommonState(this.lastStream().state)
+		return this.filterCommonState(
+			this.owner.lastStream().state
+		) as IBaseState
 	}
 
-	private lastCommonStateExtract(): Summat {
+	fromCurr(): IBaseState {
+		return this.filterCommonState(
+			this.owner.currStream().state
+		) as IBaseState
+	}
+
+	fromLast(): Summat {
 		return this.lastStreamCommonStateExtractor.get()
 	}
 
 	constructor(
+		private readonly getState: () => Summat,
+		private readonly owner: IStreamProvider<T>
+	) {}
+}
+
+interface IStreamProvider<T = any> {
+	lastStream(): IParseStream<T>
+	currStream(): IParseStream<T>
+}
+
+class ParseConcatStream<T = any, Init = any>
+	extends ConcatStream<T, IParseStream<T>>
+	implements IStreamProvider<T>, IRootStream<T>
+{
+	private readonly commonStateExtractor: CommonStreamStateExtractor<T>
+
+	currStream(): IParseStream<T> {
+		return super.currStream()
+	}
+
+	lastStream(): IParseStream<T> {
+		return this.rawStreamAt(-1)
+	}
+
+	private lastCommonStateExtract(): Summat {
+		return this.commonStateExtractor.fromLast()
+	}
+
+	get state() {
+		return this.commonStateExtractor.fromCurr()
+	}
+
+	constructor(
 		input: Init,
-		private readonly getState: () => Summat = object.empty,
-		streamMakers: IParseStreamMaker<Init, T>[]
+		streamMakers: IParseStreamMaker<Init, T>[],
+		getState: () => Summat = object.empty
 	) {
 		super(
 			...streamMakers.map(
 				(maker) => () =>
 					maker(() => this.lastCommonStateExtract())(input)
 			)
+		)
+		this.commonStateExtractor = new CommonStreamStateExtractor(
+			getState,
+			this
 		)
 	}
 }
@@ -150,12 +190,12 @@ class ParseConcatStream<T = any, Init = any> extends ConcatStream<
 // 			the existence of this specific problem, and its solutions.
 // ^ 	VITAL NOTE: this CAN'T (typically) be nested;
 // 			Important, since 'ParseStream' *does* properly support it (somewhat confusingly);
-export function Finite<Init = any, Out = any>(
+export function Concat<Init = any, Out = any>(
 	streamMakers: IParseStreamMaker<Init, Out>[]
 ) {
 	return function (getState?: () => Summat) {
-		return function (input: Init): IOwnedStream<Out> & Iterable<Out> {
-			return new ParseConcatStream(input, getState, streamMakers)
+		return function (input: Init): IRootStream<Out> {
+			return new ParseConcatStream(input, streamMakers, getState)
 		}
 	}
 }
@@ -166,4 +206,106 @@ export function Nested<Init = any, Out = any>(
 	close: IParseStreamMaker<Init, Out>
 ) {
 	return [open, ...between, close]
+}
+
+class ParseLoopStream<T = any, Init = any>
+	extends PreCommonStream<T>
+	implements IRootStream<T>, IStreamProvider<T>
+{
+	private readonly commonStateExtractor: CommonStreamStateExtractor<T>
+	private readonly streamGetter: LoopStream<IParseStream<T>>
+
+	private _lastStream: IParseStream<T>
+
+	private getNewDelegate() {
+		this._lastStream = this.delegate
+		this.streamGetter.next()
+	}
+
+	private get delegate() {
+		return this.streamGetter.curr
+	}
+
+	private currDelegateOver() {
+		return this.delegate.isEnd
+	}
+
+	lastStream(): IParseStream<T> {
+		return this._lastStream
+	}
+
+	currStream(): IParseStream<T> {
+		return this.delegate
+	}
+
+	get curr() {
+		return this.delegate.curr
+	}
+
+	next(): void {
+		const isLastItem = this.delegate.isCurrEnd()
+		this.delegate.next()
+		if (isLastItem) this.getNewDelegate()
+	}
+
+	get isEnd() {
+		for (let i = 0; i < this.conseqEmptyStreamsAllowed; ++i) {
+			if (!this.currDelegateOver()) return false
+			this.getNewDelegate()
+		}
+		return this.currDelegateOver()
+	}
+
+	get state() {
+		return this.delegate.state
+	}
+
+	// ! pre-doc: 'isCurrEnd' ALWAYS 'false' ON 'Parser.Loop(...)' results!
+	isCurrEnd(): boolean {
+		return false
+	}
+
+	private lastCommonStateExtract() {
+		return this.commonStateExtractor.fromLast()
+	}
+
+	constructor(
+		input: Init,
+		streamMakerGetter: (i: number) => IParseStreamMaker<Init, T>,
+		private readonly conseqEmptyStreamsAllowed: number = 0,
+		getState: () => Summat = object.empty
+	) {
+		super()
+		this.commonStateExtractor = new CommonStreamStateExtractor(
+			getState,
+			this
+		)
+		this.streamGetter = new LoopStream((i: number) =>
+			streamMakerGetter(i)(() => this.lastCommonStateExtract())(input)
+		)
+	}
+}
+
+// ! pre-doc: this is an alternative solution of Root Element Problem to 'Parser.Concat'. 
+// * Specifically, it gets the desired 'IParseStreamMaker' via the given factory-function. 
+//  	It depends upon the current index of the Parser being created, as well as the 
+//  	underlying implementation (most common and useful one being that the thing wil 
+// 		simply return the same type of parser over and over again). This is a TOPLEVEL 
+// 		parser, meaning it cannot (or, at least, should not) be reused as a Stream, and 
+// 		no guarantee of it working is provided by the library (although, no doubt due to 
+// 		its highly flexible design SOME applications are still possible and valid...)
+export function Loop<Init = any, Out = any>(
+	streamMakerGetter: (i: number) => IParseStreamMaker<Init, Out>,
+	conseqEmptyStreamsAllowed?: number
+) {
+	return function (getState?: () => Summat) {
+		return function (input: Init) {
+			return new ParseLoopStream(
+				input,
+				streamMakerGetter,
+				conseqEmptyStreamsAllowed,
+				getState
+			)
+		}
+	}
 }

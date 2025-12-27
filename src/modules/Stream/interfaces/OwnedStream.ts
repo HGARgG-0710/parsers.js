@@ -10,6 +10,8 @@ import type {
 	IStream
 } from "../../../interfaces/Stream.js"
 
+export type IBasicStream<T = any> = IOwnedStream<T> & Iterable<T>
+
 /**
  * This is an `IStream<T>`, which is also `IOwnerConnectable<IOwningStream>`, and
  * has a `readonly owner?: IOwningStream` property. It represents a stream,

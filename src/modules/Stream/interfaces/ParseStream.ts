@@ -2,9 +2,18 @@ import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
 	IDepthMark,
 	IErrorData,
-	IInitializable
+	IInitializable,
+	IStateHaving
 } from "../../../interfaces.js"
-import type { ILinkedStream, IStreamArray } from "../../../interfaces/Stream.js"
+import type {
+	IBasicStream,
+	ILinkedStream,
+	IStreamArray
+} from "../../../interfaces/Stream.js"
+
+export interface IBaseState extends Summat {
+	readonly errors: Error[]
+}
 
 /**
  * This is an interface employed by the library's
@@ -12,10 +21,10 @@ import type { ILinkedStream, IStreamArray } from "../../../interfaces/Stream.js"
  * state and allow the user to reference the parser's
  * internal state and composition (`.parse: IParse<FinalType, InitType>`).
  */
-export interface IParseState<FinalType = any, InitType = any> extends Summat {
+export interface IParseState<FinalType = any, InitType = any>
+	extends IBaseState {
 	readonly parse: IParse<FinalType, InitType>
 	readonly errData: IErrorData
-	readonly errors: Error[]
 }
 
 /**
@@ -34,3 +43,5 @@ export interface IParse<FinalType = any, InitType = any>
 	update(): void
 	getDepth(mark: IDepthMark): number
 }
+
+export type IRootStream<T = any> = IBasicStream<T> & IStateHaving<IBaseState>

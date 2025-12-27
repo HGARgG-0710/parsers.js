@@ -131,15 +131,22 @@ function BuildLimitStream<T = any>(
 					this.maybeEmpty()
 				},
 
+				baseIsCurrEnd() {
+					return (
+						this.isEnd ||
+						!this.resource ||
+						this.resource.isCurrEnd()
+					)
+				},
+
+				hasNoMoreSteps() {
+					if (!this.steps.toCheckAgain) return false
+					this.steps.setSteps(asSteps(this.resource!, this.longAs))
+					return this.steps.isEnd()
+				},
+
 				isCurrEnd(): boolean {
-					if (this.isEnd || this.resource?.isCurrEnd()) return true
-					if (this.steps.toCheckAgain) {
-						this.steps.setSteps(
-							asSteps(this.resource!, this.longAs)
-						)
-						return this.steps.isEnd()
-					}
-					return false
+					return this.baseIsCurrEnd() || this.hasNoMoreSteps()
 				},
 
 				next() {
