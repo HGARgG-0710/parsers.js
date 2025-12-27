@@ -9,4 +9,4 @@ import type { IControlStream, ILinkedStream } from "./OwnedStream.js"
  */
 export type ICommonStream<T = any> = ILinkedStream<T> & Iterable<T>
 
-export type ICommandStream<T = any> = IControlStream<T> & ICommonStream<T>
+export type IParseStream<T = any> = IControlStream<T> & ICommonStream<T>

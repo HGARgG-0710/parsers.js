@@ -1,6 +1,10 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IDepthMark, IErrorData, IInitializable } from "../interfaces.js"
-import type { ILinkedStream, IStreamArray } from "./Stream.js"
+import type {
+	IDepthMark,
+	IErrorData,
+	IInitializable
+} from "../../../interfaces.js"
+import type { ILinkedStream, IStreamArray } from "../../../interfaces/Stream.js"
 
 /**
  * This is an interface employed by the library's

@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IDepthMark } from "../../../../interfaces.js"
-import type { IParseState } from "../../../../interfaces/DynamicParser.js"
+import type { IParseState } from "../../interfaces/ParseStream.js"
 import type {
 	ICompositeStream,
 	ILinkedStream,

@@ -1,20 +1,29 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	ICommonStream,
 	ICompositeStream,
+	IControlStream,
 	IDepthMark,
 	IErrorDataMaker,
 	IInputStream,
-	ILinkedStream
-} from "../interfaces.js"
-import type { IParse, IParseState } from "../interfaces/DynamicParser.js"
-import { Initializable } from "./Initializable.js"
-import { IdentityStream } from "./Stream.js"
+	ILinkedStream,
+	IParseStream
+} from "../../../../interfaces.js"
+import { Initializable } from "../../../../objects/Initializable.js"
+import { IdentityStream } from "../../../../objects/Stream.js"
+import type { IParse, IParseState } from "../../interfaces/ParseStream.js"
 
-class ParsedStream<InType = any, FinalType = any, InitType = any>
+class _ParseStream<InType = any, FinalType = any, InitType = any>
 	extends IdentityStream<FinalType, []>
-	implements ILinkedStream<FinalType>
+	implements IControlStream<FinalType>
 {
+	setState(state: IParseState): void {
+		this.parseInstance.setState(state)
+	}
+
+	get state() {
+		return this.parseInstance.state
+	}
+
 	next() {
 		super.next()
 		this.parseInstance.maybeUpdate()
@@ -53,10 +62,10 @@ class Parse<InType = any, FinalType = any, InitType = any>
 		preState: Summat = {}
 	): IParseState<FinalType, InitType> {
 		return {
-			...preState,
 			parse: this,
 			errData: this.errDataMaker(this.inputStream, this.input!),
-			errors: []
+			errors: [],
+			...preState
 		}
 	}
 
@@ -162,17 +171,17 @@ class Parse<InType = any, FinalType = any, InitType = any>
  * of their last '.next()' call to the `ICompositeStream` as it had been
  * before the `.update()` call in question.
  */
-export function DynamicParser<InType = any, FinalType = any, InitType = any>(
-	config: DynamicParser.Config<InType, FinalType, InitType>
+export function ParseStream<InType = any, FinalType = any, InitType = any>(
+	config: ParseStream.Config<InType, FinalType, InitType>
 ) {
 	const { workStream, inputStream, errDataMaker, getState } = config
 	const getParse = () => new Parse(workStream(), inputStream(), errDataMaker)
-	return function (input: InitType): ICommonStream<FinalType> {
-		return new ParsedStream(getParse().init(input, getState?.()))
+	return function (input: InitType): IParseStream<FinalType> {
+		return new _ParseStream(getParse().init(input, getState?.()))
 	}
 }
 
-export namespace DynamicParser {
+export namespace ParseStream {
 	export class Config<InType = any, FinalType = any, InitType = any> {
 		private _getState?: () => Summat
 

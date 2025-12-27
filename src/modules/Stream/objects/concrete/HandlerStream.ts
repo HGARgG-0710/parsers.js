@@ -1,7 +1,7 @@
 import { Pools } from "../../../../../main.js"
 import type { IPoolKeeping } from "../../../../interfaces.js"
 import type {
-	ICommandStream,
+	IParseStream,
 	ICommonStream,
 	IControlStream,
 	ILinkedStream,
@@ -97,7 +97,7 @@ export function HandlerStream<In = any, Out = any>(
 ) {
 	const handlerStream = BuildHandlerStream(handler)
 
-	function H(resource?: IOwnedStream<In>): ICommandStream<Out> {
+	function H(resource?: IOwnedStream<In>): IParseStream<Out> {
 		return handlerStream.pool.create(resource)
 	}
 

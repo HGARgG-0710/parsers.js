@@ -5,8 +5,7 @@ import type {
 	IInputStream,
 	IOwnedStream
 } from "../interfaces.js"
-import { DynamicParser } from "../objects.js"
-import { IdentityStream } from "../objects/Stream.js"
+import { IdentityStream, ParseStream } from "../objects/Stream.js"
 
 /**
  * This is a sample function for creation of an extension-parser,
@@ -48,14 +47,14 @@ export function ParseExtension<InType = any, InitType = any, OutType = any>(
 	errDataMaker: IErrorDataMaker<InType, IOwnedStream>,
 	getState?: () => Summat
 ) {
-	const config = new DynamicParser.Config(
+	const config = new ParseStream.Config(
 		workerStream,
 		() => IdentityStream.pool.create(),
 		errDataMaker
 	)
 	if (getState) config.state(getState)
 
-	const protoExtension = DynamicParser(config)
+	const protoExtension = ParseStream(config)
 
 	return function (childStream: IInputStream<InType, InitType>) {
 		return protoExtension(childStream)
