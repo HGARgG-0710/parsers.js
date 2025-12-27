@@ -54,6 +54,10 @@ class Parse<InType = any, FinalType = any, InitType = any>
 	private input?: InitType
 	private _state?: IParseState<FinalType, InitType>
 
+	private set state(newState: IParseState<FinalType, InitType>) {
+		this._state = newState
+	}
+
 	get state() {
 		return this._state!
 	}
@@ -87,7 +91,8 @@ class Parse<InType = any, FinalType = any, InitType = any>
 	}
 
 	setState(preState: Summat): void {
-		this._state = this.createState(preState)
+		this.state = this.createState(preState)
+		this.workStream.setState(this.state)
 	}
 
 	isSetupReady() {
@@ -96,7 +101,6 @@ class Parse<InType = any, FinalType = any, InitType = any>
 
 	setupStreams() {
 		this.inputStream.init(this.input)
-		this.workStream.setState(this.state)
 		this.workStream.init(this.inputStream)
 	}
 
