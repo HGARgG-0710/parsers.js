@@ -10,11 +10,21 @@ import type {
 } from "../../interfaces.js"
 import { Initializable } from "../../objects/Initializable.js"
 
+const parseInitializer = {
+	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
+		if (input) target.setInput(input)
+		if (state) target.setState(state)
+		if (target.isSetupReady()) target.setupStreams()
+	}
+}
+
 export class Parse<InType = any, FinalType = any, InitType = any>
 	extends Initializable<[InitType, Summat]>
 	implements IParse<FinalType, InitType>
 {
-	private didUpdate = false
+	private readonly updatePending: ParseUpdatePendingState
+	private updateState: IParseUpdateState
+
 	private input?: InitType
 	private _state?: IParseState<FinalType, InitType>
 
@@ -35,11 +45,6 @@ export class Parse<InType = any, FinalType = any, InitType = any>
 			errors: [],
 			...preState
 		}
-	}
-
-	private onUpdate() {
-		this.didUpdate = false
-		this.workStream.renewResource()
 	}
 
 	protected get initializer() {
@@ -73,11 +78,11 @@ export class Parse<InType = any, FinalType = any, InitType = any>
 	}
 
 	update() {
-		this.didUpdate = true
+		this.updateState = this.updatePending
 	}
 
-	maybeUpdate() {
-		if (this.didUpdate) this.onUpdate()
+	applyUpdate() {
+		this.updateState = this.updateState.applyUpdate()
 	}
 
 	getDepth(mark: IDepthMark): number {
@@ -90,13 +95,33 @@ export class Parse<InType = any, FinalType = any, InitType = any>
 		private readonly errDataMaker: IErrorDataMaker<InType, InitType>
 	) {
 		super()
+		const updatesNone = new ParseUpdatesNone()
+		this.updateState = updatesNone
+		this.updatePending = new ParseUpdatePendingState(
+			this.workStream,
+			updatesNone
+		)
 	}
 }
 
-const parseInitializer = {
-	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
-		if (input) target.setInput(input)
-		if (state) target.setState(state)
-		if (target.isSetupReady()) target.setupStreams()
+interface IParseUpdateState {
+	applyUpdate(): IParseUpdateState
+}
+
+class ParseUpdatePendingState implements IParseUpdateState {
+	applyUpdate() {
+		this.workStream.renewResource()
+		return this.asNoUpdates
+	}
+
+	constructor(
+		private readonly workStream: ICompositeStream,
+		private readonly asNoUpdates: ParseUpdatesNone
+	) {}
+}
+
+class ParseUpdatesNone implements IParseUpdateState {
+	applyUpdate(): IParseUpdateState {
+		return this
 	}
 }

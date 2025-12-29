@@ -16,7 +16,7 @@ export class ParseStream<InType = any, FinalType = any, InitType = any>
 
 	override next() {
 		super.next()
-		this.parseInstance.maybeUpdate()
+		this.parseInstance.applyUpdate()
 	}
 
 	override free(): void {}
