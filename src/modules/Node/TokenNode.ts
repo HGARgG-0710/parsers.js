@@ -15,7 +15,7 @@ import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
 
 abstract class PreTokenNode extends PoolableNode<[]> implements INode {
-	protected ["constructor"]: new () => this
+	protected override ["constructor"]: new () => this
 
 	static fromPlain(this: IPoolNodeType<[]>, x: any, nodeMaker: INodeMaker) {
 		if (!isTyped(x)) return false
@@ -30,7 +30,7 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		return this
 	}
 
-	toJSON(): ITyped {
+	override toJSON(): ITyped {
 		return { type: this.type }
 	}
 

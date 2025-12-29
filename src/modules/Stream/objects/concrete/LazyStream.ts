@@ -23,7 +23,7 @@ export class LazyStream
 		IInputStream<string, ICharacterSource>,
 		ISourcedStream<string, ICharacterSource>
 {
-	readonly source?: ICharacterSource
+	override readonly source?: ICharacterSource
 
 	private nextDecoded() {
 		this.source!.nextChar()
@@ -33,7 +33,7 @@ export class LazyStream
 		return this.source!.decoded
 	}
 
-	protected baseNextIter() {
+	protected override baseNextIter() {
 		this.nextDecoded()
 		return super.baseNextIter()
 	}

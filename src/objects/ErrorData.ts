@@ -116,7 +116,7 @@ export class FileErrorData extends DelegateErrorData {
  * and initialized with the given `inputStream: IInputStream`.
  */
 export class StreamListErrorData extends BaseErrorData {
-	["constructor"]: new (
+	override ["constructor"]: new (
 		inputStream: IInputStream,
 		posMaker: (inputStream: IInputStream) => IPrintablePosition
 	) => this

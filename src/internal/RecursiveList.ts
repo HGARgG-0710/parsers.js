@@ -410,7 +410,7 @@ abstract class BaseEvaluableList<
 		this.evaluateSublist(fillable.list, evaledWith)
 	}
 
-	protected get initializer() {
+	protected override get initializer() {
 		return baseEvaluableListInitializer
 	}
 
@@ -445,7 +445,7 @@ abstract class EvaluableListWithLastItem<
 		return this.lastInitialized.get() || evalWith
 	}
 
-	protected evaluateSublist(
+	protected override evaluateSublist(
 		sublist: RecursiveList<T, Recursive, InitType>,
 		evaledWith: T | InitType
 	) {
@@ -453,7 +453,7 @@ abstract class EvaluableListWithLastItem<
 		this.lastInitialized.linkEvaluatedSublist(sublist)
 	}
 
-	protected initTerminal(toInitialize: T, initParam: T | InitType) {
+	protected override initTerminal(toInitialize: T, initParam: T | InitType) {
 		super.initTerminal(toInitialize, initParam)
 		this.lastInitialized.linkNew(toInitialize)
 	}
@@ -611,12 +611,14 @@ class EvaluableList<
 		InitType
 	>()
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>): void {
+	override setRenewer(
+		renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	): void {
 		super.setRenewer(renewer)
 		this.evaluator.setRenewer(renewer)
 	}
 
-	setDepthMap(map: GlobalDepthMap): void {
+	override setDepthMap(map: GlobalDepthMap): void {
 		super.setDepthMap(map)
 		this.evaluator.setDepthMap(map)
 	}
@@ -770,12 +772,14 @@ class PinpointRenewableList<
 		return foundNonOld
 	}
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>): void {
+	override setRenewer(
+		renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	): void {
 		super.setRenewer(renewer)
 		this.evaluator.setRenewer(renewer)
 	}
 
-	setDepthMap(map: GlobalDepthMap): void {
+	override setDepthMap(map: GlobalDepthMap): void {
 		super.setDepthMap(map)
 		this.evaluator.setDepthMap(map)
 	}
@@ -1097,17 +1101,23 @@ export class RecursiveList<
 	protected asDeep: DeepList<T, Recursive, InitType>
 	protected renewer: RecursiveList.Renewer<T, Recursive, InitType>
 
-	private adopt(maybeTerminal: Terminal<T, Recursive, InitType>) {
-		maybeTerminal.setParentList(this.items)
+	private adoptChild(terminal: Terminal<T, Recursive, InitType>) {
+		terminal.setParentList(this.items)
 	}
 
-	private register(wrapped: Terminal<T, Recursive, InitType>, index: number) {
-		this.asDeep.register(wrapped, this.items, index)
+	private register(
+		terminal: Terminal<T, Recursive, InitType>,
+		index: number
+	) {
+		this.asDeep.register(terminal, this.items, index)
 	}
 
-	private newTerminal(wrapped: Terminal<T, Recursive, InitType>, at: number) {
-		this.adopt(wrapped)
-		this.register(wrapped, at)
+	private newTerminal(
+		terminal: Terminal<T, Recursive, InitType>,
+		at: number
+	) {
+		this.adoptChild(terminal)
+		this.register(terminal, at)
 	}
 
 	private toWrapped(fromArr: (T | Recursive)[], atIndex: number) {

@@ -22,7 +22,7 @@ export abstract class ArrayStream<T = any, ElemType = any> extends BasicStream<
 	T,
 	ElemType[]
 > {
-	protected ["constructor"]: new (...items: ElemType[]) => this
+	protected override ["constructor"]: new (...items: ElemType[]) => this
 
 	protected items: ElemType[]
 

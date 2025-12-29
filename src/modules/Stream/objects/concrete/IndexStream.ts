@@ -19,7 +19,9 @@ function BuildIndexStream<T = any>(
 		extends IdentityStream<T, []>
 		implements IIndexStream<T>
 	{
-		static readonly pool = Pools.Stream.add(new ObjectPool(IndexStream))
+		static override readonly pool = Pools.Stream.add(
+			new ObjectPool(IndexStream)
+		)
 
 		readonly lineIndex: ILineIndex
 		private isNewline: INewlinePredicate<T>
@@ -29,11 +31,11 @@ function BuildIndexStream<T = any>(
 			else this.lineIndex.nextChar()
 		}
 
-		baseInit(): void {
+		override baseInit(): void {
 			this.lineIndex.renew()
 		}
 
-		next() {
+		override next() {
 			super.next()
 			this.lineIndexTransition()
 		}

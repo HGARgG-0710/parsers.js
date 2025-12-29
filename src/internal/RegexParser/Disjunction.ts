@@ -11,7 +11,10 @@ import {
 	isNotNextKind,
 	PastEndStream
 } from "../../samples/Stream.js"
-import { consumableIterable, consumeSingletonRevivables } from "../../utils/Stream.js"
+import {
+	consumableIterable,
+	consumeSingletonRevivables
+} from "../../utils/Stream.js"
 import { Disjunct, Disjunction, Temp } from "./Nodes.js"
 
 const isCurrPipe = isCurrKind<INode>(Temp.Pipe)
@@ -42,7 +45,7 @@ const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
 class DisjunctionStream extends SingleNodeStream<INode> {
 	private readonly builder = new ArrayBuilder<INode>()
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.builder.clear()
 		this.curr = new Disjunction(
 			consumeSingletonRevivables(this, this.builder).get()

@@ -12,11 +12,11 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 	private isErrState: IPanicStreamState<T, ErrType>
 
 	// ! pre-doc: this is NOT intended as a hook, though it can (sometimes) be used as one
-	protected onSuccess(): void {
+	protected override onSuccess(): void {
 		this.transitionNoError()
 	}
 
-	get curr() {
+	override get curr() {
 		const curr = this.isErrState.curr
 		this.isErrState = this.isErrState.nextState()
 		return curr

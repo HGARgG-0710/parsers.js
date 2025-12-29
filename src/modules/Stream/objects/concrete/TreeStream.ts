@@ -180,7 +180,7 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		return this.walker.curr
 	}
 
-	protected baseNextIter() {
+	protected override baseNextIter() {
 		this.nextResponse.respond()
 		return super.baseNextIter()
 	}
@@ -190,7 +190,7 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		return this.currGetter()
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.walker.init(this.source!)
 		this.endIndex.for(this.source!)
 	}

@@ -133,12 +133,12 @@ export namespace Regex {
 		export abstract class Mult extends Raw {
 			readonly items: Raw[]
 
-			inheritExtensions(map: ExtensionMap): this {
+			override inheritExtensions(map: ExtensionMap): this {
 				for (const item of this.items) item.inheritExtensions(map)
 				return super.inheritExtensions(map)
 			}
 
-			set(extName: string, value: any): this {
+			override set(extName: string, value: any): this {
 				for (const x of this.items) x.set(extName, value)
 				return this.setShallow(extName, value)
 			}
@@ -176,7 +176,7 @@ export namespace Regex {
 		}
 
 		export class Either extends Mult {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+			override accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleEither(this)
 			}
 		}
@@ -265,7 +265,7 @@ export namespace Regex {
 		}
 
 		export class NoneOf extends Mult {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+			override accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNoneOf(this)
 			}
 		}
@@ -299,7 +299,7 @@ export namespace Regex {
 		}
 
 		export class NonBoundary extends Mult {
-			accept<T>(visitor: IRawRegexVisitor<T>): T {
+			override accept<T>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNonBoundary(this)
 			}
 		}
@@ -313,7 +313,7 @@ export namespace Regex {
 		}
 
 		export class Boundary extends Mult {
-			accept<T>(visitor: IRawRegexVisitor<T>): T {
+			override accept<T>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleBoundary(this)
 			}
 		}

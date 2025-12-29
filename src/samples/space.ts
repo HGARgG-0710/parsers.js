@@ -73,7 +73,7 @@ export class LFStream
 		this.defineCurr()
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.lastItem.init(this.resource!)
 		this.lookahead.init(this.resource!)
 		this.updateItems()
@@ -81,7 +81,7 @@ export class LFStream
 
 	free() {}
 
-	next() {
+	override next() {
 		super.next()
 		this.updateItems()
 	}

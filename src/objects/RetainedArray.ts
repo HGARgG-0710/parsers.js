@@ -21,7 +21,7 @@ export class RetainedArray<T = any>
 	extends BasicArray<T>
 	implements ICollection<T, readonly T[]>, IInitializable<[number]>
 {
-	private ["constructor"]: new (n?: number) => this
+	private override ["constructor"]: new (n?: number) => this
 
 	private fakeSize: number = 0
 
@@ -37,7 +37,7 @@ export class RetainedArray<T = any>
 		if (newItems > 0) super.size += newItems
 	}
 
-	get size() {
+	override get size() {
 		return this.fakeSize
 	}
 
@@ -47,14 +47,14 @@ export class RetainedArray<T = any>
 		return copied
 	}
 
-	push(x: T): this {
+	override push(x: T): this {
 		if (this.freeSpace() > 0) this.write(this.fakeSize, x)
 		else super.push(x)
 		this.fakeSize++
 		return this
 	}
 
-	write(i: number, value: T): this {
+	override write(i: number, value: T): this {
 		if (i > this.fakeSize) this.fakeSize = i + 1
 		return super.write(i, value)
 	}

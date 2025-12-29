@@ -9,7 +9,9 @@ import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 import { IdentityStream } from "./IdentityStream.js"
 
 class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
-	static readonly pool = Pools.Stream.add(new ObjectPool(_MarkerStream))
+	static override readonly pool = Pools.Stream.add(
+		new ObjectPool(_MarkerStream)
+	)
 
 	private _marker: M
 	private markerMaker: IMarkerMaker<T, M>
@@ -23,7 +25,7 @@ class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
 		return this
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this._marker = this.markerMaker(this)
 	}
 }

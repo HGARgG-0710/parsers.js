@@ -290,7 +290,7 @@ export namespace ParseError {
 			return this.printFilename(this.errData.getInfo("filename"))
 		}
 
-		protected optionalFields() {
+		protected override optionalFields() {
 			return [this.filename(), this.position()]
 		}
 	}

@@ -53,12 +53,12 @@ export abstract class ProxyStream<T = any>
 		return this.delegate.depthMarks
 	}
 
-	connectResource(resource: IOwnedStream) {
+	override connectResource(resource: IOwnedStream) {
 		super.connectResource(resource)
 		this.delegate.connectResource(resource)
 	}
 
-	baseInit() {
+	override baseInit() {
 		this.delegate.baseInit()
 	}
 

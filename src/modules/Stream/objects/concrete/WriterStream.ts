@@ -12,7 +12,7 @@ import { IdentityStream } from "./IdentityStream.js"
 export class WriterStream extends IdentityStream<string> {
 	private destination: IDestination
 
-	free() {}
+	override free() {}
 
 	private write(input: string) {
 		this.destination.write(input)
@@ -23,7 +23,7 @@ export class WriterStream extends IdentityStream<string> {
 		return this
 	}
 
-	next() {
+	override next() {
 		this.write(this.curr)
 		super.next()
 	}

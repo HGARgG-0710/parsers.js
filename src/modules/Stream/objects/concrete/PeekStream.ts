@@ -176,7 +176,7 @@ class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
 		return _PeekStream.pool
 	}
 
-	protected get initializer() {
+	protected override get initializer() {
 		return peekStreamInitializer
 	}
 
@@ -194,11 +194,11 @@ class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
 		return this.peekProvider.provide(n)
 	}
 
-	isCurrEnd(): boolean {
+	override isCurrEnd(): boolean {
 		return super.isCurrEnd() && this.peekProvider.hasNone()
 	}
 
-	next() {
+	override next() {
 		if (this.isCurrEnd()) this.endStream()
 		else if (this.peekProvider.hasAny()) this.fetchNextPeek()
 		else this.baseNextIter()

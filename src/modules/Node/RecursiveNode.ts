@@ -20,7 +20,9 @@ abstract class PreRecursiveNode
 	extends PoolableNode<[readonly INode[]]>
 	implements IRecursiveNode
 {
-	protected ["constructor"]: new (children?: readonly INode[]) => this
+	protected override ["constructor"]: new (
+		children?: readonly INode[]
+	) => this
 
 	static fromPlain(
 		this: IRecursiveNodeType,
@@ -38,19 +40,19 @@ abstract class PreRecursiveNode
 		this.children = children
 	}
 
-	private assignSelfParent() {
+	private adoptChildren() {
 		for (const child of this.children) child.setParent(this)
 	}
 
-	read(i: number): INode {
+	override read(i: number): INode {
 		return this.children[i]
 	}
 
-	get lastChild() {
+	override get lastChild() {
 		return this.children.length - 1
 	}
 
-	index(multindex: number[]): INode {
+	override index(multindex: number[]): INode {
 		let result: INode = this
 		for (let i = 0; i < multindex.length; ++i)
 			result = result.read(multindex[i])
@@ -63,11 +65,11 @@ abstract class PreRecursiveNode
 
 	init(children: readonly INode[] = []) {
 		this.setChildren(children)
-		this.assignSelfParent()
+		this.adoptChildren()
 		return this
 	}
 
-	free(): void {
+	override free(): void {
 		for (const child of this.children) if (isFreeable(child)) child.free()
 		super.free()
 	}
@@ -92,7 +94,7 @@ abstract class PreRecursiveNode
 		return [`{"type": ${JSON.stringify(this.type)}, "children": [`, "]}"]
 	}
 
-	toJSON() {
+	override toJSON() {
 		return {
 			type: this.type,
 			children: this.children

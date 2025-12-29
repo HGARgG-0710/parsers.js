@@ -301,7 +301,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected comparator(curr: RealKey, x: any): boolean {
+		protected override comparator(curr: RealKey, x: any): boolean {
 			return array.recursiveSame(curr, x)
 		}
 
@@ -353,7 +353,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected indexOf(sought: any): number {
+		protected override indexOf(sought: any): number {
 			return this.realKeys.indexOf(sought)
 		}
 
@@ -405,7 +405,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected comparator(curr: IPredicate<T>, x: T): boolean {
+		protected override comparator(curr: IPredicate<T>, x: T): boolean {
 			return curr(x)
 		}
 
@@ -456,7 +456,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected comparator(curr: ITestable<T>, x: T): boolean {
+		protected override comparator(curr: ITestable<T>, x: T): boolean {
 			return curr.test(x)
 		}
 
@@ -506,7 +506,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected comparator(curr: IHaving<T>, x: T): boolean {
+		protected override comparator(curr: IHaving<T>, x: T): boolean {
 			return curr.has(x)
 		}
 
@@ -554,7 +554,7 @@ export namespace IndexMap {
 			}
 		}
 
-		protected comparator(curr: object, x: any): boolean {
+		protected override comparator(curr: object, x: any): boolean {
 			return object.same(curr, x)
 		}
 

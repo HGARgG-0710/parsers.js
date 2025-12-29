@@ -9,7 +9,7 @@ export class ArrayCollection<T = any>
 	extends BasicArray<T>
 	implements ICollection<T, readonly T[]>
 {
-	private ["constructor"]: new (items?: T[]) => this
+	private override ["constructor"]: new (items?: T[]) => this
 
 	init(items: T[]) {
 		this.items = items
@@ -22,9 +22,5 @@ export class ArrayCollection<T = any>
 
 	copy() {
 		return new this.constructor(array.copy(this.items))
-	}
-
-	*[Symbol.iterator]() {
-		yield* this.items
 	}
 }

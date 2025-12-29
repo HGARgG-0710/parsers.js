@@ -30,11 +30,11 @@ export abstract class ErrorStream<T = any>
 
 	protected onSuccess(): void {}
 
-	next() {
+	override next() {
 		this.wrapInHandler(() => super.next())
 	}
 
-	baseInit() {
+	override baseInit() {
 		this.wrapInHandler(() => super.baseInit())
 	}
 }

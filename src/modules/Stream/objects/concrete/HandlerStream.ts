@@ -1,11 +1,11 @@
 import { Pools } from "../../../../../main.js"
 import type { IPoolKeeping } from "../../../../interfaces.js"
 import type {
-	IParseStream,
 	ICommonStream,
 	IControlStream,
 	ILinkedStream,
-	IOwnedStream
+	IOwnedStream,
+	IParseStream
 } from "../../../../interfaces/Stream.js"
 import { mixin } from "../../../../mixin.js"
 import { ObjectPool, Poolable, Stateful } from "../../../../objects.js"
@@ -16,7 +16,9 @@ function BuildBeforeHandlerStream<In = any, Out = any>(
 	handler: IHandler<In, Out>
 ) {
 	abstract class BeforeHandlerStream extends BasicResourceStream<Out> {
-		protected ["constructor"]: new (resource?: IOwnedStream<In>) => this
+		protected override ["constructor"]: new (
+			resource?: IOwnedStream<In>
+		) => this
 
 		private handler: IHandler<In, Out>
 
@@ -31,11 +33,11 @@ function BuildBeforeHandlerStream<In = any, Out = any>(
 			return lastReceived
 		}
 
-		protected initGetter() {
+		protected override initGetter() {
 			return this.baseNextIter()
 		}
 
-		protected postInit() {
+		protected override postInit() {
 			if (this.resource) super.postInit()
 		}
 

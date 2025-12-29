@@ -18,12 +18,12 @@ export function RecursiveProxyStream<T = any>(
 	{
 		private depthMap: Map<IDepthMark, number>
 
-		init(resource?: IOwnedStream) {
+		override init(resource?: IOwnedStream) {
 			this.depthMap = this.getCurrDepthMap()
 			return super.init(resource)
 		}
 
-		get depthMarks() {
+		override get depthMarks() {
 			return depthMarks
 		}
 

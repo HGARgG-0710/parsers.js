@@ -9,11 +9,10 @@ import {
 	CachingLocator,
 	PosCarryingLocator
 } from "../../modules/Stream/objects/Locator.js"
-import { ErrorData, Parametrized, Regex } from "../../objects.js"
+import { ErrorData, Parametrized, Parser, Regex } from "../../objects.js"
 import {
 	CompositeStream,
 	InputStream,
-	ParseStream,
 	PeekStream,
 	PosStream
 } from "../../objects/Stream.js"
@@ -62,8 +61,8 @@ export const ParseRegexRecursively = new Parametrized(
 )
 
 export function getParser(extensions: Regex.Extension[]) {
-	return ParseStream(
-		new ParseStream.Config(
+	return Parser(
+		new Parser.Config(
 			regexWorkStreamMaker.for(extensions),
 			regexInputStreamMaker,
 			regexErrorDataMaker

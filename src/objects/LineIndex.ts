@@ -200,12 +200,12 @@ export class StringLineIndex
 		this.updateChar()
 	}
 
-	nextChar(): void {
+	override nextChar(): void {
 		if (this.isCharOnEdge()) super.nextLine()
 		else this.nextCharDefault()
 	}
 
-	nextLine(): void {
+	override nextLine(): void {
 		if (this.isNewLine()) this.addNewLine()
 		super.nextLine()
 	}
@@ -228,7 +228,7 @@ export class StringLineIndex
 		return this
 	}
 
-	copy() {
+	override copy() {
 		return super.copy().init(this.lengths)
 	}
 }

@@ -48,7 +48,7 @@ class ClassRangeStream extends SingleNodeStream<INode> {
 		return unit
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		const from = this.readBoundary() // the child Stream dies
 		tryReviveChild(this) // needs to be renewed
 		this.readHyphen()
@@ -126,7 +126,7 @@ export abstract class ClassStream<
 		new ArrayBuilder<INode>()
 	)
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.curr = this.spawnNode(this.exhaustChildren(this).get())
 	}
 }

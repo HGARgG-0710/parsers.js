@@ -9,7 +9,7 @@ import { ArrayCollection } from "./ArrayCollection.js"
  * have to be initialized via a single instance of `ArrayBuilder`.
  */
 export class ArrayBuilder<T = any> extends ArrayCollection<T> {
-	get() {
+	override get() {
 		return array.copy(super.get() as T[])
 	}
 }

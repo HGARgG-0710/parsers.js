@@ -7,22 +7,21 @@ import { IdentityStream } from "./IdentityStream.js"
 
 function BuildValidatorStream<T = any>(validator: IValidator<T>) {
 	return class ValidatorStream extends IdentityStream<T> {
-		static readonly pool = Pools.Stream.add(new ObjectPool(ValidatorStream))
+		static override readonly pool = Pools.Stream.add(
+			new ObjectPool(ValidatorStream)
+		)
 
-		private readonly validator: IValidator<T>
+		private get validator(): IValidator<T> {
+			return validator
+		}
 
-		protected get pool() {
+		protected override get pool() {
 			return ValidatorStream.pool
 		}
 
-		next(): void {
+		override next(): void {
 			this.validator(this.resource!)
 			super.next()
-		}
-
-		constructor(resource?: IOwnedStream<T>) {
-			super(resource)
-			this.validator = validator
 		}
 	} as IPoolKeeping<ICommonStream<T>>
 }

@@ -21,7 +21,7 @@ export class SectionStream<
 
 	free(): void {}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.grabber.init(this.resource)
 		this.getNextItem()
 	}

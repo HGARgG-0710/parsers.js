@@ -38,16 +38,16 @@ function BuildFilterStream<T = any>(
 			return FilterStream.pool
 		}
 
-		baseInit(): void {
+		override baseInit(): void {
 			this.prod()
 			this.updateCurr()
 		}
 
-		isCurrEnd(): boolean {
+		override isCurrEnd(): boolean {
 			return !this.hasLookahead
 		}
 
-		next() {
+		override next() {
 			super.next()
 			if (this.isCurrEnd()) this.endStream()
 			else this.currGetter()

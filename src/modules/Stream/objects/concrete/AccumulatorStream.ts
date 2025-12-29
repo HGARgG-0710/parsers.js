@@ -8,7 +8,9 @@ import { ObjectPool } from "../../../../objects.js"
 import { IdentityStream } from "./IdentityStream.js"
 
 class _AccumulatorStream<T = any> extends IdentityStream<T> {
-	static readonly pool = Pools.Stream.add(new ObjectPool(_AccumulatorStream))
+	static override readonly pool = Pools.Stream.add(
+		new ObjectPool(_AccumulatorStream)
+	)
 
 	private _storage: IStorage<T>
 
@@ -16,7 +18,7 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 		this._storage.push(this.curr)
 	}
 
-	protected get pool() {
+	protected override get pool() {
 		return super.pool as ObjectPool<_AccumulatorStream, [IOwnedStream]>
 	}
 
@@ -29,7 +31,7 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 		return this
 	}
 
-	next() {
+	override next() {
 		this.pushCurr()
 		super.next()
 	}

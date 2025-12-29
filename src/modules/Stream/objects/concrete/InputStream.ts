@@ -40,7 +40,7 @@ export class InputStream<T = any>
 		IPosed,
 		IBaseInitializable
 {
-	protected ["constructor"]: new (source?: IParseable<T>) => this
+	protected override ["constructor"]: new (source?: IParseable<T>) => this
 
 	private _pos = 0
 	private lastPos: number
@@ -58,7 +58,7 @@ export class InputStream<T = any>
 		return this.source!.read(this.pos)
 	}
 
-	protected baseNextIter() {
+	protected override baseNextIter() {
 		++this.pos
 		this.view.forward()
 		return super.baseNextIter()
@@ -68,7 +68,7 @@ export class InputStream<T = any>
 		return this.pos === this.source!.size
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.lastPos = this.source!.size - 1
 		this.view.init(this.source!)
 	}

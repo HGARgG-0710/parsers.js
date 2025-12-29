@@ -12,7 +12,7 @@ export class ByteStream extends SourceStream<number, IByteSource> {
 		return this.source!.currByte
 	}
 
-	protected baseNextIter(curr?: number | undefined): number {
+	protected override baseNextIter(curr?: number | undefined): number {
 		this.source!.nextByte()
 		return super.baseNextIter()
 	}

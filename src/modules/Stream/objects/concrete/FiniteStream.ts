@@ -32,7 +32,7 @@ export class FiniteStream<T = any>
 		return this.pos === lastIndex(this.items)
 	}
 
-	*[Symbol.iterator]() {
+	override *[Symbol.iterator]() {
 		yield* this.items
 	}
 }

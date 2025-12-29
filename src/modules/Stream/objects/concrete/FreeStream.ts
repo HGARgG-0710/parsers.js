@@ -29,13 +29,13 @@ export class FreeStream<T extends IFreeable = any> extends IdentityStream<
 		this.freeable = null
 	}
 
-	free(): void {}
+	override free(): void {}
 
-	baseInit() {
+	override baseInit() {
 		this.enqueueCurrForFreeing()
 	}
 
-	next() {
+	override next() {
 		this.freeEnqueued()
 		super.next()
 		this.enqueueCurrForFreeing()

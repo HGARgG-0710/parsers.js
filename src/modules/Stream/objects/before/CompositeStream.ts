@@ -1,6 +1,6 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type { IDepthMark } from "../../../../interfaces.js"
-import type { IParseState } from "../../interfaces/ParseStream.js"
+import type { IParseState } from "../../../../interfaces/Parser.js"
 import type {
 	ICompositeStream,
 	ILinkedStream,
@@ -29,7 +29,7 @@ export abstract class BeforeCompositeStream<T = any>
 	extends IdentityStream<T, [IRawStreamArray, IParseState]>
 	implements ICompositeStream<T>
 {
-	protected ["constructor"]: new (
+	protected override ["constructor"]: new (
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray,
 		state?: IParseState
@@ -60,7 +60,7 @@ export abstract class BeforeCompositeStream<T = any>
 		this.resource.connectOwner(this)
 	}
 
-	protected get initializer() {
+	protected override get initializer() {
 		return compositeStreamInitializer
 	}
 
@@ -72,7 +72,7 @@ export abstract class BeforeCompositeStream<T = any>
 		return this.streamList!.getDepth(mark)
 	}
 
-	connectResource(lowStream: IOwnedStream) {
+	override connectResource(lowStream: IOwnedStream) {
 		this.lowStream = lowStream
 	}
 
@@ -95,11 +95,11 @@ export abstract class BeforeCompositeStream<T = any>
 		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
 	}
 
-	get isEnd() {
+	override get isEnd() {
 		return super.isEnd && !this.renewResource()
 	}
 
-	free(): void {}
+	override free(): void {}
 
 	renewStream(stream: ILinkedStream) {
 		return this.streamList!.renewItem(stream)

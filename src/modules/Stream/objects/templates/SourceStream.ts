@@ -36,7 +36,7 @@ export abstract class SourceStream<T = any, SourceType = any>
 		return resourceInitializer
 	}
 
-	protected initGetter() {
+	protected override initGetter() {
 		return this.currGetter()
 	}
 

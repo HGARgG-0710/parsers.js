@@ -12,7 +12,9 @@ class _StorageStream<T = any, Stored = any>
 	extends IdentityStream<T, []>
 	implements IStorageStream<T, Stored>
 {
-	static readonly pool = Pools.Stream.add(new ObjectPool(_StorageStream))
+	static override readonly pool = Pools.Stream.add(
+		new ObjectPool(_StorageStream)
+	)
 
 	private handler: IHandler<T, Stored>
 	private _currStored: Stored
@@ -25,7 +27,7 @@ class _StorageStream<T = any, Stored = any>
 		this.currStored = this.handler(this.resource!)
 	}
 
-	protected get pool() {
+	protected override get pool() {
 		return _StorageStream.pool
 	}
 
@@ -33,11 +35,11 @@ class _StorageStream<T = any, Stored = any>
 		return this._currStored
 	}
 
-	baseInit(): void {
+	override baseInit(): void {
 		this.updateStored()
 	}
 
-	next() {
+	override next() {
 		super.next()
 		this.updateStored()
 	}

@@ -320,7 +320,7 @@ export abstract class State<T = any> {
 export abstract class ArrowState<T = any> extends State<T> {
 	readonly arrow = new StateArrow<T>()
 
-	resetSeenTimes(): void {
+	override resetSeenTimes(): void {
 		super.resetSeenTimes()
 		this.next().resetSeenTimes()
 	}
@@ -343,7 +343,7 @@ export abstract class ArrowState<T = any> extends State<T> {
 }
 
 abstract class SingleCapturingState<T = any> extends ArrowState<T> {
-	getCaptured(keeper: PeekKeeper<T>): T | string {
+	override getCaptured(keeper: PeekKeeper<T>): T | string {
 		return this.extensions.get("noCapture") ? "" : keeper.curr
 	}
 
@@ -360,7 +360,7 @@ class MultVerifier {
 }
 
 export class EitherState extends State {
-	resetSeenTimes(): void {
+	override resetSeenTimes(): void {
 		super.resetSeenTimes()
 		for (const option of this.options) option.resetSeenTimes()
 	}
@@ -437,7 +437,7 @@ export class AnythingState<T = any> extends SingleCapturingState<T> {
 
 // ! pre-doc: an empty state - always matches - NO ADVANCEMENT OF POSITION
 export class EmptyState<T = any> extends ArrowState<T> {
-	addTo(list: StateArray, keeper: PeekKeeper): void {
+	override addTo(list: StateArray, keeper: PeekKeeper): void {
 		this.next().addTo(list, keeper)
 	}
 
@@ -445,7 +445,7 @@ export class EmptyState<T = any> extends ArrowState<T> {
 		return this.next().verify(keeper)
 	}
 
-	getCaptured(keeper: PeekKeeper<T>): string | T {
+	override getCaptured(keeper: PeekKeeper<T>): string | T {
 		return this.next().getCaptured(keeper)
 	}
 }
@@ -504,7 +504,7 @@ export class BoundaryState<T = any> extends ArrowState<T> {
 	// * (matches word followed by anything that isn't a word, equiv. of '\w+^[\W]')
 	// (in fact, this line is pretty much the reason that
 	// `advance` was even originally added to the `State`)
-	advance(keeper: PeekKeeper): void {}
+	override advance(keeper: PeekKeeper): void {}
 
 	constructor(private readonly options: State[]) {
 		super()
@@ -512,7 +512,7 @@ export class BoundaryState<T = any> extends ArrowState<T> {
 }
 
 export class NonBoundaryState<T = any> extends BoundaryState<T> {
-	protected verifyCommon(keeper: PeekKeeper<T>): boolean {
+	protected override verifyCommon(keeper: PeekKeeper<T>): boolean {
 		return !super.verifyCommon(keeper)
 	}
 }
@@ -528,11 +528,11 @@ export class MatchState<T = any> extends State<T> {
 		return true
 	}
 
-	beenSeen(i: number): boolean {
+	override beenSeen(i: number): boolean {
 		return false
 	}
 
-	get isMatch() {
+	override get isMatch() {
 		return true
 	}
 }

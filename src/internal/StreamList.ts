@@ -25,7 +25,7 @@ export class StreamList extends RecursiveList.Poolable<
 > {
 	static readonly pool = Pools.Internal.add(new ObjectPool(StreamList))
 
-	protected renewer: StreamList.StreamRenewer
+	protected override renewer: StreamList.StreamRenewer
 
 	protected reclaim(): void {
 		StreamList.pool.free(this)
@@ -45,7 +45,7 @@ export namespace StreamList {
 		IOwnedStream,
 		[ICompositeStream]
 	> {
-		protected renewer: StreamRenewer
+		protected override renewer: StreamRenewer
 
 		createList(streams: IRawStreamArray) {
 			return StreamList.pool.create(

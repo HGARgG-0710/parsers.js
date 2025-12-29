@@ -38,11 +38,11 @@ export class RangeQuantifier extends BaseNode {
 		} { item: ${this.item.debugPrint()}, range: ${this.range.debugPrint()} }`
 	}
 
-	read(i: number): INode {
+	override read(i: number): INode {
 		return i === 0 ? this.item : this.range
 	}
 
-	get lastChild() {
+	override get lastChild() {
 		return 1
 	}
 
@@ -88,7 +88,7 @@ export class LimitsRange extends BaseNode {
 		return LimitsRange.type
 	}
 
-	get lastChild() {
+	override get lastChild() {
 		return 1
 	}
 
@@ -102,7 +102,7 @@ export class LimitsRange extends BaseNode {
 		} { from: ${this.from.debugPrint()}, to: ${this.to.debugPrint()} }`
 	}
 
-	read(i: number): INode {
+	override read(i: number): INode {
 		return i === 0 ? this.from : this.to
 	}
 
@@ -137,11 +137,11 @@ export class ClassRange extends BaseNode {
 		return ClassRange.type
 	}
 
-	get lastChild() {
+	override get lastChild() {
 		return 1
 	}
 
-	read(i: number): INode {
+	override read(i: number): INode {
 		return i === 0 ? this.start : this.end
 	}
 

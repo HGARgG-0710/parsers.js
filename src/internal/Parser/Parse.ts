@@ -1,0 +1,102 @@
+import type { Summat } from "@hgargg-0710/summat.ts"
+import type {
+	ICompositeStream,
+	IDepthMark,
+	IErrorDataMaker,
+	IInputStream,
+	ILinkedStream,
+	IParse,
+	IParseState
+} from "../../interfaces.js"
+import { Initializable } from "../../objects/Initializable.js"
+
+export class Parse<InType = any, FinalType = any, InitType = any>
+	extends Initializable<[InitType, Summat]>
+	implements IParse<FinalType, InitType>
+{
+	private didUpdate = false
+	private input?: InitType
+	private _state?: IParseState<FinalType, InitType>
+
+	private set state(newState: IParseState<FinalType, InitType>) {
+		this._state = newState
+	}
+
+	get state() {
+		return this._state!
+	}
+
+	private createState(
+		preState: Summat = {}
+	): IParseState<FinalType, InitType> {
+		return {
+			parse: this,
+			errData: this.errDataMaker(this.inputStream, this.input!),
+			errors: [],
+			...preState
+		}
+	}
+
+	private onUpdate() {
+		this.didUpdate = false
+		this.workStream.renewResource()
+	}
+
+	protected get initializer() {
+		return parseInitializer
+	}
+
+	get streams() {
+		return this.workStream.streams
+	}
+
+	setInput(input: InitType) {
+		this.input = input
+	}
+
+	setState(preState: Summat): void {
+		this.state = this.createState(preState)
+		this.workStream.setState(this.state)
+	}
+
+	isSetupReady() {
+		return !!this.input && !!this._state
+	}
+
+	setupStreams() {
+		this.inputStream.init(this.input)
+		this.workStream.init(this.inputStream)
+	}
+
+	renewStream(stream: ILinkedStream): boolean {
+		return this.workStream.renewStream(stream)
+	}
+
+	update() {
+		this.didUpdate = true
+	}
+
+	maybeUpdate() {
+		if (this.didUpdate) this.onUpdate()
+	}
+
+	getDepth(mark: IDepthMark): number {
+		return this.workStream.getDepth(mark)
+	}
+
+	constructor(
+		readonly workStream: ICompositeStream<FinalType>,
+		private readonly inputStream: IInputStream<InType, InitType>,
+		private readonly errDataMaker: IErrorDataMaker<InType, InitType>
+	) {
+		super()
+	}
+}
+
+const parseInitializer = {
+	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
+		if (input) target.setInput(input)
+		if (state) target.setState(state)
+		if (target.isSetupReady()) target.setupStreams()
+	}
+}

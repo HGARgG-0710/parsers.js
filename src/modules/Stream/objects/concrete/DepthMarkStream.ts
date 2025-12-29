@@ -17,7 +17,7 @@ function BuildDepthMarkStream<T = any>(marks: readonly IDepthMark[]) {
 		extends IdentityStream<T>
 		implements IDepthMarkStream<T>
 	{
-		static readonly pool = Pools.Stream.add(
+		static override readonly pool = Pools.Stream.add(
 			new ObjectPool<IDepthMarkStreamForPool<T>>(DepthMarkStream)
 		)
 
