@@ -73,25 +73,42 @@ const RangeBoundaryStream = SingletonStream(
 		new RangeBoundary(Number(boundaryMaker(input).get()))
 )
 
+class RangeFactory {
+	getTrivial(first: ICellNode<number>) {
+		return new Range(new TrivialRange(first))
+	}
+
+	getInfinite(first: ICellNode<number>) {
+		return new Range(new InfiniteRange(first))
+	}
+
+	getLimits(first: ICellNode<number>, last: ICellNode<number>) {
+		return new Range(new LimitsRange(first, last))
+	}
+}
+
 class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
-	private finalRange: IPoolNode<[INode]>
+	private readonly ranges = new RangeFactory()
 	private first: ICellNode<number>
-	private last: ICellNode<number>
+
+	private setFirst(item: ICellNode<number>) {
+		this.first = item
+	}
 
 	private tryTrivial() {
 		expectRangeBoundary(this.resource!)
-		this.first = this.resource!.curr as ICellNode<number>
+		this.setFirst(this.resource!.curr as ICellNode<number>)
 		this.resource!.next() // skipping first item
 		return !this.reviveChild() // does this die after 1st?
 	}
 
-	private asTrivial() {
-		this.finalRange = new Range(new TrivialRange(this.first))
+	private asTrivial(first: ICellNode<number>) {
 		this.resource!.next() // killing last (1st here) child
+		return this.ranges.getTrivial(first)
 	}
 
-	private asInfinite() {
-		this.finalRange = new Range(new InfiniteRange(this.first))
+	private asInfinite(first: ICellNode<number>) {
+		return this.ranges.getInfinite(first)
 	}
 
 	private tryLimits() {
@@ -100,18 +117,23 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 		return this.reviveChild() // is this alive for the 3rd?
 	}
 
-	private asLimits() {
+	private asLimits(first: ICellNode<number>) {
 		expectRangeBoundary(this.resource!)
-		this.last = this.resource!.curr
-		this.finalRange = new Range(new LimitsRange(this.first, this.last))
+		const last = this.resource!.curr
 		ensureChildUnrevivable(this) // we're definitely finished, no weird leftovers
+		return this.ranges.getLimits(first, last)
 	}
 
-	baseInit(): void {
-		this.curr = this.finalRange
-		if (this.tryTrivial()) this.asTrivial()
-		else if (this.tryLimits()) this.asLimits()
-		else this.asInfinite()
+	private getRange() {
+		return this.tryTrivial()
+			? this.asTrivial(this.first)
+			: this.tryLimits()
+			? this.asLimits(this.first)
+			: this.asInfinite(this.first)
+	}
+
+	override baseInit(): void {
+		this.curr = this.getRange()
 	}
 }
 
