@@ -42,11 +42,11 @@ export abstract class BeforeCompositeStream<T = any>
 	abstract state: IParseState
 	abstract setState(state: Summat): void
 
-	private renewIfPossible() {
+	private tryRenew() {
 		return this.streamList!.renewAll(this.lowStream!)
 	}
 
-	private fixRenewed() {
+	private fixupRenewe() {
 		this.updateResource()
 		return true
 	}
@@ -92,7 +92,7 @@ export abstract class BeforeCompositeStream<T = any>
 	}
 
 	renewResource() {
-		return this.renewIfPossible() ? this.fixRenewed() : this.nonRenewable()
+		return this.tryRenew() ? this.fixupRenewe() : this.nonRenewable()
 	}
 
 	override get isEnd() {

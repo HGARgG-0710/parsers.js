@@ -11,7 +11,7 @@ import type {
 	IRegexPartBuilder,
 	IValidNodeType
 } from "../interfaces.js"
-import { NFARegexFinalizer } from "../internal/RegexNFA/Finalizer.js"
+import { NFARegexFinalizer } from "../internal/Regex/NFA/Finalizer.js"
 import { RegexStorage } from "../internal/RegexStorage.js"
 import { charAfter, charBefore } from "../internal/Unicode.js"
 import { ArrayCollection } from "./ArrayCollection.js"

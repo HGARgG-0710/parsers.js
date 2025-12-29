@@ -1,6 +1,6 @@
 import type { IRegexMatcher } from "../interfaces.js"
 import type { Regex } from "../objects.js"
-import { RegexCompiler } from "./RegexCompiler/Compiler.js"
+import { RegexCompiler } from "./Regex/Compiler/Compiler.js"
 
 /**
  * This serves as a preliminary abstraction to `RegexCompiler`.
@@ -21,12 +21,12 @@ export class RegexStorage {
 		return compiled
 	}
 
-	private getCachedIfPresent(regex: string) {
+	private tryFetchCached(regex: string) {
 		return this.cached.get(regex)
 	}
 
 	get(regex: string, config: Regex.Config) {
-		return this.getCachedIfPresent(regex) || this.makeNew(regex, config)
+		return this.tryFetchCached(regex) || this.makeNew(regex, config)
 	}
 
 	private constructor() {}

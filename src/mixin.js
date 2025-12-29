@@ -132,6 +132,8 @@ export class mixin {
 		return this.class.prototype
 	}
 
+	/**
+	 * @private */
 	set class(newClass) {
 		this._class = newClass
 	}
