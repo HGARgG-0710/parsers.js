@@ -1,25 +1,23 @@
 import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	IParseStream,
-	IParseStreamMaker,
+	IBaseParseStream,
+	IBaseParseStreamMaker,
 	IRootStream
 } from "../../interfaces.js"
 import { PreCommonStream } from "../../modules/Stream/objects/templates.js"
 import { LoopStream } from "../../objects/Stream.js"
-import {
-	CommonStreamStateExtractor
-} from "./CommonStreamStateExtractor.js"
+import { CommonStreamStateExtractor } from "./CommonStreamStateExtractor.js"
 import { type IStreamProvider } from "./StreamProvider.js"
 
 export class ParseLoopStream<T = any, Init = any>
 	extends PreCommonStream<T>
-	implements IRootStream<T>, IStreamProvider<T>
+	implements IRootStream<T>, IStreamProvider<T>, IBaseParseStream<T>
 {
 	private readonly commonStateExtractor: CommonStreamStateExtractor<T>
-	private readonly streamGetter: LoopStream<IParseStream<T>>
+	private readonly streamGetter: LoopStream<IBaseParseStream<T>>
 
-	private _lastStream: IParseStream<T>
+	private _lastStream: IBaseParseStream<T>
 
 	private getNewDelegate() {
 		this._lastStream = this.delegate
@@ -34,11 +32,11 @@ export class ParseLoopStream<T = any, Init = any>
 		return this.delegate.isEnd
 	}
 
-	lastStream(): IParseStream<T> {
+	lastStream(): IBaseParseStream<T> {
 		return this._lastStream
 	}
 
-	currStream(): IParseStream<T> {
+	currStream(): IBaseParseStream<T> {
 		return this.delegate
 	}
 
@@ -75,7 +73,7 @@ export class ParseLoopStream<T = any, Init = any>
 
 	constructor(
 		input: Init,
-		streamMakerGetter: (i: number) => IParseStreamMaker<Init, T>,
+		streamMakerGetter: (i: number) => IBaseParseStreamMaker<Init, T>,
 		private readonly conseqEmptyStreamsAllowed: number = 0,
 		getState: () => Summat = object.empty
 	) {

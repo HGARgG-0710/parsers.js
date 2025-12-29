@@ -8,13 +8,16 @@ import type {
 import type {
 	IBasicStream,
 	ILinkedStream,
+	IOwnedStream,
 	IStreamArray
 } from "../interfaces/Stream.js"
-import type { IParseStream } from "./Stream.js"
 
-export type IParseStreamMaker<Init = any, Out = any> = (
+export type IBaseParseStream<T = any> = IOwnedStream<T> &
+	IStateHaving<IBaseState>
+
+export type IBaseParseStreamMaker<Init = any, Out = any> = (
 	getState?: () => Summat
-) => (input: Init) => IParseStream<Out>
+) => (input: Init) => IBaseParseStream<Out>
 
 export interface IBaseState extends Summat {
 	readonly errors: Error[]

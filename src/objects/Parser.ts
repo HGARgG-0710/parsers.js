@@ -4,7 +4,7 @@ import type {
 	IErrorDataMaker,
 	IInputStream,
 	IParseStream,
-	IParseStreamMaker,
+	IBaseParseStreamMaker,
 	IRootStream
 } from "../interfaces.js"
 import { Parse } from "../internal/Parser/Parse.js"
@@ -102,7 +102,7 @@ export namespace Parser {
 	// ^ 	VITAL NOTE: this CAN'T (typically) be nested;
 	// 			Important, since 'ParseStream' *does* properly support it (somewhat confusingly);
 	export function Concat<Init = any, Out = any>(
-		streamMakers: IParseStreamMaker<Init, Out>[]
+		streamMakers: IBaseParseStreamMaker<Init, Out>[]
 	) {
 		return function (getState?: () => Summat) {
 			return function (input: Init): IRootStream<Out> {
@@ -112,9 +112,9 @@ export namespace Parser {
 	}
 
 	export function Nested<Init = any, Out = any>(
-		open: IParseStreamMaker<Init, Out>,
-		between: IParseStreamMaker<Init, Out>[],
-		close: IParseStreamMaker<Init, Out>
+		open: IBaseParseStreamMaker<Init, Out>,
+		between: IBaseParseStreamMaker<Init, Out>[],
+		close: IBaseParseStreamMaker<Init, Out>
 	) {
 		return [open, ...between, close]
 	}
@@ -128,7 +128,7 @@ export namespace Parser {
 	// 		no guarantee of it working is provided by the library (although, no doubt due to
 	// 		its highly flexible design SOME applications are still possible and valid...)
 	export function Loop<Init = any, Out = any>(
-		streamMakerGetter: (i: number) => IParseStreamMaker<Init, Out>,
+		streamMakerGetter: (i: number) => IBaseParseStreamMaker<Init, Out>,
 		conseqEmptyStreamsAllowed?: number
 	) {
 		return function (getState?: () => Summat) {
