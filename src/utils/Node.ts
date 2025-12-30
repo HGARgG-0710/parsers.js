@@ -7,6 +7,7 @@ import type {
 	IWalkable
 } from "../interfaces/Node.js"
 import type { NodeSystem } from "../objects/NodeSystem.js"
+import { TreeStream } from "../objects/Stream.js"
 import { isGoodIndex } from "../utils.js"
 
 const { trivialCompose } = functional
@@ -116,4 +117,32 @@ export function mapTypes<T = any>(
 	typeTable: [ITyped, T][]
 ): [IValidNodeType, T][] {
 	return typeTable.map(([t, f]) => [t.type, f])
+}
+
+export function search<T extends IWalkable = IWalkable>(
+	root: T,
+	pred: (x: T) => boolean
+) {
+	const asDepthFirst = new TreeStream(root)
+	for (const item of asDepthFirst)
+		if (pred(item)) return asDepthFirst.treeIndex
+	return false
+}
+
+export function depth<T extends IWalkable = IWalkable>(root: T) {
+	const asDepthFirst = new TreeStream(root)
+	let maxDepth = 0
+	for (const _ of asDepthFirst)
+		maxDepth = Math.max(asDepthFirst.treeIndex.length, maxDepth)
+	return maxDepth
+}
+
+export function count<T extends IWalkable = IWalkable>(
+	root: T,
+	pred: (x: T) => number = () => 1
+) {
+	const asDepthFirst = new TreeStream(root)
+	let sum = 0
+	for (const item of asDepthFirst) sum += pred(item)
+	return sum
 }
