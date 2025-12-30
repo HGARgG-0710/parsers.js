@@ -7,8 +7,8 @@ import type {
 export class CollectionBuilder<T = any, C extends IIndexed<T> = IIndexed<T>>
 	implements IExtendableCollection<T, C>
 {
-	push(...items: T[]): this {
-		this.protoCollection.push(...items)
+	push(item: T): this {
+		this.protoCollection.push(item)
 		return this
 	}
 

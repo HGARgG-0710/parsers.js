@@ -190,7 +190,7 @@ export type IParseable<T = any> = IConcreteReadable<T> & ICopiable
  * via the method `push(...items: T[]): this`.
  */
 export interface IPushable<T = any> {
-	push(...items: T[]): this
+	push(item: T): this
 }
 
 /**
