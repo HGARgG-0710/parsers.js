@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 314
+	Current total: 316
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 275 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 277 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -170,62 +170,53 @@ REMINDERs:
 		The 'Concat' and 'Loop' has UNDERLYING PARSERS *sharing* their '.state'!
 		This is important! 
 
+	-3. REMINDER [testing]: 'RecursiveList'
+		ALLOW empty streams; 
+		SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursiveList' to be EMPTY ON CREATION. 
+		Let it be possible to have an EMPTY 'ParseStream' (ex: when the underlying 'InputStream' has ALL DRIED UP!)
+
+	-4. REMINDER [testing]: InputStream, LazyStream, etc
+		VERIFY that *all* of these are VIABLE for reading FROM-THE-MIDDLE of the "Source". 
+		THIS is needed for the 'Parse.Loop' and 'Parse.Concat' interoperability. 
+		Specifically, if the "source" has ALREADY been "touched" by a different stream, 
+		ENSURE that these are CAPABLE of handling it ADEQUATELY (this means that *all* the 
+		operations STILL REMAIN VALID). 
+		This is a mandatory requirement for the 'ParseStream'. 
+		If, for whatever reason, this becomes impossible for certain non-critical operations, 
+		ADD THIS AS AN IMPORTANT NOTICE TO THE DOCUMENTATION. 
+
+		1. ALSO - ensure that EMPTY STREAMS are *also* viable (almost) ANYWHERE, where non-empty 
+			ones are. This is an important edge cases. 
+
+		2. ALSO - ensure that the 'IByteSource's of the library ALL allow the ability to pass an 
+			already-read file to a DIFFERENT 'LazyStream' (or wherever...) and use it JUST THE SAME. 
+			Same for 'ICharSource's - since the only implementation wraps around 'IByteSource'. 
+			This is important. 
+
+	
+	-1. REMINDER: on 'IBaseState.errors: Error[]': 
+		This is a crucial feature to test: the user MUST be able to: 
+			1. COLLECT multiple errors during Error-resistant parsing proces 
+				(ErrorStream, PanicStream, etc)
+			2. Produce an ErrorNode-containing AST 
+				[which can be VALIDATED via the 'ast.scanFor(ErrorNode)' method call]
+			3. COLLECT *all* the errors that had ocurred from the 'parseStream.state.errors'; 
+				Those are modifiable from within EVERY underlying sub-'IResultStateStream'! 
+				(Particularly, check the 'PanicStream' effect on it...)
+			4. PRINT all the errors via the 'ErrorPrinter.prototype.logErrors' method; 
+				In particular, must support: 
+					1. ErrorPrinter.Plain
+					2. ErrorPrinter.WithLogger
+
+		In particular, it allows 'tsc'-like support for error-handling; 
+		It'll be important for transpilers that want to deliver the same kind of level of 
+		error-reporting quality (and developer productivity). 
+		
 IMMEDIATE: 
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
-	CURRENT: 	
-		-8. Parser.ts: REFACTOR the 'PropertiesGetter' to a separate 'internal/PropertiesGetter.ts' file. 
-			It'd be better this way (far too general to semantically belong there...)
-			Put its '*-State' classes/interfaces there, as well as the 'StateList' class. 
-
-		-7. Parser.ts [Interface Segregation Principle]: 
-			TRY to "reduce" the 'IParseStream' to a 'IStateHaving & IStream' [or something...]
-			The point is, TRY to make it possible to "nest" 'Concat' INTO 'Concat' or 'Loop'
-			(you can't, fundamentally, nest "Loop" into anything due to how it's implemented, 
-			but still...)
-
-			THE SAME goes for 'IParseStreamMaker<Init, Out>': 
-				1. replace 'IParseStream' with a "smaller" (more essential) interface
-				2. RENAME IT
-
-			HOWEVER, the 'ParseStream' (future 'Parser') should STILL return a 'IParseStream<T>'. 
-			This is important. 
-
-		-6. TODO: *join* the 'ParseStream.ts' with the 'Parsers.ts'
-			LET the 'ParseStream' become the 'Parser'-factory, and LET 
-			the 'Parser' ALSO become a NAMESPACE with 'Loop' and 'Concat' 
-			being a part of it. In particular, this'll follow the convention 
-			that the "simpler" parser is more immediate to access. 
-
-		-5. TODO: refactor the 'ParseLoopStream' 
-			[specifically, the constructor - replace the arguments with a DTO-Builder...]; 
-
-		-4. TODO: InputStream, LazyStream, etc
-			VERIFY that *all* of these are VIABLE for reading FROM-THE-MIDDLE of the "Source". 
-			Specifically, if the "source" has ALREADY been "touched" by a different stream, 
-			ENSURE that these are CAPABLE of handling it ADEQUATELY (this means that *all* the 
-			operations STILL REMAIN VALID). 
-			This is a mandatory requirement for the 'ParseStream'. 
-			If, for whatever reason, this becomes impossible for certain non-critical operations, 
-			ADD THIS AS AN IMPORTANT NOTICE TO THE DOCUMENTATION. 
-
-			1. ALSO - ensure that EMPTY STREAMS are *also* viable (almost) ANYWHERE, where non-empty 
-				ones are. This is an important edge cases. 
-
-		-3. TODO [for 'Parser.Loop' to work]: 'RecursiveList'
-			ALLOW empty streams; 
-			SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursiveList' to be EMPTY ON CREATION. 
-			Let it be possible to have an EMPTY 'ParseStream' (ex: when the underlying 'InputStream' has ALL DRIED UP!)
-	
-		-1. TODO: the 'Parse' class - MAKE it so that it utilizes the State Pattern instead of the 'didUpdate = false' boolean; 
-			This'll cimplify the class state control. 
-
-		2. TODO: fix the 'IPushable' interface - make it 'push(item: T): this', not 'push(...items: T[]): this'. 
-			Reasons: 
-				1. constant "wrapping" into an array negatively impacts performance 
-				2. the interface is excessively generic (too complex, too "convinient")
-
-		-1. ADD the 'T = any' generics to the 'RegexNFA/*.ts'. 
+	CURRENT: 		
+		-1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
 
@@ -268,14 +259,8 @@ IMMEDIATE:
 				This is so that we KNOW that the thing in question DOES NOT (accdientally) contain references to things 
 				that are NO LONGER NEEDED. Things that are NO LONGER NEEDED, but still CAN BE REUSED are stored EXLUSIVELY 
 				inside POOLS!!!
-
-		3. NoCapture [to complete]: 
-			2. About the 'match/no-match': 
-				1. THUS, 'NoCapture' becomes a case of a GROUP EXTENSION: 	
-					1. THEREFORE, *parser* REQUIRES modification!!!
-						1. syntax change: (=...) -> (#c...)
 	
-	3. [MAJOR PROBLEM] Regex [RegexParser and RegexCompiler]: 
+	3. [MAJOR PROBLEM; UnicodeState] Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
 			1. \p{...}-like (JS RegExp) groups of characters (new character classes): 
 				1. The \P{...} is replaced by ^[\p{...}]
@@ -284,6 +269,14 @@ IMMEDIATE:
 					1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
 					2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
 			2. DON'T FORGET EMOJIS [those are mandatory...]
+
+	1. FULFILL all the todos/notes/ideas/etc inside of the Notes app...
+
+	1. VERIFY that *all* the "public" exports ARE PROVIDED 
+		(specifically, the 'export * from'-statements, 
+			AND the 'export' modifiers; 
+			ALSO, ensure that NOTHING that should instead be 
+				a private class is exported out to the user)
 
 	1. CLEAN UP the GIT HISTORY (once you're done with the "major issues", 
 		and one can finally start working on JSDOC (wiki precursor - to later 
@@ -437,6 +430,9 @@ notes on `RegexParser` development:
 				2. https://cs.stackexchange.com/questions/138275/worst-case-complexity-of-quantifiers-in-thompsons-construction
 				3. https://en.wikipedia.org/wiki/Thompson%27s_construction#Use_in_string_pattern_matching		
 
+TODO: chase down all leftover 'TODO's inside the code: 
+	Search: // TODO, // *, // !, // ?, // ^, // %
+
 CURRENTLY BEING DONE: 	
 	NOTE: on `a + (b - ...) ...` demo implementation: 
 		FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
@@ -491,115 +487,72 @@ CURRENTLY BEING DONE:
 
 					2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 				6. PredicateStream - pick those that are not a ','
-				
-	RE2. `Regex` description:
-		Then: 
-			3. write proper docs for the class
 
-		It will improve upon the "simple" JS regex in the following ways: 
-			7. get rid of the flags: 
-				1. 'g': 
-					replace the different behaviour with METHODS; make it non-exclusive
 
-				6. 'y' (????): 
-					find out what this even is (and what it's used for)
-					seems very much like a hack for 'regex.match/exec/search/whatever(string.slice(x))'...
-				 
-			IMPORTANT NOTE[2] - missing methods: 
-				1. .toString(): 
-					Returns the original 'source' that was given for parsing...
-				
-				ALSO: the `Regex` implements an NFA
+TODO: BENCHMARK: 
+	1. RotationBuffer vs 'shift/unshift'-based solution: 
+		0. Generalize the `PeekStream` to a common "abstract" ancestor
+			1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
+		1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]
+		2. Compare the two on a large [and relatively simple] input that utilizes `TokenChooser`, with : 
+			0. benchmark 0 - 0-1 lookaheads [not very ambigious at all]
+			1. benchmark 1 - 0-3 lookaheads [somewhat intensive/ambigious - many times - doesn't require any lookaheads]
+			2. benchmark 2 - 3-12 lookaheads [IS intensive/ambigious - many times - DOES reuqire lookaheads]
 
-IMMIDIATE [first - order 'import's, then - do 'docs']: 			
-	CURRENT AGENDA: 			
-		P0: 
-			0. Exports: 
-				1. Verify all of the package's exports - remove undesirable/redundant ones
+			IF there is *any* performance benefit, either: 
+				1. replace the 'RotationBuffer'-based version with 'shift/unshift'-based
+				2. make it so that the `PeekStream` uses appropriate 
 
-			1. JSDOC - verify: 
-				Look through jsdoc for ALL the library's code, once the writing phase is finished and only the tests remain. 
-				Ensure that it is entirely correct [there were some radical changes here and there that could upset the docs' authenticity]. 
+TODO: Tests
+	1. TEST the internal/ (only what makes sense)
+	2. Test the public exports: 
+		1. ALL classes
+		2. ALL utils
+		3. ALL samples
+	3. Test that the LIST of library exports is correct: 
+		1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
+			Ensures that ALL the needed exports are available
+		2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
 
-		P1:
-		[this is just an array-like strucutre, nothing unusual to see here]
-		1. LiquidMap
-		1. RetainedArray
-			TODO: refactor this [ugly]: 
-				1. NO MORE 'MixinArray'
-				2. add sub-objects [composition] to represent respective business logic. 
-		2. `RotationBuffer` - test it
 
-		P2:
-		[Single 'ClassTest']
-		38. `ArrayMap`, 
-			`BasicMap`, 
-			`CharCodeMap`, 
-			`PredicateMap`, 
-			`RegExpMap`, 
-			`SetMap`, 
-			`ObjectMap`
-		[Single `ClassTest`]
-		8. `BasicHash`, 
-			`LengthHash`, 
-			`TokenHash`, 
-			`TypeofHash`:
-				1. DO NOT MOCK! [real dependencies are far too simple for that]
-		6. WrapHandler, TableHandler
+44. TESTING NOTE: 'FreeStream': 
+	0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
+	1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
+	2. [maybe???] Add a framework for 'spying' on methods of objects here?
+		Reason: one needs to ENSURE that the `.free` method *GETS CALLED*, 
+			no matter what. Reason being: if we DON'T know that, we DON'T 
+				know if the thing is actually *effective*. 
 
-		P3: 
-		17. `ResourceManager`: 
-			1. USE MOCKS FOR THIS ONE!
-			2. ALSO - the `.manager` properties of `WritingDestination` and `ReadableSource`
-		2. ReadableSource
-		3. WritingDestination
-		4. Encoder[8, U8, U16]
-		5. Loaded[8, U8, U16]
+		Thus, possible solutions to the dilemma: 
+			1. add a library [with existing like 'Jest' - good for resume]
+				This'll additionally require: 
+					1. accessing of `ObjectPool.prototype`, saving reference
+						To save the '.freeMethodObservable = jest.spyOn(ObjectPool.prototype, "free")'
+					2. checking the presence of the call on each iteration inside 
+						a test of `FreeStream`, via the `.freeMethodObservable.mock.calls[i]`
+			2. creating a fake `ObjectPool`-like object, which would register the `.free/.create` calls, 
+				which would be then employed as-desired
+				Then, one would need to: 
 
-		P4. STREAMS - none of the "hard" stuff yet... Just data manipulation
-
-	TODO: classes from /internal to test: 		
-		[easy, but longer]
-		6. SwitchArray: 
-			1. USE A MOCK HERE (`RecursiveRenewer`)
-			2. Do only after `Switch` has been thoroughly tested
+					1. create an interface for `IObjectPool`
+					2. use it EVERYWHERE instead of the "ordinary" 'ObjectPool' classs objects: 
+						1. That includes `FreeStream`
+					3. write a dummy-mock-class for a specific type of "poolable" objects, create-d/free-d inside the `FreeStream`
+					4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
 		
-		[not easy, but not too hard - do (slightly) later]
-		5. Switch [from RecursiveList.ts]
-		
-		[HARD - do later]
-		4. StreamList
-		8. TreeWalker: 
-			1. USE A MOCK HERE (`TreeLike`)
+		CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
 
-	TODO: public classes/functions/utils/etc to be tested: 
-		TODO: since new classes have been added (once again), 
-			after finishing this list, walk THROUGH the library code, 
-				spotting classes that are UNTESTED, and deciding whether to 
-					test them or not (note: all *public exports* must be 
-						unit-tested without exception)...
 
-		-7. ArrayBuilder
-		-6. JointPoolCollection: 
-			1. Pools.All
-		-5. PoolCollection: 
-			1. Pools.Stream [specific] - ensure all needed pools are cleared
-			2. Pools.Node [specific] - ensure all needed pools are cleared
-			3. Pools.Internal [specific] - ensure all needed pools are cleared
-		-4. WebByteSource [separate demo-test]
-		-3. FileDescriptor
-		-2. InvalidFileReadPositionError
-		-1. ParseError [abstract]: 
-			Test will use a descendant to check that: 
-				1. '.name' is correct
-				2. '.message' is correct [for various inputs]
+8. TESTING NOTE: TreeWalker: 
+	1. USE A MOCK HERE (`TreeLike` generic param...)
 
-		[easy]
-		0. TableMap
-		2. `Autocache`: 
-			1. USE A MOCK HERE! [ISettable & IIndexable]
-		
-		[hard]
+REMINDER: replace the JSDOC with an SSG Wiki in Vue.js; 
+	Let JSDOC simply reference the wiki...
+
+2. TESTNIG NOTE: `Autocache`: 
+	1. USE A MOCK HERE! [ISettable & IIndexable]
+
+3. TESTING NOTES: 
 		3. `Decoder8`, `DecoderU8`: 
 			1. DO NOT use mocks - instead, create REAL FILES [encoded appropriately]
 		4. `WritingDestination`: 
@@ -610,31 +563,34 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 						already present `IEncoder`-implementing classes of the library (since
 							the encoder must be A WORKING ENCODER). 
 			3. TEST `IEncoder` classes BEFORE TESTING THIS
-		5. `WritingDestination.manager`: 
-			1. This is tested DESPITE `ResourceManager` being tested as well
-			2. Use REAL-LIFE files with this thing
-		7. `Encoder8`, `EncoderU8`
 
-		[very hard]
-		6. `DynamicParser`: 
-			0. Do ONLY once `TokenChooser` and `Regex` has been finished and tested
-			1. Test ONLY as a part of "demo"-testing: 
-				1. +/-, () and [a-zA-Z]-variables (no self-modification)
-				2. A Self-mofidying parser
-			2. This is an *INTEGRATION TEST*
-			3. VITAL: besides this, ADD a "demo"-style integration test 
-				for `SourceBuilder + IndexMap + DepthStream + INode + NodeSystem` for 
-				GENERATION of the "+/-, (), [a-zA-Z]-vars (no-self-mod)"
-				grammar sources BASED OFF a Node-based AST. 
+TODO [about tests]: 
+	1. REVISIT old tests
+		1. FIX THEM 
+	2. PLAN OUT the testing strategy for the NEW variant of the v0.3 version: 
+		1. MUST include everything in /internal
+		2. MUST include toplevel public exports
+	3. IMPLEMENT one-by-one [rapidly]; 
 
-				It also must be: 
 
-					1. error-resistant (MarkerStream + Counter)
-					2. boasts custom error messages
-					3. keep track of MULTIPLE ERRORS [inside `.state.errors: IErrorData[]` - utilize the 
-						`refresh() + .push(.copy()) + .markHandled()` cycle]; 
-		
-		[easy, but tedious]
+6. TESTING NOTE: `Parser.ts` stuff: 
+	0. Do ONLY once `TokenChooser` and `Regex` has been finished and tested
+	1. Test ONLY as a part of "demo"-testing: 
+		1. +/-, () and [a-zA-Z]-variables (no self-modification)
+		2. A Self-mofidying parser
+	2. This is an *INTEGRATION TEST*
+	3. VITAL: besides this, ADD a "demo"-style integration test 
+		for `SourceBuilder + IndexMap + DepthStream + INode + NodeSystem` for 
+		GENERATION of the "+/-, (), [a-zA-Z]-vars (no-self-mod)"
+		grammar sources BASED OFF a Node-based AST. 
+
+		It also must be: 
+
+			1. error-resistant (MarkerStream + Counter)
+			2. boasts custom error messages
+			3. keep track of MULTIPLE ERRORS [inside `.state.errors: Error[]`]; 
+
+6. TESTING NOTES: 
 		8. `BasicHash`, 
 			`LengthHash`, 
 			`TokenHash`, 
@@ -643,217 +599,72 @@ IMMIDIATE [first - order 'import's, then - do 'docs']:
 				2. Use DIFFERENT `IPreMap`s for each case
 				3. DO NOT MOCK! [use real `IPreMap`s instead]: 
 					reason - as always, too simple
-					this would require re-implementing A LOT of stuff for no good reason...
-		
-		[easy, but tedious]
+					this would require re-implementing A LOT of stuff for no good reason...	
 		9. `IndexMap.ts` stuff: 
 			1. The functions - test each one
 			2. Each one should be given a SINGLE case of an `IMapClass/whatever` to work on
 			3. Each one given SHOULD BE REAL!!! [no mocks]
 
-		[semi-easy]
-		10. `LoadedU8`, `LoadedU16`, `Loaded8`: 
-			1. Use real files
-			2. NO MOCKS
 
-		[medium - no sooner than 'ObjectPool']
-		11. `TokenNode`, `ContentNode`, `RecursiveNode`: 
-			1. Use each one with a 'string/number/boolean' '.type': 
-				1. create several instances for each one created class
-				2. they should handle edge (if any) cases and generic behaviour
-			2. type `T` of '.type: T' should be different each time
-			3. CHECK FOR MEMORY-SAVINGS [`.prototype.type` and NOT `this.type`!!!]
+10. TESTING NOTE: `LoadedU8`, `LoadedU16`, `Loaded8`: 
+	1. Use real files
+	2. NO MOCKS
 
-		[semi-easy - no sooner than `Node`]
-		12. `NodeSystem`:
-			1. Use `samples.Nodes.PlainNodes` for this test
-			2. NO MOCKS
-			3. Test ONLY after the `TokenNode`, `ContentNode`, `RecursiveNode` have already been
+20. TESTING NOTE:
+		11. `TokenNode`, `ContentNode`, `RecursiveNode`, etc: 
+			1. create several instances for each one created class
 
-		[easy]
-		13. `ObjectPool`: 
-			1. Create a mock class
-			2. Use `ObjectPool(MockClass)` on it
-			3. Create some instances - test it...
-
-		[easy]
-		16. `PropDigger`: 
-			[VITAL: add these as TEST CASES in `PropDigger/cases.ts`!!!]
-			1. `ownerDigger`: 
-				1. on an `IStream`
-				2. ONLY AFTER an `ILinkedStream` has been tested
-			2. `resourceDigger`: 
-				1. on an `IStream`
-				2. ONLY AFTER an `ILinkedStream` has been tested
-
-		[easy]
-		17. `ResourceManager`: 
-			1. USE MOCKS FOR THIS ONE!
-		18. `RetainedArray`
-
-		[above-medium]
-		19. `ReadingSource`: 
-			1. Use real files
-			2. DO NOT use mocks for `IDecoder` - use real ones: 
-				1. 2 classes, specifically	
-
-		[above-medium]
-		20. `ReadingSource.manager`: 
-			1. Test this also, DESPITE `ResourceManager` tests
-
-		[easy]
-		22. `TableHandler`, `WrapHandler`: 
-			1. Test this NO SOONER than the respective `indexable`s
-			2. Use REAL `IIndexable`s of the library: 
-				1. MapClass-based
-				2. ModifiableMap
-
-		[medium-hardish]
-		23. ModifiableMap: 
-			1. plain index test
-			2. modify + index tests: 
-				1. one for *EACH* of the methods of `TableMap`.
-			3. DO NOT test with mocks - use REAL objects: 
-				1. `TableMap`
-				2. One `MapClass`
-				3. REMINDER: per `MapClass` - only ONE suite!
-		
-		[easy, tedious]
-		23. `aliases/`	- test everything
-		24. `utils/` - test everything
-		25. `is/` - test everything
-		26. `aliases.ts` - test everything
-		27. `constants.ts`: 
-				1. THESE HAVE SEMANTIC MEANING!
-					1. `MissingArgument` is supposed to be behaving like `undefined` ALWAYS
-					2. `isGoodIndex(BadIndex) === false`, `isGoodIndex(BadIndex + 1) === true`
-					3. Test NOTHING MORE HERE
-		28. `is.ts` - test everything
-		29. `utils.ts` - test everything
-		30. `samples/` - test everything (except for `samples/regex/refactor.ts` - that is just implementation details...)
-
-		[easy]
-		31. `modules/Stream/utils/StreamPosition.ts` - test everything
-
-		[easy, tedious]
-		38. `ArrayMap`, 
-			`BasicMap`, 
-			`CharCodeMap`, 
-			`PredicateMap`, 
-			`RegExpMap`, 
-			`SetMap`, 
-			`ObjectMap`
-		
-		[hard-ish]
-		39. CompositeStream
-			1. cases: 
-				1. many diverse streams [fewer; for greater confidence] 
-					1. This one would be simple and include only data-manipulation Stream-s
-				2. many diverse streams [more]	
-					1. This one would include a `FreeStream`
-					2. This one would include a `WriteStream`
-				2. one stream only 
-				3. no streams 
-
-		[easy-ish; varies wildly]
-		40. ConcatStream
-		41. DepthStream
-		42. FilterStream
-		43. FiniteStream
-		44. FreeStream: 
-			0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
-			1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
-			2. [maybe???] Add a framework for 'spying' on methods of objects here?
-				Reason: one needs to ENSURE that the `.free` method *GETS CALLED*, 
-					no matter what. Reason being: if we DON'T know that, we DON'T 
-						know if the thing is actually *effective*. 
-
-				Thus, possible solutions to the dilemma: 
-					1. add a library [with existing like 'Jest' - good for resume]
-						This'll additionally require: 
-							1. accessing of `ObjectPool.prototype`, saving reference
-								To save the '.freeMethodObservable = jest.spyOn(ObjectPool.prototype, "free")'
-							2. checking the presence of the call on each iteration inside 
-								a test of `FreeStream`, via the `.freeMethodObservable.mock.calls[i]`
-					2. creating a fake `ObjectPool`-like object, which would register the `.free/.create` calls, 
-						which would be then employed as-desired
-						Then, one would need to: 
-
-							1. create an interface for `IObjectPool`
-							2. use it EVERYWHERE instead of the "ordinary" 'ObjectPool' classs objects: 
-								1. That includes `FreeStream`
-							3. write a dummy-mock-class for a specific type of "poolable" objects, create-d/free-d inside the `FreeStream`
-							4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
-				
-				CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
-		46. HandlerStream
-		47. IndexStream
-		48. InputStream
-		49. InterleaveStream
-		50. LazyStream
-		51. LimitStream
-		52. LoopStream
-		53. StorageStream
-		54. PeekStream
-		55. PosStream
-		56. SingletonStream
-		57. WriterStream
-		60. AccumulatorStream
-		61. ByteStream
-		62. SingleNodeStream
-		63. NodeStream
-
-	TODO: chase down all leftover 'TODO's inside the code: 
-		Search: // TODO, // *, // !, // ?, // ^, // %
-
-	TODO: BENCHMARK: 
-		1. RotationBuffer vs 'shift/unshift'-based solution: 
-			0. Generalize the `PeekStream` to a common "abstract" ancestor
-				1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
-			1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]
-			2. Compare the two on a large [and relatively simple] input that utilizes `TokenChooser`, with : 
-				0. benchmark 0 - 0-1 lookaheads [not very ambigious at all]
-				1. benchmark 1 - 0-3 lookaheads [somewhat intensive/ambigious - many times - doesn't require any lookaheads]
-				2. benchmark 2 - 3-12 lookaheads [IS intensive/ambigious - many times - DOES reuqire lookaheads]
-
-				IF there is *any* performance benefit, either: 
-					1. replace the 'RotationBuffer'-based version with 'shift/unshift'-based
-					2. make it so that the `PeekStream` uses appropriate 
-
-	TODO: test each (public) export: 
-		AUTOMATICALLY - let they be imported via the "."-path notation. 
-		Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`
-
-	TODO: add the MISSING `.manager: ResourceManager` cases for the `IByteSource` 
-		and other `IResource`s that ahve been skipped. 
-
-	TODO: Tests
-		1. TEST the internal/ (only what makes sense)
-		2. Test the public exports: 
-			1. ALL classes
-			2. ALL utils
-			3. ALL samples
-		3. Test that the LIST of library exports is correct: 
-			1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
-				Ensures that ALL the needed exports are available
-			2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
-
-		VITAL NOTE: employ the new `ClassTest + MethodTest(s)` model. 
-			Reason: allows for using the `ICopiable` to write tests in a much more concise fashion, 
-				treating each class instance as a "test starting point", from which one can test various methods. 
-					Saves A LOT of boilerplate that is (usually) written when doing tests. 
+12. TESTING NOTE: `NodeSystem`:
+	1. Use `samples.Nodes.PlainNodes` for this test
+	2. NO MOCKS
+	3. Test ONLY after all the INode implementations have already been
+	
+13. TESTING NOTE: `ObjectPool`: 
+	1. Create a mock class
+	2. Use `ObjectPool(MockClass)` on it
+	3. Create some instances - test it...
+	4. BENCHMARK: ensure that this thing gives us REAL performance gains...
+		Otherwise, SCRAP IT: 
+			1. makes the library more complex
+			2. prevents "total" immutability due to object reuse
+			3. may be overkill...
+			
+19. TESTING NOTE: `ReadingSource`: 
+	1. Use real files
+	2. DO NOT use mocks for `IDecoder` - use real ones: 
+		1. 2 classes, specifically	
 
 
-CURRENT TODOS [top-down order...]:		
-	TODO: about exceptions: 
-		Some of those thrown by the library are far too generic (id est - need `internal/` special-purposed error-classes)
-		1. Walk through the library
-		2. Find those
-		3. Create specialized classes
+27. TESTING NOTE: `constants.ts`: 
+		1. THESE HAVE SEMANTIC MEANING!
+			1. `MissingArgument` is supposed to be behaving like `undefined` ALWAYS
+			2. `isGoodIndex(BadIndex) === false`, `isGoodIndex(BadIndex + 1) === true`
+			...ETC
+	
+39. TESTING NOTE: CompositeStream
+	1. cases: 
+		1. many diverse streams [fewer; for greater confidence] 
+			1. This one would be simple and include only data-manipulation Stream-s
+		2. many diverse streams [more]	
+			1. This one would include a `FreeStream`
+			2. This one would include a `WriteStream`
+		2. one stream only 
+		3. no streams 
 
-		Known cases: 
-			1. `throwSiblingsUnrenewable` method [PinpointRenewableList]
+TODO: test each (public) export: 
+	AUTOMATICALLY - let they be imported via the "."-path notation. 
+	Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`
 
+TODO: about exceptions: 
+	Some of those thrown by the library are far too generic (id est - need `internal/` special-purposed error-classes)
+	1. Walk through the library
+	2. Find those
+	3. Create specialized classes
+
+	Known cases: 
+		1. `throwSiblingsUnrenewable` method [PinpointRenewableList]
+
+TODOS [top-down order...]:		
 	TODO: Docs [initial, new, final]
 		Documentation order: 
 			2. fix wiki [add new stuff, delete old]
@@ -875,31 +686,6 @@ CURRENT TODOS [top-down order...]:
 			5. self-referencing: 	
 				1. provide links to interfaces for class pages
 				2. provide links ot implementations for interfaces to interface pages
-
-	TS1. DepthStream: create a new version - children-first traversal [call it `ChildrenStream`]; 
-		The 'DepthStream' (currently) is the pre-order tree traversal algorithm Stream-implementation; 
-		There should be ANOTHER - the post-order tree traversal; 
-
-		1. Create a new 'IStream' implementaiton for this - 'PostStream'; 
-			This is (particularly) useful for some types of interpreters; 
-
-			The Pre visits the node, then its children one-by-one starting from the beginning, then the siblings; 
-			The Post visits first the children, then the siblings, only THEN the parent [when there are NO MORE children - then the parent is visited]; 
-
-			Basically, Pre (parent-to-children) returns the nodes 'as they go' in the left-to-right traversal in the tree,
-				whereas Post returns them in 'reversed' order: for the parent to return, children must all return first; 
-
-			[Example usage: transform the binary '+' -- a + (b + c * (d + (k + f * r))) -> a + b + c * (d + k + f * r)]; 
-					
-	UT3. Add more complex 'Node' utilities. Based off previous 'one.js' v0.3.1 [the removed methods], add: 
-		1. deepSearch - searching inside the given Tree for a value with a given 'prop'
-		2. depth - calculating the depth of the given Tree
-		3. treeCount - counts the values of a given predicate for all items in the tree
-
-		ALSO: Add new methods to 'RecursiveNode': 
-
-			1. .reverse() - recursively reverses the given tree									
-
 
 	TODO: about 'mixins.js'
 		1. REWRITE the projectr later in your TypeScript-replacement 
@@ -1151,7 +937,6 @@ LATER TODOS:
 					2. add documentation to PUBLIC/PROTECTED methods *ONLY*!!!
 						Must be synced with `wiki`. 
 						LET the `public/protected` docs for these methods be THE SAME. 
-
 	
 [TOTAL LIST - final + leftovers...] TODOS for v0.3: 			
 				
