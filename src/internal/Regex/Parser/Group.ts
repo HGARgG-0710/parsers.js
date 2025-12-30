@@ -10,7 +10,6 @@ import {
 } from "../../../samples/Stream.js"
 import { consumableIterable } from "../../../utils/Stream.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
-import { HandleNoCaptureGroup } from "./Group/NoCapture.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 import { GroupBody } from "./Nodes.js"
 import { RegexMarks } from "./Recursive.js"
@@ -40,8 +39,7 @@ export const GroupBodyStream = CollectionStream(
 const GroupHandler = new Parametrized((extensions: Regex.Extension[]) =>
 	CurrCharHandler<IRawStreamArray>(
 		{
-			"#": HandleExtensionGroup.for(extensions),
-			"=": HandleNoCaptureGroup.for(extensions)
+			"#": HandleExtensionGroup.for(extensions)
 		},
 		HandlePlainGroup.for(extensions)
 	)
