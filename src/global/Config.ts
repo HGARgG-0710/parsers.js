@@ -7,7 +7,7 @@ class XMLConfig {
 }
 
 class RegexConfig {
-	errorPrinter: ErrorPrinter = ErrorPrinter.PlainErrorPrinter.instance
+	errorPrinter: ErrorPrinter = ErrorPrinter.Plain.instance
 }
 
 class UnicodeConfig {
