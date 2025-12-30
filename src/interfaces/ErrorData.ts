@@ -41,7 +41,11 @@ export interface IErrorData extends ICopiable {
 	readonly hasError: boolean
 	readonly errType: IErrorType
 	getInfo(keyName: string): any
-	setInfo(keyName: string, value: NonNullable<any>): void
+	setInfo(
+		keyName: string,
+		value: NonNullable<any>,
+		isTransient?: boolean
+	): void
 	markHandled(): void
 	refresh(): void
 	toError(): Error

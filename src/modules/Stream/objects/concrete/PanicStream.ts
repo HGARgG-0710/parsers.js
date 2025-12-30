@@ -57,7 +57,8 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return this.currErrData
 	}
 
-	// ! pre-doc: this is NOT intended for extension;
+	// ! pre-doc: this is NOT intended for extension [Template Method Design Pattern]
+	// * 	ALSO: it is intended that ONLY the 'IErrData' objects be thrown WHENEVER we are 
 	protected errHandler(errData: IErrorData): void {
 		this.setErrData(errData)
 		this.transitionState()

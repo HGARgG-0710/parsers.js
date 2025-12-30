@@ -15,6 +15,44 @@ import {
 	NoPosedLocatableError
 } from "./Error.js"
 
+class InfoMap {
+	private readonly transient = new Map<string, any>()
+	private readonly permanent = new Map<string, any>()
+
+	private isTransient(key: string) {
+		return this.transient.has(key)
+	}
+
+	private isPermanent(key: string) {
+		return this.permanent.has(key)
+	}
+
+	setTransient(key: string, value: any) {
+		if (this.isPermanent(key)) {
+			this.setPermanent(key, value)
+			return
+		}
+		this.transient.set(key, value)
+	}
+
+	setPermanent(key: string, value: any) {
+		if (this.isTransient(key)) {
+			this.setTransient(key, value)
+			return
+		}
+		this.permanent.set(key, value)
+	}
+
+	get(key: string) {
+		if (this.isPermanent(key)) return this.permanent.get(key)
+		return this.transient.get(key)
+	}
+
+	clearTransient() {
+		this.transient.clear()
+	}
+}
+
 /**
  * This is the abstract class implementing `IErrorData` serving as
  * the base, by providing methods and state implementation of the
@@ -22,12 +60,13 @@ import {
  * child class to provide the `abstract readonly pos: IErrorPosition`.
  */
 export abstract class BaseErrorData implements IErrorData {
-	private readonly infoMap = new Map<string, any>()
+	private readonly infoMap = new InfoMap()
+
 	private _errType: IErrorType
 	private _hasError: boolean = false
 
 	abstract readonly pos: IPrintablePosition
-	abstract refresh(): void
+	protected abstract baseRefresh(): void
 	abstract copy(): this
 
 	private set hasError(has: boolean) {
@@ -66,8 +105,18 @@ export abstract class BaseErrorData implements IErrorData {
 		return this.infoMap.get(keyName)
 	}
 
-	setInfo(keyName: string, value: NonNullable<any>): void {
-		this.infoMap.set(keyName, value)
+	setInfo(
+		keyName: string,
+		value: NonNullable<any>,
+		isTransient = true
+	): void {
+		if (isTransient) this.infoMap.setTransient(keyName, value)
+		else this.infoMap.setPermanent(keyName, value)
+	}
+
+	refresh() {
+		this.infoMap.clearTransient()
+		this.baseRefresh()
 	}
 }
 
@@ -111,8 +160,12 @@ export abstract class DelegateErrorData implements IErrorData {
 		this.delegate.markHandled()
 	}
 
-	setInfo(keyName: string, value: NonNullable<any>): void {
-		return this.delegate.setInfo(keyName, value)
+	setInfo(
+		keyName: string,
+		value: NonNullable<any>,
+		isTransient?: boolean
+	): void {
+		return this.delegate.setInfo(keyName, value, isTransient)
 	}
 
 	getInfo(keyName: string) {
@@ -135,7 +188,7 @@ export abstract class DelegateErrorData implements IErrorData {
 export class FileErrorData extends DelegateErrorData {
 	constructor(filename: string, delegate: IErrorData) {
 		super(delegate)
-		this.setInfo("filename", filename)
+		this.setInfo("filename", filename, false)
 	}
 }
 
@@ -161,7 +214,7 @@ export class StreamListErrorData extends BaseErrorData {
 		return this._pos!.locate()
 	}
 
-	refresh(): void {
+	protected baseRefresh(): void {
 		this.ensurePosNonNull()
 		this.locatePos()
 		this.markActive()

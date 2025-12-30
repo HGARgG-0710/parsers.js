@@ -193,6 +193,7 @@ export function prepareReviveError<T = any>(
 	errData: IErrorData,
 	stream: IStream<T>
 ) {
+	errData.refresh()
 	errData.setInfo("originStream", stream)
 	return errData
 }
@@ -221,6 +222,7 @@ export function prepareNonDecimalError(
 	errData: IErrorData,
 	nonDecimal: string
 ) {
+	errData.refresh()
 	errData.setInfo("nonDecimal", nonDecimal)
 	return errData
 }

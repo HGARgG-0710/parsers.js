@@ -41,6 +41,7 @@ function prepareInvalidUnicodeCodeLengthError(
 	errData: IErrorData,
 	length: number
 ) {
+	errData.refresh()
 	errData.setInfo("badCodeLength", length)
 	return errData
 }
@@ -62,6 +63,7 @@ export function validateUnicodeCodeLength(
 }
 
 function prepareHexError(errorData: IErrorData, hex: string) {
+	errorData.refresh()
 	errorData.setInfo("badHex", hex)
 	return errorData
 }
