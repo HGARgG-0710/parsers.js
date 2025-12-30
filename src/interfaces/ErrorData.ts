@@ -23,6 +23,8 @@ export interface IPrintablePosition extends ICopiable {
 	locate(): this
 }
 
+export type IErrorType = new (errData: IErrorData) => Error
+
 /**
  * This is an interface for representing a data of an error's
  * occurence during the process of parsing. It records a
@@ -37,10 +39,13 @@ export interface IPrintablePosition extends ICopiable {
 export interface IErrorData extends ICopiable {
 	readonly pos: IPrintablePosition
 	readonly hasError: boolean
+	readonly errType: IErrorType
 	getInfo(keyName: string): any
 	setInfo(keyName: string, value: NonNullable<any>): void
 	markHandled(): void
 	refresh(): void
+	toError(): Error
+	setErrType(errType: IErrorType): void
 }
 
 /**

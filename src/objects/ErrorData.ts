@@ -1,5 +1,6 @@
 import type {
 	IErrorData,
+	IErrorType,
 	IIndexCarrying,
 	IInputStream,
 	ILineIndex,
@@ -22,6 +23,7 @@ import {
  */
 export abstract class BaseErrorData implements IErrorData {
 	private readonly infoMap = new Map<string, any>()
+	private _errType: IErrorType
 	private _hasError: boolean = false
 
 	abstract readonly pos: IPrintablePosition
@@ -32,12 +34,28 @@ export abstract class BaseErrorData implements IErrorData {
 		this._hasError = has
 	}
 
-	get hasError() {
-		return this._hasError
+	private set errType(newErrType: IErrorType) {
+		this.errType = newErrType
 	}
 
 	protected markActive(): void {
 		this.hasError = true
+	}
+
+	get errType() {
+		return this._errType
+	}
+
+	get hasError() {
+		return this._hasError
+	}
+
+	setErrType(errType: IErrorType): void {
+		this.errType = errType
+	}
+
+	toError(): Error {
+		return new this.errType(this)
 	}
 
 	markHandled(): void {
@@ -65,35 +83,47 @@ export abstract class BaseErrorData implements IErrorData {
 export abstract class DelegateErrorData implements IErrorData {
 	private ["constructor"]: new (parentErrorData: IErrorData) => this
 
+	setErrType(errType: IErrorType): void {
+		this.delegate.setErrType(errType)
+	}
+
+	get errType() {
+		return this.delegate.errType
+	}
+
+	toError(): Error {
+		return this.delegate.toError()
+	}
+
 	refresh(): void {
-		this.parentErrorData.refresh()
+		this.delegate.refresh()
 	}
 
 	get pos() {
-		return this.parentErrorData.pos
+		return this.delegate.pos
 	}
 
 	get hasError() {
-		return this.parentErrorData.hasError
+		return this.delegate.hasError
 	}
 
 	markHandled(): void {
-		this.parentErrorData.markHandled()
+		this.delegate.markHandled()
 	}
 
 	setInfo(keyName: string, value: NonNullable<any>): void {
-		return this.parentErrorData.setInfo(keyName, value)
+		return this.delegate.setInfo(keyName, value)
 	}
 
 	getInfo(keyName: string) {
-		return this.parentErrorData.getInfo(keyName)
+		return this.delegate.getInfo(keyName)
 	}
 
 	copy(): this {
-		return new this.constructor(this.parentErrorData.copy())
+		return new this.constructor(this.delegate.copy())
 	}
 
-	constructor(protected readonly parentErrorData: IErrorData) {}
+	constructor(protected readonly delegate: IErrorData) {}
 }
 
 /**
@@ -103,8 +133,8 @@ export abstract class DelegateErrorData implements IErrorData {
  * parsed file.
  */
 export class FileErrorData extends DelegateErrorData {
-	constructor(filename: string, parentErrorData: IErrorData) {
-		super(parentErrorData)
+	constructor(filename: string, delegate: IErrorData) {
+		super(delegate)
 		this.setInfo("filename", filename)
 	}
 }

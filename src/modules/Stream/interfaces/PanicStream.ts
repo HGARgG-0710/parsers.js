@@ -1,3 +1,5 @@
-export interface IErrObjectFactory<T = any> {
-	getErrObject(): T
+import type { IErrorData } from "../../../interfaces.js"
+
+export interface IErrorObjectFactory<T = any> {
+	getErrorObject(errData: IErrorData): T
 }
