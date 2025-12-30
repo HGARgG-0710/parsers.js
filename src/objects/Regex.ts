@@ -27,7 +27,14 @@ export class Regex<T = any> {
 		return this.final.match(stream)
 	}
 
-	constructor(source: string, config: Regex.Config = Regex.Config.default) {
+	toString() {
+		return this.source
+	}
+
+	constructor(
+		private readonly source: string,
+		config: Regex.Config = Regex.Config.default
+	) {
 		this.final = RegexStorage.instance.get(source, config)
 	}
 }
