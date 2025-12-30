@@ -192,7 +192,6 @@ REMINDERs:
 			already-read file to a DIFFERENT 'LazyStream' (or wherever...) and use it JUST THE SAME. 
 			Same for 'ICharSource's - since the only implementation wraps around 'IByteSource'. 
 			This is important. 
-
 	
 	-1. REMINDER: on 'IBaseState.errors: Error[]': 
 		This is a crucial feature to test: the user MUST be able to: 
@@ -211,11 +210,40 @@ REMINDERs:
 		In particular, it allows 'tsc'-like support for error-handling; 
 		It'll be important for transpilers that want to deliver the same kind of level of 
 		error-reporting quality (and developer productivity). 
+
+	-1. REMINDER: ENSURE that there is a 'HashMap' (or an 'IndexMap'), such that 
+		it allows one to map an 'IErrorData' BY ITS '.errType'! 
+		This is important, since it'll allow the user the creation of respective 
+		'TableHandler's for implementing the 'IErrObjFactory'
 		
 IMMEDIATE: 
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
 	CURRENT: 		
+		-3. BIG BUG: with the 'IErrorData'-throwing: 
+			The 'ErrorPrinter.Plain' NO LONGER works with it. 
+			Same goes for the 'ErrorPrinter.WithLogger'. 
+			This is due to the fact that those expect an 'Error' object. 
+
+			SOLVE THIS. 
+			Allow for: 
+
+				1. 'IErrorData' to be thrown AND outputted
+				2. 'Error' to be thrown AND outputted
+
+			This'll (probably) require some sort of a branch inside the 'ErrorPrinter'. 
+
+		-2. REFACTOR: `Error.ts`: 
+			Specifically, the 'protected static prepare(errData: IErrData)' method 
+				is created SPECIFICALLY so that you integrate all the 'prepare*'-functions 
+				INTO the 'Error'-producing classes. 
+
+			1. CHANGE the signature of the static 'prepare' methods
+				to include all the NEEDED "parameters of failure"
+			2. USE the class-specific info-fields! 
+			3. REUSE as much as possible (namely - PUT the overriden methods into 
+				an APPROPRIATE part of the hierarchy)
+
 		-1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
@@ -514,7 +542,6 @@ TODO: Tests
 			Ensures that ALL the needed exports are available
 		2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
 
-
 44. TESTING NOTE: 'FreeStream': 
 	0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
 	1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
@@ -541,7 +568,6 @@ TODO: Tests
 					4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
 		
 		CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
-
 
 8. TESTING NOTE: TreeWalker: 
 	1. USE A MOCK HERE (`TreeLike` generic param...)
@@ -744,9 +770,6 @@ LATER TODOS:
 
 		POST-TODO: later - FIND NEW ONES... [if any]
 
-	3. FINALE OF THE V0.3 DEVELOPMENT: 
-		1. Regex
-
 	NOTES:						
 		NOTE [for later]: docs - 'protected abstract' properties...
 			DOCUMENT THOSEAS WELL. 
@@ -798,23 +821,6 @@ LATER TODOS:
 
 				USE the `TestChain` to express the chains of tests thusly. 
 				
-	TODO: OPTIMIZING `TypeScript` property definitions on classes: 
-			When [in TypeScript], one does: 
-				class C {
-					prop: P
-				}	 
-
-			This DOESN'T ACTUALLY create a property of 'prop', however, doing this: 
-
-				class C {
-					props: P = ...
-				}
-
-			DOES. UPON CREATION OF THE OBJECT ['constructor' call]; 
-			When one needs a PROTOTYPE PROPERTY, use the first variant (type-level only), 
-				where it's an INSTANCE PROPERTY, use the second, as doing so wil avoid the 
-					necessity for type-transitions in code. 
-
 	2. Workflows [GitHub Actions]: 
 		1. make-tag [like in one.js]: 
 			1. updates 'package.json' version; via `npm version`
@@ -835,22 +841,7 @@ LATER TODOS:
 			__NOT__ the `test` command. 
 			Reason: too different from project-to-project. 
 			These are the same. []
-	
-
-	JD1. [IMPORTANT] Expand JSDoc: 	
-			Read more about `JSDoc` in TypeScript at:
-				https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html	
-
-			1. use it more thoroughly (give higher priority for classes and so forth - not just a brief description + Wiki link)
-			2. expand its contents (argument types, @type, self-reference, etc)
-			3. [IMPORTANT] document early - another one of the banes of parsers.js: 
-				Due to the fact that development was (mostly) content- and feature- oriented, 
-					one very much forogt about importance of spending appropriate amount of 
-						time on documentation. Hence, one (slowly) started to forget what one 
-							was doing, and whether it even (sometimes) made any sense. 
-				Had there been documentation, certain specific poor choices may have been more avertable, and 
-					some little time could have been saved. 
-	
+		
 	4. Docs: 
 		WE1. CREATE A proper website with documentation for the library. 
 			Do benchmarks, et cetera...; 
