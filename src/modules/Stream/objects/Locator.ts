@@ -44,7 +44,7 @@ export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
  * A `WithPropDigger` case with `ownerDigger` as the `digger`.
  */
 export class Upwards<T = any> extends WithPath<T> {
-	static readonly follower = new OwnerFollower()
+	private static readonly follower = new OwnerFollower()
 
 	protected get follower(): IPathFollower {
 		return Upwards.follower
@@ -55,7 +55,7 @@ export class Upwards<T = any> extends WithPath<T> {
  * A `WithPropDigger` case with `resourceDigger` as the `digger`.
  */
 export class Downwards<T = any> extends WithPath<T> {
-	static readonly follower = new ResourceFollower()
+	private static readonly follower = new ResourceFollower()
 
 	protected get follower(): IPathFollower {
 		return Downwards.follower

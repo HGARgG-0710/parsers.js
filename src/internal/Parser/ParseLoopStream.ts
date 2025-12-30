@@ -1,10 +1,11 @@
 import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	IBaseParseStream,
-	IBaseParseStreamMaker,
+	IResultStateStream,
+	IResultStateStreamMaker,
 	IRootStream
 } from "../../interfaces.js"
+import type { IEndingProvider } from "../../interfaces/EndingProvider.js"
 import { PreCommonStream } from "../../modules/Stream/objects/templates.js"
 import { LoopStream } from "../../objects/Stream.js"
 import { CommonStreamStateExtractor } from "./CommonStreamStateExtractor.js"
@@ -12,12 +13,12 @@ import { type IStreamProvider } from "./StreamProvider.js"
 
 export class ParseLoopStream<T = any, Init = any>
 	extends PreCommonStream<T>
-	implements IRootStream<T>, IStreamProvider<T>, IBaseParseStream<T>
+	implements IRootStream<T>, IStreamProvider<T>, IResultStateStream<T>
 {
 	private readonly commonStateExtractor: CommonStreamStateExtractor<T>
-	private readonly streamGetter: LoopStream<IBaseParseStream<T>>
+	private readonly streamGetter: LoopStream<IResultStateStream<T>>
 
-	private _lastStream: IBaseParseStream<T>
+	private _lastStream: IResultStateStream<T>
 
 	private getNewDelegate() {
 		this._lastStream = this.delegate
@@ -28,15 +29,11 @@ export class ParseLoopStream<T = any, Init = any>
 		return this.streamGetter.curr
 	}
 
-	private currDelegateOver() {
-		return this.delegate.isEnd
-	}
-
-	lastStream(): IBaseParseStream<T> {
+	lastStream(): IResultStateStream<T> {
 		return this._lastStream
 	}
 
-	currStream(): IBaseParseStream<T> {
+	currStream(): IResultStateStream<T> {
 		return this.delegate
 	}
 
@@ -50,21 +47,29 @@ export class ParseLoopStream<T = any, Init = any>
 		if (isLastItem) this.getNewDelegate()
 	}
 
-	get isEnd() {
-		for (let i = 0; i < this.conseqEmptyStreamsAllowed; ++i) {
-			if (!this.currDelegateOver()) return false
-			this.getNewDelegate()
-		}
-		return this.currDelegateOver()
-	}
-
 	get state() {
 		return this.delegate.state
 	}
 
-	// ! pre-doc: 'isCurrEnd' ALWAYS 'false' ON 'Parser.Loop(...)' results!
+	// ! pre-doc: THIS has a NUMBER OF (almost-always-true) ASSUMPTIONS in order to be correct.
+	// * 	The user is, unfortunately, is left to maintain them.
+	// * 	THINK THOSE THROUGH, and list as part of this method's Wiki docs...
+	get isEnd() {
+		return this.delegate.isEnd && this.endProvider.isEnd()
+	}
+
+	// ! pre-doc: THIS has a NUMBER OF (almost-always-true) ASSUMPTIONS in order to be correct.
+	// * 	The user is, unfortunately, is left to maintain them.
+	// * 	THINK THOSE THROUGH, and list as part of this method's Wiki docs...
+	// % Specifically, here 'endProvider.isCurrEnd' is the "saviour hook" that enables the user to 
+	// * 	achieve the "correct" behaviour (although the precise implementation will vary on a 
+	// * 	case-by-case basis...)
 	isCurrEnd(): boolean {
-		return false
+		return (
+			this.delegate.isCurrEnd() &&
+			(this.endProvider.isEnd() ||
+				(!!this.endProvider.isCurrEnd && this.endProvider.isCurrEnd()))
+		)
 	}
 
 	private lastCommonStateExtract() {
@@ -72,12 +77,12 @@ export class ParseLoopStream<T = any, Init = any>
 	}
 
 	constructor(
-		input: Init,
-		streamMakerGetter: (i: number) => IBaseParseStreamMaker<Init, T>,
-		private readonly conseqEmptyStreamsAllowed: number = 0,
+		private readonly endProvider: IEndingProvider<Init>,
+		streamMakerGetter: (i: number) => IResultStateStreamMaker<Init, T>,
 		getState: () => Summat = object.empty
 	) {
 		super()
+		const input = endProvider.forItem
 		this.commonStateExtractor = new CommonStreamStateExtractor(
 			getState,
 			this

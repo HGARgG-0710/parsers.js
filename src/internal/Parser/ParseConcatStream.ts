@@ -1,8 +1,8 @@
 import { object } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import type {
-	IBaseParseStream,
-	IBaseParseStreamMaker,
+	IResultStateStream,
+	IResultStateStreamMaker,
 	IRootStream
 } from "../../interfaces.js"
 import { ConcatStream } from "../../objects/Stream.js"
@@ -10,8 +10,8 @@ import { CommonStreamStateExtractor } from "./CommonStreamStateExtractor.js"
 import { type IStreamProvider } from "./StreamProvider.js"
 
 export class ParseConcatStream<T = any, Init = any>
-	extends ConcatStream<T, IBaseParseStream<T>>
-	implements IStreamProvider<T>, IRootStream<T>, IBaseParseStream<T>
+	extends ConcatStream<T, IResultStateStream<T>>
+	implements IStreamProvider<T>, IRootStream<T>, IResultStateStream<T>
 {
 	private readonly commonStateExtractor: CommonStreamStateExtractor<T>
 
@@ -19,11 +19,11 @@ export class ParseConcatStream<T = any, Init = any>
 		return this.commonStateExtractor.fromLast()
 	}
 
-	override currStream(): IBaseParseStream<T> {
+	override currStream(): IResultStateStream<T> {
 		return super.currStream()
 	}
 
-	lastStream(): IBaseParseStream<T> {
+	lastStream(): IResultStateStream<T> {
 		return this.rawStreamAt(-1)
 	}
 
@@ -33,7 +33,7 @@ export class ParseConcatStream<T = any, Init = any>
 
 	constructor(
 		input: Init,
-		streamMakers: IBaseParseStreamMaker<Init, T>[],
+		streamMakers: IResultStateStreamMaker<Init, T>[],
 		getState: () => Summat = object.empty
 	) {
 		super(

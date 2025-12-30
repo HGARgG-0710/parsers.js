@@ -4,9 +4,10 @@ import type {
 	IErrorDataMaker,
 	IInputStream,
 	IParseStream,
-	IBaseParseStreamMaker,
+	IResultStateStreamMaker,
 	IRootStream
 } from "../interfaces.js"
+import type { IEndingProvider } from "../interfaces/EndingProvider.js"
 import { Parse } from "../internal/Parser/Parse.js"
 import { ParseConcatStream } from "../internal/Parser/ParseConcatStream.js"
 import { ParseLoopStream } from "../internal/Parser/ParseLoopStream.js"
@@ -102,7 +103,7 @@ export namespace Parser {
 	// ^ 	VITAL NOTE: this CAN'T (typically) be nested;
 	// 			Important, since 'ParseStream' *does* properly support it (somewhat confusingly);
 	export function Concat<Init = any, Out = any>(
-		streamMakers: IBaseParseStreamMaker<Init, Out>[]
+		streamMakers: IResultStateStreamMaker<Init, Out>[]
 	) {
 		return function (getState?: () => Summat) {
 			return function (input: Init): IRootStream<Out> {
@@ -112,9 +113,9 @@ export namespace Parser {
 	}
 
 	export function Nested<Init = any, Out = any>(
-		open: IBaseParseStreamMaker<Init, Out>,
-		between: IBaseParseStreamMaker<Init, Out>[],
-		close: IBaseParseStreamMaker<Init, Out>
+		open: IResultStateStreamMaker<Init, Out>,
+		between: IResultStateStreamMaker<Init, Out>[],
+		close: IResultStateStreamMaker<Init, Out>
 	) {
 		return [open, ...between, close]
 	}
@@ -128,15 +129,14 @@ export namespace Parser {
 	// 		no guarantee of it working is provided by the library (although, no doubt due to
 	// 		its highly flexible design SOME applications are still possible and valid...)
 	export function Loop<Init = any, Out = any>(
-		streamMakerGetter: (i: number) => IBaseParseStreamMaker<Init, Out>,
-		conseqEmptyStreamsAllowed?: number
+		streamMakerGetter: (i: number) => IResultStateStreamMaker<Init, Out>,
+		endProviderMaker: (input: Init) => IEndingProvider<Init>
 	) {
 		return function (getState?: () => Summat) {
-			return function (input: Init) {
+			return function (input: Init): IRootStream<Out> {
 				return new ParseLoopStream(
-					input,
+					endProviderMaker(input),
 					streamMakerGetter,
-					conseqEmptyStreamsAllowed,
 					getState
 				)
 			}

@@ -1,6 +1,6 @@
-import type { IBaseParseStream } from "../../interfaces.js"
+import type { IResultStateStream } from "../../interfaces.js"
 
 export interface IStreamProvider<T = any> {
-	lastStream(): IBaseParseStream<T>
-	currStream(): IBaseParseStream<T>
+	lastStream(): IResultStateStream<T>
+	currStream(): IResultStateStream<T>
 }

@@ -12,12 +12,12 @@ import type {
 	IStreamArray
 } from "../interfaces/Stream.js"
 
-export type IBaseParseStream<T = any> = IOwnedStream<T> &
+export type IResultStateStream<T = any> = IOwnedStream<T> &
 	IStateHaving<IBaseState>
 
-export type IBaseParseStreamMaker<Init = any, Out = any> = (
+export type IResultStateStreamMaker<Init = any, Out = any> = (
 	getState?: () => Summat
-) => (input: Init) => IBaseParseStream<Out>
+) => (input: Init) => IResultStateStream<Out>
 
 export interface IBaseState extends Summat {
 	readonly errors: Error[]
