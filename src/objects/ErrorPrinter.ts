@@ -8,6 +8,7 @@ import type {
 	IShutdownHandler
 } from "../interfaces.js"
 import { toNewline } from "../samples/space.js"
+import { isError } from "../utils.js"
 
 function newlines(error: string, offset: number = 0) {
 	return `${error}${getNewline().repeat(
@@ -21,7 +22,7 @@ function getNewline(): string {
 
 export class ErrorPrinter {
 	private getError(errorLike: Error | IErrorConvertible) {
-		return errorLike instanceof Error ? errorLike : errorLike.toError()
+		return isError(errorLike) ? errorLike : errorLike.toError()
 	}
 
 	protected errHandler(errorLike: Error | IErrorConvertible) {
