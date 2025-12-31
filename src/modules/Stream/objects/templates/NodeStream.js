@@ -15,6 +15,9 @@ export const NodeStream = new mixin(
 			free() {
 				if (this.pool) this.pool.free(this)
 			}
+		}, 
+		constructor(resource) {
+			this.super.CustomLinkedStream.constructor.call(this, resource)
 		}
 	},
 	[RenewerStream, Stateful, CustomLinkedStream, DyssyncStream]

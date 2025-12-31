@@ -26,7 +26,7 @@ const _SingletonStream = new mixin(
 			}
 		},
 		constructor(resource) {
-			this.super.OwningStream.constructor.call(this, resource)
+			this.super.CustomLinkedStream.constructor.call(this, resource)
 		}
 	},
 	[CustomLinkedStream, TrivialStream]

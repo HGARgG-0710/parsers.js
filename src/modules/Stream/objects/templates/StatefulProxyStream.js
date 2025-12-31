@@ -10,6 +10,9 @@ export const StatefulProxyStream = new mixin(
 				this.super.ProxyStream.setState.call(this, state)
 				this.super.Stateful.setState.call(this, state)
 			}
+		},
+		constructor(delegate) {
+			this.super.ProxyStream.constructor.call(this, delegate)
 		}
 	},
 	[ProxyStream, Stateful]

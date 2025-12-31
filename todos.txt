@@ -37,17 +37,13 @@ IDEA [later]:
 [v0.3]
 
 REMINDERs: 
-	0. REMINDER: the 'IgnoreCase' '(#i...)' is NOT recursively applied: 
-		It is shallow. 
-		Meaning - one CAN have it used DEEPLY *or* NON-DEEPLY, and have appropriate results. 
-		Every time that one splits into a DIFFERENT: 
-			1. ...|...|...
-			2. (...(...innerstuff))
-		ONE NO LONGER HAS THE (#i...) THING ACTIVE. 
-		However, it DOES affect all immediate CharState-s and CodeRangeState-s. 
+	0. REMINDER: the 'IgnoreCase' '(#i...)' IS recursively applied: 
+		It affects *all* the inner CharState-s and CodeRangeState-s. 
 		IT WORKS ON \p{...} AS WELL!!!
-		Reason: this enables a LARGER SET OF PATTERNS recognizable 
-			by the language that have a "nice" shortcut. 
+		Reason: 
+			This enables interoperability with other Extension Groups 
+				(such as the "optional multiline" #m, which is to be used for testing the feature). 
+			Otherwise, this would have been impossible...
 
 	REMINDER: about the `IStepPredicate`: 
 		The value (both input AND output) CAN BE < 0. 
@@ -61,9 +57,6 @@ REMINDERs:
 		The `AsInt` PROHIBITS the non-decimal characters ALTOGETHER!!!
 		(note: that must be checked AS WELL!!!)
 		
-	1. REMINDER [for tests]: the deep (=...(=...)) are supposed to NOT WORK, i.e. - ONLY the first one is registered, 
-		the SECOND ONE is interpreted *DIFFERENTLY*!!!
-
 	2. Regex [testing]: 
 		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
 		
@@ -419,10 +412,10 @@ TODOs:
 REMINDER: Final Task Order
 	1. Regex: completing features/fixes
 	2. minor stuff (finishing touches!)
-	3. jsdoc
-	4. tests [possibly - with finalization, if new redundancies are found]
+	3. tests [possibly - with finalization, if new redundancies are found]
 		1. also - some minor todo completion [those that cause bugs, more specifically...]; 
-	5. wiki
+	4. wiki [Vue.js SSG TypeScript + GitHub Pages for hosting]
+	5. jsdoc [URLs only]
 
 IMMIDIATE NOTES:
 	-4. [docs - reminder] Add a diagram of relations of various `IStream` traits present within the library. 
@@ -432,14 +425,6 @@ IMMIDIATE NOTES:
 		Describe the `this.state.parse.renewStream(this.resource)` in some detail. 
 		Let there be a description SPECIFICALLY for cases when children die BEFORE parents SEVERAL times. 
 		Let there be AN EXAMPLE class (like one of those in the `Regex` parser)
-
-notes on `RegexParser` development: 
-	DONE - DECISIONS [hard]: 
-		0. IMPORTANT: for performance reasons - USE THOMPSON'S REGEX ALGORITHM!
-			Read this: 
-				1. https://swtch.com/~rsc/regexp/regexp1.html
-				2. https://cs.stackexchange.com/questions/138275/worst-case-complexity-of-quantifiers-in-thompsons-construction
-				3. https://en.wikipedia.org/wiki/Thompson%27s_construction#Use_in_string_pattern_matching		
 
 TODO: chase down all leftover 'TODO's inside the code: 
 	Search: // TODO, // *, // !, // ?, // ^, // %
@@ -498,7 +483,6 @@ CURRENTLY BEING DONE:
 
 					2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
 				6. PredicateStream - pick those that are not a ','
-
 
 TODO: BENCHMARK: 
 	1. RotationBuffer vs 'shift/unshift'-based solution: 
@@ -581,7 +565,6 @@ TODO [about tests]:
 		2. MUST include toplevel public exports
 	3. IMPLEMENT one-by-one [rapidly]; 
 
-
 6. TESTING NOTE: `Parser.ts` stuff: 
 	0. Do ONLY once `TokenChooser` and `Regex` has been finished and tested
 	1. Test ONLY as a part of "demo"-testing: 
@@ -614,7 +597,6 @@ TODO [about tests]:
 			2. Each one should be given a SINGLE case of an `IMapClass/whatever` to work on
 			3. Each one given SHOULD BE REAL!!! [no mocks]
 
-
 10. TESTING NOTE: `LoadedU8`, `LoadedU16`, `Loaded8`: 
 	1. Use real files
 	2. NO MOCKS
@@ -642,7 +624,6 @@ TODO [about tests]:
 	1. Use real files
 	2. DO NOT use mocks for `IDecoder` - use real ones: 
 		1. 2 classes, specifically	
-
 
 27. TESTING NOTE: `constants.ts`: 
 		1. THESE HAVE SEMANTIC MEANING!
@@ -745,14 +726,6 @@ LATER TODOS:
 		NOTE: *do not* do it everywhere. 
 			Reason - may break some code. 	
 			
-	TODO: TRANSFORM "excessive" 'mixin's INTO `abstract class`es
-		These: 
-			1. are convertible to ordinary/abstract classes
-			2. have 0-1 parents
-			3. very unlikely to change
-
-		POST-TODO: later - FIND NEW ONES... [if any]
-
 	NOTES:						
 		NOTE [for later]: docs - 'protected abstract' properties...
 			DOCUMENT THOSEAS WELL. 
