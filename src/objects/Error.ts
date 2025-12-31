@@ -4,6 +4,7 @@ import type {
 	IDebugNamed,
 	IErrorData,
 	IErrorDataGetter,
+	IErrorType,
 	IOwnedStream,
 	IPrintablePosition,
 	IRenewerStream,
@@ -47,13 +48,16 @@ export abstract class ConstructorError extends Error {
  *
  * Can be easily used with `ErrorStream` descendant.
  */
-export abstract class ParseError extends ConstructorError {
+export abstract class ParseError<
+	PrepareArgs extends any[] = []
+> extends ConstructorError {
+	protected static populate(errData: IErrorData, ...args: any[]) {}
+
 	// NOTE: this is *only* supposed to be called by CONCRETE child-classes!
-	static prepare(
-		this: new (errorData: IErrorData) => Error,
-		errData: IErrorData
-	) {
-		errData.setErrType(this)
+	static prepare(errData: IErrorData, ...items: any[]) {
+		errData.refresh()
+		this.populate(errData, ...items)
+		errData.setErrType(this as unknown as IErrorType)
 		return errData
 	}
 
@@ -98,17 +102,6 @@ export function findErrorDataUpstream<T = any>(stream: IOwnedStream<T>) {
 	return state.errData
 }
 
-export function prepareExpectError<T = any>(
-	errData: IErrorData,
-	received: T,
-	expected: any
-) {
-	errData.refresh()
-	errData.setInfo("received", received)
-	errData.setInfo("expected", expected)
-	return errData
-}
-
 export function expect<T = any>(item: T) {
 	return function (
 		stream: IStream<T>,
@@ -116,7 +109,9 @@ export function expect<T = any>(item: T) {
 	) {
 		if (stream.curr !== item)
 			throw ParseError.ExpectedItemMissingError.prepare(
-				prepareExpectError(errDataGetter(stream), stream.curr, item)
+				errDataGetter(stream),
+				stream.curr,
+				item
 			)
 	}
 }
@@ -128,20 +123,24 @@ export function expectKind<T = any>(kind: ITypeCheckable & IDebugNamed) {
 	) {
 		if (!kind.is(stream.curr))
 			throw ParseError.ExpectedKindMissingError.prepare(
-				prepareExpectError(errDataGetter(stream), stream.curr, kind)
+				errDataGetter(stream),
+				stream.curr,
+				kind
 			)
 	}
 }
 
-export function allow<T = any>(..._items: T[]) {
-	const items = new Set(_items)
+export function allow<T = any>(...items: T[]) {
+	const itemSet = new Set(items)
 	return function (
 		stream: IStream<T>,
 		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 	) {
-		if (!items.has(stream.curr))
+		if (!itemSet.has(stream.curr))
 			throw ParseError.ExpectedInItemListMissingError.prepare(
-				prepareExpectError(errDataGetter(stream), stream.curr, _items)
+				errDataGetter(stream),
+				stream.curr,
+				items
 			)
 	}
 }
@@ -158,21 +157,13 @@ export function skip<T = any>(...items: T[]) {
 	}
 }
 
-export function prepareUnexpectedItemError<T = any>(
-	errData: IErrorData,
-	received: T
-) {
-	errData.refresh()
-	errData.setInfo("received", received)
-	return errData
-}
-
 export function unexpected<T = any>(
 	stream: IStream<T>,
 	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 ): never {
 	throw ParseError.UnexpectedItemError.prepare(
-		prepareUnexpectedItemError(errDataGetter(stream), stream.curr)
+		errDataGetter(stream),
+		stream.curr
 	)
 }
 
@@ -184,18 +175,11 @@ export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
 		const currItem = stream.curr
 		for (const kind of kinds) if (kind.is(currItem)) return
 		throw ParseError.ExpectedInKindListMissingError.prepare(
-			prepareExpectError(errDataGetter(stream), stream.curr, kinds)
+			errDataGetter(stream),
+			stream.curr,
+			kinds
 		)
 	}
-}
-
-export function prepareReviveError<T = any>(
-	errData: IErrorData,
-	stream: IStream<T>
-) {
-	errData.refresh()
-	errData.setInfo("originStream", stream)
-	return errData
 }
 
 export function tryReviveChild<T = any>(
@@ -204,7 +188,8 @@ export function tryReviveChild<T = any>(
 ) {
 	if (stream.reviveChild() === false)
 		throw ParseError.CannotReviveChildError.prepare(
-			prepareReviveError(errDataGetter(stream), stream)
+			errDataGetter(stream),
+			stream
 		)
 }
 
@@ -213,18 +198,10 @@ export function ensureChildUnrevivable<T = any>(
 	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
 ) {
 	if (stream.reviveChild() === true)
-		throw ParseError.ChildIsNotUnrevivable.prepare(
-			prepareReviveError(errDataGetter(stream), stream)
+		throw ParseError.ChildIsNotUnrevivableError.prepare(
+			errDataGetter(stream),
+			stream
 		)
-}
-
-export function prepareNonDecimalError(
-	errData: IErrorData,
-	nonDecimal: string
-) {
-	errData.refresh()
-	errData.setInfo("nonDecimal", nonDecimal)
-	return errData
 }
 
 export function ensureCurrDecimal(
@@ -234,13 +211,18 @@ export function ensureCurrDecimal(
 	const maybeDecimal = input.curr
 	if (!isDecimal(maybeDecimal))
 		throw ParseError.ExpectedDecimalError.prepare(
-			prepareNonDecimalError(errDataGetter(input), maybeDecimal)
+			errDataGetter(input),
+			maybeDecimal
 		)
 }
 
 export namespace ParseError {
 	export abstract class MessageBuilderParseError extends ParseError {
 		private _errData: IErrorData
+
+		private setErrData(errorData: IErrorData) {
+			this._errData = errorData
+		}
 
 		protected get separator() {
 			return `,${getNewline()}`
@@ -266,15 +248,14 @@ export namespace ParseError {
 
 		protected getFullMessage() {
 			const optional = this.printOptional()
+			const mandatory = this.printMandatory()
 			return (
-				optional +
-				(optional.length ? this.separator : "") +
-				this.printMandatory()
+				optional + (optional.length ? this.separator : "") + mandatory
 			)
 		}
 
 		protected makeMessage(errorData: IErrorData): string {
-			this._errData = errorData
+			this.setErrData(errorData)
 			const message = this.getFullMessage()
 			errorData.markHandled()
 			return message
@@ -308,6 +289,23 @@ export namespace ParseError {
 	}
 
 	export abstract class ExpectedMissingError extends GenericParseError {
+		protected static override populate<T = any>(
+			errData: IErrorData,
+			received: T,
+			expected: any
+		): void {
+			errData.setInfo("received", received)
+			errData.setInfo("expected", expected)
+		}
+
+		static override prepare<T = any>(
+			errData: IErrorData,
+			received: T,
+			expected: any
+		) {
+			return super.prepare(errData, received, expected)
+		}
+
 		protected abstract printExpected(expected: any): string
 
 		protected printReceived(received: any) {
@@ -355,6 +353,20 @@ export namespace ParseError {
 	}
 
 	export class UnexpectedItemError extends GenericParseError {
+		protected static override populate<T = any>(
+			errData: IErrorData,
+			received: T
+		): void {
+			errData.setInfo("received", received)
+		}
+
+		static override prepare<T = any>(
+			errData: IErrorData,
+			received: T
+		): IErrorData {
+			return super.prepare(errData, received)
+		}
+
 		private printReceived(received: any) {
 			return `received unexpected input item: ${tryDebugPrinting(
 				received
@@ -416,11 +428,47 @@ export namespace ParseError {
 		}
 	}
 
-	export class CannotReviveChildError<T = any> extends StreamStackError<T> {}
+	export abstract class StreamRevivalError<
+		T = any
+	> extends StreamStackError<T> {
+		protected static override populate<T = any>(
+			errData: IErrorData,
+			stream: IStream<T>
+		): void {
+			errData.setInfo("originStream", stream)
+		}
 
-	export class ChildIsNotUnrevivable<T = any> extends StreamStackError<T> {}
+		static override prepare<T = any>(
+			errData: IErrorData,
+			stream: T
+		): IErrorData {
+			return super.prepare(errData, stream)
+		}
+	}
+
+	export class CannotReviveChildError<
+		T = any
+	> extends StreamRevivalError<T> {}
+
+	export class ChildIsNotUnrevivableError<
+		T = any
+	> extends StreamRevivalError<T> {}
 
 	export class ExpectedDecimalError extends GenericParseError {
+		protected static override populate(
+			errData: IErrorData,
+			nonDecimal: string
+		): void {
+			errData.setInfo("nonDecimal", nonDecimal)
+		}
+
+		static override prepare(
+			errData: IErrorData,
+			nonDecimal: string
+		): IErrorData {
+			return super.prepare(errData, nonDecimal)
+		}
+
 		private printNonDecimal(nonDecimal: string) {
 			return `expected a decimal value, received: ${nonDecimal}`
 		}

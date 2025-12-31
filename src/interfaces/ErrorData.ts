@@ -39,7 +39,7 @@ export type IErrorType = new (errData: IErrorData) => Error
 export interface IErrorData extends ICopiable {
 	readonly pos: IPrintablePosition
 	readonly hasError: boolean
-	readonly errType: IErrorType
+	readonly errType: IErrorType | null
 	getInfo(keyName: string): any
 	setInfo(
 		keyName: string,

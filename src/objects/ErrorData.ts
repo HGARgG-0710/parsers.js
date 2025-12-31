@@ -62,7 +62,7 @@ class InfoMap {
 export abstract class BaseErrorData implements IErrorData {
 	private readonly infoMap = new InfoMap()
 
-	private _errType: IErrorType
+	private _errType: IErrorType | null
 	private _hasError: boolean = false
 
 	abstract readonly pos: IPrintablePosition
@@ -73,8 +73,12 @@ export abstract class BaseErrorData implements IErrorData {
 		this._hasError = has
 	}
 
-	private set errType(newErrType: IErrorType) {
+	private set errType(newErrType: IErrorType | null) {
 		this.errType = newErrType
+	}
+
+	private resetErrType() {
+		this.errType = null
 	}
 
 	protected markActive(): void {
@@ -94,6 +98,11 @@ export abstract class BaseErrorData implements IErrorData {
 	}
 
 	toError(): Error {
+		// TODO: make this LESS generic!
+		if (!this.hasError || !this.errType)
+			throw new Error(
+				"Attempting to extract an `Error` object out of an empty `IErrorData` object!"
+			)
 		return new this.errType(this)
 	}
 
@@ -115,8 +124,10 @@ export abstract class BaseErrorData implements IErrorData {
 	}
 
 	refresh() {
+		this.resetErrType()
 		this.infoMap.clearTransient()
 		this.baseRefresh()
+		this.markActive()
 	}
 }
 
@@ -217,7 +228,6 @@ export class StreamListErrorData extends BaseErrorData {
 	protected baseRefresh(): void {
 		this.ensurePosNonNull()
 		this.locatePos()
-		this.markActive()
 	}
 
 	get pos() {
