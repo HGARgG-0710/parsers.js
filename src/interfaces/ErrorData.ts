@@ -25,6 +25,10 @@ export interface IPrintablePosition extends ICopiable {
 
 export type IErrorType = new (errData: IErrorData) => Error
 
+export interface IErrorConvertible {
+	toError(): Error
+}
+
 /**
  * This is an interface for representing a data of an error's
  * occurence during the process of parsing. It records a
@@ -36,7 +40,7 @@ export type IErrorType = new (errData: IErrorData) => Error
  * may be important for various user-defined errors. The map is
  * accessible via the `getInfo/setInfo` methods.
  */
-export interface IErrorData extends ICopiable {
+export interface IErrorData extends ICopiable, IErrorConvertible {
 	readonly pos: IPrintablePosition
 	readonly hasError: boolean
 	readonly errType: IErrorType | null
@@ -48,7 +52,6 @@ export interface IErrorData extends ICopiable {
 	): void
 	markHandled(): void
 	refresh(): void
-	toError(): Error
 	setErrType(errType: IErrorType): void
 }
 

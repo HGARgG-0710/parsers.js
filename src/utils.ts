@@ -41,6 +41,8 @@ export function tryCopy<T = any>(x: T) {
  */
 export const isFreeable = structCheck<IFreeable>({ free: isFunction })
 
+export const isError = (x: any): x is Error => x instanceof Error
+
 export * as Debug from "./utils/Debug.js"
 export * as IndexMap from "./utils/IndexMap.js"
 export * as Node from "./utils/Node.js"

@@ -97,7 +97,6 @@ export class MissingImplementationError extends ConstructorError {
 
 export function findErrorDataUpstream<T = any>(stream: IOwnedStream<T>) {
 	const state = locateState(stream)
-	// TODO: *resove* the issue of when we're needing to throw an IErrorData! This is supposed to be handled! (as well...)
 	if (!state) throw new NoStatefulLocatableError()
 	return state.errData
 }

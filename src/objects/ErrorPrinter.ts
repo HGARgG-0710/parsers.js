@@ -1,6 +1,7 @@
 import assert from "assert"
 import { Config } from "../global.js"
 import type {
+	IErrorConvertible,
 	IFormatterHandler,
 	ILogger,
 	ILoggerHandler,
@@ -19,6 +20,16 @@ function getNewline(): string {
 }
 
 export class ErrorPrinter {
+	private getError(errorLike: Error | IErrorConvertible) {
+		return errorLike instanceof Error ? errorLike : errorLike.toError()
+	}
+
+	protected errHandler(errorLike: Error | IErrorConvertible) {
+		const error = this.getError(errorLike)
+		this.logError(error)
+		this.shutDown(error)
+	}
+
 	execute<T = any>(f: () => T) {
 		try {
 			return f()
@@ -31,14 +42,9 @@ export class ErrorPrinter {
 		this.errorLogger(this.errorFormatter(error))
 	}
 
-	// ! pre-doc: a convinience method for logging out all the errors; 
+	// ! pre-doc: a convinience method for logging out all the errors;
 	logErrors(errors: Error[]) {
 		for (const error of errors) this.logError(error)
-	}
-
-	protected errHandler(error: Error) {
-		this.logError(error)
-		this.shutDown(error)
 	}
 
 	protected constructor(

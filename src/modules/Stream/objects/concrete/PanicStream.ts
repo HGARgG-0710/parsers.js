@@ -1,4 +1,5 @@
 import type { IErrorData } from "../../../../interfaces.js"
+import { isError } from "../../../../utils.js"
 import { finish } from "../../../../utils/Stream.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
 import type { IErrorObjectFactory } from "../../interfaces/PanicStream.js"
@@ -57,13 +58,33 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return this.currErrData
 	}
 
-	// ! pre-doc: this is NOT intended for extension [Template Method Design Pattern]
-	// * 	ALSO: it is intended that ONLY the 'IErrData' objects be thrown WHENEVER we are 
-	protected errHandler(errData: IErrorData): void {
+	// ! Template Method
+	private handleErrData(errData: IErrorData) {
 		this.setErrData(errData)
 		this.transitionState()
 		this.panic()
 		this.registerError()
+	}
+
+	// ! pre-doc: THIS IS A HOOK [can be overriden]
+	// * By default, one is expecting ALL the thrown 'Error's to be NON-RECOVERABLE.
+	//  	In particular, the library (typically) throws errors in situations related to
+	//  	INCORRECT FRAMEWORK USAGE, and NOT the matters related to syntax-errors during
+	//  	parsing. In conclusion, unless the user wants to enable RECOVERY from the 'Error'
+	//  	objects thrown AS WELL (which is, in general, impossible, unless they METICULOUSLY
+	//  	try to separate Error-Types into "recoverable" and "non-recoverable", 
+	//  	which is a lot of work), they are probably better off *not* touching this specific 
+	//  	hook at all (similarly to much of the library's defaults, since it's designed to 
+	//  	support a plethora of varying approaches out-of-the-box). 
+	protected handleCommon(error: Error) {
+		throw error
+	}
+
+	// ! pre-doc: this is NOT intended for overriding [Template Method Design Pattern]
+	// * 	ALSO: it is intended that ONLY the 'IErrData' objects be thrown WHENEVER we are
+	protected errHandler(errLike: Error | IErrorData): void {
+		if (isError(errLike)) this.handleCommon(errLike)
+		else this.handleErrData(errLike)
 	}
 
 	constructor(
