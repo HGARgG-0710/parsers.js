@@ -141,8 +141,7 @@ class SubarrayLimits<T = any> {
 
 // ! predoc: the 'start' and 'end' are BOTH INCLUSIVE!
 interface ISanitizingAgent<T = any> {
-	setTarget(target: IMatchResult<T>): void
-	apply(raw: IMatchResult<T>, start: number, end: number): void
+	apply(raw: IMatchResult<T>, start: number, end: number): IPartialMatch<T>[]
 }
 
 class MatchSanitizer<T = any> {
@@ -162,6 +161,15 @@ class MatchSanitizer<T = any> {
 		if (this.nextLimits) this.nextLimits.tryAdd(withItem)
 	}
 
+	private tryUpdateNextLimitsFor(items: IMatchResult<T>) {
+		for (const item of items) this.tryUpdateNextLimit(item)
+	}
+
+	private recordCleanItems(from: IPartialMatch<T>[], into: IMatchResult<T>) {
+		this.tryUpdateNextLimitsFor(from)
+		into.push(...from)
+	}
+
 	// ! pre-doc: DOCUMENT THIS [internal JSDOC - *NOT* part or Wiki; REMINDER: create *proper* JSDoc for INTERNAL stuff
 	// !	in case you EVER have to maintain this for your future projects with new requirements...
 	// %	Specifically, this is an instance of Design-By-Contract; Document ALL such instances INTERNAL *and* public
@@ -171,14 +179,14 @@ class MatchSanitizer<T = any> {
 	// 		(implicit, by construction; introduces some Connescence);
 	private toSanitized(ranges: ISubarrLimits): IMatchResult<T> {
 		const sanitized: IMatchResult<T> = []
-		this.agent.setTarget(sanitized)
 		let i = 0
 		for (let currRngInd = 0; currRngInd < ranges.length; ++currRngInd) {
 			const [start, end] = ranges[currRngInd]
-			const itemsNewlyInserted = this.rawResult.slice(i, start)
-			for (const item of itemsNewlyInserted) this.tryUpdateNextLimit(item)
-			sanitized.push(...itemsNewlyInserted)
-			this.agent.apply(this.rawResult, start, end)
+			this.recordCleanItems(this.rawResult.slice(i, start), sanitized)
+			this.recordCleanItems(
+				this.agent.apply(this.rawResult, start, end),
+				sanitized
+			)
 			i = end + 1
 		}
 		this.firstRemainsInd = i
@@ -207,20 +215,18 @@ class MatchSanitizer<T = any> {
 }
 
 class FilteringSanitizingAgent<T = any> implements ISanitizingAgent<T> {
-	setTarget(rawResult: IMatchResult<T>): void {}
-
-	apply(): void {}
+	apply(): IPartialMatch<T>[] {
+		return []
+	}
 }
 
 class StringMatchSanitizingAgent<T = any> implements ISanitizingAgent<T> {
-	private targetSanitized: IMatchResult<T>
-
-	setTarget(target: IMatchResult<T>): void {
-		this.targetSanitized = target
-	}
-
-	apply(raw: IMatchResult<T>, start: number, end: number): void {
-		this.targetSanitized.push(raw.slice(start, end + 1).join(""))
+	apply(
+		raw: IMatchResult<T>,
+		start: number,
+		end: number
+	): IPartialMatch<T>[] {
+		return [raw.slice(start, end + 1).join("")]
 	}
 }
 
