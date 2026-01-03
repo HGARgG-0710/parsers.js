@@ -1,4 +1,5 @@
 import { type } from "@hgargg-0710/one"
+import assert from "assert"
 import type {
 	ICaptureResolutionPredicate,
 	IMatchResult,
@@ -12,22 +13,19 @@ const { isString } = type
 
 type ISubarrLimits = readonly [number, number][]
 
-// ! PROBLEM: need to MERGE the two *sanitized-only* arrays [with ARRAY-INDEXES for sanitation SAVED!];
-// !!! 	3. GENERALIZE THIS in a way that would enable the 'Sanitizer's to be COMPOSABLE [would allow FURTHER easy-addition of similar replacement-features in the future, if we *ever* need it...]
 export class MatchCollector<T = any> {
+	private readonly sanitizerChain = new MatchSanitizerChain<T>(
+		new MatchTransformLayer(
+			new MatchSanitizer(new FilteringSanitizingAgent<T>()),
+			new SubarrayLimits<IPartialMatch<T>>((x) => this.isEmpty(x))
+		),
+		new MatchTransformLayer(
+			new MatchSanitizer(new StringMatchSanitizingAgent<T>()),
+			new SubarrayLimits<IPartialMatch<T>>((x) => this.isStringMatch(x))
+		)
+	)
+
 	private readonly reversed = new RetainedArray<T | string>()
-	private readonly stringMatchSanitizer = new MatchSanitizer(
-		new StringMatchSanitizingAgent<T>()
-	)
-	private readonly emptyMatchSanitizer = new MatchSanitizer(
-		new FilteringSanitizingAgent<T>()
-	)
-	private readonly emptyMatchesLimits = new SubarrayLimits<IPartialMatch<T>>(
-		(x) => this.isEmpty(x)
-	)
-	private readonly stringMatchesLimits = new SubarrayLimits<IPartialMatch<T>>(
-		(x) => !this.isEmpty(x) && this.isStringMatch(x)
-	)
 
 	private asForward() {
 		return this.reversed.get().toReversed()
@@ -42,13 +40,12 @@ export class MatchCollector<T = any> {
 	}
 
 	private updateStartSubarrLimits(item: IPartialMatch<T>) {
-		this.emptyMatchesLimits.tryAdd(item)
+		this.sanitizerChain.start.tryAdd(item)
 	}
 
 	reset() {
 		this.reversed.clear()
-		this.emptyMatchesLimits.reset()
-		this.stringMatchesLimits.reset()
+		this.sanitizerChain.reset()
 	}
 
 	prepend(item: IPartialMatch<T>) {
@@ -57,17 +54,7 @@ export class MatchCollector<T = any> {
 	}
 
 	collect(): IMatchResult<T> {
-		const forward = this.asForward()
-		const blankSanitized = this.emptyMatchSanitizer.apply(
-			forward,
-			this.emptyMatchesLimits,
-			this.stringMatchesLimits
-		)
-		const stringSanitized = this.stringMatchSanitizer.apply(
-			blankSanitized,
-			this.stringMatchesLimits
-		)
-		return stringSanitized
+		return this.sanitizerChain.apply(this.asForward())
 	}
 }
 
@@ -81,6 +68,70 @@ class LastEndLimit {
 	}
 
 	constructor(private readonly limits: BasicArray<[number, number]>) {}
+}
+
+class MatchTransformLayer<T = any> {
+	constructor(
+		readonly sanitizer: MatchSanitizer<T>,
+		readonly subarrLimits: SubarrayLimits<IPartialMatch<T>>
+	) {}
+}
+
+class MatchTransformLink<T = any> {
+	reset() {
+		this.subarrLimits.reset()
+		this.nextLimits.reset()
+	}
+
+	apply(input: IMatchResult<T>) {
+		return this.sanitizer.apply(input, this.subarrLimits, this.nextLimits)
+	}
+
+	tryAdd(item: IPartialMatch<T>) {
+		this.subarrLimits.tryAdd(item)
+	}
+
+	constructor(
+		private readonly sanitizer: MatchSanitizer<T>,
+		private readonly subarrLimits: SubarrayLimits<IPartialMatch<T>>,
+		private readonly nextLimits: SubarrayLimits<IPartialMatch<T>>
+	) {}
+}
+
+class MatchSanitizerChain<T = any> {
+	private readonly links: MatchTransformLink<T>[]
+
+	get start() {
+		return this.links[0]
+	}
+
+	private defineLinks(layers: MatchTransformLayer<T>[]) {
+		for (let i = 0; i < layers.length - 1; ++i) {
+			const from = layers[i]
+			const to = layers[i + 1]
+			this.links[i] = new MatchTransformLink(
+				from.sanitizer,
+				from.subarrLimits,
+				to.subarrLimits
+			)
+		}
+	}
+
+	apply(input: IMatchResult<T>) {
+		let currResult: IMatchResult<T> = input
+		for (const link of this.links) currResult = link.apply(currResult)
+		return currResult
+	}
+
+	reset() {
+		for (const link of this.links) link.reset()
+	}
+
+	constructor(...layers: MatchTransformLayer<T>[]) {
+		assert(layers.length >= 2)
+		this.links = new Array(layers.length - 1)
+		this.defineLinks(layers)
+	}
 }
 
 class SubarrayLimits<T = any> {
