@@ -138,21 +138,31 @@ class SubarrayLimits<T = any> {
 	private readonly limits = new ArrayCollection<[number, number]>()
 	private readonly lastEndLimit = new LastEndLimit(this.limits)
 	private runningIndex = 0
+	private wasDiscontinuityScheduled = false
 
 	private getNextPair(): [number, number] {
 		const newStart = this.runningIndex
 		return [newStart, newStart]
 	}
 
+	private unsetDiscontinuity() {
+		this.wasDiscontinuityScheduled = false
+	}
+
 	private resetRunningIndex() {
 		this.runningIndex = 0
 	}
 
+	private onDiscontinuityScheduled() {
+		this.unsetDiscontinuity()
+		return false
+	}
+
 	private isContinuous() {
-		return (
-			this.runningIndex > 0 &&
-			this.runningIndex === this.lastEndLimit.get()
-		)
+		return this.wasDiscontinuityScheduled
+			? this.onDiscontinuityScheduled()
+			: this.runningIndex > 0 &&
+					this.runningIndex === this.lastEndLimit.get()
 	}
 
 	private increaseLast() {
@@ -173,18 +183,37 @@ class SubarrayLimits<T = any> {
 		++this.runningIndex
 	}
 
+	private onInclusionFail() {
+		this.forward()
+		// Explanation: we have ALREADY achieved
+		// 		discontinuity by calling `.forward()`
+		// 		*without* needing to "fake" it with a
+		// 		specialized `wasDiscontinuityScheduled` var;
+		// 		Ergo, we must unset it.
+		this.unsetDiscontinuity()
+	}
+
 	reset() {
 		this.limits.clear()
 		this.resetRunningIndex()
+		this.unsetDiscontinuity()
 	}
 
 	tryAdd(item: T) {
 		if (this.inclusionCondition(item)) this.addNew()
-		else this.forward()
+		else this.onInclusionFail()
 	}
 
 	get() {
 		return this.limits.get()
+	}
+
+	scheduleDiscontinuity() {
+		this.wasDiscontinuityScheduled = true
+	}
+
+	areNone() {
+		return this.limits.isEmpty()
 	}
 
 	constructor(private readonly inclusionCondition: (x: T) => boolean) {}
@@ -193,6 +222,7 @@ class SubarrayLimits<T = any> {
 // ! predoc: the 'start' and 'end' are BOTH INCLUSIVE!
 interface ISanitizingAgent<T = any> {
 	apply(raw: IMatchResult<T>, start: number, end: number): IPartialMatch<T>[]
+	postAction(nextLimits: SubarrayLimits<IPartialMatch<T>>): void
 }
 
 class MatchSanitizer<T = any> {
@@ -208,12 +238,12 @@ class MatchSanitizer<T = any> {
 		this.nextLimits = nextLimits
 	}
 
-	private tryUpdateNextLimit(withItem: IPartialMatch<T>) {
+	private tryUpdateNextLimits(withItem: IPartialMatch<T>) {
 		if (this.nextLimits) this.nextLimits.tryAdd(withItem)
 	}
 
 	private tryUpdateNextLimitsFor(items: IMatchResult<T>) {
-		for (const item of items) this.tryUpdateNextLimit(item)
+		for (const item of items) this.tryUpdateNextLimits(item)
 	}
 
 	private recordCleanItems(from: IPartialMatch<T>[], into: IMatchResult<T>) {
@@ -221,12 +251,20 @@ class MatchSanitizer<T = any> {
 		into.push(...from)
 	}
 
+	private applyAgentOn(start: number, end: number) {
+		return this.agent.apply(this.rawResult, start, end)
+	}
+
+	private tryRunPostAction() {
+		if (this.nextLimits) this.agent.postAction(this.nextLimits)
+	}
+
 	// ! pre-doc: DOCUMENT THIS [internal JSDOC - *NOT* part or Wiki; REMINDER: create *proper* JSDoc for INTERNAL stuff
 	// !	in case you EVER have to maintain this for your future projects with new requirements...
 	// %	Specifically, this is an instance of Design-By-Contract; Document ALL such instances INTERNAL *and* public
 	// ! ]
 	// * note: `i` is not checked since `last(rangeIndex)[1]` is required to be `< result.length` [`assert`-checked],
-	// 		AND `ranges[rangeIndex][i][0] <= ranges[rangeIndex][i][1] < rangeIndex[i + 1][0] + 1` holds, for each 'i'
+	// 		AND `ranges[rangeIndex][i][0] <= ranges[rangeIndex][i][1] < rangeIndex[i + 1][0]` holds, for each 'i'
 	// 		(implicit, by construction; introduces some Connescence);
 	private toSanitized(ranges: ISubarrLimits): IMatchResult<T> {
 		const sanitized: IMatchResult<T> = []
@@ -234,10 +272,8 @@ class MatchSanitizer<T = any> {
 		for (let currRngInd = 0; currRngInd < ranges.length; ++currRngInd) {
 			const [start, end] = ranges[currRngInd]
 			this.recordCleanItems(this.rawResult.slice(i, start), sanitized)
-			this.recordCleanItems(
-				this.agent.apply(this.rawResult, start, end),
-				sanitized
-			)
+			this.recordCleanItems(this.applyAgentOn(start, end), sanitized)
+			this.tryRunPostAction()
 			i = end + 1
 		}
 		this.firstRemainsInd = i
@@ -250,16 +286,25 @@ class MatchSanitizer<T = any> {
 		return to
 	}
 
+	private applyTrivial(rawResult: IMatchResult<T>) {
+		this.tryUpdateNextLimitsFor(rawResult)
+		return rawResult
+	}
+
+	private applyCommon(rawResult: IMatchResult<T>, ranges: ISubarrLimits) {
+		this.setRawResult(rawResult)
+		return this.pushCleanRemains(this.toSanitized(ranges))
+	}
+
 	apply(
 		rawResult: IMatchResult<T>,
 		subarrLimits: SubarrayLimits<IPartialMatch<T>>,
 		nextLimits?: SubarrayLimits<IPartialMatch<T>>
 	) {
-		const ranges = subarrLimits.get()
-		if (!ranges.length) return rawResult
-		this.setRawResult(rawResult)
 		this.setNextLimits(nextLimits)
-		return this.pushCleanRemains(this.toSanitized(ranges))
+		return subarrLimits.areNone()
+			? this.applyTrivial(rawResult)
+			: this.applyCommon(rawResult, subarrLimits.get())
 	}
 
 	constructor(private readonly agent: ISanitizingAgent<T>) {}
@@ -268,6 +313,10 @@ class MatchSanitizer<T = any> {
 class FilteringSanitizingAgent<T = any> implements ISanitizingAgent<T> {
 	apply(): IPartialMatch<T>[] {
 		return []
+	}
+
+	postAction(nextLimits: SubarrayLimits<IPartialMatch<T>>): void {
+		nextLimits.scheduleDiscontinuity()
 	}
 }
 
@@ -279,6 +328,8 @@ class StringMatchSanitizingAgent<T = any> implements ISanitizingAgent<T> {
 	): IPartialMatch<T>[] {
 		return [raw.slice(start, end + 1).join("")]
 	}
+
+	postAction(nextLimits: SubarrayLimits<IPartialMatch<T>>): void {}
 }
 
 export class MatchIterator<T = any> {
