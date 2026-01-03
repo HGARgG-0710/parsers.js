@@ -2,6 +2,7 @@ import assert from "node:assert"
 import type {
 	ICaptureResolutionPredicate,
 	IMatch,
+	IMatchResult,
 	IPeekableStream,
 	IRegexMatcher
 } from "../../../interfaces.js"
@@ -153,7 +154,7 @@ export class NFARegexMatcher<T = any> implements IRegexMatcher {
 		this.startState.resetSeenTimes()
 	}
 
-	private collectResultFrom(states: StateArray<T>) {
+	private collectResultFrom(states: StateArray<T>): IMatchResult<T> {
 		this.collector.reset()
 		for (const capture of this.iterator.traceback(states.matchState))
 			this.collector.prepend(capture)

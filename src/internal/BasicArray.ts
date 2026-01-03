@@ -13,8 +13,8 @@ export abstract class BasicArray<T = any> {
 		return this
 	}
 
-	push(...x: T[]) {
-		this.items.push(...x)
+	push(x: T) {
+		this.items.push(x)
 		return this
 	}
 
@@ -60,6 +60,10 @@ export abstract class BasicArray<T = any> {
 			if (pred(currItem, i, this)) result.push(currItem)
 		}
 		return result
+	}
+
+	isEmpty() {
+		return this.size === 0
 	}
 
 	constructor(protected items: T[] = []) {

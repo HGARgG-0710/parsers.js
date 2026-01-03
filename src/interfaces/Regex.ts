@@ -6,9 +6,9 @@ import type { ITableHandler } from "./StreamHandler.js"
 
 export type IPartialMatch<T = any> = T | string
 
-export type IMixedMatch<T = any> = IPartialMatch<T>[]
+export type ICleanMatch<T = any> = IPartialMatch<T> | Regex.Break
 
-export type IMatchResult<T = any> = string | IMixedMatch<T>
+export type IMatchResult<T = any> = ICleanMatch<T>[]
 
 export type IMatch<T = any> = false | IMatchResult<T>
 

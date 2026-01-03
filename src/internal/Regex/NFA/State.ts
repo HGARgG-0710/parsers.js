@@ -204,7 +204,7 @@ export class StateArray<T = any> extends Poolable<[number]> {
 	}
 
 	isEmpty() {
-		return this.states.size === 0
+		return this.states.isEmpty()
 	}
 
 	clear() {

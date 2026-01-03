@@ -445,4 +445,9 @@ export namespace Regex {
 			protected constructor() {}
 		}
 	}
+
+	// ! pre-doc: this is a Value Object, and a Marker Object contained within outputs of "matches" for a given 'Regex', when a single "word"
+	// (a continuous piece of stream of characters is INTERRUPTED by EITHER a continuous sequence of "", or of another non-string type T)
+	// ! *not* intended for extension...
+	export class Break {}
 }

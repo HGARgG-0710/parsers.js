@@ -220,6 +220,14 @@ IMMEDIATE:
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
 	CURRENT: 		
+		-2. MatchSanitizer (Match.ts): 
+			SET the 'rawResult' to 'null' RIGHT after its use is FINISHED. 
+
+			1. MORE GENERALLY, walk through the ENTIRETY of the library, and REMOVE such simple cases of 
+				UNWANTED REFERENCES with 'null'. Hold reference to an object NO LONGER than it is ACTUALLY NEEDED. 
+				Abstract the ' = null' code away into SEPARATE 'reset*'-METHODS [important, since that'll ensure for it 
+				to be a HARDER change to make ACCIDENTALLY]. 
+
 		-1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
