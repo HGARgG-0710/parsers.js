@@ -7,7 +7,8 @@ import type {
 	IRegexMatcher
 } from "../../../interfaces.js"
 import { OverflowCounter } from "../../OverflowCounter.js"
-import { MatchCollector, MatchIterator } from "./Match.js"
+import { MatchCollector } from "./MatchCollector.js"
+import { MatchIterator } from "./MatchIterator.js"
 import {
 	BoundState,
 	PeekKeeper,
