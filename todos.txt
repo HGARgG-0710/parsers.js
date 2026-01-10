@@ -252,23 +252,6 @@ IMMEDIATE:
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
 
-		0. TODO: bug - with garbage accumulating due to `RetainedArray` usage: 
-			Specifically, one must be able to FLUSH *all* the `RetainedArray`s 
-				WITHIN a single `App`-class. LET there be: 
-					1. `RetainedArray.prototype.flush()` method, which would ELIMINATE *all* the allocated space inside the given `RetainedArray`. 
-					2. Add a new `FlushableCollection`: 
-						1. Make a new interface - 'IFlushable', with `FlushableCollection` having a `.flush()` method 
-							that works EXACTLY like the `PoolCollection.prototype.clear()` method...
-							EXCEPT that it *also* removes the `IFlushable`s FROM its 'Set<IFlushable>'s upon the "complete" flush(). 
-							This is important, SINCE 
-					3. LET *all* the `RetainedArray`s have their OWN global `FlushableCollection` object. 
-						Specifically, `Retained.Internal`. LET IT BE GLOBAL. 
-						Put it into the new `Retained.ts` module... [submodule of `global.ts`]
-						The rule is: 
-							1. WHEN we "flush" the `Retained.Internal`, ALL of the items are FLUSHED, 
-								and REMOVED...
-							2. It (Retained.Internal) is FLUSHED inside the 'cleanup()' method of the default `App`. 
-
 		1. PeekStream: BUG - replace the `RetainedArray` with something MORE advanced. 
 			Specifically, one is supposed to FLUSH the `.tempItems` EVERY "x" times we call the `.clear()` (even from inside of `.init()`). 
 			Specifically, EXTEND the `RetainedArray` to ALLOW for an AUTOMATIC `.flush()` call DURING the `.clear()` call, 
@@ -286,11 +269,6 @@ IMMEDIATE:
 			method that marks the reusable objects as INVALID AND NO LONGER USABLE. Specifically, it 
 			will mark respective fields as `null`, thus REMOVING excess references, and PREVENTING CERTAIN 
 			CRAZY OUTDATED-REFERENCE BUGS. 	
-
-			1. IMPORTANT - for 'RetainedArray', let the `postFree()` be `this.flush()`. 
-				This is so that we KNOW that the thing in question DOES NOT (accdientally) contain references to things 
-				that are NO LONGER NEEDED. Things that are NO LONGER NEEDED, but still CAN BE REUSED are stored EXLUSIVELY 
-				inside POOLS!!!
 	
 	3. [MAJOR PROBLEM; UnicodeState] Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
