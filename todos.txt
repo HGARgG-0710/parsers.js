@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 319
+	Current total: 323
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 280 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 284 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -216,10 +216,30 @@ REMINDERs:
 		This is important, since otherwise the library's error-handling capabilities 
 		*will not* function as expected; 
 		
+	-1. REMINDER: about the matching in 'Regex': 
+		IMPORTANT: remember - the following Regex (when parsing XML/similar, for instance): 
+			new Regex('\w+(#n=)".*"')
+			// followed by alternative 'new Regex("\w+(#n=)'.*'")', etc... in a TokenChooser(...)
+			// NOTE: here '.*' is a simplification, but you get what's intended...
+		SHOULD MATCH string 'key="someValue"' to the array: 
+
+			["key", '"someValue"']
+
+		Which, in TokenChooser, could easily be passed to some 'new XMLAttribute("key", parseValueString('"someValue"'))'; 
+		Important, since it was the ORIGINAL motivation for the entire rewriting of the matching process to 
+		enable proper word-splitting via the '(#n...)'-groups and '\b{...}'-classes; 
+
 IMMEDIATE: 
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
 	CURRENT: 		
+		0. FIX: add ability to specify a LIMIT on the 'ObjectPool' number 
+			of instances. Particularly, enable the ability for the user to 
+			MODIFY limits on pools for specific (non-internal) types of 
+			objects. Do this ONLY AFTER having verified that, indeed, the 
+			ObjectPool DOES bring real performance gains for large inputs
+			(i.e. during the final testing phase...)
+
 		-2. MatchSanitizer (Match.ts): 
 			SET the 'rawResult' to 'null' RIGHT after its use is FINISHED. 
 

@@ -7,9 +7,8 @@ import type {
 	IStream
 } from "../../../../interfaces/Stream.js"
 import { RotationBuffer } from "../../../../internal/RotationBuffer.js"
-import { ObjectPool } from "../../../../objects.js"
+import { ArrayCollection, ObjectPool } from "../../../../objects.js"
 import { ownerInitializer } from "../../../../objects/Initializable.js"
-import { RetainedArray } from "../../../../objects/RetainedArray.js"
 import { write } from "../../../../utils/Stream.js"
 import { DyssyncOwningPoolableStream } from "../templates.js"
 
@@ -118,14 +117,17 @@ class PeekProvider<T = any> {
 
 /**
  * A class for encapsulating read-writing
- * operation to a temporary `RetainedArray<T>`.
+ * operation to a temporary `ArrayCollection<T>`.
  */
 class TempWriter<T = any> {
-	private readonly tempItems = new RetainedArray<T>()
+	private readonly tempItems = new ArrayCollection<T>()
+
+	private writeToTemp(from: IStream<T>, maxWriteCount: number) {
+		return write(from, this.tempItems.resize(maxWriteCount))
+	}
 
 	toTemp(from: IStream<T>, count: number) {
-		const writtenItems = write(from, this.tempItems.init(count))
-		return writtenItems === count
+		return this.writeToTemp(from, count) === count
 	}
 
 	get() {

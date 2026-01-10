@@ -9,7 +9,12 @@ import type {
 	IPeekableStream,
 	IValidNodeType
 } from "../../../interfaces.js"
-import { ObjectPool, Poolable, Regex, RetainedArray } from "../../../objects.js"
+import {
+	ArrayCollection,
+	ObjectPool,
+	Poolable,
+	Regex
+} from "../../../objects.js"
 import { isTyped } from "../../../utils/Node.js"
 import type { OverflowCounter } from "../../OverflowCounter.js"
 import { toLowerCase, toUpperCase } from "../../Unicode.js"
@@ -136,7 +141,7 @@ export class PeekKeeper<T = any> {
 }
 
 export class StateHistory<T = any> {
-	readonly stateArrs = new RetainedArray<StateArray<T>>()
+	readonly stateArrs = new ArrayCollection<StateArray<T>>()
 
 	hasItemAt(i: number) {
 		return i < this.stateArrs.size
@@ -169,7 +174,7 @@ export class StateArray<T = any> extends Poolable<[number]> {
 
 	private listId: number
 	private _matchState: MatchState | null = null
-	readonly states = new RetainedArray<BoundState<T>>()
+	readonly states = new ArrayCollection<BoundState<T>>()
 
 	private set matchState(newMatchState: MatchState) {
 		this._matchState = newMatchState
@@ -280,7 +285,7 @@ export abstract class State<T = any> {
 	abstract verify(keeper: PeekKeeper<T>): boolean
 	abstract advance(keeper: PeekKeeper<T>): void
 
-	private readonly keeperIds = new RetainedArray<number>()
+	private readonly keeperIds = new ArrayCollection<number>()
 
 	private seenTimes = -1
 

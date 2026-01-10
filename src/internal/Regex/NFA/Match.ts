@@ -5,8 +5,7 @@ import type {
 	IMatchResult,
 	IPartialMatch
 } from "../../../interfaces.js"
-import { ArrayCollection, RetainedArray } from "../../../objects.js"
-import type { BasicArray } from "../../BasicArray.js"
+import { ArrayCollection } from "../../../objects.js"
 import type { BoundState, MatchState, State, StateHistory } from "./State.js"
 
 const { isString } = type
@@ -25,7 +24,7 @@ export class MatchCollector<T = any> {
 		)
 	)
 
-	private readonly reversed = new RetainedArray<T | string>()
+	private readonly reversed = new ArrayCollection<T | string>()
 
 	private asForward() {
 		return this.reversed.get().toReversed()
@@ -67,7 +66,7 @@ class LastEndLimit {
 		++this.limits.last()[1]
 	}
 
-	constructor(private readonly limits: BasicArray<[number, number]>) {}
+	constructor(private readonly limits: ArrayCollection<[number, number]>) {}
 }
 
 class MatchTransformLayer<T = any> {
