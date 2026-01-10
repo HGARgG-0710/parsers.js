@@ -233,6 +233,34 @@ IMMEDIATE:
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
 	CURRENT: 		
+		-1. FIX [ObjectPool]: LET there be a NEW interface - IPoolable! 
+			Let the 'Poolable' mixin implement it (properly). 
+			Let, specifically, this new interface be employed by the 'ObjectPool'
+			inside the generic 'extends IPoolable' clause INSTEAD of the 'IInitializable'. 
+
+			Let it COMBINE the 'IInitializable' with a NEW Single-Property interface - 'IPoolOwned'. 
+			The IPoolOwned interface: 
+
+				interface IPoolOwned {
+					readonly poolId: number
+				}
+
+			*Let*, the 'free(item: T)' method of 'ObjectPool' ASSERT that the 'poolId: number' of 
+			a given 'T extends IPoolable' is NOT different from the UNIQUE 'readonly id: number'
+			of the CURRENT 'ObjectPool' [generated from a 'private static readonly TotalPools = 0'
+			property, incremented on each call to the 'constructor']. 
+			
+			THIS, in particular, maintains the *crucial* invariant that ONLY 
+			a single pool can EVER hold reference to a 'T extends IPoolable'. 
+
+			In particular, let ALL the classes for which an 'ObjectPool' exists IMPLEMENT THE PROPERTY. 
+			Place the 'get poolId(): number' onto the 'Poolable' mixin, which should IMPLEMENT the 'IFreeable'
+			AND 'IPoolable'. In particular, the getter is as such: 
+
+				get poolId() {
+					return this.pool.id
+				}
+
 		0. FIX: add ability to specify a LIMIT on the 'ObjectPool' number 
 			of instances. Particularly, enable the ability for the user to 
 			MODIFY limits on pools for specific (non-internal) types of 
