@@ -8,7 +8,7 @@ import type {
 import { ArrayCollection } from "../../../objects.js"
 import type { BoundState, MatchState, State, StateHistory } from "./State.js"
 
-const { isString } = type
+const { isString, isNull } = type
 
 type ISubarrLimits = readonly [number, number][]
 
@@ -226,8 +226,15 @@ interface ISanitizingAgent<T = any> {
 
 class MatchSanitizer<T = any> {
 	private firstRemainsInd: number
-	private rawResult: IMatchResult<T>
+	private rawResult: IMatchResult<T> | null
 	private nextLimits?: SubarrayLimits<IPartialMatch<T>>
+
+	private resetRawResult() {
+		assert(!isNull(this.rawResult))
+		const lastResults = this.rawResult
+		this.rawResult = null
+		return lastResults
+	}
 
 	private setRawResult(rawResult: IMatchResult<T>) {
 		this.rawResult = rawResult
@@ -251,7 +258,7 @@ class MatchSanitizer<T = any> {
 	}
 
 	private applyAgentOn(start: number, end: number) {
-		return this.agent.apply(this.rawResult, start, end)
+		return this.agent.apply(this.rawResult!, start, end)
 	}
 
 	private tryRunPostAction() {
@@ -270,7 +277,7 @@ class MatchSanitizer<T = any> {
 		let i = 0
 		for (let currRngInd = 0; currRngInd < ranges.length; ++currRngInd) {
 			const [start, end] = ranges[currRngInd]
-			this.recordCleanItems(this.rawResult.slice(i, start), sanitized)
+			this.recordCleanItems(this.rawResult!.slice(i, start), sanitized)
 			this.recordCleanItems(this.applyAgentOn(start, end), sanitized)
 			this.tryRunPostAction()
 			i = end + 1
@@ -281,18 +288,22 @@ class MatchSanitizer<T = any> {
 
 	private pushCleanRemains(to: IMatchResult<T>) {
 		let i = this.firstRemainsInd
-		while (i < to.length) to.push(this.rawResult[i++])
+		while (i < to.length) to.push(this.rawResult![i++])
 		return to
 	}
 
-	private applyTrivial(rawResult: IMatchResult<T>) {
-		this.tryUpdateNextLimitsFor(rawResult)
-		return rawResult
+	private applyTrivial() {
+		this.tryUpdateNextLimitsFor(this.rawResult!)
 	}
 
-	private applyCommon(rawResult: IMatchResult<T>, ranges: ISubarrLimits) {
+	private applyCommon(ranges: ISubarrLimits) {
+		this.pushCleanRemains(this.toSanitized(ranges))
+	}
+
+	private with(rawResult: IMatchResult<T>, callback: () => void) {
 		this.setRawResult(rawResult)
-		return this.pushCleanRemains(this.toSanitized(ranges))
+		callback()
+		return this.resetRawResult()
 	}
 
 	apply(
@@ -300,10 +311,12 @@ class MatchSanitizer<T = any> {
 		subarrLimits: SubarrayLimits<IPartialMatch<T>>,
 		nextLimits?: SubarrayLimits<IPartialMatch<T>>
 	) {
-		this.setNextLimits(nextLimits)
-		return subarrLimits.areNone()
-			? this.applyTrivial(rawResult)
-			: this.applyCommon(rawResult, subarrLimits.get())
+		return this.with(rawResult, () => {
+			this.setNextLimits(nextLimits)
+			subarrLimits.areNone()
+				? this.applyTrivial()
+				: this.applyCommon(subarrLimits.get())
+		})
 	}
 
 	constructor(private readonly agent: ISanitizingAgent<T>) {}

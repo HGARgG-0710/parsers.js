@@ -249,7 +249,7 @@ IMMEDIATE:
 			a given 'T extends IPoolable' is NOT different from the UNIQUE 'readonly id: number'
 			of the CURRENT 'ObjectPool' [generated from a 'private static readonly TotalPools = 0'
 			property, incremented on each call to the 'constructor']. 
-			
+
 			THIS, in particular, maintains the *crucial* invariant that ONLY 
 			a single pool can EVER hold reference to a 'T extends IPoolable'. 
 
@@ -268,30 +268,18 @@ IMMEDIATE:
 			ObjectPool DOES bring real performance gains for large inputs
 			(i.e. during the final testing phase...)
 
-		-2. MatchSanitizer (Match.ts): 
-			SET the 'rawResult' to 'null' RIGHT after its use is FINISHED. 
-
-			1. MORE GENERALLY, walk through the ENTIRETY of the library, and REMOVE such simple cases of 
-				UNWANTED REFERENCES with 'null'. Hold reference to an object NO LONGER than it is ACTUALLY NEEDED. 
-				Abstract the ' = null' code away into SEPARATE 'reset*'-METHODS [important, since that'll ensure for it 
-				to be a HARDER change to make ACCIDENTALLY]. 
+		-2. FIX the MEMORY LEAKS [in JavaScript sense - never-released references]: 
+			Walk through the ENTIRETY of the library, and REMOVE such simple cases of 
+				UNWANTED (already used) REFERENCES with 'null'. Hold reference to an 
+				object NO LONGER than it is ACTUALLY NEEDED. 
+				
+				Abstract the ' = null' code away into SEPARATE private 'reset*'-METHODS 
+				[important, since that'll ensure for it to be a HARDER change to make 
+				ACCIDENTALLY]. 
 
 		-1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
-
-		1. PeekStream: BUG - replace the `RetainedArray` with something MORE advanced. 
-			Specifically, one is supposed to FLUSH the `.tempItems` EVERY "x" times we call the `.clear()` (even from inside of `.init()`). 
-			Specifically, EXTEND the `RetainedArray` to ALLOW for an AUTOMATIC `.flush()` call DURING the `.clear()` call, 
-				WHENEVER a *circular counter* happens to reach the "autoflush-limit". This prevents re-allocations that are 
-					TOO FREQUENT, while also ensuring that the unused memory is NOT acidentally retained for too long...
-			LET the frequency of Auto-Flushes BE CONFIGURABLE via the 
-				LibConfig -> flush -> PeekStream
-
-			1. LIKEWISE, let the `MatchCollector` have THE SAME for the `reversed: RetainedArray`: 
-				LibConfig -> flush -> MatchCollector
-			
-			2. LIKEWISE, let *ALL* the cases of `RetainedArray` *have* the Auto-`.flush()` params in the `LibConfig` class...
 
 		2. 'Poolable' and 'Initializable': LIKEWISE, *LET* there be an appropriate `postFree()` 
 			method that marks the reusable objects as INVALID AND NO LONGER USABLE. Specifically, it 
