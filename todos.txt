@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 323
+	Current total: 324
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 284 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 285 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -218,21 +218,160 @@ REMINDERs:
 		
 	-1. REMINDER: about the matching in 'Regex': 
 		IMPORTANT: remember - the following Regex (when parsing XML/similar, for instance): 
-			new Regex('\w+(#n=)".*"')
+			new Regex('\w+(#n=").*(#n")')
 			// followed by alternative 'new Regex("\w+(#n=)'.*'")', etc... in a TokenChooser(...)
 			// NOTE: here '.*' is a simplification, but you get what's intended...
 		SHOULD MATCH string 'key="someValue"' to the array: 
 
-			["key", '"someValue"']
+			["key", "someValue"]
 
 		Which, in TokenChooser, could easily be passed to some 'new XMLAttribute("key", parseValueString('"someValue"'))'; 
 		Important, since it was the ORIGINAL motivation for the entire rewriting of the matching process to 
 		enable proper word-splitting via the '(#n...)'-groups and '\b{...}'-classes; 
 
+	-2. REMINDER: about Regex - the negation of UnicodeProperty MUST WORK AS WELL: 	
+		Syntax: 
+			^\p{Language=Cyrillic}
+
+	-3. REMINDER [docs]: ADD the *following* URLs to the documentation of UnicodeProperty: 	
+		1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
+		2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
+		3. [list of all unicode characters with their properties] https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+		4. ONLY the ones Unicode Properties are supported that are also supported by JavaScript's built-in 'RegExp' class!
+			This is extremely important, as implementing the entirety of the Unicode Property Specification is a 
+				huge task in itself (probably no lesser than the development of the remainder of the library), and 
+					so, therefore, too large for a single person (at least without some considerable time investment, an 
+						investment that you, at this moment, are not able to afford...)
+
 IMMEDIATE: 
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
+	UnicodeProperty [implementation/testing strategy; also - testing of 'Regex' in general...]:
+		0. PROBLEMS: 
+			1. BUG: the 'isRangeAhead' function (Regex/Parser/Class/Common.ts)
+				It (originally) was based on the idea that we ONLY need to be 
+				parsing CHARACTERS (escaped or not) as part of the [...]-char-classes 
+				and the \b{...}-boundry-classes; 		
+				Now, however, there's also '[...\p{...}...]', and '[...\u{...}...]', 
+				NEITHER of which satisfies this "hacky" check. 
+
+				ADAPT the code for their introduction. 
+				SPECIFICALLY: 
+
+					1. Utilize a STATEFUL CHOOSER, which MAY 
+						end up SKIPPING a hyphen, IF: 
+							1. it is discovered AFTER the fact of 
+								parsing of the underlying range-boundary
+							2. the FIRST range-boundary is of a VALID TYPE 
+								for a range-boundary [i.e. an elementary character, 
+								or one of the specifically allowed escaped ones...]
+							
+						OTHERWISE, let the stream be THE LAST ONE! 
+						
+						1. GENERALIZE this chooser to an ABSTRACT CLASS, put it into 'Choosers.ts'
+							Reason: encourages reuse
+
+
+		1. Testing: 
+			1. Create one-two test cases for EACH one of the NON-DEPRECATED 
+				properties from https://www.unicode.org/reports/tr44/#Property_Index. 
+				In particular, these should be ELEMENTARY and simple 
+					(testing *specifically* the UnicodeProperty thingy...). 
+				THERE WOULD BE 1-2 TESTS for *each one* of the *elementary* patterns
+					that can ocurr within Regex: '\w', '\d', '[abc]', '\u{...}', etc
+			
+			2. THEN, there'd be 10+ (i.e. MANY) different tests specifically 
+					for COMPOSITIONS of 'Regex'. 
+
+				In particular, must be tested: 
+
+					1. most common simple-compositions (like "[A-Za-z_]\w*\b{\w}", or '".*"', or "\d+", etc)
+						1. Includes also real-life applications, like [these ones are TO BE ADDED!]: 
+							1. Complex Email-regex "\w+@\(gmail|mail|yandex|icloud|...)\.(ru|com|org|...)
+							2. IP addresses (IPv4 and IPv6), e.g.: "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" [IPv4]
+						2. TAKE those "real-life cases" TO SAMPLES [under 'samples.Regex']
+							In particular, they'll serve as BOTH a "mini-demo" (i.e. a test), 
+								AND an immensely useful out-of-the-box piece of functionality. 
+					2. UBER-complex compositions [deliberately for picking out tricky bugs; at least ~5 of those]
+			
+			3. THEN, there'd be testing for things like CUSTOM GROUPS [choose 
+				whether or not to test the EXTENSION abilities of 'Regex.Factory', etc...]
+				1. The '(#m...)'-multiline group: 
+					adds an optional \n* after EVERY item within the group
+					NON-RECURSIVE!
+
+					As in: 
+						(#mabc) == (a\n*b\n*c\n*)
+				2. '(#q...)'... group
+					makes every item in the group OPTIONAL as in: 
+						(#qabc) == (a?b?c?)
+
+		2. Implementation: 	
+			0. Parser: 
+				3. ADD SUPPORT FOR '\p{...}'-properties INSIDE the '[...]'-character classes AND '\b{...}'-boundary-classes
+					Reason: 
+						1. one *can* implement it
+						2. represents a valid use-case
+						3. JavaScript RegExp has similar functionality already built-in
+
+			1. Visitor: 
+				1. Add a new method to the interface - 'handleUnicodeProperty'
+				2. Add a new 'Regex.Raw' child-class - 'new Regex.Raw.UnicodeProperty(propName: string, value: string)'
+
+			2. Matcher [NFARegexMatcher]: 
+				1. Make the 'UnicodePropertyState' a WRAPPER around the 'RegExp' class. 
+					Specifically, let it utilize JavaScript's BUILT-IN implementation of 
+						/p{PropName=Value}/.test(...)
+					since: 
+
+						1. Implementing the ENTIRE Unicode Property Spec is crazy, 
+							let ONLY the RegExp-stuff be supported
+							
+						2. RegExp already *has* support for the 'Script' property, which was THE ORIGINAL 
+							motivation for even introducing this whole thing (i.e. it supports 
+								emojis, cyrillics, chinese/japanese/arabic scripts, etc). 
+
+			3. Compiler [RegexCompiler]: 
+				1. ADD support for ^\p{...} [missing]
+					THE PARSER already *has* the support (verify, just in case - if it doesn't, ADD AS WELL!)
+				2. ADD support for p{...}-AS-OF-THEMSELVES!
+					1. In particular, CHANGE the interface of 'IRawRegexFactory'
+						One new method - for the Unicode Properties. 
+
 	CURRENT: 		
+		-3. PROBLEM [EndBracketStream]: 
+			Oh, no, not this again...
+			Ok, so it (appears) we're overusing the '.wrapLongAs' method a bit (DO NOT remove it - 'RecursiveLimitStream' NEEDS IT!!!)
+				Important thing - we need a NEW "hook"-method for 'LimitStream.Limits' - the 'afterEnd: (input: IStream<T>) => void'. 
+				In particular, there'd be the 'pushAfterEnd(...): void' and 'prependAfterEnd(...): void' adder-methods for 'LimitsBuilder', 
+					which'd set the appropriate "cleanup logic". The 'pushAfterEnd' would add it TO THE END of the logic-chain, whereas 
+					'prependAfterEnd(...)' would add it TO THE BEGINNING (i.e. BEFORE ALL ELSE). These two, in particular, should cover 
+					the common use-case. Having MULTIPLE such post-end routines to be run enables for INSANELY customizable stream-end-hook 
+					logic. 
+			
+			THEN - REIMPLEMENT 'EndBracketStream' in terms of the 'pushAfterEnd()' call. 
+
+			REPEAT: this is *not* a bug, the behaviour (should) be as-expected, HOWEVER, it *appears* that 
+				there's (rather) a missing abstraction that would have come in VERY handy. ALL the 'longAs'-wrapping 
+				stuff is EXCELLENT WORK, it it *not* to be changed in ANY WAY AT ALL. Just add these new things, 
+				and reimplement 'EndBracketStream'. 
+
+		-2. BUG [RegexParser]: 
+			A problem has reared its ugly head. 
+			At the present, the handling of the EMPTY 'EndBracketStream's 
+			is FAR TOO GENERIC. Specifically, they are ALLOWED to be empty 
+			in cases WHEN THEY MUSTN'T! 
+
+			Solution: do the same thing as with 'UnicodeProperty.ts'-EndBracketStream. 
+				Namely, THROW AN ERROR if an EMPTY EndBracketStream is detected 
+				FOR the following: 
+
+					1. Group.ts [GroupLimitStream]
+					2. TypeMatch.ts [TypeMatchLimitStream]
+					3. CharClass.ts [CharClassLimitStream]
+					4. Range.ts [RangeLimitStream]
+					5. BoundaryClass.ts [BoundaryClassLimitStream]
+					
 		-1. FIX [ObjectPool]: LET there be a NEW interface - IPoolable! 
 			Let the 'Poolable' mixin implement it (properly). 
 			Let, specifically, this new interface be employed by the 'ObjectPool'
@@ -289,7 +428,7 @@ IMMEDIATE:
 	3. [MAJOR PROBLEM; UnicodeState] Regex [RegexParser and RegexCompiler]: 
 		note: one needs NEW CLASSES, to enable: 
 			1. \p{...}-like (JS RegExp) groups of characters (new character classes): 
-				1. The \P{...} is replaced by ^[\p{...}]
+				1. The \P{...} is replaced by EITHER: ^\p{...} OR ^[\p{...}]
 				2. There isn't an actual \p{...}, instead it is replaced by a NUMBER of *different* commands
 				3. For details on what to design, see: 
 					1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
