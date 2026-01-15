@@ -1198,7 +1198,7 @@ export namespace RecursiveList {
 		Recursive = any,
 		InitType = any
 	> {
-		abstract isRecursive(x: any): x is Recursive
+		abstract isRecursive(x: T | Recursive): x is Recursive
 
 		abstract isOld(terminal: T): boolean
 

@@ -1,34 +1,30 @@
 import type { ICellNode, IOwnedStream } from "../../../../interfaces.js"
 import { skip } from "../../../../objects/Error.js"
-import { SourceBuilder } from "../../../../objects/SourceBuilder.js"
 import { LimitStream, ValidatorStream } from "../../../../objects/Stream.js"
 import {
 	CollectionStream,
-	EndBracketStream,
-	isNotNext
+	EndBracketStream
 } from "../../../../samples/Stream.js"
-import { consumableIterable } from "../../../../utils/Stream.js"
-import { validateHex, validateUnicodeCodeLength } from "../Errors.js"
+import { getStringConsumable } from "../../../../utils/Stream.js"
+import { validateUnicodeCodeLength } from "../Errors.js"
+import { validateHex } from "../Errors/Unicode/hex.js"
 import { UnicodeChar } from "../Nodes.js"
+import { isNotNextClbrace, skipOpbrace } from "../Utils/limits.js"
 
 const skipU = skip("u")
-const skipOpbrace = skip("{")
 
-const UnicodeLimitStream = EndBracketStream(
+const UnicodeCharLimitStream = EndBracketStream(
 	LimitStream.Limits.builder<string>()
 		.setFrom((input) => {
 			skipU(input) // u
 			skipOpbrace(input) // {
 			return 0
 		})
-		.setLongAs(isNotNext("}"))
+		.setLongAs(isNotNextClbrace)
 		.build()
 )
 
-const UnicodeCharStream = CollectionStream(
-	UnicodeChar,
-	consumableIterable(new SourceBuilder())
-)
+const UnicodeCharStream = CollectionStream(UnicodeChar, getStringConsumable())
 
 const UnicodeCharValidatorStream = ValidatorStream(function (
 	resource: IOwnedStream<ICellNode<string>>
@@ -37,10 +33,10 @@ const UnicodeCharValidatorStream = ValidatorStream(function (
 	validateHex(resource)
 })
 
-export function HandleUnicode(input: IOwnedStream<string>) {
+export function HandleUnicodeChar(input: IOwnedStream<string>) {
 	return [
 		UnicodeCharValidatorStream(),
 		UnicodeCharStream(),
-		UnicodeLimitStream()
+		UnicodeCharLimitStream()
 	]
 }

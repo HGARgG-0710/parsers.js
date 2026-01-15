@@ -169,3 +169,23 @@ export const AsInt = ContentNode("as-int", "AsInt")
 export const RootNode = SingleChildNode("regex-root", "RootNode")
 
 export const BoundaryClass = RecursiveNode("boundary-class", "BoundaryClass")
+
+export class UnicodeProperty extends BaseNode {
+	static readonly type = "unicode-property"
+
+	get type() {
+		return UnicodeProperty.type
+	}
+
+	override debugPrint(): string {
+		return `UnicodeProperty { name: ${this.name}, value: ${this.value} }`
+	}
+
+	get debugName() {
+		return "UnicodeProperty"
+	}
+
+	constructor(private readonly name: string, private readonly value: string) {
+		super()
+	}
+}

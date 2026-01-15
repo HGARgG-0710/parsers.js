@@ -17,7 +17,7 @@ import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
 
-function tabbed(lines: string[]) {
+function tabbed(...lines: string[]) {
 	return lines.map((x) => `${Config.errors.tab}${x}`)
 }
 
@@ -48,9 +48,7 @@ export abstract class ConstructorError extends Error {
  *
  * Can be easily used with `ErrorStream` descendant.
  */
-export abstract class ParseError<
-	PrepareArgs extends any[] = []
-> extends ConstructorError {
+export abstract class ParseError extends ConstructorError {
 	protected static populate(errData: IErrorData, ...args: any[]) {}
 
 	// NOTE: this is *only* supposed to be called by CONCRETE child-classes!
@@ -215,6 +213,17 @@ export function ensureCurrDecimal(
 		)
 }
 
+export function validateId(validator: (id: string) => boolean) {
+	return function (
+		stream: IStream<string>,
+		errDataGetter: IErrorDataGetter<string> = findErrorDataUpstream
+	) {
+		const id = stream.curr
+		if (!validator(id))
+			throw ParseError.InvalidIdError.prepare(errDataGetter(stream), id)
+	}
+}
+
 export namespace ParseError {
 	export abstract class MessageBuilderParseError extends ParseError {
 		private _errData: IErrorData
@@ -320,7 +329,7 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields() {
-			return tabbed([this.expected(), this.received()])
+			return tabbed(this.expected(), this.received())
 		}
 	}
 
@@ -377,7 +386,7 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields(): string[] {
-			return tabbed([this.received()])
+			return tabbed(this.received())
 		}
 	}
 
@@ -420,7 +429,7 @@ export namespace ParseError {
 
 		protected mandatoryFields(): string[] {
 			return tabbed(
-				array
+				...array
 					.numbers(this.getStackDepth())
 					.map((i) => this.childCurrItem(i))
 			)
@@ -477,7 +486,32 @@ export namespace ParseError {
 		}
 
 		protected mandatoryFields(): string[] {
-			return tabbed([this.nonDecimal()])
+			return tabbed(this.nonDecimal())
+		}
+	}
+
+	export class InvalidIdError extends GenericParseError {
+		protected static override populate(
+			errData: IErrorData,
+			id: string
+		): void {
+			errData.setInfo("badId", id)
+		}
+
+		static override prepare(errData: IErrorData, id: string): IErrorData {
+			return super.prepare(errData, id)
+		}
+
+		private printBadID(id: string) {
+			return `expected a valid identifier, received: ${id}`
+		}
+
+		private badId() {
+			return this.printBadID(this.errData.getInfo("badId"))
+		}
+
+		protected override mandatoryFields(): string[] {
+			return tabbed(this.badId())
 		}
 	}
 }

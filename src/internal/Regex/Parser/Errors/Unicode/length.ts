@@ -1,0 +1,44 @@
+import type {
+	ICellNode,
+	IErrorData,
+	IErrorDataGetter,
+	IStream
+} from "../../../../../interfaces.js"
+import {
+	findErrorDataUpstream,
+	ParseError
+} from "../../../../../objects/Error.js"
+import { currUnicodeHex } from "./common.js"
+
+const VALID_UNICODE_CODE_LENGTH = 6
+
+export class InvalidCodeLengthError extends ParseError.GenericParseError {
+	protected static override populate(errData: IErrorData, length: number) {
+		errData.setInfo("badCodeLength", length)
+	}
+
+	static override prepare(errData: IErrorData, length: number) {
+		return super.prepare(errData, length)
+	}
+
+	private printBadCodeLength(length: number) {
+		return `bad unicode code length detected (${VALID_UNICODE_CODE_LENGTH} expected): ${length}`
+	}
+
+	private badCodeLength() {
+		return this.printBadCodeLength(this.errData.getInfo("badCodeLength"))
+	}
+
+	protected mandatoryFields(): string[] {
+		return [this.badCodeLength()]
+	}
+}
+
+export function validateUnicodeCodeLength(
+	stream: IStream<ICellNode<string>>,
+	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataUpstream
+) {
+	const codeLength = currUnicodeHex(stream).length
+	if (codeLength !== VALID_UNICODE_CODE_LENGTH)
+		throw InvalidCodeLengthError.prepare(errDataGetter(stream), codeLength)
+}

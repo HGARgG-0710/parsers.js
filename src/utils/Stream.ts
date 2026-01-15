@@ -24,6 +24,7 @@ import type { IStreamTransform } from "../interfaces/StreamHandler.js"
 import type { IStreamStep } from "../modules/Stream/interfaces/StreamPosition.js"
 import { StatefulLocator } from "../modules/Stream/objects/Locator.js"
 import { asSteps } from "../modules/Stream/utils/Step.js"
+import { SourceBuilder } from "../objects.js"
 import { ArrayCollection } from "../objects/ArrayCollection.js"
 import type { Regex } from "../objects/Regex.js"
 import { HandlerStream } from "../objects/Stream.js"
@@ -133,6 +134,10 @@ export function consumableIterable<
 		result.clear()
 		return consume(source, result)
 	}
+}
+
+export function getStringConsumable() {
+	return consumableIterable(new SourceBuilder())
 }
 
 export function consumableRevivables<

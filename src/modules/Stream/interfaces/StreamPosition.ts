@@ -9,3 +9,8 @@ export type IStreamPredicate<T = any> = (
 	item: IStream<T>,
 	pos?: number
 ) => boolean | number
+
+export type IStreamProperty<T = any> = (
+	item: IStream<T>,
+	pos?: number
+) => boolean

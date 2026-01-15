@@ -17,10 +17,7 @@ import type { IRenewerStream } from "../../interfaces/RenewerStream.js"
  * which is implemented as the call to `this.state.parse.renewStream(this.resource)`.
  */
 export abstract class RenewerStream<T = any, Args extends any[] = []>
-	implements
-		IOwningStream<T, Args>,
-		IRenewerStream<T>,
-		IStateful<IParseState>
+	implements IRenewerStream<T>, IStateful<IParseState>, ILinkedStream<T>
 {
 	reviveChild(): boolean {
 		return this.state.parse.renewStream(this.resource!)
@@ -38,4 +35,7 @@ export abstract class RenewerStream<T = any, Args extends any[] = []>
 	abstract connectResource(resource: ILinkedStream): void
 	abstract baseInit(): void
 	abstract init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
+
+	abstract connectOwner(newOwner: IOwningStream<any, any[]>): void
+	abstract free(): void
 }

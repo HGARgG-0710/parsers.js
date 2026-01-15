@@ -40,6 +40,8 @@ export const isHex = (x: string) => /^[0-9A-Fa-f]+$/.test(x)
  */
 export const isIdentifier = (x: string) => /^[A-Za-z_]\w+$/.test(x)
 
+export const isNonDigitId = (x: string) => /^[A-Za-z_]+$/.test(x)
+
 /**
  * Verifies that a given string is a sequence of `"\n"`, `"\t"`, and `" "` characters.
  */

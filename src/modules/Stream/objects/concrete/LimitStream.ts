@@ -1,4 +1,4 @@
-import { boolean, type } from "@hgargg-0710/one"
+import { boolean } from "@hgargg-0710/one"
 import assert from "assert"
 import * as Pools from "../../../../global/Pools.js"
 import type { IPoolKeeping } from "../../../../interfaces.js"
@@ -19,13 +19,13 @@ import type {
 } from "../../interfaces/LimitStream.js"
 import type {
 	IStreamPredicate,
+	IStreamProperty,
 	IStreamStep
 } from "../../interfaces/StreamPosition.js"
 import { asSteps, bindStep, isStreamPredicate } from "../../utils/Step.js"
 import { BasicResourceStream } from "../templates/BasicResourceStream.js"
 
 const { F } = boolean
-const { isNullary } = type
 
 /**
  * A class encapsulating a lookaround of a `LimitStream`,
@@ -260,18 +260,18 @@ export namespace LimitStream {
 				: this.longAs
 		}
 
-		setFrom(from?: IStreamStep<T>) {
-			if (!isNullary(from)) this.from = from
+		setFrom(from: IStreamStep<T>) {
+			this.from = from
 			return this
 		}
 
-		setIsEmpty(isEmpty?: IStreamPredicate<T>) {
-			if (!isNullary(isEmpty)) this.isEmpty = isEmpty
+		setIsEmpty(isEmpty: IStreamProperty<T>) {
+			this.isEmpty = isEmpty
 			return this
 		}
 
-		setLongAs(longAs?: IStreamStep<T>) {
-			if (!isNullary(longAs)) this.longAs = longAs
+		setLongAs(longAs: IStreamStep<T>) {
+			this.longAs = longAs
 			return this
 		}
 

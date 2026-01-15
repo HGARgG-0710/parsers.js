@@ -6,7 +6,8 @@ import { HandleEscapedLiteral } from "./Escaped/Literal.js"
 import { HandleNewline } from "./Escaped/Newline.js"
 import { HandleSpace } from "./Escaped/Space.js"
 import { HandleTab } from "./Escaped/Tab.js"
-import { HandleUnicode } from "./Escaped/Unicode.js"
+import { HandleUnicodeChar } from "./Escaped/UnicodeChar.js"
+import { HandleUnicodeProperty } from "./Escaped/UnicodeProperty.js"
 import { HandleVTab } from "./Escaped/Vtab.js"
 import { HandleWord } from "./Escaped/Word.js"
 import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
@@ -16,19 +17,20 @@ const EscapedHandler = CurrCharHandler<IRawStreamArray>(
 		w: HandleWord,
 		d: HandleDigit,
 		s: HandleSpace,
-		u: HandleUnicode,
+		u: HandleUnicodeChar,
 		n: HandleNewline,
 		t: HandleTab,
 		v: HandleVTab,
 		f: HandleFormFeed,
-		b: HandleBoundaryClass
+		b: HandleBoundaryClass,
+		p: HandleUnicodeProperty
 	},
 	HandleEscapedLiteral
 )
 
 const RangeBoundaryEscapedHandler = CurrCharHandler<IRawStreamArray>(
 	{
-		u: HandleUnicode,
+		u: HandleUnicodeChar,
 		n: HandleNewline,
 		t: HandleTab,
 		v: HandleVTab,

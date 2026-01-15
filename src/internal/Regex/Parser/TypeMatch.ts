@@ -2,40 +2,37 @@ import type {
 	ICommonStream,
 	IOwnedStream,
 	IPeekable,
-	IPeekableStream,
 	IStream,
 	IStreamStep
 } from "../../../interfaces.js"
-import { SourceBuilder } from "../../../objects.js"
 import { ensureCurrDecimal, skip } from "../../../objects/Error.js"
 import { LimitStream, ValidatorStream } from "../../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
 	EscapedStream,
-	isCurr,
-	isNotNext,
-	isNotNonEscapedNext,
 	SingletonWrapperStream
 } from "../../../samples/Stream.js"
-import { consumableIterable } from "../../../utils/Stream.js"
+import { getStringConsumable } from "../../../utils/Stream.js"
 import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { EnableClbrackStream } from "./Recursive.js"
 import { HandleSingleChar } from "./SingleChar.js"
+import {
+	isCurrClbrace,
+	isNextOpbrace,
+	isNotNextClbrace,
+	isNotNonEscapedNextClbrace,
+	skipOpbrace
+} from "./Utils/limits.js"
 
 const skipIntModifier = skip("i")
 const skipStringModifier = skip("s")
-const skipOpbrace = skip("{")
-
 const AsIntStream = SingletonWrapperStream(AsInt)
 const AsIntValidatorStream = ValidatorStream(ensureCurrDecimal)
 const AsStringStream = SingletonWrapperStream(AsString)
-const TypeMatchStream = CollectionStream(
-	TypeMatch,
-	consumableIterable(new SourceBuilder())
-)
+const TypeMatchStream = CollectionStream(TypeMatch, getStringConsumable())
 
-const emptinessCondition = isCurr("}")
+const emptinessCondition = isCurrClbrace
 
 function TypeMatchLimitStream(
 	skipModifier: (stream: IStream<string>) => void,
@@ -56,14 +53,15 @@ function TypeMatchLimitStream(
 
 const StringTypeLimitStream = TypeMatchLimitStream(
 	skipStringModifier,
-	isNotNonEscapedNext("}")
+	isNotNonEscapedNextClbrace
 )
 
-const IntTypeLimitStream = TypeMatchLimitStream(skipIntModifier, isNotNext("}"))
+const IntTypeLimitStream = TypeMatchLimitStream(
+	skipIntModifier,
+	isNotNextClbrace
+)
 
-function isTypeMatchStart(stream: IPeekableStream<string>) {
-	return stream.peek(1) === "{"
-}
+const isTypeMatchStart = isNextOpbrace
 
 function HandleTypeMatchMaybe(
 	typeMatchParser: (input: IOwnedStream<string>) => ICommonStream[]

@@ -1,4 +1,5 @@
 import type { IArray, IDepthMark } from "../../../interfaces.js"
+import type { StatefulStreamChooser } from "../objects/Chooser.js"
 import type {
 	IControlStream,
 	ILinkedStream,
@@ -28,8 +29,12 @@ export type IRawStreamArray<T = any> = IRawStream<T>[]
  * `IStreamChoice` used to build the structure
  * on an `ILinkedStream`-by-`ILinkedStream` basis.
  */
-export type IStreamChooser<T = any> = (
-	prevStream?: IOwnedStream
+export type IStreamChooser<T = any> =
+	| IStatelessStreamChooser<T>
+	| StatefulStreamChooser<T>
+
+export type IStatelessStreamChooser<T = any> = (
+	input?: IOwnedStream
 ) => IRawStreamArray<T>
 
 /**

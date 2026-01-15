@@ -5,8 +5,9 @@ import type {
 } from "../../../interfaces.js"
 import { unexpected } from "../../../objects/Error.js"
 import { SingletonWrapperStream } from "../../../samples/Stream.js"
-import { HandleMaybeBoundaryClass } from "./Class/BoundaryClass.js"
+import { HandleBoundaryClass } from "./Class/BoundaryClass.js"
 import { HandleCharClass } from "./Class/CharClass.js"
+import { HandleUnicodeProperty } from "./Escaped/UnicodeProperty.js"
 import { Negated } from "./Nodes.js"
 import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
@@ -15,7 +16,7 @@ const NegationStream = SingletonWrapperStream(Negated)
 const NegatedHandler = CurrCharHandler<IRawStreamArray>(
 	{
 		"[": HandleCharClass,
-		"\\": HandleMaybeBoundaryClass
+		"\\": HandleNegatable
 	},
 	(input: IOwnedStream<string>) => unexpected(input)
 )
@@ -27,4 +28,14 @@ function handleNegation(input: IOwnedStream<string> & IPeekable<string>) {
 
 export const maybeNegation = {
 	"^": handleNegation
+}
+
+const handleNegatableEscaped = CurrCharHandler({
+	b: HandleBoundaryClass,
+	p: HandleUnicodeProperty
+})
+
+function HandleNegatable(input: IOwnedStream<string>) {
+	input.next() // \
+	return handleNegatableEscaped(input)
 }

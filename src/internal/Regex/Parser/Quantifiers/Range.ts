@@ -6,10 +6,9 @@ import type {
 	IOwnedStream,
 	IPeekableStream,
 	IPoolNode,
-	IStreamChooser,
+	IStatelessStreamChooser,
 	ITypeCheckable
 } from "../../../../interfaces.js"
-import { SourceBuilder } from "../../../../objects.js"
 import {
 	ensureChildUnrevivable,
 	ensureCurrDecimal,
@@ -26,11 +25,9 @@ import { isDecimal } from "../../../../samples/alphabet.js"
 import {
 	CachedTokenStream,
 	EndBracketStream,
-	isCurr,
-	isNotNext,
 	PastEndStream
 } from "../../../../samples/Stream.js"
-import { consumableIterable } from "../../../../utils/Stream.js"
+import { getStringConsumable } from "../../../../utils/Stream.js"
 import {
 	InfiniteRange,
 	LimitsRange,
@@ -39,9 +36,13 @@ import {
 	Temp,
 	TrivialRange
 } from "../Nodes.js"
+import {
+	isCurrClbrace,
+	isNotNextClbrace,
+	skipOpbrace
+} from "../Utils/limits.js"
 import { handleRangeQuantifier } from "./Common.js"
 
-const skipOpbrace = skip("{")
 const expectRangeBoundary = expectKind(RangeBoundary)
 const expectCommaNode = expectKind(Temp.Comma)
 const skipComma = skip(",")
@@ -54,8 +55,8 @@ const RangeLimitStream = EndBracketStream(
 			skipOpbrace(input) // {
 			return 0
 		})
-		.setIsEmpty(isCurr("}"))
-		.setLongAs(isNotNext("}"))
+		.setIsEmpty(isCurrClbrace)
+		.setLongAs(isNotNextClbrace)
 		.build()
 )
 
@@ -65,7 +66,7 @@ const RangeBoundaryLimitStream = PastEndStream(
 		.build()
 )
 
-const boundaryMaker = consumableIterable(new SourceBuilder())
+const boundaryMaker = getStringConsumable()
 
 const RangeBoundaryValidatorStream = ValidatorStream(ensureCurrDecimal)
 const RangeBoundaryStream = SingletonStream(
@@ -158,6 +159,5 @@ export function HandleRange() {
 	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
 }
 
-export const maybeRange: array.Pairs<ITypeCheckable, IStreamChooser> = [
-	[Range, handleRangeQuantifier]
-]
+export const maybeRange: array.Pairs<ITypeCheckable, IStatelessStreamChooser> =
+	[[Range, handleRangeQuantifier]]

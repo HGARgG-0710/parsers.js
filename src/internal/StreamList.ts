@@ -3,9 +3,12 @@ import { Pools } from "../../main.js"
 import type { ILinkedStream, IOwnedStream } from "../interfaces.js"
 import type {
 	ICompositeStream,
+	IRawStream,
 	IRawStreamArray,
+	IStatelessStreamChooser,
 	IStreamChooser
 } from "../modules/Stream/interfaces/CompositeStream.js"
+import { StatefulStreamChooser } from "../modules/Stream/objects/Chooser.js"
 import { ObjectPool } from "../objects.js"
 import { isStateful } from "../utils/Stream.js"
 import { RecursiveList, RecursiveListArgs } from "./RecursiveList.js"
@@ -99,8 +102,34 @@ export namespace StreamList {
 			return this.parent.createList(streams)
 		}
 
+		private rawEvaluateStateless(
+			chooser: IStatelessStreamChooser,
+			last: IOwnedStream
+		) {
+			return chooser.call(this.topStream, last) as IRawStreamArray
+		}
+
+		private rawEvaluateStateful(
+			chooser: StatefulStreamChooser,
+			last: IOwnedStream
+		) {
+			return chooser.choose(last)
+		}
+
+		private isStatelessChooser(
+			chooser: any
+		): chooser is IStatelessStreamChooser {
+			return isFunction(chooser)
+		}
+
+		private isStatefulChooser(chooser: any) {
+			return chooser instanceof StatefulStreamChooser
+		}
+
 		private rawEvaluate(currRec: IStreamChooser, last: IOwnedStream) {
-			return currRec.call(this.topStream, last) as IRawStreamArray
+			return this.isStatelessChooser(currRec)
+				? this.rawEvaluateStateless(currRec, last)
+				: this.rawEvaluateStateful(currRec, last)
 		}
 
 		private distributeState(rawStreams: IRawStreamArray) {
@@ -124,8 +153,8 @@ export namespace StreamList {
 			return this
 		}
 
-		isRecursive(x: any): x is IStreamChooser {
-			return isFunction(x)
+		isRecursive(x: IRawStream): x is IStreamChooser {
+			return this.isStatefulChooser(x) || this.isStatelessChooser(x)
 		}
 
 		nextItem(after: ILinkedStream): ILinkedStream {

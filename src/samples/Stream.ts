@@ -21,7 +21,7 @@ import {
 	RecursiveLimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
-import { skip } from "../utils/Stream.js"
+import { skip, getStringConsumable } from "../utils/Stream.js"
 
 const { negate } = functional
 
@@ -30,7 +30,11 @@ export function autoNextLimits(n: number) {
 		return limits.wrapLongAs((longAs) => (input: IStream<T>) => {
 			const steps = asSteps(input, longAs)
 			if (steps === 0) {
-				skip(input, n)
+				// * NOTE: for 'LimitStream's, it's required to MANUALLY provide the "skip the last character" functionality
+				// TODO: via the 'pushAfterEnd()' - add a NEW, SEPARATE function *specifically* for SKIPPING THE LAST-BEFORE-BRACKET CHARACTER!
+				// * 	THEN, let THIS ONE 'autoNextLimits' EMPLOY IT (i.e. guaranteedly call it...);
+				input.next() // current character [last-before-"end-bracket"]
+				skip(input, n) // the "end-bracket" [size varies]
 				return false
 			}
 			return steps
@@ -55,11 +59,16 @@ export function AutoNextLimitStream(n: number) {
 	}
 }
 
-export const PastEndStream = AutoNextLimitStream(1)
+// TODO: *redefine it*:
+// * 	1. add an *assertion* that 'n > 0'
+// * 	2. let THIS be a wrapper that uses SPECIFICALLY *just* the
+// 			'skip last-before-end character' function (NOT autoNextLimits,
+// 			which USES THAT SAME FUNCTION AS WELL, prior to doing 'skip(input, n)')
+export const PastEndStream = AutoNextLimitStream(0)
 
-export const EndBracketStream = AutoNextLimitStream(2)
+export const EndBracketStream = AutoNextLimitStream(1)
 
-export const RecursiveBracketStream = AutoNextRecursiveLimitStream(2)
+export const RecursiveBracketStream = AutoNextRecursiveLimitStream(1)
 
 /**
  * This is a `SingletonStream` that, as its `.curr: W`
@@ -115,6 +124,18 @@ export function isNotNonEscapedNext(value: string) {
 		input.curr === "\\"
 			? 1 + Number(isNotOneAfterNext(input))
 			: isNotValueNext(input)
+}
+
+export function ConsumerStream<V = any>(
+	withConsumable: (input: Iterable<any>) => IGettable<V>
+) {
+	return SingletonStream((input: IOwnedStream & Iterable<any>) =>
+		withConsumable(input).get()
+	)
+}
+
+export function StringConsumerStream() {
+	return ConsumerStream(getStringConsumable())
 }
 
 /**
