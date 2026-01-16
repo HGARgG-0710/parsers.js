@@ -50,20 +50,19 @@ const skipComma = skip(",")
 const CommaStream = CachedTokenStream(Temp.Comma)
 
 const RangeLimitStream = EndBracketStream(
-	LimitStream.Limits.builder<string>()
+	new LimitStream.Limits.Builder<string>()
 		.setFrom((input) => {
 			skipOpbrace(input) // {
 			return 0
 		})
 		.setIsEmpty(isCurrClbrace)
 		.setLongAs(isNotNextClbrace)
-		.build()
 )
 
 const RangeBoundaryLimitStream = PastEndStream(
-	LimitStream.Limits.builder<string>()
-		.setLongAs((input: IPeekableStream<string>) => isDecimal(input.peek(1)))
-		.build()
+	new LimitStream.Limits.Builder<string>().setLongAs(
+		(input: IPeekableStream<string>) => isDecimal(input.peek(1))
+	)
 )
 
 const boundaryMaker = getStringConsumable()

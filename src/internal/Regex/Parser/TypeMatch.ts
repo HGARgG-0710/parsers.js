@@ -39,7 +39,7 @@ function TypeMatchLimitStream(
 	longAs: IStreamStep<string>
 ) {
 	return EndBracketStream(
-		LimitStream.Limits.builder<string>()
+		new LimitStream.Limits.Builder<string>()
 			.setFrom((input) => {
 				skipModifier(input) // the modifier (i, s, etc)
 				skipOpbrace(input) // {
@@ -47,7 +47,6 @@ function TypeMatchLimitStream(
 			})
 			.setIsEmpty(emptinessCondition)
 			.setLongAs(longAs)
-			.build()
 	)
 }
 

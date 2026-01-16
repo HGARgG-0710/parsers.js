@@ -1,5 +1,5 @@
-import { Initializable } from "../../../../objects/Initializable.js"
 import { mixin } from "../../../../mixin.js"
+import { Initializable } from "../../../../objects/Initializable.js"
 import { DyssyncStream } from "./DyssyncStream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
 
@@ -19,9 +19,11 @@ export const BasicStream = new mixin(
 				const curr = this.curr
 				if (this.isCurrEnd()) {
 					this.endStream()
-					this.postEnd?.()
+					this.postEnd()
 				} else this.update(this.baseNextIter(curr))
 			},
+
+			postEnd() {},
 
 			init(...args) {
 				this.startStream()

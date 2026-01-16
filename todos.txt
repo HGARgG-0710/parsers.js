@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 324
+	Current total: 326
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 285 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 287 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -271,7 +271,6 @@ IMMEDIATE:
 						1. GENERALIZE this chooser to an ABSTRACT CLASS, put it into 'Choosers.ts'
 							Reason: encourages reuse
 
-
 		1. Testing: 
 			1. Create one-two test cases for EACH one of the NON-DEPRECATED 
 				properties from https://www.unicode.org/reports/tr44/#Property_Index. 
@@ -339,23 +338,6 @@ IMMEDIATE:
 						One new method - for the Unicode Properties. 
 
 	CURRENT: 		
-		-3. PROBLEM [EndBracketStream]: 
-			Oh, no, not this again...
-			Ok, so it (appears) we're overusing the '.wrapLongAs' method a bit (DO NOT remove it - 'RecursiveLimitStream' NEEDS IT!!!)
-				Important thing - we need a NEW "hook"-method for 'LimitStream.Limits' - the 'afterEnd: (input: IStream<T>) => void'. 
-				In particular, there'd be the 'pushAfterEnd(...): void' and 'prependAfterEnd(...): void' adder-methods for 'LimitsBuilder', 
-					which'd set the appropriate "cleanup logic". The 'pushAfterEnd' would add it TO THE END of the logic-chain, whereas 
-					'prependAfterEnd(...)' would add it TO THE BEGINNING (i.e. BEFORE ALL ELSE). These two, in particular, should cover 
-					the common use-case. Having MULTIPLE such post-end routines to be run enables for INSANELY customizable stream-end-hook 
-					logic. 
-			
-			THEN - REIMPLEMENT 'EndBracketStream' in terms of the 'pushAfterEnd()' call. 
-
-			REPEAT: this is *not* a bug, the behaviour (should) be as-expected, HOWEVER, it *appears* that 
-				there's (rather) a missing abstraction that would have come in VERY handy. ALL the 'longAs'-wrapping 
-				stuff is EXCELLENT WORK, it it *not* to be changed in ANY WAY AT ALL. Just add these new things, 
-				and reimplement 'EndBracketStream'. 
-
 		-2. BUG [RegexParser]: 
 			A problem has reared its ugly head. 
 			At the present, the handling of the EMPTY 'EndBracketStream's 

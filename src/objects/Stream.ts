@@ -1,3 +1,4 @@
+export * from "../modules/Stream/objects/ActionList.js"
 export * as Chooser from "../modules/Stream/objects/Chooser.js"
 export * from "../modules/Stream/objects/concrete.js"
 export * as Locator from "../modules/Stream/objects/Locator.js"

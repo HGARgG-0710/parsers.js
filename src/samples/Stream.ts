@@ -1,6 +1,5 @@
 import { functional } from "@hgargg-0710/one"
 import assert from "assert"
-import { asSteps } from "src/modules/Stream/utils/Step.js"
 import type {
 	IGettable,
 	ILinkedStream,
@@ -21,50 +20,45 @@ import {
 	RecursiveLimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
-import { skip, getStringConsumable } from "../utils/Stream.js"
+import { getStringConsumable, skip } from "../utils/Stream.js"
 
 const { negate } = functional
 
+export function skipLastItem<T = any>(limits: LimitStream.Limits.Builder<T>) {
+	return limits.pushAfterEnd((input) => input.next())
+}
+
 export function autoNextLimits(n: number) {
-	return function <T = any>(limits: LimitStream.Limits<T>) {
-		return limits.wrapLongAs((longAs) => (input: IStream<T>) => {
-			const steps = asSteps(input, longAs)
-			if (steps === 0) {
-				// * NOTE: for 'LimitStream's, it's required to MANUALLY provide the "skip the last character" functionality
-				// TODO: via the 'pushAfterEnd()' - add a NEW, SEPARATE function *specifically* for SKIPPING THE LAST-BEFORE-BRACKET CHARACTER!
-				// * 	THEN, let THIS ONE 'autoNextLimits' EMPLOY IT (i.e. guaranteedly call it...);
-				input.next() // current character [last-before-"end-bracket"]
-				skip(input, n) // the "end-bracket" [size varies]
-				return false
-			}
-			return steps
-		})
+	return function <T = any>(limitsBuilder: LimitStream.Limits.Builder<T>) {
+		return skipLastItem(limitsBuilder)
+			.pushAfterEnd((input) => skip(input, n))
+			.build()
 	}
 }
 
 export function AutoNextRecursiveLimitStream(n: number) {
+	assert(n > 0)
 	const limitWrapper = autoNextLimits(n)
 	return function <T = any>(
 		depthMarks: LimitDepthMarks,
-		limits: LimitStream.Limits<T>
+		limitsBuilder: LimitStream.Limits.Builder<T>
 	) {
-		return RecursiveLimitStream(depthMarks, limitWrapper(limits))
+		return RecursiveLimitStream(depthMarks, limitWrapper(limitsBuilder))
 	}
 }
 
 export function AutoNextLimitStream(n: number) {
 	const limitWrapper = autoNextLimits(n)
-	return function <T = any>(limits: LimitStream.Limits<T>) {
-		return LimitStream(limitWrapper(limits))
+	return function <T = any>(limitsBuilder: LimitStream.Limits.Builder<T>) {
+		return LimitStream(limitWrapper(limitsBuilder))
 	}
 }
 
-// TODO: *redefine it*:
-// * 	1. add an *assertion* that 'n > 0'
-// * 	2. let THIS be a wrapper that uses SPECIFICALLY *just* the
-// 			'skip last-before-end character' function (NOT autoNextLimits,
-// 			which USES THAT SAME FUNCTION AS WELL, prior to doing 'skip(input, n)')
-export const PastEndStream = AutoNextLimitStream(0)
+export function PastEndStream<T = any>(
+	limitsBuilder: LimitStream.Limits.Builder<T>
+) {
+	return LimitStream(skipLastItem(limitsBuilder).build())
+}
 
 export const EndBracketStream = AutoNextLimitStream(1)
 

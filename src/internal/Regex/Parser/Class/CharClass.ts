@@ -17,11 +17,10 @@ import { ClassStream, HandleClass } from "./Common.js"
 const skipSqopbrack = skip("[")
 
 const CharClassLimitStream = EndBracketStream(
-	LimitStream.Limits.builder<string>()
+	new LimitStream.Limits.Builder<string>()
 		.setFrom((input) => skipSqopbrack(input))
 		.setIsEmpty(isCurr("]"))
 		.setLongAs(isNotNonEscapedNext("]"))
-		.build()
 )
 
 class CharClassStream extends ClassStream<IRecursiveNode> {

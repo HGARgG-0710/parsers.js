@@ -20,14 +20,13 @@ const skipOpbrack = skip("(")
 export function GroupLimitStream(from?: IStreamPredicate<string>) {
 	return RecursiveBracketStream(
 		new LimitDepthMarks(RegexMarks.Group),
-		LimitStream.Limits.builder<string>()
+		new LimitStream.Limits.Builder<string>()
 			.setFrom((input) => {
 				skipOpbrack(input) // (
 				return from ? from(input) : 0
 			})
 			.setIsEmpty(isCurr(")"))
 			.setLongAs(isNotNonEscapedNext(")"))
-			.build()
 	)
 }
 

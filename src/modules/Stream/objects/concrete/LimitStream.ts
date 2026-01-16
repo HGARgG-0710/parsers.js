@@ -6,7 +6,8 @@ import type {
 	ICommonStream,
 	ILinkedStream,
 	IOwnedStream,
-	IStream
+	IStream,
+	IStreamAction
 } from "../../../../interfaces/Stream.js"
 import { mixin } from "../../../../mixin.js"
 import { Poolable } from "../../../../objects.js"
@@ -23,7 +24,8 @@ import type {
 	IStreamStep
 } from "../../interfaces/StreamPosition.js"
 import { asSteps, bindStep, isStreamPredicate } from "../../utils/Step.js"
-import { BasicResourceStream } from "../templates/BasicResourceStream.js"
+import { StreamActionList } from "../ActionList.js"
+import { EndActionStream } from "../templates.js"
 
 const { F } = boolean
 
@@ -88,11 +90,9 @@ class ConfirmedStepsCounter {
 	}
 }
 
-function BuildLimitStream<T = any>(
-	from: IStreamStep<T>,
-	longAs: IContextualStreamStep<T>,
-	isEmpty: IStreamPredicate<T>
-) {
+function BuildLimitStream<T = any>(limits: LimitStream.Limits<T>) {
+	const { from, longAs, isEmpty, afterEnd } = limits
+
 	return new mixin(
 		{
 			name: "LimitStream",
@@ -118,8 +118,17 @@ function BuildLimitStream<T = any>(
 				},
 
 				maybeEmpty() {
-					this.isEnd = this.isEmpty(this.resource!)
-					if (!this.isEnd) this.syncCurr()
+					if (!(this.isEnd = this.isEmpty(this.resource!)))
+						this.syncCurr()
+					else this.postEnd()
+				},
+
+				getAfterEndAction() {
+					return afterEnd
+				},
+
+				postEnd() {
+					this.afterEnd.performOn(this)
 				},
 
 				get pool() {
@@ -155,7 +164,7 @@ function BuildLimitStream<T = any>(
 				}
 			},
 			constructor(resource?: ILimitableStream<T>) {
-				this.super.BasicResourceStream.constructor.call(this)
+				this.super.EndActionStream.constructor.call(this)
 				this.lookahead = new Lookaround()
 				this.steps = new ConfirmedStepsCounter()
 				this.isEmpty = isEmpty
@@ -164,7 +173,7 @@ function BuildLimitStream<T = any>(
 				this.init(resource)
 			}
 		},
-		[BasicResourceStream, Poolable]
+		[EndActionStream, Poolable]
 	) as unknown as IPoolKeeping<ICommonStream<T>>
 }
 
@@ -185,8 +194,7 @@ function BuildLimitStream<T = any>(
  * value.
  */
 export function LimitStream<T = any>(limits: LimitStream.Limits<T>) {
-	const { from, longAs, isEmpty } = limits
-	const limitStream = BuildLimitStream<T>(from, longAs, isEmpty)
+	const limitStream = BuildLimitStream<T>(limits)
 
 	function L(resource?: ILimitableStream<T>): ICommonStream<T> {
 		return limitStream.pool.create(resource)
@@ -209,19 +217,21 @@ export namespace LimitStream {
 	export const NoMovementPredicate = F
 
 	export class Limits<T = any> {
-		static builder<T = any>() {
-			return new LimitsBuilder<T>()
-		}
-
 		wrapLongAs(into: IStreamPredicateFormation<T>) {
 			assert(this.longAs instanceof StreamPredicateContext)
-			return new Limits(this.from, this.longAs.add(into), this.isEmpty)
+			return new Limits(
+				this.from,
+				this.longAs.add(into),
+				this.isEmpty,
+				this.afterEnd.copy()
+			)
 		}
 
 		constructor(
 			readonly from: IStreamStep<T>,
 			readonly longAs: IContextualStreamStep<T>,
-			readonly isEmpty: IStreamPredicate<T>
+			readonly isEmpty: IStreamPredicate<T>,
+			readonly afterEnd: StreamActionList<T>
 		) {}
 	}
 
@@ -248,39 +258,53 @@ export namespace LimitStream {
 		) {}
 	}
 
-	class LimitsBuilder<T = any> {
-		private from: IStreamStep<T> = F
-		private isEmpty: IStreamPredicate<T> = F
-		private longAs?: IStreamStep<T>
+	export namespace Limits {
+		export class Builder<T = any> {
+			private from: IStreamStep<T> = F
+			private isEmpty: IStreamPredicate<T> = F
+			private longAs?: IStreamStep<T>
+			private readonly actionsAfterEnd: IStreamAction<T>[] = []
 
-		private nonNullContextualLongAs() {
-			assert(this.longAs)
-			return isStreamPredicate(this.longAs)
-				? new StreamPredicateContext(this.longAs)
-				: this.longAs
-		}
+			private nonNullContextualLongAs() {
+				assert(this.longAs)
+				return isStreamPredicate(this.longAs)
+					? new StreamPredicateContext(this.longAs)
+					: this.longAs
+			}
 
-		setFrom(from: IStreamStep<T>) {
-			this.from = from
-			return this
-		}
+			setFrom(from: IStreamStep<T>) {
+				this.from = from
+				return this
+			}
 
-		setIsEmpty(isEmpty: IStreamProperty<T>) {
-			this.isEmpty = isEmpty
-			return this
-		}
+			setIsEmpty(isEmpty: IStreamProperty<T>) {
+				this.isEmpty = isEmpty
+				return this
+			}
 
-		setLongAs(longAs: IStreamStep<T>) {
-			this.longAs = longAs
-			return this
-		}
+			setLongAs(longAs: IStreamStep<T>) {
+				this.longAs = longAs
+				return this
+			}
 
-		build() {
-			return new Limits(
-				this.from,
-				this.nonNullContextualLongAs(),
-				this.isEmpty
-			)
+			prependAfterEnd(callback: IStreamAction<T>) {
+				this.actionsAfterEnd.unshift(callback)
+				return this
+			}
+
+			pushAfterEnd(callback: IStreamAction<T>) {
+				this.actionsAfterEnd.push(callback)
+				return this
+			}
+
+			build() {
+				return new Limits(
+					this.from,
+					this.nonNullContextualLongAs(),
+					this.isEmpty,
+					new StreamActionList(this.actionsAfterEnd)
+				)
+			}
 		}
 	}
 

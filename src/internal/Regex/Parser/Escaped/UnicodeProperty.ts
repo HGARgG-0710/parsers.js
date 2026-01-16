@@ -24,7 +24,7 @@ import {
 const skipP = skip("p")
 
 const UnicodePropertyLimitStream = EndBracketStream<string>(
-	LimitStream.Limits.builder()
+	new LimitStream.Limits.Builder()
 		.setFrom((input) => {
 			skipP(input) // p
 			skipOpbrace(input) // {
@@ -39,11 +39,10 @@ const UnicodePropertyLimitStream = EndBracketStream<string>(
 			return false
 		})
 		.setLongAs(isNotNextClbrace)
-		.build()
 )
 
 const UnicodePropertyNameLimitStream = EndBracketStream<string>(
-	LimitStream.Limits.builder()
+	new LimitStream.Limits.Builder()
 		.setIsEmpty(() => {
 			if (isCurr("=")) {
 				// TODO: here, throw a LESS GENERIC ERROR!
@@ -53,7 +52,6 @@ const UnicodePropertyNameLimitStream = EndBracketStream<string>(
 			return false
 		})
 		.setLongAs(isNotNext("="))
-		.build()
 )
 
 class UnicodePropertyStreamChooser extends IteratorStreamChooser<string> {

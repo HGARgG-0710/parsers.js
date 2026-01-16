@@ -79,10 +79,16 @@ export class ArrayCollection<T = any> implements ICollection<T, readonly T[]> {
 
 	clear() {
 		array.clear(this.items)
+		return this
 	}
 
 	copy() {
 		return new this.constructor(array.copy(this.items))
+	}
+
+	unshift(item: T) {
+		this.items.unshift(item)
+		return this
 	}
 
 	constructor(private items: T[] = []) {

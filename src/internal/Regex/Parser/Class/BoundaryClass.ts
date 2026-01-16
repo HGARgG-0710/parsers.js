@@ -18,7 +18,7 @@ import { ClassStream, HandleClass } from "./Common.js"
 const skipB = skip("b")
 
 const BoundaryClassLimitStream = EndBracketStream(
-	LimitStream.Limits.builder()
+	new LimitStream.Limits.Builder()
 		.setFrom((input) => {
 			skipB(input) // b
 			skipOpbrace(input) // {
@@ -26,7 +26,6 @@ const BoundaryClassLimitStream = EndBracketStream(
 		})
 		.setIsEmpty(isCurrClbrace)
 		.setLongAs(isNotNonEscapedNextClbrace)
-		.build()
 )
 
 class BoundaryClassStream extends ClassStream<IRecursiveNode> {

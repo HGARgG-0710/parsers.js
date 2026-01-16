@@ -52,7 +52,7 @@ export declare abstract class BasicStream<T = any, Args extends any[] = any[]>
 
 	get owner(): IOwningStream | undefined
 
-	protected postEnd?(): void
+	protected postEnd(): void
 	protected initGetter?(...args: Partial<Args>): T
 	protected update(newCurr: T): void
 	protected postInit(...args: Partial<Args>): void

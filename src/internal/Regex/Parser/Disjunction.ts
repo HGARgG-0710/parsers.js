@@ -25,10 +25,9 @@ const isCurrPipe = isCurrKind<INode>(Temp.Pipe)
 const isNotNextPipe = isNotNextKind<INode>(Temp.Pipe)
 
 const PipeLimitStream = PastEndStream(
-	LimitStream.Limits.builder<INode>()
+	new LimitStream.Limits.Builder<INode>()
 		.setIsEmpty(isCurrPipe)
 		.setLongAs(isNotNextPipe)
-		.build()
 )
 
 // * note: this is NOT a bug, since accepting empty strings MAKES NO SENSE for this specific grammar,

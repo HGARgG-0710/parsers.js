@@ -14,14 +14,13 @@ import { isNotNextClbrace, skipOpbrace } from "../Utils/limits.js"
 const skipU = skip("u")
 
 const UnicodeCharLimitStream = EndBracketStream(
-	LimitStream.Limits.builder<string>()
+	new LimitStream.Limits.Builder<string>()
 		.setFrom((input) => {
 			skipU(input) // u
 			skipOpbrace(input) // {
 			return 0
 		})
 		.setLongAs(isNotNextClbrace)
-		.build()
 )
 
 const UnicodeCharStream = CollectionStream(UnicodeChar, getStringConsumable())
