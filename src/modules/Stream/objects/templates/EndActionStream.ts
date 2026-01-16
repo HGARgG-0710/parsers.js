@@ -1,11 +1,11 @@
-import { StreamActionList } from "../ActionList.js"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.js"
+import { StreamActionList } from "../ActionList.js"
 import { BasicResourceStream } from "./BasicResourceStream.js"
 
 export abstract class EndActionStream<
 	T = any,
 	Args extends any[] = []
-> extends BasicResourceStream<T, [IOwnedStream<T>, ...(Args | [])]> {
+> extends BasicResourceStream<T, Args> {
 	private readonly afterEnd: StreamActionList<T>
 
 	protected abstract getAfterEndActions(): StreamActionList<T>

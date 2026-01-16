@@ -127,10 +127,6 @@ function BuildLimitStream<T = any>(limits: LimitStream.Limits<T>) {
 					return afterEnd
 				},
 
-				postEnd() {
-					this.afterEnd.performOn(this)
-				},
-
 				get pool() {
 					return this.constructor.pool
 				},
@@ -156,11 +152,6 @@ function BuildLimitStream<T = any>(limits: LimitStream.Limits<T>) {
 
 				isCurrEnd(): boolean {
 					return this.baseIsCurrEnd() || this.hasNoMoreSteps()
-				},
-
-				next() {
-					if (this.isCurrEnd()) this.endStream()
-					else this.baseNextIter(this.curr)
 				}
 			},
 			constructor(resource?: ILimitableStream<T>) {
