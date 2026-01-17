@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 326
+	Current total: 327
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 287 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 288 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -243,34 +243,16 @@ REMINDERs:
 					so, therefore, too large for a single person (at least without some considerable time investment, an 
 						investment that you, at this moment, are not able to afford...)
 
+	-4. REMINDER: *every* class that uses 'ObjectPool' under the hood must be tested WITH BOTH: 
+		1. Config.features.usePools == true
+		2. Config.features.usePools == false
+
+		Important, due to test-coverage...
+
 IMMEDIATE: 
 	MAJOR PROBLEM COUNT: 1 (UnicodeState)
 
 	UnicodeProperty [implementation/testing strategy; also - testing of 'Regex' in general...]:
-		0. PROBLEMS: 
-			1. BUG: the 'isRangeAhead' function (Regex/Parser/Class/Common.ts)
-				It (originally) was based on the idea that we ONLY need to be 
-				parsing CHARACTERS (escaped or not) as part of the [...]-char-classes 
-				and the \b{...}-boundry-classes; 		
-				Now, however, there's also '[...\p{...}...]', and '[...\u{...}...]', 
-				NEITHER of which satisfies this "hacky" check. 
-
-				ADAPT the code for their introduction. 
-				SPECIFICALLY: 
-
-					1. Utilize a STATEFUL CHOOSER, which MAY 
-						end up SKIPPING a hyphen, IF: 
-							1. it is discovered AFTER the fact of 
-								parsing of the underlying range-boundary
-							2. the FIRST range-boundary is of a VALID TYPE 
-								for a range-boundary [i.e. an elementary character, 
-								or one of the specifically allowed escaped ones...]
-							
-						OTHERWISE, let the stream be THE LAST ONE! 
-						
-						1. GENERALIZE this chooser to an ABSTRACT CLASS, put it into 'Choosers.ts'
-							Reason: encourages reuse
-
 		1. Testing: 
 			1. Create one-two test cases for EACH one of the NON-DEPRECATED 
 				properties from https://www.unicode.org/reports/tr44/#Property_Index. 
@@ -338,6 +320,20 @@ IMMEDIATE:
 						One new method - for the Unicode Properties. 
 
 	CURRENT: 		
+		-1. TODO: refactor the 'ClassRangePartChooser' via the State Pattern. 
+			There are 3 possible states: 
+
+				1. State 1 - first unit not returned
+				2. State 2 - first unit returned, awaiting: 
+					1. IF hyphen found, proceed to State 3 and then process the hyphen
+					2. IF no hyphen found, proceed back to State 1
+				3. State 3 - first unit and hyphen consumed, process third unit (wraps back to State 1)
+
+			This, in particular, fixes the (potential) error when the user has 'this.hyphenSeen == true', but ALSO 
+				'this.firstItemGiven == false' (due to manual user interference or a mistake whilst coding the solution). 
+				The use of State Pattern here, as such, eliminates this impossible scenario from ever taking place inside 
+					the class (closer adherence to the model of the problem at hand). 
+
 		-2. BUG [RegexParser]: 
 			A problem has reared its ugly head. 
 			At the present, the handling of the EMPTY 'EndBracketStream's 
