@@ -10,6 +10,7 @@ import { BasicHash } from "../../../../objects/HashMap.js"
 import { SingleNodeStream } from "../../../../objects/Stream.js"
 import {
 	CachedTokenStream,
+	DefaultChooser,
 	SingletonWrapperStream
 } from "../../../../samples/Stream.js"
 import { ObjectMap } from "../../../../samples/TerminalMap.js"
@@ -77,10 +78,7 @@ function HandleRangeBoundary(input: IOwnedStream<string>) {
 	return [RangeBoundaryStream(), RangeBoundaryHandler(input)]
 }
 
-function HandleHyphen(input: IOwnedStream<string>) {
-	input.next() // -
-	return [HyphenStream()]
-}
+const HandleHyphen = DefaultChooser(HyphenStream)
 
 function HandleUnit(input: IOwnedStream<string>) {
 	return [ClassUnitStream(), ClassUnitHandler(input)]

@@ -20,7 +20,7 @@ import {
 	RecursiveLimitStream,
 	SingletonStream
 } from "../objects/Stream.js"
-import { getStringConsumable, skip } from "../utils/Stream.js"
+import { getStringConsumable, next, skip } from "../utils/Stream.js"
 
 const { negate } = functional
 
@@ -72,7 +72,7 @@ export const RecursiveBracketStream = AutoNextRecursiveLimitStream(1)
 export function SingletonWrapperStream<T = any, W = any>(
 	wrapperClass: new (value: T) => W
 ) {
-	return SingletonStream((input: IStream<T>) => new wrapperClass(input.curr))
+	return SingletonStream((input: IStream<T>) => new wrapperClass(next(input)))
 }
 
 /**
@@ -80,11 +80,17 @@ export function SingletonWrapperStream<T = any, W = any>(
  * being the result of `new tokenClass()`.
  */
 export function TokenStream<T = any>(tokenClass: new () => T) {
-	return SingletonStream(() => new tokenClass())
+	return SingletonStream((input) => {
+		input.next()
+		return new tokenClass()
+	})
 }
 
 export function CachedTokenStream(tokenClass: ISingletonNodeType) {
-	return SingletonStream(() => tokenClass.make())
+	return SingletonStream((input) => {
+		input.next()
+		return tokenClass.make()
+	})
 }
 
 /**

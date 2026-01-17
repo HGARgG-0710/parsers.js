@@ -1,10 +1,8 @@
-import type { IOwnedStream } from "../../../../interfaces.js"
-import { CachedTokenStream } from "../../../../samples/Stream.js"
+import {
+	CachedTokenStream,
+	DefaultChooser
+} from "../../../../samples/Stream.js"
 import { Space } from "../Nodes.js"
 
 const SpaceStream = CachedTokenStream(Space)
-
-export function HandleSpace(input: IOwnedStream<string>) {
-	input.next() // s
-	return [SpaceStream()]
-}
+export const HandleSpace = DefaultChooser(SpaceStream)

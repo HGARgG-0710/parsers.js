@@ -1,5 +1,7 @@
-import type { IOwnedStream } from "../../../../interfaces.js"
-import { CachedTokenStream } from "../../../../samples/Stream.js"
+import {
+	CachedTokenStream,
+	DefaultChooser
+} from "../../../../samples/Stream.js"
 import { Temp } from "../Nodes.js"
 import { HandleRange } from "./Range.js"
 
@@ -7,20 +9,9 @@ const PlusStream = CachedTokenStream(Temp.Plus)
 const StarStream = CachedTokenStream(Temp.Star)
 const QMarkStream = CachedTokenStream(Temp.QMark)
 
-function handlePlus(input: IOwnedStream<string>) {
-	input.next() // +
-	return [PlusStream()]
-}
-
-function handleStar(input: IOwnedStream<string>) {
-	input.next() // *
-	return [StarStream()]
-}
-
-function handleQmark(input: IOwnedStream<string>) {
-	input.next() // ?
-	return [QMarkStream()]
-}
+const handlePlus = DefaultChooser(PlusStream)
+const handleStar = DefaultChooser(StarStream)
+const handleQmark = DefaultChooser(QMarkStream)
 
 export const maybePreQuantifier = {
 	"+": handlePlus,

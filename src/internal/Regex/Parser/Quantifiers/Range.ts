@@ -12,8 +12,8 @@ import type {
 import {
 	ensureChildUnrevivable,
 	ensureCurrDecimal,
-	expectKind,
-	skip
+	expect,
+	expectKind
 } from "../../../../objects/Error.js"
 import {
 	LimitStream,
@@ -45,7 +45,7 @@ import { handleRangeQuantifier } from "./Common.js"
 
 const expectRangeBoundary = expectKind(RangeBoundary)
 const expectCommaNode = expectKind(Temp.Comma)
-const skipComma = skip(",")
+const expectComma = expect(",")
 
 const CommaStream = CachedTokenStream(Temp.Comma)
 
@@ -128,8 +128,8 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 		return this.tryTrivial()
 			? this.asTrivial(this.first)
 			: this.tryLimits()
-			? this.asLimits(this.first)
-			: this.asInfinite(this.first)
+				? this.asLimits(this.first)
+				: this.asInfinite(this.first)
 	}
 
 	override baseInit(): void {
@@ -138,7 +138,7 @@ class RangeStream extends SingleNodeStream<IPoolNode<[INode]>> {
 }
 
 function HandleComma(input: IOwnedStream<string>) {
-	skipComma(input) // ,
+	expectComma(input) // ,
 	return [CommaStream()]
 }
 
