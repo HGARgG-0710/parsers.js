@@ -27,12 +27,18 @@ class JSONConfig {
 	replacer: null | (number | string)[] = null
 }
 
+// ! pre-doc: that's where the FEATURE FLAGS go
+class FeatureConfig {
+	usePools = false
+}
+
 class LibConfig {
 	readonly xml = new XMLConfig()
 	readonly regex = new RegexConfig()
 	readonly unicode = new UnicodeConfig()
 	readonly errors = new ErrorConfig()
 	readonly json = new JSONConfig()
+	readonly features = new FeatureConfig()
 }
 
 export const Config = new LibConfig()

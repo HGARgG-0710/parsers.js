@@ -86,6 +86,10 @@ export class ArrayCollection<T = any> implements ICollection<T, readonly T[]> {
 		return new this.constructor(array.copy(this.items))
 	}
 
+	pop() {
+		return this.items.pop()
+	}
+
 	unshift(item: T) {
 		this.items.unshift(item)
 		return this

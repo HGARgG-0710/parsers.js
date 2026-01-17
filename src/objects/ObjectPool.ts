@@ -1,56 +1,8 @@
-import { number } from "@hgargg-0710/one"
+import { Config } from "../global.js"
 import type { IInitializable } from "../interfaces.js"
+import { ArrayCollection } from "./ArrayCollection.js"
 
-const { max } = number
-
-/**
- * An optimized stack data-structure
- * that only allocates memory but never releases it.
- */
-class RetainedStack<T = any> {
-	private readonly stack: T[] = []
-	private usedSize: number = 0
-
-	private set maxSize(newMaxSize: number) {
-		this.stack.length = newMaxSize
-	}
-
-	private get maxSize() {
-		return this.stack.length
-	}
-
-	private isFull() {
-		return this.freeSpace === 0
-	}
-
-	private get freeSpace() {
-		return this.maxSize - this.usedSize
-	}
-
-	isEmpty() {
-		return this.usedSize === 0
-	}
-
-	empty() {
-		this.maxSize = 0
-		this.usedSize = 0
-	}
-
-	pop() {
-		return this.stack[this.usedSize--]
-	}
-
-	push(item: T) {
-		if (this.isFull()) this.stack.push(item)
-		else this.stack[this.usedSize] = item
-		++this.usedSize
-	}
-
-	ensureNew(n: number) {
-		this.maxSize += max(0, n - this.freeSpace)
-	}
-}
-
+// TODO: REFACTOR THIS using the STATE PATTERN [depending on the 'Config.features.usePools']
 /**
  * A class for creation of pool objects for a given type `T`.
  * To be used correctly, it requires that:
@@ -71,33 +23,38 @@ export class ObjectPool<
 	T extends IInitializable<TypeArgs> = any,
 	TypeArgs extends any[] = any[]
 > {
-	private readonly freeStack = new RetainedStack<T>()
+	private readonly freeStack = new ArrayCollection<T>()
 
 	static clear(...pools: ObjectPool[]) {
 		for (const pool of pools) pool.clear()
+	}
+
+	private get isActive() {
+		return Config.features.usePools
+	}
+
+	private canReuse() {
+		return this.isActive && !this.freeStack.isEmpty()
+	}
+
+	private reuseOld(...withArgs: [] | Partial<TypeArgs>) {
+		return this.freeStack.pop()!.init(...withArgs)
 	}
 
 	private allocNew(...x: Partial<TypeArgs> | []) {
 		return new this.objectConstructor(...x)
 	}
 
-	prealloc(n: number) {
-		this.freeStack.ensureNew(n)
-		for (let i = 0; i < n; ++i) this.freeStack.push(this.allocNew())
-	}
-
-	create(...x: [] | Partial<TypeArgs>) {
-		return this.freeStack.isEmpty()
-			? this.allocNew(...x)
-			: this.freeStack.pop().init(...x)
+	create(...args: [] | Partial<TypeArgs>) {
+		return this.canReuse() ? this.reuseOld(...args) : this.allocNew(...args)
 	}
 
 	free(item: T) {
-		this.freeStack.push(item)
+		if (this.isActive) this.freeStack.push(item)
 	}
 
 	clear() {
-		this.freeStack.empty()
+		this.freeStack.clear()
 	}
 
 	constructor(
