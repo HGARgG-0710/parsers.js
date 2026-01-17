@@ -2,7 +2,6 @@ import { Config } from "../global.js"
 import type { IInitializable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
-// TODO: REFACTOR THIS using the STATE PATTERN [depending on the 'Config.features.usePools']
 /**
  * A class for creation of pool objects for a given type `T`.
  * To be used correctly, it requires that:
@@ -20,37 +19,71 @@ import { ArrayCollection } from "./ArrayCollection.js"
  * (that is to say - there are no more active references on them)
  */
 export class ObjectPool<
-	T extends IInitializable<TypeArgs> = any,
-	TypeArgs extends any[] = any[]
+	T extends IInitializable<Args> = any,
+	Args extends any[] = any[]
 > {
-	private readonly freeStack = new ArrayCollection<T>()
+	private readonly active: ObjectPoolActive<T, Args>
+	private readonly inactive: ObjectPoolInactive<T, Args>
 
 	static clear(...pools: ObjectPool[]) {
 		for (const pool of pools) pool.clear()
 	}
 
-	private get isActive() {
-		return Config.features.usePools
+	private getState() {
+		return Config.features.usePools ? this.active : this.inactive
 	}
+
+	create(...args: [] | Partial<Args>) {
+		return this.getState().create(...args)
+	}
+
+	free(item: T) {
+		this.getState().free(item)
+	}
+
+	clear() {
+		this.getState().clear()
+	}
+
+	constructor(objectConstructor: new (...x: Partial<Args> | []) => T) {
+		this.active = new ObjectPoolActive(objectConstructor)
+		this.inactive = new ObjectPoolInactive(objectConstructor)
+	}
+}
+
+interface IObjectPoolState<
+	T extends IInitializable<Args> = any,
+	Args extends any[] = []
+> {
+	clear(): void
+	create(...args: Partial<Args> | []): T
+	free(item: T): void
+}
+
+class ObjectPoolActive<
+	T extends IInitializable<Args>,
+	Args extends any[] = []
+> implements IObjectPoolState<T, Args> {
+	private readonly freeStack = new ArrayCollection<T>()
 
 	private canReuse() {
-		return this.isActive && !this.freeStack.isEmpty()
+		return !this.freeStack.isEmpty()
 	}
 
-	private reuseOld(...withArgs: [] | Partial<TypeArgs>) {
+	private reuseOld(...withArgs: [] | Partial<Args>) {
 		return this.freeStack.pop()!.init(...withArgs)
 	}
 
-	private allocNew(...x: Partial<TypeArgs> | []) {
+	private allocNew(...x: Partial<Args> | []) {
 		return new this.objectConstructor(...x)
 	}
 
-	create(...args: [] | Partial<TypeArgs>) {
+	create(...args: [] | Partial<Args>) {
 		return this.canReuse() ? this.reuseOld(...args) : this.allocNew(...args)
 	}
 
 	free(item: T) {
-		if (this.isActive) this.freeStack.push(item)
+		this.freeStack.push(item)
 	}
 
 	clear() {
@@ -58,8 +91,25 @@ export class ObjectPool<
 	}
 
 	constructor(
+		private readonly objectConstructor: new (...x: Partial<Args> | []) => T
+	) {}
+}
+
+class ObjectPoolInactive<
+	T extends IInitializable<Args>,
+	Args extends any[] = []
+> implements IObjectPoolState<T, Args> {
+	clear() {}
+
+	create(...args: [] | Partial<Args>): T {
+		return new this.objectConstructor(...args)
+	}
+
+	free(item: T): void {}
+
+	constructor(
 		private readonly objectConstructor: new (
-			...x: Partial<TypeArgs> | []
+			...args: Partial<Args> | []
 		) => T
 	) {}
 }
