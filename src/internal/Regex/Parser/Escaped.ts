@@ -1,3 +1,4 @@
+import { object } from "@hgargg-0710/one"
 import type { IOwnedStream, IRawStreamArray } from "../../../interfaces.js"
 import { HandleBoundaryClass } from "./Class/BoundaryClass.js"
 import { HandleDigit } from "./Escaped/Digit.js"
@@ -28,16 +29,25 @@ const EscapedHandler = CurrCharHandler<IRawStreamArray>(
 	HandleEscapedLiteral
 )
 
+const rangeBoundaryMap = {
+	u: HandleUnicodeChar,
+	n: HandleNewline,
+	t: HandleTab,
+	v: HandleVTab,
+	f: HandleFormFeed
+}
+
 const RangeBoundaryEscapedHandler = CurrCharHandler<IRawStreamArray>(
-	{
-		u: HandleUnicodeChar,
-		n: HandleNewline,
-		t: HandleTab,
-		v: HandleVTab,
-		f: HandleFormFeed
-	},
+	rangeBoundaryMap,
 	HandleEscapedLiteral
 )
+
+const validRangeBoundaryStarts = new Set(object.keys(rangeBoundaryMap))
+
+export function canBeRangeBoundaryStart(char: string) {
+	if (char.length > 1) return false
+	return validRangeBoundaryStarts.has(char)
+}
 
 export function HandleRangeBoundaryEscaped(input: IOwnedStream<string>) {
 	input.next() // \

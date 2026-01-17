@@ -143,28 +143,22 @@ export class CachingLocator<T = any> implements IStreamLocator<T> {
  * value of `this.marker` (set by `setMarker(marker: M): this`).
  */
 export class MarkerLocator<M = any> extends WithPath<IMarkerHaving<M>> {
-	private marker: M
-
-	static upwards() {
-		return new MarkerLocator(new OwnerFollower())
+	static upwards<M = any>(marker: M) {
+		return new MarkerLocator(marker, new OwnerFollower())
 	}
 
-	static downwards() {
-		return new MarkerLocator(new ResourceFollower())
-	}
-
-	setMarker(marker: M) {
-		this.marker = marker
-		return this
+	static downwards<M = any>(marker: M) {
+		return new MarkerLocator(marker, new ResourceFollower())
 	}
 
 	protected get follower() {
 		return this._follower
 	}
 
-	private constructor(private readonly _follower: IPathFollower) {
-		super(
-			(x): x is IMarkerHaving => hasMarker(x) && x.marker === this.marker
-		)
+	private constructor(
+		marker: M,
+		private readonly _follower: IPathFollower
+	) {
+		super((x): x is IMarkerHaving => hasMarker(x) && x.marker === marker)
 	}
 }

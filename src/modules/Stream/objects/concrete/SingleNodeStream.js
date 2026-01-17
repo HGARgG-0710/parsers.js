@@ -1,5 +1,6 @@
 import { mixin } from "../../../../mixin.js"
-import { NodeStream, TrivialStream } from "../templates.js"
+import { TrivialStream } from "../templates.js"
+import { NodeStream } from "./NodeStream.js"
 
 export const SingleNodeStream = new mixin(
 	{

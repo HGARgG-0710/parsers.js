@@ -1,64 +1,34 @@
 import type {
 	ICommonStream,
+	IMarkerHaving,
 	INode,
 	IOwnedStream,
-	IPeekable
+	IRawStreamArray,
+	IResourcefulStream
 } from "../../../../interfaces.js"
-import { ArrayBuilder, TableHandler } from "../../../../objects.js"
-import { expectKind, tryReviveChild } from "../../../../objects/Error.js"
+import { StatefulStreamChooser } from "../../../../modules/Stream/objects/Chooser.js"
+import { NodeStream } from "../../../../modules/Stream/objects/concrete.js"
+import { MarkerLocator } from "../../../../modules/Stream/objects/Locator.js"
+import { TableHandler } from "../../../../objects.js"
+import { tryReviveChild } from "../../../../objects/Error.js"
 import { BasicHash } from "../../../../objects/HashMap.js"
-import { SingleNodeStream } from "../../../../objects/Stream.js"
 import {
 	CachedTokenStream,
 	DefaultChooser,
 	SingletonWrapperStream
 } from "../../../../samples/Stream.js"
 import { ObjectMap } from "../../../../samples/TerminalMap.js"
-import { consumableRevivables } from "../../../../utils/Stream.js"
-import { HandleEscaped, HandleRangeBoundaryEscaped } from "../Escaped.js"
-import { ClassRange, ClassRangeBoundary, ClassUnit, Temp } from "../Nodes.js"
+import { next } from "../../../../utils/Stream.js"
+import {
+	canBeRangeBoundaryStart,
+	HandleEscaped,
+	HandleRangeBoundaryEscaped
+} from "../Escaped.js"
+import { ClassRange, ClassUnit, Temp } from "../Nodes.js"
 import { HandleSingleChar } from "../SingleChar.js"
 
 const HyphenStream = CachedTokenStream(Temp.Hyphen)
 const ClassUnitStream = SingletonWrapperStream(ClassUnit)
-const RangeBoundaryStream = SingletonWrapperStream(ClassRangeBoundary)
-
-const expectRangeBoundary = expectKind(ClassRangeBoundary)
-const expectHyphen = expectKind(Temp.Hyphen)
-
-class ClassRangeStream extends SingleNodeStream<INode> {
-	private classRange: ClassRange
-
-	private updateCurr() {
-		this.curr = this.classRange
-	}
-
-	private readBoundary() {
-		expectRangeBoundary(this.resource!)
-		return this.readNextItem()
-	}
-
-	private readHyphen() {
-		expectHyphen(this.resource!)
-		return this.readNextItem()
-	}
-
-	private readNextItem() {
-		const unit = this.resource!.curr as INode
-		this.resource!.next()
-		return unit
-	}
-
-	override baseInit(): void {
-		const from = this.readBoundary() // the child Stream dies
-		tryReviveChild(this) // needs to be renewed
-		this.readHyphen()
-		tryReviveChild(this) // needs to be renewed
-		const to = this.readBoundary()
-		this.classRange = new ClassRange(from, to)
-		this.updateCurr()
-	}
-}
 
 const RangeBoundaryHandler = TableHandler<
 	IOwnedStream<string>,
@@ -74,23 +44,7 @@ const RangeBoundaryHandler = TableHandler<
 	)
 )
 
-function HandleRangeBoundary(input: IOwnedStream<string>) {
-	return [RangeBoundaryStream(), RangeBoundaryHandler(input)]
-}
-
 const HandleHyphen = DefaultChooser(HyphenStream)
-
-function HandleUnit(input: IOwnedStream<string>) {
-	return [ClassUnitStream(), ClassUnitHandler(input)]
-}
-
-function HandleBoundaryOrHyphen(input: IOwnedStream<string>) {
-	return (input.curr === "-" ? HandleHyphen : HandleRangeBoundary)(input)
-}
-
-function HandleClassRange(input: IOwnedStream<string>) {
-	return [new ClassRangeStream(), HandleBoundaryOrHyphen]
-}
 
 const ClassUnitHandler = TableHandler<
 	IOwnedStream<string>,
@@ -106,31 +60,116 @@ const ClassUnitHandler = TableHandler<
 	)
 )
 
-function isRangeAhead(input: IOwnedStream<string> & IPeekable<string>) {
-	const peekLength = input.curr === "\\" ? 2 : 1
-	return input.peek(peekLength) === "-" // \?-? [peekLength == 2], or ?-? [peekLength == 1]
+function HandleUnit(input: IOwnedStream<string>) {
+	return [ClassUnitStream(), ClassUnitHandler(input)]
 }
 
-function ClassElementHandler(input: IOwnedStream<string> & IPeekable<string>) {
-	return [isRangeAhead(input) ? HandleClassRange : HandleUnit]
+class ClassElementSequenceChooser extends StatefulStreamChooser<INode> {
+	static readonly instance = new ClassElementSequenceChooser()
+
+	private firstItemGiven = false
+	private hyphenSeen = false
+
+	private canCurrBeFirstRangeItem(input: IOwnedStream<string>) {
+		return canBeRangeBoundaryStart(input.curr)
+	}
+
+	private chooseFirstUnit(input: IOwnedStream<string>) {
+		if (this.canCurrBeFirstRangeItem(input)) this.firstItemGiven = true
+		return HandleUnit(input)
+	}
+
+	private chooseUnrelatedUnit(input: IOwnedStream<string>) {
+		return HandleUnit(input)
+	}
+
+	private chooseHyphen() {
+		this.hyphenSeen = true
+		return HandleHyphen()
+	}
+
+	private tryChooseHyphen(input: IOwnedStream<string>) {
+		return input.curr === "-"
+			? this.chooseHyphen()
+			: this.chooseUnrelatedUnit(input)
+	}
+
+	private chooseSecondUnit(input: IOwnedStream<string>) {
+		this.reset()
+		return [RangeBoundaryHandler(input)]
+	}
+
+	override choose(input: IOwnedStream<string>): IRawStreamArray<INode> {
+		return this.firstItemGiven
+			? this.hyphenSeen
+				? this.chooseSecondUnit(input)
+				: this.tryChooseHyphen(input)
+			: this.chooseFirstUnit(input)
+	}
+
+	reset() {
+		this.firstItemGiven = false
+		this.hyphenSeen = false
+		return this
+	}
 }
 
-export abstract class ClassStream<
-	T extends INode
-> extends SingleNodeStream<INode> {
-	protected abstract spawnNode(children: INode[]): T
+class ClassElementJoinerStream extends NodeStream<INode> {
+	private readonly classEndingLocator = MarkerLocator.downwards("classEnd")
 
-	private readonly exhaustChildren = consumableRevivables(
-		new ArrayBuilder<INode>()
-	)
+	private readNextItem() {
+		return next(this.resource!) as INode
+	}
+
+	private isRange() {
+		return Temp.Hyphen.is(this.resource!.curr)
+	}
+
+	private parseRange(fromNode: INode) {
+		this.readNextItem() // skip Hyphen
+		tryReviveChild(this) // needs to be renewed
+		const toNode = this.readNextItem() // get the second range boundary
+		return new ClassRange(fromNode, toNode)
+	}
+
+	private pickOutputNode() {
+		const from = this.readNextItem() // the child Stream dies
+		tryReviveChild(this)
+		return this.isRange() ? this.parseRange(from) : from
+	}
+
+	private baseNextIter() {
+		this.curr = this.pickOutputNode()
+	}
+
+	// ! PRE-DOC [internal - vital]: CONTRACT:
+	// * 	1. The user of 'ClassElementJoinerStream' MUST provide
+	//  		a 'MarkerStream' BELOW the 'ClassElementJoinerStream',
+	//  		but DIRECTLY ABOVE the stream that DEFINES the '.isCurrEnd()'
+	//  		[and, therefore, '.isEnd'] of the current class (and, therefore,
+	//  		of the 'ClassElementJoinerStream').
+	// * 	2. SAID 'MarkerStream' MUST have the marker of "classEnd" (a string literal),
+	//  		for otherwise it WILL NOT be recognized.
+	override isCurrEnd(): boolean {
+		return (
+			this.classEndingLocator.locate(this)! as IMarkerHaving &
+				IResourcefulStream
+		).resource!.isCurrEnd()
+	}
 
 	override baseInit(): void {
-		this.curr = this.spawnNode(this.exhaustChildren(this).get())
+		this.baseNextIter()
+	}
+
+	override next(): void {
+		if (this.isCurrEnd()) this.endStream()
+		else this.baseNextIter()
 	}
 }
 
-export function HandleClass<T extends INode>(ClassKind: () => ClassStream<T>) {
-	return function (input: IOwnedStream<string> & IPeekable<string>) {
-		return [ClassKind(), ClassElementHandler]
-	}
+export function HandleClassElements(input: IOwnedStream<string>) {
+	return [
+		new ClassElementJoinerStream(),
+		ClassElementSequenceChooser.instance.reset()
+	]
 }

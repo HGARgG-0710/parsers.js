@@ -1,4 +1,5 @@
 import { type } from "@hgargg-0710/one"
+import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import type {
 	ICellNode,
 	INode,
@@ -19,7 +20,6 @@ import {
 	VTab
 } from "../Parser/Nodes.js"
 import { compileUnicodeChar } from "./Cell.js"
-import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileFormFeed,
@@ -41,7 +41,7 @@ export function compileBoundaryClass(factory: IRegexFactory) {
 }
 
 export function compileClassRange(factory: IRegexFactory) {
-	const boundaryCompiler = compileClassRangeBoundary(factory)
+	const boundaryCompiler = rangeBoundaryHandler(factory)
 	return function (
 		input: TreeStream<INode>,
 		handler: IRegexCompilerHandler<Regex.Raw | string>
@@ -50,13 +50,18 @@ export function compileClassRange(factory: IRegexFactory) {
 		const from = boundaryCompiler(input, handler)
 		input.next()
 		const to = boundaryCompiler(input, handler)
-		return isString(from)
-			? isString(to)
+		// * explanation: 'isString(from) && isString(to)' means
+		// 		that \n-\n is the range given, since ALL THE OTHER
+		// 		ONES are *transformed* into strings
+		const isFromChar = isString(from)
+		const isToChar = isString(to)
+		return isFromChar
+			? isToChar
 				? factory.charRange(from, to)
 				: factory.charToNewlineRange(from, to)
-			: isString(to)
-			? factory.newlineToCharRange(from, to)
-			: from // * explanation: this means that \n-\n is the range given
+			: isToChar
+				? factory.newlineToCharRange(from, to)
+				: from
 	}
 }
 
@@ -121,17 +126,6 @@ function rangeBoundaryHandler(factory: IRegexFactory) {
 		],
 		compilerBuilderErrHandler
 	)
-}
-
-function compileClassRangeBoundary(factory: IRegexFactory) {
-	const handleRangeBoundary = rangeBoundaryHandler(factory)
-	return function (
-		input: TreeStream<INode>,
-		_handler: IRegexCompilerHandler<string | Regex.Raw>
-	) {
-		input.next() // CharClassRangeBoundary
-		return handleRangeBoundary(input)
-	}
 }
 
 // ! ADD A PROPER ERROR HANDLER HERE!!! (not the `compilerBuilderErrHandler`)

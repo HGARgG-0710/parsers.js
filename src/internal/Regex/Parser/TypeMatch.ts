@@ -15,7 +15,7 @@ import {
 } from "../../../samples/Stream.js"
 import { getStringConsumable } from "../../../utils/Stream.js"
 import { AsInt, AsString, TypeMatch } from "./Nodes.js"
-import { EnableClbrackStream } from "./Recursive.js"
+import { EnableClbrackStream } from "./Contract.js"
 import { HandleSingleChar } from "./SingleChar.js"
 import {
 	isCurrClbrace,

@@ -3,7 +3,8 @@ import type { IRawStreamArray } from "../interfaces/CompositeStream.js"
 import type { IOwnedStream } from "../interfaces/OwnedStream.js"
 
 export abstract class StatefulStreamChooser<T = any> {
-	abstract choose(input: IOwnedStream): IRawStreamArray<T>
+	abstract choose(input: IOwnedStream): IRawStreamArray<T>	
+	protected constructor() {}
 }
 
 export abstract class IteratorStreamChooser<

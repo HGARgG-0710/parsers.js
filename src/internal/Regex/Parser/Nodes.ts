@@ -120,10 +120,6 @@ export const RangeBoundary = ContentNode<number>(
 )
 
 export const ClassUnit = SingleChildNode("char-class-unit", "ClassUnit")
-export const ClassRangeBoundary = SingleChildNode(
-	"class-range-boundary",
-	"ClassRangeBoundary"
-)
 
 export class ClassRange extends BaseNode {
 	static readonly debugName = "ClassRange"

@@ -1,18 +1,16 @@
-import type {
-	INode,
-	IRawStreamArray,
-	IRecursiveNode
-} from "../../../../interfaces.js"
+import type { INode, IRawStreamArray } from "../../../../interfaces.js"
 import { skip } from "../../../../objects/Error.js"
 import { LimitStream, PeekStream } from "../../../../objects/Stream.js"
 import {
+	CollectionStream,
 	EndBracketStream,
 	isCurr,
 	isNotNonEscapedNext
 } from "../../../../samples/Stream.js"
+import { getArrayConsumable } from "../../../../utils/Stream.js"
+import { ClassEndMarkerStream, EnableClbrackStream } from "../Contract.js"
 import { CharClass } from "../Nodes.js"
-import { EnableClbrackStream } from "../Recursive.js"
-import { ClassStream, HandleClass } from "./Common.js"
+import { HandleClassElements } from "./Common.js"
 
 const skipSqopbrack = skip("[")
 
@@ -23,17 +21,13 @@ const CharClassLimitStream = EndBracketStream(
 		.setLongAs(isNotNonEscapedNext("]"))
 )
 
-class CharClassStream extends ClassStream<IRecursiveNode> {
-	protected spawnNode(children: INode[]): IRecursiveNode {
-		return new CharClass(children)
-	}
-}
-
-const CharClassHandler = HandleClass(() => new CharClassStream())
+const CharClassStream = CollectionStream(CharClass, getArrayConsumable<INode>())
 
 export function HandleCharClass(): IRawStreamArray {
 	return [
-		CharClassHandler,
+		CharClassStream(),
+		HandleClassElements,
+		ClassEndMarkerStream(),
 		CharClassLimitStream(),
 		PeekStream(),
 		EnableClbrackStream()

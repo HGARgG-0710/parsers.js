@@ -7,7 +7,7 @@ import type {
 	IParseState
 } from "../../../../interfaces.ts"
 import type { ObjectPool } from "../../../../objects.ts"
-import type { RenewerStream } from "./RenewerStream.js"
+import type { RenewerStream } from "../templates/RenewerStream.js"
 
 /**
  * This is a an abstract class for representing a user-defined stream
@@ -18,6 +18,8 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	extends RenewerStream<T, Args>
 	implements ICommonStream<T>
 {
+	isCurrEnd(): boolean
+
 	connectOwner(newOwner: IOwningStream): void
 	get owner(): IOwningStream | undefined
 

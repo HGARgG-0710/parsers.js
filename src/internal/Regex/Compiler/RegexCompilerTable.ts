@@ -41,7 +41,7 @@ import {
 	compileCharClass,
 	compileClassRange,
 	compileNegated
-} from "./CharClass.js"
+} from "./Class.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileAnyChar,
@@ -104,7 +104,7 @@ class QuantifierCompilerTable {
 	}
 }
 
-class CharClassCompilerTable {
+class ClassCompilerTable {
 	private readonly compileAnyChar: IRegexCompilerFunction
 	private readonly compileWord: IRegexCompilerFunction
 	private readonly compileDigit: IRegexCompilerFunction
@@ -259,7 +259,7 @@ export class RegexCompilerTable {
 		return this.tables.get(factory)
 	}
 
-	private readonly charClasses: CharClassCompilerTable
+	private readonly charClasses: ClassCompilerTable
 	private readonly quantifiers: QuantifierCompilerTable
 	private readonly toplevel: ToplevelCompilerTable
 	private readonly groups: GroupCompilerTable
@@ -283,7 +283,7 @@ export class RegexCompilerTable {
 
 	constructor(factory: IRegexFactory) {
 		this.quantifiers = new QuantifierCompilerTable(factory)
-		this.charClasses = new CharClassCompilerTable(factory)
+		this.charClasses = new ClassCompilerTable(factory)
 		this.toplevel = new ToplevelCompilerTable(factory)
 		this.groups = new GroupCompilerTable(factory, this.toplevel)
 		this.special = new SpecialCharacterTable(factory)

@@ -1,5 +1,9 @@
-import type { IRawStreamArray, IStreamPredicate } from "../../../interfaces.js"
-import { ArrayBuilder, Parametrized, Regex } from "../../../objects.js"
+import type {
+	INode,
+	IRawStreamArray,
+	IStreamPredicate
+} from "../../../interfaces.js"
+import { Parametrized, Regex } from "../../../objects.js"
 import { skip } from "../../../objects/Error.js"
 import { LimitDepthMarks, LimitStream } from "../../../objects/Stream.js"
 import {
@@ -8,11 +12,11 @@ import {
 	isNotNonEscapedNext,
 	RecursiveBracketStream
 } from "../../../samples/Stream.js"
-import { consumableIterable } from "../../../utils/Stream.js"
+import { getArrayConsumable } from "../../../utils/Stream.js"
+import { RegexMarks } from "./Contract.js"
 import { HandleExtensionGroup } from "./Group/Extension.js"
 import { HandlePlainGroup } from "./Group/Plain.js"
 import { GroupBody } from "./Nodes.js"
-import { RegexMarks } from "./Recursive.js"
 import { CurrCharHandler } from "./Utils/CurrCharHandler.js"
 
 const skipOpbrack = skip("(")
@@ -32,7 +36,7 @@ export function GroupLimitStream(from?: IStreamPredicate<string>) {
 
 export const GroupBodyStream = CollectionStream(
 	GroupBody,
-	consumableIterable(new ArrayBuilder())
+	getArrayConsumable<INode>()
 )
 
 const GroupHandler = new Parametrized((extensions: Regex.Extension[]) =>

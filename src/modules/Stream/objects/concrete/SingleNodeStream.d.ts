@@ -1,4 +1,4 @@
-import type { NodeStream } from "../templates/NodeStream.js"
+import type { NodeStream } from "./NodeStream.js"
 
 /**
  * This is a special case of `NodeStream<T>` which only

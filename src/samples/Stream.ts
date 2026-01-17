@@ -3,6 +3,7 @@ import assert from "assert"
 import type {
 	IGettable,
 	ILinkedStream,
+	INode,
 	IOwnedStream,
 	IPeekableStream,
 	ISingletonNodeType,
@@ -64,11 +65,6 @@ export const EndBracketStream = AutoNextLimitStream(1)
 
 export const RecursiveBracketStream = AutoNextRecursiveLimitStream(1)
 
-/**
- * This is a `SingletonStream` that, as its `.curr: W`
- * has the result of the call to `new wrapperClass(input.curr)`.
- * Perfect for simple wrapping classes.
- */
 export function SingletonWrapperStream<T = any, W = any>(
 	wrapperClass: new (value: T) => W
 ) {
@@ -86,11 +82,15 @@ export function TokenStream<T = any>(tokenClass: new () => T) {
 	})
 }
 
-export function CachedTokenStream(tokenClass: ISingletonNodeType) {
-	return SingletonStream((input) => {
+export function CachedTokenStream<T = any>(tokenClass: ISingletonNodeType) {
+	return SingletonStream<T, INode>((input) => {
 		input.next()
 		return tokenClass.make()
 	})
+}
+
+export function StillbornIdentityStream<T = any>() {
+	return SingletonStream<T, T>((input) => next(input))
 }
 
 /**
