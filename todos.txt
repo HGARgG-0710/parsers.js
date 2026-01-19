@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 327
+	Current total: 329
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 288 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 290 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
@@ -249,13 +249,57 @@ REMINDERs:
 
 		Important, due to test-coverage...
 
-IMMEDIATE: 
-	MAJOR PROBLEM COUNT: 1 (UnicodeState)
+	3. REMINDER [testing; 'Regex']: the '\p{...}'-properties must work INSIDE the '[...]'-character classes AND '\b{...}'-boundary-classes
+		Reason: 
+			1. one *can* implement it
+			2. represents a valid use-case
+			3. JavaScript RegExp has similar functionality already built-in
 
-	UnicodeProperty [implementation/testing strategy; also - testing of 'Regex' in general...]:
+	4. REMINDER [testing; 'Regex']: the '\P{...}'-equivalent of RegExp is achieved via '^[\p{...}]';
+		Reason: enables the parser (and the grammar) to be slightly simpler, more compact and less cosmetic. 
+			Plus, it doesn't introduce such a terrible character-overhead...
+
+	5. REMINDER: the *only* three cases when the user can employ \p{...} or \u{...} are: 
+		1. \p:
+			1. \p{...} [positive use, toplevel - standalone]
+			2. ^[\p{...}] [negative use, inside a negated character-class; NON-RANGE-BOUNDARY]
+			3. [...\p{...}...] [positive use, inside a character-class; NON-RANGE-BOUNDARY]
+			4. ^\b{\p{...}} [negative use, inside a boundary class; NON-RANGE-BOUNDARY]
+			5. \b{...p{...}...} [positive use, inside a boundary class; NON-RANGE-BOUNDARY]
+		2. \u:
+			1. \u{...} [positive use, toplevel - standalone]
+			2. ^[\u{...}] [negative use, inside a negated character-class; COULD BE RANGE-BOUNDARY]
+			3. [...\u{...}...] [positive use, inside a character-class; COULD BE RANGE-BOUNDARY]
+			4. ^\b{\u{...}} [negative use, inside a boundary class; COULD BE RANGE-BOUNDARY]
+			5. \b{...u{...}...} [positive use, inside a boundary class; COULD BE RANGE-BOUNDARY]
+
+	6. REMINDER: Regex (UnicodeProperty): 
+		1. Supposed to allow EMOJIS
+		2. Supposed to allow ALL things that RegExp from JavaScript allows [including Shorthand-property-names]
+		
+	0. REMINDER [testing; ObjectPool]: 
+		ENSURE that ONLY a single 'ObjectPool' is EVER allowed to own an object 
+		(i.e., if it was CREATED with a given ObjectPool within a given class, it can ONLY 
+		ever be '.free'-d by THAT SAME POOL, and no other!)
+		
+IMMEDIATE: 
+	UnicodeProperty [finishing; implementation/testing strategy; also - testing of 'Regex' in general...]:
+		0. PROBLEMS: 
+			1. ALLOW the \p{PropertyName} shorthands, INSTEAD of the current (mandatory) \p{Prop=Value}
+				Syntax. Reason: shorter Regex-es, greater simplicity... [also RegExp supports it...]
+				This affects BOTH the Regex: Parser, Compiler AND 'UnicodePropertyState'!
+
 		1. Testing: 
 			1. Create one-two test cases for EACH one of the NON-DEPRECATED 
-				properties from https://www.unicode.org/reports/tr44/#Property_Index. 
+				properties supported by JavaScript's RegExp. 	
+
+				For that, learn SPECIFICALLY which of the https://www.unicode.org/reports/tr44/#Property_Index
+				properties does RegExp support (experimentally, or otherwise...). 
+
+				(ALSO, test all aliases: 	
+					https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
+				)
+
 				In particular, these should be ELEMENTARY and simple 
 					(testing *specifically* the UnicodeProperty thingy...). 
 				THERE WOULD BE 1-2 TESTS for *each one* of the *elementary* patterns
@@ -286,38 +330,6 @@ IMMEDIATE:
 				2. '(#q...)'... group
 					makes every item in the group OPTIONAL as in: 
 						(#qabc) == (a?b?c?)
-
-		2. Implementation: 	
-			0. Parser: 
-				3. ADD SUPPORT FOR '\p{...}'-properties INSIDE the '[...]'-character classes AND '\b{...}'-boundary-classes
-					Reason: 
-						1. one *can* implement it
-						2. represents a valid use-case
-						3. JavaScript RegExp has similar functionality already built-in
-
-			1. Visitor: 
-				1. Add a new method to the interface - 'handleUnicodeProperty'
-				2. Add a new 'Regex.Raw' child-class - 'new Regex.Raw.UnicodeProperty(propName: string, value: string)'
-
-			2. Matcher [NFARegexMatcher]: 
-				1. Make the 'UnicodePropertyState' a WRAPPER around the 'RegExp' class. 
-					Specifically, let it utilize JavaScript's BUILT-IN implementation of 
-						/p{PropName=Value}/.test(...)
-					since: 
-
-						1. Implementing the ENTIRE Unicode Property Spec is crazy, 
-							let ONLY the RegExp-stuff be supported
-							
-						2. RegExp already *has* support for the 'Script' property, which was THE ORIGINAL 
-							motivation for even introducing this whole thing (i.e. it supports 
-								emojis, cyrillics, chinese/japanese/arabic scripts, etc). 
-
-			3. Compiler [RegexCompiler]: 
-				1. ADD support for ^\p{...} [missing]
-					THE PARSER already *has* the support (verify, just in case - if it doesn't, ADD AS WELL!)
-				2. ADD support for p{...}-AS-OF-THEMSELVES!
-					1. In particular, CHANGE the interface of 'IRawRegexFactory'
-						One new method - for the Unicode Properties. 
 
 	CURRENT: 		
 		-1. TODO: refactor the 'ClassRangePartChooser' via the State Pattern. 
@@ -350,34 +362,6 @@ IMMEDIATE:
 					4. Range.ts [RangeLimitStream]
 					5. BoundaryClass.ts [BoundaryClassLimitStream]
 					
-		-1. FIX [ObjectPool]: LET there be a NEW interface - IPoolable! 
-			Let the 'Poolable' mixin implement it (properly). 
-			Let, specifically, this new interface be employed by the 'ObjectPool'
-			inside the generic 'extends IPoolable' clause INSTEAD of the 'IInitializable'. 
-
-			Let it COMBINE the 'IInitializable' with a NEW Single-Property interface - 'IPoolOwned'. 
-			The IPoolOwned interface: 
-
-				interface IPoolOwned {
-					readonly poolId: number
-				}
-
-			*Let*, the 'free(item: T)' method of 'ObjectPool' ASSERT that the 'poolId: number' of 
-			a given 'T extends IPoolable' is NOT different from the UNIQUE 'readonly id: number'
-			of the CURRENT 'ObjectPool' [generated from a 'private static readonly TotalPools = 0'
-			property, incremented on each call to the 'constructor']. 
-
-			THIS, in particular, maintains the *crucial* invariant that ONLY 
-			a single pool can EVER hold reference to a 'T extends IPoolable'. 
-
-			In particular, let ALL the classes for which an 'ObjectPool' exists IMPLEMENT THE PROPERTY. 
-			Place the 'get poolId(): number' onto the 'Poolable' mixin, which should IMPLEMENT the 'IFreeable'
-			AND 'IPoolable'. In particular, the getter is as such: 
-
-				get poolId() {
-					return this.pool.id
-				}
-
 		0. FIX: add ability to specify a LIMIT on the 'ObjectPool' number 
 			of instances. Particularly, enable the ability for the user to 
 			MODIFY limits on pools for specific (non-internal) types of 
@@ -397,22 +381,7 @@ IMMEDIATE:
 		-1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
-
-		2. 'Poolable' and 'Initializable': LIKEWISE, *LET* there be an appropriate `postFree()` 
-			method that marks the reusable objects as INVALID AND NO LONGER USABLE. Specifically, it 
-			will mark respective fields as `null`, thus REMOVING excess references, and PREVENTING CERTAIN 
-			CRAZY OUTDATED-REFERENCE BUGS. 	
 	
-	3. [MAJOR PROBLEM; UnicodeState] Regex [RegexParser and RegexCompiler]: 
-		note: one needs NEW CLASSES, to enable: 
-			1. \p{...}-like (JS RegExp) groups of characters (new character classes): 
-				1. The \P{...} is replaced by EITHER: ^\p{...} OR ^[\p{...}]
-				2. There isn't an actual \p{...}, instead it is replaced by a NUMBER of *different* commands
-				3. For details on what to design, see: 
-					1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
-					2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
-			2. DON'T FORGET EMOJIS [those are mandatory...]
-
 	1. FULFILL all the todos/notes/ideas/etc inside of the Notes app...
 
 	1. VERIFY that *all* the "public" exports ARE PROVIDED 
