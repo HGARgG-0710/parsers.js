@@ -1,5 +1,5 @@
 import type { IFileSource } from "../../interfaces.js"
-import { Chunk } from "../../internal/Chunk.js"
+import { FileChunk } from "../../internal/Utils/FileChunk.js"
 import { InvalidFileReadPositionError } from "../../objects/Error.js"
 
 /**
@@ -18,7 +18,7 @@ export class WebByteSource implements IFileSource {
 
 	private currChunk: Uint8Array
 	private lastChunkCount: number = 0
-	private readonly pos = new Chunk.BytePos()
+	private readonly pos = new FileChunk.BytePos()
 
 	get filename() {
 		return this.source.name
@@ -35,7 +35,10 @@ export class WebByteSource implements IFileSource {
 	}
 
 	private getNextChunk() {
-		return this.source.slice(this.pos.get(), this.pos.get() + Chunk.size)
+		return this.source.slice(
+			this.pos.get(),
+			this.pos.get() + FileChunk.size
+		)
 	}
 
 	private readNextChunk() {

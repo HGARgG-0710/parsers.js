@@ -1,5 +1,5 @@
-import type { IWalkable } from "../interfaces/Node.js"
-import { hasChildren, treeEndPath } from "../utils/Node.js"
+import type { IWalkable } from "../../interfaces/Node.js"
+import { hasChildren, treeEndPath } from "../../utils/Node.js"
 import { MultiIndex } from "./MultiIndex.js"
 
 /**

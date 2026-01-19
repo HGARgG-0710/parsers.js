@@ -10,7 +10,7 @@ import type {
 	INavigable,
 	IPeekable
 } from "../../../../interfaces/Stream.js"
-import { ReadableView } from "../../../../internal/ReadableView.js"
+import { ReadableView } from "../../../../internal/Stream/ReadableView.js"
 import { skip } from "../../../../utils/Stream.js"
 import type { IStreamStep } from "../../interfaces/StreamPosition.js"
 import { isStreamPredicate } from "../../utils/Step.js"

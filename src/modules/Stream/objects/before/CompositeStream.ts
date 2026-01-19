@@ -7,7 +7,7 @@ import type {
 	IOwnedStream,
 	IRawStreamArray
 } from "../../../../interfaces/Stream.js"
-import { StreamList } from "../../../../internal/StreamList.js"
+import { StreamList } from "../../../../internal/Stream/StreamList.js"
 import { resourceInitializer } from "../../../../objects/Initializable.js"
 import { IdentityStream } from "../concrete.js"
 

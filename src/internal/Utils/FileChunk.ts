@@ -2,12 +2,12 @@
  * This is a namnespace containing information pertaining to
  * the lazy reading of file chunks.
  */
-export namespace Chunk {
+export namespace FileChunk {
 	// Getting the file contents in 4KB chunks for the sake of performance.
 	export const size = 4096
 
 	export function chunkStartOf(bytePos: BytePos) {
-		return bytePos.getChunk() * Chunk.size
+		return bytePos.getChunk() * FileChunk.size
 	}
 
 	/**
@@ -33,11 +33,11 @@ export namespace Chunk {
 		}
 
 		getChunk() {
-			return Math.floor(this.pos / Chunk.size)
+			return Math.floor(this.pos / FileChunk.size)
 		}
 
 		getOffset() {
-			return this.pos % Chunk.size
+			return this.pos % FileChunk.size
 		}
 
 		isSameChunk(bytePos: BytePos) {

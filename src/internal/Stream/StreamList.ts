@@ -1,16 +1,16 @@
 import { type } from "@hgargg-0710/one"
-import { Pools } from "../../main.js"
-import type { ILinkedStream, IOwnedStream } from "../interfaces.js"
+import { Pools } from "../../../main.js"
+import type { ILinkedStream, IOwnedStream } from "../../interfaces.js"
 import type {
 	ICompositeStream,
 	IRawStream,
 	IRawStreamArray,
 	IStatelessStreamChooser,
 	IStreamChooser
-} from "../modules/Stream/interfaces/CompositeStream.js"
-import { StatefulStreamChooser } from "../modules/Stream/objects/Chooser.js"
-import { ObjectPool } from "../objects.js"
-import { isStateful } from "../utils/Stream.js"
+} from "../../modules/Stream/interfaces/CompositeStream.js"
+import { StatefulStreamChooser } from "../../modules/Stream/objects/Chooser.js"
+import { ObjectPool } from "../../objects.js"
+import { isStateful } from "../../utils/Stream.js"
 import { RecursiveList, RecursiveListArgs } from "./RecursiveList.js"
 
 const { isFunction } = type

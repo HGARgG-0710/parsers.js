@@ -6,7 +6,7 @@ import type {
 	IPeekableStream,
 	IRegexMatcher
 } from "../../../interfaces.js"
-import { OverflowCounter } from "../../OverflowCounter.js"
+import { OverflowCounter } from "../../Utils/OverflowCounter.js"
 import { MatchCollector } from "./MatchCollector.js"
 import { MatchIterator } from "./MatchIterator.js"
 import {

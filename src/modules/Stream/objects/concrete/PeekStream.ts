@@ -6,7 +6,7 @@ import type {
 	IPeekable,
 	IStream
 } from "../../../../interfaces/Stream.js"
-import { RotationBuffer } from "../../../../internal/RotationBuffer.js"
+import { RotationBuffer } from "../../../../internal/Stream/RotationBuffer.js"
 import { ArrayCollection, ObjectPool } from "../../../../objects.js"
 import { ownerInitializer } from "../../../../objects/Initializable.js"
 import { write } from "../../../../utils/Stream.js"

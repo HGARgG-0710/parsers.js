@@ -4,7 +4,7 @@ import type {
 	IConcreteReadable,
 	IInitializable,
 	IReadable
-} from "../interfaces.js"
+} from "../../interfaces.js"
 
 const { isNumber } = type
 
@@ -43,7 +43,10 @@ export class ReadableView<T = any> implements IView<T> {
 		this.offset += n
 	}
 
-	constructor(private offset: number, readable?: IConcreteReadable<T>) {
+	constructor(
+		private offset: number,
+		readable?: IConcreteReadable<T>
+	) {
 		assert(isNumber(offset))
 		assert(offset >= 0)
 		this.init(readable)

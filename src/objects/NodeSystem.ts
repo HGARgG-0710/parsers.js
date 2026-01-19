@@ -4,7 +4,7 @@ import type {
 	INodeTypeCategories,
 	IValidNodeType
 } from "../interfaces/Node.js"
-import { Enum, MapConcatenator } from "../internal/Enum.js"
+import { Enum, MapConcatenator } from "../internal/Utils/Enum.js"
 
 type INodeTypesMap = Map<IValidNodeType, INodeType>
 

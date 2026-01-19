@@ -1,5 +1,5 @@
 import assert from "node:assert"
-import { Config } from "../global.js"
+import { Config } from "../../global.js"
 
 export function charAfter(x: string) {
 	return String.fromCodePoint(x.codePointAt(0)! + 1)

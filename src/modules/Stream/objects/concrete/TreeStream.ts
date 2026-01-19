@@ -1,7 +1,7 @@
 import { BadIndex } from "../../../../constants.js"
 import { Pools } from "../../../../global.js"
 import type { INavigable, IWalkable } from "../../../../interfaces.js"
-import { TreeWalker } from "../../../../internal/TreeWalker.js"
+import { TreeWalker } from "../../../../internal/Tree/TreeWalker.js"
 import { ObjectPool } from "../../../../objects.js"
 import { isGoodIndex } from "../../../../utils.js"
 import { treeEndPath } from "../../../../utils/Node.js"

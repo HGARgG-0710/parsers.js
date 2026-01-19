@@ -16,8 +16,8 @@ import {
 	Regex
 } from "../../../objects.js"
 import { isTyped } from "../../../utils/Node.js"
-import type { OverflowCounter } from "../../OverflowCounter.js"
-import { toLowerCase, toUpperCase } from "../../Unicode.js"
+import type { OverflowCounter } from "../../Utils/OverflowCounter.js"
+import { toLowerCase, toUpperCase } from "../../Utils/Unicode.js"
 
 const { isString, isNull } = type
 
@@ -265,7 +265,10 @@ export class Fragment {
 		return this
 	}
 
-	constructor(readonly inState: State, readonly outArrows: StateArrow[]) {}
+	constructor(
+		readonly inState: State,
+		readonly outArrows: StateArrow[]
+	) {}
 }
 
 export class StateArrow<T = any> {
@@ -413,7 +416,10 @@ export class CharState<T = any> extends LocaleSensitiveState<T> {
 		return item === this.char
 	}
 
-	constructor(private readonly char: string, extensions: Regex.ExtensionMap) {
+	constructor(
+		private readonly char: string,
+		extensions: Regex.ExtensionMap
+	) {
 		super(extensions)
 	}
 }

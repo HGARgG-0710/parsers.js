@@ -1,10 +1,14 @@
 import { array, inplace, type } from "@hgargg-0710/one"
-import { type IDepthMark, Pools } from "../../main.js"
-import { MissingArgument } from "../constants.js"
-import type { IDepthMarked, IFreeable, IInitializable } from "../interfaces.js"
-import type { IArray } from "../interfaces/Array.js"
-import { Initializable } from "../objects/Initializable.js"
-import { ObjectPool } from "../objects/ObjectPool.js"
+import { type IDepthMark, Pools } from "../../../main.js"
+import { MissingArgument } from "../../constants.js"
+import type {
+	IDepthMarked,
+	IFreeable,
+	IInitializable
+} from "../../interfaces.js"
+import type { IArray } from "../../interfaces/Array.js"
+import { Initializable } from "../../objects/Initializable.js"
+import { ObjectPool } from "../../objects/ObjectPool.js"
 
 const { insert, mutate, out } = inplace
 const { first, clear } = array
@@ -39,9 +43,7 @@ type IPreRecursiveItems<
 > = (IRecursivelySwitchable<T, Recursive, InitType> | T | Recursive)[]
 
 export interface ITerminalAcceptable
-	extends IInitializable,
-		IFreeable,
-		Partial<IDepthMarked> {}
+	extends IInitializable, IFreeable, Partial<IDepthMarked> {}
 
 function isSwitch<
 	T extends ITerminalAcceptable = any,
@@ -287,11 +289,11 @@ const recursiveListInitializer = {
  * as well as extending `Initializable<[RecursiveList.Renewer<T, Recursive, InitType>]`.
  */
 abstract class RenewerHaving<
-		T extends ITerminalAcceptable = any,
-		Recursive = any,
-		InitType = any,
-		Args extends any[] = []
-	>
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
+	InitType = any,
+	Args extends any[] = []
+>
 	extends Initializable<
 		[RecursiveList.Renewer<T, Recursive, InitType>, ...Args]
 	>
@@ -953,10 +955,10 @@ const switchArrayInitializer = {
  * structure of a `DynamicParser`.
  */
 export class SwitchArray<
-		T extends ITerminalAcceptable = any,
-		Recursive = any,
-		InitType = any
-	>
+	T extends ITerminalAcceptable = any,
+	Recursive = any,
+	InitType = any
+>
 	extends Initializable<
 		[
 			IRecursiveItems<T, Recursive, InitType>,

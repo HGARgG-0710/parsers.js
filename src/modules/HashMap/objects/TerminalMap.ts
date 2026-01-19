@@ -1,5 +1,5 @@
 import type { IPlainMap, IPreMap } from "../../../interfaces/HashMap.js"
-import { Size } from "../../../internal/Size.js"
+import { Size } from "../../../internal/Utils/Size.js"
 
 function isMissing(x: any): x is undefined {
 	return x === undefined

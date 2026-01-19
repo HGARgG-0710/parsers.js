@@ -1,6 +1,6 @@
 import { closeSync, fstatSync, openSync, readSync } from "fs"
 import type { IFileSource } from "../../interfaces.js"
-import { Chunk } from "../../internal/Chunk.js"
+import { FileChunk } from "../../internal/Utils/FileChunk.js"
 import { InvalidFileReadPositionError } from "../../objects/Error.js"
 
 enum FileError {
@@ -27,16 +27,16 @@ function displayError(error: FileError, { filename, pos, size }: ErrorData) {
  * on a 4KB-basis for increased performance).
  */
 class BufferReader {
-	private readonly readPos = new Chunk.BytePos(true)
-	private readonly tempData = new Uint8Array(Chunk.size)
+	private readonly readPos = new FileChunk.BytePos(true)
+	private readonly tempData = new Uint8Array(FileChunk.size)
 
 	private readNextPage() {
 		readSync(
 			this.descriptor,
 			this.tempData,
 			0,
-			Chunk.chunkStartOf(this.nextPos),
-			Chunk.size
+			FileChunk.chunkStartOf(this.nextPos),
+			FileChunk.size
 		)
 	}
 
@@ -51,7 +51,7 @@ class BufferReader {
 		return this.tempData[this.nextPos.getOffset()]
 	}
 
-	private isEndPos(bytePos: Chunk.BytePos) {
+	private isEndPos(bytePos: FileChunk.BytePos) {
 		return bytePos.isAfter(this.endPos)
 	}
 
@@ -69,8 +69,8 @@ class BufferReader {
 
 	constructor(
 		private readonly descriptor: number,
-		private readonly nextPos: Chunk.BytePos,
-		private readonly endPos: Chunk.BytePos
+		private readonly nextPos: FileChunk.BytePos,
+		private readonly endPos: FileChunk.BytePos
 	) {}
 }
 
@@ -83,7 +83,7 @@ class BufferReader {
  */
 class ByteProvider {
 	private readonly reader: BufferReader
-	private readonly pos = new Chunk.BytePos()
+	private readonly pos = new FileChunk.BytePos()
 
 	private _byte: number
 
@@ -116,7 +116,7 @@ class ByteProvider {
 
 	constructor(
 		descriptor: number,
-		endPos: Chunk.BytePos,
+		endPos: FileChunk.BytePos,
 		private readonly errorStatus: ErrorStatus
 	) {
 		this.reader = new BufferReader(descriptor, this.pos, endPos)
@@ -216,7 +216,7 @@ interface IFileDescriptorState {
 class FileDescriptorOpen implements IFileDescriptorState {
 	private readonly byteProvider: ByteProvider
 	private readonly descriptor: number
-	private readonly endPos: Chunk.BytePos
+	private readonly endPos: FileChunk.BytePos
 	private readonly errorStatus = new ErrorStatus()
 	private readonly closed = new FileDescriptorClosed()
 
@@ -227,7 +227,7 @@ class FileDescriptorOpen implements IFileDescriptorState {
 	}
 
 	private getEndPos() {
-		return Chunk.BytePos.at(this.size)
+		return FileChunk.BytePos.at(this.size)
 	}
 
 	private getByteProvider() {

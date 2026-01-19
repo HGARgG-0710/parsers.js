@@ -1,6 +1,6 @@
-import type { IRegexMatcher } from "../interfaces.js"
-import type { Regex } from "../objects.js"
-import { RegexCompiler } from "./Regex/Compiler/Compiler.js"
+import type { IRegexMatcher } from "../../interfaces.js"
+import type { Regex } from "../../objects.js"
+import { RegexCompiler } from "./Compiler/Compiler.js"
 
 /**
  * This serves as a preliminary abstraction to `RegexCompiler`.

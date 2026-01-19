@@ -1,6 +1,6 @@
 import { array, functional } from "@hgargg-0710/one"
 import assert from "assert"
-import { Pairs } from "../samples.js"
+import { Pairs } from "../../samples.js"
 
 const { id } = functional
 const { first, firstOut } = array

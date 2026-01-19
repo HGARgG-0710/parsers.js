@@ -12,8 +12,8 @@ import type {
 	IValidNodeType
 } from "../interfaces.js"
 import { NFARegexFinalizer } from "../internal/Regex/NFA/Finalizer.js"
-import { RegexStorage } from "../internal/RegexStorage.js"
-import { charAfter, charBefore } from "../internal/Unicode.js"
+import { RegexStorage } from "../internal/Regex/Storage.js"
+import { charAfter, charBefore } from "../internal/Utils/Unicode.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
 
@@ -260,7 +260,10 @@ export namespace Regex {
 				return visitor.handleCodeRange(this)
 			}
 
-			constructor(readonly from: number, readonly to: number) {
+			constructor(
+				readonly from: number,
+				readonly to: number
+			) {
 				super()
 			}
 		}
