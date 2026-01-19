@@ -14,10 +14,6 @@ const { insert, mutate, out } = inplace
 const { first, clear } = array
 const { isUndefined } = type
 
-interface ISwitchIdentifiable {
-	readonly isSwitch: boolean
-}
-
 type IDerivedList<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
@@ -49,8 +45,8 @@ function isSwitch<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
->(x: ISwitchIdentifiable): x is Switch<T, Recursive, InitType> {
-	return x.isSwitch === true
+>(x: any): x is Switch<T, Recursive, InitType> {
+	return x instanceof Switch
 }
 
 /**
@@ -88,7 +84,15 @@ export class Switch<
 	Recursive = any,
 	InitType = any
 > extends ListIndexHaving {
-	static readonly pool = Pools.Internal.add(
+	static wrap<
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
+		InitType = any
+	>(recursive: Recursive): Switch<T, Recursive, InitType> {
+		return Switch.pool.create(recursive)
+	}
+
+	private static readonly pool = Pools.Internal.add(
 		new ObjectPool<Switch, [any]>(Switch)
 	)
 
@@ -102,10 +106,6 @@ export class Switch<
 
 	private set list(x: IDerivedList<T, Recursive, InitType>) {
 		this._list = x
-	}
-
-	get isSwitch() {
-		return true
 	}
 
 	get recursive() {
@@ -134,7 +134,7 @@ export class Switch<
 		Switch.pool.free(this)
 	}
 
-	constructor(recursive: Recursive) {
+	constructor(recursive?: Recursive) {
 		super()
 		this.init(recursive)
 	}
@@ -152,7 +152,15 @@ class Terminal<
 	Recursive = any,
 	InitType = any
 > extends ListIndexHaving {
-	static readonly pool = Pools.Internal.add(
+	static wrap<
+		T extends ITerminalAcceptable = any,
+		Recursive = any,
+		InitType = any
+	>(terminal: T): Terminal<T, Recursive, InitType> {
+		return Terminal.pool.create(terminal)
+	}
+
+	private static readonly pool = Pools.Internal.add(
 		new ObjectPool<Terminal, [any]>(Terminal)
 	)
 
@@ -184,22 +192,15 @@ class Terminal<
 		return this
 	}
 
-	get isSwitch() {
-		return false
-	}
-
 	recycle() {
 		this.terminal.free()
 		Terminal.pool.free(this)
 	}
-}
 
-function wrapSwitch<Recursive = any>(r: Recursive) {
-	return Switch.pool.create(r)
-}
-
-function wrapTerminal<T extends ITerminalAcceptable = any>(t: T) {
-	return Terminal.pool.create(t)
+	constructor(terminal?: T) {
+		super()
+		this.init(terminal)
+	}
 }
 
 function unwrap<
@@ -1012,9 +1013,9 @@ export class SwitchArray<
 	write(i: number, value: T | Recursive) {
 		const currItem = this.get(i)
 		if (!this.renewer.isRecursive(value))
-			this.baseWrite(i, wrapTerminal(value))
+			this.baseWrite(i, Terminal.wrap(value))
 		else if (isSwitch(currItem)) currItem.init(value)
-		else this.baseWrite(i, wrapSwitch(value))
+		else this.baseWrite(i, Switch.wrap(value))
 		return this
 	}
 
@@ -1213,8 +1214,10 @@ export namespace RecursiveList {
 			last: T | InitType
 		): IDerivedList<T, Recursive, InitType>
 
-		wrap(r: T | Recursive) {
-			return this.isRecursive(r) ? wrapSwitch(r) : wrapTerminal(r)
+		wrap(item: T | Recursive) {
+			return this.isRecursive(item)
+				? Switch.wrap(item)
+				: Terminal.wrap(item)
 		}
 	}
 
