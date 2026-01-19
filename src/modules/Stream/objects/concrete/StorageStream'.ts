@@ -17,10 +17,14 @@ class _StorageStream<T = any, Stored = any>
 	)
 
 	private handler: IHandler<T, Stored>
-	private _currStored: Stored
+	private _currStored: Stored | null = null
 
 	private set currStored(newCurrStored: Stored) {
 		this._currStored = newCurrStored
+	}
+
+	private resetStored() {
+		this._currStored = null
 	}
 
 	private updateStored() {
@@ -32,7 +36,7 @@ class _StorageStream<T = any, Stored = any>
 	}
 
 	get currStored() {
-		return this._currStored
+		return this._currStored!
 	}
 
 	override baseInit(): void {
@@ -42,6 +46,11 @@ class _StorageStream<T = any, Stored = any>
 	override next() {
 		super.next()
 		this.updateStored()
+	}
+
+	override postFree(): void {
+		super.postFree()
+		this.resetStored()
 	}
 
 	setHandler(handler: (stream?: IOwnedStream) => Stored) {

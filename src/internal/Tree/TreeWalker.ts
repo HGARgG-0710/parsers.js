@@ -13,7 +13,7 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 
 	private _curr: TreeLike
 	private level: TreeLike
-	private walkable?: TreeLike
+	private walkable: TreeLike | null = null
 
 	private set curr(newCurr: TreeLike) {
 		this._curr = newCurr
@@ -126,6 +126,10 @@ export class TreeWalker<TreeLike extends IWalkable<TreeLike> = IWalkable> {
 		this.walkable = walkable
 		this.restart()
 		return this
+	}
+
+	resetWalkable() {
+		this.walkable = null
 	}
 
 	constructor(walkable?: TreeLike) {

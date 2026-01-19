@@ -1,5 +1,6 @@
 import { mixin } from "../../../../mixin.js"
 import { ObjectPool } from "../../../../objects.js"
+import { LinkedResettable } from "../Resettable.js"
 import { OwningStream } from "./OwningStream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
 
@@ -15,5 +16,5 @@ export const CustomLinkedStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[OwningStream, PreCommonStream]
+	[OwningStream, PreCommonStream, LinkedResettable]
 ).toClass()

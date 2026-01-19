@@ -18,6 +18,13 @@ export const NodeStream = new mixin(
 
 			free() {
 				if (this.pool) this.pool.free(this)
+			},
+
+			postFree() {
+				this.super.CustomLinkedStream.postFree.call(this)
+				this.resetCurr()
+				this.resetIsEnd()
+				this.resetState()
 			}
 		},
 		constructor(resource) {

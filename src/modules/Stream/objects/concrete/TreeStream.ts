@@ -244,4 +244,10 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	get poolId() {
 		return TreeStream.pool.id
 	}
+
+	postFree(): void {
+		this.walker.resetWalkable()
+		this.resetCurr()
+		this.resetIsEnd()
+	}
 }

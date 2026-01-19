@@ -29,7 +29,7 @@ export class BoundState<T = any>
 		new ObjectPool<BoundState, [State, PeekKeeper]>(BoundState)
 	)
 
-	private _state: ArrowState
+	private _state: ArrowState | null
 	private _wasVerified: boolean
 	private _captured: string | T
 
@@ -47,6 +47,15 @@ export class BoundState<T = any>
 		this._state = newState
 	}
 
+	private resetState() {
+		this._state = null
+	}
+
+	private resetCommon() {
+		this.wasVerified = false
+		this.captured = ""
+	}
+
 	protected get pool() {
 		return BoundState.pool as ObjectPool<
 			typeof this,
@@ -54,11 +63,15 @@ export class BoundState<T = any>
 		>
 	}
 
+	override postFree(): void {
+		this.resetCommon()
+		this.resetState()
+	}
+
 	init(state?: ArrowState, keeper?: PeekKeeper): this {
 		if (state) this.state = state
 		if (keeper) this.keeper.from(keeper)
-		this.wasVerified = false
-		this.captured = ""
+		this.resetCommon()
 		return this
 	}
 
@@ -71,7 +84,7 @@ export class BoundState<T = any>
 	}
 
 	get state() {
-		return this._state
+		return this._state!
 	}
 
 	verify() {
@@ -180,15 +193,6 @@ export class StateArray<T = any> extends Poolable<[number]> {
 		this._matchState = newMatchState
 	}
 
-	private clearStates() {
-		for (const boundState of this.states) boundState.free()
-		this.states.clear()
-	}
-
-	private resetMatch() {
-		this._matchState = null
-	}
-
 	private newIdAdd(state: State<T>, keeper: PeekKeeper) {
 		state.markSeen(this.listId)
 		state.forgetAllKeepers()
@@ -213,8 +217,12 @@ export class StateArray<T = any> extends Poolable<[number]> {
 	}
 
 	clear() {
-		this.clearStates()
-		this.resetMatch()
+		for (const boundState of this.states) boundState.free()
+		this.states.clear()
+	}
+
+	override postFree(): void {
+		this._matchState = null
 	}
 
 	init(listId?: number) {

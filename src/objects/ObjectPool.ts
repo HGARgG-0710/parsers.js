@@ -24,7 +24,7 @@ export class ObjectPool<
 	Args extends any[] = any[]
 > {
 	// ! pre-doc: this is supposed to be a placeholder for "pool-less" classes
-	// * 	Specifically, the ones that AREN'T intended for pooling, but, instead, 
+	// * 	Specifically, the ones that AREN'T intended for pooling, but, instead,
 	// 			should be used at the top... [or, the ones that are supposed to have
 	// 				the 'readonly poolId: number' overriden]
 	static readonly BadPoolID = -1
@@ -76,7 +76,7 @@ interface IObjectPoolState<
 }
 
 class ObjectPoolActive<
-	T extends IInitializable<Args>,
+	T extends IPoolable<Args>,
 	Args extends any[] = []
 > implements IObjectPoolState<T, Args> {
 	private readonly freeStack = new ArrayCollection<T>()
@@ -99,6 +99,7 @@ class ObjectPoolActive<
 
 	free(item: T) {
 		this.freeStack.push(item)
+		item.postFree()
 	}
 
 	clear() {

@@ -12,10 +12,14 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 		new ObjectPool(_AccumulatorStream)
 	)
 
-	private _storage: IStorage<T>
+	private _storage: IStorage<T> | null = null
+
+	private resetStorage() {
+		this._storage = null
+	}
 
 	private pushCurr() {
-		this._storage.push(this.curr)
+		this.storage.push(this.curr)
 	}
 
 	protected override get pool() {
@@ -23,12 +27,17 @@ class _AccumulatorStream<T = any> extends IdentityStream<T> {
 	}
 
 	get storage() {
-		return this._storage
+		return this._storage!
 	}
 
 	setStorage(storage: IStorage<T>) {
 		this._storage = storage
 		return this
+	}
+
+	override postFree(): void {
+		super.postFree()
+		this.resetStorage()
 	}
 
 	override next() {

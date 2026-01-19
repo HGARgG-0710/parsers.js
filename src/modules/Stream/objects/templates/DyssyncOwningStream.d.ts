@@ -1,3 +1,4 @@
+import type { IFreeResettable } from "../../../../interfaces.ts"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.ts"
 import type { PipeStream } from "./PipeStream.js"
 
@@ -26,4 +27,6 @@ export declare abstract class DyssyncOwningStream<
 	protected syncCurr(): void
 	protected endStream(): void
 	protected startStream(): void
+
+	postFree(): void
 }

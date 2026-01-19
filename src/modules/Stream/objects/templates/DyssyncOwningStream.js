@@ -5,8 +5,14 @@ import { SyncCurrStream } from "./SyncCurrStream.js"
 
 export const DyssyncOwningStream = new mixin(
 	{
-		name: "DyssyncOwningMixin",
-		properties: {},
+		name: "DyssyncOwningStream",
+		properties: {
+			postFree() {
+				this.super.PipeStream.postFree.call(this)
+				this.resetCurr()
+				this.resetIsEnd()
+			}
+		},
 		constructor(resource) {
 			this.super.PipeStream.constructor.call(this, resource)
 		}

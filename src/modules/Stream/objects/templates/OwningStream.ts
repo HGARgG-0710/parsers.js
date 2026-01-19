@@ -22,9 +22,9 @@ export abstract class OwningStream<T = any, Args extends any[] = []>
 	abstract isCurrEnd(): boolean
 	abstract next(): void
 
-	private _resource?: IOwnedStream
+	private _resource: IOwnedStream | null = null
 
-	protected set resource(resource: IOwnedStream | undefined) {
+	protected set resource(resource: IOwnedStream | null) {
 		this._resource = resource
 	}
 

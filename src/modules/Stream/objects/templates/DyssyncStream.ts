@@ -18,6 +18,10 @@ export abstract class DyssyncStream<T = any> extends CurrDyssyncStream<T> {
 	protected startStream() {
 		this.isEnd = false
 	}
+	
+	protected resetIsEnd() {
+		this.isEnd = true
+	}
 
 	protected set isEnd(newIsEnd: boolean) {
 		this._isEnd = newIsEnd

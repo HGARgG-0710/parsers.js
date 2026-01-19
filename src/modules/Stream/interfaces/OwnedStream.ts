@@ -2,7 +2,7 @@ import type {
 	IFreeable,
 	IInitializable,
 	IOwnerConnectable,
-	IPoolOwned,
+	IPoolFriendly,
 	IResourceConnectable
 } from "../../../interfaces.js"
 import type {
@@ -18,13 +18,12 @@ export type IBasicStream<T = any> = IOwnedStream<T> & Iterable<T>
  * has a `readonly owner?: IOwningStream` property. It represents a stream,
  * which can be taken ownership of.
  */
-export type IOwnedStream<
-	T = any,
-	OwnerType extends IOwningStream = IOwningStream
-> = IStream<T> &
-	IOwnerConnectable<IOwningStream> & {
-		readonly owner?: OwnerType
-	}
+export interface IOwnedStream<T = any>
+	extends IStream<T>, IOwnerConnectable<IOwningStream>, IOwnable {}
+
+export interface IOwnable {
+	readonly owner: IOwningStream | null
+}
 
 /**
  * This is an `IResourcefulStream<T>`, which is also `IResourceConnectable<IOwnedStream>`,
@@ -56,7 +55,7 @@ export interface IOwningStream<T = any, Args extends any[] = any[]>
 export type ILinkedStream<
 	T = any,
 	Args extends any[] = any[]
-> = IOwnedStream<T> & IOwningStream<T, Args> & IFreeable & IPoolOwned
+> = IOwnedStream<T> & IOwningStream<T, Args> & IFreeable & IPoolFriendly
 
 /**
  * This is an `ILinkedStream<T>`, which is also an `IStatefulStream<T>`.

@@ -25,8 +25,13 @@ class _MarkerStream<T = any, M = any> extends IdentityStream<T> {
 		return this
 	}
 
-	override baseInit(): void {
+	updateMarker() {
 		this._marker = this.markerMaker(this)
+		return this
+	}
+
+	override baseInit(): void {
+		this.updateMarker()
 	}
 }
 

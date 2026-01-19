@@ -1,10 +1,10 @@
 import type {
-	ICommonStream,
 	IInitializer,
 	ILinkedStream,
 	IOwnedStream,
 	IOwningStream,
-	IParseState
+	IParseState,
+	IParseStream
 } from "../../../../interfaces.ts"
 import type { ObjectPool } from "../../../../objects.ts"
 import type { RenewerStream } from "../templates/RenewerStream.js"
@@ -16,18 +16,18 @@ import type { RenewerStream } from "../templates/RenewerStream.js"
  */
 export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	extends RenewerStream<T, Args>
-	implements ICommonStream<T>
+	implements IParseStream<T>
 {
 	isCurrEnd(): boolean
 
 	connectOwner(newOwner: IOwningStream): void
-	get owner(): IOwningStream | undefined
+	get owner(): IOwningStream | null
 
 	readonly state: IParseState
 	setState(state: IParseState): void
 
-	protected set resource(newResource: ILinkedStream | undefined)
-	get resource(): ILinkedStream | undefined
+	protected set resource(newResource: ILinkedStream | null)
+	get resource(): ILinkedStream | null
 	connectResource(resource: ILinkedStream): void
 	baseInit(): void
 	init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
@@ -39,6 +39,10 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	get curr(): T
 	get isEnd(): boolean
 
+	protected resetState(): void
+	protected resetCurr(): void
+	protected resetIsEnd(): void
+
 	[Symbol.iterator](): Generator<T>
 
 	protected get initializer(): IInitializer<[IOwnedStream, ...([] | Args)]>
@@ -48,4 +52,5 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	copy(): this
 	free(): void
 	get poolId(): number
+	postFree(): void
 }

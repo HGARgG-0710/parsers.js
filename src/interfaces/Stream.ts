@@ -46,7 +46,7 @@ export interface IPeekable<T = any> {
  * various `IResourceful` objects.
  */
 export interface IResourceful {
-	readonly resource?: IOwnedStream
+	readonly resource: IOwnedStream | null
 }
 
 /**

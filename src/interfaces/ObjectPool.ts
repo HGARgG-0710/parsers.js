@@ -1,8 +1,14 @@
 import type { IInitializable } from "../interfaces.js"
 
 export interface IPoolable<Args extends any[] = any[]>
-	extends IInitializable<Args>, IPoolOwned {}
+	extends IInitializable<Args>, IPoolFriendly {}
 
-export interface IPoolOwned {
+export interface IPoolFriendly extends IPoolOwnable, IFreeResettable {}
+
+export interface IPoolOwnable {
 	readonly poolId: number
+}
+
+export interface IFreeResettable {
+	postFree(): void
 }

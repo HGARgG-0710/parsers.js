@@ -31,12 +31,14 @@ export abstract class RenewerStream<T = any, Args extends any[] = []>
 	abstract readonly state: IParseState
 	abstract setState(state: IParseState): void
 
-	abstract readonly resource: ILinkedStream | undefined
+	abstract readonly resource: ILinkedStream | null
 	abstract connectResource(resource: ILinkedStream): void
 	abstract baseInit(): void
 	abstract init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
 
+	abstract readonly owner: IOwningStream | null
 	abstract connectOwner(newOwner: IOwningStream<any, any[]>): void
 	abstract free(): void
 	abstract readonly poolId: number
+	abstract postFree(): void
 }

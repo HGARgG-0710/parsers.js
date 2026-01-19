@@ -36,6 +36,8 @@ export class StreamList
 
 	protected override renewer: StreamList.StreamRenewer
 
+	postFree(): void {}
+
 	get poolId() {
 		return StreamList.pool.id
 	}

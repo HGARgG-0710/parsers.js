@@ -1,3 +1,4 @@
+import { MissingArgument } from "../../../../constants.js"
 import type { IIndexed, IPrototypeCollection } from "../../../../interfaces.js"
 import { CollectionBuilder } from "../../../../objects.js"
 import type { ISectionGrabber } from "../../interfaces/SectionStream.js"
@@ -22,7 +23,7 @@ export class SectionStream<
 	free(): void {}
 
 	override baseInit(): void {
-		this.grabber.init(this.resource)
+		this.grabber.init(this.resource || MissingArgument)
 		this.getNextItem()
 	}
 

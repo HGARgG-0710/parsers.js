@@ -3,8 +3,7 @@ import type {
 	ICommonStream,
 	IDepthMark,
 	IDepthMarkStream,
-	IOwnedStream,
-	IPoolable
+	IOwnedStream
 } from "../../../../interfaces.js"
 import { ObjectPool } from "../../../../objects.js"
 import { IdentityStream } from "./IdentityStream.js"
@@ -16,7 +15,7 @@ type IDepthMarkStreamForPool<T = any> = IDepthMarkStream<T> &
 function BuildDepthMarkStream<T = any>(marks: readonly IDepthMark[]) {
 	return class DepthMarkStream
 		extends IdentityStream<T>
-		implements IDepthMarkStream<T>, IPoolable<[IOwnedStream<T>]>
+		implements IDepthMarkStream<T>
 	{
 		static override readonly pool = Pools.Stream.add(
 			new ObjectPool<IDepthMarkStreamForPool<T>>(DepthMarkStream)

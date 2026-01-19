@@ -9,7 +9,7 @@ import type {
  * [which is to be provided by the using party].
  */
 export abstract class SyncStream<T> implements IResourcefulStream<T> {
-	abstract readonly resource?: IOwnedStream
+	abstract readonly resource: IOwnedStream | null
 
 	abstract next(): void
 	abstract isCurrEnd(): boolean

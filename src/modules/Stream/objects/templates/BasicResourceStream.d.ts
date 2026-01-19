@@ -15,9 +15,9 @@ import type { BasicStream } from "./BasicStream.js"
  * It inherits the constructor of `BasicStream`.
  */
 export declare abstract class BasicResourceStream<
-		T = any,
-		Args extends any[] = []
-	>
+	T = any,
+	Args extends any[] = []
+>
 	extends BasicStream<T, [IOwnedStream, ...(Args | [])]>
 	implements IOwningStream<T>
 {
@@ -26,7 +26,7 @@ export declare abstract class BasicResourceStream<
 		...args: Args | []
 	) => this
 
-	get resource(): IOwnedStream | undefined
+	get resource(): IOwnedStream | null
 	protected abstract baseNextIter(curr?: T): T
 	protected syncCurr(): void
 	connectResource(resource: IOwnedStream): void

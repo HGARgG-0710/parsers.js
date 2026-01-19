@@ -100,8 +100,8 @@ export class Switch<
 		new ObjectPool<Switch, [any]>(Switch)
 	)
 
-	private _recursive: Recursive
-	private _list: IDerivedList<T, Recursive, InitType>
+	private _recursive: Recursive | null = null
+	private _list: IDerivedList<T, Recursive, InitType> | null = null
 	private renewer: RecursiveList.Renewer<T, Recursive, InitType>
 
 	private set recursive(newRecursive: Recursive) {
@@ -113,15 +113,20 @@ export class Switch<
 	}
 
 	get recursive() {
-		return this._recursive
+		return this._recursive!
 	}
 
 	get list() {
-		return this._list
+		return this._list!
 	}
 
 	get poolId() {
 		return Switch.pool.id
+	}
+
+	postFree(): void {
+		this._list = null
+		this._recursive = null
 	}
 
 	expand(appliedUpon: T | InitType) {
@@ -175,8 +180,8 @@ class Terminal<
 		new ObjectPool<Terminal, [any]>(Terminal)
 	)
 
-	private _terminal: T
-	private _parentList: SwitchArray<T, Recursive, InitType>
+	private _terminal: T | null = null
+	private _parentList: SwitchArray<T, Recursive, InitType> | null = null
 
 	private set terminal(terminal: T) {
 		this._terminal = terminal
@@ -187,11 +192,11 @@ class Terminal<
 	}
 
 	get terminal() {
-		return this._terminal
+		return this._terminal!
 	}
 
 	get parentList() {
-		return this._parentList
+		return this._parentList!
 	}
 
 	setParentList(parentList: SwitchArray<T, Recursive, InitType>): void {
@@ -206,6 +211,11 @@ class Terminal<
 	recycle() {
 		this.terminal.free()
 		Terminal.pool.free(this)
+	}
+
+	postFree(): void {
+		this._parentList = null
+		this._terminal = null
 	}
 
 	get poolId() {
@@ -822,7 +832,7 @@ class GlobalDepthMap<T extends ITerminalAcceptable = any> {
 	}
 
 	private hasMark(item: T) {
-		return item.depthMarks !== undefined
+		return !!item.depthMarks
 	}
 
 	private for(terminal: T, callback: (mark: IDepthMark) => void) {
@@ -865,10 +875,10 @@ class RecursiveListArgsBuilder<
 	private depthMap?: GlobalDepthMap
 
 	reset() {
-		this.renewer = undefined
-		this.items = undefined
-		this.deepList = undefined
-		this.depthMap = undefined
+		this.renewer = MissingArgument
+		this.items = MissingArgument
+		this.deepList = MissingArgument
+		this.depthMap = MissingArgument
 	}
 
 	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>) {

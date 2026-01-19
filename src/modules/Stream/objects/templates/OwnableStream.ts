@@ -1,4 +1,3 @@
-import type { IStream } from "../../../../interfaces.js"
 import type {
 	IOwnedStream,
 	IOwningStream
@@ -13,17 +12,15 @@ import type {
  * property, and the property itself can be set via the `protected set owner` setter
  * by its children classes alone.
  */
-export abstract class OwnableStream<T = any>
-	implements IStream<T>, IOwnedStream<T>
-{
+export abstract class OwnableStream<T = any> implements IOwnedStream<T> {
 	abstract readonly isEnd: boolean
 	abstract readonly curr: T
 	abstract next(): void
 	abstract isCurrEnd(): boolean
 
-	private _owner?: IOwningStream
+	private _owner: IOwningStream | null
 
-	protected set owner(newOwner: IOwningStream | undefined) {
+	protected set owner(newOwner: IOwningStream | null) {
 		this._owner = newOwner
 	}
 
@@ -33,5 +30,9 @@ export abstract class OwnableStream<T = any>
 
 	connectOwner(newOwner: IOwningStream): void {
 		this.owner = newOwner
+	}
+
+	resetOwner(): void {
+		this.owner = null
 	}
 }

@@ -11,8 +11,9 @@ export declare abstract class CustomLinkedStream<
 	implements ICommonStream<T>
 {
 	connectOwner(newOwner: IOwningStream): void
-	get owner(): IOwningStream | undefined
+	get owner(): IOwningStream | null
 	abstract free(): void
 	[Symbol.iterator]: () => Generator<T>
 	get poolId(): number
+	postFree(): void
 }

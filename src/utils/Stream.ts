@@ -349,7 +349,7 @@ export const isStateful = structCheck<IStateHaving & IStateSettable>({
  */
 export const isParseState = structCheck<IParseState>({
 	state: T,
-	errorData: isObject
+	errData: isObject
 })
 
 /**

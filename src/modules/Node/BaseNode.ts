@@ -29,6 +29,10 @@ export abstract class BaseNode implements INode {
 
 	private _parent: INode | null = null
 
+	protected resetParent() {
+		this._parent = null
+	}
+
 	setParent(parent: INode) {
 		this._parent = parent
 	}

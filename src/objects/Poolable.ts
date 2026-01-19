@@ -8,6 +8,8 @@ export abstract class Poolable<Args extends any[] = any[]>
 {
 	protected abstract readonly pool: ObjectPool<this, Args>
 
+	abstract postFree(): void
+
 	get poolId() {
 		return this.pool.id
 	}

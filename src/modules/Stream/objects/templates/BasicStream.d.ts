@@ -50,7 +50,7 @@ export declare abstract class BasicStream<T = any, Args extends any[] = any[]>
 	protected abstract readonly initializer: IInitializer<Args>
 	protected abstract baseNextIter(curr?: T): T
 
-	get owner(): IOwningStream | undefined
+	get owner(): IOwningStream | null
 
 	protected postEnd(): void
 	protected initGetter?(...args: Partial<Args>): T

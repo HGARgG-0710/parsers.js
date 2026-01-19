@@ -11,7 +11,7 @@ export abstract class SyncCurrStream<T = any> implements IResourcefulStream<T> {
 	protected abstract set curr(newCurr: T)
 	abstract get curr(): T
 	abstract readonly isEnd: boolean
-	abstract readonly resource?: IOwnedStream
+	abstract readonly resource: IOwnedStream | null
 
 	abstract next(): void
 	abstract isCurrEnd(): boolean

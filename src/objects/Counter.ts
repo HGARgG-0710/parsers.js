@@ -10,11 +10,15 @@ export class Counter {
 		return ++this.count
 	}
 
+	reset() {
+		this.count = this.start
+	}
+
 	get() {
 		return this.count
 	}
 
-	constructor(start: number = 0) {
+	constructor(private readonly start: number = 0) {
 		this.count = start
 	}
 }
