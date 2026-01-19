@@ -1,4 +1,5 @@
 import assert from "assert"
+import { BadId, NewId } from "../constants.js"
 import { Config } from "../global.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
@@ -23,14 +24,13 @@ export class ObjectPool<
 	T extends IPoolable<Args> = any,
 	Args extends any[] = any[]
 > {
-	// ! pre-doc: this is supposed to be a placeholder for "pool-less" classes
-	// * 	Specifically, the ones that AREN'T intended for pooling, but, instead,
-	// 			should be used at the top... [or, the ones that are supposed to have
-	// 				the 'readonly poolId: number' overriden]
-	static readonly BadPoolID = -1
 	readonly id: number
 
-	private static TotalPools = 0
+	private static TotalInstances = BadId
+
+	private static NewId() {
+		return (this.TotalInstances = NewId(this.TotalInstances))
+	}
 
 	private readonly active: ObjectPoolActive<T, Args>
 	private readonly inactive: ObjectPoolInactive<T, Args>
@@ -62,7 +62,7 @@ export class ObjectPool<
 	constructor(objectConstructor: new (...x: Partial<Args> | []) => T) {
 		this.active = new ObjectPoolActive(objectConstructor)
 		this.inactive = new ObjectPoolInactive(objectConstructor)
-		this.id = ObjectPool.TotalPools++
+		this.id = ObjectPool.NewId()
 	}
 }
 

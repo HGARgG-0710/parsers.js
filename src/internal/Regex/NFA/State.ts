@@ -3,6 +3,7 @@
 
 import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
+import { BadId, NewId } from "../../../constants.js"
 import { Pools } from "../../../global.js"
 import type {
 	IMatchedState,
@@ -107,7 +108,11 @@ export class BoundState<T = any>
 }
 
 export class PeekKeeper<T = any> {
-	private static TotalKeepers = 0
+	private static TotalInstances = BadId
+
+	private static NewId() {
+		return (this.TotalInstances = NewId(this.TotalInstances))
+	}
 
 	readonly id: number
 	private stream: IPeekableStream<T>
@@ -148,8 +153,8 @@ export class PeekKeeper<T = any> {
 	}
 
 	constructor() {
-		assert(PeekKeeper.TotalKeepers <= Number.MAX_SAFE_INTEGER)
-		this.id = PeekKeeper.TotalKeepers++
+		assert(PeekKeeper.TotalInstances <= Number.MAX_SAFE_INTEGER)
+		this.id = PeekKeeper.NewId()
 	}
 }
 
@@ -298,16 +303,18 @@ export class StateArrow<T = any> {
 }
 
 export abstract class State<T = any> {
+	private static readonly Unseen = -1
+
 	abstract addTo(list: StateArray, keeper: PeekKeeper<T>): void
 	abstract verify(keeper: PeekKeeper<T>): boolean
 	abstract advance(keeper: PeekKeeper<T>): void
 
 	private readonly keeperIds = new ArrayCollection<number>()
 
-	private seenTimes = -1
+	private seenTimes = State.Unseen
 
 	resetSeenTimes() {
-		this.seenTimes = -1
+		this.seenTimes = State.Unseen
 	}
 
 	beenSeenWith(keeper: PeekKeeper<T>): boolean {

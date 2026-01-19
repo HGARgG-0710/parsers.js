@@ -1,5 +1,5 @@
+import { BadId } from "../../../../constants.js"
 import { mixin } from "../../../../mixin.js"
-import { ObjectPool } from "../../../../objects.js"
 import { LinkedResettable } from "../Resettable.js"
 import { OwningStream } from "./OwningStream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
@@ -9,7 +9,7 @@ export const CustomLinkedStream = new mixin(
 		name: "CustomLinkedStream",
 		properties: {
 			get poolId() {
-				return ObjectPool.BadPoolID
+				return BadId
 			}
 		},
 		constructor(resource) {

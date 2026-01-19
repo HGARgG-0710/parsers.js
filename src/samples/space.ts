@@ -1,6 +1,6 @@
+import { BadId } from "../constants.js"
 import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { DyssyncOwningStream } from "../modules/Stream/objects/templates.js"
-import { ObjectPool } from "../objects.js"
 import { FilterStream, IndexStream } from "../objects/Stream.js"
 import { isSpace } from "./alphabet.js"
 import { isCurr } from "./Stream.js"
@@ -86,7 +86,7 @@ export class LFStream
 	// * 	Meaning to say - this is a NON-RECURSIVE, one-time deal. It's just simpler this way.
 	// 		It NEVER gets reused (since it only ever dies when the input dies as well...)
 	get poolId() {
-		return ObjectPool.BadPoolID
+		return BadId
 	}
 
 	override next() {

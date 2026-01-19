@@ -24,3 +24,12 @@ export const MissingArgument = undefined
  * structure, with read-write capabilities.
  */
 export const NotCached = undefined
+
+// ! pre-doc: for objects that keep an Entity 'id'
+// Specifically, it's used as either:
+// 		1. INITIAL STATE, or
+// 		2. a PLACEHOLDER, to show that one DOES NOT connect to an object with a valid ID
+export const BadId = -1
+
+// ! pre-doc: a basic way to obtain a new Entity id (via increments)
+export const NewId = (oldId: number) => oldId + 1
