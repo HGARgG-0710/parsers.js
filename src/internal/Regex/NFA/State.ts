@@ -547,3 +547,24 @@ export class MatchState<T = any> extends State<T> {
 		return true
 	}
 }
+
+export class UnicodePropertyState<T = any> extends LocaleSensitiveState<T> {
+	private readonly delegate: RegExp
+
+	private toRegExp() {
+		return new RegExp(`^\\p{${this.propName}=${this.value}}$`, "v")
+	}
+
+	protected override baseVerify(x: string): boolean {
+		return this.delegate.test(x)
+	}
+
+	constructor(
+		private readonly propName: string,
+		private readonly value: string,
+		extensions: Regex.ExtensionMap
+	) {
+		super(extensions)
+		this.delegate = this.toRegExp()
+	}
+}

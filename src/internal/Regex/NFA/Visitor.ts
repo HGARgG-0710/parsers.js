@@ -11,7 +11,8 @@ import {
 	NonBoundaryState,
 	NoneOfState,
 	State,
-	TokenState
+	TokenState,
+	UnicodePropertyState
 } from "./State.js"
 
 // ! pre-doc: this is the thing that converts the "Regex.Raw" into a linked list of `State`s
@@ -118,5 +119,15 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 
 	handleNonBoundary({ items }: Regex.Raw.NonBoundary): Fragment | null {
 		return this.toFragment(new NonBoundaryState(this.toInStates(items)))
+	}
+
+	handleUnicodeProperty({
+		propName,
+		value,
+		extensions
+	}: Regex.Raw.UnicodeProperty): Fragment | null {
+		return this.toFragment(
+			new UnicodePropertyState(propName, value, extensions)
+		)
 	}
 }

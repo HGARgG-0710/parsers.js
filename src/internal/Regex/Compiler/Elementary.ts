@@ -2,6 +2,7 @@ import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import type { INode, IRegexFactory } from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
 import type { TreeStream } from "../../../objects/Stream.js"
+import type { UnicodeProperty } from "../Parser/Nodes.js"
 
 function compileElementary<Out extends Regex.Raw = Regex.Raw>(
 	makeElementary: (factory: IRegexFactory) => Out
@@ -26,3 +27,11 @@ export const compileNewline = compileElementary((factory) => factory.newline())
 export const compileFormFeed = compileElementary((factory) =>
 	factory.literal("\f")
 )
+
+export function compileUnicodeProperty(factory: IRegexFactory) {
+	return function (input: TreeStream<INode>) {
+		const uniPropNode = input.curr as UnicodeProperty
+		const { propName, value } = uniPropNode
+		return factory.unicodeProperty(propName, value)
+	}
+}

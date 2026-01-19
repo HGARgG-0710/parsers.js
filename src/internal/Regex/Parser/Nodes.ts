@@ -147,7 +147,10 @@ export class ClassRange extends BaseNode {
 		} { start: ${this.start.debugPrint()}, end: ${this.end.debugPrint()} }`
 	}
 
-	constructor(private readonly start: INode, private readonly end: INode) {
+	constructor(
+		private readonly start: INode,
+		private readonly end: INode
+	) {
 		super()
 	}
 }
@@ -174,14 +177,17 @@ export class UnicodeProperty extends BaseNode {
 	}
 
 	override debugPrint(): string {
-		return `UnicodeProperty { name: ${this.name}, value: ${this.value} }`
+		return `UnicodeProperty { propName: ${this.propName}, value: ${this.value} }`
 	}
 
 	get debugName() {
 		return "UnicodeProperty"
 	}
 
-	constructor(private readonly name: string, private readonly value: string) {
+	constructor(
+		readonly propName: string,
+		readonly value: string
+	) {
 		super()
 	}
 }

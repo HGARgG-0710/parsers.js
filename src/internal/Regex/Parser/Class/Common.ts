@@ -30,6 +30,8 @@ import { HandleSingleChar } from "../SingleChar.js"
 const HyphenStream = CachedTokenStream(Temp.Hyphen)
 const ClassUnitStream = SingletonWrapperStream(ClassUnit)
 
+const HandleHyphen = DefaultChooser(HyphenStream)
+
 const RangeBoundaryHandler = TableHandler<
 	IOwnedStream<string>,
 	ICommonStream<INode>
@@ -43,8 +45,6 @@ const RangeBoundaryHandler = TableHandler<
 		)
 	)
 )
-
-const HandleHyphen = DefaultChooser(HyphenStream)
 
 const ClassUnitHandler = TableHandler<
 	IOwnedStream<string>,

@@ -336,6 +336,19 @@ export namespace Regex {
 			}
 		}
 
+		export class UnicodeProperty extends Raw {
+			override accept<T>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleUnicodeProperty(this)
+			}
+
+			constructor(
+				readonly propName: string,
+				readonly value: string
+			) {
+				super()
+			}
+		}
+
 		export class Factory implements IRegexFactory {
 			static readonly instance: IRegexFactory = new Factory()
 
@@ -443,6 +456,10 @@ export namespace Regex {
 
 			charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
 				return new Either(this.charRange(from, charBefore("\n")), to)
+			}
+
+			unicodeProperty(propName: string, value: string): Regex.Raw {
+				return new UnicodeProperty(propName, value)
 			}
 
 			protected constructor() {}
