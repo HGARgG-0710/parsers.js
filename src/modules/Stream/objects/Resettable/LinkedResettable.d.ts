@@ -1,5 +1,5 @@
-import type { IFreeResettable, IOwnedStream } from "../../../interfaces.ts"
-import type { OwnerResettable } from "../../../objects/Resettable.ts"
+import type { IFreeResettable, IOwnedStream } from "../../../../interfaces.ts"
+import type { OwnerResettable } from "./OwnerResettable.ts"
 
 export declare abstract class LinkedResettable
 	extends OwnerResettable

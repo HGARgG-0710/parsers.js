@@ -1,8 +1,8 @@
-import { mixin } from "../../../mixin.js"
+import { mixin } from "../../../../mixin.js"
 import {
 	OwnerResettable,
 	ResourceResettable
-} from "../../../objects/Resettable.js"
+} from "../../../../objects/Resettable.js"
 
 export const LinkedResettable = new mixin(
 	{
