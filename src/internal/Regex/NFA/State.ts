@@ -172,10 +172,7 @@ export class StateHistory<T = any> {
 	}
 
 	clear() {
-		for (const arr of this.stateArrs) {
-			arr.clear()
-			arr.free()
-		}
+		for (const arr of this.stateArrs) arr.free()
 		this.stateArrs.clear()
 	}
 
@@ -204,6 +201,20 @@ export class StateArray<T = any> extends Poolable<[number]> {
 		state.addTo(this, keeper)
 	}
 
+	private resetMatchState() {
+		this._matchState = null
+	}
+
+	private clearStates() {
+		for (const boundState of this.states) boundState.free()
+		this.states.clear()
+	}
+
+	private clear() {
+		this.clearStates()
+		this.resetMatchState()
+	}
+
 	protected get pool() {
 		return StateArray.pool as ObjectPool<this, [number]>
 	}
@@ -216,13 +227,8 @@ export class StateArray<T = any> extends Poolable<[number]> {
 		return this.states.isEmpty()
 	}
 
-	clear() {
-		for (const boundState of this.states) boundState.free()
-		this.states.clear()
-	}
-
 	override postFree(): void {
-		this._matchState = null
+		this.clear()
 	}
 
 	init(listId?: number) {
