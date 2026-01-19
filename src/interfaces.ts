@@ -1,4 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
+import type { IPoolable } from "./interfaces.js"
 import type { IHash } from "./interfaces/HashMap.js"
 import type { ObjectPool } from "./objects.js"
 
@@ -272,7 +273,7 @@ export interface IFreeable {
  * to represent class-like objects.
  */
 export interface IPoolKeeping<
-	T extends IInitializable<Args> = any,
+	T extends IPoolable<Args> = any,
 	Args extends any[] = any[]
 > {
 	readonly pool: ObjectPool<T, Args>
@@ -297,6 +298,7 @@ export type * from "./interfaces/Initializer.js"
 export type * from "./interfaces/LineIndex.js"
 export type * from "./interfaces/Logger.js"
 export type * from "./interfaces/Node.js"
+export type * from "./interfaces/ObjectPool.js"
 export type * from "./interfaces/Parser.js"
 export type * from "./interfaces/PropertyPath.js"
 export type * from "./interfaces/Regex.js"

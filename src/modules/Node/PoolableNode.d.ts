@@ -1,4 +1,4 @@
-import type { IFreeable, IInitializable } from "../../interfaces.ts"
+import type { IFreeable, IPoolable } from "../../interfaces.ts"
 import type { ObjectPool } from "../../objects.ts"
 import { BaseNode } from "./BaseNode.ts"
 
@@ -15,9 +15,10 @@ import { BaseNode } from "./BaseNode.ts"
  */
 export declare abstract class PoolableNode<Args extends any[] = any[]>
 	extends BaseNode
-	implements IFreeable, IInitializable<Args>
+	implements IFreeable, IPoolable<Args>
 {
 	abstract init(...x: [] | Partial<Args>): this
 	protected abstract readonly pool: ObjectPool<typeof this>
 	free(): void
+	get poolId(): number
 }

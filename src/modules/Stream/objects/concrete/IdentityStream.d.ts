@@ -27,10 +27,11 @@ export declare class IdentityStream<T = any, Args extends any[] = []>
 {
 	static readonly pool: ObjectPool<IdentityStream, [IOwnedStream]>
 	protected get pool(): ObjectPool<
-		ICommonStream<T>,
+		IdentityStream<T>,
 		[IOwnedStream, ...(Args | [])]
 	>
 	get isEnd(): boolean
 	get curr(): T
 	free(): void
+	get poolId(): number
 }

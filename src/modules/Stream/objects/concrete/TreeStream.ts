@@ -1,6 +1,10 @@
 import { BadIndex } from "../../../../constants.js"
 import { Pools } from "../../../../global.js"
-import type { INavigable, IWalkable } from "../../../../interfaces.js"
+import type {
+	INavigable,
+	IPoolable,
+	IWalkable
+} from "../../../../interfaces.js"
 import { TreeWalker } from "../../../../internal/Tree/TreeWalker.js"
 import { ObjectPool } from "../../../../objects.js"
 import { isGoodIndex } from "../../../../utils.js"
@@ -50,9 +54,9 @@ class LastLevelWithSiblings<TreeLike extends IWalkable<TreeLike> = IWalkable> {
  * Represents a "response" for a `.next()` operation, sent
  * to the `.walker` sub-object.
  */
-class NextWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
-	implements IWalkerResponse
-{
+class NextWalkerResponse<
+	TreeLike extends IWalkable<TreeLike> = IWalkable
+> implements IWalkerResponse {
 	private response: NextResponse
 	private readonly lastLevel: LastLevelWithSiblings<TreeLike>
 
@@ -60,8 +64,8 @@ class NextWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		this.response = this.walker.hasChildren()
 			? NextResponse.PushFirstChild
 			: this.walker.hasSiblingAfter()
-			? NextResponse.GoSiblingAfter
-			: NextResponse.GoFirstNext
+				? NextResponse.GoSiblingAfter
+				: NextResponse.GoFirstNext
 	}
 
 	respond() {
@@ -92,17 +96,17 @@ class NextWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
  * Represents a "response" for a `.prev()` operation, sent
  * to the `.walker` sub-object.
  */
-class PrevWalkerResponse<TreeLike extends IWalkable<TreeLike> = IWalkable>
-	implements IWalkerResponse
-{
+class PrevWalkerResponse<
+	TreeLike extends IWalkable<TreeLike> = IWalkable
+> implements IWalkerResponse {
 	private response: PrevResponse = PrevResponse.Nil
 
 	pick(): void {
 		this.response = this.walker.hasSiblingBefore()
 			? PrevResponse.GoLastPrev
 			: this.walker.hasParent()
-			? PrevResponse.PopChild
-			: PrevResponse.Nil
+				? PrevResponse.PopChild
+				: PrevResponse.Nil
 	}
 
 	respond(): void {
@@ -166,7 +170,7 @@ class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
  */
 export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends SourceStream<TreeLike, TreeLike>
-	implements INavigable<TreeLike, number[]>
+	implements INavigable<TreeLike, number[]>, IPoolable<[TreeLike]>
 {
 	static readonly pool = Pools.Stream.add(new ObjectPool(TreeStream))
 
@@ -235,5 +239,9 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	prev() {
 		if (this.isCurrStart()) this.startStream()
 		else this.update(this.basePrevIter())
+	}
+
+	get poolId() {
+		return TreeStream.pool.id
 	}
 }

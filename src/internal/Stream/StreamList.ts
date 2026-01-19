@@ -1,6 +1,10 @@
 import { type } from "@hgargg-0710/one"
 import { Pools } from "../../../main.js"
-import type { ILinkedStream, IOwnedStream } from "../../interfaces.js"
+import type {
+	ILinkedStream,
+	IOwnedStream,
+	IPoolable
+} from "../../interfaces.js"
 import type {
 	ICompositeStream,
 	IRawStream,
@@ -21,14 +25,20 @@ const { isFunction } = type
  * `globalStreamRenewer` as the default renewer (which is
  * referenced across all the `StreamList`s)
  */
-export class StreamList extends RecursiveList.Poolable<
-	ILinkedStream,
-	IStreamChooser,
-	IOwnedStream
-> {
+export class StreamList
+	extends RecursiveList.Poolable<ILinkedStream, IStreamChooser, IOwnedStream>
+	implements
+		IPoolable<
+			[RecursiveListArgs<ILinkedStream, IStreamChooser, IOwnedStream>]
+		>
+{
 	static readonly pool = Pools.Internal.add(new ObjectPool(StreamList))
 
 	protected override renewer: StreamList.StreamRenewer
+
+	get poolId() {
+		return StreamList.pool.id
+	}
 
 	protected reclaim(): void {
 		StreamList.pool.free(this)

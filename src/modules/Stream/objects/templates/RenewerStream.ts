@@ -38,4 +38,5 @@ export abstract class RenewerStream<T = any, Args extends any[] = []>
 
 	abstract connectOwner(newOwner: IOwningStream<any, any[]>): void
 	abstract free(): void
+	abstract readonly poolId: number
 }

@@ -1,4 +1,4 @@
-import type { IInitializable } from "../interfaces.js"
+import type { IPoolable } from "../interfaces.js"
 import type { ObjectPool } from "./ObjectPool.js"
 
 /**
@@ -23,7 +23,7 @@ export class PoolCollection {
 		for (const pool of this.pools) pool.clear()
 	}
 
-	add<T extends IInitializable<Args> = any, Args extends any[] = any[]>(
+	add<T extends IPoolable<Args> = any, Args extends any[] = any[]>(
 		pool: ObjectPool<T, Args>
 	) {
 		this.pools.add(pool)

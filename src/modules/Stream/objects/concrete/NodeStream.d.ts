@@ -47,4 +47,5 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	init(resource?: IOwnedStream, ...args: Partial<Args> | []): this
 	copy(): this
 	free(): void
+	get poolId(): number
 }

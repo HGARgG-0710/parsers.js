@@ -4,7 +4,8 @@ import { MissingArgument } from "../../constants.js"
 import type {
 	IDepthMarked,
 	IFreeable,
-	IInitializable
+	IInitializable,
+	IPoolable
 } from "../../interfaces.js"
 import type { IArray } from "../../interfaces/Array.js"
 import { Initializable } from "../../objects/Initializable.js"
@@ -83,7 +84,10 @@ export class Switch<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends ListIndexHaving {
+>
+	extends ListIndexHaving
+	implements IPoolable<[Recursive]>
+{
 	static wrap<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
@@ -114,6 +118,10 @@ export class Switch<
 
 	get list() {
 		return this._list
+	}
+
+	get poolId() {
+		return Switch.pool.id
 	}
 
 	expand(appliedUpon: T | InitType) {
@@ -151,7 +159,10 @@ class Terminal<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends ListIndexHaving {
+>
+	extends ListIndexHaving
+	implements IPoolable<[T]>
+{
 	static wrap<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
@@ -195,6 +206,10 @@ class Terminal<
 	recycle() {
 		this.terminal.free()
 		Terminal.pool.free(this)
+	}
+
+	get poolId() {
+		return Terminal.pool.id
 	}
 
 	constructor(terminal?: T) {

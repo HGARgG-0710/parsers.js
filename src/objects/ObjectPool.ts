@@ -1,5 +1,6 @@
+import assert from "assert"
 import { Config } from "../global.js"
-import type { IInitializable } from "../interfaces.js"
+import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
 /**
@@ -19,9 +20,18 @@ import { ArrayCollection } from "./ArrayCollection.js"
  * (that is to say - there are no more active references on them)
  */
 export class ObjectPool<
-	T extends IInitializable<Args> = any,
+	T extends IPoolable<Args> = any,
 	Args extends any[] = any[]
 > {
+	// ! pre-doc: this is supposed to be a placeholder for "pool-less" classes
+	// * 	Specifically, the ones that AREN'T intended for pooling, but, instead, 
+	// 			should be used at the top... [or, the ones that are supposed to have
+	// 				the 'readonly poolId: number' overriden]
+	static readonly BadPoolID = -1
+	readonly id: number
+
+	private static TotalPools = 0
+
 	private readonly active: ObjectPoolActive<T, Args>
 	private readonly inactive: ObjectPoolInactive<T, Args>
 
@@ -33,11 +43,15 @@ export class ObjectPool<
 		return Config.features.usePools ? this.active : this.inactive
 	}
 
+	// ! PRE-DOC: the user-constructor is ITSELF responsible for
+	// 		MAKING SURE that the ownership relationship IS PRESERVED
+	// 		[i.e. that the created/reused objects have the correct poolId].
 	create(...args: [] | Partial<Args>) {
 		return this.getState().create(...args)
 	}
 
 	free(item: T) {
+		assert.strictEqual(item.poolId, this.id)
 		this.getState().free(item)
 	}
 
@@ -48,6 +62,7 @@ export class ObjectPool<
 	constructor(objectConstructor: new (...x: Partial<Args> | []) => T) {
 		this.active = new ObjectPoolActive(objectConstructor)
 		this.inactive = new ObjectPoolInactive(objectConstructor)
+		this.id = ObjectPool.TotalPools++
 	}
 }
 
