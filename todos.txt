@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 330
+	Current total: 477
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 293 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 440 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 38 (not counting those matched by 1.)
@@ -334,20 +334,6 @@ IMMEDIATE:
 						(#qabc) == (a?b?c?)
 
 	CURRENT: 		
-		-1. TODO: refactor the 'ClassRangePartChooser' via the State Pattern. 
-			There are 3 possible states: 
-
-				1. State 1 - first unit not returned
-				2. State 2 - first unit returned, awaiting: 
-					1. IF hyphen found, proceed to State 3 and then process the hyphen
-					2. IF no hyphen found, proceed back to State 1
-				3. State 3 - first unit and hyphen consumed, process third unit (wraps back to State 1)
-
-			This, in particular, fixes the (potential) error when the user has 'this.hyphenSeen == true', but ALSO 
-				'this.firstItemGiven == false' (due to manual user interference or a mistake whilst coding the solution). 
-				The use of State Pattern here, as such, eliminates this impossible scenario from ever taking place inside 
-					the class (closer adherence to the model of the problem at hand). 
-
 		-2. BUG [RegexParser]: 
 			A problem has reared its ugly head. 
 			At the present, the handling of the EMPTY 'EndBracketStream's 
