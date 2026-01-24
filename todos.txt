@@ -10,13 +10,13 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 329
+	Current total: 330
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 290 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{) = 293 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
-		2. RegexParser/Nodes.ts classes = 40 (not counting those matched by 1.)
+		2. RegexParser/Nodes.ts classes = 38 (not counting those matched by 1.)
 		3. Search (regex): export class = 1
 			ONLY inside the `*.js` files. 
 
@@ -163,9 +163,9 @@ REMINDERs:
 		The 'Concat' and 'Loop' has UNDERLYING PARSERS *sharing* their '.state'!
 		This is important! 
 
-	-3. REMINDER [testing]: 'RecursiveList'
+	-3. REMINDER [testing]: 'RecursivePipe'
 		ALLOW empty streams; 
-		SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursiveList' to be EMPTY ON CREATION. 
+		SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursivePipe' to be EMPTY ON CREATION. 
 		Let it be possible to have an EMPTY 'ParseStream' (ex: when the underlying 'InputStream' has ALL DRIED UP!)
 
 	-4. REMINDER [testing]: InputStream, LazyStream, etc
@@ -275,20 +275,22 @@ REMINDERs:
 
 	6. REMINDER: Regex (UnicodeProperty): 
 		1. Supposed to allow EMOJIS
-		2. Supposed to allow ALL things that RegExp from JavaScript allows [including Shorthand-property-names]
+		2. Supposed to allow ALL things that RegExp from JavaScript allows [including Shorthand-property-names, 
+			i.e. \p{PropName} vs \p{PropName=Value}]
 		
 	0. REMINDER [testing; ObjectPool]: 
 		ENSURE that ONLY a single 'ObjectPool' is EVER allowed to own an object 
 		(i.e., if it was CREATED with a given ObjectPool within a given class, it can ONLY 
 		ever be '.free'-d by THAT SAME POOL, and no other!)
+	
+	-1. REMINDER [DOCS]: Make sure to note that projects created with 'parsers.js' 
+		use FILTER-PIPES architecture for their Front-End Parser (assuming they 
+		use the Stream-s, which is, like, the whole point of ever even using the 
+		project in the first place...)
+
 		
 IMMEDIATE: 
 	UnicodeProperty [finishing; implementation/testing strategy; also - testing of 'Regex' in general...]:
-		0. PROBLEMS: 
-			1. ALLOW the \p{PropertyName} shorthands, INSTEAD of the current (mandatory) \p{Prop=Value}
-				Syntax. Reason: shorter Regex-es, greater simplicity... [also RegExp supports it...]
-				This affects BOTH the Regex: Parser, Compiler AND 'UnicodePropertyState'!
-
 		1. Testing: 
 			1. Create one-two test cases for EACH one of the NON-DEPRECATED 
 				properties supported by JavaScript's RegExp. 	
@@ -382,6 +384,12 @@ IMMEDIATE:
 			They truly *do* belong there...
 			Likewise, ADD the respective generics onto the `NFARegexMatcher`
 	
+		-1. MINOR: the 'get initializer() {...}' getters (style)
+			STORE all the 'IInitializer' objects ON THE CLASSES that they relate to. 
+			Sole exception is when you're COMPOSING THEM. 
+			In this case, TAKE THEM OUT TO A SEPARATE FILE (example of that: RecursivePipe); 
+			This, in particular, can help REDUCE the name duplications...
+
 	1. FULFILL all the todos/notes/ideas/etc inside of the Notes app...
 
 	1. VERIFY that *all* the "public" exports ARE PROVIDED 
