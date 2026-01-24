@@ -1,118 +1,15 @@
 import type {
-	ICommonStream,
 	IMarkerHaving,
 	INode,
 	IOwnedStream,
-	IRawStreamArray,
 	IResourcefulStream
 } from "../../../../interfaces.js"
-import { StatefulStreamChooser } from "../../../../modules/Stream/objects/Chooser.js"
 import { NodeStream } from "../../../../modules/Stream/objects/concrete.js"
 import { MarkerLocator } from "../../../../modules/Stream/objects/Locator.js"
-import { TableHandler } from "../../../../objects.js"
 import { tryReviveChild } from "../../../../objects/Error.js"
-import { BasicHash } from "../../../../objects/HashMap.js"
-import {
-	CachedTokenStream,
-	DefaultChooser,
-	SingletonWrapperStream
-} from "../../../../samples/Stream.js"
-import { ObjectMap } from "../../../../samples/TerminalMap.js"
 import { next } from "../../../../utils/Stream.js"
-import {
-	canBeRangeBoundaryStart,
-	HandleEscaped,
-	HandleRangeBoundaryEscaped
-} from "../Escaped.js"
-import { ClassRange, ClassUnit, Temp } from "../Nodes.js"
-import { HandleSingleChar } from "../SingleChar.js"
-
-const HyphenStream = CachedTokenStream(Temp.Hyphen)
-const ClassUnitStream = SingletonWrapperStream(ClassUnit)
-
-const HandleHyphen = DefaultChooser(HyphenStream)
-
-const RangeBoundaryHandler = TableHandler<
-	IOwnedStream<string>,
-	ICommonStream<INode>
->(
-	new BasicHash(
-		ObjectMap(
-			{
-				"\\": HandleRangeBoundaryEscaped
-			},
-			HandleSingleChar
-		)
-	)
-)
-
-const ClassUnitHandler = TableHandler<
-	IOwnedStream<string>,
-	ICommonStream<INode>
->(
-	new BasicHash(
-		ObjectMap(
-			{
-				"\\": HandleEscaped
-			},
-			HandleSingleChar
-		)
-	)
-)
-
-function HandleUnit(input: IOwnedStream<string>) {
-	return [ClassUnitStream(), ClassUnitHandler(input)]
-}
-
-class ClassElementSequenceChooser extends StatefulStreamChooser<INode> {
-	static readonly instance = new ClassElementSequenceChooser()
-
-	private firstItemGiven = false
-	private hyphenSeen = false
-
-	private canCurrBeFirstRangeItem(input: IOwnedStream<string>) {
-		return canBeRangeBoundaryStart(input.curr)
-	}
-
-	private chooseFirstUnit(input: IOwnedStream<string>) {
-		if (this.canCurrBeFirstRangeItem(input)) this.firstItemGiven = true
-		return HandleUnit(input)
-	}
-
-	private chooseUnrelatedUnit(input: IOwnedStream<string>) {
-		return HandleUnit(input)
-	}
-
-	private chooseHyphen() {
-		this.hyphenSeen = true
-		return HandleHyphen()
-	}
-
-	private tryChooseHyphen(input: IOwnedStream<string>) {
-		return input.curr === "-"
-			? this.chooseHyphen()
-			: this.chooseUnrelatedUnit(input)
-	}
-
-	private chooseSecondUnit(input: IOwnedStream<string>) {
-		this.reset()
-		return [RangeBoundaryHandler(input)]
-	}
-
-	override choose(input: IOwnedStream<string>): IRawStreamArray<INode> {
-		return this.firstItemGiven
-			? this.hyphenSeen
-				? this.chooseSecondUnit(input)
-				: this.tryChooseHyphen(input)
-			: this.chooseFirstUnit(input)
-	}
-
-	reset() {
-		this.firstItemGiven = false
-		this.hyphenSeen = false
-		return this
-	}
-}
+import { ClassRange, Temp } from "../Nodes.js"
+import { ClassElementSequenceChooser } from "./ClassElementSequenceChooser.js"
 
 class ClassElementJoinerStream extends NodeStream<INode> {
 	private readonly classEndingLocator = MarkerLocator.downwards("classEnd")
