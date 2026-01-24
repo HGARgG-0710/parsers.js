@@ -12,31 +12,39 @@ import {
 	NoneOfState,
 	State,
 	TokenState,
+	UnicodePropertyAliasState,
 	UnicodePropertyState
 } from "./State.js"
 
-// ! pre-doc: this is the thing that converts the "Regex.Raw" into a linked list of `State`s
-export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
-	private toFragment(arrowState: ArrowState) {
+class FragConverter {
+	toFragment(arrowState: ArrowState) {
 		return new Fragment(arrowState, [arrowState.arrow])
 	}
 
-	private toFragList(raw: Regex.Raw[]) {
+	toFragList(raw: Regex.Raw[], visitor: IRawRegexVisitor<Fragment | null>) {
 		const result: Fragment[] = []
 		for (const currItem of raw) {
-			const currFrag = currItem.accept(this)
+			const currFrag = currItem.accept(visitor)
 			if (currFrag) result.push(currFrag)
 		}
 		return result
 	}
 
-	private toInStateList(frags: Fragment[]) {
+	toInStateList(frags: Fragment[]) {
 		return frags.map((x) => x.inState)
 	}
 
-	private toInStates(raw: Regex.Raw[]): State[] {
-		return this.toInStateList(this.toFragList(raw))
+	toInStates(
+		raw: Regex.Raw[],
+		visitor: IRawRegexVisitor<Fragment | null>
+	): State[] {
+		return this.toInStateList(this.toFragList(raw, visitor))
 	}
+}
+
+// ! pre-doc: this is the thing that converts the "Regex.Raw" into a linked list of `State`s
+export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
+	private readonly fragConverter = new FragConverter()
 
 	handleCatenationLike(items: Regex.Raw[]): Fragment | null {
 		if (items.length === 0) return null
@@ -59,17 +67,17 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleChar({ char, extensions }: Regex.Raw.Char): Fragment {
-		return this.toFragment(new CharState(char, extensions))
+		return this.fragConverter.toFragment(new CharState(char, extensions))
 	}
 
 	handleEither({ items }: Regex.Raw.Either): Fragment | null {
-		const frags = this.toFragList(items)
-		const inState = new EitherState(this.toInStateList(frags))
+		const frags = this.fragConverter.toFragList(items, this)
+		const inState = new EitherState(this.fragConverter.toInStateList(frags))
 		return new Fragment(inState, []).append(...frags)
 	}
 
 	handleAnything(anything: Regex.Raw.Anything): Fragment | null {
-		return this.toFragment(new EmptyState())
+		return this.fragConverter.toFragment(new EmptyState())
 	}
 
 	handleCodeRange({
@@ -77,7 +85,9 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		to,
 		extensions
 	}: Regex.Raw.CodeRange): Fragment | null {
-		return this.toFragment(new CodeRangeState(from, to, extensions))
+		return this.fragConverter.toFragment(
+			new CodeRangeState(from, to, extensions)
+		)
 	}
 
 	handleNoneOrMore({ item }: Regex.Raw.NoneOrMore): Fragment | null {
@@ -101,8 +111,11 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 	}
 
 	handleNoneOf({ items, extensions }: Regex.Raw.NoneOf): Fragment | null {
-		return this.toFragment(
-			new NoneOfState(this.toInStates(items), extensions)
+		return this.fragConverter.toFragment(
+			new NoneOfState(
+				this.fragConverter.toInStates(items, this),
+				extensions
+			)
 		)
 	}
 
@@ -110,15 +123,19 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		type,
 		extensions
 	}: Regex.Raw.TokenType): Fragment | null {
-		return this.toFragment(new TokenState(type, extensions))
+		return this.fragConverter.toFragment(new TokenState(type, extensions))
 	}
 
 	handleBoundary({ items }: Regex.Raw.Boundary): Fragment | null {
-		return this.toFragment(new BoundaryState(this.toInStates(items)))
+		return this.fragConverter.toFragment(
+			new BoundaryState(this.fragConverter.toInStates(items, this))
+		)
 	}
 
 	handleNonBoundary({ items }: Regex.Raw.NonBoundary): Fragment | null {
-		return this.toFragment(new NonBoundaryState(this.toInStates(items)))
+		return this.fragConverter.toFragment(
+			new NonBoundaryState(this.fragConverter.toInStates(items, this))
+		)
 	}
 
 	handleUnicodeProperty({
@@ -126,8 +143,17 @@ export class NFARegexVisitor implements IRawRegexVisitor<Fragment | null> {
 		value,
 		extensions
 	}: Regex.Raw.UnicodeProperty): Fragment | null {
-		return this.toFragment(
+		return this.fragConverter.toFragment(
 			new UnicodePropertyState(propName, value, extensions)
+		)
+	}
+
+	handleUnicodePropertyAlias({
+		propName,
+		extensions
+	}: Regex.Raw.UnicodeProperty.Alias): Fragment | null {
+		return this.fragConverter.toFragment(
+			new UnicodePropertyAliasState(propName, extensions)
 		)
 	}
 }

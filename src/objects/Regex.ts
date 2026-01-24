@@ -349,6 +349,18 @@ export namespace Regex {
 			}
 		}
 
+		export namespace UnicodeProperty {
+			export class Alias extends Raw {
+				override accept<T>(visitor: IRawRegexVisitor<T>): T {
+					return visitor.handleUnicodePropertyAlias(this)
+				}
+
+				constructor(readonly propName: string) {
+					super()
+				}
+			}
+		}
+
 		export class Factory implements IRegexFactory {
 			static readonly instance: IRegexFactory = new Factory()
 
@@ -460,6 +472,10 @@ export namespace Regex {
 
 			unicodeProperty(propName: string, value: string): Regex.Raw {
 				return new UnicodeProperty(propName, value)
+			}
+
+			unicodePropertyAlias(propName: string): Regex.Raw {
+				return new UnicodeProperty.Alias(propName)
 			}
 
 			protected constructor() {}

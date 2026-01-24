@@ -169,6 +169,26 @@ export const RootNode = SingleChildNode("regex-root", "RootNode")
 
 export const BoundaryClass = RecursiveNode("boundary-class", "BoundaryClass")
 
+export class UnicodePropertyAlias extends BaseNode {
+	static readonly type = "unicode-property-alias"
+
+	get type() {
+		return UnicodePropertyAlias.type
+	}
+
+	override debugPrint(): string {
+		return `UnicodePropertyAlias { propName: ${this.propName} }`
+	}
+
+	get debugName() {
+		return "UnicodePropertyAlias"
+	}
+
+	constructor(readonly propName: string) {
+		super()
+	}
+}
+
 export class UnicodeProperty extends BaseNode {
 	static readonly type = "unicode-property"
 

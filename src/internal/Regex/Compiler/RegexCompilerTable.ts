@@ -33,6 +33,7 @@ import {
 	TypeMatch,
 	UnicodeChar,
 	UnicodeProperty,
+	UnicodePropertyAlias,
 	VTab,
 	Word
 } from "../Parser/Nodes.js"
@@ -52,6 +53,7 @@ import {
 	compileSpace,
 	compileTab,
 	compileUnicodeProperty,
+	compileUnicodePropertyAlias,
 	compileVTab,
 	compileWord
 } from "./Elementary.js"
@@ -117,6 +119,7 @@ class ClassCompilerTable {
 	private readonly compileClassUnit: IRegexCompilerFunction
 	private readonly compileNegated: IRegexCompilerFunction
 	private readonly compileUnicodeProperty: IRegexCompilerFunction
+	private readonly compileUnicodePropertyAlias: IRegexCompilerFunction
 
 	get(): IRegexCompilerTypeTable {
 		return [
@@ -129,7 +132,8 @@ class ClassCompilerTable {
 			[ClassRange, this.compileClassRange],
 			[ClassUnit, this.compileClassUnit],
 			[Negated, this.compileNegated],
-			[UnicodeProperty, this.compileUnicodeProperty]
+			[UnicodeProperty, this.compileUnicodeProperty],
+			[UnicodePropertyAlias, this.compileUnicodePropertyAlias]
 		]
 	}
 
@@ -144,6 +148,7 @@ class ClassCompilerTable {
 		this.compileClassRange = compileClassRange(factory)
 		this.compileNegated = compileNegated(factory)
 		this.compileUnicodeProperty = compileUnicodeProperty(factory)
+		this.compileUnicodePropertyAlias = compileUnicodePropertyAlias(factory)
 	}
 }
 

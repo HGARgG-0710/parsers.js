@@ -2,7 +2,7 @@ import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import type { INode, IRegexFactory } from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
 import type { TreeStream } from "../../../objects/Stream.js"
-import type { UnicodeProperty } from "../Parser/Nodes.js"
+import type { UnicodeProperty, UnicodePropertyAlias } from "../Parser/Nodes.js"
 
 function compileElementary<Out extends Regex.Raw = Regex.Raw>(
 	makeElementary: (factory: IRegexFactory) => Out
@@ -33,5 +33,13 @@ export function compileUnicodeProperty(factory: IRegexFactory) {
 		const uniPropNode = input.curr as UnicodeProperty
 		const { propName, value } = uniPropNode
 		return factory.unicodeProperty(propName, value)
+	}
+}
+
+export function compileUnicodePropertyAlias(factory: IRegexFactory) {
+	return function (input: TreeStream<INode>) {
+		const uniPropAliasNode = input.curr as UnicodePropertyAlias
+		const { propName } = uniPropAliasNode
+		return factory.unicodePropertyAlias(propName)
 	}
 }

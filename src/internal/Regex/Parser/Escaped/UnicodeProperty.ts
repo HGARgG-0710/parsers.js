@@ -1,10 +1,6 @@
-import type { IRawStreamArray } from "../../../../interfaces.js"
+import type { INode, IRawStreamArray } from "../../../../interfaces.js"
 import { IteratorStreamChooser } from "../../../../modules/Stream/objects/Chooser.js"
-import {
-	ensureChildUnrevivable,
-	skip,
-	tryReviveChild
-} from "../../../../objects/Error.js"
+import { ensureChildUnrevivable, skip } from "../../../../objects/Error.js"
 import { LimitStream, SingleNodeStream } from "../../../../objects/Stream.js"
 import {
 	EndBracketStream,
@@ -14,7 +10,7 @@ import {
 } from "../../../../samples/Stream.js"
 import { next } from "../../../../utils/Stream.js"
 import { validatePropertyName, validatePropertyValue } from "../Errors.js"
-import { UnicodeProperty } from "../Nodes.js"
+import { UnicodeProperty, UnicodePropertyAlias } from "../Nodes.js"
 import {
 	isCurrClbrace,
 	isNotNextClbrace,
@@ -67,12 +63,12 @@ class UnicodePropertyStreamChooser extends IteratorStreamChooser<string> {
 	}
 }
 
-class UnicodePropertyStream extends SingleNodeStream<UnicodeProperty> {
-	private getPropName() {
+class UnicodePropertyStream extends SingleNodeStream<INode> {
+	private getPropName(): [boolean, string] {
 		validatePropertyName(this.resource!)
 		const propName: string = next(this.resource!)
-		tryReviveChild(this)
-		return propName
+		const hasValue = this.reviveChild()
+		return [hasValue, propName]
 	}
 
 	private getPropValue() {
@@ -82,10 +78,28 @@ class UnicodePropertyStream extends SingleNodeStream<UnicodeProperty> {
 		return propValue
 	}
 
-	override baseInit(): void {
-		const propName = this.getPropName()
+	private getAsUnicodeAlias(propName: string) {
+		return new UnicodePropertyAlias(propName)
+	}
+
+	private getAsFullUnicodeProperty(propName: string, value: string) {
+		return new UnicodeProperty(propName, value)
+	}
+
+	private processFullUnicodeProperty(propName: string) {
 		const value = this.getPropValue()
-		this.curr = new UnicodeProperty(propName, value)
+		return this.getAsFullUnicodeProperty(propName, value)
+	}
+
+	private processUnicodeProperty() {
+		const [hasValue, propName] = this.getPropName()
+		return hasValue
+			? this.processFullUnicodeProperty(propName)
+			: this.getAsUnicodeAlias(propName)
+	}
+
+	override baseInit(): void {
+		this.curr = this.processUnicodeProperty()
 	}
 }
 

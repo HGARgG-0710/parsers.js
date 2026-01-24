@@ -569,15 +569,41 @@ export class MatchState<T = any> extends State<T> {
 	}
 }
 
-export class UnicodePropertyState<T = any> extends LocaleSensitiveState<T> {
-	private readonly delegate: RegExp
-
-	private toRegExp() {
-		return new RegExp(`^\\p{${this.propName}=${this.value}}$`, "v")
-	}
+abstract class BaseUnicodePropertyState<
+	T = any
+> extends LocaleSensitiveState<T> {
+	private delegate: RegExp | null = null
 
 	protected override baseVerify(x: string): boolean {
+		if (!this.delegate) this.delegate = this.getDelegate()
 		return this.delegate.test(x)
+	}
+
+	protected abstract getDelegate(): RegExp
+
+	constructor(extensions: Regex.ExtensionMap) {
+		super(extensions)
+	}
+}
+
+export class UnicodePropertyAliasState<
+	T = any
+> extends BaseUnicodePropertyState<T> {
+	protected override getDelegate(): RegExp {
+		return new RegExp(`^\\p{${this.propName}}$`, "v")
+	}
+
+	constructor(
+		private readonly propName: string,
+		extensions: Regex.ExtensionMap
+	) {
+		super(extensions)
+	}
+}
+
+export class UnicodePropertyState<T = any> extends BaseUnicodePropertyState<T> {
+	protected override getDelegate(): RegExp {
+		return new RegExp(`^\\p{${this.propName}=${this.value}}$`, "v")
 	}
 
 	constructor(
@@ -586,6 +612,5 @@ export class UnicodePropertyState<T = any> extends LocaleSensitiveState<T> {
 		extensions: Regex.ExtensionMap
 	) {
 		super(extensions)
-		this.delegate = this.toRegExp()
 	}
 }

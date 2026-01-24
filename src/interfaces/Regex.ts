@@ -27,6 +27,7 @@ export interface IRegexPartBuilder extends ICompositeRegexBuilder {
 }
 
 export interface IRawRegexVisitor<T = any> {
+	handleUnicodePropertyAlias(unicodeProp: Regex.Raw.UnicodeProperty.Alias): T
 	handleUnicodeProperty(unicodeProp: Regex.Raw.UnicodeProperty): T
 	handleEither(either: Regex.Raw.Either): T
 	handleCatenationLike(items: Regex.Raw[]): T
@@ -92,6 +93,7 @@ export interface IRegexFactory {
 	optional(item: Regex.Raw): Regex.Raw
 	repeat(item: Regex.Raw, times: number): Regex.Raw
 	unicodeProperty(propName: string, value: string): Regex.Raw
+	unicodePropertyAlias(propName: string): Regex.Raw
 }
 
 export interface IMatchedState<T = any> {
