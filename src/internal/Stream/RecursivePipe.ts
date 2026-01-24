@@ -15,11 +15,11 @@ const { insert, mutate, out } = inplace
 const { first, clear } = array
 const { isUndefined } = type
 
-type IDerivedList<
+type IDerivedPipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> = RecursiveList.Poolable<T, Recursive, InitType>
+> = RecursivePipe.Poolable<T, Recursive, InitType>
 
 type IRecursivelySwitchable<
 	T extends ITerminalAcceptable = any,
@@ -53,29 +53,29 @@ function isSwitch<
 /**
  * This is a class for representing entities
  * that are capable of keeping their
- * `listIndex: number` - a property describing
- * their position inside their `.parentList`-`SwitchArray`,
+ * `itemIndex: number` - a property describing
+ * their position inside their `.parentArray`-`WrapArray`,
  * crucial for the item-renewal algorithm.
  */
-abstract class ListIndexHaving {
-	private _listIndex: number
+abstract class ItemIndexHaving {
+	private _itemIndex: number
 
-	private set listIndex(index: number) {
-		this._listIndex = index
+	private set itemIndex(index: number) {
+		this._itemIndex = index
 	}
 
-	get listIndex() {
-		return this._listIndex
+	get itemIndex() {
+		return this._itemIndex
 	}
 
-	setListIndex(listIndex: number): void {
-		this.listIndex = listIndex
+	setItemIndex(itemIndex: number): void {
+		this.itemIndex = itemIndex
 	}
 }
 
 /**
  * This is a class for keeping track of recursion points
- * in the list. Specifically, a `Switch` represents a
+ * in the pipe. Specifically, a `Switch` represents a
  * point for introduction of a sub-array of connected items,
  * which can be renewed upon the non-revivable "final death"
  * of at least one of the items inside the array.
@@ -85,7 +85,7 @@ export class Switch<
 	Recursive = any,
 	InitType = any
 >
-	extends ListIndexHaving
+	extends ItemIndexHaving
 	implements IPoolable<[Recursive]>
 {
 	static wrap<
@@ -101,23 +101,23 @@ export class Switch<
 	)
 
 	private _recursive: Recursive | null = null
-	private _list: IDerivedList<T, Recursive, InitType> | null = null
-	private renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	private _pipe: IDerivedPipe<T, Recursive, InitType> | null = null
+	private renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 
 	private set recursive(newRecursive: Recursive) {
 		this._recursive = newRecursive
 	}
 
-	private set list(x: IDerivedList<T, Recursive, InitType>) {
-		this._list = x
+	private set pipe(x: IDerivedPipe<T, Recursive, InitType>) {
+		this._pipe = x
 	}
 
 	get recursive() {
 		return this._recursive!
 	}
 
-	get list() {
-		return this._list!
+	get pipe() {
+		return this._pipe!
 	}
 
 	get poolId() {
@@ -125,12 +125,12 @@ export class Switch<
 	}
 
 	postFree(): void {
-		this._list = null
+		this._pipe = null
 		this._recursive = null
 	}
 
 	expand(appliedUpon: T | InitType) {
-		this.list = this.renewer.evaluate(this.recursive, appliedUpon)
+		this.pipe = this.renewer.evaluate(this.recursive, appliedUpon)
 	}
 
 	init(recursive?: Recursive) {
@@ -139,7 +139,7 @@ export class Switch<
 	}
 
 	recycleSubs() {
-		this.list.recycle()
+		this.pipe.recycle()
 	}
 
 	recycle() {
@@ -158,14 +158,14 @@ export class Switch<
  * `T extends ITerminalAcceptable`. It can
  * be contrasted with a `Switch` via `.isSwitch: boolean`.
  * Besides this, it is embedded with functionality to
- * implement individual renewal algorithm (`.listIndex`, `.parentList`)
+ * implement individual renewal algorithm (`.itemIndex`, `.parentArray`)
  */
 class Terminal<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
 >
-	extends ListIndexHaving
+	extends ItemIndexHaving
 	implements IPoolable<[T]>
 {
 	static wrap<
@@ -181,26 +181,26 @@ class Terminal<
 	)
 
 	private _terminal: T | null = null
-	private _parentList: SwitchArray<T, Recursive, InitType> | null = null
+	private _parentArray: WrapArray<T, Recursive, InitType> | null = null
 
 	private set terminal(terminal: T) {
 		this._terminal = terminal
 	}
 
-	private set parentList(list: SwitchArray<T, Recursive, InitType>) {
-		this._parentList = list
+	private set parentArray(array: WrapArray<T, Recursive, InitType>) {
+		this._parentArray = array
 	}
 
 	get terminal() {
 		return this._terminal!
 	}
 
-	get parentList() {
-		return this._parentList!
+	get parentArray() {
+		return this._parentArray!
 	}
 
-	setParentList(parentList: SwitchArray<T, Recursive, InitType>): void {
-		this.parentList = parentList
+	setParentArray(parentArray: WrapArray<T, Recursive, InitType>): void {
+		this.parentArray = parentArray
 	}
 
 	init(terminal?: T) {
@@ -214,7 +214,7 @@ class Terminal<
 	}
 
 	postFree(): void {
-		this._parentList = null
+		this._parentArray = null
 		this._terminal = null
 	}
 
@@ -241,24 +241,26 @@ interface IItemsSettable {
 }
 
 interface IRenewerSettable {
-	setRenewer(renewer: RecursiveList.Renewer): void
+	setRenewer(renewer: RecursivePipe.Renewer): void
 }
 
-interface IDeepListSettable<
+interface IDeepTerminalMapSettable<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
 > {
-	setDeepList(deepList: DeepList<T, Recursive, InitType>): void
+	setDeepTerminalMap(
+		deepTerminalMap: DeepTerminalMap<T, Recursive, InitType>
+	): void
 }
 
 interface IDepthMapSettable {
 	setDepthMap(map: GlobalDepthMap): void
 }
 
-type IRecursiveListLike = IRenewerSettable &
+type IRecursivePipeLike = IRenewerSettable &
 	IItemsSettable &
-	IDeepListSettable &
+	IDeepTerminalMapSettable &
 	IDepthMapSettable
 
 const depthMapInitializer = {
@@ -267,14 +269,14 @@ const depthMapInitializer = {
 	}
 }
 
-const deepListInitializer = {
-	init(target: IDeepListSettable, deepList?: DeepList) {
-		if (deepList) target.setDeepList(deepList)
+const deepTerminalMapInitializer = {
+	init(target: IDeepTerminalMapSettable, deepTerminalMap?: DeepTerminalMap) {
+		if (deepTerminalMap) target.setDeepTerminalMap(deepTerminalMap)
 	}
 }
 
 const renewerInitializer = {
-	init(target: IRenewerSettable, renewer?: RecursiveList.Renewer) {
+	init(target: IRenewerSettable, renewer?: RecursivePipe.Renewer) {
 		if (renewer) target.setRenewer(renewer)
 	}
 }
@@ -285,10 +287,10 @@ const itemsInitializer = {
 	}
 }
 
-const baseEvaluableListInitializer = {
+const baseEvaluablePipeInitializer = {
 	init(
 		target: IRenewerSettable & IDepthMapSettable,
-		renewer?: RecursiveList.Renewer,
+		renewer?: RecursivePipe.Renewer,
 		depthMap?: GlobalDepthMap
 	) {
 		depthMapInitializer.init(target, depthMap)
@@ -296,11 +298,11 @@ const baseEvaluableListInitializer = {
 	}
 }
 
-const recursiveListInitializer = {
-	init(target: IRecursiveListLike, args: RecursiveListArgs) {
-		const { renewer, items, deepList, depthMap } = args
+const recursivePipeInitializer = {
+	init(target: IRecursivePipeLike, args: RecursivePipeArgs) {
+		const { renewer, items, deepTerminalMap, depthMap } = args
 		depthMapInitializer.init(target, depthMap)
-		deepListInitializer.init(target, deepList)
+		deepTerminalMapInitializer.init(target, deepTerminalMap)
 		renewerInitializer.init(target, renewer)
 		itemsInitializer.init(target, items)
 	}
@@ -310,9 +312,9 @@ const recursiveListInitializer = {
  * This is a general abstract class for all
  * entities that require a presence of a
  * dependency-inversion-based
- * `renewer: RecursiveList.Renewer<T, Recursive, InitType>`
+ * `renewer: RecursivePipe.Renewer<T, Recursive, InitType>`
  * reference. It provides accordingi `initializer`,
- * as well as extending `Initializable<[RecursiveList.Renewer<T, Recursive, InitType>]`.
+ * as well as extending `Initializable<[RecursivePipe.Renewer<T, Recursive, InitType>]`.
  */
 abstract class RenewerHaving<
 	T extends ITerminalAcceptable = any,
@@ -321,14 +323,14 @@ abstract class RenewerHaving<
 	Args extends any[] = []
 >
 	extends Initializable<
-		[RecursiveList.Renewer<T, Recursive, InitType>, ...Args]
+		[RecursivePipe.Renewer<T, Recursive, InitType>, ...Args]
 	>
 	implements IRenewerSettable
 {
-	private _renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	private _renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 
 	private set renewer(
-		newRenewer: RecursiveList.Renewer<T, Recursive, InitType>
+		newRenewer: RecursivePipe.Renewer<T, Recursive, InitType>
 	) {
 		this._renewer = newRenewer
 	}
@@ -337,7 +339,7 @@ abstract class RenewerHaving<
 		return this._renewer
 	}
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>): void {
+	setRenewer(renewer: RecursivePipe.Renewer<T, Recursive, InitType>): void {
 		this.renewer = renewer
 	}
 
@@ -351,9 +353,9 @@ abstract class RenewerHaving<
  * of interpreting `IRecursivelySwitchable<T, Recursive, InitType>`
  * as a live `T` instance that is attached to the `Terminal/Switch`
  * in question. The `T` in question is either `switchable.terminal`
- * for a `switchable: Terminal` and `switchable.list.firstItemDeep()`
+ * for a `switchable: Terminal` and `switchable.pipe.firstItemDeep()`
  * for the `switchable: Switch` (i.e. first non-recursive item of
- * the list).
+ * the pipe).
  */
 class UniversalRenewer<
 	T extends ITerminalAcceptable = any,
@@ -364,7 +366,7 @@ class UniversalRenewer<
 		switchable: IRecursivelySwitchable<T, Recursive, InitType>
 	) {
 		return isSwitch(switchable)
-			? switchable.list.firstItemDeep()
+			? switchable.pipe.firstItemDeep()
 			: switchable.terminal
 	}
 
@@ -376,7 +378,7 @@ class UniversalRenewer<
 /**
  * The class for encapsulating the shared state of
  * `.lastInitialized: T | null`. The purpose is to
- * ensure that the three different "List" classes
+ * ensure that the three different "Pipe" classes
  * all have the same version of the variable,
  * and can modify/access it as-necessary.
  */
@@ -391,8 +393,8 @@ class LastInitialized<
 		return this.lastInitialized
 	}
 
-	linkEvaluatedSublist(sublist: RecursiveList<T, Recursive, InitType>) {
-		this.linkNew(sublist.firstItemDeep())
+	linkEvaluatedSubpipe(subpipe: RecursivePipe<T, Recursive, InitType>) {
+		this.linkNew(subpipe.firstItemDeep())
 	}
 
 	linkNew(hasBeenLastInitialized: T) {
@@ -406,12 +408,12 @@ class LastInitialized<
 
 /**
  * An abstract class encapsulating the basic internal operations
- * on "recursive lists" - ability to evaluate a given item, with
+ * on "recursive pipes" - ability to evaluate a given item, with
  * a given "something: T | InitType", capability of being enabled with a
- * `protected readonly renewer: RecursiveList.Renewer<T, Recursive, InitType>`,
- * as well as the `.init` method that expects a `RecursiveList.Renewer`.
+ * `protected readonly renewer: RecursivePipe.Renewer<T, Recursive, InitType>`,
+ * as well as the `.init` method that expects a `RecursivePipe.Renewer`.
  */
-abstract class BaseEvaluableList<
+abstract class BaseEvaluablePipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
@@ -435,11 +437,11 @@ abstract class BaseEvaluableList<
 		evaledWith: T | InitType
 	) {
 		this.expandEvaluated(fillable, evaledWith)
-		this.evaluateSublist(fillable.list, evaledWith)
+		this.evaluateSubpipe(fillable.pipe, evaledWith)
 	}
 
 	protected override get initializer() {
-		return baseEvaluableListInitializer
+		return baseEvaluablePipeInitializer
 	}
 
 	protected initTerminal(toInitialize: T, initParam: T | InitType) {
@@ -447,11 +449,11 @@ abstract class BaseEvaluableList<
 		toInitialize.init(initParam)
 	}
 
-	protected evaluateSublist(
-		sublist: RecursiveList<T, Recursive, InitType>,
+	protected evaluateSubpipe(
+		subpipe: RecursivePipe<T, Recursive, InitType>,
 		evaledWith: T | InitType
 	) {
-		sublist.evaluate(evaledWith)
+		subpipe.evaluate(evaledWith)
 	}
 
 	setDepthMap(map: GlobalDepthMap) {
@@ -460,25 +462,25 @@ abstract class BaseEvaluableList<
 }
 
 /**
- * The base class for `RenewableList` and `EvaluableList`,
+ * The base class for `RenewablePipe` and `EvaluablePipe`,
  * enabling tracking of the last item evaluated, which is
  * essential for the two algorithms in question.
  */
-abstract class EvaluableListWithLastItem<
+abstract class EvaluablePipeWithLastItem<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends BaseEvaluableList<T, Recursive, InitType> {
+> extends BaseEvaluablePipe<T, Recursive, InitType> {
 	protected pickLastItem(evalWith: T | InitType) {
 		return this.lastInitialized.get() || evalWith
 	}
 
-	protected override evaluateSublist(
-		sublist: RecursiveList<T, Recursive, InitType>,
+	protected override evaluateSubpipe(
+		subpipe: RecursivePipe<T, Recursive, InitType>,
 		evaledWith: T | InitType
 	) {
-		super.evaluateSublist(sublist, evaledWith)
-		this.lastInitialized.linkEvaluatedSublist(sublist)
+		super.evaluateSubpipe(subpipe, evaledWith)
+		this.lastInitialized.linkEvaluatedSubpipe(subpipe)
 	}
 
 	protected override initTerminal(toInitialize: T, initParam: T | InitType) {
@@ -492,23 +494,23 @@ abstract class EvaluableListWithLastItem<
 			Recursive,
 			InitType
 		>,
-		protected readonly items: SwitchArray<T, Recursive, InitType>
+		protected readonly items: WrapArray<T, Recursive, InitType>
 	) {
 		super()
 	}
 }
 
 /**
- * This is an add-on `BaseEvaluableList<T, Recursive, InitType>` class,
+ * This is an add-on `BaseEvaluablePipe<T, Recursive, InitType>` class,
  * whose objects are capable of being used for introducing the `initSwitchable`
- * into `BaseEvaluableList`-deriving classes via delegation in cases,
+ * into `BaseEvaluablePipe`-deriving classes via delegation in cases,
  * where it would (otherwise) would have been difficult/impossible.
  */
 class SwitchableEvaluator<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends BaseEvaluableList<T, Recursive, InitType> {
+> extends BaseEvaluablePipe<T, Recursive, InitType> {
 	evalSwitchable(
 		toInitialize: IRecursivelySwitchable<T, Recursive, InitType>,
 		initParam: T | InitType
@@ -521,7 +523,7 @@ class SwitchableEvaluator<
 
 /**
  * This is an object for encapsulating the `foundSwitch: boolean` flag
- * of `RenewableList`.
+ * of `RenewablePipe`.
  */
 class FoundSwitchFlag {
 	private foundSwitch: boolean = false
@@ -542,26 +544,26 @@ class FoundSwitchFlag {
 /**
  * The `.renew` method is the one where the `CompositeStream`
  * spends most of its time in. More specifically, it is the place
- * where the given `.items: SwitchArray` gets re-checked for being
+ * where the given `.items: WrapArray` gets re-checked for being
  * no longer acceptable [i.e. that there is, now, a "terminal" which `.isOld`].
  * In such an eventuality, the further attempts to re-evalute the
  * `.items` are no longer pursued, at which point, one simply
  * quits and returns `false`.
  */
-class RenewableList<
+class RenewablePipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends EvaluableListWithLastItem<T, Recursive, InitType> {
+> extends EvaluablePipeWithLastItem<T, Recursive, InitType> {
 	private readonly foundSwitch = new FoundSwitchFlag()
 
-	private refillSublistIn(
+	private refillSubpipeIn(
 		currSwitch: Switch<T, Recursive, InitType>,
 		lastItem: T | InitType
 	) {
-		const sublist = currSwitch.list
-		if (!sublist.renewAll(lastItem)) this.fillSwitch(currSwitch, lastItem)
-		else this.lastInitialized.linkEvaluatedSublist(sublist)
+		const subpipe = currSwitch.pipe
+		if (!subpipe.renewAll(lastItem)) this.fillSwitch(currSwitch, lastItem)
+		else this.lastInitialized.linkEvaluatedSubpipe(subpipe)
 	}
 
 	/**
@@ -583,7 +585,7 @@ class RenewableList<
 		lastItem: T | InitType
 	) {
 		this.foundSwitch.found()
-		this.refillSublistIn(currSwitch, lastItem)
+		this.refillSubpipeIn(currSwitch, lastItem)
 		return true
 	}
 
@@ -623,16 +625,16 @@ class RenewableList<
 
 /**
  * The `.evaluate()` is the first call that
- * properly evaluates the `.items: SwitchArray`.
+ * properly evaluates the `.items: WrapArray`.
  * However, it is only called on re-initialization
  * of `CompositeStream`. Any further work on the
  * internal `.items` is handled by the `.renew`
  */
-class EvaluableList<
+class EvaluablePipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends EvaluableListWithLastItem<T, Recursive, InitType> {
+> extends EvaluablePipeWithLastItem<T, Recursive, InitType> {
 	private readonly evaluator = new SwitchableEvaluator<
 		T,
 		Recursive,
@@ -640,7 +642,7 @@ class EvaluableList<
 	>()
 
 	override setRenewer(
-		renewer: RecursiveList.Renewer<T, Recursive, InitType>
+		renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 	): void {
 		super.setRenewer(renewer)
 		this.evaluator.setRenewer(renewer)
@@ -663,7 +665,7 @@ class EvaluableList<
 }
 
 /**
- * This is a list-like view of the `items: SwitchArray<T, Recursive, InitType>`
+ * This is a map-like view of the `items: WrapArray<T, Recursive, InitType>`
  * intended to provide one with a way to obtain the current
  * `IRecursiveSwitchable<T, Recursive, InitType>`-representation of a given `T`
  * via the `.getBy` method, as well as to perform bookkeeping
@@ -671,28 +673,17 @@ class EvaluableList<
  * `IRecursiveSwitchable` instance.
  *
  * The `.getBy` method, in particular, is the one that makes the
- * `RecursiveList.prototype.renewItem` method implementation feasible.
+ * `RecursivePipe.prototype.renewItem` method implementation feasible.
  */
-export class DeepList<
+export class DeepTerminalMap<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
 > {
 	private readonly byTerminals: Map<
 		T,
-		[SwitchArray<T, Recursive, InitType>, number]
+		[WrapArray<T, Recursive, InitType>, number]
 	> = new Map()
-
-	/**
-	 * Reads the `Terminal<T, Recursive, InitType>` at a given `index` in a
-	 * given `parent`
-	 */
-	private getAt(parent: SwitchArray<T, Recursive, InitType>, index: number) {
-		// The reasoning here is - since one follows encapsulation,
-		// and only ever puts `Terminal<T, Recursive, InitType>`, it is obvious
-		// that this will be the type we'll get, and not a `Switch`
-		return parent.get(index) as Terminal<T, Recursive, InitType>
-	}
 
 	private findTerminal(terminal: T) {
 		return this.byTerminals.get(terminal)!
@@ -704,7 +695,7 @@ export class DeepList<
 
 	register(
 		terminal: Terminal<T, Recursive, InitType>,
-		parent: SwitchArray<T, Recursive, InitType>,
+		parent: WrapArray<T, Recursive, InitType>,
 		index: number
 	) {
 		this.byTerminals.set(terminal.terminal, [parent, index])
@@ -712,30 +703,33 @@ export class DeepList<
 
 	getBy(terminal: T) {
 		const [parent, index] = this.findTerminal(terminal)
-		return this.getAt(parent, index)
+		// The reasoning here is - since one follows encapsulation,
+		// and only ever puts `Terminal<T, Recursive, InitType>`, it is obvious
+		// that this will be the type we'll get, and not a `Switch`
+		return parent.get(index) as Terminal<T, Recursive, InitType>
 	}
 
-	constructor(readonly items: SwitchArray<T, Recursive, InitType>) {}
+	constructor(readonly items: WrapArray<T, Recursive, InitType>) {}
 }
 
 /**
- * This is a `RecursiveList` variation capable of renewing an item at a
+ * This is a `RecursivePipe` variation capable of renewing an item at a
  * specific index. In event that the renewal in question turns out to be
  * impossible (due to item relying on something else that has already
  * finished and, itself, *cannot* be renewed), one throws a corresponding
  * exception.
  */
-class PinpointRenewableList<
+class PinpointRenewablePipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> extends BaseEvaluableList<T, Recursive, InitType> {
+> extends BaseEvaluablePipe<T, Recursive, InitType> {
 	private readonly evaluator = new SwitchableEvaluator()
 	private readonly uniRenewer = new UniversalRenewer(this.renewer)
 
 	private foundNonOld(
 		firstNonOldIndex: number,
-		parent: SwitchArray<T, Recursive, InitType>
+		parent: WrapArray<T, Recursive, InitType>
 	) {
 		return firstNonOldIndex !== parent.size
 	}
@@ -746,7 +740,7 @@ class PinpointRenewableList<
 
 	private getTerminalAfter(
 		from: number,
-		parent: SwitchArray<T, Recursive, InitType>
+		parent: WrapArray<T, Recursive, InitType>
 	) {
 		return parent.get(this.itemAhead(from)) as Terminal<
 			T,
@@ -758,7 +752,7 @@ class PinpointRenewableList<
 	private renewNeeded(
 		from: number,
 		to: number,
-		parent: SwitchArray<T, Recursive, InitType>
+		parent: WrapArray<T, Recursive, InitType>
 	) {
 		let initItem = this.getTerminalAfter(from, parent).terminal
 		for (let i = from; i >= to; --i) {
@@ -770,10 +764,10 @@ class PinpointRenewableList<
 
 	private lastNonOldIndex(
 		item: Terminal<T, Recursive, InitType>
-	): [number, SwitchArray<T, Recursive, InitType>] {
-		const parent = item.parentList
+	): [number, WrapArray<T, Recursive, InitType>] {
+		const parent = item.parentArray
 		let currItem: IRecursivelySwitchable<T, Recursive, InitType> = item
-		let i: number = item.listIndex
+		let i: number = item.itemIndex
 		while (i < parent.size && this.uniRenewer.isOld(currItem))
 			currItem = parent.get(i++)
 		return [i, parent]
@@ -796,12 +790,12 @@ class PinpointRenewableList<
 	private renewOldItem(item: Terminal<T, Recursive, InitType>) {
 		const [foundNonOld, firstOldItem] = this.firstOldItem(item)
 		if (foundNonOld)
-			this.renewNeeded(firstOldItem, item.listIndex, item.parentList)
+			this.renewNeeded(firstOldItem, item.itemIndex, item.parentArray)
 		return foundNonOld
 	}
 
 	override setRenewer(
-		renewer: RecursiveList.Renewer<T, Recursive, InitType>
+		renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 	): void {
 		super.setRenewer(renewer)
 		this.evaluator.setRenewer(renewer)
@@ -814,7 +808,7 @@ class PinpointRenewableList<
 
 	/**
 	 * Renews a given terminal `item: T`, provided it is
-	 * a part of the current item-list.
+	 * a part of the current item-pipe.
 	 */
 	renewItem(item: Terminal<T, Recursive, InitType>) {
 		return this.renewer.isOld(item.terminal)
@@ -862,26 +856,26 @@ class GlobalDepthMap<T extends ITerminalAcceptable = any> {
 	}
 }
 
-class RecursiveListArgsBuilder<
+class RecursivePipeArgsBuilder<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
-> {
-	static readonly instance = new RecursiveListArgsBuilder()
+> implements IDeepTerminalMapSettable<T, Recursive, InitType> {
+	static readonly instance = new RecursivePipeArgsBuilder()
 
-	private renewer?: RecursiveList.Renewer<T, Recursive, InitType>
+	private renewer?: RecursivePipe.Renewer<T, Recursive, InitType>
 	private items?: (T | Recursive)[]
-	private deepList?: DeepList<T, Recursive, InitType>
+	private deepTerminalMap?: DeepTerminalMap<T, Recursive, InitType>
 	private depthMap?: GlobalDepthMap
 
 	reset() {
 		this.renewer = MissingArgument
 		this.items = MissingArgument
-		this.deepList = MissingArgument
+		this.deepTerminalMap = MissingArgument
 		this.depthMap = MissingArgument
 	}
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>) {
+	setRenewer(renewer: RecursivePipe.Renewer<T, Recursive, InitType>) {
 		this.renewer = renewer
 		return this
 	}
@@ -891,8 +885,10 @@ class RecursiveListArgsBuilder<
 		return this
 	}
 
-	setDeepList(deepList: DeepList<T, Recursive, InitType>) {
-		this.deepList = deepList
+	setDeepTerminalMap(
+		deepTerminalMap: DeepTerminalMap<T, Recursive, InitType>
+	) {
+		this.deepTerminalMap = deepTerminalMap
 		return this
 	}
 
@@ -901,11 +897,11 @@ class RecursiveListArgsBuilder<
 		return this
 	}
 
-	build(): RecursiveListArgs<T, Recursive, InitType> {
-		return RecursiveListArgs.instance.init(
+	build(): RecursivePipeArgs<T, Recursive, InitType> {
+		return RecursivePipeArgs.instance.init(
 			this.renewer,
 			this.items,
-			this.deepList,
+			this.deepTerminalMap,
 			this.depthMap
 		)
 	}
@@ -913,16 +909,16 @@ class RecursiveListArgsBuilder<
 	private constructor() {}
 }
 
-export class RecursiveListArgs<
+export class RecursivePipeArgs<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
 > {
-	static readonly instance = new RecursiveListArgs()
+	static readonly instance = new RecursivePipeArgs()
 
-	private _renewer?: RecursiveList.Renewer<T, Recursive, InitType>
+	private _renewer?: RecursivePipe.Renewer<T, Recursive, InitType>
 	private _items?: (T | Recursive)[]
-	private _deepList?: DeepList<T, Recursive, InitType>
+	private _deepTerminalMap?: DeepTerminalMap<T, Recursive, InitType>
 	private _depthMap?: GlobalDepthMap<T>
 
 	get renewer() {
@@ -933,8 +929,8 @@ export class RecursiveListArgs<
 		return this._items
 	}
 
-	get deepList() {
-		return this._deepList
+	get deepTerminalMap() {
+		return this._deepTerminalMap
 	}
 
 	get depthMap() {
@@ -945,21 +941,21 @@ export class RecursiveListArgs<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
 		InitType = any
-	>(): RecursiveListArgsBuilder<T, Recursive, InitType> {
-		const builder = RecursiveListArgsBuilder.instance
+	>(): RecursivePipeArgsBuilder<T, Recursive, InitType> {
+		const builder = RecursivePipeArgsBuilder.instance
 		builder.reset()
 		return builder
 	}
 
 	init(
-		renewer?: RecursiveList.Renewer<T, Recursive, InitType>,
+		renewer?: RecursivePipe.Renewer<T, Recursive, InitType>,
 		items?: (T | Recursive)[],
-		deepList?: DeepList<T, Recursive, InitType>,
+		deepTerminalMap?: DeepTerminalMap<T, Recursive, InitType>,
 		depthMap?: GlobalDepthMap
 	) {
 		this._renewer = renewer
 		this._items = items
-		this._deepList = deepList
+		this._deepTerminalMap = deepTerminalMap
 		this._depthMap = depthMap
 		return this
 	}
@@ -967,8 +963,8 @@ export class RecursiveListArgs<
 	private constructor() {}
 }
 
-const switchArrayInitializer = {
-	init(target: SwitchArray, items?: any[], renewer?: RecursiveList.Renewer) {
+const wrapArrayInitializer = {
+	init(target: WrapArray, items?: any[], renewer?: RecursivePipe.Renewer) {
 		renewerInitializer.init(target, renewer)
 		itemsInitializer.init(target, items)
 	}
@@ -976,11 +972,11 @@ const switchArrayInitializer = {
 
 /**
  * This is a class that encapsulates the `IRecursiveItems`
- * of the `RecursiveList`, and which is used by the user
+ * of the `RecursivePipe`, and which is used by the user
  * via the `IStreamArray` whenever modifying the internal
  * structure of a `DynamicParser`.
  */
-export class SwitchArray<
+export class WrapArray<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
@@ -988,13 +984,13 @@ export class SwitchArray<
 	extends Initializable<
 		[
 			IRecursiveItems<T, Recursive, InitType>,
-			RecursiveList.Renewer<T, Recursive, InitType>
+			RecursivePipe.Renewer<T, Recursive, InitType>
 		]
 	>
 	implements IArray<T | Recursive>
 {
 	private _items: IRecursiveItems<T, Recursive, InitType>
-	private renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	private renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 
 	private set items(newItems: IRecursiveItems<T, Recursive, InitType>) {
 		this._items = newItems
@@ -1023,7 +1019,7 @@ export class SwitchArray<
 		return this.renewer.wrap(r)
 	}
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>) {
+	setRenewer(renewer: RecursivePipe.Renewer<T, Recursive, InitType>) {
 		this.renewer = renewer
 	}
 
@@ -1032,7 +1028,7 @@ export class SwitchArray<
 	}
 
 	protected get initializer() {
-		return switchArrayInitializer
+		return wrapArrayInitializer
 	}
 
 	write(i: number, value: T | Recursive) {
@@ -1111,33 +1107,36 @@ export class SwitchArray<
  * This is the primary data structure for implementing the
  * library's self-modifying parser. Particularly, it is responsible
  * for keeping track of the list of items that may or may not
- * be leading to recursion within the structure of the list.
+ * be leading to recursion within the structure of the pipe.
  */
-export class RecursiveList<
+export class RecursivePipe<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any,
 	InitArgs extends any[] = []
-> extends Initializable<
-	[RecursiveListArgs<T, Recursive, InitType>, ...(InitArgs | [])]
-> {
-	readonly items = new SwitchArray<T, Recursive, InitType>()
-	private readonly asEvaluable: EvaluableList<T, Recursive, InitType>
-	private readonly asRenewable: RenewableList<T, Recursive, InitType>
+>
+	extends Initializable<
+		[RecursivePipeArgs<T, Recursive, InitType>, ...(InitArgs | [])]
+	>
+	implements IDeepTerminalMapSettable
+{
+	readonly items = new WrapArray<T, Recursive, InitType>()
+	private readonly asEvaluable: EvaluablePipe<T, Recursive, InitType>
+	private readonly asRenewable: RenewablePipe<T, Recursive, InitType>
 
 	protected depthMap: GlobalDepthMap<T>
-	protected asDeep: DeepList<T, Recursive, InitType>
-	protected renewer: RecursiveList.Renewer<T, Recursive, InitType>
+	protected asDeepMap: DeepTerminalMap<T, Recursive, InitType>
+	protected renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 
 	private adoptChild(terminal: Terminal<T, Recursive, InitType>) {
-		terminal.setParentList(this.items)
+		terminal.setParentArray(this.items)
 	}
 
 	private register(
 		terminal: Terminal<T, Recursive, InitType>,
 		index: number
 	) {
-		this.asDeep.register(terminal, this.items, index)
+		this.asDeepMap.register(terminal, this.items, index)
 	}
 
 	private newTerminal(
@@ -1150,7 +1149,7 @@ export class RecursiveList<
 
 	private toWrapped(fromArr: (T | Recursive)[], atIndex: number) {
 		const wrapped = this.renewer.wrap(fromArr[atIndex])
-		wrapped.setListIndex(atIndex)
+		wrapped.setItemIndex(atIndex)
 		if (!isSwitch(wrapped)) this.newTerminal(wrapped, atIndex)
 		return wrapped
 	}
@@ -1160,18 +1159,20 @@ export class RecursiveList<
 	}
 
 	protected get initializer() {
-		return recursiveListInitializer
+		return recursivePipeInitializer
 	}
 
 	setDepthMap(map: GlobalDepthMap) {
 		this.depthMap = map
 	}
 
-	setDeepList(deepList: DeepList<T, Recursive, InitType>) {
-		this.asDeep = deepList
+	setDeepTerminalMap(
+		deepTerminalMap: DeepTerminalMap<T, Recursive, InitType>
+	) {
+		this.asDeepMap = deepTerminalMap
 	}
 
-	setRenewer(renewer: RecursiveList.Renewer<T, Recursive, InitType>) {
+	setRenewer(renewer: RecursivePipe.Renewer<T, Recursive, InitType>) {
 		this.renewer = renewer
 		this.items.init(MissingArgument, renewer)
 		this.asEvaluable.init(renewer)
@@ -1188,7 +1189,7 @@ export class RecursiveList<
 	firstItemDeep(): T {
 		const firstItem = this.firstItem()
 		return isSwitch<T, Recursive, InitType>(firstItem)
-			? firstItem.list.firstItemDeep()
+			? firstItem.pipe.firstItemDeep()
 			: firstItem.terminal
 	}
 
@@ -1201,23 +1202,23 @@ export class RecursiveList<
 	}
 
 	constructor(
-		args: RecursiveListArgs<T, Recursive, InitType>,
+		args: RecursivePipeArgs<T, Recursive, InitType>,
 		...rest: Partial<InitArgs> | []
 	) {
 		super()
 		const lastInitialized = new LastInitialized()
-		this.asEvaluable = new EvaluableList(lastInitialized, this.items)
-		this.asRenewable = new RenewableList(lastInitialized, this.items)
+		this.asEvaluable = new EvaluablePipe(lastInitialized, this.items)
+		this.asRenewable = new RenewablePipe(lastInitialized, this.items)
 		this.init(args, ...rest)
 	}
 }
 
-export namespace RecursiveList {
+export namespace RecursivePipe {
 	/**
 	 * Responsible for keeping access to joint-access methods
-	 * essential for the functioning of the `RecursiveList` and `SwitchArray`.
+	 * essential for the functioning of the `RecursivePipe` and `WrapArray`.
 	 * Has the purpose of identifying "old" [those to be renewed] and "recursive"
-	 * [those to be turned into `Switch`es] elements of the `RecursiveList`.
+	 * [those to be turned into `Switch`es] elements of the `RecursivePipe`.
 	 * Also contains the `evaluator` method, which spits out a new `IDerivable<T, Recursive, InitType>`,
 	 * based on the current `Recursive` element, and the last evaluated `T`.
 	 */
@@ -1237,7 +1238,7 @@ export namespace RecursiveList {
 		abstract evaluate(
 			currRec: Recursive,
 			last: T | InitType
-		): IDerivedList<T, Recursive, InitType>
+		): IDerivedPipe<T, Recursive, InitType>
 
 		wrap(item: T | Recursive) {
 			return this.isRecursive(item)
@@ -1247,20 +1248,20 @@ export namespace RecursiveList {
 	}
 
 	/**
-	 * This is an abstract class representing the root `RecursiveList`.
-	 * It delegates to a toplevel `RecursiveList`, while also providing
+	 * This is an abstract class representing the root `RecursivePipe`.
+	 * It delegates to a toplevel `RecursivePipe`, while also providing
 	 * abstract operations to be overriden by concrete children and
-	 * the Facade for the algorithms of the underlying list
-	 * (full-list recursive renewal, pinpoint renewal, initial list
+	 * the Facade for the algorithms of the underlying pipe
+	 * (full-pipe recursive renewal, pinpoint renewal, initial pipe
 	 * evaluation, obtaining the first item deeply).
 	 */
-	export abstract class RootList<
+	export abstract class RootPipe<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
 		InitType = any,
 		InitArgs extends any[] = []
 	> {
-		protected abstract getList(): RecursiveList<
+		protected abstract getPipe(): RecursivePipe<
 			T,
 			Recursive,
 			InitType,
@@ -1269,11 +1270,11 @@ export namespace RecursiveList {
 
 		protected abstract getRenewer(): Renewer<T, Recursive, InitType>
 
-		protected readonly asDeep: DeepList<T, Recursive, InitType>
+		protected readonly asDeep: DeepTerminalMap<T, Recursive, InitType>
 		protected readonly renewer: Renewer<T, Recursive, InitType>
 
-		private readonly list: RecursiveList<T, Recursive, InitType, InitArgs>
-		private readonly asPinpointRenewable = new PinpointRenewableList<
+		private readonly pipe: RecursivePipe<T, Recursive, InitType, InitArgs>
+		private readonly asPinpointRenewable = new PinpointRenewablePipe<
 			T,
 			Recursive,
 			InitType
@@ -1286,7 +1287,7 @@ export namespace RecursiveList {
 		}
 
 		get items() {
-			return this.list.items
+			return this.pipe.items
 		}
 
 		renewItem(item: T) {
@@ -1294,27 +1295,27 @@ export namespace RecursiveList {
 		}
 
 		renewAll(lastItem: InitType) {
-			return this.list.renewAll(lastItem)
+			return this.pipe.renewAll(lastItem)
 		}
 
 		firstItemDeep() {
-			return this.list.firstItemDeep()
+			return this.pipe.firstItemDeep()
 		}
 
 		evaluate(initial: InitType) {
-			this.list.evaluate(initial)
+			this.pipe.evaluate(initial)
 		}
 
 		constructor(items: (T | Recursive)[], ...args: Partial<InitArgs> | []) {
 			this.renewer = this.getRenewer()
-			this.list = this.getList()
-			this.asDeep = new DeepList<T>(this.items)
+			this.pipe = this.getPipe()
+			this.asDeep = new DeepTerminalMap<T>(this.items)
 			this.asPinpointRenewable.init(this.renewer, this.globalDepth)
-			this.list.init(
-				RecursiveListArgs.build()
+			this.pipe.init(
+				RecursivePipeArgs.build()
 					.setRenewer(this.renewer)
 					.setItems(items)
-					.setDeepList(this.asDeep)
+					.setDeepTerminalMap(this.asDeep)
 					.setDepthMap(this.globalDepth)
 					.build()
 			)
@@ -1322,7 +1323,7 @@ export namespace RecursiveList {
 	}
 
 	/**
-	 * A public wrapper around the `RecursiveList`.
+	 * A public wrapper around the `RecursivePipe`.
 	 * It contains the iteration order and methods needed
 	 * for correct recursive pool reclamation routine.
 	 */
@@ -1331,14 +1332,14 @@ export namespace RecursiveList {
 		Recursive = any,
 		InitType = any,
 		InitArgs extends any[] = []
-	> extends RecursiveList<T, Recursive, InitType, InitArgs> {
-		protected abstract reclaim(list: Poolable<T, Recursive, InitType>): void
+	> extends RecursivePipe<T, Recursive, InitType, InitArgs> {
+		protected abstract reclaim(pipe: Poolable<T, Recursive, InitType>): void
 
 		private recycleAsTerminal(
 			item: IRecursivelySwitchable<T, Recursive, InitType>
 		) {
 			if (!isSwitch(item)) {
-				this.asDeep.unregister(item)
+				this.asDeepMap.unregister(item)
 				this.depthMap.decFor(item.terminal)
 			}
 		}

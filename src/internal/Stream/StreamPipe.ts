@@ -15,46 +15,46 @@ import type {
 import { StatefulStreamChooser } from "../../modules/Stream/objects/Chooser.js"
 import { ObjectPool } from "../../objects.js"
 import { isStateful } from "../../utils/Stream.js"
-import { RecursiveList, RecursiveListArgs } from "./RecursiveList.js"
+import { RecursivePipe, RecursivePipeArgs } from "./RecursivePipe.js"
 
 const { isFunction } = type
 
 /**
- * This is the `PoolableRecursiveList` actually employed
+ * This is the `PoolableRecursivePipe` actually employed
  * by the `CompositeStream` implementation. It uses the
  * `globalStreamRenewer` as the default renewer (which is
- * referenced across all the `StreamList`s)
+ * referenced across all the `StreamPipe`s)
  */
-export class StreamList
-	extends RecursiveList.Poolable<ILinkedStream, IStreamChooser, IOwnedStream>
+export class StreamPipe
+	extends RecursivePipe.Poolable<ILinkedStream, IStreamChooser, IOwnedStream>
 	implements
 		IPoolable<
-			[RecursiveListArgs<ILinkedStream, IStreamChooser, IOwnedStream>]
+			[RecursivePipeArgs<ILinkedStream, IStreamChooser, IOwnedStream>]
 		>
 {
-	static readonly pool = Pools.Internal.add(new ObjectPool(StreamList))
+	static readonly pool = Pools.Internal.add(new ObjectPool(StreamPipe))
 
-	protected override renewer: StreamList.StreamRenewer
+	protected override renewer: StreamPipe.StreamRenewer
 
 	postFree(): void {}
 
 	get poolId() {
-		return StreamList.pool.id
+		return StreamPipe.pool.id
 	}
 
 	protected reclaim(): void {
-		StreamList.pool.free(this)
+		StreamPipe.pool.free(this)
 	}
 }
 
-export namespace StreamList {
+export namespace StreamPipe {
 	/**
-	 * This is a concrete child class of `RecursiveList.RootList`,
-	 * implemented to be compatible with `StreamList` and `StreamRenewer`,
-	 * employed for the specific usecase of `RecursiveList` involving
+	 * This is a concrete child class of `RecursivePipe.RootPipe`,
+	 * implemented to be compatible with `StreamPipe` and `StreamRenewer`,
+	 * employed for the specific usecase of `RecursivePipe` involving
 	 * `IRawStream`s.
 	 */
-	export class StreamRootList extends RecursiveList.RootList<
+	export class StreamRootPipe extends RecursivePipe.RootPipe<
 		ILinkedStream,
 		IStreamChooser,
 		IOwnedStream,
@@ -62,27 +62,27 @@ export namespace StreamList {
 	> {
 		protected override renewer: StreamRenewer
 
-		createList(streams: IRawStreamArray) {
-			return StreamList.pool.create(
-				RecursiveListArgs.build()
+		createPipe(streams: IRawStreamArray) {
+			return StreamPipe.pool.create(
+				RecursivePipeArgs.build()
 					.setRenewer(this.renewer)
 					.setItems(streams)
-					.setDeepList(this.asDeep)
+					.setDeepTerminalMap(this.asDeep)
 					.setDepthMap(this.globalDepth)
 					.build()
 			)
 		}
 
-		protected getList(): RecursiveList<
+		protected getPipe(): RecursivePipe<
 			ILinkedStream,
 			IStreamChooser,
 			IOwnedStream,
 			[ICompositeStream]
 		> {
-			return StreamList.pool.create()
+			return StreamPipe.pool.create()
 		}
 
-		protected getRenewer(): RecursiveList.Renewer<
+		protected getRenewer(): RecursivePipe.Renewer<
 			ILinkedStream,
 			IStreamChooser,
 			IOwnedStream
@@ -100,10 +100,10 @@ export namespace StreamList {
 
 	/**
 	 * This is the `Renewer` employed by the library's `CompositeStream`
-	 * implementation. It is the sole definition that makes the `StreamList`
+	 * implementation. It is the sole definition that makes the `StreamPipe`
 	 * operate the way it actually does.
 	 */
-	export class StreamRenewer extends RecursiveList.Renewer<
+	export class StreamRenewer extends RecursivePipe.Renewer<
 		ILinkedStream,
 		IStreamChooser,
 		IOwnedStream
@@ -111,7 +111,7 @@ export namespace StreamList {
 		private topStream: ICompositeStream
 
 		private fromStreams(streams: IRawStreamArray) {
-			return this.parent.createList(streams)
+			return this.parent.createPipe(streams)
 		}
 
 		private rawEvaluateStateless(
@@ -177,7 +177,7 @@ export namespace StreamList {
 			return to.owner! as ILinkedStream
 		}
 
-		constructor(private readonly parent: StreamList.StreamRootList) {
+		constructor(private readonly parent: StreamPipe.StreamRootPipe) {
 			super()
 		}
 	}

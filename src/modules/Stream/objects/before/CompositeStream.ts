@@ -7,7 +7,7 @@ import type {
 	IOwnedStream,
 	IRawStreamArray
 } from "../../../../interfaces/Stream.js"
-import { StreamList } from "../../../../internal/Stream/StreamList.js"
+import { StreamPipe } from "../../../../internal/Stream/StreamPipe.js"
 import { resourceInitializer } from "../../../../objects/Initializable.js"
 import { IdentityStream } from "../concrete.js"
 
@@ -36,7 +36,7 @@ export abstract class BeforeCompositeStream<T = any>
 	) => this
 
 	protected rawStreams?: IRawStreamArray
-	private streamList?: StreamList.StreamRootList
+	private streamList?: StreamPipe.StreamRootPipe
 	private lowStream?: IOwnedStream
 
 	abstract state: IParseState
@@ -78,7 +78,7 @@ export abstract class BeforeCompositeStream<T = any>
 
 	setRawStreams(rawStreams: IRawStreamArray) {
 		this.rawStreams = rawStreams
-		this.streamList = new StreamList.StreamRootList(rawStreams, this)
+		this.streamList = new StreamPipe.StreamRootPipe(rawStreams, this)
 		return this
 	}
 
