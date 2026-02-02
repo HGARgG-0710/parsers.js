@@ -1,8 +1,11 @@
-import type { IErrorData, ISimpleErrorData } from "../../../interfaces.js"
+import type { ISimpleErrorData } from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
 import { ParseError } from "../../../objects/Error.js"
+import { LineFormatter } from "../../../objects/Logger.js"
 
 export class FactuallyEmptyRegexError extends ParseError {
+	private static readonly formatter = new LineFormatter(",\n")
+
 	protected static override populate(
 		errData: ISimpleErrorData,
 		rawRegex: Regex.Raw
@@ -17,9 +20,14 @@ export class FactuallyEmptyRegexError extends ParseError {
 		return super.prepare(errData, rawRegex)
 	}
 
-	protected override makeMessage(errorData: IErrorData): string {
-		return `factually empty Regex is forbidden: ${(
-			errorData.getInfo("rawRegex") as Regex.Raw
-		).print()}`
+	private formatErrRegex(errorData: ISimpleErrorData) {
+		return FactuallyEmptyRegexError.formatter.format(
+			errorData.getInfo("rawRegex") as Regex.Raw,
+			true
+		)
+	}
+
+	protected override makeMessage(errorData: ISimpleErrorData): string {
+		return `factually empty Regex is forbidden:\n${this.formatErrRegex(errorData)}`
 	}
 }

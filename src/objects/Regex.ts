@@ -2,6 +2,7 @@ import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type {
 	IConcreteRegexFinalizer,
+	ILinePrintable,
 	IPeekableStream,
 	IRawRegexVisitor,
 	IRegexCompilerTypeTableBindableRow,
@@ -24,8 +25,8 @@ function tabLines(lines: string[]) {
 	return lines.map((line) => `\t${line}`)
 }
 
-function tabItem(item: Regex.Raw) {
-	return tabLines(item.printLines())
+function tabItem(item: ILinePrintable) {
+	return item.printLines(true)
 }
 
 export class Regex<T = any> {
@@ -103,17 +104,14 @@ export namespace Regex {
 	// 		creates respective coupling inside the customization code...)
 	// ! ALSO - the `setExtensionMap` MUST be called BEFORE the `Regex.*.Builder.finish()`,
 	// ! 	since THAT is where 'noCapture()/ignoreCase()' are both called!
-	export abstract class Raw {
+	export abstract class Raw implements ILinePrintable {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
 
-		abstract printLines(): string[]
+		protected abstract printLinesRaw(): string[]
 
-		protected get separator(): string {
-			return ",\n"
-		}
-
-		print(): string {
-			return this.printLines().join(this.separator)
+		printLines(tab: boolean = false): string[] {
+			const raw = this.printLinesRaw()
+			return tab ? tabLines(raw) : raw
 		}
 
 		private extMap = new ExtensionMap()
@@ -160,7 +158,7 @@ export namespace Regex {
 
 			protected abstract get printName(): string
 
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return [
 					`${this.printName} [`,
 					...this.items.map((item) => tabItem(item)).flat(),
@@ -245,7 +243,7 @@ export namespace Regex {
 		export abstract class SinglePrinted extends Raw {
 			protected abstract get printName(): string
 
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return [
 					`${this.printName} {`,
 					...tabLines([`item =`, ...tabItem(this.item)]),
@@ -287,7 +285,7 @@ export namespace Regex {
 				return this.instances.get(char)
 			}
 
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return ["Char {", `\tchar = '${this.char}'`, "}"]
 			}
 
@@ -302,7 +300,7 @@ export namespace Regex {
 		}
 
 		export class TokenType extends Raw {
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return [
 					"TokenType {",
 					`\ttype = ${JSON.stringify(this.type)}`,
@@ -320,7 +318,7 @@ export namespace Regex {
 		}
 
 		export class CodeRange extends Raw {
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return [
 					"CodeRange {",
 					`\tfrom = ${this.from}`,
@@ -342,7 +340,7 @@ export namespace Regex {
 		}
 
 		export class Anything extends Raw {
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return ["Anything {}"]
 			}
 
@@ -434,7 +432,7 @@ export namespace Regex {
 		}
 
 		export class UnicodeProperty extends Raw {
-			override printLines(): string[] {
+			protected printLinesRaw(): string[] {
 				return [
 					"UnicodeProperty {",
 					`\tpropName = ${this.propName}`,
@@ -457,7 +455,7 @@ export namespace Regex {
 
 		export namespace UnicodeProperty {
 			export class Alias extends Raw {
-				override printLines(): string[] {
+				protected printLinesRaw(): string[] {
 					return [
 						"UnicodeProperty.Alias {",
 						`\tpropName = ${this.propName}`,
