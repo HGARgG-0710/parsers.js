@@ -334,6 +334,20 @@ IMMEDIATE:
 						(#qabc) == (a?b?c?)
 
 	CURRENT: 		
+		-1. IndexMap: REDESIGN: 
+			Ok, it's *ALMOST* as one would want it, except...
+			The 'extend' and 'extendKey' methods. 
+			They should become STATIC. 
+			In particular, they should NOT accept the 'this.liquid.copy()' thingy, 
+			and INSTEAD create EMPTY MidMap-s (so that those can be RE-SPECIALIZED!). 
+
+			The reuse of the common builder object functionality through inheritance 
+			here is quite good, however, this signature is absolutely godawful. 
+
+			For instance, the NEW code would be more like 'NodeMap(IndexMap.PredicateMap)', 
+			SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
+			class ITSELF [and not an instance]! 
+
 		-2. BUG [RegexParser]: 
 			A problem has reared its ugly head. 
 			At the present, the handling of the EMPTY 'EndBracketStream's 
