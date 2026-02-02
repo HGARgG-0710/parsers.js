@@ -64,6 +64,7 @@ export abstract class ParseError extends ConstructorError {
 	}
 
 	protected abstract makeMessage(errorData: IErrorData): string
+
 	constructor(errorData: IErrorData) {
 		super()
 		this.message = this.makeMessage(errorData)
@@ -93,6 +94,14 @@ export class MissingImplementationError extends ConstructorError {
 		super(
 			`Missing implementation of method \`${methodName}\`` +
 				` on class \`${className}\``
+		)
+	}
+}
+
+export class MissingErrorDataContentError extends ConstructorError {
+	constructor() {
+		super(
+			`Attempting to extract an \`Error\` object out of an empty \`ISimpleErrorData\` object!`
 		)
 	}
 }

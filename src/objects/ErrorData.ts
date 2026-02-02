@@ -11,6 +11,7 @@ import type {
 	IStreamLocator
 } from "../interfaces.js"
 import {
+	MissingErrorDataContentError,
 	MissingImplementationError,
 	NoIndexCarryingLocatableError,
 	NoPosedLocatableError
@@ -93,11 +94,8 @@ export abstract class BaseSimpleErrorData implements ISimpleErrorData {
 	}
 
 	toError(): Error {
-		// TODO: make this LESS generic!
 		if (!this.hasError || !this.errType)
-			throw new Error(
-				"Attempting to extract an `Error` object out of an empty `IErrorData` object!"
-			)
+			throw new MissingErrorDataContentError()
 		return new this.errType(this)
 	}
 
