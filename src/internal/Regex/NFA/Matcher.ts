@@ -177,3 +177,9 @@ export class NFARegexMatcher<T = any> implements IRegexMatcher {
 		this.executor = new MatchExecutor(startState, this.stateHistory)
 	}
 }
+
+export class NFARegexDudMatcher implements IRegexMatcher {
+	match<T = any>(stream: IPeekableStream<T>): IMatch {
+		return false
+	}
+}

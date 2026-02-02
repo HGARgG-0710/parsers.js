@@ -20,6 +20,14 @@ import { AutoMap } from "./AutoMap.js"
 const { numbers } = array
 const { isUndefined } = type
 
+function tabLines(lines: string[]) {
+	return lines.map((line) => `\t${line}`)
+}
+
+function tabItem(item: Regex.Raw) {
+	return tabLines(item.printLines())
+}
+
 export class Regex<T = any> {
 	private readonly final: IRegexMatcher
 
@@ -98,6 +106,16 @@ export namespace Regex {
 	export abstract class Raw {
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
 
+		abstract printLines(): string[]
+
+		protected get separator(): string {
+			return ",\n"
+		}
+
+		print(): string {
+			return this.printLines().join(this.separator)
+		}
+
 		private extMap = new ExtensionMap()
 
 		inheritExtensions(map: ExtensionMap) {
@@ -139,6 +157,16 @@ export namespace Regex {
 	export namespace Raw {
 		export abstract class Mult extends Raw {
 			readonly items: Raw[]
+
+			protected abstract get printName(): string
+
+			override printLines(): string[] {
+				return [
+					`${this.printName} [`,
+					...this.items.map((item) => tabItem(item)).flat(),
+					"]"
+				]
+			}
 
 			override inheritExtensions(map: ExtensionMap): this {
 				for (const item of this.items) item.inheritExtensions(map)
@@ -183,6 +211,10 @@ export namespace Regex {
 		}
 
 		export class Either extends Mult {
+			protected override get printName(): string {
+				return "Either"
+			}
+
 			override accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleEither(this)
 			}
@@ -196,7 +228,11 @@ export namespace Regex {
 			}
 		}
 
-		export class Catenation extends Mult {}
+		export class Catenation extends Mult {
+			protected override get printName(): string {
+				return "Catenation"
+			}
+		}
 
 		export namespace Catenation {
 			export class Builder extends Mult.Builder {
@@ -206,9 +242,15 @@ export namespace Regex {
 			}
 		}
 
-		export class Optional extends Raw {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleOptional(this)
+		export abstract class SinglePrinted extends Raw {
+			protected abstract get printName(): string
+
+			override printLines(): string[] {
+				return [
+					`${this.printName} {`,
+					...tabLines([`item =`, ...tabItem(this.item)]),
+					"}"
+				]
 			}
 
 			constructor(readonly item: Raw) {
@@ -216,13 +258,23 @@ export namespace Regex {
 			}
 		}
 
-		export class NoneOrMore extends Raw {
-			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
-				return visitor.handleNoneOrMore(this)
+		export class Optional extends SinglePrinted {
+			protected override get printName(): string {
+				return "Optional"
 			}
 
-			constructor(readonly item: Raw) {
-				super()
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleOptional(this)
+			}
+		}
+
+		export class NoneOrMore extends SinglePrinted {
+			protected override get printName(): string {
+				return "NoneOrMore"
+			}
+
+			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
+				return visitor.handleNoneOrMore(this)
 			}
 		}
 
@@ -233,6 +285,10 @@ export namespace Regex {
 
 			static make(char: string) {
 				return this.instances.get(char)
+			}
+
+			override printLines(): string[] {
+				return ["Char {", `\tchar = '${this.char}'`, "}"]
 			}
 
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
@@ -246,6 +302,14 @@ export namespace Regex {
 		}
 
 		export class TokenType extends Raw {
+			override printLines(): string[] {
+				return [
+					"TokenType {",
+					`\ttype = ${JSON.stringify(this.type)}`,
+					"}"
+				]
+			}
+
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleTokenType(this)
 			}
@@ -256,6 +320,15 @@ export namespace Regex {
 		}
 
 		export class CodeRange extends Raw {
+			override printLines(): string[] {
+				return [
+					"CodeRange {",
+					`\tfrom = ${this.from}`,
+					`\tto = ${this.to}`,
+					"}"
+				]
+			}
+
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleCodeRange(this)
 			}
@@ -269,12 +342,20 @@ export namespace Regex {
 		}
 
 		export class Anything extends Raw {
+			override printLines(): string[] {
+				return ["Anything {}"]
+			}
+
 			accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleAnything(this)
 			}
 		}
 
 		export class NoneOf extends Mult {
+			protected override get printName(): string {
+				return "NoneOf"
+			}
+
 			override accept<T = any>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNoneOf(this)
 			}
@@ -288,7 +369,11 @@ export namespace Regex {
 			}
 		}
 
-		export class IgnoreCase extends Mult {}
+		export class IgnoreCase extends Mult {
+			protected override get printName(): string {
+				return "IgnoreCase"
+			}
+		}
 
 		export namespace IgnoreCase {
 			export class Builder extends Mult.Builder {
@@ -298,7 +383,11 @@ export namespace Regex {
 			}
 		}
 
-		export class NoCapture extends Mult {}
+		export class NoCapture extends Mult {
+			protected override get printName(): string {
+				return "NoCapture"
+			}
+		}
 
 		export namespace NoCapture {
 			export class Builder extends Mult.Builder {
@@ -309,6 +398,10 @@ export namespace Regex {
 		}
 
 		export class NonBoundary extends Mult {
+			protected override get printName(): string {
+				return "NonBoundary"
+			}
+
 			override accept<T>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleNonBoundary(this)
 			}
@@ -323,6 +416,10 @@ export namespace Regex {
 		}
 
 		export class Boundary extends Mult {
+			protected override get printName(): string {
+				return "Boundary"
+			}
+
 			override accept<T>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleBoundary(this)
 			}
@@ -337,6 +434,15 @@ export namespace Regex {
 		}
 
 		export class UnicodeProperty extends Raw {
+			override printLines(): string[] {
+				return [
+					"UnicodeProperty {",
+					`\tpropName = ${this.propName}`,
+					`\tvalue = ${this.value}`,
+					"}"
+				]
+			}
+
 			override accept<T>(visitor: IRawRegexVisitor<T>): T {
 				return visitor.handleUnicodeProperty(this)
 			}
@@ -351,6 +457,14 @@ export namespace Regex {
 
 		export namespace UnicodeProperty {
 			export class Alias extends Raw {
+				override printLines(): string[] {
+					return [
+						"UnicodeProperty.Alias {",
+						`\tpropName = ${this.propName}`,
+						"}"
+					]
+				}
+
 				override accept<T>(visitor: IRawRegexVisitor<T>): T {
 					return visitor.handleUnicodePropertyAlias(this)
 				}

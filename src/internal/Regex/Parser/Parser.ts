@@ -29,7 +29,7 @@ export class RegexParser {
 	}
 
 	private parseSource(source: string) {
-		return consume(this.raw(new ParseableInput(source))).get()[0]
+		return consume<INode>(this.raw(new ParseableInput(source))).get()[0]
 	}
 
 	// ! pre-doc: IMPORTANT - the user is advised to CACHE config objects, because `extensions` identity is what determines the necessity to re-build the parser anew...

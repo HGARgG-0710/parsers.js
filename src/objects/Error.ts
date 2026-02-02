@@ -8,6 +8,7 @@ import type {
 	IOwnedStream,
 	IPrintablePosition,
 	IRenewerStream,
+	ISimpleErrorData,
 	IStream,
 	ITypeCheckable
 } from "../interfaces.js"
@@ -49,10 +50,13 @@ export abstract class ConstructorError extends Error {
  * Can be easily used with `ErrorStream` descendant.
  */
 export abstract class ParseError extends ConstructorError {
-	protected static populate(errData: IErrorData, ...args: any[]) {}
+	protected static populate(errData: ISimpleErrorData, ...args: any[]) {}
 
 	// NOTE: this is *only* supposed to be called by CONCRETE child-classes!
-	static prepare(errData: IErrorData, ...items: any[]) {
+	static prepare<T extends ISimpleErrorData = ISimpleErrorData>(
+		errData: T,
+		...items: any[]
+	) {
 		errData.refresh()
 		this.populate(errData, ...items)
 		errData.setErrType(this as unknown as IErrorType)
@@ -275,8 +279,8 @@ export namespace ParseError {
 			return position.toString
 				? `at source position: ${position.toString()}`
 				: position.toNumber
-				? `at source position: ${position.toNumber()}`
-				: ``
+					? `at source position: ${position.toNumber()}`
+					: ``
 		}
 
 		protected printFilename(filename: string) {
@@ -298,7 +302,7 @@ export namespace ParseError {
 
 	export abstract class ExpectedMissingError extends GenericParseError {
 		protected static override populate<T = any>(
-			errData: IErrorData,
+			errData: ISimpleErrorData,
 			received: T,
 			expected: any
 		): void {
@@ -306,11 +310,10 @@ export namespace ParseError {
 			errData.setInfo("expected", expected)
 		}
 
-		static override prepare<T = any>(
-			errData: IErrorData,
-			received: T,
-			expected: any
-		) {
+		static override prepare<
+			T = any,
+			K extends ISimpleErrorData = ISimpleErrorData
+		>(errData: K, received: T, expected: any) {
 			return super.prepare(errData, received, expected)
 		}
 
@@ -368,10 +371,10 @@ export namespace ParseError {
 			errData.setInfo("received", received)
 		}
 
-		static override prepare<T = any>(
-			errData: IErrorData,
-			received: T
-		): IErrorData {
+		static override prepare<
+			T = any,
+			K extends ISimpleErrorData = ISimpleErrorData
+		>(errData: K, received: T) {
 			return super.prepare(errData, received)
 		}
 
@@ -440,16 +443,16 @@ export namespace ParseError {
 		T = any
 	> extends StreamStackError<T> {
 		protected static override populate<T = any>(
-			errData: IErrorData,
+			errData: ISimpleErrorData,
 			stream: IStream<T>
 		): void {
 			errData.setInfo("originStream", stream)
 		}
 
-		static override prepare<T = any>(
-			errData: IErrorData,
-			stream: T
-		): IErrorData {
+		static override prepare<
+			T = any,
+			K extends ISimpleErrorData = ISimpleErrorData
+		>(errData: K, stream: T) {
 			return super.prepare(errData, stream)
 		}
 	}
@@ -470,10 +473,10 @@ export namespace ParseError {
 			errData.setInfo("nonDecimal", nonDecimal)
 		}
 
-		static override prepare(
-			errData: IErrorData,
+		static override prepare<T extends ISimpleErrorData = ISimpleErrorData>(
+			errData: T,
 			nonDecimal: string
-		): IErrorData {
+		) {
 			return super.prepare(errData, nonDecimal)
 		}
 
@@ -492,13 +495,16 @@ export namespace ParseError {
 
 	export class InvalidIdError extends GenericParseError {
 		protected static override populate(
-			errData: IErrorData,
+			errData: ISimpleErrorData,
 			id: string
 		): void {
 			errData.setInfo("badId", id)
 		}
 
-		static override prepare(errData: IErrorData, id: string): IErrorData {
+		static override prepare<T extends ISimpleErrorData = ISimpleErrorData>(
+			errData: T,
+			id: string
+		) {
 			return super.prepare(errData, id)
 		}
 

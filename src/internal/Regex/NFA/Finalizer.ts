@@ -1,9 +1,12 @@
+import { Config } from "../../../global.js"
 import type {
 	ICaptureResolutionPredicate,
 	IConcreteRegexFinalizer
 } from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
-import { NFARegexMatcher } from "./Matcher.js"
+import { SimpleErrorData } from "../../../objects/ErrorData.js"
+import { FactuallyEmptyRegexError } from "./Errors.js"
+import { NFARegexDudMatcher, NFARegexMatcher } from "./Matcher.js"
 import { MatchState, type Fragment } from "./State.js"
 import { NFARegexVisitor } from "./Visitor.js"
 
@@ -16,17 +19,22 @@ export class NFARegexFinalizer<T = any> implements IConcreteRegexFinalizer {
 
 	private readonly visitor = new NFARegexVisitor()
 
+	private get errPrinter() {
+		return Config.regex.errorPrinter
+	}
+
 	private toState(regex: Regex.Raw) {
 		const frag = regex.accept(this.visitor)
-		if (!frag) {
-			// TODO: add a proper error message here... - "empty" Regex are NOT ALLOWED!
-			throw false
-		}
+		if (!frag)
+			throw FactuallyEmptyRegexError.prepare(new SimpleErrorData(), regex)
 		return patchMatchStateTo(frag).inState
 	}
 
 	toConcrete(regex: Regex.Raw) {
-		return new NFARegexMatcher(this.toState(regex), this.captureResolver)
+		const asState = this.errPrinter.execute(() => this.toState(regex))
+		return asState
+			? new NFARegexMatcher(asState, this.captureResolver)
+			: new NFARegexDudMatcher()
 	}
 
 	constructor(

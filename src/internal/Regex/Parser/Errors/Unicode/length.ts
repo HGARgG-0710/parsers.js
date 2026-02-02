@@ -1,7 +1,7 @@
 import type {
 	ICellNode,
-	IErrorData,
 	IErrorDataGetter,
+	ISimpleErrorData,
 	IStream
 } from "../../../../../interfaces.js"
 import {
@@ -13,11 +13,17 @@ import { currUnicodeHex } from "./common.js"
 const VALID_UNICODE_CODE_LENGTH = 6
 
 export class InvalidCodeLengthError extends ParseError.GenericParseError {
-	protected static override populate(errData: IErrorData, length: number) {
+	protected static override populate(
+		errData: ISimpleErrorData,
+		length: number
+	) {
 		errData.setInfo("badCodeLength", length)
 	}
 
-	static override prepare(errData: IErrorData, length: number) {
+	static override prepare<T extends ISimpleErrorData = ISimpleErrorData>(
+		errData: T,
+		length: number
+	) {
 		return super.prepare(errData, length)
 	}
 

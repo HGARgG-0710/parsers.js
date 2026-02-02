@@ -23,10 +23,24 @@ export interface IPrintablePosition extends ICopiable {
 	locate(): this
 }
 
-export type IErrorType = new (errData: IErrorData) => Error
+export type IErrorType = new (errData: ISimpleErrorData) => Error
 
 export interface IErrorConvertible {
 	toError(): Error
+}
+
+export interface ISimpleErrorData {
+	readonly hasError: boolean
+	readonly errType: IErrorType | null
+	getInfo(keyName: string): any
+	setInfo(
+		keyName: string,
+		value: NonNullable<any>,
+		isTransient?: boolean
+	): void
+	markHandled(): void
+	refresh(): void
+	setErrType(errType: IErrorType): void
 }
 
 /**
@@ -40,19 +54,9 @@ export interface IErrorConvertible {
  * may be important for various user-defined errors. The map is
  * accessible via the `getInfo/setInfo` methods.
  */
-export interface IErrorData extends ICopiable, IErrorConvertible {
+export interface IErrorData
+	extends ISimpleErrorData, ICopiable, IErrorConvertible {
 	readonly pos: IPrintablePosition
-	readonly hasError: boolean
-	readonly errType: IErrorType | null
-	getInfo(keyName: string): any
-	setInfo(
-		keyName: string,
-		value: NonNullable<any>,
-		isTransient?: boolean
-	): void
-	markHandled(): void
-	refresh(): void
-	setErrType(errType: IErrorType): void
 }
 
 /**

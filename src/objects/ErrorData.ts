@@ -6,6 +6,7 @@ import type {
 	ILineIndex,
 	IPosed,
 	IPrintablePosition,
+	ISimpleErrorData,
 	IStream,
 	IStreamLocator
 } from "../interfaces.js"
@@ -53,21 +54,13 @@ class InfoMap {
 	}
 }
 
-/**
- * This is the abstract class implementing `IErrorData` serving as
- * the base, by providing methods and state implementation of the
- * `readonly .hasError: boolean` property. It still requires the
- * child class to provide the `abstract readonly pos: IErrorPosition`.
- */
-export abstract class BaseErrorData implements IErrorData {
+export abstract class BaseSimpleErrorData implements ISimpleErrorData {
+	abstract copy(): this
+
 	private readonly infoMap = new InfoMap()
 
 	private _errType: IErrorType | null
 	private _hasError: boolean = false
-
-	abstract readonly pos: IPrintablePosition
-	protected abstract baseRefresh(): void
-	abstract copy(): this
 
 	private set hasError(has: boolean) {
 		this._hasError = has
@@ -84,6 +77,8 @@ export abstract class BaseErrorData implements IErrorData {
 	protected markActive(): void {
 		this.hasError = true
 	}
+
+	protected baseRefresh(): void {}
 
 	get errType() {
 		return this._errType
@@ -129,6 +124,27 @@ export abstract class BaseErrorData implements IErrorData {
 		this.baseRefresh()
 		this.markActive()
 	}
+}
+
+export class SimpleErrorData extends BaseSimpleErrorData {
+	private override ["constructor"]: new () => this
+
+	override copy(): this {
+		return new this.constructor()
+	}
+}
+
+/**
+ * This is the abstract class implementing `IErrorData` serving as
+ * the base, by providing methods and state implementation of the
+ * `readonly .hasError: boolean` property. It still requires the
+ * child class to provide the `abstract readonly pos: IErrorPosition`.
+ */
+export abstract class BasePositionalErrorData
+	extends BaseSimpleErrorData
+	implements IErrorData
+{
+	abstract readonly pos: IPrintablePosition
 }
 
 /**
@@ -209,7 +225,7 @@ export class FileErrorData extends DelegateErrorData {
  * `posMaker: (inputStream: IInputStream) => IErrorPosition`,
  * and initialized with the given `inputStream: IInputStream`.
  */
-export class StreamListErrorData extends BaseErrorData {
+export class StreamListErrorData extends BasePositionalErrorData {
 	override ["constructor"]: new (
 		inputStream: IInputStream,
 		posMaker: (inputStream: IInputStream) => IPrintablePosition
@@ -225,7 +241,7 @@ export class StreamListErrorData extends BaseErrorData {
 		return this._pos!.locate()
 	}
 
-	protected baseRefresh(): void {
+	protected override baseRefresh(): void {
 		this.ensurePosNonNull()
 		this.locatePos()
 	}

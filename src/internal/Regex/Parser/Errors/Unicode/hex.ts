@@ -1,7 +1,7 @@
 import type {
 	ICellNode,
-	IErrorData,
 	IErrorDataGetter,
+	ISimpleErrorData,
 	IStream
 } from "../../../../../interfaces.js"
 import {
@@ -12,11 +12,17 @@ import { isHex } from "../../../../../samples/alphabet.js"
 import { currUnicodeHex } from "./common.js"
 
 export class InvalidHexError extends ParseError.GenericParseError {
-	protected static override populate(errData: IErrorData, hex: string): void {
+	protected static override populate(
+		errData: ISimpleErrorData,
+		hex: string
+	): void {
 		errData.setInfo("badHex", hex)
 	}
 
-	static override prepare(errData: IErrorData, hex: string) {
+	static override prepare<T extends ISimpleErrorData = ISimpleErrorData>(
+		errData: T,
+		hex: string
+	) {
 		return super.prepare(errData, hex)
 	}
 
