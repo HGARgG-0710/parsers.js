@@ -1,5 +1,5 @@
 import type { IControlStream } from "../../interfaces/OwnedStream.js"
-import { StatefulProxyStream } from "../templates.js"
+import { StatefulProxyStream } from "./StatefulProxyStream.js"
 
 // ! [testing] CRUCIAL REMINDER: here, the `Stateful` OVERRIDES the delegation of `get .state/setState(): void` to `this.delegate` on the `ProxyStream` parent
 // ! LATER FOR DOCS - *THIS* is how one is supposed to use ErrorHandling-Streams:

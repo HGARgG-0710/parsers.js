@@ -16,4 +16,4 @@ export const StatefulProxyStream = new mixin(
 		}
 	},
 	[ProxyStream, Stateful]
-)
+).toClass()

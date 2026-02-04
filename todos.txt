@@ -332,20 +332,6 @@ REMINDERs:
 		
 IMMEDIATE: 
 	CURRENT: 		
-		1. PROBLEM [RegexParser]: 
-			Need a NEW stream - 'StatefulProxyStream'. 
-			Child of ProxyStream. 
-			It is *specifically* designed for being guaranteedly Stateful, 
-			and to serve as, otherwise, a COMPLETE wrapper over a DIFFERENT IStream. 
-
-			USE IT *with*: 
-				1. UnicodePropertyLimitStream: 
-					1. SPECIFICALLY, LET the stream *below* the 'UnicodePropertyLimitStream' be an 
-						'StatefulProxyStream(new IdentityStream())'. This, in particular, will enable 
-						one to ACCESS 'input.state.errData', while ALSO retaining 
-
-				... all the OTHER cases of 'EndBracketStream' that we NEED TO LIKEWISE FIX!!!
-
 		-1. IndexMap: REDESIGN: 
 			Ok, it's *ALMOST* as one would want it, except...
 			The 'extend' and 'extendKey' methods. 

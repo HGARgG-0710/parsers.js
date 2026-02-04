@@ -6,8 +6,8 @@ import type {
 	IRecursiveProxyStreamFactory,
 	IRecursiveProxyStreamInstantiator
 } from "../../../../interfaces.js"
-import { StatefulProxyStream } from "../templates.js"
 import { LimitStream } from "./LimitStream.js"
+import { StatefulProxyStream } from "./StatefulProxyStream.js"
 
 export function RecursiveProxyStream<T = any>(
 	depthMarks: readonly IDepthMark[]
