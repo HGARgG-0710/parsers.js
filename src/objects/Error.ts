@@ -18,7 +18,7 @@ import { tryDebugPrinting } from "../utils/Debug.js"
 import { locateState } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
 
-function tabbed(...lines: string[]) {
+export function tabbed(...lines: string[]) {
 	return lines.map((x) => `${Config.errors.tab}${x}`)
 }
 

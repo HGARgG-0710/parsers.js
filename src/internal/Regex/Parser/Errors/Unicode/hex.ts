@@ -6,12 +6,13 @@ import type {
 } from "../../../../../interfaces.js"
 import {
 	findErrorDataUpstream,
-	ParseError
+	ParseError,
+	tabbed
 } from "../../../../../objects/Error.js"
 import { isHex } from "../../../../../samples/alphabet.js"
 import { currUnicodeHex } from "./common.js"
 
-export class InvalidHexError extends ParseError.GenericParseError {
+class InvalidHexError extends ParseError.GenericParseError {
 	protected static override populate(
 		errData: ISimpleErrorData,
 		hex: string
@@ -35,7 +36,7 @@ export class InvalidHexError extends ParseError.GenericParseError {
 	}
 
 	protected mandatoryFields(): string[] {
-		return [this.badHex()]
+		return tabbed(this.badHex())
 	}
 }
 

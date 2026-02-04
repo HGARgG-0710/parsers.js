@@ -25,12 +25,12 @@ const UnicodeCharLimitStream = EndBracketStream(
 
 const UnicodeCharStream = CollectionStream(UnicodeChar, getStringConsumable())
 
-const UnicodeCharValidatorStream = ValidatorStream(function (
-	resource: IOwnedStream<ICellNode<string>>
-) {
-	validateUnicodeCodeLength(resource)
-	validateHex(resource)
-})
+const UnicodeCharValidatorStream = ValidatorStream(
+	(resource: IOwnedStream<ICellNode<string>>) => {
+		validateUnicodeCodeLength(resource)
+		validateHex(resource)
+	}
+)
 
 export function HandleUnicodeChar(input: IOwnedStream<string>) {
 	return [

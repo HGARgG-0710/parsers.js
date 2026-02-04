@@ -2,5 +2,6 @@ export { validateHex } from "./Errors/Unicode/hex.js"
 export { validateUnicodeCodeLength } from "./Errors/Unicode/length.js"
 export {
 	validatePropertyName,
-	validatePropertyValue
+	validatePropertyValue,
+	validateUnicodePropertyNonEmpty
 } from "./Errors/Unicode/property.js"

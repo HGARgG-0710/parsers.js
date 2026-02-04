@@ -4,16 +4,19 @@ import { ensureChildUnrevivable, skip } from "../../../../objects/Error.js"
 import { LimitStream, SingleNodeStream } from "../../../../objects/Stream.js"
 import {
 	EndBracketStream,
-	isCurr,
-	isNotNext,
 	StringConsumerStream
 } from "../../../../samples/Stream.js"
 import { next } from "../../../../utils/Stream.js"
-import { validatePropertyName, validatePropertyValue } from "../Errors.js"
+import {
+	validatePropertyName,
+	validatePropertyValue,
+	validateUnicodePropertyNonEmpty
+} from "../Errors.js"
 import { UnicodeProperty, UnicodePropertyAlias } from "../Nodes.js"
 import {
-	isCurrClbrace,
+	isCurrEquality,
 	isNotNextClbrace,
+	isNotNextEquality,
 	skipOpbrace
 } from "../Utils/limits.js"
 
@@ -26,28 +29,21 @@ const UnicodePropertyLimitStream = EndBracketStream<string>(
 			skipOpbrace(input) // {
 			return 0
 		})
-		.setIsEmpty((input) => {
-			if (isCurrClbrace(input)) {
-				// TODO: here, throw a LESS GENERIC ERROR!
-				// * It's NOT ALLOWED for a given 'p{...}' to have its block empty: 'p{}'
-				throw new Error("")
-			}
-			return false
-		})
+		.setIsEmpty((input) => validateUnicodePropertyNonEmpty(input))
 		.setLongAs(isNotNextClbrace)
 )
 
 const UnicodePropertyNameLimitStream = EndBracketStream<string>(
 	new LimitStream.Limits.Builder()
-		.setIsEmpty(() => {
-			if (isCurr("=")) {
+		.setIsEmpty((input) => {
+			if (isCurrEquality(input)) {
 				// TODO: here, throw a LESS GENERIC ERROR!
 				// * Property-names must be non-empty.
 				throw new Error("")
 			}
 			return false
 		})
-		.setLongAs(isNotNext("="))
+		.setLongAs(isNotNextEquality)
 )
 
 class UnicodePropertyStreamChooser extends IteratorStreamChooser<string> {

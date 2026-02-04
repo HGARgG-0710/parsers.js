@@ -6,13 +6,14 @@ import type {
 } from "../../../../../interfaces.js"
 import {
 	findErrorDataUpstream,
-	ParseError
+	ParseError,
+	tabbed
 } from "../../../../../objects/Error.js"
 import { currUnicodeHex } from "./common.js"
 
 const VALID_UNICODE_CODE_LENGTH = 6
 
-export class InvalidCodeLengthError extends ParseError.GenericParseError {
+class InvalidCodeLengthError extends ParseError.GenericParseError {
 	protected static override populate(
 		errData: ISimpleErrorData,
 		length: number
@@ -36,7 +37,7 @@ export class InvalidCodeLengthError extends ParseError.GenericParseError {
 	}
 
 	protected mandatoryFields(): string[] {
-		return [this.badCodeLength()]
+		return tabbed(this.badCodeLength())
 	}
 }
 
