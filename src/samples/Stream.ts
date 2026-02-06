@@ -14,12 +14,14 @@ import {
 	ConcatStream,
 	FiniteStream,
 	HandlerStream,
+	IdentityStream,
 	InterleaveStream,
 	LimitDepthMarks,
 	LimitStream,
 	LoopStream,
 	RecursiveLimitStream,
-	SingletonStream
+	SingletonStream,
+	StatefulProxyStream
 } from "../objects/Stream.js"
 import { getStringConsumable, next, skip } from "../utils/Stream.js"
 
@@ -212,3 +214,6 @@ export function isNotPeekKind(n: number) {
 }
 
 export const isNotNextKind = isNotPeekKind(1)
+
+export const StateAccessStream = <T = any>() =>
+	new StatefulProxyStream(new IdentityStream<T>())

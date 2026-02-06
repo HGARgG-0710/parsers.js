@@ -1,14 +1,10 @@
 import type { INode, IRawStreamArray } from "../../../../interfaces.js"
 import { IteratorStreamChooser } from "../../../../modules/Stream/objects/Chooser.js"
 import { ensureChildUnrevivable, skip } from "../../../../objects/Error.js"
-import {
-	IdentityStream,
-	LimitStream,
-	SingleNodeStream,
-	StatefulProxyStream
-} from "../../../../objects/Stream.js"
+import { LimitStream, SingleNodeStream } from "../../../../objects/Stream.js"
 import {
 	EndBracketStream,
+	StateAccessStream,
 	StringConsumerStream
 } from "../../../../samples/Stream.js"
 import { next } from "../../../../utils/Stream.js"
@@ -123,6 +119,6 @@ export function HandleUnicodeProperty(): IRawStreamArray {
 		new UnicodePropertyStream(),
 		UnicodePropertyStreamChooser.instance.reset(),
 		UnicodePropertyLimitStream(),
-		new StatefulProxyStream(new IdentityStream<string>())
+		StateAccessStream<string>()
 	]
 }

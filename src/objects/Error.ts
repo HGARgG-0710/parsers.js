@@ -5,7 +5,7 @@ import type {
 	IErrorData,
 	IErrorDataGetter,
 	IErrorType,
-	IOwnedStream,
+	IOwningStream,
 	IPrintablePosition,
 	IRenewerStream,
 	ISimpleErrorData,
@@ -15,7 +15,7 @@ import type {
 import { isDecimal } from "../samples/alphabet.js"
 import { getNewline } from "../samples/space.js"
 import { tryDebugPrinting } from "../utils/Debug.js"
-import { locateState } from "../utils/Stream.js"
+import { locateStateDownstream } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
 
 export function tabbed(...lines: string[]) {
@@ -106,8 +106,8 @@ export class MissingErrorDataContentError extends ConstructorError {
 	}
 }
 
-export function findErrorDataUpstream<T = any>(stream: IOwnedStream<T>) {
-	const state = locateState(stream)
+export function findErrorDataDownstream<T = any>(stream: IOwningStream<T>) {
+	const state = locateStateDownstream(stream)
 	if (!state) throw new NoStatefulLocatableError()
 	return state.errData
 }
@@ -115,7 +115,7 @@ export function findErrorDataUpstream<T = any>(stream: IOwnedStream<T>) {
 export function expect<T = any>(item: T) {
 	return function (
 		stream: IStream<T>,
-		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 	) {
 		if (stream.curr !== item)
 			throw ParseError.ExpectedItemMissingError.prepare(
@@ -129,7 +129,7 @@ export function expect<T = any>(item: T) {
 export function expectKind<T = any>(kind: ITypeCheckable & IDebugNamed) {
 	return function (
 		stream: IStream<T>,
-		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 	) {
 		if (!kind.is(stream.curr))
 			throw ParseError.ExpectedKindMissingError.prepare(
@@ -144,7 +144,7 @@ export function allow<T = any>(...items: T[]) {
 	const itemSet = new Set(items)
 	return function (
 		stream: IStream<T>,
-		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 	) {
 		if (!itemSet.has(stream.curr))
 			throw ParseError.ExpectedInItemListMissingError.prepare(
@@ -159,7 +159,7 @@ export function skip<T = any>(...items: T[]) {
 	const allowItems = allow(...items)
 	return function (
 		stream: IStream<T>,
-		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 	) {
 		allowItems(stream, errDataGetter)
 		stream.next()
@@ -169,7 +169,7 @@ export function skip<T = any>(...items: T[]) {
 
 export function unexpected<T = any>(
 	stream: IStream<T>,
-	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 ): never {
 	throw ParseError.UnexpectedItemError.prepare(
 		errDataGetter(stream),
@@ -180,7 +180,7 @@ export function unexpected<T = any>(
 export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
 	return function (
 		stream: IStream<T>,
-		errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 	) {
 		const currItem = stream.curr
 		for (const kind of kinds) if (kind.is(currItem)) return
@@ -194,7 +194,7 @@ export function allowKind<T = any>(...kinds: (IDebugNamed & ITypeCheckable)[]) {
 
 export function tryReviveChild<T = any>(
 	stream: IRenewerStream<T>,
-	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 ) {
 	if (stream.reviveChild() === false)
 		throw ParseError.CannotReviveChildError.prepare(
@@ -205,7 +205,7 @@ export function tryReviveChild<T = any>(
 
 export function ensureChildUnrevivable<T = any>(
 	stream: IRenewerStream<T>,
-	errDataGetter: IErrorDataGetter<T> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
 ) {
 	if (stream.reviveChild() === true)
 		throw ParseError.ChildIsNotUnrevivableError.prepare(
@@ -216,7 +216,7 @@ export function ensureChildUnrevivable<T = any>(
 
 export function ensureCurrDecimal(
 	input: IStream<string>,
-	errDataGetter: IErrorDataGetter<string> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<string> = findErrorDataDownstream
 ) {
 	const maybeDecimal = input.curr
 	if (!isDecimal(maybeDecimal))
@@ -229,7 +229,7 @@ export function ensureCurrDecimal(
 export function validateId(validator: (id: string) => boolean) {
 	return function (
 		stream: IStream<string>,
-		errDataGetter: IErrorDataGetter<string> = findErrorDataUpstream
+		errDataGetter: IErrorDataGetter<string> = findErrorDataDownstream
 	) {
 		const id = stream.curr
 		if (!validator(id))

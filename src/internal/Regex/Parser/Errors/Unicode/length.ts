@@ -5,7 +5,7 @@ import type {
 	IStream
 } from "../../../../../interfaces.js"
 import {
-	findErrorDataUpstream,
+	findErrorDataDownstream,
 	ParseError,
 	tabbed
 } from "../../../../../objects/Error.js"
@@ -43,7 +43,7 @@ class InvalidCodeLengthError extends ParseError.GenericParseError {
 
 export function validateUnicodeCodeLength(
 	stream: IStream<ICellNode<string>>,
-	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataDownstream
 ) {
 	const codeLength = currUnicodeHex(stream).length
 	if (codeLength !== VALID_UNICODE_CODE_LENGTH)

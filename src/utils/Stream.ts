@@ -14,7 +14,7 @@ import type {
 	IIndexCarrying,
 	IMarkerHaving,
 	INavigable,
-	IOwnedStream,
+	IOwningStream,
 	IPeekable,
 	IPeekableStream,
 	IRenewerStream,
@@ -31,7 +31,7 @@ import { HandlerStream } from "../objects/Stream.js"
 
 const { structCheck } = object
 const { prop } = object
-const { isNumber, isFunction, isObject } = type
+const { isNumber, isFunction, isObject, isArray } = type
 const { T } = boolean
 
 /**
@@ -348,8 +348,9 @@ export const isStateful = structCheck<IStateHaving & IStateSettable>({
  * This is an object for identifying an `IParseState` object.
  */
 export const isParseState = structCheck<IParseState>({
-	state: T,
-	errData: isObject
+	parse: T,
+	errData: isObject,
+	errors: isArray
 })
 
 /**
@@ -361,12 +362,12 @@ export const hasState = structCheck<IStateHaving<IParseState>>({
 
 /**
  * This is a function for locating the `.state` of the
- * current `.owner`-chain, of which the given `IOwnedStream`
+ * current `.resource`-chain, of which the given `IOwningStream`
  * is (expected) to be a part of by searching it upwards.
  * When no `.state` exists in the chain, `undefined` is returned.
  */
-export function locateState(stream: IOwnedStream) {
-	return StatefulLocator.upwards.locate(stream)?.state
+export function locateStateDownstream(stream: IOwningStream) {
+	return StatefulLocator.downwards.locate(stream)?.state
 }
 
 /**

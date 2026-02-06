@@ -5,7 +5,7 @@ import type {
 	IStream
 } from "../../../../../interfaces.js"
 import {
-	findErrorDataUpstream,
+	findErrorDataDownstream,
 	ParseError,
 	tabbed
 } from "../../../../../objects/Error.js"
@@ -42,7 +42,7 @@ class InvalidHexError extends ParseError.GenericParseError {
 
 export function validateHex(
 	stream: IStream<ICellNode<string>>,
-	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<ICellNode<string>> = findErrorDataDownstream
 ) {
 	const unicodeHex = currUnicodeHex(stream)
 	if (!isHex(unicodeHex))

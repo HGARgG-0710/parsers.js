@@ -1,6 +1,6 @@
 import type { IErrorDataGetter, IStream } from "../../../../../interfaces.js"
 import {
-	findErrorDataUpstream,
+	findErrorDataDownstream,
 	ParseError,
 	tabbed,
 	validateId
@@ -24,7 +24,7 @@ class EmptyUnicodePropertyError extends ParseError.GenericParseError {
 
 export function validateUnicodePropertyNonEmpty(
 	input: IStream<string>,
-	errDataGetter: IErrorDataGetter<string> = findErrorDataUpstream
+	errDataGetter: IErrorDataGetter<string> = findErrorDataDownstream
 ) {
 	if (isCurrClbrace(input))
 		throw EmptyUnicodePropertyError.prepare(errDataGetter(input))

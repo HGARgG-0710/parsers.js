@@ -1,8 +1,8 @@
+import assert from "assert"
 import type {
 	ICommonStream,
 	IOwnedStream,
 	IPeekable,
-	IStream,
 	IStreamStep
 } from "../../../interfaces.js"
 import { ensureCurrDecimal, skip } from "../../../objects/Error.js"
@@ -11,33 +11,30 @@ import {
 	CollectionStream,
 	EndBracketStream,
 	EscapedStream,
-	SingletonWrapperStream
+	SingletonWrapperStream,
+	StateAccessStream
 } from "../../../samples/Stream.js"
 import { getStringConsumable } from "../../../utils/Stream.js"
-import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { EnableClbrackStream } from "./Contract.js"
+import { validateNonEmptyTypeMatch } from "./Errors.js"
+import { AsInt, AsString, TypeMatch } from "./Nodes.js"
 import { HandleSingleChar } from "./SingleChar.js"
 import {
-	isCurrClbrace,
 	isNextOpbrace,
 	isNotNextClbrace,
 	isNotNonEscapedNextClbrace,
 	skipOpbrace
 } from "./Utils/limits.js"
 
-const skipIntModifier = skip("i")
-const skipStringModifier = skip("s")
 const AsIntStream = SingletonWrapperStream(AsInt)
 const AsIntValidatorStream = ValidatorStream(ensureCurrDecimal)
 const AsStringStream = SingletonWrapperStream(AsString)
 const TypeMatchStream = CollectionStream(TypeMatch, getStringConsumable())
 
-const emptinessCondition = isCurrClbrace
-
-function TypeMatchLimitStream(
-	skipModifier: (stream: IStream<string>) => void,
-	longAs: IStreamStep<string>
-) {
+function TypeMatchLimitStream(modifier: string, longAs: IStreamStep<string>) {
+	assert.strictEqual(modifier.length, 1)
+	const skipModifier = skip(modifier)
+	const validateNonEmpty = validateNonEmptyTypeMatch(modifier)
 	return EndBracketStream(
 		new LimitStream.Limits.Builder<string>()
 			.setFrom((input) => {
@@ -45,28 +42,23 @@ function TypeMatchLimitStream(
 				skipOpbrace(input) // {
 				return 0
 			})
-			.setIsEmpty(emptinessCondition)
+			.setIsEmpty((input) => validateNonEmpty(input))
 			.setLongAs(longAs)
 	)
 }
 
 const StringTypeLimitStream = TypeMatchLimitStream(
-	skipStringModifier,
+	"s",
 	isNotNonEscapedNextClbrace
 )
 
-const IntTypeLimitStream = TypeMatchLimitStream(
-	skipIntModifier,
-	isNotNextClbrace
-)
-
-const isTypeMatchStart = isNextOpbrace
+const IntTypeLimitStream = TypeMatchLimitStream("i", isNotNextClbrace)
 
 function HandleTypeMatchMaybe(
 	typeMatchParser: (input: IOwnedStream<string>) => ICommonStream[]
 ) {
 	return function (input: IOwnedStream<string> & IPeekable<string>) {
-		if (!isTypeMatchStart(input)) return HandleSingleChar()
+		if (!isNextOpbrace(input)) return HandleSingleChar()
 		return typeMatchParser(input)
 	}
 }
@@ -76,7 +68,8 @@ function HandleIntTypeMatch() {
 		AsIntStream(),
 		TypeMatchStream(),
 		AsIntValidatorStream(),
-		IntTypeLimitStream()
+		IntTypeLimitStream(),
+		StateAccessStream<string>()
 	]
 }
 
@@ -86,6 +79,7 @@ function HandleStringTypeMatch() {
 		TypeMatchStream(),
 		EscapedStream(),
 		StringTypeLimitStream(),
+		StateAccessStream<string>(),
 		EnableClbrackStream()
 	]
 }
