@@ -155,7 +155,7 @@ export function allow<T = any>(...items: T[]) {
 	}
 }
 
-// ! pre-doc: the fact that the closure returns a 0 is A PART OF ITS SIGNATURE! 
+// ! pre-doc: the fact that the closure returns a 0 is A PART OF ITS SIGNATURE!
 // * [i.e. - it CANNOT CHANGE, since 'skip' result must ALSO be a valid IStepPredicate!]
 export function skip<T = any>(...items: T[]) {
 	const allowItems = allow(...items)
@@ -269,7 +269,7 @@ export namespace ParseError {
 			return this.optionalFields().join(this.separator)
 		}
 
-		protected getFullMessage() {
+		private getFullMessage() {
 			const optional = this.printOptional()
 			const mandatory = this.printMandatory()
 			return (

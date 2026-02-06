@@ -25,9 +25,11 @@ import { isDecimal } from "../../../../samples/alphabet.js"
 import {
 	CachedTokenStream,
 	EndBracketStream,
-	PastEndStream
+	PastEndStream,
+	StateAccessStream
 } from "../../../../samples/Stream.js"
 import { getStringConsumable } from "../../../../utils/Stream.js"
+import { validateRangeNonEmpty } from "../Errors.js"
 import {
 	InfiniteRange,
 	LimitsRange,
@@ -36,11 +38,7 @@ import {
 	Temp,
 	TrivialRange
 } from "../Nodes.js"
-import {
-	isCurrClbrace,
-	isNotNextClbrace,
-	skipOpbrace
-} from "../Utils/limits.js"
+import { isNotNextClbrace, skipOpbrace } from "../Utils/limits.js"
 import { handleRangeQuantifier } from "./Common.js"
 
 const expectRangeBoundary = expectKind(RangeBoundary)
@@ -55,7 +53,7 @@ const RangeLimitStream = EndBracketStream(
 			skipOpbrace(input) // {
 			return 0
 		})
-		.setIsEmpty(isCurrClbrace)
+		.setIsEmpty((input) => validateRangeNonEmpty(input))
 		.setLongAs(isNotNextClbrace)
 )
 
@@ -155,7 +153,12 @@ function HandleDecimalOrComma(input: IOwnedStream<string>) {
 }
 
 export function HandleRange() {
-	return [new RangeStream(), HandleDecimalOrComma, RangeLimitStream()]
+	return [
+		new RangeStream(),
+		HandleDecimalOrComma,
+		RangeLimitStream(),
+		StateAccessStream<string>()
+	]
 }
 
 export const maybeRange: array.Pairs<ITypeCheckable, IStatelessStreamChooser> =
