@@ -1,5 +1,4 @@
 import type { INode, IRawStreamArray } from "../../../../interfaces.js"
-import { skip } from "../../../../objects/Error.js"
 import { LimitStream, PeekStream } from "../../../../objects/Stream.js"
 import {
 	CollectionStream,
@@ -10,9 +9,8 @@ import {
 import { getArrayConsumable } from "../../../../utils/Stream.js"
 import { ClassEndMarkerStream, EnableClbrackStream } from "../Contract.js"
 import { CharClass } from "../Nodes.js"
+import { skipSqopbrack } from "../Utils/limits.js"
 import { HandleClassElements } from "./Common.js"
-
-const skipSqopbrack = skip("[")
 
 const CharClassLimitStream = EndBracketStream(
 	new LimitStream.Limits.Builder<string>()

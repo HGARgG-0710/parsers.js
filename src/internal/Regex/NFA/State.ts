@@ -515,10 +515,6 @@ export class BoundaryState<T = any> extends ArrowState<T> {
 		return MultVerifier.verifySome(this.options, keeper)
 	}
 
-	protected verifyFirst(keeper: PeekKeeper) {
-		return keeper.isFirst()
-	}
-
 	protected verifyCommon(keeper: PeekKeeper) {
 		keeper.behind()
 		const isLastMatch = this.verifySimple(keeper)
@@ -528,7 +524,7 @@ export class BoundaryState<T = any> extends ArrowState<T> {
 	}
 
 	verify(keeper: PeekKeeper<T>): boolean {
-		return this.verifyFirst(keeper) || this.verifyCommon(keeper)
+		return keeper.isFirst() || this.verifyCommon(keeper)
 	}
 
 	// * IMPORTANT. This is what enables one to put boundary

@@ -155,12 +155,14 @@ export function allow<T = any>(...items: T[]) {
 	}
 }
 
+// ! pre-doc: the fact that the closure returns a 0 is A PART OF ITS SIGNATURE! 
+// * [i.e. - it CANNOT CHANGE, since 'skip' result must ALSO be a valid IStepPredicate!]
 export function skip<T = any>(...items: T[]) {
 	const allowItems = allow(...items)
 	return function (
 		stream: IStream<T>,
 		errDataGetter: IErrorDataGetter<T> = findErrorDataDownstream
-	) {
+	): 0 {
 		allowItems(stream, errDataGetter)
 		stream.next()
 		return 0
