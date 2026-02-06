@@ -10,10 +10,10 @@ IDEA [later]:
 	That excludes: 
 		1. public JS-exported classes
 
-	Current total: 483
+	Current total: 485
 
 	Method for counting: 
-		1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 446 (at the time of writing...)
+		1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 448 (at the time of writing...)
 			NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 				(since they're also exported in .d.ts files...)
 		2. RegexParser/Nodes.ts classes = 38 (not counting those matched by 1.)
@@ -330,6 +330,25 @@ REMINDERs:
 				makes every item in the group OPTIONAL as in: 
 					(#qabc) == (a?b?c?)
 		
+	-1. REMINDER: the 'TypeMatch' CANNOT be empty, 
+		since that would necessitate SEPARATING the behaviour of 
+		s{} (legal) from i{} (illegal). 
+
+		Also, it would bring no benefit, since an empty node-name DOESN'T MEAN ANYTHING. 
+		Users should be descriptive about their datatype identifiers.
+
+	-1. REMINDER: the 'CharClass' CAN be empty. 
+		This is to allow, in particular, the [] regex, 
+		which has a nigh-UNIQUE property of failing ANYTHING [this, in particular, allows one to pick 
+			WHICH of the possible paths CAN get successfully eliminated and which cannot]. 
+		THIS must become a DOCUMENTED FEATURE!!! and not an "unfixed novelty bug". 
+		This is, for instance, something that JavaScript's Regex is FUNDAMENTALLY incapable of. 
+
+		THE SAME goes for the 'BoundaryClass'. 
+		Allow empty (early "quitting") and DOCOMENT! 
+
+		Also [reminder N2] - there obviously should be tests for this thing specifically. 
+
 IMMEDIATE: 
 	CURRENT: 		
 		-1. IndexMap: REDESIGN: 
@@ -346,22 +365,6 @@ IMMEDIATE:
 			SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
 			class ITSELF [and not an instance]! 
 
-		-2. BUG [RegexParser]: 
-			A problem has reared its ugly head. 
-			At the present, the handling of the EMPTY 'EndBracketStream's 
-			is FAR TOO GENERIC. Specifically, they are ALLOWED to be empty 
-			in cases WHEN THEY MUSTN'T! 
-
-			Solution: do the same thing as with 'UnicodeProperty.ts'-EndBracketStream. 
-				Namely, THROW AN ERROR if an EMPTY EndBracketStream is detected 
-				FOR the following: 
-
-					1. Group.ts [GroupLimitStream]
-					2. TypeMatch.ts [TypeMatchLimitStream]
-					3. CharClass.ts [CharClassLimitStream]
-					4. Range.ts [RangeLimitStream]
-					5. BoundaryClass.ts [BoundaryClassLimitStream]
-					
 		0. FIX: add ability to specify a LIMIT on the 'ObjectPool' number 
 			of instances. Particularly, enable the ability for the user to 
 			MODIFY limits on pools for specific (non-internal) types of 
