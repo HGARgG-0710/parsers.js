@@ -1,11 +1,5 @@
 
-TODAY: 
-	
-RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-	Namely: 
-		1. intersection: 	/[[...]&&[...]]/v
-		2. subtraction: 	/[[...]--[...]]/v
-		3. string literals: /[q{...}]/v
+TODAY: 	
 
 1. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
 	THIS IS VITAL. 
@@ -38,10 +32,6 @@ RE1. 'regex' - allow for methods for creation of regular expressions that use th
 
 10. Commit U: `RegexParser`: 
 	1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
-
-12. walk through ALL the library types, and FIX all the types which ARE EXCESSIVE! 
-	Let Interface Segregation Principle be followed rigorously - if something demands 
-		MORE properties than IT USES, then a NEW INTERFACE is warranted. 		
 
 TODO: ensure that all the file-reading classes use THE SAME errors
 	to signify that a filepath is nonexistent (reason: simplifies things
