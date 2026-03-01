@@ -43,6 +43,10 @@ export class ObjectPool<
 		return Config.features.usePools ? this.active : this.inactive
 	}
 
+	get size() {
+		return this.getState().size
+	}
+
 	// ! PRE-DOC: the user-constructor is ITSELF responsible for
 	// 		MAKING SURE that the ownership relationship IS PRESERVED
 	// 		[i.e. that the created/reused objects have the correct poolId].
@@ -59,8 +63,11 @@ export class ObjectPool<
 		this.getState().clear()
 	}
 
-	constructor(objectConstructor: new (...x: Partial<Args> | []) => T) {
-		this.active = new ObjectPoolActive(objectConstructor)
+	constructor(
+		objectConstructor: new (...x: Partial<Args> | []) => T,
+		limitSize = Config.objectPools.defaultMaxSize
+	) {
+		this.active = new ObjectPoolActive(objectConstructor, limitSize)
 		this.inactive = new ObjectPoolInactive(objectConstructor)
 		this.id = ObjectPool.NewId()
 	}
@@ -70,6 +77,7 @@ interface IObjectPoolState<
 	T extends IInitializable<Args> = any,
 	Args extends any[] = []
 > {
+	get size(): number
 	clear(): void
 	create(...args: Partial<Args> | []): T
 	free(item: T): void
@@ -93,11 +101,16 @@ class ObjectPoolActive<
 		return new this.objectConstructor(...x)
 	}
 
+	get size() {
+		return this.freeStack.size
+	}
+
 	create(...args: [] | Partial<Args>) {
 		return this.canReuse() ? this.reuseOld(...args) : this.allocNew(...args)
 	}
 
 	free(item: T) {
+		assert(this.size < this.limitSize)
 		this.freeStack.push(item)
 		item.postFree()
 	}
@@ -107,7 +120,8 @@ class ObjectPoolActive<
 	}
 
 	constructor(
-		private readonly objectConstructor: new (...x: Partial<Args> | []) => T
+		private readonly objectConstructor: new (...x: Partial<Args> | []) => T,
+		private readonly limitSize: number
 	) {}
 }
 
@@ -115,6 +129,10 @@ class ObjectPoolInactive<
 	T extends IInitializable<Args>,
 	Args extends any[] = []
 > implements IObjectPoolState<T, Args> {
+	get size() {
+		return 0
+	}
+
 	clear() {}
 
 	create(...args: [] | Partial<Args>): T {

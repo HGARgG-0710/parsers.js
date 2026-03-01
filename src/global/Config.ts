@@ -32,6 +32,10 @@ class FeatureConfig {
 	usePools = false
 }
 
+class ObjectPoolConfig {
+	defaultMaxSize = Infinity
+}
+
 class LibConfig {
 	readonly xml = new XMLConfig()
 	readonly regex = new RegexConfig()
@@ -39,6 +43,7 @@ class LibConfig {
 	readonly errors = new ErrorConfig()
 	readonly json = new JSONConfig()
 	readonly features = new FeatureConfig()
+	readonly objectPools = new ObjectPoolConfig()
 }
 
 export const Config = new LibConfig()
