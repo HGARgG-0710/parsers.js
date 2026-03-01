@@ -1,0 +1,111 @@
+1. Wiki Tooling: 
+	0. TypeScript (obviously)
+	1. Vue.js (use SSG)
+	2. GitHub Pages (hosting)
+		1. PROVIDE link to it on 'npm'
+		2. publish the docs PRIOR to the release of the actual 'npm' package!
+	3. Styles: 
+		1. SCSS
+		2. for an example of how it should work/look like: 
+			1. Chevrotain Docs website
+			2. Vue.js wiki
+		3. Use 2 themes (the default when entering the site is the system-wide default):
+			1. dark
+			2. light
+	4. Use ADAPTIVE DESIGN: 
+		1. in particular, must work on smartphones
+		2. maximize reuse
+	5. Ensure cross-browser availability (Google Chrome, Firefox, Microsoft Edge)
+
+2. JSDOC: 
+	1. must be limited to references to the wiki AND file prefaces
+	2. collect the '! pre-doc' notes to fill the more complex/detail-rich 
+		parts of individual abstractions'/modules' documentation
+	3. file prefaces must all have the simple format: 
+		/**
+		 * This file does XYZ...
+		 */
+
+		NO attribution, names, in these things, etc - NOTHING; 
+	4. add jsdoc-links for EVERY: 
+		1. public/protected/abstract method/property (provided said protected methods/properties are supposed to be overriden and the public methods - used); 
+		2. class (private or public)
+		3. interface (private or public)
+		4. function (all public; some private - if they do something complex/need explanation); 
+
+	5. NO DUPLICATION - *only* the references to the wiki are contained in the JSDOC. 
+		Pros: 
+			1. ensures freshness of documentation when the user accesses it (big one)
+			2. halfs the efforts for writing/updating the documentation in terms 
+				of locations to visit (medium one)
+			3. enables one to see how the docs for a given function have/have-not changed 
+				through wiki, and to set the said change in JSDOC via a reference to a 
+				differently versioned wiki page for the said function (big one)
+				1. TODO: also - one *DOESN'T HAVE TO* add a new version of docs for *every* 
+					version of a given component - if there has been no update since the last 
+						version, it's still the latest, and THEREFORE, the most recent; 
+			4. enables providing better layout for large bodies of documentation, 
+				while preventing the mangling of said layouts in jsdoc (big one)
+
+		Cons: 
+			1. requires internet connection (small one, since using npm registry does as well)
+			2. requires clicking a URL (very small one)
+			3. slower in terms of speed, due to lack of ability to employ Vim/etc for quick 
+				in-editor traversal of the documentation text (small one, affects only a small 
+				portion of users and is tolerable)
+	
+3. Sections (Navbar-Pages) of the Wiki: 
+	1. Home
+		1. Contains the "advertisment" of the library, so to speak
+		2. Contains the npm installation instructions
+		3. Key distinguishing features list
+	2. Reference (API - highly detailed and nuanced): 
+		1. classes
+		2. interfaces
+		3. functions/utils
+		4. modules (and module structure of the project)
+	3. Learning:
+		1. Basic Guides (simple expalanations with usage + links to respective References pages)
+		2. "How-To"s for complex cases
+		3. Terminology pages: 
+			Originally intended to be part of v0.3, these have gotten way out of 
+				hand, and no longer feasible without some considerable effort (for which there really isn't much time...); 
+		4. Samples page: 
+			This is a Guide to the `samples` submodule. 
+			Will list the "out-of-the-box" cases for usage 
+				and link to respective `samples` module 
+					exported definitions. 
+		5. Add a guide on creation of Fault-Tolerant parsers (which classes to extend, 
+			which patterns/abstractions to use, ErrorStream, PanicStream, etc); 
+		
+		6. A (simple) JSON parser [using 'DynamicParser' - non-self-modifying]: 
+			Reasons: 
+				1. simple to implement
+				2. simple to test
+				3. can unify the code
+				4. not really useful (as builtin JSON.parse exists; e.g. no reason to refactor to another repo, besides tidyness...)
+
+	4. Examples:
+		1. A minimal usage example for EVERY public method of EVERY public class
+		2. Links to GitHub for TESTS and DEMOS (including Web Demos) using said abstractions
+	5. Benchmarks: 
+		1. A list of various kinds of benchmarks for the library 
+			(among others - comparison against Chevrotain/Ohm/etc in speed)
+	6. GitHub: 
+		1. the URL to the project repository on GitHub
+		2. make it shaped like a clickable GitHub SVG icon
+
+4. [to Learning] Add a diagram of relations of various `IStream` traits present within the library. 
+		Will prove useful to the user when trying to identify at which point in the progrm to inherit. 
+	
+5. [to Learning] Add a page on the Library's notion of "mixins" (later to be moved to separate 'mixins.js'
+	package)
+
+6. [Home] TODO: ADD TO DOCUMENTATION/GitHub Description [a crucial notice]
+	The library is intended for PREDICTIVE RECURSIVE-DESCENT PARSERS ONLY (meaning: 
+	no backtracking). It is only intended for making of Predictive Recursive-Descent 
+	parsers, which can ONLY handle Context-Free Grammars. 
+
+	Note also that the library is intended for creation of Stream-based Validators. 
+
+7. 

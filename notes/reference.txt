@@ -1,0 +1,59 @@
+1. [LATER] TO DOCUMENTATION [about `MarkerLocator`]: 
+	usage example: 
+
+		function SomeChooser (input) {
+			// here, `this.state.counter` is `readonly .counter: Counter`, 
+			// defined as part of `getState()` function: `getState() => { counter: new Counter() }`
+			const marker = this.state.counter.inc()
+			const markerGetter = () => marker
+			return [
+				new SomeErrHandlerStream( // handles errors that can ocurr downstream
+					StorageStream(markerGetter)( // keeps marker for `SomeErrHandlerStream` to retrieve (if needed)
+						SomeStream() // error is thrown HERE 
+					) 
+				), 	
+												// CRUCIAL - if this is a CHOOSER instead of a Stream, 
+												// we may face the possibility of *recursion* 
+												// (and hence, not know the DEPTH of `.resource` we need to skip). 
+												// This is PRECISELY why the entire construct of `MarkerStream` is needed here. 
+												// In finite cases, this is an overkill, since the maximum size of the current chooser is known. 
+
+				MarkerStream(markerGetter)(),   // marker to find LATER from `SomeErrHandlerStream`
+				SomeOtherStream()			    // chooser-lifetime-limiting stream (oftentimes - a `LimitStream`)
+			]
+		}
+
+		// in `SomeErrHandlerStream()`: 
+		class SomeErrHandlerStream extends ErrorStream {
+			private readonly markerLocator = MarkerLocator.downwards<TConcreteWhatever, number>()
+
+			next() {
+				if (!this._isCurrEnd) super.next()
+				else this.isEnd = true
+			}
+
+			protected errHandler() {
+				// ...
+				// in event of unfixable error, PANIC RECOVERY
+				const bracketStream = this.markerLocator.locate(this).resource
+				for (const x of bracketStream) {}
+				this.curr = new SomeErrorToken()
+				this._isCurrEnd = true
+			}
+
+			baseInit() {
+				const storageStream = this.resource
+				const marker = storageStream.currStored
+				this.markerLocator.setMarker(marker)
+			}
+		}
+
+2. VITAL REMINDER [documentation]: let the user employ *`ErrorData.ErrorPosition.Locator.Downwards`* 
+	when creating their ParseExtension-s. 
+	Reason: they grab the position from INSIDE the stream underneath. 
+		This is the only RELIABLE WAY (yes, by breaking encapsulation...), 
+	
+3. [docs - wiki] Reminder: 
+	Describe the `this.state.parse.renewStream(this.resource)` in some detail. 
+	Let there be a description SPECIFICALLY for cases when children die BEFORE parents SEVERAL times. 
+	Let there be AN EXAMPLE class (like one of those in the `Regex` parser)

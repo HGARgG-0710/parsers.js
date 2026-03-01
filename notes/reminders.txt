@@ -1,0 +1,312 @@
+REMINDERs: 
+	0. REMINDER: the 'IgnoreCase' '(#i...)' IS recursively applied: 
+		It affects *all* the inner CharState-s and CodeRangeState-s. 
+		IT WORKS ON \p{...} AS WELL!!!
+		Reason: 
+			This enables interoperability with other Extension Groups 
+				(such as the "optional multiline" #m, which is to be used for testing the feature). 
+			Otherwise, this would have been impossible...
+
+	REMINDER: about the `IStepPredicate`: 
+		The value (both input AND output) CAN BE < 0. 
+		In these cases, it is TREATED THE SAME AS 0!!!
+		
+	-2. REMINDER [for tests]: about the `TypeMatch` parsing... (RegexParser)
+		It must ENSURE that the escaped characters are treated AS-ARE. 
+		Specifically, the "\}" must be converted to a simple "}". 
+		That is due to the END of the string...
+		Likewise, this is ONLY for the `AsString`. 
+		The `AsInt` PROHIBITS the non-decimal characters ALTOGETHER!!!
+		(note: that must be checked AS WELL!!!)
+		
+	2. Regex [testing]: 
+		! CRUCIAL REMINDER [ADD *A TEST*] - `RawRegexBuilder.instance.newline()` includes the handling of '\r\n', FOR CROSS-PLATFORM REASONS!
+		
+	1. REMINDER [for tests]: *make sure* that the *STATIC* properties on a 'mixin' GET TO BE INHERITED by the 
+		child classes/mixins. Reason: THIS IS HOW JavaScript INHERITANCE WORKS!
+
+	2. REMINDER [for the docs]: XML-generation DOES NOT support any form of DTD-entities. 
+		Those'll have to be added to the nodes manually by the user...
+
+	3. REMINDER [testing]: make sure that the XML-generation WORKS with "invalid" 
+		attribute values, etc. 
+
+	4. REMINDER [for the docs]: about the `NodeStream.prototype.free`: 
+		By default, it does NOTHING, however, ONCE `static readonly pool: ObjectPool` 
+		is DEFINED on the `this.constructor` (which is the child of the `NodeStream`), 
+		it WILL be used for `this.pool` on the `NodeStream` instances. 
+
+	4. REMINDER - SingleChildNode [during testing]: 
+		The state in which there IS NO CHILD for a 'SingleChildNode' class instance, 
+		IS NORMAL. This must be tested AS WELL, for ALL the methods on it... (INCLUDING `toXML()`!!!)
+
+	5. REMINDER: the XML generation in the library must support BOTH the LF *and* the CRLF generation. 
+		This is done via the `Config: LibConfig` exported global instance modification. 
+	
+	6. REMINDER: the XML generation in the library must support BOTH Single and Double Quotes for 
+		the Attribute-strings! That's important, since it affects the display of the XML. 
+
+	7. REMINDER: whenever using `IStepPredicate`s, and suchlike (i.e. fields of lambda types), 
+		ALWAYS ensure that the said lambdas have access to `this`. ALWAYS. It's a mandatory 
+		part of thorough testing...
+
+	8. REMINDER: add IMPORT-TESTING!!!
+		This is vital, since import paths are many and some of them are pretty complex
+			(ex: `objects.Stream.templates.CurrDyssyncStream`)
+	
+	0. REMINDER [testing]: `NFARegexFinalizer` - `OverflowCounter`; 
+		ENSURE that *once* the `OverflowCounter` reaches its limit, 
+			THE HANDLER IS RUN. 
+
+		In particular, in context of `NFARegexFinalizer`, ENSURE that 
+		going *over* the "limit" DOES NOT cause the thing to "miss" 
+		certain states... 
+	
+	1. REMINDER [testing]: about the function-fields testing
+		ENSURE that those have access to `this` (via the `.bind()`ing)
+		WHENEVER it makes sense. Do it on a case-by-case basis...
+
+	2. REMINDER [DynamicParser + CompositeStream + IErrorData + IPrintablePosition]: 
+		Document this. 
+		Absolutely crucial. 
+		WHEN one is intending to STORE a position/other-`.state`-data on a 'PosStream/ILineIndex'/etc: 
+
+			1. USE LAZY PROPERTY-LOADING
+			2. Store those "global" things on `MarkerStream`s
+			3. PUT those `MarkerStream`s AT THE BOTTOM of the parser's `CompositeStream`
+				That'll allow one to GUARANTEEDLY search for them from ANY point in the 
+				application at ANY point in time. 
+				An alternative is to store the reference to global `ICompositeStream`-contained 
+				data BEFORE the parsing even begins (as an example of an implementation of this 
+				principle - the `.state: IParseState`, it's SUPPOSED TO be initialized BEFORE 
+				the `baseInit()` ever happens, so that it's ALWAYS available, WITHOUT need for 
+				deep-searching on `this.resource/owner`... That'd, of course, require for the 
+				said `IStream`s to be `IStateful`/other-such-interface, since otherwise no `state`, 
+				or other such property, can be stored on them directly via a reference). 
+			
+		Meaning to say, an implicit property that ALL 'ILinkedStream's must follow 
+		is derived: 
+			
+			[!!!]
+			We DO NOT access a given `this.state.errData` property ANY SOONER than 
+				the `baseInit` method (meaning to say, we can ONLY do it, ONCE the 
+				`this.resource` IS initialized...). 
+
+		ALSO IMPORTANT: make sure that there IS *always* a possibility to access the `IErrorData`
+			via the `this.state` when one does the "error-throwing" function-calls that 
+				delegate to the `errDataGetter` (typically, findErrorDataUpstream). 
+
+			SPECIFICALLY, the `findErrorDataUpstream` DOES take `this.state` INTO ACCOUNT 
+				when searching, AND that the `this.state` on ALL the 'IStream's gets initialized
+				BEFORE their `respective` baseInit-s are run (since they're the parts that are 
+				intended to contain potentially-error-invoking-parsing-logic). 
+				Otherwise, we'll be needing to fix the search algorithm...
+
+	1. REMINDER: *document* the `.capturePreference` and the `NFARegexFinalizer`, 
+		and ALL the "internal" classes THAT ARE ACTUALLY PUBLIC...
+		IDEA: add the `public/` directory for EVERY "complex" directory inside of 
+		`src/internal` (such as `RegexParser`, `RegexCompiler` and `RegexNFA`). 
+
+		There, public exports for the given "internal" thing would be provided. 
+
+	3. REMINDER [for testing]: the user DOES NOT NEED to set the state via 'stream.setState(this.state)'
+		inside 'IStreamChooser'-s. It's AUTOMATICALLY SET before initialization. BUT, the user STILL has 
+		access to 'this.state' via global 'this: ICompositeStream', and so can STORE THEIR OWN GLOBAL 
+		PROPERTIES ON IT! 
+
+	4. REMINDER: *during testing/demo-ing* - VERIFY that the *pooling* does have a SIGNIFICANT, POSITIVE 
+		effect on parsing of VERY large datasets... Specifically, your JSON demo; Specifically, 
+		check MEMORY (it should be more stable) and EXECUTION SPEED (this one, particularly, since 
+		it's supposed to avoid Garbage Collections...). If NEITHER are impacted, REMOVE the pooling 
+		ALTOGETHER!!! For this, create a FEATURE BRANCH with a single commit that REMOVES the 
+		'ObjectPool's COMPLETELY. 
+
+	5. REMINDER: Parser.ts: 
+		The 'Concat' and 'Loop' has UNDERLYING PARSERS *sharing* their '.state'!
+		This is important! 
+
+	-3. REMINDER [testing]: 'RecursivePipe'
+		ALLOW empty streams; 
+		SPECIFICALLY, *allow* for the 'CompositeStream' and 'RecursivePipe' to be EMPTY ON CREATION. 
+		Let it be possible to have an EMPTY 'ParseStream' (ex: when the underlying 'InputStream' has ALL DRIED UP!)
+
+	-4. REMINDER [testing]: InputStream, LazyStream, etc
+		VERIFY that *all* of these are VIABLE for reading FROM-THE-MIDDLE of the "Source". 
+		THIS is needed for the 'Parse.Loop' and 'Parse.Concat' interoperability. 
+		Specifically, if the "source" has ALREADY been "touched" by a different stream, 
+		ENSURE that these are CAPABLE of handling it ADEQUATELY (this means that *all* the 
+		operations STILL REMAIN VALID). 
+		This is a mandatory requirement for the 'ParseStream'. 
+		If, for whatever reason, this becomes impossible for certain non-critical operations, 
+		ADD THIS AS AN IMPORTANT NOTICE TO THE DOCUMENTATION. 
+
+		1. ALSO - ensure that EMPTY STREAMS are *also* viable (almost) ANYWHERE, where non-empty 
+			ones are. This is an important edge cases. 
+
+		2. ALSO - ensure that the 'IByteSource's of the library ALL allow the ability to pass an 
+			already-read file to a DIFFERENT 'LazyStream' (or wherever...) and use it JUST THE SAME. 
+			Same for 'ICharSource's - since the only implementation wraps around 'IByteSource'. 
+			This is important. 
+	
+	-1. REMINDER: on 'IBaseState.errors: Error[]': 
+		This is a crucial feature to test: the user MUST be able to: 
+			1. COLLECT multiple errors during Error-resistant parsing proces 
+				(ErrorStream, PanicStream, etc)
+			2. Produce an ErrorNode-containing AST 
+				[which can be VALIDATED via the 'ast.scanFor(ErrorNode)' method call]
+			3. COLLECT *all* the errors that had ocurred from the 'parseStream.state.errors'; 
+				Those are modifiable from within EVERY underlying sub-'IResultStateStream'! 
+				(Particularly, check the 'PanicStream' effect on it...)
+			4. PRINT all the errors via the 'ErrorPrinter.prototype.logErrors' method; 
+				In particular, must support: 
+					1. ErrorPrinter.Plain
+					2. ErrorPrinter.WithLogger
+
+		In particular, it allows 'tsc'-like support for error-handling; 
+		It'll be important for transpilers that want to deliver the same kind of level of 
+		error-reporting quality (and developer productivity). 
+
+	-1. REMINDER: ENSURE that there is a 'HashMap' (or an 'IndexMap'), such that 
+		it allows one to map an 'IErrorData' BY ITS '.errType'! 
+		This is important, since it'll allow the user the creation of respective 
+		'TableHandler's for implementing the 'IErrObjFactory'
+
+	-1. REMINDER [docs]: CRUCIAL; Document the following: 
+		In user code, EITHER an 'Error', *or* an 'IErrorConvertible' 
+			(or, in case of PanicStream - 'IErrorData') objects ARE EXPECTED 
+			to be thrown ONLY! 	
+		This is important, since otherwise the library's error-handling capabilities 
+		*will not* function as expected; 
+		
+	-1. REMINDER: about the matching in 'Regex': 
+		IMPORTANT: remember - the following Regex (when parsing XML/similar, for instance): 
+			new Regex('\w+(#n=").*(#n")')
+			// followed by alternative 'new Regex("\w+(#n=)'.*'")', etc... in a TokenChooser(...)
+			// NOTE: here '.*' is a simplification, but you get what's intended...
+		SHOULD MATCH string 'key="someValue"' to the array: 
+
+			["key", "someValue"]
+
+		Which, in TokenChooser, could easily be passed to some 'new XMLAttribute("key", parseValueString('"someValue"'))'; 
+		Important, since it was the ORIGINAL motivation for the entire rewriting of the matching process to 
+		enable proper word-splitting via the '(#n...)'-groups and '\b{...}'-classes; 
+
+	-2. REMINDER: about Regex - the negation of UnicodeProperty MUST WORK AS WELL: 	
+		Syntax: 
+			^\p{Language=Cyrillic}
+
+	-3. REMINDER [docs]: ADD the *following* URLs to the documentation of UnicodeProperty: 	
+		1. [for property *types*] https://www.unicode.org/reports/tr44/#Property_Index
+		2. [for property *values*] https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
+		3. [list of all unicode characters with their properties] https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+		4. ONLY the ones Unicode Properties are supported that are also supported by JavaScript's built-in 'RegExp' class!
+			This is extremely important, as implementing the entirety of the Unicode Property Specification is a 
+				huge task in itself (probably no lesser than the development of the remainder of the library), and 
+					so, therefore, too large for a single person (at least without some considerable time investment, an 
+						investment that you, at this moment, are not able to afford...)
+
+	-4. REMINDER: *every* class that uses 'ObjectPool' under the hood must be tested WITH BOTH: 
+		1. Config.features.usePools == true
+		2. Config.features.usePools == false
+
+		Important, due to test-coverage...
+
+	3. REMINDER [testing; 'Regex']: the '\p{...}'-properties must work INSIDE the '[...]'-character classes AND '\b{...}'-boundary-classes
+		Reason: 
+			1. one *can* implement it
+			2. represents a valid use-case
+			3. JavaScript RegExp has similar functionality already built-in
+
+	4. REMINDER [testing; 'Regex']: the '\P{...}'-equivalent of RegExp is achieved via '^[\p{...}]';
+		Reason: enables the parser (and the grammar) to be slightly simpler, more compact and less cosmetic. 
+			Plus, it doesn't introduce such a terrible character-overhead...
+
+	5. REMINDER: the *only* three cases when the user can employ \p{...} or \u{...} are: 
+		1. \p:
+			1. \p{...} [positive use, toplevel - standalone]
+			2. ^[\p{...}] [negative use, inside a negated character-class; NON-RANGE-BOUNDARY]
+			3. [...\p{...}...] [positive use, inside a character-class; NON-RANGE-BOUNDARY]
+			4. ^\b{\p{...}} [negative use, inside a boundary class; NON-RANGE-BOUNDARY]
+			5. \b{...p{...}...} [positive use, inside a boundary class; NON-RANGE-BOUNDARY]
+		2. \u:
+			1. \u{...} [positive use, toplevel - standalone]
+			2. ^[\u{...}] [negative use, inside a negated character-class; COULD BE RANGE-BOUNDARY]
+			3. [...\u{...}...] [positive use, inside a character-class; COULD BE RANGE-BOUNDARY]
+			4. ^\b{\u{...}} [negative use, inside a boundary class; COULD BE RANGE-BOUNDARY]
+			5. \b{...u{...}...} [positive use, inside a boundary class; COULD BE RANGE-BOUNDARY]
+
+	6. REMINDER: Regex (UnicodeProperty): 
+		1. Supposed to allow EMOJIS
+		2. Supposed to allow ALL things that RegExp from JavaScript allows [including Shorthand-property-names, 
+			i.e. \p{PropName} vs \p{PropName=Value}]
+		
+	0. REMINDER [testing; ObjectPool]: 
+		ENSURE that ONLY a single 'ObjectPool' is EVER allowed to own an object 
+		(i.e., if it was CREATED with a given ObjectPool within a given class, it can ONLY 
+		ever be '.free'-d by THAT SAME POOL, and no other!)
+	
+	-1. REMINDER [DOCS]: Make sure to note that projects created with 'parsers.js' 
+		use FILTER-PIPES architecture for their Front-End Parser (assuming they 
+		use the Stream-s, which is, like, the whole point of ever even using the 
+		project in the first place...)
+
+	-1. REMINDER [on testing Regex]: 
+		1. Create one-two test cases for EACH one of the NON-DEPRECATED 
+			properties supported by JavaScript's RegExp. 	
+
+			For that, learn SPECIFICALLY which of the https://www.unicode.org/reports/tr44/#Property_Index
+			properties does RegExp support (experimentally, or otherwise...). 
+
+			(ALSO, test all aliases: 	
+				https://www.unicode.org/Public/UCD/latest/ucd/PropertyValueAliases.txt
+			)
+
+			In particular, these should be ELEMENTARY and simple 
+				(testing *specifically* the UnicodeProperty thingy...). 
+			THERE WOULD BE 1-2 TESTS for *each one* of the *elementary* patterns
+				that can ocurr within Regex: '\w', '\d', '[abc]', '\u{...}', etc
+		
+		2. THEN, there'd be 10+ (i.e. MANY) different tests specifically 
+				for COMPOSITIONS of 'Regex'. 
+
+			In particular, must be tested: 
+
+				1. most common simple-compositions (like "[A-Za-z_]\w*\b{\w}", or '".*"', or "\d+", etc)
+					1. Includes also real-life applications, like [these ones are TO BE ADDED!]: 
+						1. Complex Email-regex "\w+@\(gmail|mail|yandex|icloud|...)\.(ru|com|org|...)
+						2. IP addresses (IPv4 and IPv6), e.g.: "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" [IPv4]
+					2. TAKE those "real-life cases" TO SAMPLES [under 'samples.Regex']
+						In particular, they'll serve as BOTH a "mini-demo" (i.e. a test), 
+							AND an immensely useful out-of-the-box piece of functionality. 
+				2. UBER-complex compositions [deliberately for picking out tricky bugs; at least ~5 of those]
+		
+		3. THEN, there'd be testing for things like CUSTOM GROUPS [choose 
+			whether or not to test the EXTENSION abilities of 'Regex.Factory', etc...]
+			1. The '(#m...)'-multiline group: 
+				adds an optional \n* after EVERY item within the group
+				NON-RECURSIVE!
+
+				As in: 
+					(#mabc) == (a\n*b\n*c\n*)
+			2. '(#q...)'... group
+				makes every item in the group OPTIONAL as in: 
+					(#qabc) == (a?b?c?)
+		
+	-1. REMINDER: the 'TypeMatch' CANNOT be empty, 
+		since that would necessitate SEPARATING the behaviour of 
+		s{} (legal) from i{} (illegal). 
+
+		Also, it would bring no benefit, since an empty node-name DOESN'T MEAN ANYTHING. 
+		Users should be descriptive about their datatype identifiers.
+
+	-1. REMINDER: the 'CharClass' CAN be empty. 
+		This is to allow, in particular, the [] regex, 
+		which has a nigh-UNIQUE property of failing ANYTHING [this, in particular, allows one to pick 
+			WHICH of the possible paths CAN get successfully eliminated and which cannot]. 
+		THIS must become a DOCUMENTED FEATURE!!! and not an "unfixed novelty bug". 
+		This is, for instance, something that JavaScript's Regex is FUNDAMENTALLY incapable of. 
+
+		THE SAME goes for the 'BoundaryClass'. 
+		Allow empty (early "quitting") and DOCOMENT! 
+
+		Also [reminder N2] - there obviously should be tests for this thing specifically. 

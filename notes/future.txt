@@ -1,0 +1,44 @@
+0. MOVE this stuff to either project's JIRA (to set up), or GitHub Issues
+
+1. REFACTOR [some] of the `internal/exported` APIs into SEPARATE npm PACKAGES: 
+	0. `copiable` package: 
+		A TypeScript package. 
+		Contains: 
+			1. `ICopiable` trait
+			2. 'isCopiable' type-predicate
+
+		Make a dependency of this. 
+		RE-EXPORT IT as part of `parsers.js` under a submodule 'copiable.ICopiable' and 'copiable.isCopiable'; 
+
+	1. `test` package [already developed]: 
+		1. add the current 'ClassTest', 'MethodTest' 
+		2. make `copiable` a dependency of this: 
+			1. reason - relies upon copiability of a given class for its instances to be 
+				'ITestable' - a new interface to export
+		3. [unrelated] add serialization of tested items [interfaces for it, etc]
+		4. [unrelated] add 'Snapshot' API (similar to `Jest`)
+	
+	2. 'mixin.ts': 
+		1. a new package - the 'mixin' module here
+			It should be USED IN `parsers.js` as BOTH: 
+				1. a dependency
+				2. a re-export [since there are mixins CURRENTLY exported]
+
+	3. `object_pool`: 
+		This is the `ObjectPool` (and `IInitializable` interface) class. 
+		It is far too independent to be just left here. 
+		Far too useful to be allowed to be "herded" together with the domain-specific 
+		stuff. 
+
+		'FreeStream' REMAINS PART OF `parsers.js`
+
+		Export this from here as a dependency. 
+
+2. Rewrite this using your NEW language [later the "TS Replacement"]. 
+	Reasons: 
+		1. natural runtime-static-time combination
+		2. better + simpler type-system
+		3. [big one] natural support for mixins
+			1. replace the 'mixins.ts' solution with the one provided by the language
+				They are feature-equivalent and the end-code still utilizes the dependency 
+					in question. 

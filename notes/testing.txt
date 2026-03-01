@@ -1,0 +1,151 @@
+1. Ensure Browser Support:
+	0. use ESBuild for bundler
+	1. verify that it's possible to employ 'File's from browser environments
+		1. Specifically, those provided via an '<input type="file"/>' element
+	2. verify it's possible to run THE EXACT SAME parsers, WITHOUT any modification 
+		to the user code (crucial)
+	3. BUILD A DEMO (with raw HTML + ESBuild + TypeScript)
+	4. Ensure it's CROSSPLATFORM (to check: Google Chrome, Firefox, Microsoft Edge)
+
+2. test the 'static' field of the `mixin` class: 
+	1. add the appropriate test cases
+	2. add a new test like the old ones, with 'constructor() {}' instead of 'constructor: function () {}'
+	3. add a test for the 'this.class' property on the mixin-instances		
+
+3. remove old dead unit tests, replace with new
+
+4. things to test: 
+	1. TEST the internal/ (only what makes sense)
+	2. Test the public exports: 
+		1. ALL classes
+		2. ALL utils
+		3. ALL samples
+	3. Test that the LIST of library exports is correct: 
+		1. EMPLOY the user-end `deep import` for EACH tested export of the library FOR its tests
+			Ensures that ALL the needed exports are available
+		2. WRITE tests that verify the lists of exports for each DEEP export (export-tree-test, let's call it...); 
+
+5. TESTING NOTE: 'FreeStream': 
+	0. [See below] DO NOT Use REAL `ObjectPool` here [*manual* mock-objects instead...]
+	1. NO SOONER than `ObjectPool` and `IPoolGetter` are tested
+	2. [maybe???] Add a framework for 'spying' on methods of objects here?
+		Reason: one needs to ENSURE that the `.free` method *GETS CALLED*, 
+			no matter what. Reason being: if we DON'T know that, we DON'T 
+				know if the thing is actually *effective*. 
+
+		Thus, possible solutions to the dilemma: 
+			1. add a library [with existing like 'Jest' - good for resume]
+				This'll additionally require: 
+					1. accessing of `ObjectPool.prototype`, saving reference
+						To save the '.freeMethodObservable = jest.spyOn(ObjectPool.prototype, "free")'
+					2. checking the presence of the call on each iteration inside 
+						a test of `FreeStream`, via the `.freeMethodObservable.mock.calls[i]`
+			2. creating a fake `ObjectPool`-like object, which would register the `.free/.create` calls, 
+				which would be then employed as-desired
+				Then, one would need to: 
+
+					1. create an interface for `IObjectPool`
+					2. use it EVERYWHERE instead of the "ordinary" 'ObjectPool' classs objects: 
+						1. That includes `FreeStream`
+					3. write a dummy-mock-class for a specific type of "poolable" objects, create-d/free-d inside the `FreeStream`
+					4. use the dummy-mock-class's object with `FreeStream`, executing the necessary methods appropriately
+		
+		CONCLUSION: do the 2. - interfaces + mock objects here would be *truly* WONDEROUS. 
+
+6. TESTING NOTE: TreeWalker: 
+	1. USE A MOCK HERE (`TreeLike` generic param...)
+
+7. TESTNIG NOTE: `Autocache`: 
+	1. USE A MOCK HERE! [ISettable & IIndexable]
+
+8. TESTING NOTES: 
+		3. `Decoder8`, `DecoderU8`: 
+			1. DO NOT use mocks - instead, create REAL FILES [encoded appropriately]
+		4. `WritingDestination`: 
+			1. DO NOT use mocks - instead, utilize ACTUAL `IEncoder` classes from the library. 
+			2. Use only 2 different classes' implementations - assume that this is equivalent 
+				to it being sufficient. REASON not to use mocks - very hard to do here, since 
+					that would (in essence) demand one to actually re-implement one of the 
+						already present `IEncoder`-implementing classes of the library (since
+							the encoder must be A WORKING ENCODER). 
+			3. TEST `IEncoder` classes BEFORE TESTING THIS
+
+9. TESTING NOTE: `Parser.ts` stuff: 
+	0. Do ONLY once `TokenChooser` and `Regex` has been finished and tested
+	1. Test ONLY as a part of "demo"-testing: 
+		1. +/-, () and [a-zA-Z]-variables (no self-modification)
+		2. A Self-mofidying parser
+	2. This is an *INTEGRATION TEST*
+	3. VITAL: besides this, ADD a "demo"-style integration test 
+		for `SourceBuilder + IndexMap + DepthStream + INode + NodeSystem` for 
+		GENERATION of the "+/-, (), [a-zA-Z]-vars (no-self-mod)"
+		grammar sources BASED OFF a Node-based AST. 
+
+		It also must be: 
+
+			1. error-resistant (MarkerStream + Counter)
+			2. boasts custom error messages
+			3. keep track of MULTIPLE ERRORS [inside `.state.errors: Error[]`]; 
+		
+10. TESTING NOTES: 
+		8. `BasicHash`, 
+			`LengthHash`, 
+			`TokenHash`, 
+			`TypeofHash`:
+				1. Test each independently
+				2. Use DIFFERENT `IPreMap`s for each case
+				3. DO NOT MOCK! [use real `IPreMap`s instead]: 
+					reason - as always, too simple
+					this would require re-implementing A LOT of stuff for no good reason...	
+		9. `IndexMap.ts` stuff: 
+			1. The functions - test each one
+			2. Each one should be given a SINGLE case of an `IMapClass/whatever` to work on
+			3. Each one given SHOULD BE REAL!!! [no mocks]
+		
+11. TESTING NOTE: `LoadedU8`, `LoadedU16`, `Loaded8`: 
+	1. Use real files
+	2. NO MOCKS
+
+12. TESTING NOTE:
+		11. `TokenNode`, `ContentNode`, `RecursiveNode`, etc: 
+			1. create several instances for each one created class
+
+13. TESTING NOTE: `NodeSystem`:
+	1. Use `samples.Nodes.PlainNodes` for this test
+	2. NO MOCKS
+	3. Test ONLY after all the INode implementations have already been
+
+14. TESTING NOTE: `ObjectPool`: 
+	1. Create a mock class
+	2. Use `ObjectPool(MockClass)` on it
+	3. Create some instances - test it...
+	4. BENCHMARK: ensure that this thing gives us REAL performance gains...
+		Otherwise, SCRAP IT: 
+			1. makes the library more complex
+			2. prevents "total" immutability due to object reuse
+			3. may be overkill...
+		
+15. TESTING NOTE: `ReadingSource`: 
+	1. Use real files
+	2. DO NOT use mocks for `IDecoder` - use real ones: 
+		1. 2 classes, specifically	
+
+16. TESTING NOTE: `constants.ts`: 
+		1. THESE HAVE SEMANTIC MEANING! [so tests ARE needed...]
+			1. `MissingArgument` is supposed to be behaving like `undefined` ALWAYS
+			2. `isGoodIndex(BadIndex) === false`, `isGoodIndex(BadIndex + 1) === true`
+			...ETC
+		
+17. TESTING NOTE: CompositeStream
+	1. cases: 
+		1. many diverse streams [fewer; for greater confidence] 
+			1. This one would be simple and include only data-manipulation Stream-s
+		2. many diverse streams [more]	
+			1. This one would include a `FreeStream`
+			2. This one would include a `WriteStream`
+		2. one stream only 
+		3. no streams 
+
+18. TODO: test each (public) export: 
+	AUTOMATICALLY - let they be imported via the "."-path notation. 
+	Like `import {samples}` + `samples.Node.PlainNodes`, instead of just `import {PlainNodes}`

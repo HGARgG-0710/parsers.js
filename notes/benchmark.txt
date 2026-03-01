@@ -1,0 +1,37 @@
+1. VERIFY that the ObjectPool is NEEDED for when dealing with large files
+	DUE TO GC-induced slowdowns of allocating/reallocating objects when
+	working with a huge file on a piece-by-piece basis. 
+
+2. RotationBuffer vs 'shift/unshift'-based solution: 
+	0. Generalize the `PeekStream` to a common "abstract" ancestor
+		1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
+	1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]
+	2. Compare the two on a large [and relatively simple] input that utilizes `TokenChooser`, with : 
+		0. benchmark 0 - 0-1 lookaheads [not very ambigious at all]
+		1. benchmark 1 - 0-3 lookaheads [somewhat intensive/ambigious - many times - doesn't require any lookaheads]
+		2. benchmark 2 - 3-12 lookaheads [IS intensive/ambigious - many times - DOES reuqire lookaheads]
+
+		IF there is *any* performance benefit, either: 
+			1. replace the 'RotationBuffer'-based version with 'shift/unshift'-based
+			2. make it so that the `PeekStream` uses appropriate 
+
+	3. NOTE: *do not* throw out the old solution, keep it and, possibly, LEARN FROM IT 
+		- say that this is an excellent example of over-engineering (and, in particular, 
+		premature optimization). 
+
+3. TODO: RESEARCH AND BENCHMARKS (Chevrotain)
+	1. Compare performance with Chevrotain benchmark (the JSON parser example): 
+		1. *possibly*, if the library performance is really bad, do something about it... [if you can]
+		2. ALSO: create a benchmark for MEMORY USAGE [more concretely - compare parsers.js with the others...]; 
+			The memory usage should be noticeably better than speed...; 
+			Specifically: 
+				1. take their benchmarks
+				2. MEASURE the memory
+				3. measure memory on YOUR library
+				4. if good, add to your 'Home' section (as a more memory-effective alternative for large files); 
+		
+	2. [yes, that thing also...] https://github.com/Chevrotain/chevrotain/blob/master/packages/utils/src/to-fast-properties.ts#L2
+		Supposedly, it (significantly) speeds up property access on classes. 
+		Benchmark...
+		3. [building v8] d8 - USE IT to profile the optimizations (lack of) of the used library code [reflect upon, and change the library respectively]
+			Do research (V8 performance): https://floitsch.blogspot.com/2012/03/optimizing-for-v8-introduction.html

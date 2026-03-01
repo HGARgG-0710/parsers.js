@@ -1,0 +1,53 @@
+1. Add SonarQube to the project: 
+	1. get data on quality
+	2. UPDATE the code to get better quality metrics (coupling, SLOC, test coverage, etc)
+
+2. Add a JIRA for it: 
+	1. (possibly) - GitHub Issues?
+		NOTE: use a GitHub Issue ONLY for public stuff, the *private* todos 
+			(like library-level refactorings, new language rewrites, etc)
+			SHOULD NOT be made public, AT ALL; 
+
+3. NEW VERSIONS: 	
+	1. [0.4] Once libraries are refactored - new version will be '0.4' [try to make it BACKWARDS-COMPATIBLE]
+	2. [1.0] Once we REWRITE the whole thing in a NEW LANGUAGE - '1.0' [again, *try* to keep it fully backwards-compatible; 
+		employ 'mixins.js' in generation of said transpiled language's code; OR, conversely, *do not*, and instead just 
+		PASTE the code used for 'mixins.js' (improved) used by the transpiler, so as to avoid having to require new 
+		runtime/depmanager-specific dependency-packages]; 
+
+4. WRITE THE CHANGELOGS for *every* version tag in the GitHub repo
+
+5. CLEAN UP the GIT HISTORY (once we're done with the v0.3); 
+	1. ALSO: 
+		1. remove the old 'parsers.js' repo (temp-rename to '_parsers.js' for safety reasons; Don't want to lose all that work ;D)
+		2. create a NEW (cleaned up) 'parsers.js' repo
+		3. commit each of the versions of the project to there, ONE BY ONE;
+		4. DO THE TESTING on the new feature branch - TO BE MERGED into 'main'
+		5. RELOCATE the notes to EITHER 'ideas/', OR to GitHub Issues; 
+			(The first one's better, since these notes aren't supposed to be 
+			publicly available unlike the remainder of the project); 
+
+6. GitHub Actions: 
+	1. Set up a GitHub Actions -> npm pipeline
+	2. ADD A GitHub Workflows FILE for updating the latest version, and publishing to npm
+	3. Workflows list:
+		1. make-tag [like in one.js]: 
+			1. updates 'package.json' version; via `npm version`
+			2. makes tag
+			3. commits
+			4. pushes
+		2. npm-publish [like in one.js]: 
+			0. runs the run-tests as a Reusable Workflow
+			1. publishes to npm
+		3. run-tests [not quite like in one.js, but similar]:
+			0. builds the project and tests
+			1. runs the tests
+	4. AFTER you copy/write those, ADD a GitHub Gist for them: 
+			1. make-tag
+			2. npm-publish
+
+			__NOT__ the `test` command. 
+			Reason: too different from project-to-project. 
+			These other two are the same.
+
+7. 
