@@ -1,14 +1,15 @@
-6. Commit L: 
-	FIX the 'test-build'
-	Let it be possible to run tests again 
-		(currently, some madness arising from 
-			import order causes the whole thing to crash). 
 
-	Do this by REMOVING 'import's like 'import {A} from "../.../classes.ts"'
-	or 'import {A} from "../.../Stream.ts', etc - use FILE-BY-FILE loading, 
-	avoid re-exports like the plague. 
+TODAY: 
+	
+RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
+	Namely: 
+		1. intersection: 	/[[...]&&[...]]/v
+		2. subtraction: 	/[[...]--[...]]/v
+		3. string literals: /[q{...}]/v
 
-[v0.3]
+1. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
+	THIS IS VITAL. 
+	SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
 
 -1. IndexMap: REDESIGN: 
 	Ok, it's *ALMOST* as one would want it, except...
@@ -22,41 +23,15 @@
 
 	For instance, the NEW code would be more like 'NodeMap(IndexMap.PredicateMap)', 
 	SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
-	class ITSELF [and not an instance]! 
+	class ITSELF [and not an instance]! 		
 
-0. FIX: add ability to specify a LIMIT on the 'ObjectPool' number 
-	of instances. Particularly, enable the ability for the user to 
-	MODIFY limits on pools for specific (non-internal) types of 
-	objects. Do this ONLY AFTER having verified that, indeed, the 
-	ObjectPool DOES bring real performance gains for large inputs
-	(i.e. during the final testing phase...)
+
+[v0.3]
 
 -1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 	They truly *do* belong there...
 	Likewise, ADD the respective generics onto the `NFARegexMatcher`
-
--1. MINOR: the 'get initializer() {...}' getters (style)
-	STORE all the 'IInitializer' objects ON THE CLASSES that they relate to. 
-	Sole exception is when you're COMPOSING THEM. 
-	In this case, TAKE THEM OUT TO A SEPARATE FILE (example of that: RecursivePipe); 
-	This, in particular, can help REDUCE the name duplications...
-
-1. VERIFY that *all* the "public" exports ARE PROVIDED 
-	(specifically, the 'export * from'-statements, 
-		AND the 'export' modifiers; 
-		ALSO, ensure that NOTHING that should instead be 
-			a private class is exported out to the user)
-
-TY2. Type simplification - the `array.Pairs` overuse: 
-	Rely more upon the `Iterable<[KeyType, ValueType]>`, where possible. 
-	Specifically - when the [Symbol.iterator] is the only actually needed property.
 	
-RE1. 'regex' - allow for methods for creation of regular expressions that use the extended regex-syntax (enabled by the 'v' flag); 
-	Namely: 
-		1. intersection: 	/[[...]&&[...]]/v
-		2. subtraction: 	/[[...]--[...]]/v
-		3. string literals: /[q{...}]/v
-
 6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
 	1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!
 	2. new type - `IIndexStream = IStream & ILineIndex` [new], OLD `IIndexStream` (ILinkedIndexStream) becomes `IIndexStream & ILinkedStream`
@@ -64,28 +39,9 @@ RE1. 'regex' - allow for methods for creation of regular expressions that use th
 10. Commit U: `RegexParser`: 
 	1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
 
-11. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
-	THIS IS VITAL. 
-	SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
-
 12. walk through ALL the library types, and FIX all the types which ARE EXCESSIVE! 
 	Let Interface Segregation Principle be followed rigorously - if something demands 
-		MORE properties than IT USES, then a NEW INTERFACE is warranted. 
-		
-14. Make the `INodeType`-implementations of the library into `IDebugNamed`
-	This is important to allow one for using them with `expectKind()`-function; 
-	LET THE USER provide the factories with respective `string` identifiers ON 
-		CREATION of the classes for node-making. 
-
-TODO: BUG (possible) - in `IStream` implementations - LOOK AND SEE!
-	When one extends a given class, but adds *SPECIALIZED* composite-objects 
-	via `private readonly`/etc, that are added INSIDE the generated constructor 
-	but AFTER the `connectResource` is called from within the `.init` call that happens 
-	inside the `super(resource)`, one must ENSURE that the said composite objects 
-	are NOT REQUIRED within the `connectResource` method. 
-
-	Meaning to say - one must be MINDFUL about WHERE the said `super(resource)`
-	must be REPLACED with `super()`, and the `this.init(resource)` be called AT THE END!!!
+		MORE properties than IT USES, then a NEW INTERFACE is warranted. 		
 
 TODO: ensure that all the file-reading classes use THE SAME errors
 	to signify that a filepath is nonexistent (reason: simplifies things

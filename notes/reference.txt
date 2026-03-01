@@ -85,3 +85,9 @@
 		returned by the chooser (recursion here), and Lifetime as the Lifetime 
 		of the Youngest Stream older than the Oldest Stream returned by the chooser 
 		(i.e. the immediate consumer of the Chooser result). 
+
+5. VERIFY that *all* the "public" exports ARE PROVIDED 
+	(specifically, the 'export * from'-statements, 
+		AND the 'export' modifiers; 
+		ALSO, ensure that NOTHING that should instead be 
+			a private class is exported out to the user)

@@ -314,3 +314,5 @@ REMINDER: about the `IStepPredicate`:
 	ENSURE that by default, 'capturePreference' prefers the LONGEST version of a 'x+y?z' 
 	regex (that is, it DOESN'T skip 'y' when it IS present...)
 	
+1. REMINDER [ObjectPool-s]: DON'T forget to test the LIMIT SIZE!
+	In particular, it is supposed to throw...
