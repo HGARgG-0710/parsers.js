@@ -5,5 +5,6 @@ export { validateUnicodeCodeLength } from "./Errors/Unicode/length.js"
 export {
 	validatePropertyName,
 	validatePropertyValue,
+	validateUnicodePropertyNameNonEmpty,
 	validateUnicodePropertyNonEmpty
 } from "./Errors/Unicode/property.js"

@@ -3,6 +3,7 @@ import { IteratorStreamChooser } from "../../../../modules/Stream/objects/Choose
 import { ensureChildUnrevivable, skip } from "../../../../objects/Error.js"
 import { LimitStream, SingleNodeStream } from "../../../../objects/Stream.js"
 import {
+	DefaultChooser,
 	EndBracketStream,
 	StateAccessStream,
 	StringConsumerStream
@@ -11,11 +12,11 @@ import { next } from "../../../../utils/Stream.js"
 import {
 	validatePropertyName,
 	validatePropertyValue,
+	validateUnicodePropertyNameNonEmpty,
 	validateUnicodePropertyNonEmpty
 } from "../Errors.js"
 import { UnicodeProperty, UnicodePropertyAlias } from "../Nodes.js"
 import {
-	isCurrEquality,
 	isNotNextClbrace,
 	isNotNextEquality,
 	skipOpbrace
@@ -36,29 +37,9 @@ const UnicodePropertyLimitStream = EndBracketStream<string>(
 
 const UnicodePropertyNameLimitStream = EndBracketStream<string>(
 	new LimitStream.Limits.Builder()
-		.setIsEmpty((input) => {
-			if (isCurrEquality(input)) {
-				// TODO: here, throw a LESS GENERIC ERROR!
-				// * Property-names must be non-empty.
-				throw new Error("")
-			}
-			return false
-		})
+		.setIsEmpty((input) => validateUnicodePropertyNameNonEmpty(input))
 		.setLongAs(isNotNextEquality)
 )
-
-class UnicodePropertyStreamChooser extends IteratorStreamChooser<string> {
-	static readonly instance = new UnicodePropertyStreamChooser()
-
-	private static readonly Streams = [
-		HandleUnicodePropertyName,
-		HandleUnicodePropertyValue
-	]
-
-	protected override getStreams(): IRawStreamArray<string> {
-		return UnicodePropertyStreamChooser.Streams
-	}
-}
 
 class UnicodePropertyStream extends SingleNodeStream<INode> {
 	private getPropName(): [boolean, string] {
@@ -110,8 +91,21 @@ function HandleUnicodePropertyName() {
 	]
 }
 
-function HandleUnicodePropertyValue(): IRawStreamArray<string> {
-	return [UnicodePropertyValueConsumerStream()]
+const HandleUnicodePropertyValue = DefaultChooser(
+	UnicodePropertyValueConsumerStream
+)
+
+class UnicodePropertyStreamChooser extends IteratorStreamChooser<string> {
+	static readonly instance = new UnicodePropertyStreamChooser()
+
+	private static readonly Streams = [
+		HandleUnicodePropertyName,
+		HandleUnicodePropertyValue
+	]
+
+	protected override getStreams(): IRawStreamArray<string> {
+		return UnicodePropertyStreamChooser.Streams
+	}
 }
 
 export function HandleUnicodeProperty(): IRawStreamArray {
