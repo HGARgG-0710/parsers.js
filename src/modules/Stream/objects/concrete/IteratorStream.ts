@@ -1,20 +1,20 @@
 import type { IInitializer, IStream } from "../../../../interfaces.js"
 import { Initializable } from "../../../../objects/Initializable.js"
 
-const iteratorStreamInitializer: IInitializer<[Iterable<any>]> = {
-	init(target: IteratorStream, iterable: Iterable<any>) {
-		if (iterable) target.setIterable(iterable)
-	}
-}
-
 /**
  * This is a wrapper around the `Iterable` interface, permitting
- * one to treat it as a (non-iterable) `IStream<T>`. 
+ * one to treat it as a (non-iterable) `IStream<T>`.
  */
 export class IteratorStream<T = any>
 	extends Initializable<[Iterable<T>]>
 	implements IStream<T>
 {
+	static readonly initializer: IInitializer<[Iterable<any>]> = {
+		init(target: IteratorStream, iterable: Iterable<any>) {
+			if (iterable) target.setIterable(iterable)
+		}
+	}
+
 	private iterator: Iterator<T>
 	private _curr: T
 	private lookahead: T
@@ -56,6 +56,6 @@ export class IteratorStream<T = any>
 	}
 
 	protected get initializer() {
-		return iteratorStreamInitializer
+		return IteratorStream.initializer
 	}
 }

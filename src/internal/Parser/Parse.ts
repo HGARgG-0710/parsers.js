@@ -3,6 +3,7 @@ import type {
 	ICompositeStream,
 	IDepthMark,
 	IErrorDataMaker,
+	IInitializer,
 	IInputStream,
 	ILinkedStream,
 	IParse,
@@ -10,18 +11,18 @@ import type {
 } from "../../interfaces.js"
 import { Initializable } from "../../objects/Initializable.js"
 
-const parseInitializer = {
-	init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
-		if (input) target.setInput(input)
-		if (state) target.setState(state)
-		if (target.isSetupReady()) target.setupStreams()
-	}
-}
-
 export class Parse<InType = any, FinalType = any, InitType = any>
 	extends Initializable<[InitType, Summat]>
 	implements IParse<FinalType, InitType>
 {
+	private static readonly initializer: IInitializer<[any, Summat]> = {
+		init<InitType = any>(target: Parse, input?: InitType, state?: Summat) {
+			if (input) target.setInput(input)
+			if (state) target.setState(state)
+			if (target.isSetupReady()) target.setupStreams()
+		}
+	}
+
 	private readonly updatePending: ParseUpdatePendingState
 	private updateState: IParseUpdateState
 
@@ -48,7 +49,7 @@ export class Parse<InType = any, FinalType = any, InitType = any>
 	}
 
 	protected get initializer() {
-		return parseInitializer
+		return Parse.initializer
 	}
 
 	get streams() {

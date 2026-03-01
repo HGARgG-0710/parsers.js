@@ -135,17 +135,17 @@ class TempWriter<T = any> {
 	}
 }
 
-const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
-	init(
-		target: IInitializable<[IOwnedStream]> & IPeekResettable,
-		resource?: IOwnedStream
-	) {
-		ownerInitializer.init(target, resource)
-		target.resetPeeks()
-	}
-}
-
 class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
+	private static readonly initializer: IInitializer<[IOwnedStream]> = {
+		init(
+			target: IInitializable<[IOwnedStream]> & IPeekResettable,
+			resource?: IOwnedStream
+		) {
+			ownerInitializer.init(target, resource)
+			target.resetPeeks()
+		}
+	}
+
 	static readonly pool = Pools.Stream.add(new ObjectPool(_PeekStream))
 
 	private readonly tempWriter: TempWriter
@@ -179,7 +179,7 @@ class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
 	}
 
 	protected override get initializer() {
-		return peekStreamInitializer
+		return _PeekStream.initializer
 	}
 
 	trivialPeek() {

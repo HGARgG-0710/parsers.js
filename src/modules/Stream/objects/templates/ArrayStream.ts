@@ -1,10 +1,5 @@
+import type { IInitializer } from "../../../../interfaces.js"
 import { BasicStream } from "./BasicStream.js"
-
-const arrayStreamInitializer = {
-	init(target: ArrayStream, ...items: any[]) {
-		if (items.length > 0) target.setItems(items)
-	}
-}
 
 /**
  * This is an abstract class implementing the `IOwnedStream<T>` interface.
@@ -22,12 +17,18 @@ export abstract class ArrayStream<T = any, ElemType = any> extends BasicStream<
 	T,
 	ElemType[]
 > {
+	private static readonly initializer: IInitializer<any[]> = {
+		init(target: ArrayStream, ...items: any[]) {
+			if (items.length > 0) target.setItems(items)
+		}
+	}
+
 	protected override ["constructor"]: new (...items: ElemType[]) => this
 
 	protected items: ElemType[]
 
 	protected get initializer() {
-		return arrayStreamInitializer
+		return ArrayStream.initializer
 	}
 
 	setItems(items: ElemType[]) {

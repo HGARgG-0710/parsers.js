@@ -1,5 +1,5 @@
 import type { Summat } from "@hgargg-0710/summat.ts"
-import type { IDepthMark } from "../../../../interfaces.js"
+import type { IDepthMark, IInitializer } from "../../../../interfaces.js"
 import type { IParseState } from "../../../../interfaces/Parser.js"
 import type {
 	ICompositeStream,
@@ -11,24 +11,26 @@ import { StreamPipe } from "../../../../internal/Stream/StreamPipe.js"
 import { resourceInitializer } from "../../../../objects/Initializable.js"
 import { IdentityStream } from "../concrete.js"
 
-const compositeStreamInitializer = {
-	init(
-		target: BeforeCompositeStream,
-		lowStream?: IOwnedStream,
-		rawStreams?: IRawStreamArray,
-		state?: IParseState
-	) {
-		resourceInitializer.init(target, lowStream)
-		if (rawStreams) target.setRawStreams(rawStreams)
-		if (state) target.setState(state)
-		if (target.isEvaluationReady()) target.evaluateStreams()
-	}
-}
-
 export abstract class BeforeCompositeStream<T = any>
 	extends IdentityStream<T, [IRawStreamArray, IParseState]>
 	implements ICompositeStream<T>
 {
+	private static readonly initializer: IInitializer<
+		[IOwnedStream, IRawStreamArray, IParseState]
+	> = {
+		init(
+			target: BeforeCompositeStream,
+			lowStream?: IOwnedStream,
+			rawStreams?: IRawStreamArray,
+			state?: IParseState
+		) {
+			resourceInitializer.init(target, lowStream)
+			if (rawStreams) target.setRawStreams(rawStreams)
+			if (state) target.setState(state)
+			if (target.isEvaluationReady()) target.evaluateStreams()
+		}
+	}
+
 	protected override ["constructor"]: new (
 		lowStream?: IOwnedStream,
 		rawStreams?: IRawStreamArray,
@@ -61,7 +63,7 @@ export abstract class BeforeCompositeStream<T = any>
 	}
 
 	protected override get initializer() {
-		return compositeStreamInitializer
+		return BeforeCompositeStream.initializer
 	}
 
 	get streams() {

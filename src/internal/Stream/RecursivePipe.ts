@@ -5,6 +5,7 @@ import type {
 	IDepthMarked,
 	IFreeable,
 	IInitializable,
+	IInitializer,
 	IPoolable
 } from "../../interfaces.js"
 import type { IArray } from "../../interfaces/Array.js"
@@ -275,7 +276,7 @@ const deepTerminalMapInitializer = {
 	}
 }
 
-const renewerInitializer = {
+const renewerInitializer: IInitializer<[RecursivePipe.Renewer]> = {
 	init(target: IRenewerSettable, renewer?: RecursivePipe.Renewer) {
 		if (renewer) target.setRenewer(renewer)
 	}
@@ -284,17 +285,6 @@ const renewerInitializer = {
 const itemsInitializer = {
 	init(target: IItemsSettable, items?: any[]) {
 		if (items) target.setItems(items)
-	}
-}
-
-const baseEvaluablePipeInitializer = {
-	init(
-		target: IRenewerSettable & IDepthMapSettable,
-		renewer?: RecursivePipe.Renewer,
-		depthMap?: GlobalDepthMap
-	) {
-		depthMapInitializer.init(target, depthMap)
-		renewerInitializer.init(target, renewer)
 	}
 }
 
@@ -418,6 +408,19 @@ abstract class BaseEvaluablePipe<
 	Recursive = any,
 	InitType = any
 > extends RenewerHaving<T, Recursive, InitType, [GlobalDepthMap<T>]> {
+	private static readonly initializer: IInitializer<
+		[RecursivePipe.Renewer, GlobalDepthMap]
+	> = {
+		init(
+			target: IRenewerSettable & IDepthMapSettable,
+			renewer?: RecursivePipe.Renewer,
+			depthMap?: GlobalDepthMap
+		) {
+			depthMapInitializer.init(target, depthMap)
+			renewerInitializer.init(target, renewer)
+		}
+	}
+
 	private depthMap: GlobalDepthMap<T>
 
 	private markDepth(terminal: T) {
@@ -441,7 +444,7 @@ abstract class BaseEvaluablePipe<
 	}
 
 	protected override get initializer() {
-		return baseEvaluablePipeInitializer
+		return BaseEvaluablePipe.initializer
 	}
 
 	protected initTerminal(toInitialize: T, initParam: T | InitType) {
@@ -963,13 +966,6 @@ export class RecursivePipeArgs<
 	private constructor() {}
 }
 
-const wrapArrayInitializer = {
-	init(target: WrapArray, items?: any[], renewer?: RecursivePipe.Renewer) {
-		renewerInitializer.init(target, renewer)
-		itemsInitializer.init(target, items)
-	}
-}
-
 /**
  * This is a class that encapsulates the `IRecursiveItems`
  * of the `RecursivePipe`, and which is used by the user
@@ -989,6 +985,19 @@ export class WrapArray<
 	>
 	implements IArray<T | Recursive>
 {
+	private static readonly initializer: IInitializer<
+		[any[], RecursivePipe.Renewer]
+	> = {
+		init(
+			target: WrapArray,
+			items?: any[],
+			renewer?: RecursivePipe.Renewer
+		) {
+			renewerInitializer.init(target, renewer)
+			itemsInitializer.init(target, items)
+		}
+	}
+
 	private _items: IRecursiveItems<T, Recursive, InitType>
 	private renewer: RecursivePipe.Renewer<T, Recursive, InitType>
 
@@ -1028,7 +1037,7 @@ export class WrapArray<
 	}
 
 	protected get initializer() {
-		return wrapArrayInitializer
+		return WrapArray.initializer
 	}
 
 	write(i: number, value: T | Recursive) {
