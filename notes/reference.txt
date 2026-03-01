@@ -57,3 +57,31 @@
 	Describe the `this.state.parse.renewStream(this.resource)` in some detail. 
 	Let there be a description SPECIFICALLY for cases when children die BEFORE parents SEVERAL times. 
 	Let there be AN EXAMPLE class (like one of those in the `Regex` parser)
+
+4. On Streams [basics - math - CRUCIAL, DO NOT DELETE]: 
+	All 'IStream' (and IStreamChooser) objects have the following 
+	defining characteristics in common: 
+
+		1. Input Arity Function: for any given IOwningStream, 
+			that's a number of elements of underlying source/resource
+			(i.e. a file/IOwnedStream/tree/etc), that the current 
+			IOwningStream requires to produce a single element. It 
+			can be a constant (like 1 or 2, or whatever), or it can 
+			change as time goes by (or, it may change between a finite 
+			set of values depending on the input). 
+
+		2. Lifetime Function: for any given IStream, that's a number of 
+			elements in a given situation (i.e. source/resource) that it 
+			can produce before it dies out (i.e. finishes). You reset the 
+			lifetime of an 'IStream' by re-initializing it with an 'init()'
+			call. 
+		
+		3. (Stream Choosers) Revival Count Function - the number of times a 
+			child in a given Stream Chooser can be revived before it the said 
+			IStreamChooser value has to be renewed.  		
+
+	Note: Input Arity and Lifetime Functions are also present for Stream Choosers. 
+		They are defined as Input Arity of the INPUT for the Youngest Stream 
+		returned by the chooser (recursion here), and Lifetime as the Lifetime 
+		of the Youngest Stream older than the Oldest Stream returned by the chooser 
+		(i.e. the immediate consumer of the Chooser result). 

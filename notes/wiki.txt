@@ -108,4 +108,19 @@
 
 	Note also that the library is intended for creation of Stream-based Validators. 
 
-7. 
+7. [Home] Reasons to use parsers.js (Key Features): 
+	1. Self-Modifying parsers
+	2. High-quality Error-Handling
+	3. Ease of Development (parsers Filter-Pipes-like architecture implies strong SRP adherence)
+	4. High Testability (again, consequence of the architecture employed)
+	5. Ability to create highly extensible parsers (your future JS parser, for instance...)
+	6. Supprt for both server-side (Node) and front-end (Web) environments
+	7. High customizability 
+	8. TypeScript Support
+	9. Object Pooling Support (note: ONLY if it's actually doing something, otherwise strike this down from the list)
+		Alternative phrasing (if true): 
+			Allows for handling high load of data cheaply, i.e. Memory-Efficient. 
+	10. Easy Validation-during-Parsing support
+	11. High functionality reuse (i.e. less boilerplate)
+	12. Support tree-conversion to JSON and XML
+	13. Its own native Unicode-aware Regex Engine

@@ -86,3 +86,10 @@ TODO: BUG (possible) - in `IStream` implementations - LOOK AND SEE!
 
 	Meaning to say - one must be MINDFUL about WHERE the said `super(resource)`
 	must be REPLACED with `super()`, and the `this.init(resource)` be called AT THE END!!!
+
+TODO: ensure that all the file-reading classes use THE SAME errors
+	to signify that a filepath is nonexistent (reason: simplifies things
+	- possibly introduce your own wrapper around the basic Node error for 
+	these kinds of specific cases); SAME goes for file-writing classes 
+	- the errors in cases when there are problems with writing rights 
+	MUST BE THE SAME!!!

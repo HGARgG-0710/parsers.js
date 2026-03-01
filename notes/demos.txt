@@ -1,52 +1,15 @@
-1. NOTE [OLD]: on `a + (b - ...) ...` demo implementation: 
-	FOR ENABILING full laziness, one NEEDS choosers, since they allow one to parse items of arbitrary depth: 
-			b + a + (b - (...)), ... # and so forth - only characters are: a, b, +, -, (, ) and ','
-		can be parsed like: 
+1. List of demos: 
+	1. basic arithmetic: [a-zA-Z]+, +*-/, (...)
+		This is to prepare self for future work on things like JavaScript parser, 
+			and to ensure that one *REALLY* does have all that is necessary in the 
+			library for enabling these kinds of grammars. 
+	2. large JSON parser: this is a lazy parser for huge JSON files
+		NOTE: make this into a SEPARATE package! 
+			Reason: could be useful for handling huge JSON parsers...
+	3. simple JSON parser: this is a non-lazy parser, that does not 
+		make use of various kinds of ParseLoopStream/ParseConcatStream, etc; 
+		i.e. it's a pure ParseStream one, that loads the entire file into memory
+	4. a "multiline" Regex-matcher demo (for testing Regex Extensions feature)
+		The "multiline" matcher \m works like: 
 
-			# very rough sketch - incomplete, need to solve the issue of DEALING with the `recursive ()`-aspect of it all. 
-			1. ReadableSource
-			2. InputStream
-			3. SkipSpaces [in `samples`]
-			3. TokenChooser (+, -, a, b, (, ), ,) - provides TokenNode abstractions
-			4. chooser0:	
-				1. TRY FINDING a matching pair for '/(/': 
-					input.next() # skipping '('
-					return [
-						SingletonStream(BRACKETED_RecursiveNode_func), # a RecursiveNode, with 1 element - the sum; 
-						chooser1, # "gathering up" all the "+", etc
-						chooser0, # recursion - bracket-expression INSIDE the bracket
-						LimitedStream(EndBracketTokenPred),  # predicate of '.type === EndBracketType'
-					]	
-				2. all else - PASS AS-IS
-			5. chooser1: 
-				1. based off TableMap:
-					1. based off an MatchList:
-					
-						0. MATCHING - Peek(1) (approx, in `.type`s) -- 1/[+-]/: 
-							const elem = input.next() # a | b | (...) - last one hadled by `chooser0`
-							const sign = input.next() # - | +
-
-							# the `Summand_Curried(elem, sign)(elem1) = { type: sign, children: [elem, (elem1.type == sign ? ...elem1.children : elem1)] }`
-							# we are TURNING the `Stream`-s into a SEQUENCE of ONE-ELEMENT LAYERS TO BE EVALUATED LATER; 
-							# which are THEN - flattened to obtain a single `.children` array for the arithmetic expression; 
-							return [
-								SingletonStream(Summand_Curried(elem, sign)), 
-								chooser1,
-							]
-
-						1. MATCHING - .curr 0/[ab]|#[BRACKET_TYPE]/ [with no prev. match of 'peek(1)']
-							const elem = input.next() # skipping; NO +- AFTER the current one; Has to be end on the next [or, an ERROR]; 
-							return [
-								SingletonStream(Summand), # `Summand` - a RecursiveNode with `.children.length === 1`
-								chooser1 # end-recursion - 'IS_END'/Error ahead [NOTE: this needs to be SUBSET - break into `chooser1` and `chooser2` (lesser - without recursion)]
-							]
-
-						3. IS_END: 
-							return []
-
-						4. is ',' - return a `SingletonStream(id)` - passing those as-is; 
-
-						5. ERROR/ERROR-RECOVERY - invalid token provided
-
-				2. EACH TIME that the `chooser1` is FINISHED, we have successfully parsed AN OPERATION
-			6. PredicateStream - pick those that are not a ','
+			/#m(a|bc+)/ -> /\n*a\n*|\n*b\n*c+\n*/
