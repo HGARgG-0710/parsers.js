@@ -148,8 +148,8 @@ const peekStreamInitializer: IInitializer<[IOwnedStream]> = {
 class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
 	static readonly pool = Pools.Stream.add(new ObjectPool(_PeekStream))
 
-	private readonly tempWriter = new TempWriter()
-	private readonly peekProvider = new PeekProvider(this, DefaultPeekSize)
+	private readonly tempWriter: TempWriter
+	private readonly peekProvider: PeekProvider
 
 	private _peeksMaybeLeft = false
 
@@ -216,6 +216,13 @@ class _PeekStream<T = any> extends DyssyncOwningPoolableStream<T> {
 
 	resetPeeks() {
 		this.peekProvider.reset()
+	}
+
+	constructor(resource?: IOwnedStream) {
+		super()
+		this.tempWriter = new TempWriter()
+		this.peekProvider = new PeekProvider(this, DefaultPeekSize)
+		this.init(resource)
 	}
 }
 

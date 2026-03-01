@@ -174,11 +174,11 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 {
 	static readonly pool = Pools.Stream.add(new ObjectPool(TreeStream))
 
-	private readonly walker = new TreeWalker<TreeLike>()
-	private readonly lastLevel = new LastLevelWithSiblings(this.walker)
-	private readonly nextResponse = new NextWalkerResponse(this.walker)
-	private readonly prevResponse = new PrevWalkerResponse(this.walker)
-	private readonly endIndex = new TreeEndIndex(this.walker)
+	private readonly walker: TreeWalker<TreeLike>
+	private readonly lastLevel: LastLevelWithSiblings
+	private readonly nextResponse: NextWalkerResponse
+	private readonly prevResponse: PrevWalkerResponse
+	private readonly endIndex: TreeEndIndex
 
 	protected currGetter(): TreeLike {
 		return this.walker.curr
@@ -249,5 +249,15 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 		this.walker.resetWalkable()
 		this.resetCurr()
 		this.resetIsEnd()
+	}
+
+	constructor(source?: TreeLike) {
+		super()
+		this.walker = new TreeWalker<TreeLike>()
+		this.lastLevel = new LastLevelWithSiblings(this.walker)
+		this.nextResponse = new NextWalkerResponse(this.walker)
+		this.prevResponse = new PrevWalkerResponse(this.walker)
+		this.endIndex = new TreeEndIndex(this.walker)
+		this.init(source)
 	}
 }

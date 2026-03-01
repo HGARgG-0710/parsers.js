@@ -1,4 +1,3 @@
-import { array } from "@hgargg-0710/one"
 import type {
 	IIndexMap,
 	IParserFunction,
@@ -14,7 +13,7 @@ import { Pairs } from "../../../../samples.js"
 import { NodeMap, PeekMap } from "../../../../utils/IndexMap.js"
 
 export function LookaheadMap(
-	map: array.Pairs<ITypeCheckable, IParserFunction>,
+	map: Iterable<[ITypeCheckable, IParserFunction]>,
 	_default: IParserFunction
 ): IIndexMap<
 	ITypeCheckable,

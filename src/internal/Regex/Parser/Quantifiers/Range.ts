@@ -1,4 +1,3 @@
-import { array } from "@hgargg-0710/one"
 import type {
 	IBasicStream,
 	ICellNode,
@@ -161,5 +160,6 @@ export function HandleRange() {
 	]
 }
 
-export const maybeRange: array.Pairs<ITypeCheckable, IStatelessStreamChooser> =
-	[[Range, handleRangeQuantifier]]
+export const maybeRange: Iterable<[ITypeCheckable, IStatelessStreamChooser]> = [
+	[Range, handleRangeQuantifier]
+]
