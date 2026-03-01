@@ -31,15 +31,6 @@
 	ObjectPool DOES bring real performance gains for large inputs
 	(i.e. during the final testing phase...)
 
--2. FIX the MEMORY LEAKS [in JavaScript sense - never-released references]: 
-	Walk through the ENTIRETY of the library, and REMOVE such simple cases of 
-		UNWANTED (already used) REFERENCES with 'null'. Hold reference to an 
-		object NO LONGER than it is ACTUALLY NEEDED. 
-		
-		Abstract the ' = null' code away into SEPARATE private 'reset*'-METHODS 
-		[important, since that'll ensure for it to be a HARDER change to make 
-		ACCIDENTALLY]. 
-
 -1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 	They truly *do* belong there...
 	Likewise, ADD the respective generics onto the `NFARegexMatcher`
