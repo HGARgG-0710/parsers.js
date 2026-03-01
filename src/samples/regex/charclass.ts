@@ -1,4 +1,5 @@
 import { regex } from "../regex.js"
+import { with_flags } from "./flags.js"
 import { non_bracket } from "./refactor.js"
 
 const char_ranges = (...ranges: (string | [string, string])[]) =>
@@ -23,6 +24,19 @@ export const charclass = (...ranges: (string | [string, string])[]) =>
  */
 export const neg_charclass = (...ranges: (string | [string, string])[]) =>
 	regex(`[^${char_ranges(...ranges)}]`)
+
+export const as_uniset = with_flags(regex.UnicodeSetsFlag)
+
+export const uniset_regex = (from: string) => as_uniset(regex(from))
+
+export const uniset_intersection = (a: RegExp, b: RegExp) =>
+	uniset_regex(`[${regex.contents(a)}&&${regex.contents(b)}]`)
+
+export const uniset_subtraction = (a: RegExp, b: RegExp) =>
+	uniset_regex(`[${regex.contents(a)}--${regex.contents(b)}]`)
+
+export const string_literal = (...literals: string[]) =>
+	uniset_regex(`\\q{${literals.join("|")}}`)
 
 /**
  * Creates a regular expression for the digit character class
