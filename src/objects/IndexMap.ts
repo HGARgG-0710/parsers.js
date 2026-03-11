@@ -79,7 +79,7 @@ export abstract class MidMap<
 	RealKey = any,
 	Index = K
 > implements IMidMap<K, V, Default, Index> {
-	protected ["constructor"]: new <
+	private ["constructor"]: new <
 		K = any,
 		V = any,
 		Default = any,
@@ -94,7 +94,7 @@ export abstract class MidMap<
 	private readonly preExtension: FunctionComposition<[any, ...any[]], any>
 	private readonly preKeyExtension: FunctionComposition<[K], RealKey>
 
-	protected calcExtensions() {
+	private calcExtensions() {
 		this.preExtension.calc()
 		this.preKeyExtension.calc()
 	}
@@ -107,7 +107,12 @@ export abstract class MidMap<
 		return this.preKeyExtension.get()
 	}
 
-	abstract finalize(): IIndexMap<K, V, Default, Index>
+	protected abstract getMapInstance(): IIndexMap<K, V, Default, Index>
+
+	finalize(): IIndexMap<K, V, Default, Index> {
+		this.calcExtensions()
+		return this.getMapInstance()
+	}
 
 	extend<NI = any>(
 		f: (newKey: NI) => Index
@@ -285,8 +290,13 @@ export namespace IndexMap {
 			RealKey extends any[] = any,
 			Index = K
 		> extends MidMap<K, V, Default, RealKey, Index> {
-			finalize(): ArrayMap<K, V, Default, RealKey, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): ArrayMap<
+				K,
+				V,
+				Default,
+				RealKey,
+				Index
+			> {
 				return new ArrayMap<K, V, Default, RealKey, Index>(this.liquid)
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
@@ -340,8 +350,13 @@ export namespace IndexMap {
 			RealKey = any,
 			Index = K
 		> extends MidMap<K, V, Default, RealKey, Index> {
-			finalize(): BasicMap<K, V, Default, RealKey, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): BasicMap<
+				K,
+				V,
+				Default,
+				RealKey,
+				Index
+			> {
 				return new BasicMap<K, V, Default, RealKey, Index>(this.liquid)
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
@@ -393,8 +408,7 @@ export namespace IndexMap {
 			K = IPredicate<T>,
 			Index = any
 		> extends MidMap<K, T, Default, IPredicate<T>, Index> {
-			finalize(): PredicateMap<T, Default, K, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): PredicateMap<T, Default, K, Index> {
 				return new PredicateMap<T, Default, K, Index>(
 					this.liquid.copy()
 				)
@@ -449,8 +463,7 @@ export namespace IndexMap {
 			K = ITestable<T>,
 			Index = string
 		> extends MidMap<K, T, Default, ITestable<T>, Index> {
-			finalize(): RegExpMap<T, Default, K, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): RegExpMap<T, Default, K, Index> {
 				return new RegExpMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
@@ -503,8 +516,7 @@ export namespace IndexMap {
 			K = IHaving<T>,
 			Index = any
 		> extends MidMap<K, T, Default, IHaving<T>, Index> {
-			finalize(): SetMap<T, Default, K, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): SetMap<T, Default, K, Index> {
 				return new SetMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
@@ -555,8 +567,7 @@ export namespace IndexMap {
 			K = object,
 			Index = K
 		> extends MidMap<K, T, Default, object, Index> {
-			finalize(): ObjectMap<T, Default, K, Index> {
-				this.calcExtensions()
+			protected getMapInstance(): ObjectMap<T, Default, K, Index> {
 				return new ObjectMap<T, Default, K, Index>(this.liquid.copy())
 					.setExtension(this.extension)
 					.setKeyExtension(this.keyExtension)
