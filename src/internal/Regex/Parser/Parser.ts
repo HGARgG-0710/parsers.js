@@ -1,4 +1,4 @@
-import { Config } from "../../../global.js"
+import { Config, WrapperApp } from "../../../global.js"
 import type { ICommonStream, INode, IParseable } from "../../../interfaces.js"
 import { AutoMap, ParseableInput, Regex } from "../../../objects.js"
 import { BasicHash, PeekHash } from "../../../objects/HashMap.js"
@@ -23,21 +23,26 @@ export class RegexParser {
 	}
 
 	private readonly raw: (input: IParseable) => ICommonStream<INode>
+	private readonly asApp = new WrapperApp((source: string) =>
+		this.parseErrorAware(source)
+	)
 
 	private get errPrinter() {
 		return Config.regex.errorPrinter
 	}
 
-	private parseSource(source: string) {
+	private parserBasic(source: string) {
 		return consume<INode>(this.raw(new ParseableInput(source))).get()[0]
 	}
 
+	private parseErrorAware(source: string) {
+		return this.errPrinter.execute(() => this.parserBasic(source))
+	}
+
 	// ! pre-doc: IMPORTANT - the user is advised to CACHE config objects, because `extensions` identity is what determines the necessity to re-build the parser anew...
+	// 		[which is, obviously more expensive computationally]
 	parse(source: string) {
-		// * Vital note: there is NO CLEANUP HERE
-		// because the user may (accidentally) be
-		// re-parsing the same expressions over-and-over again.
-		return this.errPrinter.execute(() => this.parseSource(source))
+		return this.asApp.run(source)
 	}
 
 	constructor(extensions: Regex.Extension[]) {

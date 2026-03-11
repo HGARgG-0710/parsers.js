@@ -30,7 +30,7 @@ const PipeLimitStream = PastEndStream(
 		.setLongAs(isNotNextPipe)
 )
 
-// * note: this is NOT a bug, since accepting empty strings MAKES NO SENSE for this specific grammar,
+// * note: this is NOT a bug, since accepting empty strings MAKE NO SENSE for this specific grammar,
 // a sequence of characters that is matched from the given '.curr'-point MUST be non-zero in length
 function PipeLimitChooser(input: IOwnedStream<INode>) {
 	while (isCurrPipe(input)) input.next()
