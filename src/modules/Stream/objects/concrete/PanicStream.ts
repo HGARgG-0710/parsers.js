@@ -58,8 +58,8 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return this.currErrData
 	}
 
-	// Template Method, DO NOT TOUCH
-	private handleErrData(errData: IErrorData) {
+	// Template Method, TOUCH AT YOUR OWN PERIL
+	private handleErrorData(errData: IErrorData) {
 		this.setErrData(errData)
 		this.transitionState()
 		this.panic()
@@ -72,19 +72,19 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 	//  	INCORRECT FRAMEWORK USAGE, and NOT the matters related to syntax-errors during
 	//  	parsing. In conclusion, unless the user wants to enable RECOVERY from the 'Error'
 	//  	objects thrown AS WELL (which is, in general, impossible, unless they METICULOUSLY
-	//  	try to separate Error-Types into "recoverable" and "non-recoverable", 
-	//  	which is a lot of work), they are probably better off *not* touching this specific 
-	//  	hook at all (similarly to much of the library's defaults, since it's designed to 
-	//  	support a plethora of varying approaches out-of-the-box). 
-	protected handleCommon(error: Error) {
+	//  	try to separate Error-Types into "recoverable" and "non-recoverable",
+	//  	which is a lot of work), they are probably better off *not* touching this specific
+	//  	hook at all (similarly to much of the library's defaults, since it's designed to
+	//  	support a plethora of varying approaches out-of-the-box).
+	protected handleError(error: Error) {
 		throw error
 	}
 
 	// ! pre-doc: this is NOT intended for overriding [Template Method Design Pattern]
-	// * 	ALSO: it is intended that ONLY the 'IErrData' objects be thrown WHENEVER we are
+	// * 	ALSO: it is intended that ONLY the 'IErrorData' objects be thrown WHENEVER we are
 	protected errHandler(errLike: Error | IErrorData): void {
-		if (isError(errLike)) this.handleCommon(errLike)
-		else this.handleErrData(errLike)
+		if (isError(errLike)) this.handleError(errLike)
+		else this.handleErrorData(errLike)
 	}
 
 	constructor(
@@ -103,9 +103,10 @@ interface IPanicStreamState<T = any, ErrType = any> {
 	nextState(): IPanicStreamState<T, ErrType>
 }
 
-class PanicStreamNoError<T = any, ErrType = any>
-	implements IPanicStreamState<T, ErrType>
-{
+class PanicStreamNoError<T = any, ErrType = any> implements IPanicStreamState<
+	T,
+	ErrType
+> {
 	get curr(): T | ErrType {
 		return this.defaultCurr()
 	}
@@ -117,9 +118,10 @@ class PanicStreamNoError<T = any, ErrType = any>
 	constructor(private readonly defaultCurr: () => T | ErrType) {}
 }
 
-class PanicStreamOnNewError<T = any, ErrType = any>
-	implements IPanicStreamState<T, ErrType>
-{
+class PanicStreamOnNewError<
+	T = any,
+	ErrType = any
+> implements IPanicStreamState<T, ErrType> {
 	private readonly onOld: PanicStreamOnOldError<T, ErrType>
 
 	get curr(): T | ErrType {
@@ -140,9 +142,10 @@ class PanicStreamOnNewError<T = any, ErrType = any>
 	}
 }
 
-class PanicStreamOnOldError<T = any, ErrType = any>
-	implements IPanicStreamState<T, ErrType>
-{
+class PanicStreamOnOldError<
+	T = any,
+	ErrType = any
+> implements IPanicStreamState<T, ErrType> {
 	private errObject: ErrType
 
 	setErrObject(errObject: ErrType) {
