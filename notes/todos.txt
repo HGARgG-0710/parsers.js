@@ -4,45 +4,18 @@ TODAY:
 	THIS IS VITAL. 
 	SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
 
--1. IndexMap: REDESIGN: 
-	Ok, it's *ALMOST* as one would want it, except...
-	The 'extend' and 'extendKey' methods. 
-	They should become STATIC. 
-
-	The reuse of the common builder object functionality through inheritance 
-	here is quite good, however, this signature is absolutely godawful. 
-
-	DO THE GENERICS for the static methods [important, since they preserve 
-	the type coherence of individual IndexMap-s]
-
-	1. ALSO - REMOVE the 'this.calcExtensions()' call from child classes' code!
-		Replace with Template Method pattern over the 'finalize()' method: 
-
-			finalize() {
-				this.preFinalizeHook()
-				this.calcExtensions() // MADE PRIVATE
-				return this.getMapInstance()
-			}
-
-			abstract getMapInstance(): IIndexMap<...>
-
-	For instance, the NEW code would be more like 'NodeMap(IndexMap.PredicateMap)', 
-	SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
-	class ITSELF [and not an instance]! 		
-
-
-[v0.3]
-
 -1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 	They truly *do* belong there...
 	Likewise, ADD the respective generics onto the `NFARegexMatcher`
+
+10. Commit U: `RegexParser`: 
+	1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
+
+[v0.3]
 	
 6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
 	1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!
 	2. new type - `IIndexStream = IStream & ILineIndex` [new], OLD `IIndexStream` (ILinkedIndexStream) becomes `IIndexStream & ILinkedStream`
-
-10. Commit U: `RegexParser`: 
-	1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
 
 TODO: ensure that all the file-reading classes use THE SAME errors
 	to signify that a filepath is nonexistent (reason: simplifies things
