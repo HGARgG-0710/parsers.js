@@ -30,10 +30,10 @@ function tabItem(item: ILinePrintable) {
 }
 
 export class Regex<T = any> {
-	private readonly final: IRegexMatcher
+	private readonly matcher: IRegexMatcher
 
 	matchAt(stream: IPeekableStream<T>) {
-		return this.final.match(stream)
+		return this.matcher.match(stream)
 	}
 
 	toString() {
@@ -44,7 +44,7 @@ export class Regex<T = any> {
 		private readonly source: string,
 		config: Regex.Config = Regex.Config.default
 	) {
-		this.final = RegexStorage.instance.get(source, config)
+		this.matcher = RegexStorage.instance.get(source, config)
 	}
 }
 
