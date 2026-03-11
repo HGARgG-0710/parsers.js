@@ -8,7 +8,7 @@ import type {
 	ITyped,
 	IValidNodeType
 } from "../interfaces.js"
-import type { IExtendableMap } from "../interfaces/IndexMap.js"
+import type { IMapExtender } from "../interfaces/IndexMap.js"
 import { peek } from "./Stream.js"
 
 const { typeOf } = _type
@@ -17,35 +17,35 @@ const { typeOf } = _type
  * Calls and returns `indexMap.extend((x: ITyped<T>) => x.type)`
  */
 export const TypeMap = <T = any, Default = any>(
-	map: IExtendableMap<IValidNodeType, T, Default>
+	map: IMapExtender<IValidNodeType, T, Default>
 ) => map.extend((x: ITyped) => x.type)
 
 /**
  * Calls and returns `indexMap.extend((x: IResourceful) => x.resource)`
  */
 export const ResourceMap = <K = any, T = any, Default = any>(
-	map: IExtendableMap<K, T, Default, IOwnedStream>
+	map: IMapExtender<K, T, Default, IOwnedStream>
 ) => map.extend((x: IResourceful) => x.resource!)
 
 /**
  * Calls and returns `indexMap.extend((x: IStream) => x.curr)`
  */
 export const CurrMap = <K = any, T = any, Default = any, Index = any>(
-	mapClass: IExtendableMap<K, T, Default, Index>
+	mapClass: IMapExtender<K, T, Default, Index>
 ) => mapClass.extend((x: IStream<Index>) => x.curr)
 
 /**
  * Calls and returns `indexMap.extend((x) => typeof x)`
  */
 export const TypeofMap = <T = any, Default = any>(
-	map: IExtendableMap<ReturnType<typeof typeOf>, T, Default>
+	map: IMapExtender<ReturnType<typeof typeOf>, T, Default>
 ) => map.extend(typeOf)
 
 /**
  * Calls and returns `mapClass.extendKey((x) => x.is)`
  */
 export const NodeMap = <T = any, Default = any>(
-	map: IExtendableMap<IPredicate, T, Default>
+	map: IMapExtender<IPredicate, T, Default>
 ) => map.extendKey<ITypeCheckable>((x) => x.is)
 
 /**
@@ -55,12 +55,12 @@ export const NodeMap = <T = any, Default = any>(
  * inputs for the `.index` method.
  */
 export const CharCodeMap = <K = any, T = any, Default = any>(
-	map: IExtendableMap<K, T, Default, number | undefined>
+	map: IMapExtender<K, T, Default, number | undefined>
 ) => map.extend((x: string, i = 0) => x.codePointAt(i))
 
 /**
  * This is a function calling `map.extend((x: IPeekable) => x.peek(1))`.
  */
 export const PeekMap = <K = any, T = any, Default = any, Index = any>(
-	map: IExtendableMap<K, T, Default, Index>
+	map: IMapExtender<K, T, Default, Index>
 ) => map.extend(peek(1))

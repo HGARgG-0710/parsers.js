@@ -1,4 +1,4 @@
-import { array, functional, object } from "@hgargg-0710/one"
+import { array, functional, object, type } from "@hgargg-0710/one"
 import { BadIndex } from "../constants.js"
 import type { IHaving, IPredicate, ITestable } from "../interfaces.js"
 import type { IIndexMap, IMidMap } from "../interfaces/IndexMap.js"
@@ -8,6 +8,7 @@ import type {
 } from "../modules/IndexMap/interfaces/LiquidMap.js"
 import { LiquidMap } from "../modules/IndexMap/objects/LiquidMap.js"
 
+const { isArray } = type
 const { trivialCompose, id } = functional
 
 type IKeyExtension<K = any, RealKey = any> = (key: K) => RealKey
@@ -185,14 +186,6 @@ export abstract class IndexMap<
 
 	protected comparator?(curr: RealKey, x: any): boolean
 
-	abstract extendKey<NK = any>(
-		f: (newKey: NK) => K
-	): MidMap<NK, V, Default, RealKey, Index>
-
-	abstract extend<NI = any>(
-		f: (newIndexed: NI) => Index
-	): MidMap<K, V, Default, RealKey, NI>
-
 	private extension: IExtension<Index> = id
 	private keyExtension: IKeyExtension<K, RealKey> = id as any
 
@@ -300,20 +293,30 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override comparator(curr: RealKey, x: any): boolean {
-			return array.recursiveSame(curr, x)
-		}
-
-		extend<NI = any>(
-			f: (newKey: NI) => Index
-		): MidMap<K, V, Default, RealKey, NI> {
+		static extend<
+			NI,
+			K,
+			V,
+			Default,
+			RealKey extends any[] = K extends any[] ? K : K[],
+			Index = K
+		>(f: (newIndexed: NI) => Index): MidMap<K, V, Default, RealKey, NI> {
 			return new ArrayMap.MidMap<K, V, Default, RealKey, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, V, Default, RealKey, Index> {
+		static extendKey<
+			NK,
+			K,
+			V,
+			Default,
+			RealKey extends any[] = any,
+			Index = K
+		>(f: (newKey: NK) => K): MidMap<NK, V, Default, RealKey, Index> {
 			return new ArrayMap.MidMap<NK, V, Default, RealKey, Index>([], [f])
+		}
+
+		protected override comparator(curr: RealKey, x: any): boolean {
+			return isArray(x) && array.recursiveSame(curr, x)
 		}
 	}
 
@@ -345,20 +348,30 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override indexOf(sought: any): number {
-			return this.realKeys.indexOf(sought)
-		}
-
-		extend<NI = any>(
-			f: (newIndexed: NI) => Index
-		): MidMap<K, V, Default, RealKey, NI> {
+		static extend<
+			NI = any,
+			K = any,
+			V = any,
+			Default = any,
+			RealKey = any,
+			Index = K
+		>(f: (newIndexed: NI) => Index): MidMap<K, V, Default, RealKey, NI> {
 			return new BasicMap.MidMap<K, V, Default, RealKey, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, V, Default, RealKey, Index> {
+		static extendKey<
+			NK = any,
+			K = any,
+			V = any,
+			Default = any,
+			RealKey = any,
+			Index = K
+		>(f: (newKey: NK) => K): MidMap<NK, V, Default, RealKey, Index> {
 			return new BasicMap.MidMap<NK, V, Default, RealKey, Index>([], [f])
+		}
+
+		protected override indexOf(sought: any): number {
+			return this.realKeys.indexOf(sought)
 		}
 	}
 
@@ -390,20 +403,30 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override comparator(curr: IPredicate<T>, x: T): boolean {
-			return curr(x)
-		}
-
-		extend<NI = any>(
+		static extend<
+			NI = any,
+			T = any,
+			Default = any,
+			K = IPredicate<T>,
+			Index = any
+		>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, IPredicate<T>, NI> {
 			return new PredicateMap.MidMap<T, Default, K, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, IPredicate<T>, Index> {
+		static extendKey<
+			NK = any,
+			T = any,
+			Default = any,
+			K = IPredicate<T>,
+			Index = any
+		>(f: (newKey: NK) => K): MidMap<NK, T, Default, IPredicate<T>, Index> {
 			return new PredicateMap.MidMap<T, Default, NK, Index>([], [f])
+		}
+
+		protected override comparator(curr: IPredicate<T>, x: T): boolean {
+			return curr(x)
 		}
 	}
 
@@ -434,20 +457,30 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override comparator(curr: ITestable<T>, x: T): boolean {
-			return curr.test(x)
-		}
-
-		extend<NI = any>(
+		static extend<
+			NI = any,
+			T = any,
+			Default = any,
+			K = ITestable<T>,
+			Index = string
+		>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, ITestable<T>, NI> {
 			return new RegExpMap.MidMap<T, Default, K, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, ITestable<T>, Index> {
+		static extendKey<
+			NK = any,
+			T = any,
+			Default = any,
+			K = ITestable<T>,
+			Index = string
+		>(f: (newKey: NK) => K): MidMap<NK, T, Default, ITestable<T>, Index> {
 			return new RegExpMap.MidMap<T, Default, NK, Index>([], [f])
+		}
+
+		protected override comparator(curr: ITestable<T>, x: T): boolean {
+			return curr.test(x)
 		}
 	}
 
@@ -478,20 +511,28 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override comparator(curr: IHaving<T>, x: T): boolean {
-			return curr.has(x)
-		}
-
-		extend<NI = any>(
-			f: (newIndexed: NI) => Index
-		): MidMap<K, T, Default, IHaving<T>, NI> {
+		static extend<
+			NI = any,
+			T = any,
+			Default = any,
+			K = IHaving<T>,
+			Index = any
+		>(f: (newIndexed: NI) => Index): MidMap<K, T, Default, IHaving<T>, NI> {
 			return new SetMap.MidMap<T, Default, K, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, IHaving<T>, Index> {
+		static extendKey<
+			NK = any,
+			T = any,
+			Default = any,
+			K = IHaving<T>,
+			Index = any
+		>(f: (newKey: NK) => K): MidMap<NK, T, Default, IHaving<T>, Index> {
 			return new SetMap.MidMap<T, Default, NK>([], [f])
+		}
+
+		protected override comparator(curr: IHaving<T>, x: T): boolean {
+			return curr.has(x)
 		}
 	}
 
@@ -522,20 +563,24 @@ export namespace IndexMap {
 			}
 		}
 
-		protected override comparator(curr: object, x: any): boolean {
-			return object.same(curr, x)
-		}
-
-		extend<NI = any>(
+		static extend<NI = any, T = any, Default = any, K = object, Index = K>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, object, NI> {
 			return new ObjectMap.MidMap<T, Default, K, NI>([f])
 		}
 
-		extendKey<NK = any>(
-			f: (newKey: NK) => K
-		): MidMap<NK, T, Default, object, Index> {
+		static extendKey<
+			NK = any,
+			T = any,
+			Default = any,
+			K = object,
+			Index = K
+		>(f: (newKey: NK) => K): MidMap<NK, T, Default, object, Index> {
 			return new ObjectMap.MidMap<T, Default, NK, Index>([], [f])
+		}
+
+		protected override comparator(curr: object, x: any): boolean {
+			return object.same(curr, x)
 		}
 	}
 }

@@ -15,6 +15,17 @@ TODAY:
 	DO THE GENERICS for the static methods [important, since they preserve 
 	the type coherence of individual IndexMap-s]
 
+	1. ALSO - REMOVE the 'this.calcExtensions()' call from child classes' code!
+		Replace with Template Method pattern over the 'finalize()' method: 
+
+			finalize() {
+				this.preFinalizeHook()
+				this.calcExtensions() // MADE PRIVATE
+				return this.getMapInstance()
+			}
+
+			abstract getMapInstance(): IIndexMap<...>
+
 	For instance, the NEW code would be more like 'NodeMap(IndexMap.PredicateMap)', 
 	SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
 	class ITSELF [and not an instance]! 		

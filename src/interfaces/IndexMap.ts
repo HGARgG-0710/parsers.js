@@ -9,7 +9,7 @@ import type {
  * [either over its keys, or input] to
  * obtain an `IMidMap<K/NK, V, Default>`.
  */
-export interface IExtendableMap<K = any, V = any, Default = any, Index = K> {
+export interface IMapExtender<K = any, V = any, Default = any, Index = K> {
 	extend<NI = any>(f: (newIndexed: NI) => Index): IMidMap<K, V, Default, NI>
 	extendKey<NK = any>(f: (newKey: NK) => K): IMidMap<NK, V, Default, Index>
 }
@@ -20,8 +20,12 @@ export interface IExtendableMap<K = any, V = any, Default = any, Index = K> {
  * in the exactly same fashion as `IExtendableMap<K, V, Default>`
  * dictates, or `finalize()`d, to obtain an `IIndexMap<K, V, Default>`.
  */
-export interface IMidMap<K = any, V = any, Default = any, Index = K>
-	extends IExtendableMap<K, V, Default, Index> {
+export interface IMidMap<
+	K = any,
+	V = any,
+	Default = any,
+	Index = K
+> extends IMapExtender<K, V, Default, Index> {
 	finalize(): IIndexMap<K, V, Default, Index>
 }
 
@@ -36,9 +40,7 @@ export interface IMidMap<K = any, V = any, Default = any, Index = K>
  * input are treated.
  */
 export interface IIndexMap<K = any, V = any, Default = any, Index = K>
-	extends ISimpleMap<K, V, Default, Index>,
-		IExtendableMap<K, V, Default, Index>,
-		ISizeable {
+	extends ISimpleMap<K, V, Default, Index>, ISizeable {
 	readonly keys: readonly K[]
 }
 
@@ -48,7 +50,8 @@ export interface IIndexMap<K = any, V = any, Default = any, Index = K>
  * states otherwise.
  */
 export interface ISimpleMap<K = any, V = any, Default = any, Index = K>
-	extends IIndexable<Index, V | Default>,
+	extends
+		IIndexable<Index, V | Default>,
 		ICopiable,
 		IFromTableCarrierConvertible<K, V, Default>,
 		IToModifiableConvertible<K, V, Default> {}

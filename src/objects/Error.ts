@@ -98,6 +98,16 @@ export class MissingImplementationError extends ConstructorError {
 	}
 }
 
+export class AbstractStaticMethodError extends ConstructorError {
+	constructor(methodName: string, className: string) {
+		super(
+			`The static method \`${methodName}\`` +
+				` on class \`${className}\` is abstract, and` +
+				` can only be called once optionally implemented on child classes.`
+		)
+	}
+}
+
 export class MissingErrorDataContentError extends ConstructorError {
 	constructor() {
 		super(
