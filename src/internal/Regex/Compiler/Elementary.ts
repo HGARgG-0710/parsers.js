@@ -24,6 +24,9 @@ export const compileTab = compileElementary((factory) => factory.literal("\t"))
 export const compileVTab = compileElementary((factory) => factory.literal("\v"))
 export const compileSpace = compileElementary((factory) => factory.space())
 export const compileNewline = compileElementary((factory) => factory.newline())
+export const compileNewlineLiteral = compileElementary((factory) =>
+	factory.literal("\n")
+)
 export const compileFormFeed = compileElementary((factory) =>
 	factory.literal("\f")
 )

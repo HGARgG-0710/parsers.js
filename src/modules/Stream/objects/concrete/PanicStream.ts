@@ -58,7 +58,7 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return this.currErrData
 	}
 
-	// ! Template Method
+	// Template Method, DO NOT TOUCH
 	private handleErrData(errData: IErrorData) {
 		this.setErrData(errData)
 		this.transitionState()

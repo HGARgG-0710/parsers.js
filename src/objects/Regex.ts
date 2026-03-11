@@ -14,7 +14,6 @@ import type {
 } from "../interfaces.js"
 import { NFARegexFinalizer } from "../internal/Regex/NFA/Finalizer.js"
 import { RegexStorage } from "../internal/Regex/Storage.js"
-import { charAfter, charBefore } from "../internal/Utils/Unicode.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
 
@@ -572,14 +571,6 @@ export namespace Regex {
 
 			repeat(item: Regex.Raw, times: number): Regex.Raw {
 				return new Catenation(...numbers(times).map(() => item))
-			}
-
-			newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw {
-				return new Either(from, this.charRange(charAfter("\n"), to))
-			}
-
-			charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw {
-				return new Either(this.charRange(from, charBefore("\n")), to)
 			}
 
 			unicodeProperty(propName: string, value: string): Regex.Raw {

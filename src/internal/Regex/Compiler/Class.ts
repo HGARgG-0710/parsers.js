@@ -1,4 +1,3 @@
-import { type } from "@hgargg-0710/one"
 import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import type {
 	ICellNode,
@@ -23,14 +22,12 @@ import { compileUnicodeChar } from "./Cell.js"
 import { compileComplexPart } from "./Complex.js"
 import {
 	compileFormFeed,
-	compileNewline,
+	compileNewlineLiteral,
 	compileTab,
 	compileVTab
 } from "./Elementary.js"
 import { compilerBuilderErrHandler } from "./Errors.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
-
-const { isString } = type
 
 export function compileCharClass(factory: IRegexFactory) {
 	return compileComplexPart(() => factory.charClass())
@@ -44,24 +41,13 @@ export function compileClassRange(factory: IRegexFactory) {
 	const boundaryCompiler = rangeBoundaryHandler(factory)
 	return function (
 		input: TreeStream<INode>,
-		handler: IRegexCompilerHandler<Regex.Raw | string>
+		handler: IRegexCompilerHandler<Regex.Raw>
 	) {
 		input.next() // ClassRange
 		const from = boundaryCompiler(input, handler)
 		input.next()
 		const to = boundaryCompiler(input, handler)
-		// * explanation: 'isString(from) && isString(to)' means
-		// 		that \n-\n is the range given, since ALL THE OTHER
-		// 		ONES are *transformed* into strings
-		const isFromChar = isString(from)
-		const isToChar = isString(to)
-		return isFromChar
-			? isToChar
-				? factory.charRange(from, to)
-				: factory.charToNewlineRange(from, to)
-			: isToChar
-				? factory.newlineToCharRange(from, to)
-				: from
+		return factory.charRange(from, to)
 	}
 }
 
@@ -112,14 +98,24 @@ function handleFormFeedBoundary(factory: IRegexFactory) {
 	}
 }
 
+function handleNewlineBoundary(factory: IRegexFactory) {
+	const newlineCompiler = compileNewlineLiteral(factory)
+	return function (
+		input: TreeStream<INode>,
+		_handler: IRegexCompilerHandler
+	) {
+		return newlineCompiler(input, _handler).char
+	}
+}
+
 // ! Add a proper err handler later instead of the generic `compilerBuilderErrHandler`...
 function rangeBoundaryHandler(factory: IRegexFactory) {
-	return RegexTypeHandler<string | Regex.Raw>(
+	return RegexTypeHandler<string>(
 		[
 			[EscapedLiteral, handleCellBoundary],
 			[SingleChar, handleCellBoundary],
 			[UnicodeChar, handleUnicodeBoundary(factory)],
-			[Newline, compileNewline(factory)],
+			[Newline, handleNewlineBoundary(factory)],
 			[Tab, handleTabBoundary(factory)],
 			[VTab, handleVTabBoundary(factory)],
 			[FormFeed, handleFormFeedBoundary(factory)]

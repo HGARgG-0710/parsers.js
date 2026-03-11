@@ -12,7 +12,7 @@ import type { IRegexCompilerErrorHandler } from "./Compiler.js"
 
 export function RegexTypeHandler<Out = Regex.Raw>(
 	map: [ITyped, IRegexCompilerFunction<Out>][],
-	errHandler: IRegexCompilerErrorHandler<Out>
+	errHandler: IRegexCompilerErrorHandler<any>
 ) {
 	return TableHandler<TreeStream<INode>, Out>(
 		new CurrentHash(new TokenHash(BasicMap(mapTypes(map), errHandler)))

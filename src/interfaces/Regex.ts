@@ -60,7 +60,7 @@ export type IRegexCompilerTypeTable<Out = Regex.Raw> =
 
 export type IRegexCompilerFunction<Out = Regex.Raw> = (
 	input: TreeStream<INode>,
-	handler: IRegexCompilerHandler<Out>
+	handler: IRegexCompilerHandler<any>
 ) => Out
 
 export type IRegexCompilerHandler<Out = Regex.Raw> = ITableHandler<
@@ -85,8 +85,6 @@ export interface IRegexFactory {
 	newline(): Regex.Raw
 	literal(x: string): Regex.Raw.Char
 	charRange(from: string, to: string): Regex.Raw
-	newlineToCharRange(from: Regex.Raw, to: string): Regex.Raw
-	charToNewlineRange(from: string, to: Regex.Raw): Regex.Raw
 	unicodeChar(hex: string): Regex.Raw.Char
 	typeMatch(type: IValidNodeType): Regex.Raw
 	noneOrMore(item: Regex.Raw): Regex.Raw

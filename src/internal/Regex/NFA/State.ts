@@ -1,6 +1,3 @@
-// ! NEED MORE `State` classes:
-// * 1. for `UnicodeProperty` - one that (quickly/simply) defines a specific unicode property supported by the library's `Regex` syntax
-
 import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
 import { BadId, NewId } from "../../../constants.js"
@@ -400,7 +397,6 @@ export class EitherState extends State {
 	// * context in which `EitherState` is used, it serves DIFFERENT
 	// * PURPOSES. The reason it's represented by the same object is
 	// * because they are so semantically close.
-	// ? (although maybe it'd be better to split them? meh, maybe later)
 	verify(keeper: PeekKeeper): boolean {
 		return MultVerifier.verifySome(this.options, keeper)
 	}
