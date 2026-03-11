@@ -6,6 +6,7 @@ import type {
 	ILiquidMap,
 	ITableCarrier
 } from "../modules/IndexMap/interfaces/LiquidMap.js"
+import { LiquidMap } from "../modules/IndexMap/objects/LiquidMap.js"
 
 const { trivialCompose, id } = functional
 
@@ -76,18 +77,18 @@ export abstract class MidMap<
 	Default = any,
 	RealKey = any,
 	Index = K
-> implements IMidMap<K, V, Default, Index>
-{
+> implements IMidMap<K, V, Default, Index> {
 	protected ["constructor"]: new <
 		K = any,
 		V = any,
 		Default = any,
-		RealKey = any
+		RealKey = any,
+		Index = any
 	>(
-		liquid: ILiquidMap<K, V, Default>,
-		extension: Function[],
-		keyExtension: Function[]
-	) => MidMap<K, V, Default, RealKey>
+		extension?: Function[],
+		keyExtension?: Function[],
+		liquid?: ILiquidMap<K, V, Default>
+	) => MidMap<K, V, Default, RealKey, Index>
 
 	private readonly preExtension: FunctionComposition<[any, ...any[]], any>
 	private readonly preKeyExtension: FunctionComposition<[K], RealKey>
@@ -111,9 +112,9 @@ export abstract class MidMap<
 		f: (newKey: NI) => Index
 	): MidMap<K, V, Default, RealKey, NI> {
 		return new this.constructor(
-			this.liquid,
 			this.preExtension.withFront(f),
-			this.preKeyExtension.components
+			this.preKeyExtension.components,
+			this.liquid
 		)
 	}
 
@@ -121,16 +122,15 @@ export abstract class MidMap<
 		f: (newKey: NK) => K
 	): MidMap<NK, V, Default, RealKey, Index> {
 		return new this.constructor(
-			this.liquid,
 			this.preExtension.components,
 			this.preKeyExtension.withFront(f)
 		)
 	}
 
 	constructor(
-		protected readonly liquid: ILiquidMap<any, any, Default>,
 		extension: Function[] = [],
-		keyExtension: Function[] = []
+		keyExtension: Function[] = [],
+		protected readonly liquid: ILiquidMap<K, V, Default> = new LiquidMap()
 	) {
 		this.preExtension = new FunctionComposition(extension)
 		this.preKeyExtension = new FunctionComposition(keyExtension)
@@ -177,8 +177,7 @@ export abstract class IndexMap<
 	Default = any,
 	RealKey = K,
 	Index = K
-> implements IIndexMap<K, V, Default, Index>
-{
+> implements IIndexMap<K, V, Default, Index> {
 	private ["constructor"]: new (liquid: ILiquidMap<any, any, Default>) => this
 
 	private carrier: ITableCarrier<K, V, Default>
@@ -308,20 +307,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newKey: NI) => Index
 		): MidMap<K, V, Default, RealKey, NI> {
-			return new ArrayMap.MidMap<K, V, Default, RealKey, NI>(
-				this.liquid.copy(),
-				[f]
-			)
+			return new ArrayMap.MidMap<K, V, Default, RealKey, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, V, Default, RealKey, Index> {
-			return new ArrayMap.MidMap<NK, V, Default, RealKey, Index>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new ArrayMap.MidMap<NK, V, Default, RealKey, Index>([], [f])
 		}
 	}
 
@@ -360,20 +352,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, V, Default, RealKey, NI> {
-			return new BasicMap.MidMap<K, V, Default, RealKey, NI>(
-				this.liquid.copy(),
-				[f]
-			)
+			return new BasicMap.MidMap<K, V, Default, RealKey, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, V, Default, RealKey, Index> {
-			return new BasicMap.MidMap<NK, V, Default, RealKey, Index>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new BasicMap.MidMap<NK, V, Default, RealKey, Index>([], [f])
 		}
 	}
 
@@ -412,20 +397,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, IPredicate<T>, NI> {
-			return new PredicateMap.MidMap<T, Default, K, NI>(
-				this.liquid.copy(),
-				[f]
-			)
+			return new PredicateMap.MidMap<T, Default, K, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, T, Default, IPredicate<T>, Index> {
-			return new PredicateMap.MidMap<T, Default, NK, Index>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new PredicateMap.MidMap<T, Default, NK, Index>([], [f])
 		}
 	}
 
@@ -463,19 +441,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, ITestable<T>, NI> {
-			return new RegExpMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [
-				f
-			])
+			return new RegExpMap.MidMap<T, Default, K, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, T, Default, ITestable<T>, Index> {
-			return new RegExpMap.MidMap<T, Default, NK, Index>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new RegExpMap.MidMap<T, Default, NK, Index>([], [f])
 		}
 	}
 
@@ -513,17 +485,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, IHaving<T>, NI> {
-			return new SetMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [f])
+			return new SetMap.MidMap<T, Default, K, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, T, Default, IHaving<T>, Index> {
-			return new SetMap.MidMap<T, Default, NK>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new SetMap.MidMap<T, Default, NK>([], [f])
 		}
 	}
 
@@ -561,19 +529,13 @@ export namespace IndexMap {
 		extend<NI = any>(
 			f: (newIndexed: NI) => Index
 		): MidMap<K, T, Default, object, NI> {
-			return new ObjectMap.MidMap<T, Default, K, NI>(this.liquid.copy(), [
-				f
-			])
+			return new ObjectMap.MidMap<T, Default, K, NI>([f])
 		}
 
 		extendKey<NK = any>(
 			f: (newKey: NK) => K
 		): MidMap<NK, T, Default, object, Index> {
-			return new ObjectMap.MidMap<T, Default, NK, Index>(
-				this.liquid.copy(),
-				[],
-				[f]
-			)
+			return new ObjectMap.MidMap<T, Default, NK, Index>([], [f])
 		}
 	}
 }

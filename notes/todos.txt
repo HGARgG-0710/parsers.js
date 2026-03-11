@@ -1,4 +1,3 @@
-
 TODAY: 	
 
 1. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
@@ -9,11 +8,12 @@ TODAY:
 	Ok, it's *ALMOST* as one would want it, except...
 	The 'extend' and 'extendKey' methods. 
 	They should become STATIC. 
-	In particular, they should NOT accept the 'this.liquid.copy()' thingy, 
-	and INSTEAD create EMPTY MidMap-s (so that those can be RE-SPECIALIZED!). 
 
 	The reuse of the common builder object functionality through inheritance 
 	here is quite good, however, this signature is absolutely godawful. 
+
+	DO THE GENERICS for the static methods [important, since they preserve 
+	the type coherence of individual IndexMap-s]
 
 	For instance, the NEW code would be more like 'NodeMap(IndexMap.PredicateMap)', 
 	SINCE we are using the '.extendKey/extend' method on THE 'IndexMap.PredicateMap'
