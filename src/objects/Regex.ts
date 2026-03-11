@@ -548,11 +548,12 @@ export namespace Regex {
 			charRange(from: string, to: string): Regex.Raw {
 				return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
 			}
-
-			// * note: we're parsing here and not inside `RegexParser` since
-			// * this reduces the amount of transformation logic inside the
-			// * parser (purpose of `RegexParser` is only to produce a front-facing
-			// * AST, one to be later re-built into the `Regex.Raw` form).
+			
+			// * note: we're parsing here and not in 'RegexParser' since 
+			// 	interpretation of the hex id is up to the factory, and not 
+			// 	the front-end parser - its job is merely to correctly represent
+			// 	the raw data provided by the user, *not* to assign a definitive 
+			// 	meaning of it within the application
 			unicodeChar(hex: string) {
 				return Char.make(String.fromCodePoint(parseInt(hex, 16)))
 			}

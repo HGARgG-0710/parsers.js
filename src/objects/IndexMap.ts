@@ -226,6 +226,7 @@ export abstract class IndexMap<
 		return this._realKeys
 	}
 
+	// ! PRE-DOC: important extra-flexibility hook - DO NOT MISS!
 	// * NOTE: this is made `protected` to allow algorithm replacement in
 	// * child classes. Same goes for the `keysExtended` accessor
 	protected indexOf(sought: any) {
