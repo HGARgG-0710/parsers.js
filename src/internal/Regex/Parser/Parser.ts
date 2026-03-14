@@ -1,4 +1,5 @@
-import { Config, WrapperApp } from "../../../global.js"
+import { Config } from "../../../global.js"
+import { WrapperApp } from "../../../global/App.js"
 import type { ICommonStream, INode, IParseable } from "../../../interfaces.js"
 import { AutoMap, ParseableInput, Regex } from "../../../objects.js"
 import { BasicHash, PeekHash } from "../../../objects/HashMap.js"

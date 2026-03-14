@@ -9,7 +9,7 @@ import type {
 import type { Regex } from "../../../../objects.js"
 import type { TreeStream } from "../../../../objects/Stream.js"
 import { InfiniteRange, LimitsRange, TrivialRange } from "../../Parser/Nodes.js"
-import { compilerBuilderErrHandler } from "../Errors.js"
+import { rangeKindsErrHandler } from "../Errors.js"
 import { RegexTypeHandler } from "../RegexTypeHandler.js"
 
 import { array } from "@hgargg-0710/one"
@@ -42,14 +42,13 @@ function handleLimitsRange(input: TreeStream<INode>) {
 	return [readStartBoundary(range), readEndBoundary(range)]
 }
 
-// ! Replace the `compilerBuilderErrHandler` with a more appropriate one...
 const rangeKindsHandler = RegexTypeHandler<number[]>(
 	[
 		[TrivialRange, handleTrivialRange],
 		[InfiniteRange, handleInfiniteRange],
 		[LimitsRange, handleLimitsRange]
 	],
-	compilerBuilderErrHandler
+	rangeKindsErrHandler
 )
 
 function toCatenationBuilder(
@@ -86,11 +85,17 @@ function getRepetitionMethod(toRepeat: number): RepetitionMethod {
 	return toRepeat === Infinity ? repeatNoneOrMore : repeatOptional(toRepeat)
 }
 
-function includeItems(
-	catBuilder: IRegexPartBuilder,
-	parts: Iterable<Regex.Raw>
-) {
-	for (const part of parts) catBuilder.addItem(part)
+class RegexPartIncluder {
+	include(parts: Regex.Raw[]) {
+		for (const part of parts) this.partBuilder.addItem(part)
+		return this
+	}
+
+	finish() {
+		return this.partBuilder.finish()
+	}
+
+	constructor(private readonly partBuilder: IRegexPartBuilder) {}
 }
 
 export function compileRange(regexBuilder: IRegexFactory) {
@@ -102,8 +107,9 @@ export function compileRange(regexBuilder: IRegexFactory) {
 
 		const [from, toRepeat] = toRangeParts(input)
 		const catBuilder = toCatenationBuilder(regexBuilder, toMatch, from)
-		const method = getRepetitionMethod(toRepeat)
-		includeItems(catBuilder, method(toMatch, regexBuilder))
-		return catBuilder.finish()
+		const repMethod = getRepetitionMethod(toRepeat)
+		return new RegexPartIncluder(catBuilder)
+			.include(repMethod(toMatch, regexBuilder))
+			.finish()
 	}
 }

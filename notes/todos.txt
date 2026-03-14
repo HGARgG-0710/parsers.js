@@ -1,9 +1,5 @@
 TODAY: 	
 
-1. Walk through *all* the todos, "special" (!, *, ?, ^, %, etc) comments of the library; 
-	THIS IS VITAL. 
-	SOME OF THESE THINGS ARE CRITICAL, AND AREN'T WRITTEN ANYWHERE ELSE!
-
 -1. ADD the 'T = any' generics to the 'Regex/NFA/*.ts'. 
 	They truly *do* belong there...
 	Likewise, ADD the respective generics onto the `NFARegexMatcher`

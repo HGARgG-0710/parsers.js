@@ -26,7 +26,10 @@ import {
 	compileTab,
 	compileVTab
 } from "./Elementary.js"
-import { compilerBuilderErrHandler } from "./Errors.js"
+import {
+	negatedBuilderKindsErrHandler,
+	rangeBoundaryKindsErrHandler
+} from "./Errors.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
 export function compileCharClass(factory: IRegexFactory) {
@@ -108,7 +111,6 @@ function handleNewlineBoundary(factory: IRegexFactory) {
 	}
 }
 
-// ! Add a proper err handler later instead of the generic `compilerBuilderErrHandler`...
 function rangeBoundaryHandler(factory: IRegexFactory) {
 	return RegexTypeHandler<string>(
 		[
@@ -120,18 +122,17 @@ function rangeBoundaryHandler(factory: IRegexFactory) {
 			[VTab, handleVTabBoundary(factory)],
 			[FormFeed, handleFormFeedBoundary(factory)]
 		],
-		compilerBuilderErrHandler
+		rangeBoundaryKindsErrHandler
 	)
 }
 
-// ! ADD A PROPER ERROR HANDLER HERE!!! (not the `compilerBuilderErrHandler`)
 function negatedBuilderPicker(factory: IRegexFactory) {
 	return RegexTypeHandler<IRegexPartBuilder>(
 		[
 			[CharClass, () => factory.negCharClass()],
 			[BoundaryClass, () => factory.negBoundaryClass()]
 		],
-		compilerBuilderErrHandler
+		negatedBuilderKindsErrHandler
 	)
 }
 
