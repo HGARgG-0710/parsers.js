@@ -4,7 +4,7 @@ import type { IRegexCompilerHandler } from "../../../interfaces/Regex.js"
 import { AutoMap, Regex } from "../../../objects.js"
 import { TreeStream } from "../../../objects/Stream.js"
 import { RegexParser } from "../Parser/Parser.js"
-import { defaultBuilderErrHandler } from "./Errors.js"
+import { defaultCompilerErrHandler } from "./Errors.js"
 import { RegexCompilerTable } from "./RegexCompilerTable.js"
 import { RegexTypeHandler } from "./RegexTypeHandler.js"
 
@@ -41,7 +41,7 @@ class RegexCompilerAlgorithm {
 	private build(table: RegexCompilerTable) {
 		return RegexTypeHandler(
 			table.get(this.extensions),
-			defaultBuilderErrHandler
+			defaultCompilerErrHandler
 		)
 	}
 

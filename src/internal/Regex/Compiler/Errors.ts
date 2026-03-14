@@ -31,7 +31,7 @@ class RegexCompilationError extends ConstructorError {
 	protected readonly paddingProvider = new PaddingProvider(3)
 
 	protected getReason() {
-		return "unspecified"
+		return "item kind unrecognized"
 	}
 
 	protected makeMessage(item: INode): string {
@@ -86,7 +86,7 @@ class RegexNegatedBuilderError extends RegexCompilationError {
 	}
 }
 
-export function defaultBuilderErrHandler<T = any>(
+export function defaultCompilerErrHandler<T = any>(
 	input: TreeStream<INode>,
 	_handler: IRegexCompilerHandler<T>
 ) {
