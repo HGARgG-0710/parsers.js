@@ -18,8 +18,8 @@ import {
 } from "./State.js"
 
 class StateArrayPair<T = any> {
-	private currList: StateArray
-	private nextList: StateArray
+	private currList: StateArray<T>
+	private nextList: StateArray<T>
 
 	private resetLists() {
 		this.currList = this.history.pushNew()
@@ -70,7 +70,7 @@ class MatchResult<T = any> {
 		this.result = result
 	}
 
-	constructor(private readonly peekKeeper: PeekKeeper) {}
+	constructor(private readonly peekKeeper: PeekKeeper<T>) {}
 }
 
 class MatchExecutor<T = any> {
@@ -82,26 +82,26 @@ class MatchExecutor<T = any> {
 		this.stateArrPair.reset(this.startState, this.peekKeeper)
 	}
 
-	private init(stream: IPeekableStream) {
+	private init(stream: IPeekableStream<T>) {
 		this.peekKeeper.init(stream)
 		this.resetLists()
 	}
 
-	private addVerified(state: BoundState) {
+	private addVerified(state: BoundState<T>) {
 		const nextState = state.next()
 		this.stateArrPair.next.add(nextState, state.keeper)
 		return nextState.isMatch
 	}
 
-	private tryMatching(state: BoundState) {
+	private tryMatching(state: BoundState<T>) {
 		return state.verify() && this.addVerified(state)
 	}
 
-	private prepareCommit(endKeeper: PeekKeeper) {
+	private prepareCommit(endKeeper: PeekKeeper<T>) {
 		this.peekKeeper.from(endKeeper)
 	}
 
-	private toMatch(state: BoundState) {
+	private toMatch(state: BoundState<T>) {
 		this.prepareCommit(state.keeper)
 		return true
 	}

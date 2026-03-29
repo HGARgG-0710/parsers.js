@@ -18,7 +18,7 @@ export class MatchIterator<T = any> {
 	}
 
 	constructor(
-		private readonly history: StateHistory,
+		private readonly history: StateHistory<T>,
 		private readonly captureResolver: ICaptureResolutionPredicate<T>
 	) {}
 }

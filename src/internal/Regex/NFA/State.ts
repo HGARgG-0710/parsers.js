@@ -21,7 +21,7 @@ const { isString, isNull } = type
 
 export class BoundState<T = any>
 	extends Poolable<[ArrowState, PeekKeeper<T>]>
-	implements IMatchedState
+	implements IMatchedState<T>
 {
 	static readonly pool = Pools.Internal.add(
 		new ObjectPool<BoundState, [State, PeekKeeper]>(BoundState)
