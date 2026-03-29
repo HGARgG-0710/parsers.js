@@ -13,4 +13,6 @@ export enum RegexMarks {
 
 export const EnableClbrackStream = DepthMarkStream([RegexMarks.Group])
 
-export const ClassEndMarkerStream = MarkerStream(() => "classEnd")
+export const ClassEndMarkerStream = MarkerStream(() => CLASS_END_MARKER)
+
+export const CLASS_END_MARKER = "classEnd"

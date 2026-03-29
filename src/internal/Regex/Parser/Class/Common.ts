@@ -8,11 +8,13 @@ import { NodeStream } from "../../../../modules/Stream/objects/concrete.js"
 import { MarkerLocator } from "../../../../modules/Stream/objects/Locator.js"
 import { tryReviveChild } from "../../../../objects/Error.js"
 import { next } from "../../../../utils/Stream.js"
+import { CLASS_END_MARKER } from "../Contract.js"
 import { ClassRange, Temp } from "../Nodes.js"
 import { ClassElementSequenceChooser } from "./ClassElementSequenceChooser.js"
 
 class ClassElementJoinerStream extends NodeStream<INode> {
-	private readonly classEndingLocator = MarkerLocator.downwards("classEnd")
+	private readonly classEndingLocator =
+		MarkerLocator.downwards(CLASS_END_MARKER)
 
 	private readNextItem() {
 		return next(this.resource!) as INode

@@ -1,7 +1,4 @@
 [v0.3]
-
-10. Commit U: `RegexParser`: 
-	1. ADD `.pool.create()` calls to ALL the `IStream`-instance creation cases THAT ARE RELEVANT!
 	
 6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
 	1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!

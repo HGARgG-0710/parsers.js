@@ -6,7 +6,7 @@ import { maybeRange } from "./Quantifiers/Range.js"
 import { maybeStar } from "./Quantifiers/Star.js"
 import { LookaheadMap } from "./Utils/LookaheadMap.js"
 
-const PreserveLowerStream = () => new IdentityStream()
+const PreserveLowerStream = () => IdentityStream.pool.create()
 
 export const QuantifierProcessor = TableHandler(
 	LookaheadMap(
