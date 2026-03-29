@@ -47,7 +47,7 @@ class ClassElementJoinerStream extends NodeStream<INode> {
 	//  		but DIRECTLY ABOVE the stream that DEFINES the '.isCurrEnd()'
 	//  		[and, therefore, '.isEnd'] of the current class (and, therefore,
 	//  		of the 'ClassElementJoinerStream').
-	// * 	2. SAID 'MarkerStream' MUST have the marker of "classEnd" (a string literal),
+	// * 	2. SAID 'MarkerStream' MUST have the marker of CLASS_END_MARKER (a string literal),
 	//  		for otherwise it WILL NOT be recognized.
 	override isCurrEnd(): boolean {
 		return (
