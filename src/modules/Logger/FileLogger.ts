@@ -7,7 +7,7 @@ interface IFileErrorLoggerState {
 }
 
 export class FileLogger implements ILogger {
-	static readonly DefaultMaxWrites = 10000
+	static readonly DefaultMaxWrites = 30000
 
 	private readonly open: FileLoggerOpen
 	private state: IFileErrorLoggerState
@@ -20,19 +20,31 @@ export class FileLogger implements ILogger {
 		this.state = this.state.log(item)
 	}
 
-	constructor(filePath: string, maxWrites = FileLogger.DefaultMaxWrites) {
-		const writeStream = createWriteStream(filePath, { flags: "a" })
-		this.open = new FileLoggerOpen(writeStream, maxWrites)
+	constructor(
+		filePath: string,
+		errHandler: (err: Error) => void = () => {},
+		maxRecordsWritten = FileLogger.DefaultMaxWrites
+	) {
+		this.open = new FileLoggerOpen(filePath, errHandler, maxRecordsWritten)
 		this.state = this.open
 	}
 }
 
 class FileLoggerOpen implements IFileErrorLoggerState {
+	private readonly writeStream: WriteStream
 	private readonly closed: FileLoggerClosed
 	private writeCount = 0
 
 	private nextState() {
 		return this.writeCount === this.maxWrites ? this.close() : this
+	}
+
+	private rawLog(err: string) {
+		return this.writeStream.write(err)
+	}
+
+	private logOnceStreamDrained(err: string) {
+		this.writeStream.once("drain", () => this.rawLog(err))
 	}
 
 	close() {
@@ -41,16 +53,19 @@ class FileLoggerOpen implements IFileErrorLoggerState {
 	}
 
 	log(err: string) {
-		this.writeStream.write(err)
+		if (!this.rawLog(err)) this.logOnceStreamDrained(err)
 		++this.writeCount
 		return this.nextState()
 	}
 
 	constructor(
-		private readonly writeStream: WriteStream,
+		filePath: string,
+		errHandler: (err: Error) => void,
 		private readonly maxWrites: number
 	) {
-		this.closed = new FileLoggerClosed(writeStream)
+		this.writeStream = createWriteStream(filePath, { flags: "a" })
+		this.writeStream.on("error", errHandler)
+		this.closed = new FileLoggerClosed(this.writeStream)
 	}
 }
 

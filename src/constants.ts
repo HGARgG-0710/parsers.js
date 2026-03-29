@@ -32,4 +32,4 @@ export const NotCached = undefined
 export const BadId = -1
 
 // ! pre-doc: a basic way to obtain a new Entity id (via increments)
-export const NewId = (oldId: number) => oldId + 1
+export const IncrementId = (oldId: number) => oldId + 1

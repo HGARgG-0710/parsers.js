@@ -1,5 +1,5 @@
 import assert from "assert"
-import { BadId, NewId } from "../constants.js"
+import { BadId, IncrementId } from "../constants.js"
 import { Config } from "../global.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
@@ -29,7 +29,7 @@ export class ObjectPool<
 	private static TotalInstances = BadId
 
 	private static NewId() {
-		return (this.TotalInstances = NewId(this.TotalInstances))
+		return (this.TotalInstances = IncrementId(this.TotalInstances))
 	}
 
 	private readonly active: ObjectPoolActive<T, Args>

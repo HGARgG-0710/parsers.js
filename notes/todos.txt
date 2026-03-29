@@ -3,10 +3,3 @@
 6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
 	1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!
 	2. new type - `IIndexStream = IStream & ILineIndex` [new], OLD `IIndexStream` (ILinkedIndexStream) becomes `IIndexStream & ILinkedStream`
-
-TODO: ensure that all the file-reading classes use THE SAME errors
-	to signify that a filepath is nonexistent (reason: simplifies things
-	- possibly introduce your own wrapper around the basic Node error for 
-	these kinds of specific cases); SAME goes for file-writing classes 
-	- the errors in cases when there are problems with writing rights 
-	MUST BE THE SAME!!!

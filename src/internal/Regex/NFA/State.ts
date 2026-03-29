@@ -1,6 +1,6 @@
 import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
-import { BadId, NewId } from "../../../constants.js"
+import { BadId, IncrementId } from "../../../constants.js"
 import { Pools } from "../../../global.js"
 import type {
 	IMatchedState,
@@ -108,7 +108,7 @@ export class PeekKeeper<T = any> {
 	private static TotalInstances = BadId
 
 	private static NewId() {
-		return (this.TotalInstances = NewId(this.TotalInstances))
+		return (this.TotalInstances = IncrementId(this.TotalInstances))
 	}
 
 	readonly id: number

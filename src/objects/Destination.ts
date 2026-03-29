@@ -2,8 +2,6 @@ import { closeSync, openSync, writeSync } from "fs"
 import type { IEncoder, IInitializable } from "../interfaces.js"
 import type { IDestination } from "../interfaces/Destination.js"
 
-const pickTruncationWriteFlag = (truncate: boolean) => (truncate ? "w" : "a")
-
 /**
  * A class implementing `IDestination` and `IInitializable<[IEncoder]>`.
  * Purposed for safe managed writing access to files.
@@ -15,6 +13,10 @@ export class FileDestination
 
 	private state: IFileDestinationState
 	private readonly open: IFileDestinationState
+
+	private getWriteFlag(shouldTruncate: boolean) {
+		return shouldTruncate ? "w" : "a"
+	}
 
 	get isOpen() {
 		return this.state === this.open
@@ -39,13 +41,15 @@ export class FileDestination
 
 	constructor(
 		private readonly filename: string,
+		handler: (err: NodeJS.ErrnoException) => void,
 		private readonly truncate: boolean = false
 	) {
-		const descriptor = openSync(filename, pickTruncationWriteFlag(truncate))
-		this.state = this.open = new FileDestinationOpen(
-			descriptor,
-			new FileDestinationClosed()
-		)
+		try {
+			const descriptor = openSync(filename, this.getWriteFlag(truncate))
+			this.state = this.open = new FileDestinationOpen(descriptor)
+		} catch (err) {
+			handler(err)
+		}
 	}
 }
 
@@ -56,6 +60,7 @@ interface IFileDestinationState {
 }
 
 class FileDestinationOpen implements IFileDestinationState {
+	private readonly closed = new FileDestinationClosed()
 	private encoder: IEncoder
 
 	init(encoder: IEncoder) {
@@ -77,10 +82,7 @@ class FileDestinationOpen implements IFileDestinationState {
 		return this.closed
 	}
 
-	constructor(
-		private readonly descriptor: number,
-		private readonly closed: FileDestinationClosed
-	) {}
+	constructor(private readonly descriptor: number) {}
 }
 
 class FileDestinationClosed implements IFileDestinationState {
