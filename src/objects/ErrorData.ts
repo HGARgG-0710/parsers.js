@@ -1,7 +1,7 @@
 import type {
 	IErrorData,
 	IErrorType,
-	IIndexCarrying,
+	IIndexCarryingStream,
 	IInputStream,
 	ILineIndex,
 	IPosed,
@@ -268,7 +268,7 @@ export class StreamListErrorData extends BasePositionalErrorData {
 export namespace ErrorPosition {
 	/**
 	 * This is an implementation of `IErrorPosition`
-	 * that expects to locate an `.refStream: IIndexStream` from an
+	 * that expects to locate an `.refStream: IIndexCarryingStream` from an
 	 * `IInputStream` (which must first be initialized),
 	 * and then read the `.refStream.lineIndex` to provide the
 	 * position of the parser.
@@ -281,7 +281,7 @@ export namespace ErrorPosition {
 	export class LineIndexCarrying implements IPrintablePosition {
 		private ["constructor"]: new (
 			inputStream: IInputStream,
-			indexCarryingLocator: IStreamLocator<IStream & IIndexCarrying>
+			indexCarryingLocator: IStreamLocator<IIndexCarryingStream>
 		) => this
 
 		private lineIndex: ILineIndex
@@ -319,9 +319,7 @@ export namespace ErrorPosition {
 
 		constructor(
 			private readonly inputStream: IInputStream,
-			private readonly indexCarryingLocator: IStreamLocator<
-				IStream & IIndexCarrying
-			>
+			private readonly indexCarryingLocator: IStreamLocator<IIndexCarryingStream>
 		) {}
 	}
 

@@ -1,4 +1,4 @@
-import type { ILineIndex } from "../../../interfaces.js"
+import type { ILineIndex, IStream } from "../../../interfaces.js"
 import type { ILinkedStream, IOwnedStream } from "./OwnedStream.js"
 
 /**
@@ -9,6 +9,8 @@ import type { ILinkedStream, IOwnedStream } from "./OwnedStream.js"
  * string).
  */
 export type IIndexStream<T = any> = ILinkedStream<T> & IIndexCarrying
+
+export type IIndexCarryingStream<T = any> = IStream<T> & IIndexCarrying
 
 /**
  * Type for representing entitites that carry

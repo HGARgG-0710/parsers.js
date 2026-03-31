@@ -1,5 +1,0 @@
-[v0.3]
-	
-6. FIX the types for interfaces of `IErrorData` IMPLEMENTATIONS! [and related classes]
-	1. WALK THROUGHT THE PROJECT, FIXING BAD INTERFACES!!!
-	2. new type - `IIndexStream = IStream & ILineIndex` [new], OLD `IIndexStream` (ILinkedIndexStream) becomes `IIndexStream & ILinkedStream`
