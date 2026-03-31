@@ -92,4 +92,8 @@ export abstract class BaseNode implements INode {
 	*[Symbol.iterator]() {
 		for (let i = 0; i <= this.lastChild; ++i) yield this.read(i)
 	}
+
+	toString() {
+		return this.debugPrint()
+	}
 }
