@@ -8,6 +8,6 @@ export const isDebugPrintable = structCheck<IDebugPrintable>({
 	debugPrint: isFunction
 })
 
-export function tryDebugPrinting(item: any): string {
+export function debugPrint(item: any): string {
 	return isDebugPrintable(item) ? item.debugPrint() : String(item)
 }

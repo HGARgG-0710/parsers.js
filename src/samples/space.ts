@@ -3,6 +3,7 @@ import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
 import { DyssyncOwningStream } from "../modules/Stream/objects/templates.js"
 import { FilterStream, IndexStream } from "../objects/Stream.js"
 import { isSpace } from "./alphabet.js"
+import { isWindows } from "./platform.js"
 import { isCurr } from "./Stream.js"
 
 class LastItem<T = any> {
@@ -108,7 +109,7 @@ export const SpacelessStream = FilterStream(
  * Returns a crossplatform newline character value.
  */
 export function getNewline() {
-	return process.platform === "win32" ? "\r\n" : "\n"
+	return toNewline(!isWindows())
 }
 
 /**
@@ -119,9 +120,21 @@ export function getNewline() {
 export const NewlineStream = IndexStream(isCurr("\n"))
 
 export function toNewline(isLF: boolean) {
-	return isLF ? "\n" : "\r\n"
+	return isLF ? LF() : CRLF()
 }
 
+/**
+ * This function splits a given string `s` by newlines in 
+ * a cross-platform fashion, and returns the result
+*/
 export function splitNewlines(s: string) {
-	return s.split("\r\n").join("\n").split("\n")
+	return s.split(CRLF()).join(LF()).split(LF())
+}
+
+export function CRLF() {
+	return "\r\n"
+}
+
+export function LF() {
+	return "\n"
 }

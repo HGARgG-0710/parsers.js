@@ -1,4 +1,4 @@
-import { array } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
 import { Config } from "../global.js"
 import type {
 	IDebugNamed,
@@ -14,9 +14,11 @@ import type {
 } from "../interfaces.js"
 import { isDecimal } from "../samples/alphabet.js"
 import { getNewline } from "../samples/space.js"
-import { tryDebugPrinting } from "../utils/Debug.js"
+import { debugPrint } from "../utils/Debug.js"
 import { locateStateDownstream } from "../utils/Stream.js"
 import { ResourceFollower } from "./PropertyPath.js"
+
+const { isNull } = type
 
 export function tabbed(...lines: string[]) {
 	return lines.map((x) => `${Config.errors.tab}${x}`)
@@ -341,7 +343,7 @@ export namespace ParseError {
 		protected abstract printExpected(expected: any): string
 
 		protected printReceived(received: any) {
-			return `received item: ${tryDebugPrinting(received)}`
+			return `received item: ${debugPrint(received)}`
 		}
 
 		private expected() {
@@ -359,7 +361,7 @@ export namespace ParseError {
 
 	export class ExpectedItemMissingError extends ExpectedMissingError {
 		protected printExpected(item: any) {
-			return `expected item: ${tryDebugPrinting(item)}`
+			return `expected item: ${debugPrint(item)}`
 		}
 	}
 
@@ -400,7 +402,7 @@ export namespace ParseError {
 		}
 
 		private printReceived(received: any) {
-			return `received unexpected input item: ${tryDebugPrinting(
+			return `received unexpected input item: ${debugPrint(
 				received
 			)}`
 		}
@@ -427,7 +429,7 @@ export namespace ParseError {
 		private printChildCurrItem(i: number, item: T) {
 			return `current item in stream (${this.reverseStackIndex(
 				i
-			)}): ${tryDebugPrinting(item)}`
+			)}): ${debugPrint(item)}`
 		}
 
 		private followCurr(childDepth: number) {
@@ -439,7 +441,7 @@ export namespace ParseError {
 		}
 
 		private getStackDepth() {
-			return this.stackDepth !== null
+			return !isNull(this.stackDepth)
 				? this.stackDepth
 				: (this.lastStackIndex =
 						(this.stackDepth = this.resourceFollower.length(

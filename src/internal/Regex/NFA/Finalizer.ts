@@ -1,3 +1,4 @@
+import { type } from "@hgargg-0710/one"
 import { Config } from "../../../global.js"
 import type {
 	ICaptureResolutionPredicate,
@@ -9,6 +10,8 @@ import { FactuallyEmptyRegexError } from "./Errors.js"
 import { NFARegexDudMatcher, NFARegexMatcher } from "./Matcher.js"
 import { MatchState, type Fragment } from "./State.js"
 import { NFARegexVisitor } from "./Visitor.js"
+
+const { isUndefined } = type
 
 function patchMatchStateTo(frag: Fragment) {
 	return frag.patch(new MatchState())
@@ -32,7 +35,7 @@ export class NFARegexFinalizer<T = any> implements IConcreteRegexFinalizer {
 
 	toConcrete(regex: Regex.Raw) {
 		const asState = this.errPrinter.execute(() => this.toState(regex))
-		return asState
+		return !isUndefined(asState)
 			? new NFARegexMatcher(asState, this.captureResolver)
 			: new NFARegexDudMatcher()
 	}

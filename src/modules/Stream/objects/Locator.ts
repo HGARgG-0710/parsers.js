@@ -1,4 +1,4 @@
-import { functional } from "@hgargg-0710/one"
+import { functional, type } from "@hgargg-0710/one"
 import type {
 	IIndexCarrying,
 	IInputStream,
@@ -21,6 +21,7 @@ import {
 	hasState
 } from "../../../utils/Stream.js"
 
+const { isNull } = type
 const { negate } = functional
 
 /**
@@ -129,7 +130,7 @@ export class CachingLocator<T = any> implements IStreamLocator<T> {
 	private result: T | null = null
 
 	locate(inputStream: IInputStream): T | null {
-		return this.result
+		return !isNull(this.result)
 			? this.result
 			: (this.result = this.locator.locate(inputStream))
 	}

@@ -6,12 +6,14 @@ function isMissing(x: any): x is undefined {
 }
 
 /**
- * This is a class implementing the `IPreMap<K, V, Default>`, 
- * and wrapping around the `IPlainMap<K, V>`. 
+ * This is a class implementing the `IPreMap<K, V, Default>`,
+ * and wrapping around the `IPlainMap<K, V>`.
  */
-export class TerminalMap<K = any, V = any, Default = any>
-	implements IPreMap<K, V, Default>
-{
+export class TerminalMap<K = any, V = any, Default = any> implements IPreMap<
+	K,
+	V,
+	Default
+> {
 	private ["constructor"]: new (
 		plainMap?: IPlainMap<K, V>,
 		_default?: Default

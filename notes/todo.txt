@@ -1,0 +1,11 @@
+[v0.3]
+
+1. ADD 'toString()' implementations onto the 'INode' classes, and ALL the other 'IDebugPrintable': 
+	1. define the 'toString()' as: 
+		toString() {
+			return this.debugPrint()
+		}
+	
+	REASON: enables better defaults, WHILE preserving the user capability to employ the 'toString()'
+		method for separate purposes, UNRELATED to debugging (which the 'debugPrint' exists for specifically, 
+		not to confound different purposes of distinct string-based-format-conversion methods) 
