@@ -8,7 +8,7 @@ const { isArray } = type
 // 				2. TIGHTLY COUPLED to 'items' being a DIRECT representation of 'this.size'
 // 					[i.e., internally, THEY CANNOT DIFFER without violating LSP!]
 /**
- * A thin wrapper around `T[]`, satisfying the `ICollection<T, readonly T[]\>` interface.
+ * A thin wrapper around `T[]`, satisfying the `ICollection<T, readonly T[]>` interface.
  */
 export class ArrayCollection<T = any> implements ICollection<T, readonly T[]> {
 	private ["constructor"]: new (items?: T[]) => this

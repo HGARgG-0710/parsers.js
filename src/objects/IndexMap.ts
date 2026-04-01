@@ -107,11 +107,13 @@ export abstract class MidMap<
 		return this.preKeyExtension.get()
 	}
 
-	protected abstract getMapInstance(): IIndexMap<K, V, Default, Index>
+	protected abstract getMapInstance(): IndexMap<K, V, Default, RealKey, Index>
 
-	finalize(): IIndexMap<K, V, Default, Index> {
+	finalize(): IndexMap<K, V, Default, RealKey, Index> {
 		this.calcExtensions()
 		return this.getMapInstance()
+			.setExtension(this.extension)
+			.setKeyExtension(this.keyExtension)
 	}
 
 	extend<NI = any>(
@@ -207,12 +209,12 @@ export abstract class IndexMap<
 		this.realKeys = this.keys.map(this.keyExtension)
 	}
 
-	protected setExtension(extension: (x: any, ...y: any[]) => any) {
+	setExtension(extension: (x: any, ...y: any[]) => any) {
 		this.extension = extension
 		return this
 	}
 
-	protected setKeyExtension(keyExtension: IKeyExtension<K, RealKey>) {
+	setKeyExtension(keyExtension: IKeyExtension<K, RealKey>) {
 		this.keyExtension = keyExtension
 		this.initExtendedKeys()
 		return this
@@ -299,8 +301,6 @@ export namespace IndexMap {
 				Index
 			> {
 				return new ArrayMap<K, V, Default, RealKey, Index>(this.liquid)
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 
@@ -359,8 +359,6 @@ export namespace IndexMap {
 				Index
 			> {
 				return new BasicMap<K, V, Default, RealKey, Index>(this.liquid)
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 
@@ -413,8 +411,6 @@ export namespace IndexMap {
 				return new PredicateMap<T, Default, K, Index>(
 					this.liquid.copy()
 				)
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 
@@ -466,8 +462,6 @@ export namespace IndexMap {
 		> extends MidMap<K, T, Default, ITestable<T>, Index> {
 			protected getMapInstance(): RegExpMap<T, Default, K, Index> {
 				return new RegExpMap<T, Default, K, Index>(this.liquid.copy())
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 
@@ -519,8 +513,6 @@ export namespace IndexMap {
 		> extends MidMap<K, T, Default, IHaving<T>, Index> {
 			protected getMapInstance(): SetMap<T, Default, K, Index> {
 				return new SetMap<T, Default, K, Index>(this.liquid.copy())
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 
@@ -570,8 +562,6 @@ export namespace IndexMap {
 		> extends MidMap<K, T, Default, object, Index> {
 			protected getMapInstance(): ObjectMap<T, Default, K, Index> {
 				return new ObjectMap<T, Default, K, Index>(this.liquid.copy())
-					.setExtension(this.extension)
-					.setKeyExtension(this.keyExtension)
 			}
 		}
 

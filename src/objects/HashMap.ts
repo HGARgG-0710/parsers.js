@@ -20,9 +20,12 @@ function mapClassExtend<
 	)
 }
 
-abstract class PreHashClass<K = any, V = any, InternalKey = any, Default = any>
-	implements IHashMap<K, V, Default>
-{
+abstract class PreHashClass<
+	K = any,
+	V = any,
+	InternalKey = any,
+	Default = any
+> implements IHashMap<K, V, Default> {
 	private ["constructor"]: new (internal: IPreMap<InternalKey, V>) => this
 
 	private hash: IHash<K, InternalKey>
@@ -92,7 +95,7 @@ export function HashClass<K = any, V = any, InternalKey = any, Default = any>(
 	hash: IHash<K, InternalKey>
 ): IHashClass<K, V, InternalKey, Default> {
 	class hashClass extends PreHashClass<K, V, InternalKey, Default> {
-		static hash: IHash<K, InternalKey> = hash
+		static readonly hash: IHash<K, InternalKey> = hash
 		static extend<NK = any>(f: (y: NK, ...x: any[]) => K) {
 			return mapClassExtend<NK, K, V, InternalKey, Default>(f, hash)
 		}

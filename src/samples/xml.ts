@@ -93,6 +93,13 @@ export function XMLStream(table: IXMLGenerationTable) {
 		FlattenerStream.pool.create(lineProducerStream(resource))
 }
 
+// ! PRE-DOC [since one has alrady accidentally stepped on this]: 
+// * 	THIS thing is allowed to fail at runtime DELIBERATELY. 
+// 		For, otherwise, we LOSE the ability to put non-IXMLSerializable 
+// 		INode-s as children of OTHER IXMLSerializable INode-s. 
+// 			In other words, this is allowed to happen, SINCE, 
+// 			in reality, when the user implements the 'toXML' on all the 
+// 			desired classes, this shall NEVER HAPPEN. 
 export function toXML(source: IXMLDebuggable, table: IXMLGenerationTable) {
 	if (!source.toXML) throw new XMLGenerationError(source)
 	return source.toXML(table)
