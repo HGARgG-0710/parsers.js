@@ -587,5 +587,6 @@ export namespace IndexMap {
 	}
 }
 
+export * from "../modules/IndexMap/objects/LiquidMap.js"
 export * from "../modules/IndexMap/objects/ModifiableMap.js"
 export * from "../modules/IndexMap/objects/TableMap.js"

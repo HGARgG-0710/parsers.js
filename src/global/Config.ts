@@ -36,6 +36,10 @@ class ObjectPoolConfig {
 	defaultMaxSize = Infinity
 }
 
+class LoggerConfig {
+	defaultMaxWrites = 30000
+}
+
 class LibConfig {
 	readonly xml = new XMLConfig()
 	readonly regex = new RegexConfig()
@@ -44,6 +48,7 @@ class LibConfig {
 	readonly json = new JSONConfig()
 	readonly features = new FeatureConfig()
 	readonly objectPools = new ObjectPoolConfig()
+	readonly logger = new LoggerConfig()
 }
 
 export const Config = new LibConfig()

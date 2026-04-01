@@ -1,4 +1,5 @@
 import { createWriteStream, WriteStream } from "fs"
+import { Config } from "../../global.js"
 import type { ILogger } from "../../interfaces.js"
 
 interface IFileErrorLoggerState {
@@ -7,8 +8,6 @@ interface IFileErrorLoggerState {
 }
 
 export class FileLogger implements ILogger {
-	static readonly DefaultMaxWrites = 30000
-
 	private readonly open: FileLoggerOpen
 	private state: IFileErrorLoggerState
 
@@ -23,7 +22,7 @@ export class FileLogger implements ILogger {
 	constructor(
 		filePath: string,
 		errHandler: (err: Error) => void = () => {},
-		maxRecordsWritten = FileLogger.DefaultMaxWrites
+		maxRecordsWritten = Config.logger.defaultMaxWrites
 	) {
 		this.open = new FileLoggerOpen(filePath, errHandler, maxRecordsWritten)
 		this.state = this.open
