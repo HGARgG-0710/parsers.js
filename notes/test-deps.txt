@@ -1,0 +1,263 @@
+This file enumerates all the exports of the library in a way that also details their respective dependencies.
+This will allow one to choose the order of testing. 
+The things with NO dependencies will be tested first. 
+When no such things remain, one shall move on to the next "dependency-minimum", until all things are tested 
+[either via Unit Tests, or via Demos]. 
+
+[-2] One shall only list the concrete classes or those abstract that need be tested via extension. 
+
+[-1] The `global.Config` object DOES NOT get to be tested, for it affects the behaviour 
+of the entirety of the library. Instead, it shall be tested TOGETHER with the pieces 
+that it is intended to test. 
+
+[0] Items NOT listed here are deemed internal details that are changeable and are NOT to be tested.
+
+[1] the abstract classes with default methods ALSO get to be tested. 
+	In particular, one creates an ABSTRACT test-suite that gets to be employed for ALL 
+	the child classes. 
+
+[2] The assertions must ALL be tested (that can be), by using the specialized try-catch tests (contract testing)
+
+DEPENDENCIES:
+
+1. global: 
+	1. WrapperApp: 
+		1.1. global.Pools.All
+	
+	2. Pools: 
+		1. Any class that is IInitializable (and is capable of being used with a Pool). 
+	
+3. internal: 
+	1. Stream: 
+		1. RotationBuffer - Regex + TokenChooser [dependy is a DEMO]: 
+			BENCHMARK [not a unit test, nor a demo]
+
+			Specifically, write a new DumbRotationBuffer, implementing the EXACT same interface, 
+				then UPDATE the code of 'PeekStream' to instead accept an interface IMPLEMENTING
+				the thing that 'RotationBuffer' is. 
+
+			THEN, benchmark the '.peek()' operation for varying cases. 
+			DEPENDING on it, do one of the following: 
+
+				1. DumbRotationBuffer replaces the OLD RotationBuffer [you've overengineered]
+					This is if RotationBuffer performance sucks ass. 
+				2. BOTH stay, if they're BOTH good for a specific case (RUN MULTIPLE CASES!)
+					The 'RotationBuffer' is optimized for large number of backtracking versions. 
+				3. 'RotationBuffer' stays if SOMEHOW you were right: 
+					And ONLY if the difference is REALLY big (like 2x, or )
+
+			IN PARTICULAR, test this via: 
+				1. enable injecting the used IRotationBuffer implementation via the 'global.Config'
+					object INSIDE the 'PeekStream'
+				2. checking, for each case, how it behaves
+
+			USE the 'Regex' + 'TokenChooser' for this. 
+			Use one of your demos. Two, even. 
+			Pick a really LARGE input. 
+			This will show how this affects the results of reading real-life data.
+		
+	2. Tree: 
+		1. MultiIndex - NONE
+	
+	3. Utils: 
+		1. OverflowCounter - NONE
+		2. Size - NONE
+	
+4. objects: 
+	1. ArrayBuilder - ArrayCollection: 
+		You only uniquely test the '.get()' method, since everything else has already been tested. 
+		Just reuse the test suite for the `ArrayCollection`. 
+	
+	2. ArrayCollection - NONE
+	
+	3. AutoCache - ISettable & IIndexable
+		Test it with CONCRETE ISettable & IIndexable instances. 
+		Reason: avoid mocks whenever possible. 
+	
+	4. AutoMap - NONE
+
+	5. ByteSource: 
+		1. WebByteSource (conditionally, either Parser-Demos, or NONE): 
+			THIS IS 2 Demos: 
+				1. A RAW one, with nothing but manual file access, and a barebone HTML page. 
+				2. A PROPER ONE - one that uses the same barebone HTML page, but also PARSES 
+					whatever the fuck is given via the current parser. 
+
+			In particular, this is where you check that an IFileSource can be used in a 
+			real-life development situation. 
+
+		2. FileDescriptor - either Parser-Demo, or NONE: 
+			SAME as WebByteSource (use +- THE SAME test suite for them): 
+				1. Raw Demo (no parsing, just the reading of a large file)
+				2. Full Demo (requires the parser Demo-s first, to test for each case how the thing will behave); 
+
+	5. ReadingSource - IByteSource
+		Test for BOTH OF THEM. 
+		Reason: be thorough
+	
+	6. CollectionBuilder - IPrototypeCollection: 
+		Verify it with ALL the library 'IPrototypeCollection's
+
+	7. Counter - NONE
+
+	8. Decoder: 
+		1. Decoder8 - IByteSource
+			Test for BOTH. 
+
+		2. DecoderU8 - IByteSource
+			Test for BOTH.
+
+	9. FileDescrination - IEncoder: 
+		Test for ALL of them. 
+	
+	10. Encoder: 	
+		1. Encoder8 - NONE
+		2. EncodeU8 - NONE
+
+	11. EndingProvider: 
+		1. StreamEndingProvider - IStream
+		2. ByteSourceEndingProvider - IByteSource
+
+	13. Error: 
+		NOTE[1]: the Error-classes get to be tested manually via LOGGING to a file. 
+			It's a sort of regression test, thus. 
+		
+		NOTE[2]: the expect, expectKind, etc - the Error-throwing verification functions are 
+			checked thus: 
+				1. run against N correct cases
+				2. run against M incorrect cases, for each INSPECT that the resulting error is as desired
+					Do that either automatically, OR by reading its properties...
+
+		1. InvalidFileReadPositionError - NONE
+		2. MissingImplementationError - NONE
+		3. AbstractStaticMethodError - NONE
+		4. MissingErrorDataContentError  - NONE
+		5. findErrorDataDownstream - IOwningStream
+		6. expect - IStream
+		7. expectKind - ITypeCheckable & IDebugNamed
+		8. allow - IStream
+		9. skip - IStream
+		10. unexpected - IStream
+		11. allowKind - IStream
+		12. tryReviveChild - IRenewerStream
+		13. ensureChildUnrevivable - IRenewerStream
+		14. ensureCurrDecimal - IStream
+		15. validateId - IStream
+		16. ParseError - IErrorData: 
+			1. MessageBuilderParseError: 
+				1. GenericParseError: 
+					1. ExpectedMissingError: 
+						1. ExpectedItemMissingError
+						2. ExpectedKindMissingError
+						3. ExpectedInItemListMissingError
+						4. ExpectedInKindListMissingError
+					2. UnexpectedItemError - IStream
+					3. StreamStackError - ILinkedStream
+						1. StreamRevivalError
+							1. CannotReviveChildError
+							2. ChildIsNotUnrevivable
+					4. ExpectedDecimalError
+					5. InvalidIdError
+
+		17. NoPropertyHavingLocatableError:
+			1. NoStatefulLocatableError - NONE
+			2. NoIndexCarryingLocatableError - NONE
+			3. NoPosedLocatableError - NONE
+
+		18. XMLGenerationError - IDebugNamed
+
+	14. ErrorData: 
+		1. SimpleErrorData - NONE, use a Mock for IErrorType
+			1. ALSO - use this in a parser demo
+		2. FileErrorData - SimpleErrorData & StreamListErrorData (2 tests total, one for each)
+			1. ALSO - use this in a parser demo [this way, 3 tests - 2 for SimpleErrorData; 1 for StreamListErrorData]
+		3. StreamListErrorData - IPrintablePosition & ILinkedStream ...
+			THIS *only* gets to be used in a DEMO.
+
+		4. ErrorPosition: 
+			1. LineIndexCarrying - LineIndex & ILinkedStream & IStreamLocator
+				This gets used for TWO TESTS: 
+					1. manual, with an ILinkedStream
+					2. DEMO - in a parser, with an 'IErrorData' implementation
+			2. PosCarrying - ILinkedStream & IStreamLocator
+				This gets used for TWO TESTS: 
+					1. manual, with an ILinkedStream
+					2. DEMO - in a parser, with an 'IErrorData' implementation
+
+	15. ErrorPrinter - NONE: 
+		1. Plain - None
+		2. WithLogger - ILogger
+
+	16. Handler: 
+		1. TableHandler - IIndexable
+		2. WrapHandler - IIndexable
+
+	17. HashMap: 
+		1. BasicHash - NONE
+		2. CurrentHash - IStream 
+		3. LengthHash - NONE
+		4. TokenHash - ITyped
+		5. TypeofHash - NONE
+		6. PeekHash - IStream & ALL of the other available hashes;
+			Use only the concrete IHashClasses, NO MOCKS. 
+			
+		7. PlainMap: 
+			1. PlainArray - NONE
+			2. PlainMap - NONE
+			3. PlainObject - NONE
+
+		8. TerminalMap - IPlainMap
+			TEST ALL THREE IPlainMap prior to starting this
+
+	18. IndexMap: 
+		NOTE: for EACH one, you test its' 'MidMap' static class. 
+			Reason: be thorough
+	
+		1. ArrayMap - NONE
+		2. BasicMap - NONE
+		3. PredicateMap - NONE
+		4. RegExpMap - NONE
+		5. SetMap - NONE
+		6. ObjectMap - NONE
+
+		7. ModifiableMap - IIndexMap, use it for ALL OF THEM!
+		8. TableMap - TableCarrier
+		9. LiquidMap - TableCarrier
+		10. TableCarrier - NONE
+
+	19. LineIndex - NONE: 
+		USE it with BOTH a DEMO, AND a Standalone UNIT test. 
+
+		1. StringLineIndex - LineLengths
+		2. LineLengths
+
+	20. Loaded: 
+		1. LoadedU8 - NONE
+		2. LoadedU16LE - NONE
+		3. Loaded8 - NONE
+
+	21. Logger: 
+		1. FileLogger - NONE
+		2. LineFormatter - NONE
+
+	22. Node: 
+		1. SingleChildNode - INode
+		2. ContentNode - NONE
+		3. CachedContentNode - NONE
+		4. RecursiveNode - INode
+			Try it out with ALL THE OTHER types of INode-s
+		5. TokenNode - NONE
+		6. TreeValidationTable - INode: 
+			1. Builder - INode
+			2. TreePairGenerationTable - INode
+				1. Builder - INode
+
+	23. NodeSystem - INode
+	24. ObjectPool - NONE
+	25. Parametrized - AutoMap
+	26. ParseableInput - NONE
+	
+	TODO: FINISH
+
+5. samples
+	TODO: FINISH

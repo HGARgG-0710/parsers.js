@@ -181,7 +181,7 @@ export class TreeValidationTable<T = any>
 		isValidMap,
 		isValidSingle,
 		defaultValid
-	}: TreeValidationTable.Args) {
+	}: TreeValidationTable.Args<T>) {
 		super(types, isValidMap, defaultValid)
 		this.isValidSingle = isValidSingle
 	}
