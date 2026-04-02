@@ -1,6 +1,6 @@
 import assert from "assert"
 import { BadId, IncrementId } from "../constants.js"
-import { Config } from "../global.js"
+import { Config, Pools } from "../global.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
@@ -67,6 +67,7 @@ export class ObjectPool<
 		objectConstructor: new (...x: Partial<Args> | []) => T,
 		limitSize = Config.objectPools.defaultMaxSize
 	) {
+		Pools.All.add(this)
 		this.active = new ObjectPoolActive(objectConstructor, limitSize)
 		this.inactive = new ObjectPoolInactive(objectConstructor)
 		this.id = ObjectPool.NewId()

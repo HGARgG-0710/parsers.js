@@ -1,7 +1,4 @@
-import {
-	JointPoolCollection,
-	PoolCollection
-} from "../objects/PoolCollection.js"
+import { PoolCollection } from "../objects/PoolCollection.js"
 
 /**
  * This is a `PoolCollection` designated for `ObjectPool`s
@@ -44,4 +41,4 @@ export const Internal = new PoolCollection()
  * It is recommended that the user call `Pools.All.free()`
  * instead of enumerating each pool
  */
-export const All = new JointPoolCollection(Stream, Node, Internal)
+export const All = new PoolCollection()
