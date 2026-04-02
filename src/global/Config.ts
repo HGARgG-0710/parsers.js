@@ -8,6 +8,7 @@ class XMLConfig {
 
 class RegexConfig {
 	errorPrinter: ErrorPrinter = ErrorPrinter.Plain.instance
+	rawToStringLF: boolean = true
 }
 
 class UnicodeConfig {
@@ -18,6 +19,9 @@ class UnicodeConfig {
 
 class ErrorConfig {
 	tab = "\t"
+}
+
+class ErrorPrinterConfig {
 	lf = true
 	loggedNewlinesBetween = 2
 }
@@ -45,6 +49,7 @@ class LibConfig {
 	readonly regex = new RegexConfig()
 	readonly unicode = new UnicodeConfig()
 	readonly errors = new ErrorConfig()
+	readonly errorPrinter = new ErrorPrinterConfig()
 	readonly json = new JSONConfig()
 	readonly features = new FeatureConfig()
 	readonly objectPools = new ObjectPoolConfig()

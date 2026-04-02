@@ -1,11 +1,11 @@
 import { boolean, object, type } from "@hgargg-0710/one"
-import type { IRefillableCollection } from "src/interfaces/Collection.js"
 import type {
 	IFiniteWritable,
 	ILineIndex,
 	IParseState,
 	IPosed,
 	IPushable,
+	IRefillableCollection,
 	IStateHaving,
 	IStateSettable
 } from "../interfaces.js"

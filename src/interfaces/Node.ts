@@ -99,7 +99,8 @@ export interface IScannable {
  * interfaces that require `IFreeable`.
  */
 export interface INode
-	extends ITyped,
+	extends
+		ITyped,
 		IWalkable<INode>,
 		IJSONSerializableObject,
 		IXMLSerializable,
@@ -136,9 +137,7 @@ export interface ICellNode<V = any> extends IPoolNode, ICarrierNode<V> {}
  * It can be freed via the 'free()' method.
  */
 export interface IPoolNode<Args extends any[] = any[]>
-	extends INode,
-		IInitializable<Args>,
-		IFreeable {}
+	extends INode, IInitializable<Args>, IFreeable {}
 
 /**
  * This is a function for creation of `INode` from an `x: any`,
@@ -151,9 +150,7 @@ export type INodeMaker<K extends INode = INode> = (x: any) => K | false
  * their respective .type-information, but with deserialization capabilities.
  */
 export interface INodeType<Args extends any[] = any[], K extends INode = INode>
-	extends ITypeCheckable,
-		ITyped,
-		IDebugNamed {
+	extends ITypeCheckable, ITyped, IDebugNamed {
 	new (...args: Args): K
 	fromPlain(x: any, maker: INodeMaker): K | false
 }
@@ -185,15 +182,18 @@ export interface ISingletonNodeType extends INodeType<[], INode> {
  * This interface is intended to represent instances of `INodeType< [V], ICellNode<V>>`
  * that carry data of type `V`.
  */
-export interface ICellNodeType<V = any, K extends ICellNode<V> = ICellNode<V>>
-	extends IPoolNodeType<[V], K> {}
+export interface ICellNodeType<
+	V = any,
+	K extends ICellNode<V> = ICellNode<V>
+> extends IPoolNodeType<[V], K> {}
 
 /**
  * This is an interface for representing `INodeType< Args>` extensions
  * specifically purposed for `IRecursiveNode` instances.
  */
-export interface IRecursiveNodeType<K extends IRecursiveNode = IRecursiveNode>
-	extends IPoolNodeType<[INode[]?], K> {}
+export interface IRecursiveNodeType<
+	K extends IRecursiveNode = IRecursiveNode
+> extends IPoolNodeType<[INode[]?], K> {}
 
 /**
  * This is an interface for representing a function-factory for `INodeType< Args>`
@@ -223,4 +223,4 @@ export type IRecursiveNodeTypeFactory<
  * This is an interface for representing a mapping of an `INodeTypeFactory<T>`
  * to lists of `T[]`. Typically employed to simplify type-creation/maintenance.
  */
-export type INodeTypeCategories<T = any> = [INodeTypeFactory, T[]][]
+export type INodeTypeCategories = [INodeTypeFactory, IValidNodeType[]][]

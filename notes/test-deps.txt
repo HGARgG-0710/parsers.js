@@ -18,17 +18,42 @@ that it is intended to test.
 
 [2] The assertions must ALL be tested (that can be), by using the specialized try-catch tests (contract testing)
 
+[3] Errors must ALL BE TESTED - specifically, INCORRECT input must ALSO be provided 
+	(*all* kinds of incorrect input, so that ALL possible inputs for ALL the functions/classes/etc, 
+	are handled!)
+
 DEPENDENCIES:
 
 1. global: 
 	1. WrapperApp: 
 		1.1. global.Pools.All
 	
-	2. Pools: 
+	2. Pools - ObjectPool: 
 		1. Any class that is IInitializable (and is capable of being used with a Pool). 
+			When CLEARING the Pools.All (or, whatever), verify for EVERY 'ObjectPool' in 
+			the library, that its '.size' is 0!
 	
 3. internal: 
-	1. Stream: 
+	1. Regex: 
+		1. Errors: 
+			1. Compiler: 
+				1. defaultCompilerErrHandler - TreeStream, INode
+				2. rangeKindsErrHandler - TreeStream, INode
+				3. rangeBoundaryKindsErrHandler - TreeStream, INode
+				4. negatedBuilderKindsErrHandler - TreeStream, INode
+			2. NFA: 
+				1. FactuallyEmptyRegexError - ISimpleErrorData
+			3. Parser: 
+				1. validateRangeNonEmpty - IStream, INode, IErrorData
+				2. validateNonEmptyTypeMatch - IStream, INode, IErrorData
+				3. validateHex - IStream, INode, IErrorData
+				4. validateUnicodeCodeLength - IStream, INode, IErrorData
+				5. validatePropertyName - IStream, INode, IErrorData
+				6. validatePropertyValue - IStream, INode, IErrorData
+				7. validateUnicodePropertyNameNonEmpty - IStream, INode, IErrorData
+				8. validateUnicodePropertyNonEmpty - IStream, INode, IErrorData
+
+	2. Stream: 
 		1. RotationBuffer - Regex + TokenChooser [dependy is a DEMO]: 
 			BENCHMARK [not a unit test, nor a demo]
 
@@ -37,6 +62,11 @@ DEPENDENCIES:
 				the thing that 'RotationBuffer' is. 
 
 			THEN, benchmark the '.peek()' operation for varying cases. 
+
+			Specifically, check: 
+				1. memory (RotationBuffer *should* be better - but by HOW MUCH???)
+				2. speed (RotationBuffer MIGHT be worse - but by HOW MUCH???)
+
 			DEPENDING on it, do one of the following: 
 
 				1. DumbRotationBuffer replaces the OLD RotationBuffer [you've overengineered]
@@ -55,11 +85,15 @@ DEPENDENCIES:
 			Use one of your demos. Two, even. 
 			Pick a really LARGE input. 
 			This will show how this affects the results of reading real-life data.
+
+			*If* DumbRotationBuffer stays, either:
+				1. make it the new 'RotationBuffer' (if the old one bites the dust)
+				2. rename it to SimpleRotationBuffer (or smth similar, if the old one stays)
 		
-	2. Tree: 
+	3. Tree: 
 		1. MultiIndex - NONE
 	
-	3. Utils: 
+	4. Utils: 
 		1. OverflowCounter - NONE
 		2. Size - NONE
 	
@@ -91,30 +125,30 @@ DEPENDENCIES:
 				1. Raw Demo (no parsing, just the reading of a large file)
 				2. Full Demo (requires the parser Demo-s first, to test for each case how the thing will behave); 
 
-	5. ReadingSource - IByteSource
+	6. ReadingSource - IByteSource
 		Test for BOTH OF THEM. 
 		Reason: be thorough
 	
-	6. CollectionBuilder - IPrototypeCollection: 
+	7. CollectionBuilder - IPrototypeCollection: 
 		Verify it with ALL the library 'IPrototypeCollection's
 
-	7. Counter - NONE
+	8. Counter - NONE
 
-	8. Decoder: 
+	9. Decoder: 
 		1. Decoder8 - IByteSource
 			Test for BOTH. 
 
 		2. DecoderU8 - IByteSource
 			Test for BOTH.
 
-	9. FileDescrination - IEncoder: 
+	10. FileDescrination - IEncoder: 
 		Test for ALL of them. 
 	
-	10. Encoder: 	
+	11. Encoder: 	
 		1. Encoder8 - NONE
 		2. EncodeU8 - NONE
 
-	11. EndingProvider: 
+	12. EndingProvider: 
 		1. StreamEndingProvider - IStream
 		2. ByteSourceEndingProvider - IByteSource
 
@@ -185,6 +219,7 @@ DEPENDENCIES:
 					2. DEMO - in a parser, with an 'IErrorData' implementation
 
 	15. ErrorPrinter - NONE: 
+		0. getNewline - NONE
 		1. Plain - None
 		2. WithLogger - ILogger
 
@@ -238,7 +273,9 @@ DEPENDENCIES:
 
 	21. Logger: 
 		1. FileLogger - NONE
-		2. LineFormatter - NONE
+		2. LineJoiner - NONE
+		3. TabbingProvider - NONE
+		4. DynamicSpaceInserter - NONE
 
 	22. Node: 
 		1. SingleChildNode - INode
@@ -257,6 +294,77 @@ DEPENDENCIES:
 	25. Parametrized - AutoMap
 	26. ParseableInput - NONE
 	
+	27. Regex - IStream: 
+		NOTE [1]: test ALL the 'IStream's prior to even thinking of trying to test out this
+			Reason: want to be sure that ALL of the 'IStream's behave (as can be determined)
+				AS CLOSELY AS POSSIBLE to our spec. Since that, in particular, would enable 
+				one to better isolate the behavioural issues (for which there is PLENTY of 
+				opportunity inside of the Regex code...).
+
+		NOTE [2]: tests of '.match()' look like so - one provides a MATCHING STRING, then the 
+			MATCHED-INSIDE-STREAM, then checks for the correct value ['IStream's given are VEEERY
+			diverse]. Also - there are simple tests for other methods 'toString()', etc...
+		
+		NOTE [3]: the tests described above are UNIT TESTS. In particular, one also employs the 
+			'Regex + TokenChooser' combination for the parser demos. IN PARTICULAR, it means that 
+			one will be testing the parsers in question, and thus - ALSO increasing the confidence 
+			in the 'Regex' and 'TokenChooser' (and all the rest of the stuff that gets to be a part 
+			of said parser tests).
+
+		NOTE [4]: test ALL the respective stuff that is part of the 'Config' AS WELL - namely, the 
+			'ExtensionMap', 'IRegexFactory', 'Extension's. USE the `NFARegexFinalizer` with different
+			`captureResolvers', VERIFY that they all work correctly. The ONLY part of the config that 
+			does NOT get to be tested is the 'IConcreteRegexFinalizer'. One even creates a custom 
+			`IRegexFactory` (which will be, obviously, pretty hard, but still). 
+
+		NOTE [5]: test for all the `Regex.Raw` would do ALL their respective methods - including the 
+			'toString()' and the 'printLines()' thing. 
+
+		1. NFAFinalizer: 
+			1. ONLY as part of 'Regex' tests, use DIFFERENT 'captureResolvers'. 
+				POSSIBLY: make the captureResolvers that you create (that also provide 
+					practical use) into library exports. Replace the concrete values of 
+					resolvers in tests with their names into library exports. Replace the concrete values of 
+					resolvers in tests with their respective export names. 
+				
+		2. ExtensionMap: 
+			1. EXTEND IT as part of the `IRegexFactory` test (specifically - creating your own custom factory with 
+				specialized parsing extensions). 
+		
+		3. Raw: 
+			NOTE [1]: only PARTIAL testing is possible, test ONLY the methods: 
+				1. toString
+				2. printLines
+				3. set
+				4. setShallow (on `Regex.Raw.Mult` children)
+				5. printName (on `Regex.Raw.Mult/SinglePrinted` children)
+				6. inheritExtensions: 
+					1. create ExtensionMap instances just for this
+				7. extensions
+			
+			NOTE [2]: for ALL the `Regex.Mult` children, ALSO test their respective `Builder` classes. 
+
+			1. Mult: 
+				1. Either - Regex.Raw
+				2. Catenation - Regex.Raw
+				3. NoneOf - Regex.Raw
+				4. IgnoreCase
+				5. NoCapture
+				6. NonBoundary
+				7. Boundary
+			2. SinglePrinted: 
+				1. Optional - Regex.Raw
+				2. NoneOrMore - Regex.Raw
+			3. Char - NONE
+				1. Additionally, test the `make` method instead of the constructor (the Flyweight Pattern).
+			4. TokenType - NONE
+			5. CodeRange - NONE
+			6. Anything - NONE
+			7. UnicodeProperty - NONE: 
+				1. Alias - NONE
+			
+			8. Factory - ExtensionMap, Regex.Raw [ALL OF THEM]
+
 	TODO: FINISH
 
 5. samples

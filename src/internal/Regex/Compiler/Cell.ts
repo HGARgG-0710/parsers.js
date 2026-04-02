@@ -1,5 +1,9 @@
-import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
-import type { ICellNode, INode, IRegexFactory } from "../../../interfaces.js"
+import type {
+	ICellNode,
+	INode,
+	IRegexCompilerHandler,
+	IRegexFactory
+} from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
 import type { TreeStream } from "../../../objects/Stream.js"
 

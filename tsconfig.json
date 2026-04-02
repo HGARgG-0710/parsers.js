@@ -2,9 +2,12 @@
 	"compilerOptions": {
 		"allowJs": false,
 		"checkJs": false,
-		"baseUrl": ".",
 		"outDir": "dist",
 		"strictNullChecks": true,
+		"strict": false,
+		"types": [
+			"node"
+		],
 		"lib": [
 			"ESNext",
 			"DOM"
@@ -16,7 +19,7 @@
 		"verbatimModuleSyntax": true,
 		"paths": {
 			"@hgargg-0710/*": [
-				"node_modules/@hgargg-0710/*"
+				"./node_modules/@hgargg-0710/*"
 			]
 		},
 		"noUnusedLocals": true,

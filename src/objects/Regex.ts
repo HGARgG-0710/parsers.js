@@ -1,5 +1,6 @@
 import { array, type } from "@hgargg-0710/one"
 import assert from "assert"
+import * as global from "../global.js"
 import type {
 	IConcreteRegexFinalizer,
 	ILinePrintable,
@@ -14,8 +15,10 @@ import type {
 } from "../interfaces.js"
 import { NFARegexFinalizer } from "../internal/Regex/NFA/Finalizer.js"
 import { RegexStorage } from "../internal/Regex/Storage.js"
+import { toNewline } from "../samples/space.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 import { AutoMap } from "./AutoMap.js"
+import { LineJoiner } from "./Logger.js"
 
 const { numbers } = array
 const { isUndefined } = type
@@ -104,6 +107,11 @@ export namespace Regex {
 	// ! ALSO - the `setExtensionMap` MUST be called BEFORE the `Regex.*.Builder.finish()`,
 	// ! 	since THAT is where 'noCapture()/ignoreCase()' are both called!
 	export abstract class Raw implements ILinePrintable {
+		private readonly extMap = new ExtensionMap()
+		private readonly defaultJoiner = new LineJoiner(
+			toNewline(global.Config.regex.rawToStringLF)
+		)
+
 		abstract accept<T>(visitor: IRawRegexVisitor<T>): T
 
 		protected abstract printLinesRaw(): string[]
@@ -113,8 +121,6 @@ export namespace Regex {
 			return tab ? tabLines(raw) : raw
 		}
 
-		private extMap = new ExtensionMap()
-
 		inheritExtensions(map: ExtensionMap) {
 			this.extMap.from(map)
 			return this
@@ -123,6 +129,10 @@ export namespace Regex {
 		set(extName: string, value: any) {
 			this.extMap.set(extName, value)
 			return this
+		}
+
+		toString() {
+			return this.defaultJoiner.format(this, true)
 		}
 
 		get extensions() {
@@ -548,11 +558,11 @@ export namespace Regex {
 			charRange(from: string, to: string): Regex.Raw {
 				return new CodeRange(from.codePointAt(0)!, to.codePointAt(0)!)
 			}
-			
-			// * note: we're parsing here and not in 'RegexParser' since 
-			// 	interpretation of the hex id is up to the factory, and not 
+
+			// * note: we're parsing here and not in 'RegexParser' since
+			// 	interpretation of the hex id is up to the factory, and not
 			// 	the front-end parser - its job is merely to correctly represent
-			// 	the raw data provided by the user, *not* to assign a definitive 
+			// 	the raw data provided by the user, *not* to assign a definitive
 			// 	meaning of it within the application
 			unicodeChar(hex: string) {
 				return Char.make(String.fromCodePoint(parseInt(hex, 16)))

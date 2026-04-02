@@ -1,8 +1,8 @@
 import type {
 	IRegexCompilerFunction,
-	IRegexCompilerTypeTable
-} from "src/interfaces/Regex.js"
-import type { IRegexFactory } from "../../../interfaces.js"
+	IRegexCompilerTypeTable,
+	IRegexFactory
+} from "../../../interfaces.js"
 import { AutoMap, Regex } from "../../../objects.js"
 import {
 	AnyChar,

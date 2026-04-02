@@ -7,18 +7,9 @@ import type {
 	ILoggerHandler,
 	IShutdownHandler
 } from "../interfaces.js"
+import { DynamicSpaceInserter } from "../modules/Logger/DynamicSpaceInserter.js"
 import { toNewline } from "../samples/space.js"
 import { isError } from "../utils.js"
-
-function newlines(error: string, offset: number = 0) {
-	return `${error}${getNewline().repeat(
-		Config.errors.loggedNewlinesBetween - offset
-	)}`
-}
-
-function getNewline(): string {
-	return toNewline(Config.errors.lf)
-}
 
 export class ErrorPrinter {
 	private getError(errorLike: Error | IErrorConvertible) {
@@ -56,11 +47,30 @@ export class ErrorPrinter {
 }
 
 export namespace ErrorPrinter {
-	export const shutDownCounter = (errCount: number) => {
-		assert(errCount > 0)
+	const spaceInserter = new DynamicSpaceInserter(getNewline)
+
+	function newlines(error: string, offset: number = 0) {
+		return spaceInserter.insertNewlineAfter(
+			error,
+			Config.errorPrinter.loggedNewlinesBetween - offset
+		)
+	}
+
+	export function getNewline(): string {
+		return toNewline(Config.errorPrinter.lf)
+	}
+
+	export const shutDownCounter = (
+		exitCount: number,
+		finalAction = () => {}
+	) => {
+		assert(exitCount > 0)
 		let timesThrown = 0
 		return () => {
-			if (++timesThrown == errCount) process.exit(1)
+			if (++timesThrown == exitCount) {
+				finalAction()
+				process.exit(1)
+			}
 		}
 	}
 

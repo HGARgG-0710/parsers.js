@@ -13,9 +13,6 @@ type INodeTypesMap = Map<IValidNodeType, INodeType>
  * A `NodeSystem` is intended to represent a list of "keys",
  * defining the types of nodes, which are deemed valid.
  *
- * It is primarily intended to be used within JavaScript code
- * and not TypeScript due to poorer type granularity.
- *
  * It can serve as:
  *
  * 1. a way to automate the calls to `INodeTypeFactor`-ies

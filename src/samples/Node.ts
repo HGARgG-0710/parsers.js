@@ -1,8 +1,11 @@
-import { ContentNode, SingleChildNode } from "src/modules/Node/ContentNode.js"
-import { RecursiveNode } from "src/modules/Node/RecursiveNode.js"
-import { TokenNode } from "src/modules/Node/TokenNode.js"
-import type { ITypeCheckable } from "../interfaces.js"
+import type { ITypeCheckable, IValidNodeType } from "../interfaces.js"
 import { NodeSystem } from "../objects.js"
+import {
+	ContentNode,
+	RecursiveNode,
+	SingleChildNode,
+	TokenNode
+} from "../objects/Node.js"
 
 /**
  * This is a template for the most basic complete `NodeSystem` possible.
@@ -19,11 +22,11 @@ import { NodeSystem } from "../objects.js"
  * 3. It can treat simple low-level data-wrappers (`ContentNode`)
  * 4. [bonus] It can represent deep one-value predicates (`SingleChildNode`)
  */
-export function PlainNodes<T = any>(
-	token: T[] = [],
-	content: T[] = [],
-	recursive: T[] = [],
-	single: T[] = []
+export function PlainNodes(
+	token: IValidNodeType[] = [],
+	content: IValidNodeType[] = [],
+	recursive: IValidNodeType[] = [],
+	single: IValidNodeType[] = []
 ) {
 	return new NodeSystem([
 		[TokenNode, token],

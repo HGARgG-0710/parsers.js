@@ -402,9 +402,7 @@ export namespace ParseError {
 		}
 
 		private printReceived(received: any) {
-			return `received unexpected input item: ${debugPrint(
-				received
-			)}`
+			return `received unexpected input item: ${debugPrint(received)}`
 		}
 
 		private received() {

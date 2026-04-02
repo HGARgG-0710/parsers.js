@@ -1,11 +1,8 @@
 import type { ISimpleErrorData } from "../../../interfaces.js"
 import type { Regex } from "../../../objects.js"
 import { ParseError } from "../../../objects/Error.js"
-import { LineFormatter } from "../../../objects/Logger.js"
 
 export class FactuallyEmptyRegexError extends ParseError {
-	private static readonly formatter = new LineFormatter(",\n")
-
 	protected static override populate(
 		errData: ISimpleErrorData,
 		rawRegex: Regex.Raw
@@ -21,10 +18,7 @@ export class FactuallyEmptyRegexError extends ParseError {
 	}
 
 	private formatErrRegex(errorData: ISimpleErrorData) {
-		return FactuallyEmptyRegexError.formatter.format(
-			errorData.getInfo("rawRegex") as Regex.Raw,
-			true
-		)
+		return String(errorData.getInfo("rawRegex") as Regex.Raw)
 	}
 
 	protected override makeMessage(errorData: ISimpleErrorData): string {

@@ -1,34 +1,16 @@
-import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
-import type { INode } from "../../../interfaces.js"
+import { Config } from "../../../global.js"
+import type { INode, IRegexCompilerHandler } from "../../../interfaces.js"
 import { ConstructorError } from "../../../objects/Error.js"
+import { TabbingProvider } from "../../../objects/Logger.js"
 import type { TreeStream } from "../../../objects/Stream.js"
-
-class PaddingProvider {
-	private getPadding() {
-		return "\t".repeat(this.padding)
-	}
-
-	incPadding() {
-		++this.padding
-	}
-
-	decPadding() {
-		--this.padding
-	}
-
-	provideNewlinePadding(forString: string) {
-		return `\n${this.getPadding()}${forString}`
-	}
-
-	toStringList(...items: string[]) {
-		return items.map((x) => this.provideNewlinePadding(x)).join("")
-	}
-
-	constructor(private padding: number) {}
-}
+import { getNewline } from "../../../samples/space.js"
 
 class RegexCompilationError extends ConstructorError {
-	protected readonly paddingProvider = new PaddingProvider(3)
+	protected readonly paddingProvider = new TabbingProvider(
+		3,
+		Config.errors.tab,
+		getNewline()
+	)
 
 	protected getReason() {
 		return "item kind unrecognized"
@@ -46,7 +28,7 @@ class RegexCompilationError extends ConstructorError {
 
 class RegexRangeKindError extends RegexCompilationError {
 	private validRangeKindsList() {
-		return this.paddingProvider.toStringList(
+		return this.paddingProvider.tabList(
 			"TrivialRange",
 			"InfiniteRange",
 			"LimitsRange"
@@ -60,7 +42,7 @@ class RegexRangeKindError extends RegexCompilationError {
 
 class RegexRangeBoundaryError extends RegexCompilationError {
 	private validRangeBoundryKindsList() {
-		return this.paddingProvider.toStringList(
+		return this.paddingProvider.tabList(
 			"EscapedLiteral",
 			"SingleChar",
 			"UnicodeChar",
@@ -78,7 +60,7 @@ class RegexRangeBoundaryError extends RegexCompilationError {
 
 class RegexNegatedBuilderError extends RegexCompilationError {
 	private validNegatedBuilderKindsList() {
-		return this.paddingProvider.toStringList("CharClass", "BoundaryClass")
+		return this.paddingProvider.tabList("CharClass", "BoundaryClass")
 	}
 
 	protected override getReason(): string {

@@ -1,7 +1,7 @@
-import type { IRegexCompilerHandler } from "src/interfaces/Regex.js"
 import type {
 	ICellNode,
 	INode,
+	IRegexCompilerHandler,
 	IRegexFactory,
 	IValidNodeType
 } from "../../../interfaces.js"

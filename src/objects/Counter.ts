@@ -1,3 +1,5 @@
+import assert from "assert"
+
 /**
  * This is a class for representing a counter.
  * It can have an arbitrary start-point (by default, begins counting at `0`).
@@ -8,6 +10,11 @@ export class Counter {
 
 	inc() {
 		return ++this.count
+	}
+
+	dec() {
+		assert(this.count > this.start)
+		return --this.count
 	}
 
 	reset() {

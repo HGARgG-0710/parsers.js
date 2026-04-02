@@ -1,8 +1,9 @@
 import type {
+	INode,
 	IRegexCompilerFunction,
-	IRegexCompilerHandler
-} from "src/interfaces/Regex.js"
-import type { INode, IRegexPartBuilder } from "../../../interfaces.js"
+	IRegexCompilerHandler,
+	IRegexPartBuilder
+} from "../../../interfaces.js"
 import type { TreeStream } from "../../../objects/Stream.js"
 
 export function compileGroup(
