@@ -365,7 +365,15 @@ DEPENDENCIES:
 			
 			8. Factory - ExtensionMap, Regex.Raw [ALL OF THEM]
 
-	TODO: FINISH
+	28. ResourceCollection - IResource [ALL OF THEM]
+		Employ for ALL the project's IResources. 
+		Ensure it's truly implementation-agnostic 
+			[i.e. capable of handling `IResource`s of multiple concrete types at the same time]. 
+
+	29. SourceBuilder - ArrayCollection
+
+	30. Stream: 
+		TODO: FINISH
 
 5. samples
 	TODO: FINISH
