@@ -80,7 +80,7 @@ export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
 		return this._follower
 	}
 
-	private constructor(private readonly _follower: IPathFollower) {
+	protected constructor(private readonly _follower: IPathFollower) {
 		super(hasState)
 	}
 }
@@ -96,7 +96,7 @@ export class PosCarryingLocator extends WithPath<IPosed> {
 		return this._follower
 	}
 
-	private constructor(private readonly _follower: IPathFollower) {
+	protected constructor(private readonly _follower: IPathFollower) {
 		super(hasPos)
 	}
 }
@@ -156,7 +156,7 @@ export class MarkerLocator<M = any> extends WithPath<IMarkerHaving<M>> {
 		return this._follower
 	}
 
-	private constructor(
+	protected constructor(
 		marker: M,
 		private readonly _follower: IPathFollower
 	) {

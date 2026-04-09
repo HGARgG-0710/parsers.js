@@ -373,7 +373,76 @@ DEPENDENCIES:
 	29. SourceBuilder - ArrayCollection
 
 	30. Stream: 
-		TODO: FINISH
+		DO NOT utilise EVERY kind of Stream for an interface test. 
+		Only pick 2-3, one from EACH of the "general" parent classes (abstract)!
+		The concrete implementations chosen should be different very frequently. 
 
-5. samples
+		In particular, most IStream-s of the library are divided by type: 
+			1. delegates [IdentityStream and its children]
+			2. complex composites of IStream-s [ICompositeStream, ArrayStream (and its children), etc]
+			3. complex traversal streams [PeekStream, LimitStream, SectionStream, etc]
+			4. adaptor classes [IteratorStream, FiniteStream, TreeStream]
+			5. contract streams, used in large contexts [MarkerStream, StorageStream, DepthMarkStream, RecursiveLimitStream, RecursiveProxyStream]
+			6. source classes [SourceStream (and its children)]
+			7. proxies [ProxyStream (and its children)]
+			8. combiner/singleton streams [SingletonStream, and related]
+			9. user-extendable Abstract Base Classes [NodeStream, RenewableStream]
+			10. error handling and wrapper-based control flow [PanicStream (and its children)]
+			[TODO: add this categorization INTO THE WIKI, add more points to it, make sure it is UTTERLY COMPLETE!]
+
+		The choosers are divided onto: 
+			1. stateless choosers (simple functions)
+			2. stateful choosers (complex objects)
+
+		Some belong to SEVERAL categories, depending on what the user is doing (ex: HandlerStream and ValidatorStream). 
+
+		VITAL: you *must* check for the ability of ALL 'IStream's being EMPTY ON INITIALIZATION!
+
+		1. ActionList - IOwningStream
+		2. Chooser: 
+			1. IteratorStreamChooser - IOwnedStream
+				Test several different ones before attempting this. 
+				Have multiple combinations of varied stream size. 
+		3. Locator: 
+			1. WithPath: 
+				1. Upwards - IOwnedStream
+					Have multiple real-life predicates (BOTH specially made up AND already defined + exported). 
+
+				2. Downwards - IOwningStream
+					Have multiple real-life predicates (BOTH specially made up AND already defined + exported). 
+
+				3. StatefulLocator: 
+					Test for BOTH the regular AND the "caching" IPathFollower-s. 
+
+					1. downwards - IOwnedStream
+					2. upwards - IOwningStream
+
+				4. PosCarryingLocator
+					Test for BOTH the regular AND the "caching" IPathFollower-s. 
+
+					1. downwards - IOwnedStream
+					2. upwards - IOwningStream
+
+				5. IndexCarryingLocator: 
+					Test for BOTH the regular AND the "caching" IPathFollower-s. 
+				
+					1. downwards - IOwnedStream
+					2. upwards - IOwningStream
+
+				6. CachingLocator - IStreamLocator
+					Test it for EVERY SINGLE ONE of 'IStreamLocator's, including a single 'CachingLocator + Smth'. 
+
+				7. MarkerLocator:
+					Test for BOTH the regular AND the "caching" IPathFollower-s. 
+				
+					1. downwards - IOwnedStream
+					2. upwards - IOwningStream
+					
+		4. concrete: 
+			TODO: FINISH
+
+5. samples: 
+	TODO: FINISH
+
+6. utils: 
 	TODO: FINISH
