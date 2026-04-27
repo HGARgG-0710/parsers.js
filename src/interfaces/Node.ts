@@ -4,6 +4,7 @@ import type {
 	IJSONSerializableObject,
 	IXMLSerializable
 } from "../interfaces.js"
+import type { NodeData } from "../modules/Node/NodeData.js"
 import type { ObjectPool } from "../objects.js"
 import type { IDebugNamed, IDebugPrintable } from "./Debug.js"
 
@@ -108,8 +109,10 @@ export interface INode
 		IScannable,
 		IDebugNamed,
 		IDebugPrintable {
-	setParent(parnet: INode): void
+	setParent(parent: INode): void
+	setData(newData: NodeData): void
 	readonly parent: INode | null
+	readonly data: NodeData
 }
 
 /**

@@ -34,7 +34,7 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 		return { type: this.type }
 	}
 
-	toXML(table: IXMLGenerationTable): string[] {
+	override toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
 		const attrConverter = table.toAttr(type, type)
 		return [selfClosingTag(type, attrConverter ? attrConverter(this) : [])]

@@ -7,7 +7,7 @@ import type {
 	IValidatable,
 	IXMLGenerationTable
 } from "../../interfaces.js"
-import { closingTag, openingTag, tabbed, toXML } from "../../samples/xml.js"
+import { closingTag, openingTag, tabbed } from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
 import { isRecursiveNodeSerializable } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
@@ -101,7 +101,7 @@ abstract class PreRecursiveNode
 		}
 	}
 
-	toXML(table: IXMLGenerationTable): string[] {
+	override toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
 		const openTag = openingTag(
 			type,
@@ -113,7 +113,7 @@ abstract class PreRecursiveNode
 				.flat()
 		)
 		const childTags = this.children
-			.map((c) => (table.isTag(type, c.type, c) ? toXML(c, table) : []))
+			.map((c) => (table.isTag(type, c.type, c) ? c.toXML(table) : []))
 			.flat()
 		const closeTag = closingTag(type)
 		return [openTag, ...tabbed(childTags), closeTag]

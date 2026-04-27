@@ -12,10 +12,10 @@ import type {
 } from "../interfaces.js"
 import {
 	MissingErrorDataContentError,
-	MissingImplementationError,
 	NoIndexCarryingLocatableError,
 	NoPosedLocatableError
 } from "./Error.js"
+import { LineIndexToStringConvertible } from "./LineIndex.js"
 
 class InfoMap {
 	private readonly transient = new Map<string, any>()
@@ -276,7 +276,7 @@ export namespace ErrorPosition {
 	 * It guaranteedly implements `toString(): string` as
 	 * `() => .lineIndex.line:.lineIndex.char`,
 	 * and optionally implements the `isNumber`: the implementation
-	 * is valid only in cases when one can delegate to `.lineIndex.toNumber()`.
+	 * is valid only in cases when one can delegate to `.lineIndex.valueOf()`.
 	 */
 	export class LineIndexCarrying implements IPrintablePosition {
 		private ["constructor"]: new (
@@ -286,17 +286,12 @@ export namespace ErrorPosition {
 
 		private lineIndex: ILineIndex
 
-		toNumber(): number {
-			if (this.lineIndex.toNumber) return this.lineIndex.toNumber()
-
-			throw new MissingImplementationError(
-				"toNumber",
-				this.lineIndex.constructor.name
-			)
+		valueOf(): number {
+			return this.lineIndex.valueOf()
 		}
 
 		toString(): string {
-			return `${this.lineIndex.line}:${this.lineIndex.char}`
+			return String(new LineIndexToStringConvertible(this.lineIndex))
 		}
 
 		locate() {
@@ -330,7 +325,7 @@ export namespace ErrorPosition {
 	 * and then read the `.refStream.pos` to provide the
 	 * position of the parser.
 	 *
-	 * It guaranteedly implements `.toNumber(): number` as
+	 * It guaranteedly implements `.valueOf(): number` as
 	 * `() => this.refStream.pos`.
 	 */
 	export class PosCarrying implements IPrintablePosition {
@@ -341,7 +336,7 @@ export namespace ErrorPosition {
 
 		private pos: number
 
-		toNumber(): number {
+		valueOf(): number {
 			return this.pos
 		}
 

@@ -22,17 +22,17 @@ const { isFunction } = type
 const BackupIndexInterface = {
 	interfaceName: "BackupIndex",
 	conformance: structCheck({
-		toNumber: isFunction,
+		valueOf: isFunction,
 		from: isFunction,
 		init: isFunction
 	})
 }
 
-const toNumber = new MethodTest("toNumber", function (
+const valueOf = new MethodTest("valueOf", function (
 	this: StringLineIndex,
 	expected: number
 ) {
-	assert.strictEqual(this.toNumber(), expected)
+	assert.strictEqual(this.valueOf(), expected)
 })
 
 const copy = new MethodTest("copy", function (
@@ -96,8 +96,8 @@ const nextCharEdge = new MethodTest("nextCharEdge", function (
 })
 
 class StringLineIndexTest extends LineIndexTest {
-	toNumber(expected: number) {
-		this.testMethod("toNumber", expected)
+	valueOf(expected: number) {
+		this.testMethod("valueOf", expected)
 	}
 
 	from(lineIndex: ILineIndex) {
@@ -123,7 +123,7 @@ class StringLineIndexTest extends LineIndexTest {
 	constructor() {
 		super(
 			[BackupIndexInterface],
-			[toNumber, fromInvalid, from, copy, nextLineTip, nextCharEdge]
+			[valueOf, fromInvalid, from, copy, nextLineTip, nextCharEdge]
 		)
 	}
 }

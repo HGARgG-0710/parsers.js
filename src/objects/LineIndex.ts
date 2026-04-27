@@ -1,7 +1,12 @@
 import { array, number } from "@hgargg-0710/one"
 import assert from "node:assert"
-import type { ICopiable, IInitializable } from "../interfaces.js"
+import type {
+	ICopiable,
+	IIndexLikeObject,
+	IInitializable
+} from "../interfaces.js"
 import type { ILineIndex } from "../interfaces/LineIndex.js"
+import { MissingImplementationError } from "./Error.js"
 
 const { sum } = number
 
@@ -54,6 +59,10 @@ export class LineIndex implements ILineIndex {
 		return new this.constructor(this.line, this.char)
 	}
 
+	valueOf(): number {
+		throw new MissingImplementationError("valueOf", this.constructor.name)
+	}
+
 	constructor(line: number = 0, char: number = 0) {
 		this.line = line
 		this.char = char
@@ -69,7 +78,6 @@ export class LineIndex implements ILineIndex {
  *
  * Note: the class, in fact, does not actually contain
  * line lengths, but the last acceptable `.char` values.
- * This is done for the purpose of keeping and additional
  */
 export class LineLengths implements ICopiable {
 	private ["constructor"]: new (lengths?: number[]) => this
@@ -142,6 +150,12 @@ function isAcceptableChar(lineIndex: ILineIndex, lengths: LineLengths) {
 	return lengths.isAcceptable(lineIndex.line, lineIndex.char)
 }
 
+function assertIndexAcceptable(lineIndex: ILineIndex, lengths: LineLengths) {
+	assertSizeSufficient(lineIndex, lengths)
+	if (!isNewLine(lineIndex, lengths))
+		assert(isAcceptableChar(lineIndex, lengths))
+}
+
 /**
  * This is a class implementing the `ILineIndex` interface.
  * It represents a pair of indexes, by which characters inside
@@ -149,7 +163,7 @@ function isAcceptableChar(lineIndex: ILineIndex, lengths: LineLengths) {
  *
  * It allows one to
  * convert the index in question to `number` via the
- * `toNumber()` method, as well as directly modifying
+ * `valueOf()` method, as well as directly modifying
  * the `.line` and `.char` to that of another `ILineIndex`
  * object via the `.from` method (provided that it is
  * not too far out of the range of the underlying `LineLengths`).
@@ -186,9 +200,7 @@ export class StringLineIndex
 	}
 
 	private assertIndexAcceptable(lineIndex: ILineIndex) {
-		assertSizeSufficient(lineIndex, this.lengths)
-		if (!isNewLine(lineIndex, this.lengths))
-			assert(isAcceptableChar(lineIndex, this.lengths))
+		assertIndexAcceptable(lineIndex, this.lengths)
 	}
 
 	private updateChar() {
@@ -210,7 +222,7 @@ export class StringLineIndex
 		super.nextLine()
 	}
 
-	toNumber() {
+	override valueOf() {
 		return this.line + 1 + sum(...this.lengths.slice(this.line)) + this.char
 	}
 
@@ -231,4 +243,21 @@ export class StringLineIndex
 	override copy() {
 		return super.copy().init(this.lengths)
 	}
+}
+
+export class LineIndexToStringConvertible implements IIndexLikeObject {
+	protected converter(line: number, char: number): string {
+		return `(line: ${line}, char: ${char})`
+	}
+
+	valueOf(): number {
+		return this.lineIndex.valueOf()
+	}
+
+	toString() {
+		const { line, char } = this.lineIndex
+		return this.converter(line, char)
+	}
+
+	constructor(readonly lineIndex: ILineIndex) {}
 }

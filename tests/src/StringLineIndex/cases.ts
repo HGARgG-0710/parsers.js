@@ -18,7 +18,7 @@ stringLineIndexTestCounter.test(
 			new StringLineIndex().init(new LineLengths([1, 2, 3])),
 			function (test) {
 				test.copy(new LineIndex(4, 0))
-				test.toNumber(1)
+				test.valueOf(1)
 
 				test.nextChar()
 
@@ -50,7 +50,7 @@ stringLineIndexTestCounter.test(
 				test.line(4)
 				test.char(9)
 
-				test.toNumber(28)
+				test.valueOf(28)
 			}
 		)
 	},
@@ -68,7 +68,7 @@ stringLineIndexTestCounter.test(
 				test.nextLineTip(new LineIndex(5, 5))
 				test.line(4)
 				test.char(0)
-				test.toNumber(13)
+				test.valueOf(13)
 			}
 		)
 	},
@@ -84,7 +84,7 @@ stringLineIndexTestCounter.test(
 			function (test) {
 				test.from(new LineIndex(3, 3))
 				test.nextCharEdge(lengths)
-				test.toNumber(14)
+				test.valueOf(14)
 			}
 		)
 	},

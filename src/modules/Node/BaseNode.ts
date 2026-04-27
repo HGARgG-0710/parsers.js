@@ -1,11 +1,15 @@
 import { array } from "@hgargg-0710/one"
+import assert from "assert"
 import type {
 	INode,
 	ITypeCheckable,
 	ITyped,
 	IValidationTable,
-	IValidNodeType
+	IValidNodeType,
+	IXMLGenerationTable
 } from "../../interfaces.js"
+import { XMLGenerationError } from "../../objects/Error.js"
+import type { NodeData } from "./NodeData.js"
 
 /**
  * An abstract class implementing the `INode` type.
@@ -28,6 +32,7 @@ export abstract class BaseNode implements INode {
 	toJSON?(): ITyped
 
 	private _parent: INode | null = null
+	private _data: NodeData | null = null
 
 	protected resetParent() {
 		this._parent = null
@@ -39,6 +44,15 @@ export abstract class BaseNode implements INode {
 
 	get parent() {
 		return this._parent
+	}
+
+	setData(newData: NodeData): void {
+		this._data = newData
+	}
+
+	get data() {
+		assert(this._data)
+		return this._data
 	}
 
 	index(multind: number[]) {
@@ -95,5 +109,9 @@ export abstract class BaseNode implements INode {
 
 	toString() {
 		return this.debugPrint()
+	}
+
+	toXML(table: IXMLGenerationTable): string[] {
+		throw new XMLGenerationError(this)
 	}
 }

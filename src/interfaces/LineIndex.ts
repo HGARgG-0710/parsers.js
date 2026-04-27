@@ -1,4 +1,4 @@
-import type { ICopiable } from "../interfaces.js"
+import type { ICopiable, INumericConvertible } from "../interfaces.js"
 
 /**
  * This is an interface for representing a character-line
@@ -7,11 +7,10 @@ import type { ICopiable } from "../interfaces.js"
  * purposes such as diagnostics during course of input
  * validation and error output.
  */
-export interface ILineIndex extends ICopiable {
+export interface ILineIndex extends ICopiable, INumericConvertible {
 	readonly char: number
 	readonly line: number
 	nextChar(): void
 	nextLine(): void
 	renew(): void
-	toNumber?(): number
 }

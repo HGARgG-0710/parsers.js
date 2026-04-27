@@ -5,8 +5,8 @@ import type {
 	IErrorData,
 	IErrorDataGetter,
 	IErrorType,
+	IIndexLikeObject,
 	IOwningStream,
-	IPrintablePosition,
 	IRenewerStream,
 	ISimpleErrorData,
 	IStream,
@@ -298,11 +298,11 @@ export namespace ParseError {
 	}
 
 	export abstract class GenericParseError extends MessageBuilderParseError {
-		protected printPosition(position: IPrintablePosition) {
+		protected printPosition(position: Partial<IIndexLikeObject>) {
 			return position.toString
 				? `at source position: ${position.toString()}`
-				: position.toNumber
-					? `at source position: ${position.toNumber()}`
+				: position.valueOf
+					? `at source position: ${position.valueOf()}`
 					: ``
 		}
 

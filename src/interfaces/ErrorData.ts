@@ -1,25 +1,24 @@
-import type { ICopiable } from "../interfaces.js"
+import type { ICopiable, IIndexLikeObject } from "../interfaces.js"
 import type { IInputStream, IStream } from "./Stream.js"
 
 /**
  * This is an interface representing an encapsulation-object of
  * a printable error-occurence position. It is (optionally) printable
  * via the `toString(): string` method and (optionally) convertible
- * to a numerical index within the string via `toNumber(): number`.
+ * to a numerical index within the string via `valueOf(): number`.
  * It is constructed via calling the `locate(): void` method,
  * which identifies the source from which the position is to
  * be read initially. The method for position-location is
  * implementation-specific.
  *
  * The two alternatives exist because it does not always make sense
- * to provide both. Consider the case when `toString = toNumber`.
+ * to provide both. Consider the case when `toString = valueOf`.
  * A client that employs both will print out useless information,
- * duplicating call to `.toNumber()`. This is why it is preferable
+ * duplicating call to `.valueOf()`. This is why it is preferable
  * in such implementations to enable omission of `toString`.
  */
-export interface IPrintablePosition extends ICopiable {
-	toString?(): string
-	toNumber?(): number
+export interface IPrintablePosition
+	extends ICopiable, Partial<IIndexLikeObject> {
 	locate(): this
 }
 

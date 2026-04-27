@@ -17,7 +17,6 @@ import type {
 	IXMLVersion
 } from "../interfaces.js"
 import type { ISourceGenerator } from "../interfaces/SourceGenerator.js"
-import { XMLGenerationError } from "../objects/Error.js"
 import {
 	TreePairGenerationTable,
 	TreeTable,
@@ -86,23 +85,11 @@ export const XMLWrapper = DelimitedStream<string, IXMLOpenableNode>(
 
 export function XMLStream(table: IXMLGenerationTable) {
 	const lineProducerStream = HandlerStream<IXMLDebuggable, string[]>(
-		trivialCompose((source: IXMLDebuggable) => toXML(source, table), curr)
+		trivialCompose((source: IXMLDebuggable) => source.toXML(table), curr)
 	)
 
 	return (resource: IOwnedStream<IXMLDebuggable>): ICommonStream<string> =>
 		FlattenerStream.pool.create(lineProducerStream(resource))
-}
-
-// ! PRE-DOC [since one has alrady accidentally stepped on this]: 
-// * 	THIS thing is allowed to fail at runtime DELIBERATELY. 
-// 		For, otherwise, we LOSE the ability to put non-IXMLSerializable 
-// 		INode-s as children of OTHER IXMLSerializable INode-s. 
-// 			In other words, this is allowed to happen, SINCE, 
-// 			in reality, when the user implements the 'toXML' on all the 
-// 			desired classes, this shall NEVER HAPPEN. 
-export function toXML(source: IXMLDebuggable, table: IXMLGenerationTable) {
-	if (!source.toXML) throw new XMLGenerationError(source)
-	return source.toXML(table)
 }
 
 export function toValidAttributes(
@@ -180,7 +167,10 @@ export class XMLProcessingInstructionNode implements IXMLSimple {
 		return [`<?${this.target} ${this.content}?>`]
 	}
 
-	constructor(private readonly target: string, content: string) {
+	constructor(
+		private readonly target: string,
+		content: string
+	) {
 		assert(isProcessingInstructionTarget(target))
 		this.content = toValidProcessingInstructionContent(content)
 	}
@@ -321,7 +311,7 @@ export class XMLGenerator implements ISourceGenerator<IXMLDebuggable> {
 		private readonly wrapperNode: IXMLOpenableNode
 	) {
 		this.XMLStream = XMLStream(genTable)
-		this.toXML = (node: IXMLDebuggable) => toXML(node, genTable)
+		this.toXML = (node: IXMLDebuggable) => node.toXML(genTable)
 	}
 }
 
