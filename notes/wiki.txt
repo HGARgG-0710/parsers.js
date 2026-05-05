@@ -95,6 +95,10 @@
 		1. the URL to the project repository on GitHub
 		2. make it shaped like a clickable GitHub SVG icon
 
+	7. License: 
+		A copy of MIT license. 
+		Just in case.
+
 4. [to Learning] Add a diagram of relations of various `IStream` traits present within the library. 
 		Will prove useful to the user when trying to identify at which point in the progrm to inherit. 
 	
