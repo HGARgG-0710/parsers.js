@@ -5,7 +5,7 @@
 		1. PROVIDE link to it on 'npm'
 		2. publish the docs PRIOR to the release of the actual 'npm' package!
 	3. Styles: 
-		1. SCSS
+		1. Tailwind CSS
 		2. for an example of how it should work/look like: 
 			1. Chevrotain Docs website
 			2. Vue.js wiki
