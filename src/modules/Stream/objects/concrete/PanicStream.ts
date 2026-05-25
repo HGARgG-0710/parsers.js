@@ -58,7 +58,7 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 		return this.currErrData
 	}
 
-	// Template Method, TOUCH AT YOUR OWN PERIL
+	// Template Method
 	private handleErrorData(errData: IErrorData) {
 		this.setErrData(errData)
 		this.transitionState()
@@ -89,7 +89,7 @@ export class PanicStream<T = any, ErrType = any> extends ErrorStream<
 
 	constructor(
 		delegate: ISubProxyStream<T | ErrType>,
-		errObjectFactory: IErrorObjectFactory<ErrType>
+		errObjectFactory: IErrorObjectFactory<ErrType>,
 	) {
 		super(delegate)
 		this.onNewError = new PanicStreamOnNewError(errObjectFactory, this)
@@ -120,7 +120,7 @@ class PanicStreamNoError<T = any, ErrType = any> implements IPanicStreamState<
 
 class PanicStreamOnNewError<
 	T = any,
-	ErrType = any
+	ErrType = any,
 > implements IPanicStreamState<T, ErrType> {
 	private readonly onOld: PanicStreamOnOldError<T, ErrType>
 
@@ -136,7 +136,7 @@ class PanicStreamOnNewError<
 
 	constructor(
 		private readonly errObjectFactory: IErrorObjectFactory<ErrType>,
-		private readonly owner: PanicStream<T, ErrType>
+		private readonly owner: PanicStream<T, ErrType>,
 	) {
 		this.onOld = new PanicStreamOnOldError()
 	}
@@ -144,7 +144,7 @@ class PanicStreamOnNewError<
 
 class PanicStreamOnOldError<
 	T = any,
-	ErrType = any
+	ErrType = any,
 > implements IPanicStreamState<T, ErrType> {
 	private errObject: ErrType
 

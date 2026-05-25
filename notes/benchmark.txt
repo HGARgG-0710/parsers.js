@@ -2,7 +2,7 @@
 	DUE TO GC-induced slowdowns of allocating/reallocating objects when
 	working with a huge file on a piece-by-piece basis. 
 
-2. RotationBuffer vs 'shift/unshift'-based solution: 
+2. [PeekStream] RotationBuffer vs 'shift/unshift'-based solution: 
 	0. Generalize the `PeekStream` to a common "abstract" ancestor
 		1. which would enable one to "insert" an instance of the interafce used by `RotationBuffer`
 	1. Make a FakePeekStream, that utilizes a `shift/unshift`-based solution [put in `src/benchmarks`]

@@ -30,5 +30,8 @@
 		"test-build": "npm run debug-build && npm run test-compile",
 		"test-all": "cd tests/out && node run.js",
 		"unused": "ts-unused-exports ./tsconfig.json"
+	},
+	"devDependencies": {
+		"oxfmt": "^0.51.0"
 	}
 }

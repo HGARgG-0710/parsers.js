@@ -388,7 +388,8 @@ DEPENDENCIES:
 			8. combiner/singleton streams [SingletonStream, and related]
 			9. user-extendable Abstract Base Classes [NodeStream, RenewableStream]
 			10. error handling and wrapper-based control flow [PanicStream (and its children)]
-			[TODO: add this categorization INTO THE WIKI, add more points to it, make sure it is UTTERLY COMPLETE!]
+			[TODO: add this categorization INTO THE WIKI, add more points to it, make sure it is UTTERLY COMPLETE, 
+				AND NOT A SINGLE 'IStream' IS LEFT UNCATEGORIZED!]
 
 		The choosers are divided onto: 
 			1. stateless choosers (simple functions)
@@ -439,7 +440,68 @@ DEPENDENCIES:
 					2. upwards - IOwningStream
 					
 		4. concrete: 
-			TODO: FINISH
+			1. AccumulatorStream - IdentityStream
+			2. ByteStream - IByteSource
+			3. CompositeStream - ILinkedStream
+			4. ConcatStream - IOwnedStream
+			5. DepthMarkStream - IdentityStream, IStream
+			6. FilterStream - IOwnedStream
+			7. FiniteStream - IOwnedStream
+			8. FlattenerStream - IOwnedStream
+			9. FreeStream - IOwnedStream
+				+ ensure that this thing works (a basic Unit Test)
+				+ demo (benchmark): a file-writing thingy that makes HUGE nodes 
+					(i.e. large enough to leave a noticeable memory/performance footprint)
+
+					try to run the demo: 
+						1. WITHOUT `FreeStream` (+ use `ObjectPool`)
+						2. WITH `FreeStream` (+ use `ObjectPool`)
+						3. and WITHOUT `FreeStream` (no `ObjectPool`)
+						4. and WITH `FreeStream` (no `ObjectPool`)
+
+					BENCHMARK your findings, estimate how costly the `FreeStream` thing is...
+
+			10. HandlerStream - IOwnedStream
+			11. IdentityStream - IOwnedStream
+			12. IndexStream - IOwnedStream
+			13. InputStream - IParseable
+			14. InterleaveStream - IOwnedStream
+			15. LazyStream - ICharacterSource
+			16. LimitStream - IOwnedStream
+			17. LoopStream
+			18. MarkerStream - IOwnedStream
+			19. NodeStream - INode
+				test (demo): try to make your own INode, 
+					for which one shall extend the respective `NodeStream`
+
+					Use the `renew()` thingy in the process...
+
+			20. PanicStream - ILinkedStream
+
+				+ demo: use this in one of the demos, to mimic the error-resistant parsing 
+					(and multiple errors during parsing, in particular!)
+
+			21. PeekStream - IOwnedStream
+				benchmark: compare performance with the "complex" internal implementation, 
+					and the trivial one that uses shifts. Details in the `benchmark.txt` file
+
+			22. PosStrema - IOwnedStream
+			23. RecursiveLimitStream - LimitStream.limits
+			24. RecursiveProxyStream - StatefulProxyStream 
+			25. SectionStream - IOwnedStream
+				TODO [demo]: create specific 'ISectionGrabber's, 
+					such as, for instance, the ones responsible for 
+					counting non-comment, non-empty lines in JavaScript 
+					files. 
+
+				Maybe make said demo into a seprate minor little program. 
+
+			26. SingletonStream
+			27. StatefulProxyStream - ILinkedStream
+			28. StorageStream - IdentityStream
+			29. TreeStream - TreeWalker, INode
+			30. ValidatorStream - IOwnedStream
+			31. WriterStream - IdentityStream<string>
 
 5. samples: 
 	TODO: FINISH
