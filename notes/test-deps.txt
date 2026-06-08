@@ -522,7 +522,18 @@ DEPENDENCIES:
 		15. isSpace - spaces
 	
 	2. regex: 
-		1. assertions: 
+		1. GlobalSearchFlag
+		2. UnicodeFlag
+		3. HasIndiciesFlag
+		4. CaseInsensitiveFlag
+		5. MultilineFlag
+		6. UnicodeSetsFlag
+		7. DotAllFlag
+		8. StickyFlag
+		9. contents
+		10. and
+
+		11. assertions: 
 			1. lookahead
 			2. neg_lookahead
 			3. lookbehind
@@ -531,7 +542,7 @@ DEPENDENCIES:
 			6. non_word_boundry
 			7. begin
 			8. end
-		2. charclass (namespace `regex.charclass`):
+		12. charclass (namespace `regex.charclass`):
 			1. charclass (the function `regex.charclass`)
 			2. neg_charclass
 			3. as_uniset
