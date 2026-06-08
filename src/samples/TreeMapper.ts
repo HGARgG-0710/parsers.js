@@ -2,7 +2,7 @@ import type {
 	IBaseCollection,
 	IHandler,
 	IPushable,
-	IWalkable
+	IWalkable,
 } from "../interfaces.js"
 import { HandlerStream, TreeStream } from "../objects/Stream.js"
 import { consume } from "../utils/Stream.js"
@@ -32,7 +32,7 @@ import { consume } from "../utils/Stream.js"
 export function TreeEvaluator<
 	In extends IWalkable<In> = IWalkable,
 	Out = any,
-	CollectionType extends IPushable<Out> = IPushable<Out>
+	CollectionType extends IPushable<Out> = IPushable<Out>,
 >(map: IHandler<In, Out>, intoMaker: () => CollectionType) {
 	const mapperStream = HandlerStream(map)
 	return function (from: In) {
@@ -42,13 +42,14 @@ export function TreeEvaluator<
 }
 
 // ! pre-test: ENSURE that this thing WORKS with 'ArrayCollection', 'ArrayBuilder'
+// ! pre-doc: this is primarily intended for the mapping of trees into other trees (i.e. flattening, deep wrapping, etc)
 export function TreeMapper<
 	In extends IWalkable<In> = IWalkable,
-	Out extends IWalkable<Out> = IWalkable
+	Out extends IWalkable<Out> = IWalkable,
 >(
 	map: IHandler<In, Out>,
 	intoMaker: () => IBaseCollection<Out, readonly Out[]>,
-	wrapperNode: (items: Out[]) => Out
+	wrapperNode: (items: Out[]) => Out,
 ) {
 	const evaluator = TreeEvaluator(map, intoMaker)
 	return function (from: In) {

@@ -1,4 +1,4 @@
-import type { ILinkedStream, IMatchResult, IPeekStream } from "../interfaces.js"
+import type { IMatchResult, IPeekStream } from "../interfaces.js"
 import type { Regex } from "../objects.js"
 
 /**
@@ -24,12 +24,12 @@ import type { Regex } from "../objects.js"
  */
 export function TokenChooser<In = any, Out = any, Default = void>(
 	choices: Iterable<[Regex, (read: IMatchResult<In>) => Out]>,
-	defaultHandler: (stream: ILinkedStream) => Default
+	defaultHandler: (stream: IPeekStream<In>) => Default,
 ) {
-	return function (stream: ILinkedStream<In> & IPeekStream<In>) {
-		for (const [pattern, chooser] of choices) {
+	return function (stream: IPeekStream<In>) {
+		for (const [pattern, preChooser] of choices) {
 			const matched = pattern.matchAt(stream)
-			if (matched) return chooser(matched)
+			if (matched) return preChooser(matched)
 		}
 		return defaultHandler(stream)
 	}

@@ -33,7 +33,7 @@ DEPENDENCIES:
 			When CLEARING the Pools.All (or, whatever), verify for EVERY 'ObjectPool' in 
 			the library, that its '.size' is 0!
 	
-3. internal: 
+2. internal: 
 	1. Regex: 
 		1. Errors: 
 			1. Compiler: 
@@ -97,7 +97,7 @@ DEPENDENCIES:
 		1. OverflowCounter - NONE
 		2. Size - NONE
 	
-4. objects: 
+3. objects: 
 	1. ArrayBuilder - ArrayCollection: 
 		You only uniquely test the '.get()' method, since everything else has already been tested. 
 		Just reuse the test suite for the `ArrayCollection`. 
@@ -503,7 +503,7 @@ DEPENDENCIES:
 			30. ValidatorStream - IOwnedStream
 			31. WriterStream - IdentityStream<string>
 
-5. samples: 
+4. samples: 
 	1. alphabet: 
 		1. decimal - Alphabet
 		2. binary - Alphabet
@@ -521,7 +521,8 @@ DEPENDENCIES:
 		14. isNonDigitId - firstId
 		15. isSpace - spaces
 	
-	2. regex: 
+	2. regex (namespace): 
+		0. regex (function)
 		1. contents
 		2. and	
 		3. assertions: 
@@ -592,9 +593,62 @@ DEPENDENCIES:
 			6. any
 			7. maybe
 
+	3. json: 
+		1. JSONStream - HandlerStream
+		2. JSONWrapper - DelimiterStream
+		3. JSONGenerator - JSONStream, JSONWrapper, INode
+
+	4. Node: 
+		1. PlainNodes - TokenNode, RecursiveNode, ContentNode, SingleChildNode
+		2. EitherType
+	
+	5. Pairs (namespace): 
+		1. samples.Pairs (function)
+		2. fromLinear
+		3. to
+		4. from  
+		5. toArray
+
+	6. ParseExtension - CompositeStream, IdentityStream, IInputStream
+
+	7. platform: 
+		note: for effectiveness, write 3 TESTS, each for each platform
+			Let each of the 3 branches check that all the OTHER predicates 
+			are `false`, meanwhile the one for the current platform is `true`. 
+			Use `assert.strictEqual` for that
+
+		1. isWindows
+		2. isLinux
+		3. isDarwin
+	
+	8. space: 
+		1. LFStream - IOwnedStream<string>
+		2. SpacelessStream - FilterStream
+		3. getNewline - samples.platform.isWindows, samples.platform.isDarwin, samples.platform.isLinux
+			Again, make this tests crossplatform
+		4. NewlineStream - IndexStream
+		5. toNewline
+		6. splitNewlines
+		7. CRLF
+		8. LF
+
+	9. Stream: 
+		TODO: FINISH
+
+	10. TerminalMap: 
+		TODO: FINISH
+	
+	11. xml:	
+		TODO: FINISH
+
+	12. TokenChooser - Regex, PeekStream
+	13. TreeEvaluator - INode, HandlerStream, TreeStream
+	14. TreeMapper - TreeEvaluator
+
+5. utils: 
 	TODO: FINISH
 
-6. utils: 
+6. constants: 
 	TODO: FINISH
 
 [TODO, distribute] NEW CLASSES/INTERFACES [to determine tests and dependencies for these accordingly!]: 
