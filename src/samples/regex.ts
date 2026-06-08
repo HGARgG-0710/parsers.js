@@ -4,7 +4,7 @@ import { string } from "@hgargg-0710/one"
 import { non_bracket } from "./regex/refactor.js"
 
 import * as _assertions from "./regex/assertions.js"
-import * as _charclass from "./regex/charclass.js"
+import { charclass as _charclass } from "./regex/charclass.js"
 import * as _flags from "./regex/flags.js"
 import * as _groups from "./regex/groups.js"
 import * as _quantifiers from "./regex/quantifiers.js"

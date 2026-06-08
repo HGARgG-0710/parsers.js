@@ -521,6 +521,51 @@ DEPENDENCIES:
 		14. isNonDigitId - firstId
 		15. isSpace - spaces
 	
+	2. regex: 
+		1. assertions: 
+			1. lookahead
+			2. neg_lookahead
+			3. lookbehind
+			4. neg_lookbehind
+			5. word_boundry
+			6. non_word_boundry
+			7. begin
+			8. end
+		2. charclass (namespace `regex.charclass`):
+			1. charclass (the function `regex.charclass`)
+			2. neg_charclass
+			3. as_uniset
+			4. uniset_regex
+			5. uniset_intersection
+			6. uniset_subtraction
+			7. string_literal
+			8. digit
+			9. non_digit
+			10. word
+			11. non_word
+			12. space
+			13. non_space
+			14. wildcard
+			15. htab
+			16. cr
+			17. lnfeed
+			18. ffeed
+			19. vtab
+			20. nil
+			21. uni_prop
+			22. non_uni_prop
+			23. caret
+			24. uni_hex_2
+			25. uni_hex_4
+			26. uni_hex
+			27. or
+		3. flags: 
+			TODO: FINISH
+		4. groups: 	
+			TODO: FINISH
+		5. quantifiers: 
+			TODO: FINISH
+
 	TODO: FINISH
 
 6. utils: 
