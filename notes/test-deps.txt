@@ -522,18 +522,9 @@ DEPENDENCIES:
 		15. isSpace - spaces
 	
 	2. regex: 
-		1. GlobalSearchFlag
-		2. UnicodeFlag
-		3. HasIndiciesFlag
-		4. CaseInsensitiveFlag
-		5. MultilineFlag
-		6. UnicodeSetsFlag
-		7. DotAllFlag
-		8. StickyFlag
-		9. contents
-		10. and
-
-		11. assertions: 
+		1. contents
+		2. and	
+		3. assertions: 
 			1. lookahead
 			2. neg_lookahead
 			3. lookbehind
@@ -542,39 +533,53 @@ DEPENDENCIES:
 			6. non_word_boundry
 			7. begin
 			8. end
-		12. charclass (namespace `regex.charclass`):
+		4. charclass (namespace `regex.charclass`):
 			1. charclass (the function `regex.charclass`)
 			2. neg_charclass
-			3. as_uniset
-			4. uniset_regex
-			5. uniset_intersection
-			6. uniset_subtraction
-			7. string_literal
-			8. digit
-			9. non_digit
-			10. word
-			11. non_word
-			12. space
-			13. non_space
-			14. wildcard
-			15. htab
-			16. cr
-			17. lnfeed
-			18. ffeed
-			19. vtab
-			20. nil
-			21. uni_prop
-			22. non_uni_prop
-			23. caret
-			24. uni_hex_2
-			25. uni_hex_4
-			26. uni_hex
-			27. or
-		3. flags: 
+			3. uniset_intersection
+			4. uniset_subtraction
+			5. string_literal
+			6. digit
+			7. non_digit
+			8. word
+			9. non_word
+			10. space
+			11. non_space
+			12. wildcard
+			13. htab
+			14. cr
+			15. lnfeed
+			16. ffeed
+			17. vtab
+			18. nil
+			19. uni_prop
+			20. non_uni_prop
+			21. caret
+			22. uni_hex_2
+			23. uni_hex_4
+			24. uni_hex
+			25. or
+		5. flags: 	
+			1. GlobalSearchFlag
+			2. UnicodeFlag
+			3. HasIndiciesFlag
+			4. CaseInsensitiveFlag
+			5. MultilineFlag
+			6. UnicodeSetsFlag
+			7. DotAllFlag
+			8. StickyFlag
+			9. with_flags
+			10. g
+			11. u
+			12. d
+			13. i
+			14. m
+			15. v
+			16. s
+			17. y
+		6. groups: 	
 			TODO: FINISH
-		4. groups: 	
-			TODO: FINISH
-		5. quantifiers: 
+		7. quantifiers: 
 			TODO: FINISH
 
 	TODO: FINISH

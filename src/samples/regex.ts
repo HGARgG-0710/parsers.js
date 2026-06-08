@@ -5,7 +5,7 @@ import { non_bracket } from "./regex/refactor.js"
 
 import * as _assertions from "./regex/assertions.js"
 import { charclass as _charclass } from "./regex/charclass.js"
-import * as _flags from "./regex/flags.js"
+import { flags as _flags } from "./regex/flags.js"
 import * as _groups from "./regex/groups.js"
 import * as _quantifiers from "./regex/quantifiers.js"
 
@@ -24,46 +24,6 @@ export function regex(from: string | RegExp) {
 }
 
 export namespace regex {
-	/**
-	 * The regular expression flag for `RegExp.prototype.global`
-	 */
-	export const GlobalSearchFlag = "g"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.unicode`
-	 */
-	export const UnicodeFlag = "u"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.hasIndicies`
-	 */
-	export const HasIndiciesFlag = "d"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.ignoreCase`
-	 */
-	export const CaseInsensitiveFlag = "i"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.multiline`
-	 */
-	export const MultilineFlag = "m"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.unicodeSets`
-	 */
-	export const UnicodeSetsFlag = "v"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.dotAll`
-	 */
-	export const DotAllFlag = "s"
-
-	/**
-	 * The regular expression flag for `RegExp.prototype.sticky`
-	 */
-	export const StickyFlag = "y"
-
 	/**
 	 * Returns the `string` contents of the given regular expression,
 	 * such that it can be used with `RegExp` constructor to

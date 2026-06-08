@@ -1,5 +1,5 @@
 import { regex } from "../regex.js"
-import { with_flags } from "./flags.js"
+import { flags } from "./flags.js"
 import { non_bracket } from "./refactor.js"
 
 const char_ranges = (...ranges: (string | [string, string])[]) =>
@@ -30,9 +30,9 @@ export namespace charclass {
 		...ranges: (string | [string, string])[]
 	) => regex(`[^${char_ranges(...ranges)}]`)
 
-	export const as_uniset = with_flags(regex.UnicodeSetsFlag)
+	const as_uniset = flags.u
 
-	export const uniset_regex = (from: string) => as_uniset(regex(from))
+	const uniset_regex = (from: string) => as_uniset(regex(from))
 
 	export const uniset_intersection = (a: RegExp, b: RegExp) =>
 		uniset_regex(`[${regex.contents(a)}&&${regex.contents(b)}]`)
