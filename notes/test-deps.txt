@@ -578,9 +578,19 @@ DEPENDENCIES:
 			16. s
 			17. y
 		6. groups: 	
-			TODO: FINISH
+			1. capture
+			2. non_capture
+			3. named_capture
+			4. backref
+			5. named_backref
 		7. quantifiers: 
-			TODO: FINISH
+			1. repeat
+			2. multiple
+			3. indefinite
+			4. non_greedy
+			5. some 
+			6. any
+			7. maybe
 
 	TODO: FINISH
 
