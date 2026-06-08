@@ -19,7 +19,10 @@ import type { IIndexLike, IIndexLikeObject } from "../interfaces.js"
 // 		one can reasonably expect that the tree is correct after all, and now a more
 // 		complex verification is in progress already.
 //
-// 		It is, therefore, recommended to put this information onto nodes created with
+// 		It is, therefore, recommended to put this information onto nodes created
+// 		during parsing via the '.setData(...)' calls, but NOT to use it as a diagnostic
+// 		tool (for better reliability, use plain `LineIndex`, `PanicStream` children,
+// 		etc INSTEAD).
 //
 // 		Vital - this notice is to be added to the documentation.
 export class IndexRange<T extends IIndexLike> implements IIndexLikeObject {
@@ -33,6 +36,6 @@ export class IndexRange<T extends IIndexLike> implements IIndexLikeObject {
 
 	constructor(
 		readonly from: T,
-		readonly to: T
+		readonly to: T,
 	) {}
 }

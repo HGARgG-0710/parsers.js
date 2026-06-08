@@ -9,7 +9,7 @@ const {
 	propDefine,
 	keys,
 	withoutProperties,
-	extendPrototype
+	extendPrototype,
 } = object
 
 const withoutSuper = withoutProperties("super")
@@ -87,172 +87,135 @@ class PrototypeFiller {
 			extendPrototype(
 				targetClass,
 				withoutSuper(
-					withoutConstructor(propertyDescriptors(currClass.prototype))
-				)
-			)
+					withoutConstructor(propertyDescriptors(currClass.prototype)),
+				),
+			),
 		)
 	}
 
 	fromObject(targetPrototype, properties) {
 		propsDefine(
 			targetPrototype,
-			withoutConstructor(propertyDescriptors(properties))
+			withoutConstructor(propertyDescriptors(properties)),
 		)
 	}
 }
 
 export class mixin {
-	/**
-	 * @private */
 	get defaultConstructor() {
 		return this.mixinShape.constructor
 	}
 
-	/**
-	 * @private */
 	get defaultName() {
 		return this.mixinShape.name
 	}
 
-	/**
-	 * @private */
 	get static() {
 		return this.mixinShape.static
 	}
 
-	/**
-	 * @private */
 	get properties() {
 		return this.mixinShape.properties
 	}
 
-	/**
-	 * @private */
 	get proto() {
 		return this.class.prototype
 	}
 
-	/**
-	 * @private */
 	set class(newClass) {
 		this._class = newClass
 	}
 
-	/**
-	 * @protected */
 	get class() {
 		return this._class
 	}
 
-	/**
-	 * @private */
 	set super(newSuper) {
 		this.proto.super = newSuper
 	}
 
-	/**
-	 * @private */
 	get super() {
 		return this.proto.super
 	}
 
-	/**
-	 * @private */
 	defineClass() {
 		this.defineNonVoidConstructor(
 			ConstructorCreator.instance.ensureNonNullPrototype(
 				ConstructorCreator.instance.ensureConstructorNonVoid(
-					this.defaultConstructor
-				)
-			)
+					this.defaultConstructor,
+				),
+			),
 		)
 	}
 
-	/**
-	 * @private */
 	setStaticMember(name, value) {
 		this.class[name] = value
 	}
 
-	/**
-	 * @private */
 	defineStaticMember(name, propClosure) {
 		this.setStaticMember(name, propClosure(this.class))
 	}
 
-	/**
-	 * @private */
 	inheritStatic(parent) {
 		const staticNames = keys(parent)
 		for (const propName of staticNames)
 			this.setStaticMember(propName, parent[propName])
 	}
 
-	/**
-	 * @private */
 	inheritStaticMembers(parents) {
 		for (const parent of parents) this.inheritStatic(parent)
 	}
 
-	/**
-	 * @private */
 	defineStaticMembers() {
 		if (this.static)
 			for (const k of keys(this.static))
 				this.defineStaticMember(k, this.static[k])
 	}
 
-	/**
-	 * @private */
 	initSuper() {
 		this.super = {}
 	}
 
-	/**
-	 * @private */
 	fromProperties() {
 		PrototypeFiller.instance.fromObject(this.proto, this.properties)
 	}
 
-	/**
-	 * @private */
 	fromClasses(parents) {
 		PrototypeFiller.instance.fromClasses(this.class, parents)
 		this.superFromClasses(parents)
 		this.inheritStaticMembers(parents)
 	}
 
-	/**
-	 * @private */
 	superFromClasses(classes) {
 		classes.forEach((currClass) => this.provideSuper(currClass))
 	}
 
-	/**
-	 * @private */
 	provideSuper(forClass) {
 		this.super[forClass.name] = SuperCreator.instance.toSuper(
-			propertyDescriptors(forClass.prototype)
+			propertyDescriptors(forClass.prototype),
 		)
 	}
 
-	/**
-	 * @private */
 	defineNonVoidConstructor(constructor) {
 		this.constructorCreator.assignName(constructor, this.defaultName)
 		this.setConstructor(constructor)
 	}
 
-	/**
-	 * @private */
 	setConstructor(constructor) {
 		this.class = constructor
 	}
 
+	/**
+	 * @public
+	 * @readonly
+	 */
 	get name() {
 		return this.class.name
 	}
 
+	/**
+	 * @public
+	 */
 	toClass() {
 		return this.class
 	}

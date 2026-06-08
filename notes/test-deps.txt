@@ -504,12 +504,29 @@ DEPENDENCIES:
 			31. WriterStream - IdentityStream<string>
 
 5. samples: 
+	1. alphabet: 
+		1. decimal - Alphabet
+		2. binary - Alphabet
+		3. hex - Alphabet
+		4. isBinary - binary
+		5. isDecimal - decimal
+		6. isHex - hex
+		7. isIdentifier - firstId, id
+		8. Alphabet
+		9. spaces - Alphabet
+		10. hasSequence - Alphabet
+		11. id - Alphabet
+		12. english - Alphabet
+		13. firstId - Alphabet
+		14. isNonDigitId - firstId
+		15. isSpace - spaces
+	
 	TODO: FINISH
 
 6. utils: 
 	TODO: FINISH
 
-NEW CLASSES/INTERFACES [to determine tests and dependencies for these accordingly!]: 
+[TODO, distribute] NEW CLASSES/INTERFACES [to determine tests and dependencies for these accordingly!]: 
 	1. NodeData: 
 		1. WithPrintable
 		2. WithSource

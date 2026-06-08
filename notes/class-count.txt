@@ -9,10 +9,10 @@ That includes:
 That excludes: 
 	1. public JS-exported classes
 
-Current total: 502
+Current total: 503
 
 Method for counting: 
-	1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 465 (at the time of writing...)
+	1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 466 (at the time of writing...)
 		NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 			(since they're also exported in .d.ts files...)
 	2. RegexParser/Nodes.ts classes = 38 (not counting those matched by 1.)

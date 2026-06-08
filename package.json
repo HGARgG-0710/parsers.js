@@ -2,36 +2,38 @@
 	"name": "@hgargg-0710/parsers.js",
 	"version": "0.2.1",
 	"description": "A JavaScript library for simplification of the process of organization/creation of parsers/validators/code-generators of arbitrary complexity.",
-	"type": "module",
-	"main": "./dist/main.js",
-	"types": "./dist/main.d.ts",
-	"license": "MIT",
-	"author": "hgargg-0710",
 	"keywords": [
+		"generation",
 		"parsing",
 		"tokenizing",
-		"validation",
-		"generation"
+		"validation"
 	],
-	"dependencies": {
-		"@hgargg-0710/one": "0.5.0",
-		"@hgargg-0710/summat.ts": "^0.0.1",
-		"@types/node": "^25.5.0"
-	},
+	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
 	"bugs": {
 		"url": "https://github.com/HGARgG-0710/parsers.js/issues"
 	},
-	"homepage": "https://github.com/HGARgG-0710/parsers.js#readme",
+	"license": "MIT",
+	"author": "hgargg-0710",
+	"type": "module",
+	"main": "./dist/main.js",
+	"types": "./dist/main.d.ts",
 	"scripts": {
-		"copy-js": " copyfiles src/**/*.d.ts src/**/*.js dist",
-		"build": "npm run copy-js && tsc --project .",
-		"debug-build": "npm run copy-js && tsc --project ts/debug.json",
+		"copy-js": "npx copyfiles src/**/*.d.ts src/**/*.js dist",
+		"build": "npm run copy-js && npx tsc --project .",
+		"debug-build": "npm run copy-js && npx tsc --project ts/debug.json",
 		"test-compile": "cd tests && tsc --project tsconfig.json && cd ..",
 		"test-build": "npm run debug-build && npm run test-compile",
 		"test-all": "cd tests/out && node run.js",
 		"unused": "ts-unused-exports ./tsconfig.json"
 	},
+	"dependencies": {
+		"@hgargg-0710/one": "0.5.0",
+		"@hgargg-0710/summat.ts": "^0.0.1",
+		"@types/node": "^25.5.0"
+	},
 	"devDependencies": {
-		"oxfmt": "^0.51.0"
+		"copyfiles": "^2.4.1",
+		"oxfmt": "^0.51.0",
+		"typescript": "^6.0.3"
 	}
 }
