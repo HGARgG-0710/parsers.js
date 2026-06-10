@@ -34,8 +34,27 @@ export abstract class BaseNode implements INode {
 	private _parent: INode | null = null
 	private _data: NodeData | null = null
 
+	// ! pre-doc: (important) this can OPTIONALLY be used to determine how precisely
+	// 		one is to render the TAG CONTENT of the node in question. If
+	// 		`properTagContent` is `true`, then, THE CONVENTION IS, that contents
+	// 		of said node are supposed to be FORMATTED according to XML rules (i.e. < -> &lt, ETC)
+	// 		but if not, then said conventions DO NOT APPLY!
+	// * very important - one can call `this.setIsProperXMLTagContent(false)` inside the constructor SO AS
+	// 		to indicate said convention to the calling code.
+	// ! One is not implementing a `toXMLTagContent` that honours the convention because:
+	// 		1. User could still ignore it [and just use `xml.toTagContent` instead]
+	// 		2. [primary reason] Performance on newline arrays.
+	// 			Mapping an array of lines to be optionally converted is MUCH SLOWER
+	// 			than simply skipping the whole allocation + calling steps altogether
+	// 			by exposing said property
+	protected isProperXMLTagContent: boolean = true
+
 	protected resetParent() {
 		this._parent = null
+	}
+
+	setIsProperXMLTagContent(isIt: boolean) {
+		this.isProperXMLTagContent = isIt
 	}
 
 	setParent(parent: INode) {

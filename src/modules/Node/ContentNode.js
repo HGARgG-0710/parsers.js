@@ -48,7 +48,10 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 	}
 
 	toXMLRaw() {
-		return splitNewlines(String(this.value)).map(toTagContent)
+		const valueNewlines = splitNewlines(String(this.value))
+		return this.isProperXMLTagContent
+			? valueNewlines.map((item) => toTagContent(item))
+			: valueNewlines
 	}
 
 	toXMLWrapped(attrConverter, isTag) {
