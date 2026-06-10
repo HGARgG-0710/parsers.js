@@ -26,7 +26,7 @@ DEPENDENCIES:
 
 1. global: 
 	1. WrapperApp: 
-		1.1. global.Pools.All
+		1. global.Pools.All
 	
 	2. Pools - ObjectPool: 
 		1. Any class that is IInitializable (and is capable of being used with a Pool). 
@@ -348,10 +348,10 @@ DEPENDENCIES:
 				1. Either - Regex.Raw
 				2. Catenation - Regex.Raw
 				3. NoneOf - Regex.Raw
-				4. IgnoreCase
-				5. NoCapture
-				6. NonBoundary
-				7. Boundary
+				4. IgnoreCase - Regex.Raw
+				5. NoCapture - Regex.Raw
+				6. NonBoundary - Regex.Raw
+				7. Boundary - Regex.Raw
 			2. SinglePrinted: 
 				1. Optional - Regex.Raw
 				2. NoneOrMore - Regex.Raw
@@ -468,7 +468,7 @@ DEPENDENCIES:
 			14. InterleaveStream - IOwnedStream
 			15. LazyStream - ICharacterSource
 			16. LimitStream - IOwnedStream
-			17. LoopStream
+			17. LoopStream - NONE
 			18. MarkerStream - IOwnedStream
 			19. NodeStream - INode
 				test (demo): try to make your own INode, 
@@ -504,7 +504,7 @@ DEPENDENCIES:
 
 				Maybe make said demo into a seprate minor little program. 
 
-			26. SingletonStream
+			26. SingletonStream - NONE
 			27. StatefulProxyStream - ILinkedStream
 			28. StorageStream - IdentityStream
 			29. TreeStream - TreeWalker, INode
@@ -520,7 +520,7 @@ DEPENDENCIES:
 		5. isDecimal - decimal
 		6. isHex - hex
 		7. isIdentifier - firstId, id
-		8. Alphabet
+		8. Alphabet - NONE
 		9. spaces - Alphabet
 		10. hasSequence - Alphabet
 		11. id - Alphabet
@@ -530,76 +530,76 @@ DEPENDENCIES:
 		15. isSpace - spaces
 	
 	2. regex (namespace): 
-		0. regex (function)
-		1. contents
-		2. and	
+		0. regex (function) - NONE
+		1. contents - NONE
+		2. and - NONE
 		3. assertions: 
-			1. lookahead
-			2. neg_lookahead
-			3. lookbehind
-			4. neg_lookbehind
-			5. word_boundry
-			6. non_word_boundry
-			7. begin
-			8. end
+			1. lookahead - NONE
+			2. neg_lookahead - NONE
+			3. lookbehind - NONE
+			4. neg_lookbehind - NONE
+			5. word_boundry - NONE
+			6. non_word_boundry - NONE
+			7. begin - NONE
+			8. end - NONE
 		4. charclass (namespace `regex.charclass`):
-			1. charclass (the function `regex.charclass`)
-			2. neg_charclass
-			3. uniset_intersection
-			4. uniset_subtraction
-			5. string_literal
-			6. digit
-			7. non_digit
-			8. word
-			9. non_word
-			10. space
-			11. non_space
-			12. wildcard
-			13. htab
-			14. cr
-			15. lnfeed
-			16. ffeed
-			17. vtab
-			18. nil
-			19. uni_prop
-			20. non_uni_prop
-			21. caret
-			22. uni_hex_2
-			23. uni_hex_4
-			24. uni_hex
-			25. or
+			1. charclass (the function `regex.charclass`) - NONE
+			2. neg_charclass - NONE
+			3. uniset_intersection - NONE
+			4. uniset_subtraction - NONE
+			5. string_literal - NONE
+			6. digit - NONE
+			7. non_digit - NONE
+			8. word - NONE
+			9. non_word - NONE
+			10. space - NONE
+			11. non_space - NONE
+			12. wildcard - NONE
+			13. htab - NONE
+			14. cr - NONE
+			15. lnfeed - NONE
+			16. ffeed - NONE
+			17. vtab - NONE
+			18. nil - NONE
+			19. uni_prop - NONE
+			20. non_uni_prop - NONE
+			21. caret - NONE
+			22. uni_hex_2 - NONE
+			23. uni_hex_4 - NONE
+			24. uni_hex - NONE
+			25. or - NONE
 		5. flags: 	
-			1. GlobalSearchFlag
-			2. UnicodeFlag
-			3. HasIndiciesFlag
-			4. CaseInsensitiveFlag
-			5. MultilineFlag
-			6. UnicodeSetsFlag
-			7. DotAllFlag
-			8. StickyFlag
-			9. with_flags
-			10. g
-			11. u
-			12. d
-			13. i
-			14. m
-			15. v
-			16. s
-			17. y
+			1. GlobalSearchFlag - NONE
+			2. UnicodeFlag - NONE
+			3. HasIndiciesFlag - NONE
+			4. CaseInsensitiveFlag - NONE
+			5. MultilineFlag - NONE
+			6. UnicodeSetsFlag - NONE
+			7. DotAllFlag - NONE
+			8. StickyFlag - NONE
+			9. with_flags - NONE
+			10. g - NONE
+			11. u - NONE
+			12. d - NONE
+			13. i - NONE
+			14. m - NONE
+			15. v - NONE
+			16. s - NONE
+			17. y - NONE
 		6. groups: 	
-			1. capture
-			2. non_capture
-			3. named_capture
-			4. backref
-			5. named_backref
+			1. capture - NONE
+			2. non_capture - NONE
+			3. named_capture - NONE
+			4. backref - NONE
+			5. named_backref - NONE
 		7. quantifiers: 
-			1. repeat
-			2. multiple
-			3. indefinite
-			4. non_greedy
-			5. some 
-			6. any
-			7. maybe
+			1. repeat - NONE
+			2. multiple - NONE
+			3. indefinite - NONE
+			4. non_greedy - NONE
+			5. some  - NONE
+			6. any - NONE
+			7. maybe - NONE
 
 	3. json: 
 		1. JSONStream - HandlerStream
@@ -608,16 +608,16 @@ DEPENDENCIES:
 
 	4. Node: 
 		1. PlainNodes - TokenNode, RecursiveNode, ContentNode, SingleChildNode
-		2. EitherType
+		2. EitherType - NONE
 	
 	5. Pairs (namespace): 
-		1. samples.Pairs (function)
-		2. fromLinear
-		3. to
-		4. from  
-		5. toArray
-		6. uniqueKeys
-		7. getMaxKey
+		1. samples.Pairs (function) - NONE
+		2. fromLinear - NONE
+		3. to - NONE
+		4. from - NONE 
+		5. toArray - NONE
+		6. uniqueKeys - NONE
+		7. getMaxKey - NONE
 
 	6. ParseExtension - CompositeStream, IdentityStream, IInputStream
 
@@ -627,9 +627,9 @@ DEPENDENCIES:
 			are `false`, meanwhile the one for the current platform is `true`. 
 			Use `assert.strictEqual` for that
 
-		1. isWindows
-		2. isLinux
-		3. isDarwin
+		1. isWindows - NONE
+		2. isLinux - NONE
+		3. isDarwin - NONE
 	
 	8. space: 
 		1. LFStream - IOwnedStream<string>
@@ -637,10 +637,10 @@ DEPENDENCIES:
 		3. getNewline - samples.platform.isWindows, samples.platform.isDarwin, samples.platform.isLinux
 			Again, make this tests crossplatform
 		4. NewlineStream - IndexStream
-		5. toNewline
-		6. splitNewlines
-		7. CRLF
-		8. LF
+		5. toNewline - NONE
+		6. splitNewlines - NONE
+		7. CRLF - NONE
+		8. LF - NONE
 
 	9. Stream: 
 		1. skipLastItem - LimitStream
@@ -679,34 +679,34 @@ DEPENDENCIES:
 		3. BasicMap - TerminalMap (class), PlainMap
 	
 	11. xml:	
-		1. getTab
+		1. getTab - NONE
 		2. tabbed - xml.getTab
-		3. getAttrQuote
-		4. getNewline
-		5. openTag
-		6. closeTag
-		7. solitaryTag
-		8. XMLWrapper
-		9. XMLStream
-		10. toAttributes
-		11. printAttrs
+		3. getAttrQuote - NONE
+		4. getNewline - NONE
+		5. openTag - NONE
+		6. closeTag - NONE
+		7. solitaryTag - NONE
+		8. XMLWrapper - NONE
+		9. XMLStream - IStream
+		10. toAttributes - NONE
+		11. printAttrs - NONE
 		12. printAttrsValid - printAttrs, toAttributes
-		13. toAttributeValue
-		14. toComment
-		15. isProcessingInstructionTarget
-		16. isIdentifier
-		17. toProcessingInstructionContent
-		18. toTagContent
-		19. XMLProcessingInstructionNode
-		20. XMLCommentNode
-		21. XMLDeclarationNode
-		22. XMLOpenableNode
-			1. Args
-				1. Builder
-		23. XMLGenerator
-		24. XMLAttrTable
-		25. XMLTagTable
-		26. XMLGenerationTable
+		13. toAttributeValue - NONE
+		14. toComment - NONE
+		15. isProcessingInstructionTarget - NONE
+		16. isIdentifier - NONE
+		17. toProcessingInstructionContent - NONE
+		18. toTagContent - NONE
+		19. XMLProcessingInstructionNode - NONE
+		20. XMLCommentNode - NONE
+		21. XMLDeclarationNode - NONE
+		22. XMLOpenableNode - NONE
+			1. Args - NONE
+				1. Builder - NONE
+		23. XMLGenerator - INode, IStream, XMLGenerationTable
+		24. XMLAttrTable - TreePairGenerationTable
+		25. XMLTagTable - IValidationTable
+		26. XMLGenerationTable - NONE
 
 	12. TokenChooser - Regex, PeekStream
 	13. TreeEvaluator - INode, HandlerStream, TreeStream
