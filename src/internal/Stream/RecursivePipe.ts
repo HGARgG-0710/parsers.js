@@ -271,7 +271,10 @@ const depthMapInitializer = {
 }
 
 const deepTerminalMapInitializer = {
-	init(target: IDeepTerminalMapSettable, deepTerminalMap?: DeepTerminalMap) {
+	init(
+		target: IDeepTerminalMapSettable,
+		deepTerminalMap?: DeepTerminalMap
+	) {
 		if (deepTerminalMap) target.setDeepTerminalMap(deepTerminalMap)
 	}
 }
@@ -329,7 +332,9 @@ abstract class RenewerHaving<
 		return this._renewer
 	}
 
-	setRenewer(renewer: RecursivePipe.Renewer<T, Recursive, InitType>): void {
+	setRenewer(
+		renewer: RecursivePipe.Renewer<T, Recursive, InitType>
+	): void {
 		this.renewer = renewer
 	}
 
@@ -486,7 +491,10 @@ abstract class EvaluablePipeWithLastItem<
 		this.lastInitialized.linkEvaluatedSubpipe(subpipe)
 	}
 
-	protected override initTerminal(toInitialize: T, initParam: T | InitType) {
+	protected override initTerminal(
+		toInitialize: T,
+		initParam: T | InitType
+	) {
 		super.initTerminal(toInitialize, initParam)
 		this.lastInitialized.linkNew(toInitialize)
 	}
@@ -597,7 +605,10 @@ class RenewablePipe<
 		return true
 	}
 
-	private maybeReinitTerminal(currTerminal: T, lastTerminal: T | InitType) {
+	private maybeReinitTerminal(
+		currTerminal: T,
+		lastTerminal: T | InitType
+	) {
 		return this.renewer.isOld(currTerminal)
 			? this.tryRenewOldTerminal(currTerminal, lastTerminal)
 			: this.linkNonOldTerminal(currTerminal)
@@ -940,7 +951,7 @@ export class RecursivePipeArgs<
 		return this._depthMap
 	}
 
-	static build<
+	static builder<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
 		InitType = any
@@ -1315,13 +1326,16 @@ export namespace RecursivePipe {
 			this.pipe.evaluate(initial)
 		}
 
-		constructor(items: (T | Recursive)[], ...args: Partial<InitArgs> | []) {
+		constructor(
+			items: (T | Recursive)[],
+			...args: Partial<InitArgs> | []
+		) {
 			this.renewer = this.getRenewer()
 			this.pipe = this.getPipe()
 			this.asDeep = new DeepTerminalMap<T>(this.items)
 			this.asPinpointRenewable.init(this.renewer, this.globalDepth)
 			this.pipe.init(
-				RecursivePipeArgs.build()
+				RecursivePipeArgs.builder()
 					.setRenewer(this.renewer)
 					.setItems(items)
 					.setDeepTerminalMap(this.asDeep)
@@ -1342,7 +1356,9 @@ export namespace RecursivePipe {
 		InitType = any,
 		InitArgs extends any[] = []
 	> extends RecursivePipe<T, Recursive, InitType, InitArgs> {
-		protected abstract reclaim(pipe: Poolable<T, Recursive, InitType>): void
+		protected abstract reclaim(
+			pipe: Poolable<T, Recursive, InitType>
+		): void
 
 		private recycleAsTerminal(
 			item: IRecursivelySwitchable<T, Recursive, InitType>

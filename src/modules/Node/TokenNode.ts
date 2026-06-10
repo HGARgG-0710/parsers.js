@@ -6,9 +6,9 @@ import type {
 	ITyped,
 	IValidatable,
 	IValidNodeType,
-	IXMLGenerationTable
+	IXMLGenerationTable,
 } from "../../interfaces.js"
-import { selfClosingTag } from "../../samples/xml.js"
+import { solitaryTag } from "../../samples/xml.js"
 import { isTyped } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
 import { NodeFactory } from "./NodeFactory.js"
@@ -17,7 +17,11 @@ import { PoolableNode } from "./PoolableNode.js"
 abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 	protected override ["constructor"]: new () => this
 
-	static fromPlain(this: IPoolNodeType<[]>, x: any, nodeMaker: INodeMaker) {
+	static fromPlain(
+		this: IPoolNodeType<[]>,
+		x: any,
+		nodeMaker: INodeMaker,
+	) {
 		if (!isTyped(x)) return false
 		return new this()
 	}
@@ -37,7 +41,7 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 	override toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
 		const attrConverter = table.toAttr(type, type)
-		return [selfClosingTag(type, attrConverter ? attrConverter(this) : [])]
+		return [solitaryTag(type, attrConverter ? attrConverter(this) : [])]
 	}
 
 	debugPrint(): string {
@@ -47,12 +51,12 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 
 const makeTokenNodeFactory =
 	PreNodeFactory<IPoolNodeType<[], IPoolNode & IValidatable<INode>>>(
-		PreTokenNode
+		PreTokenNode,
 	)
 
 export const CachedTokenNode = NodeFactory(function (
 	type: IValidNodeType,
-	debugName: string
+	debugName: string,
 ) {
 	const factory = makeTokenNodeFactory(type, debugName)
 	const cachedInstance = new factory()
@@ -63,7 +67,7 @@ export const CachedTokenNode = NodeFactory(function (
 
 		constructor() {
 			throw new TypeError(
-				"cannot call constructor of a `CachedTokenNode` - use `.make()` method instead"
+				"cannot call constructor of a `CachedTokenNode` - use `.make()` method instead",
 			)
 			super()
 		}

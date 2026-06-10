@@ -1,10 +1,10 @@
 import { mixin } from "../../mixin.js"
 import { splitNewlines } from "../../samples/space.js"
 import {
-	closingTag,
-	openingTag,
+	closeTag,
+	openTag,
 	tabbed,
-	toValidTagContent,
+	toTagContent,
 	toXML
 } from "../../samples/xml.js"
 import { BaseNode } from "./BaseNode.js"
@@ -48,18 +48,15 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 	}
 
 	toXMLRaw() {
-		return splitNewlines(String(this.value)).map(toValidTagContent)
+		return splitNewlines(String(this.value)).map(toTagContent)
 	}
 
 	toXMLWrapped(attrConverter, isTag) {
 		const { type } = this
-		const openTag = openingTag(
-			type,
-			attrConverter ? attrConverter(this) : []
-		)
+		const oTag = openTag(type, attrConverter ? attrConverter(this) : [])
 		const tagContentFormatted = isTag ? tabbed(this.toXMLRaw()) : []
-		const closeTag = closingTag(type)
-		return [openTag, ...tagContentFormatted, closeTag]
+		const cTag = closeTag(type)
+		return [oTag, ...tagContentFormatted, cTag]
 	}
 
 	toXML(table) {
@@ -166,7 +163,9 @@ class PreSingleChildNode extends SingleItemNode {
  * In cases when a child is guaranteed to be the same preferable over
  * `RecursiveNode`.
  */
-export const SingleChildNode = NodeFactory(PreNodeFactory(PreSingleChildNode))
+export const SingleChildNode = NodeFactory(
+	PreNodeFactory(PreSingleChildNode)
+)
 
 const makeContentNodeFactory = PreNodeFactory(PreContentNode)
 

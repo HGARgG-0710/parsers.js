@@ -489,10 +489,18 @@ DEPENDENCIES:
 			23. RecursiveLimitStream - LimitStream.limits
 			24. RecursiveProxyStream - StatefulProxyStream 
 			25. SectionStream - IOwnedStream
-				TODO [demo]: create specific 'ISectionGrabber's, 
+				demo: create specific 'ISectionGrabber's, 
 					such as, for instance, the ones responsible for 
 					counting non-comment, non-empty lines in JavaScript 
-					files. 
+					files [the idea is it's supposed to require no actual parsing, 
+					as that is very complex]. 
+
+					ANOTHER example [implement as well] is the opposite - a COMMENT 
+						GRABBER.
+
+					LET these demos be applied to BOTH: 
+						1. from-file contexts
+						2. from-string contexts
 
 				Maybe make said demo into a seprate minor little program. 
 
@@ -639,7 +647,34 @@ DEPENDENCIES:
 		TODO: FINISH
 	
 	11. xml:	
-		TODO: FINISH
+		1. getTab
+		2. tabbed - xml.getTab
+		3. getAttrQuote
+		4. getNewline
+		5. openTag
+		6. closeTag
+		7. solitaryTag
+		8. XMLWrapper
+		9. XMLStream
+		10. toAttributes
+		11. printAttrs
+		12. printAttrsValid - printAttrs, toAttributes
+		13. toAttributeValue
+		14. toComment
+		15. isProcessingInstructionTarget
+		16. isIdentifier
+		17. toProcessingInstructionContent
+		18. toTagContent
+		19. XMLProcessingInstructionNode
+		20. XMLCommentNode
+		21. XMLDeclarationNode
+		22. XMLOpenableNode
+			1. Args
+				1. Builder
+		23. XMLGenerator
+		24. XMLAttrTable
+		25. XMLTagTable
+		26. XMLGenerationTable
 
 	12. TokenChooser - Regex, PeekStream
 	13. TreeEvaluator - INode, HandlerStream, TreeStream

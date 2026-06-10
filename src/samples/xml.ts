@@ -49,26 +49,26 @@ export function getNewline() {
 	return toNewline(Config.xml.lf)
 }
 
-export function openingTag(
+export function openTag(
 	type: IValidNodeType,
 	attrs: [string, string][] = []
 ) {
 	assert(isIdentifier(type))
-	const attrStr = printValidAttrs(attrs)
+	const attrStr = printAttrsValid(attrs)
 	return attrStr ? `<${type} ${attrStr}>` : `<${type}>`
 }
 
-export function closingTag(type: IValidNodeType) {
+export function closeTag(type: IValidNodeType) {
 	assert(isIdentifier(type))
 	return `</${type}>`
 }
 
-export function selfClosingTag(
+export function solitaryTag(
 	type: IValidNodeType,
 	attrs: [string, string][] = []
 ) {
 	assert(isIdentifier(type))
-	const attrStr = printValidAttrs(attrs)
+	const attrStr = printAttrsValid(attrs)
 	return attrStr ? `<${type} ${attrStr} />` : `<${type} />`
 }
 
@@ -92,12 +92,12 @@ export function XMLStream(table: IXMLGenerationTable) {
 		FlattenerStream.pool.create(lineProducerStream(resource))
 }
 
-export function toValidAttributes(
+export function toAttributes(
 	attrs: [string, string][]
 ): [string, string][] {
 	return attrs.map(([key, value]) => {
 		assert(isIdentifier(key))
-		return [key, toValidAttributeValue(value)]
+		return [key, toAttributeValue(value)]
 	})
 }
 
@@ -108,11 +108,11 @@ export function printAttrs(attrs: [string, string][]) {
 		.join(" ")
 }
 
-export function printValidAttrs(attrs: [string, string][]) {
-	return printAttrs(toValidAttributes(attrs))
+export function printAttrsValid(attrs: [string, string][]) {
+	return printAttrs(toAttributes(attrs))
 }
 
-export function toValidAttributeValue(value: string) {
+export function toAttributeValue(value: string) {
 	return value
 		.replaceAll('"', "&quot;")
 		.replaceAll("'", "&apos;")
@@ -124,7 +124,7 @@ export function toValidAttributeValue(value: string) {
 		.replaceAll(" ", "&#x20")
 }
 
-export function toValidComment(comment: string) {
+export function toComment(comment: string) {
 	return comment.replaceAll("--", "&#45;&#45;")
 }
 
@@ -152,11 +152,11 @@ export function isIdentifier(id: IValidNodeType): id is string {
 	return fullMaybeNamespaceId.test(id)
 }
 
-export function toValidProcessingInstructionContent(content: string) {
+export function toProcessingInstructionContent(content: string) {
 	return content.replaceAll("?>", "?&gt;")
 }
 
-export function toValidTagContent(content: string) {
+export function toTagContent(content: string) {
 	return content.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;")
 }
 
@@ -172,7 +172,7 @@ export class XMLProcessingInstructionNode implements IXMLSimple {
 		content: string
 	) {
 		assert(isProcessingInstructionTarget(target))
-		this.content = toValidProcessingInstructionContent(content)
+		this.content = toProcessingInstructionContent(content)
 	}
 }
 
@@ -184,7 +184,7 @@ export class XMLCommentNode implements IXMLSimple {
 	}
 
 	constructor(comment: string) {
-		this.comment = toValidComment(comment)
+		this.comment = toComment(comment)
 	}
 }
 
@@ -204,57 +204,6 @@ export class XMLDeclarationNode implements IXMLSimple {
 	) {}
 }
 
-class XMLOpenableNodeArgsBuilder {
-	private tagName?: string
-	private attrs?: [string, string][]
-	private preTags: IXMLSimple[] = []
-	private postTags: IXMLSimple[] = []
-
-	setTagName(tagName: string) {
-		this.tagName = tagName
-		return this
-	}
-
-	setAttrs(attrs: [string, string][]) {
-		this.attrs = attrs
-		return this
-	}
-
-	setPreTags(preTags: IXMLSimple[]) {
-		this.preTags = preTags
-		return this
-	}
-
-	setPostTags(postTags: IXMLSimple[]) {
-		this.postTags = postTags
-		return this
-	}
-
-	build() {
-		assert(this.tagName)
-		assert(this.attrs)
-		return new XMLOpenableNodeArgs(
-			this.tagName,
-			this.attrs,
-			this.preTags,
-			this.postTags
-		)
-	}
-}
-
-export class XMLOpenableNodeArgs {
-	static builder() {
-		return new XMLOpenableNodeArgsBuilder()
-	}
-
-	constructor(
-		readonly tagName: string,
-		readonly attrs: [string, string][],
-		readonly preTags: IXMLSimple[],
-		readonly postTags: IXMLSimple[]
-	) {}
-}
-
 export class XMLOpenableNode implements IXMLOpenableNode {
 	private readonly tagName: string
 	private readonly attrs: [string, string][]
@@ -270,7 +219,7 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 	}
 
 	tag(): [string, string] {
-		return [openingTag(this.tagName, this.attrs), closingTag(this.tagName)]
+		return [openTag(this.tagName, this.attrs), closeTag(this.tagName)]
 	}
 
 	post() {
@@ -281,13 +230,68 @@ export class XMLOpenableNode implements IXMLOpenableNode {
 			.map((x) => `${newline}${x}`)
 	}
 
-	constructor(args: XMLOpenableNodeArgs) {
+	constructor(args: XMLOpenableNode.Args) {
 		const { tagName, attrs, preTags, postTags } = args
 		assert(isIdentifier(tagName))
 		this.tagName = tagName
-		this.attrs = toValidAttributes(attrs)
+		this.attrs = toAttributes(attrs)
 		this.preTags = preTags
 		this.postTags = postTags
+	}
+}
+
+export namespace XMLOpenableNode {
+	export class Args {
+		static builder() {
+			return new Args.Builder()
+		}
+
+		constructor(
+			readonly tagName: string,
+			readonly attrs: [string, string][],
+			readonly preTags: IXMLSimple[],
+			readonly postTags: IXMLSimple[]
+		) {}
+	}
+
+	export namespace Args {
+		export class Builder {
+			private tagName?: string
+			private attrs?: [string, string][]
+			private preTags: IXMLSimple[] = []
+			private postTags: IXMLSimple[] = []
+
+			setTagName(tagName: string) {
+				this.tagName = tagName
+				return this
+			}
+
+			setAttrs(attrs: [string, string][]) {
+				this.attrs = attrs
+				return this
+			}
+
+			setPreTags(preTags: IXMLSimple[]) {
+				this.preTags = preTags
+				return this
+			}
+
+			setPostTags(postTags: IXMLSimple[]) {
+				this.postTags = postTags
+				return this
+			}
+
+			build() {
+				assert(this.tagName)
+				assert(this.attrs)
+				return new Args(
+					this.tagName,
+					this.attrs,
+					this.preTags,
+					this.postTags
+				)
+			}
+		}
 	}
 }
 

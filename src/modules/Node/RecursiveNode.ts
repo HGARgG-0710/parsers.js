@@ -5,9 +5,9 @@ import type {
 	IRecursiveNode,
 	IRecursiveNodeType,
 	IValidatable,
-	IXMLGenerationTable
+	IXMLGenerationTable,
 } from "../../interfaces.js"
-import { closingTag, openingTag, tabbed } from "../../samples/xml.js"
+import { closeTag, openTag, tabbed } from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
 import { isRecursiveNodeSerializable } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
@@ -21,13 +21,13 @@ abstract class PreRecursiveNode
 	implements IRecursiveNode
 {
 	protected override ["constructor"]: new (
-		children?: readonly INode[]
+		children?: readonly INode[],
 	) => this
 
 	static fromPlain(
 		this: IRecursiveNodeType,
 		x: any,
-		nodeMaker: INodeMaker<IRecursiveNode>
+		nodeMaker: INodeMaker<IRecursiveNode>,
 	) {
 		if (!isRecursiveNodeSerializable(x)) return false
 		const maybeNodes = x.children.map(nodeMaker)
@@ -77,7 +77,7 @@ abstract class PreRecursiveNode
 	jsonInsertablePre(): [string, string] {
 		return [
 			`{"type": ${JSON.stringify(this.type)}, "children": [`,
-			`${this.children.map((x) => JSON.stringify(x)).join(",")}]}`
+			`${this.children.map((x) => JSON.stringify(x)).join(",")}]}`,
 		]
 	}
 
@@ -86,7 +86,7 @@ abstract class PreRecursiveNode
 			`{"type": ${JSON.stringify(this.type)}, "children": [${this.children
 				.map((x) => JSON.stringify(x))
 				.join(",")}`,
-			`]}`
+			`]}`,
 		]
 	}
 
@@ -97,26 +97,26 @@ abstract class PreRecursiveNode
 	override toJSON() {
 		return {
 			type: this.type,
-			children: this.children
+			children: this.children,
 		}
 	}
 
 	override toXML(table: IXMLGenerationTable): string[] {
 		const { type } = this
-		const openTag = openingTag(
+		const oTag = openTag(
 			type,
 			this.children
 				.map((c) => {
 					const asAttr = table.toAttr(this.type, c.type)
 					return asAttr ? asAttr(c) : []
 				})
-				.flat()
+				.flat(),
 		)
-		const childTags = this.children
+		const childrenTags = this.children
 			.map((c) => (table.isTag(type, c.type, c) ? c.toXML(table) : []))
 			.flat()
-		const closeTag = closingTag(type)
-		return [openTag, ...tabbed(childTags), closeTag]
+		const cTag = closeTag(type)
+		return [oTag, ...tabbed(childrenTags), cTag]
 	}
 
 	debugPrint(): string {
@@ -148,6 +148,6 @@ abstract class PreRecursiveNode
 
 export const RecursiveNode = NodeFactory(
 	PreNodeFactory<IRecursiveNodeType<IRecursiveNode & IValidatable<INode>>>(
-		PreRecursiveNode
-	)
+		PreRecursiveNode,
+	),
 )

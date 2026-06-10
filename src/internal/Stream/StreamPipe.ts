@@ -26,7 +26,11 @@ const { isFunction } = type
  * referenced across all the `StreamPipe`s)
  */
 export class StreamPipe
-	extends RecursivePipe.Poolable<ILinkedStream, IStreamChooser, IOwnedStream>
+	extends RecursivePipe.Poolable<
+		ILinkedStream,
+		IStreamChooser,
+		IOwnedStream
+	>
 	implements
 		IPoolable<
 			[RecursivePipeArgs<ILinkedStream, IStreamChooser, IOwnedStream>]
@@ -64,7 +68,7 @@ export namespace StreamPipe {
 
 		createPipe(streams: IRawStreamArray) {
 			return StreamPipe.pool.create(
-				RecursivePipeArgs.build()
+				RecursivePipeArgs.builder()
 					.setRenewer(this.renewer)
 					.setItems(streams)
 					.setDeepTerminalMap(this.asDeep)
