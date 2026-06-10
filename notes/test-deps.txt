@@ -616,6 +616,8 @@ DEPENDENCIES:
 		3. to
 		4. from  
 		5. toArray
+		6. uniqueKeys
+		7. getMaxKey
 
 	6. ParseExtension - CompositeStream, IdentityStream, IInputStream
 
@@ -643,8 +645,10 @@ DEPENDENCIES:
 	9. Stream: 
 		TODO: FINISH
 
-	10. TerminalMap: 
-		TODO: FINISH
+	10. TerminalMap (module): 
+		1. ObjectMap - TerminalMap (class), PlainObject
+		2. ArrayMap - TerminalMap (class), PlainArray
+		3. BasicMap - TerminalMap (class), PlainMap
 	
 	11. xml:	
 		1. getTab

@@ -16,9 +16,13 @@ export function ObjectMap<T = any, Default = any>(
 
 export function ArrayMap<T = any, Default = any>(
 	pairs: Iterable<[number, T]> = [],
-	_default?: Default
+	_default: Default
 ) {
-	return new TerminalMap(new PlainArray(Pairs.toArray(pairs)), _default)
+	return new TerminalMap(
+		new PlainArray(Pairs.toArray(pairs, _default)),
+		_default,
+		_default
+	)
 }
 
 export function BasicMap<K = any, V = any, Default = any>(

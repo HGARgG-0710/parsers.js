@@ -9,21 +9,22 @@ function isMissing(x: any): x is undefined {
  * This is a class implementing the `IPreMap<K, V, Default>`,
  * and wrapping around the `IPlainMap<K, V>`.
  */
-export class TerminalMap<K = any, V = any, Default = any> implements IPreMap<
-	K,
-	V,
-	Default
-> {
+export class TerminalMap<
+	K = any,
+	V = any,
+	Default = any
+> implements IPreMap<K, V, Default> {
 	private ["constructor"]: new (
 		plainMap?: IPlainMap<K, V>,
 		_default?: Default
 	) => this
 
 	readonly default: Default
+	private readonly missing: any
 	private readonly sizeObj: Size
 
 	private isMissingKey(key: K) {
-		return isMissing(this.plainMap.read(key))
+		return this.plainMap.read(key) === this.missing
 	}
 
 	private ensureDefault(read: undefined | V) {
@@ -85,8 +86,10 @@ export class TerminalMap<K = any, V = any, Default = any> implements IPreMap<
 
 	constructor(
 		private readonly plainMap: IPlainMap<K, V>,
-		_default?: Default
+		_default?: Default,
+		missing: any = undefined
 	) {
+		this.missing = missing
 		this.default = _default!
 		this.sizeObj = new Size(this.countInitial())
 	}

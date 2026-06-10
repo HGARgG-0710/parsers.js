@@ -22,9 +22,9 @@ export namespace Pairs {
 	 * returns a [K, V][], which is broken down onto pairs
 	 * by walking from start to end, and taking the
 	 * corresponding `K` and `V`.
-	 * 
-	 * Keys without a value are given the default value 
-	 * of `undefined`. 
+	 *
+	 * Keys without a value are given the default value
+	 * of `undefined`.
 	 */
 	export function fromLinear<K = any, V = any>(linear: Iterable<K | V>) {
 		const result = Pairs<K, V | undefined>()
@@ -82,12 +82,32 @@ export namespace Pairs {
 	/**
 	 * Creates an array with index-value pairs
 	 * as-defined in the `indexValues` argument.
-	 *
-	 * Array returned can be "holey".
 	 */
-	export function toArray<T = any>(indexValues: Iterable<[number, T]>) {
-		const arr: (T | undefined)[] = []
-		for (const [i, v] of indexValues) arr[i] = v
+	export function toArray<T, D>(
+		indexValues: Iterable<[number, T]>,
+		_default: D
+	) {
+		const indexValuesUnq = uniqueKeys(indexValues)
+		const maxKey = getMaxKey(indexValuesUnq)
+		const arr: (T | D)[] = Array.from({ length: maxKey }, () => _default)
+		for (const [i, v] of indexValuesUnq) arr[i] = v
 		return arr
+	}
+
+	export function uniqueKeys<K = any, V = any>(pairs: Iterable<[K, V]>) {
+		const keys = new Set<K>()
+		const unique: [K, V][] = []
+		for (const pair of pairs) {
+			const key = pair[0]
+			if (!keys.has(key)) {
+				unique.push(pair)
+				keys.add(key)
+			}
+		}
+		return unique
+	}
+
+	export function getMaxKey<V = any>(pairs: [number, V][]) {
+		return Math.max(...pairs.map((x) => x[0]))
 	}
 }
