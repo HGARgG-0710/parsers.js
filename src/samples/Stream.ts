@@ -27,15 +27,18 @@ import { getStringConsumable, next, skip } from "../utils/Stream.js"
 
 const { negate } = functional
 
-export function skipLastItem<T = any>(limits: LimitStream.Limits.Builder<T>) {
-	return limits.pushAfterEnd((input) => input.next())
+export function skipLastItem<T = any>(
+	limits: LimitStream.Limits.Builder<T>
+) {
+	return limits.pushPostAction((input: ILinkedStream<T>) =>
+		input.resource!.next()
+	)
 }
 
 export function autoNextLimits(n: number) {
+	const skipper = (input: ILinkedStream): void => skip(input.resource!, n)
 	return function <T = any>(limitsBuilder: LimitStream.Limits.Builder<T>) {
-		return skipLastItem(limitsBuilder)
-			.pushAfterEnd((input) => skip(input, n))
-			.build()
+		return skipLastItem(limitsBuilder).pushPostAction(skipper).build()
 	}
 }
 
@@ -70,7 +73,9 @@ export const RecursiveBracketStream = AutoNextRecursiveLimitStream(1)
 export function SingletonWrapperStream<T = any, W = any>(
 	wrapperClass: new (value: T) => W
 ) {
-	return SingletonStream((input: IStream<T>) => new wrapperClass(next(input)))
+	return SingletonStream(
+		(input: IStream<T>) => new wrapperClass(next(input))
+	)
 }
 
 /**
@@ -84,7 +89,9 @@ export function TokenStream<T = any>(tokenClass: new () => T) {
 	})
 }
 
-export function CachedTokenStream<T = any>(tokenClass: ISingletonNodeType) {
+export function CachedTokenStream<T = any>(
+	tokenClass: ISingletonNodeType
+) {
 	return SingletonStream<T, INode>((input) => {
 		input.next()
 		return tokenClass.make()
@@ -171,15 +178,40 @@ export function CollectionStream<W = any, V = any>(
  *
  * Useful for cutting down boilerplate and as a pattern.
  */
-export function DefaultChooser<T = any, K extends IOwnedStream = IOwnedStream>(
-	streamFactory: (input?: K) => ILinkedStream<T>
-) {
+export function DefaultChooser<
+	T = any,
+	K extends IOwnedStream = IOwnedStream
+>(streamFactory: (input?: K) => ILinkedStream<T>) {
 	return () => [streamFactory()]
 }
 
-export const EscapedStream = HandlerStream((stream: IOwnedStream<string>) => {
-	if (stream.curr === "\\") stream.next()
-	return stream.curr
+export function EscapedStream(
+	escapedReader: (escaped: string) => string = () => ""
+) {
+	return HandlerStream((stream: IOwnedStream<string>) => {
+		if (stream.curr === "\\") stream.next()
+		const currChar = stream.curr
+		const maybeSpecial = escapedReader(currChar)
+		return maybeSpecial ? maybeSpecial : stream.curr
+	})
+}
+
+export const BasicEscapedStream = EscapedStream()
+
+export const EscapedSpacesStream = EscapedStream((currChar: string) => {
+	switch (currChar) {
+		case "t":
+			return "\t"
+
+		case "n":
+			return "\n"
+
+		case "f":
+			return "\f"
+
+		default:
+			return ""
+	}
 })
 
 export function DelimitedStream<T = any, E = any>(

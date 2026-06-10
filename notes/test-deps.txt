@@ -643,7 +643,35 @@ DEPENDENCIES:
 		8. LF
 
 	9. Stream: 
-		TODO: FINISH
+		1. skipLastItem - LimitStream
+		2. autoNextLimits - LimitStream
+		3. AutoNextRecursiveLimitStream - RecursiveLimitStream, autoNextLimits
+		4. AutoNextLimitStream - LimitStream, autoNextLimits
+		5. PastEndStream - LimitStream, skipLastItem
+		6. EndBracketStream - AutoNextLimitStream
+		7. RecursiveBracketStream - AutoNextRecursiveLimitStream
+		8. SingletonWrapperStream - SingletonStream
+		9. TokenStream - SingletonStream, INode
+		10. CachedTokenStream - SingletonStream, CachedContentNode, CachedTokenStream
+		11. StillbornIdentityStream - SingletonStream
+		12. isCurr - IStream
+		13. isPeek - IPeekableStream
+		14. isNotPeek - IPeekableStream
+		15. isNext - IStream
+		16. isNotNext - isNext
+		17. isNotNonEscapedNext - IStream<string>
+		18. ConsumerStream - SingletonStream, consume
+		19. StringConsumerStream - ConsumerStream, getStringConsumable
+		20. CollectionStream - SingletonStream
+		21. DefaultChooser - ILinkedStream
+		22. BasicEscapedStream - HandlerStream
+		23. EscapedSpacesStream - HandlerStream
+		24. DelimitedStream - ConcatStream, FiniteStream, InterleaveStream, LoopStream
+		25. isCurrKind - ITypeCheckable, IOwnedStream
+		26. peekKind - IPeekableStream, ITypeCheckable
+		27. isNotPeekKind - peekKind
+		28. isNotNextKind - isNotPeekKind
+		29. StateAccessStream - IdentityStream, StatefulProxyStream, CompositeStream
 
 	10. TerminalMap (module): 
 		1. ObjectMap - TerminalMap (class), PlainObject

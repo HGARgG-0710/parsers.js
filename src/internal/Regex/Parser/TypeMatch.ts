@@ -3,6 +3,7 @@ import type {
 	ICommonStream,
 	IOwnedStream,
 	IPeekable,
+	IStream,
 	IStreamStep
 } from "../../../interfaces.js"
 import { ensureCurrDecimal, skip } from "../../../objects/Error.js"
@@ -10,7 +11,7 @@ import { LimitStream, ValidatorStream } from "../../../objects/Stream.js"
 import {
 	CollectionStream,
 	EndBracketStream,
-	EscapedStream,
+	BasicEscapedStream,
 	SingletonWrapperStream,
 	StateAccessStream
 } from "../../../samples/Stream.js"
@@ -31,17 +32,21 @@ const AsIntValidatorStream = ValidatorStream(ensureCurrDecimal)
 const AsStringStream = SingletonWrapperStream(AsString)
 const TypeMatchStream = CollectionStream(TypeMatch, getStringConsumable())
 
-function TypeMatchLimitStream(modifier: string, longAs: IStreamStep<string>) {
+function TypeMatchLimitStream(
+	modifier: string,
+	longAs: IStreamStep<string>
+) {
 	assert.strictEqual(modifier.length, 1)
 	const skipModifier = skip(modifier)
 	const validateNonEmpty = validateNonEmptyTypeMatch(modifier)
+	const from = (input: IStream<string>) => {
+		skipModifier(input) // the modifier (i, s, etc)
+		skipOpbrace(input) // {
+		return 0
+	}
 	return EndBracketStream(
 		new LimitStream.Limits.Builder<string>()
-			.setFrom((input) => {
-				skipModifier(input) // the modifier (i, s, etc)
-				skipOpbrace(input) // {
-				return 0
-			})
+			.setFrom(from)
 			.setIsEmpty((input) => validateNonEmpty(input))
 			.setLongAs(longAs)
 	)
@@ -77,7 +82,7 @@ function HandleStringTypeMatch() {
 	return [
 		AsStringStream(),
 		TypeMatchStream(),
-		EscapedStream(),
+		BasicEscapedStream(),
 		StringTypeLimitStream(),
 		StateAccessStream<string>(),
 		EnableClbrackStream()

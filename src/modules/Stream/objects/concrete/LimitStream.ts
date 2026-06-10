@@ -118,8 +118,8 @@ function BuildLimitStream<T = any>(limits: LimitStream.Limits<T>) {
 				},
 
 				maybeEmpty() {
-					if (!(this.isEnd = this.isEmpty(this.resource!)))
-						this.syncCurr()
+					this.isEnd = this.isEmpty(this.resource!)
+					if (!this.isEnd) this.syncCurr()
 					else this.postEnd()
 				},
 
@@ -137,11 +137,7 @@ function BuildLimitStream<T = any>(limits: LimitStream.Limits<T>) {
 				},
 
 				baseIsCurrEnd() {
-					return (
-						this.isEnd ||
-						!this.resource ||
-						this.resource.isCurrEnd()
-					)
+					return this.isEnd || !this.resource || this.resource.isCurrEnd()
 				},
 
 				hasNoMoreSteps() {
@@ -254,7 +250,7 @@ export namespace LimitStream {
 			private from: IStreamStep<T> = F
 			private isEmpty: IStreamPredicate<T> = F
 			private longAs?: IStreamStep<T>
-			private readonly actionsAfterEnd: IStreamAction<T>[] = []
+			private readonly performAfterEnd: IStreamAction<T>[] = []
 
 			private nonNullContextualLongAs() {
 				assert(this.longAs)
@@ -278,13 +274,13 @@ export namespace LimitStream {
 				return this
 			}
 
-			prependAfterEnd(callback: IStreamAction<T>) {
-				this.actionsAfterEnd.unshift(callback)
+			unshiftPostAction(callback: IStreamAction<T>) {
+				this.performAfterEnd.unshift(callback)
 				return this
 			}
 
-			pushAfterEnd(callback: IStreamAction<T>) {
-				this.actionsAfterEnd.push(callback)
+			pushPostAction(callback: IStreamAction<T>) {
+				this.performAfterEnd.push(callback)
 				return this
 			}
 
@@ -293,7 +289,7 @@ export namespace LimitStream {
 					this.from,
 					this.nonNullContextualLongAs(),
 					this.isEmpty,
-					new StreamActionList(this.actionsAfterEnd)
+					new StreamActionList(this.performAfterEnd)
 				)
 			}
 		}
