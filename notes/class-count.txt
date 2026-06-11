@@ -9,17 +9,18 @@ That includes:
 That excludes: 
 	1. public JS-exported classes
 
-Current total: 505
+Current total: 503
 
 Method for counting: 
-	1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 468 (at the time of writing...)
+	1. Search (regex): class [a-zA-Z0-9_]+(<| \{| implements| extends) = 466 (at the time of writing...)
 		NOTE: this one DOUBLE-COUNTS the public JS-`class`es 
 			(since they're also exported in .d.ts files...)
 	2. RegexParser/Nodes.ts classes = 38 (not counting those matched by 1.)
 	3. Search (regex): export class = 1
 		ONLY inside the `*.js` files. 
+	4. the named local classes: 2
 
-Value: 1. + 2. - 3.
+Value: 1. + 2. - 3. - 4.
 
 ALSO: count the number of EXPORTED classes specifically... 
 	Use that number on the library's Wiki, enumerate EACH of the sub-exports. 
