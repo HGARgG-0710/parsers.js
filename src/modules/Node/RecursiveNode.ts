@@ -5,11 +5,11 @@ import type {
 	IRecursiveNode,
 	IRecursiveNodeType,
 	IValidatable,
-	IXMLGenerationTable,
+	IXMLGenerationTable
 } from "../../interfaces.js"
 import { closeTag, openTag, tabbed } from "../../samples/xml.js"
 import { isFreeable, tryCopy } from "../../utils.js"
-import { isRecursiveNodeSerializable } from "../../utils/Node.js"
+import { isRecursiveNodeLike } from "../../utils/Node.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
@@ -21,15 +21,16 @@ abstract class PreRecursiveNode
 	implements IRecursiveNode
 {
 	protected override ["constructor"]: new (
-		children?: readonly INode[],
+		children?: readonly INode[]
 	) => this
 
 	static fromPlain(
 		this: IRecursiveNodeType,
 		x: any,
-		nodeMaker: INodeMaker<IRecursiveNode>,
+		nodeMaker: INodeMaker<IRecursiveNode>
 	) {
-		if (!isRecursiveNodeSerializable(x)) return false
+		if (!isRecursiveNodeLike(x)) return false
+		if (!this.is(x)) return false
 		const maybeNodes = x.children.map(nodeMaker)
 		return maybeNodes.every(id) && new this(maybeNodes as INode[])
 	}
@@ -77,7 +78,7 @@ abstract class PreRecursiveNode
 	jsonInsertablePre(): [string, string] {
 		return [
 			`{"type": ${JSON.stringify(this.type)}, "children": [`,
-			`${this.children.map((x) => JSON.stringify(x)).join(",")}]}`,
+			`${this.children.map((x) => JSON.stringify(x)).join(",")}]}`
 		]
 	}
 
@@ -86,7 +87,7 @@ abstract class PreRecursiveNode
 			`{"type": ${JSON.stringify(this.type)}, "children": [${this.children
 				.map((x) => JSON.stringify(x))
 				.join(",")}`,
-			`]}`,
+			`]}`
 		]
 	}
 
@@ -97,7 +98,7 @@ abstract class PreRecursiveNode
 	override toJSON() {
 		return {
 			type: this.type,
-			children: this.children,
+			children: this.children
 		}
 	}
 
@@ -110,7 +111,7 @@ abstract class PreRecursiveNode
 					const asAttr = table.toAttr(this.type, c.type)
 					return asAttr ? asAttr(c) : []
 				})
-				.flat(),
+				.flat()
 		)
 		const childrenTags = this.children
 			.map((c) => (table.isTag(type, c.type, c) ? c.toXML(table) : []))
@@ -148,6 +149,6 @@ abstract class PreRecursiveNode
 
 export const RecursiveNode = NodeFactory(
 	PreNodeFactory<IRecursiveNodeType<IRecursiveNode & IValidatable<INode>>>(
-		PreRecursiveNode,
-	),
+		PreRecursiveNode
+	)
 )

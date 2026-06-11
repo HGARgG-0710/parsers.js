@@ -1,25 +1,26 @@
-import { type as _type, boolean, functional, object } from "@hgargg-0710/one"
+import { type as _type, boolean, object } from "@hgargg-0710/one"
 import type {
 	IChildrenHaving,
 	ITyped,
 	IValidNodeType,
 	IValued,
-	IWalkable
+	IWalkable,
+	IWithChild
 } from "../interfaces/Node.js"
 import type { NodeSystem } from "../objects/NodeSystem.js"
 import { TreeStream } from "../objects/Stream.js"
 import { isGoodIndex } from "../utils.js"
 
-const { trivialCompose } = functional
-const { eqcurry, T } = boolean
+const { T } = boolean
 const { prop, structCheck } = object
-const { isArray } = _type
+const { isArray, isString, isNumber, isStruct } = _type
 
 /**
  * Returns whether the given `x` has at least 1 child
  */
-export const hasChildren = <T extends IWalkable<T> = any>(x: IWalkable<T>) =>
-	isGoodIndex(x.lastChild)
+export const hasChildren = <T extends IWalkable<T> = any>(
+	x: IWalkable<T>
+) => isGoodIndex(x.lastChild)
 
 /**
  * Sequentially indexes a given `node` using `multind` for indicies array.
@@ -40,7 +41,9 @@ export function sequentialIndex<T extends IWalkable<T> = any>(
  * Returns the multi-index (`number[]`) for the deep-rightmost (recursive-last)
  * element of the given `IWalkable<T>`
  */
-export function treeEndPath<T extends IWalkable<T> = any>(node: IWalkable<T>) {
+export function treeEndPath<T extends IWalkable<T> = any>(
+	node: IWalkable<T>
+) {
 	const lastIndex: number[] = []
 	let current = node
 	while (hasChildren(current)) {
@@ -55,8 +58,10 @@ export function treeEndPath<T extends IWalkable<T> = any>(node: IWalkable<T>) {
  * Returns the predicate for checking that the `.type` property of the given
  * `ITyped` is equal to `_type`
  */
-export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
-	trivialCompose(eqcurry(_type), type)
+export const isType =
+	<T = any>(_type: T) =>
+	(x: ITyped) =>
+		_type === x.type
 
 /**
  * Returns a function `nodeWrapper` that returns either:
@@ -73,13 +78,17 @@ export const isType = <T = any>(_type: T): ((x: ITyped) => boolean) =>
  * expected to be recursive here - hence the passing of `deserializer`).
  */
 export function fromObject(allowedTypes: NodeSystem) {
-	function isValid(type: IValidNodeType): boolean {
+	function isTypeValid(type: IValidNodeType): boolean {
 		return allowedTypes.has(type)
 	}
 
+	// ! pre-doc [important]: when needing to have a toplevel array of items,
+	// 		simply use a RecursiveNode [the array support is not added precisely
+	// 		because of how it would break correct handling of hierarchy checking;
+	//		besides, the RecursiveNode route is way more elegant in any case]
 	return function nodeWrapper(from: any) {
 		if (!isTyped(from)) return false
-		if (!isValid(from.type)) return false
+		if (!isTypeValid(from.type)) return false
 		return allowedTypes.getByType(from.type)!.fromPlain(from, nodeWrapper)
 	}
 }
@@ -94,26 +103,32 @@ export const type = prop("type") as <T = any>(x: ITyped) => IValidNodeType
  */
 export const isTyped = structCheck<ITyped>(["type"])
 
+export const isNodeType = (x: any): x is IValidNodeType =>
+	isString(x) || isNumber(x)
+
 /**
  * Verifies that given input is a non-`null` object with `.type` and `.value` properties on it.
  */
-export const isContentNodeSerializable = structCheck<ITyped & IValued>([
-	"type",
-	"value"
-])
+export const isContentNodeLike = structCheck<ITyped & IValued>({
+	type: isNodeType,
+	value: T
+})
+
+export const isSingleChildNodeLike = structCheck<ITyped & IWithChild>({
+	type: isNodeType,
+	child: (x) => !!isStruct(x)
+})
 
 /**
  * Verifies that given input is a non-`null` object with `.type` and `.children` property,
  * the latter of which is an array.
  */
-export const isRecursiveNodeSerializable = structCheck<
-	ITyped & IChildrenHaving
->({
-	type: T,
+export const isRecursiveNodeLike = structCheck<ITyped & IChildrenHaving>({
+	type: isNodeType,
 	children: isArray
 })
 
-export function mapTypes<T = any>(
+export function mapTypeTable<T = any>(
 	typeTable: [ITyped, T][]
 ): [IValidNodeType, T][] {
 	return typeTable.map(([t, f]) => [t.type, f])

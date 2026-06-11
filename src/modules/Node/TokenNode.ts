@@ -3,10 +3,11 @@ import type {
 	INodeMaker,
 	IPoolNode,
 	IPoolNodeType,
+	ISingletonNodeType,
 	ITyped,
 	IValidatable,
 	IValidNodeType,
-	IXMLGenerationTable,
+	IXMLGenerationTable
 } from "../../interfaces.js"
 import { solitaryTag } from "../../samples/xml.js"
 import { isTyped } from "../../utils/Node.js"
@@ -20,9 +21,10 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 	static fromPlain(
 		this: IPoolNodeType<[]>,
 		x: any,
-		nodeMaker: INodeMaker,
+		nodeMaker: INodeMaker
 	) {
 		if (!isTyped(x)) return false
+		if (!this.is(x)) return false
 		return new this()
 	}
 
@@ -51,25 +53,27 @@ abstract class PreTokenNode extends PoolableNode<[]> implements INode {
 
 const makeTokenNodeFactory =
 	PreNodeFactory<IPoolNodeType<[], IPoolNode & IValidatable<INode>>>(
-		PreTokenNode,
+		PreTokenNode
 	)
 
 export const CachedTokenNode = NodeFactory(function (
 	type: IValidNodeType,
-	debugName: string,
-) {
+	debugName: string
+): ISingletonNodeType {
 	const factory = makeTokenNodeFactory(type, debugName)
 	const cachedInstance = new factory()
-	return class extends factory {
+	return class C extends factory {
 		static make() {
 			return cachedInstance
 		}
 
+		// ! pre-doc [important]: this is added to support the parent's `static fromPlain` method, which enables
+		// 		us to use a `CachedTokenNode` interchangeably with regular `TokenNode`
+		// 	This way, `CachedTokenNode` is preferred for the VAST variety of scenarios (particularly, the readonly
+		// 		ones, such as when the formed AST is "immutable-by-convention")
 		constructor() {
-			throw new TypeError(
-				"cannot call constructor of a `CachedTokenNode` - use `.make()` method instead",
-			)
 			super()
+			return C.make()
 		}
 	}
 })

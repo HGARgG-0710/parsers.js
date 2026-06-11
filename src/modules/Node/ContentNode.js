@@ -1,4 +1,4 @@
-import { mixin } from "../../mixin.js"
+import { ObjectPool } from "../../objects.js"
 import { splitNewlines } from "../../samples/space.js"
 import {
 	closeTag,
@@ -7,27 +7,21 @@ import {
 	toTagContent,
 	toXML
 } from "../../samples/xml.js"
-import { BaseNode } from "./BaseNode.js"
+import {
+	isContentNodeLike,
+	isSingleChildNodeLike
+} from "../../utils/Node.js"
 import { NodeFactory } from "./NodeFactory.js"
 import { PoolableNode } from "./PoolableNode.js"
 import { PreNodeFactory } from "./before/PreNodeFactory.js"
 
-class FromPlainConvertibleSingleItemNode extends BaseNode {
+class MaybeContainingNode extends PoolableNode {
 	static fromPlain(x, nodeMaker) {
-		if (!isContentNodeSerializable(x)) return false
+		if (!isContentNodeLike(x)) return false
+		if (!this.is(x)) return false
 		return new this(x.value)
 	}
-}
 
-const SingleItemNode = new mixin(
-	{
-		name: "SingleItemNode",
-		properties: {}
-	},
-	[FromPlainConvertibleSingleItemNode, PoolableNode]
-).toClass()
-
-class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 	setValue(newValue) {
 		this._value = newValue
 	}
@@ -81,8 +75,10 @@ class MaybeContainingNode extends FromPlainConvertibleSingleItemNode {
 
 const makeCachedContentNodeFactory = PreNodeFactory(MaybeContainingNode)
 
+// ! INTERNAL DOC [important] - this doesn't actually implement PoolableNode, just the BaseNode,
+// 		even though it inherits from it
 export const CachedContentNode = NodeFactory(function (type, debugName) {
-	const factory = makeCachedContentNodeFactory(type, debugName)
+	const baseClass = makeCachedContentNodeFactory(type, debugName)
 	const instanceMap = new Map()
 
 	function getCachedInstance(value) {
@@ -90,20 +86,18 @@ export const CachedContentNode = NodeFactory(function (type, debugName) {
 	}
 
 	function cacheNewInstance(value) {
-		const newInstance = new factory(value)
+		const newInstance = new baseClass(value)
 		instanceMap.set(value, newInstance)
 		return newInstance
 	}
 
-	return class extends factory {
+	return class C extends baseClass {
 		static make(value) {
 			return getCachedInstance(value) || cacheNewInstance(value)
 		}
 
 		constructor(value) {
-			throw new TypeError(
-				"Cannot create a `CachedContentNode` instance via `new` call, use the static `make` method instead"
-			)
+			return C.make(value)
 			super(value)
 		}
 	}
@@ -116,7 +110,16 @@ class PreContentNode extends MaybeContainingNode {
 	}
 }
 
-class PreSingleChildNode extends SingleItemNode {
+class PreSingleChildNode extends PoolableNode {
+	// ! pre-doc [important]: the `fromPlain` static methods can be called OUTSIDE the `utils.Node.fromObject`
+	//		reason: the user should be able to write their own equivalent deserializer-code
+	// 			for raw JSON objects
+	static fromPlain(x, nodeMaker) {
+		if (!isSingleChildNodeLike(x)) return false
+		if (!this.is(x)) return false
+		return new this(nodeMaker(x.child))
+	}
+
 	copy() {
 		return this.child
 			? new this.constructor(tryCopy(this.child))
@@ -159,6 +162,7 @@ class PreSingleChildNode extends SingleItemNode {
 		}`
 	}
 }
+
 /**
  * This is an `INodeTypeFactory<T, [Value | undefined]>` for creation of
  * `INode` instances with `.type` field (on prototype) defined by `type: T`
@@ -183,5 +187,12 @@ const makeContentNodeFactory = PreNodeFactory(PreContentNode)
  */
 
 export const ContentNode = NodeFactory(function (type, debugName) {
-	return makeContentNodeFactory(type, debugName)
+	const baseClass = makeContentNodeFactory(type, debugName)
+	return class C extends baseClass {
+		static pool = new ObjectPool(C)
+
+		get pool() {
+			return C.pool
+		}
+	}
 })

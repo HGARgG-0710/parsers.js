@@ -26,6 +26,10 @@ export interface IValued<V = any> {
 	readonly value: V
 }
 
+export interface IWithChild<T extends object = object> {
+	readonly child: NonNullable<T>
+}
+
 /**
  * This is an interface for objects with
  * a `readonly children: T[]`, representing some
@@ -152,7 +156,10 @@ export type INodeMaker<K extends INode = INode> = (x: any) => K | false
  * This is an interface for representing `INode` -factories without
  * their respective .type-information, but with deserialization capabilities.
  */
-export interface INodeType<Args extends any[] = any[], K extends INode = INode>
+export interface INodeType<
+	Args extends any[] = any[],
+	K extends INode = INode
+>
 	extends ITypeCheckable, ITyped, IDebugNamed {
 	new (...args: Args): K
 	fromPlain(x: any, maker: INodeMaker): K | false

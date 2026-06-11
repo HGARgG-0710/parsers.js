@@ -724,7 +724,21 @@ DEPENDENCIES:
 		5. NodeMap - IMapExtender, INode
 		6. PeekMap - IMapExtender, IPeekableStream
 	3. Node
-		TODO: FINISH
+		1. hasChildren - INode
+		2. sequentialIndex - INode
+		3. treeEndPath - INode
+		4. isType - ITyped
+		5. fromObject - NodeSystem
+		6. type - ITyped
+		7. isTyped - ITyped
+		8. isNodeType - NONE
+		9. isContentNodeLike - isNodeType
+		10. isSingleChildNodeLike - isNodeType
+		11. isRecursiveNodeLike - isNodeType
+		12. mapTypeTable - ITyped
+		13. search - TreeStream
+		14. depth - TreeStream
+		15. count - TreeStream
 	4. Stream
 		TODO: FINISH
 
