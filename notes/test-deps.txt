@@ -713,10 +713,24 @@ DEPENDENCIES:
 	14. TreeMapper - TreeEvaluator
 
 5. utils: 
-	TODO: FINISH
+	1. Debug
+		1. isDebugPrintable - NONE
+		2. debugPrint - NONE
+	2. IndexMap
+		1. TypeMap - IMapExtender, ITyped
+		2. ResourceMap - IMapExtender, IResourceful
+		3. CurrMap - IMapExtender, IStream
+		4. StringTypeMap - IMapExtender
+		5. NodeMap - IMapExtender, INode
+		6. PeekMap - IMapExtender, IPeekableStream
+	3. Node
+		TODO: FINISH
+	4. Stream
+		TODO: FINISH
 
 6. constants: 
-	TODO: FINISH
+	TODO: *MOVE* all the stuff that is in `constants` into `global`
+		As in, `constants` -> `global.constants`
 
 [TODO, distribute] NEW CLASSES/INTERFACES [to determine tests and dependencies for these accordingly!]: 
 	1. NodeData: 

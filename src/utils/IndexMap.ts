@@ -37,7 +37,7 @@ export const CurrMap = <K = any, T = any, Default = any, Index = any>(
 /**
  * Calls and returns `indexMap.extend((x) => typeof x)`
  */
-export const TypeofMap = <T = any, Default = any>(
+export const StringTypeMap = <T = any, Default = any>(
 	map: IMapExtender<ReturnType<typeof typeOf>, T, Default>
 ) => map.extend(typeOf)
 
@@ -47,16 +47,6 @@ export const TypeofMap = <T = any, Default = any>(
 export const NodeMap = <T = any, Default = any>(
 	map: IMapExtender<IPredicate, T, Default>
 ) => map.extendKey<ITypeCheckable>((x) => x.is)
-
-/**
- * This is an `IMapClass` without `.change` or `.keyExtension`, which uses
- * `(x: string, i: number) => x.charCodeAt(i)` as an extension.
- * It, thus, expects to have numbers for keys, and `string`s as
- * inputs for the `.index` method.
- */
-export const CharCodeMap = <K = any, T = any, Default = any>(
-	map: IMapExtender<K, T, Default, number | undefined>
-) => map.extend((x: string, i = 0) => x.codePointAt(i))
 
 /**
  * This is a function calling `map.extend((x: IPeekable) => x.peek(1))`.
