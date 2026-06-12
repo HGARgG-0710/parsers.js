@@ -40,7 +40,10 @@ abstract class BaseMixinTest {
 	protected readonly mixinInstance: mixin
 	protected readonly mixinSuper: Function[]
 
-	constructor(mixinShape: mixin.IMixinShape, superClasses: Function[] = []) {
+	constructor(
+		mixinShape: mixin.IMixinShape,
+		superClasses: Function[] = []
+	) {
 		this.mixinInstance = new mixin(mixinShape, superClasses)
 		this.mixinSuper = [...superClasses]
 	}
@@ -85,9 +88,7 @@ abstract class DefaultMixinPrototypeTest<
 		assert(
 			object.recursiveSame(
 				expectedPrototypeDescriptors,
-				withoutSuper(
-					this.mixinPrototypeDescriptors(mixinClass.prototype)
-				)
+				withoutSuper(this.mixinPrototypeDescriptors(mixinClass.prototype))
 			)
 		)
 	}
@@ -105,7 +106,7 @@ abstract class DefaultMixinPrototypeTest<
 
 			const prototypeMap = withoutSuper(propertyDescriptors(x.prototype))
 			for (const k of keys(prototypeMap)) {
-				const currDescriptor = prototypeMap[k as string]
+				const currDescriptor = (prototypeMap as any)[k]
 				const currSuperProp = currSuper[k]
 
 				if (!!currDescriptor.get || !!currDescriptor.set) {

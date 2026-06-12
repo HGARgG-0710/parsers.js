@@ -1,10 +1,13 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import test from "node:test"
-import { AutoCache } from "../../dist/src/classes.js"
-import { IndexMap, ModifiableMap } from "../../dist/src/classes/IndexMap.js"
 import type { ICopiable } from "../../dist/src/interfaces.js"
-import { LiquidMap } from "../../dist/src/modules/IndexMap/classes/LiquidMap.js"
+import { LiquidMap } from "../../dist/src/modules/IndexMap/objects/LiquidMap.js"
+import { AutoCache } from "../../dist/src/objects.js"
+import {
+	IndexMap,
+	ModifiableMap
+} from "../../dist/src/objects/IndexMap.js"
 
 const { keys } = object
 
@@ -36,9 +39,7 @@ abstract class ClassTest<InstanceType = any> {
 
 		if (index === -1)
 			throw new TypeError(
-				`Test for method \`${name}\` not found in ${this.names.join(
-					", "
-				)}`
+				`Test for method \`${name}\` not found in ${this.names.join(", ")}`
 			)
 
 		return this.callMethodTest(index, this.instance!, ...args)
@@ -95,7 +96,9 @@ export class MethodTest<InstanceType = any, Args extends any[] = any[]> {
 	) {}
 }
 
-export type InterfaceShape = object
+export interface InterfaceShape<T = any> {
+	[key: object.ObjectKey]: (instance: T) => boolean
+}
 
 export class InterfaceTest<T = any, Args extends any[] = any[]> {
 	withClass(tested: new (...args: Args) => T) {
@@ -107,7 +110,7 @@ export class InterfaceTest<T = any, Args extends any[] = any[]> {
 		}
 	}
 
-	constructor(private readonly shape: InterfaceShape) {}
+	constructor(private readonly shape: InterfaceShape<T>) {}
 }
 
 export class PrefixCounter {
@@ -128,11 +131,19 @@ export class PrefixCounter {
 
 export class TestCounter {
 	private readonly prefixes = AutoCache(
-		new ModifiableMap(new IndexMap.ArrayMap(new LiquidMap())),
+		new ModifiableMap(
+			new IndexMap.ArrayMap<number[], PrefixCounter, undefined>(
+				new LiquidMap()
+			)
+		),
 		() => new PrefixCounter()
 	)
 
-	test(testPrefix: number[], callback: () => void, toTest: boolean = false) {
+	test(
+		testPrefix: number[],
+		callback: () => void,
+		toTest: boolean = false
+	) {
 		const prefixCounter: PrefixCounter = this.prefixes(testPrefix)
 		prefixCounter.inc()
 		return test(
@@ -142,7 +153,9 @@ export class TestCounter {
 		)
 	}
 
-	constructor(private readonly label: (count: readonly number[]) => string) {}
+	constructor(
+		private readonly label: (count: readonly number[]) => string
+	) {}
 }
 
 export function assertThrowing(callback: () => void) {

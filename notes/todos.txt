@@ -6,3 +6,9 @@
 	diminish significantly (also - this, in particular, enables the MIXING OF STYLES, 
 	and merigng of the Stream-code with the post-creation code that MAY even be returning 
 	NEW NODES from the ones that were read from the current input-stream). 
+
+2. [TESTING] Remove the 'PlainMapInterface' and all objects like it
+3. [TESTING] Remove all the old methods' tests
+	* Collect precise information as to which new methods' tests ARE MISSING
+4. [TESTING] Fix all the compilation errors
+5. [TESTING] Complement the `mixin` test with all the notes that you've made

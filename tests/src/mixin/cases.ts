@@ -13,7 +13,7 @@ const { prototype, extendPrototype } = object
 const { isFunction } = type
 
 const mixinTestCounter = new TestCounter(
-	([hasConstructor, parentCode, categoryCount]: [number, number, number]) =>
+	([hasConstructor, parentCode, categoryCount]: readonly number[]) =>
 		`mixin (#${hasConstructor}.${parentCode}.${categoryCount})`
 )
 
@@ -97,22 +97,16 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			T: {
-				get: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"T"
-				)!.get!,
-				set: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"T"
-				)!.set!,
+				get: Object.getOwnPropertyDescriptor(mixinShape.properties, "T")!
+					.get!,
+				set: Object.getOwnPropertyDescriptor(mixinShape.properties, "T")!
+					.set!,
 				enumerable: true,
 				configurable: true
 			},
 			R: {
-				get: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"R"
-				)!.get!,
+				get: Object.getOwnPropertyDescriptor(mixinShape.properties, "R")!
+					.get!,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -298,17 +292,14 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			X: {
-				get: Object.getOwnPropertyDescriptor(Parent1.prototype, "X")!
-					.get,
+				get: Object.getOwnPropertyDescriptor(Parent1.prototype, "X")!.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
 			},
 			B: {
-				get: Object.getOwnPropertyDescriptor(
-					mixinShape1.properties,
-					"B"
-				)!.get,
+				get: Object.getOwnPropertyDescriptor(mixinShape1.properties, "B")!
+					.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -329,8 +320,7 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			X: {
-				get: Object.getOwnPropertyDescriptor(Parent2.prototype, "X")!
-					.get,
+				get: Object.getOwnPropertyDescriptor(Parent2.prototype, "X")!.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -342,8 +332,7 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			B: {
-				get: Object.getOwnPropertyDescriptor(Parent2.prototype, "B")!
-					.get,
+				get: Object.getOwnPropertyDescriptor(Parent2.prototype, "B")!.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -474,14 +463,10 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			S: {
-				get: Object.getOwnPropertyDescriptor(
-					parent1Shape.properties,
-					"S"
-				)!.get!,
-				set: Object.getOwnPropertyDescriptor(
-					parent1Shape.properties,
-					"S"
-				)!.set!,
+				get: Object.getOwnPropertyDescriptor(parent1Shape.properties, "S")!
+					.get!,
+				set: Object.getOwnPropertyDescriptor(parent1Shape.properties, "S")!
+					.set!,
 				enumerable: true,
 				configurable: true
 			},
@@ -504,10 +489,8 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			r: {
-				get: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"r"
-				)!.get,
+				get: Object.getOwnPropertyDescriptor(mixinShape.properties, "r")!
+					.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -603,19 +586,15 @@ mixinTestCounter.test(
 				configurable: true
 			},
 			m: {
-				get: Object.getOwnPropertyDescriptor(
-					parent2Shape.properties,
-					"m"
-				)!.get,
+				get: Object.getOwnPropertyDescriptor(parent2Shape.properties, "m")!
+					.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
 			},
 			s: {
-				get: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"s"
-				)!.get,
+				get: Object.getOwnPropertyDescriptor(mixinShape.properties, "s")!
+					.get,
 				set: undefined,
 				enumerable: true,
 				configurable: true
@@ -742,10 +721,8 @@ mixinTestCounter.test(
 		]).toClass({
 			d: {
 				get: undefined,
-				set: Object.getOwnPropertyDescriptor(
-					mixinShape.properties,
-					"d"
-				)!.set,
+				set: Object.getOwnPropertyDescriptor(mixinShape.properties, "d")!
+					.set,
 				enumerable: true,
 				configurable: true
 			},
