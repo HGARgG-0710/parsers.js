@@ -8,7 +8,10 @@ const { copy } = array
  * This is a class for a piece-wise construction
  * of a string primitive. Implements `IPrototypeCollection<string, string>`.
  */
-export class SourceBuilder implements IPrototypeCollection<string, string> {
+export class SourceBuilder implements IPrototypeCollection<
+	string,
+	string
+> {
 	private ["constructor"]: new (finalSource?: string) => this
 
 	private readonly source = new ArrayCollection<string>()
@@ -24,7 +27,7 @@ export class SourceBuilder implements IPrototypeCollection<string, string> {
 	}
 
 	push(string: string) {
-		this.source.push(string)
+		if (string) this.source.push(string)
 		return this
 	}
 

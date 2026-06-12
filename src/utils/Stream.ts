@@ -66,7 +66,7 @@ export function wrapped<T = any, Out = any>(
  * as it allows one to take specific elements of the stream out
  * from the final input
  */
-export function destroy<T = any>(
+export function destroyHandledItem<T = any>(
 	input: IStream<T>
 ): typeof HandlerStream.SkippedItem {
 	input.next()
@@ -77,7 +77,10 @@ export function destroy<T = any>(
  * A polymorphic method for skipping the number of steps inside `input`
  * specified by the `steps` (default - `1`)
  */
-export function skip<T = any>(input: IStream<T>, step: IStreamStep<T> = 1) {
+export function skip<T = any>(
+	input: IStream<T>,
+	step: IStreamStep<T> = 1
+) {
 	if (isNumber(step)) while (step-- > 0) input.next()
 	else
 		while (!input.isEnd) {
@@ -110,9 +113,13 @@ export function consume<
  *
  * @returns the `result`
  */
-export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
+export function write<T = any>(
+	stream: IStream<T>,
+	result: IFiniteWritable<T>
+) {
 	let i = 0
-	for (; i < result.size && !stream.isEnd; ++i) result.write(i, next(stream))
+	for (; i < result.size && !stream.isEnd; ++i)
+		result.write(i, next(stream))
 	return i
 }
 
@@ -125,10 +132,10 @@ export function write<T = any>(stream: IStream<T>, result: IFiniteWritable<T>) {
  * In other words, it is a way to reuse the exact same
  * `result` for multiple distinct calls to `consume`.
  */
-export function consumableIterable<
+export function iterableConsumable<
 	T = any,
-	I extends Iterable<T> = Iterable<T>,
-	K extends IRefillableCollection<T> = IRefillableCollection<T>
+	K extends IRefillableCollection<T> = IRefillableCollection<T>,
+	I extends Iterable<T> = Iterable<T>
 >(result: K) {
 	return function (source: I) {
 		result.clear()
@@ -137,17 +144,17 @@ export function consumableIterable<
 }
 
 export function getStringConsumable() {
-	return consumableIterable(new SourceBuilder())
+	return iterableConsumable<string, SourceBuilder>(new SourceBuilder())
 }
 
 export function getArrayConsumable<T = any>() {
-	return consumableIterable(new ArrayBuilder<T>())
+	return iterableConsumable<T, ArrayBuilder<T>>(new ArrayBuilder<T>())
 }
 
-export function consumableRevivables<
+export function revivablesConsumable<
 	T = any,
-	I extends IRenewerStream<T> = IRenewerStream<T>,
-	K extends IRefillableCollection<T> = IRefillableCollection<T>
+	K extends IRefillableCollection<T> = IRefillableCollection<T>,
+	I extends IRenewerStream<T> = IRenewerStream<T>
 >(result: K) {
 	return function (source: I) {
 		result.clear()
@@ -184,6 +191,10 @@ export function count<T = any>(input: IStream<T>) {
  * into `result`, delimiting them by `delimPred`.
  *
  * By default, `result` is an `ArrayCollection<T>`
+ *
+ * ! Note [self-doc]: the preferred way of doing this is actually
+ * 	via `DelimitedStream`. Do the opposite only when you need to
+ * 	evaluate the sequence immediately. Same goes for: `transform`.
  */
 export function delimited<T = any>(delimPred: IStreamStep<T>) {
 	return function <K extends IPushable<T> = IPushable<T>>(
@@ -308,7 +319,8 @@ export const isLineIndex = structCheck<ILineIndex>({
 	char: isNumber,
 	line: isNumber,
 	nextChar: isFunction,
-	nextLine: isFunction
+	nextLine: isFunction,
+	renew: isFunction
 })
 
 /**
@@ -356,7 +368,7 @@ export const isParseState = structCheck<IParseState>({
 /**
  * This is an object for identifying an `IParseState`-bearing object.
  */
-export const hasState = structCheck<IStateHaving<IParseState>>({
+export const hasParseState = structCheck<IStateHaving<IParseState>>({
 	state: isParseState
 })
 

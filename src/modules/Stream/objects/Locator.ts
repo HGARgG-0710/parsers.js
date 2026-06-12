@@ -18,7 +18,7 @@ import {
 	hasLineIndex,
 	hasMarker,
 	hasPos,
-	hasState
+	hasParseState
 } from "../../../utils/Stream.js"
 
 const { isNull } = type
@@ -31,11 +31,15 @@ const { negate } = functional
  * the `dig` method on `inputStream`, with a negation of the search
  * predicate supplied via the constructor,
  */
-export abstract class WithPath<T = any> implements IStreamLocator<T & IStream> {
+export abstract class WithPath<T = any> implements IStreamLocator<
+	T & IStream
+> {
 	protected abstract get follower(): IPathFollower<IStream, T & IStream>
 
 	locate(startStream: IStream): (T & IStream<any>) | null {
-		return this.follower.follow(startStream, negate(this.predicate)) || null
+		return (
+			this.follower.follow(startStream, negate(this.predicate)) || null
+		)
 	}
 
 	constructor(private readonly predicate: (x: any) => x is T) {}
@@ -81,7 +85,7 @@ export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
 	}
 
 	protected constructor(private readonly _follower: IPathFollower) {
-		super(hasState)
+		super(hasParseState)
 	}
 }
 /**
@@ -90,7 +94,9 @@ export class StatefulLocator extends WithPath<IStateHaving<IParseState>> {
  */
 export class PosCarryingLocator extends WithPath<IPosed> {
 	static readonly upwards = new PosCarryingLocator(new OwnerFollower())
-	static readonly downwards = new PosCarryingLocator(new ResourceFollower())
+	static readonly downwards = new PosCarryingLocator(
+		new ResourceFollower()
+	)
 
 	protected get follower() {
 		return this._follower
@@ -107,7 +113,9 @@ export class PosCarryingLocator extends WithPath<IPosed> {
  */
 export class IndexCarryingLocator extends WithPath<IIndexCarrying> {
 	static readonly upwards = new IndexCarryingLocator(new OwnerFollower())
-	static readonly downwards = new IndexCarryingLocator(new ResourceFollower())
+	static readonly downwards = new IndexCarryingLocator(
+		new ResourceFollower()
+	)
 
 	protected get follower() {
 		return this._follower

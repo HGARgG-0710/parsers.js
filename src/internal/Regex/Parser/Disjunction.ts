@@ -16,8 +16,8 @@ import {
 	PastEndStream
 } from "../../../samples/Stream.js"
 import {
-	consumableIterable,
-	consumeSingletonRevivables
+	consumeSingletonRevivables,
+	getArrayConsumable
 } from "../../../utils/Stream.js"
 import { Disjunct, Disjunction, Temp } from "./Nodes.js"
 
@@ -37,12 +37,7 @@ function PipeLimitChooser(input: IOwnedStream<INode>) {
 	return [PipeLimitStream()]
 }
 
-const withDisjunctBuilder = consumableIterable<
-	INode,
-	Iterable<INode>,
-	ArrayBuilder<INode>
->(new ArrayBuilder<INode>())
-
+const withDisjunctBuilder = getArrayConsumable<INode>()
 const DisjunctStream = CollectionStream(Disjunct, withDisjunctBuilder)
 
 class DisjunctionStream extends SingleNodeStream<INode> {

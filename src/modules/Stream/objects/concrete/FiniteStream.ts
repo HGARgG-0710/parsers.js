@@ -28,6 +28,11 @@ export class FiniteStream<T = any>
 		return this.items[++this.pos]
 	}
 
+	override setItems(items: T[]): void {
+		super.setItems(items)
+		this.pos = 0
+	}
+
 	isCurrEnd() {
 		return this.pos === lastIndex(this.items)
 	}

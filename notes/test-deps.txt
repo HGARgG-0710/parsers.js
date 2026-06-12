@@ -740,7 +740,43 @@ DEPENDENCIES:
 		14. depth - TreeStream
 		15. count - TreeStream
 	4. Stream
-		TODO: FINISH
+		1. next - IStream
+		2. wrapped - IStream
+		3. destroyHandledItem - HandlerStream
+		4. skip - IStream
+		5. consume - IPushable
+			Try to test this with as many classes as possible, 
+				similarly to other such cases. 
+		6. write - IStream, IFiniteWritable
+		7. iterableConsumable - IStream, IRefillableCollection
+		8. getStringConsumable - iterableConsumable, SourceBuilder
+		9. getArrayConsumable - iterableConsumable, ArrayBuilder
+		10. revivablesConsumable - consumeSingletonRevivables, IRefillableCollection
+		11. has - skip 
+		12. count - IStream
+		13. delimited - skip
+		14. transform - IStream
+		15. uniFinish - IStream
+		16. finish - isFinishable, IStream
+		17. navigate - isNavigable, IStream
+		18. match - Regex, IPeekableStream
+		19. peek - IPeekable
+		20. consumeSingletonRevivables - IPushable, IRenewerStream
+		21. curr - IStream
+		22. hasPos - IPosed
+		23. isLineIndex - ILineIndex
+		24. hasLineIndex - isLineIndex
+		25. isFinishable - IFinishable
+		26. isNavigable - INavigable
+		27. isStateful - IStateful
+		28. isParseState - IParseState
+		29. hasParseState - isParseState
+		30. locateStateDownstream - IOwningStream, StatefulLocator
+		31. hasMarker - IMarkerHaving
+		32. Step: 
+			1. isStreamPredicate - NONE
+			2. asSteps - IStream
+			3. bindStep - IStream, isStreamPredicate
 
 6. constants: 
 	TODO: *MOVE* all the stuff that is in `constants` into `global`
