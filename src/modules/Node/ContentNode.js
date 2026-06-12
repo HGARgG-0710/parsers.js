@@ -98,7 +98,6 @@ export const CachedContentNode = NodeFactory(function (type, debugName) {
 
 		constructor(value) {
 			return C.make(value)
-			super(value)
 		}
 	}
 })
