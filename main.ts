@@ -1,4 +1,3 @@
-export * from "./src/constants.js"
 export * from "./src/global.js"
 export type * from "./src/interfaces.js"
 export * from "./src/mixin.js"

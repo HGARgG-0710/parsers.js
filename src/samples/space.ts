@@ -1,5 +1,9 @@
-import { BadId } from "../constants.js"
-import type { ICommonStream, IOwnedStream, IStream } from "../interfaces.js"
+import { BadId } from "../global/constants.js"
+import type {
+	ICommonStream,
+	IOwnedStream,
+	IStream
+} from "../interfaces.js"
 import { DyssyncOwningStream } from "../modules/Stream/objects/templates.js"
 import { FilterStream, IndexStream } from "../objects/Stream.js"
 import { isSpace } from "./alphabet.js"
@@ -124,9 +128,9 @@ export function toNewline(isLF: boolean) {
 }
 
 /**
- * This function splits a given string `s` by newlines in 
+ * This function splits a given string `s` by newlines in
  * a cross-platform fashion, and returns the result
-*/
+ */
 export function splitNewlines(s: string) {
 	return s.split(CRLF()).join(LF()).split(LF())
 }

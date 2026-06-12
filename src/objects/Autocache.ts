@@ -1,6 +1,6 @@
 import { type } from "@hgargg-0710/one"
 import assert from "assert"
-import { NotCached } from "../constants.js"
+import { NotCached } from "../global/constants.js"
 import type { IIndexable, ISettable } from "../interfaces.js"
 
 const { isFunction } = type

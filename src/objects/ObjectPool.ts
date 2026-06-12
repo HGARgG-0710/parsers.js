@@ -1,5 +1,5 @@
 import assert from "assert"
-import { BadId, IncrementId } from "../constants.js"
+import { BadId, IncrementId } from "../global/constants.js"
 import { Config, Pools } from "../global.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
@@ -107,7 +107,9 @@ class ObjectPoolActive<
 	}
 
 	create(...args: [] | Partial<Args>) {
-		return this.canReuse() ? this.reuseOld(...args) : this.allocNew(...args)
+		return this.canReuse()
+			? this.reuseOld(...args)
+			: this.allocNew(...args)
 	}
 
 	free(item: T) {
@@ -121,7 +123,9 @@ class ObjectPoolActive<
 	}
 
 	constructor(
-		private readonly objectConstructor: new (...x: Partial<Args> | []) => T,
+		private readonly objectConstructor: new (
+			...x: Partial<Args> | []
+		) => T,
 		private readonly limitSize: number
 	) {}
 }

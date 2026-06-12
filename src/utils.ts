@@ -1,5 +1,5 @@
 import { object, type } from "@hgargg-0710/one"
-import { BadIndex } from "./constants.js"
+import { BadIndex } from "./global/constants.js"
 import type { ICopiable, IFreeable, IResource } from "./interfaces.js"
 
 const { isFunction } = type

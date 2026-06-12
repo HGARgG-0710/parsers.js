@@ -32,6 +32,11 @@ DEPENDENCIES:
 		1. Any class that is IInitializable (and is capable of being used with a Pool). 
 			When CLEARING the Pools.All (or, whatever), verify for EVERY 'ObjectPool' in 
 			the library, that its '.size' is 0!
+
+	3. constants: 
+		1. BadIndex - NONE
+		2. MissingArgument - NONE
+		3. NotCached - NONE
 	
 2. internal: 
 	1. Regex: 
@@ -783,7 +788,3 @@ DEPENDENCIES:
 			1. isStreamPredicate - NONE
 			2. asSteps - IStream
 			3. bindStep - IStream, isStreamPredicate
-
-6. constants: 
-	TODO: *MOVE* all the stuff that is in `constants` into `global`
-		As in, `constants` -> `global.constants`

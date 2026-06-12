@@ -1,6 +1,6 @@
 import { array, inplace, type } from "@hgargg-0710/one"
 import { type IDepthMark, Pools } from "../../../main.js"
-import { MissingArgument } from "../../constants.js"
+import { MissingArgument } from "../../global/constants.js"
 import type {
 	IDepthMarked,
 	IFreeable,

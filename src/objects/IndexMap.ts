@@ -1,5 +1,5 @@
 import { array, functional, object, type } from "@hgargg-0710/one"
-import { BadIndex } from "../constants.js"
+import { BadIndex } from "../global/constants.js"
 import type { IHaving, IPredicate, ITestable } from "../interfaces.js"
 import type { IIndexMap, IMidMap } from "../interfaces/IndexMap.js"
 import type {
@@ -107,7 +107,13 @@ export abstract class MidMap<
 		return this.preKeyExtension.get()
 	}
 
-	protected abstract getMapInstance(): IndexMap<K, V, Default, RealKey, Index>
+	protected abstract getMapInstance(): IndexMap<
+		K,
+		V,
+		Default,
+		RealKey,
+		Index
+	>
 
 	finalize(): IndexMap<K, V, Default, RealKey, Index> {
 		this.calcExtensions()
@@ -186,7 +192,9 @@ export abstract class IndexMap<
 	RealKey = K,
 	Index = K
 > implements IIndexMap<K, V, Default, Index> {
-	private ["constructor"]: new (liquid: ILiquidMap<any, any, Default>) => this
+	private ["constructor"]: new (
+		liquid: ILiquidMap<any, any, Default>
+	) => this
 
 	private carrier: ITableCarrier<K, V, Default>
 	private _realKeys: RealKey[]
@@ -293,13 +301,7 @@ export namespace IndexMap {
 			RealKey extends any[] = any,
 			Index = K
 		> extends MidMap<K, V, Default, RealKey, Index> {
-			protected getMapInstance(): ArrayMap<
-				K,
-				V,
-				Default,
-				RealKey,
-				Index
-			> {
+			protected getMapInstance(): ArrayMap<K, V, Default, RealKey, Index> {
 				return new ArrayMap<K, V, Default, RealKey, Index>(this.liquid)
 			}
 		}
@@ -351,13 +353,7 @@ export namespace IndexMap {
 			RealKey = any,
 			Index = K
 		> extends MidMap<K, V, Default, RealKey, Index> {
-			protected getMapInstance(): BasicMap<
-				K,
-				V,
-				Default,
-				RealKey,
-				Index
-			> {
+			protected getMapInstance(): BasicMap<K, V, Default, RealKey, Index> {
 				return new BasicMap<K, V, Default, RealKey, Index>(this.liquid)
 			}
 		}
@@ -408,9 +404,7 @@ export namespace IndexMap {
 			Index = any
 		> extends MidMap<K, T, Default, IPredicate<T>, Index> {
 			protected getMapInstance(): PredicateMap<T, Default, K, Index> {
-				return new PredicateMap<T, Default, K, Index>(
-					this.liquid.copy()
-				)
+				return new PredicateMap<T, Default, K, Index>(this.liquid.copy())
 			}
 		}
 
@@ -522,7 +516,9 @@ export namespace IndexMap {
 			Default = any,
 			K = IHaving<T>,
 			Index = any
-		>(f: (newIndexed: NI) => Index): MidMap<K, T, Default, IHaving<T>, NI> {
+		>(
+			f: (newIndexed: NI) => Index
+		): MidMap<K, T, Default, IHaving<T>, NI> {
 			return new SetMap.MidMap<T, Default, K, NI>([f])
 		}
 

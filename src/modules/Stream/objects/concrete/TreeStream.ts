@@ -1,4 +1,4 @@
-import { BadIndex } from "../../../../constants.js"
+import { BadIndex } from "../../../../global/constants.js"
 import { Pools } from "../../../../global.js"
 import type {
 	INavigable,
@@ -36,7 +36,9 @@ interface IWalkerResponse {
  * Can be updated and extracted, intended to be
  * used as shared state.
  */
-class LastLevelWithSiblings<TreeLike extends IWalkable<TreeLike> = IWalkable> {
+class LastLevelWithSiblings<
+	TreeLike extends IWalkable<TreeLike> = IWalkable
+> {
 	private level = BadIndex
 
 	get() {

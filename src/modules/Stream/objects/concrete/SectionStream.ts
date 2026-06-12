@@ -1,5 +1,8 @@
-import { MissingArgument } from "../../../../constants.js"
-import type { IIndexed, IPrototypeCollection } from "../../../../interfaces.js"
+import { MissingArgument } from "../../../../global/constants.js"
+import type {
+	IIndexed,
+	IPrototypeCollection
+} from "../../../../interfaces.js"
 import { CollectionBuilder } from "../../../../objects.js"
 import type { ISectionGrabber } from "../../interfaces/SectionStream.js"
 import { CurrDyssyncLinkedStream } from "../templates.js"

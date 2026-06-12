@@ -1,6 +1,6 @@
 import { type } from "@hgargg-0710/one"
 import assert from "node:assert"
-import { BadId, IncrementId } from "../../../constants.js"
+import { BadId, IncrementId } from "../../../global/constants.js"
 import { Pools } from "../../../global.js"
 import type {
 	IMatchedState,
@@ -410,7 +410,9 @@ export class EitherState extends State {
 	}
 }
 
-abstract class LocaleSensitiveState<T = any> extends SingleCapturingState<T> {
+abstract class LocaleSensitiveState<
+	T = any
+> extends SingleCapturingState<T> {
 	protected abstract baseVerify(x: string): boolean
 
 	private ignoreCaseVerify(item: string): boolean {
@@ -593,7 +595,9 @@ export class UnicodePropertyAliasState<
 	}
 }
 
-export class UnicodePropertyState<T = any> extends BaseUnicodePropertyState<T> {
+export class UnicodePropertyState<
+	T = any
+> extends BaseUnicodePropertyState<T> {
 	protected override getDelegate(): RegExp {
 		return new RegExp(`^\\p{${this.propName}=${this.value}}$`, "v")
 	}
