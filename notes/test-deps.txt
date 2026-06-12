@@ -264,7 +264,8 @@ DEPENDENCIES:
 		USE it with BOTH a DEMO, AND a Standalone UNIT test. 
 
 		1. StringLineIndex - LineLengths
-		2. LineLengths
+		2. LineLengths - NONE
+		3. LineIndexToStringConvertible - ILineIndex
 
 	20. Loaded: 
 		1. LoadedU8 - NONE
@@ -288,6 +289,9 @@ DEPENDENCIES:
 			1. Builder - INode
 			2. TreePairGenerationTable - INode
 				1. Builder - INode
+		7.  NodeData (- INode):  
+			1. WithPrintable - NodeData, IStringConvertible
+			2. WithSource - NodeData.WithPrintable
 
 	23. NodeSystem - INode
 	24. ObjectPool - NONE
@@ -510,6 +514,8 @@ DEPENDENCIES:
 			29. TreeStream - TreeWalker, INode
 			30. ValidatorStream - IOwnedStream
 			31. WriterStream - IdentityStream<string>
+
+	31. IndexRange - IIndexLike
 
 4. samples: 
 	1. alphabet: 
@@ -781,10 +787,3 @@ DEPENDENCIES:
 6. constants: 
 	TODO: *MOVE* all the stuff that is in `constants` into `global`
 		As in, `constants` -> `global.constants`
-
-[TODO, distribute] NEW CLASSES/INTERFACES [to determine tests and dependencies for these accordingly!]: 
-	1. NodeData: 
-		1. WithPrintable
-		2. WithSource
-	2. LineIndexToStringConvertible
-	3. IndexRange

@@ -1,6 +1,6 @@
 import type { IStringConvertible } from "../../interfaces.js"
 
-export abstract class NodeData {
+export class NodeData {
 	["constructor"]: typeof NodeData
 
 	protected static readonly ReservedKeys: readonly string[] = []
@@ -27,7 +27,9 @@ export abstract class NodeData {
 }
 
 export namespace NodeData {
-	export class WithPrintable<T extends IStringConvertible> extends NodeData {
+	export class WithPrintable<
+		T extends IStringConvertible
+	> extends NodeData {
 		protected static override readonly ReservedKeys: readonly string[] = [
 			"printable"
 		]
