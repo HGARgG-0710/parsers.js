@@ -633,10 +633,13 @@ DEPENDENCIES:
 	6. ParseExtension - CompositeStream, IdentityStream, IInputStream
 
 	7. platform: 
-		note: for effectiveness, write 3 TESTS, each for each platform
+		note[1]: for effectiveness, write 3 TESTS, each for each platform
 			Let each of the 3 branches check that all the OTHER predicates 
 			are `false`, meanwhile the one for the current platform is `true`. 
 			Use `assert.strictEqual` for that
+
+		note[2]: a JOINT test, which ensures that ONLY ONE predicate is true 
+			at the same time
 
 		1. isWindows - NONE
 		2. isLinux - NONE

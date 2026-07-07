@@ -1,6 +1,6 @@
 import assert from "assert"
-import { BadId, IncrementId } from "../global/constants.js"
 import { Config, Pools } from "../global.js"
+import { BadId, IncrementId } from "../global/constants.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
@@ -40,7 +40,7 @@ export class ObjectPool<
 	}
 
 	private getState() {
-		return Config.features.usePools ? this.active : this.inactive
+		return Config.objectPools.enabled ? this.active : this.inactive
 	}
 
 	get size() {

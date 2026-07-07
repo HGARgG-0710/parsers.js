@@ -422,7 +422,7 @@ abstract class LocaleSensitiveState<
 		)
 	}
 
-	verify({ curr }: PeekKeeper): boolean {
+	verify({ curr }: PeekKeeper<T>): boolean {
 		if (!isString(curr)) return false
 		return this.extensions.get("ignoreCase")
 			? this.ignoreCaseVerify(curr)

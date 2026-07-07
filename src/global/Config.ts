@@ -31,13 +31,12 @@ class JSONConfig {
 	replacer: null | (number | string)[] = null
 }
 
-// ! pre-doc: that's where the FEATURE FLAGS go
-class FeatureConfig {
-	usePools = false
-}
-
+// ! PRE-DOC [essential]: if the user EVER decides to switch the `enabled` back from `true` to `false`
+// 	during runtime, it MUST be done *only* after all the pools have been cleared, as otherwise a memory
+// 	leak of unknown size is guaranteedly created!
 class ObjectPoolConfig {
 	defaultMaxSize = Infinity
+	enabled = false // feature flag enabling the Object Pools (off by default)
 }
 
 class LoggerConfig {
@@ -51,7 +50,6 @@ class LibConfig {
 	readonly errors = new ErrorConfig()
 	readonly errorPrinter = new ErrorPrinterConfig()
 	readonly json = new JSONConfig()
-	readonly features = new FeatureConfig()
 	readonly objectPools = new ObjectPoolConfig()
 	readonly logger = new LoggerConfig()
 }
