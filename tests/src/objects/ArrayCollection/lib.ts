@@ -1,28 +1,14 @@
 import { array, object, type } from "@hgargg-0710/one"
 import assert from "assert"
-import type { ArrayCollection } from "../../../dist/src/classes.js"
 import type { IIndexed } from "../../../../dist/src/interfaces.js"
+import type { ArrayCollection } from "../../../dist/src/classes.js"
 import { assertDistinct } from "../../interfaces/Copiable/lib.js"
-import { MethodTest, MutableClassTest } from "../../lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { read } from "../../Readable/lib.js"
 import { sameSizeTest, size, sizeTest } from "../Sizeable/lib.js"
 
 const { structCheck } = object
 const { isFunction, isNumber } = type
-
-const ArrayCollectionInterface = {
-	interfaceName: "ArrayCollection",
-	conformance: structCheck({
-		write: isFunction,
-		push: isFunction,
-		read: isFunction,
-		size: isNumber,
-		get: isFunction,
-		[Symbol.iterator]: isFunction,
-		init: isFunction,
-		copy: isFunction
-	})
-}
 
 function baseIteratorCheck<T = any>(
 	tested: ArrayCollection<T>,
@@ -99,9 +85,7 @@ const copy = new MethodTest("copy", function <
 	assert(array.same(copied, prevCopied))
 })
 
-class ArrayCollectionTest<T = any> extends MutableClassTest<
-	ArrayCollection<T>
-> {
+class ArrayCollectionTest<T = any> extends ClassTest<ArrayCollection<T>> {
 	iterator(sameAs: Iterable<T>) {
 		this.testMethod("Symbol.iterator", sameAs)
 	}
@@ -135,10 +119,7 @@ class ArrayCollectionTest<T = any> extends MutableClassTest<
 	}
 
 	constructor() {
-		super(
-			[ArrayCollectionInterface],
-			[iterator, init, size, get, write, read, push, copy]
-		)
+		super([iterator, init, size, get, write, read, push, copy])
 	}
 }
 

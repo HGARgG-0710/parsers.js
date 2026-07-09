@@ -10,11 +10,7 @@ import {
 	sizeOneMore,
 	sizeUnchanged
 } from "../../interfaces/Sizeable/lib.js"
-import {
-	MethodTest,
-	MutableClassTest,
-	type RuntimeInterface
-} from "../../lib.js"
+import { ClassTest, MethodTest, type RuntimeInterface } from "../../lib.js"
 
 const { T } = boolean
 const { structCheck } = object
@@ -220,7 +216,7 @@ export abstract class PreMapTest<
 	K = any,
 	V = any,
 	Default = any
-> extends MutableClassTest<IPreMap<K, V, Default>> {
+> extends ClassTest<IPreMap<K, V, Default>> {
 	default(expected: Default) {
 		this.testMethod("default", expected)
 	}

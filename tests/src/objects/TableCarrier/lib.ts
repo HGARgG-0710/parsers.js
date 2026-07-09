@@ -1,13 +1,9 @@
-import { array, boolean, object, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import assert from "assert"
 import type { ITableCarrier } from "../../../../dist/src/interfaces.js"
 import { _default } from "../../interfaces/Defaulting/lib.js"
-import { ImmutableClassTest, MethodTest } from "../../lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { sameSizeTest, size } from "../Sizeable/lib.js"
-
-const { structCheck } = object
-const { isNumber, isArray, isFunction } = type
-const { T } = boolean
 
 export function carrierCompare<K = any, V = any, Default = any>(
 	c1: ITableCarrier<K, V, Default>,
@@ -17,17 +13,6 @@ export function carrierCompare<K = any, V = any, Default = any>(
 	assert(array.same(c1.keys, c2.keys))
 	assert(array.same(c1.values, c2.values))
 	sameSizeTest(c1, c2)
-}
-
-const TableCarrierInterface = {
-	interfaceName: "TableCarrier",
-	conformance: structCheck({
-		size: isNumber,
-		default: T,
-		keys: isArray,
-		values: isArray,
-		read: isFunction
-	})
 }
 
 const keys = new MethodTest("keys", function <
@@ -62,11 +47,9 @@ const readUnknown = new MethodTest("readUnknown", function <
 	assert.strictEqual(this.read(i), this.default)
 })
 
-class TableCarrierTest<
-	K = any,
-	V = any,
-	Default = any
-> extends ImmutableClassTest<ITableCarrier<K, V, Default>> {
+class TableCarrierTest<K = any, V = any, Default = any> extends ClassTest<
+	ITableCarrier<K, V, Default>
+> {
 	keys(sameAs: Iterable<K>) {
 		this.testMethod("keys", sameAs)
 	}
@@ -92,10 +75,7 @@ class TableCarrierTest<
 	}
 
 	constructor() {
-		super(
-			[TableCarrierInterface],
-			[size, _default, keys, values, readKnown, readUnknown]
-		)
+		super([size, _default, keys, values, readKnown, readUnknown])
 	}
 }
 

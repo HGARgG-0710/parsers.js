@@ -1,30 +1,7 @@
-import { array, functional, object, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import assert from "assert"
 import { MultiIndex } from "../../../dist/src/internal/MultiIndex.js"
-import { MethodTest, MutableClassTest } from "../../lib.js"
-
-const { structCheck } = object
-const { isNumber, isFunction, isUndefined } = type
-const { or } = functional
-
-const MultiIndexInterface = {
-	interfaceName: "MultiIndex",
-	conformance: structCheck({
-		levels: isNumber,
-		get: isFunction,
-		last: or(isNumber, isUndefined),
-		slice: isFunction,
-		copy: isFunction,
-		nextLevel: isFunction,
-		prevLevel: isFunction,
-		resize: isFunction,
-		clear: isFunction,
-		incLast: isFunction,
-		decLast: isFunction,
-		extend: isFunction,
-		from: isFunction
-	})
-}
+import { ClassTest, MethodTest } from "../../lib.js"
 
 function basicGetTest(tested: MultiIndex, sameAs: Iterable<number>) {
 	assert(array.same(tested.get(), sameAs))
@@ -187,7 +164,7 @@ const from = new MethodTest(
 	}
 )
 
-class MultiIndexTest extends MutableClassTest<MultiIndex> {
+class MultiIndexTest extends ClassTest<MultiIndex> {
 	levels(expected: number) {
 		this.testMethod("levels", expected)
 	}
@@ -257,28 +234,25 @@ class MultiIndexTest extends MutableClassTest<MultiIndex> {
 	}
 
 	constructor() {
-		super(
-			[MultiIndexInterface],
-			[
-				levels,
-				get,
-				last,
-				sliceWhole,
-				sliceEnd,
-				sliceToPositive,
-				sliceToNegative,
-				copy,
-				nextLevel,
-				prevLevel,
-				resizeGreaterOrEqual,
-				resizeLesser,
-				clear,
-				incLast,
-				decLast,
-				extend,
-				from
-			]
-		)
+		super([
+			levels,
+			get,
+			last,
+			sliceWhole,
+			sliceEnd,
+			sliceToPositive,
+			sliceToNegative,
+			copy,
+			nextLevel,
+			prevLevel,
+			resizeGreaterOrEqual,
+			resizeLesser,
+			clear,
+			incLast,
+			decLast,
+			extend,
+			from
+		])
 	}
 }
 

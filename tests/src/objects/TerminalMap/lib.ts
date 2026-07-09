@@ -1,4 +1,4 @@
-import { PreMapTest } from "../objects/PreMap/lib.js"
+import { PreMapTest } from "../PreMap/lib.js"
 
 export enum TestTypes {
 	PLAIN_OBJECT = 0,

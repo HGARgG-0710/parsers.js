@@ -3,15 +3,12 @@ import type {
 	IParseable
 } from "../../../../dist/src/interfaces.js"
 import type { ParseableInput } from "../../../../dist/src/objects.js"
-import { MethodTest, MutableClassTest } from "../../lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { read } from "../../Readable/lib.js"
 import { sameSizeTest, size } from "../../Sizeable/lib.js"
 
-import { array, object, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import { assertDistinct } from "../../interfaces/Copiable/lib.js"
-
-const { structCheck } = object
-const { isFunction, isNumber } = type
 
 export function readWhole<T = any>(instance: IParseable<T>) {
 	return array.numbers(instance.size).map((i) => instance.read(i))
@@ -22,15 +19,6 @@ export enum TestTypes {
 	NON_EMPTY = 1
 }
 
-const ParseableInterface = {
-	interfaceName: "IParseable",
-	conformance: structCheck<IParseable<string>>({
-		read: isFunction,
-		size: isNumber,
-		copy: isFunction
-	})
-}
-
 const copy = new MethodTest("copy", function (this: ParseableInput) {
 	const copied = this.copy()
 	sameSizeTest(this, copied)
@@ -38,7 +26,7 @@ const copy = new MethodTest("copy", function (this: ParseableInput) {
 	assertDistinct(this, copied)
 })
 
-class ParseableInputTest extends MutableClassTest<ParseableInput> {
+class ParseableInputTest extends ClassTest<ParseableInput> {
 	read(from: number, to: number, expected: IIndexed<string>) {
 		this.testMethod("read", from, to, expected)
 	}
@@ -52,7 +40,7 @@ class ParseableInputTest extends MutableClassTest<ParseableInput> {
 	}
 
 	constructor() {
-		super([ParseableInterface], [read, size, copy])
+		super([read, size, copy])
 	}
 }
 

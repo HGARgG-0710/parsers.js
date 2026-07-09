@@ -1,24 +1,19 @@
-import { array, boolean, inplace, object, type } from "@hgargg-0710/one"
+import { array, inplace } from "@hgargg-0710/one"
 import assert from "assert"
-import { TableMap } from "../../../dist/src/classes/IndexMap.js"
 import type {
 	ITableCarrier,
 	ITableMap
-} from "../../../dist/src/interfaces.js"
-import type { TableCarrier } from "../../../dist/src/modules/IndexMap/classes/LiquidMap.js"
-import { isGoodIndex } from "../../../dist/src/utils.js"
-import { assertDistinct } from "../interfaces/Copiable/lib.js"
-import { _default } from "../interfaces/Defaulting/lib.js"
-import {
-	MethodTest,
-	MutableClassTest
-} from "../objects/TableColumn/lib.js"
-import { iteratorCheck as iteratorSameCheck } from "../samples/Pairs/lib.js"
-import { sameSizeTest, size } from "../Sizeable/lib.js"
-import { carrierCompare } from "../objects/TableCarrier/lib.js"
+} from "../../../../dist/src/interfaces.js"
+import type { TableCarrier } from "../../../../dist/src/modules/IndexMap/objects/LiquidMap.js"
+import { TableMap } from "../../../../dist/src/objects/IndexMap.js"
+import { isGoodIndex } from "../../../../dist/src/utils.js"
+import { assertDistinct } from "../../interfaces/Copiable/lib.js"
+import { _default } from "../../interfaces/Defaulting/lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
+import { carrierCompare } from "../../objects/TableCarrier/lib.js"
+import { iteratorCheck as iteratorSameCheck } from "../../samples/Pairs/lib.js"
+import { sameSizeTest, size } from "../../Sizeable/lib.js"
 
-const { isFunction, isNumber } = type
-const { T } = boolean
 const { out, insert } = inplace
 
 function byTest<K = any, V = any, Default = any>(
@@ -112,30 +107,6 @@ function occurenceDecrementCheck<K = any, V = any, Default = any>(
 	const oldOccurence = tested.count(key)
 	callback(tested, oldOccurence)
 	assert.strictEqual(oldOccurence - 1, tested.count(key))
-}
-
-const TableMapInterface = {
-	interfaceName: "ITableMap",
-	conformance: object.structCheck({
-		size: isNumber,
-		default: T,
-		rekey: isFunction,
-		concat: isFunction,
-		reverse: isFunction,
-		copy: isFunction,
-		[Symbol.iterator]: isFunction,
-		unique: isFunction,
-		read: isFunction,
-		swap: isFunction,
-		add: isFunction,
-		delete: isFunction,
-		replace: isFunction,
-		set: isFunction,
-		keyIndex: isFunction,
-		by: isFunction,
-		toCarrier: isFunction,
-		fromCarrier: isFunction
-	})
 }
 
 const swap = new MethodTest("swap", function <
@@ -396,7 +367,7 @@ class TableMapTest<
 	K = any,
 	V = any,
 	Default = undefined
-> extends MutableClassTest<ITableMap<K, V, Default>> {
+> extends ClassTest<ITableMap<K, V, Default>> {
 	swap(i: number, j: number) {
 		this.testMethod("swap", i, j)
 	}
@@ -498,36 +469,33 @@ class TableMapTest<
 	}
 
 	constructor() {
-		super(
-			[TableMapInterface],
-			[
-				size,
-				_default,
-				swap,
-				readPair,
-				readDefault,
-				set,
-				rekeyFromBeforeTo,
-				rekeyFromAfterTo,
-				rekeySame,
-				rekeyToUndefined,
-				by,
-				byDefault,
-				keyIndex,
-				iterator,
-				reverse,
-				toCarrier,
-				copy,
-				fromCarrier,
-				concat,
-				unique,
-				add,
-				_delete,
-				replaceKnown,
-				replaceUnknown,
-				count
-			]
-		)
+		super([
+			size,
+			_default,
+			swap,
+			readPair,
+			readDefault,
+			set,
+			rekeyFromBeforeTo,
+			rekeyFromAfterTo,
+			rekeySame,
+			rekeyToUndefined,
+			by,
+			byDefault,
+			keyIndex,
+			iterator,
+			reverse,
+			toCarrier,
+			copy,
+			fromCarrier,
+			concat,
+			unique,
+			add,
+			_delete,
+			replaceKnown,
+			replaceUnknown,
+			count
+		])
 	}
 }
 

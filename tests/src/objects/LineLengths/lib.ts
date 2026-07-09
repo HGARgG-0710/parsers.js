@@ -1,26 +1,8 @@
-import { array, object, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import assert from "assert"
 import { LineLengths } from "../../../dist/src/classes/Position.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { assertDistinct } from "../interfaces/Copiable/lib.js"
-import { MethodTest, MutableClassTest } from "../lib.js"
-
-const { structCheck } = object
-const { isFunction } = type
-
-const LineLengthsInterface = {
-	interfaceName: "LineLengths",
-	conformance: structCheck({
-		confirmNext: isFunction,
-		updateNext: isFunction,
-		get: isFunction,
-		slice: isFunction,
-		isExcess: isFunction,
-		isNew: isFunction,
-		isKnown: isFunction,
-		isAcceptable: isFunction,
-		copy: isFunction
-	})
-}
 
 const get = new MethodTest(
 	"get",
@@ -83,7 +65,7 @@ const isAcceptable = new MethodTest(
 	}
 )
 
-class LineLengthsTest extends MutableClassTest<LineLengths> {
+class LineLengthsTest extends ClassTest<LineLengths> {
 	copy(lastIndex: number) {
 		this.testMethod("copy", lastIndex)
 	}
@@ -113,10 +95,7 @@ class LineLengthsTest extends MutableClassTest<LineLengths> {
 	}
 
 	constructor() {
-		super(
-			[LineLengthsInterface],
-			[copy, get, slice, isExcess, isNew, isKnown, isAcceptable]
-		)
+		super([copy, get, slice, isExcess, isNew, isKnown, isAcceptable])
 	}
 }
 

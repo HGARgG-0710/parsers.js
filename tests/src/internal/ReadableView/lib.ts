@@ -1,26 +1,13 @@
-import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
 import { MissingArgument } from "../../../dist/main.js"
 import type { IIndexed, IReadable } from "../../../dist/src/interfaces.js"
 import { ReadableView } from "../../../dist/src/internal/ReadableView.js"
-import { MethodTest, MutableClassTest } from "../lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { read } from "../Readable/lib.js"
-
-const { structCheck } = object
-const { isFunction } = type
 
 export enum TestTypes {
 	ZERO_OFFSET = 0,
 	NON_ZERO_OFFSET = 1
-}
-
-const ViewInterface = {
-	interfaceName: "IView",
-	conformance: structCheck({
-		read: isFunction,
-		copy: isFunction,
-		init: isFunction
-	})
 }
 
 function baseReadTest<T = any>(
@@ -31,37 +18,31 @@ function baseReadTest<T = any>(
 	assert.strictEqual(readableView.read(index), expected)
 }
 
-const initNonNull = new MethodTest("initNonNull", function <T = any>(
-	this: ReadableView<T>,
-	readable: IReadable<T>,
-	shift: number,
-	i: number
-) {
+const initNonNull = new MethodTest("initNonNull", function <
+	T = any
+>(this: ReadableView<T>, readable: IReadable<T>, shift: number, i: number) {
 	this.init(readable)
 	baseReadTest(this, i, readable.read(i + shift))
 })
 
-const initNull = new MethodTest("initNull", function (
-	readable: any,
-	i: number
-) {
-	const origItem = this.read(i)
-	assert.strictEqual(readable, MissingArgument)
-	this.init(readable)
-	baseReadTest(this, i, origItem)
-})
+const initNull = new MethodTest(
+	"initNull",
+	function (readable: any, i: number) {
+		const origItem = this.read(i)
+		assert.strictEqual(readable, MissingArgument)
+		this.init(readable)
+		baseReadTest(this, i, origItem)
+	}
+)
 
-const forward = new MethodTest("forward", function <T = any>(
-	this: ReadableView<T>,
-	count: number,
-	index: number,
-	expected: T
-) {
+const forward = new MethodTest("forward", function <
+	T = any
+>(this: ReadableView<T>, count: number, index: number, expected: T) {
 	for (let i = 0; i < count; ++i) this.forward()
 	baseReadTest(this, index, expected)
 })
 
-class ReadableViewTest<T = any> extends MutableClassTest<ReadableView<T>> {
+class ReadableViewTest<T = any> extends ClassTest<ReadableView<T>> {
 	read(from: number, to: number, expected: IIndexed<T>) {
 		this.testMethod("read", from, to, expected)
 	}
@@ -79,7 +60,7 @@ class ReadableViewTest<T = any> extends MutableClassTest<ReadableView<T>> {
 	}
 
 	constructor() {
-		super([ViewInterface], [read, initNull, initNonNull, forward])
+		super([read, initNull, initNonNull, forward])
 	}
 }
 

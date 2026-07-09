@@ -1,0 +1,31 @@
+This is the file detailing the new test strategy. 
+
+Clearly the last one was a (resounding) failure. 
+
+For that reason, one shall have a new framework for testing mutable and immutable classes alike:
+
+	* Stage 0: initialization preconditions
+		Here we basically create the tested object with respective dependencies. 
+
+	* Stage 1: test conditions
+		The test cases look very similar to what we used to have, difference being 
+		only that there's no copying between method calls. 
+
+		* Stage 1.1: methods implementations
+			Every time a method is called during the course of the object's lifetime. 
+			All assertions are run, and the correct state of the object depends entirely on 
+			the 
+			
+
+This one is [in comparison to the last one]: 
+	1. more flexible 
+
+At the expense of: 
+	1. more "separate" tests
+
+The reasoning is - instead of choosing an "anchor" state we continuously modify a single object, running the assertions 
+on EVERY single change. This way, we ensure that the thing doesn't just "work", but can be deemed workable within the 
+constraints of an object's workflow and living cycle. 
+
+In other words, the only real difference from the previous code is that we do not do the 'instance.copy()' thing. 
+It was a bad decision (excessively purist, it caused too much limitation in the end).

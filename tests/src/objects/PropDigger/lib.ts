@@ -1,34 +1,23 @@
-import { array, object, type } from "@hgargg-0710/one"
+import { array, type } from "@hgargg-0710/one"
 import type { Summat } from "@hgargg-0710/summat.ts"
 import assert from "assert"
 import { PropDigger } from "../../../dist/src/classes.js"
 import type { IPredicatePosition } from "../../../dist/src/interfaces.js"
-import { MethodTest, MutableClassTest } from "../lib.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 
-const { structCheck } = object
-const { isFunction, isArray, isNumber } = type
+const { isFunction, isNumber } = type
 
-const PropDiggerInterface = {
-	interfaceName: "PropDigger",
-	conformance: structCheck({
-		copy: isFunction,
-		with: isFunction,
-		dig: isFunction,
-		properties: isArray
-	})
-}
-
-const _with = new MethodTest("with", function (
-	this: PropDigger,
-	withProps: string[]
-) {
-	assert(
-		array.same(
-			this.with(...withProps).properties,
-			this.properties.concat(withProps)
+const _with = new MethodTest(
+	"with",
+	function (this: PropDigger, withProps: string[]) {
+		assert(
+			array.same(
+				this.with(...withProps).properties,
+				this.properties.concat(withProps)
+			)
 		)
-	)
-})
+	}
+)
 
 const copy = new MethodTest("copy", function (this: PropDigger) {
 	assert(array.same(this.copy().properties, this.properties))
@@ -46,24 +35,19 @@ const digFinite = new MethodTest("digFinite", function <
 const digPredicate = new MethodTest("digPredicate", function <
 	In extends Summat = object,
 	Out = any
->(
-	this: PropDigger,
-	toDig: In,
-	predicate: IPredicatePosition<In>,
-	expected: Out
-) {
+>(this: PropDigger, toDig: In, predicate: IPredicatePosition<In>, expected: Out) {
 	assert(isFunction(predicate))
 	assert.strictEqual(this.dig(toDig, predicate), expected)
 })
 
-const properties = new MethodTest("properties", function (
-	this: PropDigger,
-	expected: string[]
-) {
-	assert(array.same(this.properties, expected))
-})
+const properties = new MethodTest(
+	"properties",
+	function (this: PropDigger, expected: string[]) {
+		assert(array.same(this.properties, expected))
+	}
+)
 
-class PropDiggerTest extends MutableClassTest<PropDigger> {
+class PropDiggerTest extends ClassTest<PropDigger> {
 	with(withProps: string[]) {
 		this.testMethod("with", withProps)
 	}
@@ -93,10 +77,7 @@ class PropDiggerTest extends MutableClassTest<PropDigger> {
 	}
 
 	constructor() {
-		super(
-			[PropDiggerInterface],
-			[_with, copy, digFinite, digPredicate, properties]
-		)
+		super([_with, copy, digFinite, digPredicate, properties])
 	}
 }
 

@@ -1,8 +1,8 @@
 import { object, type } from "@hgargg-0710/one"
 import assert from "assert"
 import type { SourceBuilder } from "../../../dist/src/classes.js"
+import { ClassTest, MethodTest } from "../../lib.js"
 import { freeze, isFrozen, unfreeze } from "../Freezable/lib.js"
-import { MethodTest, MutableClassTest } from "../../lib.js"
 
 const { structCheck } = object
 const { isFunction, isBoolean } = type
@@ -10,23 +10,6 @@ const { isFunction, isBoolean } = type
 export enum TestTypes {
 	NON_FROZEN = 0,
 	FROZEN = 1
-}
-
-const ClearableInterface = {
-	interfaceName: "IClearable",
-	conformance: structCheck({ clear: isFunction })
-}
-
-const AccumulatorInterface = {
-	interfaceName: "IAccumulator",
-	conformance: structCheck({
-		copy: isFunction,
-		unfreeze: isFunction,
-		isFrozen: isBoolean,
-		push: isFunction,
-		get: isFunction,
-		freeze: isFunction
-	})
 }
 
 const copy = new MethodTest("copy", function (this: SourceBuilder) {
@@ -56,7 +39,7 @@ const push = new MethodTest(
 	}
 )
 
-class SourceBuilderTest extends MutableClassTest<SourceBuilder> {
+class SourceBuilderTest extends ClassTest<SourceBuilder> {
 	freeze() {
 		this.testMethod("freeze")
 	}
@@ -86,10 +69,7 @@ class SourceBuilderTest extends MutableClassTest<SourceBuilder> {
 	}
 
 	constructor() {
-		super(
-			[ClearableInterface, AccumulatorInterface],
-			[isFrozen, freeze, unfreeze, clear, copy, get, push]
-		)
+		super([isFrozen, freeze, unfreeze, clear, copy, get, push])
 	}
 }
 

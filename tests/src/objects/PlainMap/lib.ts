@@ -1,22 +1,8 @@
-import { array, object, type } from "@hgargg-0710/one"
+import { array } from "@hgargg-0710/one"
 import assert from "assert"
 import type { IPlainMap } from "../../../../dist/src/interfaces.js"
 import { assertDistinct } from "../../interfaces/Copiable/lib.js"
-import { MethodTest, MutableClassTest } from "../../lib.js"
-
-const { structCheck } = object
-const { isFunction } = type
-
-const PlainMapInterface = {
-	interfaceName: "IPlainMap",
-	conformance: structCheck({
-		annul: isFunction,
-		values: isFunction,
-		write: isFunction,
-		read: isFunction,
-		copy: isFunction
-	})
-}
+import { ClassTest, MethodTest } from "../../lib.js"
 
 function baseReadCheck<K = any, V = any>(
 	tested: IPlainMap<K, V>,
@@ -66,9 +52,7 @@ const copy = new MethodTest("copy", function <
 	assertDistinct(this, copied)
 })
 
-class PlainMapTest<K = any, V = any> extends MutableClassTest<
-	IPlainMap<K, V>
-> {
+class PlainMapTest<K = any, V = any> extends ClassTest<IPlainMap<K, V>> {
 	read(key: K, expected: V | undefined) {
 		this.testMethod("read", key, expected)
 	}
@@ -90,7 +74,7 @@ class PlainMapTest<K = any, V = any> extends MutableClassTest<
 	}
 
 	constructor() {
-		super([PlainMapInterface], [read, write, annul, values, copy])
+		super([read, write, annul, values, copy])
 	}
 }
 

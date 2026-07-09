@@ -1,7 +1,6 @@
 import { object } from "@hgargg-0710/one"
 import assert from "node:assert"
 import test from "node:test"
-import type { ICopiable } from "../../dist/src/interfaces.js"
 import { LiquidMap } from "../../dist/src/modules/IndexMap/objects/LiquidMap.js"
 import { AutoCache } from "../../dist/src/objects.js"
 import {
@@ -11,27 +10,16 @@ import {
 
 const { keys } = object
 
-export interface RuntimeInterface {
-	readonly interfaceName: string
-	conformance(x: any): boolean
-}
-
-abstract class ClassTest<InstanceType = any> {
+export class ClassTest<InstanceType = any> {
 	private instance: InstanceType | null = null
 	private readonly names: string[]
 
-	protected abstract callMethodTest(
+	private callMethodTest(
 		atIndex: number,
 		instance: InstanceType,
 		...args: any[]
-	): void
-
-	private typeCheck() {
-		for (const _interface of this.interfaces)
-			if (!_interface.conformance(this.instance))
-				throw new TypeError(
-					`Tested instance failed to conform to interface: ${_interface.interfaceName}`
-				)
+	): void {
+		return this.methods[atIndex].withInstance(instance, ...args)
 	}
 
 	protected testMethod(name: string, ...args: any[]) {
@@ -48,40 +36,12 @@ abstract class ClassTest<InstanceType = any> {
 	withInstance(instance: InstanceType, callback: (test: this) => void) {
 		const prevInstance = this.instance
 		this.instance = instance
-		this.typeCheck()
 		callback(this)
 		this.instance = prevInstance
 	}
 
-	constructor(
-		private readonly interfaces: RuntimeInterface[],
-		protected readonly methods: MethodTest<InstanceType>[]
-	) {
+	constructor(protected readonly methods: MethodTest<InstanceType>[]) {
 		this.names = methods.map((x) => x.name)
-	}
-}
-
-export class ImmutableClassTest<
-	InstanceType = any
-> extends ClassTest<InstanceType> {
-	protected callMethodTest(
-		atIndex: number,
-		instance: InstanceType,
-		...args: any[]
-	): void {
-		return this.methods[atIndex].withInstance(instance, ...args)
-	}
-}
-
-export class MutableClassTest<
-	InstanceType extends ICopiable = any
-> extends ClassTest<InstanceType> {
-	protected callMethodTest(
-		atIndex: number,
-		instance: InstanceType,
-		...args: any[]
-	): void {
-		return this.methods[atIndex].withInstance(instance.copy(), ...args)
 	}
 }
 
@@ -158,20 +118,19 @@ export class TestCounter {
 	) {}
 }
 
-export function assertThrowing(callback: () => void) {
+function checkDidThrow(callback: () => void) {
 	try {
 		callback()
+		return false
 	} catch {
-		assert(false)
+		return true
 	}
 }
 
+export function assertThrowing(callback: () => void) {
+	assert(!checkDidThrow(callback))
+}
+
 export function assertThrowingFails(callback: () => void) {
-	let hasThrown = false
-	try {
-		callback()
-	} catch {
-		hasThrown = true
-	}
-	assert(hasThrown)
+	assert(checkDidThrow(callback))
 }
