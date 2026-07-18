@@ -15,5 +15,8 @@ export declare abstract class CustomLinkedStream<
 	abstract free(): void
 	[Symbol.iterator]: () => Generator<T>
 	get poolId(): number
+	get isUsed(): boolean
 	postFree(): void
+	markFree(): void
+	markUsed(): void
 }

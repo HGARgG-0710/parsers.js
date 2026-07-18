@@ -1,5 +1,6 @@
 import { BadId } from "../../../../constants.js"
 import { mixin } from "../../../../mixin.js"
+import { BasicPoolable } from "../../../../objects.js"
 import { LinkedResettable } from "../Resettable.js"
 import { OwningStream } from "./OwningStream.js"
 import { PreCommonStream } from "./PreCommonStream.js"
@@ -16,5 +17,5 @@ export const CustomLinkedStream = new mixin(
 			this.super.OwningStream.constructor.call(this, resource)
 		}
 	},
-	[OwningStream, PreCommonStream, LinkedResettable]
+	[BasicPoolable, OwningStream, PreCommonStream, LinkedResettable]
 ).toClass()

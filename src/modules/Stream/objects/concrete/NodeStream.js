@@ -20,6 +20,10 @@ export const NodeStream = new mixin(
 				if (this.pool) this.pool.free(this)
 			},
 
+			get poolId() {
+				return this.pool.id
+			},
+
 			postFree() {
 				this.super.CustomLinkedStream.postFree.call(this)
 				this.resetCurr()

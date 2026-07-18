@@ -38,9 +38,22 @@ export class StreamPipe
 {
 	static readonly pool = Pools.Internal.add(new ObjectPool(StreamPipe))
 
+	private _isUsed: boolean = true
 	protected override renewer: StreamPipe.StreamRenewer
 
 	postFree(): void {}
+
+	get isUsed() {
+		return this._isUsed
+	}
+
+	markFree(): void {
+		this._isUsed = false
+	}
+
+	markUsed(): void {
+		this._isUsed = true
+	}
 
 	get poolId() {
 		return StreamPipe.pool.id

@@ -94,6 +94,13 @@ export class LFStream
 		return BadId
 	}
 
+	get isUsed() {
+		return true
+	}
+
+	markFree(): void {}
+	markUsed(): void {}
+
 	override next() {
 		super.next()
 		this.updateItems()

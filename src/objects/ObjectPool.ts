@@ -40,7 +40,7 @@ export class ObjectPool<
 	}
 
 	private getState() {
-		return Config.objectPools.enabled ? this.active : this.inactive
+		return Config.objectPools.enable ? this.active : this.inactive
 	}
 
 	get size() {
@@ -95,7 +95,11 @@ class ObjectPoolActive<
 	}
 
 	private reuseOld(...withArgs: [] | Partial<Args>) {
-		return this.freeStack.pop()!.init(...withArgs)
+		const item = this.freeStack.pop()!
+		assert(!item.isUsed)
+		item.markUsed()
+		item.init(...withArgs)
+		return item
 	}
 
 	private allocNew(...x: Partial<Args> | []) {
@@ -114,6 +118,8 @@ class ObjectPoolActive<
 
 	free(item: T) {
 		assert(this.size < this.limitSize)
+		assert(item.isUsed)
+		item.markFree()
 		this.freeStack.push(item)
 		item.postFree()
 	}
@@ -144,7 +150,7 @@ class ObjectPoolInactive<
 		return new this.objectConstructor(...args)
 	}
 
-	free(item: T): void {}
+	free(_item: T): void {}
 
 	constructor(
 		private readonly objectConstructor: new (

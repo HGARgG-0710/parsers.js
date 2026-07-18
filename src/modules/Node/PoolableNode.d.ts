@@ -21,5 +21,8 @@ export declare abstract class PoolableNode<Args extends any[] = any[]>
 	protected abstract readonly pool: ObjectPool<typeof this>
 	free(): void
 	get poolId(): number
+	get isUsed(): boolean
 	postFree(): void
+	markFree(): void
+	markUsed(): void
 }

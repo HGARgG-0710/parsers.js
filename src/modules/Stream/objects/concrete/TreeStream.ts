@@ -1,12 +1,6 @@
 import { BadIndex } from "../../../../global/constants.js"
-import { Pools } from "../../../../global.js"
-import type {
-	INavigable,
-	IPoolable,
-	IWalkable
-} from "../../../../interfaces.js"
+import type { INavigable, IWalkable } from "../../../../interfaces.js"
 import { TreeWalker } from "../../../../internal/Tree/TreeWalker.js"
-import { ObjectPool } from "../../../../objects.js"
 import { isGoodIndex } from "../../../../utils.js"
 import { treeEndPath } from "../../../../utils/Node.js"
 import { SourceStream } from "../templates.js"
@@ -172,10 +166,8 @@ class TreeEndIndex<TreeLike extends IWalkable<TreeLike> = IWalkable> {
  */
 export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	extends SourceStream<TreeLike, TreeLike>
-	implements INavigable<TreeLike, number[]>, IPoolable<[TreeLike]>
+	implements INavigable<TreeLike, number[]>
 {
-	static readonly pool = Pools.Stream.add(new ObjectPool(TreeStream))
-
 	private readonly walker: TreeWalker<TreeLike>
 	private readonly lastLevel: LastLevelWithSiblings
 	private readonly nextResponse: NextWalkerResponse
@@ -241,16 +233,6 @@ export class TreeStream<TreeLike extends IWalkable<TreeLike> = IWalkable>
 	prev() {
 		if (this.isCurrStart()) this.startStream()
 		else this.update(this.basePrevIter())
-	}
-
-	get poolId() {
-		return TreeStream.pool.id
-	}
-
-	postFree(): void {
-		this.walker.resetWalkable()
-		this.resetCurr()
-		this.resetIsEnd()
 	}
 
 	constructor(source?: TreeLike) {

@@ -41,4 +41,7 @@ export abstract class RenewerStream<T = any, Args extends any[] = []>
 	abstract free(): void
 	abstract readonly poolId: number
 	abstract postFree(): void
+	abstract markUsed(): void
+	abstract markFree(): void
+	abstract get isUsed(): boolean
 }

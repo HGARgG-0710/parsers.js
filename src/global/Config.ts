@@ -35,8 +35,12 @@ class JSONConfig {
 // 	during runtime, it MUST be done *only* after all the pools have been cleared, as otherwise a memory
 // 	leak of unknown size is guaranteedly created!
 class ObjectPoolConfig {
-	defaultMaxSize = Infinity
-	enabled = false // feature flag enabling the Object Pools (off by default)
+	defaultMaxSize = 1000
+	enable = false // feature flag enabling the Object Pools (off by default)
+
+	enableUnlimitedPools() {
+		this.defaultMaxSize = Infinity
+	}
 }
 
 class LoggerConfig {

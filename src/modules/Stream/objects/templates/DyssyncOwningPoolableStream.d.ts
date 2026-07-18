@@ -13,4 +13,7 @@ export declare abstract class DyssyncOwningPoolableStream<
 
 	free(): void
 	get poolId(): number
+	get isUsed(): boolean
+	markFree(): void
+	markUsed(): void
 }

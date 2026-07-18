@@ -1,12 +1,11 @@
 import { array, inplace, type } from "@hgargg-0710/one"
-import { type IDepthMark, Pools } from "../../../main.js"
+import { type IDepthMark, Poolable, Pools } from "../../../main.js"
 import { MissingArgument } from "../../global/constants.js"
 import type {
 	IDepthMarked,
 	IFreeable,
 	IInitializable,
-	IInitializer,
-	IPoolable
+	IInitializer
 } from "../../interfaces.js"
 import type { IArray } from "../../interfaces/Array.js"
 import { Initializable } from "../../objects/Initializable.js"
@@ -58,7 +57,7 @@ function isSwitch<
  * their position inside their `.parentArray`-`WrapArray`,
  * crucial for the item-renewal algorithm.
  */
-abstract class ItemIndexHaving {
+abstract class ItemIndexHaving<T = any> extends Poolable<[T]> {
 	private _itemIndex: number
 
 	private set itemIndex(index: number) {
@@ -85,10 +84,7 @@ export class Switch<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
->
-	extends ItemIndexHaving
-	implements IPoolable<[Recursive]>
-{
+> extends ItemIndexHaving<Recursive> {
 	static wrap<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
@@ -121,8 +117,8 @@ export class Switch<
 		return this._pipe!
 	}
 
-	get poolId() {
-		return Switch.pool.id
+	get pool() {
+		return Switch.pool as ObjectPool<this>
 	}
 
 	postFree(): void {
@@ -145,7 +141,7 @@ export class Switch<
 
 	recycle() {
 		this.recycleSubs()
-		Switch.pool.free(this)
+		this.free()
 	}
 
 	constructor(recursive?: Recursive) {
@@ -165,10 +161,7 @@ class Terminal<
 	T extends ITerminalAcceptable = any,
 	Recursive = any,
 	InitType = any
->
-	extends ItemIndexHaving
-	implements IPoolable<[T]>
-{
+> extends ItemIndexHaving<T> {
 	static wrap<
 		T extends ITerminalAcceptable = any,
 		Recursive = any,
@@ -211,7 +204,7 @@ class Terminal<
 
 	recycle() {
 		this.terminal.free()
-		Terminal.pool.free(this)
+		this.free()
 	}
 
 	postFree(): void {
@@ -219,8 +212,8 @@ class Terminal<
 		this._terminal = null
 	}
 
-	get poolId() {
-		return Terminal.pool.id
+	get pool() {
+		return Terminal.pool as ObjectPool<this>
 	}
 
 	constructor(terminal?: T) {
@@ -1328,7 +1321,7 @@ export namespace RecursivePipe {
 
 		constructor(
 			items: (T | Recursive)[],
-			...args: Partial<InitArgs> | []
+			..._args: Partial<InitArgs> | []
 		) {
 			this.renewer = this.getRenewer()
 			this.pipe = this.getPipe()

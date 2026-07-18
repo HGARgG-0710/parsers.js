@@ -7,6 +7,9 @@ export interface IPoolFriendly extends IPoolOwnable, IFreeResettable {}
 
 export interface IPoolOwnable {
 	readonly poolId: number
+	readonly isUsed: boolean
+	markUsed(): void
+	markFree(): void
 }
 
 export interface IFreeResettable {

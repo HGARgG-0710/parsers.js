@@ -52,5 +52,8 @@ export declare abstract class NodeStream<T = any, Args extends any[] = []>
 	copy(): this
 	free(): void
 	get poolId(): number
+	get isUsed(): boolean
 	postFree(): void
+	markFree(): void
+	markUsed(): void
 }

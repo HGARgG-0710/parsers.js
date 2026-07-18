@@ -34,4 +34,7 @@ export declare class IdentityStream<T = any, Args extends any[] = []>
 	get curr(): T
 	free(): void
 	get poolId(): number
+	get isUsed(): boolean
+	markFree(): void
+	markUsed(): void
 }
