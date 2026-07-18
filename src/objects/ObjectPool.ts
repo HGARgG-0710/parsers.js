@@ -4,6 +4,22 @@ import { BadId, IncrementId } from "../global/constants.js"
 import type { IInitializable, IPoolable } from "../interfaces.js"
 import { ArrayCollection } from "./ArrayCollection.js"
 
+// ! PRE-DOC [important]: the handling of the correctness of `poolId` is
+// 	on the user ENTIRELY. Meaning, that the library *does not* provide a
+// 	`setPoolId` method, since the "one pool per class" is (objectively)
+// 	the best (simplest, least error-prone) way to deal with this.
+//
+// 	If the user needs to - nobody's stopping them from doing a
+// 	`override get pool() { return this._pool }`, with a
+// 	`setPool(newPool): void` setter method for `this._pool`.
+//
+// 	Then, this hypothetical `setPool` would be called inside the constructor,
+// 	since it is IMMUTABLE after first write,
+//
+// 	However, it is still advised STRONGLY to use the "one pool per class"
+// 	whenever possible and reasonable. Note that pools DO support the
+// 	'worker-threads'-style multithreading by default, since workers are
+// 	completely isolated in memory.
 /**
  * A class for creation of pool objects for a given type `T`.
  * To be used correctly, it requires that:
@@ -39,6 +55,10 @@ export class ObjectPool<
 		for (const pool of pools) pool.clear()
 	}
 
+	private ensureOwns(item: T) {
+		assert.strictEqual(item.poolId, this.id)
+	}
+
 	private getState() {
 		return Config.objectPools.enable ? this.active : this.inactive
 	}
@@ -51,11 +71,13 @@ export class ObjectPool<
 	// 		MAKING SURE that the ownership relationship IS PRESERVED
 	// 		[i.e. that the created/reused objects have the correct poolId].
 	create(...args: [] | Partial<Args>) {
-		return this.getState().create(...args)
+		const newlyCreated = this.getState().create(...args)
+		this.ensureOwns(newlyCreated)
+		return newlyCreated
 	}
 
 	free(item: T) {
-		assert.strictEqual(item.poolId, this.id)
+		this.ensureOwns(item)
 		this.getState().free(item)
 	}
 
