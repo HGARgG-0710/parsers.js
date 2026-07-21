@@ -1,11 +1,11 @@
-1. ENABLE all the 'samples' `IStream`-generators to take a CALLBACK to be called 
-	on the node created, SO AS to allow the user to have the ability to ADD INDEX-RANGES 
-	(and perform other post-creation actions) on the Nodes. This is ABSOLUTELY vital. 
+1. ENABLE all the 'samples' `IStream`-generators to take a CALLBACK to be called
+	on the node created, SO AS to allow the user to have the ability to ADD INDEX-RANGES
+	(and perform other post-creation actions) on the Nodes. This is ABSOLUTELY vital.
 
-	Without this ability the user's capability for successful Error-handling gets to 
-	diminish significantly (also - this, in particular, enables the MIXING OF STYLES, 
-	and merigng of the Stream-code with the post-creation code that MAY even be returning 
-	NEW NODES from the ones that were read from the current input-stream). 
+	Without this ability the user's capability for successful Error-handling gets to
+	diminish significantly (also - this, in particular, enables the MIXING OF STYLES,
+	and merigng of the Stream-code with the post-creation code that MAY even be returning
+	NEW NODES from the ones that were read from the current input-stream).
 
 2. [TESTING] Remove the 'PlainMapInterface' and all objects like it
 3. [TESTING] Remove all the old methods' tests

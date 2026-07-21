@@ -33,11 +33,12 @@ export class ClassTest<InstanceType = any> {
 		return this.callMethodTest(index, this.instance!, ...args)
 	}
 
-	withInstance(instance: InstanceType, callback: (test: this) => void) {
-		const prevInstance = this.instance
-		this.instance = instance
+	withInstance(
+		instanceMaker: () => InstanceType,
+		callback: (test: this) => void
+	) {
+		this.instance = instanceMaker()
 		callback(this)
-		this.instance = prevInstance
 	}
 
 	constructor(protected readonly methods: MethodTest<InstanceType>[]) {
@@ -46,8 +47,8 @@ export class ClassTest<InstanceType = any> {
 }
 
 export class MethodTest<InstanceType = any, Args extends any[] = any[]> {
-	withInstance(instance: InstanceType, ...x: Args) {
-		return this.handler.call(instance, ...x)
+	withInstance(instanceMaker: InstanceType, ...x: Args) {
+		return this.handler.call(instanceMaker, ...x)
 	}
 
 	constructor(

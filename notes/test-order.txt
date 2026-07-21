@@ -1,29 +1,39 @@
-This document details the order for testing of new classes. 
+This document details the order for testing of new classes.
 (This includes also the rewriting/fixing of old tests as well as implementation of the new ones)
 
-NOTE: this list can be somewhat crude and may be rearranged/extended as needed. 
+NOTE: this list can be somewhat crude and may be rearranged/extended as needed.
 
-[NO DEPENDENCIES]
-
+[CURRENT]
 0. ObjectPool [RELATIVE to `global.`]
 1. constants
 2. MultiIndex
 3. ArrayCollection
-4. OverflowCounter
 5. Size
 6. AutoMap
 7. Counter
 8. Encoder8
 9. EncoderU8
-10. InvalidFileReadPositionError
+38. LineJoiner
+51. SingletonStream
 11. MissingImplementationError
+32. LineIndex
+56. samples.platform (module)
+34. LoadedU8
+36. Loaded8
+44. ParseableInput
+
+
+[NO DEPENDENCIES]
+
+4. OverflowCounter
+10. InvalidFileReadPositionError
 12. AbstractStaticMethodError
 13. MissingErrorDataContentError
 14. NoStatefulLocatableError
 15. NoIndexCarryingLocatableError
 16. NoPosedLocatableError
 17. SimpleErrorData
-18. ErrorPrinter: 
+18. ErrorPrinter:
 	1. getNewline
 19. BasicHash
 20. LengthHash
@@ -38,28 +48,21 @@ NOTE: this list can be somewhat crude and may be rearranged/extended as needed.
 29. SetMap
 30. ObjectMap
 31. TableCarrier
-32. LineIndex
 33. LineLengths
-34. LoadedU8
 35. LoadedU16LE
-36. Loaded8
 37. FileLogger
-38. LineJoiner
 39. TabbingProvider
 40. DynamicSpaceInserter
 41. ContentNode
 42. CachedContentNode
 43. TokenNode
-44. ParseableInput
 45. Regex.Raw.Char
 46. Regex.Raw.TokenType
 47. Regex.Raw.CodeRange
 48. Regex.Raw.Anything
 49. Regex.Raw.UnicodeProperty
 50. Regex.Raw.UnicodeProperty.Alias
-51. SingletonStream
 52. samples.alphabet.Alphabet
 53. samples.regex (module)
 54. samples.Node.EitherType
 55. samples.Pairs (module)
-56. samples.platform (module)
