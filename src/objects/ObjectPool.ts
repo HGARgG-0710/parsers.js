@@ -87,10 +87,10 @@ export class ObjectPool<
 
 	constructor(
 		objectConstructor: new (...x: Partial<Args> | []) => T,
-		limitSize = Config.objectPools.defaultMaxSize
+		maxSize = Config.objectPools.defaultSizeLimit
 	) {
 		Pools.All.add(this)
-		this.active = new ObjectPoolActive(objectConstructor, limitSize)
+		this.active = new ObjectPoolActive(objectConstructor, maxSize)
 		this.inactive = new ObjectPoolInactive(objectConstructor)
 		this.id = ObjectPool.NewId()
 	}

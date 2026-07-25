@@ -2,6 +2,21 @@ import assert from "assert"
 import { ObjectPool, type IPoolable } from "../../../../dist/main.js"
 import { assertThrowingFails, ClassTest, MethodTest } from "../../lib.js"
 
+export enum PoolState {
+	Active = 1,
+	Inactive = 2
+}
+
+function assertBaseCreationPostConditions<T extends IPoolable = any>(
+	newItem: T,
+	pool: ObjectPool<T>,
+	typeSpecificPostCreationAssertion: (item: T) => void
+) {
+	assert.strictEqual(newItem.poolId, pool.id)
+	assert.strictEqual(newItem.isUsed, true)
+	typeSpecificPostCreationAssertion(newItem)
+}
+
 function ignoreMethodCall<Args extends any[] = any[]>(
 	callback: (this: ObjectPool, ...args: Args) => void
 ) {
@@ -60,16 +75,29 @@ const size = new MethodTest(
 	}
 )
 
-const free = new MethodTest("free", function <
-	T extends IPoolable = any
->(this: ObjectPool<T>, factory: () => T) {
-	const origSize = this.size
-	const instance = factory()
-	this.free(instance)
-	assert(!instance.isUsed)
-	assertThrowingFails(() => this.free(instance))
-	assert.strictEqual(this.size, origSize + 1)
-})
+const free = new MethodTest(
+	"free",
+	function <T extends IPoolable = any, Args extends any[] = any[]>(
+		this: ObjectPool<T>,
+		factory: () => T,
+		initWith: Args,
+		// easier and more powerful to use an assertion callback here than a stub
+		runPostFreeAssertions: (instance: T) => void
+	) {
+		const origSize = this.size
+		const instance = factory()
+		this.free(instance)
+		assert(!instance.isUsed)
+		assertThrowingFails(() => this.free(instance))
+		assert.strictEqual(this.size, origSize + 1)
+		runPostFreeAssertions(instance)
+
+		const restored = this.create(...initWith)
+		assert.strictEqual(restored, instance)
+
+		this.free(instance) // mutating the state, to allow flow-based testing
+	}
+)
 
 const freeForeignFails = new MethodTest("freeForeignFails", function <
 	T extends IPoolable = any
@@ -81,24 +109,30 @@ const freeForeignFails = new MethodTest("freeForeignFails", function <
 const createNonEmpty = new MethodTest("createNonEmpty", function <
 	T extends IPoolable = any,
 	Args extends any[] = any[]
->(this: ObjectPool<T>, ...args: Args) {
+>(this: ObjectPool<T>, typeSpecificPostCreationAssertion: (item: T) => void, ...args: Args) {
 	assert(this.size > 0)
 	const origSize = this.size
 	const newItem = this.create(...args)
 	assert.strictEqual(this.size, origSize - 1)
-	assert.strictEqual(newItem.poolId, this.id)
-	assert.strictEqual(newItem.isUsed, true)
+	assertBaseCreationPostConditions(
+		newItem,
+		this,
+		typeSpecificPostCreationAssertion
+	)
 })
 
 const createEmpty = new MethodTest("createEmpty", function <
 	T extends IPoolable = any,
 	Args extends any[] = any[]
->(this: ObjectPool<T>, ...args: Args) {
+>(this: ObjectPool<T>, typeSpecificPostCreationAssertion: (item: T) => void, ...args: Args) {
 	assert.strictEqual(this.size, 0)
 	const newItem = this.create(...args)
 	assert.strictEqual(this.size, 0)
-	assert.strictEqual(newItem.poolId, this.id)
-	assert.strictEqual(newItem.isUsed, true)
+	assertBaseCreationPostConditions(
+		newItem,
+		this,
+		typeSpecificPostCreationAssertion
+	)
 })
 
 const clear = new MethodTest("clear", function <
@@ -108,7 +142,7 @@ const clear = new MethodTest("clear", function <
 	assert.strictEqual(this.size, 0)
 })
 
-export class ObjectPoolText<
+class ObjectPoolTest<
 	T extends IPoolable<Args> = any,
 	Args extends any[] = any[]
 > extends ClassTest<ObjectPool<T, Args>> {
@@ -116,20 +150,30 @@ export class ObjectPoolText<
 		this.testMethod("clear")
 	}
 
-	createEmpty(...args: Args) {
-		this.testMethod("createEmpty", ...args)
+	createEmpty(
+		assertionCallback: (item: T) => void,
+		...args: Partial<Args> | []
+	) {
+		this.testMethod("createEmpty", assertionCallback, ...args)
 	}
 
-	createNonEmpty(...args: Args) {
-		this.testMethod("createNonEmpty", ...args)
+	createNonEmpty(
+		assertionCallback: (item: T) => void,
+		...args: Partial<Args> | []
+	) {
+		this.testMethod("createNonEmpty", assertionCallback, ...args)
 	}
 
 	freeForeignFails(foreign: ObjectPool<T>, foreignInstance: T) {
 		this.testMethod("freeForeignFails", foreign, foreignInstance)
 	}
 
-	free(factory: () => T) {
-		this.testMethod("free", factory)
+	free(
+		factory: () => T,
+		initWith: Args,
+		runPostFreeAssertions: (instance: T) => void
+	) {
+		this.testMethod("free", factory, initWith, runPostFreeAssertions)
 	}
 
 	size(expected: number) {
@@ -166,4 +210,11 @@ export class ObjectPoolText<
 			inactive.free
 		])
 	}
+}
+
+export function objectPoolTest<
+	T extends IPoolable = any,
+	Args extends any[] = any[]
+>() {
+	return new ObjectPoolTest<T, Args>()
 }
