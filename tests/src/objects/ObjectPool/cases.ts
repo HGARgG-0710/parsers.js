@@ -68,9 +68,6 @@ const getNewInstance = <T = any>(item: T, pool: ObjectPool<Retainer<T>>) =>
 const assertPostFreeRan = (instance: Retainer) =>
 	assert.strictEqual(instance.getItem(), null)
 
-// ! pre-requsites:
-// * 	1. creation of pool objects and
-
 function baseActiveTest(limit: number) {
 	const primaryPool = getEmptyPool<number>()
 	const foreignPool = getEmptyPool<number>()
