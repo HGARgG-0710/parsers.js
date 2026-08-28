@@ -11,83 +11,72 @@ import { isWindows } from "./platform.js"
 import { isCurr } from "./Stream.js"
 
 class LastItem<T = any> {
-	private lastItem: T
-	private stream?: IStream<T>
+	private lastItem: T | null = null
 
-	sync() {
-		this.lastItem = this.stream!.curr
+	sync(latest: T) {
+		this.lastItem = latest
 	}
 
-	get() {
-		return this.lastItem
+	isUnset() {
+		return this.lastItem === null
 	}
 
-	init(stream: IStream<T>) {
-		this.stream = stream
+	unset() {
+		this.lastItem = null
+	}
+
+	get(): T {
+		return this.lastItem!
 	}
 }
 
 class Lookahead<T = any> {
-	private lookaround: T
+	private lookahead: T | null = null
 	private stream?: IStream<T>
 
-	private getLookahead() {
+	private getNewLookahead() {
 		this.stream!.next()
-		return this.stream!.curr
+		return this.stream!.isEnd ? null : this.stream!.curr
 	}
 
-	advance() {
-		this.lookaround = this.getLookahead()
+	sync(lastItem: T) {
+		this.lookahead = lastItem
 	}
 
-	get() {
-		return this.lookaround
+	update() {
+		this.lookahead = this.getNewLookahead()
+	}
+
+	get(): T {
+		return this.lookahead!
+	}
+
+	isUnset() {
+		return this.lookahead === null
+	}
+
+	unset() {
+		this.lookahead = null
 	}
 
 	init(stream: IStream<T>) {
 		this.stream = stream
+		this.lookahead = this.stream!.curr
 	}
 }
 
-/**
- * This is a stream that accepts an `IOwnedStream<string>` as its `.resource`,
- * and which produces a stream of `string`s such that all `\r\n` are replaced
- * by `\n`.
- */
-export class LFStream
+export abstract class SymbolicContractionStream
 	extends DyssyncOwningStream<string>
 	implements ICommonStream<string>
 {
-	private readonly lastItem = new LastItem()
-	private readonly lookahead = new Lookahead()
+	protected readonly lastItem = new LastItem<string>()
+	protected readonly lookahead = new Lookahead<string>()
 
-	private defineCurr() {
-		if (this.isCRLF()) {
-			this.curr = "\n"
-			this.lastItem.sync()
-			this.lookahead.advance()
-		} else this.curr = this.lastItem.get()
-	}
-
-	private isCRLF() {
-		return this.lastItem.get() === "\r" && this.lookahead.get() === "\n"
-	}
-
-	private updateItems() {
-		this.lastItem.sync()
-		this.lookahead.advance()
-		this.defineCurr()
-	}
-
-	override baseInit(): void {
-		this.lastItem.init(this.resource!)
-		this.lookahead.init(this.resource!)
-		this.updateItems()
-	}
+	protected abstract updateItems(): void
 
 	free() {}
 
-	// ! pre-doc: explanation: LFStream is ONLY intended to be used AT THE BEGINNING of the parser - AT THE VERY TOP.
+	// ! pre-doc: explanation: children of this stream are ONLY intended to be used AT THE BEGINNING of the parser - AT THE VERY TOP.
 	// * 	Meaning to say - this is a NON-RECURSIVE, one-time deal. It's just simpler this way.
 	// 		It NEVER gets reused (since it only ever dies when the input dies as well...)
 	get poolId() {
@@ -101,9 +90,134 @@ export class LFStream
 	markFree(): void {}
 	markUsed(): void {}
 
+	override isCurrEnd(): boolean {
+		return this.lastItem.isUnset()
+	}
+
 	override next() {
-		super.next()
+		if (!this.isCurrEnd()) this.updateItems()
+		else this.endStream()
+	}
+}
+
+/**
+ * Reduces an arbitrarily long sequence of spaces in the underlying
+ * `IOwnedStream<string>` to a single one (the last one).
+ *
+ * Note: it *does not* handle \r\n, only single-sequence spaces.
+ */
+export class SingleSpaceStream
+	extends SymbolicContractionStream
+	implements ICommonStream<string>
+{
+	private advance() {
+		this.lastItem.sync(this.lookahead.get())
+		this.lookahead.update()
+	}
+
+	protected updateItems() {
+		if (this.lookahead.isUnset()) {
+			this.curr = this.lastItem.get()
+			this.lastItem.unset()
+		} else {
+			this.advance()
+			this.defineCurr()
+		}
+	}
+
+	private defineCurr() {
+		this.curr = this.isCurrUnacceptable()
+			? this.getModifiedCurr()
+			: this.lastItem.get()
+	}
+
+	override baseInit(): void {
+		this.lookahead.init(this.resource!)
 		this.updateItems()
+	}
+
+	private hasSecondSpace() {
+		return isSpace(this.lookahead.get())
+	}
+
+	private isCurrUnacceptable(): boolean {
+		return isSpace(this.lastItem.get()) && this.hasSecondSpace()
+	}
+
+	private getModifiedCurr() {
+		while (this.hasSecondSpace()) {
+			this.advance()
+			if (this.resource!.isEnd) break
+		}
+		return this.lastItem.get()
+	}
+}
+
+/**
+ * This is a stream that accepts an `IOwnedStream<string>` as its `.resource`,
+ * and which produces a stream of `string`s such that all `\r\n` are replaced
+ * by `\n`.
+ */
+export class LFStream
+	extends SymbolicContractionStream
+	implements ICommonStream<string>
+{
+	protected readonly secondLookahead = new Lookahead<string>()
+
+	protected updateItems() {
+		if (this.isLeftCrlf()) this.handleLeftCrlf()
+		else this.handleFreeLeft()
+	}
+
+	private handleFreeLeft() {
+		this.readCurr()
+		if (this.lookahead.isUnset()) this.lastItem.unset()
+		else {
+			this.expectRightCrlf()
+			this.advance()
+		}
+	}
+
+	private expectRightCrlf() {
+		if (this.isRightCrlf()) {
+			this.lookahead.sync("\n")
+			this.secondLookahead.update()
+		}
+	}
+
+	private handleLeftCrlf() {
+		this.curr = "\n"
+		this.advance()
+		this.advance()
+	}
+
+	override baseInit(): void {
+		this.lookahead.init(this.resource!)
+		this.secondLookahead.init(this.resource!)
+		this.secondLookahead.update()
+		if (this.lastItem.isUnset() && this.secondLookahead.isUnset())
+			this.advance()
+		this.updateItems()
+	}
+
+	private readCurr() {
+		this.curr = this.lastItem.get()
+	}
+
+	private advance(): void {
+		this.lastItem.sync(this.lookahead.get())
+		this.lookahead.sync(this.secondLookahead.get())
+		this.secondLookahead.update()
+	}
+
+	private isLeftCrlf() {
+		return this.lastItem.get() === "\r" && this.lookahead.get() === "\n"
+	}
+
+	private isRightCrlf() {
+		return (
+			this.lookahead.get() === "\r" && this.secondLookahead.get() === "\n"
+		)
 	}
 }
 

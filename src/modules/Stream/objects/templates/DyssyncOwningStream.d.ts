@@ -1,4 +1,3 @@
-import type { IFreeResettable } from "../../../../interfaces.ts"
 import type { IOwnedStream } from "../../interfaces/OwnedStream.ts"
 import type { PipeStream } from "./PipeStream.js"
 
